@@ -1,0 +1,53 @@
+CREATE USER ansible_commander UNENCRYPTED PASSWORD '{{ database_password }}';
+
+GRANT ALL on DATABASE ansible_commander TO ansible_commander;
+GRANT ALL on DATABASE ansible_commander_test TO ansible_commander;
+
+\c ansible_commander
+
+CREATE TABLE thing
+(
+  id BIGSERIAL PRIMARY KEY,
+  type TEXT
+);
+
+CREATE TABLE properties
+(
+  id BIGSERIAL PRIMARY KEY,
+  thing_id BIGSERIAL NOT NULL REFERENCES thing(id) ON DELETE CASCADE,
+  key TEXT NOT NULL,
+  value TEXT
+);
+
+CREATE UNIQUE INDEX properties_thing_idx ON properties (thing_id, key);
+CREATE INDEX properties_key_idx ON properties (key);
+CREATE INDEX properties_value_idx ON properties (key, value);
+GRANT ALL on TABLE thing TO ansible_commander;
+GRANT ALL on TABLE properties TO ansible_commander;
+GRANT ALL ON SEQUENCE thing_id_seq TO ansible_commander;
+GRANT ALL ON SEQUENCE properties_id_seq TO ansible_commander;
+
+\c ansible_commander_test
+
+CREATE TABLE thing
+(
+  id BIGSERIAL PRIMARY KEY,
+  type TEXT
+);
+
+CREATE TABLE properties
+(
+  id BIGSERIAL PRIMARY KEY,
+  thing_id BIGSERIAL NOT NULL REFERENCES thing(id) ON DELETE CASCADE,
+  key TEXT NOT NULL,
+  value TEXT
+);
+
+CREATE UNIQUE INDEX properties_thing_idx ON properties (thing_id, key);
+CREATE INDEX properties_key_idx ON properties (key);
+CREATE INDEX properties_value_idx ON properties (key, value);
+GRANT ALL on TABLE thing TO ansible_commander;
+GRANT ALL on TABLE properties TO ansible_commander;
+GRANT ALL ON SEQUENCE thing_id_seq TO ansible_commander;
+GRANT ALL ON SEQUENCE properties_id_seq TO ansible_commander;
+

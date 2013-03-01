@@ -1,0 +1,66 @@
+---
+
+# tested only on CentOS6, may need adaptations for other operating systems
+# TODO: install any ansible plugins we need
+# TODO: set up Apache or Nginx to proxy this application
+# TODO: setup celery and any worker processes/requirements
+
+- hosts: 127.0.0.1
+  gather_facts: True
+  user: root
+  vars_files:
+    - vars/vars.yml
+
+  tasks:
+   
+      - name: install packages
+        action: yum name=$item state=installed
+        with_items:
+            - postgresql               # database client
+            - postgresql-server        # database server
+            - Django                   # web stack
+            - Django-south             # migration support
+            - python-django-tastypie   # rest support 
+            - python-psycopg2
+
+      # the following could probably be included, though ident identification is fiddly
+      # so we won't use it to create the database and database user
+
+      - name: configure the database authentication more or less open for setup
+        template: src=templates/pg_hba_low.j2 dest=/var/lib/pgsql/data/pg_hba.conf
+
+      - name: restart postgresql
+        service: name=postgresql state=restarted
+
+      - name: setup the postgresql user
+        postgresql_user: >
+          name=ansible_commander 
+          db=ansible_commander 
+          password=${database_password} 
+          login_user=postgres
+          priv=ALL 
+        sudo_user: postgres
+
+      - name: create the database
+        postgresql_db: name=acom state=present
+
+      - name: configure the database authentication for runtime mode
+        template: src=templates/pg_hba.j2 dest=/var/lib/pgsql/data/pg_hba.conf
+
+      - name: restart postgresql
+        service: name=postgresql state=restarted
+
+      - name: configure python settings (with database password)
+        template: src=templates/settings.py.j2 dest=${working_dir}/acom/settings.py
+
+      - name: sync Django database
+        shell: python ${working_dir}/acom/manage.py syncdb
+
+      - name: sync django database
+        django_manage: >
+          command=syncdb
+          app_path=${working_dir}/acom
+ 
+      #- name: run south migrations
+      #  command: python ${working_dir}/acom/manage.py migrate db_migrate
+
