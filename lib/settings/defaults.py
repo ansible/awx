@@ -114,6 +114,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'lib.main',
+    'lib.api',
     'south',
 # not yet compatible with Django 1.5 unless using version from github
 #   'devserver',
