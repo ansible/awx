@@ -1,6 +1,9 @@
 clean:
 	find . -type f -regex ".*\.py[co]$$" -delete
 
+rebase:
+	git pull --rebase origin master
+
 zero:
 	python manage.py migrate main zero 
 
