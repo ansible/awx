@@ -32,13 +32,12 @@
       - name: restart postgresql
         service: name=postgresql state=restarted
 
+      # took out parameter... db=acom priv=ALL
       - name: setup the postgresql user
         postgresql_user: >
           name=ansible_commander 
-          db=ansible_commander 
           password=${database_password} 
           login_user=postgres
-          priv=ALL 
         sudo_user: postgres
 
       - name: create the database
@@ -51,7 +50,7 @@
         service: name=postgresql state=restarted
 
       - name: configure python settings (with database password)
-        template: src=templates/settings.py.j2 dest=${working_dir}/acom/settings.py
+        template: src=templates/settings.py.j2 dest=${working_dir}/lib/settings.py
 
       #- name: sync Django database
       #  shell: python ${working_dir}/manage.py syncdb
