@@ -30,7 +30,7 @@ runserver:
 
 dbchange:
 	# run this each time we make changes to the model
-	python manage.py schemamigration main --auto
+	python manage.py schemamigration main changes --auto
 
 migrate:
         # run this to apply changes to the model
