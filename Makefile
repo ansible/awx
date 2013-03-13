@@ -1,3 +1,6 @@
+clean:
+	find . -type f -regex ".*\.py[co]$$" -delete
+
 setup:
 	ansible-playbook app_setup/setup.yml -i "127.0.0.1," -c local -e working_dir=`pwd`
 
