@@ -35,6 +35,10 @@ This playbook will:
 You may run this setup step again as needed as many times
 as you like.
 
+Before you login, you must also run "make adduser" to create
+a superuser.  This will allow you to login to the app.  There
+is no default user.
+
 Test the server
 ===============
 

@@ -15,6 +15,9 @@ setup:
 	# use ansible to ansible ansible commander locally
 	ansible-playbook app_setup/setup.yml --verbose -i "127.0.0.1," -c local -e working_dir=`pwd`
 
+adduser:
+	python manage.py createsuperuser
+
 syncdb:
 	# only run from initial setup
 	python manage.py syncdb

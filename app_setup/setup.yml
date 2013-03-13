@@ -50,9 +50,7 @@
         template: src=templates/local_settings.py.j2 dest=${working_dir}/lib/settings/local_settings.py
 
       - name: sync django database
-        django_manage: >
-          command=syncdb
-          app_path=${working_dir}
+        command: python ${working_dir}/manage.py syncdb --noinput
 
       - name: run south migrations
         command: python ${working_dir}/manage.py migrate main
