@@ -1,0 +1,36 @@
+{# Admin site customizations. #}
+{% extends "admin/base.html" %}
+{% load i18n %}
+ 
+{% block title %}{{ title }} | {% trans 'Ansible Commander Admin' %}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+{% endblock %}
+
+{% block blockbots %}
+{{ block.super }}
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">{% trans 'Ansible Commander Admin' %}</h1>
+{% endblock %}
+
+{% block userlinks %}
+{{ block.super }}
+{% endblock %}
+
+{% block nav-global %}
+{% if user.is_active and user.is_staff and not is_popup %}
+{# Placeholder for version/hostname info. #}
+{% endif %}
+{{ block.super }}
+{% endblock %}
+
+{% block content_title %}
+{{ block.super }}
+{% endblock %}

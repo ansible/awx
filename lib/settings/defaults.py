@@ -60,13 +60,19 @@ USE_L10N = True
 
 USE_TZ = True
 
+STATICFILES_DIRS = (
+    #os.path.join(BASE_DIR, 'static'),
+)
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'public', 'static') # FIXME: Is this where we want it?
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 STATIC_URL = '/static/'
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # FIXME: Is this where we want it?
+MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'media') # FIXME: Is this where we want it?
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -87,6 +93,12 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 )
 
 MIDDLEWARE_CLASSES += (
+    #'django.middleware.transaction.TransactionMiddleware',
+    #'devserver.middleware.DevServerMiddleware',
+)
+
+TEMPLATE_DIRS = (
+    os.path.join(BASE_DIR, 'templates'),
 )
 
 ROOT_URLCONF = 'lib.urls'
@@ -107,4 +119,18 @@ INSTALLED_APPS = (
 #   'devserver',
     'tastypie',
     'django_extensions',
+)
+
+INTERNAL_IPS = ('127.0.0.1',)
+
+DEVSERVER_DEFAULT_ADDR = '0.0.0.0'
+DEVSERVER_DEFAULT_PORT = '8013'
+DEVSERVER_MODULES = (
+    'devserver.modules.sql.SQLRealTimeModule',
+    'devserver.modules.sql.SQLSummaryModule',
+    'devserver.modules.profile.ProfileSummaryModule',
+    #'devserver.modules.ajax.AjaxDumpModule',
+    #'devserver.modules.profile.MemoryUseModule',
+    #'devserver.modules.cache.CacheSummaryModule',
+    #'devserver.modules.profile.LineProfilerModule',
 )
