@@ -1,7 +1,7 @@
 API Overview
 ============
 
-The following is a start to an API document.
+The following is a start to an API document.  It is just a sketch and may evolve as we build things out.
 
 Versioning and Semantics
 ========================

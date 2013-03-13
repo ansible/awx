@@ -1,10 +1,13 @@
 from django.db import models
 
-# TODO: split into seperate files?
-# TODO: smart objects discussion
 # TODO: jobs and events model
 # TODO: how to link up with Django user auth
 # TODO: general schema review/organization
+# TODO: audit cascade behavior and defaults
+# TODO: set related names
+
+# SET_NULL = models.SET_NULL
+# PROTECT  = models.PROTECT
 
 class CommonModel(models.Model):
     ''' 
@@ -17,18 +20,15 @@ class CommonModel(models.Model):
     name          = models.TextField()
     description   = models.TextField()
     creation_date = models.DateField()
-    tags          = models.ManyToManyField('Tag')  
-  
-class Tag(CommonModel):
-   ''' 
-   any type of object can be given a search tag 
-   '''
+    tags          = models.ManyToManyField('Tag', related_name='%(class)s_tags') 
+    audit_trail   = models.ManyToManyField('AuditTrail', related_name='%(class)s_audit_trails')
+ 
+class Tag(models.Model):
+    ''' 
+    any type of object can be given a search tag 
+    '''
 
-   class Meta:
-        db_table = 'tags'
-
-   id   = models.AutoField(primary_key=True)
-   name = models.TextField()
+    name = models.TextField()
  
  
 class AuditTrail(CommonModel):
@@ -36,13 +36,9 @@ class AuditTrail(CommonModel):
     changing any object records the change 
     '''
  
-    class Meta:
-        db_table = 'audit_trails'
-
-    id            = models.AutoField(primary_key=True)
     resource_type = models.TextField()
     modified_by   = models.ForeignKey('User')
-    delta         = models.ForeignKey('Delta')
+    delta         = models.TextField() # FIXME: switch to JSONField
     detail        = models.TextField()
     comment       = models.TextField()
     tag           = models.ForeignKey('Tag')
@@ -52,35 +48,23 @@ class Organization(CommonModel):
     organizations are the basic unit of multi-tenancy divisions 
     '''    
 
-    class Meta:
-        db_table = 'organizations'
-
-    id     = models.AutoField(primary_key=True)
-    users  = models.ManyToManyField('User')
-    admins = models.ManyToManyField('User')
+    users    = models.ManyToManyField('User', related_name='organizations')
+    admins   = models.ManyToManyField('User', related_name='admin_of_organizations')
+    projects = models.ManyToManyField('Project', related_name='organizations')
 
 class Inventory(CommonModel):
     ''' 
     an inventory source contains lists and hosts.
     '''
   
-    class Meta:
-        db_table = 'inventory'
-
-    id                = models.AutoField(primary_key=True)
-    organization      = models.ForeignKey(Organization)    
-    sync_script_path  = models.TextField() # for future use
+    organization = models.ForeignKey(Organization, related_name='inventories')    
 
 class Host(CommonModel):
     '''
     A managed node
     '''
 
-    class Meta:
-        db_table = 'hosts'
-
-    id        = models.AutoField(primary_key=True)
-    inventory = models.ForeignKey('Inventory')
+    inventory = models.ForeignKey('Inventory', related_name='hosts')
     
 
 class Group(CommonModel):
@@ -88,26 +72,20 @@ class Group(CommonModel):
     A group of managed nodes.  May belong to multiple groups
     '''
 
-    class Meta:
-        db_table = 'groups'
+    inventory = models.ForeignKey('Inventory', related_name='groups')
+    parents   = models.ManyToManyField('self', related_name='children') 
 
-    id        = models.AutoField(primary_key=True)
-    inventory = models.ForeignKey('Inventory')
-    parents   = models.ManyToManyField('Group') # ? 
+# FIXME: audit nullables
+# FIXME: audit cascades
 
-class InventoryVariable(CommonModel):
+class VariableData(CommonModel):
     '''
-    A variable
+    A set of host or group variables
     '''  
 
-    class Meta:
-        db_table = 'inventory_variables'
-
-    id    = models.AutoField(primary_key=True)
-    host  = models.ForeignKey('Host')
-    group = models.ForeignKey('Group')
-    key   = models.TextField()
-    value = models.TextField()
+    host  = models.ForeignKey('Host', null=True, default=None, blank=True, related_name='variable_data')
+    group = models.ForeignKey('Group', null=True, default=None, blank=True, related_name='variable_data')
+    data  = models.TextField() # FIXME: JsonField
 
 class User(CommonModel):
     '''
@@ -116,13 +94,7 @@ class User(CommonModel):
 
     # FIXME: how to integrate with Django auth?
 
-    class Meta:
-        db_table = 'users'
-
-    id            = models.AutoField(primary_key=True)
-    organization  = models.ManyToManyField('Organization')
-    team          = models.ManyToManyField('Team')
-    credentials   = models.ManyToManyField('Credential')
+    auth_user     = models.OneToOneField('auth.User', related_name='application_user')
 
 class Credential(CommonModel):
     '''
@@ -131,45 +103,32 @@ class Credential(CommonModel):
     If used with sudo, a sudo password should be set if required.
     '''
 
-    
-    class Meta:
-        db_table = 'credentials'
+    user            = models.ForeignKey('User', null=True, default=None, blank=True, related_name='credentials')
+    project         = models.ForeignKey('Project', null=True, default=None, blank=True, related_name='credentials')
+    team            = models.ForeignKey('Team', null=True, default=None, blank=True, related_name='credentials')
 
-    id              = models.AutoField(primary_key=True)
-    user            = models.ForeignKey('User')
-    project         = models.ForeignKey('Project')
-    team            = models.ForeignKey('Team')
-    ssh_key_path    = models.TextField()
-    ssh_key_data    = models.TextField() # later
-    ssh_key_unlock  = models.TextField()
-    ssh_password    = models.TextField()
-    sudo_password   = models.TextField()
+    ssh_key_path    = models.TextField(blank=True, default='')
+    ssh_key_data    = models.TextField(blank=True, default='') # later
+    ssh_key_unlock  = models.TextField(blank=True, default='')
+    ssh_password    = models.TextField(blank=True, default='')
+    sudo_password   = models.TextField(blank=True, default='')
+    
 
 class Team(CommonModel):
     '''
     A team is a group of users that work on common projects.
     '''
     
-    class Meta:
-        db_table = 'teams'
-
-    id              = models.AutoField(primary_key=True)
-    projects        = models.ManyToManyField('Project')
-    credentials     = models.ManyToManyField('Credential')
-    users           = models.ManyToManyField('User')
-    organization    = models.ManyToManyField('Organization')
+    projects        = models.ManyToManyField('Project', related_name='teams')
+    users           = models.ManyToManyField('User', related_name='teams')
+    organization    = models.ManyToManyField('Organization', related_name='teams')
 
 class Project(CommonModel):
     '''  
     A project represents a playbook git repo that can access a set of inventories
     '''   
  
-    class Meta:
-        db_table = 'projects'
-
-    id               = models.AutoField(primary_key=True)
-    credentials      = models.ManyToManyField('Credential')
-    inventories      = models.ManyToManyField('Inventory')
+    inventories      = models.ManyToManyField('Inventory', related_name='projects')
     local_repository = models.TextField()
     scm_type         = models.TextField()
     default_playbook = models.TextField()
@@ -179,27 +138,35 @@ class Permission(CommonModel):
     A permission allows a user, project, or team to be able to use an inventory source.
     '''
 
-    class Meta:
-        db_table = 'permissions'
+    user            = models.ForeignKey('User', related_name='permissions')
+    project         = models.ForeignKey('Project', related_name='permissions')
+    team            = models.ForeignKey('Team', related_name='permissions')
+    job_type        = models.TextField()
 
-    id              = models.AutoField(primary_key=True)
-    user            = models.ForeignKey('User')
-    project         = models.ForeignKey('Project')
-    team            = models.ForeignKey('Team')
-    # ... others? 
-
-# TODO: Jobs
+# TODO: other job types (later)
 
 class LaunchJob(CommonModel):
-    ''' a launch job is a request to apply a project to an inventory source with a given credential'
+    ''' 
+    a launch job is a request to apply a project to an inventory source with a given credential 
+    '''
 
-    inventory      = models.ForeignKey('Inventory')
-    credential     = models.ForeignKey('Credential')
-    project        = models.ForeignKey('Project')
-    user           = models.ForeignKey('User')
+    inventory      = models.ForeignKey('Inventory', null=True, default=None, blank=True, related_name='launch_jobs')
+    credential     = models.ForeignKey('Credential', null=True, default=None, blank=True, related_name='launch_jobs')
+    project        = models.ForeignKey('Project', null=True, default=None, blank=True, related_name='launch_jobs')
+    user           = models.ForeignKey('User', null=True, default=None, blank=True, related_name='launch_jobs')
     job_type       = models.TextField()
-    event          = models.ForeignKey('Event')    
+    
+ 
 
 # TODO: Events
+
+class LaunchJobStatus(CommonModel):
+
+    launch_job     = models.ForeignKey('LaunchJob', related_name='launch_job_statuses')
+    status         = models.IntegerField()
+    result_data    = models.TextField()
+     
+
+# TODO: reporting (MPD)
 
 

@@ -53,8 +53,8 @@
       - name: configure python settings (with database password)
         template: src=templates/settings.py.j2 dest=${working_dir}/acom/settings.py
 
-      - name: sync Django database
-        shell: python ${working_dir}/acom/manage.py syncdb
+      #- name: sync Django database
+      #  shell: python ${working_dir}/acom/manage.py syncdb
 
       - name: sync django database
         django_manage: >
@@ -63,4 +63,5 @@
 
       - name: run south migrations
         command: python ${working_dir}/acom/manage.py migrate main
+
 
