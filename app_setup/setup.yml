@@ -13,14 +13,14 @@
 
   tasks:
       
-      - name: install packages
+      - name: install database packages from yum
         action: yum name=$item state=installed
-        with_name:
+        with_items:
              - postgresql               # database client
              - postgresql-server        # database server
              - python-psycopg2          # database library
 
-      - name: install python modules
+      - name: install python modules from pip
         pip: requirements=${working_dir}/requirements.txt
 
       - name: configure the database authentication more or less open for setup

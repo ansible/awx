@@ -13,7 +13,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'postgresql_psycopg2', 
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
         'NAME': 'acom',                  
         'USER': 'ansible_commander',                      
         'PASSWORD': '{{ database_password }}', 
