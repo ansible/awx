@@ -6,8 +6,8 @@ from django.db import models
 # TODO: audit cascade behavior and defaults
 # TODO: set related names
 
-# SET_NULL = models.SET_NULL
-# PROTECT  = models.PROTECT
+SET_NULL = models.SET_NULL
+PROTECT  = models.PROTECT
 
 class CommonModel(models.Model):
     ''' 

@@ -4,10 +4,15 @@ clean:
 rebase:
 	git pull --rebase origin master
 
+push:
+	git push
+
 zero:
+	# go back to original database state, be careful!
 	python manage.py migrate main zero 
 
 setup:
+	# use ansible to ansible ansible commander locally
 	ansible-playbook app_setup/setup.yml --verbose -i "127.0.0.1," -c local -e working_dir=`pwd`
 
 syncdb:
@@ -20,8 +25,8 @@ runserver:
 
 # already done and should not have to happen again:
 #
-south_init:
-	python manage.py schemamigration main --initial
+#south_init:
+#	python manage.py schemamigration main --initial
 
 dbchange:
 	# run this each time we make changes to the model

@@ -6,25 +6,22 @@
 # TODO: setup celery and any worker processes/requirements
 
 - hosts: 127.0.0.1
-  gather_facts: True
+  gather_facts: False
   user: root
   vars_files:
     - vars/vars.yml
 
   tasks:
-   
+      
       - name: install packages
         action: yum name=$item state=installed
-        with_items:
-            - postgresql               # database client
-            - postgresql-server        # database server
-            - Django                   # web stack
-            - Django-south             # migration support
-            - python-django-tastypie   # rest support 
-            - python-psycopg2
+        with_name:
+             - postgresql               # database client
+             - postgresql-server        # database server
+             - python-psycopg2          # database library
 
-      # the following could probably be included, though ident identification is fiddly
-      # so we won't use it to create the database and database user
+      - name: install python modules
+        pip: requirements=${working_dir}/requirements.txt
 
       - name: configure the database authentication more or less open for setup
         template: src=templates/pg_hba_low.j2 dest=/var/lib/pgsql/data/pg_hba.conf
@@ -51,9 +48,6 @@
 
       - name: configure python settings (with database password)
         template: src=templates/settings.py.j2 dest=${working_dir}/lib/settings.py
-
-      #- name: sync Django database
-      #  shell: python ${working_dir}/manage.py syncdb
 
       - name: sync django database
         django_manage: >
