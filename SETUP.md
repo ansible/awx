@@ -18,9 +18,8 @@ You will also need the EPEL yum repository installed if using CentOS6.
 
 First edit app_setup/vars/vars.yml to select a database password.
 
-If you feel like you need to change it, the Django config file is also 
-templated.  See app_setup/templates/setting.py.j2.  Most people will
-not need to change this.
+Edit your local settings in app-setup/templates/local_settings.py.j2
+as desired.
 
 run "make setup" to run the ansible setup playbook.  It should run
 without erros.

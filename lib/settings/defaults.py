@@ -103,7 +103,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'lib.main',
     'south',
-    'devserver',
+# not yet compatible with Django 1.5 unless using version from github
+#   'devserver',
     'tastypie',
     'django_extensions',
 )
