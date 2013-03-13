@@ -59,9 +59,9 @@
       - name: sync django database
         django_manage: >
           command=syncdb
-          app_path=${working_dir}/acom
+          app_path=${working_dir}
 
       - name: run south migrations
-        command: python ${working_dir}/acom/manage.py migrate main
+        command: python ${working_dir}/manage.py migrate main
 
 
