@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import CASCADE, SET_NULL, PROTECT
+from django.utils.translation import ugettext_lazy as _
 
 # TODO: jobs and events model TBD
 # TODO: reporting model TBD
@@ -64,6 +65,7 @@ class Inventory(CommonModel):
     
     class Meta:
         app_label = 'main'
+        verbose_name_plural = _('inventories')
   
     organization = models.ForeignKey(Organization, null=True, on_delete=SET_NULL, related_name='inventories')    
 
@@ -99,6 +101,7 @@ class VariableData(CommonModel):
     
     class Meta:
         app_label = 'main'
+        verbose_name_plural = _('variable data')
 
     host  = models.ForeignKey('Host', null=True, default=None, blank=True, on_delete=CASCADE, related_name='variable_data')
     group = models.ForeignKey('Group', null=True, default=None, blank=True, on_delete=CASCADE, related_name='variable_data')
@@ -199,6 +202,7 @@ class LaunchJobStatus(CommonModel):
     
     class Meta:
         app_label = 'main'
+        verbose_name_plural = _('launch job statuses')
 
     launch_job     = models.ForeignKey('LaunchJob', null=True, on_delete=SET_NULL, related_name='launch_job_statuses')
     status         = models.IntegerField()
