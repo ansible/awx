@@ -2,9 +2,8 @@ from django.conf import settings
 from django.conf.urls import *
 
 urlpatterns = patterns('',
-    # Example:
-    # (r'^foo/', include('lib.foo.urls')),
-      (r'^api/', include('lib.api.urls')),
+    url(r'', include('lib.web.urls')),
+    url(r'^api/', include('lib.api.urls')),
 )
 
 if 'django.contrib.admin' in settings.INSTALLED_APPS:

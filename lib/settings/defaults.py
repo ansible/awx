@@ -61,7 +61,7 @@ USE_L10N = True
 USE_TZ = True
 
 STATICFILES_DIRS = (
-    #os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'static'),
 )
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'public', 'static') # FIXME: Is this where we want it?
@@ -115,6 +115,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'lib.main',
     'lib.api',
+    'lib.web',
     'south',
 # not yet compatible with Django 1.5 unless using version from github
 #   'devserver',
