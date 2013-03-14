@@ -121,6 +121,8 @@ INSTALLED_APPS = (
 #   'devserver',
     'tastypie',
     'django_extensions',
+    'djcelery',
+    'kombu.transport.django',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -136,3 +138,12 @@ DEVSERVER_MODULES = (
     #'devserver.modules.cache.CacheSummaryModule',
     #'devserver.modules.profile.LineProfilerModule',
 )
+
+if 'djcelery' in INSTALLED_APPS:
+    import djcelery
+    djcelery.setup_loader()
+
+BROKER_URL = 'django://'
+CELERY_TRACK_STARTED = True
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERYBEAT_MAX_LOOP_INTERVAL = 60

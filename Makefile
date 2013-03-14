@@ -26,6 +26,10 @@ runserver:
 	# run for testing the server
 	python manage.py runserver
 
+celeryd:
+	# run to start the background celery worker
+	python manage.py celeryd -l DEBUG -B
+
 # already done and should not have to happen again:
 #
 #south_init:
