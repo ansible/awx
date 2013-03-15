@@ -15,7 +15,7 @@ class CommonModel(models.Model):
 
     name          = models.CharField(max_length=512)
     description   = models.TextField()
-    creation_date = models.DateField()
+    creation_date = models.DateField(auto_now_add=True)
     tags          = models.ManyToManyField('Tag', related_name='%(class)s_tags', blank=True) 
     audit_trail   = models.ManyToManyField('AuditTrail', related_name='%(class)s_audit_trails', blank=True)
     active        = models.BooleanField(default=True)
