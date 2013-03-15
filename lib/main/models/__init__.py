@@ -16,9 +16,12 @@ class CommonModel(models.Model):
     name          = models.TextField()
     description   = models.TextField()
     creation_date = models.DateField()
-    tags          = models.ManyToManyField('Tag', related_name='%(class)s_tags') 
-    audit_trail   = models.ManyToManyField('AuditTrail', related_name='%(class)s_audit_trails')
+    tags          = models.ManyToManyField('Tag', related_name='%(class)s_tags', blank=True) 
+    audit_trail   = models.ManyToManyField('AuditTrail', related_name='%(class)s_audit_trails', blank=True)
     active        = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return unicode(self.name)
  
 class Tag(models.Model):
     ''' 
@@ -29,6 +32,9 @@ class Tag(models.Model):
         app_label = 'main'
 
     name = models.TextField()
+
+    def __unicode__(self):
+        return unicode(self.name)
  
  
 class AuditTrail(CommonModel):
@@ -40,11 +46,11 @@ class AuditTrail(CommonModel):
         app_label = 'main'
  
     resource_type = models.TextField()
-    modified_by   = models.ForeignKey('User', on_delete=SET_NULL, null=True)
+    modified_by   = models.ForeignKey('User', on_delete=SET_NULL, null=True, blank=True)
     delta         = models.TextField() # FIXME: switch to JSONField
     detail        = models.TextField()
     comment       = models.TextField()
-    tag           = models.ForeignKey('Tag', on_delete=SET_NULL, null=True)
+    tag           = models.ForeignKey('Tag', on_delete=SET_NULL, null=True, blank=True)
 
 class Organization(CommonModel):
     ''' 
@@ -54,9 +60,9 @@ class Organization(CommonModel):
     class Meta:
         app_label = 'main'
 
-    users    = models.ManyToManyField('User', related_name='organizations')
-    admins   = models.ManyToManyField('User', related_name='admin_of_organizations')
-    projects = models.ManyToManyField('Project', related_name='organizations')
+    users    = models.ManyToManyField('User', blank=True, related_name='organizations')
+    admins   = models.ManyToManyField('User', blank=True, related_name='admin_of_organizations')
+    projects = models.ManyToManyField('Project', blank=True, related_name='organizations')
 
 class Inventory(CommonModel):
     ''' 
@@ -89,7 +95,7 @@ class Group(CommonModel):
         app_label = 'main'
 
     inventory = models.ForeignKey('Inventory', null=True, on_delete=SET_NULL, related_name='groups')
-    parents   = models.ManyToManyField('self', related_name='children') 
+    parents   = models.ManyToManyField('self', related_name='children', blank=True) 
 
 # FIXME: audit nullables
 # FIXME: audit cascades
@@ -148,8 +154,8 @@ class Team(CommonModel):
     class Meta:
         app_label = 'main'
     
-    projects        = models.ManyToManyField('Project', related_name='teams')
-    users           = models.ManyToManyField('User', related_name='teams')
+    projects        = models.ManyToManyField('Project', blank=True, related_name='teams')
+    users           = models.ManyToManyField('User', blank=True, related_name='teams')
     organization    = models.ManyToManyField('Organization', related_name='teams')
 
 class Project(CommonModel):
@@ -160,7 +166,7 @@ class Project(CommonModel):
     class Meta:
         app_label = 'main'
  
-    inventories      = models.ManyToManyField('Inventory', related_name='projects')
+    inventories      = models.ManyToManyField('Inventory', blank=True, related_name='projects')
     local_repository = models.TextField()
     scm_type         = models.TextField()
     default_playbook = models.TextField()
@@ -173,9 +179,9 @@ class Permission(CommonModel):
     class Meta:
         app_label = 'main'
 
-    user            = models.ForeignKey('User', null=True, on_delete=SET_NULL, related_name='permissions')
-    project         = models.ForeignKey('Project', null=True, on_delete=SET_NULL, related_name='permissions')
-    team            = models.ForeignKey('Team', null=True, on_delete=SET_NULL, related_name='permissions')
+    user            = models.ForeignKey('User', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
+    project         = models.ForeignKey('Project', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
+    team            = models.ForeignKey('Team', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
     job_type        = models.TextField()
 
 # TODO: other job types (later)
