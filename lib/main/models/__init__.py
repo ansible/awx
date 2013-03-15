@@ -13,7 +13,7 @@ class CommonModel(models.Model):
     class Meta:
         abstract = True
 
-    name          = models.TextField()
+    name          = models.CharField(max_length=512)
     description   = models.TextField()
     creation_date = models.DateField()
     tags          = models.ManyToManyField('Tag', related_name='%(class)s_tags', blank=True) 
@@ -31,7 +31,7 @@ class Tag(models.Model):
     class Meta:
         app_label = 'main'
 
-    name = models.TextField()
+    name = models.CharField(max_length=512)
 
     def __unicode__(self):
         return unicode(self.name)
@@ -45,7 +45,7 @@ class AuditTrail(CommonModel):
     class Meta:
         app_label = 'main'
  
-    resource_type = models.TextField()
+    resource_type = models.CharField(max_length=64)
     modified_by   = models.ForeignKey('User', on_delete=SET_NULL, null=True, blank=True)
     delta         = models.TextField() # FIXME: switch to JSONField
     detail        = models.TextField()
@@ -139,11 +139,11 @@ class Credential(CommonModel):
     project         = models.ForeignKey('Project', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
     team            = models.ForeignKey('Team', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
 
-    ssh_key_path    = models.TextField(blank=True, default='')
+    ssh_key_path    = models.CharField(blank=True, default='', max_length=4096)
     ssh_key_data    = models.TextField(blank=True, default='') # later
-    ssh_key_unlock  = models.TextField(blank=True, default='')
-    ssh_password    = models.TextField(blank=True, default='')
-    sudo_password   = models.TextField(blank=True, default='')
+    ssh_key_unlock  = models.CharField(blank=True, default='', max_length=1024)
+    ssh_password    = models.CharField(blank=True, default='', max_length=1024)
+    sudo_password   = models.CharField(blank=True, default='', max_length=1024)
     
 
 class Team(CommonModel):
@@ -167,9 +167,9 @@ class Project(CommonModel):
         app_label = 'main'
  
     inventories      = models.ManyToManyField('Inventory', blank=True, related_name='projects')
-    local_repository = models.TextField()
-    scm_type         = models.TextField()
-    default_playbook = models.TextField()
+    local_repository = models.CharField(max_length=1024)
+    scm_type         = models.CharField(max_length=64)
+    default_playbook = models.CharField(max_length=1024)
 
 class Permission(CommonModel):
     '''
@@ -182,7 +182,7 @@ class Permission(CommonModel):
     user            = models.ForeignKey('User', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
     project         = models.ForeignKey('Project', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
     team            = models.ForeignKey('Team', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
-    job_type        = models.TextField()
+    job_type        = models.CharField(max_length=64)
 
 # TODO: other job types (later)
 
@@ -198,7 +198,7 @@ class LaunchJob(CommonModel):
     credential     = models.ForeignKey('Credential', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     project        = models.ForeignKey('Project', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     user           = models.ForeignKey('User', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
-    job_type       = models.TextField()
+    job_type       = models.CharField(max_length=64)
     
  
 
