@@ -84,7 +84,6 @@ class Host(CommonModel):
         app_label = 'main'
 
     inventory = models.ForeignKey('Inventory', null=True, on_delete=SET_NULL, related_name='hosts')
-    
 
 class Group(CommonModel):
     '''
@@ -96,6 +95,7 @@ class Group(CommonModel):
 
     inventory = models.ForeignKey('Inventory', null=True, on_delete=SET_NULL, related_name='groups')
     parents   = models.ManyToManyField('self', related_name='children', blank=True) 
+    hosts     = models.ManyToManyField('Host', related_name='groups', blank=True)
 
 # FIXME: audit nullables
 # FIXME: audit cascades
