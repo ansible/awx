@@ -7,3 +7,4 @@ django-tastypie==0.9.12
 ipython==0.13.1
 South==0.7.6
 python-dateutil==1.5
+hammock
