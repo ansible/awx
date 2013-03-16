@@ -1,7 +1,11 @@
 API Overview
 ============
 
-The following is a start to an API document.  It is just a sketch and may evolve as we build things out.
+This was an early sketch of the API.
+
+Just use this as an idea of what we want to shoot for, 
+there will be formal API docs soon.
+
 
 Versioning and Semantics
 ========================

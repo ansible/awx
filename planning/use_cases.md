@@ -1,3 +1,10 @@
+About
+=====
+
+This was an early doc of some of the things we want to be able to do.
+As database and plans change, this is not neccessarily our most up
+to date plan, but leaving this here for reference.
+
 Roles
 =====
 
