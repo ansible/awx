@@ -1,7 +1,8 @@
 # myapp/api.py
 
 from tastypie.resources import ModelResource
-from lib.api.auth import AcomAuthentication, AcomAuthorization
+from tastypie.authentication import BasicAuthentication
+from lib.api.auth import AcomAuthorization
 
 import lib.main.models as models
 
@@ -10,7 +11,7 @@ class Organizations(ModelResource):
     class Meta:
         queryset = models.Organization.objects.all()
         resource_name = 'organizations'
-        authentication = AcomAuthentication()
+        authentication = BasicAuthentication()
         authorization = AcomAuthorization()
 
 

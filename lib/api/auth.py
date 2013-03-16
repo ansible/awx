@@ -2,26 +2,15 @@ from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
 
 # FIXME: this is completely stubbed out at this point!
-
-class AcomAuthentication(Authentication):
-    def is_authenticated(self, request, **kwargs):
-        return True
-        #if 'admin' in request.user.username:
-        #  return True
-
-        #return False
-
-    # Optional but recommended
-    def get_identifier(self, request):
-        return request.user.username
+# INTENTIONALLY NOT IMPLEMENTED CORRECTLY :)
 
 class AcomAuthorization(Authorization):
+
     def is_authorized(self, request, object=None):
-        return True
-        #if request.user.username == 'admin':
-        #    return True
-        #else:
-        #    return False
+        if request.user.username == 'admin':
+            return True
+        else:
+            return False
 
     # Optional but useful for advanced limiting, such as per user.
     def apply_limits(self, request, object_list):
