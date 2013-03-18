@@ -21,12 +21,16 @@ HEADERS = {
 }
 AUTH = HTTPBasicAuth(username, password)
 
-def get(url_seg):
+def get(url_seg, expect=200):
    resp = requests.get("%s/api/v1/%s" % (server, url_seg), auth=AUTH)
+   if resp.status_code != expect:
+       assert "GET: Expecting %s got %s: %s" % (expect, resp.status_code, resp.text)
    return resp
 
-def post(url_seg, data):
+def post(url_seg, data, expect=201):
    resp = requests.post("%s/api/v1/%s" % (server, url_seg), auth=AUTH, data=data, headers=HEADERS)
+   if resp.status_code != expect:
+       assert "POST: Expecting %s got %s: %s" % (expect, resp.status_code, resp.text)
    return resp
 
 class Collection(object):
@@ -37,9 +41,7 @@ class Collection(object):
 
        print self.response.text
        print self.response.status_code
-       assert self.response.status_code == 200
        # TODO: error handling on non-200
-       print "RESPONSE=%s" % self.response.text
        self.data     = json.loads(self.response.text)
        self.meta     = self.data['meta']
        self.objects  = self.data['objects']
@@ -50,15 +52,8 @@ class Collection(object):
        return exceptions.NotImplementedError()
 
    def add(self, data):
-       # TODO: error handling
        json_data = json.dumps(data)
        response = post(self.base_url(), data=json_data)
-       print response.status_code
-       print response.text
-       assert response.status_code == 201
-       # FIXME: error handling
-       data2 = response.text
-       print data2
        return Entry(data)
 
    def __iter__(self):
