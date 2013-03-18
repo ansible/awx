@@ -36,8 +36,9 @@ def update_item(item, data, expect=200):
    return resp
 
 def delete(url_seg, expect=204):
-   print "DELETING: %s" % url_seg
-   resp = requests.delete("%s/%s" % (server, url_seg), auth=AUTH, headers=HEADERS)
+   if not url_seg.endswith("/"):
+       url_seg = "%s/" % url_seg
+   resp = requests.delete("%s%s" % (server, url_seg), auth=AUTH, headers=HEADERS)
    if resp.status_code != expect:
        assert "DELETE: Expecting %s got %s: %s" % (expect, resp.status_code, resp.text)
    return resp
@@ -49,9 +50,9 @@ class Collection(object):
    def __init__(self):
 
        self.response = get(self.base_url())
-       print "---"
-       print self.response.text
-       print "---"
+       #print "---"
+       #print self.response.text
+       #print "---"
        try:
            self.data     = json.loads(self.response.text)
        except Exception, e:
