@@ -94,6 +94,7 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 
 MIDDLEWARE_CLASSES += (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'lib.middleware.exceptions.ExceptionMiddleware',
     #'django.middleware.transaction.TransactionMiddleware',
     #'devserver.middleware.DevServerMiddleware',
 )
