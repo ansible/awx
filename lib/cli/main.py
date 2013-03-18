@@ -49,7 +49,13 @@ class Collection(object):
    def __init__(self):
 
        self.response = get(self.base_url())
-       self.data     = json.loads(self.response.text)
+       print "---"
+       print self.response.text
+       print "---"
+       try:
+           self.data     = json.loads(self.response.text)
+       except Exception, e:
+           raise e
        self.meta     = self.data['meta']
        self.objects  = self.data['objects']
        self.meta     = self.data['meta']
@@ -158,8 +164,9 @@ try:
     last_project = list(Projects())[-1]
 
     last_project.update(dict(description="new project!!!!", name="new project!!!!", organization=last_org.resource_uri))
+    print ">> it was added here: %s to %s>>" % (last_project.resource_uri, last_org.resource_uri)
     Organizations().print_display()
-   
+
     print "*** showing the orgs"
     Organizations().print_display()
 
