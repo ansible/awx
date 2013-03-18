@@ -13,7 +13,7 @@ class CommonModel(models.Model):
     class Meta:
         abstract = True
 
-    name          = models.CharField(max_length=512)
+    name          = models.CharField(max_length=512, unique=True)
     description   = models.TextField()
     creation_date = models.DateField(auto_now_add=True)
     tags          = models.ManyToManyField('Tag', related_name='%(class)s_tags', blank=True) 
@@ -163,9 +163,6 @@ class Project(CommonModel):
     A project represents a playbook git repo that can access a set of inventories
     '''   
     
-    class Meta:
-        app_label = 'main'
- 
     inventories      = models.ManyToManyField('Inventory', blank=True, related_name='projects')
     local_repository = models.CharField(max_length=1024)
     scm_type         = models.CharField(max_length=64)
