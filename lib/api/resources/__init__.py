@@ -45,7 +45,7 @@ class Organizations(ExtendedModelResource):
         queryset = models.Organization.objects.all()
         resource_name = 'organizations'
 
-        #authentication = BasicAuthentication()
+        authentication = BasicAuthentication()
         #authorization = AcomAuthorization()
         authorization = OrganizationAuthorization()
     

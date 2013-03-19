@@ -367,7 +367,6 @@ class ExtendedModelResource(ModelResource):
         """
         Dispatch a request to the nested resource.
         """
-        print "DISPATCH NESTED=%s" % kwargs
         # We don't check for is_authorized here since it will be
         # parent_cached_obj_get which will check that we have permissions
         # over the parent.
@@ -485,7 +484,6 @@ class ExtendedModelResource(ModelResource):
         # All clear. Process the request.
         request = convert_post_to_put(request)
         # MPD: fixup
-        print "KWARGS: %s" % kwargs
         response = method(request, **kwargs)
 
         # Add the throttled request.
@@ -603,14 +601,10 @@ class ExtendedModelResource(ModelResource):
             else:
                 # MPD: fixed up
                 basic_bundle = self.build_bundle(request=request)
-                #try:
-                # MPD: wild guess
+                # MPD: fixup
                 if 'bundle' in kwargs:
                     kwargs.pop('bundle')
-                print "kwargs = %s" % kwargs
                 obj = self.cached_obj_get(basic_bundle, **self.remove_api_resource_names(kwargs))
-                #except:
-                #    obj = self.cached_obj_get(request, **self.remove_api_resource_names(kwargs))
         except AttributeError:
             return http.HttpNotFound()
         except ObjectDoesNotExist:
