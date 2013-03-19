@@ -18,21 +18,26 @@ AUTH     = HTTPBasicAuth(username, password)
 # wrappers around URL request functions
 
 def get(url_seg, expect=200):
-   resp = requests.get("%s/api/v1/%s" % (server, url_seg), auth=AUTH)
+   resp = None
+   if 'api/v1' not in url_seg:
+       url = "%s/api/v1/%s" % (server, url_seg)
+   else:
+       url = "%s%s" % (server, url_seg)
+   resp = requests.get(url, auth=AUTH)
    if resp.status_code != expect:
-       assert "GET: Expecting %s got %s: %s" % (expect, resp.status_code, resp.text)
+       assert False, "GET: Expecting %s got %s: %s" % (expect, resp.status_code, resp.text)
    return resp
 
 def post(url_seg, data, expect=201):
    resp = requests.post("%s/api/v1/%s" % (server, url_seg), auth=AUTH, data=data, headers=HEADERS)
    if resp.status_code != expect:
-       assert "POST: Expecting %s got %s: %s" % (expect, resp.status_code, resp.text)
+       assert False, "POST: Expecting %s got %s: %s" % (expect, resp.status_code, resp.text)
    return resp
 
-def update_item(item, data, expect=200):
-   resp = requests.put("%s/%s" % (server, item.resource_uri), auth=AUTH, data=data, headers=HEADERS)
+def update_item(item, data, expect=204):
+   resp = requests.put("%s%s" % (server, item.resource_uri), auth=AUTH, data=data, headers=HEADERS)
    if resp.status_code != expect:
-       assert "PUT: Expecting %s got %s: %s" % (expect, resp.status_code, resp.text)
+       assert False, "PUT: Expecting %s got %s: %s" % (expect, resp.status_code, resp.text)
    return resp
 
 def delete(url_seg, expect=204):
@@ -40,7 +45,7 @@ def delete(url_seg, expect=204):
        url_seg = "%s/" % url_seg
    resp = requests.delete("%s%s" % (server, url_seg), auth=AUTH, headers=HEADERS)
    if resp.status_code != expect:
-       assert "DELETE: Expecting %s got %s: %s" % (expect, resp.status_code, resp.text)
+       assert False, "DELETE: Expecting %s got %s: %s" % (expect, resp.status_code, resp.text)
    return resp
 
 # =============================================================
@@ -56,12 +61,17 @@ class Collection(object):
        try:
            self.data     = json.loads(self.response.text)
        except Exception, e:
+           print self.response.text
            raise e
-       self.meta     = self.data['meta']
+       try:
+           self.meta     = self.data['meta']
+       except Exception, e:
+           print self.response.text
+           raise e
        self.objects  = self.data['objects']
        self.meta     = self.data['meta']
        self.objects  = self.data['objects']
-        
+
    def base_url(self):
        return exceptions.NotImplementedError()
 
@@ -90,6 +100,12 @@ class Entry(object):
 
    def __repr__(self):
        return repr(self.data)
+
+   def refresh(self):
+       print "URI=%s" % self.resource_uri
+       data = get(self.resource_uri)
+       print "Data=%s" % data
+       return Entry(json.loads(data.text))
 
    def update(self, data):
        json_data = json.dumps(data)
@@ -157,6 +173,9 @@ try:
     orgs = Organizations()
     orgs.add(dict(description="new org?", name="new org"))
     last_org = list(Organizations())[-1]  
+    last_org.refresh()
+
+
     Organizations().print_display()
 
     print "*** adding a project"
