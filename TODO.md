@@ -1,21 +1,16 @@
 TODO items for ansible commander
 ================================
 
-* tastypie subresources?  Maybe not.  Are they needed?
-
-* tastypie authz (various subclasses) using RBAC permissions model
-
-  ** for editing, is user able to edit the resource
-  ** if they can, did they remove anything they should not remove or add anything they cannot add?
-  ** did they set any properites on any resources beyond just creating them?
-
-* tastypie tests using various users
-
+* finish shift to DJANGO REST FRAMEWORK from tastypie, rework client lib code
+* write custom rbac & validation classes
+* determine how to auto-add hrefs to serializers (including sub-resources)
 * CLI client
 * business logic 
 * celery integration / job status API
 * UI layer
 * clean up initial migrations
+* inventory plugin
+* reporting plugin
 
 NEXT STEPS
 

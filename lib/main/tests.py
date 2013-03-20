@@ -1,3 +1,5 @@
+# FIXME: do not use ResourceTestCase
+
 """
 This file demonstrates two different styles of tests (one doctest and one
 unittest). These will both pass when you run "manage.py test".
@@ -11,11 +13,6 @@ import datetime
 from django.contrib.auth.models import User as DjangoUser
 from tastypie.test import ResourceTestCase
 from lib.main.models import User, Organization, Project 
-# from entries.models import Entry
-
-#class SimpleTest(TestCase):
-#    def test_basic_addition(self):
-#        self.failUnlessEqual(1 + 1, 2)
 
 class BaseResourceTest(ResourceTestCase):
 
@@ -32,23 +29,34 @@ class BaseResourceTest(ResourceTestCase):
         acom_user   = User.objects.create(name=username, auth_user=django_user)
         return (django_user, acom_user)
 
+    def make_organizations(self, count=1):
+        results = []
+        for x in range(0, count):
+            results.append(Organization.objects.create(name="org%s" % x, description="org%s" % x))
+        return results
+
     def setup_users(self):
         # Create a user.
 
         self.super_username  = 'admin'
         self.super_password  = 'admin'
-
         self.normal_username = 'normal'
         self.normal_password = 'normal'
+        self.other_username  = 'other'
+        self.other_password  = 'other'
 
-        (self.super_django_user, self.super_acom_user)   = self.make_user(self.super_username, self.super_password, super_user=True)
+        (self.super_django_user,  self.super_acom_user)  = self.make_user(self.super_username,  self.super_password, super_user=True)
         (self.normal_django_user, self.normal_acom_user) = self.make_user(self.normal_username, self.normal_password, super_user=False)
+        (self.other_django_user,  self.other_acom_user)  = self.make_user(self.other_username,  self.other_password, super_user=False)
 
-    def get_super_credentials():
+    def get_super_credentials(self):
         return self.create_basic(self.super_username, self.super_password)
 
     def get_normal_credentials(self):
         return self.create_basic(self.normal_username, self.normal_password)
+
+    def get_other_credentials(self):
+        return self.create_basic(self.other_username, self.other_password)
 
     def get_invalid_credentials(self):
         return self.create_basic('random', 'combination')
@@ -60,16 +68,25 @@ class OrganizationsResourceTest(BaseResourceTest):
 
     def setUp(self):
         super(OrganizationsResourceTest, self).setUp()
+        self.organizations = self.make_organizations(10)
+        self.a_detail_url  = "%s%s" % (self.collection(), self.organizations[0].pk)
+        self.b_detail_url  = "%s%s" % (self.collection(), self.organizations[1].pk)
+        self.c_detail_url  = "%s%s" % (self.collection(), self.organizations[2].pk)
 
+        # configuration:
+        #   admin_user is an admin and regular user in all organizations
+        #   other_user is all organizations
+        #   normal_user is a user in organization 0, and an admin of organization 1
 
-        # Fetch the ``Entry`` object we'll use in testing.
-        # Note that we aren't using PKs because they can change depending
-        # on what other tests are running.
-        #self.entry_1 = Entry.objects.get(slug='first-post')
-
-        # We also build a detail URI, since we will be using it all over.
-        # DRY, baby. DRY.
-        #self.detail_url = '/api/v1/entry/{0}/'.format(self.entry_1.pk)
+        for x in self.organizations:
+            # NOTE: superuser does not have to be explicitly added to admin group
+            # x.admins.add(self.super_acom_user)
+            x.users.add(self.super_acom_user)
+            x.users.add(self.other_acom_user)
+ 
+        self.organizations[0].users.add(self.normal_acom_user)
+        self.organizations[0].users.add(self.normal_acom_user)
+        self.organizations[1].admins.add(self.normal_acom_user)
 
         # The data we'll send on POST requests. Again, because we'll use it
         # frequently (enough).
@@ -80,34 +97,94 @@ class OrganizationsResourceTest(BaseResourceTest):
         #    'created': '2012-05-01T22:05:12'
         #}
 
-
+    # TODO: combine this triplet.
     def test_get_list_unauthorzied(self):
+ 
+        # no credentials == 401
         self.assertHttpUnauthorized(self.api_client.get(self.collection(), format='json'))
 
-    def test_get_list_invalid_authorization(self):
+        # wrong credentials == 401
         self.assertHttpUnauthorized(self.api_client.get(self.collection(), format='json', authentication=self.get_invalid_credentials()))
 
-    def test_get_list_json(self):
+        # superuser credentials == 200, full list
+        resp = self.api_client.get(self.collection(), format='json', authentication=self.get_super_credentials())
+        self.assertValidJSONResponse(resp)
+        self.assertEqual(len(self.deserialize(resp)['objects']), 10)
+        # check member data
+        first = self.deserialize(resp)['objects'][0]
+        self.assertEqual(first['name'], 'org0')
+
+        # normal credentials == 200, get only organizations that I am actually added to (there are 2)
         resp = self.api_client.get(self.collection(), format='json', authentication=self.get_normal_credentials())
         self.assertValidJSONResponse(resp)
+        self.assertEqual(len(self.deserialize(resp)['objects']), 2)
 
-#        # Scope out the data for correctness.
-#        self.assertEqual(len(self.deserialize(resp)['objects']), 12)
-#        # Here, we're checking an entire structure for the expected data.
-#        self.assertEqual(self.deserialize(resp)['objects'][0], {
-#            'pk': str(self.entry_1.pk),
-#            'user': '/api/v1/user/{0}/'.format(self.user.pk),
-#            'title': 'First post',
-#            'slug': 'first-post',
-#            'created': '2012-05-01T19:13:42',
-#            'resource_uri': '/api/v1/entry/{0}/'.format(self.entry_1.pk)
-#        })
-#
-#    def test_get_list_xml(self):
-#        self.assertValidXMLResponse(self.api_client.get('/api/v1/entries/', format='xml', authentication=self.get_credentials()))
+        # no admin rights? get empty list
+        resp = self.api_client.get(self.collection(), format='json', authentication=self.get_other_credentials())
+        self.assertValidJSONResponse(resp)
+        self.assertEqual(len(self.deserialize(resp)['objects']), 0)
+
+    def test_get_item(self):
+      
+        # no credentials == 401
+        #self.assertHttpUnauthorized(self.api_client.get(self.a_detail_url, format='json'))
+        
+        # wrong crendentials == 401
+        #self.assertHttpUnauthorized(self.api_client.get(self.c_detail_url, format='json', authentication=self.get_invalid_credentials())
+ 
+        # superuser credentials == 
+        pass
+
+
+    def test_get_item_subobjects_projects(self):
+        pass
+
+    def test_get_item_subobjects_users(self):
+        pass
+
+    def test_get_item_subobjects_admins(self):
+        pass
+
+    def test_post_item(self):
+        pass
+
+    def test_post_item_subobjects_projects(self):
+        pass
+
+    def test_post_item_subobjects_users(self):
+        pass
+
+    def test_post_item_subobjects_admins(self):
+        pass
+
+    def test_put_item(self):
+        pass
+
+    def test_put_item_subobjects_projects(self):
+        pass
+
+    def test_put_item_subobjects_users(self):
+        pass
+
+    def test_put_item_subobjects_admins(self):
+        pass
+
+    def test_delete_item(self):
+        pass
+
+    def test_delete_item_subobjects_projects(self):
+        pass
+
+    def test_delete_item_subobjects_users(self):
+        pass
+
+    def test_delete_item_subobjects_admins(self):
+        pass
+
+    def test_get_list_xml(self):
+        self.assertValidXMLResponse(self.api_client.get(self.collection(), format='xml', authentication=self.get_normal_credentials()))
 #
 #   def test_get_detail_unauthenticated(self):
-#        self.assertHttpUnauthorized(self.api_client.get(self.detail_url, format='json'))
 #
 #    def test_get_detail_json(self):
 #        resp = self.api_client.get(self.detail_url, format='json', authentication=self.get_credentials())

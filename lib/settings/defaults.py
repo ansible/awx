@@ -22,6 +22,11 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+REST_FRAMEWORK = {
+    'PAGINATE_BY': 10,
+    'PAGINATE_BY_PARAM': 'page_size' 
+}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -116,12 +121,11 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'lib.main',
-    'lib.api',
     'lib.web',
     'south',
 # not yet compatible with Django 1.5 unless using version from github
 #   'devserver',
-    'tastypie',
+    'rest_framework',
     'django_extensions',
     'djcelery',
     'kombu.transport.django',

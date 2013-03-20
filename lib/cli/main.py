@@ -1,3 +1,5 @@
+# FIXME: as we've switched things over to django-rest-framework from tastypie, this will need some revision
+
 import os
 import requests
 from requests.auth import HTTPBasicAuth
