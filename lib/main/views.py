@@ -7,7 +7,7 @@ from django.contrib.auth.models import AnonymousUser
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework import permissions
-
+import exceptions
 
 class OrganizationsList(generics.ListCreateAPIView):
 
@@ -25,6 +25,9 @@ class OrganizationsList(generics.ListCreateAPIView):
         return Organization.objects.filter(active = True, admins__in = [ self.request.user.application_user ]).distinct() | \
                Organization.objects.filter(active = True, users__in = [ self.request.user.application_user ]).distinct()
 
+    def permissions_check(self, request, obj):
+        raise exceptions.NotImplementedError
+
  
 class OrganizationsDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Organization
@@ -35,5 +38,10 @@ class OrganizationsDetail(generics.RetrieveUpdateDestroyAPIView):
     #def pre_save(self, obj):
     #   obj.owner = self.request.user
 
-
-
+    def permissions_check(self, request, obj):
+         admin = request.user.application_user in obj.admins.all() 
+         user  = request.user.application_user in obj.users.all()
+         if request.method == 'GET':
+              return admin or user
+         if request.method == 'PUT':
+              return admin

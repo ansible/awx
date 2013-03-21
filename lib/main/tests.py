@@ -74,9 +74,10 @@ class BaseTest(django.test.TestCase):
         method = getattr(client,method)
         response = None
         if data is not None:
-            response = method(url, data=json.dumps(data))
+            response = method(url, json.dumps(data), 'application/json')
         else:
             response = method(url)
+
         if response.status_code == 500 and expect != 500:
             assert False, "Failed: %s" % response.content
         if expect is not None:
@@ -87,14 +88,20 @@ class BaseTest(django.test.TestCase):
     def get(self, url, expect=200, auth=None):
         return self._generic_rest(url, data=None, expect=expect, auth=auth, method='get')
 
-    def post(self, url, expect=204, auth=None):
-        return self._generic_rest(url, data=None, expect=expect, auth=auth, method='post')
+    def post(self, url, data, expect=204, auth=None):
+        return self._generic_rest(url, data=data, expect=expect, auth=auth, method='post')
 
-    def put(self, url, expect=200, auth=None):
-        return self._generic_rest(url, data=None, expect=expect, auth=auth, method='put')
+    def put(self, url, data, expect=200, auth=None):
+        return self._generic_rest(url, data=data, expect=expect, auth=auth, method='put')
 
     def delete(self, url, expect=201, auth=None):
         return self._generic_rest(url, data=None, expect=expect, auth=auth, method='delete')
+
+    def get_urls(self, collection_url, auth=None):
+        # TODO: this test helper function doesn't support pagination
+        data = self.get(collection_url, expect=200, auth=auth)
+        return [item['url'] for item in data['results']]
+    
 
 class OrganizationsTest(BaseTest):
 
@@ -156,8 +163,9 @@ class OrganizationsTest(BaseTest):
         # make sure invalid user cannot
         data = self.get(urls[0], expect=401, auth=self.get_invalid_credentials())
 
-        # normal user should be able to get org 0 but not org 9 (as he's not a user or admin of it)
+        # normal user should be able to get org 0 and org 1 but not org 9 (as he's not a user or admin of it)
         data = self.get(urls[0], expect=200, auth=self.get_normal_credentials())
+        data = self.get(urls[1], expect=200, auth=self.get_normal_credentials())
         data = self.get(urls[9], expect=403, auth=self.get_normal_credentials())
 
         # other user isn't a user or admin of anything, and similarly can't get in
@@ -168,6 +176,7 @@ class OrganizationsTest(BaseTest):
 
     def test_get_item_subobjects_projects(self):
         pass
+        
 
     def test_get_item_subobjects_users(self):
         pass
@@ -188,7 +197,28 @@ class OrganizationsTest(BaseTest):
         pass
 
     def test_put_item(self):
-        pass
+
+        urls = self.get_urls(self.collection(), auth=self.get_super_credentials())
+        data = self.get(urls[0], expect=401, auth=self.get_invalid_credentials())
+
+        # test that an unauthenticated user cannot do a put
+        new_data = data.copy()
+        new_data['description'] = 'updated description'
+        self.put(urls[0], new_data, expect=401, auth=None)
+        self.put(urls[0], new_data, expect=401, auth=self.get_invalid_credentials())
+
+        # user normal is an admin of org 0 and a member of org 1 so should be able to put only org 1        
+        self.put(urls[1], new_data, expect=403, auth=self.get_normal_credentials())
+        put_result = self.put(urls[1], new_data, expect=200, auth=self.get_normal_credentials())
+
+        # FIXME: test the contents of the put returned object
+
+        # get back org 1 and see if it changed
+        get_result = self.get(urls[1], data=new_data, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(get_result['description'], 'updated description')
+
+        # super user can also put even though they aren't added to the org users or admins list
+        self.put(urls[0], new_data, expect=200, auth=self.get_super_credentials())
 
     def test_put_item_subobjects_projects(self):
         pass
