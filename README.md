@@ -10,8 +10,8 @@ Technology
 
 * Ansible
 * Django (a python web framework)
+* Django REST Framework
 * Celery (a python task engine)
-* Tastypie (a Django REST layer)
 * PostgreSQL
 
 Status
