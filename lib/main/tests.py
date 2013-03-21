@@ -134,7 +134,7 @@ class OrganizationsTest(BaseTest):
         # superuser credentials == 200, full list
         data = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
         self.check_pagination_and_size(data, 10, previous=None, next=None)
-        [self.assertTrue(key in data['results'][0]) for key in ['name', 'description' ]] # url
+        [self.assertTrue(key in data['results'][0]) for key in ['name', 'description', 'url' ]]
 
         # normal credentials == 200, get only organizations that I am actually added to (there are 2)
         data = self.get(self.collection(), expect=200, auth=self.get_normal_credentials())

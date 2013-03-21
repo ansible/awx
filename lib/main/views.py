@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 #from rest_framework.renderers import JSONRenderer
 #from rest_framework.parsers import JSONParser
+
 from lib.main.models import *
 from lib.main.serializers import *
 from django.contrib.auth.models import AnonymousUser
@@ -9,7 +10,7 @@ from django.contrib.auth.models import AnonymousUser
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework import permissions
-from rest_framework import permissions
+#from rest_framework.authentication import authentication
 
 # TODO: verify pagination
 # TODO: how to add relative resources
@@ -18,15 +19,31 @@ from rest_framework import permissions
 class CustomRbac(permissions.BasePermission):
 
     def has_permission(self, request, view, obj=None):
+
+        # no anonymous users
         if type(request.user) == AnonymousUser:
+            return False
+
+        # superusers are always good
+        if request.user.is_superuser:
+            return True
+
+        # other users must have associated acom user records
+        # and be active
+        acom_user = User.objects.filter(auth_user = request.user)
+        if len(acom_user) != 1:
+            return False
+        if not acom_user[0].active:
             return False
 
         if obj is None:
             return True
         else:
+            # haven't tested around these confines yet
             raise Exception("FIXME")
 
     def has_object_permission(self, request, view, obj):
+        # make sure we're running with a tested version since this is a security-related function
         raise Exception("newer than expected version of django-rest-framework installed")
 
 

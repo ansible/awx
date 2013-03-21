@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
 
 # TODO: jobs and events model TBD
 # TODO: reporting model TBD
@@ -63,6 +64,10 @@ class Organization(CommonModel):
     users    = models.ManyToManyField('User', blank=True, related_name='organizations')
     admins   = models.ManyToManyField('User', blank=True, related_name='admin_of_organizations')
     projects = models.ManyToManyField('Project', blank=True, related_name='organizations')
+
+    def get_absolute_url(self):
+        import lib.urls
+        return reverse(lib.urls.views_OrganizationsDetail, args=(self.pk,))
 
 class Inventory(CommonModel):
     ''' 

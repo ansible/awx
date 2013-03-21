@@ -4,7 +4,8 @@ from rest_framework import serializers, pagination
 
 class OrganizationSerializer(serializers.ModelSerializer):
 
+    url = serializers.CharField(source='get_absolute_url', read_only=True)
+
     class Meta:
         model = Organization
-        fields = ('name', 'description')
-
+        fields = ('url', 'name', 'description')
