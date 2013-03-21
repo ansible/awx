@@ -53,9 +53,6 @@ class OrganizationsList(generics.ListCreateAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
-    #authentication_classes = (SessionAuthentication, BasicAuthentication)
-    #permission_classes = (IsAuthenticated,)
-
     permission_classes = (CustomRbac,)
 
     #def pre_save(self, obj):
@@ -63,9 +60,9 @@ class OrganizationsList(generics.ListCreateAPIView):
    
     def get_queryset(self):
         if self.request.user.is_superuser:
-            return Organization.objects.all()
-        return Organization.objects.filter(admins__in = [ self.request.user.application_user ]).distinct() | \
-               Organization.objects.filter(users__in = [ self.request.user.application_user ]).distinct()
+            return Organization.objects.filter(active=True)
+        return Organization.objects.filter(active = True, admins__in = [ self.request.user.application_user ]).distinct() | \
+               Organization.objects.filter(active = True, users__in = [ self.request.user.application_user ]).distinct()
 
  
 class OrganizationsDetail(generics.RetrieveUpdateDestroyAPIView):
