@@ -81,7 +81,7 @@ class BaseTest(django.test.TestCase):
         if response.status_code == 500 and expect != 500:
             assert False, "Failed: %s" % response.content
         if expect is not None:
-            assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s" % (expect, response.status_code, url, auth)
+            assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, response.content)
         data = json.loads(response.content)
         return data
  
@@ -198,27 +198,29 @@ class OrganizationsTest(BaseTest):
 
     def test_put_item(self):
 
+        # first get some urls and data to put back to them
         urls = self.get_urls(self.collection(), auth=self.get_super_credentials())
-        data = self.get(urls[0], expect=401, auth=self.get_invalid_credentials())
+        data0 = self.get(urls[0], expect=200, auth=self.get_super_credentials())
+        data1 = self.get(urls[1], expect=200, auth=self.get_super_credentials())
 
         # test that an unauthenticated user cannot do a put
-        new_data = data.copy()
-        new_data['description'] = 'updated description'
-        self.put(urls[0], new_data, expect=401, auth=None)
-        self.put(urls[0], new_data, expect=401, auth=self.get_invalid_credentials())
+        new_data1 = data1.copy()
+        new_data1['description'] = 'updated description'
+        self.put(urls[0], new_data1, expect=401, auth=None)
+        self.put(urls[0], new_data1, expect=401, auth=self.get_invalid_credentials())
 
         # user normal is an admin of org 0 and a member of org 1 so should be able to put only org 1        
-        self.put(urls[1], new_data, expect=403, auth=self.get_normal_credentials())
-        put_result = self.put(urls[1], new_data, expect=200, auth=self.get_normal_credentials())
+        self.put(urls[0], new_data1, expect=403, auth=self.get_normal_credentials())
+        put_result = self.put(urls[1], new_data1, expect=200, auth=self.get_normal_credentials())
 
         # FIXME: test the contents of the put returned object
 
         # get back org 1 and see if it changed
-        get_result = self.get(urls[1], data=new_data, expect=200, auth=self.get_normal_credentials())
+        get_result = self.get(urls[1], expect=200, auth=self.get_normal_credentials())
         self.assertEquals(get_result['description'], 'updated description')
 
         # super user can also put even though they aren't added to the org users or admins list
-        self.put(urls[0], new_data, expect=200, auth=self.get_super_credentials())
+        self.put(urls[1], new_data1, expect=200, auth=self.get_super_credentials())
 
     def test_put_item_subobjects_projects(self):
         pass

@@ -45,3 +45,6 @@ class OrganizationsDetail(generics.RetrieveUpdateDestroyAPIView):
               return admin or user
          if request.method == 'PUT':
               return admin
+
+
+
