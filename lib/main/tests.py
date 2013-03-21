@@ -144,17 +144,27 @@ class OrganizationsTest(BaseTest):
         self.check_pagination_and_size(data, 0, previous=None, next=None)
 
     def test_get_item(self):
-        return
-      
-        # no credentials == 401
-        #self.assertHttpUnauthorized(self.api_client.get(self.a_detail_url, format='json'))
-        
-        # wrong crendentials == 401
-        #self.assertHttpUnauthorized(self.api_client.get(self.c_detail_url, format='json', authentication=self.get_invalid_credentials())
- 
-        # superuser credentials == 
-        pass
 
+        # first get all the URLs
+        data = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
+        urls = [item['url'] for item in data['results']]
+
+        # make sure super user can fetch records
+        data = self.get(urls[0], expect=200, auth=self.get_super_credentials())
+        [self.assertTrue(key in data) for key in ['name', 'description', 'url' ]]
+
+        # make sure invalid user cannot
+        data = self.get(urls[0], expect=401, auth=self.get_invalid_credentials())
+
+        # normal user should be able to get org 0 but not org 9 (as he's not a user or admin of it)
+        data = self.get(urls[0], expect=200, auth=self.get_normal_credentials())
+        data = self.get(urls[9], expect=403, auth=self.get_normal_credentials())
+
+        # other user isn't a user or admin of anything, and similarly can't get in
+        data = self.get(urls[0], expect=403, auth=self.get_other_credentials())
+      
+        # FIXME: make sure related resource URLs are given here.  (organizations/users, organizations/admins, organizations/projects)
+        # TODO: also implement those resources
 
     def test_get_item_subobjects_projects(self):
         pass
@@ -201,55 +211,3 @@ class OrganizationsTest(BaseTest):
     def test_delete_item_subobjects_admins(self):
         pass
 
-#   def test_get_list_xml(self):
-#       self.assertValidXMLResponse(self.api_client.get(self.collection(), format='xml', authentication=self.get_normal_credentials()))
-#
-#   def test_get_detail_unauthenticated(self):
-#
-#    def test_get_detail_json(self):
-#        resp = self.api_client.get(self.detail_url, format='json', authentication=self.get_credentials())
-#        self.assertValidJSONResponse(resp)
-#
-#        # We use ``assertKeys`` here to just verify the keys, not all the data.
-#        self.assertKeys(self.deserialize(resp), ['created', 'slug', 'title', 'user'])
-#        self.assertEqual(self.deserialize(resp)['name'], 'First post')
-#
-#    def test_get_detail_xml(self):
-#        self.assertValidXMLResponse(self.api_client.get(self.detail_url, format='xml', authentication=self.get_credentials()))
-#
-#   def test_post_list_unauthenticated(self):
-#       self.assertHttpUnauthorized(self.api_client.post('/api/v1/entries/', format='json', data=self.post_data))
-#
-#    def test_post_list(self):
-#        # Check how many are there first.
-#        self.assertEqual(Entry.objects.count(), 5)
-#        self.assertHttpCreated(self.api_client.post('/api/v1/entries/', format='json', data=self.post_data, authentication=self.get_credentials()))
-#        # Verify a new one has been added.
-#        self.assertEqual(Entry.objects.count(), 6)
-#
-#    def test_put_detail_unauthenticated(self):
-#        self.assertHttpUnauthorized(self.api_client.put(self.detail_url, format='json', data={}))
-#
-#    def test_put_detail(self):
-#        # Grab the current data & modify it slightly.
-#        original_data = self.deserialize(self.api_client.get(self.detail_url, format='json', authentication=self.get_credentials()))
-#        new_data = original_data.copy()
-#        new_data['title'] = 'Updated: First Post'
-#        new_data['created'] = '2012-05-01T20:06:12'
-#
-#        self.assertEqual(Entry.objects.count(), 5)
-#        self.assertHttpAccepted(self.api_client.put(self.detail_url, format='json', data=new_data, authentication=self.get_credentials()))
-#        # Make sure the count hasn't changed & we did an update.
-#        self.assertEqual(Entry.objects.count(), 5)
-#        # Check for updated data.
-#        self.assertEqual(Entry.objects.get(pk=25).title, 'Updated: First Post')
-#        self.assertEqual(Entry.objects.get(pk=25).slug, 'first-post')
-#        self.assertEqual(Entry.objects.get(pk=25).created, datetime.datetime(2012, 3, 1, 13, 6, 12))
-#
-#    def test_delete_detail_unauthenticated(self):
-#        self.assertHttpUnauthorized(self.api_client.delete(self.detail_url, format='json'))
-#
-#    def test_delete_detail(self):
-#        self.assertEqual(Entry.objects.count(), 5)
-#        self.assertHttpAccepted(self.api_client.delete(self.detail_url, format='json', authentication=self.get_credentials()))
-#        self.assertEqual(Entry.objects.count(), 4)
