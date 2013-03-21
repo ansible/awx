@@ -25,6 +25,7 @@ class BaseList(generics.ListCreateAPIView):
         raise exceptions.NotImplementedError
     
     def get_queryset(self):
+        
         return self._get_queryset().filter(active=True)    
 
 class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -44,12 +45,15 @@ class OrganizationsList(BaseList):
     model = Organization
     serializer_class = OrganizationSerializer
     permission_classes = (CustomRbac,)
+
+    # I can see the organizations if:
+    #   I am a superuser
+    #   I am an admin of the organization 
+    #   I am a member of the organization
    
     def _get_queryset(self):
-
         if self.request.user.is_superuser:
-            return Organization.objects.filter(active=True)
-
+            return Organization.objects.all()
         return Organization.objects.filter(
             admins__in = [ self.request.user.application_user ]
         ).distinct() | Organization.objects.filter(
@@ -60,7 +64,6 @@ class OrganizationsDetail(BaseDetail):
 
     model = Organization
     serializer_class = OrganizationSerializer
-
     permission_classes = (CustomRbac,)
 
     # FIXME: use this for the audit trail hook, ideally in base class.
@@ -81,22 +84,76 @@ class OrganizationsDetail(BaseDetail):
         return request.user.application_user in obj.admins.all() 
 
 class OrganizationsAuditTrailList(BaseList):
-    # FIXME: implementation and tests
+
+    model = AuditTrail
+    serializer_class = AuditTrailSerializer
+    permission_classes = (CustomRbac,)
+
+    # FIXME: guts & tests
     pass
 
 class OrganizationsUsersList(BaseList):
-    # FIXME: implementation and tests
-    pass
+    
+    model = User
+    serializer_class = UserSerializer
+    permission_classes = (CustomRbac,)
+
+    # I can see the users in the organization if:
+    #    I am a super user
+    #    I am an admin of the organization
+
+    def _get_queryset(self):
+        # FIXME:
+        base = Users.objects.all(organizations__pk__in = [ 'FIXME' ])
+        if self.request.user.is_superuser:
+            return base.all()
+        return base.objects.filter(
+            organizations__organization__admins__in = [ self.request.user.application_user ]
+        ).distinct() 
+
 
 class OrganizationsAdminsList(BaseList):
-    # FIXME: implementation and tests
-    pass
+    
+    model = User
+    serializer_class = UserSerializer
+    permission_classes = (CustomRbac,)
+
+    # I can see the admins in the organization if:
+    #    I am a super user
+    #    I am an admin of the organization
+    
+    def _get_queryset(self):
+
+        # FIXME
+        base = Users.objects.all(admin_of_organizations__pk__in = [ 'FIXME' ])
+
+        if self.request.user.is_superuser:
+            return base.all()
+        return base.filter(
+            organizations__organization__admins__in = [ self.request.user.application_user ]
+        ).distinct() 
+
 
 class OrganizationsProjectsList(BaseList):
-    # FIXME: implementation and tests
-    pass
+    
+    # I can see the projects from the organization if:
+    #    I'm the superuser
+    #    I am a member of the project
+    #    I am a an administrator of the organization
+
+    def _get_queryset(self):
+        # FIXME:
+        base = Projects.objects.filter(organizations__in = [ 'FIXME' ])
+        if self.request.user.is_superuser:
+            return base.all()
+        return base.filter(
+            organizations__organization__admins__in = [ self.request.user.application_user ]
+        ).distinct() | base.filter(
+            users__in = [ self.request.user.application_user ]
+        ).distinct()
 
 class OrganizationsTagsList(BaseList):
+    # FIXME: guts & tests
     pass
 
 
