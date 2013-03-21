@@ -25,7 +25,13 @@ class OrganizationsList(generics.ListCreateAPIView):
         return Organization.objects.filter(active = True, admins__in = [ self.request.user.application_user ]).distinct() | \
                Organization.objects.filter(active = True, users__in = [ self.request.user.application_user ]).distinct()
 
-    def permissions_check(self, request, obj):
+    def list_permissions_check(self, request, obj=None):
+        if request.method == 'GET':
+             # everybody can call get, but it's filtered
+             return True
+        if request.method == 'POST':
+             # superusers have already been cleared, so deny regular users
+             return False
         raise exceptions.NotImplementedError
 
  
@@ -38,13 +44,13 @@ class OrganizationsDetail(generics.RetrieveUpdateDestroyAPIView):
     #def pre_save(self, obj):
     #   obj.owner = self.request.user
 
-    def permissions_check(self, request, obj):
-         admin = request.user.application_user in obj.admins.all() 
-         user  = request.user.application_user in obj.users.all()
-         if request.method == 'GET':
-              return admin or user
-         if request.method == 'PUT':
-              return admin
+    def item_permissions_check(self, request, obj):
+        admin = request.user.application_user in obj.admins.all() 
+        user  = request.user.application_user in obj.users.all()
+        if request.method == 'GET':
+             return admin or user
+        if request.method == 'PUT':
+             return admin
 
 
 

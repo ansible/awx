@@ -185,7 +185,23 @@ class OrganizationsTest(BaseTest):
         pass
 
     def test_post_item(self):
-        pass
+
+        new_org = dict(name='magic test org', description='8675309')
+        
+        # need to be a valid user
+        self.post(self.collection(), new_org, expect=401, auth=None)
+        self.post(self.collection(), new_org, expect=401, auth=self.get_invalid_credentials())
+        
+        # only super users can create organizations
+        self.post(self.collection(), new_org, expect=403, auth=self.get_normal_credentials())
+        self.post(self.collection(), new_org, expect=403, auth=self.get_other_credentials())
+        data1 = self.post(self.collection(), new_org, expect=201, auth=self.get_super_credentials())
+
+        # duplicate post results in 400
+        data2 = self.post(self.collection(), new_org, expect=400, auth=self.get_super_credentials())
+
+        # look at what we got back from the post, make sure we added an org
+        self.assertTrue(data1['url'].endswith("/11/"))
 
     def test_post_item_subobjects_projects(self):
         pass
@@ -221,6 +237,9 @@ class OrganizationsTest(BaseTest):
 
         # super user can also put even though they aren't added to the org users or admins list
         self.put(urls[1], new_data1, expect=200, auth=self.get_super_credentials())
+
+        # make sure posting to this URL is not supported
+        self.post(urls[1], new_data1, expect=405, auth=self.get_super_credentials())
 
     def test_put_item_subobjects_projects(self):
         pass

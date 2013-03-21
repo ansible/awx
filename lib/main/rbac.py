@@ -28,7 +28,13 @@ class CustomRbac(permissions.BasePermission):
         if not self._common_user_check(request):
             return False
         if obj is None:
-            # filtering happens in the view
+            if getattr(view, 'list_permissions_check', None):
+                if request.user.is_superuser:
+                    return True
+                if not view.list_permissions_check(request):
+                    raise PermissionDenied()
+            elif not getattr(view, 'item_permissions_check', None):
+                raise Exception("internal error, list_permissions_check or item_permissions_check must be defined")
             return True
         else:
             # haven't tested around these confines yet
@@ -39,6 +45,6 @@ class CustomRbac(permissions.BasePermission):
             return True
         if not self._common_user_check(request):
             return False
-        if not view.permissions_check(request, obj):
+        if not view.item_permissions_check(request, obj):
             raise PermissionDenied()
         return True
