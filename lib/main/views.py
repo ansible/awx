@@ -3,7 +3,6 @@ from django.views.decorators.csrf import csrf_exempt
 from lib.main.models import *
 from lib.main.serializers import *
 from lib.main.rbac import *
-from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
 from rest_framework import mixins
 from rest_framework import generics
@@ -25,7 +24,6 @@ class BaseList(generics.ListCreateAPIView):
         raise exceptions.NotImplementedError
     
     def get_queryset(self):
-        
         return self._get_queryset().filter(active=True)    
 
 class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -104,7 +102,7 @@ class OrganizationsUsersList(BaseList):
 
     def _get_queryset(self):
         # FIXME:
-        base = Users.objects.all(organizations__pk__in = [ 'FIXME' ])
+        base = Users.objects.all(organizations__pk__in = [ self.kwargs.get('pk') ])
         if self.request.user.is_superuser:
             return base.all()
         return base.objects.filter(
@@ -125,7 +123,7 @@ class OrganizationsAdminsList(BaseList):
     def _get_queryset(self):
 
         # FIXME
-        base = Users.objects.all(admin_of_organizations__pk__in = [ 'FIXME' ])
+        base = User.objects.all(admin_of_organizations__pk__in = [ self.kwargs.get('pk') ])
 
         if self.request.user.is_superuser:
             return base.all()
@@ -136,24 +134,53 @@ class OrganizationsAdminsList(BaseList):
 
 class OrganizationsProjectsList(BaseList):
     
+    model = Project
+    serializer_class = ProjectSerializer
+    permission_classes = (CustomRbac,)
+    
     # I can see the projects from the organization if:
     #    I'm the superuser
-    #    I am a member of the project
     #    I am a an administrator of the organization
+    #    I am a member of a team on the project
 
     def _get_queryset(self):
-        # FIXME:
-        base = Projects.objects.filter(organizations__in = [ 'FIXME' ])
+        base = Project.objects.filter(organizations__in = [ self.kwargs.get('pk') ])
         if self.request.user.is_superuser:
             return base.all()
         return base.filter(
-            organizations__organization__admins__in = [ self.request.user.application_user ]
+            organizations__admins__in = [ self.request.user.application_user ]
         ).distinct() | base.filter(
-            users__in = [ self.request.user.application_user ]
+            teams__users__in = [ self.request.user.application_user ]
         ).distinct()
 
 class OrganizationsTagsList(BaseList):
     # FIXME: guts & tests
     pass
 
+class ProjectsDetail(BaseDetail):
+
+    model = Project
+    serializer_class = ProjectSerializer
+    permission_classes = (CustomRbac,)
+
+    def item_permissions_check(self, request, obj):
+
+        # to get, must be in a team assigned to this project
+        # or be an org admin of an org this project is in
+
+        raise exceptions.NotImplementedError()
+
+        #is_admin = request.user.application_user in obj.admins.all()
+        #is_user  = request.user.application_user in obj.users.all()
+        #
+        #if request.method == 'GET':
+        #    return is_admin or is_user
+        #elif request.method in [ 'PUT' ]:
+        #    return is_admin
+        #return False
+
+    def delete_permissions_check(self, request, obj):
+        # FIXME: logic TBD
+        raise exceptions.NotImplementedError()
+        #return request.user.application_user in obj.admins.all()
 

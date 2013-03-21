@@ -175,6 +175,10 @@ class Project(CommonModel):
     scm_type         = models.CharField(max_length=64)
     default_playbook = models.CharField(max_length=1024)
 
+    def get_absolute_url(self):
+        import lib.urls
+        return reverse(lib.urls.views_ProjectsDetail, args=(self.pk,))
+
 class Permission(CommonModel):
     '''
     A permission allows a user, project, or team to be able to use an inventory source.

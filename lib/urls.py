@@ -11,6 +11,22 @@ views_OrganizationsAdminsList     = views.OrganizationsAdminsList.as_view()
 views_OrganizationsProjectsList   = views.OrganizationsProjectsList.as_view()
 views_OrganizationsTagsList       = views.OrganizationsTagsList.as_view()
 
+# FIXME: add entries for all of these:
+    
+# projects service
+views_ProjectsDetail              = views.OrganizationsDetail.as_view()
+
+# audit trail service
+# team service
+# inventory service
+# group service
+# host service
+# inventory variable service
+# log data services
+# events services
+# jobs services
+# tags service
+
 
 urlpatterns = patterns('',
     url(r'', include('lib.web.urls')),
@@ -27,16 +43,28 @@ urlpatterns = patterns('',
     # FIXME: implement:
 
     # users service
+
     # projects service
+    url(r'^api/v1/projects/(?P<pk>[0-9]+)/$',                  views_ProjectsDetail),
+    
     # audit trail service
+
     # team service
+
     # inventory service
+
     # group service
+
     # host service
+
     # inventory variable service
+
     # log data services
+
     # events services
+
     # jobs services
+
     # tags service
 
 )

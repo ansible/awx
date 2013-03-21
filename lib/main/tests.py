@@ -34,6 +34,12 @@ class BaseTest(django.test.TestCase):
             results.append(Organization.objects.create(name="org%s" % x, description="org%s" % x))
         return results
 
+    def make_projects(self, count=1):
+        results = []
+        for x in range(0, count):
+            results.append(Project.objects.create(name="proj%s" % x, description="proj%s" % x))
+        return results
+
     def check_pagination_and_size(self, data, desired_count, previous=None, next=None):
         self.assertEquals(data['count'], desired_count)
         self.assertEquals(data['previous'], previous)
@@ -113,7 +119,21 @@ class OrganizationsTest(BaseTest):
 
     def setUp(self):
         self.setup_users()
+ 
         self.organizations = self.make_organizations(10)
+        self.projects      = self.make_projects(10)
+
+        # add projects to organizations in a more or less arbitrary way
+        for project in self.projects[0:2]:
+            self.organizations[0].projects.add(project)
+        for project in self.projects[3:8]:
+            self.organizations[1].projects.add(project)
+        for project in self.projects[9:10]: 
+            self.organizations[2].projects.add(project)
+        self.organizations[0].projects.add(self.projects[-1])
+        self.organizations[9].projects.add(self.projects[-2])
+
+        # get the URL for various organization records
         self.a_detail_url  = "%s%s" % (self.collection(), self.organizations[0].pk)
         self.b_detail_url  = "%s%s" % (self.collection(), self.organizations[1].pk)
         self.c_detail_url  = "%s%s" % (self.collection(), self.organizations[2].pk)
@@ -178,13 +198,35 @@ class OrganizationsTest(BaseTest):
 
         # other user isn't a user or admin of anything, and similarly can't get in
         data = self.get(urls[0], expect=403, auth=self.get_other_credentials())
-      
-        # FIXME: make sure related resource URLs are given here.  (organizations/users, organizations/admins, organizations/projects)
-        # TODO: also implement those resources
 
     def test_get_item_subobjects_projects(self):
-        pass
+
+        # first get all the URLs
+        orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
         
+        # find projects attached to the first org
+        projects0_url = orgs['results'][0]['related']['projects']
+        projects1_url = orgs['results'][1]['related']['projects']
+        projects9_url = orgs['results'][9]['related']['projects']
+       
+        self.get(projects0_url, expect=401, auth=None)
+        self.get(projects0_url, expect=401, auth=self.get_invalid_credentials())
+   
+        # normal user is just a member of the first org, but can't see any projects yet
+        projects0a = self.get(projects0_url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(projects0a['count'], 0)
+
+        # however in the second org, he's an admin and should see all of them
+        projects1a = self.get(projects1_url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(projects1a['count'], 5)
+        projects1b = self.get(projects1_url, expect=200, auth=self.get_other_credentials())
+        self.assertEquals(projects1b['count'], 0)
+ 
+        # superuser should be able to read anything
+        projects9a = self.get(projects9_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(projects9a['count'], 1)
+
+
     def test_get_item_subobjects_users(self):
         pass
 
