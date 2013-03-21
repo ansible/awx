@@ -117,7 +117,6 @@ class OrganizationsTest(BaseTest):
             # NOTE: superuser does not have to be explicitly added to admin group
             # x.admins.add(self.super_acom_user)
             x.users.add(self.super_acom_user)
-            x.users.add(self.other_acom_user)
  
         self.organizations[0].users.add(self.normal_acom_user)
         self.organizations[0].users.add(self.normal_acom_user)
@@ -141,9 +140,8 @@ class OrganizationsTest(BaseTest):
         self.check_pagination_and_size(data, 2, previous=None, next=None)
 
         # no admin rights? get empty list
-        #resp = self.api_client.get(self.collection(), format='json', authentication=self.get_other_credentials())
-        #self.assertValidJSONResponse(resp)
-        #self.assertEqual(len(self.deserialize(resp)['objects']), 0)
+        data = self.get(self.collection(), expect=200, auth=self.get_other_credentials())
+        self.check_pagination_and_size(data, 0, previous=None, next=None)
 
     def test_get_item(self):
         return
