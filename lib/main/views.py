@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 #from rest_framework.parsers import JSONParser
 from lib.main.models import *
 from lib.main.serializers import *
+from django.contrib.auth.models import AnonymousUser
 
 from rest_framework import mixins
 from rest_framework import generics
@@ -16,13 +17,19 @@ from rest_framework import permissions
 
 class CustomRbac(permissions.BasePermission):
 
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view, obj=None):
 
-        if request.method in permissions.SAFE_METHODS: # GET, HEAD, OPTIONS        
+        if type(request.user) == AnonymousUser:
+            return False
+
+        #if getattr(request, 'user') is None:
+        #    return False
+
+        if obj is None:
             return True
 
-        # Write permissions are only allowed to the owner of the snippet
-        return obj.owner == request.user
+        return True # obj.owner == request.user
+
 
 
 class OrganizationsList(generics.ListCreateAPIView):
@@ -31,6 +38,8 @@ class OrganizationsList(generics.ListCreateAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
+    #authentication_classes = (SessionAuthentication, BasicAuthentication)
+    #permission_classes = (IsAuthenticated,)
 
     permission_classes = (CustomRbac,)
 
