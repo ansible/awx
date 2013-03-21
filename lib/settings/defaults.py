@@ -105,7 +105,6 @@ MIDDLEWARE_CLASSES += (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'lib.middleware.exceptions.ExceptionMiddleware',
     #'django.middleware.transaction.TransactionMiddleware',
-    #'devserver.middleware.DevServerMiddleware',
 )
 
 TEMPLATE_DIRS = (
@@ -125,10 +124,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.staticfiles',
     'lib.main',
-    'lib.web',
     'south',
-# not yet compatible with Django 1.5 unless using version from github
-#   'devserver',
     'rest_framework',
     'django_extensions',
     'djcelery',
@@ -136,6 +132,13 @@ INSTALLED_APPS = (
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
+
+# Use Django-devserver if installed.
+try:
+    import devserver
+    INSTALLED_APPS += ('devserver',)
+except ImportError:
+    pass
 
 DEVSERVER_DEFAULT_ADDR = '0.0.0.0'
 DEVSERVER_DEFAULT_PORT = '8013'

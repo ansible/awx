@@ -29,8 +29,6 @@ views_ProjectsDetail              = views.OrganizationsDetail.as_view()
 
 
 urlpatterns = patterns('',
-    url(r'', include('lib.web.urls')),
-
     # organizations service
     url(r'^api/v1/organizations/$',                            views_OrganizationsList),
     url(r'^api/v1/organizations/(?P<pk>[0-9]+)/$',             views_OrganizationsDetail),
@@ -66,7 +64,6 @@ urlpatterns = patterns('',
     # jobs services
 
     # tags service
-
 )
 
 if 'django.contrib.admin' in settings.INSTALLED_APPS:
