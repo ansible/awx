@@ -3,6 +3,7 @@ from lib.main.serializers import *
 from rest_framework import permissions
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
 
 # FIXME: this will probably need to be subclassed by object type
 
@@ -45,6 +46,8 @@ class CustomRbac(permissions.BasePermission):
             return True
         if not self._common_user_check(request):
             return False
+        if not obj.active:
+            raise Http404()
         if not view.item_permissions_check(request, obj):
             raise PermissionDenied()
         return True

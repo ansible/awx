@@ -66,7 +66,8 @@ class BaseTest(django.test.TestCase):
         
     def _generic_rest(self, url, data=None, expect=204, auth=None, method=None):
         assert method is not None
-        if method != 'get':
+        method = method.lower()
+        if method not in [ 'get', 'delete' ]:
             assert data is not None
         client = Client()
         if auth:
@@ -82,8 +83,10 @@ class BaseTest(django.test.TestCase):
             assert False, "Failed: %s" % response.content
         if expect is not None:
             assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, response.content)
-        data = json.loads(response.content)
-        return data
+        if response.status_code != 204:
+            return json.loads(response.content)
+        else:
+            return None
  
     def get(self, url, expect=200, auth=None):
         return self._generic_rest(url, data=None, expect=expect, auth=auth, method='get')
@@ -251,7 +254,26 @@ class OrganizationsTest(BaseTest):
         pass
 
     def test_delete_item(self):
-        pass
+
+        # first get some urls
+        urls = self.get_urls(self.collection(), auth=self.get_super_credentials())
+        urldata1 = self.get(urls[1], auth=self.get_super_credentials())
+        
+        # check authentication -- admins of the org and superusers can delete objects only
+        self.delete(urls[0], expect=401, auth=None)
+        self.delete(urls[0], expect=401, auth=self.get_invalid_credentials())
+        self.delete(urls[8], expect=403, auth=self.get_normal_credentials())
+        self.delete(urls[1], expect=204, auth=self.get_normal_credentials())
+        self.delete(urls[0], expect=204, auth=self.get_super_credentials())
+      
+        # check that when we have deleted an object it comes back 404 via GET
+        # but that it's still in the database as inactive
+        self.get(urls[1], expect=404, auth=self.get_normal_credentials())
+        org1 = Organization.objects.get(pk=urldata1['id'])
+        self.assertEquals(org1.active, False)
+
+        # also check that DELETE on the collection doesn't work
+        self.delete(self.collection(), expect=405, auth=self.get_super_credentials())
 
     def test_delete_item_subobjects_projects(self):
         pass
