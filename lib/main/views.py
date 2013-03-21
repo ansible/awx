@@ -11,6 +11,8 @@ from rest_framework import permissions
 import exceptions
 import datetime
 
+# FIXME: machinery for auto-adding audit trail logs to all CREATE/EDITS
+
 class BaseList(generics.ListCreateAPIView):
   
     def list_permissions_check(self, request, obj=None):
@@ -61,6 +63,7 @@ class OrganizationsDetail(BaseDetail):
 
     permission_classes = (CustomRbac,)
 
+    # FIXME: use this for the audit trail hook, ideally in base class.
     #def pre_save(self, obj):
     #   obj.owner = self.request.user
 
@@ -76,4 +79,24 @@ class OrganizationsDetail(BaseDetail):
 
     def delete_permissions_check(self, request, obj):
         return request.user.application_user in obj.admins.all() 
+
+class OrganizationsAuditTrailList(BaseList):
+    # FIXME: implementation and tests
+    pass
+
+class OrganizationsUsersList(BaseList):
+    # FIXME: implementation and tests
+    pass
+
+class OrganizationsAdminsList(BaseList):
+    # FIXME: implementation and tests
+    pass
+
+class OrganizationsProjectsList(BaseList):
+    # FIXME: implementation and tests
+    pass
+
+class OrganizationsTagsList(BaseList):
+    pass
+
 

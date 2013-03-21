@@ -143,7 +143,12 @@ class OrganizationsTest(BaseTest):
         # superuser credentials == 200, full list
         data = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
         self.check_pagination_and_size(data, 10, previous=None, next=None)
-        [self.assertTrue(key in data['results'][0]) for key in ['name', 'description', 'url' ]]
+        [self.assertTrue(key in data['results'][0]) for key in ['name', 'description', 'url', 'creation_date', 'id' ]]
+
+        # check that the related URL functionality works
+        related = data['results'][0]['related']
+        for x in [ 'audit_trail', 'projects', 'users', 'admins', 'tags' ]:
+            self.assertTrue(x in related and related[x].endswith("/%s/" % x), "looking for %s in related" % x)
 
         # normal credentials == 200, get only organizations that I am actually added to (there are 2)
         data = self.get(self.collection(), expect=200, auth=self.get_normal_credentials())
@@ -180,11 +185,16 @@ class OrganizationsTest(BaseTest):
     def test_get_item_subobjects_projects(self):
         pass
         
-
     def test_get_item_subobjects_users(self):
         pass
 
     def test_get_item_subobjects_admins(self):
+        pass
+
+    def test_get_item_subobjects_tags(self):
+        pass
+
+    def test_get_item_subobjects_audit_trail(self):
         pass
 
     def test_post_item(self):
@@ -213,6 +223,12 @@ class OrganizationsTest(BaseTest):
         pass
 
     def test_post_item_subobjects_admins(self):
+        pass
+
+    def test_post_item_subobjects_tags(self):
+        pass
+
+    def test_post_item_subobjects_audit_trail(self):
         pass
 
     def test_put_item(self):
