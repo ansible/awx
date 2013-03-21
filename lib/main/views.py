@@ -18,22 +18,20 @@ from rest_framework import permissions
 class CustomRbac(permissions.BasePermission):
 
     def has_permission(self, request, view, obj=None):
-
         if type(request.user) == AnonymousUser:
             return False
 
-        #if getattr(request, 'user') is None:
-        #    return False
-
         if obj is None:
             return True
+        else:
+            raise Exception("FIXME")
 
-        return True # obj.owner == request.user
+    def has_object_permission(self, request, view, obj):
+        raise Exception("newer than expected version of django-rest-framework installed")
 
 
 
 class OrganizationsList(generics.ListCreateAPIView):
-
 
 
     model = Organization
@@ -45,7 +43,14 @@ class OrganizationsList(generics.ListCreateAPIView):
 
     #def pre_save(self, obj):
     #   obj.owner = self.request.user
-    
+   
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Organization.objects.all()
+        return Organization.objects.filter(admins__in = [ self.request.user.application_user ]).distinct() | \
+               Organization.objects.filter(users__in = [ self.request.user.application_user ]).distinct()
+
+ 
 class OrganizationsDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Organization
     serializer_class = OrganizationSerializer

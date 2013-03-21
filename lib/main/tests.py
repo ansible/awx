@@ -77,8 +77,10 @@ class BaseTest(django.test.TestCase):
             response = method(url, data=json.dumps(data))
         else:
             response = method(url)
+        if response.status_code == 500 and expect != 500:
+            assert False, "Failed: %s" % response.content
         if expect is not None:
-            assert response.status_code == expect, "expected status %s, got %s (%s) for url=%s as auth=%s" % (expect, response.status_code, response.status_text, url, auth)
+            assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s" % (expect, response.status_code, url, auth)
         data = json.loads(response.content)
         return data
  
@@ -132,17 +134,11 @@ class OrganizationsTest(BaseTest):
         # superuser credentials == 200, full list
         data = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
         self.check_pagination_and_size(data, 10, previous=None, next=None)
-
-        #self.assertValidJSONResponse(resp)
-        #self.assertEqual(len(self.deserialize(resp)['objects']), 10)
-        # check member data
-        #first = self.deserialize(resp)['objects'][0]
-        #self.assertEqual(first['name'], 'org0')
+        [self.assertTrue(key in data['results'][0]) for key in ['name', 'description' ]] # url
 
         # normal credentials == 200, get only organizations that I am actually added to (there are 2)
-        #resp = self.api_client.get(self.collection(), format='json', authentication=self.get_normal_credentials())
-        #self.assertValidJSONResponse(resp)
-        #self.assertEqual(len(self.deserialize(resp)['objects']), 2)
+        data = self.get(self.collection(), expect=200, auth=self.get_normal_credentials())
+        self.check_pagination_and_size(data, 2, previous=None, next=None)
 
         # no admin rights? get empty list
         #resp = self.api_client.get(self.collection(), format='json', authentication=self.get_other_credentials())
