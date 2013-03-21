@@ -1,10 +1,13 @@
 from django.contrib.auth.models import User as DjangoUser
-from lib.main.models import User, Organization, Project
+from lib.main.models import *
 from rest_framework import serializers, pagination
 from django.core.urlresolvers import reverse
 import lib.urls
 
-class OrganizationSerializer(serializers.ModelSerializer):
+class BaseSerializer(serializers.ModelSerializer):
+    pass
+
+class OrganizationSerializer(BaseSerializer):
 
     # add the URL and related resources
     url           = serializers.CharField(source='get_absolute_url', read_only=True)
@@ -15,11 +18,8 @@ class OrganizationSerializer(serializers.ModelSerializer):
     active        = serializers.BooleanField(read_only=True)
 
     class Meta:
-
         model = Organization
-        
-        # whitelist the fields we want to show
-        fields = ('url', 'id', 'name', 'description', 'creation_date', 'related')
+        fields = ('url', 'id', 'name', 'description', 'creation_date', 'related') # whitelist
 
     def get_related(self, obj):
         ''' related resource URLs '''
@@ -32,7 +32,63 @@ class OrganizationSerializer(serializers.ModelSerializer):
             tags        = reverse(lib.urls.views_OrganizationsTagsList,       args=(obj.pk,))
         ) 
 
+class AuditTrailSerializer(BaseSerializer):
+    
+    # add the URL and related resources
+    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    related       = serializers.SerializerMethodField('get_related')
+    
+    class Meta:
+        model = AuditTrail
+        fields = ('url', 'id', 'modified_by', 'delta', 'detail', 'comment')
 
+    def get_related(self, obj):
+        return dict()
+
+class ProjectSerializer(BaseSerializer):
+
+    # add the URL and related resources
+    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    related       = serializers.SerializerMethodField('get_related')
+
+    class Meta:
+        model = Project
+        fields = ('url', 'id', 'name', 'description', 'creation_date', 'local_repository', 'default_playbook', 'scm_type')
+
+    def get_related(self, obj):
+        # FIXME: add related resources: inventories
+        return dict()
+
+class UserSerializer(BaseSerializer):
+   
+    # FIXME: *** this is really about exposing the Django auth_user via REST so it may require
+    # some custom save hooks in the view.
+ 
+    # add the URL and related resources
+    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    related       = serializers.SerializerMethodField('get_related')
+    
+    class Meta:
+        model = User
+        # FIXME: do we want 'auth_user' exposed here?
+        fields = ('url', 'id', 'name', 'description', 'comment', 'creation_date', 'auth_user')
+
+    def get_related(self, obj):
+        # FIXME: add the related django auth user?
+        return dict()
+
+class TagSerializer(BaseSerializer):
+    
+    # add the URL and related resources
+    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    related       = serializers.SerializerMethodField('get_related')
+
+    class Meta:
+        model = Tag
+        fields = ('url', 'id', 'name')
+
+    def get_related(self, obj):
+        return dict()
 
 
 

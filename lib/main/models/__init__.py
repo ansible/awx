@@ -51,6 +51,8 @@ class AuditTrail(CommonModel):
     delta         = models.TextField() # FIXME: switch to JSONField
     detail        = models.TextField()
     comment       = models.TextField()
+
+    # FIXME: this looks like this should be a ManyToMany
     tag           = models.ForeignKey('Tag', on_delete=SET_NULL, null=True, blank=True)
 
 class Organization(CommonModel):
