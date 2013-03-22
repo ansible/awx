@@ -344,7 +344,9 @@ class OrganizationsTest(BaseTest):
     def test_put_item_subobjects_projects(self):
 
         # any attempt to put a subobject should be a 405, edit the actual resource or POST with 'disassociate' to delete
-   
+        # this is against a collection URL anyway, so we really need not repeat this test for other object types
+        # as a PUT against a collection doesn't make much sense.  
+ 
         orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
         projects0_url = orgs['results'][0]['related']['projects']
         sub_projects = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
