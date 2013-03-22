@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
+import exceptions
 
 # TODO: jobs and events model TBD
 # TODO: reporting model TBD
@@ -29,6 +30,9 @@ class CommonModel(models.Model):
 
     def __unicode__(self):
         return unicode(self.name)
+
+    def can_user_administrate(self, user):
+        raise exceptions.NotImplementedError()
  
 class Tag(models.Model):
     ''' 
@@ -172,6 +176,14 @@ class Project(CommonModel):
     def get_absolute_url(self):
         import lib.urls
         return reverse(lib.urls.views_ProjectsDetail, args=(self.pk,))
+
+    def can_user_administrate(self, user):
+        organizations = Organization.filter(admins__in = [ user ])
+        organizations = self.organizations()
+        for org in organizations:
+            if org in project.organizations():
+                return True
+        return True
 
 class Permission(CommonModel):
     '''

@@ -280,16 +280,25 @@ class OrganizationsTest(BaseTest):
         a_project = projects0['results'][-1]
 
         # attempt to add the project to the 7th org and see what happens
-        self.post(projects7_url, a_project, expect=202, auth=self.get_super_credentials())
-        projects7 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(projects7['count'], 3)
+        self.post(projects7_url, a_project, expect=204, auth=self.get_super_credentials())
+        projects1 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(projects1['count'], 3)
 
         # make sure we can't add the project again (should generate a conflict error)
         self.post(projects7_url, a_project, expect=409, auth=self.get_super_credentials())
+        projects7 = self.get(projects7_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(projects7['count'], 6)       
 
         # make sure adding a project that does not exist, or a missing pk field, results in a 400
         self.post(projects7_url, dict(id=99999), expect=400, auth=self.get_super_credentials())
         self.post(projects7_url, dict(asdf=1234), expect=400, auth=self.get_super_credentials())
+
+        # test that by posting a pk + disassociate: True we can remove a relationship
+        a_project['disassociate'] = True
+        self.post(projects7_url, a_project, expect=204, auth=self.get_super_credentials())
+        projects7 = self.get(projects7_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(projects7['count'], 5)
+        
 
     def test_post_item_subobjects_users(self):
         pass

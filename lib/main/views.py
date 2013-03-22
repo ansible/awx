@@ -159,10 +159,8 @@ class OrganizationsProjectsList(BaseList):
             teams__users__in = [ self.request.user ]
         ).distinct()
 
+    # BOOKMARK
     def post(self, request, *args, **kwargs):
-
-        # FIXME: overriden post for add-to-collection
-        # FIXME: if posted with disassociate: True, do not create object and remove the link
 
         # POST { pk: 7, disassociate: True }
 
@@ -178,14 +176,22 @@ class OrganizationsProjectsList(BaseList):
         # the person who created the project.  TODO -- want to defer this question
         # to the model. (FIXME)
 
-        if not request.user.is_superuser or project.created_by == request.user:
-            raise PermissionDenied()
-        if project in organization.projects.all():
-            return Response(status=status.HTTP_409_CONFLICT)
+        if not 'disassociate' in request.DATA:
+            # admin of another org can't add a project to their org
+            if not request.user.is_superuser or project.created_by == request.user:
+                raise PermissionDenied()
+            if project in organization.projects.all():
+                return Response(status=status.HTTP_409_CONFLICT)
+            organization.projects.add(project)
+        else:
+            # to disassociate, be the org admin or a superuser
+            # FIXME: sprinkle these throughout the object layer & simplify
+            if not request.user.is_superuser and not project.can_user_administrate(request.user):
+                raise PermissionDenied()
+            organization.projects.remove(project)
+            # multiple attempts to delete the same thing aren't an error, we're cool
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-        organization.projects.add(project)
-
-        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 
