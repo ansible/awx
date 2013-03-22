@@ -12,37 +12,7 @@ from rest_framework.response import Response
 from rest_framework import status
 import exceptions
 import datetime
-
-# FIXME: machinery for auto-adding audit trail logs to all CREATE/EDITS
-
-class BaseList(generics.ListCreateAPIView):
-  
-    def list_permissions_check(self, request, obj=None):
-        if request.method == 'GET':
-             # everybody can call get, but it's filtered
-             return True
-        if request.method == 'POST':
-             # superusers have already been cleared, so deny regular users
-             return False
-        raise exceptions.NotImplementedError
-    
-    def get_queryset(self):
-        return self._get_queryset().filter(active=True)    
-
-class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
-
-    def pre_save(self, obj):
-       obj.created_by = owner = self.request.user
-
-    def destroy(self, request, *args, **kwargs):
-        # somewhat lame that delete has to call it's own permissions check
-        obj = self.model.objects.get(pk=kwargs['pk'])
-        if not request.user.is_superuser and not self.delete_permissions_check(request, obj):
-            raise PermissionDenied()
-        obj.name   = "_deleted_%s_%s" % (str(datetime.time()), obj.name)
-        obj.active = False
-        obj.save()
-        return HttpResponse(status=204)
+from base_views import BaseList, BaseDetail
 
 class OrganizationsList(BaseList):
 
