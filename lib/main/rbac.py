@@ -11,7 +11,7 @@ class CustomRbac(permissions.BasePermission):
 
     def _common_user_check(self, request):
         # no anonymous users
-        if type(request.user) == AnonymousUser:
+        if request.user.is_anonymous():
             # 401, not 403, hence no raised exception
             return False
         # superusers are always good
