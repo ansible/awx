@@ -31,12 +31,15 @@ class CommonModel(models.Model):
     def __unicode__(self):
         return unicode(self.name)
 
+    @classmethod 
     def can_user_administrate(cls, user):
         raise exceptions.NotImplementedError()
 
+    @classmethod 
     def can_user_delete(cls, user, obj):
         raise exceptions.NotImplementedError
 
+    @classmethod 
     def can_user_access(cls, user, obj):
         raise exceptions.NotImplementedError()
 
@@ -88,18 +91,21 @@ class Organization(CommonModel):
         import lib.urls
         return reverse(lib.urls.views_OrganizationsDetail, args=(self.pk,))
 
+    @classmethod 
     def can_user_delete(cls, user, obj):
         return user in obj.admins.all()
 
+    @classmethod 
     def can_user_administrate(cls, user, obj):
-        return request.user in obj.admins.all()
+        return user in obj.admins.all()
 
+    @classmethod 
     def can_user_access(cls, user, obj):
-        return self.can_user_administrate(user,obj) or request.user in obj.users.all()
+        return cls.can_user_administrate(user,obj) or request.user in obj.users.all()
 
+    @classmethod 
     def can_user_delete(cls, user, obj):
-        return self.can_user_administrate(user, obj)
-
+        return cls.can_user_administrate(user, obj)
 
 class Inventory(CommonModel):
     ''' 
@@ -197,8 +203,9 @@ class Project(CommonModel):
         import lib.urls
         return reverse(lib.urls.views_ProjectsDetail, args=(self.pk,))
 
-    def can_user_administrate(self, user):
-        organizations = Organization.filter(admins__in = [ user ])
+    @classmethod 
+    def can_user_administrate(cls, user, obj):
+        organizations = Organization.filter(admins__in = [ user ], projects__in = [ obj ])
         organizations = self.organizations()
         for org in organizations:
             if org in project.organizations():

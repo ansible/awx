@@ -44,7 +44,7 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
         return HttpResponse(status=204)
 
     def delete_permissions_check(self, request, obj):
-        raise exceptions.NotImplementedError()
+        return self.__class__.model.can_user_delete(request.user, obj)
 
     def item_permissions_check(self, request, obj):
 

@@ -51,10 +51,6 @@ class OrganizationsDetail(BaseDetail):
             return is_admin
         return False
 
-    def delete_permissions_check(self, request, obj):
-        
-        return request.user in obj.admins.all() 
-
 class OrganizationsAuditTrailList(BaseList):
 
     model = AuditTrail
@@ -174,24 +170,20 @@ class ProjectsDetail(BaseDetail):
     serializer_class = ProjectSerializer
     permission_classes = (CustomRbac,)
 
-    def item_permissions_check(self, request, obj):
+#    #def item_permissions_check(self, request, obj):
+#
+#        # to get, must be in a team assigned to this project
+#        # or be an org admin of an org this project is in
+#
+#        raise exceptions.NotImplementedError()
+#
+#        #is_admin = request.user in obj.admins.all()
+#        #is_user  = request.user in obj.users.all()
+#        #
+#        #if request.method == 'GET':
+#        #    return is_admin or is_user
+#        #elif request.method in [ 'PUT' ]:
+#        #    return is_admin
+#        #return False
 
-        # to get, must be in a team assigned to this project
-        # or be an org admin of an org this project is in
-
-        raise exceptions.NotImplementedError()
-
-        #is_admin = request.user in obj.admins.all()
-        #is_user  = request.user in obj.users.all()
-        #
-        #if request.method == 'GET':
-        #    return is_admin or is_user
-        #elif request.method in [ 'PUT' ]:
-        #    return is_admin
-        #return False
-
-    def delete_permissions_check(self, request, obj):
-        # FIXME: logic TBD
-        raise exceptions.NotImplementedError()
-        #return request.user in obj.admins.all()
 
