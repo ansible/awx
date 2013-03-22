@@ -298,7 +298,8 @@ class OrganizationsTest(BaseTest):
         self.post(projects7_url, a_project, expect=204, auth=self.get_super_credentials())
         projects7 = self.get(projects7_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(projects7['count'], 5)
-        
+       
+        # FIXME: need to add tests for associating and disassocating from a non-priveledged acct 
 
     def test_post_item_subobjects_users(self):
         pass

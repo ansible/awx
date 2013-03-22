@@ -49,14 +49,11 @@ class CommonModel(models.Model):
             if not sub_obj.can_user_read(user, sub_obj):
                 return False
             return cls.can_user_administrate(user, obj)
-        else:
-            raise Exception("unknown relationship type: %s" % relationship)
-        return False
+        raise Exception("unknown relationship type: %s" % relationship)
  
     @classmethod
     def can_user_unattach(cls, user, obj, relationship):
-        return cls.can_user_attach(user, obj, relationship)
-
+        return cls.can_user_administrate(user, obj)
  
 class Tag(models.Model):
     ''' 
