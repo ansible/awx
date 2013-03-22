@@ -35,7 +35,10 @@ class CommonModel(models.Model):
         raise exceptions.NotImplementedError()
 
     def can_user_delete(cls, user, obj):
-        return user in obj.admins.all()
+        raise exceptions.NotImplementedError
+
+    def can_user_access(cls, user, obj):
+        raise exceptions.NotImplementedError()
 
  
 class Tag(models.Model):
@@ -87,6 +90,16 @@ class Organization(CommonModel):
 
     def can_user_delete(cls, user, obj):
         return user in obj.admins.all()
+
+    def can_user_administrate(cls, user, obj):
+        return request.user in obj.admins.all()
+
+    def can_user_access(cls, user, obj):
+        return self.can_user_administrate(user,obj) or request.user in obj.users.all()
+
+    def can_user_delete(cls, user, obj):
+        return self.can_user_administrate(user, obj)
+
 
 class Inventory(CommonModel):
     ''' 

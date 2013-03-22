@@ -46,5 +46,13 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
     def delete_permissions_check(self, request, obj):
         raise exceptions.NotImplementedError()
 
+    def item_permissions_check(self, request, obj):
+
+        if request.method == 'GET':
+            return self.__class__.model.can_user_read(request.user, obj)
+        elif request.method in [ 'PUT' ]:
+            return self.__class__.model.can_user_administrate(request.user, obj)
+        return False
+
 
 
