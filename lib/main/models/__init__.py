@@ -125,6 +125,9 @@ class Organization(CommonModel):
     def can_user_delete(cls, user, obj):
         return cls.can_user_administrate(user, obj)
 
+    def __unicode__(self):
+        return self.name
+
 class Inventory(CommonModel):
     ''' 
     an inventory source contains lists and hosts.
@@ -136,6 +139,12 @@ class Inventory(CommonModel):
   
     organization = models.ForeignKey(Organization, null=True, on_delete=SET_NULL, related_name='inventories')    
 
+    def __unicode__(self):
+        if self.organization:
+            return u'%s (%s)' % (self.name, self.organization)
+        else:
+            return self.name
+
 class Host(CommonModel):
     '''
     A managed node
@@ -146,6 +155,9 @@ class Host(CommonModel):
 
     inventory = models.ForeignKey('Inventory', null=True, on_delete=SET_NULL, related_name='hosts')
 
+    def __unicode__(self):
+        return self.name
+
 class Group(CommonModel):
     '''
     A group of managed nodes.  May belong to multiple groups
@@ -155,8 +167,11 @@ class Group(CommonModel):
         app_label = 'main'
 
     inventory = models.ForeignKey('Inventory', null=True, on_delete=SET_NULL, related_name='groups')
-    parents   = models.ManyToManyField('self', related_name='children', blank=True) 
+    parents   = models.ManyToManyField('self', symmetrical=False, related_name='children', blank=True)
     hosts     = models.ManyToManyField('Host', related_name='groups', blank=True)
+
+    def __unicode__(self):
+        return self.name
 
 # FIXME: audit nullables
 # FIXME: audit cascades
@@ -173,6 +188,9 @@ class VariableData(CommonModel):
     host  = models.ForeignKey('Host', null=True, default=None, blank=True, on_delete=CASCADE, related_name='variable_data')
     group = models.ForeignKey('Group', null=True, default=None, blank=True, on_delete=CASCADE, related_name='variable_data')
     data  = models.TextField() # FIXME: JsonField
+
+    def __unicode__(self):
+        return '%s = %s' % (self.name, self.data)
 
 class Credential(CommonModel):
     '''
@@ -268,6 +286,10 @@ class LaunchJob(CommonModel):
     project        = models.ForeignKey('Project', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     user           = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     job_type       = models.CharField(max_length=64, choices=JOB_TYPE_CHOICES)
+
+    def start(self):
+        from lib.main.tasks import run_launch_job
+        return run_launch_job.delay(self.pk)
 
     # project has one default playbook but really should have a list of playbooks and flags ...
     

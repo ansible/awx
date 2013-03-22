@@ -33,7 +33,10 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 class InventoryAdmin(admin.ModelAdmin):
 
-    list_display = ('name', 'description', 'active')
+    fields = ('name', 'organization', 'description', 'active', 'tags',
+              'created_by', 'audit_trail')
+    list_display = ('name', 'organization', 'description', 'active')
+    list_filter = ('organization', 'active')
     filter_horizontal = ('tags',)
 
 class TagAdmin(admin.ModelAdmin):
@@ -47,8 +50,12 @@ class AuditTrailAdmin(admin.ModelAdmin):
     
 class HostAdmin(admin.ModelAdmin):
 
-    list_display = ('name', 'description', 'active')
+    fields = ('name', 'inventory', 'description', 'active', 'tags',
+              'created_by', 'audit_trail')
+    list_display = ('name', 'inventory', 'description', 'active')
+    list_filter = ('inventory', 'active')
     filter_horizontal = ('tags',)
+    # FIXME: Edit reverse of many to many for groups.
 
 class GroupAdmin(admin.ModelAdmin):
 
