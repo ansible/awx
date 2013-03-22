@@ -383,11 +383,14 @@ class OrganizationsTest(BaseTest):
         self.delete(self.collection(), expect=405, auth=self.get_super_credentials())
 
     def test_delete_item_subobjects_projects(self):
+        # TODO: make sure this is covered in the POST test with a disassociate example
         pass
 
     def test_delete_item_subobjects_users(self):
+        # TODO: make sure this is covered in the POST test with a disassociate example
         pass
 
     def test_delete_item_subobjects_admins(self):
+        # TODO: make sure this is covered in the POST test with a disassociate example
         pass
 
