@@ -195,8 +195,23 @@ class LaunchJob(CommonModel):
     project        = models.ForeignKey('Project', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     user           = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     job_type       = models.CharField(max_length=64)
+
+    # project has one default playbook but really should have a list of playbooks and flags ...
     
- 
+    
+    # ENOUGH_TO_RUN_DJANGO=foo ACOM_INVENTORY_ID=<pk> ansible-playbook <path to project selected playbook.yml> -i ansible-commander-inventory.py 
+    #                                                                            ^-- this is a hard coded path
+    # ssh-agent bash
+    # ssh-add ... < key entry
+    #
+    # inventory script I can write, and will use ACOM_INVENTORY_ID
+    # 
+    #
+    # playbook in source control is already on the disk 
+    
+    # job_type:
+    #   run, check -- enough for now, more initially
+    #      if check, add "--check" to parameters
 
 # TODO: Events
 
