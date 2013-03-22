@@ -91,10 +91,11 @@ class OrganizationsAdminsList(BaseList):
 class OrganizationsProjectsList(BaseSubList):
     
     model = Project
-    parent_model = Organization
-    relationship = 'projects'
     serializer_class = ProjectSerializer
     permission_classes = (CustomRbac,)
+
+    parent_model = Organization  # for sub list
+    relationship = 'projects'    # " "
     
     # I can see the projects from the organization if:
     #    I'm the superuser

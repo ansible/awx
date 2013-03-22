@@ -33,11 +33,12 @@ class CommonModel(models.Model):
 
     @classmethod 
     def can_user_administrate(cls, user, obj):
+        # FIXME: do we want a seperate method to override put?  This is kind of general purpose
         raise exceptions.NotImplementedError()
 
     @classmethod 
     def can_user_delete(cls, user, obj):
-        raise exceptions.NotImplementedError
+        raise exceptions.NotImplementedError()
 
     @classmethod 
     def can_user_read(cls, user, obj):
@@ -45,6 +46,7 @@ class CommonModel(models.Model):
 
     @classmethod
     def can_user_attach(cls, user, obj, sub_obj, relationship):
+        ''' whether you can add sub_obj to obj using the relationship type in a subobject view '''
         if relationship in [ 'projects', 'admins', 'users' ]:
             if not sub_obj.can_user_read(user, sub_obj):
                 return False
@@ -108,6 +110,7 @@ class Organization(CommonModel):
 
     @classmethod 
     def can_user_administrate(cls, user, obj):
+        # FIXME: super user checks should be higher up so we don't have to repeat them
         if user.is_superuser:
             return True
         rc = user in obj.admins.all()
@@ -117,7 +120,6 @@ class Organization(CommonModel):
     def can_user_read(cls, user, obj):
         rc =  cls.can_user_administrate(user,obj) or user in obj.users.all()
         return rc
-
 
     @classmethod 
     def can_user_delete(cls, user, obj):

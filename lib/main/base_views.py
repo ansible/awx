@@ -45,14 +45,12 @@ class BaseSubList(BaseList):
   
         if not 'disassociate' in request.DATA:
             if not request.user.is_superuser or not self.__class__.parent_model.can_user_attach(request.user, main, sub, self.__class__.relationship):
-                print "cond1"
                 raise PermissionDenied()
             if sub in relationship.all():
                 return Response(status=status.HTTP_409_CONFLICT)
             relationship.add(sub)
         else:
             if not request.user.is_superuser and not self.__class__.parent_model.can_user_unattach(request.user, main, sub, self.__class__.relationship):
-                print "cond2"
                 raise PermissionDenied()
             relationship.remove(sub)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -61,7 +59,7 @@ class BaseSubList(BaseList):
 class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def pre_save(self, obj):
-       obj.created_by = owner = self.request.user
+        obj.created_by = self.request.user
 
     def destroy(self, request, *args, **kwargs):
         # somewhat lame that delete has to call it's own permissions check
