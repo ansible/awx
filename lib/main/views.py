@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework import status
 import exceptions
 import datetime
-from base_views import BaseList, BaseDetail
+from base_views import BaseList, BaseDetail, BaseSubList
 
 class OrganizationsList(BaseList):
 
@@ -88,9 +88,11 @@ class OrganizationsAdminsList(BaseList):
         ).distinct() 
 
 
-class OrganizationsProjectsList(BaseList):
+class OrganizationsProjectsList(BaseSubList):
     
     model = Project
+    parent_model = Organization
+    relationship = 'projects'
     serializer_class = ProjectSerializer
     permission_classes = (CustomRbac,)
     
@@ -109,43 +111,6 @@ class OrganizationsProjectsList(BaseList):
             teams__users__in = [ self.request.user ]
         ).distinct()
 
-    # BOOKMARK
-    def post(self, request, *args, **kwargs):
-
-        # POST { pk: 7, disassociate: True }
-
-        organization_id = kwargs['pk']
-        project_id = request.DATA.get('id')
-        organization = Organization.objects.get(pk=organization_id)
-        projects = Project.objects.filter(pk=project_id)
-        if len(projects) != 1:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        project = projects[0]
-
-        # you can only add a project to an organization if you are a superuser or
-        # the person who created the project.  TODO -- want to defer this question
-        # to the model. (FIXME)
-
-        if not 'disassociate' in request.DATA:
-            # admin of another org can't add a project to their org
-            if not request.user.is_superuser or project.created_by == request.user:
-                raise PermissionDenied()
-            if project in organization.projects.all():
-                return Response(status=status.HTTP_409_CONFLICT)
-            organization.projects.add(project)
-        else:
-            # to disassociate, be the org admin or a superuser
-            # FIXME: sprinkle these throughout the object layer & simplify
-            if not request.user.is_superuser and not project.can_user_administrate(request.user):
-                raise PermissionDenied()
-            organization.projects.remove(project)
-            # multiple attempts to delete the same thing aren't an error, we're cool
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-
-
-
 class OrganizationsTagsList(BaseList):
     # FIXME: guts & tests
     pass
@@ -156,20 +121,5 @@ class ProjectsDetail(BaseDetail):
     serializer_class = ProjectSerializer
     permission_classes = (CustomRbac,)
 
-#    #def item_permissions_check(self, request, obj):
-#
-#        # to get, must be in a team assigned to this project
-#        # or be an org admin of an org this project is in
-#
-#        raise exceptions.NotImplementedError()
-#
-#        #is_admin = request.user in obj.admins.all()
-#        #is_user  = request.user in obj.users.all()
-#        #
-#        #if request.method == 'GET':
-#        #    return is_admin or is_user
-#        #elif request.method in [ 'PUT' ]:
-#        #    return is_admin
-#        #return False
 
 

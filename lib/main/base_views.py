@@ -28,6 +28,36 @@ class BaseList(generics.ListCreateAPIView):
     def get_queryset(self):
         return self._get_queryset().filter(active=True)
 
+class BaseSubList(BaseList):
+
+    ''' used for subcollections with an overriden post '''
+
+    def post(self, request, *args, **kwargs):
+
+        parent_id = kwargs['pk']
+        sub_id = request.DATA.get('id')
+        main = self.__class__.parent_model.objects.get(pk=parent_id)
+        subs = self.__class__.model.objects.filter(pk=sub_id)
+        if len(subs) != 1:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        sub = subs[0]
+        relationship = getattr(main, self.__class__.relationship)
+  
+        if not 'disassociate' in request.DATA:
+            if not request.user.is_superuser or not self.__class__.parent_model.can_user_attach(request.user, main, sub, self.__class__.relationship):
+                print "cond1"
+                raise PermissionDenied()
+            if sub in relationship.all():
+                return Response(status=status.HTTP_409_CONFLICT)
+            relationship.add(sub)
+        else:
+            if not request.user.is_superuser and not self.__class__.parent_model.can_user_unattach(request.user, main, sub, self.__class__.relationship):
+                print "cond2"
+                raise PermissionDenied()
+            relationship.remove(sub)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def pre_save(self, obj):

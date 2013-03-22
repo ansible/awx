@@ -32,7 +32,7 @@ class CommonModel(models.Model):
         return unicode(self.name)
 
     @classmethod 
-    def can_user_administrate(cls, user):
+    def can_user_administrate(cls, user, obj):
         raise exceptions.NotImplementedError()
 
     @classmethod 
@@ -42,6 +42,20 @@ class CommonModel(models.Model):
     @classmethod 
     def can_user_read(cls, user, obj):
         raise exceptions.NotImplementedError()
+
+    @classmethod
+    def can_user_attach(cls, user, obj, sub_obj, relationship):
+        if relationship in [ 'projects', 'admins', 'users' ]:
+            if not sub_obj.can_user_read(user, sub_obj):
+                return False
+            return cls.can_user_administrate(user, obj)
+        else:
+            raise Exception("unknown relationship type: %s" % relationship)
+        return False
+ 
+    @classmethod
+    def can_user_unattach(cls, user, obj, relationship):
+        return cls.can_user_attach(user, obj, relationship)
 
  
 class Tag(models.Model):
@@ -97,11 +111,16 @@ class Organization(CommonModel):
 
     @classmethod 
     def can_user_administrate(cls, user, obj):
-        return user in obj.admins.all()
+        if user.is_superuser:
+            return True
+        rc = user in obj.admins.all()
+        return rc
 
     @classmethod 
     def can_user_read(cls, user, obj):
-        return cls.can_user_administrate(user,obj) or user in obj.users.all()
+        rc =  cls.can_user_administrate(user,obj) or user in obj.users.all()
+        return rc
+
 
     @classmethod 
     def can_user_delete(cls, user, obj):
@@ -205,12 +224,22 @@ class Project(CommonModel):
 
     @classmethod 
     def can_user_administrate(cls, user, obj):
-        organizations = Organization.filter(admins__in = [ user ], projects__in = [ obj ])
-        organizations = self.organizations()
+        if user.is_superuser:
+            return True
+        organizations = Organization.objects.filter(admins__in = [ user ], projects__in = [ obj ])
         for org in organizations:
             if org in project.organizations():
                 return True
-        return True
+        return False
+
+    @classmethod
+    def can_user_read(cls, user, obj):
+        if cls.can_user_administrate(user,obj):
+            return True
+        # and also if I happen to be on a team inside the project
+        # FIXME: add this too
+        return False
+
 
 class Permission(CommonModel):
     '''
