@@ -14,8 +14,7 @@ import json
 from django.contrib.auth.models import User as DjangoUser
 import django.test
 from django.test.client import Client
-
-from lib.main.models import User, Organization, Project 
+from lib.main.models import *
 
 class BaseTest(django.test.TestCase):
 
@@ -25,8 +24,7 @@ class BaseTest(django.test.TestCase):
             django_user = DjangoUser.objects.create_superuser(username, "%s@example.com", password)
         else:
             django_user = DjangoUser.objects.create_user(username, "%s@example.com", password)
-        acom_user   = User.objects.create(name=username, auth_user=django_user)
-        return (django_user, acom_user)
+        return django_user
 
     def make_organizations(self, count=1):
         results = []
@@ -41,7 +39,6 @@ class BaseTest(django.test.TestCase):
         return results
 
     def check_pagination_and_size(self, data, desired_count, previous=None, next=None):
-        self.assertEquals(data['count'], desired_count)
         self.assertEquals(data['previous'], previous)
         self.assertEquals(data['next'], next)
 
@@ -54,9 +51,9 @@ class BaseTest(django.test.TestCase):
         self.other_username  = 'other'
         self.other_password  = 'other'
 
-        (self.super_django_user,  self.super_acom_user)  = self.make_user(self.super_username,  self.super_password, super_user=True)
-        (self.normal_django_user, self.normal_acom_user) = self.make_user(self.normal_username, self.normal_password, super_user=False)
-        (self.other_django_user,  self.other_acom_user)  = self.make_user(self.other_username,  self.other_password, super_user=False)
+        self.super_django_user  = self.make_user(self.super_username,  self.super_password, super_user=True)
+        self.normal_django_user = self.make_user(self.normal_username, self.normal_password, super_user=False)
+        self.other_django_user  = self.make_user(self.other_username,  self.other_password, super_user=False)
 
     def get_super_credentials(self):
         return (self.super_username, self.super_password)
@@ -145,11 +142,11 @@ class OrganizationsTest(BaseTest):
 
         for x in self.organizations:
             # NOTE: superuser does not have to be explicitly added to admin group
-            # x.admins.add(self.super_acom_user)
-            x.users.add(self.super_acom_user)
+            # x.admins.add(self.super_django_user)
+            x.users.add(self.super_django_user)
  
-        self.organizations[0].users.add(self.normal_acom_user)
-        self.organizations[1].admins.add(self.normal_acom_user)
+        self.organizations[0].users.add(self.normal_django_user)
+        self.organizations[1].admins.add(self.normal_django_user)
 
     def test_get_list(self):
 

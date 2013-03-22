@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User as DjangoUser
+from django.contrib.auth.models import User
 from lib.main.models import *
 from rest_framework import serializers, pagination
 from django.core.urlresolvers import reverse
@@ -70,11 +70,11 @@ class UserSerializer(BaseSerializer):
     
     class Meta:
         model = User
-        # FIXME: do we want 'auth_user' exposed here?
-        fields = ('url', 'id', 'name', 'description', 'comment', 'creation_date', 'auth_user')
+        # FIXME: make sure is_active is and is_superuser is read only
+        fields = ('url', 'id', 'username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser')
 
     def get_related(self, obj):
-        # FIXME: add the related django auth user?
+        # FIXME: add related lookups?
         return dict()
 
 class TagSerializer(BaseSerializer):

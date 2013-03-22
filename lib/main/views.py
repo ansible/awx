@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from lib.main.models import *
+from django.contrib.auth.models import User
 from lib.main.serializers import *
 from lib.main.rbac import *
 from django.core.exceptions import PermissionDenied
@@ -55,9 +56,9 @@ class OrganizationsList(BaseList):
         if self.request.user.is_superuser:
             return Organization.objects.all()
         return Organization.objects.filter(
-            admins__in = [ self.request.user.application_user ]
+            admins__in = [ self.request.user ]
         ).distinct() | Organization.objects.filter(
-            users__in = [ self.request.user.application_user ]
+            users__in = [ self.request.user ]
         ).distinct()
 
 class OrganizationsDetail(BaseDetail):
@@ -71,8 +72,8 @@ class OrganizationsDetail(BaseDetail):
     #   obj.owner = self.request.user
 
     def item_permissions_check(self, request, obj):
-        is_admin = request.user.application_user in obj.admins.all() 
-        is_user  = request.user.application_user in obj.users.all()
+        is_admin = request.user in obj.admins.all() 
+        is_user  = request.user in obj.users.all()
         
         if request.method == 'GET':
             return is_admin or is_user
@@ -81,7 +82,7 @@ class OrganizationsDetail(BaseDetail):
         return False
 
     def delete_permissions_check(self, request, obj):
-        return request.user.application_user in obj.admins.all() 
+        return request.user in obj.admins.all() 
 
 class OrganizationsAuditTrailList(BaseList):
 
@@ -104,11 +105,11 @@ class OrganizationsUsersList(BaseList):
 
     def _get_queryset(self):
         # FIXME:
-        base = Users.objects.all(organizations__pk__in = [ self.kwargs.get('pk') ])
+        base = User.objects.all(organizations__pk__in = [ self.kwargs.get('pk') ])
         if self.request.user.is_superuser:
             return base.all()
         return base.objects.filter(
-            organizations__organization__admins__in = [ self.request.user.application_user ]
+            organizations__organization__admins__in = [ self.request.user ]
         ).distinct() 
 
 
@@ -130,7 +131,7 @@ class OrganizationsAdminsList(BaseList):
         if self.request.user.is_superuser:
             return base.all()
         return base.filter(
-            organizations__organization__admins__in = [ self.request.user.application_user ]
+            organizations__organization__admins__in = [ self.request.user ]
         ).distinct() 
 
 
@@ -150,9 +151,9 @@ class OrganizationsProjectsList(BaseList):
         if self.request.user.is_superuser:
             return base.all()
         return base.filter(
-            organizations__admins__in = [ self.request.user.application_user ]
+            organizations__admins__in = [ self.request.user ]
         ).distinct() | base.filter(
-            teams__users__in = [ self.request.user.application_user ]
+            teams__users__in = [ self.request.user ]
         ).distinct()
 
     def post(self, request, *args, **kwargs):
@@ -187,8 +188,8 @@ class ProjectsDetail(BaseDetail):
 
         raise exceptions.NotImplementedError()
 
-        #is_admin = request.user.application_user in obj.admins.all()
-        #is_user  = request.user.application_user in obj.users.all()
+        #is_admin = request.user in obj.admins.all()
+        #is_user  = request.user in obj.users.all()
         #
         #if request.method == 'GET':
         #    return is_admin or is_user
@@ -199,5 +200,5 @@ class ProjectsDetail(BaseDetail):
     def delete_permissions_check(self, request, obj):
         # FIXME: logic TBD
         raise exceptions.NotImplementedError()
-        #return request.user.application_user in obj.admins.all()
+        #return request.user in obj.admins.all()
 

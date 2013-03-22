@@ -47,7 +47,7 @@ class AuditTrail(CommonModel):
         app_label = 'main'
  
     resource_type = models.CharField(max_length=64)
-    modified_by   = models.ForeignKey('User', on_delete=SET_NULL, null=True, blank=True)
+    modified_by   = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, blank=True)
     delta         = models.TextField() # FIXME: switch to JSONField
     detail        = models.TextField()
     comment       = models.TextField()
@@ -63,8 +63,8 @@ class Organization(CommonModel):
     class Meta:
         app_label = 'main'
 
-    users    = models.ManyToManyField('User', blank=True, related_name='organizations')
-    admins   = models.ManyToManyField('User', blank=True, related_name='admin_of_organizations')
+    users    = models.ManyToManyField('auth.User', blank=True, related_name='organizations')
+    admins   = models.ManyToManyField('auth.User', blank=True, related_name='admin_of_organizations')
     projects = models.ManyToManyField('Project', blank=True, related_name='organizations')
 
     def get_absolute_url(self):
@@ -120,18 +120,6 @@ class VariableData(CommonModel):
     group = models.ForeignKey('Group', null=True, default=None, blank=True, on_delete=CASCADE, related_name='variable_data')
     data  = models.TextField() # FIXME: JsonField
 
-class User(CommonModel):
-    '''
-    Basic user class
-    '''
-    
-    class Meta:
-        app_label = 'main'
-
-    # FIXME: how to integrate with Django auth?
-
-    auth_user     = models.OneToOneField('auth.User', related_name='application_user')
-
 class Credential(CommonModel):
     '''
     A credential contains information about how to talk to a remote set of hosts
@@ -142,7 +130,7 @@ class Credential(CommonModel):
     class Meta:
         app_label = 'main'
 
-    user            = models.ForeignKey('User', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
+    user            = models.ForeignKey('auth.User', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
     project         = models.ForeignKey('Project', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
     team            = models.ForeignKey('Team', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
 
@@ -162,7 +150,7 @@ class Team(CommonModel):
         app_label = 'main'
     
     projects        = models.ManyToManyField('Project', blank=True, related_name='teams')
-    users           = models.ManyToManyField('User', blank=True, related_name='teams')
+    users           = models.ManyToManyField('auth.User', blank=True, related_name='teams')
     organization    = models.ManyToManyField('Organization', related_name='teams')
 
 class Project(CommonModel):
@@ -187,7 +175,7 @@ class Permission(CommonModel):
     class Meta:
         app_label = 'main'
 
-    user            = models.ForeignKey('User', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
+    user            = models.ForeignKey('auth.User', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
     project         = models.ForeignKey('Project', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
     team            = models.ForeignKey('Team', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
     job_type        = models.CharField(max_length=64)
@@ -205,7 +193,7 @@ class LaunchJob(CommonModel):
     inventory      = models.ForeignKey('Inventory', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     credential     = models.ForeignKey('Credential', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     project        = models.ForeignKey('Project', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
-    user           = models.ForeignKey('User', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
+    user           = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     job_type       = models.CharField(max_length=64)
     
  

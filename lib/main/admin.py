@@ -21,7 +21,6 @@ class AuditTrailAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'active')
     filter_horizontal = ('tags',)
     
-
 class HostAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'description', 'active')
@@ -33,11 +32,6 @@ class GroupAdmin(admin.ModelAdmin):
     filter_horizontal = ('parents', 'hosts', 'tags')
 
 class VariableDataAdmin(admin.ModelAdmin):
-
-    list_display = ('name', 'description', 'active')
-    filter_horizontal = ('tags',)
-
-class UserAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'description', 'active')
     filter_horizontal = ('tags',)
@@ -81,7 +75,6 @@ admin.site.register(AuditTrail, AuditTrailAdmin)
 admin.site.register(Host, HostAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(VariableData, VariableDataAdmin)
-admin.site.register(User, UserAdmin)
 admin.site.register(Team, TeamAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(Credential, CredentialAdmin)

@@ -18,10 +18,7 @@ class CustomRbac(permissions.BasePermission):
         if request.user.is_superuser:
             return True
         # other users must have associated acom user records & be active
-        acom_user = User.objects.filter(auth_user = request.user)
-        if len(acom_user) != 1:
-            raise PermissionDenied()
-        if not acom_user[0].active:
+        if not request.user.is_active:
             raise PermissionDenied()
         return True
 
