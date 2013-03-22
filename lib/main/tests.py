@@ -342,7 +342,15 @@ class OrganizationsTest(BaseTest):
         self.post(urls[1], new_data1, expect=405, auth=self.get_super_credentials())
 
     def test_put_item_subobjects_projects(self):
-        pass
+
+        # any attempt to put a subobject should be a 405, edit the actual resource or POST with 'disassociate' to delete
+   
+        orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
+        projects0_url = orgs['results'][0]['related']['projects']
+        sub_projects = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(sub_projects['count'], 3)
+        first_sub_project = sub_projects['results'][0]
+        self.put(projects0_url, first_sub_project, expect=405, auth=self.get_super_credentials())
 
     def test_put_item_subobjects_users(self):
         pass
