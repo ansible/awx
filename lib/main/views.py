@@ -40,25 +40,11 @@ class OrganizationsDetail(BaseDetail):
     serializer_class = OrganizationSerializer
     permission_classes = (CustomRbac,)
 
-    def item_permissions_check(self, request, obj):
-
-        is_admin = request.user in obj.admins.all() 
-        is_user  = request.user in obj.users.all()
-        
-        if request.method == 'GET':
-            return is_admin or is_user
-        elif request.method in [ 'PUT' ]:
-            return is_admin
-        return False
-
 class OrganizationsAuditTrailList(BaseList):
 
     model = AuditTrail
     serializer_class = AuditTrailSerializer
     permission_classes = (CustomRbac,)
-
-    # FIXME: guts & tests
-    pass
 
 class OrganizationsUsersList(BaseList):
     

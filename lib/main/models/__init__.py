@@ -40,7 +40,7 @@ class CommonModel(models.Model):
         raise exceptions.NotImplementedError
 
     @classmethod 
-    def can_user_access(cls, user, obj):
+    def can_user_read(cls, user, obj):
         raise exceptions.NotImplementedError()
 
  
@@ -100,8 +100,8 @@ class Organization(CommonModel):
         return user in obj.admins.all()
 
     @classmethod 
-    def can_user_access(cls, user, obj):
-        return cls.can_user_administrate(user,obj) or request.user in obj.users.all()
+    def can_user_read(cls, user, obj):
+        return cls.can_user_administrate(user,obj) or user in obj.users.all()
 
     @classmethod 
     def can_user_delete(cls, user, obj):
