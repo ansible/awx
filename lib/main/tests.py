@@ -149,10 +149,9 @@ class OrganizationsTest(BaseTest):
             x.users.add(self.super_acom_user)
  
         self.organizations[0].users.add(self.normal_acom_user)
-        self.organizations[0].users.add(self.normal_acom_user)
         self.organizations[1].admins.add(self.normal_acom_user)
 
-    def test_get_list_unauthorzied(self):
+    def test_get_list(self):
 
         # no credentials == 401
         self.get(self.collection(), expect=401)

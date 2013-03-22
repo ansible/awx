@@ -162,6 +162,8 @@ class OrganizationsProjectsList(BaseList):
         # FIXME: verify permissions checks are in place
         # FIXME: do not create objects
 
+        # POST { pk: 7, disassociate: True }
+
         project_id = request.DATA.get('pk')
         return Response('this is incomplete', status=status.HTTP_400_BAD_REQUEST)
 
