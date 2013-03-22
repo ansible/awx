@@ -26,16 +26,27 @@ class BaseTest(django.test.TestCase):
             django_user = DjangoUser.objects.create_user(username, "%s@example.com", password)
         return django_user
 
-    def make_organizations(self, count=1):
+    def make_organizations(self, created_by, count=1):
         results = []
         for x in range(0, count):
-            results.append(Organization.objects.create(name="org%s" % x, description="org%s" % x))
+            results.append(Organization.objects.create(
+                name="org%s" % x, 
+                description="org%s" % x,
+                created_by=created_by
+            ))
         return results
 
-    def make_projects(self, count=1):
+    def make_projects(self, created_by, count=1):
         results = []
         for x in range(0, count):
-            results.append(Project.objects.create(name="proj%s" % x, description="proj%s" % x, scm_type='git', default_playbook='foo.yml', local_repository='/checkout'))
+            results.append(Project.objects.create(
+                name="proj%s" % x, 
+                description="proj%s" % x, 
+                scm_type='git', 
+                default_playbook='foo.yml', 
+                local_repository='/checkout',
+                created_by=created_by
+            ))
         return results
 
     def check_pagination_and_size(self, data, desired_count, previous=None, next=None):
@@ -86,7 +97,8 @@ class BaseTest(django.test.TestCase):
             assert False, "Failed: %s" % response.content
         if expect is not None:
             assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, response.content)
-        if response.status_code != 204:
+        if response.status_code not in [ 202, 204, 400, 409 ]:
+            # no JSON responses in these at least for now, 400/409 should probably return some (FIXME)
             return json.loads(response.content)
         else:
             return None
@@ -117,8 +129,8 @@ class OrganizationsTest(BaseTest):
     def setUp(self):
         self.setup_users()
  
-        self.organizations = self.make_organizations(10)
-        self.projects      = self.make_projects(10)
+        self.organizations = self.make_organizations(self.super_django_user, 10)
+        self.projects      = self.make_projects(self.normal_django_user, 10)
 
         # add projects to organizations in a more or less arbitrary way
         for project in self.projects[0:2]:
@@ -266,22 +278,18 @@ class OrganizationsTest(BaseTest):
         # get all the projects on the first org
         projects0 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
         a_project = projects0['results'][-1]
-        print a_project
 
         # attempt to add the project to the 7th org and see what happens
-        print projects7_url
-        self.post(projects7_url, a_project, expect=201, auth=self.get_super_credentials())
+        self.post(projects7_url, a_project, expect=202, auth=self.get_super_credentials())
         projects7 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
-        print projects7
-        assertEquals(project7['count'], 1)
-
-        raise Exception("stop, need more tests for this!")
+        self.assertEquals(projects7['count'], 3)
 
         # make sure we can't add the project again (should generate a conflict error)
-        # make sure we can't edit an existing project off this resource
-        # make sure you have to be a superuser or org admin to add a project to an org
-        # make sure you can create a /new/ project (need similar permissions) -- not always true of all subresources
-        pass
+        self.post(projects7_url, a_project, expect=409, auth=self.get_super_credentials())
+
+        # make sure adding a project that does not exist, or a missing pk field, results in a 400
+        self.post(projects7_url, dict(id=99999), expect=400, auth=self.get_super_credentials())
+        self.post(projects7_url, dict(asdf=1234), expect=400, auth=self.get_super_credentials())
 
     def test_post_item_subobjects_users(self):
         pass

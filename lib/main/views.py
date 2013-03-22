@@ -163,25 +163,27 @@ class OrganizationsProjectsList(BaseList):
 
         # FIXME: overriden post for add-to-collection
         # FIXME: if posted with disassociate: True, do not create object and remove the link
-        # FIXME: verify permissions checks are in place
-        # FIXME: do not create objects
 
         # POST { pk: 7, disassociate: True }
 
-
         organization_id = kwargs['pk']
-        print request.DATA
         project_id = request.DATA.get('id')
+        organization = Organization.objects.get(pk=organization_id)
+        projects = Project.objects.filter(pk=project_id)
+        if len(projects) != 1:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        project = projects[0]
 
         # you can only add a project to an organization if you are a superuser or
-        # the person who created the project.
+        # the person who created the project.  TODO -- want to defer this question
+        # to the model. (FIXME)
 
-        if request.user.is_superuser or project.user == request.user:
+        if not request.user.is_superuser or project.created_by == request.user:
             raise PermissionDenied()
+        if project in organization.projects.all():
+            return Response(status=status.HTTP_409_CONFLICT)
 
-        organization = Organization.objects.get(pk=organization_id)
-        project = Project.objects.get(pk=project_id)
-        organization.projects.add(Project)
+        organization.projects.add(project)
 
         return Response(status=status.HTTP_202_ACCEPTED)
 
