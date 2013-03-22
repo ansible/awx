@@ -6,6 +6,11 @@ from django.core.urlresolvers import reverse
 # TODO: jobs and events model TBD
 # TODO: reporting model TBD
 
+JOB_TYPE_CHOICES = [
+    ('run', _('Run')),
+    ('check', _('Check')),
+]
+
 class CommonModel(models.Model):
     ''' 
     common model for all object types that have these standard fields 
@@ -15,7 +20,7 @@ class CommonModel(models.Model):
         abstract = True
 
     name          = models.CharField(max_length=512, unique=True)
-    description   = models.TextField()
+    description   = models.TextField(blank=True, default='')
     creation_date = models.DateField(auto_now_add=True)
     tags          = models.ManyToManyField('Tag', related_name='%(class)s_tags', blank=True) 
     audit_trail   = models.ManyToManyField('AuditTrail', related_name='%(class)s_audit_trails', blank=True)
@@ -178,7 +183,7 @@ class Permission(CommonModel):
     user            = models.ForeignKey('auth.User', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
     project         = models.ForeignKey('Project', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
     team            = models.ForeignKey('Team', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
-    job_type        = models.CharField(max_length=64)
+    job_type        = models.CharField(max_length=64, choices=JOB_TYPE_CHOICES)
 
 # TODO: other job types (later)
 
@@ -194,7 +199,7 @@ class LaunchJob(CommonModel):
     credential     = models.ForeignKey('Credential', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     project        = models.ForeignKey('Project', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     user           = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
-    job_type       = models.CharField(max_length=64)
+    job_type       = models.CharField(max_length=64, choices=JOB_TYPE_CHOICES)
 
     # project has one default playbook but really should have a list of playbooks and flags ...
     
