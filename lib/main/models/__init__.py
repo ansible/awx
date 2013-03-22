@@ -31,8 +31,12 @@ class CommonModel(models.Model):
     def __unicode__(self):
         return unicode(self.name)
 
-    def can_user_administrate(self, user):
+    def can_user_administrate(cls, user):
         raise exceptions.NotImplementedError()
+
+    def can_user_delete(cls, user, obj):
+        return user in obj.admins.all()
+
  
 class Tag(models.Model):
     ''' 
@@ -80,6 +84,9 @@ class Organization(CommonModel):
     def get_absolute_url(self):
         import lib.urls
         return reverse(lib.urls.views_OrganizationsDetail, args=(self.pk,))
+
+    def can_user_delete(cls, user, obj):
+        return user in obj.admins.all()
 
 class Inventory(CommonModel):
     ''' 

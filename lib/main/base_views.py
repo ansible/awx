@@ -43,3 +43,8 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
         obj.save()
         return HttpResponse(status=204)
 
+    def delete_permissions_check(self, request, obj):
+        raise exceptions.NotImplementedError()
+
+
+

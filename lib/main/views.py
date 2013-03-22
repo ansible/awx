@@ -40,11 +40,8 @@ class OrganizationsDetail(BaseDetail):
     serializer_class = OrganizationSerializer
     permission_classes = (CustomRbac,)
 
-    # FIXME: use this for the audit trail hook, ideally in base class.
-    #def pre_save(self, obj):
-    #   obj.owner = self.request.user
-
     def item_permissions_check(self, request, obj):
+
         is_admin = request.user in obj.admins.all() 
         is_user  = request.user in obj.users.all()
         
@@ -55,6 +52,7 @@ class OrganizationsDetail(BaseDetail):
         return False
 
     def delete_permissions_check(self, request, obj):
+        
         return request.user in obj.admins.all() 
 
 class OrganizationsAuditTrailList(BaseList):
