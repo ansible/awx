@@ -7,6 +7,8 @@ from django.core.exceptions import PermissionDenied
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework import permissions
+from rest_framework.response import Response
+from rest_framework import status
 import exceptions
 import datetime
 
@@ -152,6 +154,19 @@ class OrganizationsProjectsList(BaseList):
         ).distinct() | base.filter(
             teams__users__in = [ self.request.user.application_user ]
         ).distinct()
+
+    def post(self, request, *args, **kwargs):
+
+        # FIXME: overriden post for add-to-collection
+        # FIXME: if posted with disassociate: True, do not create object and remove the link
+        # FIXME: verify permissions checks are in place
+        # FIXME: do not create objects
+
+        project_id = request.DATA.get('pk')
+        return Response('this is incomplete', status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 class OrganizationsTagsList(BaseList):
     # FIXME: guts & tests

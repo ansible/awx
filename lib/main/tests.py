@@ -37,7 +37,7 @@ class BaseTest(django.test.TestCase):
     def make_projects(self, count=1):
         results = []
         for x in range(0, count):
-            results.append(Project.objects.create(name="proj%s" % x, description="proj%s" % x))
+            results.append(Project.objects.create(name="proj%s" % x, description="proj%s" % x, scm_type='git', default_playbook='foo.yml', local_repository='/checkout'))
         return results
 
     def check_pagination_and_size(self, data, desired_count, previous=None, next=None):
@@ -201,7 +201,7 @@ class OrganizationsTest(BaseTest):
 
     def test_get_item_subobjects_projects(self):
 
-        # first get all the URLs
+        # first get all the orgs
         orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
         
         # find projects attached to the first org
@@ -259,6 +259,32 @@ class OrganizationsTest(BaseTest):
         self.assertTrue(data1['url'].endswith("/11/"))
 
     def test_post_item_subobjects_projects(self):
+        
+        # first get all the orgs
+        orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
+        
+        # find projects attached to the first org
+        projects0_url = orgs['results'][0]['related']['projects']
+        projects7_url = orgs['results'][1]['related']['projects']
+        
+        # get all the projects on the first org
+        projects0 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
+        a_project = projects0['results'][-1]
+        print a_project
+
+        # attempt to add the project to the 7th org and see what happens
+        print projects7_url
+        self.post(projects7_url, a_project, expect=201, auth=self.get_super_credentials())
+        projects7 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
+        print projects7
+        assertEquals(project7['count'], 1)
+
+        raise Exception("stop, need more tests for this!")
+
+        # make sure we can't add the project again (should generate a conflict error)
+        # make sure we can't edit an existing project off this resource
+        # make sure you have to be a superuser or org admin to add a project to an org
+        # make sure you can create a /new/ project (need similar permissions) -- not always true of all subresources
         pass
 
     def test_post_item_subobjects_users(self):
