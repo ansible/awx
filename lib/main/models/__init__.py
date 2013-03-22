@@ -21,6 +21,7 @@ class CommonModel(models.Model):
 
     name          = models.CharField(max_length=512, unique=True)
     description   = models.TextField(blank=True, default='')
+    created_by    = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, blank=True, related_name='+') # FIXME: want to make required?
     creation_date = models.DateField(auto_now_add=True)
     tags          = models.ManyToManyField('Tag', related_name='%(class)s_tags', blank=True) 
     audit_trail   = models.ManyToManyField('AuditTrail', related_name='%(class)s_audit_trails', blank=True)

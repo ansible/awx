@@ -31,6 +31,9 @@ class BaseList(generics.ListCreateAPIView):
 
 class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
 
+    def pre_save(self, obj):
+       obj.created_by = owner = self.request.user
+
     def destroy(self, request, *args, **kwargs):
         # somewhat lame that delete has to call it's own permissions check
         obj = self.model.objects.get(pk=kwargs['pk'])
@@ -165,8 +168,22 @@ class OrganizationsProjectsList(BaseList):
 
         # POST { pk: 7, disassociate: True }
 
-        project_id = request.DATA.get('pk')
-        return Response('this is incomplete', status=status.HTTP_400_BAD_REQUEST)
+
+        organization_id = kwargs['pk']
+        print request.DATA
+        project_id = request.DATA.get('id')
+
+        # you can only add a project to an organization if you are a superuser or
+        # the person who created the project.
+
+        if request.user.is_superuser or project.user == request.user:
+            raise PermissionDenied()
+
+        organization = Organization.objects.get(pk=organization_id)
+        project = Project.objects.get(pk=project_id)
+        organization.projects.add(Project)
+
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 
 
