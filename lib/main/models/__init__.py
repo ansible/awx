@@ -213,6 +213,23 @@ class LaunchJob(CommonModel):
     #   run, check -- enough for now, more initially
     #      if check, add "--check" to parameters
 
+    # we'll extend ansible core to have callback context like
+    #    self.context.playbook
+    #    self.context.runner
+    #    and the callback will read the environment for ACOM_CELERY_JOB_ID or similar
+    #    and log tons into the database
+ 
+    # we'll also log stdout/stderr somewhere for debugging
+
+    # the ansible commander setup instructions will include installing the database logging callback
+    # inventory script is going to need some way to load Django models
+    #    it is documented on ansible.cc under API docs and takes two parameters
+    #    --list
+    #    -- host <hostname>
+
+    # posting the LaunchJob should return some type of resource that we can check for status
+    # that all the log data will use as a Foreign Key
+
 # TODO: Events
 
 class LaunchJobStatus(CommonModel):
