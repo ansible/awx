@@ -14,7 +14,7 @@ class OrganizationSerializer(BaseSerializer):
     related       = serializers.SerializerMethodField('get_related')
 
     # make certain fields read only
-    creation_date = serializers.DateTimeField(read_only=True)
+    creation_date = serializers.DateTimeField(read_only=True) # FIXME: is model Date or DateTime, fix model
     active        = serializers.BooleanField(read_only=True)
 
     class Meta:

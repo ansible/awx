@@ -2,6 +2,30 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from lib.main.models import *
 
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin
+
+class UserAdmin(UserAdmin):
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
+        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser')}),
+        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+    )
+    readonly_fields = ('last_login', 'date_joined')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff')
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
+    search_fields = ('username', 'first_name', 'last_name', 'email')
+    ordering = ('username',)
+
+try:
+    admin.site.unregister(User)
+except admin.site.NotRegistered:
+    pass
+admin.site.register(User, UserAdmin)
+
+# FIXME: Hide auth.Group admin
+
 class OrganizationAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'description', 'active')
