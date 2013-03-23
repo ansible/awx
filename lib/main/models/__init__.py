@@ -45,16 +45,23 @@ class CommonModel(models.Model):
         raise exceptions.NotImplementedError()
 
     @classmethod
+    def can_user_add(cls, user):
+        return user.is_superuser
+
+    @classmethod
     def can_user_attach(cls, user, obj, sub_obj, relationship):
         ''' whether you can add sub_obj to obj using the relationship type in a subobject view '''
         if relationship in [ 'projects', 'admins', 'users' ]:
             if not sub_obj.can_user_read(user, sub_obj):
+                print "DEBUG: can't attach"
                 return False
+            print "DEBUG: defer"
             return cls.can_user_administrate(user, obj)
         raise Exception("unknown relationship type: %s" % relationship)
  
     @classmethod
-    def can_user_unattach(cls, user, obj, relationship):
+    def can_user_unattach(cls, user, obj, sub_obj, relationship):
+        print "DEBUG: CUA?"
         return cls.can_user_administrate(user, obj)
  
 class Tag(models.Model):

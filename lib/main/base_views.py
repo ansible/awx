@@ -22,7 +22,7 @@ class BaseList(generics.ListCreateAPIView):
         if request.method == 'GET':
              return True
         if request.method == 'POST':
-             return False
+             return self.__class__.model.can_user_add(request.user)
         raise exceptions.NotImplementedError
    
     def get_queryset(self):
@@ -31,6 +31,16 @@ class BaseList(generics.ListCreateAPIView):
 class BaseSubList(BaseList):
 
     ''' used for subcollections with an overriden post '''
+
+    def list_permissions_check(self, request, obj=None):
+        ''' determines some early yes/no access decisions, pre-filtering '''
+        if request.method == 'GET':
+             return True
+        if request.method == 'POST':
+             # the can_user_attach methods will be called below
+             return True
+        raise exceptions.NotImplementedError
+
 
     def post(self, request, *args, **kwargs):
 
