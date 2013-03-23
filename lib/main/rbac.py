@@ -13,7 +13,6 @@ class CustomRbac(permissions.BasePermission):
         # no anonymous users
         if request.user.is_anonymous():
             # 401, not 403, hence no raised exception
-            print "PD4"
             return False
         # superusers are always good
         if request.user.is_superuser:
@@ -31,7 +30,6 @@ class CustomRbac(permissions.BasePermission):
                 if request.user.is_superuser:
                     return True
                 if not view.list_permissions_check(request):
-                    print "DEBUG: PD1"
                     raise PermissionDenied()
             elif not getattr(view, 'item_permissions_check', None):
                 raise Exception("internal error, list_permissions_check or item_permissions_check must be defined")
@@ -44,11 +42,9 @@ class CustomRbac(permissions.BasePermission):
         if request.user.is_superuser:
             return True
         if not self._common_user_check(request):
-            print "DEBUG: PD2"
             return False
         if not obj.active:
             raise Http404()
         if not view.item_permissions_check(request, obj):
-            print "DEBUG: PD3"
             raise PermissionDenied()
         return True

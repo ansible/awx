@@ -54,7 +54,7 @@ class BaseSubList(BaseList):
         relationship = getattr(main, self.__class__.relationship)
   
         if not 'disassociate' in request.DATA:
-            if not request.user.is_superuser or not self.__class__.parent_model.can_user_attach(request.user, main, sub, self.__class__.relationship):
+            if not request.user.is_superuser and not self.__class__.parent_model.can_user_attach(request.user, main, sub, self.__class__.relationship):
                 raise PermissionDenied()
             if sub in relationship.all():
                 return Response(status=status.HTTP_409_CONFLICT)

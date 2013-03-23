@@ -53,15 +53,14 @@ class CommonModel(models.Model):
         ''' whether you can add sub_obj to obj using the relationship type in a subobject view '''
         if relationship in [ 'projects', 'admins', 'users' ]:
             if not sub_obj.can_user_read(user, sub_obj):
-                print "DEBUG: can't attach"
                 return False
-            print "DEBUG: defer"
-            return cls.can_user_administrate(user, obj)
+            rc = cls.can_user_administrate(user, obj)
+            return rc
+
         raise Exception("unknown relationship type: %s" % relationship)
  
     @classmethod
     def can_user_unattach(cls, user, obj, sub_obj, relationship):
-        print "DEBUG: CUA?"
         return cls.can_user_administrate(user, obj)
  
 class Tag(models.Model):
@@ -120,13 +119,14 @@ class Organization(CommonModel):
         # FIXME: super user checks should be higher up so we don't have to repeat them
         if user.is_superuser:
             return True
+        if obj.created_by == user:
+            return True
         rc = user in obj.admins.all()
         return rc
 
     @classmethod 
     def can_user_read(cls, user, obj):
-        rc =  cls.can_user_administrate(user,obj) or user in obj.users.all()
-        return rc
+        return cls.can_user_administrate(user,obj) or user in obj.users.all()
 
     @classmethod 
     def can_user_delete(cls, user, obj):
@@ -249,6 +249,8 @@ class Project(CommonModel):
     @classmethod 
     def can_user_administrate(cls, user, obj):
         if user.is_superuser:
+            return True
+        if obj.created_by == user:
             return True
         organizations = Organization.objects.filter(admins__in = [ user ], projects__in = [ obj ])
         for org in organizations:

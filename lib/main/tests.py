@@ -16,6 +16,7 @@ import django.test
 from django.test.client import Client
 from lib.main.models import *
 
+
 class BaseTest(django.test.TestCase):
 
     def make_user(self, username, password, super_user=False):
@@ -29,8 +30,9 @@ class BaseTest(django.test.TestCase):
     def make_organizations(self, created_by, count=1):
         results = []
         for x in range(0, count):
+            self.object_ctr = self.object_ctr + 1
             results.append(Organization.objects.create(
-                name="org%s" % x, 
+                name="org%s-%s" % (x, self.object_ctr), 
                 description="org%s" % x,
                 created_by=created_by
             ))
@@ -39,8 +41,9 @@ class BaseTest(django.test.TestCase):
     def make_projects(self, created_by, count=1):
         results = []
         for x in range(0, count):
+            self.object_ctr = self.object_ctr + 1
             results.append(Project.objects.create(
-                name="proj%s" % x, 
+                name="proj%s-%s" % (x, self.object_ctr), 
                 description="proj%s" % x, 
                 scm_type='git', 
                 default_playbook='foo.yml', 
@@ -127,6 +130,7 @@ class OrganizationsTest(BaseTest):
         return '/api/v1/organizations/'
 
     def setUp(self):
+        self.object_ctr = 0
         self.setup_users()
  
         self.organizations = self.make_organizations(self.super_django_user, 10)
@@ -274,7 +278,7 @@ class OrganizationsTest(BaseTest):
         # find projects attached to the first org
         projects0_url = orgs['results'][0]['related']['projects']
         projects1_url = orgs['results'][1]['related']['projects']
-        projects2_url = orgs['results'][1]['related']['projects']
+        projects2_url = orgs['results'][2]['related']['projects']
         
         # get all the projects on the first org
         projects0 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
@@ -301,12 +305,9 @@ class OrganizationsTest(BaseTest):
         self.assertEquals(projects1['count'], 5)
        
         # FIXME: need to add tests for associating and disassocating from a non-priveledged acct 
-        print projects1_url
         a_project = projects1['results'][-1]
         a_project['disassociate'] = 1
         projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
-        print "GOT: %s" % projects1
-        print "POSTING: %s" % a_project
         self.post(projects1_url, a_project, expect=204, auth=self.get_normal_credentials())
         projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(projects1['count'], 4)
@@ -314,16 +315,16 @@ class OrganizationsTest(BaseTest):
         new_project_a = self.make_projects(self.normal_django_user, 1)[0]
         new_project_b = self.make_projects(self.other_django_user, 1)[0]
 
-        # admin of org can add projects he can read
-        self.post(projects1_url, dict(id=new_project_a['id']), expect=204, auth=self.get_normal_credentials())
+        # admin of org can add projects that he can read
+        self.post(projects1_url, dict(id=new_project_a.pk), expect=204, auth=self.get_normal_credentials())
         # but not those he cannot
-        self.post(projects1_url, dict(id=new_project_b['id']), expect=403, auth=self.get_normal_credentials())
+        self.post(projects1_url, dict(id=new_project_b.pk), expect=403, auth=self.get_normal_credentials())
 
         # and can't post a project he can read to an org he cannot
-        self.post(projects2_url, dict(id=new_project_a['id']), expect=403, auth=self.get_normal_credentials())
+        # self.post(projects2_url, dict(id=new_project_a.pk), expect=403, auth=self.get_normal_credentials())
 
         # and can't do post a project he can read to an organization he cannot
-        self.post(projects2_url, dict(id=new_project_a['id']), expect=403, auth=self.get_normal_credentials())
+        self.post(projects2_url, dict(id=new_project_a.pk), expect=403, auth=self.get_normal_credentials())
           
 
     def test_post_item_subobjects_users(self):
