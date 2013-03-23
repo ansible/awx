@@ -57,7 +57,7 @@ class OrganizationsAuditTrailList(BaseSubList):
         if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
             # FIXME: use: organization.can_user_administrate(self.request.user)
             raise PermissionDenied()
-        return AuditTrail.objects.filter(audit_trail_by_tag__in = [ organization ])
+        return AuditTrail.objects.filter(organization_by_audit_trail__in = [ organization ])
 
 
 class OrganizationsUsersList(BaseSubList):

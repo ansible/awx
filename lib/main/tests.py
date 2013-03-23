@@ -269,8 +269,9 @@ class OrganizationsTest(BaseTest):
         org1_tags = self.get(org1_tags_url, expect=403, auth=self.get_other_credentials())
 
     def test_get_item_subobjects_audit_trail(self):
-        # FIXME
-        pass
+        url = '/api/v1/organizations/2/audit_trail/'
+        self.get(url, expect=200, auth=self.get_normal_credentials())
+        # FIXME: verify that some audit trail records are auto-created on save AND post
 
     def test_post_item(self):
 

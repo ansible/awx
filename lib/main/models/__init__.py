@@ -90,7 +90,7 @@ class Tag(models.Model):
         return True
 
  
-class AuditTrail(CommonModel):
+class AuditTrail(models.Model):
     ''' 
     changing any object records the change 
     '''
