@@ -257,7 +257,22 @@ class OrganizationsTest(BaseTest):
         self.assertEquals(org1_users['count'], 1)
 
     def test_get_item_subobjects_tags(self):
-        pass
+
+        # put some tags on the org
+        org1 = Organization.objects.get(pk=2)
+        tag1 = Tag.objects.create(name='atag')
+        tag2 = Tag.objects.create(name='btag')
+        org1.tags.add(tag1)
+        org1.tags.add(tag2)
+
+        # see if we can list the users added to the organization
+        orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
+        org1_tags_url = orgs['results'][1]['related']['tags']
+        org1_tags = self.get(org1_tags_url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(org1_tags['count'], 2)
+        org1_tags = self.get(org1_tags_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(org1_tags['count'], 2)
+        org1_tags = self.get(org1_tags_url, expect=403, auth=self.get_other_credentials())
 
     def test_get_item_subobjects_audit_trail(self):
         pass

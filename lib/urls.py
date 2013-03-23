@@ -26,6 +26,7 @@ views_ProjectsDetail              = views.OrganizationsDetail.as_view()
 # events services
 # jobs services
 # tags service
+views_TagsDetail              = views.TagsDetail.as_view()
 
 
 urlpatterns = patterns('',
@@ -64,6 +65,8 @@ urlpatterns = patterns('',
     # jobs services
 
     # tags service
+    url(r'^api/v1/tags/(?P<pk>[0-9]+)/$',                  views_TagsDetail),
+
 )
 
 if 'django.contrib.admin' in settings.INSTALLED_APPS:

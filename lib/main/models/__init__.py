@@ -24,8 +24,8 @@ class CommonModel(models.Model):
     description   = models.TextField(blank=True, default='')
     created_by    = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, related_name='%s(class)s_created') # not blank=False on purpose for admin!
     creation_date = models.DateField(auto_now_add=True)
-    tags          = models.ManyToManyField('Tag', related_name='%(class)s_tags', blank=True) 
-    audit_trail   = models.ManyToManyField('AuditTrail', related_name='%(class)s_audit_trails', blank=True)
+    tags          = models.ManyToManyField('Tag', related_name='%(class)s_by_tag', blank=True) 
+    audit_trail   = models.ManyToManyField('AuditTrail', related_name='%(class)s_by_audit_trail', blank=True)
     active        = models.BooleanField(default=True)
 
     def __unicode__(self):
@@ -75,7 +75,10 @@ class Tag(models.Model):
 
     def __unicode__(self):
         return unicode(self.name)
- 
+
+    def get_absolute_url(self):
+        import lib.urls
+        return reverse(lib.urls.views_TagsDetail, args=(self.pk,))
  
 class AuditTrail(CommonModel):
     ''' 

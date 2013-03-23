@@ -48,11 +48,14 @@ class OrganizationsAuditTrailList(BaseList):
     serializer_class = AuditTrailSerializer
     permission_classes = (CustomRbac,)
 
-class OrganizationsUsersList(BaseList):
+class OrganizationsUsersList(BaseSubList):
     
     model = User
     serializer_class = UserSerializer
     permission_classes = (CustomRbac,)
+
+    parent_model = Organization
+    relationship = 'users'
 
     def _get_queryset(self):
         ''' to list users in the organization, I must be a superuser or org admin '''
@@ -61,11 +64,14 @@ class OrganizationsUsersList(BaseList):
             raise PermissionDenied()
         return User.objects.filter(organizations__in = [ organization ])
 
-class OrganizationsAdminsList(BaseList):
+class OrganizationsAdminsList(BaseSubList):
     
     model = User
     serializer_class = UserSerializer
     permission_classes = (CustomRbac,)
+    
+    parent_model = Organization
+    relationship = 'admins'
 
     def _get_queryset(self):
         ''' to list admins in the organization, I must be a superuser or org admin '''
@@ -91,8 +97,21 @@ class OrganizationsProjectsList(BaseSubList):
         return Project.objects.filter(organizations__in = [ organization ])
 
 class OrganizationsTagsList(BaseList):
-    # FIXME: guts & tests
-    pass
+    
+    model = Tag
+    serializer_class = TagSerializer
+    permission_classes = (CustomRbac,)
+
+    parent_model = Organization  # for sub list
+    relationship = 'tags'        # " "
+
+    def _get_queryset(self):
+        ''' to list tags in the organization, I must be a superuser or org admin '''
+        organization = Organization.objects.get(pk=self.kwargs['pk'])
+        if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
+            # FIXME: use: organization.can_user_administrate(self.request.user)
+            raise PermissionDenied()
+        return Tag.objects.filter(organization_by_tag__in = [ organization ])
 
 class ProjectsDetail(BaseDetail):
 
@@ -100,5 +119,10 @@ class ProjectsDetail(BaseDetail):
     serializer_class = ProjectSerializer
     permission_classes = (CustomRbac,)
 
+class TagsDetail(BaseDetail):
+
+    model = Tag
+    serializer_class = TagSerializer
+    permission_classes = (CustomRbac,)
 
 

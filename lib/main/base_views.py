@@ -26,8 +26,12 @@ class BaseList(generics.ListCreateAPIView):
         raise exceptions.NotImplementedError
    
     def get_queryset(self):
-        if self.__class__.model == User:
-            return self._get_queryset().filter(is_active=True)
+        base = self._get_queryset()
+        model = self.__class__.model
+        if model == User:
+            return base.filter(is_active=True)
+        elif model in [ Tag, AuditTrail ]:
+            return base
         else:
             return self._get_queryset().filter(active=True)
 
