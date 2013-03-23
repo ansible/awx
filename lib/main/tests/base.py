@@ -47,7 +47,7 @@ class BaseTest(django.test.TestCase):
         self.assertEquals(data['previous'], previous)
         self.assertEquals(data['next'], next)
 
-    def setup_users(self):
+    def setup_users(self, just_super_user=False):
         # Create a user.
         self.super_username  = 'admin'
         self.super_password  = 'admin'
@@ -57,8 +57,11 @@ class BaseTest(django.test.TestCase):
         self.other_password  = 'other'
 
         self.super_django_user  = self.make_user(self.super_username,  self.super_password, super_user=True)
-        self.normal_django_user = self.make_user(self.normal_username, self.normal_password, super_user=False)
-        self.other_django_user  = self.make_user(self.other_username,  self.other_password, super_user=False)
+
+        if not just_super_user:
+
+            self.normal_django_user = self.make_user(self.normal_username, self.normal_password, super_user=False)
+            self.other_django_user  = self.make_user(self.other_username,  self.other_password, super_user=False)
 
     def get_super_credentials(self):
         return (self.super_username, self.super_password)
