@@ -355,6 +355,9 @@ class OrganizationsTest(BaseTest):
         self.post(url, dict(id=2), expect=204, auth=self.get_normal_credentials())
         users = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(users['count'], 2)
+        self.post(url, dict(id=2, disassociate=True), expect=204, auth=self.get_normal_credentials())
+        users = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(users['count'], 1)
 
     def test_post_item_subobjects_admins(self):
 
@@ -364,6 +367,9 @@ class OrganizationsTest(BaseTest):
         self.post(url, dict(id=1), expect=204, auth=self.get_normal_credentials())
         admins = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(admins['count'], 2)
+        self.post(url, dict(id=1, disassociate=1), expect=204, auth=self.get_normal_credentials())
+        admins = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(admins['count'], 1)
 
     def test_post_item_subobjects_tags(self):
 
@@ -375,6 +381,9 @@ class OrganizationsTest(BaseTest):
         tags = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(tags['count'], 1)
         self.assertEqual(tags['results'][0]['id'], tag.pk)
+        self.post(url, dict(id=tag.pk, disassociate=1), expect=204, auth=self.get_normal_credentials())
+        tags = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(tags['count'], 0)
 
     def test_post_item_subobjects_audit_trail(self):
         # audit trails are system things, and no user can post to them.
@@ -443,15 +452,4 @@ class OrganizationsTest(BaseTest):
         # also check that DELETE on the collection doesn't work
         self.delete(self.collection(), expect=405, auth=self.get_super_credentials())
 
-    def test_delete_item_subobjects_projects(self):
-        # TODO: make sure this is covered in the POST test with a disassociate example
-        pass
-
-    def test_delete_item_subobjects_users(self):
-        # TODO: make sure this is covered in the POST test with a disassociate example
-        pass
-
-    def test_delete_item_subobjects_admins(self):
-        # TODO: make sure this is covered in the POST test with a disassociate example
-        pass
 
