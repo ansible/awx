@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User
 import exceptions
 
 # TODO: jobs and events model TBD
@@ -52,8 +53,9 @@ class CommonModel(models.Model):
     def can_user_attach(cls, user, obj, sub_obj, relationship):
         ''' whether you can add sub_obj to obj using the relationship type in a subobject view '''
         if relationship in [ 'projects', 'admins', 'users' ]:
-            if not sub_obj.can_user_read(user, sub_obj):
-                return False
+            if type(sub_obj) != User:
+                if not sub_obj.can_user_read(user, sub_obj):
+                    return False
             rc = cls.can_user_administrate(user, obj)
             return rc
 

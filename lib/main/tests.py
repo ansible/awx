@@ -29,9 +29,7 @@ class BaseTest(django.test.TestCase):
         for x in range(0, count):
             self.object_ctr = self.object_ctr + 1
             results.append(Organization.objects.create(
-                name="org%s-%s" % (x, self.object_ctr), 
-                description="org%s" % x,
-                created_by=created_by
+                name="org%s-%s" % (x, self.object_ctr), description="org%s" % x, created_by=created_by
             ))
         return results
 
@@ -40,12 +38,8 @@ class BaseTest(django.test.TestCase):
         for x in range(0, count):
             self.object_ctr = self.object_ctr + 1
             results.append(Project.objects.create(
-                name="proj%s-%s" % (x, self.object_ctr), 
-                description="proj%s" % x, 
-                scm_type='git', 
-                default_playbook='foo.yml', 
-                local_repository='/checkout',
-                created_by=created_by
+                name="proj%s-%s" % (x, self.object_ctr), description="proj%s" % x, scm_type='git', 
+                default_playbook='foo.yml', local_repository='/checkout', created_by=created_by
             ))
         return results
 
@@ -330,7 +324,6 @@ class OrganizationsTest(BaseTest):
         projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(projects1['count'], 5)
        
-        # FIXME: need to add tests for associating and disassocating from a non-priveledged acct 
         a_project = projects1['results'][-1]
         a_project['disassociate'] = 1
         projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
@@ -354,7 +347,13 @@ class OrganizationsTest(BaseTest):
           
 
     def test_post_item_subobjects_users(self):
-        pass
+
+        url = '/api/v1/organizations/2/users/'
+        users = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(users['count'], 1)
+        self.post(url, dict(id=2), expect=204, auth=self.get_normal_credentials())
+        users = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(users['count'], 2)
 
     def test_post_item_subobjects_admins(self):
         pass
