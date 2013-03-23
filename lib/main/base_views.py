@@ -16,7 +16,7 @@ import datetime
 # FIXME: machinery for auto-adding audit trail logs to all CREATE/EDITS
 
 class BaseList(generics.ListCreateAPIView):
-  
+ 
     def list_permissions_check(self, request, obj=None):
         ''' determines some early yes/no access decisions, pre-filtering '''
         if request.method == 'GET':
