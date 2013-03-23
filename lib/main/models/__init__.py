@@ -50,16 +50,13 @@ class CommonModel(models.Model):
         return user.is_superuser
 
     @classmethod
-    def can_user_attach(cls, user, obj, sub_obj, relationship):
+    def can_user_attach(cls, user, obj, sub_obj, relationship_type):
         ''' whether you can add sub_obj to obj using the relationship type in a subobject view '''
-        if relationship in [ 'projects', 'admins', 'users' ]:
-            if type(sub_obj) != User:
-                if not sub_obj.can_user_read(user, sub_obj):
-                    return False
-            rc = cls.can_user_administrate(user, obj)
-            return rc
-
-        raise Exception("unknown relationship type: %s" % relationship)
+        if type(sub_obj) != User:
+            if not sub_obj.can_user_read(user, sub_obj):
+                return False
+        rc = cls.can_user_administrate(user, obj)
+        return rc
  
     @classmethod
     def can_user_unattach(cls, user, obj, sub_obj, relationship):
@@ -81,6 +78,17 @@ class Tag(models.Model):
     def get_absolute_url(self):
         import lib.urls
         return reverse(lib.urls.views_TagsDetail, args=(self.pk,))
+
+    @classmethod
+    def can_user_add(cls, user):
+        # anybody can make up tags
+        return True
+
+    @classmethod
+    def can_user_read(cls, user, obj):
+        # anybody can read tags, we won't show much detail other than the names
+        return True
+
  
 class AuditTrail(CommonModel):
     ''' 

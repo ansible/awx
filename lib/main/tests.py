@@ -356,10 +356,24 @@ class OrganizationsTest(BaseTest):
         self.assertEqual(users['count'], 2)
 
     def test_post_item_subobjects_admins(self):
-        pass
+
+        url = '/api/v1/organizations/2/admins/'
+        admins = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(admins['count'], 1)
+        self.post(url, dict(id=1), expect=204, auth=self.get_normal_credentials())
+        admins = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(admins['count'], 2)
 
     def test_post_item_subobjects_tags(self):
-        pass
+
+        tag = Tag.objects.create(name='blippy')
+        url = '/api/v1/organizations/2/tags/'
+        tags = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(tags['count'], 0)
+        self.post(url, dict(id=tag.pk), expect=204, auth=self.get_normal_credentials())
+        tags = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(tags['count'], 1)
+        self.assertEqual(tags['results'][0]['id'], tag.pk)
 
     def test_post_item_subobjects_audit_trail(self):
         pass
@@ -380,8 +394,6 @@ class OrganizationsTest(BaseTest):
         # user normal is an admin of org 0 and a member of org 1 so should be able to put only org 1        
         self.put(urls[0], new_data1, expect=403, auth=self.get_normal_credentials())
         put_result = self.put(urls[1], new_data1, expect=200, auth=self.get_normal_credentials())
-
-        # FIXME: test the contents of the put returned object
 
         # get back org 1 and see if it changed
         get_result = self.get(urls[1], expect=200, auth=self.get_normal_credentials())
@@ -405,12 +417,6 @@ class OrganizationsTest(BaseTest):
         self.assertEquals(sub_projects['count'], 3)
         first_sub_project = sub_projects['results'][0]
         self.put(projects0_url, first_sub_project, expect=405, auth=self.get_super_credentials())
-
-    def test_put_item_subobjects_users(self):
-        pass
-
-    def test_put_item_subobjects_admins(self):
-        pass
 
     def test_delete_item(self):
 

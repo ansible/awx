@@ -96,7 +96,7 @@ class OrganizationsProjectsList(BaseSubList):
             raise PermissionDenied()
         return Project.objects.filter(organizations__in = [ organization ])
 
-class OrganizationsTagsList(BaseList):
+class OrganizationsTagsList(BaseSubList):
     
     model = Tag
     serializer_class = TagSerializer
