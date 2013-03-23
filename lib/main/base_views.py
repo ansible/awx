@@ -26,7 +26,10 @@ class BaseList(generics.ListCreateAPIView):
         raise exceptions.NotImplementedError
    
     def get_queryset(self):
-        return self._get_queryset().filter(active=True)
+        if self.__class__.model == User:
+            return self._get_queryset().filter(is_active=True)
+        else:
+            return self._get_queryset().filter(active=True)
 
 class BaseSubList(BaseList):
 

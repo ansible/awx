@@ -224,15 +224,15 @@ class OrganizationsTest(BaseTest):
         self.get(projects0_url, expect=401, auth=None)
         self.get(projects0_url, expect=401, auth=self.get_invalid_credentials())
    
-        # normal user is just a member of the first org, but can't see any projects yet
-        projects0a = self.get(projects0_url, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(projects0a['count'], 0)
+        # normal user is just a member of the first org, but can't see any projects under the org
+        projects0a = self.get(projects0_url, expect=403, auth=self.get_normal_credentials())
 
         # however in the second org, he's an admin and should see all of them
         projects1a = self.get(projects1_url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(projects1a['count'], 5)
-        projects1b = self.get(projects1_url, expect=200, auth=self.get_other_credentials())
-        self.assertEquals(projects1b['count'], 0)
+
+        # but the non-admin cannot access the list of projects in the org.  He should use /projects/ instead!
+        projects1b = self.get(projects1_url, expect=403, auth=self.get_other_credentials())
  
         # superuser should be able to read anything
         projects9a = self.get(projects9_url, expect=200, auth=self.get_super_credentials())
@@ -240,7 +240,12 @@ class OrganizationsTest(BaseTest):
 
 
     def test_get_item_subobjects_users(self):
-        pass
+
+        # see if we can list the users added to the organization
+        orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
+        org1_users_url = orgs['results'][1]['related']['users']
+        org1_users = self.get(org1_users_url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(org1_users['count'], 1)
 
     def test_get_item_subobjects_admins(self):
         pass

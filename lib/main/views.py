@@ -26,11 +26,13 @@ class OrganizationsList(BaseList):
     #   I am a member of the organization
    
     def _get_queryset(self):
+        ''' I can see organizations when I am a superuser, or I am an admin or user in that organization '''
+        base = Organization.objects
         if self.request.user.is_superuser:
-            return Organization.objects.all()
-        return Organization.objects.filter(
+            return base.all()
+        return base.filter(
             admins__in = [ self.request.user ]
-        ).distinct() | Organization.objects.filter(
+        ).distinct() | base.filter(
             users__in = [ self.request.user ]
         ).distinct()
 
@@ -52,19 +54,12 @@ class OrganizationsUsersList(BaseList):
     serializer_class = UserSerializer
     permission_classes = (CustomRbac,)
 
-    # I can see the users in the organization if:
-    #    I am a super user
-    #    I am an admin of the organization
-
     def _get_queryset(self):
-        # FIXME:
-        base = User.objects.all(organizations__pk__in = [ self.kwargs.get('pk') ])
-        if self.request.user.is_superuser:
-            return base.all()
-        return base.objects.filter(
-            organizations__organization__admins__in = [ self.request.user ]
-        ).distinct() 
-
+        ''' to list users in the organization, I must be a superuser or org admin '''
+        organization = Organization.objects.get(pk=self.kwargs['pk'])
+        if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
+            raise PermissionDenied()
+        return User.objects.filter(organizations__in = [ organization ])
 
 class OrganizationsAdminsList(BaseList):
     
@@ -72,21 +67,12 @@ class OrganizationsAdminsList(BaseList):
     serializer_class = UserSerializer
     permission_classes = (CustomRbac,)
 
-    # I can see the admins in the organization if:
-    #    I am a super user
-    #    I am an admin of the organization
-    
     def _get_queryset(self):
-
-        # FIXME
-        base = User.objects.all(admin_of_organizations__pk__in = [ self.kwargs.get('pk') ])
-
-        if self.request.user.is_superuser:
-            return base.all()
-        return base.filter(
-            organizations__organization__admins__in = [ self.request.user ]
-        ).distinct() 
-
+        ''' to list admins in the organization, I must be a superuser or org admin '''
+        organization = Organization.objects.get(pk=self.kwargs['pk'])
+        if not self.request.user.is_superuser or self.request.user in organizations.admins.all():
+            raise PermissionDenied()
+        return User.objects.all(admin_of_organizations__in = [ organization ])
 
 class OrganizationsProjectsList(BaseSubList):
     
@@ -97,20 +83,12 @@ class OrganizationsProjectsList(BaseSubList):
     parent_model = Organization  # for sub list
     relationship = 'projects'    # " "
     
-    # I can see the projects from the organization if:
-    #    I'm the superuser
-    #    I am a an administrator of the organization
-    #    I am a member of a team on the project
-
     def _get_queryset(self):
-        base = Project.objects.filter(organizations__in = [ self.kwargs.get('pk') ])
-        if self.request.user.is_superuser:
-            return base.all()
-        return base.filter(
-            organizations__admins__in = [ self.request.user ]
-        ).distinct() | base.filter(
-            teams__users__in = [ self.request.user ]
-        ).distinct()
+        ''' to list projects in the organization, I must be a superuser or org admin '''
+        organization = Organization.objects.get(pk=self.kwargs['pk'])
+        if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
+            raise PermissionDenied()
+        return Project.objects.filter(organizations__in = [ organization ])
 
 class OrganizationsTagsList(BaseList):
     # FIXME: guts & tests

@@ -48,3 +48,4 @@ class CustomRbac(permissions.BasePermission):
         if not view.item_permissions_check(request, obj):
             raise PermissionDenied()
         return True
+
