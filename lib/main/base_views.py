@@ -51,6 +51,10 @@ class BaseSubList(BaseList):
 
     def post(self, request, *args, **kwargs):
 
+        postable = getattr(self.__class__, 'postable', False)
+        if not postable:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
         parent_id = kwargs['pk']
         sub_id = request.DATA.get('id')
         main = self.__class__.parent_model.objects.get(pk=parent_id)

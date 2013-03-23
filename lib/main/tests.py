@@ -91,7 +91,7 @@ class BaseTest(django.test.TestCase):
             assert False, "Failed: %s" % response.content
         if expect is not None:
             assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, response.content)
-        if response.status_code not in [ 202, 204, 400, 409 ]:
+        if response.status_code not in [ 202, 204, 400, 405, 409 ]:
             # no JSON responses in these at least for now, 400/409 should probably return some (FIXME)
             return json.loads(response.content)
         else:
@@ -269,6 +269,7 @@ class OrganizationsTest(BaseTest):
         org1_tags = self.get(org1_tags_url, expect=403, auth=self.get_other_credentials())
 
     def test_get_item_subobjects_audit_trail(self):
+        # FIXME
         pass
 
     def test_post_item(self):
@@ -376,7 +377,9 @@ class OrganizationsTest(BaseTest):
         self.assertEqual(tags['results'][0]['id'], tag.pk)
 
     def test_post_item_subobjects_audit_trail(self):
-        pass
+        # audit trails are system things, and no user can post to them.
+        url = '/api/v1/organizations/2/audit_trail/'
+        self.post(url, dict(id=1), expect=405, auth=self.get_super_credentials())
 
     def test_put_item(self):
 

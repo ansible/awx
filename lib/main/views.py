@@ -42,20 +42,32 @@ class OrganizationsDetail(BaseDetail):
     serializer_class = OrganizationSerializer
     permission_classes = (CustomRbac,)
 
-class OrganizationsAuditTrailList(BaseList):
+class OrganizationsAuditTrailList(BaseSubList):
 
     model = AuditTrail
     serializer_class = AuditTrailSerializer
     permission_classes = (CustomRbac,)
+    parent_model = Organization
+    relationship = 'audit_trail'
+    postable = False
+
+    def _get_queryset(self):
+        ''' to list tags in the organization, I must be a superuser or org admin '''
+        organization = Organization.objects.get(pk=self.kwargs['pk'])
+        if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
+            # FIXME: use: organization.can_user_administrate(self.request.user)
+            raise PermissionDenied()
+        return AuditTrail.objects.filter(audit_trail_by_tag__in = [ organization ])
+
 
 class OrganizationsUsersList(BaseSubList):
     
     model = User
     serializer_class = UserSerializer
     permission_classes = (CustomRbac,)
-
     parent_model = Organization
     relationship = 'users'
+    postable = True
 
     def _get_queryset(self):
         ''' to list users in the organization, I must be a superuser or org admin '''
@@ -69,9 +81,9 @@ class OrganizationsAdminsList(BaseSubList):
     model = User
     serializer_class = UserSerializer
     permission_classes = (CustomRbac,)
-    
     parent_model = Organization
     relationship = 'admins'
+    postable = True
 
     def _get_queryset(self):
         ''' to list admins in the organization, I must be a superuser or org admin '''
@@ -85,9 +97,9 @@ class OrganizationsProjectsList(BaseSubList):
     model = Project
     serializer_class = ProjectSerializer
     permission_classes = (CustomRbac,)
-
     parent_model = Organization  # for sub list
     relationship = 'projects'    # " "
+    postable = True
     
     def _get_queryset(self):
         ''' to list projects in the organization, I must be a superuser or org admin '''
@@ -101,9 +113,9 @@ class OrganizationsTagsList(BaseSubList):
     model = Tag
     serializer_class = TagSerializer
     permission_classes = (CustomRbac,)
-
     parent_model = Organization  # for sub list
     relationship = 'tags'        # " "
+    postable = True
 
     def _get_queryset(self):
         ''' to list tags in the organization, I must be a superuser or org admin '''
