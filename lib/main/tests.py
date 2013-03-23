@@ -1,10 +1,7 @@
-# FIXME: do not use ResourceTestCase
-
 """
-This file demonstrates two different styles of tests (one doctest and one
-unittest). These will both pass when you run "manage.py test".
+Test code for ansible commander.
 
-Replace these with more appropriate tests for your application.
+(C) 2013 AnsibleWorks <michael@ansibleworks.com>
 """
 
 
@@ -246,9 +243,18 @@ class OrganizationsTest(BaseTest):
         org1_users_url = orgs['results'][1]['related']['users']
         org1_users = self.get(org1_users_url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(org1_users['count'], 1)
+        org1_users = self.get(org1_users_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(org1_users['count'], 1)
 
     def test_get_item_subobjects_admins(self):
-        pass
+
+        # see if we can list the users added to the organization
+        orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
+        org1_users_url = orgs['results'][1]['related']['admins']
+        org1_users = self.get(org1_users_url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(org1_users['count'], 1)
+        org1_users = self.get(org1_users_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(org1_users['count'], 1)
 
     def test_get_item_subobjects_tags(self):
         pass

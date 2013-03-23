@@ -57,7 +57,7 @@ class OrganizationsUsersList(BaseList):
     def _get_queryset(self):
         ''' to list users in the organization, I must be a superuser or org admin '''
         organization = Organization.objects.get(pk=self.kwargs['pk'])
-        if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
+        if not self.request.user.is_superuser and not self.request.user in organization.admins.all():
             raise PermissionDenied()
         return User.objects.filter(organizations__in = [ organization ])
 
@@ -70,9 +70,9 @@ class OrganizationsAdminsList(BaseList):
     def _get_queryset(self):
         ''' to list admins in the organization, I must be a superuser or org admin '''
         organization = Organization.objects.get(pk=self.kwargs['pk'])
-        if not self.request.user.is_superuser or self.request.user in organizations.admins.all():
+        if not self.request.user.is_superuser and not self.request.user in organization.admins.all():
             raise PermissionDenied()
-        return User.objects.all(admin_of_organizations__in = [ organization ])
+        return User.objects.filter(admin_of_organizations__in = [ organization ])
 
 class OrganizationsProjectsList(BaseSubList):
     
