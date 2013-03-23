@@ -274,6 +274,7 @@ class OrganizationsTest(BaseTest):
         # find projects attached to the first org
         projects0_url = orgs['results'][0]['related']['projects']
         projects1_url = orgs['results'][1]['related']['projects']
+        projects2_url = orgs['results'][1]['related']['projects']
         
         # get all the projects on the first org
         projects0 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
@@ -309,6 +310,21 @@ class OrganizationsTest(BaseTest):
         self.post(projects1_url, a_project, expect=204, auth=self.get_normal_credentials())
         projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(projects1['count'], 4)
+
+        new_project_a = self.make_projects(self.normal_django_user, 1)[0]
+        new_project_b = self.make_projects(self.other_django_user, 1)[0]
+
+        # admin of org can add projects he can read
+        self.post(projects1_url, dict(id=new_project_a['id']), expect=204, auth=self.get_normal_credentials())
+        # but not those he cannot
+        self.post(projects1_url, dict(id=new_project_b['id']), expect=403, auth=self.get_normal_credentials())
+
+        # and can't post a project he can read to an org he cannot
+        self.post(projects2_url, dict(id=new_project_a['id']), expect=403, auth=self.get_normal_credentials())
+
+        # and can't do post a project he can read to an organization he cannot
+        self.post(projects2_url, dict(id=new_project_a['id']), expect=403, auth=self.get_normal_credentials())
+          
 
     def test_post_item_subobjects_users(self):
         pass
