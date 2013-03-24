@@ -31,7 +31,69 @@ Certain fields in the REST API are marked read only.  These usually include the 
 and occasionally some internal fields.  For instance, the 'created_by' attribute of each object indicates
 which user created the resource, and can not be edited.
 
+A Prelude: Workflow
+===================
+
+Assume you are starting out with a blank Ansible Commander instance, and don't intend to use the GUI.
+What sort of REST operations do you need to perform to seed everything out and deploy your first
+playbook entirely via web services?  It would look something like this.
+
+Create Users and Organizations
+------------------------------
+
+ * Confirm your super user account at /api/v1/me/
+ * Create some organizations at /api/v1/organizations/
+ * Create some users at /api/v1/users/
+ * Add some users to some organizations at /api/v1/organizations/X/users/
+ * Add some users to be admins of those organizations at /api/v1/organizatoins/X/admins/
+ * At this point, use your org admin account, instead of your superuser account, if you wish
+
+Build Out Inventory
+-------------------
+ 
+ * Create an inventory resource at /api/v1/inventories/
+ * Create some host records at /api/v1/hosts/
+ * Add the host to inventory at /api/v1/inventories/X/hosts/
+ * Create some group records at /api/v1/projects/
+ * Add the group to inventory at /api/v1/inventories/X/groups/
+ * Create some variables at /api/v1/variables/
+ * Add some variables to a host at /api/v1/hosts/X/variables/
+ * Add some variables to a group at /api/v1/groups/X/variables/
+ * Add a subgroup to a group at /api/v1/groups/X/children/
+
+Set Up Projects and Teams
+-------------------------
+
+ * Create some teams at /api/v1/teams/
+ * Create some projects at /api/v1/projects/
+ * Assign some projects to one or more teams at /api/v1/teams/X/projects/
+
+Save Login Credentials and Grant Role (Team) Based Permissions
+--------------------------------------------------------------
+
+ * Create some login credentials at /api/v1/credentials/
+ * Assign credentials to some teams at /api/v1/teams/X/credentials/ OR
+ * Assign credentials to some users at /api/v1/user/X/credentials/ (no fancy priveledges required)
+ * Create a permission tuple to allow a user or project to be used with an inventory source at /api/v1/permissions/
+ * Permission tuples can allow execution, dry run execution, or inventory editing.
+
+Launch Playbooks and View Results
+---------------------------------
+
+ * Create a launch job request by posting project, permission, and credential to /api/v1/events/
+ * Monitor the job results at /api/v1/launch_results/X
+ * See the history of runs on each host at /api/v1/hosts/X/events/ or /api/v1/groups/X/events/ or /api/v1/inventories/X/events/
+
+Audit API based Activity, Search For Resources
+----------------------------------------------
+
+ * Apply tags or see applied tags on any resource at /api/v1/RESOURCE/X/tags/
+ * View audit trail information on any resource change at /api/v1/RESOURCE/X/audit_trail/
+
+
+
 Working With Users
+
 ==================
 
 After a fresh install, there should be no organizations and only the superuser.
@@ -304,6 +366,17 @@ Audit Trails
 Viewing object audit trails
 ---------------------------
 
+Additional Topics
+=================
+
+API Sorting And Filtering
+-------------------------
+
+Pagination Controls
+-------------------
+
+Alternative Content Types
+-------------------------
 
 
 
