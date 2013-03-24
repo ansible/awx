@@ -56,16 +56,16 @@ class CustomRbac(permissions.BasePermission):
             raise Exception("did not expect to get to this position")
 
     def has_object_permission(self, request, view, obj):
-        if request.user.is_superuser:
-            return True
-        if not self._common_user_check(request):
-            return False
-        if type(obj) == User:
+        if isinstance(obj, User):
             if not obj.is_active:
                 raise Http404()
         else:
             if not obj.active:
                 raise Http404()
+        if request.user.is_superuser:
+            return True
+        if not self._common_user_check(request):
+            return False
         if not view.item_permissions_check(request, obj):
             raise PermissionDenied()
         return True

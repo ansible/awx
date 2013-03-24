@@ -112,13 +112,25 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
         obj = self.model.objects.get(pk=kwargs['pk'])
         if not request.user.is_superuser and not self.delete_permissions_check(request, obj):
             raise PermissionDenied()
-        obj.name   = "_deleted_%s_%s" % (str(datetime.time()), obj.name)
-        obj.active = False
-        obj.save()
+        if isinstance(obj, CommonModel):
+            obj.name   = "_deleted_%s_%s" % (str(datetime.time()), obj.name)
+            obj.active = False
+            obj.save()
+        elif type(obj) == User:
+            obj.username  = "_deleted_%s_%s" % (str(datetime.time()), obj.username)
+            obj.is_active = False
+            obj.save()
+        else:
+            raise Exception("InternalError: destroy() not implemented yet for %s" % obj)
         return HttpResponse(status=204)
 
     def delete_permissions_check(self, request, obj):
-        return self.__class__.model.can_user_delete(request.user, obj)
+        if isinstance(obj, CommonModel):
+            return self.__class__.model.can_user_delete(request.user, obj)
+        elif isinstance(obj, User):
+            return UserHelper.can_user_delete(request.user, obj)
+        raise PermissionDenied()
+
 
     def item_permissions_check(self, request, obj):
 

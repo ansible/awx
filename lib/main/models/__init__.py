@@ -57,7 +57,6 @@ class EditHelper(object):
                 changed[f] = (left, right)
         return changed
 
-
 class UserHelper(object):
 
     # fields that the user themselves cannot edit, but are not actually read only
@@ -78,6 +77,13 @@ class UserHelper(object):
         ''' a user can be read if they are on the same team or can be administrated ''' 
         matching_teams = user.teams.filter(users__in = [ user ]).count()
         return matching_teams or cls.can_user_administrate(user, obj)
+    
+    @classmethod 
+    def can_user_delete(cls, user, obj):
+        if user.is_superuser:
+            return True
+        matching_orgs = len(set(obj.organizations.all()) & set(user.admin_of_organizations.all()))
+        return matching_orgs
 
 
 class CommonModel(models.Model):

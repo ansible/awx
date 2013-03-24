@@ -20,6 +20,7 @@ from django.contrib.auth.models import User
 from lib.main.models import *
 from rest_framework import serializers, pagination
 from django.core.urlresolvers import reverse
+from django.core.serializers import json
 import lib.urls
 
 class BaseSerializer(serializers.ModelSerializer):
@@ -79,21 +80,22 @@ class ProjectSerializer(BaseSerializer):
 
 class UserSerializer(BaseSerializer):
    
-    # FIXME: *** this is really about exposing the Django auth_user via REST so it may require
-    # some custom save hooks in the view.
- 
     # add the URL and related resources
-    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    url           = serializers.SerializerMethodField('get_absolute_url_override')
     related       = serializers.SerializerMethodField('get_related')
     
     class Meta:
         model = User
-        # FIXME: make sure is_active is and is_superuser is read only
-        fields = ('url', 'id', 'username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser')
+        fields = ('url', 'id', 'username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser', 'related')
 
     def get_related(self, obj):
         # FIXME: add related lookups?
         return dict()
+
+    def get_absolute_url_override(self, obj):
+        import lib.urls
+        return reverse(lib.urls.views_UsersDetail, args=(obj.pk,))
+
 
 class TagSerializer(BaseSerializer):
     

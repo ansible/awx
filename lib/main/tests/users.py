@@ -105,7 +105,6 @@ class UsersTest(BaseTest):
         orig = User.objects.get(pk=1)
         self.assertTrue(orig.username != 'change')
  
- 
     def test_password_not_shown_in_get_operations_for_list_or_detail(self):
         url = '/api/v1/users/1/'
         data = self.get(url, expect=200, auth=self.get_super_credentials())
@@ -116,17 +115,29 @@ class UsersTest(BaseTest):
         self.assertTrue('password' not in data['results'][0])
 
     def test_user_list_filtered(self):
-        # I can see a user if I'm on a team with them, am their org admin, am a superuser, or am them
-        #self.assertTrue(False)
-        pass
+        url = '/api/v1/users/'
+        data3 = self.get(url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(data3['count'], 3)
+        data2 = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data2['count'], 2)
+        data1 = self.get(url, expect=200, auth=self.get_other_credentials())
+        self.assertEquals(data1['count'], 1)
 
     def test_super_user_can_delete_a_user_but_only_marked_inactive(self):
-        #self.assertTrue(False)
-        pass
+        url = '/api/v1/users/2/'
+        data = self.delete(url, expect=204, auth=self.get_super_credentials())
+        data = self.get(url, expect=404, auth=self.get_super_credentials())
+        url = '/api/v1/users/2/'
+        obj = User.objects.get(pk=2)
+        self.assertEquals(obj.is_active, False)
  
     def test_non_org_admin_user_cannot_delete_any_user_including_himself(self):
-        #self.assertTrue(False)
-        pass
+        url1 = '/api/v1/users/1/'
+        url2 = '/api/v1/users/2/'
+        url3 = '/api/v1/users/3/'
+        data = self.delete(url1, expect=403, auth=self.get_other_credentials())
+        data = self.delete(url2, expect=403, auth=self.get_other_credentials())
+        data = self.delete(url3, expect=403, auth=self.get_other_credentials())
 
     def test_there_exists_an_obvious_url_where_a_user_may_find_his_user_record(self):
         #self.assertTrue(False)
