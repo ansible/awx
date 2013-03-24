@@ -16,6 +16,10 @@ from lib.main.models import *
 
 class BaseTest(django.test.TestCase):
 
+    def setUp(self):
+        super(BaseTest, self).setUp()
+        self.object_ctr = 0
+
     def make_user(self, username, password, super_user=False):
         django_user = None
         if super_user:

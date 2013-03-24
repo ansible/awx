@@ -160,18 +160,25 @@ class UsersList(BaseList):
     serializer_class = UserSerializer
     permission_classes = (CustomRbac,)
 
+    def post(self, request, *args, **kwargs):
+        password = request.DATA.get('password', None)
+        result = super(UsersList, self).post(request, *args, **kwargs)
+        if password:
+            pk = result.data['id']
+            user = User.objects.get(pk=pk)
+            user.set_password(password)
+            user.save()
+        return result    
+
     def _get_queryset(self):
         ''' I can see user records when I'm a superuser, I'm that user, I'm their org admin, or I'm on a team with that user '''
         base = User.objects
         if self.request.user.is_superuser:
             return base.all()
-        return base.filter(
-            pk = [ self.request.user.pk ]
-        ).distinct() | base.filter(
-            organizations__in = [ self.request.user.admin_of_organizations.all() ]
-        ).distinct() | base.filter(
-            teams__in = [ self.request.user.teams.all() ]
-        ).distinct()
+        mine = base.filter(pk = self.request.user.pk).distinct() 
+        admin_of = base.filter(organizations__in = self.request.user.admin_of_organizations.all()).distinct() 
+        same_team = base.filter(teams__in = self.request.user.teams.all()).distinct()
+        return mine | admin_of | same_team
 
 class UsersDetail(BaseDetail):
 

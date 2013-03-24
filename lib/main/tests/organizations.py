@@ -20,7 +20,7 @@ class OrganizationsTest(BaseTest):
         return '/api/v1/organizations/'
 
     def setUp(self):
-        self.object_ctr = 0
+        super(OrganizationsTest, self).setUp()
         self.setup_users()
  
         self.organizations = self.make_organizations(self.super_django_user, 10)

@@ -20,17 +20,23 @@ class UsersTest(BaseTest):
         return '/api/v1/users/'
 
     def setUp(self):
+        super(UsersTest, self).setUp()
         self.setup_users()
+        self.organizations = self.make_organizations(self.super_django_user, 1)
+        self.organizations[0].admins.add(self.normal_django_user)
+        self.organizations[0].users.add(self.other_django_user)
  
-    def test_only_super_user_can_add_users(self):
+    def test_only_super_user_or_org_admin_can_add_users(self):
         url = '/api/v1/users/'
         new_user = dict(username='blippy')
+        new_user2 = dict(username='blippy2')
         self.post(url, expect=401, data=new_user, auth=None)
         self.post(url, expect=401, data=new_user, auth=self.get_invalid_credentials())
-        self.post(url, expect=403, data=new_user, auth=self.get_normal_credentials())
         self.post(url, expect=403, data=new_user, auth=self.get_other_credentials())
         self.post(url, expect=201, data=new_user, auth=self.get_super_credentials())
         self.post(url, expect=400, data=new_user, auth=self.get_super_credentials())
+        self.post(url, expect=201, data=new_user2, auth=self.get_normal_credentials())
+        self.post(url, expect=400, data=new_user2, auth=self.get_normal_credentials())
 
     def test_ordinary_user_can_modify_some_fields_about_himself_but_not_all_and_passwords_work(self):
 
@@ -74,19 +80,40 @@ class UsersTest(BaseTest):
         self.assertTrue(User.objects.get(pk=self.normal_django_user.pk).password != data['password'])
 
     def test_user_created_with_password_can_login(self):
-        pass
 
-    def test_normal_user_cannot_modify_another_user(self):
-        #self.assertTrue(False)
-        pass
+        # this is something an org admin can do...
+        url = '/api/v1/users/'
+        data  = dict(username='username',  password='password')
+        data2 = dict(username='username2', password='password2')
+        data = self.post(url, expect=201, data=data, auth=self.get_normal_credentials())
 
-    def test_superuser_can_modify_anything_about_anyone(self):
-        #self.assertTrue(False)
-        pass
+        # verify that the login works...
+        self.get(url, expect=200, auth=('username', 'password'))
 
-    def test_password_not_shown_in_get_operations(self):
-        #self.assertTrue(False)
-        pass
+        # but a regular user cannot        
+        data = self.post(url, expect=403, data=data2, auth=self.get_other_credentials())
+        
+        # a super user can also create new users   
+        data = self.post(url, expect=201, data=data2, auth=self.get_super_credentials())
+
+        # verify that the login works
+        self.get(url, expect=200, auth=('username2', 'password2'))
+
+        # verify that if you post a user with a pk, you do not alter that user's password info
+        mod = dict(id=1, username='change', password='change')
+        data = self.post(url, expect=201, data=mod, auth=self.get_super_credentials())
+        orig = User.objects.get(pk=1)
+        self.assertTrue(orig.username != 'change')
+ 
+ 
+    def test_password_not_shown_in_get_operations_for_list_or_detail(self):
+        url = '/api/v1/users/1/'
+        data = self.get(url, expect=200, auth=self.get_super_credentials())
+        self.assertTrue('password' not in data)
+
+        url = '/api/v1/users/'
+        data = self.get(url, expect=200, auth=self.get_super_credentials())
+        self.assertTrue('password' not in data['results'][0])
 
     def test_user_list_filtered(self):
         # I can see a user if I'm on a team with them, am their org admin, am a superuser, or am them
@@ -97,7 +124,7 @@ class UsersTest(BaseTest):
         #self.assertTrue(False)
         pass
  
-    def test_non_super_user_cannot_delete_any_user_including_himself(self):
+    def test_non_org_admin_user_cannot_delete_any_user_including_himself(self):
         #self.assertTrue(False)
         pass
 
