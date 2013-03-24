@@ -78,6 +78,21 @@ class ProjectSerializer(BaseSerializer):
         # FIXME: add related resources: inventories
         return dict()
 
+class TeamSerializer(BaseSerializer):
+
+    # add the URL and related resources
+    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    related       = serializers.SerializerMethodField('get_related')
+
+    class Meta:
+        model = Team
+        fields = ('url', 'id', 'related', 'name', 'description', 'creation_date')
+
+    def get_related(self, obj):
+        # FIXME: add related resources: projects, users, organizations
+        return dict()
+
+
 class UserSerializer(BaseSerializer):
    
     # add the URL and related resources
@@ -89,8 +104,12 @@ class UserSerializer(BaseSerializer):
         fields = ('url', 'id', 'username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser', 'related')
 
     def get_related(self, obj):
-        # FIXME: add related lookups?
-        return dict()
+        return dict(
+            teams                  = reverse(lib.urls.views_UsersTeamsList,              args=(obj.pk,)),
+            organizations          = reverse(lib.urls.views_UsersOrganizationsList,      args=(obj.pk,)),
+            admin_of_organizations = reverse(lib.urls.views_UsersAdminOrganizationsList, args=(obj.pk,)),
+        )
+
 
     def get_absolute_url_override(self, obj):
         import lib.urls

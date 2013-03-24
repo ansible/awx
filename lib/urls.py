@@ -20,18 +20,23 @@ from django.conf.urls import *
 import lib.main.views as views
 
 # organizations service
-views_OrganizationsList           = views.OrganizationsList.as_view()
-views_OrganizationsDetail         = views.OrganizationsDetail.as_view()
-views_OrganizationsAuditTrailList = views.OrganizationsAuditTrailList.as_view()
-views_OrganizationsUsersList      = views.OrganizationsUsersList.as_view()
-views_OrganizationsAdminsList     = views.OrganizationsAdminsList.as_view()
-views_OrganizationsProjectsList   = views.OrganizationsProjectsList.as_view()
-views_OrganizationsTagsList       = views.OrganizationsTagsList.as_view()
+views_OrganizationsList            = views.OrganizationsList.as_view()
+views_OrganizationsDetail          = views.OrganizationsDetail.as_view()
+views_OrganizationsAuditTrailList  = views.OrganizationsAuditTrailList.as_view()
+views_OrganizationsUsersList       = views.OrganizationsUsersList.as_view()
+views_OrganizationsAdminsList      = views.OrganizationsAdminsList.as_view()
+views_OrganizationsProjectsList    = views.OrganizationsProjectsList.as_view()
+views_OrganizationsTagsList        = views.OrganizationsTagsList.as_view()
 
 # users service
-views_UsersList                   = views.UsersList.as_view()
-views_UsersDetail                 = views.UsersDetail.as_view()
-views_UsersMeList                 = views.UsersMeList.as_view()
+views_UsersList                    = views.UsersList.as_view()
+views_UsersDetail                  = views.UsersDetail.as_view()
+views_UsersMeList                  = views.UsersMeList.as_view()
+views_UsersTeamsList               = views.UsersTeamsList.as_view()
+views_UsersOrganizationsList       = views.UsersOrganizationsList.as_view()
+views_UsersAdminOrganizationsList  = views.UsersAdminOrganizationsList.as_view()
+
+
 
 # projects service
 views_ProjectsDetail              = views.OrganizationsDetail.as_view()
@@ -69,9 +74,12 @@ urlpatterns = patterns('',
     url(r'^api/v1/organizations/(?P<pk>[0-9]+)/tags/$',        views_OrganizationsTagsList),
 
     # users service
-    url(r'^api/v1/users/$',                                    views_UsersList),
-    url(r'^api/v1/users/(?P<pk>[0-9]+)/$',                     views_UsersDetail),
-    url(r'^api/v1/me/$',                                       views_UsersMeList),
+    url(r'^api/v1/users/$',                                       views_UsersList),
+    url(r'^api/v1/users/(?P<pk>[0-9]+)/$',                        views_UsersDetail),
+    url(r'^api/v1/me/$',                                          views_UsersMeList),
+    url(r'^api/v1/users/(?P<pk>[0-9]+)/teams/$',                  views_UsersTeamsList),
+    url(r'^api/v1/users/(?P<pk>[0-9]+)/organizations/$',          views_UsersOrganizationsList),
+    url(r'^api/v1/users/(?P<pk>[0-9]+)/admin_of_organizations/$', views_UsersAdminOrganizationsList),
 
     # projects service
     url(r'^api/v1/projects/(?P<pk>[0-9]+)/$',                  views_ProjectsDetail),

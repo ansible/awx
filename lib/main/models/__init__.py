@@ -316,7 +316,7 @@ class Team(CommonModel):
     
     projects        = models.ManyToManyField('Project', blank=True, related_name='teams')
     users           = models.ManyToManyField('auth.User', blank=True, related_name='teams')
-    organization    = models.ManyToManyField('Organization', related_name='teams')
+    organizations   = models.ManyToManyField('Organization', related_name='teams')
 
 class Project(CommonModel):
     '''  

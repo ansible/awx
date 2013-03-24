@@ -193,6 +193,51 @@ class UsersMeList(BaseList):
         ''' a quick way to find my user record '''
         return User.objects.filter(pk=self.request.user.pk)
 
+class UsersTeamsList(BaseSubList):
+
+    model = Team
+    serializer_class = TeamSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = User
+    relationship = 'teams'
+    postable = False
+
+    def _get_queryset(self):
+        user = User.objects.get(pk=self.kwargs['pk'])
+        if not UserHelper.can_user_administrate(self.request.user, user):
+            raise PermissionDenied()
+        return Team.objects.filter(users__in = [ user ])
+
+class UsersOrganizationsList(BaseSubList):
+
+    model = Organization
+    serializer_class = OrganizationSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = User
+    relationship = 'organizations'
+    postable = False
+    
+    def _get_queryset(self):
+        user = User.objects.get(pk=self.kwargs['pk'])
+        if not UserHelper.can_user_administrate(self.request.user, user):
+            raise PermissionDenied()
+        return Organization.objects.filter(users__in = [ user ])
+
+class UsersAdminOrganizationsList(BaseSubList):
+
+    model = Organization
+    serializer_class = OrganizationSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = User
+    relationship = 'admin_of_organizations'
+    postable = False
+
+    def _get_queryset(self):
+        user = User.objects.get(pk=self.kwargs['pk'])
+        if not UserHelper.can_user_administrate(self.request.user, user):
+            raise PermissionDenied()
+        return Organization.objects.filter(admins__in = [ user ])
+
 class UsersDetail(BaseDetail):
 
     model = User

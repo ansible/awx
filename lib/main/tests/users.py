@@ -25,6 +25,7 @@ class UsersTest(BaseTest):
         self.organizations = self.make_organizations(self.super_django_user, 1)
         self.organizations[0].admins.add(self.normal_django_user)
         self.organizations[0].users.add(self.other_django_user)
+        self.organizations[0].users.add(self.normal_django_user)
  
     def test_only_super_user_or_org_admin_can_add_users(self):
         url = '/api/v1/users/'
@@ -153,11 +154,47 @@ class UsersTest(BaseTest):
         self.assertEquals(data['results'][0]['username'], 'admin')
         self.assertEquals(data['count'], 1)
 
-    # TODO:
-    # possibly nice to have, some quick lookup functions that are not postable:
-    # /users/2/organizations
-    # /users/2/projects
-    # /users/2/teams
+    def test_user_related_resources(self):
 
+        # organizations the user is a member of, should be 1
+        url = '/api/v1/users/2/organizations/'
+        data = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['count'], 1) 
+        # also accessible via superuser
+        data = self.get(url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(data['count'], 1) 
+        # but not by other user
+        data = self.get(url, expect=403, auth=self.get_other_credentials())
+
+        # organizations the user is an admin of, should be 1
+        url = '/api/v1/users/2/admin_of_organizations/'
+        data = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['count'], 1)
+        # also accessible via superuser
+        data = self.get(url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(data['count'], 1)
+        # but not by other user
+        data = self.get(url, expect=403, auth=self.get_other_credentials())
+ 
+        # teams the user is on, should be 0
+        url = '/api/v1/users/2/teams/'
+        data = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['count'], 0)
+        # also accessible via superuser
+        data = self.get(url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(data['count'], 0)
+        # but not by other user
+        data = self.get(url, expect=403, auth=self.get_other_credentials())
+
+        # verify org admin can still read other user data too
+        url = '/api/v1/users/3/organizations/'
+        data = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['count'], 1)
+        url = '/api/v1/users/3/admin_of_organizations/'
+        data = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['count'], 0)
+        url = '/api/v1/users/3/teams/'
+        data = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['count'], 0)
 
 
