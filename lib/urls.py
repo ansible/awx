@@ -31,6 +31,7 @@ views_OrganizationsTagsList       = views.OrganizationsTagsList.as_view()
 # users service
 views_UsersList                   = views.UsersList.as_view()
 views_UsersDetail                 = views.UsersDetail.as_view()
+views_UsersMeList                 = views.UsersMeList.as_view()
 
 # projects service
 views_ProjectsDetail              = views.OrganizationsDetail.as_view()
@@ -67,11 +68,10 @@ urlpatterns = patterns('',
     url(r'^api/v1/organizations/(?P<pk>[0-9]+)/projects/$',    views_OrganizationsProjectsList),
     url(r'^api/v1/organizations/(?P<pk>[0-9]+)/tags/$',        views_OrganizationsTagsList),
 
-    # FIXME: implement:
-
     # users service
     url(r'^api/v1/users/$',                                    views_UsersList),
     url(r'^api/v1/users/(?P<pk>[0-9]+)/$',                     views_UsersDetail),
+    url(r'^api/v1/me/$',                                       views_UsersMeList),
 
     # projects service
     url(r'^api/v1/projects/(?P<pk>[0-9]+)/$',                  views_ProjectsDetail),

@@ -180,6 +180,19 @@ class UsersList(BaseList):
         same_team = base.filter(teams__in = self.request.user.teams.all()).distinct()
         return mine | admin_of | same_team
 
+class UsersMeList(BaseList):
+
+    model = User
+    serializer_class = UserSerializer
+    permission_classes = (CustomRbac,)
+
+    def post(self, request, *args, **kwargs):
+        raise PermissionDenied()
+
+    def _get_queryset(self):
+        ''' a quick way to find my user record '''
+        return User.objects.filter(pk=self.request.user.pk)
+
 class UsersDetail(BaseDetail):
 
     model = User

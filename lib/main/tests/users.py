@@ -140,8 +140,24 @@ class UsersTest(BaseTest):
         data = self.delete(url3, expect=403, auth=self.get_other_credentials())
 
     def test_there_exists_an_obvious_url_where_a_user_may_find_his_user_record(self):
-        #self.assertTrue(False)
-        pass
+        url = '/api/v1/me/'
+        data = self.get(url, expect=401, auth=None)
+        data = self.get(url, expect=401, auth=self.get_invalid_credentials())
+        data = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['results'][0]['username'], 'normal')
+        self.assertEquals(data['count'], 1)
+        data = self.get(url, expect=200, auth=self.get_other_credentials())
+        self.assertEquals(data['results'][0]['username'], 'other')
+        self.assertEquals(data['count'], 1)
+        data = self.get(url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(data['results'][0]['username'], 'admin')
+        self.assertEquals(data['count'], 1)
+
+    # TODO:
+    # possibly nice to have, some quick lookup functions that are not postable:
+    # /users/2/organizations
+    # /users/2/projects
+    # /users/2/teams
 
 
 
