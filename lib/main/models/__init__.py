@@ -31,6 +31,55 @@ JOB_TYPE_CHOICES = [
     ('check', _('Check')),
 ]
 
+class EditHelper(object):
+
+    @classmethod
+    def illegal_changes(cls, request, obj, model_class):
+        ''' have any illegal changes been made (for a PUT request)? '''
+        can_admin = model_class.can_user_administrate(request.user, obj)
+        if (not can_admin) or (can_admin == 'partial'): 
+            check_fields = model_class.admin_only_edit_fields
+            changed = cls.fields_changed(check_fields, obj, request.DATA)
+            if len(changed.keys()) > 0:   
+                return True
+        return False
+
+    @classmethod
+    def fields_changed(cls, fields, obj, data):
+        ''' return the fields that would be changed by a prospective PUT operation '''
+        changed = {}
+        for f in fields:
+            left = getattr(obj, f, None) 
+            if left is None:
+                raise Exception("internal error, %s is not a member of %s" % (f, obj))
+            right = data.get(f, None)
+            if (right is not None) and (left != right):
+                changed[f] = (left, right)
+        return changed
+
+
+class UserHelper(object):
+
+    # fields that the user themselves cannot edit, but are not actually read only
+    admin_only_edit_fields = ('last_name', 'first_name', 'username', 'is_active', 'is_superuser')
+
+    @classmethod
+    def can_user_administrate(cls, user, obj):
+        ''' a user can be administrated if they are themselves, or by org admins or superusers '''
+        if user == obj:
+            return 'partial'
+        if user.is_superuser:
+            return True
+        matching_orgs = len(set(obj.organizations.all()) & set(user.admin_of_organizations.all()))
+        return matching_orgs
+
+    @classmethod
+    def can_user_read(cls, user, obj):
+        ''' a user can be read if they are on the same team or can be administrated ''' 
+        matching_teams = user.teams.filter(users__in = [ user ]).count()
+        return matching_teams or cls.can_user_administrate(user, obj)
+
+
 class CommonModel(models.Model):
     ''' 
     common model for all object types that have these standard fields 

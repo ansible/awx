@@ -60,8 +60,12 @@ class CustomRbac(permissions.BasePermission):
             return True
         if not self._common_user_check(request):
             return False
-        if not obj.active:
-            raise Http404()
+        if type(obj) == User:
+            if not obj.is_active:
+                raise Http404()
+        else:
+            if not obj.active:
+                raise Http404()
         if not view.item_permissions_check(request, obj):
             raise PermissionDenied()
         return True

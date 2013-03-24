@@ -154,4 +154,38 @@ class TagsDetail(BaseDetail):
     serializer_class = TagSerializer
     permission_classes = (CustomRbac,)
 
+class UsersList(BaseList):
 
+    model = User
+    serializer_class = UserSerializer
+    permission_classes = (CustomRbac,)
+
+    def _get_queryset(self):
+        ''' I can see user records when I'm a superuser, I'm that user, I'm their org admin, or I'm on a team with that user '''
+        base = User.objects
+        if self.request.user.is_superuser:
+            return base.all()
+        return base.filter(
+            pk = [ self.request.user.pk ]
+        ).distinct() | base.filter(
+            organizations__in = [ self.request.user.admin_of_organizations.all() ]
+        ).distinct() | base.filter(
+            teams__in = [ self.request.user.teams.all() ]
+        ).distinct()
+
+class UsersDetail(BaseDetail):
+
+    model = User
+    serializer_class = UserSerializer
+    permission_classes = (CustomRbac,)
+
+    def put_filter(self, request, *args, **kwargs):
+        ''' make sure non-read-only fields that can only be edited by admins, are only edited by admins ''' 
+        obj = User.objects.get(pk=kwargs['pk'])
+        if EditHelper.illegal_changes(request, obj, UserHelper):
+            raise PermissionDenied()
+        if 'password' in request.DATA:
+            obj.set_password(request.DATA['password'])
+            obj.save()
+            request.DATA.pop('password')
+ 

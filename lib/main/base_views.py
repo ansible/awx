@@ -39,7 +39,12 @@ class BaseList(generics.ListCreateAPIView):
         if request.method == 'GET':
              return True
         if request.method == 'POST':
-             return self.__class__.model.can_user_add(request.user)
+             if self.__class__.model in [ User ]:
+                  # Django user gets special handling since it's not our class
+                  # org admins are allowed to create users
+                  return self.request.user.is_superuser or (self.request.user.admin_of_organizations.count() > 0)
+             else:
+                  return self.__class__.model.can_user_add(request.user)
         raise exceptions.NotImplementedError
    
     def get_queryset(self):
@@ -51,6 +56,8 @@ class BaseList(generics.ListCreateAPIView):
             return base
         else:
             return self._get_queryset().filter(active=True)
+
+
 
 class BaseSubList(BaseList):
 
@@ -97,7 +104,8 @@ class BaseSubList(BaseList):
 class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def pre_save(self, obj):
-        obj.created_by = self.request.user
+        if type(obj) not in [ User, Tag, AuditTrail ]:
+            obj.created_by = self.request.user
 
     def destroy(self, request, *args, **kwargs):
         # somewhat lame that delete has to call it's own permissions check
@@ -115,10 +123,23 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
     def item_permissions_check(self, request, obj):
 
         if request.method == 'GET':
-            return self.__class__.model.can_user_read(request.user, obj)
+            if type(obj) == User:
+                return UserHelper.can_user_read(request.user, obj)
+            else:
+                return self.__class__.model.can_user_read(request.user, obj)
         elif request.method in [ 'PUT' ]:
-            return self.__class__.model.can_user_administrate(request.user, obj)
+            if type(obj) == User:
+                return UserHelper.can_user_administrate(request.user, obj)
+            else:
+                return self.__class__.model.can_user_administrate(request.user, obj)
         return False
 
+    def put(self, request, *args, **kwargs):
+        self.put_filter(request, *args, **kwargs)
+        return super(BaseDetail, self).put(request, *args, **kwargs)
+
+    def put_filter(self, request, *args, **kwargs):
+        ''' scrub any fields the user cannot/should not put, based on user context.  This runs after read-only serialization filtering '''
+        pass
 
 
