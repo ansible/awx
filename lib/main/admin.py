@@ -43,10 +43,11 @@ class TagAdmin(admin.ModelAdmin):
 
     list_display = ('name', )
 
-class AuditTrailAdmin(admin.ModelAdmin):
-
-    list_display = ('name', 'description', 'active')
-    filter_horizontal = ('tags',)
+#class AuditTrailAdmin(admin.ModelAdmin):
+#
+#    list_display = ('name', 'description', 'active')
+#    not currently on model, so disabling for now.
+#    filter_horizontal = ('tags',)
     
 class HostAdmin(admin.ModelAdmin):
 
@@ -102,7 +103,7 @@ class LaunchJobStatusAdmin(admin.ModelAdmin):
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(Inventory, InventoryAdmin)
 admin.site.register(Tag, TagAdmin)
-admin.site.register(AuditTrail, AuditTrailAdmin)
+#admin.site.register(AuditTrail, AuditTrailAdmin)
 admin.site.register(Host, HostAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(VariableData, VariableDataAdmin)
