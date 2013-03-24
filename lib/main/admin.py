@@ -48,7 +48,7 @@ class TagAdmin(admin.ModelAdmin):
 #    list_display = ('name', 'description', 'active')
 #    not currently on model, so disabling for now.
 #    filter_horizontal = ('tags',)
-    
+
 class HostAdmin(admin.ModelAdmin):
 
     fields = ('name', 'inventory', 'description', 'active', 'tags',
@@ -76,7 +76,7 @@ class CredentialAdmin(admin.ModelAdmin):
 class TeamAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'description', 'active')
-    filter_horizontal = ('projects', 'users', 'organization', 'tags')
+    filter_horizontal = ('projects', 'users', 'organizations', 'tags')
 
 class ProjectAdmin(admin.ModelAdmin):
 
