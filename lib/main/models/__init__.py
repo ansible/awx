@@ -37,10 +37,10 @@ class EditHelper(object):
     def illegal_changes(cls, request, obj, model_class):
         ''' have any illegal changes been made (for a PUT request)? '''
         can_admin = model_class.can_user_administrate(request.user, obj)
-        if (not can_admin) or (can_admin == 'partial'): 
+        if (not can_admin) or (can_admin == 'partial'):
             check_fields = model_class.admin_only_edit_fields
             changed = cls.fields_changed(check_fields, obj, request.DATA)
-            if len(changed.keys()) > 0:   
+            if len(changed.keys()) > 0:
                 return True
         return False
 
@@ -49,7 +49,7 @@ class EditHelper(object):
         ''' return the fields that would be changed by a prospective PUT operation '''
         changed = {}
         for f in fields:
-            left = getattr(obj, f, None) 
+            left = getattr(obj, f, None)
             if left is None:
                 raise Exception("internal error, %s is not a member of %s" % (f, obj))
             right = data.get(f, None)
@@ -74,11 +74,11 @@ class UserHelper(object):
 
     @classmethod
     def can_user_read(cls, user, obj):
-        ''' a user can be read if they are on the same team or can be administrated ''' 
+        ''' a user can be read if they are on the same team or can be administrated '''
         matching_teams = user.teams.filter(users__in = [ user ]).count()
         return matching_teams or cls.can_user_administrate(user, obj)
-    
-    @classmethod 
+
+    @classmethod
     def can_user_delete(cls, user, obj):
         if user.is_superuser:
             return True
@@ -87,8 +87,8 @@ class UserHelper(object):
 
 
 class CommonModel(models.Model):
-    ''' 
-    common model for all object types that have these standard fields 
+    '''
+    common model for all object types that have these standard fields
     '''
 
     class Meta:
@@ -98,23 +98,23 @@ class CommonModel(models.Model):
     description   = models.TextField(blank=True, default='')
     created_by    = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, related_name='%s(class)s_created') # not blank=False on purpose for admin!
     creation_date = models.DateField(auto_now_add=True)
-    tags          = models.ManyToManyField('Tag', related_name='%(class)s_by_tag', blank=True) 
+    tags          = models.ManyToManyField('Tag', related_name='%(class)s_by_tag', blank=True)
     audit_trail   = models.ManyToManyField('AuditTrail', related_name='%(class)s_by_audit_trail', blank=True)
     active        = models.BooleanField(default=True)
 
     def __unicode__(self):
         return unicode(self.name)
 
-    @classmethod 
+    @classmethod
     def can_user_administrate(cls, user, obj):
         # FIXME: do we want a seperate method to override put?  This is kind of general purpose
         raise exceptions.NotImplementedError()
 
-    @classmethod 
+    @classmethod
     def can_user_delete(cls, user, obj):
         raise exceptions.NotImplementedError()
 
-    @classmethod 
+    @classmethod
     def can_user_read(cls, user, obj):
         raise exceptions.NotImplementedError()
 
@@ -130,16 +130,16 @@ class CommonModel(models.Model):
                 return False
         rc = cls.can_user_administrate(user, obj)
         return rc
- 
+
     @classmethod
     def can_user_unattach(cls, user, obj, sub_obj, relationship):
         return cls.can_user_administrate(user, obj)
- 
+
 class Tag(models.Model):
-    ''' 
-    any type of object can be given a search tag 
     '''
-    
+    any type of object can be given a search tag
+    '''
+
     class Meta:
         app_label = 'main'
 
@@ -162,15 +162,15 @@ class Tag(models.Model):
         # anybody can read tags, we won't show much detail other than the names
         return True
 
- 
+
 class AuditTrail(models.Model):
-    ''' 
-    changing any object records the change 
     '''
-    
+    changing any object records the change
+    '''
+
     class Meta:
         app_label = 'main'
- 
+
     resource_type = models.CharField(max_length=64)
     modified_by   = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, blank=True)
     delta         = models.TextField() # FIXME: switch to JSONField
@@ -181,10 +181,10 @@ class AuditTrail(models.Model):
     tag           = models.ForeignKey('Tag', on_delete=SET_NULL, null=True, blank=True)
 
 class Organization(CommonModel):
-    ''' 
-    organizations are the basic unit of multi-tenancy divisions 
-    '''    
-    
+    '''
+    organizations are the basic unit of multi-tenancy divisions
+    '''
+
     class Meta:
         app_label = 'main'
 
@@ -196,11 +196,11 @@ class Organization(CommonModel):
         import lib.urls
         return reverse(lib.urls.views_OrganizationsDetail, args=(self.pk,))
 
-    @classmethod 
+    @classmethod
     def can_user_delete(cls, user, obj):
         return user in obj.admins.all()
 
-    @classmethod 
+    @classmethod
     def can_user_administrate(cls, user, obj):
         # FIXME: super user checks should be higher up so we don't have to repeat them
         if user.is_superuser:
@@ -210,11 +210,11 @@ class Organization(CommonModel):
         rc = user in obj.admins.all()
         return rc
 
-    @classmethod 
+    @classmethod
     def can_user_read(cls, user, obj):
         return cls.can_user_administrate(user,obj) or user in obj.users.all()
 
-    @classmethod 
+    @classmethod
     def can_user_delete(cls, user, obj):
         return cls.can_user_administrate(user, obj)
 
@@ -222,15 +222,15 @@ class Organization(CommonModel):
         return self.name
 
 class Inventory(CommonModel):
-    ''' 
+    '''
     an inventory source contains lists and hosts.
     '''
-    
+
     class Meta:
         app_label = 'main'
         verbose_name_plural = _('inventories')
-  
-    organization = models.ForeignKey(Organization, null=True, on_delete=SET_NULL, related_name='inventories')    
+
+    organization = models.ForeignKey(Organization, null=True, on_delete=SET_NULL, related_name='inventories')
 
     def __unicode__(self):
         if self.organization:
@@ -242,7 +242,7 @@ class Host(CommonModel):
     '''
     A managed node
     '''
-    
+
     class Meta:
         app_label = 'main'
 
@@ -255,7 +255,7 @@ class Group(CommonModel):
     '''
     A group of managed nodes.  May belong to multiple groups
     '''
-    
+
     class Meta:
         app_label = 'main'
 
@@ -272,8 +272,8 @@ class Group(CommonModel):
 class VariableData(CommonModel):
     '''
     A set of host or group variables
-    '''  
-    
+    '''
+
     class Meta:
         app_label = 'main'
         verbose_name_plural = _('variable data')
@@ -291,7 +291,7 @@ class Credential(CommonModel):
     Usually this is a SSH key location, and possibly an unlock password.
     If used with sudo, a sudo password should be set if required.
     '''
-    
+
     class Meta:
         app_label = 'main'
 
@@ -304,25 +304,25 @@ class Credential(CommonModel):
     ssh_key_unlock  = models.CharField(blank=True, default='', max_length=1024)
     ssh_password    = models.CharField(blank=True, default='', max_length=1024)
     sudo_password   = models.CharField(blank=True, default='', max_length=1024)
-    
+
 
 class Team(CommonModel):
     '''
     A team is a group of users that work on common projects.
     '''
-    
+
     class Meta:
         app_label = 'main'
-    
+
     projects        = models.ManyToManyField('Project', blank=True, related_name='teams')
     users           = models.ManyToManyField('auth.User', blank=True, related_name='teams')
     organizations   = models.ManyToManyField('Organization', related_name='teams')
 
 class Project(CommonModel):
-    '''  
+    '''
     A project represents a playbook git repo that can access a set of inventories
-    '''   
-    
+    '''
+
     inventories      = models.ManyToManyField('Inventory', blank=True, related_name='projects')
     local_repository = models.CharField(max_length=1024)
     scm_type         = models.CharField(max_length=64)
@@ -332,7 +332,7 @@ class Project(CommonModel):
         import lib.urls
         return reverse(lib.urls.views_ProjectsDetail, args=(self.pk,))
 
-    @classmethod 
+    @classmethod
     def can_user_administrate(cls, user, obj):
         if user.is_superuser:
             return True
@@ -357,7 +357,7 @@ class Permission(CommonModel):
     '''
     A permission allows a user, project, or team to be able to use an inventory source.
     '''
-    
+
     class Meta:
         app_label = 'main'
 
@@ -369,10 +369,10 @@ class Permission(CommonModel):
 # TODO: other job types (later)
 
 class LaunchJob(CommonModel):
-    ''' 
-    a launch job is a request to apply a project to an inventory source with a given credential 
     '''
-    
+    a launch job is a request to apply a project to an inventory source with a given credential
+    '''
+
     class Meta:
         app_label = 'main'
 
@@ -387,18 +387,18 @@ class LaunchJob(CommonModel):
         return run_launch_job.delay(self.pk)
 
     # project has one default playbook but really should have a list of playbooks and flags ...
-    
-    
-    # ENOUGH_TO_RUN_DJANGO=foo ACOM_INVENTORY_ID=<pk> ansible-playbook <path to project selected playbook.yml> -i ansible-commander-inventory.py 
+
+
+    # ENOUGH_TO_RUN_DJANGO=foo ACOM_INVENTORY_ID=<pk> ansible-playbook <path to project selected playbook.yml> -i ansible-commander-inventory.py
     #                                                                            ^-- this is a hard coded path
     # ssh-agent bash
     # ssh-add ... < key entry
     #
     # inventory script I can write, and will use ACOM_INVENTORY_ID
-    # 
     #
-    # playbook in source control is already on the disk 
-    
+    #
+    # playbook in source control is already on the disk
+
     # job_type:
     #   run, check -- enough for now, more initially
     #      if check, add "--check" to parameters
@@ -408,7 +408,7 @@ class LaunchJob(CommonModel):
     #    self.context.runner
     #    and the callback will read the environment for ACOM_CELERY_JOB_ID or similar
     #    and log tons into the database
- 
+
     # we'll also log stdout/stderr somewhere for debugging
 
     # the ansible commander setup instructions will include installing the database logging callback
@@ -423,7 +423,7 @@ class LaunchJob(CommonModel):
 # TODO: Events
 
 class LaunchJobStatus(CommonModel):
-    
+
     class Meta:
         app_label = 'main'
         verbose_name_plural = _('launch job statuses')
@@ -431,7 +431,7 @@ class LaunchJobStatus(CommonModel):
     launch_job     = models.ForeignKey('LaunchJob', null=True, on_delete=SET_NULL, related_name='launch_job_statuses')
     status         = models.IntegerField()
     result_data    = models.TextField()
-     
+
 
 # TODO: reporting (MPD)
 
