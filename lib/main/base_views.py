@@ -44,7 +44,7 @@ class BaseList(generics.ListCreateAPIView):
                   # org admins are allowed to create users
                   return self.request.user.is_superuser or (self.request.user.admin_of_organizations.count() > 0)
              else:
-                  return self.__class__.model.can_user_add(request.user)
+                  return self.__class__.model.can_user_add(request.user, self.request.DATA)
         raise exceptions.NotImplementedError
    
     def get_queryset(self):

@@ -91,13 +91,23 @@ class InventoryTest(BaseTest):
         data = self.get(inventories_2, expect=403, auth=self.get_nobody_credentials())
 
         # a super user can create inventory
-
-        # self.post(url, expect=401, data=new_user, auth=None)
+        new_inv_1 = dict(name='inventory-c', description='baz', organization=1)
+        data = self.post(inventories, data=new_inv_1, expect=201, auth=self.get_super_credentials())
+        self.assertEquals(data['id'], 3)
 
         # an org admin of any org can create inventory, if it is one of his organizations
-        # the organization parameter is required
+        # the organization parameter is required!
+        new_inv_incomplete = dict(name='inventory-d', description='baz')
+        data = self.post(inventories, data=new_inv_incomplete, expect=403,  auth=self.get_normal_credentials())
+        new_inv_not_my_org = dict(name='inventory-d', description='baz', organization=3)
+
+        data = self.post(inventories, data=new_inv_not_my_org, expect=403,  auth=self.get_normal_credentials())
+        new_inv_my_org = dict(name='inventory-d', description='baz', organization=1)
+        data = self.post(inventories, data=new_inv_my_org, expect=201, auth=self.get_normal_credentials())
 
         # a regular user cannot create inventory
+        new_inv_denied = dict(name='inventory-e', description='glorp', organization=1)
+        data = self.post(inventories, data=new_inv_denied, expect=403, auth=self.get_other_credentials())
 
         # a super user can add hosts
  

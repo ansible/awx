@@ -157,7 +157,7 @@ class CommonModel(models.Model):
         raise exceptions.NotImplementedError()
 
     @classmethod
-    def can_user_add(cls, user):
+    def can_user_add(cls, user, data):
         return user.is_superuser
 
     @classmethod
@@ -191,7 +191,7 @@ class Tag(models.Model):
         return reverse(lib.urls.views_TagsDetail, args=(self.pk,))
 
     @classmethod
-    def can_user_add(cls, user):
+    def can_user_add(cls, user, data):
         # anybody can make up tags
         return True
 
@@ -284,7 +284,7 @@ class Inventory(CommonModel):
     def _has_permission_types(cls, user, obj, allowed):
         if user.is_superuser:
             return True
-        by_org_admin = user in obj.organization.admins.all()
+        by_org_admin = obj.organization.admins.filter(pk = user.pk).count()
         by_team_permission = obj.permissions.filter(
             team__in = user.teams.all(),
             permission_type__in = allowed
@@ -293,7 +293,21 @@ class Inventory(CommonModel):
             user = user,
             permission_type__in = allowed
         ).count()
-        return (by_org_admin + by_team_permission + by_user_permission) > 0
+        
+        result = (by_org_admin + by_team_permission + by_user_permission)
+        return result > 0
+
+    @classmethod
+    def can_user_add(cls, user, data):
+        if not 'organization' in data:
+            return False
+        if user.is_superuser:
+            return True
+        if not user.is_superuser:
+            org = Organization.objects.get(pk=data['organization'])
+            if user in org.admins.all():
+                return True
+        return False
 
     @classmethod
     def can_user_administrate(cls, user, obj):

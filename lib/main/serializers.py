@@ -87,7 +87,7 @@ class InventorySerializer(BaseSerializer):
 
     class Meta:
         model = Inventory
-        fields = ('url', 'id', 'name', 'description', 'creation_date')
+        fields = ('url', 'id', 'name', 'description', 'creation_date', 'organization')
 
     def get_related(self, obj):
         # FIXME: add related resources: inventories

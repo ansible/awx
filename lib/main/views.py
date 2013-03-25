@@ -282,5 +282,3 @@ class InventoryDetail(BaseDetail):
     serializer_class = InventorySerializer
     permission_classes = (CustomRbac,)
 
- 
- 
