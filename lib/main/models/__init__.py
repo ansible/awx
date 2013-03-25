@@ -431,11 +431,29 @@ class Permission(CommonModel):
     class Meta:
         app_label = 'main'
 
+    # permissions are granted to either a user or a team:
     user            = models.ForeignKey('auth.User', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
-    project         = models.ForeignKey('Project', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
     team            = models.ForeignKey('Team', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
-    inventory       = models.ForeignKey('Inventory', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
+
+    # to be used against a project or inventory (or a project and inventory in conjunction):
+    project         = models.ForeignKey('Project', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
+    inventory       = models.ForeignKey('Inventory', null=True, on_delete=SET_NULL, related_name='permissions')
+
+    # permission system explanation:
+    #
+    # for example, user A on inventory X has write permissions                 (PERM_INVENTORY_WRITE)
+    #              team C on inventory X has read permissions                  (PERM_INVENTORY_READ)
+    #              team C on inventory X and project Y has launch permissions  (PERM_INVENTORY_DEPLOY)
+    #              team C on inventory X and project Z has dry run permissions (PERM_INVENTORY_CHECK)   
+    #
+    # basically for launching, permissions can be awarded to the whole inventory source or just the inventory source
+    # in context of a given project.
+    #
+    # the project parameter is not used when dealing with READ, WRITE, or ADMIN permissions.
+
     permission_type = models.CharField(max_length=64, choices=PERMISSION_TYPE_CHOICES)
+
+
 
 # TODO: other job types (later)
 

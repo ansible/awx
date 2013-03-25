@@ -266,11 +266,15 @@ class InventoryList(BaseList):
         if self.request.user.is_superuser:
             return base.all()
         admin_of  = base.filter(organization__admins__in = [ self.request.user ]).distinct()
-        has_perms = base.filter(
+        has_user_perms = base.filter(
             permissions__user__in = [ self.request.user ],
             permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
         ).distinct()
-        return admin_of | has_perms
+        has_team_perms = base.filter(
+            permissions__team__in = self.request.user.teams.all(),
+            permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        return admin_of | has_user_perms | has_team_perms
 
 class InventoryDetail(BaseDetail):
 
