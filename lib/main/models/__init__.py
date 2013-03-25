@@ -26,6 +26,7 @@ import exceptions
 # TODO: jobs and events model TBD
 # TODO: reporting model TBD
 
+PERM_INVENTORY_ADMIN  = 'admin'
 PERM_INVENTORY_READ   = 'read'
 PERM_INVENTORY_WRITE  = 'write'
 PERM_INVENTORY_DEPLOY = 'run'
@@ -37,17 +38,33 @@ JOB_TYPE_CHOICES = [
 ]
 
 PERMISSION_TYPES = [
+    PERM_INVENTORY_ADMIN,
     PERM_INVENTORY_READ,
     PERM_INVENTORY_WRITE,
     PERM_INVENTORY_DEPLOY,
     PERM_INVENTORY_CHECK,
 ]
 
-PERMISSION_TYPES_ALLOWING_INVENTORY_READ = PERMISSION_TYPES
+PERMISSION_TYPES_ALLOWING_INVENTORY_READ = [
+    PERM_INVENTORY_ADMIN,
+    PERM_INVENTORY_WRITE,
+    PERM_INVENTORY_READ,
+]
 
+PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE = [
+    PERM_INVENTORY_ADMIN,
+    PERM_INVENTORY_WRITE,
+]
+
+PERMISSION_TYPES_ALLOWING_INVENTORY_ADMIN = [
+    PERM_INVENTORY_ADMIN,
+]
+
+# FIXME: TODO: make sure all of these are used and consistent
 PERMISSION_TYPE_CHOICES = [
     (PERM_INVENTORY_READ, _('Read Inventory')),
-    (PERM_INVENTORY_WRITE, _('Write Inventory')),
+    (PERM_INVENTORY_WRITE, _('Edit Inventory')),
+    (PERM_INVENTORY_ADMIN, _('Administrate Inventory')),
     (PERM_INVENTORY_DEPLOY, _('Deploy To Inventory')),
     (PERM_INVENTORY_CHECK, _('Deploy To Inventory (Dry Run)')),
 ]
@@ -262,6 +279,34 @@ class Inventory(CommonModel):
             return u'%s (%s)' % (self.name, self.organization)
         else:
             return self.name
+
+    @classmethod
+    def _has_permission_types(cls, user, obj, allowed):
+        if user.is_superuser:
+            return True
+        by_org_admin = user in obj.organization.admins.all()
+        by_team_permission = obj.permissions.filter(
+            team__in = user.teams.all(),
+            permission_type__in = allowed
+        ).count()
+        by_user_permission = obj.permissions.filter(
+            user = user,
+            permission_type__in = allowed
+        ).count()
+        return (by_org_admin + by_team_permission + by_user_permission) > 0
+
+    @classmethod
+    def can_user_administrate(cls, user, obj):
+        return cls._has_permission_types(user, obj, PERMISSION_TYPES_ALLOWING_INVENTORY_ADMIN)
+
+    @classmethod
+    def can_user_read(cls, user, obj):
+        return cls._has_permission_types(user, obj, PERMISSION_TYPES_ALLOWING_INVENTORY_READ)
+
+    @classmethod
+    def can_user_delete(cls, user, obj):
+        return cls._has_permission_types(user, obj, PERMISSION_TYPES_ALLOWING_INVENTORY_ADMIN)
+
 
 class Host(CommonModel):
     '''

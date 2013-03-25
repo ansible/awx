@@ -30,7 +30,12 @@ class InventoryTest(BaseTest):
         # the normal user is an org admin of org 0
 
         # create a permission here on the 'other' user so they have edit access on the org
-        # TODO
+        # we may add another permission type later.
+        self.perm_read = Permission.objects.create(
+             inventory       = self.inventory_b,
+             user            = self.other_django_user,
+             permission_type = 'read'
+        )
 
         # and make one more user that won't be a part of any org, just for negative-access testing
 
@@ -62,7 +67,7 @@ class InventoryTest(BaseTest):
 
         # a user who is on a team who has a read permissions on an inventory can see filtered inventories
         data = self.get(inventories, expect=200, auth=self.get_other_credentials())
-        self.assertEquals(data['count'], 0)      
+        self.assertEquals(data['count'], 1)      
 
         # a regular user not part of anything cannot see any inventories
         data = self.get(inventories, expect=200, auth=self.get_nobody_credentials())
@@ -72,12 +77,18 @@ class InventoryTest(BaseTest):
         data = self.get(inventories_1, expect=200, auth=self.get_super_credentials())
         self.assertEquals(data['name'], 'inventory-a')
 
+        # an org admin can get inventory records
+        data = self.get(inventories_1, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['name'], 'inventory-a')
+
         # a user who is on a team who has read permissions on an inventory can see inventory records
+        data = self.get(inventories_1, expect=403, auth=self.get_other_credentials())
+        data = self.get(inventories_2, expect=200, auth=self.get_other_credentials())
+        self.assertEquals(data['name'], 'inventory-b')
 
         # a regular user cannot read any inventory records
-
-
-        #new_user2 = dict(username='blippy2')
+        data = self.get(inventories_1, expect=403, auth=self.get_nobody_credentials())
+        data = self.get(inventories_2, expect=403, auth=self.get_nobody_credentials())
 
         # a super user can create inventory
 
