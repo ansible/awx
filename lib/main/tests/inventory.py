@@ -19,13 +19,13 @@ class InventoryTest(BaseTest):
     def setUp(self):
         super(InventoryTest, self).setUp()
         self.setup_users()
-        self.organizations = self.make_organizations(self.super_django_user, 1)
+        self.organizations = self.make_organizations(self.super_django_user, 3)
         self.organizations[0].admins.add(self.normal_django_user)
         self.organizations[0].users.add(self.other_django_user)
         self.organizations[0].users.add(self.normal_django_user)
 
         self.inventory_a = Inventory.objects.create(name='inventory-a', description='foo', organization=self.organizations[0])
-        self.inventory_b = Inventory.objects.create(name='inventory-b', description='foo', organization=self.organizations[0])
+        self.inventory_b = Inventory.objects.create(name='inventory-b', description='bar', organization=self.organizations[1])
  
         # the normal user is an org admin of org 0
 
@@ -34,7 +34,9 @@ class InventoryTest(BaseTest):
 
         # and make one more user that won't be a part of any org, just for negative-access testing
 
-        self.nobody_django_user = User.objects.create(username='nobody', password='nobody')
+        self.nobody_django_user = User.objects.create(username='nobody')
+        self.nobody_django_user.set_password('nobody')
+        self.nobody_django_user.save()
 
     def get_nobody_credentials(self):
         # here is a user without any permissions...
@@ -52,7 +54,6 @@ class InventoryTest(BaseTest):
 
         # a super user can list inventories
         data = self.get(inventories, expect=200, auth=self.get_super_credentials())
-        print data
         self.assertEquals(data['count'], 2)
 
         # an org admin can list inventories but is filtered to what he adminsters
@@ -68,7 +69,7 @@ class InventoryTest(BaseTest):
         self.assertEquals(data['count'], 0)
 
         # a super user can get inventory records
-        data = self.get(detail_url_1, expect=200, auth=self.get_super_credentials())
+        data = self.get(inventories_1, expect=200, auth=self.get_super_credentials())
         self.assertEquals(data['name'], 'inventory-a')
 
         # a user who is on a team who has read permissions on an inventory can see inventory records
