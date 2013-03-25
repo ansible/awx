@@ -253,4 +253,30 @@ class UsersDetail(BaseDetail):
             obj.set_password(request.DATA['password'])
             obj.save()
             request.DATA.pop('password')
+
+class InventoryList(BaseList):
+
+    model = Inventory
+    serializer_class = InventorySerializer
+    permission_classes = (CustomRbac,)
+
+    def _get_queryset(self):
+        ''' I can see inventory when I'm a superuser, an org admin of the inventory, or I have permissions on it '''
+        base = Inventory.objects
+        if self.request.user.is_superuser:
+            return base.all()
+        admin_of  = base.filter(organization__admins__in = [ self.request.user ]).distinct()
+        has_perms = base.filter(
+            permissions__user__in = [ self.request.user ],
+            permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        return admin_of | has_perms
+
+class InventoryDetail(BaseDetail):
+
+    model = Inventory
+    serializer_class = InventorySerializer
+    permission_classes = (CustomRbac,)
+
+ 
  

@@ -17,17 +17,65 @@ from lib.main.tests.base import BaseTest
 class InventoryTest(BaseTest):
 
     def setUp(self):
-        super(UsersTest, self).setUp()
+        super(InventoryTest, self).setUp()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 1)
         self.organizations[0].admins.add(self.normal_django_user)
         self.organizations[0].users.add(self.other_django_user)
         self.organizations[0].users.add(self.normal_django_user)
+
+        self.inventory_a = Inventory.objects.create(name='inventory-a', description='foo', organization=self.organizations[0])
+        self.inventory_b = Inventory.objects.create(name='inventory-b', description='foo', organization=self.organizations[0])
  
+        # the normal user is an org admin of org 0
+
+        # create a permission here on the 'other' user so they have edit access on the org
+        # TODO
+
+        # and make one more user that won't be a part of any org, just for negative-access testing
+
+        self.nobody_django_user = User.objects.create(username='nobody', password='nobody')
+
+    def get_nobody_credentials(self):
+        # here is a user without any permissions...
+        return ('nobody', 'nobody')
+
     def test_main_line(self):
-        
-        #url = '/api/v1/users/'
-        #new_user = dict(username='blippy')
+       
+        # some basic URLs... 
+        inventories   = '/api/v1/inventories/'
+        inventories_1 = '/api/v1/inventories/1/'
+        inventories_2 = '/api/v1/inventories/2/'
+        hosts         = '/api/v1/hosts/'
+        groups        = '/api/v1/groups/'
+        variables     = '/api/v1/variables/'
+
+        # a super user can list inventories
+        data = self.get(inventories, expect=200, auth=self.get_super_credentials())
+        print data
+        self.assertEquals(data['count'], 2)
+
+        # an org admin can list inventories but is filtered to what he adminsters
+        data = self.get(inventories, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['count'], 1)
+
+        # a user who is on a team who has a read permissions on an inventory can see filtered inventories
+        data = self.get(inventories, expect=200, auth=self.get_other_credentials())
+        self.assertEquals(data['count'], 0)      
+
+        # a regular user not part of anything cannot see any inventories
+        data = self.get(inventories, expect=200, auth=self.get_nobody_credentials())
+        self.assertEquals(data['count'], 0)
+
+        # a super user can get inventory records
+        data = self.get(detail_url_1, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(data['name'], 'inventory-a')
+
+        # a user who is on a team who has read permissions on an inventory can see inventory records
+
+        # a regular user cannot read any inventory records
+
+
         #new_user2 = dict(username='blippy2')
 
         # a super user can create inventory
@@ -102,22 +150,6 @@ class InventoryTest(BaseTest):
         # a normal user cannot set subgroups
 
         # a normal user with inventory edit permissions can associate subgroups
-
-        # a super user can list inventories
- 
-        # an org admin can list inventories
-
-        # a user who is on a team who has a read permissions on an inventory can see filtered inventories
-
-        # a regular user not part of anything cannot see any inventories
-
-        # a super user can get inventory records
-
-        # an org admin can get inventory records 
-
-        # a user who is on a team who has read permissions on an inventory can see inventory records
-
-        # a regular user cannot read any inventory records
 
         # a super user can get a group record
 
@@ -231,9 +263,16 @@ class InventoryTest(BaseTest):
 
         #    variable records
 
+        #  on an inventory resource, I can see related resources for hosts and groups and permissions
+        #  and these work 
 
+        #  on a host resource, I can see related resources variables and inventories
+        #  and these work
+
+        #  on a group resource, I can see related resources for variables, inventories, and children
+        #  and these work
                 
-
+    
 
        
 

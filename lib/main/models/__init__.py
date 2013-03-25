@@ -26,9 +26,30 @@ import exceptions
 # TODO: jobs and events model TBD
 # TODO: reporting model TBD
 
+PERM_INVENTORY_READ   = 'read'
+PERM_INVENTORY_WRITE  = 'write'
+PERM_INVENTORY_DEPLOY = 'run'
+PERM_INVENTORY_CHECK  = 'check'
+
 JOB_TYPE_CHOICES = [
-    ('run', _('Run')),
-    ('check', _('Check')),
+    (PERM_INVENTORY_DEPLOY, _('Run')),
+    (PERM_INVENTORY_CHECK, _('Check')),
+]
+
+PERMISSION_TYPES = [
+    PERM_INVENTORY_READ,
+    PERM_INVENTORY_WRITE,
+    PERM_INVENTORY_DEPLOY,
+    PERM_INVENTORY_CHECK,
+]
+
+PERMISSION_TYPES_ALLOWING_INVENTORY_READ = PERMISSION_TYPES
+
+PERMISSION_TYPE_CHOICES = [
+    (PERM_INVENTORY_READ, _('Read Inventory')),
+    (PERM_INVENTORY_WRITE, _('Write Inventory')),
+    (PERM_INVENTORY_DEPLOY, _('Deploy To Inventory')),
+    (PERM_INVENTORY_CHECK, _('Deploy To Inventory (Dry Run)')),
 ]
 
 class EditHelper(object):
@@ -231,6 +252,10 @@ class Inventory(CommonModel):
         verbose_name_plural = _('inventories')
 
     organization = models.ForeignKey(Organization, null=True, on_delete=SET_NULL, related_name='inventories')
+    
+    def get_absolute_url(self):
+        import lib.urls
+        return reverse(lib.urls.views_InventoryDetail, args=(self.pk,))
 
     def __unicode__(self):
         if self.organization:
@@ -364,7 +389,8 @@ class Permission(CommonModel):
     user            = models.ForeignKey('auth.User', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
     project         = models.ForeignKey('Project', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
     team            = models.ForeignKey('Team', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
-    job_type        = models.CharField(max_length=64, choices=JOB_TYPE_CHOICES)
+    inventory       = models.ForeignKey('Inventory', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
+    permission_type = models.CharField(max_length=64, choices=PERMISSION_TYPE_CHOICES)
 
 # TODO: other job types (later)
 
@@ -380,6 +406,8 @@ class LaunchJob(CommonModel):
     credential     = models.ForeignKey('Credential', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     project        = models.ForeignKey('Project', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
     user           = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
+
+    # JOB_TYPE_CHOICES are a subset of PERMISSION_TYPE_CHOICES
     job_type       = models.CharField(max_length=64, choices=JOB_TYPE_CHOICES)
 
     def start(self):

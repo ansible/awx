@@ -352,4 +352,5 @@ class OrganizationsTest(BaseTest):
         # also check that DELETE on the collection doesn't work
         self.delete(self.collection(), expect=405, auth=self.get_super_credentials())
 
+# TODO: tests for tag disassociation
 

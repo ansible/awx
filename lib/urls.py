@@ -36,16 +36,16 @@ views_UsersTeamsList               = views.UsersTeamsList.as_view()
 views_UsersOrganizationsList       = views.UsersOrganizationsList.as_view()
 views_UsersAdminOrganizationsList  = views.UsersAdminOrganizationsList.as_view()
 
-
-
 # projects service
-views_ProjectsDetail              = views.OrganizationsDetail.as_view()
+views_ProjectsDetail               = views.OrganizationsDetail.as_view()
 
 # audit trail service
 
 # team service
 
 # inventory service
+views_InventoryList                = views.InventoryList.as_view()
+views_InventoryDetail              = views.InventoryDetail.as_view()
 
 # group service
 
@@ -65,13 +65,13 @@ views_TagsDetail              = views.TagsDetail.as_view()
 
 urlpatterns = patterns('',
     # organizations service
-    url(r'^api/v1/organizations/$',                            views_OrganizationsList),
-    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/$',             views_OrganizationsDetail),
-    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/audit_trail/$', views_OrganizationsAuditTrailList),
-    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/users/$',       views_OrganizationsUsersList),
-    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/admins/$',      views_OrganizationsAdminsList),
-    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/projects/$',    views_OrganizationsProjectsList),
-    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/tags/$',        views_OrganizationsTagsList),
+    url(r'^api/v1/organizations/$',                               views_OrganizationsList),
+    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/$',                views_OrganizationsDetail),
+    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/audit_trail/$',    views_OrganizationsAuditTrailList),
+    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/users/$',          views_OrganizationsUsersList),
+    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/admins/$',         views_OrganizationsAdminsList),
+    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/projects/$',       views_OrganizationsProjectsList),
+    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/tags/$',           views_OrganizationsTagsList),
 
     # users service
     url(r'^api/v1/users/$',                                       views_UsersList),
@@ -82,13 +82,15 @@ urlpatterns = patterns('',
     url(r'^api/v1/users/(?P<pk>[0-9]+)/admin_of_organizations/$', views_UsersAdminOrganizationsList),
 
     # projects service
-    url(r'^api/v1/projects/(?P<pk>[0-9]+)/$',                  views_ProjectsDetail),
+    url(r'^api/v1/projects/(?P<pk>[0-9]+)/$',                     views_ProjectsDetail),
     
     # audit trail service
 
     # team service
 
     # inventory service
+    url(r'^api/v1/inventories/$',                                 views_InventoryList),
+    url(r'^api/v1/inventories/(?P<pk>[0-9]+)/$',                  views_InventoryDetail),
 
     # group service
 

@@ -28,4 +28,4 @@ TWEAKS/ASSORTED
 * allow multiple playbook execution types per project, different --tag choices, different --limit choices (maybe just free form in the job for now?)
 * permissions infrastructure about who can kick off what kind of jobs
 * it would be nice if POSTs to subcollections used the permissions of the regular collection POST rules and then called the PUT code.
-
+* root API discovery resource at /api and /api/v1

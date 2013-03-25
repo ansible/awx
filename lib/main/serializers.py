@@ -78,6 +78,22 @@ class ProjectSerializer(BaseSerializer):
         # FIXME: add related resources: inventories
         return dict()
 
+
+class InventorySerializer(BaseSerializer):
+    
+    # add the URL and related resources
+    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    related       = serializers.SerializerMethodField('get_related')
+
+    class Meta:
+        model = Inventory
+        fields = ('url', 'id', 'name', 'description', 'creation_date')
+
+    def get_related(self, obj):
+        # FIXME: add related resources: inventories
+        return dict()
+
+
 class TeamSerializer(BaseSerializer):
 
     # add the URL and related resources
