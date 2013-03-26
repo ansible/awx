@@ -144,7 +144,7 @@ class InventoryTest(BaseTest):
         edit_perm = Permission.objects.create(
              user            = self.other_django_user,
              inventory       = Inventory.objects.get(pk=1),
-             permission_type = PERM_INVENTORY_EDIT
+             permission_type = PERM_INVENTORY_WRITE
         )
         data3 = self.post(hosts, data=new_host_c, expect=201, auth=self.get_other_credentials())
 

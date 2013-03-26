@@ -378,9 +378,7 @@ class Host(CommonModelNameNotUnique):
     
     @classmethod
     def can_user_add(cls, user, data):
-        print "DEBUG: can_user_add called for HOST: %s" % data
         if not 'inventory' in data:
-            print 'DEBUG: missing inventory!' 
             return False
         inventory = Inventory.objects.get(pk=data['inventory'])
         return Inventory._has_permission_types(user, inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
@@ -499,7 +497,7 @@ class Project(CommonModel):
         return False
 
 
-class Permission(CommonModel):
+class Permission(CommonModelNameNotUnique):
     '''
     A permission allows a user, project, or team to be able to use an inventory source.
     '''
