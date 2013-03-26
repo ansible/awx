@@ -85,6 +85,7 @@ class OrganizationsUsersList(BaseSubList):
     parent_model = Organization
     relationship = 'users'
     postable = True
+    inject_primary_key_on_post_as = 'organization'
 
     def _get_queryset(self):
         ''' to list users in the organization, I must be a superuser or org admin '''
@@ -101,6 +102,7 @@ class OrganizationsAdminsList(BaseSubList):
     parent_model = Organization
     relationship = 'admins'
     postable = True
+    inject_primary_key_on_post_as = 'organization'
 
     def _get_queryset(self):
         ''' to list admins in the organization, I must be a superuser or org admin '''
@@ -117,6 +119,7 @@ class OrganizationsProjectsList(BaseSubList):
     parent_model = Organization  # for sub list
     relationship = 'projects'    # " "
     postable = True
+    inject_primary_key_on_post_as = 'organization'
     
     def _get_queryset(self):
         ''' to list projects in the organization, I must be a superuser or org admin '''
@@ -133,6 +136,7 @@ class OrganizationsTagsList(BaseSubList):
     parent_model = Organization  # for sub list
     relationship = 'tags'        # " "
     postable = True
+    inject_primary_key_on_post_as = 'organization'
 
     def _get_queryset(self):
         ''' to list tags in the organization, I must be a superuser or org admin '''

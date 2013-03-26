@@ -207,4 +207,8 @@ class UsersTest(BaseTest):
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 0)
 
+        # FIXME: add test that shows posting a user w/o id to /organizations/2/users/ can create a new one & associate
+        # FIXME: add test that shows posting a user w/o id to /organizations/2/admins/ can create a new one & associate
+        # FIXME: add test that shows posting a projects w/o id to /organizations/2/projects/ can create a new one & associate
+
 
