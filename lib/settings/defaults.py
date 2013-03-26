@@ -122,7 +122,8 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 MIDDLEWARE_CLASSES += (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'lib.middleware.exceptions.ExceptionMiddleware',
-    #'django.middleware.transaction.TransactionMiddleware',
+    'django.middleware.transaction.TransactionMiddleware',
+    # middleware loaded after this point will be subject to transactions
 )
 
 TEMPLATE_DIRS = (

@@ -29,6 +29,7 @@ from rest_framework.response import Response
 from rest_framework import status
 import exceptions
 import datetime
+import json as python_json
 
 # FIXME: machinery for auto-adding audit trail logs to all CREATE/EDITS
 
@@ -40,7 +41,7 @@ class BaseList(generics.ListCreateAPIView):
              return True
         if request.method == 'POST':
              if self.__class__.model in [ User ]:
-                  ok = self.request.user.is_superuser or (self.request.user.admin_of_organizations.count() > 0)
+                  ok = request.user.is_superuser or (request.user.admin_of_organizations.count() > 0)
                   if not ok:
                       raise PermissionDenied()
                   return True
@@ -83,9 +84,58 @@ class BaseSubList(BaseList):
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
         parent_id = kwargs['pk']
-        sub_id = request.DATA.get('id')
+        sub_id = request.DATA.get('id', None)
         main = self.__class__.parent_model.objects.get(pk=parent_id)
-        subs = self.__class__.model.objects.filter(pk=sub_id)
+
+        subs = None
+
+        if sub_id:
+            subs = self.__class__.model.objects.filter(pk=sub_id)
+        else:
+            if 'disassociate' in request.DATA:
+                raise PermissionDenied() # ID is required to disassociate
+            else:
+
+                # this is a little tricky and a little manual
+                # the object ID was not specified, so it probably doesn't exist in the DB yet.
+                # we want to see if we can create it.  The URL may choose to inject it's primary key into the object
+                # because we are posting to a subcollection. Use all the normal access control mechanisms.
+
+                inject_primary_key = getattr(self.__class__, 'inject_primary_key_on_post_as', None)
+
+                if inject_primary_key is not None:
+
+                    # add the key to the post data using the pk from the URL
+                    request.DATA[inject_primary_key] = kwargs['pk']
+
+                    # attempt to deserialize the object
+                    ser = self.__class__.serializer_class(data=request.DATA)
+                    if not ser.is_valid():
+                        return Response(status=status.HTTP_400_BAD_REQUEST, data=python_json.dumps(dict(msg='invalid post data')))
+
+                    # ask the usual access control settings
+                    if not self.__class__.model.can_user_add(request.user, ser.init_data):
+                        raise PermissionDenied()
+
+                    # save the object through the serializer, reload and returned the saved object deserialized
+                    obj = ser.save()
+                    ser = self.__class__.serializer_class(obj)
+            
+                    # now make sure we could have already attached the two together.  If we could not have, raise an exception
+                    # such that the transaction does not commit.
+                    if not self.__class__.parent_model.can_user_attach(request.user, main, obj, self.__class__.relationship):
+                        raise PermissionDenied()
+
+                    return Response(status=status.HTTP_201_CREATED, data=python_json.dumps(ser.data))
+
+                else:
+
+                    # view didn't specify a way to get the pk from the URL, so not even trying
+                    return Response(status=status.HTTP_400_BAD_REQUEST, data=python_json.dumps(dict(msg='object cannot be created')))
+
+        # we didn't have to create the object, so this is just associating the two objects together now...
+        # (or disassociating them)
+
         if len(subs) != 1:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         sub = subs[0]

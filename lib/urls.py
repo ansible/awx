@@ -46,6 +46,7 @@ views_ProjectsDetail               = views.OrganizationsDetail.as_view()
 # inventory service
 views_InventoryList                = views.InventoryList.as_view()
 views_InventoryDetail              = views.InventoryDetail.as_view()
+views_InventoryHostsList           = views.InventoryHostsList.as_view()
 
 # group service
 views_GroupsList                   = views.GroupsList.as_view()
@@ -95,6 +96,7 @@ urlpatterns = patterns('',
     # inventory service
     url(r'^api/v1/inventories/$',                                 views_InventoryList),
     url(r'^api/v1/inventories/(?P<pk>[0-9]+)/$',                  views_InventoryDetail),
+    url(r'^api/v1/inventories/(?P<pk>[0-9]+)/hosts/$',            views_InventoryHostsList),
 
     # host service
     url(r'^api/v1/hosts/$',                                       views_HostsList),

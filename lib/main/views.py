@@ -260,9 +260,7 @@ class InventoryList(BaseList):
     serializer_class = InventorySerializer
     permission_classes = (CustomRbac,)
 
-    def _get_queryset(self):
-        ''' I can see inventory when I'm a superuser, an org admin of the inventory, or I have permissions on it '''
-        base = Inventory.objects
+    def _filter_queryset(self, base):
         if self.request.user.is_superuser:
             return base.all()
         admin_of  = base.filter(organization__admins__in = [ self.request.user ]).distinct()
@@ -275,6 +273,11 @@ class InventoryList(BaseList):
             permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
         ).distinct()
         return admin_of | has_user_perms | has_team_perms
+
+    def _get_queryset(self):
+        ''' I can see inventory when I'm a superuser, an org admin of the inventory, or I have permissions on it '''
+        base = Inventory.objects
+        return self._filter_queryset(base)
 
 class InventoryDetail(BaseDetail):
 
@@ -314,6 +317,23 @@ class HostsDetail(BaseDetail):
     model = Host
     serializer_class = HostSerializer
     permission_classes = (CustomRbac,)
+
+class InventoryHostsList(BaseSubList):
+
+    model = Host
+    serializer_class = HostSerializer
+    permission_classes = (CustomRbac,)
+    # to allow the sub-aspect listing
+    parent_model = Inventory
+    relationship = 'hosts'
+    # to allow posting to this resource to create resources
+    postable = True
+    # FIXME: go back and add these to other SubLists
+    inject_primary_key_on_post_as = 'inventory'
+
+    def _get_queryset(self):
+        # FIXME: more DRY methods like this
+        return Inventory._filter_queryset(Inventory.objects.get(pk=self.kwargs['pk']).hosts)
 
 class GroupsList(BaseList):
 

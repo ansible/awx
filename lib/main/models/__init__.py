@@ -371,6 +371,10 @@ class Host(CommonModelNameNotUnique):
 
     def __unicode__(self):
         return self.name
+
+    @classmethod
+    def can_user_read(cls, user, obj):
+        return Inventory.can_user_read(user, obj.inventory)
     
     @classmethod
     def can_user_add(cls, user, data):

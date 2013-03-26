@@ -130,14 +130,14 @@ class InventoryTest(BaseTest):
         new_host_c   = dict(name='asdf2.example.com', inventory=inv.pk)
         new_host_d   = dict(name='asdf3.example.com', inventory=inv.pk)
         new_host_e   = dict(name='asdf4.example.com', inventory=inv.pk)
-        data0 = self.post(hosts, data=invalid, expect=400, auth=self.get_super_credentials())
-        data0 = self.post(hosts, data=new_host_a, expect=201, auth=self.get_super_credentials())
+        host_data0 = self.post(hosts, data=invalid, expect=400, auth=self.get_super_credentials())
+        host_data0 = self.post(hosts, data=new_host_a, expect=201, auth=self.get_super_credentials())
  
         # an org admin can add hosts
-        data1 = self.post(hosts, data=new_host_e, expect=201, auth=self.get_normal_credentials())
+        host_data1 = self.post(hosts, data=new_host_e, expect=201, auth=self.get_normal_credentials())
 
         # a normal user cannot add hosts
-        data2 = self.post(hosts, data=new_host_b, expect=403, auth=self.get_nobody_credentials())
+        host_data2 = self.post(hosts, data=new_host_b, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with inventory edit permissions (on any inventory) can create hosts
         edit_perm = Permission.objects.create(
@@ -145,10 +145,10 @@ class InventoryTest(BaseTest):
              inventory       = Inventory.objects.get(pk=inv.pk),
              permission_type = PERM_INVENTORY_WRITE
         )
-        data3 = self.post(hosts, data=new_host_c, expect=201, auth=self.get_other_credentials())
+        host_data3 = self.post(hosts, data=new_host_c, expect=201, auth=self.get_other_credentials())
 
         # hostnames must be unique inside an organization
-        data4 = self.post(hosts, data=new_host_c, expect=400, auth=self.get_other_credentials())
+        host_data4 = self.post(hosts, data=new_host_c, expect=400, auth=self.get_other_credentials())
 
         ###########################################
         # GROUPS
@@ -163,10 +163,10 @@ class InventoryTest(BaseTest):
         data0 = self.post(groups, data=new_group_a, expect=201, auth=self.get_super_credentials())
 
         # an org admin can add hosts
-        data1 = self.post(groups, data=new_group_e, expect=201, auth=self.get_normal_credentials())
+        group_data1 = self.post(groups, data=new_group_e, expect=201, auth=self.get_normal_credentials())
 
         # a normal user cannot add hosts
-        data2 = self.post(groups, data=new_group_b, expect=403, auth=self.get_nobody_credentials())
+        group_data2 = self.post(groups, data=new_group_b, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with inventory edit permissions (on any inventory) can create hosts
         # already done!
@@ -175,13 +175,18 @@ class InventoryTest(BaseTest):
         #     inventory       = Inventory.objects.get(pk=inv.pk),
         #     permission_type = PERM_INVENTORY_WRITE
         #)       
-        data3 = self.post(groups, data=new_group_c, expect=201, auth=self.get_other_credentials())
+        group_data3 = self.post(groups, data=new_group_c, expect=201, auth=self.get_other_credentials())
 
         # hostnames must be unique inside an organization
-        data4 = self.post(groups, data=new_group_c, expect=400, auth=self.get_other_credentials())
+        group_data4 = self.post(groups, data=new_group_c, expect=400, auth=self.get_other_credentials())
 
         #################################################
-        # HOSTS->inventories
+        # HOSTS->inventories POST via subcollection
+       
+        url = '/api/v1/inventories/1/hosts/'
+ 
+        new_host = dict(name='web100.example.com')
+        added_by_collection = self.post(url, data=new_host, expect=201, auth=self.get_super_credentials())
 
         # a super user can associate hosts with inventories
 
@@ -192,7 +197,7 @@ class InventoryTest(BaseTest):
         # a normal user with edit permission on the inventory can associate hosts with inventories
 
         ##################################################
-        # GROUPS->inventories
+        # GROUPS->inventories POST via subcollection
 
         # a super user can associate groups with inventories
 
