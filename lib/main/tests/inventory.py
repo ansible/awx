@@ -108,7 +108,7 @@ class InventoryTest(BaseTest):
         # an org admin of any org can create inventory, if it is one of his organizations
         # the organization parameter is required!
         new_inv_incomplete = dict(name='inventory-d', description='baz')
-        data = self.post(inventories, data=new_inv_incomplete, expect=403,  auth=self.get_normal_credentials())
+        data = self.post(inventories, data=new_inv_incomplete, expect=400,  auth=self.get_normal_credentials())
         new_inv_not_my_org = dict(name='inventory-d', description='baz', organization=3)
 
         data = self.post(inventories, data=new_inv_not_my_org, expect=403,  auth=self.get_normal_credentials())
@@ -119,13 +119,38 @@ class InventoryTest(BaseTest):
         new_inv_denied = dict(name='inventory-e', description='glorp', organization=1)
         data = self.post(inventories, data=new_inv_denied, expect=403, auth=self.get_other_credentials())
 
-        # a super user can add hosts
+        # a super user can add hosts (but inventory ID is required)
+        inv = Inventory.objects.create(
+            name = 'test inventory',
+            organization = self.organizations[0]
+        )
+        invalid      = dict(name='asdf0.example.com')
+        new_host_a   = dict(name='asdf0.example.com', inventory=inv.pk)
+        new_host_b   = dict(name='asdf1.example.com', inventory=inv.pk)
+        new_host_c   = dict(name='asdf2.example.com', inventory=inv.pk)
+        new_host_d   = dict(name='asdf3.example.com', inventory=inv.pk)
+        # FIXME: should raise 400 not 201, look into required fields in rest_framework
+        print hosts
+        data0 = self.post(hosts, data=invalid, expect=400, auth=self.get_super_credentials())
+        data0 = self.post(hosts, data=new_host_a, expect=201, auth=self.get_super_credentials())
  
-        # an org admin can add groups
+        # an org admin can add hosts
+        data1 = self.post(hosts, data=new_host_a, expect=201, auth=self.get_normal_credentials())
 
         # a normal user cannot add hosts
+        data2 = self.post(hosts, data=new_host_b, expect=403, auth=self.get_nobody_credentials())
 
-        # a normal user with inventory edit permissions can create hosts
+        # a normal user with inventory edit permissions (on any inventory) can create hosts
+        edit_perm = Permission.objects.create(
+             user            = self.other_django_user,
+             inventory       = Inventory.objects.get(pk=1),
+             permission_type = PERM_INVENTORY_EDIT
+        )
+        data3 = self.post(hosts, data=new_host_c, expect=201, auth=self.get_other_credentials())
+
+        # hostnames must be unique -- posting a duplicate just returns the previous
+        data4 = self.post(hosts, data=new_host_c, expect=200, auth=self.get_other_credentials())
+        self.assertEqual(data1['id'], data4['id'])
 
         # a super user can add groups
 
@@ -134,6 +159,8 @@ class InventoryTest(BaseTest):
         # a normal user cannot create groups
 
         # a normal user with inventory edit permissions can create groups
+        
+        # group names must be unique for each inventory record
 
         # a super user can associate hosts with inventories
 

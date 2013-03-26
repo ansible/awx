@@ -90,9 +90,36 @@ class InventorySerializer(BaseSerializer):
         fields = ('url', 'id', 'name', 'description', 'creation_date', 'organization')
 
     def get_related(self, obj):
-        # FIXME: add related resources: inventories
+        # FIXME: add related resources: hosts, groups
         return dict()
 
+class HostSerializer(BaseSerializer):
+
+    # add the URL and related resources
+    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    related       = serializers.SerializerMethodField('get_related')
+
+    class Meta:
+        model = Host
+        fields = ('url', 'id', 'name', 'description', 'creation_date', 'inventory')
+
+    def get_related(self, obj):
+        # FIXME: add related resources
+        return dict()
+
+class GroupSerializer(BaseSerializer):
+
+    # add the URL and related resources
+    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    related       = serializers.SerializerMethodField('get_related')
+
+    class Meta:
+        model = Host
+        fields = ('url', 'id', 'name', 'description', 'creation_date', 'inventory')
+
+    def get_related(self, obj):
+        # FIXME: add related resources
+        return dict()
 
 class TeamSerializer(BaseSerializer):
 
@@ -125,7 +152,6 @@ class UserSerializer(BaseSerializer):
             organizations          = reverse(lib.urls.views_UsersOrganizationsList,      args=(obj.pk,)),
             admin_of_organizations = reverse(lib.urls.views_UsersAdminOrganizationsList, args=(obj.pk,)),
         )
-
 
     def get_absolute_url_override(self, obj):
         import lib.urls

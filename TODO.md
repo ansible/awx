@@ -27,5 +27,6 @@ TWEAKS/ASSORTED
 * uniqueness checks for playbook paths?
 * allow multiple playbook execution types per project, different --tag choices, different --limit choices (maybe just free form in the job for now?)
 * permissions infrastructure about who can kick off what kind of jobs
-* it would be nice if POSTs to subcollections used the permissions of the regular collection POST rules and then called the PUT code.
+* it would be nice if POSTs to subcollections used the permissions of the regular collection POST rules and then called the attach code.
 * root API discovery resource at /api and /api/v1
+* audit/test read only fields like creation_date

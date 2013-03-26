@@ -40,11 +40,14 @@ class BaseList(generics.ListCreateAPIView):
              return True
         if request.method == 'POST':
              if self.__class__.model in [ User ]:
-                  # Django user gets special handling since it's not our class
-                  # org admins are allowed to create users
-                  return self.request.user.is_superuser or (self.request.user.admin_of_organizations.count() > 0)
+                  ok = self.request.user.is_superuser or (self.request.user.admin_of_organizations.count() > 0)
+                  if not ok:
+                      raise PermissionDenied()
+                  return True
              else:
-                  return self.__class__.model.can_user_add(request.user, self.request.DATA)
+                  if not self.__class__.model.can_user_add(request.user, self.request.DATA):
+                      raise PermissionDenied()
+                  return True
         raise exceptions.NotImplementedError
    
     def get_queryset(self):
@@ -112,7 +115,7 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
         obj = self.model.objects.get(pk=kwargs['pk'])
         if not request.user.is_superuser and not self.delete_permissions_check(request, obj):
             raise PermissionDenied()
-        if isinstance(obj, CommonModel):
+        if isinstance(obj, PrimordialModel):
             obj.name   = "_deleted_%s_%s" % (str(datetime.time()), obj.name)
             obj.active = False
             obj.save()
@@ -125,7 +128,7 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
         return HttpResponse(status=204)
 
     def delete_permissions_check(self, request, obj):
-        if isinstance(obj, CommonModel):
+        if isinstance(obj, PrimordialModel):
             return self.__class__.model.can_user_delete(request.user, obj)
         elif isinstance(obj, User):
             return UserHelper.can_user_delete(request.user, obj)

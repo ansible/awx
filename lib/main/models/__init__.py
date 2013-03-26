@@ -124,15 +124,16 @@ class UserHelper(object):
         return matching_orgs
 
 
-class CommonModel(models.Model):
+class PrimordialModel(models.Model):
     '''
     common model for all object types that have these standard fields
+    must use a subclass CommonModel or CommonModelNameNotUnique though
+    as this lacks a name field.
     '''
 
     class Meta:
         abstract = True
 
-    name          = models.CharField(max_length=512, unique=True)
     description   = models.TextField(blank=True, default='')
     created_by    = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, related_name='%s(class)s_created') # not blank=False on purpose for admin!
     creation_date = models.DateField(auto_now_add=True)
@@ -172,6 +173,22 @@ class CommonModel(models.Model):
     @classmethod
     def can_user_unattach(cls, user, obj, sub_obj, relationship):
         return cls.can_user_administrate(user, obj)
+
+class CommonModel(PrimordialModel):
+    ''' a base model where the name is unique '''
+
+    class Meta:
+        abstract = True
+
+    name          = models.CharField(max_length=512, unique=True)
+
+class CommonModelNameNotUnique(PrimordialModel):
+    ''' a base model where the name is not unique '''    
+
+    class Meta:
+        abstract = True
+    
+    name          = models.CharField(max_length=512, unique=False)
 
 class Tag(models.Model):
     '''
@@ -268,7 +285,7 @@ class Inventory(CommonModel):
         app_label = 'main'
         verbose_name_plural = _('inventories')
 
-    organization = models.ForeignKey(Organization, null=True, on_delete=SET_NULL, related_name='inventories')
+    organization = models.ForeignKey(Organization, null=False, related_name='inventories')
     
     def get_absolute_url(self):
         import lib.urls
@@ -298,9 +315,33 @@ class Inventory(CommonModel):
         return result > 0
 
     @classmethod
+    def _has_any_inventory_permission_types(cls, user, allowed):
+        ''' 
+        rather than checking for a permission on a specific inventory, return whether we have 
+        permissions on any inventory.  This is primarily used to decide if the user can create
+        host or group objects 
+        '''
+
+        if user.is_superuser:
+            return True
+        by_org_admin = user.organizations.filter(
+            admins__in = [ user ]
+        ).count()
+        by_team_permission = Permission.objects.filter(
+            team__in = user.teams.all(),
+            permission_type__in = allowed
+        ).count()
+        by_user_permission = user.permissions.filter(
+            permission_type__in = allowed
+        ).count()
+    
+        result = (by_org_admin + by_team_permission + by_user_permission)
+        return result > 0
+
+    @classmethod
     def can_user_add(cls, user, data):
         if not 'organization' in data:
-            return False
+            return True
         if user.is_superuser:
             return True
         if not user.is_superuser:
@@ -322,7 +363,7 @@ class Inventory(CommonModel):
         return cls._has_permission_types(user, obj, PERMISSION_TYPES_ALLOWING_INVENTORY_ADMIN)
 
 
-class Host(CommonModel):
+class Host(CommonModelNameNotUnique):
     '''
     A managed node
     '''
@@ -330,12 +371,26 @@ class Host(CommonModel):
     class Meta:
         app_label = 'main'
 
-    inventory = models.ForeignKey('Inventory', null=True, on_delete=SET_NULL, related_name='hosts')
+    inventory = models.ForeignKey('Inventory', null=False, related_name='hosts')
 
     def __unicode__(self):
         return self.name
+    
+    @classmethod
+    def can_user_add(cls, user, data):
+        print "DEBUG: can_user_add called for HOST: %s" % data
+        if not 'inventory' in data:
+            print 'DEBUG: missing inventory!' 
+            return False
+        inventory = Inventory.objects.get(pk=data['inventory'])
+        return Inventory._has_permission_types(user, inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
 
-class Group(CommonModel):
+    def get_absolute_url(self):
+        import lib.urls
+        return reverse(lib.urls.views_HostsDetail, args=(self.pk,))
+
+class Group(CommonModelNameNotUnique):
+
     '''
     A group of managed nodes.  May belong to multiple groups
     '''
@@ -343,12 +398,19 @@ class Group(CommonModel):
     class Meta:
         app_label = 'main'
 
-    inventory = models.ForeignKey('Inventory', null=True, on_delete=SET_NULL, related_name='groups')
+    inventory = models.ForeignKey('Inventory', null=False, related_name='groups')
     parents   = models.ManyToManyField('self', symmetrical=False, related_name='children', blank=True)
     hosts     = models.ManyToManyField('Host', related_name='groups', blank=True)
 
     def __unicode__(self):
         return self.name
+
+    @classmethod
+    def can_user_add(cls, user, data):
+        if not 'inventory' in data:
+            return False
+        inventory = Inventory.objects.get(pk=data['inventory'])
+        return Inventory._has_permission_types(user, inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
 
 # FIXME: audit nullables
 # FIXME: audit cascades
@@ -362,8 +424,8 @@ class VariableData(CommonModel):
         app_label = 'main'
         verbose_name_plural = _('variable data')
 
-    host  = models.ForeignKey('Host', null=True, default=None, blank=True, on_delete=CASCADE, related_name='variable_data')
-    group = models.ForeignKey('Group', null=True, default=None, blank=True, on_delete=CASCADE, related_name='variable_data')
+    host  = models.ForeignKey('Host', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
+    group = models.ForeignKey('Group', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
     data  = models.TextField() # FIXME: JsonField
 
     def __unicode__(self):
