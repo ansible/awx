@@ -43,45 +43,42 @@ Create Users and Organizations
 
  * Confirm your super user account at /api/v1/me/
  * Create some organizations at /api/v1/organizations/
- * Create some users at /api/v1/users/
- * Add some users to some organizations at /api/v1/organizations/X/users/
- * Add some users to be admins of those organizations at /api/v1/organizatoins/X/admins/
+ * Create some users by posting to /api/v1/organizations/X/users/
+ * Add some users to be admins of those organizations by posting to /api/v1/organizatoins/X/admins/
  * At this point, use your org admin account, instead of your superuser account, if you wish
 
 Build Out Inventory
 -------------------
  
- * Create an inventory resource at /api/v1/inventories/
- * Create some host records at /api/v1/hosts/
- * Add the host to inventory at /api/v1/inventories/X/hosts/
- * Create some group records at /api/v1/projects/
+ * Create an inventory resource by posting to /api/v1/organizations/X/inventories/
+ * Create a new host by posting to /api/v1/inventories/X/hosts/
  * Add the group to inventory at /api/v1/inventories/X/groups/
- * Create some variables at /api/v1/variables/
- * Add some variables to a host at /api/v1/hosts/X/variables/
- * Add some variables to a group at /api/v1/groups/X/variables/
- * Add a subgroup to a group at /api/v1/groups/X/children/
+ * PUT variables to /api/v1/hosts/X/variables/
+ * PUT variables to /api/v1/groups/X/variables/
+ * POST a subgroup to a group at /api/v1/groups/X/children/
 
 Set Up Projects and Teams
 -------------------------
 
- * Create some teams at /api/v1/teams/
- * Create some projects at /api/v1/projects/
+ * Create a new project by posting to /api/v1/organizations/X/projects/
+ * Create some teams at /api/v1/organizations/X/teams/
+ * Create some projects at /api/v1/organizations/X/projects/
  * Assign some projects to one or more teams at /api/v1/teams/X/projects/
 
 Save Login Credentials and Grant Role (Team) Based Permissions
 --------------------------------------------------------------
 
- * Create some login credentials at /api/v1/credentials/
- * Assign credentials to some teams at /api/v1/teams/X/credentials/ OR
- * Assign credentials to some users at /api/v1/user/X/credentials/ (no fancy priveledges required)
+ * Add credentials to some teams at /api/v1/teams/X/credentials/ OR
+ * Add credentials to some users at /api/v1/user/X/credentials/ (no fancy priveledges required)
  * Create a permission tuple to allow a user or project to be used with an inventory source at /api/v1/permissions/
+   or /api/v1/users/permissions or /api/v1/teams/permissions/
  * Permission tuples can allow execution, dry run execution, or inventory editing.
 
 Launch Playbooks and View Results
 ---------------------------------
 
- * Create a launch job request by posting project, permission, and credential to /api/v1/events/
- * Monitor the job results at /api/v1/launch_results/X
+ * Create a launch job request by posting project, permission, and credential to /api/v1/launch_jobs/
+ * Monitor the job results at /api/v1/launch_results/X (API subject to change)
  * See the history of runs on each host at /api/v1/hosts/X/events/ or /api/v1/groups/X/events/ or /api/v1/inventories/X/events/
 
 Audit API based Activity, Search For Resources
@@ -231,6 +228,9 @@ Similarly, you can list users of an organization if you are an org admin or supe
 
 GET /api/v1/organizations/X/users/
 
+Note as a shortcut, most related resources in Ansible Commander will allow object creation if you post
+a resource without an 'id' field, and have a permission to create that resource. 
+
 Adding admins to an organization
 --------------------------------
 
@@ -265,7 +265,7 @@ A similar post can also be made to /api/v1/organizations/Y/admins/ to remove an 
 
 The same removal facility is available elsewhere in Ansible commander for most related resources.
 
-Projects
+Project
 ========
 
 ...
