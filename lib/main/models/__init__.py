@@ -142,7 +142,7 @@ class PrimordialModel(models.Model):
     active        = models.BooleanField(default=True)
 
     def __unicode__(self):
-        return unicode(self.name)
+        return unicode("%s-%s"% (self.name, self.id))
 
     @classmethod
     def can_user_administrate(cls, user, obj):
@@ -284,18 +284,13 @@ class Inventory(CommonModel):
     class Meta:
         app_label = 'main'
         verbose_name_plural = _('inventories')
+        unique_together = (("name", "organization"),)
 
     organization = models.ForeignKey(Organization, null=False, related_name='inventories')
     
     def get_absolute_url(self):
         import lib.urls
         return reverse(lib.urls.views_InventoryDetail, args=(self.pk,))
-
-    def __unicode__(self):
-        if self.organization:
-            return u'%s (%s)' % (self.name, self.organization)
-        else:
-            return self.name
 
     @classmethod
     def _has_permission_types(cls, user, obj, allowed):
@@ -370,6 +365,7 @@ class Host(CommonModelNameNotUnique):
 
     class Meta:
         app_label = 'main'
+        unique_together = (("name", "inventory"),)
 
     inventory = models.ForeignKey('Inventory', null=False, related_name='hosts')
 
@@ -395,6 +391,7 @@ class Group(CommonModelNameNotUnique):
 
     class Meta:
         app_label = 'main'
+        unique_together = (("name", "inventory"),)
 
     inventory = models.ForeignKey('Inventory', null=False, related_name='groups')
     parents   = models.ManyToManyField('self', symmetrical=False, related_name='children', blank=True)
@@ -410,10 +407,14 @@ class Group(CommonModelNameNotUnique):
         inventory = Inventory.objects.get(pk=data['inventory'])
         return Inventory._has_permission_types(user, inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
 
+    def get_absolute_url(self):
+        import lib.urls
+        return reverse(lib.urls.views_GroupsDetail, args=(self.pk,))
+
 # FIXME: audit nullables
 # FIXME: audit cascades
 
-class VariableData(CommonModel):
+class VariableData(CommonModelNameNotUnique):
     '''
     A set of host or group variables
     '''
@@ -421,6 +422,7 @@ class VariableData(CommonModel):
     class Meta:
         app_label = 'main'
         verbose_name_plural = _('variable data')
+        unique_together = (("host", "group"),)
 
     host  = models.ForeignKey('Host', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
     group = models.ForeignKey('Group', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
@@ -526,8 +528,16 @@ class Permission(CommonModelNameNotUnique):
     # the project parameter is not used when dealing with READ, WRITE, or ADMIN permissions.
 
     permission_type = models.CharField(max_length=64, choices=PERMISSION_TYPE_CHOICES)
-
-
+    
+    def __unicode__(self):
+        return unicode("Permission(name=%s,ON(user=%s,team=%s),FOR(project=%s,inventory=%s,type=%s))" % (
+            self.name,
+            self.user, 
+            self.team, 
+            self.project, 
+            self.inventory, 
+            self.permission_type
+        ))
 
 # TODO: other job types (later)
 

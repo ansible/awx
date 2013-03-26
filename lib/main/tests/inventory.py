@@ -129,13 +129,12 @@ class InventoryTest(BaseTest):
         new_host_b   = dict(name='asdf1.example.com', inventory=inv.pk)
         new_host_c   = dict(name='asdf2.example.com', inventory=inv.pk)
         new_host_d   = dict(name='asdf3.example.com', inventory=inv.pk)
-        # FIXME: should raise 400 not 201, look into required fields in rest_framework
-        print hosts
+        new_host_e   = dict(name='asdf4.example.com', inventory=inv.pk)
         data0 = self.post(hosts, data=invalid, expect=400, auth=self.get_super_credentials())
         data0 = self.post(hosts, data=new_host_a, expect=201, auth=self.get_super_credentials())
  
         # an org admin can add hosts
-        data1 = self.post(hosts, data=new_host_a, expect=201, auth=self.get_normal_credentials())
+        data1 = self.post(hosts, data=new_host_e, expect=201, auth=self.get_normal_credentials())
 
         # a normal user cannot add hosts
         data2 = self.post(hosts, data=new_host_b, expect=403, auth=self.get_nobody_credentials())
@@ -143,24 +142,46 @@ class InventoryTest(BaseTest):
         # a normal user with inventory edit permissions (on any inventory) can create hosts
         edit_perm = Permission.objects.create(
              user            = self.other_django_user,
-             inventory       = Inventory.objects.get(pk=1),
+             inventory       = Inventory.objects.get(pk=inv.pk),
              permission_type = PERM_INVENTORY_WRITE
         )
         data3 = self.post(hosts, data=new_host_c, expect=201, auth=self.get_other_credentials())
 
-        # hostnames must be unique -- posting a duplicate just returns the previous
-        data4 = self.post(hosts, data=new_host_c, expect=200, auth=self.get_other_credentials())
-        self.assertEqual(data1['id'], data4['id'])
+        # hostnames must be unique inside an organization
+        data4 = self.post(hosts, data=new_host_c, expect=400, auth=self.get_other_credentials())
 
-        # a super user can add groups
+        ###########################################
+        # GROUPS
 
-        # an org admin can create groups
+        invalid       = dict(name='web1')
+        new_group_a   = dict(name='web2', inventory=inv.pk)
+        new_group_b   = dict(name='web3', inventory=inv.pk)
+        new_group_c   = dict(name='web4', inventory=inv.pk)
+        new_group_d   = dict(name='web5', inventory=inv.pk)
+        new_group_e   = dict(name='web6', inventory=inv.pk)
+        data0 = self.post(groups, data=invalid, expect=400, auth=self.get_super_credentials())
+        data0 = self.post(groups, data=new_group_a, expect=201, auth=self.get_super_credentials())
 
-        # a normal user cannot create groups
+        # an org admin can add hosts
+        data1 = self.post(groups, data=new_group_e, expect=201, auth=self.get_normal_credentials())
 
-        # a normal user with inventory edit permissions can create groups
-        
-        # group names must be unique for each inventory record
+        # a normal user cannot add hosts
+        data2 = self.post(groups, data=new_group_b, expect=403, auth=self.get_nobody_credentials())
+
+        # a normal user with inventory edit permissions (on any inventory) can create hosts
+        # already done!
+        #edit_perm = Permission.objects.create(
+        #     user            = self.other_django_user,
+        #     inventory       = Inventory.objects.get(pk=inv.pk),
+        #     permission_type = PERM_INVENTORY_WRITE
+        #)       
+        data3 = self.post(groups, data=new_group_c, expect=201, auth=self.get_other_credentials())
+
+        # hostnames must be unique inside an organization
+        data4 = self.post(groups, data=new_group_c, expect=400, auth=self.get_other_credentials())
+
+        #################################################
+        # HOSTS->inventories
 
         # a super user can associate hosts with inventories
 
@@ -170,13 +191,19 @@ class InventoryTest(BaseTest):
 
         # a normal user with edit permission on the inventory can associate hosts with inventories
 
+        ##################################################
+        # GROUPS->inventories
+
         # a super user can associate groups with inventories
 
         # an org admin can associate groups with inventories
 
-        # a normal user cannot associate hosts with inventories
+        # a normal user cannot associate groups with inventories
 
-        # a normal user with edit permissions on the inventory can associate hosts with inventories
+        # a normal user with edit permissions on the inventory can associate groups with inventories
+
+        ###################################################
+        # VARIABLES
 
         # a super user can create variable objects
 
@@ -186,6 +213,9 @@ class InventoryTest(BaseTest):
 
         # a normal user with at least one inventory edit permission can create variable objects
 
+        ###################################################
+        # VARIABLES -> GROUPS
+
         # a super user can associate variable objects with groups
 
         # an org admin can associate variable objects with groups
@@ -193,6 +223,9 @@ class InventoryTest(BaseTest):
         # a normal user cannot associate variable objects with groups
 
         # a normal user with inventory edit permissions can associate variable objects with groups
+
+        ####################################################
+        # VARIABLES -> HOSTS
 
         # a super user can associate variable objects with hosts
 
@@ -202,6 +235,9 @@ class InventoryTest(BaseTest):
 
         # a normal user with inventory edit permissions can associate variable objects with hosts
 
+        ####################################################
+        # SUBGROUPS
+
         # a super user can set subgroups
 
         # an org admin can set subgroups
@@ -209,6 +245,9 @@ class InventoryTest(BaseTest):
         # a normal user cannot set subgroups
 
         # a normal user with inventory edit permissions can associate subgroups
+
+        ######################################################
+        # GROUP ACCESS
 
         # a super user can get a group record
 
@@ -218,6 +257,9 @@ class InventoryTest(BaseTest):
          
         # a regular user cannot read any group records
 
+        ########################################################
+        # HOST ACCESS
+
         # a super user can get a host record
 
         # an org admin can get a host record
@@ -226,13 +268,19 @@ class InventoryTest(BaseTest):
 
         # a regular user cannot get a host record
 
+        #########################################################
+        # GROUP VARIABLE ACCESS
+
         # a super user can see the variables attached to a group
 
         # a org admin can see the variables attached to a group
 
         # a user who is on a team who has read permissions on an inventory can see the variables attached to a group
 
-        # a regular user cannot get a host record
+        # a regular user cannot get a group variable record
+
+        #########################################################
+        # HOST VARIABLE ACCESS
 
         # a super user can see the variables attached to a host
 
@@ -241,6 +289,9 @@ class InventoryTest(BaseTest):
         # a user who is on a team who has read permissions on an inventory can see the variables attached to a host
 
         # a regular user cannot see variables attached to a host
+        
+        #########################################################
+        # GROUP CHILDREN ACCESS
 
         # a super user can see the children attached to a group
 
@@ -249,6 +300,9 @@ class InventoryTest(BaseTest):
         # a user who is on a team who has read permissions on an inventory can see the children attached to a group
       
         # a regular user cannot see children attached to a group
+        
+        #########################################################
+        # VARIABLE RESOURCE ACCESS
 
         # a super user can see a variable record
 
@@ -257,6 +311,9 @@ class InventoryTest(BaseTest):
         # a user who is on a team who has read permissions on an inventory can see the variable record
       
         # a regular user cannot see a variable record
+        
+        #########################################################
+        # SUPER USER DISASSOCIATION
 
         # a super user can disassociate...
 
@@ -267,6 +324,9 @@ class InventoryTest(BaseTest):
         #    subgroups from groups
 
         # the inventory task code returns valid inventory JSON.
+        
+        #########################################################
+        # ORG ADMIN DISASSOCIATION
 
         # an org admin user can disassociate...
 
@@ -276,6 +336,9 @@ class InventoryTest(BaseTest):
 
         #    subgroups from groups
 
+        #########################################################
+        # USER DISASSOCIATION
+
         # a user with inventory edit permission disassociate...
 
         #    hosts from inventory
@@ -283,6 +346,9 @@ class InventoryTest(BaseTest):
         #    groups from inventory
 
         #    subgroups from groups
+
+        #########################################################
+        # USER DISASSOCIATION (2)
       
         # a regular user cannot disassociate....
 
@@ -291,6 +357,9 @@ class InventoryTest(BaseTest):
         #    groups from inventory
 
         #    subgroups from inventory
+
+        #########################################################
+        # TAGS
 
         # the following objects can be tagged
 
@@ -321,6 +390,9 @@ class InventoryTest(BaseTest):
         #    group records
 
         #    variable records
+
+        #########################################################
+        # RELATED FIELDS
 
         #  on an inventory resource, I can see related resources for hosts and groups and permissions
         #  and these work 

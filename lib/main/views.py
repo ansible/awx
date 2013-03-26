@@ -315,4 +315,37 @@ class HostsDetail(BaseDetail):
     serializer_class = HostSerializer
     permission_classes = (CustomRbac,)
 
+class GroupsList(BaseList):
+
+    model = Group
+    serializer_class = GroupSerializer
+    permission_classes = (CustomRbac,)
+
+    def _get_queryset(self):
+        '''
+        I can see groups  when:
+           I'm a superuser,
+           or an organization admin of an inventory they are in
+           or when I have allowing read permissions via a user or team on an inventory they are in
+        '''
+        base = Groups.objects
+        if self.request.user.is_superuser:
+            return base.all()
+        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
+        has_user_perms = base.filter(
+            inventory__permissions__user__in = [ self.request.user ],
+            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        has_team_perms = base.filter(
+            inventory__permissions__team__in = self.request.user.teams.all(),
+            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        return admin_of | has_user_perms | has_team_perms
+
+class GroupsDetail(BaseDetail):
+
+    model = Group
+    serializer_class = GroupSerializer
+    permission_classes = (CustomRbac,)
+
 

@@ -48,6 +48,8 @@ views_InventoryList                = views.InventoryList.as_view()
 views_InventoryDetail              = views.InventoryDetail.as_view()
 
 # group service
+views_GroupsList                   = views.GroupsList.as_view()
+views_GroupsDetail                 = views.GroupsDetail.as_view()
 
 # host service
 views_HostsList                    = views.HostsList.as_view()
@@ -99,6 +101,8 @@ urlpatterns = patterns('',
     url(r'^api/v1/hosts/(?P<pk>[0-9]+)/$',                        views_HostsDetail),
 
     # group service
+    url(r'^api/v1/groups/$',                                      views_GroupsList),
+    url(r'^api/v1/groups/(?P<pk>[0-9]+)/$',                       views_GroupsDetail),
 
     # inventory variable service
 
