@@ -350,6 +350,14 @@ class Inventory(CommonModel):
         return cls._has_permission_types(user, obj, PERMISSION_TYPES_ALLOWING_INVENTORY_ADMIN)
 
     @classmethod
+    def can_user_attach(cls, user, obj, sub_obj, relationship_type):
+        ''' whether you can add sub_obj to obj using the relationship type in a subobject view '''
+        if type(sub_obj) != User:
+            if not sub_obj.can_user_read(user, sub_obj):
+                return False
+        return cls._has_permission_types(user, obj, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
+
+    @classmethod
     def can_user_read(cls, user, obj):
         return cls._has_permission_types(user, obj, PERMISSION_TYPES_ALLOWING_INVENTORY_READ)
 
@@ -381,7 +389,9 @@ class Host(CommonModelNameNotUnique):
         if not 'inventory' in data:
             return False
         inventory = Inventory.objects.get(pk=data['inventory'])
-        return Inventory._has_permission_types(user, inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
+        rc =  Inventory._has_permission_types(user, inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
+        return rc
+
 
     def get_absolute_url(self):
         import lib.urls

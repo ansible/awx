@@ -184,7 +184,6 @@ class InventoryTest(BaseTest):
         # HOSTS->inventories POST via subcollection
        
         url = '/api/v1/inventories/1/hosts/'
- 
         new_host_a = dict(name='web100.example.com')
         new_host_b = dict(name='web101.example.com')
         new_host_c = dict(name='web102.example.com')
@@ -201,25 +200,38 @@ class InventoryTest(BaseTest):
         added_by_collection = self.post(url, data=new_host_c, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with edit permission on the inventory can associate hosts with inventories
-        added_by_collection = self.post(url, data=new_host_d, expect=403, auth=self.get_other_credentials())
+        url5 = '/api/v1/inventories/5/hosts/'
+        added_by_collection = self.post(url5, data=new_host_d, expect=201, auth=self.get_other_credentials())
 
         ##################################################
         # GROUPS->inventories POST via subcollection
+        
+        url = '/api/v1/inventories/1/groups/'
+        new_group_a = dict(name='web100')
+        new_group_b = dict(name='web101')
+        new_group_c = dict(name='web102')
+        new_group_d = dict(name='web103')
+        new_group_e = dict(name='web104')
 
         # a super user can associate groups with inventories
+        added_by_collection = self.post(url, data=new_group_a, expect=201, auth=self.get_super_credentials())
 
         # an org admin can associate groups with inventories
+        added_by_collection = self.post(url, data=new_group_b, expect=201, auth=self.get_normal_credentials())
 
         # a normal user cannot associate groups with inventories
+        added_by_collection = self.post(url, data=new_group_c, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with edit permissions on the inventory can associate groups with inventories
+        url5 = '/api/v1/inventories/5/groups/'
+        added_by_collection = self.post(url5, data=new_group_d, expect=201, auth=self.get_other_credentials())
+        # make sure duplicates give 400s
+        added_by_collection2 = self.post(url5, data=new_group_d, expect=400, auth=self.get_other_credentials())
 
         ###################################################
         # VARIABLES
 
-        # a super user can create variable objects
-
-        # an org admin can create variable objects
+        # an org admin can create variable objects (defers to inventory permissions)
 
         # a normal user cannot create variable objects
 
@@ -258,50 +270,8 @@ class InventoryTest(BaseTest):
 
         # a normal user with inventory edit permissions can associate subgroups
 
-        ######################################################
-        # GROUP ACCESS
-
-        # a super user can get a group record
-
-        # an org admin can get a group record
-
-        # a user who is on a team who has read permissions on an inventory can get a group record
+        # FIXME: go back and put in GET requests after all the post stuff
          
-        # a regular user cannot read any group records
-
-        ########################################################
-        # HOST ACCESS
-
-        # a super user can get a host record
-
-        # an org admin can get a host record
-
-        # a user who is on a team who has read permissions on an inventory can get a host record
-
-        # a regular user cannot get a host record
-
-        #########################################################
-        # GROUP VARIABLE ACCESS
-
-        # a super user can see the variables attached to a group
-
-        # a org admin can see the variables attached to a group
-
-        # a user who is on a team who has read permissions on an inventory can see the variables attached to a group
-
-        # a regular user cannot get a group variable record
-
-        #########################################################
-        # HOST VARIABLE ACCESS
-
-        # a super user can see the variables attached to a host
-
-        # a org admin can see the variables attached to a host
-
-        # a user who is on a team who has read permissions on an inventory can see the variables attached to a host
-
-        # a regular user cannot see variables attached to a host
-        
         #########################################################
         # GROUP CHILDREN ACCESS
 
@@ -314,86 +284,16 @@ class InventoryTest(BaseTest):
         # a regular user cannot see children attached to a group
         
         #########################################################
-        # VARIABLE RESOURCE ACCESS
-
-        # a super user can see a variable record
-
-        # an org admin can see a variable record
-
-        # a user who is on a team who has read permissions on an inventory can see the variable record
-      
-        # a regular user cannot see a variable record
-        
-        #########################################################
-        # SUPER USER DISASSOCIATION
-
-        # a super user can disassociate...
-
+        # DISASSOCIATION TESTS
         #    hosts from inventory
-
         #    groups from inventory
-
         #    subgroups from groups
-
-        # the inventory task code returns valid inventory JSON.
-        
-        #########################################################
-        # ORG ADMIN DISASSOCIATION
-
-        # an org admin user can disassociate...
-
-        #    hosts from inventory
-
-        #    groups from inventory
-
-        #    subgroups from groups
-
-        #########################################################
-        # USER DISASSOCIATION
-
-        # a user with inventory edit permission disassociate...
-
-        #    hosts from inventory
-
-        #    groups from inventory
-
-        #    subgroups from groups
-
-        #########################################################
-        # USER DISASSOCIATION (2)
-      
-        # a regular user cannot disassociate....
-
-        #    hosts from inventory
-
-        #    groups from inventory
-
-        #    subgroups from inventory
-
+        #    others?
+ 
         #########################################################
         # TAGS
 
-        # the following objects can be tagged
-
-        #    inventory
-
-        #    host records
-
-        #    group records
-
-        #    variable records
-
-        # the following objects can have their tags listed
-
-        #    inventory
-
-        #    host records
-
-        #    group records
-
-        #    variable records
-
-        # the following tags can be removed
+        # the following objects can be tagged and the tags can be read
 
         #    inventory
 

@@ -111,7 +111,7 @@ class BaseSubList(BaseList):
                     # attempt to deserialize the object
                     ser = self.__class__.serializer_class(data=request.DATA)
                     if not ser.is_valid():
-                        return Response(status=status.HTTP_400_BAD_REQUEST, data=python_json.dumps(dict(msg='invalid post data')))
+                        return Response(status=status.HTTP_400_BAD_REQUEST, data=ser.errors)
 
                     # ask the usual access control settings
                     if not self.__class__.model.can_user_add(request.user, ser.init_data):
@@ -126,7 +126,7 @@ class BaseSubList(BaseList):
                     if not self.__class__.parent_model.can_user_attach(request.user, main, obj, self.__class__.relationship):
                         raise PermissionDenied()
 
-                    return Response(status=status.HTTP_201_CREATED, data=python_json.dumps(ser.data))
+                    return Response(status=status.HTTP_201_CREATED, data=ser.data)
 
                 else:
 

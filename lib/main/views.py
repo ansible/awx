@@ -372,4 +372,21 @@ class GroupsDetail(BaseDetail):
     serializer_class = GroupSerializer
     permission_classes = (CustomRbac,)
 
+class InventoryGroupsList(BaseSubList):
+
+    model = Group
+    serializer_class = GroupSerializer
+    permission_classes = (CustomRbac,)
+    # to allow the sub-aspect listing
+    parent_model = Inventory
+    relationship = 'groups'
+    # to allow posting to this resource to create resources
+    postable = True
+    # FIXME: go back and add these to other SubLists
+    inject_primary_key_on_post_as = 'inventory'
+
+    def _get_queryset(self):
+        # FIXME: more DRY methods like this
+        return Inventory._filter_queryset(Inventory.objects.get(pk=self.kwargs['pk']).groups)
+
 
