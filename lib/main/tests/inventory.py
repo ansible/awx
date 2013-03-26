@@ -185,16 +185,23 @@ class InventoryTest(BaseTest):
        
         url = '/api/v1/inventories/1/hosts/'
  
-        new_host = dict(name='web100.example.com')
-        added_by_collection = self.post(url, data=new_host, expect=201, auth=self.get_super_credentials())
+        new_host_a = dict(name='web100.example.com')
+        new_host_b = dict(name='web101.example.com')
+        new_host_c = dict(name='web102.example.com')
+        new_host_d = dict(name='web103.example.com')
+        new_host_e = dict(name='web104.example.com')
 
         # a super user can associate hosts with inventories
+        added_by_collection = self.post(url, data=new_host_a, expect=201, auth=self.get_super_credentials())
 
         # an org admin can associate hosts with inventories
+        added_by_collection = self.post(url, data=new_host_b, expect=201, auth=self.get_normal_credentials())
 
         # a normal user cannot associate hosts with inventories
+        added_by_collection = self.post(url, data=new_host_c, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with edit permission on the inventory can associate hosts with inventories
+        added_by_collection = self.post(url, data=new_host_d, expect=403, auth=self.get_other_credentials())
 
         ##################################################
         # GROUPS->inventories POST via subcollection
