@@ -334,10 +334,13 @@ class InventoryHostsList(BaseSubList):
     postable = True
     # FIXME: go back and add these to other SubLists
     inject_primary_key_on_post_as = 'inventory'
+    severable = False
 
     def _get_queryset(self):
-        # FIXME: more DRY methods like this
-        return Inventory._filter_queryset(Inventory.objects.get(pk=self.kwargs['pk']).hosts)
+        inventory = Inventory.objects.get(pk=self.kwargs['pk'])
+        base = inventory.hosts
+        # FIXME: verify that you can can_read permission on the inventory is required
+        return base.all()
 
 class GroupsList(BaseList):
 
@@ -416,10 +419,14 @@ class InventoryGroupsList(BaseSubList):
     postable = True
     # FIXME: go back and add these to other SubLists
     inject_primary_key_on_post_as = 'inventory'
+    severable = False
 
     def _get_queryset(self):
-        # FIXME: more DRY methods like this
-        return Inventory._filter_queryset(Inventory.objects.get(pk=self.kwargs['pk']).groups)
+        # FIXME: share code with inventory filter queryset methods (make that a classmethod)
+        inventory = Inventory.objects.get(pk=self.kwargs['pk'])
+        base = inventory.groups
+        # FIXME: verify that you can can_read permission on the inventory is required
+        return base
 
 class GroupsVariableDetail(VariableBaseDetail):
 

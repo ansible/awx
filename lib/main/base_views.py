@@ -86,6 +86,7 @@ class BaseSubList(BaseList):
         parent_id = kwargs['pk']
         sub_id = request.DATA.get('id', None)
         main = self.__class__.parent_model.objects.get(pk=parent_id)
+        severable = getattr(self.__class__, 'severable', True)
 
         subs = None
 
@@ -150,7 +151,12 @@ class BaseSubList(BaseList):
         else:
             if not request.user.is_superuser and not self.__class__.parent_model.can_user_unattach(request.user, main, sub, self.__class__.relationship):
                 raise PermissionDenied()
-            relationship.remove(sub)
+            if severable:
+                relationship.remove(sub)
+            else:
+                # resource is just a ForeignKey, can't remove it from the set, just set it inactive
+                sub.active = False
+                sub.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

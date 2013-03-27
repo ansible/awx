@@ -204,6 +204,14 @@ class InventoryTest(BaseTest):
         # a normal user with edit permission on the inventory can associate hosts with inventories
         url5 = '/api/v1/inventories/5/hosts/'
         added_by_collection_d = self.post(url5, data=new_host_d, expect=201, auth=self.get_other_credentials())
+        got = self.get(url5, expect=200, auth=self.get_other_credentials())
+        self.assertEquals(got['count'], 4)
+
+        # now remove the host from inventory (still keeps the record) 
+        added_by_collection_d['disassociate'] = 1
+        self.post(url5, data=added_by_collection_d, expect=204, auth=self.get_other_credentials())
+        got = self.get(url5, expect=200, auth=self.get_other_credentials())
+        self.assertEquals(got['count'], 3)
 
         ##################################################
         # GROUPS->inventories POST via subcollection
@@ -228,7 +236,15 @@ class InventoryTest(BaseTest):
         url5 = '/api/v1/inventories/5/groups/'
         added_by_collection = self.post(url5, data=new_group_d, expect=201, auth=self.get_other_credentials())
         # make sure duplicates give 400s
-        added_by_collection2 = self.post(url5, data=new_group_d, expect=400, auth=self.get_other_credentials())
+        self.post(url5, data=new_group_d, expect=400, auth=self.get_other_credentials())
+        got = self.get(url5, expect=200, auth=self.get_other_credentials())
+        self.assertEquals(got['count'], 4)
+          
+        remove_me = added_by_collection
+        remove_me['disassociate'] = 1
+        self.post(url5, data=remove_me, expect=204, auth=self.get_other_credentials())
+        got = self.get(url5, expect=200, auth=self.get_other_credentials())
+        self.assertEquals(got['count'], 3)
 
         ###################################################
         # VARIABLES
@@ -341,35 +357,32 @@ class InventoryTest(BaseTest):
         checked = self.get(subgroups_url3, expect=200, auth=self.get_normal_credentials()) 
         self.assertEqual(checked['count'], 1)
 
+        # now post it back to remove it, by adding the disassociate bit
+        result = checked['results'][0]
+        result['disassociate'] = 1
+        self.post(subgroups_url3, data=result, expect=204, auth=self.get_other_credentials())
+        checked = self.get(subgroups_url3, expect=200, auth=self.get_normal_credentials()) 
+        self.assertEqual(checked['count'], 0)
+        # try to double disassociate to see what happens (should no-op)
+        self.post(subgroups_url3, data=result, expect=204, auth=self.get_other_credentials())
+
         #########################################################
-        # DISASSOCIATION TESTS
-        #    hosts from inventory
-        #    groups from inventory
-        #    children from groups
-        #    others?
- 
-        #########################################################
-        # TAGS
+        # FIXME: TAGS
 
         # the following objects can be tagged and the tags can be read
-
         #    inventory
-
         #    host records
-
         #    group records
-
         #    variable records
+        # this may just be in a seperate test file called 'tags'
 
         #########################################################
-        # RELATED FIELDS
+        # FIXME: RELATED FIELDS
 
         #  on an inventory resource, I can see related resources for hosts and groups and permissions
         #  and these work 
-
         #  on a host resource, I can see related resources variables and inventories
         #  and these work
-
         #  on a group resource, I can see related resources for variables, inventories, and children
         #  and these work
                 

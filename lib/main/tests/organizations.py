@@ -230,6 +230,8 @@ class OrganizationsTest(BaseTest):
         self.post(projects1_url, dict(asdf=1234), expect=400, auth=self.get_super_credentials())
 
         # test that by posting a pk + disassociate: True we can remove a relationship
+        projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(projects1['count'], 6)
         a_project['disassociate'] = True
         self.post(projects1_url, a_project, expect=204, auth=self.get_super_credentials())
         projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())

@@ -352,9 +352,12 @@ class Inventory(CommonModel):
     @classmethod
     def can_user_attach(cls, user, obj, sub_obj, relationship_type):
         ''' whether you can add sub_obj to obj using the relationship type in a subobject view '''
-        if type(sub_obj) != User:
-            if not sub_obj.can_user_read(user, sub_obj):
-                return False
+        if not sub_obj.can_user_read(user, sub_obj):
+            return False
+        return cls._has_permission_types(user, obj, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
+
+    @classmethod
+    def can_user_unattach(cls, user, obj, sub_obj, relationship):
         return cls._has_permission_types(user, obj, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
 
     @classmethod
