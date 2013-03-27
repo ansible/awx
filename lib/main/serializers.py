@@ -171,5 +171,19 @@ class TagSerializer(BaseSerializer):
     def get_related(self, obj):
         return dict()
 
+class VariableDataSerializer(BaseSerializer):
+
+    # add the URL and related resources
+    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    related       = serializers.SerializerMethodField('get_related')
+
+    class Meta:
+        model = VariableData
+        fields = ('url', 'id', 'data', 'related', 'name', 'description', 'creation_date')
+
+    def get_related(self, obj):
+        # FIXME: related resources, maybe just the audit trail
+        return dict()
+
 
 

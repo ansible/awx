@@ -374,8 +374,9 @@ class Host(CommonModelNameNotUnique):
     class Meta:
         app_label = 'main'
         unique_together = (("name", "inventory"),)
-
-    inventory = models.ForeignKey('Inventory', null=False, related_name='hosts')
+    
+    variable_data  = models.OneToOneField('VariableData', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='host')
+    inventory      = models.ForeignKey('Inventory', null=False, related_name='hosts')
 
     def __unicode__(self):
         return self.name
@@ -392,7 +393,6 @@ class Host(CommonModelNameNotUnique):
         rc =  Inventory._has_permission_types(user, inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
         return rc
 
-
     def get_absolute_url(self):
         import lib.urls
         return reverse(lib.urls.views_HostsDetail, args=(self.pk,))
@@ -407,9 +407,9 @@ class Group(CommonModelNameNotUnique):
         app_label = 'main'
         unique_together = (("name", "inventory"),)
 
-    inventory = models.ForeignKey('Inventory', null=False, related_name='groups')
-    parents   = models.ManyToManyField('self', symmetrical=False, related_name='children', blank=True)
-    hosts     = models.ManyToManyField('Host', related_name='groups', blank=True)
+    inventory     = models.ForeignKey('Inventory', null=False, related_name='groups')
+    parents       = models.ManyToManyField('self', symmetrical=False, related_name='children', blank=True)
+    variable_data = models.OneToOneField('VariableData', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='group')
 
     def __unicode__(self):
         return self.name
@@ -436,14 +436,26 @@ class VariableData(CommonModelNameNotUnique):
     class Meta:
         app_label = 'main'
         verbose_name_plural = _('variable data')
-        unique_together = (("host", "group"),)
 
-    host  = models.ForeignKey('Host', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
-    group = models.ForeignKey('Group', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
+    #host  = models.OneToOneField('Host', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
+    #group = models.OneToOneField('Group', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
     data  = models.TextField() # FIXME: JsonField
 
     def __unicode__(self):
         return '%s = %s' % (self.name, self.data)
+
+    def get_absolute_url(self):
+        import lib.urls
+        return reverse(lib.urls.views_VariableDetail, args=(self.pk,))
+
+    @classmethod
+    def can_user_read(cls, user, obj):
+        ''' a user can be read if they are on the same team or can be administrated '''
+        if obj.host is not None:
+            return Inventory.can_user_read(user, obj.host.inventory)
+        if obj.group is not None:
+            return Inventory.can_user_read(user, obj.group.inventory)
+        return False
 
 class Credential(CommonModel):
     '''

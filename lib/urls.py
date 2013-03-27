@@ -52,12 +52,15 @@ views_InventoryGroupsList          = views.InventoryGroupsList.as_view()
 # group service
 views_GroupsList                   = views.GroupsList.as_view()
 views_GroupsDetail                 = views.GroupsDetail.as_view()
+views_GroupsVariableDetail         = views.GroupsVariableDetail.as_view()
 
 # host service
 views_HostsList                    = views.HostsList.as_view()
 views_HostsDetail                  = views.HostsDetail.as_view()
+views_HostsVariableDetail          = views.HostsVariableDetail.as_view()
 
-# inventory variable service
+# seperate variable data
+views_VariableDetail               = views.VariableDetail.as_view()
 
 # log data services
 
@@ -66,10 +69,11 @@ views_HostsDetail                  = views.HostsDetail.as_view()
 # jobs services
 
 # tags service
-views_TagsDetail              = views.TagsDetail.as_view()
+views_TagsDetail                   = views.TagsDetail.as_view()
 
 
 urlpatterns = patterns('',
+
     # organizations service
     url(r'^api/v1/organizations/$',                               views_OrganizationsList),
     url(r'^api/v1/organizations/(?P<pk>[0-9]+)/$',                views_OrganizationsDetail),
@@ -91,8 +95,14 @@ urlpatterns = patterns('',
     url(r'^api/v1/projects/(?P<pk>[0-9]+)/$',                     views_ProjectsDetail),
     
     # audit trail service
+    # api/v1/audit_trails/
+    # api/v1/audit_trails/N/
+    # and ./audit_trails/ on all resources
 
     # team service
+    # api/v1/teams/
+    # api/v1/teams/N/   
+    # api/v1/teams/N/users/
 
     # inventory service
     url(r'^api/v1/inventories/$',                                 views_InventoryList),
@@ -108,16 +118,31 @@ urlpatterns = patterns('',
     url(r'^api/v1/groups/$',                                      views_GroupsList),
     url(r'^api/v1/groups/(?P<pk>[0-9]+)/$',                       views_GroupsDetail),
 
-    # inventory variable service
+    # variable data
+    url(r'^api/v1/hosts/(?P<pk>[0-9]+)/variable_data/$',          views_HostsVariableDetail),
+    url(r'^api/v1/groups/(?P<pk>[0-9]+)/variable_data/$',         views_GroupsVariableDetail),
+    url(r'^api/v1/variable_data/(?P<pk>[0-9]+)/$',                views_VariableDetail),
 
-    # log data services
+    # log data (results) services
 
-    # events services
-
-    # jobs services
+    # jobs & job status services
+    # /jobs/
+    # /jobs/N/
+    # /job_statuses/
+    # /job_statuses/N/
 
     # tags service
-    url(r'^api/v1/tags/(?P<pk>[0-9]+)/$',                  views_TagsDetail),
+    url(r'^api/v1/tags/(?P<pk>[0-9]+)/$',                         views_TagsDetail),
+    # ... and tag relations on all resources
+
+    # credentials services
+    # ... users
+    # ... teams
+    # ... projects (?)
+
+    # permissions services
+    # ... users
+    # ... teams
 
 )
 

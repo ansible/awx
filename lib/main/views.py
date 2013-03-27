@@ -29,7 +29,7 @@ from rest_framework.response import Response
 from rest_framework import status
 import exceptions
 import datetime
-from base_views import BaseList, BaseDetail, BaseSubList
+from base_views import *
 
 class OrganizationsList(BaseList):
 
@@ -388,5 +388,33 @@ class InventoryGroupsList(BaseSubList):
     def _get_queryset(self):
         # FIXME: more DRY methods like this
         return Inventory._filter_queryset(Inventory.objects.get(pk=self.kwargs['pk']).groups)
+
+class GroupsVariableDetail(VariableBaseDetail):
+
+    model = VariableData
+    serializer_class = VariableDataSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Group
+    reverse_relationship = 'variable_data'
+    relationship = 'group'
+
+class HostsVariableDetail(VariableBaseDetail):
+
+    model = VariableData
+    serializer_class = VariableDataSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Host
+    reverse_relationship = 'variable_data'
+    relationship = 'host'
+
+class VariableDetail(BaseDetail):
+
+    model = VariableData
+    serializer_class = VariableDataSerializer
+    permission_classes = (CustomRbac,)
+
+    def put(self, request, *args, **kwargs):
+        raise PermissionDenied()
+
 
 

@@ -191,17 +191,17 @@ class InventoryTest(BaseTest):
         new_host_e = dict(name='web104.example.com')
 
         # a super user can associate hosts with inventories
-        added_by_collection = self.post(url, data=new_host_a, expect=201, auth=self.get_super_credentials())
+        added_by_collection_a = self.post(url, data=new_host_a, expect=201, auth=self.get_super_credentials())
 
         # an org admin can associate hosts with inventories
-        added_by_collection = self.post(url, data=new_host_b, expect=201, auth=self.get_normal_credentials())
+        added_by_collection_b = self.post(url, data=new_host_b, expect=201, auth=self.get_normal_credentials())
 
         # a normal user cannot associate hosts with inventories
-        added_by_collection = self.post(url, data=new_host_c, expect=403, auth=self.get_nobody_credentials())
+        added_by_collection_c = self.post(url, data=new_host_c, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with edit permission on the inventory can associate hosts with inventories
         url5 = '/api/v1/inventories/5/hosts/'
-        added_by_collection = self.post(url5, data=new_host_d, expect=201, auth=self.get_other_credentials())
+        added_by_collection_d = self.post(url5, data=new_host_d, expect=201, auth=self.get_other_credentials())
 
         ##################################################
         # GROUPS->inventories POST via subcollection
@@ -231,11 +231,40 @@ class InventoryTest(BaseTest):
         ###################################################
         # VARIABLES
 
+        vars_a = dict(asdf=1234, dog='fido',  cat='fluffy', unstructured=dict(a=[1,2,3],b=dict(x=2,y=3)))
+        vars_b = dict(asdf=4321, dog='barky', cat='snarf',  unstructured=dict(a=[1,2,3],b=dict(x=2,y=3)))
+        vars_c = dict(asdf=5555, dog='mouse', cat='mogwai', unstructured=dict(a=[3,0,3],b=dict(z=2600)))
+
+        # attempting to get a variable object creates it, even though it does not already exist
+        vdata_url = "/api/v1/hosts/%s/variable_data/" % (added_by_collection_a['id'])
+        got = self.get(vdata_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(got, dict())
+
+        # super user can create variable objects
         # an org admin can create variable objects (defers to inventory permissions)
+        got = self.put(vdata_url, data=vars_a, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(got, vars_a) 
 
-        # a normal user cannot create variable objects
+        # verify that we can update things and get them back    
+        got = self.put(vdata_url, data=vars_c, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(got, vars_c)    
+        got = self.get(vdata_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(got, vars_c)    
 
-        # a normal user with at least one inventory edit permission can create variable objects
+        # a normal user cannot edit variable objects
+        self.put(vdata_url, data=vars_a, expect=403, auth=self.get_nobody_credentials())
+
+        # a normal user with inventory write permissions can edit variable objects
+        vdata_url = "/api/v1/hosts/1/variable_data/" 
+        got = self.put(vdata_url, data=vars_b, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(got, vars_b)        
+
+        # this URL is not one end users will use, but is what you get back from a put
+        # as a result, it also needs to be access controlled and working.  You will not
+        # be able to put to it.
+        backend_url = '/api/v1/variable_data/1/'
+        got = self.get(backend_url, expect=200, auth=self.get_normal_credentials())
+        got = self.put(backend_url, data=dict(), expect=403, auth=self.get_super_credentials())
 
         ###################################################
         # VARIABLES -> GROUPS
@@ -247,17 +276,6 @@ class InventoryTest(BaseTest):
         # a normal user cannot associate variable objects with groups
 
         # a normal user with inventory edit permissions can associate variable objects with groups
-
-        ####################################################
-        # VARIABLES -> HOSTS
-
-        # a super user can associate variable objects with hosts
-
-        # an org admin can associate variable objects with hosts
- 
-        # a normal user cannot associate variable objects with hosts
-
-        # a normal user with inventory edit permissions can associate variable objects with hosts
 
         ####################################################
         # SUBGROUPS
