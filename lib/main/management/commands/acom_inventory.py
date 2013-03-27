@@ -44,12 +44,14 @@ class Command(NoArgsCommand):
         groups = {}
         for group in inventory.groups.all():
             # FIXME: Check if group is active?
+
             group_info = {
                 'hosts': list(group.hosts.values_list('name', flat=True)),
-                # FIXME: Include host vars here?
-                'vars': dict(group.variable_data.values_list('name', 'data')),
                 'children': list(group.children.values_list('name', flat=True)),
             }
+            if group.variables is not None:
+                group_info['vars'] = json.loads(group.variables.data)
+
             group_info = dict(filter(lambda x: bool(x[1]), group_info.items()))
             if group_info.keys() in ([], ['hosts']):
                 groups[group.name] = group_info.get('hosts', [])
@@ -65,9 +67,11 @@ class Command(NoArgsCommand):
             host = inventory.hosts.get(name=hostname)
         except Host.DoesNotExist:
             raise CommandError('Host %s not found in the given inventory' % hostname)
-        hostvars = dict(host.variable_data.values_list('name', 'data'))
+        hostvars = {}
+        if host.variables is not None:
+            hostvars = json.loads(host.variables.data)
         # FIXME: Do we also need to include variables defined for groups of which
-        # this host is a member?
+        # this host is a member?  (MPD: pretty sure we don't!)
         self.stdout.write(json.dumps(hostvars, indent=indent))
 
     def handle_noargs(self, **options):
