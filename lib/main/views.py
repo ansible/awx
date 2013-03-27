@@ -366,6 +366,38 @@ class GroupsList(BaseList):
         ).distinct()
         return admin_of | has_user_perms | has_team_perms
 
+class GroupsChildrenList(BaseSubList):
+
+    model = Group
+    serializer_class = GroupSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Group
+    relationship = 'children'
+    postable = True
+    inject_primary_key_on_post_as = 'parent'
+
+    def _get_queryset(self):
+
+        # FIXME: this is the mostly the same as GroupsList, share code similar to how done with Host and Group objects.
+ 
+        parent = Group.objects.get(pk=self.kwargs['pk'])
+
+        # FIXME: verify read permissions on this object are still required at a higher level
+
+        base = parent.children
+        if self.request.user.is_superuser:
+            return base.all()
+        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
+        has_user_perms = base.filter(
+            inventory__permissions__user__in = [ self.request.user ],
+            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        has_team_perms = base.filter(
+            inventory__permissions__team__in = self.request.user.teams.all(),
+            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        return admin_of | has_user_perms | has_team_perms
+
 class GroupsDetail(BaseDetail):
 
     model = Group

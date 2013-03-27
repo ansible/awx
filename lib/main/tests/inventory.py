@@ -159,6 +159,8 @@ class InventoryTest(BaseTest):
         new_group_c   = dict(name='web4', inventory=inv.pk)
         new_group_d   = dict(name='web5', inventory=inv.pk)
         new_group_e   = dict(name='web6', inventory=inv.pk)
+        groups = '/api/v1/groups/'
+
         data0 = self.post(groups, data=invalid, expect=400, auth=self.get_super_credentials())
         data0 = self.post(groups, data=new_group_a, expect=201, auth=self.get_super_credentials())
 
@@ -176,7 +178,7 @@ class InventoryTest(BaseTest):
         #     permission_type = PERM_INVENTORY_WRITE
         #)       
         group_data3 = self.post(groups, data=new_group_c, expect=201, auth=self.get_other_credentials())
-
+ 
         # hostnames must be unique inside an organization
         group_data4 = self.post(groups, data=new_group_c, expect=400, auth=self.get_other_credentials())
 
@@ -268,44 +270,82 @@ class InventoryTest(BaseTest):
 
         ###################################################
         # VARIABLES -> GROUPS
+        
+        vars_a = dict(asdf=7777, dog='droopy',   cat='battlecat', unstructured=dict(a=[1,1,1],b=dict(x=1,y=2)))
+        vars_b = dict(asdf=8888, dog='snoopy',   cat='cheshire',  unstructured=dict(a=[2,2,2],b=dict(x=3,y=4)))
+        vars_c = dict(asdf=9999, dog='pluto',    cat='five',      unstructured=dict(a=[3,3,3],b=dict(z=5)))
+        groups = Group.objects.all()
+         
+        vdata1_url = "/api/v1/groups/%s/variable_data/" % (groups[0].pk)
+        vdata2_url = "/api/v1/groups/%s/variable_data/" % (groups[1].pk)
 
         # a super user can associate variable objects with groups
+        got = self.get(vdata1_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(got, {})
+        put = self.put(vdata1_url, data=vars_a, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(put, vars_a)
 
         # an org admin can associate variable objects with groups
+        put = self.put(vdata1_url, data=vars_b, expect=200, auth=self.get_normal_credentials())
  
         # a normal user cannot associate variable objects with groups
+        put = self.put(vdata1_url, data=vars_b, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with inventory edit permissions can associate variable objects with groups
+        put = self.put(vdata1_url, data=vars_c, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(put, vars_c)
 
         ####################################################
         # SUBGROUPS
 
+        groups = Group.objects.all()
+
+        # just some more groups for kicks
+        inv  = Inventory.objects.get(pk=1)
+        Group.objects.create(name='group-X1', inventory=inv)
+        Group.objects.create(name='group-X2', inventory=inv)
+        Group.objects.create(name='group-X3', inventory=inv)
+        Group.objects.create(name='group-X4', inventory=inv)
+        Group.objects.create(name='group-X5', inventory=inv)
+
+        Permission.objects.create(
+            inventory       = inv,
+            user            = self.other_django_user,
+            permission_type = PERM_INVENTORY_WRITE
+        )
+
         # a super user can set subgroups
+        subgroups_url = '/api/v1/groups/1/children/'
+        child_url     = '/api/v1/groups/2/'
+        subgroups_url2    = '/api/v1/groups/3/children/'
+        subgroups_url3    = '/api/v1/groups/4/children/'
+        subgroups_url4    = '/api/v1/groups/5/children/'
+        got = self.get(child_url, expect=200, auth=self.get_super_credentials())
+        self.post(subgroups_url, data=got, expect=204, auth=self.get_super_credentials())
+        kids = Group.objects.get(pk=1).children.all()
+        self.assertEqual(len(kids), 1)
+        checked = self.get(subgroups_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(checked['count'], 1)
 
         # an org admin can set subgroups
- 
+        self.post(subgroups_url2, data=got, expect=204, auth=self.get_normal_credentials())
+        # double post causes conflict error
+        self.post(subgroups_url2, data=got, expect=409, auth=self.get_normal_credentials())
+        checked = self.get(subgroups_url2, expect=200, auth=self.get_normal_credentials()) 
+
         # a normal user cannot set subgroups
+        self.post(subgroups_url3, data=got, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with inventory edit permissions can associate subgroups
+        self.post(subgroups_url3, data=got, expect=204, auth=self.get_other_credentials())
+        checked = self.get(subgroups_url3, expect=200, auth=self.get_normal_credentials()) 
+        self.assertEqual(checked['count'], 1)
 
-        # FIXME: go back and put in GET requests after all the post stuff
-         
-        #########################################################
-        # GROUP CHILDREN ACCESS
-
-        # a super user can see the children attached to a group
-
-        # a org admin can see the children attached to a group
-
-        # a user who is on a team who has read permissions on an inventory can see the children attached to a group
-      
-        # a regular user cannot see children attached to a group
-        
         #########################################################
         # DISASSOCIATION TESTS
         #    hosts from inventory
         #    groups from inventory
-        #    subgroups from groups
+        #    children from groups
         #    others?
  
         #########################################################

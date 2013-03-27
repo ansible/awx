@@ -114,7 +114,7 @@ class GroupSerializer(BaseSerializer):
     related       = serializers.SerializerMethodField('get_related')
 
     class Meta:
-        model = Host
+        model = Group
         fields = ('url', 'id', 'name', 'description', 'creation_date', 'inventory')
 
     def get_related(self, obj):

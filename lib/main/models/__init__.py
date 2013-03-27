@@ -421,6 +421,16 @@ class Group(CommonModelNameNotUnique):
         inventory = Inventory.objects.get(pk=data['inventory'])
         return Inventory._has_permission_types(user, inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
 
+   
+    @classmethod
+    def can_user_administrate(cls, user, obj):
+        # here this controls whether the user can attach subgroups
+        return Inventory._has_permission_types(user, obj.inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
+
+    @classmethod
+    def can_user_read(cls, user, obj):
+        return Inventory.can_user_read(user, obj.inventory)
+
     def get_absolute_url(self):
         import lib.urls
         return reverse(lib.urls.views_GroupsDetail, args=(self.pk,))
