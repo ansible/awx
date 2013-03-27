@@ -155,6 +155,7 @@ class BaseSubList(BaseList):
                 relationship.remove(sub)
             else:
                 # resource is just a ForeignKey, can't remove it from the set, just set it inactive
+                sub.name   = "_deleted_%s_%s" % (str(datetime.time()), sub.name)
                 sub.active = False
                 sub.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
