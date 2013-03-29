@@ -60,7 +60,34 @@ class AcomInventoryTest(BaseCommandTest):
     '''
 
     def setUp(self):
-        pass
+        super(AcomInventoryTest, self).setUp()
+        self.setup_users()
+        self.organizations = self.make_organizations(self.super_django_user, 2)
+        self.projects = self.make_projects(self.normal_django_user, 2)
+        self.organizations[0].projects.add(self.projects[1])
+        self.organizations[1].projects.add(self.projects[0])
+        self.inventories = []
+        self.hosts = []
+        self.groups = []
+        for n, organization in enumerate(self.organizations):
+            inventory = Inventory.objects.create(name='inventory-%d' % n,
+                                                 description='description for inventory %d' % n,
+                                                 organization=organization)
+            self.inventories.append(inventory)
+            hosts = []
+            for x in xrange(10):
+                host = inventory.hosts.create(name='host-%02d.example.com' % x,
+                                              inventory=inventory)
+                hosts.append(host)
+            self.hosts.extend(hosts)
+            groups = []
+            for x in xrange(5):
+                group = inventory.groups.create(name='group-%d' % x,
+                                                inventory=inventory)
+                groups.append(group)
+                group.hosts.add(hosts[x])
+                group.hosts.add(hosts[x + 5])
+            self.groups.extend(groups)
 
     def test_without_inventory_id(self):
         result, stdout, stderr = self.run_command('acom_inventory', list=True)
@@ -68,10 +95,13 @@ class AcomInventoryTest(BaseCommandTest):
         self.assertEqual(json.loads(stdout), {})
 
     def test_with_inventory_id_as_argument(self):
+        inventory = self.inventories[0]
         result, stdout, stderr = self.run_command('acom_inventory', list=True,
-                                                  inventory=1)
-        self.assertTrue(isinstance(result, CommandError))
-        self.assertEqual(json.loads(stdout), {})
+                                                  inventory=inventory.pk)
+        self.assertEqual(result, None)
+        data = json.loads(stdout)
+        self.assertEqual(set(data.keys()),
+                         set(inventory.groups.values_list('name', flat=True)))
 
     def test_with_inventory_id_in_environment(self):
         pass

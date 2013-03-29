@@ -48,8 +48,8 @@ class Command(NoArgsCommand):
                 'hosts': list(group.hosts.values_list('name', flat=True)),
                 'children': list(group.children.values_list('name', flat=True)),
             }
-            if group.variables is not None:
-                group_info['vars'] = json.loads(group.variables.data)
+            if group.variable_data is not None:
+                group_info['vars'] = json.loads(group.variable_data.data)
 
             group_info = dict(filter(lambda x: bool(x[1]), group_info.items()))
             if group_info.keys() in ([], ['hosts']):
@@ -67,8 +67,8 @@ class Command(NoArgsCommand):
         except Host.DoesNotExist:
             raise CommandError('Host %s not found in the given inventory' % hostname)
         hostvars = {}
-        if host.variables is not None:
-            hostvars = json.loads(host.variables.data)
+        if host.variable_data is not None:
+            hostvars = json.loads(host.variable_data.data)
         self.stdout.write(json.dumps(hostvars, indent=indent))
 
     def handle_noargs(self, **options):
@@ -97,22 +97,22 @@ class Command(NoArgsCommand):
                 self.stderr.write('Either --list or --host must be specified')
                 self.print_help()
         except CommandError:
+            # Always return an empty hash on stdout, even when an error occurs.
             self.stdout.write(json.dumps({}))
             raise
 
 if __name__ == '__main__':
+    # FIXME: The DJANGO_SETTINGS_MODULE environment variable *should* already
+    # be set if this script is called from a celery task.
+    settings_module = os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lib.settings')
     # FIXME: Not particularly fond of this sys.path hack, but it is needed
-    # when a celery task calls ansible-playback and needs to execute this
+    # when a celery task calls ansible-playbook and needs to execute this
     # script directly.
     try:
-        import lib.settings
+        __import__(settings_module)
     except ImportError:
         top_dir = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..')
         sys.path.insert(0, os.path.abspath(top_dir))
-    # FIXME: The DJANGO_SETTINGS_MODULE environment variable *should* already
-    # be set if this script is called from a celery task.  Probably won't work
-    # otherwise.
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lib.settings')
     from django.core.management import execute_from_command_line
     argv = [sys.argv[0], 'acom_inventory'] + sys.argv[1:]
     execute_from_command_line(argv)

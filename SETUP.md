@@ -44,7 +44,11 @@ Test the server
 
 make runserver
 
-access the server on 127.0.0.1:8000
+access the server on 127.0.0.1:8013
+
+make celeryd
+
+to start the celery worker for background tasks
 
 Running through Apache
 ======================

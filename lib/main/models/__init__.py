@@ -15,12 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible Commander.  If not, see <http://www.gnu.org/licenses/>.
 
-import datetime
+
 from django.db import models
 from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 import exceptions
 from jsonfield import JSONField
 from djcelery.models import TaskMeta
@@ -415,6 +416,7 @@ class Group(CommonModelNameNotUnique):
     inventory     = models.ForeignKey('Inventory', null=False, related_name='groups')
     parents       = models.ManyToManyField('self', symmetrical=False, related_name='children', blank=True)
     variable_data = models.OneToOneField('VariableData', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='group')
+    hosts         = models.ManyToManyField('Host', related_name='groups', blank=True)
 
     def __unicode__(self):
         return self.name
@@ -584,7 +586,8 @@ class Permission(CommonModelNameNotUnique):
 
 class LaunchJob(CommonModel):
     '''
-    a launch job is a request to apply a project to an inventory source with a given credential
+    A launch job is a definition for applying a project (with playbook) to an
+    inventory source with a given credential.
     '''
 
     class Meta:
@@ -599,9 +602,11 @@ class LaunchJob(CommonModel):
     job_type       = models.CharField(max_length=64, choices=JOB_TYPE_CHOICES)
 
     def start(self):
-        """Create a new launch job status and start the task via celery."""
+        '''
+        Create a new launch job status and start the task via celery.
+        '''
         from lib.main.tasks import run_launch_job
-        launch_job_status = self.launch_job_statuses.create(name='Launch Job Status %s' % datetime.datetime.now().isoformat())
+        launch_job_status = self.launch_job_statuses.create(name='Launch Job Status %s' % now().isoformat())
         task_result = run_launch_job.delay(launch_job_status.pk)
         launch_job_status.celery_task = TaskMeta.objects.get(task_id=task_result.task_id)
         launch_job_status.save()
@@ -649,7 +654,6 @@ class LaunchJobStatus(CommonModel):
     '''
 
     STATUS_CHOICES = [
-        ('new', _('New')),
         ('pending', _('Pending')),
         ('running', _('Running')),
         ('successful', _('Successful')),
@@ -661,14 +665,14 @@ class LaunchJobStatus(CommonModel):
         verbose_name_plural = _('launch job statuses')
 
     launch_job     = models.ForeignKey('LaunchJob', null=True, on_delete=SET_NULL, related_name='launch_job_statuses')
-    status         = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    status         = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     result_stdout  = models.TextField(blank=True, default='')
     result_stderr  = models.TextField(blank=True, default='')
     celery_task    = models.ForeignKey('djcelery.TaskMeta', related_name='launch_job_statuses', blank=True, null=True, default=None, on_delete=SET_NULL)
 
 class LaunchJobStatusEvent(models.Model):
     '''
-    A single event/message logged from the callback when running a job.
+    An event/message logged from the callback when running a job.
     '''
 
     EVENT_TYPES = [
@@ -694,9 +698,8 @@ class LaunchJobStatusEvent(models.Model):
 
     class Meta:
         app_label = 'main'
-        abstract = True
 
-    launch_job_status = models.ForeignKey('LaunchJobEvent', related_name='launch_job_status_events', on_delete=CASCADE)
+    launch_job_status = models.ForeignKey('LaunchJobStatus', related_name='launch_job_status_events', on_delete=CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     event = models.CharField(max_length=100, choices=EVENT_TYPES)
     event_data = JSONField(blank=True, default='')
