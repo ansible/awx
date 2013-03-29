@@ -21,15 +21,22 @@ from celery import task
 from lib.main.models import *
 
 @task(name='run_launch_job')
-def run_launch_job(launch_job_pk):
-    launch_job = LaunchJob.objects.get(pk=launch_job_pk)
-    os.environ['ACOM_INVENTORY'] = str(launch_job.inventory.pk)
+def run_launch_job(launch_job_status_pk):
+    launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status_pk)
+    launch_job = launch_job_status.launch_job
+    plugin_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
+                                              'plugins', 'callback'))
     inventory_script = os.path.abspath(os.path.join(os.path.dirname(__file__),
-        'management', 'commands', 'acom_inventory.py'))
+                                                    'management', 'commands',
+                                                    'acom_inventory.py'))
+    env = dict(os.environ.items())
+    env['ACOM_LAUNCH_JOB_STATUS_ID'] = str(launch_job_status.pk)
+    env['ACOM_INVENTORY_ID'] = str(launch_job.inventory.pk)
+    env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
     playbook = launch_job.project.default_playbook
-    cmd = ['ansible-playbook', '-i', inventory_script, '-v']
+    cmdline = ['ansible-playbook', '-i', inventory_script, '-v']
     if False: # local mode
-        cmd.extend(['-c', 'local'])
-    cmd.append(playbook)
-    subprocess.check_call(cmd)
-    # FIXME: Do stuff here!
+        cmdline.extend(['-c', 'local'])
+    cmdline.append(playbook)
+    subprocess.check_call(cmdline, env=env)
+    # FIXME: Capture stdout/stderr

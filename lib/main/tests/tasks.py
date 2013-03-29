@@ -14,3 +14,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Ansible Commander.  If not, see <http://www.gnu.org/licenses/>.
+
+
+from lib.main.models import *
+from lib.main.tests.base import BaseTest
+
+class RunLaunchJobTest(BaseTest):
+    '''
+    Test cases for run_launch_job celery task.
+    '''
+
+    def setUp(self):
+        pass

@@ -365,4 +365,3 @@ class OrganizationsTest(BaseTest):
         self.delete(self.collection(), expect=405, auth=self.get_super_credentials())
 
 # TODO: tests for tag disassociation
-

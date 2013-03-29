@@ -31,7 +31,7 @@ class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
         make_option('-i', '--inventory', dest='inventory', type='int', default=0,
                     help='Inventory ID (can also be specified using '
-                         'ACOM_INVENTORY environment variable)'),
+                         'ACOM_INVENTORY_ID environment variable)'),
         make_option('--list', action='store_true', dest='list', default=False,
                     help='Return JSON hash of host groups.'),
         make_option('--host', dest='host', default='',
@@ -44,7 +44,6 @@ class Command(NoArgsCommand):
         groups = {}
         for group in inventory.groups.all():
             # FIXME: Check if group is active?
-
             group_info = {
                 'hosts': list(group.hosts.values_list('name', flat=True)),
                 'children': list(group.children.values_list('name', flat=True)),
@@ -70,42 +69,49 @@ class Command(NoArgsCommand):
         hostvars = {}
         if host.variables is not None:
             hostvars = json.loads(host.variables.data)
-        # FIXME: Do we also need to include variables defined for groups of which
-        # this host is a member?  (MPD: pretty sure we don't!)
         self.stdout.write(json.dumps(hostvars, indent=indent))
 
     def handle_noargs(self, **options):
-        from lib.main.models import Inventory
         try:
-            inventory_id = int(os.getenv('ACOM_INVENTORY', options.get('inventory', 0)))
-        except ValueError:
-            raise CommandError('Inventory ID must be an integer')
-        if not inventory_id:
-            raise CommandError('No inventory ID specified')
-        try:
-            inventory = Inventory.objects.get(id=inventory_id)
-        except Inventory.DoesNotExist:
-            raise CommandError('Inventory with ID %d not found' % inventory_id)
-        list_ = options.get('list', False)
-        host = options.get('host', '')
-        indent = options.get('indent', None)
-        if list_ and host:
-            raise CommandError('Only one of --list or --host can be specified')
-        elif list_:
-            self.get_list(inventory, indent=indent)
-        elif host:
-            self.get_host(inventory, host, indent=indent)
-        else:
-            self.stderr.write('Either --list or --host must be specified')
-            self.print_help()
+            from lib.main.models import Inventory
+            try:
+                inventory_id = int(os.getenv('ACOM_INVENTORY_ID', options.get('inventory', 0)))
+            except ValueError:
+                raise CommandError('Inventory ID must be an integer')
+            if not inventory_id:
+                raise CommandError('No inventory ID specified')
+            try:
+                inventory = Inventory.objects.get(id=inventory_id)
+            except Inventory.DoesNotExist:
+                raise CommandError('Inventory with ID %d not found' % inventory_id)
+            list_ = options.get('list', False)
+            host = options.get('host', '')
+            indent = options.get('indent', None)
+            if list_ and host:
+                raise CommandError('Only one of --list or --host can be specified')
+            elif list_:
+                self.get_list(inventory, indent=indent)
+            elif host:
+                self.get_host(inventory, host, indent=indent)
+            else:
+                self.stderr.write('Either --list or --host must be specified')
+                self.print_help()
+        except CommandError:
+            self.stdout.write(json.dumps({}))
+            raise
 
 if __name__ == '__main__':
-    # FIXME: This environment variable *should* already be set if this script
-    # is called from a celery task.  Probably won't work otherwise.
+    # FIXME: Not particularly fond of this sys.path hack, but it is needed
+    # when a celery task calls ansible-playback and needs to execute this
+    # script directly.
     try:
         import lib.settings
     except ImportError:
-        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..')))
+        top_dir = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..')
+        sys.path.insert(0, os.path.abspath(top_dir))
+    # FIXME: The DJANGO_SETTINGS_MODULE environment variable *should* already
+    # be set if this script is called from a celery task.  Probably won't work
+    # otherwise.
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lib.settings')
     from django.core.management import execute_from_command_line
     argv = [sys.argv[0], 'acom_inventory'] + sys.argv[1:]

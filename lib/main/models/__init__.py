@@ -15,13 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible Commander.  If not, see <http://www.gnu.org/licenses/>.
 
-
+import datetime
 from django.db import models
 from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 import exceptions
+from jsonfield import JSONField
+from djcelery.models import TaskMeta
 
 # TODO: jobs and events model TBD
 # TODO: reporting model TBD
@@ -597,8 +599,13 @@ class LaunchJob(CommonModel):
     job_type       = models.CharField(max_length=64, choices=JOB_TYPE_CHOICES)
 
     def start(self):
+        """Create a new launch job status and start the task via celery."""
         from lib.main.tasks import run_launch_job
-        return run_launch_job.delay(self.pk)
+        launch_job_status = self.launch_job_statuses.create(name='Launch Job Status %s' % datetime.datetime.now().isoformat())
+        task_result = run_launch_job.delay(launch_job_status.pk)
+        launch_job_status.celery_task = TaskMeta.objects.get(task_id=task_result.task_id)
+        launch_job_status.save()
+        return launch_job_status
 
     # project has one default playbook but really should have a list of playbooks and flags ...
 
@@ -637,16 +644,61 @@ class LaunchJob(CommonModel):
 # TODO: Events
 
 class LaunchJobStatus(CommonModel):
+    '''
+    Status for a single run of a launch job.
+    '''
+
+    STATUS_CHOICES = [
+        ('new', _('New')),
+        ('pending', _('Pending')),
+        ('running', _('Running')),
+        ('successful', _('Successful')),
+        ('failed', _('Failed')),
+    ]
 
     class Meta:
         app_label = 'main'
         verbose_name_plural = _('launch job statuses')
 
     launch_job     = models.ForeignKey('LaunchJob', null=True, on_delete=SET_NULL, related_name='launch_job_statuses')
-    status         = models.IntegerField()
-    result_data    = models.TextField()
+    status         = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    result_stdout  = models.TextField(blank=True, default='')
+    result_stderr  = models.TextField(blank=True, default='')
+    celery_task    = models.ForeignKey('djcelery.TaskMeta', related_name='launch_job_statuses', blank=True, null=True, default=None, on_delete=SET_NULL)
 
+class LaunchJobStatusEvent(models.Model):
+    '''
+    A single event/message logged from the callback when running a job.
+    '''
+
+    EVENT_TYPES = [
+        ('runner_on_failed', _('Runner on Failed')),
+        ('runner_on_ok', _('Runner on OK')),
+        ('runner_on_error', _('Runner on Error')),
+        ('runner_on_skipped', _('Runner on Skipped')),
+        ('runner_on_unreachable', _('Runner on Unreachable')),
+        ('runner_on_no_hosts', _('Runner on No Hosts')),
+        ('runner_on_async_poll', _('Runner on Async Poll')),
+        ('runner_on_async_ok', _('Runner on Async OK')),
+        ('runner_on_async_failed', _('Runner on Async Failed')),
+        ('playbook_on_start', _('Playbook on Start')),
+        ('playbook_on_notify', _('Playbook on Notify')),
+        ('playbook_on_task_start', _('Playbook on Task Start')),
+        ('playbook_on_vars_prompt', _('Playbook on Vars Prompt')),
+        ('playbook_on_setup', _('Playbook on Setup')),
+        ('playbook_on_import_for_host', _('Playbook on Import for Host')),
+        ('playbook_on_not_import_for_host', _('Playbook on Not Import for Host')),
+        ('playbook_on_play_start', _('Playbook on Play Start')),
+        ('playbook_on_stats', _('Playbook on Stats')),
+    ]
+
+    class Meta:
+        app_label = 'main'
+        abstract = True
+
+    launch_job_status = models.ForeignKey('LaunchJobEvent', related_name='launch_job_status_events', on_delete=CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+    event = models.CharField(max_length=100, choices=EVENT_TYPES)
+    event_data = JSONField(blank=True, default='')
 
 # TODO: reporting (MPD)
-
-
