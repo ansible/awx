@@ -52,7 +52,9 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'acom.sqlite3'),       
+        'NAME': os.path.join(BASE_DIR, 'acom.sqlite3'),
+        # Test database cannot be :memory: for celery/inventory tests to work.
+        'TEST_NAME': os.path.join(BASE_DIR, 'acom_test.sqlite3'),
     }
 }
 

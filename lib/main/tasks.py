@@ -18,11 +18,14 @@
 import os
 import subprocess
 from celery import task
+from django.conf import settings
 from lib.main.models import *
 
 @task(name='run_launch_job')
 def run_launch_job(launch_job_status_pk):
     launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status_pk)
+    launch_job_status.status = 'running'
+    launch_job_status.save()
     launch_job = launch_job_status.launch_job
     plugin_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
                                               'plugins', 'callback'))
@@ -33,10 +36,20 @@ def run_launch_job(launch_job_status_pk):
     env['ACOM_LAUNCH_JOB_STATUS_ID'] = str(launch_job_status.pk)
     env['ACOM_INVENTORY_ID'] = str(launch_job.inventory.pk)
     env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
+    if hasattr(settings, 'ANSIBLE_TRANSPORT'):
+        env['ANSIBLE_TRANSPORT'] = getattr(settings, 'ANSIBLE_TRANSPORT')
     playbook = launch_job.project.default_playbook
-    cmdline = ['ansible-playbook', '-i', inventory_script, '-v']
-    if False: # local mode
-        cmdline.extend(['-c', 'local'])
+    cmdline = ['ansible-playbook', '-i', inventory_script]#, '-v']
     cmdline.append(playbook)
-    subprocess.check_call(cmdline, env=env)
-    # FIXME: Capture stdout/stderr
+    proc = subprocess.Popen(cmdline, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, env=env)
+    stdout, stderr = proc.communicate()
+    # Reload from database before updating/saving.
+    launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status_pk)
+    if proc.returncode == 0:
+        launch_job_status.status = 'successful'
+    else:
+        launch_job_status.status = 'failed'
+    launch_job_status.result_stdout = stdout
+    launch_job_status.result_stderr = stderr
+    launch_job_status.save()

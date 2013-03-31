@@ -24,10 +24,13 @@ from django.test.client import Client
 from lib.main.models import *
 
 
-class BaseTest(django.test.TestCase):
+class BaseTestMixin(object):
+    '''
+    Mixin with shared code for use by all test cases.
+    '''
 
     def setUp(self):
-        super(BaseTest, self).setUp()
+        super(BaseTestMixin, self).setUp()
         self.object_ctr = 0
 
     def make_user(self, username, password, super_user=False):
@@ -131,3 +134,13 @@ class BaseTest(django.test.TestCase):
         data = self.get(collection_url, expect=200, auth=auth)
         return [item['url'] for item in data['results']]
     
+class BaseTest(BaseTestMixin, django.test.TestCase):
+    '''
+    Base class for unit tests.
+    '''
+
+class BaseTransactionTest(BaseTestMixin, django.test.TransactionTestCase):
+    '''
+    Base class for tests requiring transactions (or where the test database
+    needs to be accessed by subprocesses).
+    '''

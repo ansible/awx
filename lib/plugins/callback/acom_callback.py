@@ -22,8 +22,8 @@ class CallbackModule(object):
     '''
 
     def _log_event(self, event, *args, **kwargs):
-        print '====', event, args, kwargs
         # FIXME: Push these events back to the server.
+        pass#print '====', event, args, kwargs
 
     def on_any(self, *args, **kwargs):
         pass

@@ -95,7 +95,7 @@ class Command(NoArgsCommand):
                 self.get_host(inventory, host, indent=indent)
             else:
                 raise CommandError('Either --list or --host must be specified')
-        except CommandError:
+        except CommandError, e:
             # Always return an empty hash on stdout, even when an error occurs.
             self.stdout.write(json.dumps({}))
             raise
@@ -103,15 +103,21 @@ class Command(NoArgsCommand):
 if __name__ == '__main__':
     # FIXME: The DJANGO_SETTINGS_MODULE environment variable *should* already
     # be set if this script is called from a celery task.
-    settings_module = os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lib.settings')
+    settings_module_name = os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lib.settings')
     # FIXME: Not particularly fond of this sys.path hack, but it is needed
     # when a celery task calls ansible-playbook and needs to execute this
     # script directly.
     try:
-        __import__(settings_module)
+        settings_parent_module = __import__(settings_module_name)
     except ImportError:
         top_dir = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..')
         sys.path.insert(0, os.path.abspath(top_dir))
+        settings_parent_module = __import__(settings_module_name)
+    settings_module = getattr(settings_parent_module, settings_module_name.split('.')[-1])
+    # Use the ACOM_TEST_DATABASE_NAME environment variable to specify the test
+    # database name when called from unit tests.
+    if os.environ.get('ACOM_TEST_DATABASE_NAME', None):
+        settings_module.DATABASES['default']['NAME'] = os.environ['ACOM_TEST_DATABASE_NAME']
     from django.core.management import execute_from_command_line
     argv = [sys.argv[0], 'acom_inventory'] + sys.argv[1:]
     execute_from_command_line(argv)
