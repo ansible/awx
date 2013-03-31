@@ -84,8 +84,8 @@ class Command(NoArgsCommand):
                 inventory = Inventory.objects.get(id=inventory_id)
             except Inventory.DoesNotExist:
                 raise CommandError('Inventory with ID %d not found' % inventory_id)
-            list_ = options.get('list', False)
             host = options.get('host', '')
+            list_ = options.get('list', False)
             indent = options.get('indent', None)
             if list_ and host:
                 raise CommandError('Only one of --list or --host can be specified')
@@ -94,8 +94,7 @@ class Command(NoArgsCommand):
             elif host:
                 self.get_host(inventory, host, indent=indent)
             else:
-                self.stderr.write('Either --list or --host must be specified')
-                self.print_help()
+                raise CommandError('Either --list or --host must be specified')
         except CommandError:
             # Always return an empty hash on stdout, even when an error occurs.
             self.stdout.write(json.dumps({}))
