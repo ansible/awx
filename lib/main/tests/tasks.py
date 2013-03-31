@@ -78,10 +78,16 @@ class RunLaunchJobTest(BaseCeleryTest):
         launch_job_status = self.launch_job.start()
         self.assertEqual(launch_job_status.status, 'pending')
         launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
-        self.assertEqual(launch_job_status.status, 'successful')
-        self.assertTrue(launch_job_status.result_stdout)
         #print 'stdout:', launch_job_status.result_stdout
         #print 'stderr:', launch_job_status.result_stderr
+        self.assertEqual(launch_job_status.status, 'successful')
+        self.assertTrue(launch_job_status.result_stdout)
+        launch_job_status_events = launch_job_status.launch_job_status_events.all()
+        #for ev in launch_job_status_events:
+        #    print ev.event, ev.event_data
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
 
     # FIXME: Test with a task that fails.
-    # FIXME: Get callback working.
