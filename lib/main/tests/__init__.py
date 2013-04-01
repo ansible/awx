@@ -19,6 +19,7 @@
 from lib.main.tests.organizations import OrganizationsTest
 from lib.main.tests.users import UsersTest
 from lib.main.tests.inventory import InventoryTest
-from lib.main.tests.projects import ProjectsTest
+# FIXME: Uncomment the next line when projects.py is added to git.
+# from lib.main.tests.projects import ProjectsTest
 from lib.main.tests.commands import AcomInventoryTest
 from lib.main.tests.tasks import RunLaunchJobTest
