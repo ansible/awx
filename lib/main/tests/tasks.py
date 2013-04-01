@@ -30,6 +30,13 @@ TEST_PLAYBOOK = '''- hosts: test-group
     command: test 1 = 1
 '''
 
+TEST_PLAYBOOK2 = '''- hosts: test-group
+  gather_facts: False
+  tasks:
+  - name: should fail
+    command: test 1 = 0
+'''
+
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
 class BaseCeleryTest(BaseTransactionTest):
@@ -48,12 +55,6 @@ class RunLaunchJobTest(BaseCeleryTest):
         self.setup_users()
         self.organization = self.make_organizations(self.super_django_user, 1)[0]
         self.project = self.make_projects(self.normal_django_user, 1)[0]
-        handle, self.test_playbook = tempfile.mkstemp(suffix='.yml', prefix='playbook-')
-        test_playbook_file = os.fdopen(handle, 'w')
-        test_playbook_file.write(TEST_PLAYBOOK)
-        test_playbook_file.close()
-        self.project.default_playbook = self.test_playbook
-        self.project.save()
         self.organization.projects.add(self.project)
         self.inventory = Inventory.objects.create(name='test-inventory',
                                                   description='description for test-inventory',
@@ -74,7 +75,16 @@ class RunLaunchJobTest(BaseCeleryTest):
         os.environ.pop('ACOM_TEST_DATABASE_NAME', None)
         os.remove(self.test_playbook)
 
+    def create_test_playbook(self, s):
+        handle, self.test_playbook = tempfile.mkstemp(suffix='.yml', prefix='playbook-')
+        test_playbook_file = os.fdopen(handle, 'w')
+        test_playbook_file.write(s)
+        test_playbook_file.close()
+        self.project.default_playbook = self.test_playbook
+        self.project.save()
+
     def test_run_launch_job(self):
+        self.create_test_playbook(TEST_PLAYBOOK)
         launch_job_status = self.launch_job.start()
         self.assertEqual(launch_job_status.status, 'pending')
         launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
@@ -88,6 +98,19 @@ class RunLaunchJobTest(BaseCeleryTest):
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_start').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='runner_on_ok').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
 
-    # FIXME: Test with a task that fails.
+    def test_run_launch_job_that_fails(self):
+        self.create_test_playbook(TEST_PLAYBOOK2)
+        launch_job_status = self.launch_job.start()
+        self.assertEqual(launch_job_status.status, 'pending')
+        launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
+        self.assertEqual(launch_job_status.status, 'failed')
+        self.assertTrue(launch_job_status.result_stdout)
+        launch_job_status_events = launch_job_status.launch_job_status_events.all()
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='runner_on_failed').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
