@@ -192,6 +192,28 @@ class TeamsDetail(BaseDetail):
     serializer_class = TeamSerializer
     permission_classes = (CustomRbac,)
 
+class TeamsUsersList(BaseSubList):
+    
+    model = User
+    serializer_class = UserSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Team
+    relationship = 'users'
+    postable = True
+    inject_primary_key_on_post_as = 'team'
+    severable = True
+
+    def _get_queryset(self):
+        # FIXME: audit all BaseSubLists to check for permissions on the original object too
+        'team members can see the whole team, as can org admins or superusers'
+        team = Team.objects.get(pk=self.kwargs['pk'])
+        base = team.users.all()
+        if self.request.user.is_superuser or self.request.user in team.organization.admins.all():
+            return base
+        if self.request.user in team.users.all():
+            return base
+        raise PermissionDenied()
+
 class ProjectsList(BaseList):
 
     model = Project

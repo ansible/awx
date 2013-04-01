@@ -216,23 +216,42 @@ class ProjectsTest(BaseTest):
         # =====================================================================
         # TEAMS USER MEMBERSHIP
 
-        team_users = '/api/v1/teams/1/users/'
-
-        # can add users to teams
-        print Team.objects.all()
-        raise Exception("STOP")
-
-        # can remove users from teams
+        team = Team.objects.filter(organization__pk = 2)[0]
+        team_users = '/api/v1/teams/%s/users/' % (team.pk)
+        for x in team.users.all():
+            team.users.remove(x)
+        team.save()
 
         # can list uses on teams
+        self.get(team_users, expect=401)
+        self.get(team_users, expect=401, auth=self.get_invalid_credentials())
+        self.get(team_users, expect=403, auth=self.get_nobody_credentials())
+        self.get(team_users, expect=403, auth=self.get_other_credentials())
+        self.get(team_users, expect=200, auth=self.get_normal_credentials())
+        self.get(team_users, expect=200, auth=self.get_super_credentials())
 
-        # from a user, can see what teams they are on
+        # can add users to teams
+        all_users = self.get('/api/v1/users/', expect=200, auth=self.get_super_credentials())
+        for x in all_users['results']:
+            self.post(team_users, data=x, expect=403, auth=self.get_nobody_credentials())
+            self.post(team_users, data=x, expect=204, auth=self.get_normal_credentials())
+
+        self.assertEqual(Team.objects.get(pk=team.pk).users.count(), 4)
+
+        # can remove users from teams
+        for x in all_users['results']:
+            y = dict(id=x['id'], disassociate=1)
+            self.post(team_users, data=y, expect=403, auth=self.get_nobody_credentials())
+            self.post(team_users, data=y, expect=204, auth=self.get_normal_credentials())
+
+        self.assertEquals(Team.objects.get(pk=team.pk).users.count(), 0)
+
+        # from a user, can see what teams they are on (related resource)
+        print "TEAMS?"
+        print User.objects.get(username = 'other').teams.all()
 
         # from a user, can see what projects they can see based on team association
         # though this resource doesn't do anything else
-
-        # =====================================================================
-        # ADDING ORGANIZATIONS TO TEAMS        
 
         # =====================================================================
         # CREDENTIALS
