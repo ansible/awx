@@ -110,7 +110,7 @@ class UserHelper(object):
             return 'partial'
         if user.is_superuser:
             return True
-        matching_orgs = len(set(obj.organizations.all()) & set(user.admin_of_organizations.all()))
+        matching_orgs = obj.organizations.filter(admins__in = [user]).count()
         return matching_orgs
 
     @classmethod
@@ -123,7 +123,7 @@ class UserHelper(object):
     def can_user_delete(cls, user, obj):
         if user.is_superuser:
             return True
-        matching_orgs = len(set(obj.organizations.all()) & set(user.admin_of_organizations.all()))
+        matching_orgs = obj.organizations.filter(admins__in = [user]).count()
         return matching_orgs
 
 

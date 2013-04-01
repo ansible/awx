@@ -246,12 +246,30 @@ class ProjectsTest(BaseTest):
 
         self.assertEquals(Team.objects.get(pk=team.pk).users.count(), 0)
 
+        # =====================================================================
+        # USER TEAMS
+
         # from a user, can see what teams they are on (related resource)
-        print "TEAMS?"
-        print User.objects.get(username = 'other').teams.all()
+        other = User.objects.get(username = 'other')
+        url = '/api/v1/users/%s/teams/' % other.pk
+        self.get(url, expect=401)
+        self.get(url, expect=401, auth=self.get_invalid_credentials())
+        self.get(url, expect=403, auth=self.get_nobody_credentials())
+        other.organizations.add(Organization.objects.get(pk=2))
+        other.save()
+        my_teams1 = self.get(url, expect=200, auth=self.get_normal_credentials())
+        my_teams2 = self.get(url, expect=200, auth=self.get_other_credentials())
+        self.assertEqual(my_teams1['count'], 2)
+        self.assertEqual(my_teams1, my_teams2)
+
+        # =====================================================================
+        # USER PROJECTS
+
+        url = '/api/v1/users/%s/projects/' % other.pk
 
         # from a user, can see what projects they can see based on team association
         # though this resource doesn't do anything else
+        raise Exception("STOP")
 
         # =====================================================================
         # CREDENTIALS
