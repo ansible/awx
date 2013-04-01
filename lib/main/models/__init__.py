@@ -507,6 +507,10 @@ class Team(CommonModel):
     users           = models.ManyToManyField('auth.User', blank=True, related_name='teams')
     organizations   = models.ManyToManyField('Organization', related_name='teams')
 
+    def get_absolute_url(self):
+        import lib.urls
+        return reverse(lib.urls.views_TeamsDetail, args=(self.pk,))
+
 class Project(CommonModel):
     '''
     A project represents a playbook git repo that can access a set of inventories
