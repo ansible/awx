@@ -541,7 +541,9 @@ class Project(CommonModel):
         # FIXME: add this too
         return False
 
-
+    @classmethod
+    def can_user_delete(cls, user, obj):
+        return cls.can_user_administrate(user, obj)
 
 
 class Permission(CommonModelNameNotUnique):
@@ -610,11 +612,8 @@ class LaunchJob(CommonModel):
         from lib.main.tasks import run_launch_job
         launch_job_status = self.launch_job_statuses.create(name='Launch Job Status %s' % now().isoformat())
         task_result = run_launch_job.delay(launch_job_status.pk)
-        try:
-            launch_job_status.celery_task = TaskMeta.objects.get(task_id=task_result.task_id)
-            launch_job_status.save()
-        except TaskMeta.DoesNotExist:
-            pass
+        launch_job_status.celery_task = TaskMeta.objects.get(task_id=task_result.task_id)
+        launch_job_status.save()
         return launch_job_status
 
     # project has one default playbook but really should have a list of playbooks and flags ...
