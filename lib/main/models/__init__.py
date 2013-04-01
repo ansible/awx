@@ -616,8 +616,11 @@ class LaunchJob(CommonModel):
         from lib.main.tasks import run_launch_job
         launch_job_status = self.launch_job_statuses.create(name='Launch Job Status %s' % now().isoformat())
         task_result = run_launch_job.delay(launch_job_status.pk)
-        launch_job_status.celery_task = TaskMeta.objects.get(task_id=task_result.task_id)
-        launch_job_status.save()
+        try:
+            launch_job_status.celery_task = TaskMeta.objects.get(task_id=task_result.task_id)
+            launch_job_status.save()
+        except TaskMeta.DoesNotExist:
+            pass
         return launch_job_status
 
     # project has one default playbook but really should have a list of playbooks and flags ...
