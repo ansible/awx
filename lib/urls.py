@@ -37,7 +37,8 @@ views_UsersOrganizationsList       = views.UsersOrganizationsList.as_view()
 views_UsersAdminOrganizationsList  = views.UsersAdminOrganizationsList.as_view()
 
 # projects service
-views_ProjectsDetail               = views.OrganizationsDetail.as_view()
+views_ProjectsList                 = views.ProjectsList.as_view()
+views_ProjectsDetail               = views.ProjectsDetail.as_view()
 
 # audit trail service
 
@@ -75,7 +76,7 @@ views_TagsDetail                   = views.TagsDetail.as_view()
 
 urlpatterns = patterns('',
 
-    # organizations service
+    # organizations vice
     url(r'^api/v1/organizations/$',                               views_OrganizationsList),
     url(r'^api/v1/organizations/(?P<pk>[0-9]+)/$',                views_OrganizationsDetail),
     url(r'^api/v1/organizations/(?P<pk>[0-9]+)/audit_trail/$',    views_OrganizationsAuditTrailList),
@@ -93,6 +94,7 @@ urlpatterns = patterns('',
     url(r'^api/v1/users/(?P<pk>[0-9]+)/admin_of_organizations/$', views_UsersAdminOrganizationsList),
 
     # projects service
+    url(r'^api/v1/projects/$',                                    views_ProjectsList),
     url(r'^api/v1/projects/(?P<pk>[0-9]+)/$',                     views_ProjectsDetail),
     
     # audit trail service

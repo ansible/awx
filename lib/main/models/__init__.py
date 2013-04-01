@@ -542,6 +542,8 @@ class Project(CommonModel):
         return False
 
 
+
+
 class Permission(CommonModelNameNotUnique):
     '''
     A permission allows a user, project, or team to be able to use an inventory source.

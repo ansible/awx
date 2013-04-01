@@ -146,6 +146,30 @@ class OrganizationsTagsList(BaseSubList):
             raise PermissionDenied()
         return Tag.objects.filter(organization_by_tag__in = [ organization ])
 
+class ProjectsList(BaseList):
+
+    model = Project
+    serializer_class = ProjectSerializer
+    permission_classes = (CustomRbac,)
+
+    # I can see a project if
+    #   I am a superuser
+    #   I am an admin of the organization that contains the project
+    #   I am a member of a team that also contains the project
+   
+    def _get_queryset(self):
+        ''' I can see organizations when I am a superuser, or I am an admin or user in that organization '''
+        base = Project.objects
+        if self.request.user.is_superuser:
+            return base.all()
+        my_teams = Team.objects.filter(users__in = [ self.request.user])
+        my_orgs  = Organization.objects.filter(admins__in = [ self.request.user ])
+        return base.filter(
+            teams__in = my_teams
+        ).distinct() | base.filter(
+            organizations__in = my_orgs
+        ).distinct()
+
 class ProjectsDetail(BaseDetail):
 
     model = Project
