@@ -1,19 +1,19 @@
-# (c) 2013, AnsibleWorks, Michael DeHaan <michael@ansibleworks.com>
+# Copyright (c) 2013 AnsibleWorks, Inc.
 #
 # This file is part of Ansible Commander
 #
 # Ansible Commander is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
 #
-# Ansible Commander is distributed in the hope that it will be useful,
+# This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# GNU Affero General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
-# along with Ansible Commander.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 from django.db import models
@@ -510,6 +510,32 @@ class Team(CommonModel):
     def get_absolute_url(self):
         import lib.urls
         return reverse(lib.urls.views_TeamsDetail, args=(self.pk,))
+
+    @classmethod
+    def can_user_administrate(cls, user, obj):
+        if user.is_superuser:
+            return True
+        if obj.organizations.filter(admins__in = [ user ]).count():
+            return True
+        return False
+
+    @classmethod
+    def can_user_read(cls, user, obj):
+        if cls.can_user_administrate(user, obj):
+            return True
+        if obj.users.filter(pk__in = [ user.pk ]).count():
+            return True
+        return False
+
+    @classmethod
+    def can_user_add(cls, user, data):
+        if user.is_superuser:
+            return True
+        if Organization.objects.filter(admins__in = [user]).count():
+            # team assignment to organizations is handled elsewhere, this just creates
+            # a blank team
+            return True
+        return False
 
 class Project(CommonModel):
     '''
