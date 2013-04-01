@@ -129,7 +129,7 @@ class TeamSerializer(BaseSerializer):
 
     class Meta:
         model = Team
-        fields = ('url', 'id', 'related', 'name', 'description', 'creation_date')
+        fields = ('url', 'id', 'related', 'name', 'description', 'organization', 'creation_date')
 
     def get_related(self, obj):
         # FIXME: add related resources: projects, users, organizations

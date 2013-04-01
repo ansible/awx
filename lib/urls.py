@@ -27,6 +27,7 @@ views_OrganizationsUsersList       = views.OrganizationsUsersList.as_view()
 views_OrganizationsAdminsList      = views.OrganizationsAdminsList.as_view()
 views_OrganizationsProjectsList    = views.OrganizationsProjectsList.as_view()
 views_OrganizationsTagsList        = views.OrganizationsTagsList.as_view()
+views_OrganizationsTeamsList       = views.OrganizationsTeamsList.as_view()
 
 # users service
 views_UsersList                    = views.UsersList.as_view()
@@ -87,6 +88,7 @@ urlpatterns = patterns('',
     url(r'^api/v1/organizations/(?P<pk>[0-9]+)/admins/$',         views_OrganizationsAdminsList),
     url(r'^api/v1/organizations/(?P<pk>[0-9]+)/projects/$',       views_OrganizationsProjectsList),
     url(r'^api/v1/organizations/(?P<pk>[0-9]+)/tags/$',           views_OrganizationsTagsList),
+    url(r'^api/v1/organizations/(?P<pk>[0-9]+)/teams/$',          views_OrganizationsTeamsList),
 
     # users service
     url(r'^api/v1/users/$',                                       views_UsersList),

@@ -505,7 +505,7 @@ class Team(CommonModel):
 
     projects        = models.ManyToManyField('Project', blank=True, related_name='teams')
     users           = models.ManyToManyField('auth.User', blank=True, related_name='teams')
-    organizations   = models.ManyToManyField('Organization', related_name='teams')
+    organization    = models.ForeignKey('Organization', blank=False, null=True, on_delete=SET_NULL, related_name='teams')
 
     def get_absolute_url(self):
         import lib.urls
@@ -513,9 +513,10 @@ class Team(CommonModel):
 
     @classmethod
     def can_user_administrate(cls, user, obj):
+        # FIXME -- audit when this is called explicitly, if any
         if user.is_superuser:
             return True
-        if obj.organizations.filter(admins__in = [ user ]).count():
+        if obj.organization and (user in obj.organization.admins.all()):
             return True
         return False
 
@@ -537,6 +538,10 @@ class Team(CommonModel):
             return True
         return False
 
+    @classmethod
+    def can_user_delete(cls, user, obj):
+        return cls.can_user_administrate(user, obj)
+         
 class Project(CommonModel):
     '''
     A project represents a playbook git repo that can access a set of inventories

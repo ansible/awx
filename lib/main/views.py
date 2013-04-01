@@ -146,6 +146,24 @@ class OrganizationsTagsList(BaseSubList):
             raise PermissionDenied()
         return Tag.objects.filter(organization_by_tag__in = [ organization ])
 
+class OrganizationsTeamsList(BaseSubList):
+    
+    model = Team
+    serializer_class = TeamSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Organization
+    relationship = 'teams'
+    postable = True
+    inject_primary_key_on_post_as = 'organization'
+    severable = False
+
+    def _get_queryset(self):
+        ''' to list users in the organization, I must be a superuser or org admin '''
+        organization = Organization.objects.get(pk=self.kwargs['pk'])
+        if not self.request.user.is_superuser and not self.request.user in organization.admins.all():
+            raise PermissionDenied()
+        return Team.objects.filter(organization = organization)
+
 class TeamsList(BaseList):
 
     model = Team
