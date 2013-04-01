@@ -269,43 +269,14 @@ class ProjectsTest(BaseTest):
 
         # from a user, can see what projects they can see based on team association
         # though this resource doesn't do anything else
-        raise Exception("STOP")
+        got = self.get(url, expect=200, auth=self.get_other_credentials())
+        self.assertEquals(got['count'], 5)
+        got = self.get(url, expect=403, auth=self.get_nobody_credentials())
+        got = self.get(url, expect=401, auth=self.get_invalid_credentials())
+        got = self.get(url, expect=401)
+        got = self.get(url, expect=200, auth=self.get_super_credentials())
+        
 
-        # =====================================================================
-        # CREDENTIALS
-
-        credentials = '/api/v1/credentials/'
-        team_creds = '/api/v1/teams/1/credentials/'
-        user_creds = '/api/v1/users/1/credentials/'
-
-        # can add credentials for a team
-
-        # can add credentials for a user
-
-        # can list credentials belonging to a user
-
-        # can list credentials belonging to a team
-
-        # can access all credentials for a user (team+project) in one view
-
-        # ======================================================================
-        # PERMISSIONS
-
-        permissions = '/api/v1/permissions/'
-        user_permissions = '/api/v1/users/1/permissions/'
-        team_permissions = '/api/v1/teams/1/permissions/'
-
-        # can add permissions to a user
-
-        # can add permissions to a team
-
-        # can list permissions
-
-        # can list permissions that match a user
-
-        # can list permissions that match a project
-
-        # can remove permissions
 
 
         

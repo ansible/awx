@@ -319,6 +319,22 @@ class UsersTeamsList(BaseSubList):
             raise PermissionDenied()
         return Team.objects.filter(users__in = [ user ])
 
+class UsersProjectsList(BaseSubList):
+
+    model = Project
+    serializer_class = ProjectSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = User
+    relationship = 'teams'
+    postable = False
+
+    def _get_queryset(self):
+        user = User.objects.get(pk=self.kwargs['pk'])
+        if not UserHelper.can_user_administrate(self.request.user, user):
+            raise PermissionDenied()
+        teams = user.teams.all()
+        return Project.objects.filter(teams__in = teams)
+
 class UsersOrganizationsList(BaseSubList):
 
     model = Organization
