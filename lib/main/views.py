@@ -176,6 +176,21 @@ class ProjectsDetail(BaseDetail):
     serializer_class = ProjectSerializer
     permission_classes = (CustomRbac,)
 
+class ProjectsOrganizationsList(BaseSubList):
+
+    model = Organization
+    serializer_class = OrganizationSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Project
+    relationship = 'organizations'
+    postable = False
+
+    def _get_queryset(self):
+        project = Project.objects.get(pk=self.kwargs['pk'])
+        if not self.request.user.is_superuser:
+            raise PermissionDenied()
+        return Organization.objects.filter(projects__in = [ project ])
+
 class TagsDetail(BaseDetail):
 
     model = Tag
