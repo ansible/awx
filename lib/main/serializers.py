@@ -135,6 +135,24 @@ class TeamSerializer(BaseSerializer):
         # FIXME: add related resources: projects, users, organizations
         return dict()
 
+class CredentialSerializer(BaseSerializer):
+
+    # add the URL and related resources
+    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    related       = serializers.SerializerMethodField('get_related')
+
+    # FIXME: may want to make soem of these filtered based on user accessing
+    class Meta:
+        model = Credential
+        fields = (
+            'url', 'id', 'related', 'name', 'description', 'creation_date', 
+            'ssh_key_path', 'ssh_key_data', 'ssh_key_unlock', 'ssh_password', 'sudo_password',
+            'user', 'team'
+        )
+
+    def get_related(self, obj):
+        # FIXME: add related resources: projects, users, organizations
+        return dict()
 
 class UserSerializer(BaseSerializer):
    

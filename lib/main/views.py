@@ -335,6 +335,25 @@ class UsersProjectsList(BaseSubList):
         teams = user.teams.all()
         return Project.objects.filter(teams__in = teams)
 
+class UsersCredentialsList(BaseSubList):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = User
+    relationship = 'credentials'
+    postable = True
+    inject_primary_key_on_post_as = 'user'
+
+    def _get_queryset(self):
+        user = User.objects.get(pk=self.kwargs['pk'])
+        if not UserHelper.can_user_administrate(self.request.user, user):
+            raise PermissionDenied()
+        project_credentials = Credential.objects.filter(
+            projects__teams__users__in = [ user ]
+        )
+        return user.credentials.distinct() | project_credentials.distinct()
+
 class UsersOrganizationsList(BaseSubList):
 
     model = Organization

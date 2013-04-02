@@ -485,7 +485,6 @@ class Credential(CommonModel):
         app_label = 'main'
 
     user            = models.ForeignKey('auth.User', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
-    project         = models.ForeignKey('Project', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
     team            = models.ForeignKey('Team', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
 
     ssh_key_path    = models.CharField(blank=True, default='', max_length=4096)

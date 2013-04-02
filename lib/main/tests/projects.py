@@ -276,6 +276,69 @@ class ProjectsTest(BaseTest):
         got = self.get(url, expect=401)
         got = self.get(url, expect=200, auth=self.get_super_credentials())
         
+        # =====================================================================
+        # CREDENTIALS
+  
+        other_creds = '/api/v1/users/%s/credentials/' % other.pk
+        team_creds  = '/api/v1/teams/%s/credentials/' % team.pk
+
+        new_credentials = dict(
+            name = 'credential'
+            project = Project.objects.all()[0].pk,
+            ssh_key_path = 'foo',
+            ssh_key_data = 'bar',
+            ssh_key_unlock = 'baz',
+            ssh_password = 'narf',
+            sudo_password = 'troz'
+        )
+
+        # can add credentials to a user (if user or org admin or super user)
+        self.post(other_creds, data=new_credentials, expect=401)
+        self.post(other_creds, data=new_credentials, expect=401, auth=self.get_invalid_credentials())
+        self.post(other_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
+        self.post(other_creds, data=new_credentials, expect=201, auth=self.get_normal_credentials())
+        self.post(other_creds, data=new_credentials, expect=201, auth=self.get_other_credentials())
+        self.post(other_creds, data=new_credentials, expect=403, auth=self.get_nobody_credentials())
+
+        # can add credentials to a team
+        self.post(team_creds, data=new_credentials, expect=401)
+        self.post(team_creds, data=new_credentials, expect=401, auth=self.get_invalid_credentials())
+        self.post(team_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
+        self.post(team_creds, data=new_credentials, expect=201, auth=self.get_normal_credentials())
+        self.post(team_creds, data=new_credentials, expect=201, auth=self.get_other_credentials())
+        self.post(team_creds, data=new_credentials, expect=403, auth=self.get_nobody_credentials())
+
+        # can list credentials on a user
+        self.get(other_creds, expect=401)
+        self.get(other_creds, expect=401, auth=self.get_invalid_credentials())
+        self.get(other_creds, expect=201, auth=self.get_super_credentials())
+        self.get(other_creds, expect=201, auth=self.get_normal_credentials())
+        self.get(other_creds, expect=201, auth=self.get_other_credentials())
+        self.get(other_creds, expect=403, auth=self.get_nobody_credentials())
+
+        # can list credentials on a team
+        self.get(team_creds, expect=401)
+        self.get(team_creds, expect=401, auth=self.get_invalid_credentials())
+        self.get(team_creds, expect=201, auth=self.get_super_credentials())
+        self.get(team_creds, expect=201, auth=self.get_normal_credentials())
+        self.get(team_creds, expect=201, auth=self.get_other_credentials())
+        self.get(team_creds, expect=403, auth=self.get_nobody_credentials())
+
+        # can edit a credential
+        # can remove credentials from a user (via disassociate)
+        # can remove credentials from a team (via disassociate)
+        # can delete a credential directly
+
+        # =====================================================================
+        # PERMISSIONS
+        # can add permissions to a user
+        # can add permissions on a team
+        # can list permissions on a user
+        # can list permissions on a team
+        # can edit a permission
+        # can remove credentials from a user
+        # can remove credentials from a team
+
 
 
 
