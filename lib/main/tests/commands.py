@@ -139,6 +139,15 @@ class AcomInventoryTest(BaseCommandTest):
             group = inventory.groups.get(name=k)
             self.assertEqual(set(v),
                              set(group.hosts.values_list('name', flat=True)))
+        # Command line argument for inventory ID should take precedence over
+        # environment variable.
+        inventory_pks = set(map(lambda x: x.pk, self.inventories))
+        invalid_id = [x for x in xrange(9999) if x not in inventory_pks][0]
+        os.environ['ACOM_INVENTORY_ID'] = str(invalid_id)
+        result, stdout, stderr = self.run_command('acom_inventory', list=True,
+                                               inventory=inventory.pk)
+        self.assertEqual(result, None)
+        data = json.loads(stdout)
 
     def test_list_with_inventory_id_in_environment(self):
         inventory = self.inventories[1]

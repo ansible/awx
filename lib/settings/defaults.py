@@ -137,12 +137,12 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    'lib.main',
     'south',
     'rest_framework',
     'django_extensions',
     'djcelery',
     'kombu.transport.django',
+    'lib.main',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
