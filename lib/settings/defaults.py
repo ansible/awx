@@ -56,11 +56,6 @@ DATABASES = {
     }
 }
 
-#if 'test' in sys.argv:
-#    DATABASES['default'] = {
-#        'ENGINE': 'django.db.backends.sqlite3'
-#    }
-
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 #
