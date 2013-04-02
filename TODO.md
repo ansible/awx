@@ -1,14 +1,14 @@
 TODO items for ansible commander
 ================================
 
-(merge code)
-
-NEXT STEPS
-
-* Michael -- flesh out REST model & tests for everything, API guide
-* Chris ---- document celery devs stuff.
-* Chris ---- inventory script is done, integrate with celery system, make celery REST triggerable, callback plugin
-* Michael -- enhance callback plugin to provide runner and playbook context
+4/2 NOTES
+=========
+* supervisord to start celery, modify ansible playbook to set up supervisord <- Chris
+* host relationships in DB, last launch job status per host, etc (self.play.inventory) <- Chris
+* make launch job rest triggerable & launch job statuses readable.  launch_job.start() <-- MPD
+* Chris ---- callback plugin calls external script <-- Chris
+  ansible_delegate_callback calls ACOM_DATABASE_LOGGER script ?
+* do we need something other than default playbook (ProjectOptions) <-- BOTH, TBD
 
 REST TODO
 ---------
