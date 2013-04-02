@@ -59,6 +59,7 @@ class CallbackModule(object):
 
     def _log_event(self, event, **event_data):
         #print '====', event, args, kwargs
+        # self.playbook.inventory
         if hasattr(self, 'launch_job_status'):
             kwargs = {
                 'event': event,

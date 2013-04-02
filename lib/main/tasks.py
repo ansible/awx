@@ -45,7 +45,8 @@ def run_launch_job(launch_job_status_pk):
     playbook = launch_job.project.default_playbook
     cmdline = ['ansible-playbook', '-i', inventory_script]#, '-v']
     cmdline.append(playbook)
- 
+
+    # FIXME: How to cancel/interrupt job? (not that important for now)
     proc = subprocess.Popen(cmdline, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, env=env)
     stdout, stderr = proc.communicate()

@@ -403,6 +403,10 @@ class Host(CommonModelNameNotUnique):
         import lib.urls
         return reverse(lib.urls.views_HostsDetail, args=(self.pk,))
 
+    # relationship to LaunchJobStatus
+    # relationship to LaunchJobStatusEvent
+    # last_job_status
+
 class Group(CommonModelNameNotUnique):
 
     '''
