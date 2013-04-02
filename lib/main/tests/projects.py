@@ -283,7 +283,7 @@ class ProjectsTest(BaseTest):
         team_creds  = '/api/v1/teams/%s/credentials/' % team.pk
 
         new_credentials = dict(
-            name = 'credential'
+            name = 'credential',
             project = Project.objects.all()[0].pk,
             ssh_key_path = 'foo',
             ssh_key_data = 'bar',
