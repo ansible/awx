@@ -29,4 +29,8 @@ See SETUP.md for requirements and details.
 License
 =======
 
-Ansible-Commander is GPLv3, see COPYING, (C) AnsibleWorks, 2013.
+Ansible-Commander is made available under the Affero GPL v3, see COPYING, (C) AnsibleWorks, 2013.
+
+Commercial licensing is also available.
+
+
