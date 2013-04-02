@@ -487,11 +487,38 @@ class Credential(CommonModel):
     user            = models.ForeignKey('auth.User', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
     team            = models.ForeignKey('Team', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
 
-    ssh_key_path    = models.CharField(blank=True, default='', max_length=4096)
-    ssh_key_data    = models.TextField(blank=True, default='') # later
-    ssh_key_unlock  = models.CharField(blank=True, default='', max_length=1024)
-    ssh_password    = models.CharField(blank=True, default='', max_length=1024)
-    sudo_password   = models.CharField(blank=True, default='', max_length=1024)
+    # IF ssh_key_path is SET
+    #
+    # STAGE 1: SSH KEY SUPPORT
+    #
+    # ssh-agent bash &
+    # save keyfile to tempdir in /var/tmp (permissions guarded)
+    # ssh-add path-to-keydata
+    # key could locked or unlocked, so use 'expect like' code to enter it at the prompt
+    #    if key is locked:
+    #       if ssh_key_unlock is provided provide key password
+    #       if not provided, FAIL
+    #
+    # default_username if set corresponds to -u on ansible-playbook, if unset -u root
+    #
+    # STAGE 2:
+    # OR if ssh_password is set instead, do not use SSH agent
+    #    set ANSIBLE_SSH_PASSWORD
+    #
+    # STAGE 3:
+    #
+    # MICHAEL: modify ansible/ansible-playbook such that 
+    # if ANSIBLE_PASSWORD or ANSIBLE_SUDO_PASSWORD is set
+    # you do not have to use --ask-pass and --ask-sudo-pass, so we don't have to do interactive
+    # stuff with that.
+    #
+    # ansible-playbook foo.yml ...
+
+    ssh_key_data     = models.TextField(blank=True, default='')
+    ssh_key_unlock   = models.CharField(blank=True, default='', max_length=1024)
+    default_username = models.CharField(blank=True, default='', max_length=1024) 
+    ssh_password     = models.CharField(blank=True, default='', max_length=1024)
+    sudo_password    = models.CharField(blank=True, default='', max_length=1024)
 
 
 class Team(CommonModel):

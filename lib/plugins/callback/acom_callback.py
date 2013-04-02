@@ -25,7 +25,7 @@ class CallbackModule(object):
     '''
 
     def __init__(self):
-        # he DJANGO_SETTINGS_MODULE environment variable *should* already
+        # the DJANGO_SETTINGS_MODULE environment variable *should* already
         # be set if this callback is called when executing a playbook via a
         # celery task, otherwise just bail out.
         settings_module_name = os.environ.get('DJANGO_SETTINGS_MODULE', None)
@@ -113,7 +113,7 @@ class CallbackModule(object):
                                 salt=None, default=None):
         self._log_event('playbook_on_vars_prompt', varname=varname,
                         private=private, prompt=prompt, encrypt=encrypt,
-                        confirm=confirm, salt_size=salt_size, salt=salf,
+                        confirm=confirm, salt_size=salt_size, salt=salt,
                         default=default)
 
     def playbook_on_setup(self):
