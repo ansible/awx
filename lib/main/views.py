@@ -39,9 +39,9 @@ class OrganizationsList(BaseList):
 
     # I can see the organizations if:
     #   I am a superuser
-    #   I am an admin of the organization 
+    #   I am an admin of the organization
     #   I am a member of the organization
-   
+
     def _get_queryset(self):
         ''' I can see organizations when I am a superuser, or I am an admin or user in that organization '''
         base = Organization.objects
@@ -78,7 +78,7 @@ class OrganizationsAuditTrailList(BaseSubList):
 
 
 class OrganizationsUsersList(BaseSubList):
-    
+
     model = User
     serializer_class = UserSerializer
     permission_classes = (CustomRbac,)
@@ -95,7 +95,7 @@ class OrganizationsUsersList(BaseSubList):
         return User.objects.filter(organizations__in = [ organization ])
 
 class OrganizationsAdminsList(BaseSubList):
-    
+
     model = User
     serializer_class = UserSerializer
     permission_classes = (CustomRbac,)
@@ -112,7 +112,7 @@ class OrganizationsAdminsList(BaseSubList):
         return User.objects.filter(admin_of_organizations__in = [ organization ])
 
 class OrganizationsProjectsList(BaseSubList):
-    
+
     model = Project
     serializer_class = ProjectSerializer
     permission_classes = (CustomRbac,)
@@ -120,7 +120,7 @@ class OrganizationsProjectsList(BaseSubList):
     relationship = 'projects'    # " "
     postable = True
     inject_primary_key_on_post_as = 'organization'
-    
+
     def _get_queryset(self):
         ''' to list projects in the organization, I must be a superuser or org admin '''
         organization = Organization.objects.get(pk=self.kwargs['pk'])
@@ -129,7 +129,7 @@ class OrganizationsProjectsList(BaseSubList):
         return Project.objects.filter(organizations__in = [ organization ])
 
 class OrganizationsTagsList(BaseSubList):
-    
+
     model = Tag
     serializer_class = TagSerializer
     permission_classes = (CustomRbac,)
@@ -147,7 +147,7 @@ class OrganizationsTagsList(BaseSubList):
         return Tag.objects.filter(organization_by_tag__in = [ organization ])
 
 class OrganizationsTeamsList(BaseSubList):
-    
+
     model = Team
     serializer_class = TeamSerializer
     permission_classes = (CustomRbac,)
@@ -174,7 +174,7 @@ class TeamsList(BaseList):
     #   I am a superuser
     #   I am an admin of the organization that the team is
     #   I am on that team
-   
+
     def _get_queryset(self):
         ''' I can see organizations when I am a superuser, or I am an admin or user in that organization '''
         base = Team.objects
@@ -193,7 +193,7 @@ class TeamsDetail(BaseDetail):
     permission_classes = (CustomRbac,)
 
 class TeamsUsersList(BaseSubList):
-    
+
     model = User
     serializer_class = UserSerializer
     permission_classes = (CustomRbac,)
@@ -224,7 +224,7 @@ class ProjectsList(BaseList):
     #   I am a superuser
     #   I am an admin of the organization that contains the project
     #   I am a member of a team that also contains the project
-   
+
     def _get_queryset(self):
         ''' I can see organizations when I am a superuser, or I am an admin or user in that organization '''
         base = Project.objects
@@ -279,15 +279,15 @@ class UsersList(BaseList):
             user = User.objects.get(pk=pk)
             user.set_password(password)
             user.save()
-        return result    
+        return result
 
     def _get_queryset(self):
         ''' I can see user records when I'm a superuser, I'm that user, I'm their org admin, or I'm on a team with that user '''
         base = User.objects
         if self.request.user.is_superuser:
             return base.all()
-        mine = base.filter(pk = self.request.user.pk).distinct() 
-        admin_of = base.filter(organizations__in = self.request.user.admin_of_organizations.all()).distinct() 
+        mine = base.filter(pk = self.request.user.pk).distinct()
+        admin_of = base.filter(organizations__in = self.request.user.admin_of_organizations.all()).distinct()
         same_team = base.filter(teams__in = self.request.user.teams.all()).distinct()
         return mine | admin_of | same_team
 
@@ -362,7 +362,7 @@ class UsersOrganizationsList(BaseSubList):
     parent_model = User
     relationship = 'organizations'
     postable = False
-    
+
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
         if not UserHelper.can_user_administrate(self.request.user, user):
@@ -391,7 +391,7 @@ class UsersDetail(BaseDetail):
     permission_classes = (CustomRbac,)
 
     def put_filter(self, request, *args, **kwargs):
-        ''' make sure non-read-only fields that can only be edited by admins, are only edited by admins ''' 
+        ''' make sure non-read-only fields that can only be edited by admins, are only edited by admins '''
         obj = User.objects.get(pk=kwargs['pk'])
         if EditHelper.illegal_changes(request, obj, UserHelper):
             raise PermissionDenied()
@@ -399,6 +399,13 @@ class UsersDetail(BaseDetail):
             obj.set_password(request.DATA['password'])
             obj.save()
             request.DATA.pop('password')
+
+class CredentialsDetail(BaseDetail):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+    permission_classes = (CustomRbac,)
+
 
 class InventoryList(BaseList):
 
@@ -438,9 +445,9 @@ class HostsList(BaseList):
     permission_classes = (CustomRbac,)
 
     def _get_queryset(self):
-        ''' 
+        '''
         I can see hosts when:
-           I'm a superuser, 
+           I'm a superuser,
            or an organization admin of an inventory they are in
            or when I have allowing read permissions via a user or team on an inventory they are in
         '''
@@ -524,7 +531,7 @@ class GroupsChildrenList(BaseSubList):
     def _get_queryset(self):
 
         # FIXME: this is the mostly the same as GroupsList, share code similar to how done with Host and Group objects.
- 
+
         parent = Group.objects.get(pk=self.kwargs['pk'])
 
         # FIXME: verify read permissions on this object are still required at a higher level

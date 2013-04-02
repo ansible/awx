@@ -34,7 +34,7 @@ import json as python_json
 # FIXME: machinery for auto-adding audit trail logs to all CREATE/EDITS
 
 class BaseList(generics.ListCreateAPIView):
- 
+
     def list_permissions_check(self, request, obj=None):
         ''' determines some early yes/no access decisions, pre-filtering '''
         if request.method == 'GET':
@@ -50,7 +50,7 @@ class BaseList(generics.ListCreateAPIView):
                       raise PermissionDenied()
                   return True
         raise exceptions.NotImplementedError
-   
+
     def get_queryset(self):
         base = self._get_queryset()
         model = self.__class__.model
@@ -121,11 +121,16 @@ class BaseSubList(BaseList):
                     # save the object through the serializer, reload and returned the saved object deserialized
                     obj = ser.save()
                     ser = self.__class__.serializer_class(obj)
-            
+
                     # now make sure we could have already attached the two together.  If we could not have, raise an exception
                     # such that the transaction does not commit.
-                    if not self.__class__.parent_model.can_user_attach(request.user, main, obj, self.__class__.relationship):
-                        raise PermissionDenied()
+                    if self.__class__.parent_model != User:
+                        if not self.__class__.parent_model.can_user_attach(request.user, main, obj, self.__class__.relationship):
+                            raise PermissionDenied()
+                    else:
+                        # FIXME: should generalize this
+                        if not UserHelper.can_user_attach(request.user, main, obj, self.__class__.relationship):
+                            raise PermissionDenied()
 
                     return Response(status=status.HTTP_201_CREATED, data=ser.data)
 
@@ -141,7 +146,7 @@ class BaseSubList(BaseList):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         sub = subs[0]
         relationship = getattr(main, self.__class__.relationship)
-  
+
         if not 'disassociate' in request.DATA:
             if not request.user.is_superuser and not self.__class__.parent_model.can_user_attach(request.user, main, sub, self.__class__.relationship):
                 raise PermissionDenied()
@@ -215,14 +220,14 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
         pass
 
 class VariableBaseDetail(BaseDetail):
-    ''' 
-    an object that is always 1 to 1 with the foreign key of another object 
-    and does not have it's own key, such as HostVariableDetail 
+    '''
+    an object that is always 1 to 1 with the foreign key of another object
+    and does not have it's own key, such as HostVariableDetail
     '''
 
     def destroy(self, request, *args, **kwargs):
         raise PermissionDenied()
-    
+
     def delete_permissions_check(self, request, obj):
         raise PermissionDenied()
 
@@ -285,4 +290,4 @@ class VariableBaseDetail(BaseDetail):
         if not has_permission:
             raise PermissionDenied()
         return Response(status=status.HTTP_200_OK, data=python_json.loads(this_object.data))
- 
+

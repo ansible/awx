@@ -285,7 +285,7 @@ class ProjectsTest(BaseTest):
         new_credentials = dict(
             name = 'credential',
             project = Project.objects.all()[0].pk,
-            ssh_key_path = 'foo',
+            default_username = 'foo',
             ssh_key_data = 'bar',
             ssh_key_unlock = 'baz',
             ssh_password = 'narf',

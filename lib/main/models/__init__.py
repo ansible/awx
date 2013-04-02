@@ -126,6 +126,13 @@ class UserHelper(object):
         matching_orgs = obj.organizations.filter(admins__in = [user]).count()
         return matching_orgs
 
+    @classmethod
+    def can_user_attach(cls, user, obj, sub_obj, relationship_type):
+        if type(sub_obj) != User:
+            if not sub_obj.can_user_read(user, sub_obj):
+                return False
+        rc = cls.can_user_administrate(user, obj)
+        return rc
 
 class PrimordialModel(models.Model):
     '''
@@ -186,11 +193,11 @@ class CommonModel(PrimordialModel):
     name          = models.CharField(max_length=512, unique=True)
 
 class CommonModelNameNotUnique(PrimordialModel):
-    ''' a base model where the name is not unique '''    
+    ''' a base model where the name is not unique '''
 
     class Meta:
         abstract = True
-    
+
     name          = models.CharField(max_length=512, unique=False)
 
 class Tag(models.Model):
@@ -290,7 +297,7 @@ class Inventory(CommonModel):
         unique_together = (("name", "organization"),)
 
     organization = models.ForeignKey(Organization, null=False, related_name='inventories')
-    
+
     def get_absolute_url(self):
         import lib.urls
         return reverse(lib.urls.views_InventoryDetail, args=(self.pk,))
@@ -308,16 +315,16 @@ class Inventory(CommonModel):
             user = user,
             permission_type__in = allowed
         ).count()
-        
+
         result = (by_org_admin + by_team_permission + by_user_permission)
         return result > 0
 
     @classmethod
     def _has_any_inventory_permission_types(cls, user, allowed):
-        ''' 
-        rather than checking for a permission on a specific inventory, return whether we have 
+        '''
+        rather than checking for a permission on a specific inventory, return whether we have
         permissions on any inventory.  This is primarily used to decide if the user can create
-        host or group objects 
+        host or group objects
         '''
 
         if user.is_superuser:
@@ -332,7 +339,7 @@ class Inventory(CommonModel):
         by_user_permission = user.permissions.filter(
             permission_type__in = allowed
         ).count()
-    
+
         result = (by_org_admin + by_team_permission + by_user_permission)
         return result > 0
 
@@ -380,7 +387,7 @@ class Host(CommonModelNameNotUnique):
     class Meta:
         app_label = 'main'
         unique_together = (("name", "inventory"),)
-    
+
     variable_data  = models.OneToOneField('VariableData', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='host')
     inventory      = models.ForeignKey('Inventory', null=False, related_name='hosts')
 
@@ -390,7 +397,7 @@ class Host(CommonModelNameNotUnique):
     @classmethod
     def can_user_read(cls, user, obj):
         return Inventory.can_user_read(user, obj.inventory)
-    
+
     @classmethod
     def can_user_add(cls, user, data):
         if not 'inventory' in data:
@@ -432,7 +439,7 @@ class Group(CommonModelNameNotUnique):
         inventory = Inventory.objects.get(pk=data['inventory'])
         return Inventory._has_permission_types(user, inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
 
-   
+
     @classmethod
     def can_user_administrate(cls, user, obj):
         # here this controls whether the user can attach subgroups
@@ -511,7 +518,7 @@ class Credential(CommonModel):
     #
     # STAGE 3:
     #
-    # MICHAEL: modify ansible/ansible-playbook such that 
+    # MICHAEL: modify ansible/ansible-playbook such that
     # if ANSIBLE_PASSWORD or ANSIBLE_SUDO_PASSWORD is set
     # you do not have to use --ask-pass and --ask-sudo-pass, so we don't have to do interactive
     # stuff with that.
@@ -520,10 +527,24 @@ class Credential(CommonModel):
 
     ssh_key_data     = models.TextField(blank=True, default='')
     ssh_key_unlock   = models.CharField(blank=True, default='', max_length=1024)
-    default_username = models.CharField(blank=True, default='', max_length=1024) 
+    default_username = models.CharField(blank=True, default='', max_length=1024)
     ssh_password     = models.CharField(blank=True, default='', max_length=1024)
     sudo_password    = models.CharField(blank=True, default='', max_length=1024)
 
+    @classmethod
+    def can_user_read(cls, user, obj):
+        ''' a user can be read if they are on the same team or can be administrated '''
+        if user.is_superuser:
+            return True
+        if user == obj.user:
+            return True
+        if Organizations.filter(admins__in = [ user ], users__in = [ obj.user ]).count():
+            return True
+        return False
+
+    def get_absolute_url(self):
+        import lib.urls
+        return reverse(lib.urls.views_CredentialsDetail, args=(self.pk,))
 
 class Team(CommonModel):
     '''
@@ -571,7 +592,7 @@ class Team(CommonModel):
     @classmethod
     def can_user_delete(cls, user, obj):
         return cls.can_user_administrate(user, obj)
-         
+
 class Project(CommonModel):
     '''
     A project represents a playbook git repo that can access a set of inventories
@@ -632,7 +653,7 @@ class Permission(CommonModelNameNotUnique):
     # for example, user A on inventory X has write permissions                 (PERM_INVENTORY_WRITE)
     #              team C on inventory X has read permissions                  (PERM_INVENTORY_READ)
     #              team C on inventory X and project Y has launch permissions  (PERM_INVENTORY_DEPLOY)
-    #              team C on inventory X and project Z has dry run permissions (PERM_INVENTORY_CHECK)   
+    #              team C on inventory X and project Z has dry run permissions (PERM_INVENTORY_CHECK)
     #
     # basically for launching, permissions can be awarded to the whole inventory source or just the inventory source
     # in context of a given project.
@@ -640,14 +661,14 @@ class Permission(CommonModelNameNotUnique):
     # the project parameter is not used when dealing with READ, WRITE, or ADMIN permissions.
 
     permission_type = models.CharField(max_length=64, choices=PERMISSION_TYPE_CHOICES)
-    
+
     def __unicode__(self):
         return unicode("Permission(name=%s,ON(user=%s,team=%s),FOR(project=%s,inventory=%s,type=%s))" % (
             self.name,
-            self.user, 
-            self.team, 
-            self.project, 
-            self.inventory, 
+            self.user,
+            self.team,
+            self.project,
+            self.inventory,
             self.permission_type
         ))
 

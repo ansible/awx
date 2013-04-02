@@ -146,7 +146,7 @@ class CredentialSerializer(BaseSerializer):
         model = Credential
         fields = (
             'url', 'id', 'related', 'name', 'description', 'creation_date', 
-            'ssh_key_path', 'ssh_key_data', 'ssh_key_unlock', 'ssh_password', 'sudo_password',
+            'default_username', 'ssh_key_data', 'ssh_key_unlock', 'ssh_password', 'sudo_password',
             'user', 'team'
         )
 

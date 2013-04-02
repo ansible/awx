@@ -80,6 +80,9 @@ views_VariableDetail               = views.VariableDetail.as_view()
 # tags service
 views_TagsDetail                   = views.TagsDetail.as_view()
 
+# credentials service
+views_CredentialsDetail            = views.CredentialsDetail.as_view()
+
 
 urlpatterns = patterns('',
 
@@ -107,7 +110,7 @@ urlpatterns = patterns('',
     url(r'^api/v1/projects/$',                                    views_ProjectsList),
     url(r'^api/v1/projects/(?P<pk>[0-9]+)/$',                     views_ProjectsDetail),
     url(r'^api/v1/projects/(?P<pk>[0-9]+)/organizations/$',       views_ProjectsOrganizationsList),
-    
+
     # audit trail service
     # api/v1/audit_trails/
     # api/v1/audit_trails/N/
@@ -119,7 +122,7 @@ urlpatterns = patterns('',
     url(r'^api/v1/teams/(?P<pk>[0-9]+)/$',                        views_TeamsDetail),
     url(r'^api/v1/teams/(?P<pk>[0-9]+)/users/$',                  views_TeamsUsersList),
 
-    # api/v1/teams/N/   
+    # api/v1/teams/N/
     # api/v1/teams/N/users/
 
     # inventory service
@@ -155,9 +158,7 @@ urlpatterns = patterns('',
     # ... and tag relations on all resources
 
     # credentials services
-    # ... users
-    # ... teams
-    # ... projects (?)
+    url(r'^api/v1/credentials/(?P<pk>[0-9]+)/$',                  views_CredentialsDetail),
 
     # permissions services
     # ... users
