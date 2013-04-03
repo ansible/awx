@@ -44,7 +44,7 @@ Create Users and Organizations
  * Confirm your super user account at /api/v1/me/
  * Create some organizations at /api/v1/organizations/
  * Create some users by posting to /api/v1/organizations/X/users/
- * Add some users to be admins of those organizations by posting to /api/v1/organizatoins/X/admins/
+ * Add some users to be admins of those organizations by posting to /api/v1/organizations/X/admins/
  * At this point, use your org admin account, instead of your superuser account, if you wish
 
 Build Out Inventory
