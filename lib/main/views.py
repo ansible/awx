@@ -226,12 +226,13 @@ class TeamsCredentialsList(BaseSubList):
 
     def _get_queryset(self):
         team = Team.objects.get(pk=self.kwargs['pk'])
-        if not Team.can_user_read(self.request.user, team):
-            raise PermissionDenied()
+        if not Team.can_user_administrate(self.request.user, team):
+            if not (self.request.user.is_superuser or self.request.user in team.users.all()):
+                raise PermissionDenied()
         project_credentials = Credential.objects.filter(
-            projects__team__users__in = [ user ]
+            team = team
         )
-        return user.credentials.distinct() | project_credentials.distinct()
+        return project_credentials.distinct()
 
 
 class ProjectsList(BaseList):

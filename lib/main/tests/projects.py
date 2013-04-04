@@ -322,9 +322,9 @@ class ProjectsTest(BaseTest):
         # can list credentials on a team
         self.get(team_creds, expect=401)
         self.get(team_creds, expect=401, auth=self.get_invalid_credentials())
-        self.get(team_creds, expect=201, auth=self.get_super_credentials())
-        self.get(team_creds, expect=201, auth=self.get_normal_credentials())
-        self.get(team_creds, expect=201, auth=self.get_other_credentials())
+        self.get(team_creds, expect=200, auth=self.get_super_credentials())
+        self.get(team_creds, expect=200, auth=self.get_normal_credentials())
+        self.get(team_creds, expect=403, auth=self.get_other_credentials())
         self.get(team_creds, expect=403, auth=self.get_nobody_credentials())
 
         # can edit a credential
