@@ -42,6 +42,8 @@ directory.  Project directories must be unique and be (also no ../, etc).  defau
 * when app starts it creates a default organization and all superusers are automatically added to it
 * API discovery resource at /api and /api/v1
 * audit/test read only fields like creation_date
+* ability to import inventory from script (adds variables and merges, does not override, does not remove anything)
+* ability to import inventory from inventory files (upgrade case)
 
 QUESTIONS
 ---------
