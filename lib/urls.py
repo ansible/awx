@@ -50,6 +50,8 @@ views_ProjectsOrganizationsList    = views.ProjectsOrganizationsList.as_view()
 views_TeamsList                    = views.TeamsList.as_view()
 views_TeamsDetail                  = views.TeamsDetail.as_view()
 views_TeamsUsersList               = views.TeamsUsersList.as_view()
+views_TeamsCredentialsList         = views.TeamsCredentialsList.as_view()
+views_TeamsCredentialsList         = views.TeamsCredentialsList.as_view()
 
 # inventory service
 views_InventoryList                = views.InventoryList.as_view()
@@ -121,6 +123,7 @@ urlpatterns = patterns('',
     url(r'^api/v1/teams/$',                                       views_TeamsList),
     url(r'^api/v1/teams/(?P<pk>[0-9]+)/$',                        views_TeamsDetail),
     url(r'^api/v1/teams/(?P<pk>[0-9]+)/users/$',                  views_TeamsUsersList),
+    url(r'^api/v1/teams/(?P<pk>[0-9]+)/credentials/$',            views_TeamsCredentialsList),
 
     # api/v1/teams/N/
     # api/v1/teams/N/users/

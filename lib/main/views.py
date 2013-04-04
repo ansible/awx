@@ -214,6 +214,26 @@ class TeamsUsersList(BaseSubList):
             return base
         raise PermissionDenied()
 
+class TeamsCredentialsList(BaseSubList):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Team
+    relationship = 'credentials'
+    postable = True
+    inject_primary_key_on_post_as = 'team'
+
+    def _get_queryset(self):
+        team = Team.objects.get(pk=self.kwargs['pk'])
+        if not Team.can_user_read(self.request.user, team):
+            raise PermissionDenied()
+        project_credentials = Credential.objects.filter(
+            projects__teams__users__in = [ user ]
+        )
+        return user.credentials.distinct() | project_credentials.distinct()
+
+
 class ProjectsList(BaseList):
 
     model = Project

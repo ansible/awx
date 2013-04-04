@@ -557,8 +557,9 @@ class Credential(CommonModelNameNotUnique):
             user_obj = User.objects.get(pk=data['user'])
             return UserHelper.can_user_administrate(user, user_obj)
         if 'team' in data:
-            team_obj = Team.objects.get(pk=data['user'])
-            return team_obj.organization.users.filter(admins__in = [user]).count()
+            raise Exception("FIXME")
+            #team_obj = Team.objects.get(pk=data['team'])
+            #return team_obj.organization.users.filter(admins__in = [user]).count()
 
     def get_absolute_url(self):
         import lib.urls
