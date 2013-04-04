@@ -133,7 +133,6 @@ class UserHelper(object):
                 print "N1"
                 return False
         rc = cls.can_user_administrate(user, obj)
-        print "N2: %s" % rc
         return rc
 
 class PrimordialModel(models.Model):

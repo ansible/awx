@@ -282,9 +282,8 @@ class ProjectsTest(BaseTest):
         other_creds = '/api/v1/users/%s/credentials/' % other.pk
         team_creds  = '/api/v1/teams/%s/credentials/' % team.pk
 
-        print "ORGS=%s", other.organizations.all()
-        for x in other.organizations.all():
-            print x.admins.all()
+        #for x in other.organizations.all():
+        #    print x.admins.all()
 
         new_credentials = dict(
             name = 'credential',
@@ -300,7 +299,6 @@ class ProjectsTest(BaseTest):
         self.post(other_creds, data=new_credentials, expect=401)
         self.post(other_creds, data=new_credentials, expect=401, auth=self.get_invalid_credentials())
         self.post(other_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
-        print "TEST NOW"
         self.post(other_creds, data=new_credentials, expect=201, auth=self.get_normal_credentials())
         self.post(other_creds, data=new_credentials, expect=201, auth=self.get_other_credentials())
         self.post(other_creds, data=new_credentials, expect=403, auth=self.get_nobody_credentials())
