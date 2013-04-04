@@ -7,8 +7,6 @@ TODO items for ansible commander
 * host relationships in DB, last launch job status per host, etc (self.play.inventory) <- Chris
 * stats attributes on launch job (??)
 * make launch job rest triggerable & launch job statuses readable.  launch_job.start() <-- MPD
-* Chris ---- callback plugin calls external script <-- Chris
-  ansible_delegate_callback calls ACOM_DATABASE_LOGGER script ?
 * do we need something other than default playbook (ProjectOptions) <-- BOTH, TBD
 * way to send cntrl-c to kill job (method on job?) <-- Chris, low priority
 * documentation on how to run with callbacks from NOT a launchjob <-- Chris

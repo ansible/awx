@@ -725,20 +725,14 @@ class LaunchJob(CommonModel):
 
     # project has one default playbook but really should have a list of playbooks and flags ...
 
-
-    # ENOUGH_TO_RUN_DJANGO=foo ACOM_INVENTORY_ID=<pk> ansible-playbook <path to project selected playbook.yml> -i ansible-commander-inventory.py
-    #                                                                            ^-- this is a hard coded path
     # ssh-agent bash
     # ssh-add ... < key entry
-    #
-    # inventory script I can write, and will use ACOM_INVENTORY_ID
-    #
     #
     # playbook in source control is already on the disk
 
     # job_type:
     #   run, check -- enough for now, more initially
-    #      if check, add "--check" to parameters
+    #   if check, add "--check" to parameters
 
     # we'll extend ansible core to have callback context like
     #    self.context.playbook
@@ -746,18 +740,11 @@ class LaunchJob(CommonModel):
     #    and the callback will read the environment for ACOM_CELERY_JOB_ID or similar
     #    and log tons into the database
 
-    # we'll also log stdout/stderr somewhere for debugging
-
     # the ansible commander setup instructions will include installing the database logging callback
     # inventory script is going to need some way to load Django models
     #    it is documented on ansible.cc under API docs and takes two parameters
     #    --list
     #    -- host <hostname>
-
-    # posting the LaunchJob should return some type of resource that we can check for status
-    # that all the log data will use as a Foreign Key
-
-# TODO: Events
 
 class LaunchJobStatus(CommonModel):
     '''
