@@ -308,15 +308,15 @@ class ProjectsTest(BaseTest):
         self.post(team_creds, data=new_credentials, expect=401, auth=self.get_invalid_credentials())
         self.post(team_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
         self.post(team_creds, data=new_credentials, expect=201, auth=self.get_normal_credentials())
-        self.post(team_creds, data=new_credentials, expect=201, auth=self.get_other_credentials())
+        self.post(team_creds, data=new_credentials, expect=403, auth=self.get_other_credentials())
         self.post(team_creds, data=new_credentials, expect=403, auth=self.get_nobody_credentials())
 
         # can list credentials on a user
         self.get(other_creds, expect=401)
         self.get(other_creds, expect=401, auth=self.get_invalid_credentials())
-        self.get(other_creds, expect=201, auth=self.get_super_credentials())
-        self.get(other_creds, expect=201, auth=self.get_normal_credentials())
-        self.get(other_creds, expect=201, auth=self.get_other_credentials())
+        self.get(other_creds, expect=200, auth=self.get_super_credentials())
+        self.get(other_creds, expect=200, auth=self.get_normal_credentials())
+        self.get(other_creds, expect=200, auth=self.get_other_credentials())
         self.get(other_creds, expect=403, auth=self.get_nobody_credentials())
 
         # can list credentials on a team

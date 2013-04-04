@@ -229,7 +229,7 @@ class TeamsCredentialsList(BaseSubList):
         if not Team.can_user_read(self.request.user, team):
             raise PermissionDenied()
         project_credentials = Credential.objects.filter(
-            projects__teams__users__in = [ user ]
+            projects__team__users__in = [ user ]
         )
         return user.credentials.distinct() | project_credentials.distinct()
 
@@ -370,7 +370,7 @@ class UsersCredentialsList(BaseSubList):
         if not UserHelper.can_user_administrate(self.request.user, user):
             raise PermissionDenied()
         project_credentials = Credential.objects.filter(
-            projects__teams__users__in = [ user ]
+            team__users__in = [ user ]
         )
         return user.credentials.distinct() | project_credentials.distinct()
 
