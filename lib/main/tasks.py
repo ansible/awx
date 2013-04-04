@@ -34,10 +34,14 @@ def run_launch_job(launch_job_status_pk):
     inventory_script = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                     'management', 'commands',
                                                     'acom_inventory.py'))
+    callback_script = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                                    'management', 'commands',
+                                                    'acom_callback_event.py'))
     env = dict(os.environ.items())
     env['ACOM_LAUNCH_JOB_STATUS_ID'] = str(launch_job_status.pk)
     env['ACOM_INVENTORY_ID'] = str(launch_job.inventory.pk)
     env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
+    env['ACOM_CALLBACK_EVENT_SCRIPT'] = callback_script
  
     if hasattr(settings, 'ANSIBLE_TRANSPORT'):
         env['ANSIBLE_TRANSPORT'] = getattr(settings, 'ANSIBLE_TRANSPORT')

@@ -88,12 +88,10 @@ class RunLaunchJobTest(BaseCeleryTest):
         launch_job_status = self.launch_job.start()
         self.assertEqual(launch_job_status.status, 'pending')
         launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
-        print 'stdout:', launch_job_status.result_stdout
-        print 'stderr:', launch_job_status.result_stderr
-        print launch_job_status.status
-        
-        print settings.DATABASES
-        
+        #print 'stdout:', launch_job_status.result_stdout
+        #print 'stderr:', launch_job_status.result_stderr
+        #print launch_job_status.status
+        #print settings.DATABASES
         self.assertEqual(launch_job_status.status, 'successful')
         self.assertTrue(launch_job_status.result_stdout)
         launch_job_status_events = launch_job_status.launch_job_status_events.all()

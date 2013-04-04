@@ -16,7 +16,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
+import json
 import os
+import subprocess
 import sys
 
 class CallbackModule(object):
@@ -25,47 +27,12 @@ class CallbackModule(object):
     '''
 
     def __init__(self):
-        # the DJANGO_SETTINGS_MODULE environment variable *should* already
-        # be set if this callback is called when executing a playbook via a
-        # celery task, otherwise just bail out.
-        settings_module_name = os.environ.get('DJANGO_SETTINGS_MODULE', None)
-        if not settings_module_name:
-            return
-        # FIXME: Not particularly fond of this sys.path hack, but it is needed
-        # when a celery task calls ansible-playbook and needs to execute this
-        # script directly.
-        try:
-            settings_parent_module = __import__(settings_module_name)
-        except ImportError:
-            top_dir = os.path.join(os.path.dirname(__file__), '..', '..', '..')
-            sys.path.insert(0, os.path.abspath(top_dir))
-            settings_parent_module = __import__(settings_module_name)
-        settings_module = getattr(settings_parent_module, settings_module_name.split('.')[-1])
-        # Use the ACOM_TEST_DATABASE_NAME environment variable to specify the test
-        # database name when called from unit tests.
-        if os.environ.get('ACOM_TEST_DATABASE_NAME', None):
-            settings_module.DATABASES['default']['NAME'] = os.environ['ACOM_TEST_DATABASE_NAME']
-        # Try to get the launch job status ID from the environment, otherwise
-        # just bail out now.
-        try:
-            launch_job_status_pk = int(os.environ.get('ACOM_LAUNCH_JOB_STATUS_ID', ''))
-        except ValueError:
-            return
-        from lib.main.models import LaunchJobStatus
-        try:
-            self.launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status_pk)
-        except LaunchJobStatus.DoesNotExist:
-            pass
+        self.acom_callback_event_script = os.getenv('ACOM_CALLBACK_EVENT_SCRIPT')
 
     def _log_event(self, event, **event_data):
-        #print '====', event, args, kwargs
-        # self.playbook.inventory
-        if hasattr(self, 'launch_job_status'):
-            kwargs = {
-                'event': event,
-                'event_data': event_data,
-            }
-            self.launch_job_status.launch_job_status_events.create(**kwargs)
+        event_data_json = json.dumps(event_data)
+        cmdline = [self.acom_callback_event_script, '-e', event, '-d', event_data_json]
+        subprocess.check_call(cmdline)
 
     def on_any(self, *args, **kwargs):
         pass

@@ -132,7 +132,7 @@ class CredentialAdmin(admin.ModelAdmin):
 class TeamAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'description', 'active')
-    filter_horizontal = ('projects', 'users', 'organizations', 'tags')
+    filter_horizontal = ('projects', 'users', 'tags')
 
 class ProjectAdmin(admin.ModelAdmin):
 

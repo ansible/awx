@@ -21,7 +21,6 @@
 import json
 from optparse import make_option
 import os
-import sys
 from django.core.management.base import NoArgsCommand, CommandError
 
 class Command(NoArgsCommand):
