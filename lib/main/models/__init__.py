@@ -716,11 +716,10 @@ class LaunchJob(CommonModel):
         from lib.main.tasks import run_launch_job
         launch_job_status = self.launch_job_statuses.create(name='Launch Job Status %s' % now().isoformat())
         task_result = run_launch_job.delay(launch_job_status.pk)
-        try:
-            launch_job_status.celery_task = TaskMeta.objects.get(task_id=task_result.task_id)
-            launch_job_status.save()
-        except TaskMeta.DoesNotExist:
-            pass
+        # The TaskMeta instance in the database isn't created until the worker
+        # starts processing the task, so we can only store the task ID here.
+        launch_job_status.celery_task_id = task_result.task_id
+        launch_job_status.save(update_fields=['celery_task_id'])
         return launch_job_status
 
     # project has one default playbook but really should have a list of playbooks and flags ...
@@ -729,10 +728,6 @@ class LaunchJob(CommonModel):
     # ssh-add ... < key entry
     #
     # playbook in source control is already on the disk
-
-    # job_type:
-    #   run, check -- enough for now, more initially
-    #   if check, add "--check" to parameters
 
     # we'll extend ansible core to have callback context like
     #    self.context.playbook
@@ -756,17 +751,29 @@ class LaunchJobStatus(CommonModel):
         ('running', _('Running')),
         ('successful', _('Successful')),
         ('failed', _('Failed')),
+        ('error', _('Error')),
     ]
 
     class Meta:
         app_label = 'main'
         verbose_name_plural = _('launch job statuses')
 
-    launch_job     = models.ForeignKey('LaunchJob', null=True, on_delete=SET_NULL, related_name='launch_job_statuses')
-    status         = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    result_stdout  = models.TextField(blank=True, default='')
-    result_stderr  = models.TextField(blank=True, default='')
-    celery_task    = models.ForeignKey('djcelery.TaskMeta', related_name='launch_job_statuses', blank=True, null=True, default=None, on_delete=SET_NULL)
+    launch_job       = models.ForeignKey('LaunchJob', null=True, on_delete=SET_NULL, related_name='launch_job_statuses')
+    status           = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    result_stdout    = models.TextField(blank=True, default='')
+    result_stderr    = models.TextField(blank=True, default='')
+    result_traceback = models.TextField(blank=True, default='')
+    celery_task_id   = models.CharField(max_length=100, blank=True, default='', editable=False)
+    #hosts            = models.ManyToManyField('Host', blank=True, related_name='launch_job_statuses')
+    # FIXME: Connect hosts based on inventory.
+
+    @property
+    def celery_task(self):
+        try:
+            if self.celery_task_id:
+                return TaskMeta.objects.get(task_id=self.celery_task_id)
+        except TaskMeta.DoesNotExist:
+            pass
 
 class LaunchJobStatusEvent(models.Model):
     '''
@@ -801,5 +808,8 @@ class LaunchJobStatusEvent(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     event = models.CharField(max_length=100, choices=EVENT_TYPES)
     event_data = JSONField(blank=True, default='')
+    host = models.ForeignKey('Host', blank=True, null=True, default=None, on_delete=SET_NULL, related_name='launch_job_status_events')
+    
+    # FIXME: Connect host based on event_data.
 
 # TODO: reporting (MPD)

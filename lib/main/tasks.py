@@ -17,53 +17,55 @@
 
 import os
 import subprocess
+import traceback
 from celery import task
 from django.conf import settings
 from lib.main.models import *
 
 @task(name='run_launch_job')
 def run_launch_job(launch_job_status_pk):
-
     launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status_pk)
     launch_job_status.status = 'running'
     launch_job_status.save()
     launch_job = launch_job_status.launch_job
- 
-    plugin_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 
-                                              'plugins', 'callback'))
-    inventory_script = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                                    'management', 'commands',
-                                                    'acom_inventory.py'))
-    callback_script = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                                    'management', 'commands',
-                                                    'acom_callback_event.py'))
-    env = dict(os.environ.items())
-    env['ACOM_LAUNCH_JOB_STATUS_ID'] = str(launch_job_status.pk)
-    env['ACOM_INVENTORY_ID'] = str(launch_job.inventory.pk)
-    env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
-    env['ACOM_CALLBACK_EVENT_SCRIPT'] = callback_script
- 
-    if hasattr(settings, 'ANSIBLE_TRANSPORT'):
-        env['ANSIBLE_TRANSPORT'] = getattr(settings, 'ANSIBLE_TRANSPORT')
- 
-    playbook = launch_job.project.default_playbook
-    cmdline = ['ansible-playbook', '-i', inventory_script]
-    if launch_job.job_type == 'check':
-        cmdline.append('--check')
-    cmdline.append(playbook)
 
-    # FIXME: How to cancel/interrupt job? (not that important for now)
-    proc = subprocess.Popen(cmdline, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, env=env)
-    stdout, stderr = proc.communicate()
+    try:
+        status, stdout, stderr, tb = 'error', '', '', ''
+        plugin_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 
+                                                  'plugins', 'callback'))
+        inventory_script = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                                        'management', 'commands',
+                                                        'acom_inventory.py'))
+        callback_script = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                                        'management', 'commands',
+                                                        'acom_callback_event.py'))
+        env = dict(os.environ.items())
+        env['ACOM_LAUNCH_JOB_STATUS_ID'] = str(launch_job_status.pk)
+        env['ACOM_INVENTORY_ID'] = str(launch_job.inventory.pk)
+        env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
+        env['ACOM_CALLBACK_EVENT_SCRIPT'] = callback_script
+ 
+        if hasattr(settings, 'ANSIBLE_TRANSPORT'):
+            env['ANSIBLE_TRANSPORT'] = getattr(settings, 'ANSIBLE_TRANSPORT')
+ 
+        playbook = launch_job.project.default_playbook
+        cmdline = ['ansible-playbook', '-i', inventory_script]
+        if launch_job.job_type == 'check':
+            cmdline.append('--check')
+        cmdline.append(playbook)
+
+        # FIXME: How to cancel/interrupt job? (not that important for now)
+        proc = subprocess.Popen(cmdline, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, env=env)
+        stdout, stderr = proc.communicate()
+        status = 'successful' if proc.returncode == 0 else 'failed'
+    except Exception:
+        tb = traceback.format_exc()
  
     # Reload from database before updating/saving.
     launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status_pk)
-    if proc.returncode == 0:
-        launch_job_status.status = 'successful'
-    else:
-        launch_job_status.status = 'failed'
- 
+    launch_job_status.status = status
     launch_job_status.result_stdout = stdout
     launch_job_status.result_stderr = stderr
+    launch_job_status.result_traceback = tb
     launch_job_status.save()
