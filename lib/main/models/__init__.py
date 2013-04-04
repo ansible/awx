@@ -130,8 +130,10 @@ class UserHelper(object):
     def can_user_attach(cls, user, obj, sub_obj, relationship_type):
         if type(sub_obj) != User:
             if not sub_obj.can_user_read(user, sub_obj):
+                print "N1"
                 return False
         rc = cls.can_user_administrate(user, obj)
+        print "N2: %s" % rc
         return rc
 
 class PrimordialModel(models.Model):
@@ -485,7 +487,7 @@ class VariableData(CommonModelNameNotUnique):
             return Inventory.can_user_read(user, obj.group.inventory)
         return False
 
-class Credential(CommonModel):
+class Credential(CommonModelNameNotUnique):
     '''
     A credential contains information about how to talk to a remote set of hosts
     Usually this is a SSH key location, and possibly an unlock password.
@@ -532,15 +534,32 @@ class Credential(CommonModel):
     sudo_password    = models.CharField(blank=True, default='', max_length=1024)
 
     @classmethod
-    def can_user_read(cls, user, obj):
-        ''' a user can be read if they are on the same team or can be administrated '''
+    def can_user_administrate(cls, user, obj):
         if user.is_superuser:
             return True
         if user == obj.user:
             return True
-        if Organizations.filter(admins__in = [ user ], users__in = [ obj.user ]).count():
+        if obj.user and (obj.user.organizations.filter(admins__in = [user]).count()):
+            return True
+        if obj.team and (user in obj.team.organization.admins.all()):
             return True
         return False
+
+    @classmethod
+    def can_user_read(cls, user, obj):
+        ''' a user can be read if they are on the same team or can be administrated '''
+        return cls.can_user_administrate(user, obj)
+    
+    @classmethod
+    def can_user_add(cls, user, data):
+        if user.is_superuser:
+            return True
+        if 'user' in data:
+            user_obj = User.objects.get(pk=data['user'])
+            return UserHelper.can_user_administrate(user, user_obj)
+        if 'team' in data:
+            team_obj = Team.objects.get(pk=data['user'])
+            return team_obj.organization.users.filter(admins__in = [user]).count()
 
     def get_absolute_url(self):
         import lib.urls
@@ -567,7 +586,7 @@ class Team(CommonModel):
         # FIXME -- audit when this is called explicitly, if any
         if user.is_superuser:
             return True
-        if obj.organization and (user in obj.organization.admins.all()):
+        if user in obj.organization.admins.all():
             return True
         return False
 

@@ -232,7 +232,6 @@ class VariableBaseDetail(BaseDetail):
         raise PermissionDenied()
 
     def item_permissions_check(self, request, obj):
-        import epdb; epdb.st()
         through_obj = self.__class__.parent_model.objects.get(pk = self.request.args['pk'])
         if request.method == 'GET':
             return self.__class__.parent_model.can_user_read(request.user, through_obj)
