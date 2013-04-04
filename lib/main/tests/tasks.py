@@ -103,6 +103,22 @@ class RunLaunchJobTest(BaseCeleryTest):
         self.assertEqual(launch_job_status_events.filter(event='runner_on_ok').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
 
+    def test_check_launch_job(self):
+        self.create_test_playbook(TEST_PLAYBOOK)
+        self.launch_job.job_type = 'check'
+        self.launch_job.save()
+        launch_job_status = self.launch_job.start()
+        self.assertEqual(launch_job_status.status, 'pending')
+        launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
+        self.assertEqual(launch_job_status.status, 'successful')
+        self.assertTrue(launch_job_status.result_stdout)
+        launch_job_status_events = launch_job_status.launch_job_status_events.all()
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='runner_on_skipped').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
+
     def test_run_launch_job_that_fails(self):
         self.create_test_playbook(TEST_PLAYBOOK2)
         launch_job_status = self.launch_job.start()
@@ -115,4 +131,22 @@ class RunLaunchJobTest(BaseCeleryTest):
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='runner_on_failed').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
+
+    def test_check_launch_job_where_task_would_fail(self):
+        self.create_test_playbook(TEST_PLAYBOOK2)
+        self.launch_job.job_type = 'check'
+        self.launch_job.save()
+        launch_job_status = self.launch_job.start()
+        self.assertEqual(launch_job_status.status, 'pending')
+        launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
+        # Since we don't actually run the task, the --check should indicate
+        # everything is successful.
+        self.assertEqual(launch_job_status.status, 'successful')
+        self.assertTrue(launch_job_status.result_stdout)
+        launch_job_status_events = launch_job_status.launch_job_status_events.all()
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='runner_on_skipped').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)

@@ -47,7 +47,9 @@ def run_launch_job(launch_job_status_pk):
         env['ANSIBLE_TRANSPORT'] = getattr(settings, 'ANSIBLE_TRANSPORT')
  
     playbook = launch_job.project.default_playbook
-    cmdline = ['ansible-playbook', '-i', inventory_script]#, '-v']
+    cmdline = ['ansible-playbook', '-i', inventory_script]
+    if launch_job.job_type == 'check':
+        cmdline.append('--check')
     cmdline.append(playbook)
 
     # FIXME: How to cancel/interrupt job? (not that important for now)
