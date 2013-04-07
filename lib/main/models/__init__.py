@@ -538,10 +538,16 @@ class Credential(CommonModelNameNotUnique):
             return True
         if user == obj.user:
             return True
-        if obj.user and (obj.user.organizations.filter(admins__in = [user]).count()):
-            return True
-        if obj.team and (user in obj.team.organization.admins.all()):
-            return True
+        
+        if obj.user:
+            print "user orgs = " , obj.user.organizations.all()
+            print "user org admins = " , [ x.admins.all() for x in obj.user.organizations.all() ] 
+            if (obj.user.organizations.filter(admins__in = [user]).count()):
+                return True
+        if obj.team:
+            print "ADMINS OF TEAM=%s" % obj.team.organization.admins.all()
+            if user in obj.team.organization.admins.all():
+                return True
         return False
 
     @classmethod

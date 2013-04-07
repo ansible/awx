@@ -34,7 +34,7 @@ class ProjectsTest(BaseTest):
     def setUp(self):
         super(ProjectsTest, self).setUp()
         self.setup_users()
- 
+
         self.organizations = self.make_organizations(self.super_django_user, 10)
         self.projects      = self.make_projects(self.normal_django_user, 10)
 
@@ -43,7 +43,7 @@ class ProjectsTest(BaseTest):
             self.organizations[0].projects.add(project)
         for project in self.projects[3:8]:
             self.organizations[1].projects.add(project)
-        for project in self.projects[9:10]: 
+        for project in self.projects[9:10]:
             self.organizations[2].projects.add(project)
         self.organizations[0].projects.add(self.projects[-1])
         self.organizations[9].projects.add(self.projects[-2])
@@ -62,7 +62,7 @@ class ProjectsTest(BaseTest):
             # NOTE: superuser does not have to be explicitly added to admin group
             # x.admins.add(self.super_django_user)
             x.users.add(self.super_django_user)
- 
+
         self.organizations[0].users.add(self.normal_django_user)
         self.organizations[1].admins.add(self.normal_django_user)
 
@@ -115,8 +115,8 @@ class ProjectsTest(BaseTest):
         self.assertEquals(results['count'], 5)
         # user not on any teams
         results = self.get(projects, expect=200, auth=self.get_nobody_credentials())
-        self.assertEquals(results['count'], 0)       
- 
+        self.assertEquals(results['count'], 0)
+
         # =====================================================================
         # PROJECTS - ACCESS
         project = '/api/v1/projects/%s/' % self.projects[3].pk
@@ -160,7 +160,7 @@ class ProjectsTest(BaseTest):
         got = self.get(team1, expect=200, auth=self.get_other_credentials())
         got = self.get(team1, expect=403, auth=self.get_nobody_credentials())
 
-        new_team  = dict(name='newTeam',  description='blarg', organization=1)        
+        new_team  = dict(name='newTeam',  description='blarg', organization=1)
         new_team2 = dict(name='newTeam2', description='blarg', organization=1)
         new_team3 = dict(name='newTeam3', description='bad wolf', organization=1)
 
@@ -180,12 +180,12 @@ class ProjectsTest(BaseTest):
         # can delete teams
         self.delete(url, expect=401)
         self.delete(url, expect=403, auth=self.get_nobody_credentials())
-        self.delete(url, expect=403, auth=self.get_other_credentials())        
+        self.delete(url, expect=403, auth=self.get_other_credentials())
         self.delete(url, expect=204, auth=self.get_normal_credentials())
         self.delete(url3, expect=204, auth=self.get_super_credentials())
 
         # =====================================================================
-        # ORGANIZATION TEAMS        
+        # ORGANIZATION TEAMS
 
         # can list organization teams (filtered by user) -- this is an org admin function
         org_teams = '/api/v1/organizations/2/teams/'
@@ -275,10 +275,10 @@ class ProjectsTest(BaseTest):
         got = self.get(url, expect=401, auth=self.get_invalid_credentials())
         got = self.get(url, expect=401)
         got = self.get(url, expect=200, auth=self.get_super_credentials())
-        
+
         # =====================================================================
         # CREDENTIALS
-  
+
         other_creds = '/api/v1/users/%s/credentials/' % other.pk
         team_creds  = '/api/v1/teams/%s/credentials/' % team.pk
 
@@ -300,16 +300,19 @@ class ProjectsTest(BaseTest):
         self.post(other_creds, data=new_credentials, expect=401, auth=self.get_invalid_credentials())
         self.post(other_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
         self.post(other_creds, data=new_credentials, expect=201, auth=self.get_normal_credentials())
-        self.post(other_creds, data=new_credentials, expect=201, auth=self.get_other_credentials())
+        result = self.post(other_creds, data=new_credentials, expect=201, auth=self.get_other_credentials())
         self.post(other_creds, data=new_credentials, expect=403, auth=self.get_nobody_credentials())
+        cred_user = result['id']
+
 
         # can add credentials to a team
         self.post(team_creds, data=new_credentials, expect=401)
         self.post(team_creds, data=new_credentials, expect=401, auth=self.get_invalid_credentials())
         self.post(team_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
-        self.post(team_creds, data=new_credentials, expect=201, auth=self.get_normal_credentials())
+        result = self.post(team_creds, data=new_credentials, expect=201, auth=self.get_normal_credentials())
         self.post(team_creds, data=new_credentials, expect=403, auth=self.get_other_credentials())
         self.post(team_creds, data=new_credentials, expect=403, auth=self.get_nobody_credentials())
+        cred_team = result['id']
 
         # can list credentials on a user
         self.get(other_creds, expect=401)
@@ -328,6 +331,29 @@ class ProjectsTest(BaseTest):
         self.get(team_creds, expect=403, auth=self.get_nobody_credentials())
 
         # can edit a credential
+        cred_user = Credential.objects.get(pk=cred_user)
+        cred_team = Credential.objects.get(pk=cred_team)
+        d_cred_user = dict(id=cred_user.pk, name='x', sudo_password='blippy')
+        #print "user of cred_user = %s" % cred_user.user
+        d_cred_team = dict(id=cred_team.pk, name='x', sudo_password='blippy')
+        edit_creds1 = '/api/v1/credentials/%s/' % cred_user.pk
+        edit_creds2 = '/api/v1/credentials/%s/' % cred_team.pk
+        #print "TEST ORG = %s" % cred_team.organization
+        #print "TEST ADMINS = %s" % cred_team.organization.admins.all()
+
+        self.put(edit_creds1, data=d_cred_user, expect=401)
+        self.put(edit_creds1, data=d_cred_user, expect=401, auth=self.get_invalid_credentials())
+        self.put(edit_creds1, data=d_cred_user, expect=200, auth=self.get_super_credentials())
+        # org admin should NOT be able to get at user credentials.  superuser can.
+        self.put(edit_creds1, data=d_cred_user, expect=403, auth=self.get_normal_credentials())
+        self.put(edit_creds1, data=d_cred_user, expect=403, auth=self.get_other_credentials())
+        self.put(edit_creds2, data=d_cred_team, expect=401)
+        self.put(edit_creds2, data=d_cred_team, expect=401, auth=self.get_invalid_credentials())
+        self.put(edit_creds2, data=d_cred_team, expect=200, auth=self.get_super_credentials())
+        #print "TEST NOW"
+        self.put(edit_creds2, data=d_cred_team, expect=200, auth=self.get_normal_credentials())
+        self.put(edit_creds2, data=d_cred_team, expect=403, auth=self.get_other_credentials())
+
         # can remove credentials from a user (via disassociate)
         # can remove credentials from a team (via disassociate)
         # can delete a credential directly
@@ -345,7 +371,7 @@ class ProjectsTest(BaseTest):
 
 
 
-        
+
 
 
 
