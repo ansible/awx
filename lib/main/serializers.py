@@ -49,14 +49,14 @@ class OrganizationSerializer(BaseSerializer):
             users       = reverse(lib.urls.views_OrganizationsUsersList,      args=(obj.pk,)),
             admins      = reverse(lib.urls.views_OrganizationsAdminsList,     args=(obj.pk,)),
             tags        = reverse(lib.urls.views_OrganizationsTagsList,       args=(obj.pk,))
-        ) 
+        )
 
 class AuditTrailSerializer(BaseSerializer):
-    
+
     # add the URL and related resources
     url           = serializers.CharField(source='get_absolute_url', read_only=True)
     related       = serializers.SerializerMethodField('get_related')
-    
+
     class Meta:
         model = AuditTrail
         fields = ('url', 'id', 'modified_by', 'delta', 'detail', 'comment')
@@ -80,7 +80,7 @@ class ProjectSerializer(BaseSerializer):
 
 
 class InventorySerializer(BaseSerializer):
-    
+
     # add the URL and related resources
     url           = serializers.CharField(source='get_absolute_url', read_only=True)
     related       = serializers.SerializerMethodField('get_related')
@@ -145,7 +145,7 @@ class CredentialSerializer(BaseSerializer):
     class Meta:
         model = Credential
         fields = (
-            'url', 'id', 'related', 'name', 'description', 'creation_date', 
+            'url', 'id', 'related', 'name', 'description', 'creation_date',
             'default_username', 'ssh_key_data', 'ssh_key_unlock', 'ssh_password', 'sudo_password',
             'user', 'team'
         )
@@ -154,12 +154,22 @@ class CredentialSerializer(BaseSerializer):
         # FIXME: add related resources: projects, users, organizations
         return dict()
 
+    def validate(self, attrs):
+        ''' some fields cannot be changed once written '''
+        if self.object is not None:
+            # this is an update
+            if self.object.user != attrs['user']:
+                raise serializers.ValidationError("user cannot be changed")
+            if self.object.team != attrs['team']:
+                raise serializers.ValidationError("team cannot be changed")
+        return attrs
+
 class UserSerializer(BaseSerializer):
-   
+
     # add the URL and related resources
     url           = serializers.SerializerMethodField('get_absolute_url_override')
     related       = serializers.SerializerMethodField('get_related')
-    
+
     class Meta:
         model = User
         fields = ('url', 'id', 'username', 'first_name', 'last_name', 'email', 'is_active', 'is_superuser', 'related')
@@ -177,7 +187,7 @@ class UserSerializer(BaseSerializer):
 
 
 class TagSerializer(BaseSerializer):
-    
+
     # add the URL and related resources
     url           = serializers.CharField(source='get_absolute_url', read_only=True)
     related       = serializers.SerializerMethodField('get_related')

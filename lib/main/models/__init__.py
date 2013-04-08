@@ -538,14 +538,11 @@ class Credential(CommonModelNameNotUnique):
             return True
         if user == obj.user:
             return True
-        
+
         if obj.user:
-            print "user orgs = " , obj.user.organizations.all()
-            print "user org admins = " , [ x.admins.all() for x in obj.user.organizations.all() ] 
             if (obj.user.organizations.filter(admins__in = [user]).count()):
                 return True
         if obj.team:
-            print "ADMINS OF TEAM=%s" % obj.team.organization.admins.all()
             if user in obj.team.organization.admins.all():
                 return True
         return False
@@ -554,7 +551,7 @@ class Credential(CommonModelNameNotUnique):
     def can_user_read(cls, user, obj):
         ''' a user can be read if they are on the same team or can be administrated '''
         return cls.can_user_administrate(user, obj)
-    
+
     @classmethod
     def can_user_add(cls, user, data):
         if user.is_superuser:
@@ -815,7 +812,7 @@ class LaunchJobStatusEvent(models.Model):
     event = models.CharField(max_length=100, choices=EVENT_TYPES)
     event_data = JSONField(blank=True, default='')
     host = models.ForeignKey('Host', blank=True, null=True, default=None, on_delete=SET_NULL, related_name='launch_job_status_events')
-    
+
     # FIXME: Connect host based on event_data.
 
 # TODO: reporting (MPD)

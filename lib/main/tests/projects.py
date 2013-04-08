@@ -282,9 +282,6 @@ class ProjectsTest(BaseTest):
         other_creds = '/api/v1/users/%s/credentials/' % other.pk
         team_creds  = '/api/v1/teams/%s/credentials/' % team.pk
 
-        #for x in other.organizations.all():
-        #    print x.admins.all()
-
         new_credentials = dict(
             name = 'credential',
             project = Project.objects.all()[0].pk,
@@ -333,24 +330,26 @@ class ProjectsTest(BaseTest):
         # can edit a credential
         cred_user = Credential.objects.get(pk=cred_user)
         cred_team = Credential.objects.get(pk=cred_team)
-        d_cred_user = dict(id=cred_user.pk, name='x', sudo_password='blippy')
-        #print "user of cred_user = %s" % cred_user.user
-        d_cred_team = dict(id=cred_team.pk, name='x', sudo_password='blippy')
+        d_cred_user = dict(id=cred_user.pk, name='x', sudo_password='blippy', user=cred_user.pk)
+        d_cred_user2 = dict(id=cred_user.pk, name='x', sudo_password='blippy', user=User.objects.get(pk=1).pk)
+        d_cred_team = dict(id=cred_team.pk, name='x', sudo_password='blippy', team=cred_team.pk)
         edit_creds1 = '/api/v1/credentials/%s/' % cred_user.pk
         edit_creds2 = '/api/v1/credentials/%s/' % cred_team.pk
-        #print "TEST ORG = %s" % cred_team.organization
-        #print "TEST ADMINS = %s" % cred_team.organization.admins.all()
 
         self.put(edit_creds1, data=d_cred_user, expect=401)
         self.put(edit_creds1, data=d_cred_user, expect=401, auth=self.get_invalid_credentials())
         self.put(edit_creds1, data=d_cred_user, expect=200, auth=self.get_super_credentials())
-        # org admin should NOT be able to get at user credentials.  superuser can.
-        self.put(edit_creds1, data=d_cred_user, expect=403, auth=self.get_normal_credentials())
-        self.put(edit_creds1, data=d_cred_user, expect=403, auth=self.get_other_credentials())
+        self.put(edit_creds1, data=d_cred_user, expect=200, auth=self.get_normal_credentials())
+        # editing a credential to edit the user record is not legal, this is a test of the .validate
+        # method on the serializer to allow 'write once' fields
+        self.put(edit_creds1, data=d_cred_user2, expect=400, auth=self.get_normal_credentials())
+        self.put(edit_creds1, data=d_cred_user, expect=200, auth=self.get_other_credentials())
+
         self.put(edit_creds2, data=d_cred_team, expect=401)
         self.put(edit_creds2, data=d_cred_team, expect=401, auth=self.get_invalid_credentials())
+        cred_team = Credential.objects.get(pk=cred_team.pk)
         self.put(edit_creds2, data=d_cred_team, expect=200, auth=self.get_super_credentials())
-        #print "TEST NOW"
+        cred_team = Credential.objects.get(pk=cred_team.pk)
         self.put(edit_creds2, data=d_cred_team, expect=200, auth=self.get_normal_credentials())
         self.put(edit_creds2, data=d_cred_team, expect=403, auth=self.get_other_credentials())
 
