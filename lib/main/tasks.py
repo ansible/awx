@@ -40,6 +40,7 @@ def run_launch_job(launch_job_status_pk):
                                                         'management', 'commands',
                                                         'acom_callback_event.py'))
         env = dict(os.environ.items())
+        # question: when running over CLI, generate a random ID or grab next, etc?
         env['ACOM_LAUNCH_JOB_STATUS_ID'] = str(launch_job_status.pk)
         env['ACOM_INVENTORY_ID'] = str(launch_job.inventory.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
