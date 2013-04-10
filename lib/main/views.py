@@ -26,9 +26,17 @@ from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.settings import api_settings
+from rest_framework.authtoken.views import ObtainAuthToken
 import exceptions
 import datetime
 from base_views import *
+
+class AuthTokenView(ObtainAuthToken):
+
+    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+    # FIXME: Show a better form for HTML view
+    # FIXME: How to make this view discoverable?
 
 class OrganizationsList(BaseList):
 

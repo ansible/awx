@@ -18,6 +18,9 @@ from django.conf import settings
 from django.conf.urls import *
 import lib.main.views as views
 
+# auth token
+views_AuthTokenView                = views.AuthTokenView.as_view()
+
 # organizations service
 views_OrganizationsList            = views.OrganizationsList.as_view()
 views_OrganizationsDetail          = views.OrganizationsDetail.as_view()
@@ -86,6 +89,9 @@ views_CredentialsDetail            = views.CredentialsDetail.as_view()
 
 
 urlpatterns = patterns('',
+
+    # obtain auth token
+    url(r'^api/v1/authtoken/$', views_AuthTokenView),
 
     # organizations vice
     url(r'^api/v1/organizations/$',                               views_OrganizationsList),

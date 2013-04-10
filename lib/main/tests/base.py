@@ -38,6 +38,7 @@ class BaseTestMixin(object):
             django_user = DjangoUser.objects.create_superuser(username, "%s@example.com", password)
         else:
             django_user = DjangoUser.objects.create_user(username, "%s@example.com", password)
+        self.assertTrue(django_user.auth_token)
         return django_user
 
     def make_organizations(self, created_by, count=1):
@@ -98,7 +99,10 @@ class BaseTestMixin(object):
             assert data is not None
         client = Client()
         if auth:
-           client.login(username=auth[0], password=auth[1])
+            if isinstance(auth, (list, tuple)):
+                client.login(username=auth[0], password=auth[1])
+            elif isinstance(auth, basestring):
+                client = Client(HTTP_AUTHORIZATION='Token %s' % auth)
         method = getattr(client,method)
         response = None
         if data is not None:

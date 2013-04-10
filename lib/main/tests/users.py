@@ -47,6 +47,33 @@ class UsersTest(BaseTest):
         self.post(url, expect=201, data=new_user2, auth=self.get_normal_credentials())
         self.post(url, expect=400, data=new_user2, auth=self.get_normal_credentials())
 
+    def test_auth_token_login(self):
+        auth_token_url = '/api/v1/authtoken/'
+
+        # Always returns a 405 for any GET request, regardless of credentials.
+        self.get(auth_token_url, expect=405, auth=None)
+        self.get(auth_token_url, expect=405, auth=self.get_invalid_credentials())
+        self.get(auth_token_url, expect=405, auth=self.get_normal_credentials())
+        
+        # Posting without username/password fields or invalid username/password
+        # returns a 400 error.
+        data = {}
+        self.post(auth_token_url, data, expect=400)
+        data = dict(zip(('username', 'password'), self.get_invalid_credentials()))
+        self.post(auth_token_url, data, expect=400)
+
+        # A valid username/password should give us an auth token.
+        data = dict(zip(('username', 'password'), self.get_normal_credentials()))
+        result = self.post(auth_token_url, data, expect=200, auth=None)
+        self.assertTrue('token' in result)
+        self.assertEqual(result['token'], self.normal_django_user.auth_token.key)
+        auth_token = result['token']
+
+        # Verify we can access our own user information with the auth token.
+        data = self.get('/api/v1/me/', expect=200, auth=auth_token)
+        self.assertEquals(data['results'][0]['username'], 'normal')
+        self.assertEquals(data['count'], 1)
+
     def test_ordinary_user_can_modify_some_fields_about_himself_but_not_all_and_passwords_work(self):
 
         detail_url = '/api/v1/users/%s/' % self.other_django_user.pk

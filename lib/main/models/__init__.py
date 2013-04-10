@@ -14,8 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible Commander. If not, see <http://www.gnu.org/licenses/>.
 
-from django.db import models
+from django.db import models, DatabaseError
 from django.db.models import CASCADE, SET_NULL, PROTECT
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -23,6 +25,7 @@ from django.utils.timezone import now
 import exceptions
 from jsonfield import JSONField
 from djcelery.models import TaskMeta
+from rest_framework.authtoken.models import Token
 
 # TODO: jobs and events model TBD
 # TODO: reporting model TBD
@@ -814,3 +817,13 @@ class LaunchJobStatusEvent(models.Model):
     # FIXME: Connect host based on event_data.
 
 # TODO: reporting (MPD)
+
+@receiver(post_save, sender=User)
+def create_auth_token_for_user(sender, **kwargs):
+    instance = kwargs.get('instance', None)
+    if instance:
+        try:
+            Token.objects.get_or_create(user=instance)
+        except DatabaseError:
+            pass    # Only fails when creating a new superuser from syncdb on a
+                    # new database (before migrate has been called).
