@@ -167,6 +167,9 @@ DEVSERVER_MODULES = (
     #'devserver.modules.profile.LineProfilerModule',
 )
 
+# Skip migrations when running tests.
+SOUTH_TESTS_MIGRATE = False
+
 if 'djcelery' in INSTALLED_APPS:
     import djcelery
     djcelery.setup_loader()

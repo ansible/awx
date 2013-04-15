@@ -15,6 +15,8 @@
 # along with Ansible Commander. If not, see <http://www.gnu.org/licenses/>.
 
 
+import json
+
 from django.conf.urls import *
 from django.contrib import admin
 from django.contrib.admin.util import unquote
@@ -22,6 +24,7 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
+from django.utils.html import format_html
 from lib.main.models import *
 
 from django.contrib.auth.models import User
@@ -108,6 +111,39 @@ class VariableDataInline(admin.StackedInline):
     # FIXME: Doesn't yet work as inline due to the way the OneToOne field is
     # defined.
 
+class LaunchJobHostSummaryInline(admin.TabularInline):
+
+    model = LaunchJobHostSummary
+    extra = 0
+    can_delete = False
+
+    def has_add_permission(self, request):
+        return False
+
+class LaunchJobStatusEventInline(admin.StackedInline):
+
+    model = LaunchJobStatusEvent
+    extra = 0
+    can_delete = False
+
+    def has_add_permission(self, request):
+        return False
+
+    def get_event_data_display(self, obj):
+        return format_html('<pre class="json-display">{0}</pre>', json.dumps(obj.event_data, indent=4))
+    get_event_data_display.short_description = _('Event data')
+    get_event_data_display.allow_tags = True
+
+class LaunchJobHostSummaryInlineForHost(LaunchJobHostSummaryInline):
+
+    fields = ('launch_job_status', 'changed', 'dark', 'failures', 'ok', 'processed', 'skipped')
+    readonly_fields = ('launch_job_status', 'changed', 'dark', 'failures', 'ok', 'processed', 'skipped')
+
+class LaunchJobStatusEventInlineForHost(LaunchJobStatusEventInline):
+
+    fields = ('created', 'event', 'get_event_data_display', 'launch_job_status')
+    readonly_fields = ('created', 'event', 'get_event_data_display', 'launch_job_status')
+
 class HostAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'inventory', 'description', 'active')
@@ -117,6 +153,7 @@ class HostAdmin(admin.ModelAdmin):
     filter_horizontal = ('tags',)
     # FIXME: Edit reverse of many to many for groups.
     #inlines = [VariableDataInline]
+    inlines = [LaunchJobHostSummaryInlineForHost, LaunchJobStatusEventInlineForHost]
 
 class GroupAdmin(admin.ModelAdmin):
 
@@ -200,30 +237,56 @@ class LaunchJobAdmin(admin.ModelAdmin):
         messages.success(request, '%s has been started.' % ljs)
         return HttpResponseRedirect(status_url)
 
-class LaunchJobStatusEventInline(admin.StackedInline):
+class LaunchJobHostSummaryInlineForLaunchJobStatus(LaunchJobHostSummaryInline):
 
-    model = LaunchJobStatusEvent
-    extra = 0
-    can_delete = False
-    fields = ('created', 'event', 'event_data')
-    readonly_fields = ('created', 'event', 'event_data')
+    fields = ('host', 'changed', 'dark', 'failures', 'ok', 'processed', 'skipped')
+    readonly_fields = ('host', 'changed', 'dark', 'failures', 'ok', 'processed', 'skipped')
 
-    def has_add_permission(self, request):
-        return False
+class LaunchJobStatusEventInlineForLaunchJobStatus(LaunchJobStatusEventInline):
+
+    fields = ('created', 'event', 'get_event_data_display', 'host')
+    readonly_fields = ('created', 'event', 'get_event_data_display', 'host')
 
 class LaunchJobStatusAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'launch_job', 'status')
-    fields = ('name', 'launch_job', 'status', 'result_stdout', 'result_stderr',
-              'result_traceback', 'celery_task_id', 'tags', 'created_by')
-    readonly_fields = ('name', 'description', 'status', 'launch_job',
-                       'result_stdout', 'result_stderr', 'result_traceback',
-                       'celery_task_id', 'created_by', 'tags', 'audit_trail', 'active')
+    fields = ('name', 'get_launch_job_display', 'status',
+              'get_result_stdout_display', 'get_result_stderr_display',
+              'get_result_traceback_display', 'celery_task_id', 'tags',
+              'created_by')
+    readonly_fields = ('name', 'description', 'status', 'get_launch_job_display',
+                       'get_result_stdout_display', 'get_result_stderr_display',
+                       'get_result_traceback_display', 'celery_task_id',
+                       'created_by', 'tags', 'audit_trail', 'active')
     filter_horizontal = ('tags',)
-    inlines = [LaunchJobStatusEventInline]
+    inlines = [LaunchJobHostSummaryInlineForLaunchJobStatus,
+               LaunchJobStatusEventInlineForLaunchJobStatus]
 
     def has_add_permission(self, request):
         return False
+
+    def get_launch_job_display(self, obj):
+        info = obj.launch_job._meta.app_label, obj.launch_job._meta.module_name
+        lj_url = reverse('admin:%s_%s_change' % info, args=(obj.launch_job.pk,),
+                         current_app=self.admin_site.name)
+        return format_html('<a href="{0}">{1}</a>', lj_url, obj.launch_job)
+    get_launch_job_display.short_description = _('Launch job')
+    get_launch_job_display.allow_tags = True
+
+    def get_result_stdout_display(self, obj):
+        return format_html('<pre class="result-display">{0}</pre>', obj.result_stdout or ' ')
+    get_result_stdout_display.short_description = _('Stdout')
+    get_result_stdout_display.allow_tags = True
+
+    def get_result_stderr_display(self, obj):
+        return format_html('<pre class="result-display">{0}</pre>', obj.result_stderr or ' ')
+    get_result_stderr_display.short_description = _('Stderr')
+    get_result_stderr_display.allow_tags = True
+
+    def get_result_traceback_display(self, obj):
+        return format_html('<pre class="result-display">{0}</pre>', obj.result_traceback or ' ')
+    get_result_traceback_display.short_description = _('Traceback')
+    get_result_traceback_display.allow_tags = True
 
 # FIXME: Add the rest of the models...
 

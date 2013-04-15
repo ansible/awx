@@ -27,6 +27,8 @@ TEST_PLAYBOOK = '''- hosts: test-group
   tasks:
   - name: should pass
     command: test 1 = 1
+  - name: should also pass
+    command: test 2 = 2
 '''
 
 TEST_PLAYBOOK2 = '''- hosts: test-group
@@ -86,6 +88,8 @@ class RunLaunchJobTest(BaseCeleryTest):
         self.create_test_playbook(TEST_PLAYBOOK)
         launch_job_status = self.launch_job.start()
         self.assertEqual(launch_job_status.status, 'pending')
+        self.assertEqual(set(launch_job_status.hosts.values_list('pk', flat=True)),
+                         set([self.host.pk]))
         launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
         #print 'stdout:', launch_job_status.result_stdout
         #print 'stderr:', launch_job_status.result_stderr
@@ -98,8 +102,10 @@ class RunLaunchJobTest(BaseCeleryTest):
         #    print ev.event, ev.event_data
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_start').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='runner_on_ok').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 2)
+        self.assertEqual(launch_job_status_events.filter(event='runner_on_ok').count(), 2)
+        for evt in launch_job_status_events.filter(event='runner_on_ok'):
+            self.assertEqual(evt.host, self.host)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
 
     def test_check_launch_job(self):
@@ -108,20 +114,26 @@ class RunLaunchJobTest(BaseCeleryTest):
         self.launch_job.save()
         launch_job_status = self.launch_job.start()
         self.assertEqual(launch_job_status.status, 'pending')
+        self.assertEqual(set(launch_job_status.hosts.values_list('pk', flat=True)),
+                         set([self.host.pk]))
         launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
         self.assertEqual(launch_job_status.status, 'successful')
         self.assertTrue(launch_job_status.result_stdout)
         launch_job_status_events = launch_job_status.launch_job_status_events.all()
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_start').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='runner_on_skipped').count(), 1)
+        self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 2)
+        self.assertEqual(launch_job_status_events.filter(event='runner_on_skipped').count(), 2)
+        for evt in launch_job_status_events.filter(event='runner_on_skipped'):
+            self.assertEqual(evt.host, self.host)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
 
     def test_run_launch_job_that_fails(self):
         self.create_test_playbook(TEST_PLAYBOOK2)
         launch_job_status = self.launch_job.start()
         self.assertEqual(launch_job_status.status, 'pending')
+        self.assertEqual(set(launch_job_status.hosts.values_list('pk', flat=True)),
+                         set([self.host.pk]))
         launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
         self.assertEqual(launch_job_status.status, 'failed')
         self.assertTrue(launch_job_status.result_stdout)
@@ -130,6 +142,7 @@ class RunLaunchJobTest(BaseCeleryTest):
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='runner_on_failed').count(), 1)
+        self.assertEqual(launch_job_status_events.get(event='runner_on_failed').host, self.host)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
 
     def test_check_launch_job_where_task_would_fail(self):
@@ -138,6 +151,8 @@ class RunLaunchJobTest(BaseCeleryTest):
         self.launch_job.save()
         launch_job_status = self.launch_job.start()
         self.assertEqual(launch_job_status.status, 'pending')
+        self.assertEqual(set(launch_job_status.hosts.values_list('pk', flat=True)),
+                         set([self.host.pk]))
         launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
         # Since we don't actually run the task, the --check should indicate
         # everything is successful.
@@ -148,4 +163,5 @@ class RunLaunchJobTest(BaseCeleryTest):
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 1)
         self.assertEqual(launch_job_status_events.filter(event='runner_on_skipped').count(), 1)
+        self.assertEqual(launch_job_status_events.get(event='runner_on_skipped').host, self.host)
         self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)

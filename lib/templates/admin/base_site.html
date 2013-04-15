@@ -102,6 +102,26 @@ ul.messagelist li {
 .errors textarea {
   border: 1px solid #b22222 !important;
 }
+pre.json-display, pre.result-display {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  font-size: 0.9em;
+}
+pre.result-display {
+  width: 75%;
+  border: 1px solid #ccc;
+  background: #444;
+  color: #eee;
+  max-height: 300px;
+  overflow: auto;
+}
+#launch_job_host_summaries-group table td.original p {
+  display: none
+}
+#launch_job_host_summaries-group table tr.has_original td {
+  padding-top: 5px;
+}
 </style>
 {% endblock %}
 

@@ -383,7 +383,6 @@ class Inventory(CommonModel):
     def can_user_delete(cls, user, obj):
         return cls._has_permission_types(user, obj, PERMISSION_TYPES_ALLOWING_INVENTORY_ADMIN)
 
-
 class Host(CommonModelNameNotUnique):
     '''
     A managed node
@@ -780,8 +779,7 @@ class LaunchJobStatus(CommonModel):
     result_stderr    = models.TextField(blank=True, default='')
     result_traceback = models.TextField(blank=True, default='')
     celery_task_id   = models.CharField(max_length=100, blank=True, default='', editable=False)
-    #hosts            = models.ManyToManyField('Host', blank=True, related_name='launch_job_statuses')
-    # FIXME: Connect hosts based on inventory.
+    hosts            = models.ManyToManyField('Host', related_name='launch_job_statuses', blank=True, through='LaunchJobHostSummary')
 
     @property
     def celery_task(self):
@@ -790,6 +788,37 @@ class LaunchJobStatus(CommonModel):
                 return TaskMeta.objects.get(task_id=self.celery_task_id)
         except TaskMeta.DoesNotExist:
             pass
+
+    def save(self, *args, **kwargs):
+        super(LaunchJobStatus, self).save(*args, **kwargs)
+        # Create a new host summary for each host in the inventory.
+        for host in self.launch_job.inventory.hosts.all():
+            # Due to the way the inventory script is called, hosts without a group won't be affected.
+            if host.groups.count():
+                self.launch_job_host_summaries.get_or_create(host=host)
+
+class LaunchJobHostSummary(models.Model):
+
+    class Meta:
+        unique_together = [('launch_job_status', 'host')]
+        verbose_name_plural = _('Launch Job Host Summaries')
+        ordering = ('-pk',)
+
+    launch_job_status = models.ForeignKey('LaunchJobStatus', on_delete=models.CASCADE, related_name='launch_job_host_summaries')
+    host = models.ForeignKey('Host', on_delete=models.CASCADE, related_name='launch_job_host_summaries')
+    # FIXME: Can't use SET_NULL for host relationship because of unique constraint.
+
+    changed = models.PositiveIntegerField(default=0)
+    dark = models.PositiveIntegerField(default=0)
+    failures = models.PositiveIntegerField(default=0)
+    ok = models.PositiveIntegerField(default=0)
+    processed = models.PositiveIntegerField(default=0)
+    skipped = models.PositiveIntegerField(default=0)
+
+    def __unicode__(self):
+        return '%s changed=%d dark=%d failures=%d ok=%d processed=%d skipped=%s' % \
+            (self.host.name, self.changed, self.dark, self.failures, self.ok,
+             self.processed, self.skipped)
 
 class LaunchJobStatusEvent(models.Model):
     '''
@@ -826,7 +855,39 @@ class LaunchJobStatusEvent(models.Model):
     event_data = JSONField(blank=True, default='')
     host = models.ForeignKey('Host', blank=True, null=True, default=None, on_delete=SET_NULL, related_name='launch_job_status_events')
 
-    # FIXME: Connect host based on event_data.
+    def __unicode__(self):
+        return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())
+
+    def save(self, *args, **kwargs):
+        try:
+            if not self.host and self.event_data.get('host', ''):
+                # Make sure we're looking at only the hosts from this launch job's associated inventory.
+                self.host = self.launch_job_status.launch_job.inventory.hosts.get(name=self.event_data['host'])
+        except (Host.DoesNotExist, AttributeError):
+            pass
+        super(LaunchJobStatusEvent, self).save(*args, **kwargs)
+        self.update_host_summary_from_stats()
+
+    def update_host_summary_from_stats(self):
+        if self.event != 'playbook_on_stats':
+            return
+        hostnames = set()
+        for v in self.event_data.values():
+            hostnames.update(v.keys())
+        for hostname in hostnames:
+            try:
+                host = self.launch_job_status.launch_job.inventory.hosts.get(name=hostname)
+            except Host.DoesNotExist:
+                continue
+            host_summary = self.launch_job_status.launch_job_host_summaries.get_or_create(host=host)[0]
+            host_summary_changed = False
+            for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
+                value = self.event_data.get(stat, {}).get(hostname, 0)
+                if getattr(host_summary, stat) != value:
+                    setattr(host_summary, stat, value)
+                    host_summary_changed = True
+            if host_summary_changed:
+                host_summary.save()
 
 # TODO: reporting (MPD)
 
