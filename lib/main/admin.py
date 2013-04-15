@@ -142,7 +142,7 @@ class TeamAdmin(admin.ModelAdmin):
 class ProjectAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'description', 'active')
-    filter_horizontal = ('inventories', 'tags')
+    filter_horizontal = ('tags',)
 
 class PermissionAdmin(admin.ModelAdmin):
 

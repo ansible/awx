@@ -620,7 +620,9 @@ class Project(CommonModel):
     A project represents a playbook git repo that can access a set of inventories
     '''
 
-    inventories      = models.ManyToManyField('Inventory', blank=True, related_name='projects')
+    # this is not part of the project, but managed with perms
+    # inventories      = models.ManyToManyField('Inventory', blank=True, related_name='projects')
+
     local_repository = models.CharField(max_length=1024)
     scm_type         = models.CharField(max_length=64)
     default_playbook = models.CharField(max_length=1024)
