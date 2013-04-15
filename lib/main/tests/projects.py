@@ -342,19 +342,29 @@ class ProjectsTest(BaseTest):
         # editing a credential to edit the user record is not legal, this is a test of the .validate
         # method on the serializer to allow 'write once' fields
         self.put(edit_creds1, data=d_cred_user2, expect=400, auth=self.get_normal_credentials())
-        self.put(edit_creds1, data=d_cred_user, expect=200, auth=self.get_other_credentials())
+        cred_put_u = self.put(edit_creds1, data=d_cred_user, expect=200, auth=self.get_other_credentials())
 
         self.put(edit_creds2, data=d_cred_team, expect=401)
         self.put(edit_creds2, data=d_cred_team, expect=401, auth=self.get_invalid_credentials())
         cred_team = Credential.objects.get(pk=cred_team.pk)
         self.put(edit_creds2, data=d_cred_team, expect=200, auth=self.get_super_credentials())
         cred_team = Credential.objects.get(pk=cred_team.pk)
-        self.put(edit_creds2, data=d_cred_team, expect=200, auth=self.get_normal_credentials())
+        cred_put_t = self.put(edit_creds2, data=d_cred_team, expect=200, auth=self.get_normal_credentials())
         self.put(edit_creds2, data=d_cred_team, expect=403, auth=self.get_other_credentials())
 
+        cred_put_t['disassociate'] = 1
+        team_url = "/api/v1/teams/%s/credentials/" % cred_put_t['team']
+        self.post(team_url, data=cred_put_t, expect=204, auth=self.get_normal_credentials())
+
         # can remove credentials from a user (via disassociate)
-        # can remove credentials from a team (via disassociate)
-        # can delete a credential directly
+        cred_put_u['disassociate'] = 1
+        url = cred_put_u['url']
+        user_url = "/api/v1/users/%s/credentials/" % cred_put_u['user']
+        self.post(user_url, data=cred_put_u, expect=204, auth=self.get_normal_credentials())
+
+        # can delete a credential directly -- probably won't be used too often
+        data = self.delete(url, expect=204, auth=self.get_other_credentials())
+        data = self.delete(url, expect=404, auth=self.get_other_credentials())
 
         # =====================================================================
         # PERMISSIONS

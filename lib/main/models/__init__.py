@@ -131,10 +131,13 @@ class UserHelper(object):
     def can_user_attach(cls, user, obj, sub_obj, relationship_type):
         if type(sub_obj) != User:
             if not sub_obj.can_user_read(user, sub_obj):
-                print "N1"
                 return False
         rc = cls.can_user_administrate(user, obj)
         return rc
+
+    @classmethod
+    def can_user_unattach(cls, user, obj, sub_obj, relationship_type):
+        return cls.can_user_administrate(user, obj)
 
 class PrimordialModel(models.Model):
     '''
@@ -547,6 +550,13 @@ class Credential(CommonModelNameNotUnique):
             if user in obj.team.organization.admins.all():
                 return True
         return False
+
+    @classmethod
+    def can_user_delete(cls, user, obj):
+        if obj.user is None and obj.team is None:
+            # unassociated credentials may be marked deleted by anyone
+            return True
+        return cls.can_user_administrate(user,obj)
 
     @classmethod
     def can_user_read(cls, user, obj):

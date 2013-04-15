@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible Commander. If not, see <http://www.gnu.org/licenses/>.
 
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from lib.main.models import *
 from django.contrib.auth.models import User
@@ -147,14 +147,27 @@ class BaseSubList(BaseList):
         relationship = getattr(main, self.__class__.relationship)
 
         if not 'disassociate' in request.DATA:
-            if not request.user.is_superuser and not self.__class__.parent_model.can_user_attach(request.user, main, sub, self.__class__.relationship):
-                raise PermissionDenied()
+            if not request.user.is_superuser:
+                if type(main) != User:
+                    if not self.__class__.parent_model.can_user_attach(request.user, main, sub, self.__class__.relationship):
+                        raise PermissionDenied()
+                else:
+		    if not UserHelper.can_user_attach(request.user, main, sub, self.__class__.relationship):
+                        raise PermissionDenied()
+
             if sub in relationship.all():
                 return Response(status=status.HTTP_409_CONFLICT)
             relationship.add(sub)
         else:
-            if not request.user.is_superuser and not self.__class__.parent_model.can_user_unattach(request.user, main, sub, self.__class__.relationship):
-                raise PermissionDenied()
+            if not request.user.is_superuser:
+                if type(main) != User:
+                     if not self.__class__.parent_model.can_user_unattach(request.user, main, sub, self.__class__.relationship):
+                         raise PermissionDenied()
+                else:
+                     if not UserHelper.can_user_unattach(request.user, main, sub, self.__class__.relationship):
+                         raise PermissionDenied()
+
+
             if severable:
                 relationship.remove(sub)
             else:
@@ -174,6 +187,10 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         # somewhat lame that delete has to call it's own permissions check
         obj = self.model.objects.get(pk=kwargs['pk'])
+        if getattr(obj, 'active', True) == False:
+            raise Http404()
+        if getattr(obj, 'is_active', True) == False:
+            raise Http404()
         if not request.user.is_superuser and not self.delete_permissions_check(request, obj):
             raise PermissionDenied()
         if isinstance(obj, PrimordialModel):
