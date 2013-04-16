@@ -19,6 +19,8 @@
       - name: install packages from yum
         yum: name=$item state=installed
         with_items:
+             - gcc
+             - python-pip
              - postgresql               # database client
              - postgresql-server        # database server
              - python-psycopg2          # database library
@@ -28,7 +30,7 @@
         pip: requirements=${working_dir}/requirements.txt
 
       - name: configure the database authentication more or less open for setup
-        template: src=templates/pg_hba_low.j2 dest=/var/lib/pgsql/data/pg_hba.conf
+        template: src=templates/pg_hba_low.j2 dest=/var/lib/pgsql/data/pg_hba.conf owner=postgres
 
       - name: restart postgresql
         service: name=postgresql state=restarted
@@ -45,7 +47,7 @@
         postgresql_db: name=acom state=present
 
       - name: configure the database authentication for runtime mode
-        template: src=templates/pg_hba.j2 dest=/var/lib/pgsql/data/pg_hba.conf
+        template: src=templates/pg_hba.j2 dest=/var/lib/pgsql/data/pg_hba.conf owner=postgres
 
       - name: restart postgresql
         service: name=postgresql state=restarted
