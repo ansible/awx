@@ -123,6 +123,11 @@ class BaseSubList(BaseList):
 
                     # now make sure we could have already attached the two together.  If we could not have, raise an exception
                     # such that the transaction does not commit.
+
+                    if main == obj:
+                        # no attaching to yourself
+                        raise PermissionDenied()
+
                     if self.__class__.parent_model != User:
                         if not self.__class__.parent_model.can_user_attach(request.user, main, obj, self.__class__.relationship):
                             raise PermissionDenied()

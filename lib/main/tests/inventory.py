@@ -212,6 +212,7 @@ class InventoryTest(BaseTest):
         got = self.get(url5, expect=200, auth=self.get_other_credentials())
         self.assertEquals(got['count'], 3)
 
+
         ##################################################
         # GROUPS->inventories POST via subcollection
         
@@ -310,6 +311,38 @@ class InventoryTest(BaseTest):
         put = self.put(vdata1_url, data=vars_c, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(put, vars_c)
 
+
+        ####################################################
+        # ADDING HOSTS TO GROUPS
+
+        groups = Group.objects.all()
+        hosts = Host.objects.all()
+        groups[0].hosts.add(Host.objects.get(pk=1))
+        groups[0].hosts.add(Host.objects.get(pk=3)) 
+        groups[0].save()
+
+        # access        
+        url1 = '/api/v1/groups/1/hosts/'
+        data = self.get(url1, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['count'], 2)
+        self.assertEquals(data['results'][0]['id'], 1)
+        self.assertEquals(data['results'][1]['id'], 3)
+
+        # addition
+        got = self.get('/api/v1/hosts/2/', expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(got['id'], 2)
+        posted = self.post('/api/v1/groups/1/hosts/', data=got, expect=204, auth=self.get_normal_credentials())
+        data = self.get(url1, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['count'], 3)
+        self.assertEquals(data['results'][1]['id'], 2)
+
+        # removal
+        got['disassociate'] = 1
+        posted = self.post('/api/v1/groups/1/hosts/', data=got, expect=204, auth=self.get_normal_credentials())
+        data = self.get(url1, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['count'], 2)
+        self.assertEquals(data['results'][1]['id'], 3)
+
         ####################################################
         # SUBGROUPS
 
@@ -328,6 +361,12 @@ class InventoryTest(BaseTest):
             user            = self.other_django_user,
             permission_type = PERM_INVENTORY_WRITE
         )
+
+        # data used for testing listing all hosts that are transitive members of a group
+        g2 = Group.objects.get(pk=2)
+        nh = Host.objects.create(name='newhost.example.com', inventory=inv, created_by=User.objects.get(pk=1))
+        g2.hosts.add(nh)
+        g2.save()
 
         # a super user can set subgroups
         subgroups_url = '/api/v1/groups/1/children/'
@@ -355,6 +394,15 @@ class InventoryTest(BaseTest):
         self.post(subgroups_url3, data=got, expect=204, auth=self.get_other_credentials())
         checked = self.get(subgroups_url3, expect=200, auth=self.get_normal_credentials()) 
         self.assertEqual(checked['count'], 1)
+        
+        # slight detour
+        # can see all hosts under a group, even if it has subgroups
+        # this URL is NOT postable
+        all_hosts = '/api/v1/groups/1/all_hosts/'
+        self.assertEqual(Group.objects.get(pk=1).hosts.count(), 2)
+        data = self.get(all_hosts, expect=200, auth=self.get_normal_credentials())
+        self.post(all_hosts, data=dict(id=123456, msg='spam'), expect=405, auth=self.get_normal_credentials())
+        self.assertEquals(data['count'], 3)
 
         # now post it back to remove it, by adding the disassociate bit
         result = checked['results'][0]

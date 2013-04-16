@@ -66,6 +66,8 @@ views_GroupsList                   = views.GroupsList.as_view()
 views_GroupsDetail                 = views.GroupsDetail.as_view()
 views_GroupsVariableDetail         = views.GroupsVariableDetail.as_view()
 views_GroupsChildrenList           = views.GroupsChildrenList.as_view()
+views_GroupsAllHostsList           = views.GroupsAllHostsList.as_view()
+views_GroupsHostsList              = views.GroupsHostsList.as_view()
 
 # host service
 views_HostsList                    = views.HostsList.as_view()
@@ -147,6 +149,8 @@ urlpatterns = patterns('',
     url(r'^api/v1/groups/$',                                      views_GroupsList),
     url(r'^api/v1/groups/(?P<pk>[0-9]+)/$',                       views_GroupsDetail),
     url(r'^api/v1/groups/(?P<pk>[0-9]+)/children/$',              views_GroupsChildrenList),
+    url(r'^api/v1/groups/(?P<pk>[0-9]+)/hosts/$',                 views_GroupsHostsList),
+    url(r'^api/v1/groups/(?P<pk>[0-9]+)/all_hosts/$',             views_GroupsAllHostsList),
 
     # variable data
     url(r'^api/v1/hosts/(?P<pk>[0-9]+)/variable_data/$',          views_HostsVariableDetail),

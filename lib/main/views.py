@@ -578,6 +578,83 @@ class GroupsChildrenList(BaseSubList):
         ).distinct()
         return admin_of | has_user_perms | has_team_perms
 
+class GroupsHostsList(BaseSubList):
+    ''' the list of hosts directly below a group '''
+
+    model = Host
+    serializer_class = HostSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Group
+    relationship = 'hosts'
+    postable = True
+    inject_primary_key_on_post_as = 'group'
+
+    def _get_queryset(self):
+
+        parent = Group.objects.get(pk=self.kwargs['pk'])
+
+        # FIXME: verify read permissions on this object are still required at a higher level
+
+        base = parent.hosts
+        if self.request.user.is_superuser:
+            return base.all()
+        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
+        has_user_perms = base.filter(
+            inventory__permissions__user__in = [ self.request.user ],
+            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        has_team_perms = base.filter(
+            inventory__permissions__team__in = self.request.user.teams.all(),
+            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        return admin_of | has_user_perms | has_team_perms
+
+
+class GroupsAllHostsList(BaseSubList):
+    ''' the list of all hosts below a group, even including subgroups '''
+
+    model = Host
+    serializer_class = HostSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Group
+    relationship = 'hosts'
+
+    def _child_hosts(self, parent):
+        # TODO: should probably be a method on the model
+        result = parent.hosts.distinct() 
+        if parent.children.count() == 0:
+            return result
+        else:
+            for child in parent.children.all():
+                if child == parent:
+                    # shouldn't happen, but be prepared in case DB is weird
+                    continue
+                result = result | self._child_hosts(child)
+            return result
+
+    def _get_queryset(self):
+    
+        parent = Group.objects.get(pk=self.kwargs['pk'])
+    
+        # FIXME: verify read permissions on this object are still required at a higher level
+
+        base = self._child_hosts(parent)
+
+        if self.request.user.is_superuser:
+            return base.all()
+
+        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
+        has_user_perms = base.filter(
+            inventory__permissions__user__in = [ self.request.user ],
+            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        has_team_perms = base.filter(
+            inventory__permissions__team__in = self.request.user.teams.all(),
+            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        return admin_of | has_user_perms | has_team_perms
+
+
 class GroupsDetail(BaseDetail):
 
     model = Group

@@ -78,3 +78,9 @@ QUESTIONS
 * if creating a project, do we want to have an appliance style path for them, like
   /storage/projects/GUID ??? may want to keep somewhere else ?
 
+MISC
+----
+
+when associating inventory objects, objects should share common inventory records (user_can_attach method should check)
+
+
