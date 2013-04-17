@@ -46,13 +46,13 @@ class BaseCeleryTest(BaseTransactionTest):
     '''
 
 @override_settings(ANSIBLE_TRANSPORT='local')
-class RunLaunchJobTest(BaseCeleryTest):
+class RunJobTest(BaseCeleryTest):
     '''
-    Test cases for run_launch_job celery task.
+    Test cases for run_job celery task.
     '''
 
     def setUp(self):
-        super(RunLaunchJobTest, self).setUp()
+        super(RunJobTest, self).setUp()
         self.setup_users()
         self.organization = self.make_organizations(self.super_django_user, 1)[0]
         self.project = self.make_projects(self.normal_django_user, 1)[0]
@@ -65,14 +65,11 @@ class RunLaunchJobTest(BaseCeleryTest):
         self.group = self.inventory.groups.create(name='test-group',
                                                   inventory=self.inventory)
         self.group.hosts.add(self.host)
-        self.launch_job = LaunchJob.objects.create(name='test-launch-job',
-                                                   inventory=self.inventory,
-                                                   project=self.project)
         # Pass test database name in environment for use by the inventory script.
         os.environ['ACOM_TEST_DATABASE_NAME'] = settings.DATABASES['default']['NAME']
 
     def tearDown(self):
-        super(RunLaunchJobTest, self).tearDown()
+        super(RunJobTest, self).tearDown()
         os.environ.pop('ACOM_TEST_DATABASE_NAME', None)
         os.remove(self.test_playbook)
 
@@ -84,84 +81,84 @@ class RunLaunchJobTest(BaseCeleryTest):
         self.project.default_playbook = self.test_playbook
         self.project.save()
 
-    def test_run_launch_job(self):
+    def test_run_job(self):
         self.create_test_playbook(TEST_PLAYBOOK)
-        launch_job_status = self.launch_job.start()
-        self.assertEqual(launch_job_status.status, 'pending')
-        self.assertEqual(set(launch_job_status.hosts.values_list('pk', flat=True)),
+        job = Job.objects.create(name='test-job', inventory=self.inventory,
+                                 project=self.project)
+        self.assertEqual(job.status, 'pending')
+        self.assertEqual(set(job.hosts.values_list('pk', flat=True)),
                          set([self.host.pk]))
-        launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
+        job = Job.objects.get(pk=job.pk)
         #print 'stdout:', launch_job_status.result_stdout
         #print 'stderr:', launch_job_status.result_stderr
         #print launch_job_status.status
         #print settings.DATABASES
-        self.assertEqual(launch_job_status.status, 'successful')
-        self.assertTrue(launch_job_status.result_stdout)
-        launch_job_status_events = launch_job_status.launch_job_status_events.all()
+        self.assertEqual(job.status, 'successful')
+        self.assertTrue(job.result_stdout)
+        job_events = job.job_events.all()
         #for ev in launch_job_status_events:
         #    print ev.event, ev.event_data
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 2)
-        self.assertEqual(launch_job_status_events.filter(event='runner_on_ok').count(), 2)
-        for evt in launch_job_status_events.filter(event='runner_on_ok'):
+        self.assertEqual(job_events.filter(event='playbook_on_start').count(), 1)
+        self.assertEqual(job_events.filter(event='playbook_on_play_start').count(), 1)
+        self.assertEqual(job_events.filter(event='playbook_on_task_start').count(), 2)
+        self.assertEqual(job_events.filter(event='runner_on_ok').count(), 2)
+        for evt in job_events.filter(event='runner_on_ok'):
             self.assertEqual(evt.host, self.host)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
+        self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
 
-    def test_check_launch_job(self):
+    def test_check_job(self):
         self.create_test_playbook(TEST_PLAYBOOK)
-        self.launch_job.job_type = 'check'
-        self.launch_job.save()
-        launch_job_status = self.launch_job.start()
-        self.assertEqual(launch_job_status.status, 'pending')
-        self.assertEqual(set(launch_job_status.hosts.values_list('pk', flat=True)),
+        job = Job.objects.create(name='test-job', inventory=self.inventory,
+                                 project=self.project, job_type='check')
+        self.assertEqual(job.status, 'pending')
+        self.assertEqual(set(job.hosts.values_list('pk', flat=True)),
                          set([self.host.pk]))
-        launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
-        self.assertEqual(launch_job_status.status, 'successful')
-        self.assertTrue(launch_job_status.result_stdout)
-        launch_job_status_events = launch_job_status.launch_job_status_events.all()
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 2)
-        self.assertEqual(launch_job_status_events.filter(event='runner_on_skipped').count(), 2)
-        for evt in launch_job_status_events.filter(event='runner_on_skipped'):
+        job = Job.objects.get(pk=job.pk)
+        self.assertEqual(job.status, 'successful')
+        self.assertTrue(job.result_stdout)
+        job_events = job.job_events.all()
+        self.assertEqual(job_events.filter(event='playbook_on_start').count(), 1)
+        self.assertEqual(job_events.filter(event='playbook_on_play_start').count(), 1)
+        self.assertEqual(job_events.filter(event='playbook_on_task_start').count(), 2)
+        self.assertEqual(job_events.filter(event='runner_on_skipped').count(), 2)
+        for evt in job_events.filter(event='runner_on_skipped'):
             self.assertEqual(evt.host, self.host)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
+        self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
 
-    def test_run_launch_job_that_fails(self):
+    def test_run_job_that_fails(self):
         self.create_test_playbook(TEST_PLAYBOOK2)
-        launch_job_status = self.launch_job.start()
-        self.assertEqual(launch_job_status.status, 'pending')
-        self.assertEqual(set(launch_job_status.hosts.values_list('pk', flat=True)),
+        job = Job.objects.create(name='test-job', inventory=self.inventory,
+                                 project=self.project)
+        self.assertEqual(job.status, 'pending')
+        self.assertEqual(set(job.hosts.values_list('pk', flat=True)),
                          set([self.host.pk]))
-        launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
-        self.assertEqual(launch_job_status.status, 'failed')
-        self.assertTrue(launch_job_status.result_stdout)
-        launch_job_status_events = launch_job_status.launch_job_status_events.all()
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='runner_on_failed').count(), 1)
-        self.assertEqual(launch_job_status_events.get(event='runner_on_failed').host, self.host)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
+        job = Job.objects.get(pk=job.pk)
+        self.assertEqual(job.status, 'failed')
+        self.assertTrue(job.result_stdout)
+        job_events = job.job_events.all()
+        self.assertEqual(job_events.filter(event='playbook_on_start').count(), 1)
+        self.assertEqual(job_events.filter(event='playbook_on_play_start').count(), 1)
+        self.assertEqual(job_events.filter(event='playbook_on_task_start').count(), 1)
+        self.assertEqual(job_events.filter(event='runner_on_failed').count(), 1)
+        self.assertEqual(job_events.get(event='runner_on_failed').host, self.host)
+        self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
 
-    def test_check_launch_job_where_task_would_fail(self):
+    def test_check_job_where_task_would_fail(self):
         self.create_test_playbook(TEST_PLAYBOOK2)
-        self.launch_job.job_type = 'check'
-        self.launch_job.save()
-        launch_job_status = self.launch_job.start()
-        self.assertEqual(launch_job_status.status, 'pending')
-        self.assertEqual(set(launch_job_status.hosts.values_list('pk', flat=True)),
+        job = Job.objects.create(name='test-job', inventory=self.inventory,
+                                 project=self.project, job_type='check')
+        self.assertEqual(job.status, 'pending')
+        self.assertEqual(set(job.hosts.values_list('pk', flat=True)),
                          set([self.host.pk]))
-        launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status.pk)
+        job = Job.objects.get(pk=job.pk)
         # Since we don't actually run the task, the --check should indicate
         # everything is successful.
-        self.assertEqual(launch_job_status.status, 'successful')
-        self.assertTrue(launch_job_status.result_stdout)
-        launch_job_status_events = launch_job_status.launch_job_status_events.all()
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_play_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_task_start').count(), 1)
-        self.assertEqual(launch_job_status_events.filter(event='runner_on_skipped').count(), 1)
-        self.assertEqual(launch_job_status_events.get(event='runner_on_skipped').host, self.host)
-        self.assertEqual(launch_job_status_events.filter(event='playbook_on_stats').count(), 1)
+        self.assertEqual(job.status, 'successful')
+        self.assertTrue(job.result_stdout)
+        job_events = job.job_events.all()
+        self.assertEqual(job_events.filter(event='playbook_on_start').count(), 1)
+        self.assertEqual(job_events.filter(event='playbook_on_play_start').count(), 1)
+        self.assertEqual(job_events.filter(event='playbook_on_task_start').count(), 1)
+        self.assertEqual(job_events.filter(event='runner_on_skipped').count(), 1)
+        self.assertEqual(job_events.get(event='runner_on_skipped').host, self.host)
+        self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)

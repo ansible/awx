@@ -21,12 +21,13 @@ from celery import task
 from django.conf import settings
 from lib.main.models import *
 
-@task(name='run_launch_job')
-def run_launch_job(launch_job_status_pk):
-    launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status_pk)
-    launch_job_status.status = 'running'
-    launch_job_status.save()
-    launch_job = launch_job_status.launch_job
+__all__ = ['run_job']
+
+@task(name='run_job')
+def run_job(job_pk):
+    job = Job.objects.get(pk=job_pk)
+    job.status = 'running'
+    job.save(update_fields=['status'])
 
     try:
         status, stdout, stderr, tb = 'error', '', '', ''
@@ -40,17 +41,18 @@ def run_launch_job(launch_job_status_pk):
                                                         'acom_callback_event.py'))
         env = dict(os.environ.items())
         # question: when running over CLI, generate a random ID or grab next, etc?
-        env['ACOM_LAUNCH_JOB_STATUS_ID'] = str(launch_job_status.pk)
-        env['ACOM_INVENTORY_ID'] = str(launch_job.inventory.pk)
+        # answer: TBD
+        env['ACOM_JOB_ID'] = str(job.pk)
+        env['ACOM_INVENTORY_ID'] = str(job.inventory.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
         env['ACOM_CALLBACK_EVENT_SCRIPT'] = callback_script
  
         if hasattr(settings, 'ANSIBLE_TRANSPORT'):
             env['ANSIBLE_TRANSPORT'] = getattr(settings, 'ANSIBLE_TRANSPORT')
  
-        playbook = launch_job.project.default_playbook
+        playbook = job.project.default_playbook
         cmdline = ['ansible-playbook', '-i', inventory_script]
-        if launch_job.job_type == 'check':
+        if job.job_type == 'check':
             cmdline.append('--check')
         cmdline.append(playbook)
 
@@ -63,9 +65,10 @@ def run_launch_job(launch_job_status_pk):
         tb = traceback.format_exc()
  
     # Reload from database before updating/saving.
-    launch_job_status = LaunchJobStatus.objects.get(pk=launch_job_status_pk)
-    launch_job_status.status = status
-    launch_job_status.result_stdout = stdout
-    launch_job_status.result_stderr = stderr
-    launch_job_status.result_traceback = tb
-    launch_job_status.save()
+    job = Job.objects.get(pk=job_pk)
+    job.status = status
+    job.result_stdout = stdout
+    job.result_stderr = stderr
+    job.result_traceback = tb
+    job.save(update_fields=['status', 'result_stdout', 'result_stderr',
+                            'result_traceback'])

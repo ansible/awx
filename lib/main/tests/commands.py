@@ -138,7 +138,7 @@ class AcomInventoryTest(BaseCommandTest):
     def test_list_with_inventory_id_as_argument(self):
         inventory = self.inventories[0]
         result, stdout, stderr = self.run_command('acom_inventory', list=True,
-                                                  inventory=inventory.pk)
+                                                  inventory_id=inventory.pk)
         self.assertEqual(result, None)
         data = json.loads(stdout)
         self.assertEqual(set(data.keys()),
@@ -156,7 +156,7 @@ class AcomInventoryTest(BaseCommandTest):
         invalid_id = [x for x in xrange(9999) if x not in inventory_pks][0]
         os.environ['ACOM_INVENTORY_ID'] = str(invalid_id)
         result, stdout, stderr = self.run_command('acom_inventory', list=True,
-                                               inventory=inventory.pk)
+                                                  inventory_id=inventory.pk)
         self.assertEqual(result, None)
         data = json.loads(stdout)
 
@@ -274,40 +274,38 @@ class AcomCallbackEventTest(BaseCommandTest):
         self.group = self.inventory.groups.create(name='test-group',
                                                   inventory=self.inventory)
         self.group.hosts.add(self.host)
-        self.launch_job = LaunchJob.objects.create(name='test-launch-job',
-                                                   inventory=self.inventory,
-                                                   project=self.project)
-        self.launch_job_status = self.launch_job.launch_job_statuses.create(
-            name='launch-job-status-%s' % now().isoformat())
+        self.job = Job.objects.create(name='job-%s' % now().isoformat(),
+                                      inventory=self.inventory,
+                                      project=self.project)
         self.valid_kwargs = {
-            'launch_job_status_id': self.launch_job_status.id,
+            'job_id': self.job.id,
             'event_type': 'playbook_on_start',
             'event_data_json': json.dumps({'test_event_data': [2,4,6]}),
         }
 
-    def test_with_launch_job_status_not_running(self):
-        # Events can only be added when the launch job is running.
-        self.assertEqual(self.launch_job_status.status, 'pending')
+    def test_with_job_status_not_running(self):
+        # Events can only be added when the job is running.
+        self.assertEqual(self.job.status, 'pending')
         result, stdout, stderr = self.run_command('acom_callback_event',
                                                   **self.valid_kwargs)
         self.assertTrue(isinstance(result, CommandError))
         self.assertTrue('unable to add event ' in str(result).lower())
-        self.launch_job_status.status = 'successful'
-        self.launch_job_status.save()
+        self.job.status = 'successful'
+        self.job.save()
         result, stdout, stderr = self.run_command('acom_callback_event',
                                                   **self.valid_kwargs)
         self.assertTrue(isinstance(result, CommandError))
         self.assertTrue('unable to add event ' in str(result).lower())
-        self.launch_job_status.status = 'failed'
-        self.launch_job_status.save()
+        self.job.status = 'failed'
+        self.job.save()
         result, stdout, stderr = self.run_command('acom_callback_event',
                                                   **self.valid_kwargs)
         self.assertTrue(isinstance(result, CommandError))
         self.assertTrue('unable to add event ' in str(result).lower())
 
     def test_with_invalid_args(self):
-        self.launch_job_status.status = 'running'
-        self.launch_job_status.save()
+        self.job.status = 'running'
+        self.job.save()
         # Event type not given.
         kwargs = dict(self.valid_kwargs.items())
         kwargs.pop('event_type')
@@ -326,21 +324,21 @@ class AcomCallbackEventTest(BaseCommandTest):
         result, stdout, stderr = self.run_command('acom_callback_event', **kwargs)
         self.assertTrue(isinstance(result, CommandError))
         self.assertTrue('either --file or --data' in str(result).lower())
-        # Non-integer launch job status ID.
+        # Non-integer job ID.
         kwargs = dict(self.valid_kwargs.items())
-        kwargs['launch_job_status_id'] = 'foo'
+        kwargs['job_id'] = 'foo'
         result, stdout, stderr = self.run_command('acom_callback_event', **kwargs)
         self.assertTrue(isinstance(result, CommandError))
         self.assertTrue('id must be an integer' in str(result).lower())
-        # No launch job status ID.
+        # No job ID.
         kwargs = dict(self.valid_kwargs.items())
-        kwargs.pop('launch_job_status_id')
+        kwargs.pop('job_id')
         result, stdout, stderr = self.run_command('acom_callback_event', **kwargs)
         self.assertTrue(isinstance(result, CommandError))
-        self.assertTrue('no launch job status id' in str(result).lower())
-        # Invalid launch job status ID.
+        self.assertTrue('no job id' in str(result).lower())
+        # Invalid job ID.
         kwargs = dict(self.valid_kwargs.items())
-        kwargs['launch_job_status_id'] = 9999
+        kwargs['job_id'] = 9999
         result, stdout, stderr = self.run_command('acom_callback_event', **kwargs)
         self.assertTrue(isinstance(result, CommandError))
         self.assertTrue('not found' in str(result).lower())
@@ -362,21 +360,21 @@ class AcomCallbackEventTest(BaseCommandTest):
         self.assertTrue('reading from' in str(result).lower())
 
     def test_with_valid_args(self):
-        self.launch_job_status.status = 'running'
-        self.launch_job_status.save()
+        self.job.status = 'running'
+        self.job.save()
         # Default valid args.
         kwargs = dict(self.valid_kwargs.items())
         result, stdout, stderr = self.run_command('acom_callback_event', **kwargs)
         self.assertEqual(result, None)
-        self.assertEqual(self.launch_job_status.launch_job_status_events.count(), 1)
-        # Pass launch job status in environment instead.
+        self.assertEqual(self.job.job_events.count(), 1)
+        # Pass job ID in environment instead.
         kwargs = dict(self.valid_kwargs.items())
-        kwargs.pop('launch_job_status_id')
-        os.environ['ACOM_LAUNCH_JOB_STATUS_ID'] = str(self.launch_job_status.id)
+        kwargs.pop('job_id')
+        os.environ['ACOM_JOB_ID'] = str(self.job.id)
         result, stdout, stderr = self.run_command('acom_callback_event', **kwargs)
         self.assertEqual(result, None)
-        self.assertEqual(self.launch_job_status.launch_job_status_events.count(), 2)
-        os.environ.pop('ACOM_LAUNCH_JOB_STATUS_ID', None)
+        self.assertEqual(self.job.job_events.count(), 2)
+        os.environ.pop('ACOM_JOB_ID', None)
         # Test with JSON data in a file instead.
         kwargs = dict(self.valid_kwargs.items())
         kwargs.pop('event_data_json')
@@ -388,7 +386,7 @@ class AcomCallbackEventTest(BaseCommandTest):
         kwargs['event_data_file'] = tf
         result, stdout, stderr = self.run_command('acom_callback_event', **kwargs)
         self.assertEqual(result, None)
-        self.assertEqual(self.launch_job_status.launch_job_status_events.count(), 3)
+        self.assertEqual(self.job.job_events.count(), 3)
         # Test with JSON data from stdin.
         kwargs = dict(self.valid_kwargs.items())
         kwargs.pop('event_data_json')
@@ -396,4 +394,4 @@ class AcomCallbackEventTest(BaseCommandTest):
         kwargs['stdin_fileobj'] = StringIO.StringIO(json.dumps({'blah': 'bleep'}))
         result, stdout, stderr = self.run_command('acom_callback_event', **kwargs)
         self.assertEqual(result, None)
-        self.assertEqual(self.launch_job_status.launch_job_status_events.count(), 4)
+        self.assertEqual(self.job.job_events.count(), 4)

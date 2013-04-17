@@ -19,4 +19,4 @@ from lib.main.tests.users import UsersTest
 from lib.main.tests.inventory import InventoryTest
 from lib.main.tests.projects import ProjectsTest
 from lib.main.tests.commands import *
-from lib.main.tests.tasks import RunLaunchJobTest
+from lib.main.tests.tasks import RunJobTest

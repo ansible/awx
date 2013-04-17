@@ -150,7 +150,7 @@ class PrimordialModel(models.Model):
         abstract = True
 
     description   = models.TextField(blank=True, default='')
-    created_by    = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, related_name='%s(class)s_created') # not blank=False on purpose for admin!
+    created_by    = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, related_name='%s(class)s_created', editable=False) # not blank=False on purpose for admin!
     creation_date = models.DateField(auto_now_add=True)
     tags          = models.ManyToManyField('Tag', related_name='%(class)s_by_tag', blank=True)
     audit_trail   = models.ManyToManyField('AuditTrail', related_name='%(class)s_by_audit_trail', blank=True)
@@ -707,35 +707,51 @@ class Permission(CommonModelNameNotUnique):
 
 # TODO: other job types (later)
 
-class LaunchJob(CommonModel):
+class JobTemplate(CommonModel):
     '''
-    A launch job is a definition for applying a project (with playbook) to an
-    inventory source with a given credential.
+    A job template is a reusable job definition for applying a project (with
+    playbook) to an inventory source with a given credential.
     '''
 
     class Meta:
         app_label = 'main'
 
-    inventory      = models.ForeignKey('Inventory', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
-    credential     = models.ForeignKey('Credential', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
-    project        = models.ForeignKey('Project', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
-    user           = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, default=None, blank=True, related_name='launch_jobs')
-
-    # JOB_TYPE_CHOICES are a subset of PERMISSION_TYPE_CHOICES
-    job_type       = models.CharField(max_length=64, choices=JOB_TYPE_CHOICES)
-
-    def start(self):
-        '''
-        Create a new launch job status and start the task via celery.
-        '''
-        from lib.main.tasks import run_launch_job
-        launch_job_status = self.launch_job_statuses.create(name='Launch Job Status %s' % now().isoformat())
-        task_result = run_launch_job.delay(launch_job_status.pk)
-        # The TaskMeta instance in the database isn't created until the worker
-        # starts processing the task, so we can only store the task ID here.
-        launch_job_status.celery_task_id = task_result.task_id
-        launch_job_status.save(update_fields=['celery_task_id'])
-        return launch_job_status
+    job_type = models.CharField(
+        max_length=64,
+        choices=JOB_TYPE_CHOICES,
+    )
+    inventory = models.ForeignKey(
+        'Inventory',
+        related_name='job_templates',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+    credential = models.ForeignKey(
+        'Credential',
+        related_name='job_templates',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+    project = models.ForeignKey(
+        'Project',
+        related_name='job_templates',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+    user = models.ForeignKey(
+        'auth.User',
+        related_name='job_templates',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
 
     # project has one default playbook but really should have a list of playbooks and flags ...
 
@@ -756,9 +772,11 @@ class LaunchJob(CommonModel):
     #    --list
     #    -- host <hostname>
 
-class LaunchJobStatus(CommonModel):
+class Job(CommonModel):
     '''
-    Status for a single run of a launch job.
+    A job applies a project (with playbook) to an inventory source with a given
+    credential.  It represents a single invocation of ansible-playbook with the
+    given parameters.
     '''
 
     STATUS_CHOICES = [
@@ -771,15 +789,77 @@ class LaunchJobStatus(CommonModel):
 
     class Meta:
         app_label = 'main'
-        verbose_name_plural = _('launch job statuses')
 
-    launch_job       = models.ForeignKey('LaunchJob', null=True, on_delete=SET_NULL, related_name='launch_job_statuses')
-    status           = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    result_stdout    = models.TextField(blank=True, default='')
-    result_stderr    = models.TextField(blank=True, default='')
-    result_traceback = models.TextField(blank=True, default='')
-    celery_task_id   = models.CharField(max_length=100, blank=True, default='', editable=False)
-    hosts            = models.ManyToManyField('Host', related_name='launch_job_statuses', blank=True, through='LaunchJobHostSummary')
+    job_template = models.ForeignKey(
+        'JobTemplate',
+        related_name='jobs',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+    job_type = models.CharField(
+        max_length=64,
+        choices=JOB_TYPE_CHOICES,
+    )
+    inventory = models.ForeignKey(
+        'Inventory',
+        related_name='jobs',
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    credential = models.ForeignKey(
+        'Credential',
+        related_name='jobs',
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    project = models.ForeignKey(
+        'Project',
+        related_name='jobs',
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    user = models.ForeignKey(
+        'auth.User',
+        related_name='jobs',
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        editable=False,
+    )
+    result_stdout = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
+    result_stderr = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
+    result_traceback = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
+    celery_task_id = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        editable=False,
+    )
+    hosts = models.ManyToManyField(
+        'Host',
+        related_name='jobs',
+        blank=True,
+        editable=False,
+        through='JobHostSummary',
+    )
 
     @property
     def celery_task(self):
@@ -789,24 +869,46 @@ class LaunchJobStatus(CommonModel):
         except TaskMeta.DoesNotExist:
             pass
 
-    def save(self, *args, **kwargs):
-        super(LaunchJobStatus, self).save(*args, **kwargs)
-        # Create a new host summary for each host in the inventory.
-        for host in self.launch_job.inventory.hosts.all():
-            # Due to the way the inventory script is called, hosts without a group won't be affected.
-            if host.groups.count():
-                self.launch_job_host_summaries.get_or_create(host=host)
+    def _run(self):
+        from lib.main.tasks import run_job
+        task_result = run_job.delay(self.pk)
+        # The TaskMeta instance in the database isn't created until the worker
+        # starts processing the task, so we can only store the task ID here.
+        self.celery_task_id = task_result.task_id
+        self.save(update_fields=['celery_task_id'])
 
-class LaunchJobHostSummary(models.Model):
+    def save(self, *args, **kwargs):
+        created = not bool(self.pk)
+        super(Job, self).save(*args, **kwargs)
+        # Create a new host summary for each host in the inventory.
+        for host in self.inventory.hosts.all():
+            # Due to the way the inventory script is called, hosts without a
+            # group won't be included.
+            if host.groups.count():
+                self.job_host_summaries.get_or_create(host=host)
+        # Start job running (but only if just created).
+        if created and self.status == 'pending':
+            self._run()
+
+class JobHostSummary(models.Model):
+    '''
+    Per-host statistics for each job.
+    '''
 
     class Meta:
-        unique_together = [('launch_job_status', 'host')]
-        verbose_name_plural = _('Launch Job Host Summaries')
+        unique_together = [('job', 'host')]
+        verbose_name_plural = _('Job Host Summaries')
         ordering = ('-pk',)
 
-    launch_job_status = models.ForeignKey('LaunchJobStatus', on_delete=models.CASCADE, related_name='launch_job_host_summaries')
-    host = models.ForeignKey('Host', on_delete=models.CASCADE, related_name='launch_job_host_summaries')
-    # FIXME: Can't use SET_NULL for host relationship because of unique constraint.
+    job = models.ForeignKey(
+        'Job',
+        related_name='job_host_summaries',
+        on_delete=models.CASCADE,
+    )
+    host = models.ForeignKey('Host',
+        related_name='job_host_summaries',
+        on_delete=models.CASCADE,
+    )
 
     changed = models.PositiveIntegerField(default=0)
     dark = models.PositiveIntegerField(default=0)
@@ -820,7 +922,7 @@ class LaunchJobHostSummary(models.Model):
             (self.host.name, self.changed, self.dark, self.failures, self.ok,
              self.processed, self.skipped)
 
-class LaunchJobStatusEvent(models.Model):
+class JobEvent(models.Model):
     '''
     An event/message logged from the callback when running a job.
     '''
@@ -849,11 +951,30 @@ class LaunchJobStatusEvent(models.Model):
     class Meta:
         app_label = 'main'
 
-    launch_job_status = models.ForeignKey('LaunchJobStatus', related_name='launch_job_status_events', on_delete=CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
-    event = models.CharField(max_length=100, choices=EVENT_TYPES)
-    event_data = JSONField(blank=True, default='')
-    host = models.ForeignKey('Host', blank=True, null=True, default=None, on_delete=SET_NULL, related_name='launch_job_status_events')
+    job = models.ForeignKey(
+        'Job',
+        related_name='job_events',
+        on_delete=models.CASCADE,
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+    )
+    event = models.CharField(
+        max_length=100,
+        choices=EVENT_TYPES,
+    )
+    event_data = JSONField(
+        blank=True,
+        default='',
+    )
+    host = models.ForeignKey(
+        'Host',
+        related_name='job_events',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
 
     def __unicode__(self):
         return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())
@@ -861,31 +982,36 @@ class LaunchJobStatusEvent(models.Model):
     def save(self, *args, **kwargs):
         try:
             if not self.host and self.event_data.get('host', ''):
-                # Make sure we're looking at only the hosts from this launch job's associated inventory.
-                self.host = self.launch_job_status.launch_job.inventory.hosts.get(name=self.event_data['host'])
+                self.host = self.job.inventory.hosts.get(name=self.event_data['host'])
         except (Host.DoesNotExist, AttributeError):
             pass
-        super(LaunchJobStatusEvent, self).save(*args, **kwargs)
+        super(JobEvent, self).save(*args, **kwargs)
         self.update_host_summary_from_stats()
 
     def update_host_summary_from_stats(self):
         if self.event != 'playbook_on_stats':
             return
         hostnames = set()
-        for v in self.event_data.values():
-            hostnames.update(v.keys())
+        try:
+            for v in self.event_data.values():
+                hostnames.update(v.keys())
+        except AttributeError: # In case event_data or v isn't a dict.
+            pass
         for hostname in hostnames:
             try:
-                host = self.launch_job_status.launch_job.inventory.hosts.get(name=hostname)
+                host = self.job.inventory.hosts.get(name=hostname)
             except Host.DoesNotExist:
                 continue
-            host_summary = self.launch_job_status.launch_job_host_summaries.get_or_create(host=host)[0]
+            host_summary = self.job.job_host_summaries.get_or_create(host=host)[0]
             host_summary_changed = False
             for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
-                value = self.event_data.get(stat, {}).get(hostname, 0)
-                if getattr(host_summary, stat) != value:
-                    setattr(host_summary, stat, value)
-                    host_summary_changed = True
+                try:
+                    value = self.event_data.get(stat, {}).get(hostname, 0)
+                    if getattr(host_summary, stat) != value:
+                        setattr(host_summary, stat, value)
+                        host_summary_changed = True
+                except AttributeError: # in case event_data[stat] isn't a dict.
+                    pass
             if host_summary_changed:
                 host_summary.save()
 

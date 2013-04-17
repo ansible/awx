@@ -27,9 +27,9 @@ class Command(NoArgsCommand):
     help = 'Ansible Commander Inventory script'
 
     option_list = NoArgsCommand.option_list + (
-        make_option('-i', '--inventory', dest='inventory', type='int', default=0,
-                    help='Inventory ID (can also be specified using '
-                         'ACOM_INVENTORY_ID environment variable)'),
+        make_option('-i', '--inventory', dest='inventory_id', type='int',
+                    default=0, help='Inventory ID (can also be specified using'
+                                    ' ACOM_INVENTORY_ID environment variable)'),
         make_option('--list', action='store_true', dest='list', default=False,
                     help='Return JSON hash of host groups.'),
         make_option('--host', dest='host', default='',
@@ -75,7 +75,7 @@ class Command(NoArgsCommand):
             try:
                 # Command line argument takes precedence over environment
                 # variable.
-                inventory_id = int(options.get('inventory', 0) or \
+                inventory_id = int(options.get('inventory_id', 0) or \
                                    os.getenv('ACOM_INVENTORY_ID', 0))
             except ValueError:
                 raise CommandError('Inventory ID must be an integer')

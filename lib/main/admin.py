@@ -16,6 +16,7 @@
 
 
 import json
+import urllib
 
 from django.conf.urls import *
 from django.contrib import admin
@@ -51,7 +52,16 @@ admin.site.register(User, UserAdmin)
 
 # FIXME: Hide auth.Group admin
 
-class OrganizationAdmin(admin.ModelAdmin):
+class BaseModelAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change):
+        # Automatically set created_by when saved from the admin.
+        # FIXME: Doesn't handle inline model instances yet.
+        if hasattr(obj, 'created_by') and obj.created_by is None:
+            obj.created_by = request.user
+        return super(BaseModelAdmin, self).save_model(request, obj, form, change)
+
+class OrganizationAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
     list_filter = ('active', 'tags')
@@ -62,7 +72,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'audit_trail',)}),
     )
-    readonly_fields = ('creation_date', 'audit_trail')
+    readonly_fields = ('creation_date', 'created_by', 'audit_trail')
     filter_horizontal = ('users', 'admins', 'projects', 'tags')
 
 class InventoryHostInline(admin.StackedInline):
@@ -79,7 +89,7 @@ class InventoryGroupInline(admin.StackedInline):
     fields = ('name', 'description', 'active', 'parents', 'hosts', 'tags')
     filter_horizontal = ('parents', 'hosts', 'tags')
 
-class InventoryAdmin(admin.ModelAdmin):
+class InventoryAdmin(BaseModelAdmin):
 
     list_display = ('name', 'organization', 'description', 'active')
     list_filter = ('organization', 'active')
@@ -89,11 +99,11 @@ class InventoryAdmin(admin.ModelAdmin):
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'audit_trail',)}),
     )
-    readonly_fields = ('creation_date', 'audit_trail')
+    readonly_fields = ('creation_date', 'created_by', 'audit_trail')
     filter_horizontal = ('tags',)
     inlines = [InventoryHostInline, InventoryGroupInline]
 
-class TagAdmin(admin.ModelAdmin):
+class TagAdmin(BaseModelAdmin):
 
     list_display = ('name',)
 
@@ -111,18 +121,18 @@ class VariableDataInline(admin.StackedInline):
     # FIXME: Doesn't yet work as inline due to the way the OneToOne field is
     # defined.
 
-class LaunchJobHostSummaryInline(admin.TabularInline):
+class JobHostSummaryInline(admin.TabularInline):
 
-    model = LaunchJobHostSummary
+    model = JobHostSummary
     extra = 0
     can_delete = False
 
     def has_add_permission(self, request):
         return False
 
-class LaunchJobStatusEventInline(admin.StackedInline):
+class JobEventInline(admin.StackedInline):
 
-    model = LaunchJobStatusEvent
+    model = JobEvent
     extra = 0
     can_delete = False
 
@@ -130,161 +140,197 @@ class LaunchJobStatusEventInline(admin.StackedInline):
         return False
 
     def get_event_data_display(self, obj):
-        return format_html('<pre class="json-display">{0}</pre>', json.dumps(obj.event_data, indent=4))
+        return format_html('<pre class="json-display">{0}</pre>',
+                           json.dumps(obj.event_data, indent=4))
     get_event_data_display.short_description = _('Event data')
     get_event_data_display.allow_tags = True
 
-class LaunchJobHostSummaryInlineForHost(LaunchJobHostSummaryInline):
+class JobHostSummaryInlineForHost(JobHostSummaryInline):
 
-    fields = ('launch_job_status', 'changed', 'dark', 'failures', 'ok', 'processed', 'skipped')
-    readonly_fields = ('launch_job_status', 'changed', 'dark', 'failures', 'ok', 'processed', 'skipped')
+    fields = ('job', 'changed', 'dark', 'failures', 'ok', 'processed',
+              'skipped')
+    readonly_fields = ('job', 'changed', 'dark', 'failures', 'ok', 'processed',
+                       'skipped')
 
-class LaunchJobStatusEventInlineForHost(LaunchJobStatusEventInline):
+class JobEventInlineForHost(JobEventInline):
 
-    fields = ('created', 'event', 'get_event_data_display', 'launch_job_status')
-    readonly_fields = ('created', 'event', 'get_event_data_display', 'launch_job_status')
+    fields = ('job', 'created', 'event', 'get_event_data_display')
+    readonly_fields = ('job', 'created', 'event', 'get_event_data_display')
 
-class HostAdmin(admin.ModelAdmin):
+class HostAdmin(BaseModelAdmin):
 
     list_display = ('name', 'inventory', 'description', 'active')
     list_filter = ('inventory', 'active')
     fields = ('name', 'inventory', 'description', 'active', 'tags',
               'created_by', 'audit_trail')
+    readonly_fields = ('creation_date', 'created_by', 'audit_trail')
     filter_horizontal = ('tags',)
     # FIXME: Edit reverse of many to many for groups.
     #inlines = [VariableDataInline]
-    inlines = [LaunchJobHostSummaryInlineForHost, LaunchJobStatusEventInlineForHost]
+    inlines = [JobHostSummaryInlineForHost, JobEventInlineForHost]
 
-class GroupAdmin(admin.ModelAdmin):
+class GroupAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
     filter_horizontal = ('parents', 'hosts', 'tags')
     #inlines = [VariableDataInline]
 
-class VariableDataAdmin(admin.ModelAdmin):
+class VariableDataAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
     filter_horizontal = ('tags',)
 
-class CredentialAdmin(admin.ModelAdmin):
+class CredentialAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
     filter_horizontal = ('tags',)
 
-class TeamAdmin(admin.ModelAdmin):
+class TeamAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
     filter_horizontal = ('projects', 'users', 'tags')
 
-class ProjectAdmin(admin.ModelAdmin):
+class ProjectAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
     filter_horizontal = ('tags',)
 
-class PermissionAdmin(admin.ModelAdmin):
+class PermissionAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
     filter_horizontal = ('tags',)
 
-class LaunchJobAdmin(admin.ModelAdmin):
+class JobTemplateAdmin(BaseModelAdmin):
 
-    list_display = ('name', 'description', 'active', 'get_start_link_display',
-                    'get_statuses_link_display')
+    list_display = ('name', 'description', 'active', 'get_create_link_display',
+                    'get_jobs_link_display')
     fieldsets = (
-        (None, {'fields': ('name', 'active', 'created_by', 'description',
-                           'get_start_link_display', 'get_statuses_link_display')}),
+        (None, {'fields': ('name', 'active', 'description',
+                           'get_create_link_display', 'get_jobs_link_display')}),
         (_('Job Parameters'), {'fields': ('inventory', 'project', 'credential',
                                           'user', 'job_type')}),
-        (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('creation_date', 'audit_trail',)}),
+        #(_('Tags'), {'fields': ('tags',)}),
+        (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
+                                       'audit_trail',)}),
     )
-    readonly_fields = ('creation_date', 'audit_trail', 'get_start_link_display',
-                       'get_statuses_link_display')
-    filter_horizontal = ('tags',)
+    readonly_fields = ('creation_date', 'created_by', 'audit_trail',
+                       'get_create_link_display', 'get_jobs_link_display')
+    #filter_horizontal = ('tags',)
 
-    def get_start_link_display(self, obj):
-        info = self.model._meta.app_label, self.model._meta.module_name
-        start_url = reverse('admin:%s_%s_start' % info, args=(obj.pk,),
-                            current_app=self.admin_site.name)
-        return '<a href="%s">Run Job</a>' % start_url
-    get_start_link_display.short_description = _('Run')
-    get_start_link_display.allow_tags = True
-
-    def get_statuses_link_display(self, obj):
-        info = LaunchJobStatus._meta.app_label, LaunchJobStatus._meta.module_name
-        statuses_url = reverse('admin:%s_%s_changelist' % info,
-                               current_app=self.admin_site.name)
-        statuses_url += '?launch_job__id__exact=%d' % obj.pk
-        return '<a href="%s">View Logs</a>' % statuses_url
-    get_statuses_link_display.short_description = _('Logs')
-    get_statuses_link_display.allow_tags = True
-
-    def get_urls(self):
-        info = self.model._meta.app_label, self.model._meta.module_name
-        urls = super(LaunchJobAdmin, self).get_urls()
-        return patterns('',
-            url(r'^(.+)/start/$',
-                self.admin_site.admin_view(self.start_job_view),
-                name='%s_%s_start' % info),
-        ) + urls
-
-    def start_job_view(self, request, object_id):
-        obj = self.get_object(request, unquote(object_id))
-        ljs = obj.start()
-        info = ljs._meta.app_label, ljs._meta.module_name
-        status_url = reverse('admin:%s_%s_change' % info, args=(ljs.pk,),
+    def get_create_link_display(self, obj):
+        info = Job._meta.app_label, Job._meta.module_name
+        create_url = reverse('admin:%s_%s_add' % info,
                              current_app=self.admin_site.name)
-        messages.success(request, '%s has been started.' % ljs)
-        return HttpResponseRedirect(status_url)
+        create_opts = {
+            'job_template': obj.pk,
+            'job_type': obj.job_type,
+        }
+        if obj.inventory:
+            create_opts['inventory'] = obj.inventory.pk
+        if obj.project:
+            create_opts['project'] = obj.project.pk
+        if obj.credential:
+            create_opts['credential'] = obj.credential.pk
+        if obj.user:
+            create_opts['user'] = obj.user.pk
+        create_url += '?%s' % urllib.urlencode(create_opts)
+        return format_html('<a href="{0}">{1}</a>', create_url, 'Create Job')
+    get_create_link_display.short_description = _('Create Job')
+    get_create_link_display.allow_tags = True
 
-class LaunchJobHostSummaryInlineForLaunchJobStatus(LaunchJobHostSummaryInline):
+    def get_jobs_link_display(self, obj):
+        info = Job._meta.app_label, Job._meta.module_name
+        jobs_url = reverse('admin:%s_%s_changelist' % info,
+                           current_app=self.admin_site.name)
+        jobs_url += '?job_template__id__exact=%d' % obj.pk
+        return format_html('<a href="{0}">{1}</a>', jobs_url, 'View Jobs')
+    get_jobs_link_display.short_description = _('View Jobs')
+    get_jobs_link_display.allow_tags = True
 
-    fields = ('host', 'changed', 'dark', 'failures', 'ok', 'processed', 'skipped')
-    readonly_fields = ('host', 'changed', 'dark', 'failures', 'ok', 'processed', 'skipped')
+class JobHostSummaryInlineForJob(JobHostSummaryInline):
 
-class LaunchJobStatusEventInlineForLaunchJobStatus(LaunchJobStatusEventInline):
+    fields = ('host', 'changed', 'dark', 'failures', 'ok', 'processed',
+              'skipped')
+    readonly_fields = ('host', 'changed', 'dark', 'failures', 'ok',
+                       'processed', 'skipped')
+
+class JobEventInlineForJob(JobEventInline):
 
     fields = ('created', 'event', 'get_event_data_display', 'host')
     readonly_fields = ('created', 'event', 'get_event_data_display', 'host')
 
-class LaunchJobStatusAdmin(admin.ModelAdmin):
+class JobAdmin(BaseModelAdmin):
 
-    list_display = ('name', 'launch_job', 'status')
-    fields = ('name', 'get_launch_job_display', 'status',
-              'get_result_stdout_display', 'get_result_stderr_display',
-              'get_result_traceback_display', 'celery_task_id', 'tags',
-              'created_by')
-    readonly_fields = ('name', 'description', 'status', 'get_launch_job_display',
+    list_display = ('name', 'job_template', 'status')
+    fieldsets = (
+        (None, {'fields': ('name', 'job_template', 'description')}),
+        (_('Job Parameters'), {'fields': ('inventory', 'project', 'credential',
+                                          'user', 'job_type')}),
+        #(_('Tags'), {'fields': ('tags',)}),
+        (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
+                            'audit_trail',)}),
+        (_('Job Status'), {'fields': ('status', 'get_result_stdout_display',
+                                      'get_result_stderr_display',
+                                      'get_result_traceback_display',
+                                      'celery_task_id')}),
+    )
+    readonly_fields = ('status', 'get_job_template_display',
                        'get_result_stdout_display', 'get_result_stderr_display',
                        'get_result_traceback_display', 'celery_task_id',
-                       'created_by', 'tags', 'audit_trail', 'active')
+                       'creation_date', 'created_by', 'audit_trail',)
     filter_horizontal = ('tags',)
-    inlines = [LaunchJobHostSummaryInlineForLaunchJobStatus,
-               LaunchJobStatusEventInlineForLaunchJobStatus]
+    inlines = [JobHostSummaryInlineForJob, JobEventInlineForJob]
 
-    def has_add_permission(self, request):
-        return False
+    def get_readonly_fields(self, request, obj=None):
+        ro_fields = list(super(JobAdmin, self).get_readonly_fields(request, obj))
+        if obj and obj.pk:
+            ro_fields.extend(['name', 'description', 'job_template',
+                              'inventory', 'project', 'credential', 'user',
+                              'job_type'])
+        return ro_fields
 
-    def get_launch_job_display(self, obj):
-        info = obj.launch_job._meta.app_label, obj.launch_job._meta.module_name
-        lj_url = reverse('admin:%s_%s_change' % info, args=(obj.launch_job.pk,),
-                         current_app=self.admin_site.name)
-        return format_html('<a href="{0}">{1}</a>', lj_url, obj.launch_job)
-    get_launch_job_display.short_description = _('Launch job')
-    get_launch_job_display.allow_tags = True
+    def get_fieldsets(self, request, obj=None):
+        fsets = list(super(JobAdmin, self).get_fieldsets(request, obj))
+        if not obj or not obj.pk:
+            fsets = [fs for fs in fsets if
+                     'creation_date' not in fs[1]['fields'] and
+                     'status' not in fs[1]['fields']]
+        return fsets
+
+    def get_inline_instances(self, request, obj=None):
+        if obj and obj.pk:
+            return super(JobAdmin, self).get_inline_instances(request, obj)
+        else:
+            return []
+
+    def get_job_template_display(self, obj):
+        if obj.job_template:
+            info = JobTemplate._meta.app_label, JobTemplate._meta.module_name
+            job_template_url = reverse('admin:%s_%s_change' % info,
+                                       args=(obj.job_template.pk,),
+                                       current_app=self.admin_site.name)
+            return format_html('<a href="{0}">{1}</a>', job_template_url,
+                               obj.job_template)
+        else:
+            return _('(None)')
+    get_job_template_display.short_description = _('Job template')
+    get_job_template_display.allow_tags = True
 
     def get_result_stdout_display(self, obj):
-        return format_html('<pre class="result-display">{0}</pre>', obj.result_stdout or ' ')
+        return format_html('<pre class="result-display">{0}</pre>',
+                           obj.result_stdout or ' ')
     get_result_stdout_display.short_description = _('Stdout')
     get_result_stdout_display.allow_tags = True
 
     def get_result_stderr_display(self, obj):
-        return format_html('<pre class="result-display">{0}</pre>', obj.result_stderr or ' ')
+        return format_html('<pre class="result-display">{0}</pre>',
+                           obj.result_stderr or ' ')
     get_result_stderr_display.short_description = _('Stderr')
     get_result_stderr_display.allow_tags = True
 
     def get_result_traceback_display(self, obj):
-        return format_html('<pre class="result-display">{0}</pre>', obj.result_traceback or ' ')
+        return format_html('<pre class="result-display">{0}</pre>',
+                           obj.result_traceback or ' ')
     get_result_traceback_display.short_description = _('Traceback')
     get_result_traceback_display.allow_tags = True
 
@@ -300,5 +346,5 @@ admin.site.register(VariableData, VariableDataAdmin)
 admin.site.register(Team, TeamAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(Credential, CredentialAdmin)
-admin.site.register(LaunchJob, LaunchJobAdmin)
-admin.site.register(LaunchJobStatus, LaunchJobStatusAdmin)
+admin.site.register(JobTemplate, JobTemplateAdmin)
+admin.site.register(Job, JobAdmin)
