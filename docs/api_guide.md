@@ -77,8 +77,8 @@ Save Login Credentials and Grant Role (Team) Based Permissions
 Launch Playbooks and View Results
 ---------------------------------
 
- * Create a launch job request by posting project, permission, and credential to /api/v1/launch_jobs/
- * Monitor the job results at /api/v1/launch_results/X (API subject to change)
+ * Create a job request by posting project, permission, and credential to /api/v1/jobs/
+ * Monitor the job results at /api/v1/jobs/X (API subject to change)
  * See the history of runs on each host at /api/v1/hosts/X/events/ or /api/v1/groups/X/events/ or /api/v1/inventories/X/events/
 
 Audit API based Activity, Search For Resources

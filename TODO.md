@@ -4,9 +4,7 @@ TODO items for ansible commander
 4/2 NOTES
 =========
 * supervisord to start celery, modify ansible playbook to set up supervisord <- ChrisC
-* host relationships in DB, last launch job status per host, etc (self.play.inventory) <- ChrisC
-* stats attributes on launch job status (??) -- which hosts succeeded, failed, etc (through relationship) <-- Chris C
-* make launch job rest triggerable & launch job statuses readable.  launch_job.start() <-- MPD
+* make job rest triggerable & job status readable.  now happens just by creating a new job <-- MPD
 * do we need something other than default playbook (ProjectOptions) <-- me, later
 * way to send cntrl-c to kill job (method on job?) <-- ChrisC, low priority 
 * documentation on how to run with callbacks from NOT a launchjob <-- ChrisC
@@ -23,16 +21,16 @@ sorting?
 if you delete a subgroup, hosts go up to parent
 verify unique_together on inventory and host name
 
-make a way to start a launch job via the API.
+make a way to start a job via the API (create a new job)
 
-future feature of being able to create SavedLaunchJob templates.
+future feature of being able to create job templates -- supported in db by JobTemplate
 
 REST TODO
 ---------
 * credentials objects & permissions
 * tags (later)
 * audit trails (later)
-* launch jobs triggering <-- important
+* jobs triggering <-- important
 * related resources on everything that makes sense <--- important
 * expose log data from callback (decide on structure)
 
