@@ -890,6 +890,40 @@ class Job(CommonModel):
         if created and self.status == 'pending':
             self._run()
 
+    @property
+    def successful_hosts(self):
+        return Host.objects.filter(job_host_summaries__job__pk=self.pk,
+                                   job_host_summaries__ok__gt=0)
+
+    @property
+    def failed_hosts(self):
+        return Host.objects.filter(job_host_summaries__job__pk=self.pk,
+                                   job_host_summaries__failures__gt=0)
+
+    @property
+    def changed_hosts(self):
+        return Host.objects.filter(job_host_summaries__job__pk=self.pk,
+                                   job_host_summaries__changed__gt=0)
+
+    @property
+    def dark_hosts(self):
+        return Host.objects.filter(job_host_summaries__job__pk=self.pk,
+                                   job_host_summaries__dark__gt=0)
+
+    @property
+    def unreachable_hosts(self):
+        return self.dark_hosts
+
+    @property
+    def skipped_hosts(self):
+        return Host.objects.filter(job_host_summaries__job__pk=self.pk,
+                                   job_host_summaries__skipped__gt=0)
+
+    @property
+    def processed_hosts(self):
+        return Host.objects.filter(job_host_summaries__job__pk=self.pk,
+                                   job_host_summaries__processed__gt=0)
+
 class JobHostSummary(models.Model):
     '''
     Per-host statistics for each job.

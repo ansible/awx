@@ -105,6 +105,13 @@ class RunJobTest(BaseCeleryTest):
         for evt in job_events.filter(event='runner_on_ok'):
             self.assertEqual(evt.host, self.host)
         self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
+        #print job_events.get(event='playbook_on_stats').event_data
+        self.assertEqual(job.successful_hosts.count(), 1)
+        self.assertEqual(job.failed_hosts.count(), 0)
+        self.assertEqual(job.changed_hosts.count(), 1)
+        self.assertEqual(job.unreachable_hosts.count(), 0)
+        self.assertEqual(job.skipped_hosts.count(), 0)
+        self.assertEqual(job.processed_hosts.count(), 1)
 
     def test_check_job(self):
         self.create_test_playbook(TEST_PLAYBOOK)
@@ -124,6 +131,12 @@ class RunJobTest(BaseCeleryTest):
         for evt in job_events.filter(event='runner_on_skipped'):
             self.assertEqual(evt.host, self.host)
         self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
+        self.assertEqual(job.successful_hosts.count(), 0)
+        self.assertEqual(job.failed_hosts.count(), 0)
+        self.assertEqual(job.changed_hosts.count(), 0)
+        self.assertEqual(job.unreachable_hosts.count(), 0)
+        self.assertEqual(job.skipped_hosts.count(), 1)
+        self.assertEqual(job.processed_hosts.count(), 1)
 
     def test_run_job_that_fails(self):
         self.create_test_playbook(TEST_PLAYBOOK2)
@@ -142,6 +155,12 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job_events.filter(event='runner_on_failed').count(), 1)
         self.assertEqual(job_events.get(event='runner_on_failed').host, self.host)
         self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
+        self.assertEqual(job.successful_hosts.count(), 0)
+        self.assertEqual(job.failed_hosts.count(), 1)
+        self.assertEqual(job.changed_hosts.count(), 0)
+        self.assertEqual(job.unreachable_hosts.count(), 0)
+        self.assertEqual(job.skipped_hosts.count(), 0)
+        self.assertEqual(job.processed_hosts.count(), 1)
 
     def test_check_job_where_task_would_fail(self):
         self.create_test_playbook(TEST_PLAYBOOK2)
@@ -162,3 +181,9 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job_events.filter(event='runner_on_skipped').count(), 1)
         self.assertEqual(job_events.get(event='runner_on_skipped').host, self.host)
         self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
+        self.assertEqual(job.successful_hosts.count(), 0)
+        self.assertEqual(job.failed_hosts.count(), 0)
+        self.assertEqual(job.changed_hosts.count(), 0)
+        self.assertEqual(job.unreachable_hosts.count(), 0)
+        self.assertEqual(job.skipped_hosts.count(), 1)
+        self.assertEqual(job.processed_hosts.count(), 1)
