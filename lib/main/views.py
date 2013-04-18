@@ -1,16 +1,16 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 #
 # This file is part of Ansible Commander.
-# 
+#
 # Ansible Commander is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, version 3 of the License. 
+# the Free Software Foundation, version 3 of the License.
 #
 # Ansible Commander is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Ansible Commander. If not, see <http://www.gnu.org/licenses/>.
 
@@ -94,6 +94,7 @@ class OrganizationsUsersList(BaseSubList):
     relationship = 'users'
     postable = True
     inject_primary_key_on_post_as = 'organization'
+    filter_fields = ('username',)
 
     def _get_queryset(self):
         ''' to list users in the organization, I must be a superuser or org admin '''
@@ -111,6 +112,7 @@ class OrganizationsAdminsList(BaseSubList):
     relationship = 'admins'
     postable = True
     inject_primary_key_on_post_as = 'organization'
+    filter_fields = ('username',)
 
     def _get_queryset(self):
         ''' to list admins in the organization, I must be a superuser or org admin '''
@@ -128,6 +130,7 @@ class OrganizationsProjectsList(BaseSubList):
     relationship = 'projects'    # " "
     postable = True
     inject_primary_key_on_post_as = 'organization'
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         ''' to list projects in the organization, I must be a superuser or org admin '''
@@ -145,6 +148,7 @@ class OrganizationsTagsList(BaseSubList):
     relationship = 'tags'        # " "
     postable = True
     inject_primary_key_on_post_as = 'organization'
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         ''' to list tags in the organization, I must be a superuser or org admin '''
@@ -164,6 +168,7 @@ class OrganizationsTeamsList(BaseSubList):
     postable = True
     inject_primary_key_on_post_as = 'organization'
     severable = False
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         ''' to list users in the organization, I must be a superuser or org admin '''
@@ -177,6 +182,7 @@ class TeamsList(BaseList):
     model = Team
     serializer_class = TeamSerializer
     permission_classes = (CustomRbac,)
+    filter_fields = ('name',)
 
     # I can see a team if:
     #   I am a superuser
@@ -210,6 +216,7 @@ class TeamsUsersList(BaseSubList):
     postable = True
     inject_primary_key_on_post_as = 'team'
     severable = True
+    filter_fields = ('username',)
 
     def _get_queryset(self):
         # FIXME: audit all BaseSubLists to check for permissions on the original object too
@@ -231,6 +238,7 @@ class TeamsCredentialsList(BaseSubList):
     relationship = 'credentials'
     postable = True
     inject_primary_key_on_post_as = 'team'
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         team = Team.objects.get(pk=self.kwargs['pk'])
@@ -248,6 +256,7 @@ class ProjectsList(BaseList):
     model = Project
     serializer_class = ProjectSerializer
     permission_classes = (CustomRbac,)
+    filter_fields = ('name',)
 
     # I can see a project if
     #   I am a superuser
@@ -281,6 +290,7 @@ class ProjectsOrganizationsList(BaseSubList):
     parent_model = Project
     relationship = 'organizations'
     postable = False
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         project = Project.objects.get(pk=self.kwargs['pk'])
@@ -299,6 +309,7 @@ class UsersList(BaseList):
     model = User
     serializer_class = UserSerializer
     permission_classes = (CustomRbac,)
+    filter_fields = ('username',)
 
     def post(self, request, *args, **kwargs):
         password = request.DATA.get('password', None)
@@ -325,6 +336,7 @@ class UsersMeList(BaseList):
     model = User
     serializer_class = UserSerializer
     permission_classes = (CustomRbac,)
+    filter_fields = ('username',)
 
     def post(self, request, *args, **kwargs):
         raise PermissionDenied()
@@ -341,6 +353,7 @@ class UsersTeamsList(BaseSubList):
     parent_model = User
     relationship = 'teams'
     postable = False
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
@@ -356,6 +369,7 @@ class UsersProjectsList(BaseSubList):
     parent_model = User
     relationship = 'teams'
     postable = False
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
@@ -373,6 +387,7 @@ class UsersCredentialsList(BaseSubList):
     relationship = 'credentials'
     postable = True
     inject_primary_key_on_post_as = 'user'
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
@@ -391,6 +406,7 @@ class UsersOrganizationsList(BaseSubList):
     parent_model = User
     relationship = 'organizations'
     postable = False
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
@@ -406,6 +422,7 @@ class UsersAdminOrganizationsList(BaseSubList):
     parent_model = User
     relationship = 'admin_of_organizations'
     postable = False
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
@@ -441,6 +458,7 @@ class InventoryList(BaseList):
     model = Inventory
     serializer_class = InventorySerializer
     permission_classes = (CustomRbac,)
+    filter_fields = ('name',)
 
     def _filter_queryset(self, base):
         if self.request.user.is_superuser:
@@ -472,6 +490,7 @@ class HostsList(BaseList):
     model = Host
     serializer_class = HostSerializer
     permission_classes = (CustomRbac,)
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         '''
@@ -513,6 +532,7 @@ class InventoryHostsList(BaseSubList):
     # FIXME: go back and add these to other SubLists
     inject_primary_key_on_post_as = 'inventory'
     severable = False
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         inventory = Inventory.objects.get(pk=self.kwargs['pk'])
@@ -525,6 +545,7 @@ class GroupsList(BaseList):
     model = Group
     serializer_class = GroupSerializer
     permission_classes = (CustomRbac,)
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         '''
@@ -556,6 +577,7 @@ class GroupsChildrenList(BaseSubList):
     relationship = 'children'
     postable = True
     inject_primary_key_on_post_as = 'parent'
+    filter_fields = ('name',)
 
     def _get_queryset(self):
 
@@ -589,6 +611,7 @@ class GroupsHostsList(BaseSubList):
     relationship = 'hosts'
     postable = True
     inject_primary_key_on_post_as = 'group'
+    filter_fields = ('name',)
 
     def _get_queryset(self):
 
@@ -619,10 +642,11 @@ class GroupsAllHostsList(BaseSubList):
     permission_classes = (CustomRbac,)
     parent_model = Group
     relationship = 'hosts'
+    filter_fields = ('name',)
 
     def _child_hosts(self, parent):
         # TODO: should probably be a method on the model
-        result = parent.hosts.distinct() 
+        result = parent.hosts.distinct()
         if parent.children.count() == 0:
             return result
         else:
@@ -634,9 +658,9 @@ class GroupsAllHostsList(BaseSubList):
             return result
 
     def _get_queryset(self):
-    
+
         parent = Group.objects.get(pk=self.kwargs['pk'])
-    
+
         # FIXME: verify read permissions on this object are still required at a higher level
 
         base = self._child_hosts(parent)
@@ -675,6 +699,7 @@ class InventoryGroupsList(BaseSubList):
     # FIXME: go back and add these to other SubLists
     inject_primary_key_on_post_as = 'inventory'
     severable = False
+    filter_fields = ('name',)
 
     def _get_queryset(self):
         # FIXME: share code with inventory filter queryset methods (make that a classmethod)
