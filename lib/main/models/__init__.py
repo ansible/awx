@@ -744,14 +744,6 @@ class JobTemplate(CommonModel):
         default=None,
         on_delete=models.SET_NULL,
     )
-    user = models.ForeignKey(
-        'auth.User',
-        related_name='job_templates',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
 
     # project has one default playbook but really should have a list of playbooks and flags ...
 
@@ -816,12 +808,6 @@ class Job(CommonModel):
     )
     project = models.ForeignKey(
         'Project',
-        related_name='jobs',
-        null=True,
-        on_delete=models.SET_NULL,
-    )
-    user = models.ForeignKey(
-        'auth.User',
         related_name='jobs',
         null=True,
         on_delete=models.SET_NULL,

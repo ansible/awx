@@ -77,11 +77,20 @@ views_HostsVariableDetail          = views.HostsVariableDetail.as_view()
 # seperate variable data
 views_VariableDetail               = views.VariableDetail.as_view()
 
-# log data services
-
-# events services
-
 # jobs services
+views_JobTemplatesList             = views.JobTemplatesList.as_view()
+views_JobTemplateDetail            = views.JobTemplateDetail.as_view()
+views_JobTemplateStart             = views.JobTemplateStart.as_view()
+views_JobsList                     = views.JobsList.as_view()
+views_JobsDetail                   = views.JobsDetail.as_view()
+views_JobsHostsList                = views.JobsHostsList.as_view()
+views_JobsSuccessfulHostsList      = views.JobsSuccessfulHostsList.as_view()
+views_JobsChangedHostsList         = views.JobsChangedHostsList.as_view()
+views_JobsFailedHostsList          = views.JobsFailedHostsList.as_view()
+views_JobsUnreachableHostsList     = views.JobsUnreachableHostsList.as_view()
+views_JobsEventsList               = views.JobsEventsList.as_view()
+views_JobsEventsDetail             = views.JobsEventsDetail.as_view()
+views_HostJobEventsList            = views.HostJobEventsList.as_view()
 
 # tags service
 views_TagsDetail                   = views.TagsDetail.as_view()
@@ -160,10 +169,19 @@ urlpatterns = patterns('',
     # log data (results) services
 
     # jobs & job status services
-    # /jobs/
-    # /jobs/N/
-    # /job_statuses/
-    # /job_statuses/N/
+    url(r'^api/v1/job_templates/$',                               views_JobTemplatesList),
+    url(r'^api/v1/job_templates/(?P<pk>[0-9]+)/$',                views_JobTemplateDetail),
+    url(r'^api/v1/job_templates/(?P<pk>[0-9]+)/start$',           views_JobTemplateStart),
+    url(r'^api/v1/jobs/$',                                        views_JobsList),
+    url(r'^api/v1/jobs/(?P<pk>[0-9]+)/$',                         views_JobsDetail),
+    url(r'^api/v1/jobs/(?P<pk>[0-9]+)/hosts$',                    views_JobsHostsList),
+    url(r'^api/v1/jobs/(?P<pk>[0-9]+)/successful_hosts$',         views_JobsSuccessfulHostsList),
+    url(r'^api/v1/jobs/(?P<pk>[0-9]+)/changed_hosts$',            views_JobsChangedHostsList),
+    url(r'^api/v1/jobs/(?P<pk>[0-9]+)/failed_hosts$',             views_JobsFailedHostsList),
+    url(r'^api/v1/jobs/(?P<pk>[0-9]+)/unreachable_hosts$',        views_JobsUnreachableHostsList),
+    url(r'^api/v1/job_events/$',                                  views_JobsEventsList),
+    url(r'^api/v1/job_events/(?P<pk>[0-9]+)/$',                   views_JobsEventsDetail),
+    url(r'^api/v1/hosts/(?P<pk>[0-9]+)/job_events/',              views_HostJobEventsList),
 
     # tags service
     url(r'^api/v1/tags/(?P<pk>[0-9]+)/$',                         views_TagsDetail),

@@ -735,5 +735,42 @@ class VariableDetail(BaseDetail):
     def put(self, request, *args, **kwargs):
         raise PermissionDenied()
 
+class JobTemplatesList(BaseList):
+    pass
 
+class JobTemplateDetail(BaseDetail):
+    pass
+
+class JobTemplateStart(BaseDetail):
+    pass
+
+class JobsList(BaseList):
+    pass
+
+class JobsDetail(BaseDetail):
+    pass
+
+class JobsHostsList(BaseSubList):
+    pass
+
+class JobsSuccessfulHostsList(BaseSubList):
+    pass
+
+class JobsChangedHostsList(BaseSubList):
+    pass
+
+class JobsFailedHostsList(BaseSubList):
+    pass
+
+class JobsUnreachableHostsList(BaseSubList):
+    pass
+
+class JobsEventsList(BaseList):
+    pass
+
+class JobsEventsDetail(BaseDetail):
+    pass
+
+class HostJobEventsList(BaseSubList):
+    pass
 
