@@ -43,6 +43,7 @@ class OrganizationsList(BaseList):
     model = Organization
     serializer_class = OrganizationSerializer
     permission_classes = (CustomRbac,)
+    filter_fields = ('name',)
 
     # I can see the organizations if:
     #   I am a superuser

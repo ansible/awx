@@ -1,16 +1,16 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 #
 # This file is part of Ansible Commander.
-# 
+#
 # Ansible Commander is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, version 3 of the License. 
+# the Free Software Foundation, version 3 of the License.
 #
 # Ansible Commander is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Ansible Commander. If not, see <http://www.gnu.org/licenses/>.
 
@@ -38,7 +38,8 @@ ADMINS = (
 MANAGERS = ADMINS
 
 REST_FRAMEWORK = {
-    'PAGINATE_BY': 10,
+    'FILTER_BACKEND': 'rest_framework.filters.DjangoFilterBackend',
+    'PAGINATE_BY': 25,
     'PAGINATE_BY_PARAM': 'page_size',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
