@@ -187,3 +187,5 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.unreachable_hosts.count(), 0)
         self.assertEqual(job.skipped_hosts.count(), 1)
         self.assertEqual(job.processed_hosts.count(), 1)
+
+
