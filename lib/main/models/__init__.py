@@ -780,6 +780,7 @@ class JobTemplate(CommonModel):
         if user.is_superuser:
             return True
         project = Project.objects.get(pk=data['project'])
+        inventory = Inventory.objects.get(pk=data['inventory'])
 
         admin_of_orgs = project.organizations.filter(admins__in = [ user ])
         if admin_of_orgs.count() > 0:
@@ -792,7 +793,7 @@ class JobTemplate(CommonModel):
             if job_type == PERM_INVENTORY_CHECK:
                 # if you have run permissions, you can also create check jobs
                 has_project_permission = True
-            elif job_type == PERM_INVENTORY_DEPLOY and perm.job_type == PERM_INVENTORY_DEPLOY:
+            elif job_type == PERM_INVENTORY_DEPLOY and perm.permission_type == PERM_INVENTORY_DEPLOY:
                 # you need explicit run permissions to make run jobs
                 has_project_permission = True
         team_permissions = Permission.objects.filter(inventory=inventory, project=project, team__users__in = [user])
@@ -800,7 +801,7 @@ class JobTemplate(CommonModel):
             if job_type == PERM_INVENTORY_CHECK:
                 # if you have run permissions, you can also create check jobs
                 has_project_permission = True
-            elif job_type == PERM_INVENTORY_DEPLOY and perm.job_type == PERM_INVENTORY_DEPLOY:
+            elif job_type == PERM_INVENTORY_DEPLOY and perm.permission_type == PERM_INVENTORY_DEPLOY:
                 # you need explicit run permissions to make run jobs
                 has_project_permission = True
 

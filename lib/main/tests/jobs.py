@@ -29,9 +29,22 @@ class JobsTest(BaseTest):
         # not really used
         return '/api/v1/job_templates/'
 
+    def get_other2_credentials(self):
+        return ('other2', 'other2')
+
+    def get_nobody_credentials(self):
+        return ('nobody', 'nobody')
+
     def setUp(self):
         super(JobsTest, self).setUp()
         self.setup_users()
+
+        self.other2_django_user = User.objects.create(username='other2')
+        self.other2_django_user.set_password('other2')
+        self.other2_django_user.save()
+        self.nobody_django_user = User.objects.create(username='nobody')
+        self.nobody_django_user.set_password('nobody')
+        self.nobody_django_user.save()
  
         self.organization = Organization.objects.create(
             name = 'engineering',
@@ -48,6 +61,39 @@ class JobsTest(BaseTest):
             name = 'group1',
             inventory = self.inventory,
             created_by = self.normal_django_user 
+        )
+
+        self.team = Team.objects.create(
+             name = 'Tigger',
+             created_by = self.normal_django_user
+        )
+
+        self.team.users.add(self.other_django_user)
+
+        self.project = Project.objects.create(
+            name = 'testProject',
+            created_by = self.normal_django_user,
+            local_repository = '/tmp/',
+            scm_type = 'git',
+            default_playbook = 'site.yml',
+        )
+
+        # other django user is on the project team and can deploy
+        self.permission1 = Permission.objects.create(
+            inventory       = self.inventory,
+            project         = self.project,
+            team            = self.team, 
+            permission_type = PERM_INVENTORY_DEPLOY,
+            created_by      = self.normal_django_user
+        ) 
+
+        # individual permission granted to other2 user, can run check mode
+        self.permission2 = Permission.objects.create(
+            inventory       = self.inventory,
+            project         = self.project,
+            user            = self.other2_django_user,
+            permission_type = PERM_INVENTORY_CHECK,
+            created_by      = self.normal_django_user
         )
  
         self.host_a = Host.objects.create(
@@ -66,13 +112,6 @@ class JobsTest(BaseTest):
         self.group_a.hosts.add(self.host_b)
         self.group_a.save()
 
-        self.project = Project.objects.create(
-            name = 'testProject',
-            created_by = self.normal_django_user,
-            local_repository = '/tmp/',
-            scm_type = 'git',
-            default_playbook = 'site.yml',
-        )
 
         self.credential = Credential.objects.create(
             ssh_key_data = 'xxx',
@@ -114,9 +153,31 @@ class JobsTest(BaseTest):
             project      = self.project.pk,
             job_type     = PERM_INVENTORY_DEPLOY
         )
+
+        # org admin can add job type
         posted = self.post('/api/v1/job_templates/', rec, expect=201, auth=self.get_normal_credentials())
         self.assertEquals(posted['url'], '/api/v1/job_templates/3/')
 
- 
+        # other_django_user is on a team that can deploy, so can create both deploy and check type jobs
+        rec['name'] = 'job-foo2' 
+        posted = self.post('/api/v1/job_templates/', rec, expect=201, auth=self.get_other_credentials())
+        rec['name'] = 'job-foo3'
+        rec['job_type'] = PERM_INVENTORY_CHECK
+        posted = self.post('/api/v1/job_templates/', rec, expect=201, auth=self.get_other_credentials())
+
+        # other2_django_user has individual permissions to run check mode, but not deploy
+        # nobody user can't even run check mode
+        rec['name'] = 'job-foo4'
+        posted = self.post('/api/v1/job_templates/', rec, expect=403, auth=self.get_nobody_credentials())
+        posted = self.post('/api/v1/job_templates/', rec, expect=201, auth=self.get_other2_credentials())
+        rec['name'] = 'job-foo5'
+        rec['job_type'] = PERM_INVENTORY_DEPLOY
+        posted = self.post('/api/v1/job_templates/', rec, expect=403, auth=self.get_nobody_credentials())
+        posted = self.post('/api/v1/job_templates/', rec, expect=403, auth=self.get_other2_credentials())
+
+        # TODO: add more tests that show
+        # the method used to START a JobTemplate follow the exact same permissions as those to create it ...
+        # and that jobs come back nicely serialized with related resources and so on ...
+        # that we can drill all the way down and can get at host failure lists, etc ...
 
 
