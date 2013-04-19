@@ -168,12 +168,17 @@ class JobsTest(BaseTest):
         # other2_django_user has individual permissions to run check mode, but not deploy
         # nobody user can't even run check mode
         rec['name'] = 'job-foo4'
-        posted = self.post('/api/v1/job_templates/', rec, expect=403, auth=self.get_nobody_credentials())
+        self.post('/api/v1/job_templates/', rec, expect=403, auth=self.get_nobody_credentials())
         posted = self.post('/api/v1/job_templates/', rec, expect=201, auth=self.get_other2_credentials())
         rec['name'] = 'job-foo5'
         rec['job_type'] = PERM_INVENTORY_DEPLOY
-        posted = self.post('/api/v1/job_templates/', rec, expect=403, auth=self.get_nobody_credentials())
-        posted = self.post('/api/v1/job_templates/', rec, expect=403, auth=self.get_other2_credentials())
+        self.post('/api/v1/job_templates/', rec, expect=403, auth=self.get_nobody_credentials())
+        self.post('/api/v1/job_templates/', rec, expect=403, auth=self.get_other2_credentials())
+        url = posted['url']
+
+        # verify we can also get the job template record
+        got = self.get(url, expect=200, auth=self.get_other2_credentials())
+        self.failUnlessEqual(got['url'], '/api/v1/job_templates/6/')
 
         # TODO: add more tests that show
         # the method used to START a JobTemplate follow the exact same permissions as those to create it ...

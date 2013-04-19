@@ -768,6 +768,16 @@ class JobTemplate(CommonModel):
         return reverse(lib.urls.views_JobTemplateDetail, args=(self.pk,))
 
     @classmethod
+    def can_user_read(cls, user, obj):
+        # you can only see the job templates that you have permission to launch.
+        data = dict(
+            inventory = obj.inventory.pk,
+            project = obj.project.pk,
+            job_type = obj.job_type
+        )
+        return cls.can_user_add(user, data)
+
+    @classmethod
     def can_user_add(cls, user, data):
         ''' 
         a user can create a job template if they are a superuser, an org admin of any org
