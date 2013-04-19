@@ -45,6 +45,7 @@ directory.  Project directories must be unique and be (also no ../, etc).  defau
 * when associating inventory objects, objects should share common inventory records (user_can_attach method should check)
 * permissions on launching a job should be same as creating a job template
 * should be able to access permissions as subcollection off of users or teams (no need for permissions tab)
+* make sure all can_user_add/edit methods ensure ownership/access on subobjects
 
 QUESTIONS
 ---------
