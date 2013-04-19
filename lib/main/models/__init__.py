@@ -815,6 +815,8 @@ class JobTemplate(CommonModel):
                 # you need explicit run permissions to make run jobs
                 has_project_permission = True
 
+        # FIXME: make sure credential belongs to me or my team
+
         return has_project_permission
 
 
