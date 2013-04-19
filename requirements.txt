@@ -6,6 +6,7 @@ django-jsonfield==0.9.2
 ipython==0.13.1
 # psycopg2==2.4.6
 python-dateutil==1.5
+PyYAML==3.10
 South==0.7.6
 requests
 djangorestframework

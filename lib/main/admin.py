@@ -206,7 +206,21 @@ class TeamAdmin(BaseModelAdmin):
 class ProjectAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
+    fieldsets = (
+        (None, {'fields': (('name', 'active'), 'description', 'local_path',
+                            'get_available_playbooks_display')}),
+        (_('Tags'), {'fields': ('tags',)}),
+        (_('Audit Trail'), {'fields': ('creation_date', 'created_by', 'audit_trail',)}),
+    )
+    readonly_fields = ('creation_date', 'created_by', 'audit_trail',
+                       'get_available_playbooks_display')
     filter_horizontal = ('tags',)
+
+    def get_available_playbooks_display(self, obj):
+        return '<br/>'.join([format_html('{0}', x) for x in
+                             obj.available_playbooks])
+    get_available_playbooks_display.short_description = _('Available playbooks')
+    get_available_playbooks_display.allow_tags = True
 
 class PermissionAdmin(BaseModelAdmin):
 
@@ -220,14 +234,15 @@ class JobTemplateAdmin(BaseModelAdmin):
     fieldsets = (
         (None, {'fields': ('name', 'active', 'description',
                            'get_create_link_display', 'get_jobs_link_display')}),
-        (_('Job Parameters'), {'fields': ('inventory', 'project', 'credential',
-                                          'job_type')}),
+        (_('Job Parameters'), {'fields': ('inventory', 'project', 'playbook',
+                                          'credential', 'job_type')}),
         #(_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
                                        'audit_trail',)}),
     )
     readonly_fields = ('creation_date', 'created_by', 'audit_trail',
                        'get_create_link_display', 'get_jobs_link_display')
+    form = JobTemplateAdminForm
     #filter_horizontal = ('tags',)
 
     def get_create_link_display(self, obj):
@@ -242,10 +257,10 @@ class JobTemplateAdmin(BaseModelAdmin):
             create_opts['inventory'] = obj.inventory.pk
         if obj.project:
             create_opts['project'] = obj.project.pk
+        if obj.playbook:
+            create_opts['playbook'] = obj.playbook
         if obj.credential:
             create_opts['credential'] = obj.credential.pk
-        #if obj.user:
-        #    create_opts['user'] = obj.user.pk
         create_url += '?%s' % urllib.urlencode(create_opts)
         return format_html('<a href="{0}">{1}</a>', create_url, 'Create Job')
     get_create_link_display.short_description = _('Create Job')
@@ -274,11 +289,11 @@ class JobEventInlineForJob(JobEventInline):
 
 class JobAdmin(BaseModelAdmin):
 
-    list_display = ('name', 'job_template', 'status')
+    list_display = ('name', 'job_template', 'project', 'playbook', 'status')
     fieldsets = (
         (None, {'fields': ('name', 'job_template', 'description')}),
-        (_('Job Parameters'), {'fields': ('inventory', 'project', 'credential',
-                                          'job_type')}),
+        (_('Job Parameters'), {'fields': ('inventory', 'project', 'playbook',
+                                          'credential', 'job_type')}),
         #(_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
                             'audit_trail',)}),
@@ -292,13 +307,14 @@ class JobAdmin(BaseModelAdmin):
                        'get_result_traceback_display', 'celery_task_id',
                        'creation_date', 'created_by', 'audit_trail',)
     filter_horizontal = ('tags',)
+    form = JobAdminForm
     inlines = [JobHostSummaryInlineForJob, JobEventInlineForJob]
 
     def get_readonly_fields(self, request, obj=None):
         ro_fields = list(super(JobAdmin, self).get_readonly_fields(request, obj))
         if obj and obj.pk:
             ro_fields.extend(['name', 'description', 'job_template',
-                              'inventory', 'project', 'credential', 'user',
+                              'inventory', 'project', 'playbook', 'credential',
                               'job_type'])
         return ro_fields
 

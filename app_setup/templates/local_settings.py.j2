@@ -46,6 +46,9 @@ if 'test' in sys.argv or 'ACOM_TEST_DATABASE_NAME' in os.environ:
         }
     }
 
+# Absolute filesystem path to the directory to host projects (with playbooks).
+# This directory should not be web-accessible.
+PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

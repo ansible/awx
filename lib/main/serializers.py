@@ -70,7 +70,7 @@ class ProjectSerializer(BaseSerializer):
 
     class Meta:
         model = Project
-        fields = ('url', 'id', 'name', 'description', 'creation_date', 'local_repository', 'default_playbook', 'scm_type')
+        fields = ('url', 'id', 'name', 'description', 'creation_date', 'local_path')#, 'default_playbook', 'scm_type')
 
     def get_related(self, obj):
         # FIXME: add related resources: inventories

@@ -14,6 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible Commander. If not, see <http://www.gnu.org/licenses/>.
 
+
+import os
+from django.conf import settings
 from django.db import models, DatabaseError
 from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.db.models.signals import post_save
@@ -26,6 +29,7 @@ import exceptions
 from jsonfield import JSONField
 from djcelery.models import TaskMeta
 from rest_framework.authtoken.models import Token
+import yaml
 
 # TODO: jobs and events model TBD
 # TODO: reporting model TBD
@@ -641,9 +645,18 @@ class Project(CommonModel):
     # this is not part of the project, but managed with perms
     # inventories      = models.ManyToManyField('Inventory', blank=True, related_name='projects')
 
-    local_repository = models.CharField(max_length=1024)
-    scm_type         = models.CharField(max_length=64)
-    default_playbook = models.CharField(max_length=1024)
+    local_path = models.FilePathField(
+        path=settings.PROJECTS_ROOT,
+        recursive=False,
+        allow_files=False,
+        allow_folders=True,
+        max_length=1024,
+        unique=True,
+        help_text=_('Local path (relative to PROJECTS_ROOT) containing '
+                    'playbooks and related files for this project.')
+    )
+    #scm_type         = models.CharField(max_length=64)
+    #default_playbook = models.CharField(max_length=1024)
 
     def get_absolute_url(self):
         import lib.urls
@@ -673,6 +686,36 @@ class Project(CommonModel):
     def can_user_delete(cls, user, obj):
         return cls.can_user_administrate(user, obj, None)
 
+    @property
+    def available_playbooks(self):
+        playbooks = []
+        if self.local_path and os.path.exists(self.local_path):
+            for dirpath, dirnames, filenames in os.walk(self.local_path):
+                for filename in filenames:
+                    if os.path.splitext(filename)[-1] != '.yml':
+                        continue
+                    playbook = os.path.join(dirpath, filename)
+                    # Filter any invalid YAML files.
+                    try:
+                        data = yaml.safe_load(file(playbook).read())
+                    except (IOError, yaml.YAMLError):
+                        continue
+                    # Filter files that do not have either hosts or top-level
+                    # includes.
+                    try:
+                        if 'hosts' not in data[0] and 'include' not in data[0]:
+                            continue
+                    except (IndexError, KeyError):
+                        continue
+                    playbook = os.path.relpath(playbook, self.local_path)
+                    # Filter files in a roles subdirectory.
+                    if 'roles' in playbook.split(os.sep):
+                        continue
+                    # Filter files in a tasks subdirectory.
+                    if 'tasks' in playbook.split(os.sep):
+                        continue
+                    playbooks.append(playbook)
+        return playbooks
 
 class Permission(CommonModelNameNotUnique):
     '''
@@ -752,6 +795,11 @@ class JobTemplate(CommonModel):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+    )
+    playbook = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
     )
 
     # project has one default playbook but really should have a list of playbooks and flags ...
@@ -894,6 +942,9 @@ class Job(CommonModel):
         related_name='jobs',
         null=True,
         on_delete=models.SET_NULL,
+    )
+    playbook = models.CharField(
+        max_length=1024,
     )
     status = models.CharField(
         max_length=20,

@@ -49,16 +49,16 @@ def run_job(job_pk):
  
         if hasattr(settings, 'ANSIBLE_TRANSPORT'):
             env['ANSIBLE_TRANSPORT'] = getattr(settings, 'ANSIBLE_TRANSPORT')
- 
-        playbook = job.project.default_playbook
+
+        cwd = job.project.local_path
         cmdline = ['ansible-playbook', '-i', inventory_script]
         if job.job_type == 'check':
             cmdline.append('--check')
-        cmdline.append(playbook)
+        cmdline.append(job.playbook) # relative path to project.local_path
 
         # FIXME: How to cancel/interrupt job? (not that important for now)
         proc = subprocess.Popen(cmdline, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE, env=env)
+                                stderr=subprocess.PIPE, cwd=cwd, env=env)
         stdout, stderr = proc.communicate()
         status = 'successful' if proc.returncode == 0 else 'failed'
     except Exception:

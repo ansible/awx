@@ -16,6 +16,7 @@
 
 
 import os
+import shutil
 import tempfile
 from django.conf import settings
 from django.test.utils import override_settings
@@ -53,10 +54,9 @@ class RunJobTest(BaseCeleryTest):
 
     def setUp(self):
         super(RunJobTest, self).setUp()
+        self.test_project_path = None
         self.setup_users()
         self.organization = self.make_organizations(self.super_django_user, 1)[0]
-        self.project = self.make_projects(self.normal_django_user, 1)[0]
-        self.organization.projects.add(self.project)
         self.inventory = Inventory.objects.create(name='test-inventory',
                                                   description='description for test-inventory',
                                                   organization=self.organization)
@@ -71,27 +71,33 @@ class RunJobTest(BaseCeleryTest):
     def tearDown(self):
         super(RunJobTest, self).tearDown()
         os.environ.pop('ACOM_TEST_DATABASE_NAME', None)
-        os.remove(self.test_playbook)
+        if self.test_project_path:
+            shutil.rmtree(self.test_project_path, True)
 
-    def create_test_playbook(self, s):
-        handle, self.test_playbook = tempfile.mkstemp(suffix='.yml', prefix='playbook-')
-        test_playbook_file = os.fdopen(handle, 'w')
-        test_playbook_file.write(s)
-        test_playbook_file.close()
-        self.project.default_playbook = self.test_playbook
-        self.project.save()
+    def create_test_project(self, playbook_content):
+        self.project = self.make_projects(self.normal_django_user, 1, playbook_content)[0]
+        self.organization.projects.add(self.project)
+
+    def create_test_job(self, **kwargs):
+        opts = {
+            'name': 'test-job',
+            'inventory': self.inventory,
+            'project': self.project,
+            'playbook': self.project.available_playbooks[0],
+        }
+        opts.update(kwargs)
+        return Job.objects.create(**opts)
 
     def test_run_job(self):
-        self.create_test_playbook(TEST_PLAYBOOK)
-        job = Job.objects.create(name='test-job', inventory=self.inventory,
-                                 project=self.project)
+        self.create_test_project(TEST_PLAYBOOK)
+        job = self.create_test_job()
         self.assertEqual(job.status, 'pending')
         self.assertEqual(set(job.hosts.values_list('pk', flat=True)),
                          set([self.host.pk]))
         job = Job.objects.get(pk=job.pk)
-        #print 'stdout:', launch_job_status.result_stdout
-        #print 'stderr:', launch_job_status.result_stderr
-        #print launch_job_status.status
+        #print 'stdout:', job.result_stdout
+        #print 'stderr:', job.result_stderr
+        #print job.status
         #print settings.DATABASES
         self.assertEqual(job.status, 'successful')
         self.assertTrue(job.result_stdout)
@@ -114,9 +120,8 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.processed_hosts.count(), 1)
 
     def test_check_job(self):
-        self.create_test_playbook(TEST_PLAYBOOK)
-        job = Job.objects.create(name='test-job', inventory=self.inventory,
-                                 project=self.project, job_type='check')
+        self.create_test_project(TEST_PLAYBOOK)
+        job = self.create_test_job(job_type='check')
         self.assertEqual(job.status, 'pending')
         self.assertEqual(set(job.hosts.values_list('pk', flat=True)),
                          set([self.host.pk]))
@@ -139,9 +144,8 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.processed_hosts.count(), 1)
 
     def test_run_job_that_fails(self):
-        self.create_test_playbook(TEST_PLAYBOOK2)
-        job = Job.objects.create(name='test-job', inventory=self.inventory,
-                                 project=self.project)
+        self.create_test_project(TEST_PLAYBOOK2)
+        job = self.create_test_job()
         self.assertEqual(job.status, 'pending')
         self.assertEqual(set(job.hosts.values_list('pk', flat=True)),
                          set([self.host.pk]))
@@ -163,9 +167,8 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.processed_hosts.count(), 1)
 
     def test_check_job_where_task_would_fail(self):
-        self.create_test_playbook(TEST_PLAYBOOK2)
-        job = Job.objects.create(name='test-job', inventory=self.inventory,
-                                 project=self.project, job_type='check')
+        self.create_test_project(TEST_PLAYBOOK2)
+        job = self.create_test_job(job_type='check')
         self.assertEqual(job.status, 'pending')
         self.assertEqual(set(job.hosts.values_list('pk', flat=True)),
                          set([self.host.pk]))
@@ -187,5 +190,3 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.unreachable_hosts.count(), 0)
         self.assertEqual(job.skipped_hosts.count(), 1)
         self.assertEqual(job.processed_hosts.count(), 1)
-
-

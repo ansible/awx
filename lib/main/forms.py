@@ -4,6 +4,29 @@ from django.utils.translation import ugettext_lazy as _
 from jsonfield.fields import JSONFormField
 from lib.main.models import *
 
+
+EMPTY_CHOICE = ('', '---------')
+
+class PlaybookOption(object):
+
+    def __init__(self, project, playbook):
+        self.project, self.playbook = project, playbook
+
+    def __unicode__(self):
+        return self.playbook
+
+class PlaybookSelect(forms.Select):
+    '''Custom select widget for playbooks related to a project.'''
+
+    def render_option(self, selected_choices, option_value, obj):
+        opt = super(PlaybookSelect, self).render_option(selected_choices,
+                                                        option_value,
+                                                        unicode(obj))
+        # Add a class with the project ID so JS can filter the options.
+        if hasattr(obj, 'project'):
+            opt = opt.replace('">', '" class="project-%s">' % obj.project.pk)
+        return opt
+
 class HostAdminForm(forms.ModelForm):
 
     class Meta:
@@ -45,3 +68,30 @@ class GroupForm(forms.ModelForm):
 
     variable_data = JSONFormField(required=False, widget=forms.Textarea(attrs={'class': 'vLargeTextField'}))
 
+class JobTemplateAdminForm(forms.ModelForm):
+    '''Custom admin form for creating/editing JobTemplates.'''
+
+    playbook = forms.ChoiceField(choices=[EMPTY_CHOICE], required=False,
+                                 widget=PlaybookSelect)
+    
+    class Meta:
+        model = JobTemplate
+
+    def __init__(self, *args, **kwargs):
+        super(JobTemplateAdminForm, self).__init__(*args, **kwargs)
+        playbook_choices = []
+        for project in Project.objects.all():
+            for playbook in project.available_playbooks:
+                playbook_choices.append((playbook,
+                                         PlaybookOption(project, playbook)))
+        self.fields['playbook'].choices = [EMPTY_CHOICE] + playbook_choices
+
+class JobAdminForm(JobTemplateAdminForm):
+    '''Custom admin form for creating Jobs.'''
+
+    class Meta:
+        model = Job
+
+    def __init__(self, *args, **kwargs):
+        super(JobAdminForm, self).__init__(*args, **kwargs)
+        self.fields['playbook'].required = True

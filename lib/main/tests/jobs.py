@@ -71,13 +71,9 @@ class JobsTest(BaseTest):
         self.team.users.add(self.other_django_user)
         self.team.users.add(self.other2_django_user)
 
-        self.project = Project.objects.create(
-            name = 'testProject',
-            created_by = self.normal_django_user,
-            local_repository = '/tmp/',
-            scm_type = 'git',
-            default_playbook = 'site.yml',
-        )
+        self.project = self.make_projects(self.normal_django_user, 1,
+                                          playbook_content='')[0]
+        self.organization.projects.add(self.project)
 
         # other django user is on the project team and can deploy
         self.permission1 = Permission.objects.create(

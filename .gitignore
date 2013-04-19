@@ -1,5 +1,8 @@
 lib/settings/local_settings.py
 lib/acom.sqlite3
+lib/projects
+lib/public/media
+lib/public/static
 env/*
 *.py[c,o]
 *.swp

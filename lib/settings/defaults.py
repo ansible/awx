@@ -102,6 +102,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'media') # FIXME: Is this where we
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/media/'
 
+# Absolute filesystem path to the directory to host projects (with playbooks).
+# This directory should not be web-accessible.
+PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
+
 SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.

@@ -131,6 +131,22 @@ pre.result-display {
 
 {% block blockbots %}
 {{ block.super }}
+<script type="text/javascript">
+var django = django || {};
+if (django.jQuery) {
+  (function($) {
+    // Update playbook list based on project selected.
+    function onProjectChange() {
+      var project_pk = $('select[name="project"]').val() || 0;
+      $('select[name="playbook"] span option').unwrap();
+      $('select[name="playbook"] option:not(.project-' + project_pk + '):not([value=""])').wrap('<span/>');
+    }
+    $(function() {
+      $('select[name="project"]').each(onProjectChange).change(onProjectChange);
+    })
+  })(django.jQuery);
+}
+</script>
 {% endblock %}
 
 {% block branding %}

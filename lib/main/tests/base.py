@@ -16,7 +16,11 @@
 
 import datetime
 import json
+import os
+import shutil
+import tempfile
 
+from django.conf import settings
 from django.contrib.auth.models import User as DjangoUser
 import django.test
 from django.test.client import Client
@@ -31,6 +35,13 @@ class BaseTestMixin(object):
     def setUp(self):
         super(BaseTestMixin, self).setUp()
         self.object_ctr = 0
+        self._temp_project_dirs = []
+
+    def tearDown(self):
+        super(BaseTestMixin, self).tearDown()
+        for project_dir in self._temp_project_dirs:
+            if os.path.exists(project_dir):
+                shutil.rmtree(project_dir, True)
 
     def make_user(self, username, password, super_user=False):
         django_user = None
@@ -50,13 +61,24 @@ class BaseTestMixin(object):
             ))
         return results
 
-    def make_projects(self, created_by, count=1):
+    def make_projects(self, created_by, count=1, playbook_content=''):
         results = []
         for x in range(0, count):
             self.object_ctr = self.object_ctr + 1
+            # Create temp project directory.
+            project_dir = tempfile.mkdtemp(dir=settings.PROJECTS_ROOT)
+            self._temp_project_dirs.append(project_dir)
+            # Create temp playbook in project (if playbook content is given).
+            if playbook_content:
+                handle, playbook_path = tempfile.mkstemp(suffix='.yml',
+                                                         dir=project_dir)
+                test_playbook_file = os.fdopen(handle, 'w')
+                test_playbook_file.write(playbook_content)
+                test_playbook_file.close()
             results.append(Project.objects.create(
-                name="proj%s-%s" % (x, self.object_ctr), description="proj%s" % x, scm_type='git', 
-                default_playbook='foo.yml', local_repository='/checkout', created_by=created_by
+                name="proj%s-%s" % (x, self.object_ctr), description="proj%s" % x,
+                #scm_type='git',  default_playbook='foo.yml',
+                local_path=project_dir, created_by=created_by
             ))
         return results
 
