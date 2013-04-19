@@ -208,7 +208,7 @@ class JobTemplateAdmin(BaseModelAdmin):
         (None, {'fields': ('name', 'active', 'description',
                            'get_create_link_display', 'get_jobs_link_display')}),
         (_('Job Parameters'), {'fields': ('inventory', 'project', 'credential',
-                                          'user', 'job_type')}),
+                                          'job_type')}),
         #(_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
                                        'audit_trail',)}),
@@ -231,8 +231,8 @@ class JobTemplateAdmin(BaseModelAdmin):
             create_opts['project'] = obj.project.pk
         if obj.credential:
             create_opts['credential'] = obj.credential.pk
-        if obj.user:
-            create_opts['user'] = obj.user.pk
+        #if obj.user:
+        #    create_opts['user'] = obj.user.pk
         create_url += '?%s' % urllib.urlencode(create_opts)
         return format_html('<a href="{0}">{1}</a>', create_url, 'Create Job')
     get_create_link_display.short_description = _('Create Job')
@@ -265,7 +265,7 @@ class JobAdmin(BaseModelAdmin):
     fieldsets = (
         (None, {'fields': ('name', 'job_template', 'description')}),
         (_('Job Parameters'), {'fields': ('inventory', 'project', 'credential',
-                                          'user', 'job_type')}),
+                                          'job_type')}),
         #(_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
                             'audit_trail',)}),
