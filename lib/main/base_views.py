@@ -45,6 +45,7 @@ class BaseList(generics.ListCreateAPIView):
                       raise PermissionDenied()
                   return True
              else:
+                  # audit all of these to check ownership/readability of subobjects
                   if not self.__class__.model.can_user_add(request.user, self.request.DATA):
                       raise PermissionDenied()
                   return True
@@ -236,8 +237,10 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
                 return self.__class__.model.can_user_read(request.user, obj)
         elif request.method in [ 'PUT' ]:
             if type(obj) == User:
+                # FIXME: pass request.DATA to all of these and verify permissions on subobjects
                 return UserHelper.can_user_administrate(request.user, obj)
             else:
+                # FIXME: pass request.DATA to all of these and verify permission on subobjects
                 return self.__class__.model.can_user_administrate(request.user, obj)
         return False
 

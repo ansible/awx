@@ -46,6 +46,9 @@ directory.  Project directories must be unique and be (also no ../, etc).  defau
 * permissions on launching a job should be same as creating a job template
 * should be able to access permissions as subcollection off of users or teams (no need for permissions tab)
 * make sure all can_user_add/edit methods ensure ownership/access on subobjects
+* project should have a method to list valid YAML files and not require default playbook
+* do not allow ../ in paths (etc)
+* should be able to specify in a launch job a limit string, combine with shell=False when using subprocess
 
 QUESTIONS
 ---------

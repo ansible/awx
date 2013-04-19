@@ -154,6 +154,7 @@ class CredentialSerializer(BaseSerializer):
 
     def validate(self, attrs):
         ''' some fields cannot be changed once written '''
+        import epdb; epdb.st()
         if self.object is not None:
             # this is an update
             if self.object.user != attrs['user']:
