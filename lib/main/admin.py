@@ -27,6 +27,7 @@ from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import format_html
 from lib.main.models import *
+from lib.main.forms import *
 
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
@@ -66,11 +67,12 @@ class OrganizationAdmin(BaseModelAdmin):
     list_display = ('name', 'description', 'active')
     list_filter = ('active', 'tags')
     fieldsets = (
-        (None, {'fields': ('name', 'active', 'created_by', 'description',)}),
+        (None, {'fields': (('name', 'active'), 'description',)}),
         (_('Members'), {'fields': ('users', 'admins',)}),
         (_('Projects'), {'fields': ('projects',)}),
         (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('creation_date', 'audit_trail',)}),
+        (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
+                                       'audit_trail',)}),
     )
     readonly_fields = ('creation_date', 'created_by', 'audit_trail')
     filter_horizontal = ('users', 'admins', 'projects', 'tags')
@@ -94,10 +96,9 @@ class InventoryAdmin(BaseModelAdmin):
     list_display = ('name', 'organization', 'description', 'active')
     list_filter = ('organization', 'active')
     fieldsets = (
-        (None, {'fields': ('name', 'organization', 'active', 'created_by',
-                           'description',)}),
+        (None, {'fields': (('name', 'active'), 'organization', 'description',)}),
         (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('creation_date', 'audit_trail',)}),
+        (_('Audit Trail'), {'fields': ('creation_date', 'created_by', 'audit_trail',)}),
     )
     readonly_fields = ('creation_date', 'created_by', 'audit_trail')
     filter_horizontal = ('tags',)
@@ -161,8 +162,13 @@ class HostAdmin(BaseModelAdmin):
 
     list_display = ('name', 'inventory', 'description', 'active')
     list_filter = ('inventory', 'active')
-    fields = ('name', 'inventory', 'description', 'active', 'tags',
-              'created_by', 'audit_trail')
+    #form = HostAdminForm
+    fieldsets = (
+        (None, {'fields': (('name', 'active'), 'inventory', 'description', #'vdata'
+        )}),
+        (_('Tags'), {'fields': ('tags',)}),
+        (_('Audit Trail'), {'fields': ('creation_date', 'created_by', 'audit_trail',)}),
+    )
     readonly_fields = ('creation_date', 'created_by', 'audit_trail')
     filter_horizontal = ('tags',)
     # FIXME: Edit reverse of many to many for groups.
@@ -172,6 +178,13 @@ class HostAdmin(BaseModelAdmin):
 class GroupAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
+    fieldsets = (
+        (None, {'fields': (('name', 'active'), 'inventory', 'description',
+                            'parents')}),
+        (_('Tags'), {'fields': ('tags',)}),
+        (_('Audit Trail'), {'fields': ('creation_date', 'created_by', 'audit_trail',)}),
+    )
+    readonly_fields = ('creation_date', 'created_by', 'audit_trail')
     filter_horizontal = ('parents', 'hosts', 'tags')
     #inlines = [VariableDataInline]
 
