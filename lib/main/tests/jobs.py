@@ -69,6 +69,7 @@ class JobsTest(BaseTest):
         )
 
         self.team.users.add(self.other_django_user)
+        self.team.users.add(self.other2_django_user)
 
         self.project = Project.objects.create(
             name = 'testProject',
@@ -115,7 +116,14 @@ class JobsTest(BaseTest):
 
         self.credential = Credential.objects.create(
             ssh_key_data = 'xxx',
-            created_by = self.normal_django_user
+            created_by = self.normal_django_user,
+            user = self.other_django_user
+        )
+
+        self.credential2 = Credential.objects.create(
+            ssh_key_data = 'xxx',
+            created_by = self.normal_django_user,
+            team = self.team,
         )
 
         self.organization.projects.add(self.project)
@@ -169,11 +177,12 @@ class JobsTest(BaseTest):
         # nobody user can't even run check mode
         rec['name'] = 'job-foo4'
         self.post('/api/v1/job_templates/', rec, expect=403, auth=self.get_nobody_credentials())
+        rec['credential'] = self.credential2.pk
         posted = self.post('/api/v1/job_templates/', rec, expect=201, auth=self.get_other2_credentials())
         rec['name'] = 'job-foo5'
         rec['job_type'] = PERM_INVENTORY_DEPLOY
         self.post('/api/v1/job_templates/', rec, expect=403, auth=self.get_nobody_credentials())
-        self.post('/api/v1/job_templates/', rec, expect=403, auth=self.get_other2_credentials())
+        self.post('/api/v1/job_templates/', rec, expect=201, auth=self.get_other2_credentials())
         url = posted['url']
 
         # verify we can also get the job template record

@@ -806,29 +806,45 @@ class JobTemplate(CommonModel):
             return True
         job_type = data['job_type']
 
-        has_project_permission = False
+        has_launch_permission = False
         user_permissions = Permission.objects.filter(inventory=inventory, project=project, user=user)
         for perm in user_permissions:
             if job_type == PERM_INVENTORY_CHECK:
                 # if you have run permissions, you can also create check jobs
-                has_project_permission = True
+                has_launch_permission = True
             elif job_type == PERM_INVENTORY_DEPLOY and perm.permission_type == PERM_INVENTORY_DEPLOY:
                 # you need explicit run permissions to make run jobs
-                has_project_permission = True
+                has_launch_permission = True
         team_permissions = Permission.objects.filter(inventory=inventory, project=project, team__users__in = [user])
         for perm in team_permissions:
             if job_type == PERM_INVENTORY_CHECK:
                 # if you have run permissions, you can also create check jobs
-                has_project_permission = True
+                has_launch_permission = True
             elif job_type == PERM_INVENTORY_DEPLOY and perm.permission_type == PERM_INVENTORY_DEPLOY:
                 # you need explicit run permissions to make run jobs
-                has_project_permission = True
+                has_launch_permission = True
 
-        # FIXME: make sure credential belongs to me or my team
+        if not has_launch_permission:
+            return False
 
-        return has_project_permission
+        # make sure user owns the credentials they are using
+        if data.has_key('credential'):
+            has_credential = False
+            credential = Credential.objects.get(pk=data['credential'])
+            if credential.team and credential.team.users.filter(id = user.pk).count():
+               has_credential = True
+            if credential.user and credential.user == user:
+               has_credential = True
+            if not has_credential:
+               return False
 
+        # shouldn't really matter with permissions given, but make sure the user
+        # is also currently on the team in case they were added a per-user permission and then removed
+        # from the project.
+        if project.teams.filter(users__in = [ user ]).count():
+            return False
 
+        return True
 
 
 class Job(CommonModel):

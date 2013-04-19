@@ -138,10 +138,15 @@ class BaseSubList(BaseList):
                         # no attaching to yourself
                         raise PermissionDenied()
 
+
                     if self.__class__.parent_model != User:
+                        if not obj.__class__.can_user_read(request.user, obj):
+                            raise PermissionDenied()
                         if not self.__class__.parent_model.can_user_attach(request.user, main, obj, self.__class__.relationship, request.DATA):
                             raise PermissionDenied()
                     else:
+                        if not UserHelper.can_user_read(request.user, obj):
+                            raise PermissionDenied()
                         # FIXME: should generalize this
                         if not UserHelper.can_user_attach(request.user, main, obj, self.__class__.relationship, request.DATA):
                             raise PermissionDenied()
