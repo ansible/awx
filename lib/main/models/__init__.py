@@ -775,10 +775,18 @@ class JobTemplate(CommonModel):
     inventory = models.ForeignKey(
         'Inventory',
         related_name='job_templates',
-        blank=True,
         null=True,
-        default=None,
         on_delete=models.SET_NULL,
+    )
+    project = models.ForeignKey(
+        'Project',
+        related_name='job_templates',
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    playbook = models.CharField(
+        max_length=1024,
+        default='',
     )
     credential = models.ForeignKey(
         'Credential',
@@ -788,19 +796,27 @@ class JobTemplate(CommonModel):
         default=None,
         on_delete=models.SET_NULL,
     )
-    project = models.ForeignKey(
-        'Project',
-        related_name='job_templates',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
-    playbook = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-    )
+
+    def create_job(self, **kwargs):
+        '''
+        Create a new job based on this template.
+        '''
+        start_job = kwargs.pop('start', False)
+        save_job = kwargs.pop('save', True) or start_job # Start implies save.
+        kwargs['job_template'] = self
+        kwargs.setdefault('name', '%s %s' % (self.name, now().isoformat()))
+        kwargs.setdefault('description', self.description)
+        kwargs.setdefault('job_type', self.job_type)
+        kwargs.setdefault('inventory', self.inventory)
+        kwargs.setdefault('project', self.project)
+        kwargs.setdefault('playbook', self.playbook)
+        kwargs.setdefault('credential', self.credential)
+        job = Job(**kwargs)
+        if save_job:
+            job.save()
+        if start_job:
+            job.start()
+        return job
 
     # project has one default playbook but really should have a list of playbooks and flags ...
     # ssh-agent bash
@@ -903,11 +919,12 @@ class Job(CommonModel):
     '''
 
     STATUS_CHOICES = [
-        ('pending', _('Pending')),
-        ('running', _('Running')),
-        ('successful', _('Successful')),
-        ('failed', _('Failed')),
-        ('error', _('Error')),
+        ('new', _('New')),                  # Job has been created, but not started.
+        ('pending', _('Pending')),          # Job has been queued, but is not yet running.
+        ('running', _('Running')),          # Job is currently running.
+        ('successful', _('Successful')),    # Job completed successfully.
+        ('failed', _('Failed')),            # Job completed, but with failures.
+        ('error', _('Error')),              # The job was unable to run.
     ]
 
     class Meta:
@@ -949,7 +966,7 @@ class Job(CommonModel):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='pending',
+        default='new',
         editable=False,
     )
     result_stdout = models.TextField(
@@ -989,26 +1006,17 @@ class Job(CommonModel):
         except TaskMeta.DoesNotExist:
             pass
 
-    def _run(self):
+    def start(self):
         from lib.main.tasks import run_job
+        if self.status != 'new':
+            return
+        self.status = 'pending'
+        self.save(update_fields=['status'])
         task_result = run_job.delay(self.pk)
         # The TaskMeta instance in the database isn't created until the worker
         # starts processing the task, so we can only store the task ID here.
         self.celery_task_id = task_result.task_id
         self.save(update_fields=['celery_task_id'])
-
-    def save(self, *args, **kwargs):
-        created = not bool(self.pk)
-        super(Job, self).save(*args, **kwargs)
-        # Create a new host summary for each host in the inventory.
-        for host in self.inventory.hosts.all():
-            # Due to the way the inventory script is called, hosts without a
-            # group won't be included.
-            if host.groups.count():
-                self.job_host_summaries.get_or_create(host=host)
-        # Start job running (but only if just created).
-        if created and self.status == 'pending':
-            self._run()
 
     @property
     def successful_hosts(self):

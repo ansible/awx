@@ -285,7 +285,9 @@ class AcomCallbackEventTest(BaseCommandTest):
 
     def test_with_job_status_not_running(self):
         # Events can only be added when the job is running.
-        self.assertEqual(self.job.status, 'pending')
+        self.assertEqual(self.job.status, 'new')
+        self.job.status = 'pending'
+        self.job.save()
         result, stdout, stderr = self.run_command('acom_callback_event',
                                                   **self.valid_kwargs)
         self.assertTrue(isinstance(result, CommandError))

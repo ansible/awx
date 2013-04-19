@@ -24,6 +24,7 @@ from django.contrib.admin.util import unquote
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import format_html
 from lib.main.models import *
@@ -195,7 +196,15 @@ class VariableDataAdmin(BaseModelAdmin):
 
 class CredentialAdmin(BaseModelAdmin):
 
-    list_display = ('name', 'description', 'active')
+    fieldsets = (
+        (None, {'fields': (('name', 'active'), ('user', 'team'), 'description')}),
+        (_('Auth Info'), {'fields': ('default_username', 'ssh_key_data',
+                                     'ssh_key_unlock', 'ssh_password',
+                                     'sudo_password')}),
+        #(_('Tags'), {'fields': ('tags',)}),
+        (_('Audit Trail'), {'fields': ('creation_date', 'created_by', 'audit_trail',)}),
+    )
+    readonly_fields = ('creation_date', 'created_by', 'audit_trail')
     filter_horizontal = ('tags',)
 
 class TeamAdmin(BaseModelAdmin):
@@ -246,12 +255,16 @@ class JobTemplateAdmin(BaseModelAdmin):
     #filter_horizontal = ('tags',)
 
     def get_create_link_display(self, obj):
+        if not obj or not obj.pk:
+            return ''
         info = Job._meta.app_label, Job._meta.module_name
         create_url = reverse('admin:%s_%s_add' % info,
                              current_app=self.admin_site.name)
         create_opts = {
             'job_template': obj.pk,
             'job_type': obj.job_type,
+            'description': obj.description,
+            'name': '%s %s' % (obj.name, now().isoformat()),
         }
         if obj.inventory:
             create_opts['inventory'] = obj.inventory.pk
@@ -267,6 +280,8 @@ class JobTemplateAdmin(BaseModelAdmin):
     get_create_link_display.allow_tags = True
 
     def get_jobs_link_display(self, obj):
+        if not obj or not obj.pk:
+            return ''
         info = Job._meta.app_label, Job._meta.module_name
         jobs_url = reverse('admin:%s_%s_changelist' % info,
                            current_app=self.admin_site.name)
@@ -293,7 +308,8 @@ class JobAdmin(BaseModelAdmin):
     fieldsets = (
         (None, {'fields': ('name', 'job_template', 'description')}),
         (_('Job Parameters'), {'fields': ('inventory', 'project', 'playbook',
-                                          'credential', 'job_type')}),
+                                          'credential', 'job_type',
+                                          'start_job')}),
         #(_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
                             'audit_trail',)}),
@@ -312,7 +328,7 @@ class JobAdmin(BaseModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         ro_fields = list(super(JobAdmin, self).get_readonly_fields(request, obj))
-        if obj and obj.pk:
+        if obj and obj.pk and obj.status != 'new':
             ro_fields.extend(['name', 'description', 'job_template',
                               'inventory', 'project', 'playbook', 'credential',
                               'job_type'])
@@ -320,14 +336,21 @@ class JobAdmin(BaseModelAdmin):
 
     def get_fieldsets(self, request, obj=None):
         fsets = list(super(JobAdmin, self).get_fieldsets(request, obj))
-        if not obj or not obj.pk:
+        if not obj or not obj.pk or obj.status == 'new':
             fsets = [fs for fs in fsets if
                      'creation_date' not in fs[1]['fields'] and
                      'status' not in fs[1]['fields']]
+        elif obj and obj.pk and obj.status != 'new':
+            #print obj, obj.pk, obj.status
+            for fs in fsets:
+                # FIXME: Show start job on add view
+                if 'start_job' in fs[1]['fields']:
+                    fs[1]['fields'] = [x for x in fs[1]['fields']
+                                       if x != 'start_job']
         return fsets
 
     def get_inline_instances(self, request, obj=None):
-        if obj and obj.pk:
+        if obj and obj.pk and obj.status != 'new':
             return super(JobAdmin, self).get_inline_instances(request, obj)
         else:
             return []

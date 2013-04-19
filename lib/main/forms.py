@@ -71,8 +71,7 @@ class GroupForm(forms.ModelForm):
 class JobTemplateAdminForm(forms.ModelForm):
     '''Custom admin form for creating/editing JobTemplates.'''
 
-    playbook = forms.ChoiceField(choices=[EMPTY_CHOICE], required=False,
-                                 widget=PlaybookSelect)
+    playbook = forms.ChoiceField(choices=[EMPTY_CHOICE], widget=PlaybookSelect)
     
     class Meta:
         model = JobTemplate
@@ -89,9 +88,30 @@ class JobTemplateAdminForm(forms.ModelForm):
 class JobAdminForm(JobTemplateAdminForm):
     '''Custom admin form for creating Jobs.'''
 
+    start_job = forms.BooleanField(initial=False, required=False)
+
     class Meta:
         model = Job
 
     def __init__(self, *args, **kwargs):
         super(JobAdminForm, self).__init__(*args, **kwargs)
-        self.fields['playbook'].required = True
+        if self.instance.pk and self.instance.status != 'new':
+            self.fields.pop('playbook', None)
+
+    def clean_start_job(self):
+        return self.cleaned_data.get('start_job', False)
+
+    def save(self, commit=True):
+        instance = super(JobAdminForm, self).save(commit)
+        save_m2m = getattr(self, 'save_m2m', lambda: None)
+        should_start = bool(self.cleaned_data.get('start_job', '') and
+                            instance.status == 'new')
+        def new_save_m2m():
+            save_m2m()
+            if should_start:
+                instance.start()
+        if commit:
+            new_save_m2m()
+        else:
+            self.save_m2m = new_save_m2m
+        return instance

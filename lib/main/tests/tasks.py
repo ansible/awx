@@ -80,20 +80,21 @@ class RunJobTest(BaseCeleryTest):
 
     def create_test_job(self, **kwargs):
         opts = {
-            'name': 'test-job',
+            'name': 'test-job-template',
             'inventory': self.inventory,
             'project': self.project,
             'playbook': self.project.available_playbooks[0],
         }
         opts.update(kwargs)
-        return Job.objects.create(**opts)
+        self.job_template = JobTemplate.objects.create(**opts)
+        return self.job_template.create_job()
 
     def test_run_job(self):
         self.create_test_project(TEST_PLAYBOOK)
         job = self.create_test_job()
+        self.assertEqual(job.status, 'new')
+        job.start()
         self.assertEqual(job.status, 'pending')
-        self.assertEqual(set(job.hosts.values_list('pk', flat=True)),
-                         set([self.host.pk]))
         job = Job.objects.get(pk=job.pk)
         #print 'stdout:', job.result_stdout
         #print 'stderr:', job.result_stderr
@@ -102,8 +103,6 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.status, 'successful')
         self.assertTrue(job.result_stdout)
         job_events = job.job_events.all()
-        #for ev in launch_job_status_events:
-        #    print ev.event, ev.event_data
         self.assertEqual(job_events.filter(event='playbook_on_start').count(), 1)
         self.assertEqual(job_events.filter(event='playbook_on_play_start').count(), 1)
         self.assertEqual(job_events.filter(event='playbook_on_task_start').count(), 2)
@@ -111,7 +110,6 @@ class RunJobTest(BaseCeleryTest):
         for evt in job_events.filter(event='runner_on_ok'):
             self.assertEqual(evt.host, self.host)
         self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
-        #print job_events.get(event='playbook_on_stats').event_data
         self.assertEqual(job.successful_hosts.count(), 1)
         self.assertEqual(job.failed_hosts.count(), 0)
         self.assertEqual(job.changed_hosts.count(), 1)
@@ -122,9 +120,9 @@ class RunJobTest(BaseCeleryTest):
     def test_check_job(self):
         self.create_test_project(TEST_PLAYBOOK)
         job = self.create_test_job(job_type='check')
+        self.assertEqual(job.status, 'new')
+        job.start()
         self.assertEqual(job.status, 'pending')
-        self.assertEqual(set(job.hosts.values_list('pk', flat=True)),
-                         set([self.host.pk]))
         job = Job.objects.get(pk=job.pk)
         self.assertEqual(job.status, 'successful')
         self.assertTrue(job.result_stdout)
@@ -146,9 +144,9 @@ class RunJobTest(BaseCeleryTest):
     def test_run_job_that_fails(self):
         self.create_test_project(TEST_PLAYBOOK2)
         job = self.create_test_job()
+        self.assertEqual(job.status, 'new')
+        job.start()
         self.assertEqual(job.status, 'pending')
-        self.assertEqual(set(job.hosts.values_list('pk', flat=True)),
-                         set([self.host.pk]))
         job = Job.objects.get(pk=job.pk)
         self.assertEqual(job.status, 'failed')
         self.assertTrue(job.result_stdout)
@@ -169,9 +167,9 @@ class RunJobTest(BaseCeleryTest):
     def test_check_job_where_task_would_fail(self):
         self.create_test_project(TEST_PLAYBOOK2)
         job = self.create_test_job(job_type='check')
+        self.assertEqual(job.status, 'new')
+        job.start()
         self.assertEqual(job.status, 'pending')
-        self.assertEqual(set(job.hosts.values_list('pk', flat=True)),
-                         set([self.host.pk]))
         job = Job.objects.get(pk=job.pk)
         # Since we don't actually run the task, the --check should indicate
         # everything is successful.
