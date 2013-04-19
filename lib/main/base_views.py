@@ -139,11 +139,11 @@ class BaseSubList(BaseList):
                         raise PermissionDenied()
 
                     if self.__class__.parent_model != User:
-                        if not self.__class__.parent_model.can_user_attach(request.user, main, obj, self.__class__.relationship):
+                        if not self.__class__.parent_model.can_user_attach(request.user, main, obj, self.__class__.relationship, request.DATA):
                             raise PermissionDenied()
                     else:
                         # FIXME: should generalize this
-                        if not UserHelper.can_user_attach(request.user, main, obj, self.__class__.relationship):
+                        if not UserHelper.can_user_attach(request.user, main, obj, self.__class__.relationship, request.DATA):
                             raise PermissionDenied()
 
                     return Response(status=status.HTTP_201_CREATED, data=ser.data)
@@ -164,10 +164,10 @@ class BaseSubList(BaseList):
         if not 'disassociate' in request.DATA:
             if not request.user.is_superuser:
                 if type(main) != User:
-                    if not self.__class__.parent_model.can_user_attach(request.user, main, sub, self.__class__.relationship):
+                    if not self.__class__.parent_model.can_user_attach(request.user, main, sub, self.__class__.relationship, request.DATA):
                         raise PermissionDenied()
                 else:
-		    if not UserHelper.can_user_attach(request.user, main, sub, self.__class__.relationship):
+		    if not UserHelper.can_user_attach(request.user, main, sub, self.__class__.relationship, request.DATA):
                         raise PermissionDenied()
 
             if sub in relationship.all():
@@ -237,11 +237,9 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
                 return self.__class__.model.can_user_read(request.user, obj)
         elif request.method in [ 'PUT' ]:
             if type(obj) == User:
-                # FIXME: pass request.DATA to all of these and verify permissions on subobjects
-                return UserHelper.can_user_administrate(request.user, obj)
+                return UserHelper.can_user_administrate(request.user, obj, request.DATA)
             else:
-                # FIXME: pass request.DATA to all of these and verify permission on subobjects
-                return self.__class__.model.can_user_administrate(request.user, obj)
+                return self.__class__.model.can_user_administrate(request.user, obj, request.DATA)
         return False
 
     def put(self, request, *args, **kwargs):
@@ -269,7 +267,7 @@ class VariableBaseDetail(BaseDetail):
         if request.method == 'GET':
             return self.__class__.parent_model.can_user_read(request.user, through_obj)
         elif request.method in [ 'PUT' ]:
-            return self.__class__.parent_model.can_user_administrate(request.user, through_obj)
+            return self.__class__.parent_model.can_user_administrate(request.user, through_obj, request.DATA)
         return False
 
     def put(self, request, *args, **kwargs):

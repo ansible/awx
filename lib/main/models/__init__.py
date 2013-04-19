@@ -78,7 +78,7 @@ class EditHelper(object):
     @classmethod
     def illegal_changes(cls, request, obj, model_class):
         ''' have any illegal changes been made (for a PUT request)? '''
-        can_admin = model_class.can_user_administrate(request.user, obj)
+        can_admin = model_class.can_user_administrate(request.user, obj, request.DATA)
         if (not can_admin) or (can_admin == 'partial'):
             check_fields = model_class.admin_only_edit_fields
             changed = cls.fields_changed(check_fields, obj, request.DATA)
@@ -105,7 +105,7 @@ class UserHelper(object):
     admin_only_edit_fields = ('last_name', 'first_name', 'username', 'is_active', 'is_superuser')
 
     @classmethod
-    def can_user_administrate(cls, user, obj):
+    def can_user_administrate(cls, user, obj, data):
         ''' a user can be administrated if they are themselves, or by org admins or superusers '''
         if user == obj:
             return 'partial'
@@ -118,7 +118,7 @@ class UserHelper(object):
     def can_user_read(cls, user, obj):
         ''' a user can be read if they are on the same team or can be administrated '''
         matching_teams = user.teams.filter(users__in = [ user ]).count()
-        return matching_teams or cls.can_user_administrate(user, obj)
+        return matching_teams or cls.can_user_administrate(user, obj, None)
 
     @classmethod
     def can_user_delete(cls, user, obj):
@@ -128,16 +128,18 @@ class UserHelper(object):
         return matching_orgs
 
     @classmethod
-    def can_user_attach(cls, user, obj, sub_obj, relationship_type):
+    def can_user_attach(cls, user, obj, sub_obj, relationship_type, data):
         if type(sub_obj) != User:
             if not sub_obj.can_user_read(user, sub_obj):
                 return False
-        rc = cls.can_user_administrate(user, obj)
-        return rc
+        rc = cls.can_user_administrate(user, obj, None)
+        if not rc:
+            return False
+        return sub_obj.__class__.can_user_read(user, sub_obj)
 
     @classmethod
     def can_user_unattach(cls, user, obj, sub_obj, relationship_type):
-        return cls.can_user_administrate(user, obj)
+        return cls.can_user_administrate(user, obj, None)
 
 class PrimordialModel(models.Model):
     '''
@@ -160,7 +162,7 @@ class PrimordialModel(models.Model):
         return unicode("%s-%s"% (self.name, self.id))
 
     @classmethod
-    def can_user_administrate(cls, user, obj):
+    def can_user_administrate(cls, user, obj, data):
         # FIXME: do we want a seperate method to override put?  This is kind of general purpose
         raise exceptions.NotImplementedError()
 
@@ -177,17 +179,24 @@ class PrimordialModel(models.Model):
         return user.is_superuser
 
     @classmethod
-    def can_user_attach(cls, user, obj, sub_obj, relationship_type):
+    def can_user_attach(cls, user, obj, sub_obj, relationship_type, data):
         ''' whether you can add sub_obj to obj using the relationship type in a subobject view '''
         if type(sub_obj) != User:
             if not sub_obj.can_user_read(user, sub_obj):
                 return False
-        rc = cls.can_user_administrate(user, obj)
-        return rc
+        rc = cls.can_user_administrate(user, obj, None)
+        if not rc:
+            return False
+
+        # in order to attach something you also be able to read what you are attaching
+        if type(sub_obj) == User:
+            return UserHelper.can_user_read(user, sub_obj)
+        else:
+            return sub_obj.__class__.can_user_read(user, sub_obj)
 
     @classmethod
     def can_user_unattach(cls, user, obj, sub_obj, relationship):
-        return cls.can_user_administrate(user, obj)
+        return cls.can_user_administrate(user, obj, None)
 
 class CommonModel(PrimordialModel):
     ''' a base model where the name is unique '''
@@ -271,7 +280,7 @@ class Organization(CommonModel):
         return user in obj.admins.all()
 
     @classmethod
-    def can_user_administrate(cls, user, obj):
+    def can_user_administrate(cls, user, obj, data):
         # FIXME: super user checks should be higher up so we don't have to repeat them
         if user.is_superuser:
             return True
@@ -282,11 +291,11 @@ class Organization(CommonModel):
 
     @classmethod
     def can_user_read(cls, user, obj):
-        return cls.can_user_administrate(user,obj) or user in obj.users.all()
+        return cls.can_user_administrate(user,obj,None) or user in obj.users.all()
 
     @classmethod
     def can_user_delete(cls, user, obj):
-        return cls.can_user_administrate(user, obj)
+        return cls.can_user_administrate(user, obj, None)
 
     def __unicode__(self):
         return self.name
@@ -361,11 +370,11 @@ class Inventory(CommonModel):
         return False
 
     @classmethod
-    def can_user_administrate(cls, user, obj):
+    def can_user_administrate(cls, user, obj, data):
         return cls._has_permission_types(user, obj, PERMISSION_TYPES_ALLOWING_INVENTORY_ADMIN)
 
     @classmethod
-    def can_user_attach(cls, user, obj, sub_obj, relationship_type):
+    def can_user_attach(cls, user, obj, sub_obj, relationship_type, data):
         ''' whether you can add sub_obj to obj using the relationship type in a subobject view '''
         if not sub_obj.can_user_read(user, sub_obj):
             return False
@@ -445,7 +454,7 @@ class Group(CommonModelNameNotUnique):
 
 
     @classmethod
-    def can_user_administrate(cls, user, obj):
+    def can_user_administrate(cls, user, obj, data):
         # here this controls whether the user can attach subgroups
         return Inventory._has_permission_types(user, obj.inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
 
@@ -536,7 +545,7 @@ class Credential(CommonModelNameNotUnique):
     sudo_password    = models.CharField(blank=True, default='', max_length=1024)
 
     @classmethod
-    def can_user_administrate(cls, user, obj):
+    def can_user_administrate(cls, user, obj, data):
         if user.is_superuser:
             return True
         if user == obj.user:
@@ -555,12 +564,12 @@ class Credential(CommonModelNameNotUnique):
         if obj.user is None and obj.team is None:
             # unassociated credentials may be marked deleted by anyone
             return True
-        return cls.can_user_administrate(user,obj)
+        return cls.can_user_administrate(user,obj,None)
 
     @classmethod
     def can_user_read(cls, user, obj):
         ''' a user can be read if they are on the same team or can be administrated '''
-        return cls.can_user_administrate(user, obj)
+        return cls.can_user_administrate(user, obj, None)
 
     @classmethod
     def can_user_add(cls, user, data):
@@ -568,10 +577,10 @@ class Credential(CommonModelNameNotUnique):
             return True
         if 'user' in data:
             user_obj = User.objects.get(pk=data['user'])
-            return UserHelper.can_user_administrate(user, user_obj)
+            return UserHelper.can_user_administrate(user, user_obj, data)
         if 'team' in data:
             team_obj = Team.objects.get(pk=data['team'])
-            return Team.can_user_administrate(user, team_obj)
+            return Team.can_user_administrate(user, team_obj, data)
 
     def get_absolute_url(self):
         import lib.urls
@@ -594,7 +603,7 @@ class Team(CommonModel):
         return reverse(lib.urls.views_TeamsDetail, args=(self.pk,))
 
     @classmethod
-    def can_user_administrate(cls, user, obj):
+    def can_user_administrate(cls, user, obj, data):
         # FIXME -- audit when this is called explicitly, if any
         if user.is_superuser:
             return True
@@ -604,7 +613,7 @@ class Team(CommonModel):
 
     @classmethod
     def can_user_read(cls, user, obj):
-        if cls.can_user_administrate(user, obj):
+        if cls.can_user_administrate(user, obj, None):
             return True
         if obj.users.filter(pk__in = [ user.pk ]).count():
             return True
@@ -622,7 +631,7 @@ class Team(CommonModel):
 
     @classmethod
     def can_user_delete(cls, user, obj):
-        return cls.can_user_administrate(user, obj)
+        return cls.can_user_administrate(user, obj, None)
 
 class Project(CommonModel):
     '''
@@ -641,7 +650,7 @@ class Project(CommonModel):
         return reverse(lib.urls.views_ProjectsDetail, args=(self.pk,))
 
     @classmethod
-    def can_user_administrate(cls, user, obj):
+    def can_user_administrate(cls, user, obj, data):
         if user.is_superuser:
             return True
         if obj.created_by == user:
@@ -654,7 +663,7 @@ class Project(CommonModel):
 
     @classmethod
     def can_user_read(cls, user, obj):
-        if cls.can_user_administrate(user,obj):
+        if cls.can_user_administrate(user, obj, None):
             return True
         # and also if I happen to be on a team inside the project
         # FIXME: add this too
@@ -662,7 +671,7 @@ class Project(CommonModel):
 
     @classmethod
     def can_user_delete(cls, user, obj):
-        return cls.can_user_administrate(user, obj)
+        return cls.can_user_administrate(user, obj, None)
 
 
 class Permission(CommonModelNameNotUnique):

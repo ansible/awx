@@ -80,7 +80,7 @@ class OrganizationsAuditTrailList(BaseSubList):
         ''' to list tags in the organization, I must be a superuser or org admin '''
         organization = Organization.objects.get(pk=self.kwargs['pk'])
         if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
-            # FIXME: use: organization.can_user_administrate(self.request.user)
+            # FIXME: use: organization.can_user_administrate(...) ?
             raise PermissionDenied()
         return AuditTrail.objects.filter(organization_by_audit_trail__in = [ organization ])
 
@@ -154,7 +154,7 @@ class OrganizationsTagsList(BaseSubList):
         ''' to list tags in the organization, I must be a superuser or org admin '''
         organization = Organization.objects.get(pk=self.kwargs['pk'])
         if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
-            # FIXME: use: organization.can_user_administrate(self.request.user)
+            # FIXME: use: organization.can_user_administrate(...) ?
             raise PermissionDenied()
         return Tag.objects.filter(organization_by_tag__in = [ organization ])
 
@@ -242,7 +242,7 @@ class TeamsCredentialsList(BaseSubList):
 
     def _get_queryset(self):
         team = Team.objects.get(pk=self.kwargs['pk'])
-        if not Team.can_user_administrate(self.request.user, team):
+        if not Team.can_user_administrate(self.request.user, team, None):
             if not (self.request.user.is_superuser or self.request.user in team.users.all()):
                 raise PermissionDenied()
         project_credentials = Credential.objects.filter(
@@ -357,7 +357,7 @@ class UsersTeamsList(BaseSubList):
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
-        if not UserHelper.can_user_administrate(self.request.user, user):
+        if not UserHelper.can_user_administrate(self.request.user, user, None):
             raise PermissionDenied()
         return Team.objects.filter(users__in = [ user ])
 
@@ -373,7 +373,7 @@ class UsersProjectsList(BaseSubList):
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
-        if not UserHelper.can_user_administrate(self.request.user, user):
+        if not UserHelper.can_user_administrate(self.request.user, user, None):
             raise PermissionDenied()
         teams = user.teams.all()
         return Project.objects.filter(teams__in = teams)
@@ -391,7 +391,7 @@ class UsersCredentialsList(BaseSubList):
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
-        if not UserHelper.can_user_administrate(self.request.user, user):
+        if not UserHelper.can_user_administrate(self.request.user, user, None):
             raise PermissionDenied()
         project_credentials = Credential.objects.filter(
             team__users__in = [ user ]
@@ -410,7 +410,7 @@ class UsersOrganizationsList(BaseSubList):
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
-        if not UserHelper.can_user_administrate(self.request.user, user):
+        if not UserHelper.can_user_administrate(self.request.user, user, None):
             raise PermissionDenied()
         return Organization.objects.filter(users__in = [ user ])
 
@@ -426,7 +426,7 @@ class UsersAdminOrganizationsList(BaseSubList):
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
-        if not UserHelper.can_user_administrate(self.request.user, user):
+        if not UserHelper.can_user_administrate(self.request.user, user, None):
             raise PermissionDenied()
         return Organization.objects.filter(admins__in = [ user ])
 
