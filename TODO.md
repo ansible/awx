@@ -43,13 +43,17 @@ directory.  Project directories must be unique and be (also no ../, etc).  defau
 * ability to import inventory from script (adds variables and merges, does not override, does not remove anything) -- merge control, possibly via script
 * ability to import inventory from inventory files (upgrade case) -- write a inventory script that is ansible-inventory API compatible maybe?
 * when associating inventory objects, objects should share common inventory records (user_can_attach method should check)
+* permissions on launching a job should be same as creating a job template
+* should be able to access permissions as subcollection off of users or teams (no need for permissions tab)
 
 QUESTIONS
 ---------
 
 * if creating a new project, do we want to have an appliance style path for them, like /storage/projects/GUID ??? may want to keep somewhere else ?
 
-
+* for dashboard purposes, should there be a URL where I can see all hosts in an inventory whose last job status
+  is a failed playbook run?
+* what else do we need for dashboarding?
 
 
 
