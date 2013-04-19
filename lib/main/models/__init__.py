@@ -746,7 +746,6 @@ class JobTemplate(CommonModel):
     )
 
     # project has one default playbook but really should have a list of playbooks and flags ...
-
     # ssh-agent bash
     # ssh-add ... < key entry
     #
@@ -767,6 +766,47 @@ class JobTemplate(CommonModel):
     def get_absolute_url(self):
         import lib.urls
         return reverse(lib.urls.views_JobTemplateDetail, args=(self.pk,))
+
+    @classmethod
+    def can_user_add(cls, user, data):
+        ''' 
+        a user can create a job template if they are a superuser, an org admin of any org
+        that the project is a member, or if they have user or team based permissions tying
+        the project to the inventory source for the given action.
+   
+        users who are able to create deploy jobs can also make check (dry run) jobs
+        '''
+
+        if user.is_superuser:
+            return True
+        project = Project.objects.get(pk=data['project'])
+
+        admin_of_orgs = project.organizations.filter(admins__in = [ user ])
+        if admin_of_orgs.count() > 0:
+            return True
+        job_type = data['job_type']
+
+        has_project_permission = False
+        user_permissions = Permission.objects.filter(inventory=inventory, project=project, user=user)
+        for perm in user_permissions:
+            if job_type == PERM_INVENTORY_CHECK:
+                # if you have run permissions, you can also create check jobs
+                has_project_permission = True
+            elif job_type == PERM_INVENTORY_DEPLOY and perm.job_type == PERM_INVENTORY_DEPLOY:
+                # you need explicit run permissions to make run jobs
+                has_project_permission = True
+        team_permissions = Permission.objects.filter(inventory=inventory, project=project, team__users__in = [user])
+        for perm in team_permissions:
+            if job_type == PERM_INVENTORY_CHECK:
+                # if you have run permissions, you can also create check jobs
+                has_project_permission = True
+            elif job_type == PERM_INVENTORY_DEPLOY and perm.job_type == PERM_INVENTORY_DEPLOY:
+                # you need explicit run permissions to make run jobs
+                has_project_permission = True
+
+        return has_project_permission
+
+
 
 
 class Job(CommonModel):

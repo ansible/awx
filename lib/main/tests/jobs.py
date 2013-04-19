@@ -100,12 +100,23 @@ class JobsTest(BaseTest):
         )        
 
 
-    def test_get_list(self):
+    def test_mainline(self):
 
-        # no credentials == 401
+        # job templates
         data = self.get('/api/v1/job_templates/', expect=401)
         data = self.get('/api/v1/job_templates/', expect=200, auth=self.get_normal_credentials())
-        #print data
-        self.assertTrue(data['count'], 99)
+        self.assertTrue(data['count'], 2)
+        
+        rec = dict(
+            name         = 'job-foo', 
+            credential   = self.credential.pk, 
+            inventory    = self.inventory.pk, 
+            project      = self.project.pk,
+            job_type     = PERM_INVENTORY_DEPLOY
+        )
+        posted = self.post('/api/v1/job_templates/', rec, expect=201, auth=self.get_normal_credentials())
+        self.assertEquals(posted['url'], '/api/v1/job_templates/3/')
+
+ 
 
 
