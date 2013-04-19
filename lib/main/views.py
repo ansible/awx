@@ -736,10 +736,33 @@ class VariableDetail(BaseDetail):
         raise PermissionDenied()
 
 class JobTemplatesList(BaseList):
-    pass
+
+    model = JobTemplate
+    serializer_class = JobTemplateSerializer
+    permission_classes = (CustomRbac,)
+    filter_fields = ('name',)
+
+    def _get_queryset(self):
+        ''' 
+        I can see job templates when I am a superuser, or I am an admin of the project's orgs, or if I'm in a team on the project. 
+        This does not mean I would be able to launch a job from the template or edit the JobTemplate.
+        '''
+        base = JobTemplate.objects
+        if self.request.user.is_superuser:
+            return base.all()
+        return base.filter(
+            project__organizations__admins__in = [ self.request.user ]
+        ).distinct() | base.filter(
+            project__teams__users__in = [ self.request.user ]
+        ).distinct()
+
 
 class JobTemplateDetail(BaseDetail):
-    pass
+
+    model = JobTemplate
+    serializer_class = JobTemplateSerializer
+    permission_classes = (CustomRbac,)
+
 
 class JobTemplateStart(BaseDetail):
     pass

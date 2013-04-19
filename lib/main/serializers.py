@@ -211,5 +211,19 @@ class VariableDataSerializer(BaseSerializer):
         # FIXME: related resources, maybe just the audit trail
         return dict()
 
+class JobTemplateSerializer(BaseSerializer):
 
+    # add the URL and related resources
+    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    related       = serializers.SerializerMethodField('get_related')
+
+    class Meta:
+        model = JobTemplate
+        fields = ('url', 'id', 'related', 'name', 'description', 'job_type', 'credential', 'project', 'inventory', 'created_by', 'creation_date')
+
+    def get_related(self, obj):
+        # FIXME: related resources, credential, project, inventory, etc
+        return dict()
+
+    
 

@@ -764,6 +764,11 @@ class JobTemplate(CommonModel):
     #    --list
     #    -- host <hostname>
 
+    def get_absolute_url(self):
+        import lib.urls
+        return reverse(lib.urls.views_JobTemplateDetail, args=(self.pk,))
+
+
 class Job(CommonModel):
     '''
     A job applies a project (with playbook) to an inventory source with a given
