@@ -38,7 +38,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 REST_FRAMEWORK = {
-    'FILTER_BACKEND': 'rest_framework.filters.DjangoFilterBackend',
+    'FILTER_BACKEND': 'lib.main.custom_filters.CustomFilterBackend',
     'PAGINATE_BY': 25,
     'PAGINATE_BY_PARAM': 'page_size',
     'DEFAULT_AUTHENTICATION_CLASSES': (
