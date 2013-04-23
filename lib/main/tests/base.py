@@ -63,9 +63,14 @@ class BaseTestMixin(object):
 
     def make_projects(self, created_by, count=1, playbook_content=''):
         results = []
+
+        if not os.path.exists(settings.PROJECTS_ROOT):
+            os.makedirs(settings.PROJECTS_ROOT)
+
         for x in range(0, count):
             self.object_ctr = self.object_ctr + 1
             # Create temp project directory.
+
             project_dir = tempfile.mkdtemp(dir=settings.PROJECTS_ROOT)
             self._temp_project_dirs.append(project_dir)
             # Create temp playbook in project (if playbook content is given).

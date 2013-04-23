@@ -229,6 +229,31 @@ class TeamsUsersList(BaseSubList):
             return base
         raise PermissionDenied()
 
+
+class TeamsProjectsList(BaseSubList):
+
+    model = Project
+    serializer_class = ProjectSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Team
+    relationship = 'projects'
+    postable = True
+    inject_primary_key_on_post_as = 'team'
+    severable = True
+
+    # FIXME: filter_fields is no longer used, think we can remove these references everywhere given new custom filtering -- MPD
+    filter_fields = ('name',)
+
+    def _get_queryset(self):
+        team = Team.objects.get(pk=self.kwargs['pk'])
+        base = team.projects.all()
+        if self.request.user.is_superuser or self.request.user in team.organization.admins.all():
+            return base
+        if self.request.user in team.users.all():
+            return base
+        raise PermissionDenied()
+
+
 class TeamsCredentialsList(BaseSubList):
 
     model = Credential

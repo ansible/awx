@@ -212,6 +212,24 @@ class ProjectsTest(BaseTest):
         deleted = self.post(org_teams, data2, expect=204, auth=self.get_normal_credentials())
         got = self.get(url, expect=404, auth=self.get_normal_credentials())
 
+
+        # =====================================================================
+        # TEAM PROJECTS
+ 
+        team = Team.objects.filter(organization__pk = 2)[0]
+        team_projects = '/api/v1/teams/%s/projects/' % (team.pk)
+      
+        p1 = self.projects[0]
+        team.projects.add(p1)
+        team.save()
+ 
+        got = self.get(team_projects, expect=200, auth=self.get_super_credentials())
+
+        # FIXME: project postablility tests somewhat incomplete.
+        # add tests to show we can create new projects on the subresource and so on.
+
+        self.assertEquals(got['count'], 1)
+
         # =====================================================================
         # TEAMS USER MEMBERSHIP
 
