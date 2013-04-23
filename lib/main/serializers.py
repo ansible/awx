@@ -66,6 +66,8 @@ class AuditTrailSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = dict()
+        if obj.modified_by:
+            res['modified_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.modified_by.pk,))
         return res
 
 class ProjectSerializer(BaseSerializer):
