@@ -74,7 +74,6 @@ class ProjectSerializer(BaseSerializer):
         fields = ('url', 'id', 'name', 'description', 'creation_date', 'local_path')#, 'default_playbook', 'scm_type')
 
     def get_related(self, obj):
-        # FIXME: add related resources: inventories
         return dict(
             organizations = reverse(lib.urls.views_ProjectsOrganizationsList,  args=(obj.pk,))
         )
@@ -91,8 +90,10 @@ class InventorySerializer(BaseSerializer):
         fields = ('url', 'id', 'name', 'description', 'creation_date', 'organization')
 
     def get_related(self, obj):
-        # FIXME: add related resources: hosts, groups
-        return dict()
+        return dict(
+            hosts  = reverse(lib.urls.views_HostsList,   args=(obj.pk,)),
+            groups = reverse(lib.urls.views_GroupsList,  args=(obj.pk,)),
+        )
 
 class HostSerializer(BaseSerializer):
 
@@ -105,8 +106,9 @@ class HostSerializer(BaseSerializer):
         fields = ('url', 'id', 'name', 'description', 'creation_date', 'inventory')
 
     def get_related(self, obj):
-        # FIXME: add related resources
-        return dict()
+        return dict(
+            variable_data = reverse(lib.urls.views_HostsVariableDetail, args=(obj.pk,)),
+        )
 
 class GroupSerializer(BaseSerializer):
 
@@ -119,8 +121,12 @@ class GroupSerializer(BaseSerializer):
         fields = ('url', 'id', 'name', 'description', 'creation_date', 'inventory')
 
     def get_related(self, obj):
-        # FIXME: add related resources
-        return dict()
+        return dict(
+            variable_data = reverse(lib.urls.views_GroupsVariableDetail, args=(obj.pk,)),
+            hosts         = reverse(lib.urls.views_GroupsHostsList,      args=(obj.pk,)),
+            children      = reverse(lib.urls.views_GroupsChildrenList,   args=(obj.pk,)),
+            all_hosts     = reverse(lib.urls.views_GroupsAllHostsList,   args=(obj.pk,)),
+        )
 
 class TeamSerializer(BaseSerializer):
 
@@ -132,9 +138,14 @@ class TeamSerializer(BaseSerializer):
         model = Team
         fields = ('url', 'id', 'related', 'name', 'description', 'organization', 'creation_date')
 
+    # FIXME: TODO: include related collections but also related FK urls
+
     def get_related(self, obj):
-        # FIXME: add related resources: projects, users, organizations
-        return dict()
+        return dict(
+            projects    = reverse(lib.urls.views_TeamsProjectsList,     args=(obj.pk,)),
+            users       = reverse(lib.urls.views_TeamsUsersList,        args=(obj.pk,)),
+            credentials = reverse(lib.urls.views_TeamsCredentialsList,  args=(obj.pk,)),
+        )
 
 class CredentialSerializer(BaseSerializer):
 
