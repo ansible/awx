@@ -103,6 +103,7 @@ class InventorySerializer(BaseSerializer):
         res = dict(
             hosts      = reverse(lib.urls.views_HostsList,   args=(obj.pk,)),
             groups     = reverse(lib.urls.views_GroupsList,  args=(obj.pk,)),
+            inventory  = reverse(lib.urls.views_InventoryDetail, args=(obj.inventory.pk,)),
         )
         if obj.created_by:
             res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
