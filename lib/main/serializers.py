@@ -168,7 +168,7 @@ class TeamSerializer(BaseSerializer):
             projects     = reverse(lib.urls.views_TeamsProjectsList,     args=(obj.pk,)),
             users        = reverse(lib.urls.views_TeamsUsersList,        args=(obj.pk,)),
             credentials  = reverse(lib.urls.views_TeamsCredentialsList,  args=(obj.pk,)),
-            organization = reverse(lib.urls.views_OrganizationsDetail,   args=(obj.pk,)),
+            organization = reverse(lib.urls.views_OrganizationsDetail,   args=(obj.organization.pk,)),
         )
         if obj.created_by:
             res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
