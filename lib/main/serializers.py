@@ -46,7 +46,8 @@ class OrganizationSerializer(BaseSerializer):
             projects    = reverse(lib.urls.views_OrganizationsProjectsList,   args=(obj.pk,)),
             users       = reverse(lib.urls.views_OrganizationsUsersList,      args=(obj.pk,)),
             admins      = reverse(lib.urls.views_OrganizationsAdminsList,     args=(obj.pk,)),
-            tags        = reverse(lib.urls.views_OrganizationsTagsList,       args=(obj.pk,))
+            tags        = reverse(lib.urls.views_OrganizationsTagsList,       args=(obj.pk,)),
+            teams       = reverse(lib.urls.views_OrganizationsTeamsList,      args=(obj.pk,))
         )
 
 class AuditTrailSerializer(BaseSerializer):
