@@ -101,9 +101,9 @@ class InventorySerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = dict(
-            hosts      = reverse(lib.urls.views_HostsList,   args=(obj.pk,)),
-            groups     = reverse(lib.urls.views_GroupsList,  args=(obj.pk,)),
-            inventory  = reverse(lib.urls.views_InventoryDetail, args=(obj.inventory.pk,)),
+            hosts        = reverse(lib.urls.views_HostsList,           args=(obj.pk,)),
+            groups       = reverse(lib.urls.views_GroupsList,          args=(obj.pk,)),
+            organization = reverse(lib.urls.views_OrganizationsDetail, args=(obj.organization.pk,)),
         )
         if obj.created_by:
             res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
@@ -122,7 +122,9 @@ class HostSerializer(BaseSerializer):
     def get_related(self, obj):
         res = dict(
             variable_data = reverse(lib.urls.views_HostsVariableDetail, args=(obj.pk,)),
+            inventory     = reverse(lib.urls.views_InventoryDetail,     args=(obj.inventory.pk,)),
         )
+        # NICE TO HAVE: possible reverse resource to show what groups the host is in
         if obj.created_by:
             res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
         return res
@@ -143,6 +145,7 @@ class GroupSerializer(BaseSerializer):
             hosts         = reverse(lib.urls.views_GroupsHostsList,      args=(obj.pk,)),
             children      = reverse(lib.urls.views_GroupsChildrenList,   args=(obj.pk,)),
             all_hosts     = reverse(lib.urls.views_GroupsAllHostsList,   args=(obj.pk,)),
+            inventory     = reverse(lib.urls.views_InventoryDetail,      args=(obj.inventory.pk,)),
         )
         if obj.created_by:
             res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
@@ -162,9 +165,10 @@ class TeamSerializer(BaseSerializer):
 
     def get_related(self, obj):
         res = dict(
-            projects    = reverse(lib.urls.views_TeamsProjectsList,     args=(obj.pk,)),
-            users       = reverse(lib.urls.views_TeamsUsersList,        args=(obj.pk,)),
-            credentials = reverse(lib.urls.views_TeamsCredentialsList,  args=(obj.pk,)),
+            projects     = reverse(lib.urls.views_TeamsProjectsList,     args=(obj.pk,)),
+            users        = reverse(lib.urls.views_TeamsUsersList,        args=(obj.pk,)),
+            credentials  = reverse(lib.urls.views_TeamsCredentialsList,  args=(obj.pk,)),
+            organization = reverse(lib.urls.views_OrganizationsDetail,   args=(obj.pk,)),
         )
         if obj.created_by:
             res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
