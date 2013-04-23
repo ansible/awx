@@ -527,7 +527,7 @@ class Credential(CommonModelNameNotUnique):
     #       if ssh_key_unlock is provided provide key password
     #       if not provided, FAIL
     #
-    # default_username if set corresponds to -u on ansible-playbook, if unset -u root
+    # ssh_username if set corresponds to -u on ansible-playbook, if unset -u root
     #
     # STAGE 2:
     # OR if ssh_password is set instead, do not use SSH agent
@@ -542,11 +542,59 @@ class Credential(CommonModelNameNotUnique):
     #
     # ansible-playbook foo.yml ...
 
-    ssh_key_data     = models.TextField(blank=True, default='')
-    ssh_key_unlock   = models.CharField(blank=True, default='', max_length=1024)
-    default_username = models.CharField(blank=True, default='', max_length=1024)
-    ssh_password     = models.CharField(blank=True, default='', max_length=1024)
-    sudo_password    = models.CharField(blank=True, default='', max_length=1024)
+    ssh_username = models.CharField(
+        blank=True,
+        default='',
+        max_length=1024,
+        verbose_name=_('SSH username'),
+        help_text=_('SSH username for a job using this credential.'),
+    )
+    ssh_password = models.CharField(
+        blank=True,
+        default='',
+        max_length=1024,
+        verbose_name=_('SSH password'),
+        help_text=_('SSH password (or "ASK" to prompt the user).'),
+    )
+    ssh_key_data = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('SSH private key'),
+        help_text=_('RSA or DSA private key to be used instead of password.'),
+    )
+    ssh_key_unlock = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        verbose_name=_('SSH key unlock'),
+        help_text=_('Passphrase to unlock SSH private key if encrypted (or '
+                    '"ASK" to prompt the user).'),
+    )
+    sudo_username = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Sudo username for a job using this credential.'),
+    )
+    sudo_password = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        help_text=_('Sudo password (or "ASK" to prompt the user).'),
+    )
+
+    @property
+    def needs_ssh_password(self):
+        return not self.ssh_key_data and self.ssh_password == 'ASK'
+
+    @property
+    def needs_ssh_key_unlock(self):
+        return 'ENCRYPTED' in self.ssh_key_data and \
+            (not self.ssh_key_unlock or self.ssh_key_unlock == 'ASK')
+
+    @property
+    def needs_sudo_password(self):
+        return self.sudo_password == 'ASK'
 
     @classmethod
     def can_user_administrate(cls, user, obj, data):
@@ -796,6 +844,27 @@ class JobTemplate(CommonModel):
         default=None,
         on_delete=models.SET_NULL,
     )
+    use_sudo = models.NullBooleanField(
+        blank=True,
+        default=None,
+    )
+    forks = models.PositiveIntegerField(
+        blank=True,
+        default=0,
+    )
+    limit = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
+    verbosity = models.PositiveIntegerField(
+        blank=True,
+        default=0,
+    )
+    extra_vars = JSONField(
+        blank=True,
+        default='',
+    )
 
     def create_job(self, **kwargs):
         '''
@@ -811,6 +880,11 @@ class JobTemplate(CommonModel):
         kwargs.setdefault('project', self.project)
         kwargs.setdefault('playbook', self.playbook)
         kwargs.setdefault('credential', self.credential)
+        kwargs.setdefault('use_sudo', self.use_sudo)
+        kwargs.setdefault('forks', self.forks)
+        kwargs.setdefault('limit', self.limit)
+        kwargs.setdefault('verbosity', self.verbosity)
+        kwargs.setdefault('extra_vars', self.extra_vars)
         job = Job(**kwargs)
         if save_job:
             job.save()
@@ -925,6 +999,7 @@ class Job(CommonModel):
         ('successful', _('Successful')),    # Job completed successfully.
         ('failed', _('Failed')),            # Job completed, but with failures.
         ('error', _('Error')),              # The job was unable to run.
+        ('canceled', _('Canceled')),        # The job was canceled before completion.
     ]
 
     class Meta:
@@ -962,6 +1037,31 @@ class Job(CommonModel):
     )
     playbook = models.CharField(
         max_length=1024,
+    )
+    use_sudo = models.NullBooleanField(
+        blank=True,
+        default=None,
+    )
+    forks = models.PositiveIntegerField(
+        blank=True,
+        default=0,
+    )
+    limit = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
+    verbosity = models.PositiveIntegerField(
+        blank=True,
+        default=0,
+    )
+    extra_vars = JSONField(
+        blank=True,
+        default='',
+    )
+    cancel_flag = models.BooleanField(
+        blank=True,
+        default=False,
     )
     status = models.CharField(
         max_length=20,
@@ -1006,17 +1106,29 @@ class Job(CommonModel):
         except TaskMeta.DoesNotExist:
             pass
 
-    def start(self):
+    def start(self, **kwargs):
         from lib.main.tasks import run_job
         if self.status != 'new':
-            return
+            return False
+        
+        #username = kwargs.get('username', self.username)
+        
+        opts = {}
         self.status = 'pending'
         self.save(update_fields=['status'])
-        task_result = run_job.delay(self.pk)
+        task_result = run_job.delay(self.pk, **opts)
         # The TaskMeta instance in the database isn't created until the worker
         # starts processing the task, so we can only store the task ID here.
         self.celery_task_id = task_result.task_id
         self.save(update_fields=['celery_task_id'])
+        return True
+
+    def cancel(self):
+        if self.status in ('pending', 'running'):
+            if not self.cancel_flag:
+                self.cancel_flag = True
+                self.save(update_fields=['cancel_flag'])
+        return self.cancel_flag
 
     @property
     def successful_hosts(self):

@@ -74,6 +74,20 @@ class RunJobTest(BaseCeleryTest):
         if self.test_project_path:
             shutil.rmtree(self.test_project_path, True)
 
+    def create_test_credential(self, **kwargs):
+        opts = {
+            'name': 'test-creds',
+            'user': self.super_django_user,
+            'default_username': '',
+            'ssh_key_data': '',
+            'ssh_key_unlock': '',
+            'ssh_password': '',
+            'sudo_password': '',
+        }
+        opts.update(kwargs)
+        self.credential = Credential.objects.create(**opts)
+        return self.credential
+
     def create_test_project(self, playbook_content):
         self.project = self.make_projects(self.normal_django_user, 1, playbook_content)[0]
         self.organization.projects.add(self.project)

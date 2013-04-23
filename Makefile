@@ -28,7 +28,7 @@ runserver:
 
 celeryd:
 	# run to start the background celery worker
-	python manage.py celeryd -l DEBUG -B
+	python manage.py celeryd -l DEBUG -B --autoreload
 
 # already done and should not have to happen again:
 #

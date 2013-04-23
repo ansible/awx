@@ -198,9 +198,9 @@ class CredentialAdmin(BaseModelAdmin):
 
     fieldsets = (
         (None, {'fields': (('name', 'active'), ('user', 'team'), 'description')}),
-        (_('Auth Info'), {'fields': ('default_username', 'ssh_key_data',
-                                     'ssh_key_unlock', 'ssh_password',
-                                     'sudo_password')}),
+        (_('Auth Info'), {'fields': (('ssh_username', 'ssh_password'),
+                                     'ssh_key_data', 'ssh_key_unlock',
+                                     ('sudo_username', 'sudo_password'))}),
         #(_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'created_by', 'audit_trail',)}),
     )
@@ -245,6 +245,9 @@ class JobTemplateAdmin(BaseModelAdmin):
                            'get_create_link_display', 'get_jobs_link_display')}),
         (_('Job Parameters'), {'fields': ('inventory', 'project', 'playbook',
                                           'credential', 'job_type')}),
+        (_('More Options'), {'fields': ('use_sudo', 'forks', 'limit',
+                                        'verbosity', 'extra_vars'),
+                             'classes': ('collapse',)}),
         #(_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
                                        'audit_trail',)}),
@@ -274,6 +277,17 @@ class JobTemplateAdmin(BaseModelAdmin):
             create_opts['playbook'] = obj.playbook
         if obj.credential:
             create_opts['credential'] = obj.credential.pk
+        if obj.use_sudo is not None:
+            # Assume these are the defaults for a null boolean field select.
+            create_opts['use_sudo'] = 2 if obj.use_sudo else 3
+        if obj.forks:
+            create_opts['forks'] = obj.forks
+        if obj.limit:
+            create_opts['limit'] = obj.limit
+        if obj.verbosity:
+            create_opts['verbosity'] = obj.verbosity
+        if obj.extra_vars:
+            create_opts['extra_vars'] = json.dumps(obj.extra_vars)
         create_url += '?%s' % urllib.urlencode(create_opts)
         return format_html('<a href="{0}">{1}</a>', create_url, 'Create Job')
     get_create_link_display.short_description = _('Create Job')
@@ -308,8 +322,11 @@ class JobAdmin(BaseModelAdmin):
     fieldsets = (
         (None, {'fields': ('name', 'job_template', 'description')}),
         (_('Job Parameters'), {'fields': ('inventory', 'project', 'playbook',
-                                          'credential', 'job_type',
-                                          'start_job')}),
+                                          'credential', 'job_type')}),
+        (_('More Options'), {'fields': ('use_sudo', 'forks', 'limit',
+                                        'verbosity', 'extra_vars'),
+                             'classes': ('collapse',)}),
+        (_('Start/Cancel Job'), {'fields': ('start_job',)}),
         #(_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
                             'audit_trail',)}),
@@ -331,7 +348,8 @@ class JobAdmin(BaseModelAdmin):
         if obj and obj.pk and obj.status != 'new':
             ro_fields.extend(['name', 'description', 'job_template',
                               'inventory', 'project', 'playbook', 'credential',
-                              'job_type'])
+                              'job_type', 'use_sudo', 'forks', 'limit',
+                              'verbosity', 'extra_vars'])
         return ro_fields
 
     def get_fieldsets(self, request, obj=None):
@@ -342,11 +360,12 @@ class JobAdmin(BaseModelAdmin):
                      'status' not in fs[1]['fields']]
         elif obj and obj.pk and obj.status != 'new':
             #print obj, obj.pk, obj.status
-            for fs in fsets:
-                # FIXME: Show start job on add view
-                if 'start_job' in fs[1]['fields']:
-                    fs[1]['fields'] = [x for x in fs[1]['fields']
-                                       if x != 'start_job']
+            fsets = [fs for fs in fsets if 'start_job' not in fs[1]['fields']]
+            #for fs in fsets:
+            #    # FIXME: Show start job on add view
+            #    if 'start_job' in fs[1]['fields']:
+            #        fs[1]['fields'] = [x for x in fs[1]['fields']
+            #                           if x != 'start_job']
         return fsets
 
     def get_inline_instances(self, request, obj=None):
