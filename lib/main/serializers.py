@@ -193,6 +193,10 @@ class CredentialSerializer(BaseSerializer):
         # FIXME: no related collections, do want to add user and team if defined
         res = dict(
         )
+        if obj.user:
+            res['user']        = reverse(lib.urls.views_UsersDetail, args=(obj.user.pk,))
+        if obj.team:
+            res['team']        = reverse(lib.urls.views_TeamsDetail, args=(obj.team.pk,))
         if obj.created_by:
             res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
         return res
@@ -222,6 +226,8 @@ class UserSerializer(BaseSerializer):
             teams                  = reverse(lib.urls.views_UsersTeamsList,              args=(obj.pk,)),
             organizations          = reverse(lib.urls.views_UsersOrganizationsList,      args=(obj.pk,)),
             admin_of_organizations = reverse(lib.urls.views_UsersAdminOrganizationsList, args=(obj.pk,)),
+            projects               = reverse(lib.urls.views_UsersProjectsList,           args=(obj.pk,)),
+            credentials            = reverse(lib.urls.views_UsersCredentialsList,        args=(obj.pk,)),
         )
 
     def get_absolute_url_override(self, obj):
