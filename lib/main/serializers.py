@@ -75,7 +75,9 @@ class ProjectSerializer(BaseSerializer):
 
     def get_related(self, obj):
         # FIXME: add related resources: inventories
-        return dict()
+        return dict(
+            organizations = reverse(lib.urls.views_ProjectsOrganizationsList,  args=(obj.pk,))
+        )
 
 
 class InventorySerializer(BaseSerializer):
