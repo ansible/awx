@@ -41,14 +41,18 @@ class OrganizationSerializer(BaseSerializer):
     def get_related(self, obj):
         ''' related resource URLs '''
 
-        return dict(
+        res = dict(
             audit_trail = reverse(lib.urls.views_OrganizationsAuditTrailList, args=(obj.pk,)),
             projects    = reverse(lib.urls.views_OrganizationsProjectsList,   args=(obj.pk,)),
             users       = reverse(lib.urls.views_OrganizationsUsersList,      args=(obj.pk,)),
             admins      = reverse(lib.urls.views_OrganizationsAdminsList,     args=(obj.pk,)),
             tags        = reverse(lib.urls.views_OrganizationsTagsList,       args=(obj.pk,)),
-            teams       = reverse(lib.urls.views_OrganizationsTeamsList,      args=(obj.pk,))
+            teams       = reverse(lib.urls.views_OrganizationsTeamsList,      args=(obj.pk,)),
         )
+        if obj.created_by:
+            res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
+
+        return res
 
 class AuditTrailSerializer(BaseSerializer):
 
@@ -61,7 +65,8 @@ class AuditTrailSerializer(BaseSerializer):
         fields = ('url', 'id', 'modified_by', 'delta', 'detail', 'comment')
 
     def get_related(self, obj):
-        return dict()
+        res = dict()
+        return res
 
 class ProjectSerializer(BaseSerializer):
 
@@ -74,9 +79,12 @@ class ProjectSerializer(BaseSerializer):
         fields = ('url', 'id', 'name', 'description', 'creation_date', 'local_path')#, 'default_playbook', 'scm_type')
 
     def get_related(self, obj):
-        return dict(
-            organizations = reverse(lib.urls.views_ProjectsOrganizationsList,  args=(obj.pk,))
+        res = dict(
+            organizations = reverse(lib.urls.views_ProjectsOrganizationsList, args=(obj.pk,)),
         )
+        if obj.created_by:
+            res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
+        return res
 
 
 class InventorySerializer(BaseSerializer):
@@ -90,10 +98,13 @@ class InventorySerializer(BaseSerializer):
         fields = ('url', 'id', 'name', 'description', 'creation_date', 'organization')
 
     def get_related(self, obj):
-        return dict(
-            hosts  = reverse(lib.urls.views_HostsList,   args=(obj.pk,)),
-            groups = reverse(lib.urls.views_GroupsList,  args=(obj.pk,)),
+        res = dict(
+            hosts      = reverse(lib.urls.views_HostsList,   args=(obj.pk,)),
+            groups     = reverse(lib.urls.views_GroupsList,  args=(obj.pk,)),
         )
+        if obj.created_by:
+            res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
+        return res
 
 class HostSerializer(BaseSerializer):
 
@@ -106,9 +117,12 @@ class HostSerializer(BaseSerializer):
         fields = ('url', 'id', 'name', 'description', 'creation_date', 'inventory')
 
     def get_related(self, obj):
-        return dict(
+        res = dict(
             variable_data = reverse(lib.urls.views_HostsVariableDetail, args=(obj.pk,)),
         )
+        if obj.created_by:
+            res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
+        return res
 
 class GroupSerializer(BaseSerializer):
 
@@ -121,12 +135,15 @@ class GroupSerializer(BaseSerializer):
         fields = ('url', 'id', 'name', 'description', 'creation_date', 'inventory')
 
     def get_related(self, obj):
-        return dict(
+        res = dict(
             variable_data = reverse(lib.urls.views_GroupsVariableDetail, args=(obj.pk,)),
             hosts         = reverse(lib.urls.views_GroupsHostsList,      args=(obj.pk,)),
             children      = reverse(lib.urls.views_GroupsChildrenList,   args=(obj.pk,)),
             all_hosts     = reverse(lib.urls.views_GroupsAllHostsList,   args=(obj.pk,)),
         )
+        if obj.created_by:
+            res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
+        return res
 
 class TeamSerializer(BaseSerializer):
 
@@ -141,11 +158,14 @@ class TeamSerializer(BaseSerializer):
     # FIXME: TODO: include related collections but also related FK urls
 
     def get_related(self, obj):
-        return dict(
+        res = dict(
             projects    = reverse(lib.urls.views_TeamsProjectsList,     args=(obj.pk,)),
             users       = reverse(lib.urls.views_TeamsUsersList,        args=(obj.pk,)),
             credentials = reverse(lib.urls.views_TeamsCredentialsList,  args=(obj.pk,)),
         )
+        if obj.created_by:
+            res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
+        return res
 
 class CredentialSerializer(BaseSerializer):
 
@@ -163,8 +183,12 @@ class CredentialSerializer(BaseSerializer):
         )
 
     def get_related(self, obj):
-        # FIXME: add related resources: projects, users, organizations
-        return dict()
+        # FIXME: no related collections, do want to add user and team if defined
+        res = dict(
+        )
+        if obj.created_by:
+            res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
+        return res
 
     def validate(self, attrs):
         ''' some fields cannot be changed once written '''
@@ -209,7 +233,8 @@ class TagSerializer(BaseSerializer):
         fields = ('url', 'id', 'name')
 
     def get_related(self, obj):
-        return dict()
+        res = dict()
+        return res
 
 class VariableDataSerializer(BaseSerializer):
 
@@ -222,8 +247,12 @@ class VariableDataSerializer(BaseSerializer):
         fields = ('url', 'id', 'data', 'related', 'name', 'description', 'creation_date')
 
     def get_related(self, obj):
-        # FIXME: related resources, maybe just the audit trail
-        return dict()
+        # FIXME: add host or group if defined
+        res = dict(
+        )
+        if obj.created_by:
+            res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
+        return res
 
 class JobTemplateSerializer(BaseSerializer):
 
@@ -236,8 +265,11 @@ class JobTemplateSerializer(BaseSerializer):
         fields = ('url', 'id', 'related', 'name', 'description', 'job_type', 'credential', 'project', 'inventory', 'created_by', 'creation_date')
 
     def get_related(self, obj):
-        # FIXME: related resources, credential, project, inventory, etc
-        return dict()
-
+        # FIXME: fill in once further defined.  related resources, credential, project, inventory, etc
+        res = dict(
+        )
+        if obj.created_by:
+            res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
+        return res
     
 
