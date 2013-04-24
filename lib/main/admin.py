@@ -319,6 +319,7 @@ class JobEventInlineForJob(JobEventInline):
 class JobAdmin(BaseModelAdmin):
 
     list_display = ('name', 'job_template', 'project', 'playbook', 'status')
+    list_filter = ('status',)
     fieldsets = (
         (None, {'fields': ('name', 'job_template', 'description')}),
         (_('Job Parameters'), {'fields': ('inventory', 'project', 'playbook',

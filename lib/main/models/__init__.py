@@ -1107,7 +1107,7 @@ class Job(CommonModel):
             pass
 
     def start(self, **kwargs):
-        from lib.main.tasks import run_job
+        from lib.main.tasks import RunJob
         if self.status != 'new':
             return False
         
@@ -1116,7 +1116,7 @@ class Job(CommonModel):
         opts = {}
         self.status = 'pending'
         self.save(update_fields=['status'])
-        task_result = run_job.delay(self.pk, **opts)
+        task_result = RunJob().delay(self.pk, **opts)
         # The TaskMeta instance in the database isn't created until the worker
         # starts processing the task, so we can only store the task ID here.
         self.celery_task_id = task_result.task_id

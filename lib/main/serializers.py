@@ -185,8 +185,8 @@ class CredentialSerializer(BaseSerializer):
         model = Credential
         fields = (
             'url', 'id', 'related', 'name', 'description', 'creation_date',
-            'default_username', 'ssh_key_data', 'ssh_key_unlock', 'ssh_password', 'sudo_password',
-            'user', 'team'
+            'ssh_username', 'ssh_password', 'ssh_key_data', 'ssh_key_unlock',
+            'sudo_username', 'sudo_password', 'user', 'team',
         )
 
     def get_related(self, obj):

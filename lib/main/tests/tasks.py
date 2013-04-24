@@ -78,10 +78,11 @@ class RunJobTest(BaseCeleryTest):
         opts = {
             'name': 'test-creds',
             'user': self.super_django_user,
-            'default_username': '',
+            'ssh_username': '',
             'ssh_key_data': '',
             'ssh_key_unlock': '',
             'ssh_password': '',
+            'sudo_username': '',
             'sudo_password': '',
         }
         opts.update(kwargs)
