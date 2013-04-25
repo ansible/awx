@@ -21,6 +21,7 @@ from django.contrib.auth.models import User
 from lib.main.serializers import *
 from lib.main.rbac import *
 from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework import permissions
@@ -38,15 +39,20 @@ from base_views import *
 class ApiRootView(APIView):
 
     def get(self, request, format=None):
-        data = {}
-        #data = python_json.dumps(data)
+        current = reverse(lib.urls.views_ApiV1RootView, args=[])
+        data = dict(
+           description = 'Ansible Commander REST API',
+           current_version = current,
+           available_versions = dict(
+              v1 = current
+           )
+        )
         return Response(data)
 
 class ApiV1RootView(APIView):
 
     def get(self, request, format=None):
         data = {}
-        #data = python_json.dumps(data)
         return Response(data)
 
 class AuthTokenView(ObtainAuthToken):

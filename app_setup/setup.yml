@@ -25,6 +25,7 @@
              - postgresql               # database client
              - postgresql-server        # database server
              - python-psycopg2          # database library
+             - python-devel             # only because pexpect comes from pip
              - python-lxml              # xml for ?format=xml instead of json (optional)
 
       - name: install python modules from pip
