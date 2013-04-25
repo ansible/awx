@@ -32,6 +32,9 @@ class CustomFilterBackend(object):
 
             value = request.GET[key]
 
+            if key in [ 'page', 'page_size' ]:
+               continue
+
             if key == 'order_by':
                order_by = value
                continue
