@@ -19,6 +19,7 @@
       - name: install packages from yum
         yum: name=$item state=installed
         with_items:
+             - libyaml
              - gcc
              - python-pip
              - postgresql               # database client
