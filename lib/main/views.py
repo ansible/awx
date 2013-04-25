@@ -28,9 +28,26 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.settings import api_settings
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.views import APIView
 import exceptions
 import datetime
+import json as python_json
 from base_views import *
+
+
+class ApiRootView(APIView):
+
+    def get(self, request, format=None):
+        data = {}
+        #data = python_json.dumps(data)
+        return Response(data)
+
+class ApiV1RootView(APIView):
+
+    def get(self, request, format=None):
+        data = {}
+        #data = python_json.dumps(data)
+        return Response(data)
 
 class AuthTokenView(ObtainAuthToken):
 

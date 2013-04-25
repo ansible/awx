@@ -18,6 +18,9 @@ from django.conf import settings
 from django.conf.urls import *
 import lib.main.views as views
 
+views_ApiRootView                  = views.ApiRootView.as_view()
+views_ApiV1RootView                = views.ApiV1RootView.as_view()
+
 # auth token
 views_AuthTokenView                = views.AuthTokenView.as_view()
 
@@ -101,6 +104,9 @@ views_CredentialsDetail            = views.CredentialsDetail.as_view()
 
 
 urlpatterns = patterns('',
+
+    url(r'^api/$',    views_ApiRootView),
+    url(r'^api/v1/$', views_ApiV1RootView),
 
     # obtain auth token
     url(r'^api/v1/authtoken/$', views_AuthTokenView),
