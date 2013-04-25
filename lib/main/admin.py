@@ -327,11 +327,14 @@ class JobAdmin(BaseModelAdmin):
         (_('More Options'), {'fields': ('use_sudo', 'forks', 'limit',
                                         'verbosity', 'extra_vars'),
                              'classes': ('collapse',)}),
-        (_('Start/Cancel Job'), {'fields': ('start_job',)}),
+        (_('Start Job'), {'fields': ('start_job', 'ssh_password',
+                                     'sudo_password', 'ssh_key_unlock')}),
+        #(_('Cancel Job'), {'fields': ('cancel_job',)}),
         #(_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
                             'audit_trail',)}),
-        (_('Job Status'), {'fields': ('status', 'get_result_stdout_display',
+        (_('Job Status'), {'fields': (('status', 'cancel_job'),
+                                      'get_result_stdout_display',
                                       'get_result_stderr_display',
                                       'get_result_traceback_display',
                                       'celery_task_id')}),
@@ -358,15 +361,16 @@ class JobAdmin(BaseModelAdmin):
         if not obj or not obj.pk or obj.status == 'new':
             fsets = [fs for fs in fsets if
                      'creation_date' not in fs[1]['fields'] and
-                     'status' not in fs[1]['fields']]
-        elif obj and obj.pk and obj.status != 'new':
-            #print obj, obj.pk, obj.status
+                     'celery_task_id' not in fs[1]['fields']]
+        if not obj or (obj and obj.pk and obj.status != 'new'):
             fsets = [fs for fs in fsets if 'start_job' not in fs[1]['fields']]
-            #for fs in fsets:
-            #    # FIXME: Show start job on add view
-            #    if 'start_job' in fs[1]['fields']:
-            #        fs[1]['fields'] = [x for x in fs[1]['fields']
-            #                           if x != 'start_job']
+        if not obj or (obj and obj.pk and obj.status not in ('pending', 'running')):
+            for fs in fsets:
+                if 'celery_task_id' in fs[1]['fields']:
+                    fs[1]['fields'] = ('status', 'get_result_stdout_display',
+                                       'get_result_stderr_display',
+                                       'get_result_traceback_display',
+                                       'celery_task_id')
         return fsets
 
     def get_inline_instances(self, request, obj=None):
@@ -405,6 +409,7 @@ class JobAdmin(BaseModelAdmin):
                            obj.result_traceback or ' ')
     get_result_traceback_display.short_description = _('Traceback')
     get_result_traceback_display.allow_tags = True
+
 
 # FIXME: Add the rest of the models...
 

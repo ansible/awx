@@ -55,6 +55,33 @@ class RunJob(Task):
         '''
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
+    def build_ssh_key_path(self, job, **kwargs):
+        '''
+        Create a temporary file containing the SSH private key.
+        '''
+        creds = job.credential
+        if creds and creds.ssh_key_data:
+            handle, path = tempfile.mkstemp()
+            f = os.fdopen(handle, 'w')
+            f.write(creds.ssh_key_data)
+            f.close()
+            return path
+        else:
+            return ''
+
+    def build_passwords(self, job, **kwargs):
+        '''
+        Build a dictionary of passwords for SSH private key, SSH user and sudo.
+        '''
+        passwords = {}
+        creds = job.credential
+        if creds:
+            for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password'):
+                value = kwargs.get(field, getattr(creds, field))
+                if value not in ('', 'ASK'):
+                    passwords[field] = value
+        return passwords
+
     def build_env(self, job, **kwargs):
         '''
         Build environment dictionary for ansible-playbook.
@@ -80,18 +107,25 @@ class RunJob(Task):
         optionally using ssh-agent for public/private key authentication.
         '''
         creds = job.credential
-        use_ssh_agent = False
+        ssh_username, sudo_username = '', ''
         if creds:
-            username = creds.ssh_username
-            sudo_username = creds.sudo_username
-            # FIXME: Do something with creds.
+            ssh_username = kwargs.get('ssh_username', creds.ssh_username)
+            sudo_username = kwargs.get('sudo_username', creds.sudo_username)
+        ssh_username = ssh_username or 'root'
+        sudo_username = sudo_username or 'root'
         inventory_script = self.get_path_to('management', 'commands',
                                             'acom_inventory.py')
         args = ['ansible-playbook', '-i', inventory_script]
         if job.job_type == 'check':
             args.append('--check')
+        args.append('--user=%s' % ssh_username)
+        if 'ssh_password' in kwargs.get('passwords', {}):
+            args.append('--ask-pass')
         if job.use_sudo:
             args.append('--sudo')
+        args.append('--sudo-user=%s' % sudo_username)
+        if 'sudo_password' in kwargs.get('passwords', {}):
+            args.append('--ask-sudo-pass')
         if job.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % job.forks)
         if job.limit:
@@ -102,21 +136,15 @@ class RunJob(Task):
             # FIXME: escaping!
             extra_vars = ' '.join(['%s=%s' % (str(k), str(v)) for k,v in
                                    job.extra_vars.items()])
-            args.append('-e', extra_vars)
+            args.append('--extra-vars=%s' % extra_vars)
         args.append(job.playbook) # relative path to project.local_path
-        if use_ssh_agent:
-            key_path = 'myrsa' # FIXME
-            cmd = '; '.join([subprocess.list2cmdline(['ssh-add', keypath]),
+        ssh_key_path = kwargs.get('ssh_key_path', '')
+        if ssh_key_path:
+            cmd = '; '.join([subprocess.list2cmdline(['ssh-add', ssh_key_path]),
                              subprocess.list2cmdline(args)])
             return ['ssh-agent', 'sh', '-c', cmd]
         else:
             return args
-
-    def build_passwords(self, job, **kwargs):
-        '''
-        Build a dictionary of passwords for SSH private key, SSH user and sudo.
-        '''
-        return {}
 
     def capture_subprocess_output(self, proc, timeout=1.0):
         '''
@@ -195,6 +223,7 @@ class RunJob(Task):
         status, stdout, stderr = 'error', '', ''
         logfile = cStringIO.StringIO()
         logfile_pos = logfile.tell()
+        print 'ARGS:', repr(args)
         child = pexpect.spawn(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
         job_canceled = False
@@ -209,7 +238,7 @@ class RunJob(Task):
             ]
             result_id = child.expect(expect_list, timeout=2)
             if result_id == 0:
-                child.sendline(passwords.get('ssh_unlock_key', ''))
+                child.sendline(passwords.get('ssh_key_unlock', ''))
             elif result_id == 1:
                 child.sendline('')
             elif result_id == 2:
@@ -237,17 +266,24 @@ class RunJob(Task):
         Run the job using ansible-playbook and capture its output.
         '''
         job = self.update_job(job_pk, status='running')
+        status, stdout, stderr, tb = 'error', '', '', ''
         try:
-            status, stdout, stderr, tb = 'error', '', '', ''
+            kwargs['ssh_key_path'] = self.build_ssh_key_path(job, **kwargs)
+            kwargs['passwords'] = self.build_passwords(job, **kwargs)
             args = self.build_args(job, **kwargs)
             cwd = job.project.local_path
             env = self.build_env(job, **kwargs)
-            passwords = self.build_passwords(job, **kwargs)
             #status, stdout, stderr = self.run_subprocess(job_pk, args, cwd,
             #                                             env, passwords)
             status, stdout, stderr = self.run_pexpect(job_pk, args, cwd, env,
-                                                      passwords)
+                                                      kwargs['passwords'])
         except Exception:
             tb = traceback.format_exc()
+        finally:
+            if kwargs.get('ssh_key_path', ''):
+                try:
+                    os.remove(kwargs['ssh_key_path'])
+                except IOError:
+                    pass
         self.update_job(job_pk, status=status, result_stdout=stdout,
                         result_stderr=stderr, result_traceback=tb)

@@ -901,8 +901,7 @@ class JobTemplate(CommonModel):
         '''
         Create a new job based on this template.
         '''
-        start_job = kwargs.pop('start', False)
-        save_job = kwargs.pop('save', True) or start_job # Start implies save.
+        save_job = kwargs.pop('save', True)
         kwargs['job_template'] = self
         kwargs.setdefault('name', '%s %s' % (self.name, now().isoformat()))
         kwargs.setdefault('description', self.description)
@@ -919,8 +918,6 @@ class JobTemplate(CommonModel):
         job = Job(**kwargs)
         if save_job:
             job.save()
-        if start_job:
-            job.start()
         return job
 
     # project has one default playbook but really should have a list of playbooks and flags ...
@@ -1137,14 +1134,22 @@ class Job(CommonModel):
         except TaskMeta.DoesNotExist:
             pass
 
+    def get_passwords_needed_to_start(self):
+        '''Return list of password field names needed to start the job.'''
+        needed = []
+        for field in ('ssh_password', 'sudo_password', 'ssh_key_unlock'):
+            if self.credential and getattr(self.credential, 'needs_%s' % field):
+                needed.append(field)
+        return needed
+
     def start(self, **kwargs):
         from lib.main.tasks import RunJob
         if self.status != 'new':
             return False
-        
-        #username = kwargs.get('username', self.username)
-        
-        opts = {}
+        needed = self.get_passwords_needed_to_start()
+        opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        if not all(opts.values()):
+            return False
         self.status = 'pending'
         self.save(update_fields=['status'])
         task_result = RunJob().delay(self.pk, **opts)
