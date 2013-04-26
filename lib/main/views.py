@@ -39,6 +39,8 @@ from base_views import *
 class ApiRootView(APIView):
 
     def get(self, request, format=None):
+        ''' list supported API versions '''
+
         current = reverse(lib.urls.views_ApiV1RootView, args=[])
         data = dict(
            description = 'Ansible Commander REST API',
@@ -52,7 +54,19 @@ class ApiRootView(APIView):
 class ApiV1RootView(APIView):
 
     def get(self, request, format=None):
-        data = {}
+        ''' list top level resources '''
+
+        data = dict(
+            organizations = reverse(lib.urls.views_OrganizationsList, args=[]),
+            users         = reverse(lib.urls.views_UsersList,         args=[]),
+            projects      = reverse(lib.urls.views_ProjectsList,      args=[]),
+            teams         = reverse(lib.urls.views_TeamsList,         args=[]),
+            inventory     = reverse(lib.urls.views_InventoryList,     args=[]),
+            groups        = reverse(lib.urls.views_GroupsList,        args=[]),
+            hosts         = reverse(lib.urls.views_HostsList,         args=[]),
+            job_templates = reverse(lib.urls.views_JobTemplatesList,  args=[]),
+            jobs          = reverse(lib.urls.views_JobsList,          args=[]),
+        )
         return Response(data)
 
 class AuthTokenView(ObtainAuthToken):
