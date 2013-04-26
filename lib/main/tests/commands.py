@@ -19,13 +19,15 @@ import os
 import StringIO
 import sys
 import tempfile
+from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.utils.timezone import now
 from lib.main.models import *
 from lib.main.tests.base import BaseTest
 
-__all__ = ['AcomInventoryTest', 'AcomCallbackEventTest']
+__all__ = ['RunCommandAsScriptTest', 'AcomInventoryTest',
+           'AcomCallbackEventTest']
 
 class BaseCommandTest(BaseTest):
     '''
@@ -34,11 +36,13 @@ class BaseCommandTest(BaseTest):
 
     def setUp(self):
         super(BaseCommandTest, self).setUp()
+        self._sys_path = [x for x in sys.path]
         self._environ = dict(os.environ.items())
         self._temp_files = []
 
     def tearDown(self):
         super(BaseCommandTest, self).tearDown()
+        sys.path = self._sys_path
         for k,v in self._environ.items():
             if os.environ.get(k, None) != v:
                 os.environ[k] = v
@@ -54,6 +58,7 @@ class BaseCommandTest(BaseTest):
         Run a management command and capture its stdout/stderr along with any
         exceptions.
         '''
+        command_runner = options.pop('command_runner', call_command)
         stdin_fileobj = options.pop('stdin_fileobj', None)
         options.setdefault('verbosity', 1)
         options.setdefault('interactive', False)
@@ -66,7 +71,7 @@ class BaseCommandTest(BaseTest):
         sys.stderr = StringIO.StringIO()
         result = None
         try:
-            result = call_command(name, *args, **options)
+            result = command_runner(name, *args, **options)
         except Exception, e:
             result = e
         except SystemExit, e:
@@ -78,6 +83,23 @@ class BaseCommandTest(BaseTest):
             sys.stdout = original_stdout
             sys.stderr = original_stderr
         return result, captured_stdout, captured_stderr
+
+class RunCommandAsScriptTest(BaseCommandTest):
+    '''
+    Test helper to run management command as standalone script.
+    '''
+
+    def test_run_command_as_script(self):
+        from lib.main.management.commands import run_command_as_script
+        os.environ['ACOM_TEST_DATABASE_NAME'] = settings.DATABASES['default']['NAME']
+        # FIXME: Not sure how to test ImportError for settings module.
+        def run_cmd(name, *args, **kwargs):
+            return run_command_as_script(name)
+        result, stdout, stderr = self.run_command('version',
+                                                  command_runner=run_cmd)
+        self.assertEqual(result, None)
+        self.assertTrue(stdout)
+        self.assertFalse(stderr)
 
 class AcomInventoryTest(BaseCommandTest):
     '''

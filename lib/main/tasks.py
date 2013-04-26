@@ -19,6 +19,7 @@ import logging
 import os
 import select
 import subprocess
+import tempfile
 import time
 import traceback
 from celery import Task
@@ -61,6 +62,7 @@ class RunJob(Task):
         '''
         creds = job.credential
         if creds and creds.ssh_key_data:
+            # FIXME: File permissions?
             handle, path = tempfile.mkstemp()
             f = os.fdopen(handle, 'w')
             f.write(creds.ssh_key_data)
@@ -140,11 +142,10 @@ class RunJob(Task):
         args.append(job.playbook) # relative path to project.local_path
         ssh_key_path = kwargs.get('ssh_key_path', '')
         if ssh_key_path:
-            cmd = '; '.join([subprocess.list2cmdline(['ssh-add', ssh_key_path]),
-                             subprocess.list2cmdline(args)])
-            return ['ssh-agent', 'sh', '-c', cmd]
-        else:
-            return args
+            cmd = ' '.join([subprocess.list2cmdline(['ssh-add', ssh_key_path]),
+                            '&&', subprocess.list2cmdline(args)])
+            args = ['ssh-agent', 'sh', '-c', cmd]
+        return args
 
     def capture_subprocess_output(self, proc, timeout=1.0):
         '''
@@ -223,7 +224,6 @@ class RunJob(Task):
         status, stdout, stderr = 'error', '', ''
         logfile = cStringIO.StringIO()
         logfile_pos = logfile.tell()
-        print 'ARGS:', repr(args)
         child = pexpect.spawn(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
         job_canceled = False

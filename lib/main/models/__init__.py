@@ -920,24 +920,6 @@ class JobTemplate(CommonModel):
             job.save()
         return job
 
-    # project has one default playbook but really should have a list of playbooks and flags ...
-    # ssh-agent bash
-    # ssh-add ... < key entry
-    #
-    # playbook in source control is already on the disk
-
-    # we'll extend ansible core to have callback context like
-    #    self.context.playbook
-    #    self.context.runner
-    #    and the callback will read the environment for ACOM_CELERY_JOB_ID or similar
-    #    and log tons into the database
-
-    # the ansible commander setup instructions will include installing the database logging callback
-    # inventory script is going to need some way to load Django models
-    #    it is documented on ansible.cc under API docs and takes two parameters
-    #    --list
-    #    -- host <hostname>
-
     def get_absolute_url(self):
         import lib.urls
         return reverse(lib.urls.views_JobTemplateDetail, args=(self.pk,))
