@@ -168,15 +168,15 @@ class PrimordialModel(models.Model):
     @classmethod
     def can_user_administrate(cls, user, obj, data):
         # FIXME: do we want a seperate method to override put?  This is kind of general purpose
-        raise exceptions.NotImplementedError()
+        raise Exception("can_user_administrate needs to be implemented in model subclass")
 
     @classmethod
     def can_user_delete(cls, user, obj):
-        raise exceptions.NotImplementedError()
+        raise Exception("can_user_delete needs to be implemented in model subclass")
 
     @classmethod
     def can_user_read(cls, user, obj):
-        raise exceptions.NotImplementedError()
+        raise Exception("can_user_read needs to be implemented in model subclass")
 
     @classmethod
     def can_user_add(cls, user, data):
@@ -804,6 +804,37 @@ class Permission(CommonModelNameNotUnique):
             self.inventory,
             self.permission_type
         ))
+
+    def get_absolute_url(self):
+        import lib.urls
+        return reverse(lib.urls.views_PermissionsDetail, args=(self.pk,))
+
+    @classmethod
+    def can_user_administrate(cls, user, obj, data):
+        if user.is_superuser:
+            return True
+        # a permission can be administrated by a super
+        # or if a user permission, that an admin of a user's organization
+        # or if a team permission, an admin of that team's organization
+        if obj.user and obj.user.organizations.filter(admins__in = [user]).count() > 0:
+            return True
+        if obj.team and obj.team.organization.admins.filter(user=user).count() > 0:
+            return True
+        return False
+
+    @classmethod
+    def can_user_read(cls, user, obj):
+        # a permission can be seen by the assigned user or team
+        # or anyone who can administrate that permission
+        if obj.user and obj.user == user:
+            return True
+        if obj.team and obj.team.users.filter(pk = user.pk).count() > 0:
+            return True
+        return cls.can_user_administrate(user, obj, None)
+
+    @classmethod
+    def can_user_delete(cls, user, obj):
+        return cls.can_user_administrate(user, obj, None)
 
 # TODO: other job types (later)
 

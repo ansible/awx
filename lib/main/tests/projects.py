@@ -386,15 +386,56 @@ class ProjectsTest(BaseTest):
 
         # =====================================================================
         # PERMISSIONS
+
+        user         = self.other_django_user
+        team         = Team.objects.get(pk=1)
+        organization = Organization.objects.get(pk=1) 
+        inventory    = Inventory.objects.create(
+            name         = 'test inventory', 
+            organization = organization,
+            created_by   = self.super_django_user
+        )
+        project = Project.objects.get(pk=1)        
+
         # can add permissions to a user
+
+        user_permission = dict(
+            name='user can deploy a certain project to a certain inventory', 
+            # user=user.pk, # no need to specify, this will be automatically filled in
+            inventory=inventory.pk, 
+            project=project.pk, 
+            permission_type=PERM_INVENTORY_DEPLOY
+        )
+        team_permission = dict(
+            name='team can deploy a certain project to a certain inventory',
+            # team=team.pk, # no need to specify, this will be automatically filled in
+            inventory=inventory.pk,
+            project=project.pk,
+            permission_type=PERM_INVENTORY_DEPLOY
+        )
+
+        url = '/api/v1/users/%s/permissions/' % user.pk
+        self.post(url, user_permission, expect=201, auth=self.get_super_credentials())
+
         # can add permissions on a team
+        url = '/api/v1/teams/%s/permissions/' % team.pk
+        self.post(url, team_permission, expect=201, auth=self.get_super_credentials())
+
         # can list permissions on a user
+        url = '/api/v1/users/%s/permissions/' % user.pk
+
         # can list permissions on a team
+        url = '/api/v1/teams/%s/permissions/' % team.pk
+
         # can edit a permission
-        # can remove credentials from a user
-        # can remove credentials from a team
 
+        # can remove permissions from a user
+        # do need to disassociate, just delete it 
 
+        # can remove permissions from a team
+        # do need to disassociate, just delete it 
+
+        
 
 
 

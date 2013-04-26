@@ -169,10 +169,34 @@ class TeamSerializer(BaseSerializer):
             users        = reverse(lib.urls.views_TeamsUsersList,        args=(obj.pk,)),
             credentials  = reverse(lib.urls.views_TeamsCredentialsList,  args=(obj.pk,)),
             organization = reverse(lib.urls.views_OrganizationsDetail,   args=(obj.organization.pk,)),
+            permissions  = reverse(lib.urls.views_TeamsPermissionsList,  args=(obj.pk,)),
         )
         if obj.created_by:
             res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
         return res
+
+class PermissionSerializer(BaseSerializer):
+
+    url           = serializers.CharField(source='get_absolute_url', read_only=True)
+    related       = serializers.SerializerMethodField('get_related')
+
+    class Meta:
+        model = Permission
+        fields = ( 'url', 'id', 'user', 'team', 'name', 'description', 'creation_date',
+                   'project', 'inventory', 'permission_type' )
+         
+    def get_related(self, obj):
+        res = dict()
+        if obj.user:
+            res['user']        = reverse(lib.urls.views_UsersDetail, args=(obj.user.pk,))
+        if obj.team:
+            res['team']        = reverse(lib.urls.views_TeamsDetail, args=(obj.team.pk,))
+        if self.project:
+            res['project']     = reverse(lib.urls.views_ProjectsDetail, args=(obj.project.pk,)) 
+        if self.inventory:
+            res['inventory']   = reverse(lib.urls.views_InventoryDetail, args=(obj.inventory.pk,))
+        if self.created_by:
+            res['created_by']  = reverse(lib.urls.views_UsersDetail, args=(obj.created_by.pk,))
 
 class CredentialSerializer(BaseSerializer):
 
@@ -180,7 +204,7 @@ class CredentialSerializer(BaseSerializer):
     url           = serializers.CharField(source='get_absolute_url', read_only=True)
     related       = serializers.SerializerMethodField('get_related')
 
-    # FIXME: may want to make soem of these filtered based on user accessing
+    # FIXME: may want to make some of these filtered based on user accessing
     class Meta:
         model = Credential
         fields = (
@@ -228,6 +252,7 @@ class UserSerializer(BaseSerializer):
             admin_of_organizations = reverse(lib.urls.views_UsersAdminOrganizationsList, args=(obj.pk,)),
             projects               = reverse(lib.urls.views_UsersProjectsList,           args=(obj.pk,)),
             credentials            = reverse(lib.urls.views_UsersCredentialsList,        args=(obj.pk,)),
+            permissions            = reverse(lib.urls.views_UsersPermissionsList,        args=(obj.pk,)),
         )
 
     def get_absolute_url_override(self, obj):

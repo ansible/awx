@@ -102,6 +102,10 @@ views_TagsDetail                   = views.TagsDetail.as_view()
 # credentials service
 views_CredentialsDetail            = views.CredentialsDetail.as_view()
 
+# permissions
+views_UsersPermissionsList         = views.UsersPermissionsList.as_view()
+views_TeamsPermissionsList         = views.TeamsPermissionsList.as_view()
+views_PermissionsDetail            = views.PermissionsDetail.as_view()    
 
 urlpatterns = patterns('',
 
@@ -199,8 +203,9 @@ urlpatterns = patterns('',
     url(r'^api/v1/credentials/(?P<pk>[0-9]+)/$',                  views_CredentialsDetail),
 
     # permissions services
-    # ... users
-    # ... teams
+    url(r'^api/v1/users/(?P<pk>[0-9]+)/permissions/$',            views_UsersPermissionsList),
+    url(r'^api/v1/teams/(?P<pk>[0-9]+)/permissions/$',            views_TeamsPermissionsList),
+    url(r'^api/v1/permissions/(?P<pk>[0-9]+)/$',                  views_PermissionsDetail),
 
 )
 

@@ -266,6 +266,23 @@ class TeamsUsersList(BaseSubList):
             return base
         raise PermissionDenied()
 
+class TeamsPermissionsList(BaseSubList):
+
+    model = Permission
+    serializer_class = PermissionSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Team
+    relationship = 'permissions'
+    postable = True
+    filter_fields = ('name',)
+    inject_primary_key_on_post_as = 'team'
+
+    def _get_queryset(self):
+        team = Team.objects.get(pk=self.kwargs['pk'])
+        if not Team.can_user_administrate(self.request.user, team, None):
+            raise PermissionDenied()
+        return Permission.objects.filter(team = team)
+
 
 class TeamsProjectsList(BaseSubList):
 
@@ -423,6 +440,23 @@ class UsersTeamsList(BaseSubList):
             raise PermissionDenied()
         return Team.objects.filter(users__in = [ user ])
 
+class UsersPermissionsList(BaseSubList):
+
+    model = Permission
+    serializer_class = PermissionSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = User
+    relationship = 'permissions'
+    postable = True
+    filter_fields = ('name',)
+    inject_primary_key_on_post_as = 'user'
+
+    def _get_queryset(self):
+        user = User.objects.get(pk=self.kwargs['pk'])
+        if not UserHelper.can_user_administrate(self.request.user, user, None):
+            raise PermissionDenied()
+        return Permission.objects.filter(user=user)
+
 class UsersProjectsList(BaseSubList):
 
     model = Project
@@ -514,6 +548,11 @@ class CredentialsDetail(BaseDetail):
     serializer_class = CredentialSerializer
     permission_classes = (CustomRbac,)
 
+class PermissionsDetail(BaseDetail):
+
+    model = Permission
+    serializer_class = PermissionSerializer
+    permission_classes = (CustomRbac,)
 
 class InventoryList(BaseList):
 
