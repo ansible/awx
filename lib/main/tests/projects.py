@@ -415,25 +415,40 @@ class ProjectsTest(BaseTest):
         )
 
         url = '/api/v1/users/%s/permissions/' % user.pk
-        self.post(url, user_permission, expect=201, auth=self.get_super_credentials())
-
+        posted = self.post(url, user_permission, expect=201, auth=self.get_super_credentials())
+        url2 = posted['url']
+        got = self.get(url2, expect=200, auth=self.get_other_credentials())
+        
         # can add permissions on a team
         url = '/api/v1/teams/%s/permissions/' % team.pk
-        self.post(url, team_permission, expect=201, auth=self.get_super_credentials())
+        posted = self.post(url, team_permission, expect=201, auth=self.get_super_credentials())
+        url2 = posted['url']
+        # check we can get that permission back
+        got = self.get(url2, expect=200, auth=self.get_other_credentials())
 
         # can list permissions on a user
         url = '/api/v1/users/%s/permissions/' % user.pk
+        got = self.get(url, expect=200, auth=self.get_super_credentials())
+        got = self.get(url, expect=200, auth=self.get_other_credentials())
+        got = self.get(url, expect=403, auth=self.get_nobody_credentials())
 
         # can list permissions on a team
         url = '/api/v1/teams/%s/permissions/' % team.pk
+        got = self.get(url, expect=200, auth=self.get_super_credentials())
+        got = self.get(url, expect=200, auth=self.get_other_credentials())
+        got = self.get(url, expect=403, auth=self.get_nobody_credentials())
 
-        # can edit a permission
+        # can edit a permission -- reducing the permission level
+        team_permission['permission_type'] = PERM_INVENTORY_CHECK
+        self.put(url2, team_permission, expect=200, auth=self.get_super_credentials())
+        self.put(url2, team_permission, expect=403, auth=self.get_other_credentials())
 
-        # can remove permissions from a user
-        # do need to disassociate, just delete it 
+        # can remove permissions
+        # do need to disassociate, just delete it
+        self.delete(url2, expect=403, auth=self.get_other_credentials())
+        self.delete(url2, expect=204, auth=self.get_super_credentials())
+        self.delete(url2, expect=404, auth=self.get_other_credentials())
 
-        # can remove permissions from a team
-        # do need to disassociate, just delete it 
 
         
 

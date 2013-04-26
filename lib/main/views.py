@@ -279,9 +279,12 @@ class TeamsPermissionsList(BaseSubList):
 
     def _get_queryset(self):
         team = Team.objects.get(pk=self.kwargs['pk'])
-        if not Team.can_user_administrate(self.request.user, team, None):
-            raise PermissionDenied()
-        return Permission.objects.filter(team = team)
+        base = Permission.objects.filter(team = team)
+        if Team.can_user_administrate(self.request.user, team, None):
+            return base
+        elif team.users.filter(pk=self.request.user.pk).count() > 0:
+            return base
+        raise PermissionDenied()
 
 
 class TeamsProjectsList(BaseSubList):
