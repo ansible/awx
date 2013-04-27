@@ -31,7 +31,6 @@ from djcelery.models import TaskMeta
 from rest_framework.authtoken.models import Token
 import yaml
 
-# TODO: jobs and events model TBD
 # TODO: reporting model TBD
 
 PERM_INVENTORY_ADMIN  = 'admin'
@@ -427,12 +426,11 @@ class Host(CommonModelNameNotUnique):
         import lib.urls
         return reverse(lib.urls.views_HostsDetail, args=(self.pk,))
 
-    # relationship to LaunchJobStatus
-    # relationship to LaunchJobStatusEvent
-    # last_job_status
+    # Use .job_host_summaries.all() to get jobs affecting this host.
+    # Use .job_events.all() to get events affecting this host.
+    # Use .job_host_summaries.order_by('-pk')[0] to get the last result.
 
 class Group(CommonModelNameNotUnique):
-
     '''
     A group of managed nodes.  May belong to multiple groups
     '''
@@ -514,33 +512,6 @@ class Credential(CommonModelNameNotUnique):
 
     user            = models.ForeignKey('auth.User', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
     team            = models.ForeignKey('Team', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
-
-    # IF ssh_key_path is SET
-    #
-    # STAGE 1: SSH KEY SUPPORT
-    #
-    # ssh-agent bash &
-    # save keyfile to tempdir in /var/tmp (permissions guarded)
-    # ssh-add path-to-keydata
-    # key could locked or unlocked, so use 'expect like' code to enter it at the prompt
-    #    if key is locked:
-    #       if ssh_key_unlock is provided provide key password
-    #       if not provided, FAIL
-    #
-    # ssh_username if set corresponds to -u on ansible-playbook, if unset -u root
-    #
-    # STAGE 2:
-    # OR if ssh_password is set instead, do not use SSH agent
-    #    set ANSIBLE_SSH_PASSWORD
-    #
-    # STAGE 3:
-    #
-    # MICHAEL: modify ansible/ansible-playbook such that
-    # if ANSIBLE_PASSWORD or ANSIBLE_SUDO_PASSWORD is set
-    # you do not have to use --ask-pass and --ask-sudo-pass, so we don't have to do interactive
-    # stuff with that.
-    #
-    # ansible-playbook foo.yml ...
 
     ssh_username = models.CharField(
         blank=True,
@@ -753,7 +724,7 @@ class Project(CommonModel):
                     try:
                         if 'hosts' not in data[0] and 'include' not in data[0]:
                             continue
-                    except (IndexError, KeyError):
+                    except (TypeError, IndexError, KeyError):
                         continue
                     playbook = os.path.relpath(playbook, self.local_path)
                     # Filter files in a roles subdirectory.

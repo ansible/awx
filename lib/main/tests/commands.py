@@ -243,7 +243,7 @@ class AcomInventoryTest(BaseCommandTest):
 
     def test_with_invalid_inventory_id(self):
         inventory_pks = set(map(lambda x: x.pk, self.inventories))
-        invalid_id = [x for x in xrange(9999) if x not in inventory_pks][0]
+        invalid_id = [x for x in xrange(1, 9999) if x not in inventory_pks][0]
         os.environ['ACOM_INVENTORY_ID'] = str(invalid_id)
         result, stdout, stderr = self.run_command('acom_inventory', list=True)
         self.assertTrue(isinstance(result, CommandError))

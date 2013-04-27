@@ -147,75 +147,6 @@ class RunJob(Task):
             args = ['ssh-agent', 'sh', '-c', cmd]
         return args
 
-    def capture_subprocess_output(self, proc, timeout=1.0):
-        '''
-        Capture stdout/stderr from the given process until the timeout expires.
-        '''
-        stdout, stderr = '', ''
-        until = time.time() + timeout
-        remaining = max(0, until - time.time())
-        while remaining > 0:
-            # FIXME: Probably want to use poll (when on Linux), needs to be tested.
-            if hasattr(select, 'poll') and False: 
-                poll = select.poll()
-                poll.register(proc.stdout.fileno(), select.POLLIN or select.POLLPRI)
-                poll.register(proc.stderr.fileno(), select.POLLIN or select.POLLPRI)
-                fd_events = poll.poll(remaining)
-                if not fd_events:
-                    break
-                for fd, evt in fd_events:
-                    if fd == proc.stdout.fileno() and evt > 0:
-                        stdout += proc.stdout.read(1)
-                    elif fd == proc.stderr.fileno() and evt > 0:
-                        stderr += proc.stderr.read(1)
-            else:
-                stdout_byte, stderr_byte = '', ''
-                fdlist = [proc.stdout.fileno(), proc.stderr.fileno()]
-                rwx = select.select(fdlist, [], [], remaining)
-                if proc.stdout.fileno() in rwx[0]:
-                    stdout_byte = proc.stdout.read(1)
-                    stdout += stdout_byte
-                if proc.stderr.fileno() in rwx[0]:
-                    stderr_byte = proc.stderr.read(1)
-                    stderr += stderr_byte
-                if not stdout_byte and not stderr_byte:
-                    break
-            remaining = max(0, until - time.time())
-        return stdout, stderr
-
-    def run_subprocess(self, job_pk, args, cwd, env, passwords):
-        '''
-        Run the job using subprocess to capture stdout/stderr.
-        '''
-        status, stdout, stderr = 'error', '', ''
-        proc = subprocess.Popen(args, cwd=cwd, env=env,
-                                stdin=subprocess.PIPE,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
-        proc_canceled = False
-        while proc.poll() is None:
-            new_stdout, new_stderr = self.capture_subprocess_output(proc)
-            job_updates = {}
-            if new_stdout:
-                stdout += new_stdout
-                job_updates['result_stdout'] = stdout
-            if new_stderr:
-                stderr += new_stderr
-                job_updates['result_stdout'] = stdout
-            job = self.update_job(job_pk, **job_updates)
-            if job.cancel_flag and not proc_canceled:
-                proc.terminate()
-                proc_canceled = True
-        stdout += proc.stdout.read()
-        stderr += proc.stderr.read()
-        if proc_canceled:
-            status = 'canceled'
-        elif proc.returncode == 0:
-            status = 'successful'
-        else:
-            status = 'failed'
-        return status, stdout, stderr
-
     def run_pexpect(self, job_pk, args, cwd, env, passwords):
         '''
         Run the job using pexpect to capture output and provide passwords when
@@ -273,8 +204,6 @@ class RunJob(Task):
             args = self.build_args(job, **kwargs)
             cwd = job.project.local_path
             env = self.build_env(job, **kwargs)
-            #status, stdout, stderr = self.run_subprocess(job_pk, args, cwd,
-            #                                             env, passwords)
             status, stdout, stderr = self.run_pexpect(job_pk, args, cwd, env,
                                                       kwargs['passwords'])
         except Exception:

@@ -23,6 +23,13 @@ from django.test.client import Client
 from lib.main.models import *
 from lib.main.tests.base import BaseTest
 
+TEST_PLAYBOOK = '''- hosts: mygroup
+  gather_facts: false
+  tasks:
+  - name: woohoo
+    command: test 1 = 1
+'''
+
 class ProjectsTest(BaseTest):
 
     # tests for users, projects, and teams
@@ -92,6 +99,51 @@ class ProjectsTest(BaseTest):
     def get_nobody_credentials(self):
         # here is a user without any permissions...
         return ('nobody', 'nobody')
+
+    def test_available_playbooks(self):
+        def write_test_file(project, name, content):
+            full_path = os.path.join(project.local_path, name)
+            if not os.path.exists(os.path.dirname(full_path)):
+                os.makedirs(os.path.dirname(full_path))
+            f = file(os.path.join(project.local_path, name), 'wb')
+            f.write(content)
+            f.close()
+        # Invalid local_path
+        project = self.projects[0]
+        project.local_path = os.path.join(project.local_path,
+                                          'does_not_exist')
+        project.save()
+        self.assertEqual(len(project.available_playbooks), 0)
+        # Simple playbook
+        project = self.projects[1]
+        write_test_file(project, 'foo.yml', TEST_PLAYBOOK)
+        self.assertEqual(len(project.available_playbooks), 1)
+        # Other files
+        project = self.projects[2]
+        write_test_file(project, 'foo.txt', 'not a playbook')
+        self.assertEqual(len(project.available_playbooks), 0)
+        # Empty playbook
+        project = self.projects[3]
+        write_test_file(project, 'blah.yml', '')
+        self.assertEqual(len(project.available_playbooks), 0)
+        # Invalid YAML
+        project = self.projects[4]
+        write_test_file(project, 'blah.yml', TEST_PLAYBOOK + '----')
+        self.assertEqual(len(project.available_playbooks), 0)
+        # No hosts or includes
+        project = self.projects[5]
+        playbook_content = TEST_PLAYBOOK.replace('hosts', 'hoists')
+        write_test_file(project, 'blah.yml', playbook_content)
+        self.assertEqual(len(project.available_playbooks), 0)
+        # Playbook in roles folder
+        project = self.projects[6]
+        write_test_file(project, 'roles/blah.yml', TEST_PLAYBOOK)
+        self.assertEqual(len(project.available_playbooks), 0)
+        # Playbook in tasks folder
+        project = self.projects[7]
+        write_test_file(project, 'tasks/blah.yml', TEST_PLAYBOOK)
+        self.assertEqual(len(project.available_playbooks), 0)
+                
 
     def test_mainline(self):
 
