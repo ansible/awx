@@ -1,0 +1,77 @@
+{% extends 'rest_framework/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Ansible Commander API' %}{% endblock %}
+
+{% block style %}
+{{ block.super }}
+<link href="{{ STATIC_URL }}favicon.ico" rel="shortcut icon" />
+<style type="text/css">
+html body {
+  background: #ddd;
+}
+html body .navbar .navbar-inner {
+  background: #1778c3;
+  border-top: none;
+  border-bottom: solid 3px #074979;
+  height: 20px;
+}
+html body .navbar-inverse .nav li.dropdown.open > .dropdown-toggle,
+html body .navbar-inverse .nav li.dropdown.active > .dropdown-toggle,
+html body .navbar-inverse .nav li.dropdown.open.active > .dropdown-toggle {
+  background-color: #074979;
+}
+html body .navbar-inverse .brand a,
+span.powered-by .version {
+  color: #ddd;
+}
+span.powered-by {
+  font-size: 75%;
+  color: #ddd;
+}
+html body .navbar .navbar-inner .dropdown-menu li a,
+html body .navbar .navbar-inner .dropdown-menu li,
+html body .hero-unit h2,
+html body .hero-unit h1,
+html body a,
+html body a {
+ color: #2773ae; 
+}
+html body .navbar .navbar-inner .dropdown-menu li a:hover,
+html body a:hover {
+  color: #074979;
+}
+html body .str,
+html body .atv {
+  color: #1778c3;
+}
+</style>
+{% endblock %}
+
+{% block branding %}
+  {% trans 'Ansible Commander API' %}
+  <span class="powered-by">({% trans 'powered by' %} {{ block.super }})</span>
+{% endblock %}
+
+{% block userlinks %}
+  {% if user.is_authenticated %}
+  <li>
+    <a href="/api/v1/me/">{{ user }}</a>
+  </li>
+  {% endif %}
+{% endblock %}
+
+{% block script %}
+{{ block.super }}
+<script type="text/javascript">
+$(function() {
+  // Make linkes from relative URLs to resources.
+  $('span.str').each(function() {
+    var s = $(this).html();
+    if (s.match(/^\"\/.+\/\"$/)) {
+      $(this).html('"<a href=' + s + '>' + s.replace(/\"/g, '') + '</a>"');
+    }
+  });
+});
+</script>
+{% endblock %}
