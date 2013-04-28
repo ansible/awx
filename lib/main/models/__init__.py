@@ -231,8 +231,7 @@ class Tag(models.Model):
         return unicode(self.name)
 
     def get_absolute_url(self):
-        import lib.urls
-        return reverse(lib.urls.views_TagsDetail, args=(self.pk,))
+        return reverse('main:tags_detail', args=(self.pk,))
 
     @classmethod
     def can_user_add(cls, user, data):
@@ -275,8 +274,7 @@ class Organization(CommonModel):
     projects = models.ManyToManyField('Project', blank=True, related_name='organizations')
 
     def get_absolute_url(self):
-        import lib.urls
-        return reverse(lib.urls.views_OrganizationsDetail, args=(self.pk,))
+        return reverse('main:organizations_detail', args=(self.pk,))
 
     @classmethod
     def can_user_delete(cls, user, obj):
@@ -316,8 +314,7 @@ class Inventory(CommonModel):
     organization = models.ForeignKey(Organization, null=False, related_name='inventories')
 
     def get_absolute_url(self):
-        import lib.urls
-        return reverse(lib.urls.views_InventoryDetail, args=(self.pk,))
+        return reverse('main:inventory_detail', args=(self.pk,))
 
     @classmethod
     def _has_permission_types(cls, user, obj, allowed):
@@ -423,8 +420,7 @@ class Host(CommonModelNameNotUnique):
         return rc
 
     def get_absolute_url(self):
-        import lib.urls
-        return reverse(lib.urls.views_HostsDetail, args=(self.pk,))
+        return reverse('main:hosts_detail', args=(self.pk,))
 
     # Use .job_host_summaries.all() to get jobs affecting this host.
     # Use .job_events.all() to get events affecting this host.
@@ -465,8 +461,7 @@ class Group(CommonModelNameNotUnique):
         return Inventory.can_user_read(user, obj.inventory)
 
     def get_absolute_url(self):
-        import lib.urls
-        return reverse(lib.urls.views_GroupsDetail, args=(self.pk,))
+        return reverse('main:groups_detail', args=(self.pk,))
 
 # FIXME: audit nullables
 # FIXME: audit cascades
@@ -488,8 +483,7 @@ class VariableData(CommonModelNameNotUnique):
         return '%s = %s' % (self.name, self.data)
 
     def get_absolute_url(self):
-        import lib.urls
-        return reverse(lib.urls.views_VariableDetail, args=(self.pk,))
+        return reverse('main:variable_detail', args=(self.pk,))
 
     @classmethod
     def can_user_read(cls, user, obj):
@@ -606,8 +600,7 @@ class Credential(CommonModelNameNotUnique):
             return Team.can_user_administrate(user, team_obj, data)
 
     def get_absolute_url(self):
-        import lib.urls
-        return reverse(lib.urls.views_CredentialsDetail, args=(self.pk,))
+        return reverse('main:credentials_detail', args=(self.pk,))
 
 class Team(CommonModel):
     '''
@@ -622,8 +615,7 @@ class Team(CommonModel):
     organization    = models.ForeignKey('Organization', blank=False, null=True, on_delete=SET_NULL, related_name='teams')
 
     def get_absolute_url(self):
-        import lib.urls
-        return reverse(lib.urls.views_TeamsDetail, args=(self.pk,))
+        return reverse('main:teams_detail', args=(self.pk,))
 
     @classmethod
     def can_user_administrate(cls, user, obj, data):
@@ -678,8 +670,7 @@ class Project(CommonModel):
     #default_playbook = models.CharField(max_length=1024)
 
     def get_absolute_url(self):
-        import lib.urls
-        return reverse(lib.urls.views_ProjectsDetail, args=(self.pk,))
+        return reverse('main:projects_detail', args=(self.pk,))
 
     @classmethod
     def can_user_administrate(cls, user, obj, data):
@@ -777,8 +768,7 @@ class Permission(CommonModelNameNotUnique):
         ))
 
     def get_absolute_url(self):
-        import lib.urls
-        return reverse(lib.urls.views_PermissionsDetail, args=(self.pk,))
+        return reverse('main:permissions_detail', args=(self.pk,))
 
     @classmethod
     def can_user_administrate(cls, user, obj, data):
@@ -892,8 +882,7 @@ class JobTemplate(CommonModel):
         return job
 
     def get_absolute_url(self):
-        import lib.urls
-        return reverse(lib.urls.views_JobTemplateDetail, args=(self.pk,))
+        return reverse('main:job_templates_detail', args=(self.pk,))
 
     @classmethod
     def can_user_read(cls, user, obj):
@@ -1078,6 +1067,9 @@ class Job(CommonModel):
         editable=False,
         through='JobHostSummary',
     )
+
+    def get_absolute_url(self):
+        return reverse('main:jobs_detail', args=(self.pk,))
 
     @property
     def celery_task(self):

@@ -32,16 +32,23 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.views import APIView
 import exceptions
 import datetime
+import re
+import sys
 import json as python_json
 from base_views import *
 
-
 class ApiRootView(APIView):
+    '''
+    Ansible Commander REST API
+    '''
+
+    def get_name(self):
+        return 'REST API'
 
     def get(self, request, format=None):
         ''' list supported API versions '''
 
-        current = reverse(lib.urls.views_ApiV1RootView, args=[])
+        current = reverse('main:api_v1_root_view', args=[])
         data = dict(
            description = 'Ansible Commander REST API',
            current_version = current,
@@ -52,24 +59,35 @@ class ApiRootView(APIView):
         return Response(data)
 
 class ApiV1RootView(APIView):
+    '''
+    Version 1 of the REST API.
+    '''
+
+    def get_name(self):
+        return 'Version 1'
 
     def get(self, request, format=None):
         ''' list top level resources '''
 
         data = dict(
-            organizations = reverse(lib.urls.views_OrganizationsList, args=[]),
-            users         = reverse(lib.urls.views_UsersList,         args=[]),
-            projects      = reverse(lib.urls.views_ProjectsList,      args=[]),
-            teams         = reverse(lib.urls.views_TeamsList,         args=[]),
-            inventory     = reverse(lib.urls.views_InventoryList,     args=[]),
-            groups        = reverse(lib.urls.views_GroupsList,        args=[]),
-            hosts         = reverse(lib.urls.views_HostsList,         args=[]),
-            job_templates = reverse(lib.urls.views_JobTemplatesList,  args=[]),
-            jobs          = reverse(lib.urls.views_JobsList,          args=[]),
+            organizations = reverse('main:organizations_list'),
+            users         = reverse('main:users_list'),
+            projects      = reverse('main:projects_list'),
+            teams         = reverse('main:teams_list'),
+            inventory     = reverse('main:inventory_list'),
+            groups        = reverse('main:groups_list'),
+            hosts         = reverse('main:hosts_list'),
+            job_templates = reverse('main:job_templates_list'),
+            jobs          = reverse('main:jobs_list'),
+            authtoken     = reverse('main:auth_token_view'),
+            me            = reverse('main:users_me_list'),
         )
         return Response(data)
 
 class AuthTokenView(ObtainAuthToken):
+    '''
+    POST username and password to obtain an auth token for subsequent requests.
+    '''
 
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
     # FIXME: Show a better form for HTML view
@@ -420,6 +438,9 @@ class UsersMeList(BaseList):
     permission_classes = (CustomRbac,)
     filter_fields = ('username',)
 
+    def get_name(self):
+        return 'Me!'
+
     def post(self, request, *args, **kwargs):
         raise PermissionDenied()
 
@@ -658,7 +679,7 @@ class GroupsList(BaseList):
            or an organization admin of an inventory they are in
            or when I have allowing read permissions via a user or team on an inventory they are in
         '''
-        base = Groups.objects
+        base = Group.objects
         if self.request.user.is_superuser:
             return base.all()
         admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
@@ -861,18 +882,26 @@ class JobTemplatesList(BaseList):
         ).distinct()
 
 
-class JobTemplateDetail(BaseDetail):
+class JobTemplatesDetail(BaseDetail):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
     permission_classes = (CustomRbac,)
 
+    def _get_queryset(self):
+        return self.model.objects.all() # FIXME
 
-class JobTemplateStart(BaseDetail):
+class JobTemplatesStart(BaseDetail):
     pass
 
 class JobsList(BaseList):
-    pass
+
+    model = Job
+    serializer_class = JobSerializer
+    permission_classes = (CustomRbac,)
+
+    def _get_queryset(self):
+        return self.model.objects.all() # FIXME
 
 class JobsDetail(BaseDetail):
     pass
@@ -892,12 +921,23 @@ class JobsFailedHostsList(BaseSubList):
 class JobsUnreachableHostsList(BaseSubList):
     pass
 
-class JobsEventsList(BaseList):
+class JobEventsList(BaseList):
     pass
 
-class JobsEventsDetail(BaseDetail):
+class JobEventsDetail(BaseDetail):
     pass
 
-class HostJobEventsList(BaseSubList):
+class HostsJobEventsList(BaseSubList):
     pass
 
+
+# Create view functions for all of the class-based views to simplify inclusion
+# in URL patterns and reverse URL lookups, converting CamelCase names to
+# lowercase_with_underscore (e.g. MyView.as_view() becomes my_view).
+this_module = sys.modules[__name__]
+camelcase_to_underscore = lambda str: re.sub(r'(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))', '_\\1', str).lower().strip('_')
+for attr, value in locals().items():
+    if isinstance(value, type) and issubclass(value, APIView):
+        name = camelcase_to_underscore(attr)
+        view = value.as_view()
+        setattr(this_module, name, view)
