@@ -97,7 +97,7 @@ class InventorySerializer(BaseSerializer):
 
     class Meta:
         model = Inventory
-        fields = ('url', 'id', 'name', 'description', 'creation_date', 'related')
+        fields = ('url', 'id', 'name', 'description', 'creation_date', 'related', 'organization')
 
     def get_related(self, obj):
         res = dict(
@@ -117,10 +117,9 @@ class HostSerializer(BaseSerializer):
 
     class Meta:
         model = Host
-        fields = ('url', 'id', 'name', 'description', 'creation_date', 'related')
+        fields = ('url', 'id', 'name', 'description', 'creation_date', 'related', 'inventory')
 
     def get_related(self, obj):
-        print self, obj
         res = dict(
             variable_data = reverse('main:hosts_variable_detail', args=(obj.pk,)),
             inventory     = reverse('main:inventory_detail',      args=(obj.inventory.pk,)),
