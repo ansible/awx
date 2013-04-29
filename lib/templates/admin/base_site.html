@@ -135,6 +135,27 @@ pre.result-display {
 var django = django || {};
 if (django.jQuery) {
   (function($) {
+    window.refreshJobStatus = function() {
+      var status = $('.field-status p').text();
+      if (status == 'Running' || status == 'Pending') {
+        var url = '{{ request.path }}';
+        $.get(url, function(data) {
+          var selectors = [
+            '.form-row.field-status',
+            '.field-get_result_stdout_display pre',
+            '.field-get_result_stderr_display pre',
+            '.field-get_result_traceback_display pre',
+            '.field-get_result_stdout_display pre',
+            '#job_host_summaries-group',
+            '#job_events-group',
+          ]
+          $.each(selectors, function(index, selector) {
+            $(selector).html($(data).find(selector).html());
+          });
+          setTimeout('window.refreshJobStatus()', 5000);
+        });
+      }
+    }
     // Update playbook list based on project selected.
     function onProjectChange() {
       var project_pk = $('select[name="project"]').val() || 0;
@@ -144,6 +165,7 @@ if (django.jQuery) {
     $(function() {
       $('select[name="project"]').each(onProjectChange).change(onProjectChange);
     })
+    setTimeout('window.refreshJobStatus()', 2000);
   })(django.jQuery);
 }
 </script>

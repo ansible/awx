@@ -329,7 +329,6 @@ class JobAdmin(BaseModelAdmin):
                              'classes': ('collapse',)}),
         (_('Start Job'), {'fields': ('start_job', 'ssh_password',
                                      'sudo_password', 'ssh_key_unlock')}),
-        #(_('Cancel Job'), {'fields': ('cancel_job',)}),
         #(_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
                             'audit_trail',)}),

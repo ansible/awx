@@ -42,7 +42,8 @@ class OrganizationSerializer(BaseSerializer):
 
         res = dict(
             audit_trail = reverse('main:organizations_audit_trail_list',    args=(obj.pk,)),
-            projects    = reverse('main:organizations_projects_list',        args=(obj.pk,)),
+            projects    = reverse('main:organizations_projects_list',       args=(obj.pk,)),
+            inventories = reverse('main:organizations_inventories_list',    args=(obj.pk,)),
             users       = reverse('main:organizations_users_list',          args=(obj.pk,)),
             admins      = reverse('main:organizations_admins_list',         args=(obj.pk,)),
             tags        = reverse('main:organizations_tags_list',           args=(obj.pk,)),
@@ -96,12 +97,12 @@ class InventorySerializer(BaseSerializer):
 
     class Meta:
         model = Inventory
-        fields = ('url', 'id', 'name', 'description', 'creation_date', 'organization')
+        fields = ('url', 'id', 'name', 'description', 'creation_date', 'related')
 
     def get_related(self, obj):
         res = dict(
-            hosts        = reverse('main:hosts_list',           args=(obj.pk,)),
-            groups       = reverse('main:groups_list',          args=(obj.pk,)),
+            hosts        = reverse('main:inventory_hosts_list',           args=(obj.pk,)),
+            groups       = reverse('main:inventory_groups_list',          args=(obj.pk,)),
             organization = reverse('main:organizations_detail', args=(obj.organization.pk,)),
         )
         if obj.created_by:
@@ -116,9 +117,10 @@ class HostSerializer(BaseSerializer):
 
     class Meta:
         model = Host
-        fields = ('url', 'id', 'name', 'description', 'creation_date', 'inventory')
+        fields = ('url', 'id', 'name', 'description', 'creation_date', 'related')
 
     def get_related(self, obj):
+        print self, obj
         res = dict(
             variable_data = reverse('main:hosts_variable_detail', args=(obj.pk,)),
             inventory     = reverse('main:inventory_detail',      args=(obj.inventory.pk,)),

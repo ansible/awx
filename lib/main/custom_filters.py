@@ -23,16 +23,12 @@ class CustomFilterBackend(object):
 
     def filter_queryset(self, request, queryset, view):
 
-        keys = request.GET.keys()
-
         terms = {}
         order_by = None
 
-        for key in keys:
+        for key, value in request.GET.items():
 
-            value = request.GET[key]
-
-            if key in [ 'page', 'page_size' ]:
+            if key in [ 'page', 'page_size', 'format' ]:
                continue
 
             if key == 'order_by':

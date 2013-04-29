@@ -139,6 +139,22 @@ class OrganizationsAuditTrailList(BaseSubList):
             raise PermissionDenied()
         return AuditTrail.objects.filter(organization_by_audit_trail__in = [ organization ])
 
+class OrganizationsInventoriesList(BaseSubList):
+
+    model = Inventory
+    serializer_class = InventorySerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Organization
+    relationship = 'inventories'
+    postable = False
+
+    def _get_queryset(self):
+        ''' to list inventories in the organization, I must be a superuser or org admin '''
+        organization = Organization.objects.get(pk=self.kwargs['pk'])
+        if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
+            # FIXME: use: organization.can_user_administrate(...) ?
+            raise PermissionDenied()
+        return Inventory.objects.filter(organization__in=[organization])
 
 class OrganizationsUsersList(BaseSubList):
 
