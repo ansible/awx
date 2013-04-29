@@ -124,8 +124,12 @@ class BaseSubList(BaseList):
                         return Response(status=status.HTTP_400_BAD_REQUEST, data=ser.errors)
 
                     # ask the usual access control settings
-                    if not self.__class__.model.can_user_add(request.user, ser.init_data):
-                        raise PermissionDenied()
+                    if self.__class__.model in [ User ]:
+                        if not UserHelper.can_user_add(request.user, ser.init_data):
+                            raise PermissionDenied()
+                    else:
+                        if not self.__class__.model.can_user_add(request.user, ser.init_data):
+                            raise PermissionDenied()
 
                     # save the object through the serializer, reload and returned the saved object deserialized
                     obj = ser.save()
@@ -140,10 +144,42 @@ class BaseSubList(BaseList):
 
 
                     if self.__class__.parent_model != User:
-                        if not obj.__class__.can_user_read(request.user, obj):
-                            raise PermissionDenied()
+
+                        # FIXME: refactor into smaller functions
+
+                        if obj.__class__ in [ User]:
+                            if self.__class__.parent_model == Organization:
+                                # user can't inject an organization because it's not part of the user
+                                # model so we have to cheat here.  This may happen for other cases
+                                # where we are creating a user immediately on a subcollection
+                                # when that user does not already exist.  Relations will work post-save.
+                                organization = Organization.objects.get(pk=request.DATA[inject_primary_key])
+                                if not request.user.is_superuser:
+                                    if not organization.admins.filter(pk=request.user.pk).count() > 0:
+                                        raise PermissionDenied()
+                            else:
+                                raise exceptions.NotImplementedError()
+                        else:
+                            if not obj.__class__.can_user_read(request.user, obj):
+                                raise PermissionDenied()
                         if not self.__class__.parent_model.can_user_attach(request.user, main, obj, self.__class__.relationship, request.DATA):
                             raise PermissionDenied()
+
+                        # FIXME: manual attachment code neccessary for users here, move this into the main code.
+                        # this is because users don't have FKs into what they are attaching. (also refactor)
+
+                        if self.__class__.parent_model == Organization:
+                             organization = Organization.objects.get(pk=request.DATA[inject_primary_key])
+                             import lib.main.views
+			     if self.__class__ == lib.main.views.OrganizationsUsersList:
+                                 organization.users.add(obj)
+                                 organization.save()
+                             elif self.__class__ == lib.main.views.OrganizationsAdminsList:
+                                 organization.admins.add(obj)
+                                 organization.save()
+                                
+
+
                     else:
                         if not UserHelper.can_user_read(request.user, obj):
                             raise PermissionDenied()

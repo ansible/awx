@@ -270,6 +270,15 @@ class OrganizationsTest(BaseTest):
         users = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(users['count'], 1)
 
+        # post a completely new user to verify we can add users to the subcollection directly
+        new_user = dict(username='NewUser9000')
+        which_org = self.normal_django_user.admin_of_organizations.all()[0]
+        url = '/api/v1/organizations/%s/users/' % (which_org.pk)
+        posted = self.post(url, new_user, expect=201, auth=self.get_normal_credentials())
+
+        all_users = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(all_users['count'], 2)
+
     def test_post_item_subobjects_admins(self):
 
         url = '/api/v1/organizations/2/admins/'

@@ -131,6 +131,14 @@ class UserHelper(object):
         return matching_orgs
 
     @classmethod
+    def can_user_add(cls, user, data):
+        # TODO: reuse. make helper functions like "is user an org admin"
+        # apply throughout permissions code
+        if user.is_superuser:
+            return True
+        return user.admin_of_organizations.count() > 0
+
+    @classmethod
     def can_user_attach(cls, user, obj, sub_obj, relationship_type, data):
         if type(sub_obj) != User:
             if not sub_obj.can_user_read(user, sub_obj):
@@ -193,7 +201,9 @@ class PrimordialModel(models.Model):
 
         # in order to attach something you also be able to read what you are attaching
         if type(sub_obj) == User:
-            return UserHelper.can_user_read(user, sub_obj)
+            # we already check that the user is an admin or org admin up in base_views.py
+            # because the user doesn't have the attributes on it directly to tie it to the org
+            return True
         else:
             return sub_obj.__class__.can_user_read(user, sub_obj)
 
