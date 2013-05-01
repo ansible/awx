@@ -304,6 +304,9 @@ class JobTemplateSerializer(BaseSerializer):
     def get_related(self, obj):
         # FIXME: fill in once further defined.  related resources, credential, project, inventory, etc
         res = dict(
+            credential  = reverse('main:credentials_detail', args=(obj.credential.pk,)),
+            project     = reverse('main:projects_detail',    args=(obj.project.pk,)),
+            inventory   = reverse('main:inventory_detail',   args=(obj.inventory.pk,)),
         )
         if obj.created_by:
             res['created_by']  = reverse('main:users_detail', args=(obj.created_by.pk,))

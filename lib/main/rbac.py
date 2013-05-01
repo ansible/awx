@@ -15,58 +15,60 @@
 # along with Ansible Commander. If not, see <http://www.gnu.org/licenses/>.
 
 
-from lib.main.models import *
-from lib.main.serializers import *
-from rest_framework import permissions
-from django.contrib.auth.models import AnonymousUser
-from django.core.exceptions import PermissionDenied
+import logging
 from django.http import Http404
+from rest_framework.exceptions import PermissionDenied
+from rest_framework import permissions
+
+logger = logging.getLogger('lib.main.rbac')
 
 # FIXME: this will probably need to be subclassed by object type
 
 class CustomRbac(permissions.BasePermission):
 
-    def _common_user_check(self, request):
-        # no anonymous users
-        if request.user.is_anonymous():
-            # 401, not 403, hence no raised exception
+    def _check_permissions(self, request, view, obj=None):
+        # Check that obj (if given) is active, otherwise raise a 404.
+        active = getattr(obj, 'active', getattr(obj, 'is_active', True))
+        if callable(active):
+            active = active()
+        if not active:
+            raise Http404()
+        # Don't allow anonymous users. 401, not 403, hence no raised exception.
+        if not request.user or request.user.is_anonymous():
             return False
-        # superusers are always good
-        if request.user.is_superuser:
-            return True
-        # other users must have associated acom user records & be active
+        # Don't allow inactive users (and respond with a 403).
         if not request.user.is_active:
             raise PermissionDenied()
-        return True
-
-    def has_permission(self, request, view, obj=None):
-        if not self._common_user_check(request):
-            return False
+        # Always allow superusers (as long as they are active).
+        if request.user.is_superuser:
+            return True
+        # If no obj is given, check list permissions.
         if obj is None:
             if getattr(view, 'list_permissions_check', None):
-                if request.user.is_superuser:
-                    return True
                 if not view.list_permissions_check(request):
                     raise PermissionDenied()
             elif not getattr(view, 'item_permissions_check', None):
-                raise Exception("internal error, list_permissions_check or item_permissions_check must be defined")
+                raise Exception('internal error, list_permissions_check or '
+                                'item_permissions_check must be defined')
             return True
+        # Otherwise, check the item permissions for the given obj.
         else:
-            # haven't tested around these confines yet
-            raise Exception("did not expect to get to this position")
+            if not view.item_permissions_check(request, obj):
+                raise PermissionDenied()
+            return True
+
+    def has_permission(self, request, view, obj=None):
+        logger.debug('has_permission(user=%s method=%s data=%r, %s, %r)',
+                     request.user, request.method, request.DATA,
+                     view.__class__.__name__, obj)
+        try:
+            response = self._check_permissions(request, view, obj)
+        except Exception, e:
+            logger.debug('has_permission raised %r', e, exc_info=True)
+            raise
+        else:
+            logger.debug('has_permission returned %r', response)
+            return response
 
     def has_object_permission(self, request, view, obj):
-        if isinstance(obj, User):
-            if not obj.is_active:
-                raise Http404()
-        else:
-            if not obj.active:
-                raise Http404()
-        if request.user.is_superuser:
-            return True
-        if not self._common_user_check(request):
-            return False
-        if not view.item_permissions_check(request, obj):
-            raise PermissionDenied()
-        return True
-
+        return self.has_permission(request, view, obj)

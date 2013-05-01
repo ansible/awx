@@ -5,9 +5,6 @@ CC TODO
 =======
 * supervisord to start celery, modify ansible playbook to set up supervisord <- ChrisC
 * documentation on how to run with callbacks from NOT a launchjob <-- ChrisC
-* interactive SSH agent support for launch jobs/creds <-- ChrisC
-* michael to modify ansible to accept ssh password and sudo password from env vars
-* way to send cntrl-c to kill job (method on job?) <-- ChrisC, low priority 
 * default_playbook should be relative to scm_repository and not allow "../" out of the directory
 
 * do we need something other than default playbook (ProjectOptions) <-- MPD later

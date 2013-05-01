@@ -18,6 +18,7 @@ import datetime
 import json
 
 from django.contrib.auth.models import User as DjangoUser
+from django.core.urlresolvers import reverse
 import django.test
 from django.test.client import Client
 from lib.main.models import *
@@ -64,17 +65,26 @@ class OrganizationsTest(BaseTest):
         self.organizations[1].admins.add(self.normal_django_user)
 
     def test_get_list(self):
+        url = reverse('main:organizations_list')
 
         # no credentials == 401
-        self.get(self.collection(), expect=401)
+        self.options(url, expect=401)
+        self.head(url, expect=401)
+        self.get(url, expect=401)
 
         # wrong credentials == 401
-        self.get(self.collection(), expect=401, auth=self.get_invalid_credentials())
+        with self.current_user(self.get_invalid_credentials()):
+            self.options(url, expect=401)
+            self.head(url, expect=401)
+            self.get(url, expect=401)
 
         # superuser credentials == 200, full list
-        data = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
-        self.check_pagination_and_size(data, 10, previous=None, next=None)
-        [self.assertTrue(key in data['results'][0]) for key in ['name', 'description', 'url', 'creation_date', 'id' ]]
+        with self.current_user(self.super_django_user):
+            self.options(url, expect=200)
+            self.head(url, expect=200)
+            data = self.get(url, expect=200)
+            self.check_pagination_and_size(data, 10, previous=None, next=None)
+            [self.assertTrue(key in data['results'][0]) for key in ['name', 'description', 'url', 'creation_date', 'id' ]]
 
         # check that the related URL functionality works
         related = data['results'][0]['related']

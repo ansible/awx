@@ -905,6 +905,11 @@ class JobTemplate(CommonModel):
         return cls.can_user_add(user, data)
 
     @classmethod
+    def can_user_administrate(cls, user, obj, data):
+        '''
+        '''
+
+    @classmethod
     def can_user_add(cls, user, data):
         ''' 
         a user can create a job template if they are a superuser, an org admin of any org
@@ -915,6 +920,8 @@ class JobTemplate(CommonModel):
         '''
 
         if user.is_superuser:
+            return True
+        if not data or '_method' in data:  # FIXME: So the browseable API will work?
             return True
         project = Project.objects.get(pk=data['project'])
         inventory = Inventory.objects.get(pk=data['inventory'])

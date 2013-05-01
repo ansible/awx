@@ -20,7 +20,7 @@ from lib.main.models import *
 from django.contrib.auth.models import User
 from lib.main.serializers import *
 from lib.main.rbac import *
-from django.core.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework import permissions
@@ -36,20 +36,21 @@ class BaseList(generics.ListCreateAPIView):
 
     def list_permissions_check(self, request, obj=None):
         ''' determines some early yes/no access decisions, pre-filtering '''
-        if request.method == 'GET':
-             return True
+        #print '---', request.method, getattr(request, '_method', None)
+        if request.method in ('OPTIONS', 'HEAD', 'GET'):
+            return True
         if request.method == 'POST':
-             if self.__class__.model in [ User ]:
-                  ok = request.user.is_superuser or (request.user.admin_of_organizations.count() > 0)
-                  if not ok:
-                      raise PermissionDenied()
-                  return True
-             else:
-                  # audit all of these to check ownership/readability of subobjects
-                  if not self.__class__.model.can_user_add(request.user, self.request.DATA):
-                      raise PermissionDenied()
-                  return True
-        raise exceptions.NotImplementedError
+            if self.__class__.model in [ User ]:
+                ok = request.user.is_superuser or (request.user.admin_of_organizations.count() > 0)
+                if not ok:
+                    raise PermissionDenied()
+                return True
+            else:
+                # audit all of these to check ownership/readability of subobjects
+                if not self.__class__.model.can_user_add(request.user, self.request.DATA):
+                    raise PermissionDenied()
+                return True
+        return False#raise exceptions.NotImplementedError
 
     def get_queryset(self):
 
@@ -78,8 +79,8 @@ class BaseSubList(BaseList):
 
     def list_permissions_check(self, request, obj=None):
         ''' determines some early yes/no access decisions, pre-filtering '''
-        if request.method == 'GET':
-             return True
+        if request.method in ('OPTIONS', 'HEAD', 'GET'):
+            return True
         if request.method == 'POST':
              # the can_user_attach methods will be called below
              return True
@@ -171,14 +172,10 @@ class BaseSubList(BaseList):
                         if self.__class__.parent_model == Organization:
                              organization = Organization.objects.get(pk=request.DATA[inject_primary_key])
                              import lib.main.views
-			     if self.__class__ == lib.main.views.OrganizationsUsersList:
+                             if self.__class__ == lib.main.views.OrganizationsUsersList:
                                  organization.users.add(obj)
-                                 organization.save()
                              elif self.__class__ == lib.main.views.OrganizationsAdminsList:
                                  organization.admins.add(obj)
-                                 organization.save()
-                                
-
 
                     else:
                         if not UserHelper.can_user_read(request.user, obj):

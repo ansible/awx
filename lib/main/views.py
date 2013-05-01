@@ -20,8 +20,8 @@ from lib.main.models import *
 from django.contrib.auth.models import User
 from lib.main.serializers import *
 from lib.main.rbac import *
-from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
+from rest_framework.exceptions import PermissionDenied
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework import permissions
@@ -266,7 +266,7 @@ class TeamsList(BaseList):
         if self.request.user.is_superuser:
             return base.all()
         return base.filter(
-            admins__in = [ self.request.user ]
+            organization__admins__in = [ self.request.user ]
         ).distinct() | base.filter(
             users__in = [ self.request.user ]
         ).distinct()

@@ -20,5 +20,5 @@ from lib.main.tests.inventory import InventoryTest
 from lib.main.tests.projects import ProjectsTest
 from lib.main.tests.commands import *
 from lib.main.tests.tasks import RunJobTest
-from lib.main.tests.jobs import JobsTest # similar to above, but mostly focused on REST API
+from lib.main.tests.jobs import *
 

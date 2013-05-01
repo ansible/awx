@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible Commander. If not, see <http://www.gnu.org/licenses/>.
 
+import contextlib
 import datetime
 import json
 import os
@@ -21,7 +22,7 @@ import shutil
 import tempfile
 
 from django.conf import settings
-from django.contrib.auth.models import User as DjangoUser
+from django.contrib.auth.models import User
 import django.test
 from django.test.client import Client
 from lib.main.models import *
@@ -36,6 +37,8 @@ class BaseTestMixin(object):
         super(BaseTestMixin, self).setUp()
         self.object_ctr = 0
         self._temp_project_dirs = []
+        self._current_auth = None
+        self._user_passwords = {}
 
     def tearDown(self):
         super(BaseTestMixin, self).tearDown()
@@ -43,14 +46,30 @@ class BaseTestMixin(object):
             if os.path.exists(project_dir):
                 shutil.rmtree(project_dir, True)
 
-    def make_user(self, username, password, super_user=False):
-        django_user = None
+    def make_user(self, username, password=None, super_user=False):
+        user = None
+        password = password or username
         if super_user:
-            django_user = DjangoUser.objects.create_superuser(username, "%s@example.com", password)
+            user = User.objects.create_superuser(username, "%s@example.com", password)
         else:
-            django_user = DjangoUser.objects.create_user(username, "%s@example.com", password)
-        self.assertTrue(django_user.auth_token)
-        return django_user
+            user = User.objects.create_user(username, "%s@example.com", password)
+        self.assertTrue(user.auth_token)
+        self._user_passwords[user.username] = password
+        return user
+
+    @contextlib.contextmanager
+    def current_user(self, user_or_username, password=None):
+        try:
+            if isinstance(user_or_username, User):
+                username = user_or_username.username
+            else:
+                username = user_or_username
+            password = password or self._user_passwords.get(username)
+            previous_auth = self._current_auth
+            self._current_auth = (username, password)
+            yield
+        finally:
+            self._current_auth = previous_auth
 
     def make_organizations(self, created_by, count=1):
         results = []
@@ -121,16 +140,17 @@ class BaseTestMixin(object):
         
     def _generic_rest(self, url, data=None, expect=204, auth=None, method=None):
         assert method is not None
-        method = method.lower()
-        if method not in [ 'get', 'delete' ]:
+        method_name = method.lower()
+        if method_name not in ('options', 'head', 'get', 'delete'):
             assert data is not None
         client = Client()
+        auth = auth or self._current_auth
         if auth:
             if isinstance(auth, (list, tuple)):
                 client.login(username=auth[0], password=auth[1])
             elif isinstance(auth, basestring):
                 client = Client(HTTP_AUTHORIZATION='Token %s' % auth)
-        method = getattr(client,method)
+        method = getattr(client, method_name)
         response = None
         if data is not None:
             response = method(url, json.dumps(data), 'application/json')
@@ -141,11 +161,19 @@ class BaseTestMixin(object):
             assert False, "Failed: %s" % response.content
         if expect is not None:
             assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, response.content)
-        if response.status_code not in [ 202, 204, 400, 405, 409 ]:
+        if method_name == 'head':
+            self.assertFalse(response.content)
+        if response.status_code not in [ 202, 204, 400, 405, 409 ] and method_name != 'head':
             # no JSON responses in these at least for now, 400/409 should probably return some (FIXME)
             return json.loads(response.content)
         else:
             return None
+
+    def options(self, url, expect=200, auth=None):
+        return self._generic_rest(url, data=None, expect=expect, auth=auth, method='options')
+
+    def head(self, url, expect=200, auth=None):
+        return self._generic_rest(url, data=None, expect=expect, auth=auth, method='head')
  
     def get(self, url, expect=200, auth=None):
         return self._generic_rest(url, data=None, expect=expect, auth=auth, method='get')
