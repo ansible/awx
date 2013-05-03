@@ -165,7 +165,7 @@ class HostAdmin(BaseModelAdmin):
     list_filter = ('inventory', 'active')
     #form = HostAdminForm
     fieldsets = (
-        (None, {'fields': (('name', 'active'), 'inventory', 'description', #'vdata'
+        (None, {'fields': (('name', 'active'), 'inventory', 'description', 'variable_data',
         )}),
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('creation_date', 'created_by', 'audit_trail',)}),

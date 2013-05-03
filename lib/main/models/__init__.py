@@ -487,7 +487,7 @@ class VariableData(CommonModelNameNotUnique):
 
     #host  = models.OneToOneField('Host', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
     #group = models.OneToOneField('Group', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
-    data  = models.TextField() # FIXME: JsonField
+    data  = models.TextField() # FIXME: JsonField (and validation)
 
     def __unicode__(self):
         return '%s = %s' % (self.name, self.data)
