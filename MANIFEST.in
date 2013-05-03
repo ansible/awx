@@ -1,0 +1,9 @@
+recursive-include lib *.py
+recursive-include lib/static *.ico
+recursive-include lib/templates *.html
+recursive-exclude lib/settings local_settings.py
+include *.py *.txt *.md
+include MANIFEST.in
+include COPYING
+prune lib/public
+prune lib/project

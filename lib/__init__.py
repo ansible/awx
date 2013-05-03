@@ -14,3 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible Commander. If not, see <http://www.gnu.org/licenses/>.
 
+
+__version__ = '1.2-b1'
+
+import os
+import sys
+
+__all__ = ['__version__']
+
+def manage():
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lib.settings')
+    from django.core.management import execute_from_command_line
+    if len(sys.argv) >= 2 and sys.argv[1] in ('version', '--version'):
+        sys.stdout.write('acom-%s\n' % __version__)
+    else:
+        execute_from_command_line(sys.argv)
