@@ -13,49 +13,49 @@
 
   tasks:
 
-#      - name: remove python-dateutils package if installed
-#        yum: name=python-dateutils15 state=removed
-#      
-#      - name: install packages from yum
-#        yum: name=$item state=installed
-#        with_items:
-#             - libyaml
-#             - gcc
-#             - python-pip
-#             - postgresql               # database client
-#             - postgresql-server        # database server
-#             - python-psycopg2          # database library
-#             - python-devel             # only because pexpect comes from pip
-#             - python-lxml              # xml for ?format=xml instead of json (optional)
-#
-#      - name: install python modules from pip
-#        pip: requirements=${working_dir}/requirements.txt
-#
-#      - name: configure the database authentication more or less open for setup
-#        template: src=templates/pg_hba_low.j2 dest=/var/lib/pgsql/data/pg_hba.conf owner=postgres
-#
-#      - name: restart postgresql
-#        service: name=postgresql state=restarted
-#
-#      # took out parameter... db=acom priv=ALL
-#      - name: setup the postgresql user
-#        postgresql_user: >
-#          name=ansible_commander 
-#          password=${database_password} 
-#          login_user=postgres
-#        sudo_user: postgres
-#
-#      - name: create the database
-#        postgresql_db: name=acom state=present
-#
-#      - name: configure the database authentication for runtime mode
-#        template: src=templates/pg_hba.j2 dest=/var/lib/pgsql/data/pg_hba.conf owner=postgres
+      - name: remove python-dateutils package if installed
+        yum: name=python-dateutils15 state=removed
+      
+      - name: install packages from yum
+        yum: name=$item state=installed
+        with_items:
+             - libyaml
+             - gcc
+             - python-pip
+             - postgresql               # database client
+             - postgresql-server        # database server
+             - python-psycopg2          # database library
+             - python-devel             # only because pexpect comes from pip
+             - python-lxml              # xml for ?format=xml instead of json (optional)
 
-#     - name: restart postgresql
-#       service: name=postgresql state=restarted
+      - name: install python modules from pip
+        pip: requirements=${working_dir}/requirements.txt
 
-#     - name: configure python settings (with database password)
-#       template: src=templates/local_settings.py.j2 dest=${working_dir}/lib/settings/local_settings.py
+      - name: configure the database authentication more or less open for setup
+        template: src=templates/pg_hba_low.j2 dest=/var/lib/pgsql/data/pg_hba.conf owner=postgres
+
+      - name: restart postgresql
+        service: name=postgresql state=restarted
+
+      # took out parameter... db=acom priv=ALL
+      - name: setup the postgresql user
+        postgresql_user: >
+          name=ansible_commander 
+          password=${database_password} 
+          login_user=postgres
+        sudo_user: postgres
+
+      - name: create the database
+        postgresql_db: name=acom state=present
+
+      - name: configure the database authentication for runtime mode
+        template: src=templates/pg_hba.j2 dest=/var/lib/pgsql/data/pg_hba.conf owner=postgres
+
+      - name: restart postgresql
+        service: name=postgresql state=restarted
+
+      - name: configure python settings (with database password)
+        template: src=templates/local_settings.py.j2 dest=${working_dir}/lib/settings/local_settings.py
 
       - name: sync django database
         command: python ${working_dir}/manage.py syncdb --noinput
