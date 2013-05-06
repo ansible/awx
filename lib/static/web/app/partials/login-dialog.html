@@ -1,0 +1,39 @@
+  <div class="row-fluid">
+    <div class="span12">
+      
+      <div id="login-modal" class="modal hide">
+        <div class="modal-header">
+          <h3>Ansible Login</h3>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning alert-block" ng-show="(sessionExpired == true)">Your session timed out due to inactivity. Please sign in again. Session timeout is set to: {{ sessionTimeout }} minutes.</div>
+          <form id="login-form" name="loginForm" class="form-horizontal" novalidate>
+            <div class="control-group">
+              <label class="control-label">Username:</label>
+              <div class="controls">
+                <input type="text" name="username" ng-model="username" required><br />
+                <span class="error" ng-show="loginForm.username.$dirty && loginForm.username.$error.required">A value is required!</span>
+                <span class="errora api-error" ng-bind="usernameError"></span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Password:</label>
+              <div class="controls">
+                <input type="password" name="password" ng-model="password" required><br />
+                <span class="error" ng-show="loginForm.password.$dirty && loginForm.password.$error.required">A value is required!</span>
+                <span class="error api-error" ng-bind="passwordError"></span>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button ng-click="systemLogin(loginForm.username.$modelValue,loginForm.password.$modelValue)"
+                  ng-disabled="loginForm.$invalid || $loginForm.$pristine" 
+                  class="btn btn-primary">Sign In</button>
+        </div>
+      </div><!-- modal -->
+      
+    </div><!-- span -->
+  </div><!-- row -->
+
+  

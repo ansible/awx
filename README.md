@@ -26,6 +26,14 @@ Getting Things Installed
 
 See SETUP.md for requirements and details.
 
+Accessing the new UI
+====================
+
+The UI is installed under lib/static/web. After starting the django server
+(i.e. make runserver), access the ui from a web browser at:
+
+http://127.0.0.1:8013/static/web/app/index.html
+
 License
 =======
 
