@@ -1,0 +1,171 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>jsTree v.1.0 - checkbox documentation</title>
+	<script type="text/javascript" src="../_lib/jquery.js"></script>
+	<script type="text/javascript" src="../_lib/jquery.cookie.js"></script>
+	<script type="text/javascript" src="../_lib/jquery.hotkeys.js"></script>
+	<script type="text/javascript" src="../jquery.jstree.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="syntax/!style.css"/>
+	<link type="text/css" rel="stylesheet" href="!style.css"/>
+	<script type="text/javascript" src="syntax/!script.js"></script>
+</head>
+<body>
+<div id="container">
+
+<h1 id="dhead">jsTree v.1.0</h1>
+<h1>checkbox plugin</h1>
+<h2>Description</h2>
+<div id="description">
+<p>The <code>checkbox</code> plugin makes multiselection possible using three-state checkboxes.</p>
+</div>
+
+<h2 id="configuration">Configuration</h2>
+<div class="panel configuration">
+
+<h3>override_ui</h3>
+<p class="meta">A boolean. Default is <code>false</code>.</p>
+<p>If set to <code>true</code> all selection will be handled by checkboxes. The checkbox plugin will map UI's <a href="ui.html#get_selected">get_selected function</a> to its own <a href="#get_checked">get_checked function</a> and overwrite the <a href="ui.html#reselect">UI reselect function</a>. It will also disable the <code>select_node</code>, <code>deselect_node</code> and <code>deselect_all</code> functions. If left as <code>false</code> nodes can be selected and checked independently. </p>
+
+<h3>checked_parent_open</h3>
+<p class="meta">A Boolean. Default is <code>true</code>.</p>
+<p>When set to <code>true</code> when programatically checking a node in the tree all of its closed parents are opened automatically.</p>
+
+<h3>two_state</h3>
+<p class="meta">A boolean. Default is <code>false</code>.</p>
+<p>If set to <code>true</code> checkboxes will be two-state only, meaning that you will be able to select parent and children independently and there will be no undetermined state.</p>
+
+<h3>real_checkboxes</h3>
+<p class="meta">A boolean. Default is <code>false</code>.</p>
+<p>If set to <code>true</code> real hidden checkboxes will be created for each element, so if the tree is part of a form, checked nodes will be submitted automatically. By default the name of the checkbox is <code>"check_" + <em>the ID of the LI element</em></code> and the value is <code>1</code>, this can be changed using the <code>real_checkboxes_names</code> config option.</p>
+
+<h3>real_checkboxes_names</h3>
+<p class="meta">A function. Default is <code>function (n) { return [("check_" + (n[0].id || Math.ceil(Math.random() * 10000))), 1]; }</code>.</p>
+<p>If real checkboxes are used this function is invoked in the current tree's scope for each new checkbox that is created. It receives a single argument - the node that will contain the checkbox. The function must return an array consisting of two values - the name for the checkbox and the value for the checkbox.</p>
+
+</div>
+
+<h2 id="demos">Demos</h2>
+<div class="panel">
+<h3>Using the checkbox plugin - all you need to do is include it in the list of active plugins.</h3>
+<div id="demo1" class="demo">
+	<ul>
+		<li id="phtml_1">
+			<a href="#">Root node 1</a>
+			<ul>
+				<li id="phtml_2" class="jstree-checked">
+					<a href="#">Child node 1</a>
+				</li>
+				<li id="phtml_3">
+					<a href="#">A Child node 2</a>
+				</li>
+			</ul>
+		</li>
+		<li id="phtml_4">
+			<a href="#">Root node 2</a>
+		</li>
+	</ul>
+</div>
+<script type="text/javascript" class="source">
+$(function () {
+	$("#demo1").jstree({ 
+		"plugins" : [ "themes", "html_data", "checkbox", "sort", "ui" ]
+	});
+});
+</script>
+
+</div>
+
+<h2 id="api">API</h2>
+<div class="panel api">
+<h3 id="_prepare_checkboxes">._prepare_checkboxes ( node )</h3>
+<p>Inserts the checkbox icons on the node. Used internally.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to an element within the tree.</p>
+	</li>
+</ul>
+
+<h3 id="_repair_state">._repair_state ( node )</h3>
+<p>Repairs the checkbox state inside the node. Used internally.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to an element within the tree.</p>
+	</li>
+</ul>
+
+<h3 id="change_state">.change_state ( node , uncheck )</h3>
+<p>Changes the state of a node. Used mostly internally - you'd be better off using the <code>check_node</code> and <code>uncheck_node</code> functions. Triggers an event.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to an element within the tree.</p>
+	</li>
+	<li>
+		<code class="tp">boolean</code> <strong>uncheck</strong>
+		<p>If set to <code>true</code> the node is unchecked, if set to <code>false</code> the node is checked, otherwise - the state is toggled.</p>
+	</li>
+</ul>
+
+<h3 id="check_node">.check_node ( node )</h3>
+<p>Checks a node.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to an element within the tree.</p>
+	</li>
+</ul>
+
+<h3 id="uncheck_node">.uncheck_node ( node )</h3>
+<p>Unchecks a node.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to an element within the tree.</p>
+	</li>
+</ul>
+
+<h3 id="check_all">.check_all ( )</h3>
+<p>Checks all nodes.</p>
+
+<h3 id="uncheck_all">.uncheck_all ( )</h3>
+<p>Unchecks all nodes.</p>
+
+<h3 id="is_checked">.is_checked ( node )</h3>
+<p>Checks if a node is checked. Returns boolean.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to an element within the tree.</p>
+	</li>
+</ul>
+
+<div style="height:1px; visibility:hidden; overflow:hidden;"><span id="get_unchecked">&#160;</span></div>
+<h3 id="get_checked">.get_checked ( context, get_all ), .get_unchecked ( context, get_all )</h3>
+<p>Both functions return jQuery collections.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>context</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to an element within the tree. If specified only nodes inside the specified context are returned, otherwise the whole tree is searched.</p>
+	</li>
+	<li>
+		<code class="tp">boolean</code> <strong>get_all</strong>
+		<p>By default these functions return only top level checked/unchecked nodes (if a node is checked its children are note returned), if this parameter is set to <code>true</code> they will return all checked/unchecked nodes.</p>
+	</li>
+</ul>
+
+<div style="height:1px; visibility:hidden; overflow:hidden;"><span id="hide_checkboxes">&#160;</span></div>
+<h3 id="show_checkboxes">.show_checkboxes ( ), .hide_checkboxes ( )</h3>
+<p>Show or hide the checkbox icons.</p>
+
+</div>
+
+</div>
+</body>
+</html>

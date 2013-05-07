@@ -1,0 +1,199 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>jsTree v.1.0 - dnd documentation</title>
+	<script type="text/javascript" src="../_lib/jquery.js"></script>
+	<script type="text/javascript" src="../_lib/jquery.cookie.js"></script>
+	<script type="text/javascript" src="../_lib/jquery.hotkeys.js"></script>
+	<script type="text/javascript" src="../jquery.jstree.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="syntax/!style.css"/>
+	<link type="text/css" rel="stylesheet" href="!style.css"/>
+	<script type="text/javascript" src="syntax/!script.js"></script>
+</head>
+<body>
+<div id="container">
+
+<h1 id="dhead">jsTree v.1.0</h1>
+<h1>dnd plugin</h1>
+<h2>Description</h2>
+<div id="description">
+<p>The <code>dnd</code> plugin enables drag'n'drop support for jstree, also using foreign nodes and drop targets.</p>
+<p class="note">All foreign node options and callback functions in the config (drop_target, drop_check, drop_finish, drag_target, drag_check, drag_finish) are to be used ONLY when nodes that are not part of any tree are involved.<br />If moving nodes from one tree instance to another - just listen for the "move_node.jstree" event on the receiving tree.<br /><span style="color:red">DO NOT SET drag_target AND drop_target to match tree nodes!</span></p>
+</div>
+
+<h2 id="configuration">Configuration</h2>
+<div class="panel configuration">
+
+<h3>copy_modifier</h3>
+<p class="meta">A string. Default is <code>"ctrl"</code>.</p>
+<p>The special key used to make a drag copy instead of move (<code>"ctrl"</code>, <code>"shift"</code>, <code>"alt"</code>, <code>"meta"</code>).</p>
+
+<h3>check_timeout</h3>
+<p class="meta">A number. Default is <code>200</code>.</p>
+<p>The number of milliseconds to wait before checking if a move is valid upon hovering a node (while dragging). <code>200</code> is a reasonable value - a higher number means better performance but slow feedback to the user, a lower number means lower performance (possibly) but the user will get feedback faster.</p>
+
+<h3>open_timeout</h3>
+<p class="meta">A number. Default is <code>500</code>.</p>
+<p>The number of milliseconds to wait before opening a hovered if it has children (while dragging). This means that the user has to stop over the node for half a second in order to trigger the open operation. Keep in mind that a low value in combination with async data could mean a lot of unneeded traffic, so <code>500</code> is quite reasonable.</p>
+
+<h3>drop_target</h3>
+<p class="meta">A string (jQuery selector) (or <code>false</code>). Default is <code>".jstree-drop"</code>.</p>
+<p>A jquery selector matching all drop targets (you can also use the comma <code>,</code> in the string to specify multiple valid targets). If set to <code>false</code> drop targets are disabled.</p>
+
+<h3>drop_check</h3>
+<p class="meta">A function. Default is <code>function (data) { return true; }</code>.</p>
+<p>Return <code>false</code> to mark the move as invalid, otherwise return <code>true</code>. The <code>data</code> parameter is as follows:</p>
+<p style="margin-left:2em;"><code>data.o</code> - the object being dragged</p>
+<p style="margin-left:2em;"><code>data.r</code> - the drop target</p>
+
+<h3>drop_finish</h3>
+<p class="meta">A function. Default is <code>$.noop</code>.</p>
+<p>Gets executed after a valid drop, you get one parameter, which is as follows:</p>
+<p style="margin-left:2em;"><code>data.o</code> - the object being dragged</p>
+<p style="margin-left:2em;"><code>data.r</code> - the drop target</p>
+
+<h3>drag_target</h3>
+<p class="meta">A string (jQuery selector) (or <code>false</code>). Default is <code>".jstree-draggable"</code>.</p>
+<p>A jquery selector matching all foreign nodes that can be dropped on the tree (you can also use the comma <code>,</code> in the string to specify multiple valid foreign nodes). If set to <code>false</code> dragging foreign nodes is disabled.</p>
+
+<h3>drag_check</h3>
+<p class="meta">A function. Default is <code>function (data) { return { after : false, before : false, inside : true }; }</code>.</p>
+<p>Return a boolean for each position. The <code>data</code> parameter is as follows:</p>
+<p style="margin-left:2em;"><code>data.o</code> - the foreign object being dragged</p>
+<p style="margin-left:2em;"><code>data.r</code> - the hovered node</p>
+
+<h3>drag_finish</h3>
+<p class="meta">A function. Default is <code>$.noop</code>.</p>
+<p>Gets executed after a dropping a foreign element on a tree item, you get one parameter, which is as follows:</p>
+<p style="margin-left:2em;"><code>data.o</code> - the foreign object being dragged</p>
+<p style="margin-left:2em;"><code>data.r</code> - the target node</p>
+
+
+</div>
+
+<h2 id="demos">Demos</h2>
+<div class="panel">
+<h3>Using the dnd plugin</h3>
+<p>Drag stuff around!</p>
+<div class="jstree-drop" style="clear:both; border:5px solid green; background:lime; color:green; height:40px; line-height:40px; text-align:center; font-size:20px;">I have the jstree-drop class</div>
+<div class="jstree-draggable" style="margin:10px 0; clear:both; border:5px solid navy; background:aqua; color:navy; height:40px; line-height:40px; text-align:center; font-size:20px;">I have the jstree-draggable class</div>
+<div id="demo1" class="demo">
+	<ul>
+		<li id="phtml_1">
+			<a href="#">Root node 1</a>
+			<ul>
+				<li id="phtml_2">
+					<a href="#">Child node 1</a>
+				</li>
+				<li id="phtml_3">
+					<a href="#">Child node 2</a>
+				</li>
+			</ul>
+		</li>
+		<li id="phtml_4">
+			<a href="#">Root node 2</a>
+		</li>
+	</ul>
+</div>
+<script type="text/javascript" class="source">
+$(function () {
+	$("#demo1").jstree({ 
+		"dnd" : {
+			"drop_finish" : function () { 
+				alert("DROP"); 
+			},
+			"drag_check" : function (data) {
+				if(data.r.attr("id") == "phtml_1") {
+					return false;
+				}
+				return { 
+					after : false, 
+					before : false, 
+					inside : true 
+				};
+			},
+			"drag_finish" : function (data) { 
+				alert("DRAG OK"); 
+			}
+		},
+		"plugins" : [ "themes", "html_data", "dnd" ]
+	});
+});
+</script>
+
+<h3>Reorder only demo</h3>
+<div id="demo2" class="demo">
+	<ul>
+		<li id="rhtml_1">
+			<a href="#">Root node 1</a>
+			<ul>
+				<li id="rhtml_2">
+					<a href="#">Child node 1</a>
+				</li>
+				<li id="rhtml_3">
+					<a href="#">Child node 2</a>
+				</li>
+				<li id="rhtml_4">
+					<a href="#">Child node 3</a>
+				</li>
+				<li id="rhtml_5">
+					<a href="#">Child node 4</a>
+				</li>
+			</ul>
+		</li>
+		<li id="rhtml_6">
+			<a href="#">Root node 2</a>
+		</li>
+		<li id="rhtml_7">
+			<a href="#">Root node 3</a>
+		</li>
+	</ul>
+</div>
+<script type="text/javascript" class="source">
+$(function () {
+	$("#demo2").jstree({ 
+		"crrm" : { 
+			"move" : {
+				"check_move" : function (m) { 
+					var p = this._get_parent(m.o);
+					if(!p) return false;
+					p = p == -1 ? this.get_container() : p;
+					if(p === m.np) return true;
+					if(p[0] && m.np[0] && p[0] === m.np[0]) return true;
+					return false;
+				}
+			}
+		},
+		"dnd" : {
+			"drop_target" : false,
+			"drag_target" : false
+		},
+		"plugins" : [ "themes", "html_data", "crrm", "dnd" ]
+	});
+});
+</script>
+
+</div>
+
+<h2 id="api">API</h2>
+<div class="panel api">
+
+<div style="height:1px; visibility:hidden;">
+	<span id="dnd_show">&nbsp;</span>
+	<span id="dnd_open">&nbsp;</span>
+	<span id="dnd_finish">&nbsp;</span>
+	<span id="dnd_enter">&nbsp;</span>
+	<span id="start_drag">&nbsp;</span>
+</div>
+<h3 id="dnd_prepare">.dnd_prepare ( ), .dnd_show ( ), .dnd_open ( ), .dnd_finish ( ), .dnd_enter ( ), .dnd_leave ( ), .start_drag ( )</h3>
+<p>All those functions are used internally only. If you want more information - examine the source code.</p>
+
+</div>
+
+</div>
+</body>
+</html>

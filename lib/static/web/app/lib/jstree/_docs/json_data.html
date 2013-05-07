@@ -1,0 +1,249 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>jsTree v.1.0 - json_data documentation</title>
+	<script type="text/javascript" src="../_lib/jquery.js"></script>
+	<script type="text/javascript" src="../_lib/jquery.cookie.js"></script>
+	<script type="text/javascript" src="../_lib/jquery.hotkeys.js"></script>
+	<script type="text/javascript" src="../jquery.jstree.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="syntax/!style.css"/>
+	<link type="text/css" rel="stylesheet" href="!style.css"/>
+	<script type="text/javascript" src="syntax/!script.js"></script>
+</head>
+<body>
+<div id="container">
+
+<h1 id="dhead">jsTree v.1.0</h1>
+<h1>json_data plugin</h1>
+<h2>Description</h2>
+<div id="description">
+<p>The <code>json_data</code> plugin enables jsTree to convert JSON objects to interactive trees. The data (JSON) can be set up in the config or retrieved from a server (also ondemand). Version 1.0 also introduces the experimental progressive render feature, which is suitable for large heavy trees, when the DOM would be too heavy to manipulate.</p>
+<p>The basic structure you need to follow when supplying data in the JSON format is:</p>
+<div class="code_f">
+<pre class="brush:js;">
+{ 
+	"data" : "node_title", 
+	// omit `attr` if not needed; the `attr` object gets passed to the jQuery `attr` function
+	"attr" : { "id" : "node_identificator", "some-other-attribute" : "attribute_value" }, 
+	// `state` and `children` are only used for NON-leaf nodes
+	"state" : "closed", // or "open", defaults to "closed"
+	"children" : [ /* an array of child nodes objects */ ]
+}
+</pre>
+</div>
+<p>The attr object will appear as attributes on the resulting <code>li</code> node.</p>
+<p>You may need to pass some attributes to the <code>a</code> node, or set some metadata, or use language versions (for the <a href="languages.html">languages plugin</a>):</p>
+<div class="code_f">
+<pre class="brush:js;">
+{
+	// `data` can also be an object
+	"data" : { 
+		"title" : "The node title", 
+		// omit when not needed
+		"attr" : {}, 
+		// if `icon` contains a slash / it is treated as a file, used for background
+		// otherwise - it is added as a class to the &lt;ins&gt; node
+		"icon" : "folder"
+	},
+
+	// the `metadata` property will be saved using the jQuery `data` function on the `li` node
+	"metadata" : "a string, array, object, etc",
+
+	// if you use the language plugin - just set this property
+	// also make sure that `data` is an array of objects
+	"language" : "en" // any code you are using
+}
+</pre>
+</div>
+<p>As seen in the first example below - you can also use a simple string to define a node (Child 1 &amp; Child 2).</p>
+</div>
+
+<h2 id="configuration">Configuration</h2>
+<div class="panel configuration">
+<h3>data</h3>
+<p class="meta">A JSON object (or <code>false</code> if not used). Default is <code>false</code>.</p>
+<p>Specifies the content to load into the container and convert to a tree. You can also set this to a function - it will be executed in the tree's scope for every node that needs to be loaded, the function will receive two arguments - the node being loaded &amp; a function to call with the data once your processing is done.</p>
+<h3>ajax</h3>
+<p class="meta">An object (or <code>false</code> if not used). Default is <code>false</code>.</p>
+<p>The ajax config object is pretty much the same as the <a href="http://api.jquery.com/jQuery.ajax/">jQuery ajax settings object</a>.</p>
+<p>You can set the <code>data</code> option to a function, that will be executed in the current tree's scope (<code>this</code> will be the tree instance) and gets the node about to be open as a paramater (or <code>-1</code> for initial load). Whatever you return in the <code>data</code> function will be sent to the server as data (so for example you can send the node's ID).</p>
+<p>You can set the <code>url</code> option to a function, that will be executed in the current tree's scope (<code>this</code> will be the tree instance) and gets the node about to be open as a paramater (or <code>-1</code> for initial load). Whatever you return in the <code>url</code> function will be used as the ajax URL (so that you can accomodate pretty paths such as /get_children/node_2).</p>
+<p>The <code>error</code> and <code>success</code> functions (if present) also fire in the context of the tree, and if you return a value in the <code>success</code> function it will be used to populate the tree - this can be useful if you want to somehow change what the server returned on the client side before it is displayed in the tree (for example some .NET json implementations require this to work: <code>"success" : function (data) { return data.d; }</code>.</p>
+<h3>correct_state</h3>
+<p class="meta">A Boolean. Default is <code>true</code>.</p>
+<p>If this option is set to <code>true</code> if an AJAX returns an empty result, the node that was about to be opened will be converted to a leaf node (the open icon will no longer be displayed).</p>
+<h3>progressive_render</h3>
+<p class="meta">A Boolean. Default is <code>false</code>.</p>
+<p>If this option is set to <code>true</code> only the visible (open nodes) parts of the returned JSON are converted to DOM nodes, any hidden parts are saved away and parsed ondemand (when a node becomes visible). This is useful when you have a large nested tree which would result in a heavy DOM.</p>
+<h3>progressive_unload</h3>
+<p class="meta">A Boolean. Default is <code>false</code>.</p>
+<p>If this option is set to <code>true</code> when a node is closed its children are removed from the DOM and saved as metadata on the node itself, on reopen that metadata is used (much like <code>progressive_render</code>).</p>
+
+<p class="note"><strong>NOTE:</strong><br />If both <code>data</code> and <code>ajax</code> are set the initial tree is rendered from the <code>data</code> string. When opening a closed node (that has no loaded children) an AJAX request is made.</p>
+</div>
+
+<h2 id="demos">Demos</h2>
+<div class="panel">
+
+<h3>Using the data config option</h3>
+<div id="demo1" class="demo"></div>
+<script type="text/javascript" class="source">
+$(function () {
+	$("#demo1").jstree({ 
+		"json_data" : {
+			"data" : [
+				{ 
+					"data" : "A node", 
+					"metadata" : { id : 23 },
+					"children" : [ "Child 1", "A Child 2" ]
+				},
+				{ 
+					"attr" : { "id" : "li.node.id1" }, 
+					"data" : { 
+						"title" : "Long format demo", 
+						"attr" : { "href" : "#" } 
+					} 
+				}
+			]
+		},
+		"plugins" : [ "themes", "json_data", "ui" ]
+	}).bind("select_node.jstree", function (e, data) { alert(jQuery.data(data.rslt.obj[0], "id")); });
+});
+</script>
+
+<h3>Using the ajax config option</h3>
+<div id="demo2" class="demo"></div>
+<script type="text/javascript" class="source">
+$(function () {
+	$("#demo2").jstree({ 
+		"json_data" : {
+			"ajax" : {
+				"url" : "_json_data.json",
+				"data" : function (n) { 
+					return { id : n.attr ? n.attr("id") : 0 }; 
+				}
+			}
+		},
+		"plugins" : [ "themes", "json_data" ]
+	});
+});
+</script>
+
+<h3>Using the progressive render config option</h3>
+<div id="demo3" class="demo"></div>
+<script type="text/javascript" class="source">
+$(function () {
+	$("#demo3").jstree({ 
+		"json_data" : {
+			"data" : [
+				{ 
+					"data" : "A node", 
+					"children" : [ "Child 1", "Child 2" ]
+				},
+				{ 
+					"attr" : { "id" : "li.node.id2" }, 
+					"data" : { 
+						"title" : "Long format demo", 
+						"attr" : { "href" : "#" } 
+					} 
+				}
+			],
+			"progressive_render" : true
+		},
+		"plugins" : [ "themes", "json_data" ]
+	});
+});
+</script>
+
+<h3>Using both the data &amp; ajax config options</h3>
+<div id="demo4" class="demo"></div>
+<script type="text/javascript" class="source">
+$(function () {
+	$("#demo4").jstree({ 
+		"json_data" : {
+			"data" : [
+				{ 
+					"data" : "A node", 
+					"state" : "closed"
+				},
+				{ 
+					"attr" : { "id" : "li.node.id3" }, 
+					"data" : { 
+						"title" : "Long format demo", 
+						"attr" : { "href" : "#" } 
+					} 
+				}
+			],
+			"ajax" : { "url" : "_json_data.json" }
+		},
+		"plugins" : [ "themes", "json_data" ]
+	});
+});
+</script>
+</div>
+
+<h2 id="api">API</h2>
+<div class="panel api">
+<p>Both dummy functions - <code>_is_loaded</code> and <code>load_node</code> are overwritten.</p>
+<h3 id="load_node_json">.load_node_json ( node , success_callback , error_callback )</h3>
+<p>This function is called instead of <code>load_node</code>.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to an element you want loaded. Use <code>-1</code> for root nodes.</p>
+	</li>
+	<li>
+		<code class="tp">function</code> <strong>success_callback</strong>
+		<p>A function to be executed once the node is loaded successfully - used internally. You should wait for the <code>load_node</code> event.</p>
+	</li>
+	<li>
+		<code class="tp">function</code> <strong>error_callback</strong>
+		<p>A function to be executed if the node is not loaded due to an error - used internally. You should wait for the <code>load_node</code> event.</p>
+	</li>
+</ul>
+<h3 id="_parse_json">._parse_json ( data , node , is_callback )</h3>
+<p>This function converts JSON nodes to the DOM structure required by jstree. Returns a jQuery object.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a tree node in the JSON format described above, or an array of such JSON nodes, may also be a string.</p>
+	</li>
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This is the DOM node, jQuery node or selector pointing to the element for which data is parsed. <code>-1</code> means root nodes.</p>
+	</li>
+	<li>
+		<code class="tp">bool</code> <strong>is_callback</strong>
+		<p>Specifies if the function is called recursively - used ONLY internally.</p>
+	</li>
+</ul>
+<h3 id="get_json">.get_json ( node , li_attr , a_attr )</h3>
+<p>This function returns an array of tree nodes converted back to JSON.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to an element you want returned. Use <code>-1</code> or omit to get the whole tree.</p>
+	</li>
+	<li>
+		<code class="tp">array</code> <strong>li_attr</strong>
+		<p>The attributes to collect from the <code>LI</code> node. Defaults to <code>[ "id" , "class" ]</p>
+	</li>
+	<li>
+		<code class="tp">array</code> <strong>a_attr</strong>
+		<p>The attributes to collect from the <code>A</code> node. Defaults to <code>[ ]</p>
+	</li>
+	<li>
+		<code class="tp">boolean</code> <strong>is_callback</strong>
+		<p>Used internally.</p>
+	</li>
+</ul>
+
+</div>
+
+</div>
+</body>
+</html>
