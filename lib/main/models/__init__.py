@@ -874,5 +874,6 @@ def create_auth_token_for_user(sender, **kwargs):
         try:
             Token.objects.get_or_create(user=instance)
         except DatabaseError:
-            pass    # Only fails when creating a new superuser from syncdb on a
-                    # new database (before migrate has been called).
+            pass    
+    # Only fails when creating a new superuser from syncdb on a
+    # new database (before migrate has been called).

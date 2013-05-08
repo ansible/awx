@@ -221,7 +221,7 @@ LOGGING = {
             'handlers': ['console'],
         },
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['console','mail_admins'],
             'level': 'ERROR',
             'propagate': False,
         },

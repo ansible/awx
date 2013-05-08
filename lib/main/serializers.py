@@ -25,9 +25,10 @@ from rest_framework.templatetags.rest_framework import replace_query_param
 # Ansible Commander
 from lib.main.models import *
 
-BASE_FIELDS = ('id', 'url', 'related', 'creation_date', 'name', 'description')
+BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'creation_date', 'name', 'description')
 
 class NextPageField(pagination.NextPageField):
+    ''' makes the pagination relative URL not full URL '''
 
     def to_native(self, value):
         if not value.has_next():
@@ -38,6 +39,7 @@ class NextPageField(pagination.NextPageField):
         return replace_query_param(url, self.page_field, page)
 
 class PreviousPageField(pagination.NextPageField):
+    ''' makes the pagination relative URL not full URL '''
 
     def to_native(self, value):
         if not value.has_previous():
@@ -56,11 +58,22 @@ class PaginationSerializer(pagination.BasePaginationSerializer):
     next = NextPageField(source='*')
     previous = PreviousPageField(source='*')
 
+# objects that if found we should add summary info for them
+SUMMARIZABLE_FKS = ( 
+   'organization', 'host', 'group', 'inventory', 'project', 'team', 'job', 'job_template',
+   'credential', 'permission' 
+)
+# fields that should be summarized regardless of object type
+SUMMARIZABLE_FIELDS = (
+   'name', 'username', 'first_name', 'last_name', 'description'
+)
+
 class BaseSerializer(serializers.ModelSerializer):
 
     # add the URL and related resources
-    url           = serializers.SerializerMethodField('get_absolute_url')
-    related       = serializers.SerializerMethodField('get_related')
+    url            = serializers.SerializerMethodField('get_absolute_url')
+    related        = serializers.SerializerMethodField('get_related')
+    summary_fields = serializers.SerializerMethodField('get_summary_fields')
 
     # make certain fields read only
     creation_date = serializers.SerializerMethodField('get_creation_date') # FIXME: is model Date or DateTime, fix model
@@ -77,6 +90,20 @@ class BaseSerializer(serializers.ModelSerializer):
         if getattr(obj, 'created_by', None):
             res['created_by'] = reverse('main:users_detail', args=(obj.created_by.pk,))
         return res
+
+    def get_summary_fields(self, obj):
+        # return the names (at least) for various fields, so we don't have to write this
+        # method for each object.
+        summary_fields = {}
+        for fk in SUMMARIZABLE_FKS:
+            fkval = getattr(obj, fk, None)
+            if fkval is not None:
+                summary_fields[fk] = {}
+                for field in SUMMARIZABLE_FIELDS:
+                    fval = getattr(fkval, field, None)
+                    if fval is not None:
+                        summary_fields[fk][field] = fval
+        return summary_fields 
 
     def get_creation_date(self, obj):
         if isinstance(obj, User):
