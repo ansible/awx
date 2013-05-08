@@ -86,7 +86,7 @@ class OrganizationsTest(BaseTest):
             self.check_pagination_and_size(response, 10, previous=None, next=None)
             self.assertEqual(len(response['results']),
                              Organization.objects.count())
-            for field in ['id', 'url', 'name', 'description', 'creation_date']:
+            for field in ['id', 'url', 'name', 'description', 'created']:
                 self.assertTrue(field in response['results'][0],
                                 'field %s not in result' % field)
 

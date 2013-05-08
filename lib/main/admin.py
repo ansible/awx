@@ -72,10 +72,10 @@ class OrganizationAdmin(BaseModelAdmin):
         (_('Members'), {'fields': ('users', 'admins',)}),
         (_('Projects'), {'fields': ('projects',)}),
         (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
+        (_('Audit Trail'), {'fields': ('created', 'created_by',
                                        'audit_trail',)}),
     )
-    readonly_fields = ('creation_date', 'created_by', 'audit_trail')
+    readonly_fields = ('created', 'created_by', 'audit_trail')
     filter_horizontal = ('users', 'admins', 'projects', 'tags')
 
 class InventoryHostInline(admin.StackedInline):
@@ -99,9 +99,9 @@ class InventoryAdmin(BaseModelAdmin):
     fieldsets = (
         (None, {'fields': (('name', 'active'), 'organization', 'description',)}),
         (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('creation_date', 'created_by', 'audit_trail',)}),
+        (_('Audit Trail'), {'fields': ('created', 'created_by', 'audit_trail',)}),
     )
-    readonly_fields = ('creation_date', 'created_by', 'audit_trail')
+    readonly_fields = ('created', 'created_by', 'audit_trail')
     filter_horizontal = ('tags',)
     inlines = [InventoryHostInline, InventoryGroupInline]
 
@@ -168,9 +168,9 @@ class HostAdmin(BaseModelAdmin):
         (None, {'fields': (('name', 'active'), 'inventory', 'description', 'variable_data',
         )}),
         (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('creation_date', 'created_by', 'audit_trail',)}),
+        (_('Audit Trail'), {'fields': ('created', 'created_by', 'audit_trail',)}),
     )
-    readonly_fields = ('creation_date', 'created_by', 'audit_trail')
+    readonly_fields = ('created', 'created_by', 'audit_trail')
     filter_horizontal = ('tags',)
     # FIXME: Edit reverse of many to many for groups.
     #inlines = [VariableDataInline]
@@ -183,9 +183,9 @@ class GroupAdmin(BaseModelAdmin):
         (None, {'fields': (('name', 'active'), 'inventory', 'description',
                             'parents')}),
         (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('creation_date', 'created_by', 'audit_trail',)}),
+        (_('Audit Trail'), {'fields': ('created', 'created_by', 'audit_trail',)}),
     )
-    readonly_fields = ('creation_date', 'created_by', 'audit_trail')
+    readonly_fields = ('created', 'created_by', 'audit_trail')
     filter_horizontal = ('parents', 'hosts', 'tags')
     #inlines = [VariableDataInline]
 
@@ -202,9 +202,9 @@ class CredentialAdmin(BaseModelAdmin):
                                      'ssh_key_data', 'ssh_key_unlock',
                                      ('sudo_username', 'sudo_password'))}),
         #(_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('creation_date', 'created_by', 'audit_trail',)}),
+        (_('Audit Trail'), {'fields': ('created', 'created_by', 'audit_trail',)}),
     )
-    readonly_fields = ('creation_date', 'created_by', 'audit_trail')
+    readonly_fields = ('created', 'created_by', 'audit_trail')
     filter_horizontal = ('tags',)
 
 class TeamAdmin(BaseModelAdmin):
@@ -219,9 +219,9 @@ class ProjectAdmin(BaseModelAdmin):
         (None, {'fields': (('name', 'active'), 'description', 'local_path',
                             'get_available_playbooks_display')}),
         (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('creation_date', 'created_by', 'audit_trail',)}),
+        (_('Audit Trail'), {'fields': ('created', 'created_by', 'audit_trail',)}),
     )
-    readonly_fields = ('creation_date', 'created_by', 'audit_trail',
+    readonly_fields = ('created', 'created_by', 'audit_trail',
                        'get_available_playbooks_display')
     filter_horizontal = ('tags',)
 
@@ -245,14 +245,14 @@ class JobTemplateAdmin(BaseModelAdmin):
                            'get_create_link_display', 'get_jobs_link_display')}),
         (_('Job Parameters'), {'fields': ('inventory', 'project', 'playbook',
                                           'credential', 'job_type')}),
-        (_('More Options'), {'fields': ('use_sudo', 'forks', 'limit',
+        (_('More Options'), {'fields': ('forks', 'limit',
                                         'verbosity', 'extra_vars'),
                              'classes': ('collapse',)}),
         #(_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
+        (_('Audit Trail'), {'fields': ('created', 'created_by',
                                        'audit_trail',)}),
     )
-    readonly_fields = ('creation_date', 'created_by', 'audit_trail',
+    readonly_fields = ('created', 'created_by', 'audit_trail',
                        'get_create_link_display', 'get_jobs_link_display')
     form = JobTemplateAdminForm
     #filter_horizontal = ('tags',)
@@ -277,9 +277,6 @@ class JobTemplateAdmin(BaseModelAdmin):
             create_opts['playbook'] = obj.playbook
         if obj.credential:
             create_opts['credential'] = obj.credential.pk
-        if obj.use_sudo is not None:
-            # Assume these are the defaults for a null boolean field select.
-            create_opts['use_sudo'] = 2 if obj.use_sudo else 3
         if obj.forks:
             create_opts['forks'] = obj.forks
         if obj.limit:
@@ -287,7 +284,7 @@ class JobTemplateAdmin(BaseModelAdmin):
         if obj.verbosity:
             create_opts['verbosity'] = obj.verbosity
         if obj.extra_vars:
-            create_opts['extra_vars'] = json.dumps(obj.extra_vars)
+            create_opts['extra_vars'] = obj.extra_vars
         create_url += '?%s' % urllib.urlencode(create_opts)
         return format_html('<a href="{0}">{1}</a>', create_url, 'Create Job')
     get_create_link_display.short_description = _('Create Job')
@@ -313,8 +310,9 @@ class JobHostSummaryInlineForJob(JobHostSummaryInline):
 
 class JobEventInlineForJob(JobEventInline):
 
-    fields = ('created', 'event', 'get_event_data_display', 'host')
-    readonly_fields = ('created', 'event', 'get_event_data_display', 'host')
+    fields = ('created', 'event', 'get_event_data_display', 'failed', 'host')
+    readonly_fields = ('created', 'event', 'get_event_data_display', 'failed',
+                       'host')
 
 class JobAdmin(BaseModelAdmin):
 
@@ -324,24 +322,23 @@ class JobAdmin(BaseModelAdmin):
         (None, {'fields': ('name', 'job_template', 'description')}),
         (_('Job Parameters'), {'fields': ('inventory', 'project', 'playbook',
                                           'credential', 'job_type')}),
-        (_('More Options'), {'fields': ('use_sudo', 'forks', 'limit',
-                                        'verbosity', 'extra_vars'),
+        (_('More Options'), {'fields': ('forks', 'limit', 'verbosity',
+                                        'extra_vars'),
                              'classes': ('collapse',)}),
         (_('Start Job'), {'fields': ('start_job', 'ssh_password',
                                      'sudo_password', 'ssh_key_unlock')}),
         #(_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('creation_date', 'created_by',
+        (_('Audit Trail'), {'fields': ('created', 'created_by',
                             'audit_trail',)}),
-        (_('Job Status'), {'fields': (('status', 'cancel_job'),
+        (_('Job Status'), {'fields': (('status', 'failed', 'cancel_job'),
                                       'get_result_stdout_display',
-                                      'get_result_stderr_display',
                                       'get_result_traceback_display',
                                       'celery_task_id')}),
     )
-    readonly_fields = ('status', 'get_job_template_display',
-                       'get_result_stdout_display', 'get_result_stderr_display',
+    readonly_fields = ('status', 'failed', 'get_job_template_display',
+                       'get_result_stdout_display',
                        'get_result_traceback_display', 'celery_task_id',
-                       'creation_date', 'created_by', 'audit_trail',)
+                       'created', 'created_by', 'audit_trail',)
     filter_horizontal = ('tags',)
     form = JobAdminForm
     inlines = [JobHostSummaryInlineForJob, JobEventInlineForJob]
@@ -351,7 +348,7 @@ class JobAdmin(BaseModelAdmin):
         if obj and obj.pk and obj.status != 'new':
             ro_fields.extend(['name', 'description', 'job_template',
                               'inventory', 'project', 'playbook', 'credential',
-                              'job_type', 'use_sudo', 'forks', 'limit',
+                              'job_type', 'forks', 'limit',
                               'verbosity', 'extra_vars'])
         return ro_fields
 
@@ -359,7 +356,7 @@ class JobAdmin(BaseModelAdmin):
         fsets = list(super(JobAdmin, self).get_fieldsets(request, obj))
         if not obj or not obj.pk or obj.status == 'new':
             fsets = [fs for fs in fsets if
-                     'creation_date' not in fs[1]['fields'] and
+                     'created' not in fs[1]['fields'] and
                      'celery_task_id' not in fs[1]['fields']]
         if not obj or (obj and obj.pk and obj.status != 'new'):
             fsets = [fs for fs in fsets if 'start_job' not in fs[1]['fields']]
@@ -367,7 +364,6 @@ class JobAdmin(BaseModelAdmin):
             for fs in fsets:
                 if 'celery_task_id' in fs[1]['fields']:
                     fs[1]['fields'] = ('status', 'get_result_stdout_display',
-                                       'get_result_stderr_display',
                                        'get_result_traceback_display',
                                        'celery_task_id')
         return fsets
@@ -396,12 +392,6 @@ class JobAdmin(BaseModelAdmin):
                            obj.result_stdout or ' ')
     get_result_stdout_display.short_description = _('Stdout')
     get_result_stdout_display.allow_tags = True
-
-    def get_result_stderr_display(self, obj):
-        return format_html('<pre class="result-display">{0}</pre>',
-                           obj.result_stderr or ' ')
-    get_result_stderr_display.short_description = _('Stderr')
-    get_result_stderr_display.allow_tags = True
 
     def get_result_traceback_display(self, obj):
         return format_html('<pre class="result-display">{0}</pre>',

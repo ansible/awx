@@ -213,7 +213,6 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
         #print 'stdout:', job.result_stdout
-        #print 'stderr:', job.result_stderr
         #print job.status
         #print settings.DATABASES
         #print self.run_job_args
@@ -352,9 +351,8 @@ class RunJobTest(BaseCeleryTest):
 
     def test_extra_job_options(self):
         self.create_test_project(TEST_PLAYBOOK)
-        job_template = self.create_test_job_template(use_sudo=True, forks=3,
-                                                     verbosity=2,
-                                                     extra_vars={'foo': 1})
+        job_template = self.create_test_job_template(forks=3, verbosity=2,
+                                                     extra_vars='foo=1')
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
         self.assertFalse(job.get_passwords_needed_to_start())
@@ -365,10 +363,9 @@ class RunJobTest(BaseCeleryTest):
         # privileges, but we're mainly checking the command line arguments.
         self.assertTrue(job.status in ('successful', 'failed'))
         self.assertTrue(job.result_stdout)
-        self.assertTrue('--sudo' in self.run_job_args)
         self.assertTrue('--forks=3' in self.run_job_args)
         self.assertTrue('-vv' in self.run_job_args)
-        self.assertTrue('--extra-vars=foo=1' in self.run_job_args)
+        self.assertTrue('-e' in self.run_job_args)
 
     def test_limit_option(self):
         self.create_test_project(TEST_PLAYBOOK)
@@ -380,7 +377,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
         self.assertEqual(job.status, 'failed')
-        self.assertTrue('--limit=bad.example.com' in self.run_job_args)
+        self.assertTrue('-l' in self.run_job_args)
 
     def test_ssh_username_and_password(self):
         self.create_test_credential(ssh_username='sshuser',
@@ -394,7 +391,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
         self.assertEqual(job.status, 'successful')
-        self.assertTrue('--user=sshuser' in self.run_job_args)
+        self.assertTrue('-u' in self.run_job_args)
         self.assertTrue('--ask-pass' in self.run_job_args)
 
     def test_ssh_ask_password(self):
@@ -427,7 +424,7 @@ class RunJobTest(BaseCeleryTest):
         # Job may fail if current user doesn't have password-less sudo
         # privileges, but we're mainly checking the command line arguments.
         self.assertTrue(job.status in ('successful', 'failed'))
-        self.assertTrue('--sudo-user=sudouser' in self.run_job_args)
+        self.assertTrue('-U' in self.run_job_args)
         self.assertTrue('--ask-sudo-pass' in self.run_job_args)
 
     def test_sudo_ask_password(self):

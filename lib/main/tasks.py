@@ -45,9 +45,13 @@ class RunJob(Task):
         '''
         job = Job.objects.get(pk=job_pk)
         if job_updates:
+            update_fields = []
             for field, value in job_updates.items():
                 setattr(job, field, value)
-            job.save(update_fields=job_updates.keys())
+                update_fields.append(field)
+                if field == 'status':
+                    update_fields.append('failed')
+            job.save(update_fields=update_fields)
         return job
 
     def get_path_to(self, *args):
@@ -120,25 +124,20 @@ class RunJob(Task):
         args = ['ansible-playbook', '-i', inventory_script]
         if job.job_type == 'check':
             args.append('--check')
-        args.append('--user=%s' % ssh_username)
+        args.extend(['-u', ssh_username])
         if 'ssh_password' in kwargs.get('passwords', {}):
             args.append('--ask-pass')
-        if job.use_sudo:
-            args.append('--sudo')
-        args.append('--sudo-user=%s' % sudo_username)
+        args.extend(['-U', sudo_username])
         if 'sudo_password' in kwargs.get('passwords', {}):
             args.append('--ask-sudo-pass')
         if job.forks:  # FIXME: Max limit?
             args.append('--forks=%d' % job.forks)
         if job.limit:
-            args.append('--limit=%s' % job.limit)
+            args.extend(['-l', job.limit])
         if job.verbosity:
             args.append('-%s' % ('v' * min(3, job.verbosity)))
         if job.extra_vars:
-            # FIXME: escaping!
-            extra_vars = ' '.join(['%s=%s' % (str(k), str(v)) for k,v in
-                                   job.extra_vars.items()])
-            args.append('--extra-vars=%s' % extra_vars)
+            args.extend(['-e', job.extra_vars])
         args.append(job.playbook) # relative path to project.local_path
         ssh_key_path = kwargs.get('ssh_key_path', '')
         if ssh_key_path:
@@ -152,7 +151,7 @@ class RunJob(Task):
         Run the job using pexpect to capture output and provide passwords when
         requested.
         '''
-        status, stdout, stderr = 'error', '', ''
+        status, stdout = 'error', ''
         logfile = cStringIO.StringIO()
         logfile_pos = logfile.tell()
         child = pexpect.spawn(args[0], args[1:], cwd=cwd, env=env)
@@ -190,22 +189,22 @@ class RunJob(Task):
         else:
             status = 'failed'
         stdout = logfile.getvalue()
-        return status, stdout, stderr
+        return status, stdout
 
     def run(self, job_pk, **kwargs):
         '''
         Run the job using ansible-playbook and capture its output.
         '''
         job = self.update_job(job_pk, status='running')
-        status, stdout, stderr, tb = 'error', '', '', ''
+        status, stdout, tb = 'error', '', ''
         try:
             kwargs['ssh_key_path'] = self.build_ssh_key_path(job, **kwargs)
             kwargs['passwords'] = self.build_passwords(job, **kwargs)
             args = self.build_args(job, **kwargs)
             cwd = job.project.local_path
             env = self.build_env(job, **kwargs)
-            status, stdout, stderr = self.run_pexpect(job_pk, args, cwd, env,
-                                                      kwargs['passwords'])
+            status, stdout = self.run_pexpect(job_pk, args, cwd, env,
+                                              kwargs['passwords'])
         except Exception:
             tb = traceback.format_exc()
         finally:
@@ -215,4 +214,4 @@ class RunJob(Task):
                 except IOError:
                     pass
         self.update_job(job_pk, status=status, result_stdout=stdout,
-                        result_stderr=stderr, result_traceback=tb)
+                        result_traceback=tb)

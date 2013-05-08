@@ -30,6 +30,7 @@ from jsonfield import JSONField
 from djcelery.models import TaskMeta
 from rest_framework.authtoken.models import Token
 import yaml
+from lib.main.fields import *
 
 # TODO: reporting model TBD
 
@@ -81,7 +82,7 @@ class EditHelper(object):
     @classmethod
     def illegal_changes(cls, request, obj, model_class):
         ''' have any illegal changes been made (for a PUT request)? '''
-        from lib.main.access import *
+        from lib.main.access import check_user_access
         #can_admin = model_class.can_user_administrate(request.user, obj, request.DATA)
         can_admin = check_user_access(request.user, User, 'change', obj, request.DATA)
         if (not can_admin) or (can_admin == 'partial'):
@@ -121,9 +122,7 @@ class PrimordialModel(models.Model):
 
     description   = models.TextField(blank=True, default='')
     created_by    = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, related_name='%s(class)s_created', editable=False) # not blank=False on purpose for admin!
-    creation_date = models.DateField(auto_now_add=True)
-    #created       = models.DateTimeField(auto_now_add=True)
-    #modified      = models.DateTimeField(auto_now=True)
+    created       = models.DateTimeField(auto_now_add=True)
     tags          = models.ManyToManyField('Tag', related_name='%(class)s_by_tag', blank=True)
     audit_trail   = models.ManyToManyField('AuditTrail', related_name='%(class)s_by_audit_trail', blank=True)
     active        = models.BooleanField(default=True)
@@ -222,8 +221,10 @@ class Host(CommonModelNameNotUnique):
         app_label = 'main'
         unique_together = (("name", "inventory"),)
 
-    variable_data  = models.OneToOneField('VariableData', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='host')
-    inventory      = models.ForeignKey('Inventory', null=False, related_name='hosts')
+    variable_data           = models.OneToOneField('VariableData', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='host')
+    inventory               = models.ForeignKey('Inventory', null=False, related_name='hosts')
+    last_job                = models.ForeignKey('Job', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job+')
+    last_job_host_summary   = models.ForeignKey('JobHostSummary', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job_summary+')
 
     def __unicode__(self):
         return self.name
@@ -269,7 +270,7 @@ class VariableData(CommonModelNameNotUnique):
 
     #host  = models.OneToOneField('Host', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
     #group = models.OneToOneField('Group', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
-    data  = models.TextField() # FIXME: JsonField (and validation)
+    data  = JSONField(default='')
 
     def __unicode__(self):
         return '%s = %s' % (self.name, self.data)
@@ -499,10 +500,6 @@ class JobTemplate(CommonModel):
         default=None,
         on_delete=models.SET_NULL,
     )
-    use_sudo = models.NullBooleanField(
-        blank=True,
-        default=None,
-    )
     forks = models.PositiveIntegerField(
         blank=True,
         default=0,
@@ -516,7 +513,7 @@ class JobTemplate(CommonModel):
         blank=True,
         default=0,
     )
-    extra_vars = JSONField(
+    extra_vars = models.TextField(
         blank=True,
         default='',
     )
@@ -534,7 +531,6 @@ class JobTemplate(CommonModel):
         kwargs.setdefault('project', self.project)
         kwargs.setdefault('playbook', self.playbook)
         kwargs.setdefault('credential', self.credential)
-        kwargs.setdefault('use_sudo', self.use_sudo)
         kwargs.setdefault('forks', self.forks)
         kwargs.setdefault('limit', self.limit)
         kwargs.setdefault('verbosity', self.verbosity)
@@ -600,10 +596,6 @@ class Job(CommonModel):
     playbook = models.CharField(
         max_length=1024,
     )
-    use_sudo = models.NullBooleanField(
-        blank=True,
-        default=None,
-    )
     forks = models.PositiveIntegerField(
         blank=True,
         default=0,
@@ -617,7 +609,7 @@ class Job(CommonModel):
         blank=True,
         default=0,
     )
-    extra_vars = JSONField(
+    extra_vars = models.TextField(
         blank=True,
         default='',
     )
@@ -631,12 +623,10 @@ class Job(CommonModel):
         default='new',
         editable=False,
     )
-    result_stdout = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
+    failed = models.BooleanField(
+        default=False,
     )
-    result_stderr = models.TextField(
+    result_stdout = models.TextField(
         blank=True,
         default='',
         editable=False,
@@ -662,6 +652,14 @@ class Job(CommonModel):
 
     def get_absolute_url(self):
         return reverse('main:job_detail', args=(self.pk,))
+
+    def save(self, *args, **kwargs):
+        self.failed = bool(self.status in ('failed', 'error', 'canceled'))
+        super(Job, self).save(*args, **kwargs)
+
+    @property
+    def extra_vars_dict(self):
+        '''Return extra_vars key=value pairs as a dictionary.'''
 
     @property
     def celery_task(self):
@@ -795,8 +793,16 @@ class JobEvent(models.Model):
         ('playbook_on_stats', _('Playbook on Stats')),
     ]
 
+    FAILED_EVENTS = [
+        'runner_on_failed',
+        'runner_on_error',
+        'runner_on_unreachable',
+        'runner_on_async_failed',
+    ]
+
     class Meta:
         app_label = 'main'
+        ordering = ('pk',)
 
     job = models.ForeignKey(
         'Job',
@@ -813,6 +819,9 @@ class JobEvent(models.Model):
     event_data = JSONField(
         blank=True,
         default='',
+    )
+    failed = models.BooleanField(
+        default=False,
     )
     host = models.ForeignKey(
         'Host',
@@ -835,6 +844,7 @@ class JobEvent(models.Model):
                 self.host = self.job.inventory.hosts.get(name=self.event_data['host'])
         except (Host.DoesNotExist, AttributeError):
             pass
+        self.failed = bool(self.event in self.FAILED_EVENTS)
         super(JobEvent, self).save(*args, **kwargs)
         self.update_host_summary_from_stats()
 

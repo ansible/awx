@@ -25,7 +25,8 @@ from rest_framework.templatetags.rest_framework import replace_query_param
 # Ansible Commander
 from lib.main.models import *
 
-BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'creation_date', 'name', 'description')
+BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created',
+               'creation_date', 'name', 'description')
 
 class NextPageField(pagination.NextPageField):
     ''' makes the pagination relative URL not full URL '''
@@ -76,7 +77,8 @@ class BaseSerializer(serializers.ModelSerializer):
     summary_fields = serializers.SerializerMethodField('get_summary_fields')
 
     # make certain fields read only
-    creation_date = serializers.SerializerMethodField('get_creation_date') # FIXME: is model Date or DateTime, fix model
+    created       = serializers.SerializerMethodField('get_created')
+    creation_date = serializers.SerializerMethodField('get_creation_date') # FIXME: temporarily left this field in case anything uses it.. should be removed.
     active        = serializers.SerializerMethodField('get_active')
 
     def get_absolute_url(self, obj):
@@ -109,7 +111,13 @@ class BaseSerializer(serializers.ModelSerializer):
         if isinstance(obj, User):
             return obj.date_joined.date()
         else:
-            return obj.creation_date
+            return obj.created.date()
+
+    def get_created(self, obj):
+        if isinstance(obj, User):
+            return obj.date_joined
+        else:
+            return obj.created
 
     def get_active(self, obj):
         if isinstance(obj, User):
@@ -280,8 +288,8 @@ class UserSerializer(BaseSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'url', 'related', 'creation_date', 'username',
-                  'first_name', 'last_name', 'email', 'is_active',
+        fields = ('id', 'url', 'related', 'created', 'creation_date',
+                  'username', 'first_name', 'last_name', 'email', 'is_active',
                   'is_superuser',)
 
     def get_related(self, obj):
@@ -330,8 +338,8 @@ class JobTemplateSerializer(BaseSerializer):
     class Meta:
         model = JobTemplate
         fields = BASE_FIELDS + ('job_type', 'inventory', 'project', 'playbook',
-                                'credential', 'use_sudo', 'forks', 'limit',
-                                'verbosity', 'extra_vars')
+                                'credential', 'forks', 'limit', 'verbosity',
+                                'extra_vars')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -352,9 +360,10 @@ class JobSerializer(BaseSerializer):
         model = Job
         fields = BASE_FIELDS + ('job_template', 'job_type', 'inventory',
                                 'project', 'playbook', 'credential',
-                                'use_sudo', 'forks', 'limit', 'verbosity',
-                                'extra_vars', 'status', 'result_stdout',
-                                'result_traceback', 'passwords_needed_to_start')
+                                'forks', 'limit', 'verbosity', 'extra_vars',
+                                'status', 'failed', 'result_stdout',
+                                'result_traceback',
+                                'passwords_needed_to_start')
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)
@@ -387,7 +396,8 @@ class JobEventSerializer(BaseSerializer):
 
     class Meta:
         model = JobEvent
-        fields = ('id', 'url', 'job', 'event', 'event_data', 'host', 'related')
+        fields = ('id', 'url', 'job', 'event', 'event_data', 'failed', 'host',
+                  'related')
 
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)
