@@ -13,6 +13,9 @@
   <script src="{{ STATIC_URL }}lib/angular/angular.js"></script>
   <script src="{{ STATIC_URL }}lib/angular/angular-resource.js"></script>
   <script src="{{ STATIC_URL }}lib/angular/angular-cookies.js"></script>
+  {% if not debug %}
+  <script src="{{ STATIC_URL }}js/ansible.min.js"></script> <!-- FIXME: Change to whatever we end up calling the minified file. -->
+  {% else %}
   <script src="{{ STATIC_URL }}js/app.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/authenticate.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/rest-services.js"></script>
@@ -55,6 +58,7 @@
   <script src="{{ STATIC_URL }}lib/ansible/directives.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/filters.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/tooltip.js"></script>
+  {% endif %}
   <!-- <script src="{{ STATIC_URL }}lib/angular/http-auth-interceptor.js"></script> -->
  </head>
 <body>
