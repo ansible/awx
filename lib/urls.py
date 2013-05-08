@@ -18,6 +18,7 @@ from django.conf import settings
 from django.conf.urls import *
 
 urlpatterns = patterns('',
+    url(r'', include('lib.ui.urls', namespace='ui', app_name='ui')),
     url(r'^api/', include('lib.main.urls', namespace='main', app_name='main')),
 )
 

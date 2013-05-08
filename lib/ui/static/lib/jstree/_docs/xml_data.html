@@ -1,0 +1,218 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>jsTree v.1.0 - xml_data documentation</title>
+	<script type="text/javascript" src="../_lib/jquery.js"></script>
+	<script type="text/javascript" src="../_lib/jquery.cookie.js"></script>
+	<script type="text/javascript" src="../_lib/jquery.hotkeys.js"></script>
+	<script type="text/javascript" src="../jquery.jstree.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="syntax/!style.css"/>
+	<link type="text/css" rel="stylesheet" href="!style.css"/>
+	<script type="text/javascript" src="syntax/!script.js"></script>
+</head>
+<body>
+<div id="container">
+
+<h1 id="dhead">jsTree v.1.0</h1>
+<h1>xml_data plugin</h1>
+<h2>Description</h2>
+<div id="description">
+<p>The <code>xml_data</code> plugin enables jsTree to convert XML objects to interactive trees (using XSL). The data (XML) can be set up in the config (as a string) or retrieved from a server (also ondemand).</p>
+<p>Two types of XML structures are supported - flat and nested:</p>
+<div class="code_f">
+<pre class="brush:xml;">
+&lt;!-- FLAT --&gt;
+&lt;root&gt;
+	&lt;item id="root_1" parent_id="0" state="closed"&gt;
+		&lt;content&gt;
+			&lt;name&gt;&lt;![CDATA[Node 1]]&gt;&lt;/name&gt;
+		&lt;/content&gt;
+	&lt;/item&gt;
+	&lt;item id="node_2" parent_id="root_1"&gt;
+		&lt;content&gt;
+			&lt;name&gt;&lt;![CDATA[Node 2]]&gt;&lt;/name&gt;
+		&lt;/content&gt;
+	&lt;/item&gt;
+&lt;/root&gt;
+
+&lt;!-- NESTED --&gt;
+&lt;root&gt;
+	&lt;item id="xml_1"&gt;
+		&lt;content&gt;&lt;name&gt;&lt;![CDATA[Root node 1]]&gt;&lt;/name&gt;&lt;/content&gt;
+		&lt;item id="xml_2"&gt;
+			&lt;content&gt;&lt;name&gt;&lt;![CDATA[Child node 1]]&gt;&lt;/name&gt;&lt;/content&gt;
+		&lt;/item&gt;
+	&lt;/item&gt;
+&lt;/root&gt;
+</pre>
+</div>
+<p>Aside from nesting the only difference is the <code>parent_id</code> attribute used in <code>xml_flat</code>.</p>
+<p><code>parent_id</code> defines the parent of the node in XML flat, use <code>0</code> for root nodes. Also when using async - use <code>0</code> for the first level.</p>
+<p><code>state</code> defines the state of the node (<code>open</code> or <code>closed</code>). You can omit it too - jstree will handle the data automatically - nodes with no children will be leaf nodes, nodes with children will be closed.</p>
+<p>All attributes you set on the <code>item</code> node will be transfered to the resulting <code>li</code> node. All attributes you set on the <code>name</code> node will be transfered to the resulting <code>a</code> node.</p>
+<p>If you are using the <a href="languages.html">languages plugin</a> you can have multiple <code>name</code> nodes in a every <code>item</code> node, just set a <code>language</code> attribute on each one (<code>&lt;name language="en" ...</code>).</p>
+<p class="note">Remember to always set the XML header on your XML files.</p>
+</div>
+
+<h2 id="configuration">Configuration</h2>
+<div class="panel configuration">
+<h3>data</h3>
+<p class="meta">A XML string (or <code>false</code> if not used). Default is <code>false</code>.</p>
+<p>Specifies the content to load into the container and convert to a tree.</p>
+<h3>ajax</h3>
+<p class="meta">An object (or <code>false</code> if not used). Default is <code>false</code>.</p>
+<p>The ajax config object is pretty much the same as the <a href="http://api.jquery.com/jQuery.ajax/">jQuery ajax settings object</a>.</p>
+<p>You can set the <code>data</code> option to a function, that will be executed in the current tree's scope (<code>this</code> will be the tree instance) and gets the node about to be open as a parameter (or <code>-1</code> for initial load). Whatever you return in the function will be sent to the server as data (so for example you can send the node's ID).</p>
+<p>You can set the <code>url</code> option to a function, that will be executed in the current tree's scope (<code>this</code> will be the tree instance) and gets the node about to be open as a paramater (or <code>-1</code> for initial load). Whatever you return in the <code>url</code> function will be used as the ajax URL (so that you can accomodate pretty paths such as /get_children/node_2).</p>
+<p>The <code>error</code> and <code>success</code> functions (if present) also fire in the context of the tree, and if you return a value in the <code>success</code> function it will be used to populate the tree - this can be useful if you want to somehow change what the server returned on the client side before it is displayed in the tree. Please note that the <code>success</code> function receives a string as the first parameter, and also if you decide to return a value - return a string.</p>
+<h3>correct_state</h3>
+<p class="meta">A Boolean. Default is <code>true</code>.</p>
+<p>If this option is set to <code>true</code> if an AJAX returns an empty result, the node that was about to be opened will be converted to a leaf node (the open icon will no longer be displayed).</p>
+<h3>clean_node</h3>
+<p class="meta">A Boolean. Default is <code>false</code>.</p>
+<p>Set to true if node needs to be cleaned - usually you should leave this to <code>false</code>.</p>
+<h3>xsl</h3>
+<p class="meta">A string. Default is <code>"flat"</code>.</p>
+<p>The type of structure you wiil be using - set either to <code>"flat"</code> or <code>"nest"</code>.</p>
+<h3>get_skip_empty</h3>
+<p class="meta">A Boolean. Default is <code>false</code>.</p>
+<p>If set to <code>true</code> empty attributes won't be returned by the <code>get_xml</code> function.</p>
+
+<p class="note"><strong>NOTE:</strong><br />If both <code>data</code> and <code>ajax</code> are set the initial tree is rendered from the <code>data</code> string. When opening a closed node (that has no loaded children) an AJAX request is made.</p>
+</div>
+
+<h2 id="demos">Demos</h2>
+<div class="panel">
+
+<h3>Using the data config option (flat)</h3>
+<div id="demo1" class="demo"></div>
+<script type="text/javascript" class="source">
+$(function () {
+	$("#demo1").jstree({ 
+		"xml_data" : {
+			"data" : "" + 
+"<root>" + 
+	"<item id='node_1'>" + 
+		"<content><name>Root node 1</name></content>" + 
+	"</item>" + 
+	"<item>" + 
+		"<content><name>Root node 2</name></content>" + 
+	"</item>" + 
+	"<item parent_id='node_1'>" + 
+		"<content><name>Child node</name></content>" + 
+	"</item>" + 
+"</root>"
+		},
+		"plugins" : [ "themes", "xml_data" ]
+	});
+});
+</script>
+
+<h3>Using the ajax config option (nested)</h3>
+<div id="demo2" class="demo"></div>
+<script type="text/javascript" class="source">
+$(function () {
+	$("#demo2").jstree({ 
+		"xml_data" : {
+			"ajax" : {
+				"url" : "_xml_nest.xml"
+			},
+			"xsl" : "nest"
+		},
+		"plugins" : [ "themes", "xml_data" ]
+	});
+});
+</script>
+
+<h3>Using both the data &amp; ajax config options (flat)</h3>
+<div id="demo4" class="demo"></div>
+<script type="text/javascript" class="source">
+$(function () {
+	$("#demo4").jstree({ 
+		"xml_data" : {
+			"data" : "" + 
+"<root>" + 
+	"<item id='node_1' state='closed'>" + 
+		"<content><name>Root node 1</name></content>" + 
+	"</item>" + 
+	"<item>" + 
+		"<content><name>Root node 2</name></content>" + 
+	"</item>" + 
+"</root>",
+			"ajax" : {
+				"url" : "_xml_flat.xml",
+				"data" : function (n) { 
+					return { 
+						id : n.attr ? n.attr("id") : 0, 
+						rand : new Date().getTime()
+					}; 
+				}
+			}
+		},
+		"plugins" : [ "themes", "xml_data" ]
+	});
+});
+</script>
+</div>
+
+<h2 id="api">API</h2>
+<div class="panel api">
+<p>Both dummy functions - <code>_is_loaded</code> and <code>load_node</code> are overwritten.</p>
+<h3 id="load_node_xml">.load_node_xml ( node , success_callback , error_callback )</h3>
+<p>This function is called instead of <code>load_node</code>.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to an element you want loaded. Use <code>-1</code> for root nodes.</p>
+	</li>
+	<li>
+		<code class="tp">function</code> <strong>success_callback</strong>
+		<p>A function to be executed once the node is loaded successfully - used internally. You should wait for the <code>load_node</code> event.</p>
+	</li>
+	<li>
+		<code class="tp">function</code> <strong>error_callback</strong>
+		<p>A function to be executed if the node is not loaded due to an error - used internally. You should wait for the <code>load_node</code> event.</p>
+	</li>
+</ul>
+<h3 id="parse_xml">.parse_xml ( data )</h3>
+<p>This function converts XML strings or objects to the DOM structure required by jstree. Returns a jQuery object.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>data</strong>
+		<p>The XML string/object.</p>
+	</li>
+</ul>
+<h3 id="get_xml">.get_xml ( type , node , li_attr , a_attr , is_callback )</h3>
+<p>This function returns an array of tree nodes converted back to XML.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">string</code> <strong>type</strong>
+		<p>Either <code>"flat"</code> or <code>"nest"</code>. Default is <code>"flat"</code>.</p>
+	</li>
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to an element you want returned. Use <code>-1</code> or omit to get the whole tree.</p>
+	</li>
+	<li>
+		<code class="tp">array</code> <strong>li_attr</strong>
+		<p>The attributes to collect from the <code>LI</code> node. Defaults to <code>[ "id" , "class" ]</p>
+	</li>
+	<li>
+		<code class="tp">array</code> <strong>a_attr</strong>
+		<p>The attributes to collect from the <code>A</code> node. Defaults to <code>[ ]</p>
+	</li>
+	<li>
+		<code class="tp">string</code> <strong>is_callback</strong>
+		<p>Used internally.</p>
+	</li>
+</ul>
+
+</div>
+
+</div>
+</body>
+</html>

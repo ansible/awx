@@ -1,0 +1,107 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>jsTree v.1.0 - themeroller documentation</title>
+	<script type="text/javascript" src="../_lib/jquery.js"></script>
+	<script type="text/javascript" src="../_lib/jquery.cookie.js"></script>
+	<script type="text/javascript" src="../_lib/jquery.hotkeys.js"></script>
+	<script type="text/javascript" src="../jquery.jstree.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="syntax/!style.css"/>
+	<link type="text/css" rel="stylesheet" href="!style.css"/>
+	<script type="text/javascript" src="syntax/!script.js"></script>
+
+	<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.1/themes/base/jquery-ui.css" type="text/css" media="all" />
+</head>
+<body>
+<div id="container">
+
+<h1 id="dhead">jsTree v.1.0</h1>
+<h1>themeroller plugin</h1>
+<h2>Description</h2>
+<div id="description">
+<p>The <code>themeroller</code> plugin adds support for jQuery UI's themes. Add the plugin as last in your <code>plugins</code> config option. Also make sure that you have included the jquery theme you'd like to use and you should NOT use the native jstree <code>themes</code> plugin.</p>
+<p>If using the search plugin - bind to <code>"search.jstree"</code> to style the found nodes, or apply some styles to the <code>.jstree-search</code> class (which is added by default) but make sure the selector is stronger than your current theme or use <code>!important</code></p>
+</div>
+
+<h2 id="configuration">Configuration</h2>
+<div class="panel configuration">
+<h3>opened</h3>
+<p class="meta">A string. Default is <code>"ui-icon-triangle-1-se"</code>.</p>
+<p>The class name to use for open nodes (shows the arrow to close).</p>
+
+<h3>closed</h3>
+<p class="meta">A string. Default is <code>"ui-icon-triangle-1-e"</code>.</p>
+<p>The class name to use for closed nodes (shows the arrow to open).</p>
+
+<h3>item</h3>
+<p class="meta">A string. Default is <code>"ui-state-default"</code>.</p>
+<p>The class name to use for the actual items.</p>
+
+<h3>item_h</h3>
+<p class="meta">A string. Default is <code>"ui-state-hover"</code>.</p>
+<p>The class name to use for the hovered item.</p>
+
+<h3>item_a</h3>
+<p class="meta">A string. Default is <code>"ui-state-active"</code>.</p>
+<p>The class name to use for selected items (UI plugin).</p>
+
+<h3>item_open</h3>
+<p class="meta">A string. Default is <code>"ui-icon-folder-open"</code>.</p>
+<p>The class name to use for the opened items. If set to <code>false</code> the icon is not shown.</p>
+<h3>item_clsd</h3>
+<p class="meta">A string. Default is <code>"ui-icon-folder-collapsed"</code>.</p>
+<p>The class name to use for the opened items. If set to <code>false</code> the icon is not shown.</p>
+<h3>item_leaf</h3>
+<p class="meta">A string. Default is <code>"ui-icon-document"</code>.</p>
+<p>The class name to use for the opened items. If set to <code>false</code> the icon is not shown.</p>
+
+
+</div>
+
+<h2 id="demos">Demos</h2>
+<div class="panel">
+
+<h3>Using the themeroller plugin</h3>
+<div id="demo1" class="demo">
+	<ul>
+		<li id="phtml_1">
+			<a href="#">Root node 1</a>
+			<ul>
+				<li id="phtml_2">
+					<a href="#"><ins class="ui-icon ui-icon-lightbulb">&#160;</ins>Child node 1</a>
+				</li>
+				<li id="phtml_3">
+					<a href="#">Child node 2</a>
+				</li>
+			</ul>
+		</li>
+		<li id="phtml_4">
+			<a href="#">Root node 2</a>
+		</li>
+	</ul>
+</div>
+<script type="text/javascript" class="source">
+$(function () {
+	$("#demo1").jstree({ 
+		"plugins" : [ "html_data", "ui", "themeroller" ]
+	});
+});
+</script>
+
+</div>
+
+<h2 id="api">API</h2>
+<div class="panel api">
+
+<h3 id="_themeroller">._themeroller ( obj )</h3>
+<p>Fixes the tree on various events by applying the configured classes - used internally only.</p>
+
+</div>
+
+</div>
+</body>
+</html>

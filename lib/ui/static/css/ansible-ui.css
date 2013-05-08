@@ -1,0 +1,223 @@
+/*********************************************
+ *  Copyright (c) 2013 AnsibleWorks, Inc.
+ *  
+ *  ansible-ui.css
+ *  
+ *  custom styles for ansible-ui
+ *
+ */
+
+ html {
+    background-color: #36454F;
+ }
+
+ body {
+    color: #36454F;
+    padding-top: 40px;
+ }
+
+ .container-fluid {
+    min-height: 700px ;
+ }
+
+ .navbar-fixed-top .container {
+    width: 100%;
+ }
+
+ .navbar-inverse .navbar-inner {
+    background-color: #36454F;
+    background-image: -moz-linear-gradient(top, #36454F, #36454F);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#36454F), to(#36454F));
+    background-image: -webkit-linear-gradient(top, #36454F, #36454F);
+    background-image: -o-linear-gradient(top, #36454F, #36454F);
+    background-image: linear-gradient(to bottom, #36454F, #36454F);
+    background-repeat: repeat-x;
+    border-color: #36454F;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#36454F', endColorstr='#36454F', GradientType=0);
+ }
+
+ .navbar-inverse .nav > li > a {
+    color: #A9A9A9;
+ }
+
+ .navbar-inverse .nav > li > a:hover,
+ .navbar-inverse .nav > li > a:focus {
+   color: #2078be;
+ }
+
+ .navbar .brand {
+    margin-left: 15px;
+ }  
+
+ .navbar .brand img {
+    width: 130px;
+ }
+
+ /*.modal-header {
+    border-bottom: 1px solid #000;
+    padding-top: 15px;
+    padding-bottom: 15px;
+ }*/
+
+ a:hover {
+    text-decoration: none;
+ }
+
+ .site-footer {
+    width: 100%;
+    margin-top: 60px;
+    background-color: #36454F;
+    color: #A9A9A9;
+    padding-top: 20px;
+ }
+
+ .copyright {
+    margin-top: 40px;
+    font-size: 11px;
+    font-weight: normal;
+    text-align: center;
+ }
+
+ .site-footer a, 
+ .site-footer a:active, 
+ .site-footer a:hover, 
+ .site-footer a:visited {
+    color: #A9A9A9; 
+    font-size: 18px;
+    margin-right: 15px;
+ }
+
+ .site-footer .social {
+    display: inline-block;
+    margin-left: 50px;
+ }
+
+ .site-footer .logo {
+    display: inline-block;
+    text-align: left;
+    font-size: 12px;
+    margin-right: 20px;
+ }
+
+ .site-footer .logo img {
+    max-width: 165px;
+ }
+
+ .site-footer .logo .tag-line {
+    line-height: normal;
+    margin-top: 5px;
+    margin-left: 15px;
+ }
+
+ .error {
+    font-size: 12px;
+    color: #FF0000;
+ }
+
+ .xsmall {
+    font-size: 12px;
+ }
+
+ legend {
+    font-size: medium;
+    font-weight: bold; 
+ }
+
+ .navigation { 
+    margin: 15px 0 15px 0;
+ }
+
+ .page-number {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+ }
+
+ .page-number-small {
+    display: inline-block;
+    font-size: 11px;
+    margin-left: 10px;
+ }
+
+ .footer-navigation {
+    border-top: 1px solid #000;
+    margin: 20px 0 20px 0;
+    padding-top: 20px;
+ }
+
+ .lookup-navigation {
+    margin: 15px 0 0 0;
+    /*padding-top: 20px;*/
+ }
+
+ .related-footer {
+    padding-bottom: 0;
+    margin: 20px 0 0 0;
+ }
+
+ .page-size {
+    line-size: normal;
+    font-size: 10.5px;
+ }
+ 
+ .page-size-label {
+    margin-left: 15px;
+    font-size: 10.5px;
+ }
+
+ .accordion-heading {
+    font-weight: bold;
+    color: #0088cc;
+ } 
+
+ .accordion-heading i {
+    margin-right: 5px;
+ }
+
+ .search-widget .spin {
+    display: inline-block;
+    font-size: 18px;
+    margin-left: 15px;
+ }
+
+ .nav-path {
+    padding: 5px 0 10px 0;
+    margin-bottom: 25px;
+    margin-right: 5px;
+    border: 1px solid #d8d8d8;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    box-shadow: 3px 3px 4px 0 #808080;
+ }
+
+ .nav-path ul {
+    padding-left: 0; 
+    margin-left: 10px;
+    padding-bottom: 0;
+    margin-bottom: 0;
+
+ }
+
+ .greeting {
+    padding-right: 22px;
+ }
+
+ .breadcrumb .active {
+    color: #36454F;
+ }
+
+ .nav-tabs > li > a {
+    font-weight: bold;
+ }
+
+ input[type="text"].field-mini-height {
+    font-size: 10.5px;
+    height: 12px;
+ }
+
+ select.field-mini-height {
+    height: 22px;
+    font-size: 10.5px;
+ }

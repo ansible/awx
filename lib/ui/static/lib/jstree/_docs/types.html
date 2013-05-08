@@ -1,0 +1,178 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>jsTree v.1.0 - types documentation</title>
+	<script type="text/javascript" src="../_lib/jquery.js"></script>
+	<script type="text/javascript" src="../_lib/jquery.cookie.js"></script>
+	<script type="text/javascript" src="../_lib/jquery.hotkeys.js"></script>
+	<script type="text/javascript" src="../jquery.jstree.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="syntax/!style.css"/>
+	<link type="text/css" rel="stylesheet" href="!style.css"/>
+	<script type="text/javascript" src="syntax/!script.js"></script>
+</head>
+<body>
+<div id="container">
+
+<h1 id="dhead">jsTree v.1.0</h1>
+<h1>types plugin</h1>
+<h2>Description</h2>
+<div id="description">
+<p>The <code>types</code> enables node types - each node can have a type, and you can define rules on how that type should behave - maximum children count, maximum depth, valid children types, selectable or not, etc.</p>
+</div>
+
+<h2 id="configuration">Configuration</h2>
+<div class="panel configuration">
+
+<h3>max_children</h3>
+<p class="meta">A number. Default is <code>-1</code>.</p>
+<p>Defines maximum number of root nodes (<code>-1</code> means unlimited, <code>-2</code> means disable max_children checking in the tree).</p>
+
+<h3>max_depth</h3>
+<p class="meta">A number. Default is <code>-1</code>.</p>
+<p>Defines maximum depth of the tree (<code>-1</code> means unlimited, <code>-2</code> means disable max_depth checking in the tree).</p>
+
+<h3>valid_children</h3>
+<p class="meta">A string or array. Default is <code>"all"</code>.</p>
+<p>Defines valid root node types (could be <code>"all"</code>, <code>"none"</code>, or an array of type strings).</p>
+
+<h3>use_data</h3>
+<p class="meta">A boolean. Default is <code>false</code>.</p>
+<p>If set to <code>true</code> jstree will check every node for <code>$.metadata</code> or <code>$.data</code> for rules (valid_children, max_depth &amp; the function rules). Keep in mind jstree will look for this data in <code>$("li-node-here").metadata().jstree.<em>rule_name</em></code> (or <code>$.data</code> respectively).</p>
+
+<h3>type_attr</h3>
+<p class="meta">A string. Default is <code>"rel"</code>.</p>
+<p>Defines the attribute on each <code>li</code> node, where the type attribute will be stored. <em>For correct usage in IE - do not assign to <code>"type"</code> - it triggers an IE bug.</em></p>
+
+<h3>types</h3>
+<p class="meta">An object.</p>
+<p>Defines all the active types in the tree. Each key is the type name, and each value represents the rules for this type. A <code>default</code> type is defined - all nodes with no explicit type set are treated as if they were of the <code>default</code> type.</p>
+<div style="border:1px solid gray;">
+<pre class="brush:js">
+types : {
+	// the default type
+	"default" : {
+		"max_children"	: -1,
+		"max_depth"		: -1,
+		"valid_children": "all"
+
+		// Bound functions - you can bind any other function here (using boolean or function)
+		//"select_node"	: true,
+		//"open_node"	: true,
+		//"close_node"	: true,
+		//"create_node"	: true,
+		//"delete_node"	: true
+	}
+}
+</pre>
+</div>
+<p>For <code>max_children</code>, <code>max_depth</code> &amp; <code>valid_children</code> use the same values as for the tree, but the value you set will only apply for that node type.</p>
+<p>You can set an <code>icon</code> key - it should be an object consisting of two keys - <code>image</code> (string - location of the image to be used as an icon) &amp; <code>position</code> (string - left and top pixels of the image - 10px 40px, only useful when using sprites - omit otherwise).</p>
+<p>You can set more keys in that object - each key should be a function name, and each value - either a boolean (in order to allow or disallow that operation, on that node type) or a function. If you supply a function - your function will be called with two arguments - the name of the called function (the key) and the arguments passed to that function - you can then decide whether to return <code>true</code> or <code>false</code>.</p>
+<p class="note">For any type - for now you can control only functions that take the node being manipulated as the first argument.</p>
+
+</div>
+
+<h2 id="demos">Demos</h2>
+<div class="panel">
+<h3>Using the types plugin</h3>
+
+<div id="demo1" class="demo">
+	<ul>
+		<li id="phtml_1" rel="root">
+			<a href="#">Root node 1</a>
+			<ul>
+				<li id="phtml_2">
+					<a href="#">Child node 1</a>
+				</li>
+				<li id="phtml_3">
+					<a href="#">Child node 2</a>
+				</li>
+			</ul>
+		</li>
+		<li id="phtml_4" rel="root">
+			<a href="#">Root node 2</a>
+		</li>
+	</ul>
+</div>
+<script type="text/javascript" class="source">
+$(function () {
+	$("#demo1").jstree({ 
+		"types" : {
+			"valid_children" : [ "root" ],
+			"types" : {
+				"root" : {
+					"icon" : { 
+						"image" : "http://static.jstree.com/v.1.0rc/_docs/_drive.png" 
+					},
+					"valid_children" : [ "default" ],
+					"max_depth" : 2,
+					"hover_node" : false,
+					"select_node" : function () {return false;}
+				},
+				"default" : {
+					"valid_children" : [ "default" ]
+				}
+			}
+		},
+		"plugins" : ["themes","html_data","dnd","ui","types"]
+	});
+});
+</script>
+
+</div>
+
+<h2 id="api">API</h2>
+<div class="panel api">
+
+<h3 id="_get_type">._get_type ( node )</h3>
+<p>Get the type of a node.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to the element.</p>
+	</li>
+</ul>
+
+<h3 id="set_type">.set_type ( type , node )</h3>
+<p>Set the type of a node. Triggers an event.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">string</code> <strong>type</strong>
+		<p>The new type.</p>
+	</li>
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to the element.</p>
+	</li>
+</ul>
+
+<h3 id="_check">._check ( rule , node , opts )</h3>
+<p>Checks a rule on a give node. Used mostly internally.</p>
+<ul class="arguments">
+	<li>
+		<code class="tp">string</code> <strong>rule</strong>
+		<p>The rule to check.</p>
+	</li>
+	<li>
+		<code class="tp">mixed</code> <strong>node</strong>
+		<p>This can be a DOM node, jQuery node or selector pointing to the element.</p>
+	</li>
+	<li>
+		<code class="tp">mixed</code> <strong>opts</strong>
+		<p>Any additional options regarding the rule. Used internally.</p>
+	</li>
+</ul>
+
+<div style="height:1px; visibility:hidden;"><span id="check_move">&nbsp;</span></div>
+<h3 id="create_node">.create_node ( ), .check_move ( )</h3>
+<p>Both functions are overwritten to accomodate the new functionality presented by the plugin.</p>
+
+</div>
+
+</div>
+</body>
+</html>

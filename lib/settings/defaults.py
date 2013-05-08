@@ -150,6 +150,7 @@ INSTALLED_APPS = (
     'djcelery',
     'kombu.transport.django',
     'lib.main',
+    'lib.ui',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
