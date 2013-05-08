@@ -17,6 +17,7 @@
 # Django
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
 
 # Django REST framework
 from rest_framework import serializers, pagination
@@ -98,13 +99,17 @@ class BaseSerializer(serializers.ModelSerializer):
         # method for each object.
         summary_fields = {}
         for fk in SUMMARIZABLE_FKS:
-            fkval = getattr(obj, fk, None)
-            if fkval is not None:
-                summary_fields[fk] = {}
-                for field in SUMMARIZABLE_FIELDS:
-                    fval = getattr(fkval, field, None)
-                    if fval is not None:
-                        summary_fields[fk][field] = fval
+            try:
+                fkval = getattr(obj, fk, None)
+                if fkval is not None:
+                    summary_fields[fk] = {}
+                    for field in SUMMARIZABLE_FIELDS:
+                        fval = getattr(fkval, field, None)
+                        if fval is not None:
+                            summary_fields[fk][field] = fval
+            # Can be raised by the reverse accessor for a OneToOneField.
+            except ObjectDoesNotExist:
+                pass
         return summary_fields 
 
     def get_creation_date(self, obj):
