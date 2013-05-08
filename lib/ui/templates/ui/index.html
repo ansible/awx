@@ -62,7 +62,7 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
        <div class="navbar-inner">
          <div class="container">
-           <a class="brand" href="#/"><img class="logo" src="img/ansibleworks-logo.png" /></a>
+           <a class="brand" href="#/"><img class="logo" src="{{ STATIC_URL }}img/ansibleworks-logo.png" /></a>
            <ul class="nav pull-right">
              <li ng-show="current_user.username != null && current_user.username != undefined">
               <a href="" ng-bind="'Hello! ' + current_user.username"></a></li>
@@ -155,7 +155,7 @@
         <a href="mailto://info@ansibleworks.com"><i class="icon-envelope"></i></a>
       </div>
       <div class="logo pull-right">
-        <a href="http://www.ansibleworks.com" target="_blank"><img src="img/ansible-logo-bw-invert.png" /></a>
+        <a href="http://www.ansibleworks.com" target="_blank"><img src="{{ STATIC_URL }}img/ansible-logo-bw-invert.png" /></a>
         <div class="tag-line">Radically simple IT orchestration.</div>
       </div>
     </div>
