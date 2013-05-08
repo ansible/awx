@@ -46,17 +46,6 @@ class BaseTestMixin(object):
             if os.path.exists(project_dir):
                 shutil.rmtree(project_dir, True)
 
-    def make_user(self, username, password=None, super_user=False):
-        user = None
-        password = password or username
-        if super_user:
-            user = User.objects.create_superuser(username, "%s@example.com", password)
-        else:
-            user = User.objects.create_user(username, "%s@example.com", password)
-        self.assertTrue(user.auth_token)
-        self._user_passwords[user.username] = password
-        return user
-
     @contextlib.contextmanager
     def current_user(self, user_or_username, password=None):
         try:
@@ -71,6 +60,17 @@ class BaseTestMixin(object):
         finally:
             self._current_auth = previous_auth
 
+    def make_user(self, username, password=None, super_user=False):
+        user = None
+        password = password or username
+        if super_user:
+            user = User.objects.create_superuser(username, "%s@example.com", password)
+        else:
+            user = User.objects.create_user(username, "%s@example.com", password)
+        self.assertTrue(user.auth_token)
+        self._user_passwords[user.username] = password
+        return user
+
     def make_organizations(self, created_by, count=1):
         results = []
         for x in range(0, count):
@@ -80,35 +80,51 @@ class BaseTestMixin(object):
             ))
         return results
 
-    def make_projects(self, created_by, count=1, playbook_content=''):
-        results = []
-
+    def make_project(self, name, description='', created_by=None,
+                     playbook_content=''):
         if not os.path.exists(settings.PROJECTS_ROOT):
             os.makedirs(settings.PROJECTS_ROOT)
+        # Create temp project directory.
+        project_dir = tempfile.mkdtemp(dir=settings.PROJECTS_ROOT)
+        self._temp_project_dirs.append(project_dir)
+        # Create temp playbook in project (if playbook content is given).
+        if playbook_content:
+            handle, playbook_path = tempfile.mkstemp(suffix='.yml',
+                                                     dir=project_dir)
+            test_playbook_file = os.fdopen(handle, 'w')
+            test_playbook_file.write(playbook_content)
+            test_playbook_file.close()
+        return Project.objects.create(
+            name=name, description=description, local_path=project_dir,
+            created_by=created_by,
+            #scm_type='git',  default_playbook='foo.yml',
+        )
 
+    def make_projects(self, created_by, count=1, playbook_content=''):
+        results = []
         for x in range(0, count):
             self.object_ctr = self.object_ctr + 1
-            # Create temp project directory.
-
-            project_dir = tempfile.mkdtemp(dir=settings.PROJECTS_ROOT)
-            self._temp_project_dirs.append(project_dir)
-            # Create temp playbook in project (if playbook content is given).
-            if playbook_content:
-                handle, playbook_path = tempfile.mkstemp(suffix='.yml',
-                                                         dir=project_dir)
-                test_playbook_file = os.fdopen(handle, 'w')
-                test_playbook_file.write(playbook_content)
-                test_playbook_file.close()
-            results.append(Project.objects.create(
-                name="proj%s-%s" % (x, self.object_ctr), description="proj%s" % x,
-                #scm_type='git',  default_playbook='foo.yml',
-                local_path=project_dir, created_by=created_by
+            results.append(self.make_project(
+                name="proj%s-%s" % (x, self.object_ctr),
+                description="proj%s" % x,
+                created_by=created_by,
+                playbook_content=playbook_content,
             ))
         return results
 
     def check_pagination_and_size(self, data, desired_count, previous=None, next=None):
-        self.assertEquals(data['previous'], previous)
-        self.assertEquals(data['next'], next)
+        self.assertTrue('results' in data)
+        self.assertEqual(data['count'], desired_count)
+        self.assertEqual(data['previous'], previous)
+        self.assertEqual(data['next'], next)
+
+    def check_list_ids(self, data, queryset, check_order=False):
+        data_ids = [x['id'] for x in data['results']]
+        qs_ids = queryset.values_list('pk', flat=True)
+        if check_order:
+            self.assertEqual(data_ids, qs_ids)
+        else:
+            self.assertEqual(set(data_ids), set(qs_ids))
 
     def setup_users(self, just_super_user=False):
         # Create a user.
@@ -191,7 +207,7 @@ class BaseTestMixin(object):
         # TODO: this test helper function doesn't support pagination
         data = self.get(collection_url, expect=200, auth=auth)
         return [item['url'] for item in data['results']]
-    
+
 class BaseTest(BaseTestMixin, django.test.TestCase):
     '''
     Base class for unit tests.

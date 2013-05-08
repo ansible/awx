@@ -39,6 +39,7 @@ MANAGERS = ADMINS
 
 REST_FRAMEWORK = {
     'FILTER_BACKEND': 'lib.main.custom_filters.CustomFilterBackend',
+    'DEFAULT_PAGINATION_SERIALIZER_CLASS': 'lib.main.serializers.PaginationSerializer',
     'PAGINATE_BY': 25,
     'PAGINATE_BY_PARAM': 'page_size',
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -232,6 +233,11 @@ LOGGING = {
             'filters': []
         },
         'lib.main.rbac': {
+            'handlers': ['null'],
+            # Comment the line below to show lots of permissions logging.
+            'propagate': False,
+        },
+        'lib.main.access': {
             'handlers': ['null'],
             # Comment the line below to show lots of permissions logging.
             'propagate': False,

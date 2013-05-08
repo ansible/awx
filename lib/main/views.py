@@ -16,6 +16,7 @@
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
 from lib.main.models import *
 from django.contrib.auth.models import User
 from lib.main.serializers import *
@@ -36,6 +37,7 @@ import re
 import sys
 import json as python_json
 from base_views import *
+from lib.main.access import *
 
 class ApiRootView(APIView):
     '''
@@ -77,8 +79,8 @@ class ApiV1RootView(APIView):
             inventory     = reverse('main:inventory_list'),
             groups        = reverse('main:groups_list'),
             hosts         = reverse('main:hosts_list'),
-            job_templates = reverse('main:job_templates_list'),
-            jobs          = reverse('main:jobs_list'),
+            job_templates = reverse('main:job_template_list'),
+            jobs          = reverse('main:job_list'),
             authtoken     = reverse('main:auth_token_view'),
             me            = reverse('main:users_me_list'),
         )
@@ -314,7 +316,8 @@ class TeamsPermissionsList(BaseSubList):
     def _get_queryset(self):
         team = Team.objects.get(pk=self.kwargs['pk'])
         base = Permission.objects.filter(team = team)
-        if Team.can_user_administrate(self.request.user, team, None):
+        #if Team.can_user_administrate(self.request.user, team, None):
+        if check_user_access(self.request.user, Team, 'change', team, None):
             return base
         elif team.users.filter(pk=self.request.user.pk).count() > 0:
             return base
@@ -358,7 +361,8 @@ class TeamsCredentialsList(BaseSubList):
 
     def _get_queryset(self):
         team = Team.objects.get(pk=self.kwargs['pk'])
-        if not Team.can_user_administrate(self.request.user, team, None):
+        #if not Team.can_user_administrate(self.request.user, team, None):
+        if not check_user_access(self.request.user, Team, 'change', team, None):
             if not (self.request.user.is_superuser or self.request.user in team.users.all()):
                 raise PermissionDenied()
         project_credentials = Credential.objects.filter(
@@ -476,7 +480,8 @@ class UsersTeamsList(BaseSubList):
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
-        if not UserHelper.can_user_administrate(self.request.user, user, None):
+        #if not UserHelper.can_user_administrate(self.request.user, user, None):
+        if not check_user_access(self.request.user, User, 'change', user, None):
             raise PermissionDenied()
         return Team.objects.filter(users__in = [ user ])
 
@@ -493,7 +498,8 @@ class UsersPermissionsList(BaseSubList):
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
-        if not UserHelper.can_user_administrate(self.request.user, user, None):
+        #if not UserHelper.can_user_administrate(self.request.user, user, None):
+        if not check_user_access(self.request.user, User, 'change', user, None):
             raise PermissionDenied()
         return Permission.objects.filter(user=user)
 
@@ -509,7 +515,8 @@ class UsersProjectsList(BaseSubList):
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
-        if not UserHelper.can_user_administrate(self.request.user, user, None):
+        #if not UserHelper.can_user_administrate(self.request.user, user, None):
+        if not check_user_access(self.request.user, User, 'change', user, None):
             raise PermissionDenied()
         teams = user.teams.all()
         return Project.objects.filter(teams__in = teams)
@@ -527,7 +534,8 @@ class UsersCredentialsList(BaseSubList):
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
-        if not UserHelper.can_user_administrate(self.request.user, user, None):
+        #if not UserHelper.can_user_administrate(self.request.user, user, None):
+        if not check_user_access(self.request.user, User, 'change', user, None):
             raise PermissionDenied()
         project_credentials = Credential.objects.filter(
             team__users__in = [ user ]
@@ -546,7 +554,8 @@ class UsersOrganizationsList(BaseSubList):
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
-        if not UserHelper.can_user_administrate(self.request.user, user, None):
+        #if not UserHelper.can_user_administrate(self.request.user, user, None):
+        if not check_user_access(self.request.user, User, 'change', user, None):
             raise PermissionDenied()
         return Organization.objects.filter(users__in = [ user ])
 
@@ -562,7 +571,8 @@ class UsersAdminOrganizationsList(BaseSubList):
 
     def _get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
-        if not UserHelper.can_user_administrate(self.request.user, user, None):
+        #if not UserHelper.can_user_administrate(self.request.user, user, None):
+        if not check_user_access(self.request.user, User, 'change', user, None):
             raise PermissionDenied()
         return Organization.objects.filter(admins__in = [ user ])
 
@@ -876,7 +886,7 @@ class VariableDetail(BaseDetail):
     def put(self, request, *args, **kwargs):
         raise PermissionDenied()
 
-class JobTemplatesList(BaseList):
+class JobTemplateList(BaseList):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
@@ -884,33 +894,36 @@ class JobTemplatesList(BaseList):
     filter_fields = ('name',)
 
     def _get_queryset(self):
-        ''' 
-        I can see job templates when I am a superuser, or I am an admin of the project's orgs, or if I'm in a team on the project. 
-        This does not mean I would be able to launch a job from the template or edit the JobTemplate.
-        '''
-        base = JobTemplate.objects
-        if self.request.user.is_superuser:
-            return base.all()
-        return base.filter(
-            project__organizations__admins__in = [ self.request.user ]
-        ).distinct() | base.filter(
-            project__teams__users__in = [ self.request.user ]
-        ).distinct()
+        return get_user_queryset(self.request.user, self.model)
 
 
-class JobTemplatesDetail(BaseDetail):
+class JobTemplateDetail(BaseDetail):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
     permission_classes = (CustomRbac,)
 
+class JobTemplateJobList(BaseSubList):
+
+    model = Job
+    serializer_class = JobSerializer
+    permission_classes = (CustomRbac,)
+    # to allow the sub-aspect listing
+    parent_model = JobTemplate
+    relationship = 'jobs'
+    # to allow posting to this resource to create resources
+    postable = True
+    # FIXME: go back and add these to other SubLists
+    inject_primary_key_on_post_as = 'job_template'
+    severable = False
+    #filter_fields = ('name',)
+
     def _get_queryset(self):
-        return self.model.objects.all() # FIXME
+        # FIxME: Verify read permission on the job template.
+        job_template = get_object_or_404(JobTemplate, pk=self.kwargs['pk'])
+        return job_template.jobs
 
-class JobTemplatesStart(BaseDetail):
-    pass
-
-class JobsList(BaseList):
+class JobList(BaseList):
 
     model = Job
     serializer_class = JobSerializer
@@ -919,10 +932,16 @@ class JobsList(BaseList):
     def _get_queryset(self):
         return self.model.objects.all() # FIXME
 
-class JobsDetail(BaseDetail):
-    pass
+class JobDetail(BaseDetail):
 
-class JobsHostsList(BaseSubList):
+    model = Job
+    serializer_class = JobSerializer
+    permission_classes = (CustomRbac,)
+
+    def post(self, request, *args, **kwargs):
+        pass # FIXME 
+
+class JobHostsList(BaseSubList):
     pass
 
 class JobsSuccessfulHostsList(BaseSubList):
@@ -937,14 +956,50 @@ class JobsFailedHostsList(BaseSubList):
 class JobsUnreachableHostsList(BaseSubList):
     pass
 
-class JobEventsList(BaseList):
-    pass
+class JobEventList(BaseList):
 
-class JobEventsDetail(BaseDetail):
-    pass
+    model = JobEvent
+    serializer_class = JobEventSerializer
+    permission_classes = (CustomRbac,)
 
-class HostsJobEventsList(BaseSubList):
-    pass
+    def _get_queryset(self):
+        return self.model.objects.all() # FIXME
+
+class JobEventDetail(BaseDetail):
+
+    model = JobEvent
+    serializer_class = JobEventSerializer
+    permission_classes = (CustomRbac,)
+
+class JobJobEventList(BaseSubList):
+
+    model = JobEvent
+    serializer_class = JobEventSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Job
+    relationship = 'job_events'
+    postable = False
+    severable = False
+
+    def _get_queryset(self):
+        job = get_object_or_404(Job, pk=self.kwargs['pk'])
+        # FIXME: Verify read permission on the job.
+        return job.job_events
+
+class HostJobEventList(BaseSubList):
+
+    model = JobEvent
+    serializer_class = JobEventSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Host
+    relationship = 'job_events'
+    postable = False
+    severable = False
+
+    def _get_queryset(self):
+        host = get_object_or_404(Host, pk=self.kwargs['pk'])
+        # FIXME: Verify read permission on the host.
+        return host.job_events
 
 
 # Create view functions for all of the class-based views to simplify inclusion

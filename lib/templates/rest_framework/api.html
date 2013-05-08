@@ -71,7 +71,7 @@ $(function() {
   // Make linkes from relative URLs to resources.
   $('span.str').each(function() {
     var s = $(this).html();
-    if (s.match(/^\"\/.+\/\"$/)) {
+    if (s.match(/^\"\/.+\/\"$/) || s.match(/^\"\/.+\/\?.*\"$/)) {
       $(this).html('"<a href=' + s + '>' + s.replace(/\"/g, '') + '</a>"');
     }
   });

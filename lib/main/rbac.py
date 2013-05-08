@@ -19,12 +19,55 @@ import logging
 from django.http import Http404
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import permissions
+from lib.main.access import *
 
 logger = logging.getLogger('lib.main.rbac')
 
 # FIXME: this will probably need to be subclassed by object type
 
 class CustomRbac(permissions.BasePermission):
+
+    def _check_options_permissions(self, request, view, obj=None):
+        return self._check_get_permissions(request, view, obj)
+
+    def _check_head_permissions(self, request, view, obj=None):
+        return self._check_get_permissions(request, view, obj)
+
+    def _check_get_permissions(self, request, view, obj=None):
+        if hasattr(view, 'parent_model'):
+            parent_obj = view.parent_model.objects.get(pk=view.kwargs['pk'])
+            if not check_user_access(request.user, view.parent_model, 'read',
+                                     parent_obj):
+                return False
+        if not obj:
+            return True
+        return check_user_access(request.user, view.model, 'read', obj)
+
+    def _check_post_permissions(self, request, view, obj=None):
+        if hasattr(view, 'parent_model'):
+            parent_obj = view.parent_model.objects.get(pk=view.kwargs['pk'])
+            #if not check_user_access(request.user, view.parent_model, 'change',
+            #                         parent_obj, None):
+            #    return False
+            # FIXME: attach/unattach
+            return True
+        else:
+            if obj:
+                return True
+            return check_user_access(request.user, view.model, 'add', request.DATA)
+
+    def _check_put_permissions(self, request, view, obj=None):
+        if not obj:
+            return True # FIXME: For some reason this needs to return True
+                        # because it is first called with obj=None?
+        return check_user_access(request.user, view.model, 'change', obj,
+                                 request.DATA)
+
+    def _check_delete_permissions(self, request, view, obj=None):
+        if not obj:
+            return True # FIXME: For some reason this needs to return True
+                        # because it is first called with obj=None?
+        return check_user_access(request.user, view.model, 'delete', obj)
 
     def _check_permissions(self, request, view, obj=None):
         # Check that obj (if given) is active, otherwise raise a 404.
@@ -42,6 +85,15 @@ class CustomRbac(permissions.BasePermission):
         # Always allow superusers (as long as they are active).
         if request.user.is_superuser:
             return True
+        # Check permissions for the given view and object, based on the request
+        # method used.
+        check_method = getattr(self, '_check_%s_permissions' % \
+                               request.method.lower(), None)
+        result = check_method and check_method(request, view, obj)
+        if not result:
+            raise PermissionDenied()
+        return result
+            
         # If no obj is given, check list permissions.
         if obj is None:
             if getattr(view, 'list_permissions_check', None):

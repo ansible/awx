@@ -20,6 +20,7 @@ from lib.main.models import *
 from django.contrib.auth.models import User
 from lib.main.serializers import *
 from lib.main.rbac import *
+from lib.main.access import *
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import mixins
 from rest_framework import generics
@@ -34,23 +35,11 @@ import json as python_json
 
 class BaseList(generics.ListCreateAPIView):
 
-    def list_permissions_check(self, request, obj=None):
-        ''' determines some early yes/no access decisions, pre-filtering '''
-        #print '---', request.method, getattr(request, '_method', None)
-        if request.method in ('OPTIONS', 'HEAD', 'GET'):
-            return True
-        if request.method == 'POST':
-            if self.__class__.model in [ User ]:
-                ok = request.user.is_superuser or (request.user.admin_of_organizations.count() > 0)
-                if not ok:
-                    raise PermissionDenied()
-                return True
-            else:
-                # audit all of these to check ownership/readability of subobjects
-                if not self.__class__.model.can_user_add(request.user, self.request.DATA):
-                    raise PermissionDenied()
-                return True
-        return False#raise exceptions.NotImplementedError
+    permission_classes = (CustomRbac,)
+
+    # Subclasses should define:
+    #   model = ModelClass
+    #   serializer_class = SerializerClass
 
     def get_queryset(self):
 
@@ -59,7 +48,7 @@ class BaseList(generics.ListCreateAPIView):
         qs = None 
         if model == User:
             qs = base.filter(is_active=True)
-        elif model in [ Tag, AuditTrail ]:
+        elif model in [ Tag, AuditTrail, JobEvent ]:
             qs = base
         else:
             qs = self._get_queryset().filter(active=True)
@@ -70,22 +59,19 @@ class BaseList(generics.ListCreateAPIView):
 
         return qs
 
-
-
-
 class BaseSubList(BaseList):
 
     ''' used for subcollections with an overriden post '''
 
-    def list_permissions_check(self, request, obj=None):
-        ''' determines some early yes/no access decisions, pre-filtering '''
-        if request.method in ('OPTIONS', 'HEAD', 'GET'):
-            return True
-        if request.method == 'POST':
-             # the can_user_attach methods will be called below
-             return True
-        raise exceptions.NotImplementedError
-
+    # Subclasses should define at least:
+    #   model = ModelClass
+    #   serializer_class = SerializerClass
+    #   parent_model = ModelClass
+    #   relationship = 'rel_name_from_parent_to_model'
+    # And optionally:
+    #   postable = True/False
+    #   inject_primary_key_on_post_as = 'field_on_model_referring_to_parent'
+    #   severable = True/False
 
     def post(self, request, *args, **kwargs):
 
@@ -93,8 +79,14 @@ class BaseSubList(BaseList):
         if not postable:
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+        # Make a copy of the data provided (since it's readonly) in order to
+        # inject additional data.
+        if hasattr(request.DATA, 'dict'):
+            data = request.DATA.dict()
+        else:
+            data = request.DATA
         parent_id = kwargs['pk']
-        sub_id = request.DATA.get('id', None)
+        sub_id = data.get('id', None)
         main = self.__class__.parent_model.objects.get(pk=parent_id)
         severable = getattr(self.__class__, 'severable', True)
 
@@ -103,7 +95,7 @@ class BaseSubList(BaseList):
         if sub_id:
             subs = self.__class__.model.objects.filter(pk=sub_id)
         else:
-            if 'disassociate' in request.DATA:
+            if 'disassociate' in data:
                 raise PermissionDenied() # ID is required to disassociate
             else:
 
@@ -117,20 +109,22 @@ class BaseSubList(BaseList):
                 if inject_primary_key is not None:
 
                     # add the key to the post data using the pk from the URL
-                    request.DATA[inject_primary_key] = kwargs['pk']
+                    data[inject_primary_key] = kwargs['pk']
 
                     # attempt to deserialize the object
-                    ser = self.__class__.serializer_class(data=request.DATA)
+                    ser = self.__class__.serializer_class(data=data)
                     if not ser.is_valid():
                         return Response(status=status.HTTP_400_BAD_REQUEST, data=ser.errors)
 
                     # ask the usual access control settings
-                    if self.__class__.model in [ User ]:
-                        if not UserHelper.can_user_add(request.user, ser.init_data):
-                            raise PermissionDenied()
-                    else:
-                        if not self.__class__.model.can_user_add(request.user, ser.init_data):
-                            raise PermissionDenied()
+                    #if self.__class__.model in [ User ]:
+                    #    if not UserHelper.can_user_add(request.user, ser.init_data):
+                    #        raise PermissionDenied()
+                    #else:
+                    #    if not self.__class__.model.can_user_add(request.user, ser.init_data):
+                    #        raise PermissionDenied()
+                    if not check_user_access(request.user, self.model, 'add', ser.init_data):
+                        raise PermissionDenied()
 
                     # save the object through the serializer, reload and returned the saved object deserialized
                     obj = ser.save()
@@ -154,23 +148,26 @@ class BaseSubList(BaseList):
                                 # model so we have to cheat here.  This may happen for other cases
                                 # where we are creating a user immediately on a subcollection
                                 # when that user does not already exist.  Relations will work post-save.
-                                organization = Organization.objects.get(pk=request.DATA[inject_primary_key])
+                                organization = Organization.objects.get(pk=data[inject_primary_key])
                                 if not request.user.is_superuser:
                                     if not organization.admins.filter(pk=request.user.pk).count() > 0:
                                         raise PermissionDenied()
                             else:
                                 raise exceptions.NotImplementedError()
                         else:
-                            if not obj.__class__.can_user_read(request.user, obj):
+                            #if not obj.__class__.can_user_read(request.user, obj):
+                            if not check_user_access(request.user, type(obj), 'read', obj):
                                 raise PermissionDenied()
-                        if not self.__class__.parent_model.can_user_attach(request.user, main, obj, self.__class__.relationship, request.DATA):
+                        #if not self.__class__.parent_model.can_user_attach(request.user, main, obj, self.__class__.relationship, data):
+                        # If we just created a new object, we may not yet be able to read it because it's not yet associated with its parent model.
+                        if not check_user_access(request.user, self.parent_model, 'attach', main, obj, self.relationship, data, skip_sub_obj_read_check=True):
                             raise PermissionDenied()
 
                         # FIXME: manual attachment code neccessary for users here, move this into the main code.
                         # this is because users don't have FKs into what they are attaching. (also refactor)
 
                         if self.__class__.parent_model == Organization:
-                             organization = Organization.objects.get(pk=request.DATA[inject_primary_key])
+                             organization = Organization.objects.get(pk=data[inject_primary_key])
                              import lib.main.views
                              if self.__class__ == lib.main.views.OrganizationsUsersList:
                                  organization.users.add(obj)
@@ -178,10 +175,12 @@ class BaseSubList(BaseList):
                                  organization.admins.add(obj)
 
                     else:
-                        if not UserHelper.can_user_read(request.user, obj):
+                        #if not UserHelper.can_user_read(request.user, obj):
+                        if not check_user_access(request.user, type(obj), 'read', obj):
                             raise PermissionDenied()
                         # FIXME: should generalize this
-                        if not UserHelper.can_user_attach(request.user, main, obj, self.__class__.relationship, request.DATA):
+                        #if not UserHelper.can_user_attach(request.user, main, obj, self.__class__.relationship, data):
+                        if not check_user_access(request.user, self.parent_model, 'attach', main, obj, self.relationship, data):
                             raise PermissionDenied()
 
                     return Response(status=status.HTTP_201_CREATED, data=ser.data)
@@ -199,13 +198,15 @@ class BaseSubList(BaseList):
         sub = subs[0]
         relationship = getattr(main, self.__class__.relationship)
 
-        if not 'disassociate' in request.DATA:
+        if not 'disassociate' in data:
             if not request.user.is_superuser:
                 if type(main) != User:
-                    if not self.__class__.parent_model.can_user_attach(request.user, main, sub, self.__class__.relationship, request.DATA):
+                    #if not self.__class__.parent_model.can_user_attach(request.user, main, sub, self.__class__.relationship, data):
+                    if not check_user_access(request.user, self.parent_model, 'attach', main, sub, self.relationship, data):
                         raise PermissionDenied()
                 else:
-		    if not UserHelper.can_user_attach(request.user, main, sub, self.__class__.relationship, request.DATA):
+		            #if not UserHelper.can_user_attach(request.user, main, sub, self.__class__.relationship, data):
+                    if not check_user_access(request.user, self.parent_model, 'attach', main, sub, self.relationship, data):
                         raise PermissionDenied()
 
             if sub in relationship.all():
@@ -214,10 +215,12 @@ class BaseSubList(BaseList):
         else:
             if not request.user.is_superuser:
                 if type(main) != User:
-                     if not self.__class__.parent_model.can_user_unattach(request.user, main, sub, self.__class__.relationship):
+                     #if not self.__class__.parent_model.can_user_unattach(request.user, main, sub, self.__class__.relationship):
+                     if not check_user_access(request.user, self.parent_model, 'unattach', main, sub, self.relationship):
                          raise PermissionDenied()
                 else:
-                     if not UserHelper.can_user_unattach(request.user, main, sub, self.__class__.relationship):
+                     #if not UserHelper.can_user_unattach(request.user, main, sub, self.__class__.relationship):
+                     if not check_user_access(request.user, self.parent_model, 'unattach', main, sub, self.relationship):
                          raise PermissionDenied()
 
 
@@ -240,11 +243,13 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         # somewhat lame that delete has to call it's own permissions check
         obj = self.model.objects.get(pk=kwargs['pk'])
+        # FIXME: Why isn't the active check being caught earlier by RBAC?
         if getattr(obj, 'active', True) == False:
             raise Http404()
         if getattr(obj, 'is_active', True) == False:
             raise Http404()
-        if not request.user.is_superuser and not self.delete_permissions_check(request, obj):
+        #if not request.user.is_superuser and not self.delete_permissions_check(request, obj):
+        if not check_user_access(request.user, self.model, 'delete', obj):
             raise PermissionDenied()
         if isinstance(obj, PrimordialModel):
             obj.name   = "_deleted_%s_%s" % (str(datetime.time()), obj.name)
@@ -257,28 +262,6 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
         else:
             raise Exception("InternalError: destroy() not implemented yet for %s" % obj)
         return HttpResponse(status=204)
-
-    def delete_permissions_check(self, request, obj):
-        if isinstance(obj, PrimordialModel):
-            return self.__class__.model.can_user_delete(request.user, obj)
-        elif isinstance(obj, User):
-            return UserHelper.can_user_delete(request.user, obj)
-        raise PermissionDenied()
-
-
-    def item_permissions_check(self, request, obj):
-
-        if request.method == 'GET':
-            if type(obj) == User:
-                return UserHelper.can_user_read(request.user, obj)
-            else:
-                return self.__class__.model.can_user_read(request.user, obj)
-        elif request.method in [ 'PUT' ]:
-            if type(obj) == User:
-                return UserHelper.can_user_administrate(request.user, obj, request.DATA)
-            else:
-                return self.__class__.model.can_user_administrate(request.user, obj, request.DATA)
-        return False
 
     def put(self, request, *args, **kwargs):
         self.put_filter(request, *args, **kwargs)
@@ -297,26 +280,16 @@ class VariableBaseDetail(BaseDetail):
     def destroy(self, request, *args, **kwargs):
         raise PermissionDenied()
 
-    def delete_permissions_check(self, request, obj):
-        raise PermissionDenied()
-
-    def item_permissions_check(self, request, obj):
-        through_obj = self.__class__.parent_model.objects.get(pk = self.request.args['pk'])
-        if request.method == 'GET':
-            return self.__class__.parent_model.can_user_read(request.user, through_obj)
-        elif request.method in [ 'PUT' ]:
-            return self.__class__.parent_model.can_user_administrate(request.user, through_obj, request.DATA)
-        return False
-
     def put(self, request, *args, **kwargs):
         # FIXME: lots of overlap between put and get here, need to refactor
 
         through_obj = self.__class__.parent_model.objects.get(pk=kwargs['pk'])
 
-        has_permission = Inventory._has_permission_types(request.user, through_obj.inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
-
-        if not has_permission:
-            raise PermissionDenied()
+        #has_permission = Inventory._has_permission_types(request.user, through_obj.inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
+        #if not has_permission:
+        #    raise PermissionDenied()
+        if not check_user_access(request.user, Inventory, 'change', through_obj.inventory, None):
+            raise PermissionDenied
 
         this_object = None
 
@@ -354,8 +327,11 @@ class VariableBaseDetail(BaseDetail):
             setattr(through_obj, self.__class__.reverse_relationship, this_object)
             through_obj.save()
 
-        has_permission = Inventory._has_permission_types(request.user, through_obj.inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
-        if not has_permission:
-            raise PermissionDenied()
+        #has_permission = Inventory._has_permission_types(request.user, through_obj.inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
+        #if not has_permission:
+        #    raise PermissionDenied()
+        if not check_user_access(request.user, Inventory, 'read', through_obj.inventory):
+            raise PermissionDenied
+
         return Response(status=status.HTTP_200_OK, data=python_json.loads(this_object.data))
 

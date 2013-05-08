@@ -82,22 +82,30 @@ class OrganizationsTest(BaseTest):
         with self.current_user(self.super_django_user):
             self.options(url, expect=200)
             self.head(url, expect=200)
-            data = self.get(url, expect=200)
-            self.check_pagination_and_size(data, 10, previous=None, next=None)
-            [self.assertTrue(key in data['results'][0]) for key in ['name', 'description', 'url', 'creation_date', 'id' ]]
+            response = self.get(url, expect=200)
+            self.check_pagination_and_size(response, 10, previous=None, next=None)
+            self.assertEqual(len(response['results']),
+                             Organization.objects.count())
+            for field in ['id', 'url', 'name', 'description', 'creation_date']:
+                self.assertTrue(field in response['results'][0],
+                                'field %s not in result' % field)
 
         # check that the related URL functionality works
-        related = data['results'][0]['related']
+        related = response['results'][0]['related']
         for x in [ 'audit_trail', 'projects', 'users', 'admins', 'tags' ]:
             self.assertTrue(x in related and related[x].endswith("/%s/" % x), "looking for %s in related" % x)
 
-        # normal credentials == 200, get only organizations that I am actually added to (there are 2)
-        data = self.get(self.collection(), expect=200, auth=self.get_normal_credentials())
-        self.check_pagination_and_size(data, 2, previous=None, next=None)
+        # normal credentials == 200, get only organizations of which user is a member
+        with self.current_user(self.normal_django_user):
+            self.options(url, expect=200)
+            self.head(url, expect=200)
+            response = self.get(url, expect=200)
+            self.check_pagination_and_size(response, 2, previous=None, next=None)
 
         # no admin rights? get empty list
-        data = self.get(self.collection(), expect=200, auth=self.get_other_credentials())
-        self.check_pagination_and_size(data, 0, previous=None, next=None)
+        with self.current_user(self.other_django_user):
+            response = self.get(url, expect=200)
+            self.check_pagination_and_size(response, 0, previous=None, next=None)
 
     def test_get_item(self):
 

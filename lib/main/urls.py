@@ -79,7 +79,7 @@ hosts_urls = patterns('lib.main.views',
     url(r'^$',                                          'hosts_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'hosts_detail'),
     url(r'^(?P<pk>[0-9]+)/variable_data/$',             'hosts_variable_detail'),
-    url(r'^(?P<pk>[0-9]+)/job_events/',                 'hosts_job_events_list'),
+    url(r'^(?P<pk>[0-9]+)/job_events/',                 'host_job_event_list'),
 )
 
 groups_urls = patterns('lib.main.views',
@@ -106,24 +106,25 @@ permissions_urls = patterns('lib.main.views',
 )
 
 job_templates_urls = patterns('lib.main.views',
-    url(r'^$',                                          'job_templates_list'),
-    url(r'^(?P<pk>[0-9]+)/$',                           'job_templates_detail'),
-    url(r'^(?P<pk>[0-9]+)/start$',                      'job_templates_start'),
+    url(r'^$',                                          'job_template_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'job_template_detail'),
+    url(r'^(?P<pk>[0-9]+)/jobs/$',                      'job_template_job_list'),
 )
 
 jobs_urls = patterns('lib.main.views',
-    url(r'^$',                                          'jobs_list'),
-    url(r'^(?P<pk>[0-9]+)/$',                           'jobs_detail'),
-    url(r'^(?P<pk>[0-9]+)/hosts$',                      'jobs_hosts_list'),
-    url(r'^(?P<pk>[0-9]+)/successful_hosts$',           'jobs_successful_hosts_list'),
-    url(r'^(?P<pk>[0-9]+)/changed_hosts$',              'jobs_changed_hosts_list'),
-    url(r'^(?P<pk>[0-9]+)/failed_hosts$',               'jobs_failed_hosts_list'),
-    url(r'^(?P<pk>[0-9]+)/unreachable_hosts$',          'jobs_unreachable_hosts_list'),
+    url(r'^$',                                          'job_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'job_detail'),
+    url(r'^(?P<pk>[0-9]+)/hosts/$',                     'job_hosts_list'),
+    url(r'^(?P<pk>[0-9]+)/successful_hosts/$',          'jobs_successful_hosts_list'),
+    url(r'^(?P<pk>[0-9]+)/changed_hosts/$',             'jobs_changed_hosts_list'),
+    url(r'^(?P<pk>[0-9]+)/failed_hosts/$',              'jobs_failed_hosts_list'),
+    url(r'^(?P<pk>[0-9]+)/unreachable_hosts/$',         'jobs_unreachable_hosts_list'),
+    url(r'^(?P<pk>[0-9]+)/job_events/$',                'job_job_event_list'),
 )
 
 job_events_urls = patterns('lib.main.views',
-    url(r'^$',                                          'job_events_list'),
-    url(r'^(?P<pk>[0-9]+)/$',                           'job_events_detail'),
+    url(r'^$',                                          'job_event_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'job_event_detail'),
 )
 
 tags_urls = patterns('lib.main.views',
