@@ -124,7 +124,7 @@ class AcomInventoryTest(BaseCommandTest):
             hosts = []
             for x in xrange(10):
                 if n > 0:
-                    variable_data = VariableData.objects.create(data={'ho': 'hum-%d' % x})
+                    variable_data = VariableData.objects.create(data=json.dumps({'ho': 'hum-%d' % x}))
                 else:
                     variable_data = None
                 host = inventory.hosts.create(name='host-%02d-%02d.example.com' % (n, x),
@@ -135,7 +135,7 @@ class AcomInventoryTest(BaseCommandTest):
             groups = []
             for x in xrange(5):
                 if n > 0:
-                    variable_data = VariableData.objects.create(data={'gee': 'whiz-%d' % x})
+                    variable_data = VariableData.objects.create(data=json.dumps({'gee': 'whiz-%d' % x}))
                 else:
                     variable_data = None
                 group = inventory.groups.create(name='group-%d' % x,
@@ -199,7 +199,7 @@ class AcomInventoryTest(BaseCommandTest):
                              set(group.hosts.values_list('name', flat=True)))
             if group.variable_data:
                 self.assertEqual(v.get('vars', {}),
-                                 group.variable_data.data)
+                                 json.loads(group.variable_data.data))
             if k == 'group-3':
                 self.assertEqual(set(v.get('children', [])),
                                  set(group.children.values_list('name', flat=True)))
@@ -224,7 +224,7 @@ class AcomInventoryTest(BaseCommandTest):
                                                   host=host.name)
         self.assertEqual(result, None)
         data = json.loads(stdout)
-        self.assertEqual(data, host.variable_data.data)
+        self.assertEqual(data, json.loads(host.variable_data.data))
 
     def test_invalid_host(self):
         # Valid host, but not part of the specified inventory.

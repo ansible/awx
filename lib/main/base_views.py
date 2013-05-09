@@ -304,14 +304,14 @@ class VariableBaseDetail(BaseDetail):
             pass
 
         if this_object is None:
-            this_object = self.__class__.model.objects.create(data=data)
+            this_object = self.__class__.model.objects.create(data=python_json.dumps(data))
         else:
-            this_object.data = data
+            this_object.data = python_json.dumps(data)
             this_object.save()
         setattr(through_obj, self.__class__.reverse_relationship, this_object)
         through_obj.save()
 
-        return Response(status=status.HTTP_200_OK, data=this_object.data)
+        return Response(status=status.HTTP_200_OK, data=python_json.loads(this_object.data))
 
 
     def get(self, request, *args, **kwargs):
@@ -327,7 +327,7 @@ class VariableBaseDetail(BaseDetail):
 
         if this_object is None:
             new_args               = {}
-            new_args['data']       = {}
+            new_args['data']       = python_json.dumps(dict())
             this_object            = self.__class__.model.objects.create(**new_args)
             setattr(through_obj, self.__class__.reverse_relationship, this_object)
             through_obj.save()
@@ -338,5 +338,5 @@ class VariableBaseDetail(BaseDetail):
         if not check_user_access(request.user, Inventory, 'read', through_obj.inventory):
             raise PermissionDenied
 
-        return Response(status=status.HTTP_200_OK, data=this_object.data)
+        return Response(status=status.HTTP_200_OK, data=python_json.loads(this_object.data))
 

@@ -31,6 +31,9 @@ class Migration(SchemaMigration):
         # Deleting field 'LaunchJobStatusEvent.host'
         db.delete_column(u'main_launchjobstatusevent', 'host_id')
 
+        # Deleting field 'LaunchJobStatus.celery_task_id'
+        db.delete_column(u'main_launchjobstatus', 'celery_task_id')
+
         # Adding field 'LaunchJobStatus.celery_task'
         db.add_column(u'main_launchjobstatus', 'celery_task',
                       self.gf('django.db.models.fields.related.ForeignKey')(related_name='launch_job_statuses', on_delete=models.SET_NULL, default=None, to=orm['djcelery.TaskMeta'], blank=True, null=True),
@@ -38,9 +41,6 @@ class Migration(SchemaMigration):
 
         # Deleting field 'LaunchJobStatus.result_traceback'
         db.delete_column(u'main_launchjobstatus', 'result_traceback')
-
-        # Deleting field 'LaunchJobStatus.celery_task_id'
-        db.delete_column(u'main_launchjobstatus', 'celery_task_id')
 
 
     models = {

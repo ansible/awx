@@ -3,6 +3,7 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from django.utils.timezone import now
 
 
 class Migration(SchemaMigration):
@@ -19,7 +20,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Job.created'
         db.add_column(u'main_job', 'created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=now, blank=True),
                       keep_default=False)
 
         # Adding field 'Job.failed'
@@ -35,7 +36,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Inventory.created'
         db.add_column(u'main_inventory', 'created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=now, blank=True),
                       keep_default=False)
 
         # Deleting field 'Host.creation_date'
@@ -43,7 +44,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Host.created'
         db.add_column(u'main_host', 'created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=now, blank=True),
                       keep_default=False)
 
         # Adding field 'Host.last_job'
@@ -61,7 +62,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Group.created'
         db.add_column(u'main_group', 'created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=now, blank=True),
                       keep_default=False)
 
         # Deleting field 'Credential.creation_date'
@@ -69,7 +70,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Credential.created'
         db.add_column(u'main_credential', 'created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=now, blank=True),
                       keep_default=False)
 
         # Deleting field 'JobTemplate.use_sudo'
@@ -80,7 +81,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'JobTemplate.created'
         db.add_column(u'main_jobtemplate', 'created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=now, blank=True),
                       keep_default=False)
 
 
@@ -91,7 +92,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Team.created'
         db.add_column(u'main_team', 'created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=now, blank=True),
                       keep_default=False)
 
         # Deleting field 'Project.creation_date'
@@ -99,7 +100,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Project.created'
         db.add_column(u'main_project', 'created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=now, blank=True),
                       keep_default=False)
 
         # Adding field 'JobEvent.failed'
@@ -112,7 +113,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Permission.created'
         db.add_column(u'main_permission', 'created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=now, blank=True),
                       keep_default=False)
 
         # Deleting field 'VariableData.creation_date'
@@ -120,25 +121,22 @@ class Migration(SchemaMigration):
 
         # Adding field 'VariableData.created'
         db.add_column(u'main_variabledata', 'created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=now, blank=True),
                       keep_default=False)
 
-
-        # Changing field 'VariableData.data'
-        db.alter_column(u'main_variabledata', 'data', self.gf('jsonfield.fields.JSONField')())
         # Deleting field 'Organization.creation_date'
         db.delete_column(u'main_organization', 'creation_date')
 
         # Adding field 'Organization.created'
         db.add_column(u'main_organization', 'created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=now, blank=True),
                       keep_default=False)
 
 
     def backwards(self, orm):
         # Adding field 'Job.creation_date'
         db.add_column(u'main_job', 'creation_date',
-                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.date.today, blank=True),
                       keep_default=False)
 
         # Adding field 'Job.use_sudo'
@@ -157,12 +155,12 @@ class Migration(SchemaMigration):
         # Deleting field 'Job.failed'
         db.delete_column(u'main_job', 'failed')
 
+        # Changing field 'Job.extra_vars' (Disabled: something is broken when going from a TextField to JSONField)
+        #db.alter_column(u'main_job', 'extra_vars', self.gf('jsonfield.fields.JSONField')())
 
-        # Changing field 'Job.extra_vars'
-        db.alter_column(u'main_job', 'extra_vars', self.gf('jsonfield.fields.JSONField')())
         # Adding field 'Inventory.creation_date'
         db.add_column(u'main_inventory', 'creation_date',
-                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.date.today, blank=True),
                       keep_default=False)
 
         # Deleting field 'Inventory.created'
@@ -170,7 +168,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Host.creation_date'
         db.add_column(u'main_host', 'creation_date',
-                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.date.today, blank=True),
                       keep_default=False)
 
         # Deleting field 'Host.created'
@@ -184,7 +182,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Group.creation_date'
         db.add_column(u'main_group', 'creation_date',
-                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.date.today, blank=True),
                       keep_default=False)
 
         # Deleting field 'Group.created'
@@ -192,7 +190,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Credential.creation_date'
         db.add_column(u'main_credential', 'creation_date',
-                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.date.today, blank=True),
                       keep_default=False)
 
         # Deleting field 'Credential.created'
@@ -205,18 +203,19 @@ class Migration(SchemaMigration):
 
         # Adding field 'JobTemplate.creation_date'
         db.add_column(u'main_jobtemplate', 'creation_date',
-                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.date.today, blank=True),
                       keep_default=False)
 
         # Deleting field 'JobTemplate.created'
         db.delete_column(u'main_jobtemplate', 'created')
 
 
-        # Changing field 'JobTemplate.extra_vars'
-        db.alter_column(u'main_jobtemplate', 'extra_vars', self.gf('jsonfield.fields.JSONField')())
+        # Changing field 'JobTemplate.extra_vars' (disabled: see above)
+        #db.alter_column(u'main_jobtemplate', 'extra_vars', self.gf('jsonfield.fields.JSONField')())
+        
         # Adding field 'Team.creation_date'
         db.add_column(u'main_team', 'creation_date',
-                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.date.today, blank=True),
                       keep_default=False)
 
         # Deleting field 'Team.created'
@@ -224,7 +223,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Project.creation_date'
         db.add_column(u'main_project', 'creation_date',
-                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.date.today, blank=True),
                       keep_default=False)
 
         # Deleting field 'Project.created'
@@ -235,7 +234,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Permission.creation_date'
         db.add_column(u'main_permission', 'creation_date',
-                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.date.today, blank=True),
                       keep_default=False)
 
         # Deleting field 'Permission.created'
@@ -243,18 +242,15 @@ class Migration(SchemaMigration):
 
         # Adding field 'VariableData.creation_date'
         db.add_column(u'main_variabledata', 'creation_date',
-                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.date.today, blank=True),
                       keep_default=False)
 
         # Deleting field 'VariableData.created'
         db.delete_column(u'main_variabledata', 'created')
 
-
-        # Changing field 'VariableData.data'
-        db.alter_column(u'main_variabledata', 'data', self.gf('django.db.models.fields.TextField')())
         # Adding field 'Organization.creation_date'
         db.add_column(u'main_organization', 'creation_date',
-                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.datetime(2013, 5, 8, 0, 0), blank=True),
+                      self.gf('django.db.models.fields.DateField')(auto_now_add=True, default=datetime.date.today, blank=True),
                       keep_default=False)
 
         # Deleting field 'Organization.created'
@@ -506,7 +502,7 @@ class Migration(SchemaMigration):
             'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'variabledata_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'variabledata\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'data': ('jsonfield.fields.JSONField', [], {'default': "''"}),
+            'data': ('django.db.models.fields.TextField', [], {'default': "''"}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '512'}),

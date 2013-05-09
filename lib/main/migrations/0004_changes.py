@@ -62,9 +62,11 @@ class Migration(SchemaMigration):
         # Deleting field 'LaunchJobStatus.celery_task'
         db.delete_column(u'main_launchjobstatus', 'celery_task_id')
 
+        # Deleting field 'LaunchJobStatus.status'
+        db.delete_column(u'main_launchjobstatus', 'status')
 
-        # Changing field 'LaunchJobStatus.status'
-        db.alter_column(u'main_launchjobstatus', 'status', self.gf('django.db.models.fields.IntegerField')())
+        # Adding field 'LaunchJobStatus.status'
+        db.add_column(u'main_launchjobstatus', 'status', self.gf('django.db.models.fields.IntegerField')(), keep_default=False)
 
     models = {
         u'auth.group': {
