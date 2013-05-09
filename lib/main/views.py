@@ -76,6 +76,7 @@ class ApiV1RootView(APIView):
             users         = reverse('main:users_list'),
             projects      = reverse('main:projects_list'),
             teams         = reverse('main:teams_list'),
+            credentials   = reverse('main:credentials_list'),
             inventory     = reverse('main:inventory_list'),
             groups        = reverse('main:groups_list'),
             hosts         = reverse('main:hosts_list'),
@@ -591,6 +592,16 @@ class UsersDetail(BaseDetail):
             obj.set_password(request.DATA['password'])
             obj.save()
             request.DATA.pop('password')
+
+class CredentialsList(BaseList):
+
+    model = Credential
+    serializer_class = CredentialSerializer
+    permission_classes = (CustomRbac,)
+    postable = False
+
+    def _get_queryset(self):
+        return get_user_queryset(self.request.user, self.model)
 
 class CredentialsDetail(BaseDetail):
 

@@ -97,6 +97,7 @@ variable_data_urls = patterns('lib.main.views',
 )
 
 credentials_urls = patterns('lib.main.views',
+    url(r'^$',                                          'credentials_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'credentials_detail'),
     # See also credentials resources on users/teams.
 )
