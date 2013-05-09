@@ -13,7 +13,7 @@
   <script src="{{ STATIC_URL }}lib/angular/angular.js"></script>
   <script src="{{ STATIC_URL }}lib/angular/angular-resource.js"></script>
   <script src="{{ STATIC_URL }}lib/angular/angular-cookies.js"></script>
-  {% if not debug %}
+  {% if not settings.DEBUG %}
   <script src="{{ STATIC_URL }}js/ansible.min.js"></script> <!-- FIXME: Change to whatever we end up calling the minified file. -->
   {% else %}
   <script src="{{ STATIC_URL }}js/app.js"></script>

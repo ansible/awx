@@ -30,7 +30,6 @@ from jsonfield import JSONField
 from djcelery.models import TaskMeta
 from rest_framework.authtoken.models import Token
 import yaml
-from lib.main.fields import *
 
 # TODO: reporting model TBD
 

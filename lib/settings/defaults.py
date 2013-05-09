@@ -118,6 +118,7 @@ ALLOWED_HOSTS = []
 
 TEMPLATE_CONTEXT_PROCESSORS += (
     'django.core.context_processors.request',
+    'lib.ui.context_processors.settings',
 )
 
 MIDDLEWARE_CLASSES += (
