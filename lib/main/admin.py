@@ -217,19 +217,20 @@ class ProjectAdmin(BaseModelAdmin):
     list_display = ('name', 'description', 'active')
     fieldsets = (
         (None, {'fields': (('name', 'active'), 'description', 'local_path',
-                            'get_available_playbooks_display')}),
+                            'get_playbooks_display')}),
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit Trail'), {'fields': ('created', 'created_by', 'audit_trail',)}),
     )
     readonly_fields = ('created', 'created_by', 'audit_trail',
-                       'get_available_playbooks_display')
+                       'get_playbooks_display')
     filter_horizontal = ('tags',)
+    form = ProjectAdminForm
 
-    def get_available_playbooks_display(self, obj):
+    def get_playbooks_display(self, obj):
         return '<br/>'.join([format_html('{0}', x) for x in
-                             obj.available_playbooks])
-    get_available_playbooks_display.short_description = _('Available playbooks')
-    get_available_playbooks_display.allow_tags = True
+                             obj.playbooks])
+    get_playbooks_display.short_description = _('Playbooks')
+    get_playbooks_display.allow_tags = True
 
 class PermissionAdmin(BaseModelAdmin):
 

@@ -50,6 +50,7 @@ users_urls = patterns('lib.main.views',
 projects_urls = patterns('lib.main.views',
     url(r'^$',                                          'projects_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'projects_detail'),
+    url(r'^(?P<pk>[0-9]+)/playbooks/$',                 'projects_detail_playbooks'),
     url(r'^(?P<pk>[0-9]+)/organizations/$',             'projects_organizations_list'),
 )
 

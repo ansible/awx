@@ -370,13 +370,25 @@ class Project(CommonModel):
     # this is not part of the project, but managed with perms
     # inventories      = models.ManyToManyField('Inventory', blank=True, related_name='projects')
 
-    local_path = models.FilePathField(
-        path=settings.PROJECTS_ROOT,
-        recursive=False,
-        allow_files=False,
-        allow_folders=True,
+    # Project files must be available on the server in folders directly
+    # beneath the path specified by settings.PROJECTS_ROOT.  There is no way
+    # via the API to upload/update a project or its playbooks; this must be
+    # done by other means for now.
+
+    @classmethod
+    def get_local_path_choices(cls):
+        if os.path.exists(settings.PROJECTS_ROOT):
+            return [x for x in os.listdir(settings.PROJECTS_ROOT)
+                    if os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x))
+                    and not x.startswith('.')]
+        else:
+            return []
+
+    local_path = models.CharField(
         max_length=1024,
-        unique=True,
+        # Not unique for now, otherwise "deletes" won't allow reusing the
+        # same path for another active project.
+        #unique=True,
         help_text=_('Local path (relative to PROJECTS_ROOT) containing '
                     'playbooks and related files for this project.')
     )
@@ -386,11 +398,19 @@ class Project(CommonModel):
     def get_absolute_url(self):
         return reverse('main:projects_detail', args=(self.pk,))
 
+    def get_project_path(self):
+        local_path = os.path.basename(self.local_path)
+        if local_path and not local_path.startswith('.'):
+            proj_path = os.path.join(settings.PROJECTS_ROOT, local_path)
+            if os.path.exists(proj_path):
+                return proj_path
+
     @property
-    def available_playbooks(self):
-        playbooks = []
-        if self.local_path and os.path.exists(self.local_path):
-            for dirpath, dirnames, filenames in os.walk(self.local_path):
+    def playbooks(self):
+        results = []
+        project_path = self.get_project_path()
+        if project_path:
+            for dirpath, dirnames, filenames in os.walk(project_path):
                 for filename in filenames:
                     if os.path.splitext(filename)[-1] != '.yml':
                         continue
@@ -407,15 +427,15 @@ class Project(CommonModel):
                             continue
                     except (TypeError, IndexError, KeyError):
                         continue
-                    playbook = os.path.relpath(playbook, self.local_path)
+                    playbook = os.path.relpath(playbook, project_path)
                     # Filter files in a roles subdirectory.
                     if 'roles' in playbook.split(os.sep):
                         continue
                     # Filter files in a tasks subdirectory.
                     if 'tasks' in playbook.split(os.sep):
                         continue
-                    playbooks.append(playbook)
-        return playbooks
+                    results.append(playbook)
+        return results
 
 class Permission(CommonModelNameNotUnique):
     '''

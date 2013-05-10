@@ -42,7 +42,7 @@ class ProjectsTest(BaseTest):
         self.setup_users()
 
         self.organizations = self.make_organizations(self.super_django_user, 10)
-        self.projects      = self.make_projects(self.normal_django_user, 10)
+        self.projects      = self.make_projects(self.normal_django_user, 10, TEST_PLAYBOOK)
 
         # add projects to organizations in a more or less arbitrary way
         for project in self.projects[0:2]:
@@ -100,50 +100,56 @@ class ProjectsTest(BaseTest):
         # here is a user without any permissions...
         return ('nobody', 'nobody')
 
-    def test_available_playbooks(self):
+    def test_playbooks(self):
         def write_test_file(project, name, content):
-            full_path = os.path.join(project.local_path, name)
+            full_path = os.path.join(project.get_project_path(), name)
             if not os.path.exists(os.path.dirname(full_path)):
                 os.makedirs(os.path.dirname(full_path))
-            f = file(os.path.join(project.local_path, name), 'wb')
+            f = file(full_path, 'wb')
             f.write(content)
             f.close()
         # Invalid local_path
         project = self.projects[0]
-        project.local_path = os.path.join(project.local_path,
-                                          'does_not_exist')
+        project.local_path = 'path_does_not_exist'
         project.save()
-        self.assertEqual(len(project.available_playbooks), 0)
+        self.assertFalse(project.get_project_path())
+        self.assertEqual(len(project.playbooks), 0)
         # Simple playbook
         project = self.projects[1]
+        self.assertEqual(len(project.playbooks), 1)
         write_test_file(project, 'foo.yml', TEST_PLAYBOOK)
-        self.assertEqual(len(project.available_playbooks), 1)
+        self.assertEqual(len(project.playbooks), 2)
         # Other files
         project = self.projects[2]
+        self.assertEqual(len(project.playbooks), 1)
         write_test_file(project, 'foo.txt', 'not a playbook')
-        self.assertEqual(len(project.available_playbooks), 0)
+        self.assertEqual(len(project.playbooks), 1)
         # Empty playbook
         project = self.projects[3]
+        self.assertEqual(len(project.playbooks), 1)
         write_test_file(project, 'blah.yml', '')
-        self.assertEqual(len(project.available_playbooks), 0)
+        self.assertEqual(len(project.playbooks), 1)
         # Invalid YAML
         project = self.projects[4]
+        self.assertEqual(len(project.playbooks), 1)
         write_test_file(project, 'blah.yml', TEST_PLAYBOOK + '----')
-        self.assertEqual(len(project.available_playbooks), 0)
+        self.assertEqual(len(project.playbooks), 1)
         # No hosts or includes
         project = self.projects[5]
+        self.assertEqual(len(project.playbooks), 1)
         playbook_content = TEST_PLAYBOOK.replace('hosts', 'hoists')
         write_test_file(project, 'blah.yml', playbook_content)
-        self.assertEqual(len(project.available_playbooks), 0)
+        self.assertEqual(len(project.playbooks), 1)
         # Playbook in roles folder
         project = self.projects[6]
+        self.assertEqual(len(project.playbooks), 1)
         write_test_file(project, 'roles/blah.yml', TEST_PLAYBOOK)
-        self.assertEqual(len(project.available_playbooks), 0)
+        self.assertEqual(len(project.playbooks), 1)
         # Playbook in tasks folder
         project = self.projects[7]
+        self.assertEqual(len(project.playbooks), 1)
         write_test_file(project, 'tasks/blah.yml', TEST_PLAYBOOK)
-        self.assertEqual(len(project.available_playbooks), 0)
-                
+        self.assertEqual(len(project.playbooks), 1)
 
     def test_mainline(self):
 
@@ -179,6 +185,11 @@ class ProjectsTest(BaseTest):
         # can delete projects
         self.delete(project, expect=204, auth=self.get_normal_credentials())
         self.get(project, expect=404, auth=self.get_normal_credentials())
+
+        # can list playbooks for projects
+        proj_playbooks = '/api/v1/projects/%d/playbooks/' % self.projects[2].pk
+        got = self.get(proj_playbooks, expect=200, auth=self.get_super_credentials())
+        self.assertEqual(got, self.projects[2].playbooks)
 
         # can list member organizations for projects
         proj_orgs = '/api/v1/projects/1/organizations/'
