@@ -201,7 +201,10 @@ class RunJob(Task):
             kwargs['ssh_key_path'] = self.build_ssh_key_path(job, **kwargs)
             kwargs['passwords'] = self.build_passwords(job, **kwargs)
             args = self.build_args(job, **kwargs)
-            cwd = job.project.local_path
+            cwd = job.project.get_project_path()
+            if not cwd:
+                raise RuntimeError('project local_path %s cannot be found' %
+                                   project.local_path)
             env = self.build_env(job, **kwargs)
             status, stdout = self.run_pexpect(job_pk, args, cwd, env,
                                               kwargs['passwords'])

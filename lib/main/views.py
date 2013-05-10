@@ -403,6 +403,12 @@ class ProjectsDetail(BaseDetail):
     serializer_class = ProjectSerializer
     permission_classes = (CustomRbac,)
 
+class ProjectsDetailPlaybooks(generics.RetrieveAPIView):
+
+    model = Project
+    serializer_class = ProjectPlaybooksSerializer
+    permission_classes = (CustomRbac,)
+
 class ProjectsOrganizationsList(BaseSubList):
 
     model = Organization

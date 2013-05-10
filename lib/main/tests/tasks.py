@@ -177,7 +177,7 @@ class RunJobTest(BaseCeleryTest):
             'credential': self.credential,
         }
         try:
-            opts['playbook'] = self.project.available_playbooks[0]
+            opts['playbook'] = self.project.playbooks[0]
         except (AttributeError, IndexError):
             pass
         opts.update(kwargs)
@@ -196,7 +196,7 @@ class RunJobTest(BaseCeleryTest):
                 'credential': self.credential,
             }
             try:
-                opts['playbook'] = self.project.available_playbooks[0]
+                opts['playbook'] = self.project.playbooks[0]
             except (AttributeError, IndexError):
                 pass
             opts.update(kwargs)

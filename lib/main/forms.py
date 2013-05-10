@@ -68,6 +68,18 @@ class GroupForm(forms.ModelForm):
 
     variable_data = JSONFormField(required=False, widget=forms.Textarea(attrs={'class': 'vLargeTextField'}))
 
+class ProjectAdminForm(forms.ModelForm):
+    '''Custom admin form for Projects.'''
+
+    local_path = forms.ChoiceField(choices=[])
+
+    class Meta:
+        model = Project
+
+    def __init__(self, *args, **kwargs):
+        super(ProjectAdminForm, self).__init__(*args, **kwargs)
+        self.fields['local_path'].choices = [(x, x) for x in Project.get_local_path_choices()]
+
 class JobTemplateAdminForm(forms.ModelForm):
     '''Custom admin form for creating/editing JobTemplates.'''
 
@@ -80,7 +92,7 @@ class JobTemplateAdminForm(forms.ModelForm):
         super(JobTemplateAdminForm, self).__init__(*args, **kwargs)
         playbook_choices = []
         for project in Project.objects.all():
-            for playbook in project.available_playbooks:
+            for playbook in project.playbooks:
                 playbook_choices.append((playbook,
                                          PlaybookOption(project, playbook)))
         self.fields['playbook'].choices = [EMPTY_CHOICE] + playbook_choices

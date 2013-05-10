@@ -315,7 +315,7 @@ class BaseJobTest(BaseTest):
             job_type='check',
             inventory= self.inv_eng,
             project=self.proj_dev,
-            playbook=self.proj_dev.available_playbooks[0],
+            playbook=self.proj_dev.playbooks[0],
             created_by=self.user_sue,
         )        
         self.jt_eng_run = JobTemplate.objects.create(
@@ -323,7 +323,7 @@ class BaseJobTest(BaseTest):
             job_type='run',
             inventory= self.inv_eng,
             project=self.proj_dev,
-            playbook=self.proj_dev.available_playbooks[0],
+            playbook=self.proj_dev.playbooks[0],
             created_by=self.user_sue,
         )
 
@@ -334,7 +334,7 @@ class BaseJobTest(BaseTest):
             job_type='check',
             inventory= self.inv_sup,
             project=self.proj_test,
-            playbook=self.proj_test.available_playbooks[0],
+            playbook=self.proj_test.playbooks[0],
             created_by=self.user_sue,
         )        
         self.jt_sup_run = JobTemplate.objects.create(
@@ -342,7 +342,7 @@ class BaseJobTest(BaseTest):
             job_type='run',
             inventory= self.inv_sup,
             project=self.proj_test,
-            playbook=self.proj_test.available_playbooks[0],
+            playbook=self.proj_test.playbooks[0],
             created_by=self.user_sue,
         )
 
@@ -353,7 +353,7 @@ class BaseJobTest(BaseTest):
             job_type='check',
             inventory= self.inv_ops_east,
             project=self.proj_prod,
-            playbook=self.proj_prod.available_playbooks[0],
+            playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_east,
             created_by=self.user_sue,
         )        
@@ -362,7 +362,7 @@ class BaseJobTest(BaseTest):
             job_type='run',
             inventory= self.inv_ops_east,
             project=self.proj_prod,
-            playbook=self.proj_prod.available_playbooks[0],
+            playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_east,
             created_by=self.user_sue,
         )
@@ -371,7 +371,7 @@ class BaseJobTest(BaseTest):
             job_type='check',
             inventory= self.inv_ops_west,
             project=self.proj_prod,
-            playbook=self.proj_prod.available_playbooks[0],
+            playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_west,
             created_by=self.user_sue,
         )        
@@ -380,7 +380,7 @@ class BaseJobTest(BaseTest):
             job_type='run',
             inventory= self.inv_ops_west,
             project=self.proj_prod,
-            playbook=self.proj_prod.available_playbooks[0],
+            playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_west,
             created_by=self.user_sue,
         )
@@ -454,7 +454,7 @@ class JobTemplateTest(BaseJobTest):
             inventory    = self.inventory.pk, 
             project      = self.project.pk,
             job_type     = PERM_INVENTORY_DEPLOY,
-            playbook     = self.project.available_playbooks[0],
+            playbook     = self.project.playbooks[0],
         )
         with self.current_user(self.normal_django_user):
             response = self.post(url, data, expect=201)

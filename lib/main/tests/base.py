@@ -95,8 +95,8 @@ class BaseTestMixin(object):
             test_playbook_file.write(playbook_content)
             test_playbook_file.close()
         return Project.objects.create(
-            name=name, description=description, local_path=project_dir,
-            created_by=created_by,
+            name=name, description=description,
+            local_path=os.path.basename(project_dir), created_by=created_by,
             #scm_type='git',  default_playbook='foo.yml',
         )
 

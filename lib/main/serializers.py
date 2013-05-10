@@ -163,20 +163,35 @@ class AuditTrailSerializer(BaseSerializer):
 
 class ProjectSerializer(BaseSerializer):
 
-    available_playbooks = serializers.Field(source='available_playbooks')
+    playbooks = serializers.Field(source='playbooks')
+    local_path_choices = serializers.SerializerMethodField('get_local_path_choices')
 
     class Meta:
         model = Project
-        fields = BASE_FIELDS + ('local_path', 'available_playbooks')
+        fields = BASE_FIELDS + ('local_path', 'local_path_choices')
                                 # 'default_playbook', 'scm_type')
 
     def get_related(self, obj):
         res = super(ProjectSerializer, self).get_related(obj)
         res.update(dict(
             organizations = reverse('main:projects_organizations_list', args=(obj.pk,)),
+            playbooks = reverse('main:projects_detail_playbooks', args=(obj.pk,)),
         ))
         return res
 
+    def get_local_path_choices(self, obj):
+        return Project.get_local_path_choices()
+
+class ProjectPlaybooksSerializer(ProjectSerializer):
+
+    class Meta:
+        model = Project
+        fields = ('playbooks',)
+
+    def to_native(self, obj):
+        ret = super(ProjectPlaybooksSerializer, self).to_native(obj)
+        return ret.get('playbooks', [])
+    
 class InventorySerializer(BaseSerializer):
 
     class Meta:
