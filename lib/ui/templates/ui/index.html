@@ -30,6 +30,7 @@
   <script src="{{ STATIC_URL }}js/controllers/Admins.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Inventories.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Teams.js"></script>
+  <script src="{{ STATIC_URL }}js/controllers/Credentials.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Groups.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Users.js"></script>
@@ -38,6 +39,7 @@
   <script src="{{ STATIC_URL }}js/forms/Teams.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Groups.js"></script>
+  <script src="{{ STATIC_URL }}js/forms/Credentials.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Users.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Admins.js"></script>
@@ -45,7 +47,7 @@
   <script src="{{ STATIC_URL }}js/lists/Teams.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Groups.js"></script>
-  <script src="{{ STATIC_URL }}js/helpers/api-defaults.js"></script>
+  <script src="{{ STATIC_URL }}js/lists/Credentials.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/refresh-related.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-paginate.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-search.js"></script>
@@ -55,9 +57,12 @@
   <script src="{{ STATIC_URL }}js/helpers/inventory.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/hosts.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/teams.js"></script>
+  <script src="{{ STATIC_URL }}js/helpers/teams.js"></script>
+  <script src="{{ STATIC_URL }}js/helpers/Lookup.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/directives.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/filters.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/tooltip.js"></script>
+  <script src="{{ STATIC_URL }}lib/ansible/api-loader.js"></script>
   {% endif %}
   <!-- <script src="{{ STATIC_URL }}lib/angular/http-auth-interceptor.js"></script> -->
  </head>
@@ -114,7 +119,7 @@
       </div>
       <div class="modal-footer">
         <a href="#" data-target="#prompt-modal" data-dismiss="modal" class="btn">No</a>
-        <a href="" ng-click="promptAction()" ng-bind="promptBtnClass" class="btn">Yes</a> <!-- FIXME: Make sure the ng-bind works. -->
+        <a href="" ng-click="promptAction()" id="prompt-action-btn" class="btn">Yes</a> <!-- FIXME: Make sure the ng-bind works. -->
       </div>
     </div>
 

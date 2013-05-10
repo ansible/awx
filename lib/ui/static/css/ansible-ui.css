@@ -140,9 +140,7 @@
  }
 
  .footer-navigation {
-    border-top: 1px solid #000;
-    margin: 20px 0 20px 0;
-    padding-top: 20px;
+    margin: 10px 0 10px 0;
  }
 
  .lookup-navigation {
@@ -151,8 +149,7 @@
  }
 
  .related-footer {
-    padding-bottom: 0;
-    margin: 20px 0 0 0;
+    margin: 10px 0 0 0;
  }
 
  .page-size {
