@@ -41,6 +41,12 @@ class BaseList(generics.ListCreateAPIView):
     #   model = ModelClass
     #   serializer_class = SerializerClass
 
+    def post(self, request, *args, **kwargs):
+        postable = getattr(self.__class__, 'postable', True)
+        if not postable:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super(BaseList, self).post(request, *args, **kwargs)
+
     def get_queryset(self):
 
         base = self._get_queryset()

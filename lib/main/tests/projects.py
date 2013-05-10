@@ -20,6 +20,7 @@ import json
 from django.contrib.auth.models import User as DjangoUser
 import django.test
 from django.test.client import Client
+from django.core.urlresolvers import reverse
 from lib.main.models import *
 from lib.main.tests.base import BaseTest
 
@@ -406,6 +407,23 @@ class ProjectsTest(BaseTest):
         self.get(team_creds, expect=200, auth=self.get_normal_credentials())
         self.get(team_creds, expect=403, auth=self.get_other_credentials())
         self.get(team_creds, expect=403, auth=self.get_nobody_credentials())
+
+        # Check /api/v1/credentials (GET)
+        url = reverse('main:credentials_list')
+        with self.current_user(self.super_django_user):
+            self.options(url)
+            self.head(url)
+            response = self.get(url)
+        qs = Credential.objects.all()
+        self.check_pagination_and_size(response, qs.count())
+        self.check_list_ids(response, qs)
+
+        # POST should fail for all users.
+        with self.current_user(self.super_django_user):
+            data = dict(name='xyz', user=self.super_django_user.pk)
+            self.post(url, data, expect=405)
+    
+        # FIXME: Check list as other users.
 
         # can edit a credential
         cred_user = Credential.objects.get(pk=cred_user)
