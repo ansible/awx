@@ -16,6 +16,7 @@
 
 
 import os
+import shlex
 from django.conf import settings
 from django.db import models, DatabaseError
 from django.db.models import CASCADE, SET_NULL, PROTECT
@@ -25,7 +26,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.utils.timezone import now
-import exceptions
 from jsonfield import JSONField
 from djcelery.models import TaskMeta
 from rest_framework.authtoken.models import Token
@@ -679,6 +679,13 @@ class Job(CommonModel):
     @property
     def extra_vars_dict(self):
         '''Return extra_vars key=value pairs as a dictionary.'''
+        d = {}
+        extra_vars = self.extra_vars.encode('utf-8')
+        for kv in [x.decode('utf-8') for x in shlex.split(extra_vars, posix=True)]:
+            if '=' in kv:
+                k, v = kv.split('=', 1)
+                d[k] = v
+        return d
 
     @property
     def celery_task(self):

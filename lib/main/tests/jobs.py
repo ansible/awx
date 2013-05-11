@@ -317,7 +317,11 @@ class BaseJobTest(BaseTest):
             project=self.proj_dev,
             playbook=self.proj_dev.playbooks[0],
             created_by=self.user_sue,
-        )        
+        )
+        self.job_eng_check = self.jt_eng_check.create_job(
+            created_by=self.user_sue,
+            credential=self.cred_doug,
+        )
         self.jt_eng_run = JobTemplate.objects.create(
             name='eng-dev-run',
             job_type='run',
@@ -325,6 +329,10 @@ class BaseJobTest(BaseTest):
             project=self.proj_dev,
             playbook=self.proj_dev.playbooks[0],
             created_by=self.user_sue,
+        )
+        self.job_eng_run = self.jt_eng_run.create_job(
+            created_by=self.user_sue,
+            credential=self.cred_chuck,
         )
 
         # Support has job templates to check/run the test project onto
@@ -336,7 +344,11 @@ class BaseJobTest(BaseTest):
             project=self.proj_test,
             playbook=self.proj_test.playbooks[0],
             created_by=self.user_sue,
-        )        
+        )
+        self.job_sup_check = self.jt_sup_check.create_job(
+            created_by=self.user_sue,
+            credential=self.cred_frank,
+        )
         self.jt_sup_run = JobTemplate.objects.create(
             name='sup-test-run',
             job_type='run',
@@ -344,6 +356,10 @@ class BaseJobTest(BaseTest):
             project=self.proj_test,
             playbook=self.proj_test.playbooks[0],
             created_by=self.user_sue,
+        )
+        self.job_sup_run = self.jt_sup_run.create_job(
+            created_by=self.user_sue,
+            credential=self.cred_eve,
         )
 
         # Operations has job templates to check/run the prod project onto
@@ -356,7 +372,10 @@ class BaseJobTest(BaseTest):
             playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_east,
             created_by=self.user_sue,
-        )        
+        )
+        self.job_ops_east_check = self.jt_ops_east_check.create_job(
+            created_by=self.user_sue,
+        )
         self.jt_ops_east_run = JobTemplate.objects.create(
             name='ops-east-prod-run',
             job_type='run',
@@ -364,6 +383,9 @@ class BaseJobTest(BaseTest):
             project=self.proj_prod,
             playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_east,
+            created_by=self.user_sue,
+        )
+        self.job_ops_east_run = self.jt_ops_east_run.create_job(
             created_by=self.user_sue,
         )
         self.jt_ops_west_check = JobTemplate.objects.create(
@@ -374,7 +396,10 @@ class BaseJobTest(BaseTest):
             playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_west,
             created_by=self.user_sue,
-        )        
+        )
+        self.job_ops_west_check = self.jt_ops_west_check.create_job(
+            created_by=self.user_sue,
+        )
         self.jt_ops_west_run = JobTemplate.objects.create(
             name='ops-west-prod-run',
             job_type='run',
@@ -382,6 +407,9 @@ class BaseJobTest(BaseTest):
             project=self.proj_prod,
             playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_west,
+            created_by=self.user_sue,
+        )
+        self.job_ops_west_run = self.jt_ops_west_run.create_job(
             created_by=self.user_sue,
         )
 
@@ -395,19 +423,23 @@ class JobTemplateTest(BaseJobTest):
     def setUp(self):
         super(JobTemplateTest, self).setUp()
 
+    def _test_invalid_creds(self, url, data=None, methods=None):
+        data = data or {}
+        methods = methods or ('options', 'head', 'get')
+        for auth in [(None,), ('invalid', 'password')]:
+            with self.current_user(*auth):
+                for method in methods:
+                    f = getattr(self, method)
+                    if method in ('post', 'put'):
+                        f(url, data, expect=401)
+                    else:
+                        f(url, expect=401)
+
     def test_get_job_template_list(self):
         url = reverse('main:job_template_list')
 
-        # no credentials == 401
-        self.options(url, expect=401)
-        self.head(url, expect=401)
-        self.get(url, expect=401)
-
-        # wrong credentials == 401
-        with self.current_user('invalid', 'password'):
-            self.options(url, expect=401)
-            self.head(url, expect=401)
-            self.get(url, expect=401)
+        # Test with no auth and with invalid login.
+        self._test_invalid_creds(url)
 
         # sue's credentials (superuser) == 200, full list
         with self.current_user(self.user_sue):
@@ -418,7 +450,7 @@ class JobTemplateTest(BaseJobTest):
         self.check_pagination_and_size(response, qs.count())
         self.check_list_ids(response, qs)
 
-        # FIXME: Check individual job template result.
+        # FIXME: Check individual job template result fields.
 
         # alex's credentials (admin of all orgs) == 200, full list
         with self.current_user(self.user_alex):
@@ -441,66 +473,78 @@ class JobTemplateTest(BaseJobTest):
         #self.check_pagination_and_size(response, qs.count())
         #self.check_list_ids(response, qs)
 
+        # FIXME: Check with other credentials.
 
     def test_post_job_template_list(self):
         url = reverse('main:job_template_list')
-        
-        return # FIXME
-
-        # org admin can add job template
         data = dict(
-            name         = 'job-foo', 
-            credential   = self.user_credential.pk, 
-            inventory    = self.inventory.pk, 
-            project      = self.project.pk,
+            name         = 'new job template',
             job_type     = PERM_INVENTORY_DEPLOY,
-            playbook     = self.project.playbooks[0],
+            inventory    = self.inv_eng.pk,
+            project      = self.proj_dev.pk,
+            playbook     = self.proj_dev.playbooks[0],
         )
-        with self.current_user(self.normal_django_user):
+
+        # Test with no auth and with invalid login.
+        self._test_invalid_creds(url, data, methods=('post',))
+
+        # sue can always add job templates.
+        with self.current_user(self.user_sue):
             response = self.post(url, data, expect=201)
             detail_url = reverse('main:job_template_detail',
                                  args=(response['id'],))
             self.assertEquals(response['url'], detail_url)
 
-        # other_django_user is on a team that can deploy, so can create both
-        # deploy and check type job templates
-        with self.current_user(self.other_django_user):
-            data['name'] = 'job-foo2'
-            response = self.post(url, data, expect=201)
-            data['name'] = 'job-foo3'
-            data['job_type'] = PERM_INVENTORY_CHECK
-            response = self.post(url, data, expect=201)
+        # Check that all fields provided were set.
+        jt = JobTemplate.objects.get(pk=response['id'])
+        self.assertEqual(jt.name, data['name'])
+        self.assertEqual(jt.job_type, data['job_type'])
+        self.assertEqual(jt.inventory.pk, data['inventory'])
+        self.assertEqual(jt.credential, None)
+        self.assertEqual(jt.project.pk, data['project'])
+        self.assertEqual(jt.playbook, data['playbook'])
 
-        # other2_django_user has individual permissions to run check mode,
-        # but not deploy
-        with self.current_user(self.other2_django_user):
-            data['name'] = 'job-foo4'
-            #data['credential'] = self.user_credential.pk
-            #response = self.post(url, data, expect=201)
-            data['name'] = 'job-foo5'
-            data['job_type'] = PERM_INVENTORY_DEPLOY
-            response = self.post(url, data, expect=403)
+        # Test that all required fields are really required.
+        data['name'] = 'another new job template'
+        for field in ('name', 'job_type', 'inventory', 'project', 'playbook'):
+            with self.current_user(self.user_sue):
+                d = dict(data.items())
+                d.pop(field)
+                response = self.post(url, d, expect=400)
+                self.assertTrue(field in response,
+                                'no error for field "%s" in response' % field)
 
-        # nobody user can't even run check mode
-        with self.current_user(self.nobody_django_user):
-            data['name'] = 'job-foo5'
-            data['job_type'] = PERM_INVENTORY_CHECK
-            response = self.post(url, data, expect=403)
-            data['job_type'] = PERM_INVENTORY_DEPLOY
-            response = self.post(url, data, expect=403)
+        # Test invalid value for job_type.
+        with self.current_user(self.user_sue):
+            d = dict(data.items())
+            d['job_type'] = 'world domination'
+            response = self.post(url, d, expect=400)
+            self.assertTrue('job_type' in response)
+    
+        # Test playbook not in list of project playbooks.
+        with self.current_user(self.user_sue):
+            d = dict(data.items())
+            d['playbook'] = 'no_playbook_here.yml'
+            response = self.post(url, d, expect=400)
+            self.assertTrue('playbook' in response)
+
+        # FIXME: Check other credentials and optional fields.
 
     def test_get_job_template_detail(self):
-        
-        return # FIXME
-        
-        url = reverse('main:job_template_detail', args=(self.job_template1.pk,))
-        
-        # verify we can also get the job template record
-        with self.current_user(self.other2_django_user):
+        jt = self.jt_eng_run
+        url = reverse('main:job_template_detail', args=(jt.pk,))
+
+        # Test with no auth and with invalid login.
+        self._test_invalid_creds(url)
+
+        # sue can read the job template detail.
+        with self.current_user(self.user_sue):
             self.options(url)
             self.head(url)
             response = self.get(url)
             self.assertEqual(response['url'], url)
+
+        # FIXME: Check other credentials and optional fields.
 
         # TODO: add more tests that show
         # the method used to START a JobTemplate follow the exact same permissions as those to create it ...
@@ -508,13 +552,53 @@ class JobTemplateTest(BaseJobTest):
         # that we can drill all the way down and can get at host failure lists, etc ...
 
     def test_put_job_template_detail(self):
-        pass
+        jt = self.jt_eng_run
+        url = reverse('main:job_template_detail', args=(jt.pk,))
+
+        # Test with no auth and with invalid login.
+        self._test_invalid_creds(url, methods=('put',))
+
+        # sue can update the job template detail.
+        with self.current_user(self.user_sue):
+            data = self.get(url)
+            response = self.put(url, data)
+
+        # FIXME: Check other credentials and optional fields.
 
     def test_get_job_template_job_list(self):
-        pass
+        jt = self.jt_eng_run
+        url = reverse('main:job_template_job_list', args=(jt.pk,))
+
+        # Test with no auth and with invalid login.
+        self._test_invalid_creds(url)
+
+        # sue can read the job template job list.
+        with self.current_user(self.user_sue):
+            self.options(url)
+            self.head(url)
+            response = self.get(url)
+        qs = jt.jobs.all()
+        self.check_pagination_and_size(response, qs.count())
+        self.check_list_ids(response, qs)
+
+        # FIXME: Check other credentials and optional fields.
 
     def test_post_job_template_job_list(self):
-        pass
+        jt = self.jt_eng_run
+        url = reverse('main:job_template_job_list', args=(jt.pk,))
+        data = dict(
+            name='new job from template',
+            credential=self.cred_bob.pk,
+        )
+
+        # Test with no auth and with invalid login.
+        self._test_invalid_creds(url, data, methods=('post',))
+
+        # sue can create a new job from the template.
+        with self.current_user(self.user_sue):
+            response = self.post(url, data, expect=201)
+
+        # FIXME: Check other credentials and optional fields.
 
 class JobTest(BaseJobTest):
 
@@ -533,7 +617,16 @@ class JobTest(BaseJobTest):
     def test_put_job_detail(self):
         pass
 
-    def test_post_job_detail(self):
+    def test_get_job_start(self):
+        pass
+
+    def test_post_job_start(self):
+        pass
+
+    def test_get_job_cancel(self):
+        pass
+
+    def test_post_job_cancel(self):
         pass
 
     def test_get_job_host_list(self):

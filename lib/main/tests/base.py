@@ -55,7 +55,10 @@ class BaseTestMixin(object):
                 username = user_or_username
             password = password or self._user_passwords.get(username)
             previous_auth = self._current_auth
-            self._current_auth = (username, password)
+            if username is None:
+                self._current_auth = None
+            else:
+                self._current_auth = (username, password)
             yield
         finally:
             self._current_auth = previous_auth
@@ -179,8 +182,8 @@ class BaseTestMixin(object):
             assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, response.content)
         if method_name == 'head':
             self.assertFalse(response.content)
-        if response.status_code not in [ 202, 204, 400, 405, 409 ] and method_name != 'head':
-            # no JSON responses in these at least for now, 400/409 should probably return some (FIXME)
+        if response.status_code not in [ 202, 204, 405, 409 ] and method_name != 'head' and response.content:
+            # no JSON responses in these at least for now, 409 should probably return some (FIXME)
             return json.loads(response.content)
         else:
             return None

@@ -511,7 +511,7 @@ class JobTemplateAccess(BaseAccess):
     def can_change(self, obj, data):
         '''
         '''
-        return False # FIXME
+        return self.user.is_superuser # FIXME
 
 class JobAccess(BaseAccess):
 

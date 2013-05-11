@@ -376,6 +376,13 @@ class JobTemplateSerializer(BaseSerializer):
             res['credential'] = reverse('main:credentials_detail', args=(obj.credential.pk,))
         return res
 
+    def validate_playbook(self, attrs, source):
+        project = attrs.get('project', None)
+        playbook = attrs.get('playbook', '')
+        if project and playbook and playbook not in project.playbooks:
+            raise serializers.ValidationError('Playbook not found for project')
+        return attrs
+
 class JobSerializer(BaseSerializer):
 
     passwords_needed_to_start = serializers.Field(source='get_passwords_needed_to_start')
@@ -401,6 +408,28 @@ class JobSerializer(BaseSerializer):
         if obj.job_template:
             res['job_template'] = reverse('main:job_template_detail', args=(obj.job_template.pk,))
         return res
+
+    def from_native(self, data, files):
+        # When creating a new job and a job template is specified, populate any
+        # fields not provided in data from the job template.
+        if not self.object and isinstance(data, dict) and 'job_template' in data:
+            try:
+                job_template = JobTemplate.objects.get(pk=data['job_template'])
+            except JobTemplate.DoesNotExist:
+                self._errors = {'job_template': 'Invalid job template'}
+                return
+            # Don't auto-populate name or description.
+            data.setdefault('job_type', job_template.job_type)
+            data.setdefault('inventory', job_template.inventory.pk)
+            data.setdefault('project', job_template.project.pk)
+            data.setdefault('playbook', job_template.playbook)
+            if job_template.credential:
+                data.setdefault('credential', job_template.credential.pk)
+            data.setdefault('forks', job_template.forks)
+            data.setdefault('limit', job_template.limit)
+            data.setdefault('verbosity', job_template.verbosity)
+            data.setdefault('extra_vars', job_template.extra_vars)
+        return super(JobSerializer, self).from_native(data, files)
 
 class JobHostSummarySerializer(BaseSerializer):
 

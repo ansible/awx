@@ -913,7 +913,6 @@ class JobTemplateList(BaseList):
     def _get_queryset(self):
         return get_user_queryset(self.request.user, self.model)
 
-
 class JobTemplateDetail(BaseDetail):
 
     model = JobTemplate
@@ -954,6 +953,13 @@ class JobDetail(BaseDetail):
     model = Job
     serializer_class = JobSerializer
     permission_classes = (CustomRbac,)
+
+class JobStart(BaseDetail):
+
+    def post(self, request, *args, **kwargs):
+        pass # FIXME 
+
+class JobCancel(BaseDetail):
 
     def post(self, request, *args, **kwargs):
         pass # FIXME 
