@@ -220,6 +220,10 @@ class HostSerializer(BaseSerializer):
             inventory     = reverse('main:inventory_detail',      args=(obj.inventory.pk,)),
             job_events    = reverse('main:host_job_event_list',   args=(obj.pk,)),
         ))
+        if obj.last_job:
+            res['last_job'] = reverse('main:job_detail', args=(obj.last_job.pk,))
+        #if obj.last_job_host_summary:
+        #    res['last_job_host_summary'] = reverse('main:job_host_summary_detail', args=(obj.last_job_host_summary.pk,))
         # NICE TO HAVE: possible reverse resource to show what groups the host is in
         return res
 

@@ -786,6 +786,21 @@ class JobHostSummary(models.Model):
             (self.host.name, self.changed, self.dark, self.failures, self.ok,
              self.processed, self.skipped)
 
+    def save(self, *args, **kwargs):
+        super(JobHostSummary, self).save(*args, **kwargs)
+        self.update_host_last_job_summary()
+
+    def update_host_last_job_summary(self):
+        update_fields = []
+        if self.host.last_job != self.job:
+            self.host.last_job = self.job
+            update_fields.append('last_job')
+        if self.host.last_job_host_summary != self:
+            self.host.last_job_host_summary = self
+            update_fields.append('last_job_host_summary')
+        if update_fields:
+            self.host.save(update_fields=update_fields)
+
 class JobEvent(models.Model):
     '''
     An event/message logged from the callback when running a job.
@@ -866,6 +881,16 @@ class JobEvent(models.Model):
         self.failed = bool(self.event in self.FAILED_EVENTS)
         super(JobEvent, self).save(*args, **kwargs)
         self.update_host_summary_from_stats()
+        self.update_host_last_job()
+
+    def update_host_last_job(self):
+        if self.host:
+            update_fields = []
+            if self.host.last_job != self.job:
+                self.host.last_job = self.job
+                update_fields.append('last_job')
+            if update_fields:
+                self.host.save(update_fields=update_fields)
 
     def update_host_summary_from_stats(self):
         if self.event != 'playbook_on_stats':

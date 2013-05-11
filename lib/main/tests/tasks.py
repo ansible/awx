@@ -231,6 +231,9 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
         for job_host_summary in job.job_host_summaries.all():
             unicode(job_host_summary)  # For test coverage.
+            self.assertEqual(job_host_summary.host.last_job_host_summary, job_host_summary)
+        self.host = Host.objects.get(pk=self.host.pk)
+        self.assertEqual(self.host.last_job, job)
         self.assertEqual(job.successful_hosts.count(), 1)
         self.assertEqual(job.failed_hosts.count(), 0)
         self.assertEqual(job.changed_hosts.count(), 1)
@@ -257,6 +260,8 @@ class RunJobTest(BaseCeleryTest):
         for evt in job_events.filter(event='runner_on_skipped'):
             self.assertEqual(evt.host, self.host)
         self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
+        self.host = Host.objects.get(pk=self.host.pk)
+        self.assertEqual(self.host.last_job, job)
         self.assertEqual(job.successful_hosts.count(), 0)
         self.assertEqual(job.failed_hosts.count(), 0)
         self.assertEqual(job.changed_hosts.count(), 0)
@@ -282,6 +287,8 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job_events.filter(event='runner_on_failed').count(), 1)
         self.assertEqual(job_events.get(event='runner_on_failed').host, self.host)
         self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
+        self.host = Host.objects.get(pk=self.host.pk)
+        self.assertEqual(self.host.last_job, job)
         self.assertEqual(job.successful_hosts.count(), 0)
         self.assertEqual(job.failed_hosts.count(), 1)
         self.assertEqual(job.changed_hosts.count(), 0)
@@ -309,6 +316,8 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job_events.filter(event='runner_on_skipped').count(), 1)
         self.assertEqual(job_events.get(event='runner_on_skipped').host, self.host)
         self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
+        self.host = Host.objects.get(pk=self.host.pk)
+        self.assertEqual(self.host.last_job, job)
         self.assertEqual(job.successful_hosts.count(), 0)
         self.assertEqual(job.failed_hosts.count(), 0)
         self.assertEqual(job.changed_hosts.count(), 0)
