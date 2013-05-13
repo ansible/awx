@@ -203,6 +203,9 @@ class BaseTestMixin(object):
     def put(self, url, data, expect=200, auth=None):
         return self._generic_rest(url, data=data, expect=expect, auth=auth, method='put')
 
+    def patch(self, url, data, expect=200, auth=None):
+        return self._generic_rest(url, data=data, expect=expect, auth=auth, method='patch')
+
     def delete(self, url, expect=201, auth=None):
         return self._generic_rest(url, data=None, expect=expect, auth=auth, method='delete')
 

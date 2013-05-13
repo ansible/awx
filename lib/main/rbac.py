@@ -70,6 +70,8 @@ class CustomRbac(permissions.BasePermission):
         return check_user_access(request.user, view.model, 'delete', obj)
 
     def _check_permissions(self, request, view, obj=None):
+        #if not obj and hasattr(view, 'get_object'):
+        #    obj = view.get_object()
         # Check that obj (if given) is active, otherwise raise a 404.
         active = getattr(obj, 'active', getattr(obj, 'is_active', True))
         if callable(active):
@@ -81,7 +83,7 @@ class CustomRbac(permissions.BasePermission):
             return False
         # Don't allow inactive users (and respond with a 403).
         if not request.user.is_active:
-            raise PermissionDenied()
+            raise PermissionDenied('your account is inactive')
         # Always allow superusers (as long as they are active).
         if request.user.is_superuser:
             return True

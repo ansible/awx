@@ -644,6 +644,7 @@ class Job(CommonModel):
     )
     failed = models.BooleanField(
         default=False,
+        editable=False,
     )
     result_stdout = models.TextField(
         blank=True,
@@ -703,9 +704,13 @@ class Job(CommonModel):
                 needed.append(field)
         return needed
 
+    @property
+    def can_start(self):
+        return bool(self.status == 'new')
+
     def start(self, **kwargs):
         from lib.main.tasks import RunJob
-        if self.status != 'new':
+        if not self.can_start:
             return False
         needed = self.get_passwords_needed_to_start()
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
@@ -720,8 +725,12 @@ class Job(CommonModel):
         self.save(update_fields=['celery_task_id'])
         return True
 
+    @property
+    def can_cancel(self):
+        return bool(self.status in ('pending', 'running'))
+
     def cancel(self):
-        if self.status in ('pending', 'running'):
+        if self.can_cancel:
             if not self.cancel_flag:
                 self.cancel_flag = True
                 self.save(update_fields=['cancel_flag'])

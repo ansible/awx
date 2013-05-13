@@ -954,15 +954,57 @@ class JobDetail(BaseDetail):
     serializer_class = JobSerializer
     permission_classes = (CustomRbac,)
 
-class JobStart(BaseDetail):
+    def update(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # Only allow changes (PUT/PATCH) when job status is "new".
+        if obj.status != 'new':
+            return self.http_method_not_allowed(request, *args, **kwargs)
+        return super(JobDetail, self).update(request, *args, **kwargs)
+
+class JobStart(generics.RetrieveAPIView):
+
+    model = Job
+    permission_classes = (CustomRbac,)
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        data = dict(
+            can_start=obj.can_start,
+        )
+        if obj.can_start:
+            data['passwords_needed_to_start'] = obj.get_passwords_needed_to_start()
+        return Response(data)
 
     def post(self, request, *args, **kwargs):
-        pass # FIXME 
+        obj = self.get_object()
+        if obj.can_start:
+            result = obj.start(**request.DATA)
+            if not result:
+                return Response(status=400)
+            else:
+                return Response(status=202)
+        else:
+            return Response(status=405)
 
-class JobCancel(BaseDetail):
+class JobCancel(generics.RetrieveAPIView):
+
+    model = Job
+    permission_classes = (CustomRbac,)
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        data = dict(
+            can_cancel=obj.can_cancel,
+        )
+        return Response(data)
 
     def post(self, request, *args, **kwargs):
-        pass # FIXME 
+        obj = self.get_object()
+        if obj.can_cancel:
+            result = obj.cancel()
+            return Response(status=202)
+        else:
+            return Response(status=405)
 
 class JobHostsList(BaseSubList):
     pass

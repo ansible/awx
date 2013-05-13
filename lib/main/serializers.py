@@ -407,6 +407,10 @@ class JobSerializer(BaseSerializer):
         ))
         if obj.job_template:
             res['job_template'] = reverse('main:job_template_detail', args=(obj.job_template.pk,))
+        if obj.can_start or True:
+            res['start'] = reverse('main:job_start', args=(obj.pk,))
+        if obj.can_cancel or True:
+            res['cancel'] = reverse('main:job_cancel', args=(obj.pk,))
         return res
 
     def from_native(self, data, files):

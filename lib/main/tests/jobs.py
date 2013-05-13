@@ -18,11 +18,13 @@ import datetime
 import json
 from django.contrib.auth.models import User as DjangoUser
 from django.core.urlresolvers import reverse
+import django.test
 from django.test.client import Client
+from django.test.utils import override_settings
 from lib.main.models import *
-from lib.main.tests.base import BaseTest
+from lib.main.tests.base import BaseTestMixin
 
-__all__ = ['JobTemplateTest', 'JobTest']
+__all__ = ['JobTemplateTest', 'JobTest', 'JobStartCancelTest']
 
 TEST_PLAYBOOK = '''- hosts: all
   gather_facts: false
@@ -31,7 +33,7 @@ TEST_PLAYBOOK = '''- hosts: all
     command: test 1 = 1
 '''
 
-class BaseJobTest(BaseTest):
+class BaseJobTestMixin(BaseTestMixin):
     ''''''
 
     def _create_inventory(self, name, organization, created_by,
@@ -273,7 +275,7 @@ class BaseJobTest(BaseTest):
         )
         self.cred_iris = self.user_iris.credentials.create(
             ssh_username='iris',
-            ssh_password='',
+            ssh_password='ASK',
             created_by=self.user_sue,
         )
 
@@ -414,14 +416,8 @@ class BaseJobTest(BaseTest):
         )
 
     def setUp(self):
-        super(BaseJobTest, self).setUp()
+        super(BaseJobTestMixin, self).setUp()
         self.populate()
-
-
-class JobTemplateTest(BaseJobTest):
-
-    def setUp(self):
-        super(JobTemplateTest, self).setUp()
 
     def _test_invalid_creds(self, url, data=None, methods=None):
         data = data or {}
@@ -430,10 +426,12 @@ class JobTemplateTest(BaseJobTest):
             with self.current_user(*auth):
                 for method in methods:
                     f = getattr(self, method)
-                    if method in ('post', 'put'):
+                    if method in ('post', 'put', 'patch'):
                         f(url, data, expect=401)
                     else:
                         f(url, expect=401)
+
+class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_get_job_template_list(self):
         url = reverse('main:job_template_list')
@@ -556,12 +554,15 @@ class JobTemplateTest(BaseJobTest):
         url = reverse('main:job_template_detail', args=(jt.pk,))
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url, methods=('put',))
+        self._test_invalid_creds(url, methods=('put',))# 'patch'))
 
         # sue can update the job template detail.
         with self.current_user(self.user_sue):
             data = self.get(url)
+            data['name'] = '%s-updated' % data['name']
             response = self.put(url, data)
+            #patch_data = dict(name='%s-changed' % data['name'])
+            #response = self.patch(url, patch_data)
 
         # FIXME: Check other credentials and optional fields.
 
@@ -600,40 +601,100 @@ class JobTemplateTest(BaseJobTest):
 
         # FIXME: Check other credentials and optional fields.
 
-class JobTest(BaseJobTest):
-
-    def setUp(self):
-        super(JobTest, self).setUp()
+class JobTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_get_job_list(self):
-        pass
+        url = reverse('main:job_list')
+
+        # Test with no auth and with invalid login.
+        self._test_invalid_creds(url)
+
+        # sue's credentials (superuser) == 200, full list
+        with self.current_user(self.user_sue):
+            self.options(url)
+            self.head(url)
+            response = self.get(url)
+        qs = Job.objects.all()
+        self.check_pagination_and_size(response, qs.count())
+        self.check_list_ids(response, qs)
+
+        # FIXME: Check individual job result fields.
+        # FIXME: Check with other credentials.
 
     def test_post_job_list(self):
-        pass
+        url = reverse('main:job_list')
+        data = dict(
+            name='new job without template',
+            job_type=PERM_INVENTORY_DEPLOY,
+            inventory=self.inv_ops_east.pk,
+            project=self.proj_prod.pk,
+            playbook=self.proj_prod.playbooks[0],
+            credential=self.cred_ops_east.pk,
+        )
+
+        # Test with no auth and with invalid login.
+        self._test_invalid_creds(url, data, methods=('post',))
+
+        # sue can create a new job without a template.
+        with self.current_user(self.user_sue):
+            response = self.post(url, data, expect=201)
+
+        # sue can also create a job here from a template
+        jt = self.jt_ops_east_run
+        data = dict(
+            name='new job from template',
+            job_template=jt.pk,
+        )
+        with self.current_user(self.user_sue):
+            response = self.post(url, data, expect=201)
+
+        # FIXME: Check with other credentials and optional fields.
 
     def test_get_job_detail(self):
-        pass
+        job = self.job_ops_east_run
+        url = reverse('main:job_detail', args=(job.pk,))
+
+        # Test with no auth and with invalid login.
+        self._test_invalid_creds(url)
+
+        # sue can read the job detail.
+        with self.current_user(self.user_sue):
+            self.options(url)
+            self.head(url)
+            response = self.get(url)
+            self.assertEqual(response['url'], url)
+
+        # FIXME: Check with other credentials and optional fields.
 
     def test_put_job_detail(self):
-        pass
+        job = self.job_ops_west_run
+        url = reverse('main:job_detail', args=(job.pk,))
 
-    def test_get_job_start(self):
-        pass
+        # Test with no auth and with invalid login.
+        self._test_invalid_creds(url, methods=('put',))# 'patch'))
 
-    def test_post_job_start(self):
-        pass
+        # sue can update the job detail only if the job is new.
+        self.assertEqual(job.status, 'new')
+        with self.current_user(self.user_sue):
+            data = self.get(url)
+            data['name'] = '%s-updated' % data['name']
+            response = self.put(url, data)
+            #patch_data = dict(name='%s-changed' % data['name'])
+            #response = self.patch(url, patch_data)
 
-    def test_get_job_cancel(self):
-        pass
+        # sue cannot update the job detail if it is in any other state.
+        for status in ('pending', 'running', 'successful', 'failed', 'error',
+                       'canceled'):
+            job.status = status
+            job.save()
+            with self.current_user(self.user_sue):
+                data = self.get(url)
+                data['name'] = '%s-updated' % data['name']
+                self.put(url, data, expect=405)
+                #patch_data = dict(name='%s-changed' % data['name'])
+                #self.patch(url, patch_data, expect=405)
 
-    def test_post_job_cancel(self):
-        pass
-
-    def test_get_job_host_list(self):
-        pass
-
-    def test_get_job_job_event_list(self):
-        pass
+        # FIXME: Check with other credentials and readonly fields.
 
     def _test_mainline(self):
         url = reverse('main:job_list')
@@ -682,5 +743,67 @@ class JobTest(BaseJobTest):
         # the method used to START a JobTemplate follow the exact same permissions as those to create it ...
         # and that jobs come back nicely serialized with related resources and so on ...
         # that we can drill all the way down and can get at host failure lists, etc ...
+
+@override_settings(CELERY_ALWAYS_EAGER=True,
+                   CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                   ANSIBLE_TRANSPORT='local')
+class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
+    '''Job API tests that need to use the celery task backend.'''
+
+    def setUp(self):
+        super(JobStartCancelTest, self).setUp()
+        # Pass test database name in environment for use by the inventory script.
+        os.environ['ACOM_TEST_DATABASE_NAME'] = settings.DATABASES['default']['NAME']
+
+    def tearDown(self):
+        super(JobStartCancelTest, self).tearDown()
+        os.environ.pop('ACOM_TEST_DATABASE_NAME', None)
+
+    def test_job_start(self):
+        job = self.job_ops_east_run
+        url = reverse('main:job_start', args=(job.pk,))
+
+        # Test with no auth and with invalid login.
+        self._test_invalid_creds(url)
+        self._test_invalid_creds(url, methods=('post',))
+
+        self.assertEqual(job.status, 'new')
+        with self.current_user(self.user_sue):
+            response = self.get(url)
+            self.assertTrue(response['can_start'])
+            self.assertFalse(response['passwords_needed_to_start'])
+            response = self.post(url, {}, expect=202)
+
+        # FIXME: Test with other users, test when passwords are required.
+
+    def test_job_cancel(self):
+        job = self.job_ops_east_run
+        url = reverse('main:job_cancel', args=(job.pk,))
+
+        # Test with no auth and with invalid login.
+        self._test_invalid_creds(url)
+        self._test_invalid_creds(url, methods=('post',))
+
+        # sue can cancel the job, but only when it is pending or running.
+        for status in [x[0] for x in Job.STATUS_CHOICES]:
+            job.status = status
+            job.save()
+            with self.current_user(self.user_sue):
+                response = self.get(url)
+                if status in ('pending', 'running'):
+                    self.assertTrue(response['can_cancel'])
+                    response = self.post(url, {}, expect=202)
+                else:
+                    self.assertFalse(response['can_cancel'])
+                    response = self.post(url, {}, expect=405)
+
+        # FIXME: Test with other users.
+
+    def test_get_job_host_list(self):
+        pass
+
+    def test_get_job_job_event_list(self):
+        pass
+
 
 

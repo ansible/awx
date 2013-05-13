@@ -359,9 +359,9 @@ class JobAdmin(BaseModelAdmin):
             fsets = [fs for fs in fsets if
                      'created' not in fs[1]['fields'] and
                      'celery_task_id' not in fs[1]['fields']]
-        if not obj or (obj and obj.pk and obj.status != 'new'):
+        if not obj or (obj and obj.pk and not obj.can_start):
             fsets = [fs for fs in fsets if 'start_job' not in fs[1]['fields']]
-        if not obj or (obj and obj.pk and obj.status not in ('pending', 'running')):
+        if not obj or (obj and obj.pk and not obj.can_cancel):
             for fs in fsets:
                 if 'celery_task_id' in fs[1]['fields']:
                     fs[1]['fields'] = ('status', 'get_result_stdout_display',
