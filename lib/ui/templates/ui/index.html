@@ -55,8 +55,6 @@
   <script src="{{ STATIC_URL }}js/helpers/search.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/paginate.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/inventory.js"></script>
-  <script src="{{ STATIC_URL }}js/helpers/hosts.js"></script>
-  <script src="{{ STATIC_URL }}js/helpers/teams.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/teams.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/Lookup.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/directives.js"></script>
@@ -108,18 +106,18 @@
       </div>
     </div>
 
-    <!-- Generic Modal dialog. Use to confirming an action (i.e. Delete) -->
+    <!-- Confirmation Dialog -->
     <div id="prompt-modal" class="modal hide">
       <div class="modal-header">
         <button type="button" class="close" data-target="#prompt-modal" 
                         data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3 ng-bind="promptHeader"></h3>
+        <h3 ng-bind="promptHeader" id="prompt-header"></h3>
       </div>
-      <div class="modal-body" ng-bind="promptBody">
+      <div class="modal-body" ng-bind="promptBody" id="prompt-body">
       </div>
       <div class="modal-footer">
         <a href="#" data-target="#prompt-modal" data-dismiss="modal" class="btn">No</a>
-        <a href="" ng-click="promptAction()" id="prompt-action-btn" class="btn">Yes</a> <!-- FIXME: Make sure the ng-bind works. -->
+        <a href="" ng-click="promptAction()" id="prompt-action-btn" class="btn">Yes</a>
       </div>
     </div>
 
@@ -137,7 +135,7 @@
       </div>
     </div>
 
-    <!-- Generic Modal dialog. Use for alerts/error handling -->
+    <!-- Alerts/error handling dialog -->
     <div id="alert-modal" class="modal hide">
       <div class="modal-header">
         <button type="button" class="close" data-target="#alert-modal" 
