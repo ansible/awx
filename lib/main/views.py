@@ -875,7 +875,7 @@ class InventoryRootGroupsList(BaseSubList):
     severable = False
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         inventory = Inventory.objects.get(pk=self.kwargs['pk'])
         base = inventory.groups
         all_ids = base.values_list('id', flat=True)
