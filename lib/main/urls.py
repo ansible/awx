@@ -74,6 +74,7 @@ inventory_urls = patterns('lib.main.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'inventory_detail'),
     url(r'^(?P<pk>[0-9]+)/hosts/$',                     'inventory_hosts_list'),
     url(r'^(?P<pk>[0-9]+)/groups/$',                    'inventory_groups_list'),
+    url(r'^(?P<pk>[0-9]+)/root_groups/$',               'inventory_root_groups_list'),
 )
 
 hosts_urls = patterns('lib.main.views',

@@ -216,6 +216,8 @@ class InventoryTest(BaseTest):
         ##################################################
         # GROUPS->inventories POST via subcollection
         
+        root_groups = '/api/v1/inventories/1/root_groups/'
+        
         url = '/api/v1/inventories/1/groups/'
         new_group_a = dict(name='web100')
         new_group_b = dict(name='web101')
@@ -239,7 +241,11 @@ class InventoryTest(BaseTest):
         self.post(url5, data=new_group_d, expect=400, auth=self.get_other_credentials())
         got = self.get(url5, expect=200, auth=self.get_other_credentials())
         self.assertEquals(got['count'], 4)
-          
+        
+        # side check: see if root groups URL is operational.  These are groups without parents.
+        root_groups = self.get(root_groups, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(root_groups['count'], 2)
+
         remove_me = added_by_collection
         remove_me['disassociate'] = 1
         self.post(url5, data=remove_me, expect=204, auth=self.get_other_credentials())

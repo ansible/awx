@@ -876,6 +876,25 @@ class InventoryGroupsList(BaseSubList):
         # FIXME: verify that you can can_read permission on the inventory is required
         return base
 
+class InventoryRootGroupsList(BaseSubList):
+
+    model = Group
+    serializer_class = GroupSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Inventory
+    relationship = 'groups'
+    postable = True
+    inject_primary_key_on_post_as = 'inventory'
+    severable = False
+    filter_fields = ('name',)
+
+    def _get_queryset(self):
+        inventory = Inventory.objects.get(pk=self.kwargs['pk'])
+        base = inventory.groups
+        all_ids = base.values_list('id', flat=True)
+        base.exclude(parents__id__in = all_ids)
+        return base
+
 class GroupsVariableDetail(VariableBaseDetail):
 
     model = VariableData
