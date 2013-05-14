@@ -33,6 +33,7 @@
   <script src="{{ STATIC_URL }}js/controllers/Credentials.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Groups.js"></script>
+  <script src="{{ STATIC_URL }}js/controllers/JobTemplates.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Users.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Inventories.js"></script>
@@ -48,6 +49,7 @@
   <script src="{{ STATIC_URL }}js/lists/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Groups.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Credentials.js"></script>
+  <script src="{{ STATIC_URL }}js/lists/JobTemplates.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/refresh-related.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-paginate.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-search.js"></script>
@@ -97,6 +99,7 @@
           <li><a href="#users" data-toggle="tab">Users</a></li>
           <li><a href="#credentials" data-toggle="tab">Credentials</a></li>
           <li><a href="#inventories" data-toggle="tab">Inventories</a></li>
+          <li><a href="#job_templates" data-toggle="tab">Job Templates</a></li>
           <li><a href="#jobs" data-toggle="tab">Jobs</a></li>
         </ul>
      
@@ -176,7 +179,7 @@
   <script>
       $('a[data-toggle="tab"]').on('show', function (e) {
           var url = $(e.target).text();
-          window.location = '#/' + url.toLowerCase();
+          window.location = '#/' + url.toLowerCase().replace(/ /g,'_');
           });
   </script>
 
