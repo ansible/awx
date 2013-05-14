@@ -203,6 +203,7 @@ class InventorySerializer(BaseSerializer):
         res.update(dict(
             hosts        = reverse('main:inventory_hosts_list',           args=(obj.pk,)),
             groups       = reverse('main:inventory_groups_list',          args=(obj.pk,)),
+            root_groups  = reverse('main:inventory_root_groups_list',     args=(obj.pk,)),
             organization = reverse('main:organizations_detail', args=(obj.organization.pk,)),
         ))
         return res
