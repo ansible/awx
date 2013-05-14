@@ -65,7 +65,8 @@ class Command(NoArgsCommand):
         except Job.DoesNotExist:
             raise CommandError('Job with ID %d not found' % job_id)
         if job.status != 'running':
-            raise CommandError('Unable to add event except when job is running')
+            raise CommandError('Unable to add event except when job is running'
+                               ', status is currently %s' % job.status)
         try:
             if event_data_json is None:
                 try:

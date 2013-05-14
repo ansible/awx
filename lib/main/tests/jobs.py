@@ -18,6 +18,7 @@ import datetime
 import json
 from django.contrib.auth.models import User as DjangoUser
 from django.core.urlresolvers import reverse
+from django.db import transaction
 import django.test
 from django.test.client import Client
 from django.test.utils import override_settings
@@ -255,6 +256,8 @@ class BaseJobTestMixin(BaseTestMixin):
         self.cred_eve = self.user_eve.credentials.create(
             ssh_username='eve',
             ssh_password='ASK',
+            sudo_username='root',
+            sudo_password='ASK',
             created_by=self.user_sue,
         )
         self.cred_frank = self.user_frank.credentials.create(
@@ -639,7 +642,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         with self.current_user(self.user_sue):
             response = self.post(url, data, expect=201)
 
-        # sue can also create a job here from a template
+        # sue can also create a job here from a template.
         jt = self.jt_ops_east_run
         data = dict(
             name='new job from template',
@@ -744,9 +747,19 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         # and that jobs come back nicely serialized with related resources and so on ...
         # that we can drill all the way down and can get at host failure lists, etc ...
 
+# Need to disable transaction middleware for testing so that the callback
+# management command will be able to read the database changes made to start
+# the job.  It won't be an issue normally, because the task will be running
+# asynchronously; the start API call will update the database, queue the task,
+# then return immediately (committing the transaction) before celery has even
+# woken up to run the new task.
+MIDDLEWARE_CLASSES = filter(lambda x: not x.endswith('TransactionMiddleware'),
+                            settings.MIDDLEWARE_CLASSES)
+
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-                   ANSIBLE_TRANSPORT='local')
+                   ANSIBLE_TRANSPORT='local',
+                   MIDDLEWARE_CLASSES=MIDDLEWARE_CLASSES)
 class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
     '''Job API tests that need to use the celery task backend.'''
 
@@ -767,12 +780,81 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
         self._test_invalid_creds(url)
         self._test_invalid_creds(url, methods=('post',))
 
-        self.assertEqual(job.status, 'new')
+        # Sue can start a job (when passwords are already saved) as long as the
+        # status is new.  Reverse list so "new" will be last.
+        for status in reversed([x[0] for x in Job.STATUS_CHOICES]):
+            job.status = status
+            job.save()
+            with self.current_user(self.user_sue):
+                response = self.get(url)
+                if status == 'new':
+                    self.assertTrue(response['can_start'])
+                    self.assertFalse(response['passwords_needed_to_start'])
+                    response = self.post(url, {}, expect=202)
+                    job = Job.objects.get(pk=job.pk)
+                    self.assertEqual(job.status, 'successful')
+                else:
+                    self.assertFalse(response['can_start'])
+                    response = self.post(url, {}, expect=405)
+
+        # Test with a job that prompts for SSH and sudo passwords.
+        job = self.job_sup_run
+        url = reverse('main:job_start', args=(job.pk,))
         with self.current_user(self.user_sue):
             response = self.get(url)
             self.assertTrue(response['can_start'])
-            self.assertFalse(response['passwords_needed_to_start'])
-            response = self.post(url, {}, expect=202)
+            self.assertEqual(set(response['passwords_needed_to_start']),
+                             set(['ssh_password', 'sudo_password']))
+            data = dict()
+            response = self.post(url, data, expect=400)
+            data['ssh_password'] = 'sshpass'
+            response = self.post(url, data, expect=400)
+            data2 = dict(sudo_password='sudopass')
+            response = self.post(url, data2, expect=400)
+            data.update(data2)
+            response = self.post(url, data, expect=202)
+            job = Job.objects.get(pk=job.pk)
+            # FIXME: Test run gets the following error in this case:
+            #   fatal: [hostname] => sudo output closed while waiting for password prompt:
+            #self.assertEqual(job.status, 'successful')
+
+        # Test with a job that prompts for SSH unlock key, given the wrong key.
+        job = self.jt_ops_west_run.create_job(
+            credential=self.cred_greg,
+            created_by=self.user_sue,
+        )
+        url = reverse('main:job_start', args=(job.pk,))
+        with self.current_user(self.user_sue):
+            response = self.get(url)
+            self.assertTrue(response['can_start'])
+            self.assertEqual(set(response['passwords_needed_to_start']),
+                             set(['ssh_key_unlock']))
+            data = dict()
+            response = self.post(url, data, expect=400)
+            # The job should start but fail.
+            data['ssh_key_unlock'] = 'sshunlock'
+            response = self.post(url, data, expect=202)
+            job = Job.objects.get(pk=job.pk)
+            self.assertEqual(job.status, 'failed')
+
+        # Test with a job that prompts for SSH unlock key, given the right key.
+        from lib.main.tests.tasks import TEST_SSH_KEY_DATA_UNLOCK
+        job = self.jt_ops_west_run.create_job(
+            credential=self.cred_greg,
+            created_by=self.user_sue,
+        )
+        url = reverse('main:job_start', args=(job.pk,))
+        with self.current_user(self.user_sue):
+            response = self.get(url)
+            self.assertTrue(response['can_start'])
+            self.assertEqual(set(response['passwords_needed_to_start']),
+                             set(['ssh_key_unlock']))
+            data = dict()
+            response = self.post(url, data, expect=400)
+            data['ssh_key_unlock'] = TEST_SSH_KEY_DATA_UNLOCK
+            response = self.post(url, data, expect=202)
+            job = Job.objects.get(pk=job.pk)
+            self.assertEqual(job.status, 'successful')
 
         # FIXME: Test with other users, test when passwords are required.
 
