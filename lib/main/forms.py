@@ -1,9 +1,11 @@
+# (C) AnsibleWorks, 2013
+# All Rights Reserved
+
 import json
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from jsonfield.fields import JSONFormField
 from lib.main.models import *
-
 
 EMPTY_CHOICE = ('', '---------')
 
