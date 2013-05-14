@@ -1,9 +1,11 @@
-Ansible-Commander
-=================
+AnsibleWorks
+============
 
-Ansible-commander is a set of add-ons on top of ansible-core that adds a server,
-REST API, cli client, extensive logging, background job execution, and a 
-user interface.
+AnsibleWorks is a GUI and REST API on top of core Ansible.
+
+AnsibleWorks is commercial software, for use only under license.
+
+This source code is not for distribution.
 
 Technology
 ==========
@@ -13,32 +15,22 @@ Technology
 * Django REST Framework
 * Celery (a python task engine)
 * PostgreSQL
-
-Status
-======
-
-Ansible-Commander (ACOM) is in very early development and is of interest
-to development audiences only.  Open development is important though so
-we are building it in the open.
+* Angular.js
 
 Getting Things Installed
 ========================
 
-See SETUP.md for requirements and details.
+See the ansible-doc repo
 
-Accessing the new UI
-====================
+Accessing the UI
+================
 
 The UI is installed under lib/static/web. After starting the django server
 (i.e. make runserver), access the ui from a web browser at:
 
 http://127.0.0.1:8013/static/web/app/index.html
 
-License
-=======
+(routes and formal installation steps including Apache proxying pending)
 
-Ansible-Commander is made available under the GPL v3, see COPYING, (C) AnsibleWorks, 2013.
-
-Commercial licensing is also available.
 
 
