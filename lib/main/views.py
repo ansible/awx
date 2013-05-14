@@ -95,7 +95,7 @@ class OrganizationsList(BaseList):
     #   I am an admin of the organization
     #   I am a member of the organization
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' I can see organizations when I am a superuser, or I am an admin or user in that organization '''
         base = Organization.objects
         if self.request.user.is_superuser:
@@ -121,7 +121,7 @@ class OrganizationsAuditTrailList(BaseSubList):
     relationship = 'audit_trail'
     postable = False
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' to list tags in the organization, I must be a superuser or org admin '''
         organization = Organization.objects.get(pk=self.kwargs['pk'])
         if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
@@ -138,7 +138,7 @@ class OrganizationsInventoriesList(BaseSubList):
     relationship = 'inventories'
     postable = False
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' to list inventories in the organization, I must be a superuser or org admin '''
         organization = Organization.objects.get(pk=self.kwargs['pk'])
         if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
@@ -157,7 +157,7 @@ class OrganizationsUsersList(BaseSubList):
     inject_primary_key_on_post_as = 'organization'
     filter_fields = ('username',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' to list users in the organization, I must be a superuser or org admin '''
         organization = Organization.objects.get(pk=self.kwargs['pk'])
         if not self.request.user.is_superuser and not self.request.user in organization.admins.all():
@@ -175,7 +175,7 @@ class OrganizationsAdminsList(BaseSubList):
     inject_primary_key_on_post_as = 'organization'
     filter_fields = ('username',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' to list admins in the organization, I must be a superuser or org admin '''
         organization = Organization.objects.get(pk=self.kwargs['pk'])
         if not self.request.user.is_superuser and not self.request.user in organization.admins.all():
@@ -193,7 +193,7 @@ class OrganizationsProjectsList(BaseSubList):
     inject_primary_key_on_post_as = 'organization'
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' to list projects in the organization, I must be a superuser or org admin '''
         organization = Organization.objects.get(pk=self.kwargs['pk'])
         if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
@@ -211,7 +211,7 @@ class OrganizationsTagsList(BaseSubList):
     inject_primary_key_on_post_as = 'organization'
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' to list tags in the organization, I must be a superuser or org admin '''
         organization = Organization.objects.get(pk=self.kwargs['pk'])
         if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
@@ -231,7 +231,7 @@ class OrganizationsTeamsList(BaseSubList):
     severable = False
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' to list users in the organization, I must be a superuser or org admin '''
         organization = Organization.objects.get(pk=self.kwargs['pk'])
         if not self.request.user.is_superuser and not self.request.user in organization.admins.all():
@@ -250,7 +250,7 @@ class TeamsList(BaseList):
     #   I am an admin of the organization that the team is
     #   I am on that team
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' I can see organizations when I am a superuser, or I am an admin or user in that organization '''
         base = Team.objects
         if self.request.user.is_superuser:
@@ -279,7 +279,7 @@ class TeamsUsersList(BaseSubList):
     severable = True
     filter_fields = ('username',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         # FIXME: audit all BaseSubLists to check for permissions on the original object too
         'team members can see the whole team, as can org admins or superusers'
         team = Team.objects.get(pk=self.kwargs['pk'])
@@ -301,7 +301,7 @@ class TeamsPermissionsList(BaseSubList):
     filter_fields = ('name',)
     inject_primary_key_on_post_as = 'team'
 
-    def _get_queryset(self):
+    def get_queryset(self):
         team = Team.objects.get(pk=self.kwargs['pk'])
         base = Permission.objects.filter(team = team)
         #if Team.can_user_administrate(self.request.user, team, None):
@@ -326,7 +326,7 @@ class TeamsProjectsList(BaseSubList):
     # FIXME: filter_fields is no longer used, think we can remove these references everywhere given new custom filtering -- MPD
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         team = Team.objects.get(pk=self.kwargs['pk'])
         base = team.projects.all()
         if self.request.user.is_superuser or self.request.user in team.organization.admins.all():
@@ -347,7 +347,7 @@ class TeamsCredentialsList(BaseSubList):
     inject_primary_key_on_post_as = 'team'
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         team = Team.objects.get(pk=self.kwargs['pk'])
         #if not Team.can_user_administrate(self.request.user, team, None):
         if not check_user_access(self.request.user, Team, 'change', team, None):
@@ -371,7 +371,7 @@ class ProjectsList(BaseList):
     #   I am an admin of the organization that contains the project
     #   I am a member of a team that also contains the project
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' I can see organizations when I am a superuser, or I am an admin or user in that organization '''
         base = Project.objects
         if self.request.user.is_superuser:
@@ -406,7 +406,7 @@ class ProjectsOrganizationsList(BaseSubList):
     postable = False
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         project = Project.objects.get(pk=self.kwargs['pk'])
         if not self.request.user.is_superuser:
             raise PermissionDenied()
@@ -435,7 +435,7 @@ class UsersList(BaseList):
             user.save()
         return result
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' I can see user records when I'm a superuser, I'm that user, I'm their org admin, or I'm on a team with that user '''
         base = User.objects
         if self.request.user.is_superuser:
@@ -458,7 +458,7 @@ class UsersMeList(BaseList):
     def post(self, request, *args, **kwargs):
         raise PermissionDenied()
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' a quick way to find my user record '''
         return User.objects.filter(pk=self.request.user.pk)
 
@@ -472,7 +472,7 @@ class UsersTeamsList(BaseSubList):
     postable = False
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
         #if not UserHelper.can_user_administrate(self.request.user, user, None):
         if not check_user_access(self.request.user, User, 'change', user, None):
@@ -490,7 +490,7 @@ class UsersPermissionsList(BaseSubList):
     filter_fields = ('name',)
     inject_primary_key_on_post_as = 'user'
 
-    def _get_queryset(self):
+    def get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
         #if not UserHelper.can_user_administrate(self.request.user, user, None):
         if not check_user_access(self.request.user, User, 'change', user, None):
@@ -507,7 +507,7 @@ class UsersProjectsList(BaseSubList):
     postable = False
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
         #if not UserHelper.can_user_administrate(self.request.user, user, None):
         if not check_user_access(self.request.user, User, 'change', user, None):
@@ -526,7 +526,7 @@ class UsersCredentialsList(BaseSubList):
     inject_primary_key_on_post_as = 'user'
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
         #if not UserHelper.can_user_administrate(self.request.user, user, None):
         if not check_user_access(self.request.user, User, 'change', user, None):
@@ -546,7 +546,7 @@ class UsersOrganizationsList(BaseSubList):
     postable = False
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
         #if not UserHelper.can_user_administrate(self.request.user, user, None):
         if not check_user_access(self.request.user, User, 'change', user, None):
@@ -563,7 +563,7 @@ class UsersAdminOrganizationsList(BaseSubList):
     postable = False
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         user = User.objects.get(pk=self.kwargs['pk'])
         #if not UserHelper.can_user_administrate(self.request.user, user, None):
         if not check_user_access(self.request.user, User, 'change', user, None):
@@ -593,7 +593,7 @@ class CredentialsList(BaseList):
     permission_classes = (CustomRbac,)
     postable = False
 
-    def _get_queryset(self):
+    def get_queryset(self):
         return get_user_queryset(self.request.user, self.model)
 
 class CredentialsDetail(BaseDetail):
@@ -629,7 +629,7 @@ class InventoryList(BaseList):
         ).distinct()
         return admin_of | has_user_perms | has_team_perms
 
-    def _get_queryset(self):
+    def get_queryset(self):
         ''' I can see inventory when I'm a superuser, an org admin of the inventory, or I have permissions on it '''
         base = Inventory.objects
         return self._filter_queryset(base)
@@ -647,7 +647,7 @@ class HostsList(BaseList):
     permission_classes = (CustomRbac,)
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         '''
         I can see hosts when:
            I'm a superuser,
@@ -689,7 +689,7 @@ class InventoryHostsList(BaseSubList):
     severable = False
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         inventory = Inventory.objects.get(pk=self.kwargs['pk'])
         base = inventory.hosts
         # FIXME: verify that you can can_read permission on the inventory is required
@@ -702,7 +702,7 @@ class GroupsList(BaseList):
     permission_classes = (CustomRbac,)
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         '''
         I can see groups  when:
            I'm a superuser,
@@ -734,7 +734,7 @@ class GroupsChildrenList(BaseSubList):
     inject_primary_key_on_post_as = 'parent'
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
 
         # FIXME: this is the mostly the same as GroupsList, share code similar to how done with Host and Group objects.
 
@@ -768,7 +768,7 @@ class GroupsHostsList(BaseSubList):
     inject_primary_key_on_post_as = 'group'
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
 
         parent = Group.objects.get(pk=self.kwargs['pk'])
 
@@ -812,7 +812,7 @@ class GroupsAllHostsList(BaseSubList):
                 result = result | self._child_hosts(child)
             return result
 
-    def _get_queryset(self):
+    def get_queryset(self):
 
         parent = Group.objects.get(pk=self.kwargs['pk'])
 
@@ -856,7 +856,7 @@ class InventoryGroupsList(BaseSubList):
     severable = False
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         # FIXME: share code with inventory filter queryset methods (make that a classmethod)
         inventory = Inventory.objects.get(pk=self.kwargs['pk'])
         base = inventory.groups
@@ -916,7 +916,7 @@ class JobTemplateList(BaseList):
     permission_classes = (CustomRbac,)
     filter_fields = ('name',)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         return get_user_queryset(self.request.user, self.model)
 
 class JobTemplateDetail(BaseDetail):
@@ -940,8 +940,8 @@ class JobTemplateJobList(BaseSubList):
     severable = False
     #filter_fields = ('name',)
 
-    def _get_queryset(self):
-        # FIxME: Verify read permission on the job template.
+    def get_queryset(self):
+        # FIXME: Verify read permission on the job template.
         job_template = get_object_or_404(JobTemplate, pk=self.kwargs['pk'])
         return job_template.jobs
 
@@ -951,7 +951,7 @@ class JobList(BaseList):
     serializer_class = JobSerializer
     permission_classes = (CustomRbac,)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         return self.model.objects.all() # FIXME
 
 class JobDetail(BaseDetail):
@@ -1012,20 +1012,45 @@ class JobCancel(generics.RetrieveAPIView):
         else:
             return Response(status=405)
 
-class JobHostsList(BaseSubList):
-    pass
+class HostJobHostSummaryList(generics.ListAPIView):
 
-class JobsSuccessfulHostsList(BaseSubList):
-    pass
+    model = JobHostSummary
+    serializer_class = JobHostSummarySerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Host
+    relationship = 'job_host_summaries'
 
-class JobsChangedHostsList(BaseSubList):
-    pass
+    def get_name(self):
+        return 'Job Host Summary List'
 
-class JobsFailedHostsList(BaseSubList):
-    pass
+    def get_queryset(self):
+        # FIXME: Verify read permission on the host and job.
+        host = get_object_or_404(Host, pk=self.kwargs['pk'])
+        return host.job_host_summaries
 
-class JobsUnreachableHostsList(BaseSubList):
-    pass
+class JobJobHostSummaryList(generics.ListAPIView):
+
+    model = JobHostSummary
+    serializer_class = JobHostSummarySerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Job
+    relationship = 'job_host_summaries'
+
+    def get_name(self):
+        return 'Job Host Summary List'
+
+    def get_queryset(self):
+        # FIXME: Verify read permission on the host and job.
+        job = get_object_or_404(Job, pk=self.kwargs['pk'])
+        return job.job_host_summaries
+
+# FIXME: Subclasses of XJobHostSummaryList for failed/successful/etc.
+
+class JobHostSummaryDetail(generics.RetrieveAPIView):
+
+    model = JobHostSummary
+    serializer_class = JobHostSummarySerializer
+    permission_classes = (CustomRbac,)
 
 class JobEventList(BaseList):
 
@@ -1033,10 +1058,10 @@ class JobEventList(BaseList):
     serializer_class = JobEventSerializer
     permission_classes = (CustomRbac,)
 
-    def _get_queryset(self):
+    def get_queryset(self):
         return self.model.objects.all() # FIXME
 
-class JobEventDetail(BaseDetail):
+class JobEventDetail(generics.RetrieveAPIView):
 
     model = JobEvent
     serializer_class = JobEventSerializer
@@ -1052,7 +1077,7 @@ class JobJobEventList(BaseSubList):
     postable = False
     severable = False
 
-    def _get_queryset(self):
+    def get_queryset(self):
         job = get_object_or_404(Job, pk=self.kwargs['pk'])
         # FIXME: Verify read permission on the job.
         return job.job_events
@@ -1067,7 +1092,7 @@ class HostJobEventList(BaseSubList):
     postable = False
     severable = False
 
-    def _get_queryset(self):
+    def get_queryset(self):
         host = get_object_or_404(Host, pk=self.kwargs['pk'])
         # FIXME: Verify read permission on the host.
         return host.job_events

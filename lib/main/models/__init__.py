@@ -802,6 +802,9 @@ class JobHostSummary(models.Model):
             (self.host.name, self.changed, self.dark, self.failures, self.ok,
              self.processed, self.skipped)
 
+    def get_absolute_url(self):
+        return reverse('main:job_host_summary_detail', args=(self.pk,))
+
     def save(self, *args, **kwargs):
         super(JobHostSummary, self).save(*args, **kwargs)
         self.update_host_last_job_summary()

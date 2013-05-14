@@ -13,12 +13,20 @@ class CustomFilterBackend(object):
         terms = {}
         order_by = None
 
-        for key, value in request.GET.items():
+        # Filtering by is_active/active that was previously in BaseList.
+        qs = queryset
+        for field in queryset.model._meta.fields:
+            if field.name == 'is_active':
+                qs = qs.filter(is_active=True)
+            elif field.name == 'active':
+                qs = qs.filter(active=True)
+
+        for key, value in request.QUERY_PARAMS.items():
 
             if key in [ 'page', 'page_size', 'format' ]:
                continue
 
-            if key == 'order_by':
+            if key in ('order', 'order_by'):
                order_by = value
                continue
 
@@ -29,7 +37,7 @@ class CustomFilterBackend(object):
 
             terms[key2] = value
 
-        qs = queryset.filter(**terms)
+        qs = qs.filter(**terms)
 
         if order_by:
            qs = qs.order_by(order_by)

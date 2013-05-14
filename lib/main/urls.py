@@ -68,6 +68,7 @@ hosts_urls = patterns('lib.main.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'hosts_detail'),
     url(r'^(?P<pk>[0-9]+)/variable_data/$',             'hosts_variable_detail'),
     url(r'^(?P<pk>[0-9]+)/job_events/',                 'host_job_event_list'),
+    url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'host_job_host_summary_list'),
 )
 
 groups_urls = patterns('lib.main.views',
@@ -105,12 +106,16 @@ jobs_urls = patterns('lib.main.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'job_detail'),
     url(r'^(?P<pk>[0-9]+)/start/$',                     'job_start'),
     url(r'^(?P<pk>[0-9]+)/cancel/$',                    'job_cancel'),
-    url(r'^(?P<pk>[0-9]+)/hosts/$',                     'job_hosts_list'),
-    url(r'^(?P<pk>[0-9]+)/successful_hosts/$',          'jobs_successful_hosts_list'),
-    url(r'^(?P<pk>[0-9]+)/changed_hosts/$',             'jobs_changed_hosts_list'),
-    url(r'^(?P<pk>[0-9]+)/failed_hosts/$',              'jobs_failed_hosts_list'),
-    url(r'^(?P<pk>[0-9]+)/unreachable_hosts/$',         'jobs_unreachable_hosts_list'),
+    url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'job_job_host_summary_list'),
+    #url(r'^(?P<pk>[0-9]+)/successful_hosts/$',          'jobs_successful_hosts_list'),
+    #url(r'^(?P<pk>[0-9]+)/changed_hosts/$',             'jobs_changed_hosts_list'),
+    #url(r'^(?P<pk>[0-9]+)/failed_hosts/$',              'jobs_failed_hosts_list'),
+    #url(r'^(?P<pk>[0-9]+)/unreachable_hosts/$',         'jobs_unreachable_hosts_list'),
     url(r'^(?P<pk>[0-9]+)/job_events/$',                'job_job_event_list'),
+)
+
+job_host_summary_urls = patterns('lib.main.views',
+    url(r'^(?P<pk>[0-9]+)/$',                           'job_host_summary_detail'),
 )
 
 job_events_urls = patterns('lib.main.views',
@@ -140,6 +145,7 @@ v1_urls = patterns('lib.main.views',
     url(r'^permissions/',   include(permissions_urls)),
     url(r'^job_templates/', include(job_templates_urls)),
     url(r'^jobs/',          include(jobs_urls)),
+    url(r'^job_host_summaries/', include(job_host_summary_urls)),
     url(r'^job_events/',    include(job_events_urls)),
     url(r'^tags/',          include(tags_urls)),
 )

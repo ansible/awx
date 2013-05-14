@@ -868,11 +868,81 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
         # FIXME: Test with other users.
 
-    def test_get_job_host_list(self):
-        pass
+    def test_get_job_results(self):
+        # Start/run a job and then access its results via the API.
+        job = self.job_ops_east_run
+        job.start()
 
-    def test_get_job_job_event_list(self):
-        pass
+        # Check that the job detail has been updated.
+        url = reverse('main:job_detail', args=(job.pk,))
+        with self.current_user(self.user_sue):
+            response = self.get(url)
+            self.assertEqual(response['status'], 'successful')
+            self.assertTrue(response['result_stdout'])
 
+        # Test job events for completed job.
+        url = reverse('main:job_job_event_list', args=(job.pk,))
+        with self.current_user(self.user_sue):
+            response = self.get(url)
+            qs = job.job_events.all()
+            self.assertTrue(qs.count())
+            self.check_pagination_and_size(response, qs.count())
+            self.check_list_ids(response, qs)
 
+        # Test individual job event detail records.
+        host_ids = set()
+        for job_event in job.job_events.all():
+            if job_event.host:
+                host_ids.add(job_event.host.pk)
+            url = reverse('main:job_event_detail', args=(job_event.pk,))
+            with self.current_user(self.user_sue):
+                response = self.get(url)
 
+        # Also test job event list for each host.
+        for host in Host.objects.filter(pk__in=host_ids):
+            url = reverse('main:host_job_event_list', args=(host.pk,))
+            with self.current_user(self.user_sue):
+                response = self.get(url)
+                qs = host.job_events.all()
+                self.assertTrue(qs.count())
+                self.check_pagination_and_size(response, qs.count())
+                self.check_list_ids(response, qs)
+
+        # Test global job event list.
+        url = reverse('main:job_event_list')
+        with self.current_user(self.user_sue):
+            response = self.get(url)
+            qs = JobEvent.objects.all()
+            self.assertTrue(qs.count())
+            self.check_pagination_and_size(response, qs.count())
+            self.check_list_ids(response, qs)
+
+        # Test job host summaries for completed job.
+        url = reverse('main:job_job_host_summary_list', args=(job.pk,))
+        with self.current_user(self.user_sue):
+            response = self.get(url)
+            qs = job.job_host_summaries.all()
+            self.assertTrue(qs.count())
+            self.check_pagination_and_size(response, qs.count())
+            self.check_list_ids(response, qs)
+            # Every host referenced by a job_event should be present as a job
+            # host summary record.
+            self.assertEqual(host_ids,
+                             set(qs.values_list('host__pk', flat=True)))
+
+        # Test individual job host summary records.
+        for job_host_summary in job.job_host_summaries.all():
+            url = reverse('main:job_host_summary_detail',
+                          args=(job_host_summary.pk,))
+            with self.current_user(self.user_sue):
+                response = self.get(url)
+
+        # Test job host summaries for each host.
+        for host in Host.objects.filter(pk__in=host_ids):
+            url = reverse('main:host_job_host_summary_list', args=(host.pk,))
+            with self.current_user(self.user_sue):
+                response = self.get(url)
+                qs = host.job_host_summaries.all()
+                self.assertTrue(qs.count())
+                self.check_pagination_and_size(response, qs.count())
+                self.check_list_ids(response, qs)

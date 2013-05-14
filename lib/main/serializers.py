@@ -207,11 +207,12 @@ class HostSerializer(BaseSerializer):
             variable_data = reverse('main:hosts_variable_detail', args=(obj.pk,)),
             inventory     = reverse('main:inventory_detail',      args=(obj.inventory.pk,)),
             job_events    = reverse('main:host_job_event_list',   args=(obj.pk,)),
+            job_host_summaries = reverse('main:host_job_host_summary_list', args=(obj.pk,)),
         ))
         if obj.last_job:
             res['last_job'] = reverse('main:job_detail', args=(obj.last_job.pk,))
-        #if obj.last_job_host_summary:
-        #    res['last_job_host_summary'] = reverse('main:job_host_summary_detail', args=(obj.last_job_host_summary.pk,))
+        if obj.last_job_host_summary:
+            res['last_job_host_summary'] = reverse('main:job_host_summary_detail', args=(obj.last_job_host_summary.pk,))
         # NICE TO HAVE: possible reverse resource to show what groups the host is in
         return res
 
@@ -391,7 +392,7 @@ class JobSerializer(BaseSerializer):
             project     = reverse('main:projects_detail',    args=(obj.project.pk,)),
             credential  = reverse('main:credentials_detail', args=(obj.credential.pk,)),
             job_events  = reverse('main:job_job_event_list', args=(obj.pk,)),
-            #hosts  =      reverse('main:job_???', args=(obj.pk,)),
+            job_host_summaries = reverse('main:job_job_host_summary_list', args=(obj.pk,)),
         ))
         if obj.job_template:
             res['job_template'] = reverse('main:job_template_detail', args=(obj.job_template.pk,))
@@ -427,14 +428,15 @@ class JobHostSummarySerializer(BaseSerializer):
 
     class Meta:
         model = JobHostSummary
-        fields = ('id', 'url', 'job', 'host', 'changed', 'dark', 'failures',
-                  'ok', 'processed', 'skipped', 'related')
+        fields = ('id', 'url', 'job', 'host', 'summary_fields', 'related',
+                  'changed', 'dark', 'failures', 'ok', 'processed', 'skipped')
 
     def get_related(self, obj):
         res = super(JobHostSummarySerializer, self).get_related(obj)
-        res['job'] = reverse('main:job_detail', args=(obj.job.pk,))
-        if obj.host:
-            res['host'] = reverse('main:hosts_detail', args=(obj.host.pk,))
+        res.update(dict(
+            job=reverse('main:job_detail', args=(obj.job.pk,)),
+            host=reverse('main:hosts_detail', args=(obj.host.pk,))
+        ))
         return res
 
 class JobEventSerializer(BaseSerializer):
@@ -442,7 +444,7 @@ class JobEventSerializer(BaseSerializer):
     class Meta:
         model = JobEvent
         fields = ('id', 'url', 'job', 'event', 'event_data', 'failed', 'host',
-                  'related')
+                  'related', 'summary_fields')
 
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)

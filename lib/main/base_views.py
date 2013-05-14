@@ -31,28 +31,13 @@ class BaseList(generics.ListCreateAPIView):
     #   serializer_class = SerializerClass
 
     def post(self, request, *args, **kwargs):
+        # FIXME: Should  inherit from generics.ListAPIView if not postable.
         postable = getattr(self.__class__, 'postable', True)
         if not postable:
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super(BaseList, self).post(request, *args, **kwargs)
 
-    def get_queryset(self):
-
-        base = self._get_queryset()
-        model = self.__class__.model
-        qs = None 
-        if model == User:
-            qs = base.filter(is_active=True)
-        elif model in [ Tag, AuditTrail, JobEvent ]:
-            qs = base
-        else:
-            qs = self._get_queryset().filter(active=True)
-
-        order = self.request.QUERY_PARAMS.get('order', None)
-        if order:
-            qs = qs.order_by(order)
-
-        return qs
+    # NOTE: Moved filtering from get_queryset into custom filter backend.
 
 class BaseSubList(BaseList):
 
