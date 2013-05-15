@@ -55,6 +55,10 @@ class BaseSubList(BaseList):
 
     def post(self, request, *args, **kwargs):
 
+        # decide whether to return 201 with data (new object) or 204 (just associated)
+        created = False
+        ser = None
+
         postable = getattr(self.__class__, 'postable', False)
         if not postable:
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -96,13 +100,6 @@ class BaseSubList(BaseList):
                     if not ser.is_valid():
                         return Response(status=status.HTTP_400_BAD_REQUEST, data=ser.errors)
 
-                    # ask the usual access control settings
-                    #if self.__class__.model in [ User ]:
-                    #    if not UserHelper.can_user_add(request.user, ser.init_data):
-                    #        raise PermissionDenied()
-                    #else:
-                    #    if not self.__class__.model.can_user_add(request.user, ser.init_data):
-                    #        raise PermissionDenied()
                     if not check_user_access(request.user, self.model, 'add', ser.init_data):
                         raise PermissionDenied()
 
@@ -116,7 +113,6 @@ class BaseSubList(BaseList):
                     if main == obj:
                         # no attaching to yourself
                         raise PermissionDenied()
-
 
                     if self.__class__.parent_model != User:
 
@@ -135,10 +131,8 @@ class BaseSubList(BaseList):
                             else:
                                 raise exceptions.NotImplementedError()
                         else:
-                            #if not obj.__class__.can_user_read(request.user, obj):
                             if not check_user_access(request.user, type(obj), 'read', obj):
                                 raise PermissionDenied()
-                        #if not self.__class__.parent_model.can_user_attach(request.user, main, obj, self.__class__.relationship, data):
                         # If we just created a new object, we may not yet be able to read it because it's not yet associated with its parent model.
                         if not check_user_access(request.user, self.parent_model, 'attach', main, obj, self.relationship, data, skip_sub_obj_read_check=True):
                             raise PermissionDenied()
@@ -155,15 +149,16 @@ class BaseSubList(BaseList):
                                  organization.admins.add(obj)
 
                     else:
-                        #if not UserHelper.can_user_read(request.user, obj):
                         if not check_user_access(request.user, type(obj), 'read', obj):
                             raise PermissionDenied()
                         # FIXME: should generalize this
-                        #if not UserHelper.can_user_attach(request.user, main, obj, self.__class__.relationship, data):
                         if not check_user_access(request.user, self.parent_model, 'attach', main, obj, self.relationship, data):
                             raise PermissionDenied()
 
-                    return Response(status=status.HTTP_201_CREATED, data=ser.data)
+                    # why are we returning here?
+                    # return Response(status=status.HTTP_201_CREATED, data=ser.data)
+                    created = True 
+                    subs = [ obj ]
 
                 else:
 
@@ -189,9 +184,8 @@ class BaseSubList(BaseList):
                     if not check_user_access(request.user, self.parent_model, 'attach', main, sub, self.relationship, data):
                         raise PermissionDenied()
 
-            if sub in relationship.all():
-                return Response(status=status.HTTP_409_CONFLICT)
-            relationship.add(sub)
+            if sub not in relationship.all():
+                relationship.add(sub)
         else:
             if not request.user.is_superuser:
                 if type(main) != User:
@@ -211,7 +205,11 @@ class BaseSubList(BaseList):
                 sub.name   = "_deleted_%s_%s" % (str(datetime.time()), sub.name)
                 sub.active = False
                 sub.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+        if created:
+            return Response(status=status.HTTP_201_CREATED, data=ser.data)
+        else:
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class BaseDetail(generics.RetrieveUpdateDestroyAPIView):

@@ -13,6 +13,7 @@ from lib.main.tests.base import BaseTest
 class InventoryTest(BaseTest):
 
     def setUp(self):
+
         super(InventoryTest, self).setUp()
         self.setup_users()
         self.organizations = self.make_organizations(self.super_django_user, 3)
@@ -362,8 +363,8 @@ class InventoryTest(BaseTest):
         g2.save()
 
         # a super user can set subgroups
-        subgroups_url = '/api/v1/groups/1/children/'
-        child_url     = '/api/v1/groups/2/'
+        subgroups_url     = '/api/v1/groups/1/children/'
+        child_url         = '/api/v1/groups/2/'
         subgroups_url2    = '/api/v1/groups/3/children/'
         subgroups_url3    = '/api/v1/groups/4/children/'
         subgroups_url4    = '/api/v1/groups/5/children/'
@@ -375,9 +376,18 @@ class InventoryTest(BaseTest):
         self.assertEquals(checked['count'], 1)
 
         # an org admin can set subgroups
-        self.post(subgroups_url2, data=got, expect=204, auth=self.get_normal_credentials())
-        # double post causes conflict error
-        self.post(subgroups_url2, data=got, expect=409, auth=self.get_normal_credentials())
+        posted = self.post(subgroups_url2, data=got, expect=204, auth=self.get_normal_credentials())
+
+        # see if we can post a completely new subgroup
+        new_data = dict(inventory=5, name='completely new', description='blarg?')
+        kids = self.get(subgroups_url2, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(kids['count'], 1)
+        posted2 = self.post(subgroups_url2, data=new_data, expect=201, auth=self.get_normal_credentials()) 
+        with_one_more_kid = self.get(subgroups_url2, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(with_one_more_kid['count'], 2)
+
+        # double post causes conflict error (actually, should it? -- just got a 204, already associated)
+        # self.post(subgroups_url2, data=got, expect=409, auth=self.get_normal_credentials())
         checked = self.get(subgroups_url2, expect=200, auth=self.get_normal_credentials()) 
 
         # a normal user cannot set subgroups

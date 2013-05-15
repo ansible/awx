@@ -169,7 +169,7 @@ class BaseTestMixin(object):
             assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, response.content)
         if method_name == 'head':
             self.assertFalse(response.content)
-        if response.status_code not in [ 202, 204, 405, 409 ] and method_name != 'head' and response.content:
+        if response.status_code not in [ 202, 204, 405 ] and method_name != 'head' and response.content:
             # no JSON responses in these at least for now, 409 should probably return some (FIXME)
             return json.loads(response.content)
         else:
