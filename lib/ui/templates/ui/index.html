@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Ansible Commander</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}css/smoothness/jquery-ui-1.10.3.custom.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap-responsive.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/font-awesome.min.css" />
@@ -34,6 +35,7 @@
   <script src="{{ STATIC_URL }}js/controllers/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Groups.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/JobTemplates.js"></script>
+  <script src="{{ STATIC_URL }}js/controllers/Projects.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Users.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Inventories.js"></script>
@@ -51,6 +53,7 @@
   <script src="{{ STATIC_URL }}js/lists/Groups.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Credentials.js"></script>
   <script src="{{ STATIC_URL }}js/lists/JobTemplates.js"></script>
+  <script src="{{ STATIC_URL }}js/lists/Projects.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/refresh-related.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-paginate.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-search.js"></script>
@@ -173,10 +176,10 @@
     <div class="copyright">Copyright &copy; 2013 AnsibleWorks, Inc. All rights reservied.<br />1482 East Valley Road, Suite 888 &middot; Montecito, California 9308 &middot; +1-800-825-0212</div>
   </div><!-- site footer --> 
   
-  <script src="{{ STATIC_URL }}lib/jquery/jquery-1.9.1.js"></script>
+  <script src="{{ STATIC_URL }}lib/jquery/jquery-1.9.1.min.js"></script>
   <script src="{{ STATIC_URL }}lib/twitter/bootstrap.min.js"></script>
   <script src="{{ STATIC_URL }}lib/jstree/jquery.jstree.js"></script>
-
+  <script src="{{ STATIC_URL }}lib/jquery/jquery-ui-1.10.3.custom.js"></script>
   <script>
       $('a[data-toggle="tab"]').on('show', function (e) {
           var url = $(e.target).text();
