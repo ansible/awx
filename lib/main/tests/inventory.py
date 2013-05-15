@@ -330,11 +330,18 @@ class InventoryTest(BaseTest):
         self.assertEquals(data['count'], 3)
         self.assertEquals(data['results'][1]['id'], 2)
 
+        # now add one new completely new host, to test creation+association in one go
+        new_host = dict(inventory=got['inventory'], name='completelynewhost.example.com', description='...')
+        posted = self.post('/api/v1/groups/1/hosts/', data=new_host, expect=201, auth=self.get_normal_credentials())
+        
+        data = self.get(url1, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data['count'], 4)
+
         # removal
         got['disassociate'] = 1
         posted = self.post('/api/v1/groups/1/hosts/', data=got, expect=204, auth=self.get_normal_credentials())
         data = self.get(url1, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(data['count'], 2)
+        self.assertEquals(data['count'], 3)
         self.assertEquals(data['results'][1]['id'], 3)
 
         ####################################################
@@ -402,10 +409,10 @@ class InventoryTest(BaseTest):
         # can see all hosts under a group, even if it has subgroups
         # this URL is NOT postable
         all_hosts = '/api/v1/groups/1/all_hosts/'
-        self.assertEqual(Group.objects.get(pk=1).hosts.count(), 2)
+        self.assertEqual(Group.objects.get(pk=1).hosts.count(), 3)
         data = self.get(all_hosts, expect=200, auth=self.get_normal_credentials())
         self.post(all_hosts, data=dict(id=123456, msg='spam'), expect=405, auth=self.get_normal_credentials())
-        self.assertEquals(data['count'], 3)
+        self.assertEquals(data['count'], 4)
 
         # now post it back to remove it, by adding the disassociate bit
         result = checked['results'][0]
