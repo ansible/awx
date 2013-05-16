@@ -224,11 +224,6 @@ class OrganizationsTest(BaseTest):
         projects1 = self.get(projects0_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(projects1['count'], 3)
 
-        # make sure we can't add the project again (should generate a conflict error)
-        self.post(projects1_url, a_project, expect=409, auth=self.get_super_credentials())
-        projects1 = self.get(projects1_url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(projects1['count'], 6)       
-
         # make sure adding a project that does not exist, or a missing pk field, results in a 400
         self.post(projects1_url, dict(id=99999), expect=400, auth=self.get_super_credentials())
         self.post(projects1_url, dict(asdf=1234), expect=400, auth=self.get_super_credentials())
