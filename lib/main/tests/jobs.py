@@ -908,6 +908,16 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
                 self.check_pagination_and_size(response, qs.count())
                 self.check_list_ids(response, qs)
 
+        # Test job event list for groups.
+        for group in self.inv_ops_east.groups.all():
+            url = reverse('main:group_job_event_list', args=(group.pk,))
+            with self.current_user(self.user_sue):
+                response = self.get(url)
+                qs = group.job_events.all()
+                self.assertTrue(qs.count())
+                self.check_pagination_and_size(response, qs.count())
+                self.check_list_ids(response, qs)
+
         # Test global job event list.
         url = reverse('main:job_event_list')
         with self.current_user(self.user_sue):
@@ -943,6 +953,16 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
             with self.current_user(self.user_sue):
                 response = self.get(url)
                 qs = host.job_host_summaries.all()
+                self.assertTrue(qs.count())
+                self.check_pagination_and_size(response, qs.count())
+                self.check_list_ids(response, qs)
+
+        # Test job host summaries for groups.
+        for group in self.inv_ops_east.groups.all():
+            url = reverse('main:group_job_host_summary_list', args=(group.pk,))
+            with self.current_user(self.user_sue):
+                response = self.get(url)
+                qs = group.job_host_summaries.all()
                 self.assertTrue(qs.count())
                 self.check_pagination_and_size(response, qs.count())
                 self.check_list_ids(response, qs)

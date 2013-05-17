@@ -230,6 +230,8 @@ class GroupSerializer(BaseSerializer):
             children      = reverse('main:groups_children_list',   args=(obj.pk,)),
             all_hosts     = reverse('main:groups_all_hosts_list',  args=(obj.pk,)),
             inventory     = reverse('main:inventory_detail',       args=(obj.inventory.pk,)),
+            job_events    = reverse('main:group_job_event_list',   args=(obj.pk,)),
+            job_host_summaries = reverse('main:group_job_host_summary_list', args=(obj.pk,)),
         ))
         return res
 
@@ -443,8 +445,8 @@ class JobEventSerializer(BaseSerializer):
 
     class Meta:
         model = JobEvent
-        fields = ('id', 'url', 'job', 'event', 'event_data', 'failed', 'host',
-                  'related', 'summary_fields')
+        fields = ('id', 'url', 'created', 'job', 'event', 'event_data',
+                  'failed', 'host', 'related', 'summary_fields')
 
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)

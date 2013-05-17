@@ -799,26 +799,13 @@ class GroupsAllHostsList(BaseSubList):
     relationship = 'hosts'
     filter_fields = ('name',)
 
-    def _child_hosts(self, parent):
-        # TODO: should probably be a method on the model
-        result = parent.hosts.distinct()
-        if parent.children.count() == 0:
-            return result
-        else:
-            for child in parent.children.all():
-                if child == parent:
-                    # shouldn't happen, but be prepared in case DB is weird
-                    continue
-                result = result | self._child_hosts(child)
-            return result
-
     def get_queryset(self):
 
         parent = Group.objects.get(pk=self.kwargs['pk'])
 
         # FIXME: verify read permissions on this object are still required at a higher level
 
-        base = self._child_hosts(parent)
+        base = parent.all_hosts
 
         if self.request.user.is_superuser:
             return base.all()
@@ -1012,37 +999,33 @@ class JobCancel(generics.RetrieveAPIView):
         else:
             return Response(status=405)
 
-class HostJobHostSummaryList(generics.ListAPIView):
+class BaseJobHostSummaryList(generics.ListAPIView):
 
     model = JobHostSummary
     serializer_class = JobHostSummarySerializer
     permission_classes = (CustomRbac,)
+    parent_model = None # Subclasses must define this attribute.
+    relationship = 'job_host_summaries'
+
+    def get_name(self):
+        return 'Job Host Summary List'
+
+    def get_queryset(self):
+        # FIXME: Verify read permission on the parent object and job.
+        parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        return getattr(parent_obj, self.relationship)
+
+class HostJobHostSummaryList(BaseJobHostSummaryList):
+
     parent_model = Host
-    relationship = 'job_host_summaries'
 
-    def get_name(self):
-        return 'Job Host Summary List'
+class GroupJobHostSummaryList(BaseJobHostSummaryList):
 
-    def get_queryset(self):
-        # FIXME: Verify read permission on the host and job.
-        host = get_object_or_404(Host, pk=self.kwargs['pk'])
-        return host.job_host_summaries
+    parent_model = Group
 
-class JobJobHostSummaryList(generics.ListAPIView):
+class JobJobHostSummaryList(BaseJobHostSummaryList):
 
-    model = JobHostSummary
-    serializer_class = JobHostSummarySerializer
-    permission_classes = (CustomRbac,)
     parent_model = Job
-    relationship = 'job_host_summaries'
-
-    def get_name(self):
-        return 'Job Host Summary List'
-
-    def get_queryset(self):
-        # FIXME: Verify read permission on the host and job.
-        job = get_object_or_404(Job, pk=self.kwargs['pk'])
-        return job.job_host_summaries
 
 # FIXME: Subclasses of XJobHostSummaryList for failed/successful/etc.
 
@@ -1067,36 +1050,30 @@ class JobEventDetail(generics.RetrieveAPIView):
     serializer_class = JobEventSerializer
     permission_classes = (CustomRbac,)
 
-class JobJobEventList(BaseSubList):
+class BaseJobEventList(generics.ListAPIView):
 
     model = JobEvent
     serializer_class = JobEventSerializer
     permission_classes = (CustomRbac,)
-    parent_model = Job
+    parent_model = None # Subclasses must define this attribute.
     relationship = 'job_events'
-    postable = False
-    severable = False
 
     def get_queryset(self):
-        job = get_object_or_404(Job, pk=self.kwargs['pk'])
-        # FIXME: Verify read permission on the job.
-        return job.job_events
+        # FIXME: Verify read permission on the parent object and job.
+        parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        return getattr(parent_obj, self.relationship)
 
-class HostJobEventList(BaseSubList):
+class HostJobEventList(BaseJobEventList):
 
-    model = JobEvent
-    serializer_class = JobEventSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Host
-    relationship = 'job_events'
-    postable = False
-    severable = False
 
-    def get_queryset(self):
-        host = get_object_or_404(Host, pk=self.kwargs['pk'])
-        # FIXME: Verify read permission on the host.
-        return host.job_events
+class GroupJobEventList(BaseJobEventList):
 
+    parent_model = Group
+
+class JobJobEventList(BaseJobEventList):
+
+    parent_model = Job
 
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to

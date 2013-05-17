@@ -78,6 +78,8 @@ groups_urls = patterns('lib.main.views',
     url(r'^(?P<pk>[0-9]+)/hosts/$',                     'groups_hosts_list'),
     url(r'^(?P<pk>[0-9]+)/all_hosts/$',                 'groups_all_hosts_list'),
     url(r'^(?P<pk>[0-9]+)/variable_data/$',             'groups_variable_detail'),
+    url(r'^(?P<pk>[0-9]+)/job_events/$',                'group_job_event_list'),
+    url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'group_job_host_summary_list'),
 )
 
 variable_data_urls = patterns('lib.main.views',

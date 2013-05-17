@@ -255,6 +255,21 @@ class Group(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('main:groups_detail', args=(self.pk,))
 
+    @property
+    def all_hosts(self):
+        qs = self.hosts.distinct()
+        for group in self.children.exclude(pk=self.pk):
+            qs = qs | group.all_hosts
+        return qs
+
+    @property
+    def job_host_summaries(self):
+        return JobHostSummary.objects.filter(host__in=self.all_hosts)
+
+    @property
+    def job_events(self):
+        return JobEvent.objects.filter(host__in=self.all_hosts)
+
 # FIXME: audit nullables
 # FIXME: audit cascades
 
