@@ -233,6 +233,7 @@
     padding: 0;
  }
  
+ /* Display list actions next to search widget */
  .search-widget {
     display: inline-block;
  }
@@ -242,4 +243,9 @@
     vertical-align: top;
     margin-left: 15px;
     margin-top: 3px;
+ }
+ /* Display list actions */
+
+ .well {
+    padding-bottom: 0;
  }
