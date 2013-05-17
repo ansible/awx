@@ -232,3 +232,14 @@
     margin: 0;
     padding: 0;
  }
+ 
+ .search-widget {
+    display: inline-block;
+ }
+
+ .list-actions {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 15px;
+    margin-top: 3px;
+ }
