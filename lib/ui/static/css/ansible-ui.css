@@ -249,3 +249,22 @@
  .well {
     padding-bottom: 0;
  }
+
+ /* Jobs page */
+ .jobs-table tbody tr:hover > td,
+ .jobs-table tbody tr:hover > th {
+    background-color: #fff;
+ }
+
+ .job-error, .job-failure {
+    color: #da4f49;
+ }
+
+ .job-new {
+    color: #778899;
+ }
+
+ .job-pending, .job-running {
+    color: #5bb75b;
+ }
+
