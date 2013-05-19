@@ -244,7 +244,7 @@
     margin-left: 15px;
     margin-top: 3px;
  }
- /* Display list actions */
+ /* End Display list actions */
 
  .well {
     padding-bottom: 0;
@@ -256,7 +256,7 @@
     background-color: #fff;
  }
 
- .job-error, .job-failure {
+ .job-error, .job-failed {
     color: #da4f49;
  }
 
@@ -267,4 +267,5 @@
  .job-pending, .job-running {
     color: #5bb75b;
  }
+ /* End Jobs Page */
 
