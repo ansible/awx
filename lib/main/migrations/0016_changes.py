@@ -397,7 +397,7 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "('pk',)", 'object_name': 'JobEvent'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'event': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'event_data': ('jsonfield.fields.JSONField', [], {'default': "''", 'blank': 'True'}),
+            'event_data': ('jsonfield.fields.JSONField', [], {'default': "{}", 'blank': 'True'}),
             'failed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'host': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_events'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Host']", 'blank': 'True', 'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),

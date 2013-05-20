@@ -886,7 +886,7 @@ class JobEvent(models.Model):
     )
     event_data = JSONField(
         blank=True,
-        default='',
+        default={},
     )
     failed = models.BooleanField(
         default=False,

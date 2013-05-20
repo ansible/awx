@@ -185,7 +185,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'LaunchJobStatusEvent'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'event': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'event_data': ('jsonfield.fields.JSONField', [], {'default': "''", 'blank': 'True'}),
+            'event_data': ('jsonfield.fields.JSONField', [], {'default': "{}", 'blank': 'True'}),
             'host': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'launch_job_status_events'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Host']", 'blank': 'True', 'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'launch_job_status': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'launch_job_status_events'", 'to': "orm['main.LaunchJobStatus']"})

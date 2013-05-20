@@ -30,7 +30,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Job.extra_vars'
         db.add_column(u'main_job', 'extra_vars',
-                      self.gf('jsonfield.fields.JSONField')(default='', blank=True),
+                      self.gf('jsonfield.fields.JSONField')(default={}, blank=True),
                       keep_default=False)
 
         # Adding field 'Job.cancel_flag'
@@ -73,7 +73,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'JobTemplate.extra_vars'
         db.add_column(u'main_jobtemplate', 'extra_vars',
-                      self.gf('jsonfield.fields.JSONField')(default='', blank=True),
+                      self.gf('jsonfield.fields.JSONField')(default={}, blank=True),
                       keep_default=False)
 
 
@@ -239,7 +239,7 @@ class Migration(SchemaMigration):
             'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Credential']"}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
-            'extra_vars': ('jsonfield.fields.JSONField', [], {'default': "''", 'blank': 'True'}),
+            'extra_vars': ('jsonfield.fields.JSONField', [], {'default': "{}", 'blank': 'True'}),
             'forks': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
             'hosts': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'jobs'", 'blank': 'True', 'through': u"orm['main.JobHostSummary']", 'to': "orm['main.Host']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -262,7 +262,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'JobEvent'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'event': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'event_data': ('jsonfield.fields.JSONField', [], {'default': "''", 'blank': 'True'}),
+            'event_data': ('jsonfield.fields.JSONField', [], {'default': "{}", 'blank': 'True'}),
             'host': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_events'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Host']", 'blank': 'True', 'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'job': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_events'", 'to': "orm['main.Job']"})
@@ -287,7 +287,7 @@ class Migration(SchemaMigration):
             'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_templates'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
-            'extra_vars': ('jsonfield.fields.JSONField', [], {'default': "''", 'blank': 'True'}),
+            'extra_vars': ('jsonfield.fields.JSONField', [], {'default': "{}", 'blank': 'True'}),
             'forks': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_templates'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Inventory']"}),

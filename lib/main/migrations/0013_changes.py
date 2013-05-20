@@ -128,7 +128,7 @@ class Migration(SchemaMigration):
             ('job', self.gf('django.db.models.fields.related.ForeignKey')(related_name='job_events', to=orm['main.Job'])),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('event', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('event_data', self.gf('jsonfield.fields.JSONField')(default='', blank=True)),
+            ('event_data', self.gf('jsonfield.fields.JSONField')(default={}, blank=True)),
             ('host', self.gf('django.db.models.fields.related.ForeignKey')(related_name='job_events', on_delete=models.SET_NULL, default=None, to=orm['main.Host'], blank=True, null=True)),
         ))
         db.send_create_signal('main', ['JobEvent'])
@@ -159,7 +159,7 @@ class Migration(SchemaMigration):
         db.create_table(u'main_launchjobstatusevent', (
             ('event', self.gf('django.db.models.fields.CharField')(max_length=100)),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('event_data', self.gf('jsonfield.fields.JSONField')(default='', blank=True)),
+            ('event_data', self.gf('jsonfield.fields.JSONField')(default={}, blank=True)),
             ('host', self.gf('django.db.models.fields.related.ForeignKey')(related_name='launch_job_status_events', on_delete=models.SET_NULL, default=None, to=orm['main.Host'], blank=True, null=True)),
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('launch_job_status', self.gf('django.db.models.fields.related.ForeignKey')(related_name='launch_job_status_events', to=orm['main.LaunchJobStatus'])),
@@ -388,7 +388,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'JobEvent'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'event': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'event_data': ('jsonfield.fields.JSONField', [], {'default': "''", 'blank': 'True'}),
+            'event_data': ('jsonfield.fields.JSONField', [], {'default': "{}", 'blank': 'True'}),
             'host': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_events'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Host']", 'blank': 'True', 'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'job': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_events'", 'to': "orm['main.Job']"})
