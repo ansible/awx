@@ -267,5 +267,11 @@
  .job-pending, .job-running {
     color: #5bb75b;
  }
+
+ .job-detail-status {
+    font-size: 15px;
+    font-weight: bold;
+    padding-left: 15px;
+ }
  /* End Jobs Page */
 
