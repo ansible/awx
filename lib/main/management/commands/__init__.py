@@ -31,9 +31,8 @@ def run_command_as_script(command_name):
 
     '''
     # The DJANGO_SETTINGS_MODULE environment variable should already be set if
-    # the script is called from a celery task.
-    settings_module_name = os.environ.setdefault('DJANGO_SETTINGS_MODULE',
-                                                 'lib.settings')
+    # the script is called from a celery task.  Don't attemtp to set a default.
+    settings_module_name = os.environ['DJANGO_SETTINGS_MODULE']
     # This sys.path hack is needed when a celery task calls ansible-playbook
     # and needs to execute the script directly.  FIXME: Figure out if this will
     # work when installed in a production environment.

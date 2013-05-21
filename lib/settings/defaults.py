@@ -1,19 +1,5 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
-#
-# This file is part of Ansible Commander.
-#
-# Ansible Commander is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, version 3 of the License.
-#
-# Ansible Commander is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Ansible Commander. If not, see <http://www.gnu.org/licenses/>.
-
+# All Rights Reserved.
 
 import os
 import sys
@@ -88,7 +74,9 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'public', 'static') # FIXME: Is this where we want it?
+# Absolute filesystem path to the directory where static file are collected via
+# the collectstatic command.
+STATIC_ROOT = os.path.join(BASE_DIR, 'public', 'static')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
@@ -155,6 +143,34 @@ INSTALLED_APPS = (
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
+
+# Email address that error messages come from.
+SERVER_EMAIL = 'root@localhost'
+
+# Default email address to use for various automated correspondence from
+# the site managers.
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+
+# Subject-line prefix for email messages send with django.core.mail.mail_admins
+# or ...mail_managers.  Make sure to include the trailing space.
+EMAIL_SUBJECT_PREFIX = '[AnsibleWorks] '
+
+# The email backend to use. For possible shortcuts see django.core.mail.
+# The default is to use the SMTP backend.
+# Third-party backends can be specified by providing a Python path
+# to a module that defines an EmailBackend class.
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Host for sending email.
+EMAIL_HOST = 'localhost'
+
+# Port for sending email.
+EMAIL_PORT = 25
+
+# Optional SMTP authentication information for EMAIL_HOST.
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = False
 
 # Use Django-devserver if installed.
 try:

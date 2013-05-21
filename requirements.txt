@@ -7,7 +7,7 @@ ipython==0.13.1
 pexpect==2.4
 # psycopg2==2.4.6
 python-dateutil==1.5
-PyYAML==3.10
+# PyYAML==3.10
 South==0.7.6
 requests
 djangorestframework

@@ -25,7 +25,7 @@ https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/
 
 
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lib.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lib.settings.production')
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()

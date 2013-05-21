@@ -13,8 +13,8 @@
 
   tasks:
 
-      - name: remove python-dateutils package if installed
-        yum: name=python-dateutils15 state=removed
+      - name: remove python-dateutil package if installed
+        yum: name=python-dateutil15 state=removed
       
       - name: install packages from yum
         yum: name=$item state=installed
