@@ -973,7 +973,8 @@ class JobStart(generics.RetrieveAPIView):
         if obj.can_start:
             result = obj.start(**request.DATA)
             if not result:
-                return Response(status=400)
+                data = dict(passwords_needed_to_start=obj.get_passwords_needed_to_start())
+                return Response(data, status=400)
             else:
                 return Response(status=202)
         else:
