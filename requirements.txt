@@ -1,15 +1,26 @@
-Django==1.5.1
-django-celery==3.0.11
-django-devserver==0.5.0
-django-extensions==1.1.1
-django-jsonfield==0.9.2
-ipython==0.13.1
-pexpect==2.4
-# psycopg2==2.4.6
-python-dateutil==1.5
-# PyYAML==3.10
-South==0.7.6
-requests
-djangorestframework
-markdown  
+# PIP requirements for AnsibleWorks development/build environment.
+# Install using "pip -r requirements.txt"
+
+Django>=1.5
+django-celery
+django-devserver
+django-extensions
 django-filter
+django-jsonfield
+djangorestframework
+ipython
+markdown
+pexpect
+python-dateutil
+PyYAML
+South
+
+# You may also need to install the following extra packages using the OS
+# package manager, or pip if you're running inside a virtualenv.
+# - ansible (via yum, pip or source checkout)
+# - distribute (Use the latest version via "pip install -U distribute"; the
+#   default python-setuptools package is old.)
+# - psycopg2 (via "yum install python-psycopg2")
+# - coverage (if you want to check test coverage, via "pip install coverage";
+#   the default python-coverage package is old.)
+# - readline (for using the ipython interactive shell)

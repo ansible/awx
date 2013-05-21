@@ -1,10 +1,16 @@
 ansibleworks/settings/local_settings.py*
-ansibleworks/acom.sqlite3
+ansibleworks/*.sqlite3
 ansibleworks/projects
 ansibleworks/public/media
 ansibleworks/public/static
 env/*
 build
 dist
+htmlcov
+*.egg-info
 *.py[c,o]
 *.swp
+.coverage
+coverage.xml
+pep8.txt
+

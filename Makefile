@@ -58,6 +58,14 @@ dbshell:
 test:
 	python manage.py test main
 
+test_coverage:
+	# Run tests with coverage enabled.
+	coverage run manage.py test main
+
+coverage_html:
+	# Output test coverage as HTML (into htmlcov directory).
+	coverage html
+
 dev_build:
 	python setup.py dev_build
 
