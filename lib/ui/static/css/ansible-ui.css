@@ -16,6 +16,10 @@
     padding-top: 40px;
  }
 
+ hr {
+    border-color: #e3e3e3;
+ }
+
  .container-fluid {
     min-height: 700px ;
  }
@@ -175,6 +179,13 @@
     display: inline-block;
     font-size: 18px;
     margin-left: 15px;
+    min-width: 30px;
+ }
+
+ .search-widget label {
+    display:inline-block;
+    vertical-align: middle;
+    padding-right: 15px;
  }
 
  .nav-path {
@@ -241,7 +252,7 @@
  .list-actions {
     display: inline-block;
     vertical-align: top;
-    margin-left: 15px;
+    margin-left: 10px;
     margin-top: 3px;
  }
  /* End Display list actions */
@@ -256,15 +267,20 @@
     background-color: #fff;
  }
 
- .job-error, .job-failed {
+ .job-error, .job-failed,
+ input[type="text"].job-failed,
+ input[type="text"].job-error 
+ {
     color: #da4f49;
  }
 
- .job-new {
+ .job-new,  input[type="text"].job-new {
     color: #778899;
  }
 
- .job-pending, .job-running {
+ .job-pending, .job-running, .job-success,
+ input[type="text"].job-success
+ {
     color: #5bb75b;
  }
 
@@ -273,5 +289,28 @@
     font-weight: bold;
     padding-left: 15px;
  }
+
+ #job_events label {
+    margin-right: 10px;
+ }
+
+ #job_events {
+    text-align: center;
+ }
+
+ #job_events_items_form {
+    margin-top: 15px;
+ }
+
+ .form-items .search-widget {
+    margin-top: 15px;
+ }
+
+ .form-items .item-count {
+    display: inline-block;
+    font-size: small;
+    margin-top: 25px;
+ }
+
  /* End Jobs Page */
 
