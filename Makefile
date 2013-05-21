@@ -15,6 +15,12 @@ setup:
 	# use ansible to ansible ansible commander locally
 	ansible-playbook app_setup/setup.yml --verbose -i "127.0.0.1," -c local -e working_dir=`pwd`
 
+refresh: clean
+	# update/refresh development environment after pulling new code
+	python setup.py develop
+	python manage.py syncdb
+	python manage.py migrate
+
 adduser:
 	python manage.py createsuperuser
 
@@ -39,7 +45,7 @@ dbchange:
 	# run this each time we make changes to the model
 	python manage.py schemamigration main changes --auto
 
-migrate:
+migrate: syncdb
         # run this to apply changes to the model
 	python manage.py migrate
 
@@ -50,4 +56,9 @@ dbshell:
 
 test:
 	python manage.py test main
-         
+
+dev_build:
+	python setup.py dev_build
+
+release_build:
+	pythons setup.py release_build

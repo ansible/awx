@@ -24,16 +24,14 @@ try:
     local_settings_file = os.path.join(os.path.dirname(__file__),
                                        'local_settings.py')
     execfile(local_settings_file)
-    # Hack so that the autoreload will detect changes to local_settings.py.
-    class dummymodule(str):
-        __file__ = property(lambda self: self)
-    sys.modules['local_settings'] = dummymodule(local_settings_file)
 except IOError:
     # Otherwise, rely on the global settings file specified in the environment,
     # defaulting to /etc/ansibleworks/settings.py.
+    settings_file = os.environ.get('ANSIBLEWORKS_SETTINGS_FILE',
+                                   '/etc/ansibleworks/settings.py')
     try:
-        settings_file = os.environ.get('ANSIBLEWORKS_SETTINGS_FILE',
-                                       '/etc/ansibleworks/settings.py')
         execfile(settings_file)
     except IOError:
-        pass
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured('No AnsibleWorks configuration found in %s'\
+                                   % settings_file)

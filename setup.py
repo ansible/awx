@@ -1,21 +1,23 @@
 #!/usr/bin/env python
 
-#from distutils.core import setup
+import datetime
 from setuptools import setup, find_packages
 
 from lib import __version__
 
+build_timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M')
+
 setup(
-    name='ansible-commander',
+    name='ansibleworks',
     version=__version__,
     author='AnsibleWorks, Inc.',
     author_email='support@ansibleworks.com',
-    description='Ansible REST API and background job execution.',
+    description='AnsibleWorks API, UI and Task Engine',
     long_description=file('README.md', 'rb').read(),
     license='Proprietary',
     keywords='ansible',
     url='http://github.com/ansible/ansible-commander',
-    packages=['lib'],  # FIXME: Rename to acom?
+    packages=['lib'],  # FIXME: Rename to ansibleworks
     include_package_data=True,
     zip_safe=False,
     install_requires=[
@@ -64,12 +66,12 @@ setup(
     ],
     entry_points = {
         'console_scripts': [
-            'acom-manage = lib:manage',
+            'ansibleworks-manage = lib:manage',
         ],
     },
     options={
         'egg_info': {
-            'tag_build': '-dev',
+            'tag_build': '-dev%s' % build_timestamp,
         },
         'aliases': {
             'dev_build': 'clean --all egg_info sdist',
