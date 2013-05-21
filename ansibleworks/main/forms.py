@@ -46,7 +46,6 @@ class HostAdminForm(forms.ModelForm):
         instance = super(HostAdminForm, self).save(commit=commit)
         save_m2m = getattr(self, 'save_m2m', lambda: None)
         vdata = self.cleaned_data.get('vdata', '')
-        print 'vdata', repr(vdata)
         def new_save_m2m():
             save_m2m()
             if not instance.variable_data:
@@ -146,7 +145,6 @@ class JobAdminForm(JobTemplateAdminForm):
             value = self.cleaned_data.get(field, '')
             if value:
                 start_opts[field] = value
-        #print 'should_start', should_start
         should_cancel = bool(self.cleaned_data.get('cancel_job', '') and
                              instance.can_cancel)
         def new_save_m2m():

@@ -521,7 +521,6 @@ class JobAccess(BaseAccess):
     model = Job
 
     def can_change(self, obj, data):
-        print 'CAN_CHANGE', obj, data
         return self.user.is_superuser and obj.status == 'new'
 
     def can_start(self, obj):
