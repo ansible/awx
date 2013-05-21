@@ -189,6 +189,30 @@ class RunJobTest(BaseCeleryTest):
             self.job = Job.objects.create(**opts)
         return self.job
 
+    def check_job_result(self, job, expected='successful', expect_stdout=True,
+                         expect_traceback=False):
+        msg = 'job status is %s, expected %s' % (job.status, expected)
+        if job.result_traceback:
+            msg = '%s\ngot traceback:\n%s' % (msg, job.result_traceback)
+        if job.result_stdout:
+            msg = '%s\ngot stdout:\n%s' % (msg, job.result_stdout)
+        if isinstance(expected, (list, tuple)):
+            self.assertTrue(job.status in expected)
+        else:
+            self.assertEqual(job.status, expected, msg)
+        if expect_stdout:
+            self.assertTrue(job.result_stdout)
+        else:
+            self.assertFalse(job.result_stdout,
+                             'expected no stdout, got:\n%s' %
+                             job.result_stdout)
+        if expect_traceback:
+            self.assertTrue(job.result_traceback)
+        else:
+            self.assertFalse(job.result_traceback,
+                             'expected no traceback, got:\n%s' %
+                             job.result_traceback)
+
     def test_run_job(self):
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
@@ -198,12 +222,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
-        #print 'stdout:', job.result_stdout
-        #print job.status
-        #print settings.DATABASES
-        #print self.run_job_args
-        self.assertEqual(job.status, 'successful')
-        self.assertTrue(job.result_stdout)
+        self.check_job_result(job, 'successful')
         job_events = job.job_events.all()
         for job_event in job_events:
             unicode(job_event)  # For test coverage.
@@ -236,8 +255,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
-        self.assertEqual(job.status, 'successful')
-        self.assertTrue(job.result_stdout)
+        self.check_job_result(job, 'successful')
         job_events = job.job_events.all()
         self.assertEqual(job_events.filter(event='playbook_on_start').count(), 1)
         self.assertEqual(job_events.filter(event='playbook_on_play_start').count(), 1)
@@ -264,8 +282,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
-        self.assertEqual(job.status, 'failed')
-        self.assertTrue(job.result_stdout)
+        self.check_job_result(job, 'failed')
         job_events = job.job_events.all()
         self.assertEqual(job_events.filter(event='playbook_on_start').count(), 1)
         self.assertEqual(job_events.filter(event='playbook_on_play_start').count(), 1)
@@ -293,8 +310,7 @@ class RunJobTest(BaseCeleryTest):
         job = Job.objects.get(pk=job.pk)
         # Since we don't actually run the task, the --check should indicate
         # everything is successful.
-        self.assertEqual(job.status, 'successful')
-        self.assertTrue(job.result_stdout)
+        self.check_job_result(job, 'successful')
         job_events = job.job_events.all()
         self.assertEqual(job_events.filter(event='playbook_on_start').count(), 1)
         self.assertEqual(job_events.filter(event='playbook_on_play_start').count(), 1)
@@ -332,7 +348,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
-        self.assertEqual(job.status, 'canceled')
+        self.check_job_result(job, 'canceled')
         self.assertEqual(job.cancel_flag, True)
         # Calling cancel afterwards just returns the cancel flag.
         self.assertTrue(job.cancel())
@@ -356,8 +372,7 @@ class RunJobTest(BaseCeleryTest):
         job = Job.objects.get(pk=job.pk)
         # Job may fail if current user doesn't have password-less sudo
         # privileges, but we're mainly checking the command line arguments.
-        self.assertTrue(job.status in ('successful', 'failed'))
-        self.assertTrue(job.result_stdout)
+        self.check_job_result(job, ('successful', 'failed'))
         self.assertTrue('--forks=3' in self.run_job_args)
         self.assertTrue('-vv' in self.run_job_args)
         self.assertTrue('-e' in self.run_job_args)
@@ -371,7 +386,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
-        self.assertEqual(job.status, 'failed')
+        self.check_job_result(job, 'failed')
         self.assertTrue('-l' in self.run_job_args)
 
     def test_ssh_username_and_password(self):
@@ -385,7 +400,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
-        self.assertEqual(job.status, 'successful')
+        self.check_job_result(job, 'successful')
         self.assertTrue('-u' in self.run_job_args)
         self.assertTrue('--ask-pass' in self.run_job_args)
 
@@ -402,7 +417,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.start(ssh_password='sshpass'))
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
-        self.assertEqual(job.status, 'successful')
+        self.check_job_result(job, 'successful')
         self.assertTrue('--ask-pass' in self.run_job_args)
 
     def test_sudo_username_and_password(self):
@@ -418,7 +433,7 @@ class RunJobTest(BaseCeleryTest):
         job = Job.objects.get(pk=job.pk)
         # Job may fail if current user doesn't have password-less sudo
         # privileges, but we're mainly checking the command line arguments.
-        self.assertTrue(job.status in ('successful', 'failed'))
+        self.check_job_result(job, ('successful', 'failed'))
         self.assertTrue('-U' in self.run_job_args)
         self.assertTrue('--ask-sudo-pass' in self.run_job_args)
 
@@ -450,7 +465,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
-        self.assertEqual(job.status, 'successful')
+        self.check_job_result(job, 'successful')
         self.assertTrue('ssh-agent' in self.run_job_args)
 
     def test_locked_ssh_key_with_password(self):
@@ -464,7 +479,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
-        self.assertEqual(job.status, 'successful')
+        self.check_job_result(job, 'successful')
         self.assertTrue('ssh-agent' in self.run_job_args)
         self.assertTrue('Bad passphrase' not in job.result_stdout)
 
@@ -479,7 +494,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
-        self.assertEqual(job.status, 'failed')
+        self.check_job_result(job, 'failed')
         self.assertTrue('ssh-agent' in self.run_job_args)
         self.assertTrue('Bad passphrase' in job.result_stdout)
 
@@ -497,6 +512,6 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.start(ssh_key_unlock=TEST_SSH_KEY_DATA_UNLOCK))
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
-        self.assertEqual(job.status, 'successful')
+        self.check_job_result(job, 'successful')
         self.assertTrue('ssh-agent' in self.run_job_args)
         self.assertTrue('Bad passphrase' not in job.result_stdout)

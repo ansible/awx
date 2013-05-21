@@ -37,12 +37,13 @@ def run_command_as_script(command_name):
     # and needs to execute the script directly.  FIXME: Figure out if this will
     # work when installed in a production environment.
     try:
-        settings_parent_module = __import__(settings_module_name)
+        settings_module = __import__(settings_module_name, globals(), locals(),
+                                     [settings_module_name.split('.')[-1]])
     except ImportError:
         top_dir = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..')
         sys.path.insert(0, os.path.abspath(top_dir))
-        settings_parent_module = __import__(settings_module_name)
-    settings_module = getattr(settings_parent_module, settings_module_name.split('.')[-1])
+        settings_module = __import__(settings_module_name, globals(), locals(),
+                                     [settings_module_name.split('.')[-1]])
     # Use the ACOM_TEST_DATABASE_NAME environment variable to specify the test
     # database name when called from unit tests.
     if os.environ.get('ACOM_TEST_DATABASE_NAME', None):
