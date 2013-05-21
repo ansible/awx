@@ -55,7 +55,7 @@
         service: name=postgresql state=restarted
 
       - name: configure python settings (with database password)
-        template: src=templates/local_settings.py.j2 dest=${working_dir}/lib/settings/local_settings.py
+        template: src=templates/local_settings.py.j2 dest=${working_dir}/ansibleworks/settings/local_settings.py
 
       - name: sync django database
         command: python ${working_dir}/manage.py syncdb --noinput

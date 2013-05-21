@@ -25,12 +25,10 @@ See the ansible-doc repo
 Accessing the UI
 ================
 
-The UI is installed under lib/static/web. After starting the django server
-(i.e. make runserver), access the ui from a web browser at:
+The UI is installed under ansibleworks/ui/ and accessible at the root URL.
+After starting the Django server (i.e. make runserver), access the UI from a
+web browser at:
 
-http://127.0.0.1:8013/static/web/app/index.html
+http://127.0.0.1:8013/
 
 (routes and formal installation steps including Apache proxying pending)
-
-
-

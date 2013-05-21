@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
+# Copyright (c) 2013 AnsibleWorks, Inc.
+# All Rights Reserved.
+
 import datetime
 from setuptools import setup, find_packages
 
-from lib import __version__
+from ansibleworks import __version__
 
 build_timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M')
 
@@ -17,7 +20,7 @@ setup(
     license='Proprietary',
     keywords='ansible',
     url='http://github.com/ansible/ansible-commander',
-    packages=['lib'],  # FIXME: Rename to ansibleworks
+    packages=['ansibleworks'],
     include_package_data=True,
     zip_safe=False,
     install_requires=[
@@ -66,7 +69,7 @@ setup(
     ],
     entry_points = {
         'console_scripts': [
-            'ansibleworks-manage = lib:manage',
+            'ansibleworks-manage = ansibleworks:manage',
         ],
     },
     options={

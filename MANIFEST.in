@@ -1,9 +1,9 @@
-recursive-include lib *.py
-recursive-include lib/static *.ico
-recursive-include lib/templates *.html
-recursive-exclude lib/settings local_settings.py
+recursive-include ansibleworks *.py
+recursive-include ansibleworks/static *.ico
+recursive-include ansibleworks/templates *.html
+recursive-exclude ansibleworks/settings local_settings.py
 include *.py *.txt *.md
 include MANIFEST.in
 include COPYING
-prune lib/public
-prune lib/project
+prune ansibleworks/public
+prune ansibleworks/project

@@ -1,8 +1,10 @@
-lib/settings/local_settings.py*
-lib/acom.sqlite3
-lib/projects
-lib/public/media
-lib/public/static
+ansibleworks/settings/local_settings.py*
+ansibleworks/acom.sqlite3
+ansibleworks/projects
+ansibleworks/public/media
+ansibleworks/public/static
 env/*
+build
+dist
 *.py[c,o]
 *.swp

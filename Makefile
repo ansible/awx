@@ -1,4 +1,5 @@
 clean:
+	rm -rf build dist *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
 
 rebase:
