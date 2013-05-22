@@ -185,6 +185,7 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
         Rest.get()
             .success( function(data, status, headers, config) {
                 // Create a job record
+                scope.credential = '';
                 if (data.credential == '' || data.credential == null) {
                    // Template does not have credential, prompt for one
                    if (scope.credentialWatchRemove) {

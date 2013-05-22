@@ -30,7 +30,13 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         // Set default values
         for (fld in list.fields) {
             if (list.fields[fld].key) {
-               default_order = (list.fields[fld].desc) ? '-' + fld : fld;
+               if (list.fields[fld].sourceModel) {
+                  var fka = list.fields[fld].sourceModel + '__' + list.fields[fld].sourceField;
+                  default_order = (list.fields[fld].desc) ? '-' + fka : fka;
+               }
+               else {
+                  default_order = (list.fields[fld].desc) ? '-' + fld : fld; 
+               }
                scope[iterator + 'SearchField'] = fld
                scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
                break;
@@ -84,6 +90,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            // need to be able to search by related set. Ex: /api/v1/inventories/?organization__name__icontains=
            //
            scope[iterator + 'SearchSpin'] = true;
+           scope[iterator + 'SearchParms'] = '';
            var url = defaultUrl;
            if ( (scope[iterator + 'SelectShow'] == false && scope[iterator + 'SearchValue'] != '' && scope[iterator + 'SearchValue'] != undefined) ||
                 (scope[iterator + 'SelectShow'] && scope[iterator + 'SearchSelectValue']) ) {

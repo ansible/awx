@@ -37,6 +37,7 @@
   <script src="{{ STATIC_URL }}js/controllers/Projects.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Jobs.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/JobEvents.js"></script>
+  <script src="{{ STATIC_URL }}js/controllers/JobHosts.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Users.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Inventories.js"></script>
@@ -60,6 +61,7 @@
   <script src="{{ STATIC_URL }}js/lists/Projects.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Jobs.js"></script>
   <script src="{{ STATIC_URL }}js/lists/JobEvents.js"></script>
+  <script src="{{ STATIC_URL }}js/lists/JobHosts.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/refresh-related.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-paginate.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-search.js"></script>
@@ -208,7 +210,6 @@
 
           var loc = window.location.toString();
           if (! regx.test(loc)) {
-             console.log('change! ' + window.location.toString());
              window.location = '#/' + url.toLowerCase().replace(/ /g,'_');
           }
           });

@@ -15,7 +15,7 @@ angular.module('CredentialsListDefinition', [])
         selectTitle: 'Add Credentials',
         editTitle: 'Credentials',
         selectInstructions: 'Check the Select checkbox next to each credential to be added, and click Finished when done. Use the green <i class=\"icon-plus\"></i> button to create a new user.', 
-        editInstructions: 'Add a new credential record from either the Teams tab or the Users tab. Teams and Users each have an associated set of Credentials.',
+        editInstructions: 'Create a new credential from either the Teams tab or the Users tab. Teams and Users each have an associated set of Credentials.',
         index: true,
         index: true,
         

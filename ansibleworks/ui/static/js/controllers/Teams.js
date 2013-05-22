@@ -34,7 +34,6 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
         }
         });
 
-
     //SetTeamListeners({ scope: scope, set: 'teams', iterator: list.iterator });
     SearchInit({ scope: scope, set: 'teams', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });

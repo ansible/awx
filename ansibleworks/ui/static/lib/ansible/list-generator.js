@@ -200,8 +200,17 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
            html +=  "\" ";  
            html += (list.fields[fld].ngClass) ? this.attr(list.fields[fld], 'ngClass') : "";
            html += ">\n";
-           if ((list.fields[fld].key || list.fields[fld].link) && options.mode != 'lookup' && options.mode != 'select') { 
-              html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
+           if ((list.fields[fld].key || list.fields[fld].link || list.fields[fld].linkTo || list.fields[fld].ngClick )
+                && options.mode != 'lookup' && options.mode != 'select') {
+              if (list.fields[fld].linkTo) {
+                 html += "<a href=\"#" + list.fields[fld].linkTo + "\">";
+              }
+              else if (list.fields[fld].ngClick) {
+                 html += "<a href=\"\"" + this.attr(list.fields[fld], 'ngClick') + "\">";
+              }
+              else {
+                 html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
+              }
            }
            html += (list.fields[fld].icon) ? this.icon(list.fields[fld].icon) : "";
            if (list.fields[fld].ngBind) {       

@@ -179,7 +179,7 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
       }
       Rest.post(data)
           .success( function(data, status, headers, config) {
-              ReturnToCaller();
+              $location.path('/inventories/' + data.id);
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, form,

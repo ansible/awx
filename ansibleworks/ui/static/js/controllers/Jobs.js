@@ -41,6 +41,11 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
        $location.path($location.path() + '/' + id + '/job_events');
        }
 
+    scope.viewSummary = function(id, name) {
+       LoadBreadCrumbs({ path: '/jobs/' + id, title: name });
+       $location.path($location.path() + '/' + id + '/job_host_summaries');
+       }
+
     scope.deleteJob = function(id, name) {
        Rest.setUrl(defaultUrl + id + '/');
        Rest.get()

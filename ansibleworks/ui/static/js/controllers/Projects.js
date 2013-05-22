@@ -207,7 +207,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    var id = $routeParams.id;
    var relatedSets = {}; 
 
-   // After the Organization is loaded, retrieve each related set
+   // After the project is loaded, retrieve each related set
    if (scope.projectLoadedRemove) {
       scope.projectLoadedRemove();
    }
@@ -257,8 +257,8 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
               ReturnToCaller();
               })
           .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, OrganizationForm,
-                            { hdr: 'Error!', msg: 'Failed to update project: ' + id + '. PUT status: ' + status });
+              ProcessErrors(scope, data, status, form,
+                { hdr: 'Error!', msg: 'Failed to update project: ' + id + '. PUT status: ' + status });
               });
       };
 

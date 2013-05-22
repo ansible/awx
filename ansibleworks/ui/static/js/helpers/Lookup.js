@@ -66,7 +66,6 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
                        'and then click the Select button.');
                 }
                 else {
-                   console.log('found!');
                    if (postAction) {
                        postAction();
                    }

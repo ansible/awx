@@ -67,7 +67,7 @@ angular.module('JobsListDefinition', [])
             summary: {
                 title: 'Summary',
                 icon: 'icon-filter',
-                ngClick: 'viewSummary(\{{ job.id \}\})',
+                ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.name \}\}')",
                 class: 'btn-success btn-mini',
                 awToolTip: 'View host summary',
                 ngDisabled: "job.status == 'new'"
@@ -88,7 +88,7 @@ angular.module('JobsListDefinition', [])
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
                 class: 'btn-danger btn-mini',
                 awToolTip: 'Cancel job',
-                ngDisabled: "job.status == 'error' || job.status == 'failed' || job.status == 'success'"
+                ngDisabled: "job.status != 'new' && job.status != 'pending'"
                 }
             }
         });

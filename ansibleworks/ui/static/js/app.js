@@ -49,7 +49,8 @@ angular.module('ansible', [
     'JobsListDefinition',
     'JobFormDefinition',
     'JobEventsListDefinition',
-    'JobEventFormDefinition'
+    'JobEventFormDefinition',
+    'JobHostDefinition'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.
@@ -61,6 +62,9 @@ angular.module('ansible', [
 
             when('/jobs/:id/job_events',
                 { templateUrl: urlPrefix + 'partials/jobs.html', controller: JobEventsList }).
+
+            when('/jobs/:id/job_host_summaries',
+                { templateUrl: urlPrefix + 'partials/jobs.html', controller: JobHostSummaryList }).
             
             when('/jobs/:job_id/job_events/:event_id',
                 { templateUrl: urlPrefix + 'partials/jobs.html', controller: JobEventsEdit }).
