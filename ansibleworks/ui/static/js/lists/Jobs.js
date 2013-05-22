@@ -35,7 +35,16 @@ angular.module('JobsListDefinition', [])
             status: {
                 label: 'Status',
                 icon: 'icon-circle',
-                class: 'job-\{\{ job.status \}\}'
+                class: 'job-\{\{ job.status \}\}',
+                searchType: 'select',
+                searchOptions: [
+                    { name: "new", value: "new" }, 
+                    { name: "pending", value: "pending" },
+                    { name: "running", value: "running" }, 
+                    { name: "success", value: "success" },
+                    { name: "error", value: "error" },
+                    { name: "failed", value: "failed" },
+                    { name: "canceled", value: "canceled" } ]
                 }
             },
         
@@ -67,7 +76,7 @@ angular.module('JobsListDefinition', [])
                 title: 'Detail',
                 icon: 'icon-list-ul',
                 mode: 'all',             
-                ngClick: 'viewEvents(\{{ job.id \}\})',
+                ngClick: "viewEvents(\{{ job.id \}\}, '\{\{ job.name \}\}')",
                 class: 'btn-success btn-mini',
                 awToolTip: 'View events',
                 ngDisabled: "job.status == 'new'"

@@ -274,7 +274,8 @@
     color: #da4f49;
  }
 
- .job-new,  input[type="text"].job-new {
+ .job-new,  input[type="text"].job-new,
+ .job-canceled,  input[type="text"].job-canceled {
     color: #778899;
  }
 
@@ -288,18 +289,6 @@
     font-size: 15px;
     font-weight: bold;
     padding-left: 15px;
- }
-
- #job_events label {
-    margin-right: 10px;
- }
-
- #job_events {
-    text-align: center;
- }
-
- #job_events_items_form {
-    margin-top: 15px;
  }
 
  .form-items .search-widget {

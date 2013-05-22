@@ -22,6 +22,9 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
            case 'ngClick':
                 result = "ng-click=\"" + obj[key] + "\" ";
                 break;
+           case 'ngClass':
+                result = "ng-class=\"" + obj[key] + "\" ";
+                break;
            case 'ngDisabled':
                 result = "ng-disabled=\"" + obj[key] + "\" ";
                 break;
@@ -187,30 +190,27 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
        }
        var cnt = 2;
        var base = (list.base) ? list.base : list.name;
+       base = base.replace(/^\//,'');
        for (fld in list.fields) {
-           cnt++;
-           if (! list.fields[fld].ngBind) {
-              html += "<td class=\"" + fld + "-column"; 
-              html += (list.fields[fld].class) ? " " + list.fields[fld].class : "";
-              html +=  "\">";
-              if ((list.fields[fld].key || list.fields[fld].link) && options.mode != 'lookup' && options.mode != 'select') { 
-                 html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
-              }
-              html += (list.fields[fld].icon) ? this.icon(list.fields[fld].icon) : "";
-              html += "{{" + list.iterator + "." + fld + "}}";
-              html += ((list.fields[fld].key || list.fields[fld].link) && options.mode != 'lookup' && options.mode != 'select') ? "</a>" : "";
-              html += "</td>\n";
+           cnt++;  
+           html += "<td ";
+           html += "<td class=\"" + fld + "-column"; 
+           html += (list.fields[fld].class) ? " " + list.fields[fld].class : "";
+           html +=  "\" ";  
+           html += (list.fields[fld].ngClass) ? this.attr(list.fields[fld], 'ngClass') : "";
+           html += ">\n";
+           if ((list.fields[fld].key || list.fields[fld].link) && options.mode != 'lookup' && options.mode != 'select') { 
+              html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
+           }
+           html += (list.fields[fld].icon) ? this.icon(list.fields[fld].icon) : "";
+           if (list.fields[fld].ngBind) {       
+              html += "{{ " + list.fields[fld].ngBind + " }}";
            }
            else {
-              html += "<td class=\"" + fld + "-column\">";
-              if ((list.fields[fld].key || list.fields[fld].link) && options.mode != 'lookup' && options.mode != 'select') {
-                 html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
-              }
-              html += (list.fields[fld].icon) ? this.icon(list.fields[fld].icon) : "";
-              html += "{{ " + list.fields[fld].ngBind + " }}";
-              html += ((list.fields[fld].key || list.fields[fld].link) && options.mode != 'lookup' && options.mode != 'select') ? "</a>" : "";
-              html += "</td>\n";
-          }
+              html += "{{" + list.iterator + "." + fld + "}}";    
+           }
+           html += ((list.fields[fld].key || list.fields[fld].link) && options.mode != 'lookup' && options.mode != 'select') ? "</a>" : "";
+           html += "</td>\n";
        }
 
        if (options.mode == 'select' ) {

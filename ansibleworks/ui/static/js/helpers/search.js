@@ -44,7 +44,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         scope[iterator + 'HideSearchType'] = false;
 
         var f = scope[iterator + 'SearchField']
-        if (list.fields[f].searchType && list.fields[f].searchType == 'boolean') {
+        if (list.fields[f].searchType && ( list.fields[f].searchType == 'boolean' 
+              || list.fields[f].searchType == 'select')) {
            scope[iterator + 'SelectShow'] = true;
            scope[iterator + 'SearchSelectOpts'] = list.fields[fld].searchOptions;
         }
@@ -60,9 +61,10 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            scope[iterator + 'SelectShow'] = false;
            scope[iterator + 'HideSearchType'] = false;
            
-           if (list.fields[fld].searchType && list.fields[fld].searchType == 'boolean') {
+           if (list.fields[fld].searchType && (list.fields[fld].searchType == 'boolean' 
+                || list.fields[fld].searchType == 'select')) {
               scope[iterator + 'SelectShow'] = true;
-              scope[iterator + 'SearchSelectOpts'] = list.fields[f].searchOptions;
+              scope[iterator + 'SearchSelectOpts'] = list.fields[fld].searchOptions;
            }
            if (list.fields[fld].searchType && list.fields[fld].searchType == 'int') {
               scope[iterator + 'HideSearchType'] = true;   
@@ -107,7 +109,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
               }             
               
               if ( list.fields[scope[iterator + 'SearchField']].searchType && 
-                   list.fields[scope[iterator + 'SearchField']].searchType == 'boolean' ) { 
+                   (list.fields[scope[iterator + 'SearchField']].searchType == 'boolean' 
+                       || list.fields[scope[iterator + 'SearchField']].searchType == 'select') ) { 
                    scope[iterator + 'SearchParams'] += scope[iterator + 'SearchSelectValue'].value;
               }
               else {

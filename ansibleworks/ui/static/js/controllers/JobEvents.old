@@ -1,0 +1,79 @@
+function JobEvents ($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventForm, 
+                    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, SearchInit, 
+                    PaginateInit, GetBasePath) 
+{
+   ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
+                                //scope.
+
+   // Inject dynamic view
+   var form = JobEventForm;
+   var generator = GenerateForm;
+   var scope = GenerateForm.inject(form, {mode: 'edit', related: true});
+   generator.reset();
+   
+   var defaultUrl = GetBasePath('jobs') + $routeParams.id + '/job_events/';
+   var base = $location.path().replace(/^\//,'').split('/')[0];
+   var master = {};
+   var id = $routeParams.id;
+   var relatedSets = {}; 
+
+   if (scope.PostRefreshRemove){
+      scope.PostRefreshRemove();
+   }
+   scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
+       
+       // Disable Next/Prev buttons when we reach the end/beginning of array
+       scope[form.items.event.iterator + 'NextUrlDisable'] = (scope[form.items.event.iterator + 'NextUrl'] !== null) ? "" : "disabled";
+       scope[form.items.event.iterator + 'PrevUrlDisable'] = (scope[form.items.event.iterator + 'PrevUrl'] !== null) ? "" : "disabled";
+       
+       // Set the scope input field values
+       if (scope[form.items.event.set] && scope[form.items.event.set].length > 0) {
+          var results = scope[form.items.event.set][0];
+          for (var fld in form.items.event.fields) {
+              if (fld == 'event_data') {
+                 scope.event_data = JSON.stringify(results[fld]);
+              }
+              else {
+                 if (results[fld]) {
+                    scope[fld] = results[fld];
+                 }
+              }
+           }
+           scope['event_status'] = (results.failed) ? 'failed' : 'success';
+        }
+       });
+
+   // Retrieve detail record and prepopulate the form
+   Rest.setUrl(defaultUrl); 
+   Rest.get({ params: {page_size: 1} })
+       .success( function(data, status, headers, config) {
+           var results = data.results[0];
+           scope[form.items.event.iterator + 'NextUrl'] = data.next;
+           scope[form.items.event.iterator + 'PrevUrl'] = data.previous;
+           scope[form.items.event.iterator + 'Count'] = data.count;
+           LoadBreadCrumbs({ path: '/jobs/' + id, title: results["summary_fields"].job.name });
+           for (var fld in form.fields) {
+              if (results[fld]) {
+                 scope[fld] = results[fld];
+              }
+              if (form.fields[fld].sourceModel && results.summary_fields[form.fields[fld].sourceModel]) {
+                 scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
+                      results.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+              }
+           }
+           scope[form.items.event.set] = data.results;
+           SearchInit({ scope: scope, set: form.items.event.set, list: form.items.event, iterator: form.items.event.iterator, url: defaultUrl });
+           PaginateInit({ scope: scope, list: form.items.event, iterator: form.items.event.iterator, url: defaultUrl , pageSize: 1 });
+           scope.$emit('PostRefresh');
+           })
+       .error( function(data, status, headers, config) {
+           ProcessErrors(scope, data, status, form,
+                         { hdr: 'Error!', msg: 'Failed to retrieve job event data: ' + $routeParams.id + '. GET status: ' + status });
+           });
+
+}
+
+JobEvents.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobEventForm', 
+                      'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'SearchInit',
+                      'PaginateInit', 'GetBasePath' ];
+
