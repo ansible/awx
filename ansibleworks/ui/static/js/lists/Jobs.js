@@ -41,7 +41,7 @@ angular.module('JobsListDefinition', [])
                     { name: "new", value: "new" }, 
                     { name: "pending", value: "pending" },
                     { name: "running", value: "running" }, 
-                    { name: "success", value: "success" },
+                    { name: "successful", value: "successful" },
                     { name: "error", value: "error" },
                     { name: "failed", value: "failed" },
                     { name: "canceled", value: "canceled" } ]

@@ -30,15 +30,15 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
     LoadBreadCrumbs();
     
-    scope.addCredential = function() {
+    scope.addProject = function() {
        $location.path($location.path() + '/add');
        }
 
-    scope.editCredential = function(id) {
+    scope.editProject = function(id) {
        $location.path($location.path() + '/' + id);
        }
  
-    scope.deleteCredential = function(id, name) {
+    scope.deleteProject = function(id, name) {
        
        var action = function() {
            var url = defaultUrl + id + '/';
@@ -139,3 +139,175 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList', 
                          'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
                          'GetBasePath' ];
+
+
+function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
+                      GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, 
+                      GetBasePath, ReturnToCaller) 
+{
+   ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
+                                //scope.
+
+   // Inject dynamic view
+   var form = ProjectsForm;
+   var generator = GenerateForm;
+   var defaultUrl = GetBasePath('projects');
+   var scope = generator.inject(form, {mode: 'add', related: false});
+   var id = $routeParams.id;
+   generator.reset();
+   
+   LoadBreadCrumbs();
+
+   // Save
+   scope.formSave = function() {
+      
+      var data = {};
+      for (var fld in form.fields) {
+          data[fld] = scope[fld];
+      }
+
+      Rest.setUrl(defaultUrl);
+      Rest.post(data)
+          .success( function(data, status, headers, config) {
+              ReturnToCaller();
+              })
+          .error( function(data, status, headers, config) {
+              ProcessErrors(scope, data, status, ProjectsForm,
+                            { hdr: 'Error!', msg: 'Failed to add new project. Post returned status: ' + status });
+              });
+      };
+
+   // Cancel
+   scope.formReset = function() {
+      $rootScope.flashMessage = null;
+      form.reset();
+      }; 
+}
+
+ProjectsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
+                        'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
+                        'ReturnToCaller'
+                        ];
+
+
+function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
+                       GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
+                       RelatedPaginateInit, Prompt, ClearScope, GetBasePath, ReturnToCaller) 
+{
+   ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
+                                //scope.
+
+   // Inject dynamic view
+   var form = ProjectsForm;
+   var generator = GenerateForm;
+   var scope = generator.inject(form, {mode: 'edit', related: true});
+   generator.reset();
+   
+   var defaultUrl = GetBasePath('projects') + $routeParams.id + '/';
+   var base = $location.path().replace(/^\//,'').split('/')[0];
+   var master = {};
+   var id = $routeParams.id;
+   var relatedSets = {}; 
+
+   // After the Organization is loaded, retrieve each related set
+   if (scope.projectLoadedRemove) {
+      scope.projectLoadedRemove();
+   }
+   scope.projectLoadedRemove = scope.$on('projectLoaded', function() {
+       for (var set in relatedSets) {
+           scope.search(relatedSets[set].iterator);
+       }
+       });
+
+   // Retrieve detail record and prepopulate the form
+   Rest.setUrl(defaultUrl); 
+   Rest.get({ params: {id: id} })
+       .success( function(data, status, headers, config) {
+           LoadBreadCrumbs({ path: '/projects/' + id, title: data.name });
+           for (var fld in form.fields) {
+              if (data[fld]) {
+                 scope[fld] = data[fld];
+                 master[fld] = data[fld];
+              }
+           }
+           var related = data.related;
+           for (var set in form.related) {
+               if (related[set]) {
+                  relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
+               }
+           }
+           // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
+           RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
+           RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
+           scope.$emit('projectLoaded');
+           })
+       .error( function(data, status, headers, config) {
+           ProcessErrors(scope, data, status, form,
+                         { hdr: 'Error!', msg: 'Failed to retrieve project: ' + id + '. GET status: ' + status });
+           });
+   
+   
+   // Save changes to the parent
+   scope.formSave = function() {
+      var params = {};
+      for (var fld in form.fields) {
+          params[fld] = scope[fld];
+      }
+      Rest.setUrl(defaultUrl);
+      Rest.put(params)
+          .success( function(data, status, headers, config) {
+              ReturnToCaller();
+              })
+          .error( function(data, status, headers, config) {
+              ProcessErrors(scope, data, status, OrganizationForm,
+                            { hdr: 'Error!', msg: 'Failed to update project: ' + id + '. PUT status: ' + status });
+              });
+      };
+
+   // Reset the form
+   scope.formReset = function() {
+      form.reset();
+      for (var fld in master) {
+          scope[fld] = master[fld];
+      }
+      };
+
+   // Related set: Add button
+   scope.add = function(set) {
+      $location.path('/' + base + '/' + $routeParams.id + '/' + set);
+      };
+
+   // Related set: Edit button
+   scope.edit = function(set, id, name) {
+      $location.path('/' + base + '/' + $routeParams.id + '/' + set + '/' + id);
+      };
+
+   // Related set: Delete button
+   scope.delete = function(set, itm_id, name, title) {
+      var action = function() {
+          var url = GetBasePath('projects') + id + '/' + set + '/';
+          Rest.setUrl(url);
+          Rest.post({ id: itm_id, disassociate: 1 })
+              .success( function(data, status, headers, config) {
+                  $('#prompt-modal').modal('hide');
+                  scope.search(form.related[set].iterator);
+                  })
+              .error( function(data, status, headers, config) {
+                  $('#prompt-modal').modal('hide');
+                  ProcessErrors(scope, data, status, null,
+                            { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+                  });      
+          };
+
+       Prompt({ hdr: 'Delete', 
+                body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
+                action: action
+                });
+       
+      }
+}
+
+ProjectsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
+                         'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit',
+                         'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath', 'ReturnToCaller'
+                          ];

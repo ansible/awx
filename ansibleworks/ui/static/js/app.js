@@ -45,6 +45,7 @@ angular.module('ansible', [
     'JobTemplateFormDefinition',
     'JobTemplateHelper',
     'ProjectsListDefinition',
+    'ProjectFormDefinition',
     'JobsListDefinition',
     'JobFormDefinition',
     'JobEventsListDefinition',
@@ -75,6 +76,12 @@ angular.module('ansible', [
 
             when('/projects', 
                 { templateUrl: urlPrefix + 'partials/projects.html', controller: ProjectsList }).
+
+            when('/projects/add', 
+                { templateUrl: urlPrefix + 'partials/projects.html', controller: ProjectsAdd }).
+
+            when('/projects/:id', 
+                { templateUrl: urlPrefix + 'partials/projects.html', controller: ProjectsEdit }).
 
             when('/inventories', 
                 { templateUrl: urlPrefix + 'partials/inventories.html', controller: InventoriesList }).

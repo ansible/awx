@@ -241,7 +241,6 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    Rest.get({ params: {id: id} })
        .success( function(data, status, headers, config) {
            LoadBreadCrumbs({ path: '/teams/' + id, title: data.name });
-           console.log(data);
            for (var fld in form.fields) {
               if (data[fld]) {
                  scope[fld] = data[fld];

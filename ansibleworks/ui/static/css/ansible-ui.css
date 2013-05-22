@@ -279,8 +279,12 @@
     color: #778899;
  }
 
- .job-pending, .job-running, .job-success,
- input[type="text"].job-success
+ .job-pending, 
+ .job-running, 
+ .job-success,
+ .job-successful,
+ input[type="text"].job-success,
+ input[type="text"].job-successful
  {
     color: #5bb75b;
  }
