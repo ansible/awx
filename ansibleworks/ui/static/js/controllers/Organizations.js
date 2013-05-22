@@ -11,7 +11,8 @@
 'use strict';
 
 function OrganizationsList ($scope, $rootScope, $location, $log, Rest, Alert, LoadBreadCrumbs, Prompt,
-                            GenerateList, OrganizationList, SearchInit, PaginateInit, ClearScope, ProcessErrors)
+                            GenerateList, OrganizationList, SearchInit, PaginateInit, ClearScope, ProcessErrors,
+                            GetBasePath)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -21,7 +22,7 @@ function OrganizationsList ($scope, $rootScope, $location, $log, Rest, Alert, Lo
     var paths = $location.path().replace(/^\//,'').split('/');
     var mode = (paths[0] == 'organizations') ? 'edit' : 'select';      // if base path 'users', we're here to add/edit users
     var scope = generate.inject(OrganizationList, { mode: mode });         // Inject our view
-    var defaultUrl = '/api/v1/organizations/';
+    var defaultUrl = GetBasePath('organizations');
     var iterator = list.iterator;
     $rootScope.flashMessage = null;
 
@@ -64,14 +65,33 @@ function OrganizationsList ($scope, $rootScope, $location, $log, Rest, Alert, Lo
                 action: action
                 });
        }
+
+    scope.toggle_organization = function(id) {
+       if (scope[list.iterator + "_" + id + "_class"] == "success") {
+          scope[list.iterator + "_" + id + "_class"] = "";
+          document.getElementById('check_' + id).checked = false;
+          if (scope.selected.indexOf(id) > -1) {
+             scope.selected.splice(scope.selected.indexOf(id),1);
+          }
+       }
+       else {
+          scope[list.iterator + "_" + id + "_class"] = "success";
+          document.getElementById('check_' + id).checked = true;
+          if (scope.selected.indexOf(id) == -1) {
+             scope.selected.push(id);
+          }
+       }
+       }
 }
 
 OrganizationsList.$inject=[ '$scope', '$rootScope', '$location', '$log', 'Rest', 'Alert', 'LoadBreadCrumbs', 'Prompt',
-                            'GenerateList', 'OrganizationList', 'SearchInit', 'PaginateInit', 'ClearScope', 'ProcessErrors'];
+                            'GenerateList', 'OrganizationList', 'SearchInit', 'PaginateInit', 'ClearScope', 'ProcessErrors',
+                            'GetBasePath' ];
 
 
 function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm, 
-                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope) 
+                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath,
+                           ReturnToCaller) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -79,22 +99,23 @@ function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $route
    // Inject dynamic view
    var form = GenerateForm;
    var scope = form.inject(OrganizationForm, {mode: 'add', related: false});
+   var defaultUrl = GetBasePath('organizations');
    form.reset();
 
    LoadBreadCrumbs();
 
    // Save
    scope.formSave = function() {
-      Rest.setUrl('/api/v1/organizations/');
+      Rest.setUrl(defaultUrl);
       Rest.post({ name: $scope.name, 
                   description: $scope.description })
           .success( function(data, status, headers, config) {
-              $rootScope.flashMessage = "Your changes were successfully saved!";
-              $location.path('/organizations/' + data.id + '/');
+              $rootScope.flashMessage = "New organization successfully created!";
+              $location.path('/organizations/' + data.id);
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, OrganizationForm,
-                            { hdr: 'Error!', msg: 'Failed to add new location. Post returned status: ' + status });
+                            { hdr: 'Error!', msg: 'Failed to add new organization. Post returned status: ' + status });
               });
       };
 
@@ -106,12 +127,13 @@ function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $route
 }
 
 OrganizationsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'OrganizationForm', 
-                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope' ];
+                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
+                             'ReturnToCaller' ];
 
 
 function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm, 
                             GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
-                            RelatedPaginateInit, Prompt, ClearScope) 
+                            RelatedPaginateInit, Prompt, ClearScope, GetBasePath) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -122,22 +144,25 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
    var scope = GenerateForm.inject(form, {mode: 'edit', related: true});
    generator.reset();
    
-   var defaultUrl = '/api/v1/organizations/';
+   var defaultUrl = GetBasePath('organizations');
    var base = $location.path().replace(/^\//,'').split('/')[0];
    var master = {};
-   var id = $routeParams.id;
+   var id = $routeParams.organization_id;
    var relatedSets = {}; 
 
    // After the Organization is loaded, retrieve each related set
-   scope.$on('organizationLoaded', function() {
+   if (scope.organizationLoadedRemove) {
+      scope.organizationLoadedRemove();
+   }
+   scope.organizationLoadedRemove = scope.$on('organizationLoaded', function() {
        for (var set in relatedSets) {
            scope.search(relatedSets[set].iterator);
        }
        });
 
    // Retrieve detail record and prepopulate the form
-   Rest.setUrl(defaultUrl + ':id/'); 
-   Rest.get({ params: {id: id} })
+   Rest.setUrl(defaultUrl + id + '/'); 
+   Rest.get()
        .success( function(data, status, headers, config) {
            LoadBreadCrumbs({ path: '/organizations/' + id, title: data.name });
            for (var fld in form.fields) {
@@ -169,7 +194,7 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
       for (var fld in form.fields) {
           params[fld] = scope[fld];
       }
-      Rest.setUrl('/api/v1/organizations/' + $routeParams.id + '/');
+      Rest.setUrl(defaultUrl + id + '/');
       Rest.put(params)
           .success( function(data, status, headers, config) {
               master = params;
@@ -193,13 +218,13 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
    // Related set: Add button
    scope.add = function(set) {
       $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.id + '/' + set);
+      $location.path('/' + base + '/' + $routeParams.organization_id + '/' + set);
       };
 
    // Related set: Edit button
    scope.edit = function(set, id, name) {
       $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.id + '/' + set + '/' + id);
+      $location.path('/' + set + '/' + id);
       };
 
    // Related set: Delete button
@@ -207,7 +232,7 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
       $rootScope.flashMessage = null;
       
       var action = function() {
-          var url = defaultUrl + id + '/' + set + '/';
+          var url = defaultUrl + $routeParams.organization_id + '/' + set + '/';
           Rest.setUrl(url);
           Rest.post({ id: itm_id, disassociate: 1 })
               .success( function(data, status, headers, config) {
@@ -231,4 +256,4 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
 
 OrganizationsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'OrganizationForm', 
                               'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit',
-                              'RelatedPaginateInit', 'Prompt', 'ClearScope'];
+                              'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath'];

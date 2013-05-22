@@ -117,21 +117,19 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
        }
 
     scope.toggle_job_template = function(id) {
-      if (scope.selected.indexOf(id) > -1) {
-          scope.selected.splice(scope.selected.indexOf(id),1);
-       }
-       else {
-          scope.selected.push(id);
-       }
-       if (scope[list.iterator + "_" + id + "_class"] == "success") {
+      if (scope[list.iterator + "_" + id + "_class"] == "success") {
           scope[list.iterator + "_" + id + "_class"] = "";
-          //$('input[name="check_' + id + '"]').checked = false;
           document.getElementById('check_' + id).checked = false;
+          if (scope.selected.indexOf(id) > -1) {
+             scope.selected.splice(scope.selected.indexOf(id),1);
+          }
        }
        else {
           scope[list.iterator + "_" + id + "_class"] = "success";
-          //$('input[name="check_' + id + '"]').checked = true;
           document.getElementById('check_' + id).checked = true;
+          if (scope.selected.indexOf(id) == -1) {
+             scope.selected.push(id);
+          }
        }
        }
 

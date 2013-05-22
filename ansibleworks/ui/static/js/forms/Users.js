@@ -158,6 +158,13 @@ angular.module('UserFormDefinition', [])
                 iterator: 'credential',
                 open: false,
 
+                actions: { 
+                    add: {
+                        ngClick: "add('credentials')",
+                        icon: 'icon-plus'
+                        },
+                    },
+
                 fields: {
                     name: {
                         key: true,
@@ -166,7 +173,20 @@ angular.module('UserFormDefinition', [])
                     description: {
                         label: 'Description'
                         }
+                    },
+
+                fieldActions: {
+                    edit: {
+                        ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
+                        icon: 'icon-edit'
+                        },
+                    delete: {
+                        ngClick: "delete('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}', 'credentials')",
+                        icon: 'icon-remove',
+                        class: 'btn-danger'
+                        }
                     }
+
                 },
                 
             }

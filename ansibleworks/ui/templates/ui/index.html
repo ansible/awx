@@ -204,7 +204,13 @@
   <script>
       $('a[data-toggle="tab"]').on('show', function (e) {
           var url = $(e.target).text();
-          window.location = '#/' + url.toLowerCase().replace(/ /g,'_');
+          var regx = new RegExp('/\#\/' + url.toLowerCase().replace(/ /g,'_') + '/');
+
+          var loc = window.location.toString();
+          if (! regx.test(loc)) {
+             console.log('change! ' + window.location.toString());
+             window.location = '#/' + url.toLowerCase().replace(/ /g,'_');
+          }
           });
   </script>
 

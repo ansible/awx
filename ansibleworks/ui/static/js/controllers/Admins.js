@@ -12,12 +12,11 @@
 
 function AdminsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                      Alert, AdminList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit,
-                     ReturnToCaller)
+                     ReturnToCaller,GetBasePath)
 {
     var list = AdminList;
-    var defaultUrl = '/api/v1' + '/organizations/' + $routeParams.id + '/users/' ;
+    var defaultUrl = GetBasePath('organizations') + $routeParams.organization_id + '/users/' ;
     var view = GenerateList;
-    //var paths = $location.path().replace(/^\//,'').split('/');
     var mode = 'select';
     var scope = view.inject(AdminList, { mode: mode });         // Inject our view
     scope.selected = [];
@@ -29,8 +28,8 @@ function AdminsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     LoadBreadCrumbs();
     
     scope.finishSelection = function() {
-       Rest.setUrl('/api/v1' + $location.path() + '/');  // We're assuming the path matches the api path. 
-                                                          // Will this always be true??
+       var url = GetBasePath('organizations') + $routeParams.organization_id + '/admins/'
+       Rest.setUrl(url);
        scope.queue = [];
 
        scope.$on('callFinished', function() {
@@ -44,13 +43,6 @@ function AdminsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
              for (var i=0; i < scope.queue.length; i++) {
                  if (scope.queue[i].result == 'error') {
                     errors++;
-                    // there is no way to know which user raised the error. no data comes
-                    // back from the api call. 
-                    //   $('td.username-column').each(function(index) {
-                    //      if ($(this).text() == scope.queue[i].username) {
-                    //         $(this).addClass("error");
-                    //      }
-                    //   });
                  }
              }
              if (errors > 0) {
@@ -85,30 +77,28 @@ function AdminsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
           }
        }
        else {
-          returnToCaller();
+          ReturnToCaller(1);
        }  
        }
 
     scope.toggle_admin = function(id) {
-       if (scope.selected.indexOf(id) > -1) {
-          scope.selected.splice(scope.selected.indexOf(id),1);
-       }
-       else {
-          scope.selected.push(id);
-       }
        if (scope[list.iterator + "_" + id + "_class"] == "success") {
           scope[list.iterator + "_" + id + "_class"] = "";
-          //$('input[name="check_' + id + '"]').checked = false;
           document.getElementById('check_' + id).checked = false;
+          if (scope.selected.indexOf(id) > -1) {
+             scope.selected.splice(scope.selected.indexOf(id),1);
+          }
        }
        else {
           scope[list.iterator + "_" + id + "_class"] = "success";
-          //$('input[name="check_' + id + '"]').checked = true;
           document.getElementById('check_' + id).checked = true;
+          if (scope.selected.indexOf(id) == -1) {
+             scope.selected.push(id);
+          }
        }
        }
 }
 
 AdminsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'AdminList', 'GenerateList', 
-                       'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller' ];
+                       'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'GetBasePath'];
 

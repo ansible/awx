@@ -24,6 +24,17 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
     var scope = view.inject(list, { mode: mode });    // Inject our view
     scope.selected = [];
   
+    // After a refresh, populate the organization name on each row
+    if (scope.PostRefreshRemove) {
+       scope.PostRefreshRemove();
+    }
+    scope.PostRefershRemove = scope.$on('PostRefresh', function() {
+        for( var i=0; i < scope.teams.length; i++) {
+           scope.teams[i].organization_name = scope.teams[i].summary_fields.organization.name;  
+        }
+        });
+
+
     //SetTeamListeners({ scope: scope, set: 'teams', iterator: list.iterator });
     SearchInit({ scope: scope, set: 'teams', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
@@ -131,21 +142,19 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
        }
 
     scope.toggle_team = function(id) {
-       if (scope.selected.indexOf(id) > -1) {
-          scope.selected.splice(scope.selected.indexOf(id),1);
-       }
-       else {
-          scope.selected.push(id);
-       }
        if (scope[list.iterator + "_" + id + "_class"] == "success") {
           scope[list.iterator + "_" + id + "_class"] = "";
-          //$('input[name="check_' + id + '"]').checked = false;
           document.getElementById('check_' + id).checked = false;
+          if (scope.selected.indexOf(id) > -1) {
+             scope.selected.splice(scope.selected.indexOf(id),1);
+          }
        }
        else {
           scope[list.iterator + "_" + id + "_class"] = "success";
-          //$('input[name="check_' + id + '"]').checked = true;
           document.getElementById('check_' + id).checked = true;
+          if (scope.selected.indexOf(id) == -1) {
+             scope.selected.push(id);
+          }
        }
        }
 }
@@ -156,8 +165,8 @@ TeamsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams
 
 
 function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, 
-                         GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-                         GenerateList, OrganizationList, SearchInit, PaginateInit, TeamLookUpOrganizationInit) 
+                   GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+                   GenerateList, OrganizationList, SearchInit, PaginateInit, TeamLookUpOrganizationInit) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -180,7 +189,7 @@ function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
       } 
       Rest.post(data)
           .success( function(data, status, headers, config) {
-              ReturnToCaller();
+              $location.path('/teams/' + data.id);
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, form,
@@ -202,19 +211,21 @@ TeamsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$
 
 function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, 
                     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
-                    RelatedPaginateInit, ReturnToCaller, ClearScope, TeamLookUpOrganizationInit, Prompt) 
+                    RelatedPaginateInit, ReturnToCaller, ClearScope, TeamLookUpOrganizationInit, Prompt, 
+                    GetBasePath) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
 
-   var defaultUrl='/api/v1/teams/';
+   var defaultUrl=GetBasePath('teams');
    var generator = GenerateForm;
    var form = TeamForm;
    var scope = generator.inject(form, {mode: 'edit', related: true});
    generator.reset();
+   
    var base = $location.path().replace(/^\//,'').split('/')[0];
    var master = {};
-   var id = $routeParams.id;
+   var id = $routeParams.team_id;
    var relatedSets = {}; 
    
    TeamLookUpOrganizationInit({ scope: scope });
@@ -293,13 +304,13 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    // Related set: Add button
    scope.add = function(set) {
       $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.id + '/' + set);
+      $location.path('/' + base + '/' + $routeParams.team_id + '/' + set);
       };
 
    // Related set: Edit button
    scope.edit = function(set, id, name) {
       $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.id + '/' + set + '/' + id);
+      $location.path('/' + set + '/' + id);
       };
 
    // Related set: Delete button
@@ -307,7 +318,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
       $rootScope.flashMessage = null;
       
       var action = function() {
-          var url = defaultUrl + id + '/' + set + '/';
+          var url = defaultUrl + $routeParams.team_id + '/' + set + '/';
           Rest.setUrl(url);
           Rest.post({ id: itm_id, disassociate: 1 })
               .success( function(data, status, headers, config) {
@@ -332,6 +343,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 
 TeamsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm', 
                       'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
-                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'TeamLookUpOrganizationInit', 'Prompt'
+                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'TeamLookUpOrganizationInit', 'Prompt',
+                      'GetBasePath'
                       ]; 
   

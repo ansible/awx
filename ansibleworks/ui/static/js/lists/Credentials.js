@@ -14,7 +14,9 @@ angular.module('CredentialsListDefinition', [])
         iterator: 'credential',
         selectTitle: 'Add Credentials',
         editTitle: 'Credentials',
-        selectInstructions: 'Click on a row to select it, and click Finished when done. Use the green <i class=\"icon-plus\"></i> button to create a new row.', 
+        selectInstructions: 'Check the Select checkbox next to each credential to be added, and click Finished when done. Use the green <i class=\"icon-plus\"></i> button to create a new user.', 
+        editInstructions: 'Add a new credential record from either the Teams tab or the Users tab. Teams and Users each have an associated set of Credentials.',
+        index: true,
         index: true,
         
         fields: {
@@ -44,7 +46,7 @@ angular.module('CredentialsListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',                         // One of: edit, select, all
                 ngClick: 'addCredential()',
-                basePaths: ['credentials'],          // base path must be in list, or action not available
+                basePaths: ['teams','users'],        // base path must be in list, or action not available
                 class: 'btn-success',
                 awToolTip: 'Create a new credential'
                 }

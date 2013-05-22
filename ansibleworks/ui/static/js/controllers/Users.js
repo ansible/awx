@@ -20,8 +20,8 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     var list = UserList;
     var defaultUrl = '/api/v1/users/';
     var view = GenerateList;
-    var paths = $location.path().replace(/^\//,'').split('/');
-    var mode = (paths[0] == 'users') ? 'edit' : 'select';      // if base path 'users', we're here to add/edit users
+    var base = $location.path().replace(/^\//,'').split('/')[0];
+    var mode = (base == 'users') ? 'edit' : 'select';      // if base path 'users', we're here to add/edit users
     var scope = view.inject(UserList, { mode: mode });         // Inject our view
     scope.selected = [];
   
@@ -118,21 +118,19 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
        }
 
     scope.toggle_user = function(id) {
-       if (scope.selected.indexOf(id) > -1) {
-          scope.selected.splice(scope.selected.indexOf(id),1);
-       }
-       else {
-          scope.selected.push(id);
-       }
        if (scope[list.iterator + "_" + id + "_class"] == "success") {
           scope[list.iterator + "_" + id + "_class"] = "";
-          //$('input[name="check_' + id + '"]').checked = false;
           document.getElementById('check_' + id).checked = false;
+          if (scope.selected.indexOf(id) > -1) {
+             scope.selected.splice(scope.selected.indexOf(id),1);
+          }
        }
        else {
           scope[list.iterator + "_" + id + "_class"] = "success";
-          //$('input[name="check_' + id + '"]').checked = true;
           document.getElementById('check_' + id).checked = true;
+          if (scope.selected.indexOf(id) == -1) {
+             scope.selected.push(id);
+          }
        }
        }
 }
@@ -158,7 +156,7 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
    // Save
    scope.formSave = function() {
-      Rest.setUrl(defaultUrl + $routeParams.id + '/users/');
+      Rest.setUrl(defaultUrl + $routeParams.organization_id + '/users/');
       var data = {}
       for (var fld in form.fields) {
           data[fld] = scope[fld];   
@@ -183,7 +181,7 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    scope.clearPWConfirm = function(fld) {
       // If password value changes, make sure password_confirm must be re-entered
       scope[fld] = '';
-      scope[form.name][fld].$setValidity('awpassmatch', false);
+      scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
       }
 }
 
@@ -193,19 +191,22 @@ UsersAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$
 
 function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
                     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
-                    RelatedPaginateInit, ReturnToCaller, ClearScope) 
+                    RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                              //scope.
 
-   var defaultUrl='/api/v1/users/';
+   var defaultUrl=GetBasePath('users');
    var generator = GenerateForm;
    var form = UserForm;
+   var base = $location.path().replace(/^\//,'').split('/')[0];
    var scope = generator.inject(form, {mode: 'edit', related: true});
    generator.reset();
    var master = {};
-   var id = $routeParams.id;
+   var id = $routeParams.user_id;
    var relatedSets = {}; 
+
+   console.log('here!');
 
    // After the Organization is loaded, retrieve each related set
    scope.$on('userLoaded', function() {
@@ -248,7 +249,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    
    // Save changes to the parent
    scope.formSave = function() {
-      Rest.setUrl(defaultUrl + $routeParams.id + '/');
+      Rest.setUrl(defaultUrl + id + '/');
       var data = {}
       for (var fld in form.fields) {
           data[fld] = scope[fld];   
@@ -279,9 +280,47 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
       scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
       }
 
+
+   // Related set: Add button
+   scope.add = function(set) {
+      $rootScope.flashMessage = null;
+      $location.path('/' + base + '/' + $routeParams.user_id + '/' + set);
+      };
+
+   // Related set: Edit button
+   scope.edit = function(set, id, name) {
+      $rootScope.flashMessage = null;
+      $location.path('/' + set + '/' + id);
+      };
+
+   // Related set: Delete button
+   scope.delete = function(set, itm_id, name, title) {
+      $rootScope.flashMessage = null;
+      
+      var action = function() {
+          var url = defaultUrl + $routeParams.user_id + '/' + set + '/';
+          Rest.setUrl(url);
+          Rest.post({ id: itm_id, disassociate: 1 })
+              .success( function(data, status, headers, config) {
+                  $('#prompt-modal').modal('hide');
+                  scope.search(form.related[set].iterator);
+                  })
+              .error( function(data, status, headers, config) {
+                  $('#prompt-modal').modal('hide');
+                  ProcessErrors(scope, data, status, null,
+                            { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+                  });      
+          };
+
+       Prompt({ hdr: 'Delete', 
+                body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
+                action: action
+                });
+      }
+
 }
 
 UsersEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 
                       'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
-                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope']; 
+                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'GetBasePath']; 
   

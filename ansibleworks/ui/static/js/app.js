@@ -134,20 +134,20 @@ angular.module('ansible', [
             when('/organizations/add', { templateUrl: urlPrefix + 'partials/organizations.html',
                                          controller: OrganizationsAdd }).
 
-            when('/organizations/:id', { templateUrl: urlPrefix + 'partials/organizations.html',
-                                         controller: OrganizationsEdit }).
+            when('/organizations/:organization_id', { templateUrl: urlPrefix + 'partials/organizations.html',
+                                                      controller: OrganizationsEdit }).
 
-            when('/organizations/:id/admins', { templateUrl: urlPrefix + 'partials/organizations.html',
+            when('/organizations/:organization_id/admins', { templateUrl: urlPrefix + 'partials/organizations.html',
                                                 controller: AdminsList }).
 
-            when('/organizations/:id/users', { templateUrl: urlPrefix + 'partials/users.html',
-                                               controller: UsersList }).
+            when('/organizations/:organization_id/users', { templateUrl: urlPrefix + 'partials/users.html',
+                                                            controller: UsersList }).
 
-            when('/organizations/:id/users/add', { templateUrl: urlPrefix + 'partials/users.html',
-                                                   controller: UsersAdd }).
+            when('/organizations/:organization_id/users/add', { templateUrl: urlPrefix + 'partials/users.html',
+                                                                controller: UsersAdd }).
 
-            when('/organizations/:organization_id/users/:id', { templateUrl: urlPrefix + 'partials/users.html',
-                                                                controller: UsersEdit }).
+            when('/organizations/:organization_id/users/:user_id', { templateUrl: urlPrefix + 'partials/users.html',
+                                                                     controller: UsersEdit }).
 
             when('/teams', { templateUrl: urlPrefix + 'partials/teams.html',
                              controller: TeamsList }).
@@ -155,23 +155,29 @@ angular.module('ansible', [
             when('/teams/add', { templateUrl: urlPrefix + 'partials/teams.html',
                                  controller: TeamsAdd }).
 
-            when('/teams/:id', { templateUrl: urlPrefix + 'partials/teams.html',
-                                 controller: TeamsEdit }).
+            when('/teams/:team_id', { templateUrl: urlPrefix + 'partials/teams.html',
+                                      controller: TeamsEdit }).
 
-            when('/teams/:id/users', { templateUrl: urlPrefix + 'partials/teams.html',
-                                       controller: UsersList }).
+            when('/teams/:team_id/users', { templateUrl: urlPrefix + 'partials/teams.html',
+                                            controller: UsersList }).
 
-            when('/teams/:organization_id/users/:id', { templateUrl: urlPrefix + 'partials/teams.html',
-                                                        controller: UsersEdit }).
+            when('/teams/:team_id/users/:user_id', { templateUrl: urlPrefix + 'partials/teams.html',
+                                                     controller: UsersEdit }).
+
+            when('/teams/:team_id/credentials', { templateUrl: urlPrefix + 'partials/teams.html',
+                                                  controller: CredentialsList }).
+
+            when('/teams/:team_id/credentials/add', { templateUrl: urlPrefix + 'partials/teams.html',
+                                                      controller: CredentialsAdd }).
+
+            when('/teams/:team_id/credentials/:credential_id', { templateUrl: urlPrefix + 'partials/teams.html',
+                                                                 controller: CredentialsEdit }).
 
             when('/credentials', { templateUrl: urlPrefix + 'partials/credentials.html',
                                    controller: CredentialsList }).
 
-            when('/credentials/add', { templateUrl: urlPrefix + 'partials/credentials.html',
-                                       controller: CredentialsAdd }).
-
-            when('/credentials/:id', { templateUrl: urlPrefix + 'partials/credentials.html',
-                                       controller: CredentialsEdit }).
+            when('/credentials/:credential_id', { templateUrl: urlPrefix + 'partials/credentials.html',
+                                                  controller: CredentialsEdit }).
             
             when('/users', { templateUrl: urlPrefix + 'partials/users.html',
                              controller: UsersList }).
@@ -179,8 +185,17 @@ angular.module('ansible', [
             when('/users/add', { templateUrl: urlPrefix + 'partials/users.html',
                                  controller: UsersAdd }).
 
-            when('/users/:id', { templateUrl: urlPrefix + 'partials/users.html',
-                                 controller: UsersEdit }).
+            when('/users/:user_id', { templateUrl: urlPrefix + 'partials/users.html',
+                                      controller: UsersEdit }).
+
+            when('/users/:user_id/credentials', { templateUrl: urlPrefix + 'partials/teams.html',
+                                                 controller: CredentialsList }).
+
+            when('/users/:user_id/credentials/add', { templateUrl: urlPrefix + 'partials/teams.html',
+                                                      controller: CredentialsAdd }).
+
+            when('/teams/:user_id/credentials/:credential_id', { templateUrl: urlPrefix + 'partials/teams.html',
+                                                                 controller: CredentialsEdit }).
 
             when('/login', { templateUrl: urlPrefix + 'partials/login-dialog.html', controller: Authenticate }). 
 

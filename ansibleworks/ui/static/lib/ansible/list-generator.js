@@ -141,7 +141,8 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
           html += "<div class=\"list-actions\">\n";
           for (action in list.actions) {
               if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
-                 if ( (list.basePaths == undefined) || (list.basePaths && list.basePaths.indexOf(base) > -1) ) {
+                 if ( (list.actions[action].basePaths == undefined) || 
+                      (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
                     html += "<button " + this.attr(list.actions[action], 'ngClick') + 
                             "class=\"btn btn-small " + list.actions[action].class + "\" ";
                     html += (list.actions[action].awToolTip) ? this.attr(list.actions[action],'awToolTip') : "";
