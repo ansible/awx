@@ -30,6 +30,13 @@ angular.module('JobEventsListDefinition', [])
             created: {
                 label: 'Creation Date',
                 },
+            host: {
+                label: 'Host',
+                ngClick: "viewHost(\{\{ jobevent.host \}\})",
+                ngBind: 'jobevent.host_name',
+                sourceModel: 'host',
+                sourceField: 'name'
+                },
             status: {
                 label: 'Status',
                 icon: 'icon-circle',

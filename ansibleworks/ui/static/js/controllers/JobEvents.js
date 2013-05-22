@@ -35,12 +35,30 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
         for (var i=0; i < scope.jobevents.length; i++) {
             scope.jobevents[i].status = (scope.jobevents[i].failed) ? 'error' : 'success';
+            if (scope.jobevents[i].host !== null) {
+               scope.jobevents[i].host_name = scope.jobevents[i].summary_fields.host.name;
+            }
         }
         });
     
     scope.editJobEvent = function(id) {
        $location.path($location.path() + '/' + id);
        }
+
+    scope.viewHost = function(id) {
+        if (id !== undefined && id !== null) {
+            Rest.setUrl(GetBasePath('jobs') + $routeParams.id + '/'); 
+            Rest.get()
+                .success( function(data, status, headers, config) {
+                    LoadBreadCrumbs({ path: '/inventories/' + data.inventory, title: data.summary_fields.inventory.name });
+                    $location.path('/inventories/' + data.inventory + /hosts/ + id);
+                    })
+                .error( function(data, status, headers, config) {
+                    ProcessErrors(scope, data, status, null,
+                       { hdr: 'Error!', msg: 'Failed to lookup job record for job ' + $routeParams.id + ' GET returned status: ' + status });
+                    });
+            };
+        }
 }
 
 JobEventsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
