@@ -16,7 +16,7 @@ setup(
     author='AnsibleWorks, Inc.',
     author_email='support@ansibleworks.com',
     description='AnsibleWorks API, UI and Task Engine',
-    long_description=file('README.md', 'rb').read(),
+    long_description='AnsibleWorks API, UI and Task Engine',
     license='Proprietary',
     keywords='ansible',
     url='http://github.com/ansible/ansible-commander',
