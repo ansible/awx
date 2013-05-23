@@ -20,8 +20,8 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     var defaultUrl = GetBasePath('projects');
     var view = GenerateList;
     var base = $location.path().replace(/^\//,'').split('/')[0];
-    var mode = (base == 'projects') ? 'edit' : 'select';      // if base path 'credentials', we're here to add/edit
-    var scope = view.inject(list, { mode: mode });         // Inject our view
+    var mode = (base == 'projects') ? 'edit' : 'select';
+    var scope = view.inject(list, { mode: mode });
     scope.selected = [];
   
     SearchInit({ scope: scope, set: 'projects', list: list, url: defaultUrl });
@@ -62,7 +62,8 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
        }
     
     scope.finishSelection = function() {
-       Rest.setUrl(GetBasePath('projects'));
+       var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
+       Rest.setUrl(url);
        scope.queue = [];
      
        if (scope.callFinishedRemove) {
@@ -95,7 +96,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
           for (var i=0; i < scope.selected.length; i++) {
               for (var j=0; j < scope.projects.length; j++) {
                   if (scope.projects[j].id == scope.selected[i]) {
-                     project = scope.credentials[j];
+                     project = scope.projects[j];
                   }
               }
               if (project !== null) {
@@ -149,6 +150,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    // Inject dynamic view
    var form = ProjectsForm;
    var generator = GenerateForm;
+   var base = $location.path().replace(/^\//,'').split('/')[0];
    var defaultUrl = GetBasePath('projects');
    var scope = generator.inject(form, {mode: 'add', related: false});
    var id = $routeParams.id;
@@ -158,20 +160,19 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
 
    // Save
    scope.formSave = function() {
-      
       var data = {};
       for (var fld in form.fields) {
           data[fld] = scope[fld];
       }
-
-      Rest.setUrl(defaultUrl);
+      var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
+      Rest.setUrl(url);
       Rest.post(data)
           .success( function(data, status, headers, config) {
-              ReturnToCaller();
+              (base == 'projects') ? ReturnToCaller() : ReturnToCaller(1);
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, ProjectsForm,
-                            { hdr: 'Error!', msg: 'Failed to add new project. Post returned status: ' + status });
+                            { hdr: 'Error!', msg: 'Failed to create new project. Post returned status: ' + status });
               });
       };
 

@@ -168,6 +168,15 @@ angular.module('ansible', [
             when('/teams/:team_id/users/:user_id', { templateUrl: urlPrefix + 'partials/teams.html',
                                                      controller: UsersEdit }).
 
+            when('/teams/:team_id/projects', { templateUrl: urlPrefix + 'partials/teams.html',
+                                               controller: ProjectsList }).
+
+            when('/teams/:team_id/projects/add', { templateUrl: urlPrefix + 'partials/teams.html',
+                                                   controller: ProjectsAdd }).
+
+            when('/teams/:team_id/projects/:project_id', { templateUrl: urlPrefix + 'partials/teams.html',
+                                                           controller: ProjectsEdit }).
+          
             when('/teams/:team_id/credentials', { templateUrl: urlPrefix + 'partials/teams.html',
                                                   controller: CredentialsList }).
 
