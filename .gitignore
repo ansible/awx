@@ -13,4 +13,5 @@ htmlcov
 .coverage
 coverage.xml
 pep8.txt
+.vagrant
 

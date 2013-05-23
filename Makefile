@@ -70,4 +70,4 @@ dev_build:
 	python setup.py dev_build
 
 release_build:
-	pythons setup.py release_build
+	python setup.py release_build
