@@ -253,5 +253,9 @@ angular.module('ansible', [
         else {
             base.replace(/\_/g,' ');
             $('.nav-tabs a[href="#' + base + '"]').tab('show');
-        }     
+        }
+
+        $rootScope.viewCurrentUser = function() {
+            $location.path('/users/' + $rootScope.current_user.id);
+            }    
     }]);

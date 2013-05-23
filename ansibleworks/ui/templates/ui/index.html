@@ -87,7 +87,7 @@
            <a class="brand" href="#/"><img class="logo" src="{{ STATIC_URL }}img/ansibleworks-logo.png" /></a>
            <ul class="nav pull-right">
              <li ng-show="current_user.username != null && current_user.username != undefined">
-              <a href="" ng-bind="'Hello! ' + current_user.username"></a></li>
+              <a href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
              <li ng-show="userLoggedIn == true"><a href="#/logout">Logout</a></li>
            </ul>
          </div><!-- container -->
