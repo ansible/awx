@@ -443,10 +443,12 @@ class JobHostSummarySerializer(BaseSerializer):
 
 class JobEventSerializer(BaseSerializer):
 
+    event_display = serializers.Field(source='get_event_display')
+
     class Meta:
         model = JobEvent
-        fields = ('id', 'url', 'created', 'job', 'event', 'event_data',
-                  'failed', 'host', 'related', 'summary_fields')
+        fields = ('id', 'url', 'created', 'job', 'event', 'event_display',
+                  'event_data', 'failed', 'host', 'related', 'summary_fields')
 
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)
