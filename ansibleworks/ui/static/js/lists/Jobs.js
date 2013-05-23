@@ -59,7 +59,7 @@ angular.module('JobsListDefinition', [])
 
         fieldActions: {
             edit: {
-                ngClick: "editJob(\{\{ job.id \}\})",
+                ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.name \}\}')",
                 icon: 'icon-edit',
                 class: 'btn-mini',
                 awToolTip: 'View/Edit detail',

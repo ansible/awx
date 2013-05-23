@@ -146,6 +146,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
                     html += "<button " + this.attr(list.actions[action], 'ngClick') + 
                             "class=\"btn btn-small " + list.actions[action].class + "\" ";
                     html += (list.actions[action].awToolTip) ? this.attr(list.actions[action],'awToolTip') : "";
+                    html += (list.actions[action].awToolTip) ? "data-placement=\"top\" " : "";
                     html += " >" + this.icon(list.actions[action].icon) + "</button> ";
                  }
               }

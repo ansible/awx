@@ -146,7 +146,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Standard Out', 
                 type: 'textarea',
                 readonly: true,
-                rows: 10,
+                rows: 20,
                 class: 'span12'
                 },
             result_traceback: {
@@ -155,6 +155,30 @@ angular.module('JobFormDefinition', [])
                 readonly: true,
                 rows: 10,
                 class: 'span12'
+                }
+            },
+
+        statusActions: {
+            refresh: {
+                icon: 'icon-refresh',
+                ngClick: "refresh()",
+                class: 'btn-small',
+                awToolTip: 'Refresh job status &amp; output',
+                mode: 'all'
+                },
+            summary: {
+                icon: 'icon-filter',
+                ngClick: "jobSummary()",
+                class: 'btn-success btn-small',
+                awToolTip: 'View host summary',
+                mode: 'all'
+                },
+            events: {
+                icon: 'icon-list-ul',
+                ngClick: "jobEvents()",
+                class: 'btn-success btn-small',
+                awToolTip: 'View job events',
+                mode: 'all',             
                 }
             },
 

@@ -50,6 +50,18 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
                    { hdr: 'Error!', msg: 'Failed to lookup job record for job ' + $routeParams.id + ' GET returned status: ' + status });
                 });
         };
+
+    scope.refresh = function() {
+       scope.search(list.iterator);
+       }
+
+    scope.jobDetails = function() {
+       $location.path('/jobs/' + $routeParams.id);
+       };
+
+    scope.jobEvents = function() {
+       $location.path('/jobs/' + $routeParams.id + '/job_events');
+       };
   
 }
 

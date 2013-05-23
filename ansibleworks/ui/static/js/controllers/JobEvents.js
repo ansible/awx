@@ -59,6 +59,19 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                     });
             };
         }
+
+    scope.refresh = function() {
+       scope.search(list.iterator);
+       }
+
+    scope.jobDetails = function() {
+       $location.path('/jobs/' + $routeParams.id);
+       };
+
+    scope.jobSummary = function() {
+       $location.path('/jobs/' + $routeParams.id + '/job_host_summaries');
+       };
+
 }
 
 JobEventsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',

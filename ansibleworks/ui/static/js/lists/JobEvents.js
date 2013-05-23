@@ -48,6 +48,27 @@ angular.module('JobEventsListDefinition', [])
             },
         
         actions: {
+            refresh: {
+                ngClick: "refresh()",
+                icon: 'icon-refresh',
+                awToolTip: 'Refresh the page',
+                class: 'btn-small',
+                mode: 'all'
+                },
+            edit: {
+                ngClick: "jobDetails()",
+                icon: 'icon-edit',
+                class: 'btn-small',
+                awToolTip: 'View/Edit detail',
+                mode: 'all'
+                },
+            summary: {
+                icon: 'icon-filter',
+                ngClick: "jobSummary()",
+                class: 'btn-success btn-small',
+                awToolTip: 'View host summary',
+                mode: 'all'
+                }
             },
 
         fieldActions: {

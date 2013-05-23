@@ -419,6 +419,30 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           html += "</li>\n</ul>\n</div>\n";
        }
 
+       if ((!this.modal && this.form.statusFields)) {
+          // Add status fields section (used in Jobs form)
+          html += "<div class=\"well\">\n";
+          if (this.form.statusActions) {
+             html += "<div class=\"status-actions\">\n";
+             var act;
+             for (action in this.form.statusActions) {
+                 act = this.form.statusActions[action];
+                 html += "<button " + this.attr(act, 'ngClick') + 
+                         "class=\"btn btn-small " + act.class + "\" ";
+                 html += (act.awToolTip) ? this.attr(act,'awToolTip') : "";
+                 html += (act.awToolTip) ? "data-placement=\"top\" " : "";
+                 html += " >" + this.icon(act.icon) + "</button> ";
+              }
+              html += "</div>\n";
+              html += "<div class=\"status-spin\"><i class=\"icon-spinner icon-spin\" ng-show=\"statusSearchSpin == true\"></i></div>\n";
+          }
+          for (var fld in this.form.statusFields) {
+              field = this.form.statusFields[fld];
+              html += this.buildField(fld, field, options);
+          }
+          html += "</div><!-- well -->\n";
+       }
+
        if (this.form.fieldsAsHeader) {
           html += "<div class=\"well\">\n";
           html += "<form class=\"form-inline\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "\" novalidate >\n";
@@ -517,15 +541,6 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           }
        }
 
-       if ((!this.modal && this.form.statusFields)) {
-          // Add status fields section (used in Jobs form)
-          html += "<div class=\"well\">\n";
-          for (var fld in this.form.statusFields) {
-              field = this.form.statusFields[fld];
-              html += this.buildField(fld, field, options);
-          }
-          html += "</div><!-- well -->\n";
-       }
 
        if ((!this.modal && this.form.items)) {
           for (itm in this.form.items) {

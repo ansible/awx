@@ -32,7 +32,8 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
        scope.search(list.iterator);
        }
 
-    scope.editJob = function(id) {
+    scope.editJob = function(id, name) {
+       LoadBreadCrumbs({ path: '/jobs/' + id, title: name });
        $location.path($location.path() + '/' + id);
        }
 
@@ -129,8 +130,9 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    var base = $location.path().replace(/^\//,'').split('/')[0];
    var master = {};
    var id = $routeParams.id;
-   var relatedSets = {}; 
+   var relatedSets = {};
 
+   scope.statusSearchSpin = false;
 
    function getPlaybooks(project) {
        if (project !== null && project !== '' && project !== undefined) {
@@ -186,7 +188,9 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    Rest.setUrl(defaultUrl + ':id/'); 
    Rest.get({ params: {id: id} })
        .success( function(data, status, headers, config) {
+           
            LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.name });
+           
            for (var fld in form.fields) {
               if (data[fld] !== null && data[fld] !== undefined) {  
                  if (form.fields[fld].type == 'select') {
@@ -326,17 +330,40 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
               .error( function(data, status, headers, config) {
                   $('#prompt-modal').modal('hide');
                   ProcessErrors(scope, data, status, null,
-                            { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+                      { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
                   });      
           };
 
-       Prompt({ hdr: 'Delete', 
-                body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
-                action: action
-                });
+      Prompt({ hdr: 'Delete', 
+               body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
+               action: action
+               });
        
       }
 
+   scope.refresh = function() {
+      scope.statusSearchSpin = true;
+      Rest.setUrl(defaultUrl + id + '/'); 
+      Rest.get()
+          .success( function(data, status, headers, config) {
+              scope.status = data.status; 
+              scope.result_stdout = data.result_stdout;
+              scope.result_traceback = data.result_traceback;
+              scope.statusSearchSpin = false;
+              })
+          .error( function(data, status, headers, config) {
+              ProcessErrors(scope, data, status, null,
+                 { hdr: 'Error!', msg: 'Attempt to load job failed. GET returned status: ' + status });
+              });
+      }
+
+  scope.jobSummary = function() {
+      $location.path('/jobs/' + id + '/job_host_summaries');
+      }
+
+  scope.jobEvents = function() {
+      $location.path('/jobs/' + id + '/job_events');
+      }
 }
 
 JobsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobForm', 
