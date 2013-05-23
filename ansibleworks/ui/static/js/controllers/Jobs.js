@@ -219,6 +219,12 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                   scope[fld] = data[fld];
                }
            }
+            
+           if (data.status != 'new') {
+              $('input[type="text"], textarea').attr('readonly','readonly');
+              $('select').prop('disabled', 'disabled');
+              $('.lookup-btn').prop('disabled', 'disabled');
+           }
 
            scope.url = data.url; 
            var related = data.related;

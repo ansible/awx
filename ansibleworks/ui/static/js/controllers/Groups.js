@@ -24,7 +24,22 @@ function GroupsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     
     var scope = view.inject(GroupList, { mode: 'select' });               // Inject our view
     scope.selected = [];
-  
+    
+    if (scope.PostRefreshRemove) {
+       scope.PostRefreshRemove();
+    }
+    scope.PostRefresRemove = scope.$on('PostRefresh', function() {
+        if ($routeParams.group_id) {
+           // Remove the current group from the list of available groups, thus
+           // preventing a group from being added to itself
+           for (var i=0; i < scope.groups.length; i++) {
+               if (scope.groups[i].id == $routeParams.group_id) {
+                  scope.groups.splice(i,1);
+               }
+           }
+        }
+        });
+
     SearchInit({ scope: scope, set: 'groups', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);

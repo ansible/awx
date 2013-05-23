@@ -13,6 +13,7 @@ angular.module('JobTemplateFormDefinition', [])
         addTitle: 'Create Job Templates',                          //Legend in add mode
         editTitle: '{{ name }}',                                   //Legend in edit mode
         name: 'job_templates',
+        twoColumns: true,
         well: true,
 
         fields: {
@@ -20,13 +21,15 @@ angular.module('JobTemplateFormDefinition', [])
                 label: 'Name',
                 type: 'text',
                 addRequired: true,
-                editRequired: true
+                editRequired: true,
+                column: 1
                 },
             description: { 
                 label: 'Description',
                 type: 'text',
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                column: 1
                 },
             job_type: {
                 label: 'Job Type',
@@ -34,7 +37,8 @@ angular.module('JobTemplateFormDefinition', [])
                 ngOptions: 'type.label for type in job_type_options',
                 default: 'run',
                 addRequired: true, 
-                editRequired: true
+                editRequired: true,
+                column: 1
                 },
             inventory: {
                 label: 'Inventory',
@@ -43,7 +47,8 @@ angular.module('JobTemplateFormDefinition', [])
                 sourceField: 'name',
                 addRequired: true,
                 editRequired: true,
-                ngClick: 'lookUpInventory()'
+                ngClick: 'lookUpInventory()',
+                column: 1
                 },
             project: {
                 label: 'Project',
@@ -53,6 +58,7 @@ angular.module('JobTemplateFormDefinition', [])
                 addRequired: true,
                 editRequired: true,
                 ngClick: 'lookUpProject()',
+                column: 1
                 },
             playbook: {
                 label: 'Playbook',
@@ -60,7 +66,8 @@ angular.module('JobTemplateFormDefinition', [])
                 ngOptions: 'book for book in playbook_options',
                 id: 'playbook-select',
                 addRequired: true, 
-                editRequired: true
+                editRequired: true,
+                column: 1
                 },
             credential: {
                 label: 'Credential',
@@ -69,7 +76,8 @@ angular.module('JobTemplateFormDefinition', [])
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
                 addRequired: false, 
-                editRequired: false
+                editRequired: false,
+                column: 1
                 },
             forks: {
                 label: 'Forks',
@@ -79,13 +87,15 @@ angular.module('JobTemplateFormDefinition', [])
                 max: 100,
                 default: 0,
                 addRequired: false, 
-                editRequired: false
+                editRequired: false,
+                column: 2
                 },
             limit: {
                 label: 'Limit',
                 type: 'text', 
                 addRequired: false, 
-                editRequired: false
+                editRequired: false,
+                column: 2
                 },
             verbosity: {
                 label: 'Verbosity',
@@ -95,15 +105,17 @@ angular.module('JobTemplateFormDefinition', [])
                 min: 0,
                 max: 3,
                 addRequired: false, 
-                editRequired: false
+                editRequired: false,
+                column: 2
                 },
             extra_vars: {
                 label: 'Extra Variables',
                 type: 'textarea',
                 rows: 6,
-                class: 'span4',
+                class: 'span12',
                 addRequired: false, 
-                editRequired: false
+                editRequired: false,
+                column: 2
                 }
             },
 

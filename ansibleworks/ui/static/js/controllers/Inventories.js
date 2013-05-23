@@ -12,12 +12,12 @@
 
 function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, InventoryList,
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                          ClearScope, ProcessErrors)
+                          ClearScope, ProcessErrors, GetBasePath)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
     var list = InventoryList;
-    var defaultUrl = '/api/v1/inventories/';
+    var defaultUrl = GetBasePath('inventory');
     var view = GenerateList;
     var paths = $location.path().replace(/^\//,'').split('/');
     var mode = (paths[0] == 'inventories') ? 'edit' : 'select';      // if base path 'users', we're here to add/edit users
@@ -141,7 +141,8 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
 }
 
 InventoriesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'InventoryList', 'GenerateList', 
-                            'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors' ];
+                            'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+                            'GetBasePath' ];
 
 
 function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 

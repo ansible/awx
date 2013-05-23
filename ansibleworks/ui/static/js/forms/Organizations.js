@@ -93,6 +93,7 @@ angular.module('OrganizationFormDefinition', [])
                 title: 'Administrators',
                 iterator: 'admin',                                        // Singular form of name (e.g.  thing)
                 open: false,                                              // Open accordion on load?
+                base: '/users',
                 actions: {                                                // Actions displayed top right of list
                     add: {
                         ngClick: "add('admins')",

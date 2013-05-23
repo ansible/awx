@@ -19,8 +19,8 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
     var list = CredentialList;
     var defaultUrl = GetBasePath('credentials');
     var view = GenerateList;
-    var paths = $location.path().replace(/^\//,'').split('/');
-    var mode = (paths[0] == 'credentials') ? 'edit' : 'select';      // if base path 'credentials', we're here to add/edit
+    var base = $location.path().replace(/^\//,'').split('/')[0];
+    var mode = (base == 'credentials') ? 'edit' : 'select';      // if base path 'credentials', we're here to add/edit
     var scope = view.inject(CredentialList, { mode: mode });         // Inject our view
     scope.selected = [];
   
@@ -62,8 +62,9 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
        }
     
     scope.finishSelection = function() {
-       Rest.setUrl(GetBasePath('base') + $location.path() + '/');  // We're assuming the path matches the api path. 
-                                                                   // Will this always be true??
+       var url = GetBasePath(base);
+       url += (base == 'users') ? $routeParams.user_id + '/credentials/' : $routeParams.team_id + '/credentials/';
+       Rest.setUrl(url);
        scope.queue = [];
 
        scope.$on('callFinished', function() {
@@ -77,13 +78,6 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
              for (var i=0; i < scope.queue.length; i++) {
                  if (scope.queue[i].result == 'error') {
                     errors++;
-                    // there is no way to know which user raised the error. no data comes
-                    // back from the api call. 
-                    //   $('td.username-column').each(function(index) {
-                    //      if ($(this).text() == scope.queue[i].username) {
-                    //         $(this).addClass("error");
-                    //      }
-                    //   });
                  }
              }
              if (errors > 0) {

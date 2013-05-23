@@ -365,7 +365,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           html += "<label class=\"control-label\" for=\"" + fld + '">' + field.label + '</label>' + "\n";
           html += "<div class=\"controls\">\n";
           html += "<div class=\"input-prepend\">\n";
-          html += "<button class=\"btn\" " + this.attr(field,'ngClick') + "><i class=\"icon-search\"></i></button>\n";
+          html += "<button class=\"lookup-btn btn\" " + this.attr(field,'ngClick') + "><i class=\"icon-search\"></i></button>\n";
           html += "<input class=\"input-medium\" type=\"text\" ";
           html += "ng-model=\"" + field.sourceModel + '_' + field.sourceField +  "\" ";
           html += "name=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
@@ -470,6 +470,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           //buttons
           if (!this.modal) {
              if (this.has('buttons')) {
+                html += (this.form.twoColumns) ? "<hr />" : "";
                 html += "<div class=\"control-group\">\n";
                 html += "<div class=\"controls buttons\">\n";
              }
@@ -477,7 +478,8 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                  var button = this.form.buttons[btn];
                  //button
                  html += "<button ";
-                 html += "class=\"btn btn-small";
+                 html += "class=\"btn"; 
+                 html += (this.form.twoColumns) ? "" : " btn-small";
                  html += (button.class) ? " " + button.class : "";
                  html += "\" ";
                  if (button.ngClick) {
@@ -641,9 +643,29 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                   html += "<td>{{ $index + (" + form.related[itm].iterator + "Page * " + 
                           form.related[itm].iterator + "PageSize) + 1 }}.</td>\n";
                   var cnt = 1;
+                  var rfield;
+                  var base = (form.related[itm].base) ? form.related[itm].base : itm;
+                  base = base.replace(/^\//,'');
                   for (var fld in form.related[itm].fields) {
                       cnt++;
-                      html += "<td>{{ " + form.related[itm].iterator + "." + fld + " }}</td>\n";
+                      rfield = form.related[itm].fields[fld];
+                      html += "<td>";
+                      if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
+                         if (rfield.linkTo) {
+                            html += "<a href=\"#" + rfield.linkTo + "\">";
+                         }
+                         else if (rfield.ngClick) {
+                            html += "<a href=\"\"" + this.attr(rfield, 'ngClick') + "\">";
+                         }
+                         else {
+                            html += "<a href=\"#/" + base + "/{{" + form.related[itm].iterator + ".id }}\">";
+                         }
+                      }
+                      html += "{{ " + form.related[itm].iterator + "." + fld + " }}";
+                      if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
+                         html += "</a>";
+                      }
+                      html += "</td>\n";
                   }
                   
                   // Row level actions

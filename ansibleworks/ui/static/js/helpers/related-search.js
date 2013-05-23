@@ -34,6 +34,8 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
             }
             scope[form.related[set].iterator + 'SearchType'] = 'contains';
             scope[form.related[set].iterator + 'SearchTypeLabel'] = 'Contains';
+            scope[form.related[set].iterator + 'SelectShow'] = false;
+            scope[form.related[set].iterator + 'HideSearchType'] = false;
         } 
         
         // Functions to handle search widget changes

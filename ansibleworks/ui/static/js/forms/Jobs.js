@@ -15,7 +15,6 @@ angular.module('JobFormDefinition', [])
         name: 'jobs',
         well: true,
         twoColumns: true,
-        allowReadonly: true,
         
         fields: {
             name: {
@@ -113,7 +112,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Extra Variables',
                 type: 'textarea',
                 rows: 6,
-                class: 'span5',
+                class: 'span12',
                 addRequired: false, 
                 editRequired: false,
                 column: 2

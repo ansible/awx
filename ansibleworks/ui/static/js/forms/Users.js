@@ -89,6 +89,7 @@ angular.module('UserFormDefinition', [])
                 title: 'Admin of Organizations',
                 iterator: 'adminof',                                        // Singular form of name (e.g.  thing)
                 open: false,                                                // Open accordion on load?
+                base: '/organizations',
                 
                 fields: {
                     name: {
