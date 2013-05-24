@@ -75,3 +75,17 @@ dev_build:
 
 release_build:
 	python setup.py release_build
+
+release_ball: 
+	-(rm ansibleworks*.tar)
+	make release_build
+	(cd ../ansible-doc; make)
+	-(rm -rf release)
+	mkdir -p release/dist
+	cp -a dist/* release/dist
+	mkdir -p release/setup
+	cp -a setup/* release/setup
+	mkdir -p release/docs
+	cp -a ../ansible-doc/*.pdf release/docs
+	tar -cvf ansibleworks-1.2b1-all.tar release
+
