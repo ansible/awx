@@ -1,5 +1,5 @@
 clean:
-	rm -rf build dist *.egg-info
+	rm -rf build *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
 
 rebase:
@@ -16,18 +16,20 @@ setup:
 	# use ansible to ansible ansible commander locally
 	ansible-playbook app_setup/setup.yml --verbose -i "127.0.0.1," -c local -e working_dir=`pwd`
 
-refresh: clean
-	# update/refresh development environment after pulling new code
+develop:
+	# "Install" ansibleworks package in development mode.  Creates link to
+	# working copy in site-packages, 
 	python setup.py develop
-	python manage.py syncdb
-	python manage.py migrate
+
+refresh: clean develop syncdb migrate
+	# update/refresh development environment after pulling new code
 
 adduser:
 	python manage.py createsuperuser
 
 syncdb:
 	# only run from initial setup
-	python manage.py syncdb
+	python manage.py syncdb --noinput
 
 runserver:
 	# run for testing the server
@@ -47,8 +49,10 @@ dbchange:
 	python manage.py schemamigration main changes --auto
 
 migrate: syncdb
+	# This command fixes migrations following the cleanup for the 1.2b1 release.
+	-(python manage.py migrate main 2>&1 | grep 0017_changes) && python manage.py migrate main --delete-ghost-migrations --fake 0001_v12b1_initial
         # run this to apply changes to the model
-	python manage.py migrate
+	python manage.py migrate --noinput
 
 dbshell:
 	# access database shell

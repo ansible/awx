@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+
+# Copyright (c) 2013 AnsibleWorks, Inc.
+# All Rights Reserved.
+
 import datetime
 from south.db import db
 from south.v2 import SchemaMigration
@@ -6,6 +10,7 @@ from django.db import models
 
 
 class Migration(SchemaMigration):
+    '''Complete initial migration for AnsibleWorks 1.2-b1 release.'''
 
     def forwards(self, orm):
         # Adding model 'Tag'
@@ -32,7 +37,7 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
             ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'organization', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('creation_date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=512)),
         ))
@@ -83,12 +88,15 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
             ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'inventory', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('creation_date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=512)),
             ('organization', self.gf('django.db.models.fields.related.ForeignKey')(related_name='inventories', to=orm['main.Organization'])),
         ))
         db.send_create_signal('main', ['Inventory'])
+
+        # Adding unique constraint on 'Inventory', fields ['name', 'organization']
+        db.create_unique(u'main_inventory', ['name', 'organization_id'])
 
         # Adding M2M table for field tags on 'Inventory'
         db.create_table(u'main_inventory_tags', (
@@ -111,12 +119,18 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
             ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'host', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('creation_date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=512)),
+            ('variable_data', self.gf('django.db.models.fields.related.OneToOneField')(related_name='host', unique=True, on_delete=models.SET_NULL, default=None, to=orm['main.VariableData'], blank=True, null=True)),
             ('inventory', self.gf('django.db.models.fields.related.ForeignKey')(related_name='hosts', to=orm['main.Inventory'])),
+            ('last_job', self.gf('django.db.models.fields.related.ForeignKey')(related_name='hosts_as_last_job+', on_delete=models.SET_NULL, default=None, to=orm['main.Job'], blank=True, null=True)),
+            ('last_job_host_summary', self.gf('django.db.models.fields.related.ForeignKey')(related_name='hosts_as_last_job_summary+', on_delete=models.SET_NULL, default=None, to=orm['main.JobHostSummary'], blank=True, null=True)),
         ))
         db.send_create_signal('main', ['Host'])
+
+        # Adding unique constraint on 'Host', fields ['name', 'inventory']
+        db.create_unique(u'main_host', ['name', 'inventory_id'])
 
         # Adding M2M table for field tags on 'Host'
         db.create_table(u'main_host_tags', (
@@ -139,12 +153,16 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
             ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'group', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('creation_date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=512)),
             ('inventory', self.gf('django.db.models.fields.related.ForeignKey')(related_name='groups', to=orm['main.Inventory'])),
+            ('variable_data', self.gf('django.db.models.fields.related.OneToOneField')(related_name='group', unique=True, on_delete=models.SET_NULL, default=None, to=orm['main.VariableData'], blank=True, null=True)),
         ))
         db.send_create_signal('main', ['Group'])
+
+        # Adding unique constraint on 'Group', fields ['name', 'inventory']
+        db.create_unique(u'main_group', ['name', 'inventory_id'])
 
         # Adding M2M table for field tags on 'Group'
         db.create_table(u'main_group_tags', (
@@ -183,12 +201,10 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
             ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'variabledata', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('creation_date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=512)),
-            ('host', self.gf('django.db.models.fields.related.ForeignKey')(related_name='variable_data', on_delete=models.SET_NULL, default=None, to=orm['main.Host'], blank=True, null=True)),
-            ('group', self.gf('django.db.models.fields.related.ForeignKey')(related_name='variable_data', on_delete=models.SET_NULL, default=None, to=orm['main.Group'], blank=True, null=True)),
-            ('data', self.gf('django.db.models.fields.TextField')()),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=512)),
+            ('data', self.gf('django.db.models.fields.TextField')(default='')),
         ))
         db.send_create_signal('main', ['VariableData'])
 
@@ -213,16 +229,16 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
             ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'credential', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('creation_date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=512)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=512)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='credentials', on_delete=models.SET_NULL, default=None, to=orm['auth.User'], blank=True, null=True)),
-            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='credentials', on_delete=models.SET_NULL, default=None, to=orm['main.Project'], blank=True, null=True)),
             ('team', self.gf('django.db.models.fields.related.ForeignKey')(related_name='credentials', on_delete=models.SET_NULL, default=None, to=orm['main.Team'], blank=True, null=True)),
-            ('ssh_key_path', self.gf('django.db.models.fields.CharField')(default='', max_length=4096, blank=True)),
+            ('ssh_username', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
+            ('ssh_password', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
             ('ssh_key_data', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
             ('ssh_key_unlock', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('ssh_password', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
+            ('sudo_username', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
             ('sudo_password', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
         ))
         db.send_create_signal('main', ['Credential'])
@@ -248,9 +264,10 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
             ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'team', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('creation_date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=512)),
+            ('organization', self.gf('django.db.models.fields.related.ForeignKey')(related_name='teams', null=True, on_delete=models.SET_NULL, to=orm['main.Organization'])),
         ))
         db.send_create_signal('main', ['Team'])
 
@@ -286,25 +303,15 @@ class Migration(SchemaMigration):
         ))
         db.create_unique(u'main_team_users', ['team_id', 'user_id'])
 
-        # Adding M2M table for field organizations on 'Team'
-        db.create_table(u'main_team_organizations', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('team', models.ForeignKey(orm['main.team'], null=False)),
-            ('organization', models.ForeignKey(orm['main.organization'], null=False))
-        ))
-        db.create_unique(u'main_team_organizations', ['team_id', 'organization_id'])
-
         # Adding model 'Project'
         db.create_table(u'main_project', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
             ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'project', 'app_label': u'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('creation_date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=512)),
-            ('local_repository', self.gf('django.db.models.fields.CharField')(max_length=1024)),
-            ('scm_type', self.gf('django.db.models.fields.CharField')(max_length=64)),
-            ('default_playbook', self.gf('django.db.models.fields.CharField')(max_length=1024)),
+            ('local_path', self.gf('django.db.models.fields.CharField')(max_length=1024)),
         ))
         db.send_create_signal(u'main', ['Project'])
 
@@ -324,22 +331,14 @@ class Migration(SchemaMigration):
         ))
         db.create_unique(u'main_project_audit_trail', ['project_id', 'audittrail_id'])
 
-        # Adding M2M table for field inventories on 'Project'
-        db.create_table(u'main_project_inventories', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('project', models.ForeignKey(orm[u'main.project'], null=False)),
-            ('inventory', models.ForeignKey(orm['main.inventory'], null=False))
-        ))
-        db.create_unique(u'main_project_inventories', ['project_id', 'inventory_id'])
-
         # Adding model 'Permission'
         db.create_table(u'main_permission', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
             ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'permission', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('creation_date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=512)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=512)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='permissions', null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
             ('team', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='permissions', null=True, on_delete=models.SET_NULL, to=orm['main.Team'])),
             ('project', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='permissions', null=True, on_delete=models.SET_NULL, to=orm['main.Project'])),
@@ -364,70 +363,127 @@ class Migration(SchemaMigration):
         ))
         db.create_unique(u'main_permission_audit_trail', ['permission_id', 'audittrail_id'])
 
-        # Adding model 'LaunchJob'
-        db.create_table(u'main_launchjob', (
+        # Adding model 'JobTemplate'
+        db.create_table(u'main_jobtemplate', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'launchjob', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('creation_date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
+            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'jobtemplate', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=512)),
-            ('inventory', self.gf('django.db.models.fields.related.ForeignKey')(related_name='launch_jobs', on_delete=models.SET_NULL, default=None, to=orm['main.Inventory'], blank=True, null=True)),
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='launch_jobs', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='launch_jobs', on_delete=models.SET_NULL, default=None, to=orm['main.Project'], blank=True, null=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='launch_jobs', on_delete=models.SET_NULL, default=None, to=orm['auth.User'], blank=True, null=True)),
             ('job_type', self.gf('django.db.models.fields.CharField')(max_length=64)),
+            ('inventory', self.gf('django.db.models.fields.related.ForeignKey')(related_name='job_templates', null=True, on_delete=models.SET_NULL, to=orm['main.Inventory'])),
+            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='job_templates', null=True, on_delete=models.SET_NULL, to=orm['main.Project'])),
+            ('playbook', self.gf('django.db.models.fields.CharField')(default='', max_length=1024)),
+            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='job_templates', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
+            ('forks', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
+            ('limit', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
+            ('verbosity', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
+            ('extra_vars', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
         ))
-        db.send_create_signal('main', ['LaunchJob'])
+        db.send_create_signal('main', ['JobTemplate'])
 
-        # Adding M2M table for field tags on 'LaunchJob'
-        db.create_table(u'main_launchjob_tags', (
+        # Adding M2M table for field tags on 'JobTemplate'
+        db.create_table(u'main_jobtemplate_tags', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('launchjob', models.ForeignKey(orm['main.launchjob'], null=False)),
+            ('jobtemplate', models.ForeignKey(orm['main.jobtemplate'], null=False)),
             ('tag', models.ForeignKey(orm['main.tag'], null=False))
         ))
-        db.create_unique(u'main_launchjob_tags', ['launchjob_id', 'tag_id'])
+        db.create_unique(u'main_jobtemplate_tags', ['jobtemplate_id', 'tag_id'])
 
-        # Adding M2M table for field audit_trail on 'LaunchJob'
-        db.create_table(u'main_launchjob_audit_trail', (
+        # Adding M2M table for field audit_trail on 'JobTemplate'
+        db.create_table(u'main_jobtemplate_audit_trail', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('launchjob', models.ForeignKey(orm['main.launchjob'], null=False)),
+            ('jobtemplate', models.ForeignKey(orm['main.jobtemplate'], null=False)),
             ('audittrail', models.ForeignKey(orm['main.audittrail'], null=False))
         ))
-        db.create_unique(u'main_launchjob_audit_trail', ['launchjob_id', 'audittrail_id'])
+        db.create_unique(u'main_jobtemplate_audit_trail', ['jobtemplate_id', 'audittrail_id'])
 
-        # Adding model 'LaunchJobStatus'
-        db.create_table(u'main_launchjobstatus', (
+        # Adding model 'Job'
+        db.create_table(u'main_job', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'launchjobstatus', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('creation_date', self.gf('django.db.models.fields.DateField')(auto_now_add=True, blank=True)),
+            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'job', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=512)),
-            ('launch_job', self.gf('django.db.models.fields.related.ForeignKey')(related_name='launch_job_statuses', null=True, on_delete=models.SET_NULL, to=orm['main.LaunchJob'])),
-            ('status', self.gf('django.db.models.fields.IntegerField')()),
-            ('result_data', self.gf('django.db.models.fields.TextField')()),
+            ('job_template', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobs', on_delete=models.SET_NULL, default=None, to=orm['main.JobTemplate'], blank=True, null=True)),
+            ('job_type', self.gf('django.db.models.fields.CharField')(max_length=64)),
+            ('inventory', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobs', null=True, on_delete=models.SET_NULL, to=orm['main.Inventory'])),
+            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobs', null=True, on_delete=models.SET_NULL, to=orm['main.Credential'])),
+            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobs', null=True, on_delete=models.SET_NULL, to=orm['main.Project'])),
+            ('playbook', self.gf('django.db.models.fields.CharField')(max_length=1024)),
+            ('forks', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
+            ('limit', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
+            ('verbosity', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
+            ('extra_vars', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
+            ('cancel_flag', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('status', self.gf('django.db.models.fields.CharField')(default='new', max_length=20)),
+            ('failed', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('result_stdout', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
+            ('result_traceback', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
+            ('celery_task_id', self.gf('django.db.models.fields.CharField')(default='', max_length=100, blank=True)),
         ))
-        db.send_create_signal('main', ['LaunchJobStatus'])
+        db.send_create_signal('main', ['Job'])
 
-        # Adding M2M table for field tags on 'LaunchJobStatus'
-        db.create_table(u'main_launchjobstatus_tags', (
+        # Adding M2M table for field tags on 'Job'
+        db.create_table(u'main_job_tags', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('launchjobstatus', models.ForeignKey(orm['main.launchjobstatus'], null=False)),
+            ('job', models.ForeignKey(orm['main.job'], null=False)),
             ('tag', models.ForeignKey(orm['main.tag'], null=False))
         ))
-        db.create_unique(u'main_launchjobstatus_tags', ['launchjobstatus_id', 'tag_id'])
+        db.create_unique(u'main_job_tags', ['job_id', 'tag_id'])
 
-        # Adding M2M table for field audit_trail on 'LaunchJobStatus'
-        db.create_table(u'main_launchjobstatus_audit_trail', (
+        # Adding M2M table for field audit_trail on 'Job'
+        db.create_table(u'main_job_audit_trail', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('launchjobstatus', models.ForeignKey(orm['main.launchjobstatus'], null=False)),
+            ('job', models.ForeignKey(orm['main.job'], null=False)),
             ('audittrail', models.ForeignKey(orm['main.audittrail'], null=False))
         ))
-        db.create_unique(u'main_launchjobstatus_audit_trail', ['launchjobstatus_id', 'audittrail_id'])
+        db.create_unique(u'main_job_audit_trail', ['job_id', 'audittrail_id'])
 
+        # Adding model 'JobHostSummary'
+        db.create_table(u'main_jobhostsummary', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('job', self.gf('django.db.models.fields.related.ForeignKey')(related_name='job_host_summaries', to=orm['main.Job'])),
+            ('host', self.gf('django.db.models.fields.related.ForeignKey')(related_name='job_host_summaries', to=orm['main.Host'])),
+            ('changed', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
+            ('dark', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
+            ('failures', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
+            ('ok', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
+            ('processed', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
+            ('skipped', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
+        ))
+        db.send_create_signal(u'main', ['JobHostSummary'])
+
+        # Adding unique constraint on 'JobHostSummary', fields ['job', 'host']
+        db.create_unique(u'main_jobhostsummary', ['job_id', 'host_id'])
+
+        # Adding model 'JobEvent'
+        db.create_table(u'main_jobevent', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('job', self.gf('django.db.models.fields.related.ForeignKey')(related_name='job_events', to=orm['main.Job'])),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('event', self.gf('django.db.models.fields.CharField')(max_length=100)),
+            ('event_data', self.gf('jsonfield.fields.JSONField')(default={}, blank=True)),
+            ('failed', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('host', self.gf('django.db.models.fields.related.ForeignKey')(related_name='job_events', on_delete=models.SET_NULL, default=None, to=orm['main.Host'], blank=True, null=True)),
+        ))
+        db.send_create_signal('main', ['JobEvent'])
 
     def backwards(self, orm):
+        # Removing unique constraint on 'JobHostSummary', fields ['job', 'host']
+        db.delete_unique(u'main_jobhostsummary', ['job_id', 'host_id'])
+
+        # Removing unique constraint on 'Group', fields ['name', 'inventory']
+        db.delete_unique(u'main_group', ['name', 'inventory_id'])
+
+        # Removing unique constraint on 'Host', fields ['name', 'inventory']
+        db.delete_unique(u'main_host', ['name', 'inventory_id'])
+
+        # Removing unique constraint on 'Inventory', fields ['name', 'organization']
+        db.delete_unique(u'main_inventory', ['name', 'organization_id'])
+
         # Deleting model 'Tag'
         db.delete_table(u'main_tag')
 
@@ -518,9 +574,6 @@ class Migration(SchemaMigration):
         # Removing M2M table for field users on 'Team'
         db.delete_table('main_team_users')
 
-        # Removing M2M table for field organizations on 'Team'
-        db.delete_table('main_team_organizations')
-
         # Deleting model 'Project'
         db.delete_table(u'main_project')
 
@@ -529,9 +582,6 @@ class Migration(SchemaMigration):
 
         # Removing M2M table for field audit_trail on 'Project'
         db.delete_table('main_project_audit_trail')
-
-        # Removing M2M table for field inventories on 'Project'
-        db.delete_table('main_project_inventories')
 
         # Deleting model 'Permission'
         db.delete_table(u'main_permission')
@@ -542,24 +592,29 @@ class Migration(SchemaMigration):
         # Removing M2M table for field audit_trail on 'Permission'
         db.delete_table('main_permission_audit_trail')
 
-        # Deleting model 'LaunchJob'
-        db.delete_table(u'main_launchjob')
+        # Deleting model 'JobTemplate'
+        db.delete_table(u'main_jobtemplate')
 
-        # Removing M2M table for field tags on 'LaunchJob'
-        db.delete_table('main_launchjob_tags')
+        # Removing M2M table for field tags on 'JobTemplate'
+        db.delete_table('main_jobtemplate_tags')
 
-        # Removing M2M table for field audit_trail on 'LaunchJob'
-        db.delete_table('main_launchjob_audit_trail')
+        # Removing M2M table for field audit_trail on 'JobTemplate'
+        db.delete_table('main_jobtemplate_audit_trail')
 
-        # Deleting model 'LaunchJobStatus'
-        db.delete_table(u'main_launchjobstatus')
+        # Deleting model 'Job'
+        db.delete_table(u'main_job')
 
-        # Removing M2M table for field tags on 'LaunchJobStatus'
-        db.delete_table('main_launchjobstatus_tags')
+        # Removing M2M table for field tags on 'Job'
+        db.delete_table('main_job_tags')
 
-        # Removing M2M table for field audit_trail on 'LaunchJobStatus'
-        db.delete_table('main_launchjobstatus_audit_trail')
+        # Removing M2M table for field audit_trail on 'Job'
+        db.delete_table('main_job_audit_trail')
 
+        # Deleting model 'JobHostSummary'
+        db.delete_table(u'main_jobhostsummary')
+
+        # Deleting model 'JobEvent'
+        db.delete_table(u'main_jobevent')
 
     models = {
         u'auth.group': {
@@ -612,96 +667,140 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Credential'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'credential_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'credential\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
-            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'credentials'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': u"orm['main.Project']", 'blank': 'True', 'null': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'ssh_key_data': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
-            'ssh_key_path': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '4096', 'blank': 'True'}),
             'ssh_key_unlock': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'ssh_password': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
+            'ssh_username': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'sudo_password': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
+            'sudo_username': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'credential_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"}),
             'team': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'credentials'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Team']", 'blank': 'True', 'null': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'credentials'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': u"orm['auth.User']", 'blank': 'True', 'null': 'True'})
         },
         'main.group': {
-            'Meta': {'object_name': 'Group'},
+            'Meta': {'unique_together': "(('name', 'inventory'),)", 'object_name': 'Group'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'group_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'group\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'hosts': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'groups'", 'blank': 'True', 'to': "orm['main.Host']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'groups'", 'to': "orm['main.Inventory']"}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'parents': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'children'", 'blank': 'True', 'to': "orm['main.Group']"}),
-            'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'group_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"})
+            'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'group_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"}),
+            'variable_data': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'group'", 'unique': 'True', 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.VariableData']", 'blank': 'True', 'null': 'True'})
         },
         'main.host': {
-            'Meta': {'object_name': 'Host'},
+            'Meta': {'unique_together': "(('name', 'inventory'),)", 'object_name': 'Host'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'host_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'host\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'hosts'", 'to': "orm['main.Inventory']"}),
+            'last_job': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'hosts_as_last_job+'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Job']", 'blank': 'True', 'null': 'True'}),
+            'last_job_host_summary': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'hosts_as_last_job_summary+'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': u"orm['main.JobHostSummary']", 'blank': 'True', 'null': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
-            'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'host_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"})
+            'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'host_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"}),
+            'variable_data': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'host'", 'unique': 'True', 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.VariableData']", 'blank': 'True', 'null': 'True'})
         },
         'main.inventory': {
-            'Meta': {'object_name': 'Inventory'},
+            'Meta': {'unique_together': "(('name', 'organization'),)", 'object_name': 'Inventory'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'inventory_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'inventory\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
             'organization': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'inventories'", 'to': "orm['main.Organization']"}),
             'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'inventory_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"})
         },
-        'main.launchjob': {
-            'Meta': {'object_name': 'LaunchJob'},
+        'main.job': {
+            'Meta': {'object_name': 'Job'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'launchjob_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'launchjob\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'launch_jobs'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
+            'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'job_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
+            'cancel_flag': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'celery_task_id': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'job\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
+            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Credential']"}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'extra_vars': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'failed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'forks': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
+            'hosts': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'jobs'", 'blank': 'True', 'through': u"orm['main.JobHostSummary']", 'to': "orm['main.Host']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'launch_jobs'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Inventory']", 'blank': 'True', 'null': 'True'}),
+            'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Inventory']"}),
+            'job_template': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.JobTemplate']", 'blank': 'True', 'null': 'True'}),
             'job_type': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
+            'limit': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
-            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'launch_jobs'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': u"orm['main.Project']", 'blank': 'True', 'null': 'True'}),
-            'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'launchjob_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'launch_jobs'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': u"orm['auth.User']", 'blank': 'True', 'null': 'True'})
+            'playbook': ('django.db.models.fields.CharField', [], {'max_length': '1024'}),
+            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'jobs'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['main.Project']"}),
+            'result_stdout': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'result_traceback': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'status': ('django.db.models.fields.CharField', [], {'default': "'new'", 'max_length': '20'}),
+            'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'job_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"}),
+            'verbosity': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'})
         },
-        'main.launchjobstatus': {
-            'Meta': {'object_name': 'LaunchJobStatus'},
-            'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'launchjobstatus_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'launchjobstatus\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+        'main.jobevent': {
+            'Meta': {'ordering': "('pk',)", 'object_name': 'JobEvent'},
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'event': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'event_data': ('jsonfield.fields.JSONField', [], {'default': '{}', 'blank': 'True'}),
+            'failed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'host': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_events'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Host']", 'blank': 'True', 'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'launch_job': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'launch_job_statuses'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.LaunchJob']"}),
+            'job': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_events'", 'to': "orm['main.Job']"})
+        },
+        u'main.jobhostsummary': {
+            'Meta': {'ordering': "('-pk',)", 'unique_together': "[('job', 'host')]", 'object_name': 'JobHostSummary'},
+            'changed': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
+            'dark': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
+            'failures': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
+            'host': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_host_summaries'", 'to': "orm['main.Host']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'job': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_host_summaries'", 'to': "orm['main.Job']"}),
+            'ok': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
+            'processed': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
+            'skipped': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'})
+        },
+        'main.jobtemplate': {
+            'Meta': {'object_name': 'JobTemplate'},
+            'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'jobtemplate_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'jobtemplate\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
+            'credential': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_templates'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Credential']", 'blank': 'True', 'null': 'True'}),
+            'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'extra_vars': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'forks': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_templates'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Inventory']"}),
+            'job_type': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
+            'limit': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
-            'result_data': ('django.db.models.fields.TextField', [], {}),
-            'status': ('django.db.models.fields.IntegerField', [], {}),
-            'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'launchjobstatus_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"})
+            'playbook': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024'}),
+            'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'job_templates'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['main.Project']"}),
+            'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'jobtemplate_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"}),
+            'verbosity': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0', 'blank': 'True'})
         },
         'main.organization': {
             'Meta': {'object_name': 'Organization'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'admins': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'admin_of_organizations'", 'blank': 'True', 'to': u"orm['auth.User']"}),
             'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'organization_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'organization\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
@@ -713,12 +812,12 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Permission'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'permission_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'permission\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'inventory': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'permissions'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Inventory']"}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'permission_type': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
             'project': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'permissions'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['main.Project']"}),
             'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'permission_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"}),
@@ -729,15 +828,12 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Project'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'project_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'project\', \'app_label\': u\'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'default_playbook': ('django.db.models.fields.CharField', [], {'max_length': '1024'}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'inventories': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'projects'", 'blank': 'True', 'to': "orm['main.Inventory']"}),
-            'local_repository': ('django.db.models.fields.CharField', [], {'max_length': '1024'}),
+            'local_path': ('django.db.models.fields.CharField', [], {'max_length': '1024'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
-            'scm_type': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
             'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'project_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"})
         },
         'main.tag': {
@@ -749,12 +845,12 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Team'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'team_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'team\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
-            'organizations': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'teams'", 'symmetrical': 'False', 'to': "orm['main.Organization']"}),
+            'organization': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'teams'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['main.Organization']"}),
             'projects': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'teams'", 'blank': 'True', 'to': u"orm['main.Project']"}),
             'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'team_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"}),
             'users': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'teams'", 'blank': 'True', 'to': u"orm['auth.User']"})
@@ -763,14 +859,12 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'VariableData'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'audit_trail': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'variabledata_by_audit_trail'", 'blank': 'True', 'to': "orm['main.AuditTrail']"}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'variabledata\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
-            'creation_date': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'data': ('django.db.models.fields.TextField', [], {}),
+            'data': ('django.db.models.fields.TextField', [], {'default': "''"}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
-            'group': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'variable_data'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Group']", 'blank': 'True', 'null': 'True'}),
-            'host': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'variable_data'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['main.Host']", 'blank': 'True', 'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
             'tags': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'variabledata_by_tag'", 'blank': 'True', 'to': "orm['main.Tag']"})
         }
     }
