@@ -260,6 +260,7 @@
  .search-widget {
     display: inline-block;
     vertical-align: bottom;
+    margin-bottom: 15px;
  }
 
  .list-actions {

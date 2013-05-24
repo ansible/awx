@@ -632,12 +632,12 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
               else {
                   html += "<div class=\"well\">\n";
                   
-                  html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true });
+                  html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: false });
 
                   // Add actions(s)
                   html += "<div class=\"list-actions\">\n";
                   for (var action in form.related[itm].actions) {
-                      html += "<button class=\"btn btn-mini btn-success\" ";
+                      html += "<button class=\"btn btn-small btn-success\" ";
                       html += this.attr(form.related[itm]['actions'][action],'ngClick');
                       html += "><i class=\"" + form.related[itm]['actions'][action].icon + "\"></i></button>\n";
                   }
@@ -689,7 +689,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                   // Row level actions
                   html += "<td class=\"actions\">";
                   for (action in form.related[itm].fieldActions) {
-                      html += "<button class=\"btn btn-mini"; 
+                      html += "<button class=\"btn btn-small"; 
                       html += (form.related[itm]['fieldActions'][action].class) ?
                           " " + form.related[itm]['fieldActions'][action].class : "";
                       html += "\" " + this.attr(form.related[itm]['fieldActions'][action],'ngClick') +

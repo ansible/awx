@@ -24,7 +24,7 @@ angular.module('GeneratorHelpers', [])
         html += "<div class=\"input-prepend input-append\">\n";
         html += "<div class=\"btn-group\">\n";
         html += "<button class=\"btn "; 
-        html += (useMini) ? "btn-mini " : "";
+        html += (useMini) ? "btn-mini " : "btn-small";
         html += "dropdown-toggle\" data-toggle=\"dropdown\">\n";
         html += "<span ng-bind=\"" + iterator + "SearchFieldLabel\"></span>\n";
         html += "<span class=\"caret\"></span>\n";
@@ -51,7 +51,7 @@ angular.module('GeneratorHelpers', [])
 
         html += "<div class=\"btn-group\">\n";
         html += "<button ng-hide=\"" + iterator + "SelectShow || " + iterator + "HideSearchType\" class=\"btn ";
-        html += (useMini) ? "btn-mini " : "";
+        html += (useMini) ? "btn-mini " : "btn-small";
         html += "dropdown-toggle\" data-toggle=\"dropdown\">\n";
         html += "<span ng-bind=\"" + iterator + "SearchTypeLabel\"></span>\n";
         html += "<span class=\"caret\"></span>\n";
