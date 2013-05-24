@@ -30,25 +30,28 @@ angular.module('HostListDefinition', [])
         actions: {
             add: {
                 icon: 'icon-plus',
+                label: 'Add',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addHost()',
-                class: 'btn-success',
+                class: 'btn-success btn-small',
                 awToolTip: 'Create a new host'
                 }
             },
 
         fieldActions: {
             edit: {
+                label: 'Edit',
                 ngClick: "editHost(\{\{ host.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-mini',
+                class: 'btn-small',
                 awToolTip: 'View/Edit host'
                 },
 
             delete: {
+                label: 'Delete',
                 ngClick: "deleteHost(\{\{ host.id \}\},'\{\{ host.name \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-mini btn-danger',
+                class: 'btn-small btn-danger',
                 awToolTip: 'Delete host'
                 }
             }

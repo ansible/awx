@@ -276,7 +276,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 
    // Save changes to the parent
    scope.formSave = function() {
-      Rest.setUrl(defaultUrl + $routeParams.id);
+      Rest.setUrl(defaultUrl + $routeParams.id +'/');
       var data = {}
       for (var fld in form.fields) {
           data[fld] = scope[fld];   

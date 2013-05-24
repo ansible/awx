@@ -69,13 +69,15 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
                }
            }
            if (scope[model + 'SearchValue'] != '' && scope[model + 'SearchValue'] != undefined) {
-              url += '?' + scope[model + 'SearchField'] + 
+              scope[model + 'SearchParams'] = '?' + scope[model + 'SearchField'] + 
                      '__' + scope[model + 'SearchType'] + '=' + escape(scope[model + 'SearchValue']);
-              url += (default_order) ? '&order_by=' + escape(default_order) : '';
+              scope[model + 'SearchParams'] += (default_order) ? '&order_by=' + escape(default_order) : '';
            }
            else {
-              url += (default_order) ? '?order_by=' + escape(default_order) : '';
+              scope[model + 'SearchParams'] = (default_order) ? '?order_by=' + escape(default_order) : '';
            }
+           url += scope[model + 'SearchParams'];
+           url += (scope[model + 'PageSize']) ? '&page_size=' + scope[iterator + 'PageSize'] : "";
            RefreshRelated({ scope: scope, set: set, iterator: iterator, url: url });
            }
         }

@@ -35,26 +35,29 @@ angular.module('InventoriesListDefinition', [])
         
         actions: {
             add: {
+                label: 'Add',
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addInventory()',
-                class: 'btn-success',
+                class: 'btn-small btn-success',
                 awToolTip: 'Create a new row'
                 }
             },
 
         fieldActions: {
             edit: {
+                label: 'Edit',
                 ngClick: "editInventory(\{\{ inventory.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-mini',
+                class: 'btn-small',
                 awToolTip: 'View/Edit inventory'
                 },
 
             delete: {
+                label: 'Delete',
                 ngClick: "deleteInventory(\{\{ inventory.id \}\},'\{\{ inventory.name \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-mini btn-danger',
+                class: 'btn-small btn-danger',
                 awToolTip: 'Delete'
                 }
             }

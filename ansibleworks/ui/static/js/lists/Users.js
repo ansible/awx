@@ -33,27 +33,30 @@ angular.module('UserListDefinition', [])
         
         actions: {
             add: {
+                label: 'Add',
                 icon: 'icon-plus',
                 mode: 'select',                      // One of: edit, select, all
                 ngClick: 'addUser()',
                 basePaths: ['organizations'],        // base path must be in list, or action not available
-                class: 'btn-success',
+                class: 'btn-success btn-small',
                 awToolTip: 'Create a new user'
                 }
             },
 
         fieldActions: {
             edit: {
+                label: 'Edit',
                 ngClick: "editUser(\{\{ user.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-mini',
+                class: 'btn-small',
                 awToolTip: 'View/Edit user'
                 },
 
             delete: {
+                label: 'Delete',
                 ngClick: "deleteUser(\{\{ user.id \}\},'\{\{ user.username \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-mini btn-danger',
+                class: 'btn-small btn-danger',
                 awToolTip: 'Delete user'
                 }
             }

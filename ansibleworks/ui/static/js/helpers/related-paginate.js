@@ -23,7 +23,7 @@ angular.module('RelatedPaginateHelper', ['RefreshRelatedHelper'])
 
         for (var key in relatedSets){
             scope[relatedSets[key].iterator + 'Page'] = 0;
-            scope[relatedSets[key].iterator + 'PageSize'] = 20;
+            scope[relatedSets[key].iterator + 'PageSize'] = 10;
         }
 
         scope.nextSet = function(set, iterator) {
@@ -38,15 +38,18 @@ angular.module('RelatedPaginateHelper', ['RefreshRelatedHelper'])
 
         scope.changePageSize = function(set, iterator) {
            // Called when a new page size is selected
-           var defaultUrl;
+           var url;
            scope[iterator + 'Page'] = 0;
            for (var key in relatedSets) {
                if (key == set) {
-                  defaultUrl = relatedSets[key].url;
+                  url = relatedSets[key].url;
                   break;
                }
            }
-           RefreshRelated({ scope: scope, set: set, iterator: iterator, url: defaultUrl });  
+           url = url.replace(/\/\?.*$/,'/');
+           url += (scope[iterator + 'SearchParams']) ? scope[iterator + 'SearchParams'] + '&page_size=' + scope[iterator + 'PageSize' ] :
+               '?page_size=' + scope[iterator + 'PageSize' ];
+           RefreshRelated({ scope: scope, set: set, iterator: iterator, url: url });  
            }
         }
         }]);

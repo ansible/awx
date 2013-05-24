@@ -143,11 +143,14 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
               if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
                  if ( (list.actions[action].basePaths == undefined) || 
                       (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
-                    html += "<button " + this.attr(list.actions[action], 'ngClick') + 
-                            "class=\"btn btn-small " + list.actions[action].class + "\" ";
+                    html += "<button " + this.attr(list.actions[action], 'ngClick') + "class=\"btn";
+                    html += (list.actions[action].class) ?  " " + list.actions[action].class : " btn-small";
+                    html += "\" ";
                     html += (list.actions[action].awToolTip) ? this.attr(list.actions[action],'awToolTip') : "";
                     html += (list.actions[action].awToolTip) ? "data-placement=\"top\" " : "";
-                    html += " >" + this.icon(list.actions[action].icon) + "</button> ";
+                    html += " >" + this.icon(list.actions[action].icon);
+                    html += (list.actions[action].label) ? " " + list.actions[action].label : ""; 
+                    html += "</button> ";
                  }
               }
           }
@@ -234,9 +237,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
           html += "<td class=\"actions\">";
           for (action in list.fieldActions) {
               html += "<button class=\"btn"; 
-              if (list.fieldActions[action].class) {
-                 html += " " + list.fieldActions[action].class;
-              }
+              html += (list.fieldActions[action].class) ? " " + list.fieldActions[action].class : " btn-small";
               html += "\" " + this.attr(list.fieldActions[action],'ngClick');
               html += (list.fieldActions[action].ngShow) ? this.attr(list.fieldActions[action],'ngShow') : "";
               html += (list.fieldActions[action].awToolTip) ? this.attr(list.fieldActions[action],'awToolTip') : "";
@@ -252,7 +253,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
             
        // Message for when a collection is empty
        html += "<tr class=\"info\" ng-show=\"" + list.name + " == null || " + list.name + ".length == 0\">\n";
-       html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No " + list.iterator + " records matched your search.</div></td>\n";
+       html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
        html += "</tr>\n";
 
        // End List

@@ -54,23 +54,26 @@ angular.module('JobHostDefinition', [])
         
         actions: {
             refresh: {
+                label: 'Refresh',
                 icon: 'icon-refresh',
                 ngClick: "refresh()",
-                class: 'btn-small',
+                class: 'btn-success btn-small',
                 awToolTip: 'Refresh the page',
                 mode: 'all'
                 },
             edit: {
+                label: 'View',
                 icon: 'icon-edit',
                 ngClick: "jobDetails()",
-                class: 'btn-small',
+                class: 'btn-success btn-small',
                 awToolTip: 'View job detail',
                 mode: 'all'
                 },
             events: {
+                label: 'Events',
                 icon: 'icon-list-ul',
                 ngClick: "jobEvents()",
-                class: 'btn-success btn-small',
+                class: 'btn-info btn-small',
                 awToolTip: 'View job events',
                 mode: 'all',             
                 }

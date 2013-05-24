@@ -160,23 +160,26 @@ angular.module('JobFormDefinition', [])
 
         statusActions: {
             refresh: {
+                label: 'Refresh',
                 icon: 'icon-refresh',
                 ngClick: "refresh()",
-                class: 'btn-small',
+                class: 'btn-small btn-success',
                 awToolTip: 'Refresh job status &amp; output',
                 mode: 'all'
                 },
             summary: {
+                label: 'Hosts',
                 icon: 'icon-filter',
                 ngClick: "jobSummary()",
-                class: 'btn-success btn-small',
+                class: 'btn-info btn-small',
                 awToolTip: 'View host summary',
                 mode: 'all'
                 },
             events: {
+                label: 'Events',
                 icon: 'icon-list-ul',
                 ngClick: "jobEvents()",
-                class: 'btn-success btn-small',
+                class: 'btn-info btn-small',
                 awToolTip: 'View job events',
                 mode: 'all',             
                 }

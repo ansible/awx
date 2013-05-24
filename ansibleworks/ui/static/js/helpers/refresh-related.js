@@ -23,10 +23,8 @@ angular.module('RefreshRelatedHelper', ['RestServices', 'Utilities'])
         var iterator = params.iterator; 
         var url = params.url;
 
-        url.replace(/page_size\=\d+/,'');  //stop repeatedly appending page_size
-
         Rest.setUrl(url);
-        Rest.get({ params: { page_size: scope[iterator + 'PageSize'] }})
+        Rest.get()
             .success( function(data, status, headers, config) {
                 scope[set] = data['results'];
                 scope[iterator + 'NextUrl'] = data.next;

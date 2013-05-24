@@ -29,26 +29,29 @@ angular.module('GroupListDefinition', [])
         
         actions: {
             add: {
+                label: 'Add',
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addGroup()',
-                class: 'btn-success',
+                class: 'btn-success btn-small',
                 awToolTip: 'Create a new group'
                 }
             },
 
         fieldActions: {
             edit: {
+                label: 'Edit',
                 ngClick: "editGroup(\{\{ group.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-mini',
+                class: 'btn-small',
                 awToolTip: 'View/Edit group'
                 },
 
             delete: {
+                label: 'Delete',
                 ngClick: "deleteGroup(\{\{ group.id \}\},'\{\{ group.name \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-mini btn-danger',
+                class: 'btn-small btn-danger',
                 awToolTip: 'Delete group'
                 }
             }

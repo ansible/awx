@@ -44,10 +44,11 @@ angular.module('CredentialsListDefinition', [])
         actions: {
             add: {
                 icon: 'icon-plus',
+                label: 'Add',
                 mode: 'all',                         // One of: edit, select, all
                 ngClick: 'addCredential()',
                 basePaths: ['teams','users'],        // base path must be in list, or action not available
-                class: 'btn-success',
+                class: 'btn-success btn-small',
                 awToolTip: 'Create a new credential'
                 }
             },
@@ -56,14 +57,16 @@ angular.module('CredentialsListDefinition', [])
             edit: {
                 ngClick: "editCredential(\{\{ credential.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-mini',
+                label: 'Edit',
+                class: 'btn-small',
                 awToolTip: 'View/Edit credential'
                 },
 
             delete: {
                 ngClick: "deleteCredential(\{\{ credential.id \}\},'\{\{ credential.name \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-mini btn-danger',
+                label: 'Delete',
+                class: 'btn-small btn-danger',
                 awToolTip: 'Delete credential'
                 }
             }

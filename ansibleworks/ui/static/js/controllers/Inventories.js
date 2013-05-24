@@ -262,8 +262,8 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
            TreeInit({ scope: scope, inventory: data });
 
            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
-           RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
-           RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
+           //RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
+           //RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
            scope.$emit('inventoryLoaded');
            })
        .error( function(data, status, headers, config) {

@@ -29,26 +29,29 @@ angular.module('ProjectsListDefinition', [])
         
         actions: {
             add: {
+                label: 'Add',
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addProject()',
-                class: 'btn-success',
+                class: 'btn-success btn-small',
                 awToolTip: 'Create a new project'
                 }
             },
 
         fieldActions: {
             edit: {
+                label: 'Edit',
                 ngClick: "editProject(\{\{ project.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-mini',
+                class: 'btn-small',
                 awToolTip: 'View/edit project'
                 },
 
             delete: {
+                label: 'Delete',
                 ngClick: "deleteProject(\{\{ project.id \}\},'\{\{ project.name \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-mini btn-danger',
+                class: 'btn-small btn-danger',
                 awToolTip: 'Delete project'
                 }
             }

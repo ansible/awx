@@ -54,7 +54,7 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                
                var url, action_label, restcall, hdr; 
 
-               if (data.status == 'pending') {
+               if (data.status == 'pending' || data.status == 'running') {
                   url = data.related.cancel;
                   action_label = 'cancel';
                   hdr = 'Cancel Job';
@@ -274,7 +274,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
    // Save changes to the parent
    scope.formSave = function() {
-      Rest.setUrl(defaultUrl + $routeParams.id);
+      Rest.setUrl(defaultUrl + $routeParams.id + '/');
       var data = {}
       for (var fld in form.fields) {
           if (form.fields[fld].type == 'select' && fld != 'playbook') {
@@ -291,7 +291,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to update team: ' + $routeParams.id + '. PUT status: ' + status });
+                            { hdr: 'Error!', msg: 'Failed to update job ' + $routeParams.id + '. PUT returned status: ' + status });
               });
       };
 

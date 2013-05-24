@@ -50,6 +50,8 @@ angular.module('JobsListDefinition', [])
         
         actions: {
             refresh: {
+                label: 'Refresh',
+                class: 'btn-success btn-small',
                 ngClick: "refreshJob(\{\{ job.id \}\})",
                 icon: 'icon-refresh',
                 awToolTip: 'Refresh the page',
@@ -59,36 +61,37 @@ angular.module('JobsListDefinition', [])
 
         fieldActions: {
             edit: {
-                ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.name \}\}')",
                 icon: 'icon-edit',
-                class: 'btn-mini',
+                label: 'View',
+                ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.name \}\}')",
+                class: 'btn-success btn-small',
                 awToolTip: 'View/Edit detail',
                 },
             summary: {
-                title: 'Summary',
+                label: 'Hosts',
                 icon: 'icon-filter',
                 ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.name \}\}')",
-                class: 'btn-success btn-mini',
+                class: 'btn-info btn-small',
                 awToolTip: 'View host summary',
                 ngDisabled: "job.status == 'new'"
                 },
             events: {
-                title: 'Detail',
+                label: 'Events',
                 icon: 'icon-list-ul',
                 mode: 'all',             
                 ngClick: "viewEvents(\{{ job.id \}\}, '\{\{ job.name \}\}')",
-                class: 'btn-success btn-mini',
+                class: 'btn-info btn-small',
                 awToolTip: 'View events',
                 ngDisabled: "job.status == 'new'"
                 },
             cancel: {
-                title: 'Cancel',
                 icon: 'icon-minus-sign',
+                label: 'Cancel',
                 mode: 'all',             
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
-                class: 'btn-danger btn-mini',
+                class: 'btn-danger btn-small',
                 awToolTip: 'Cancel job',
-                ngDisabled: "job.status != 'new' && job.status != 'pending'"
+                ngDisabled: "job.status != 'new' && job.status != 'pending' && job.status != 'running'"
                 }
             }
         });

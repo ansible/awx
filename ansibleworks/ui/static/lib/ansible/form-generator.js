@@ -427,11 +427,14 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              var act;
              for (action in this.form.statusActions) {
                  act = this.form.statusActions[action];
-                 html += "<button " + this.attr(act, 'ngClick') + 
-                         "class=\"btn btn-small " + act.class + "\" ";
+                 html += "<button " + this.attr(act, 'ngClick') + "class=\"btn";
+                 html += (act.class) ? " " + act.class : "";
+                 html += "\" ";
                  html += (act.awToolTip) ? this.attr(act,'awToolTip') : "";
                  html += (act.awToolTip) ? "data-placement=\"top\" " : "";
-                 html += " >" + this.icon(act.icon) + "</button> ";
+                 html += " >" + this.icon(act.icon);
+                 html += (act.label) ? act.label : ""; 
+                 html += "</button> ";
               }
               html += "</div>\n";
               html += "<div class=\"status-spin\"><i class=\"icon-spinner icon-spin\" ng-show=\"statusSearchSpin == true\"></i></div>\n";

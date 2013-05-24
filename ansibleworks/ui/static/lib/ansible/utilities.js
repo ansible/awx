@@ -44,7 +44,10 @@ angular.module('Utilities',[])
                'requested action. Please contact a system administrator.');
       }
       else if (data.non_field_errors) {
-            Alert('Error!', data.non_field_errors);
+         Alert('Error!', data.non_field_errors);
+      }
+      else if (data.detail) {
+         Alert(defaultMsg.hdr, defaultMsg.msg + ' ' + data.detail);
       }
       else if (form) {
          var fieldErrors = false; 

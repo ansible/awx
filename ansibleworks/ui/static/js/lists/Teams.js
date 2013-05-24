@@ -35,26 +35,29 @@ angular.module('TeamsListDefinition', [])
         
         actions: {
             add: {
+                label: 'Add',
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addTeam()',
-                class: 'btn-success',
+                class: 'btn-success btn-small',
                 awToolTip: 'Create a new team'
                 }
             },
 
         fieldActions: {
             edit: {
+                label: 'Edit',
                 ngClick: "editTeam(\{\{ team.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-mini',
+                class: 'btn-small',
                 awToolTip: 'View/Edit team'
                 },
 
             delete: {
+                label: 'Delete',
                 ngClick: "deleteTeam(\{\{ team.id \}\},'\{\{ team.name \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-mini btn-danger',
+                class: 'btn-small btn-danger',
                 awToolTip: 'Delete team'
                 }
             }

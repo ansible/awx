@@ -102,6 +102,7 @@ angular.module('GeneratorHelpers', [])
                     set + "'," + "'" + iterator + "')\" class=\"input-mini";
            html += (useMini) ? " field-mini-height" : "";
            html += " page-size\">\n";
+           html += "<option value=\"10\" selected>10</option>\n";
            html += "<option value=\"20\" selected>20</option>\n";
            html += "<option value=\"40\">40</option>\n";
            html += "<option value=\"60\">60</option>\n";

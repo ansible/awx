@@ -51,21 +51,24 @@ angular.module('JobEventsListDefinition', [])
             refresh: {
                 ngClick: "refresh()",
                 icon: 'icon-refresh',
+                label: 'Refresh',
                 awToolTip: 'Refresh the page',
-                class: 'btn-small',
+                class: 'btn-small btn-success',
                 mode: 'all'
                 },
             edit: {
+                label: 'View',
                 ngClick: "jobDetails()",
                 icon: 'icon-edit',
-                class: 'btn-small',
+                class: 'btn-small btn-success',
                 awToolTip: 'View/Edit detail',
                 mode: 'all'
                 },
             summary: {
+                label: 'Hosts',
                 icon: 'icon-filter',
                 ngClick: "jobSummary()",
-                class: 'btn-success btn-small',
+                class: 'btn-info btn-small',
                 awToolTip: 'View host summary',
                 mode: 'all'
                 }
@@ -73,9 +76,10 @@ angular.module('JobEventsListDefinition', [])
 
         fieldActions: {
             edit: {
+                label: 'View',
                 ngClick: "editJobEvent(\{\{ jobevent.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-mini',
+                class: 'btn-small',
                 awToolTip: 'View event detail',
                 },
             }

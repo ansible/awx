@@ -469,7 +469,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
            })
        .error( function(data, status, headers, config) {
            ProcessErrors(scope, data, status, form,
-                         { hdr: 'Error!', msg: 'Failed to retrieve job template: ' + $routeParams.id + '. GET status: ' + status });
+              { hdr: 'Error!', msg: 'Failed to retrieve job template: ' + $routeParams.id + '. GET status: ' + status });
            });
 
    // Save changes to the parent
@@ -491,7 +491,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to update team: ' + $routeParams.id + '. PUT status: ' + status });
+                  { hdr: 'Error!', msg: 'Failed to update team: ' + $routeParams.id + '. PUT status: ' + status });
               });
       };
 
