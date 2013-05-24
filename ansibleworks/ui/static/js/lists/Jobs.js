@@ -62,14 +62,14 @@ angular.module('JobsListDefinition', [])
         fieldActions: {
             edit: {
                 icon: 'icon-edit',
-                label: 'View',
+                label: 'Edit',
                 ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.name \}\}')",
                 class: 'btn-success btn-small',
-                awToolTip: 'View/Edit detail',
+                awToolTip: 'Edit job details',
                 },
             summary: {
                 label: 'Hosts',
-                icon: 'icon-filter',
+                icon: 'icon-th-large',
                 ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.name \}\}')",
                 class: 'btn-info btn-small',
                 awToolTip: 'View host summary',

@@ -21,7 +21,7 @@ angular.module('JobEventFormDefinition', [])
                 readonly: true,
                 class: 'span2'
                 },
-            event: {
+            event_display: {
                 label: 'Event',
                 type: 'text',
                 readonly: true

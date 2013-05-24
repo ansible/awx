@@ -42,7 +42,7 @@ angular.module('HostListDefinition', [])
             edit: {
                 label: 'Edit',
                 ngClick: "editHost(\{\{ host.id \}\})",
-                icon: 'icon-edit',
+                icon: 'icon-edit btn-success',
                 class: 'btn-small',
                 awToolTip: 'View/Edit host'
                 },

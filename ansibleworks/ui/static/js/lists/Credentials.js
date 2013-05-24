@@ -58,7 +58,7 @@ angular.module('CredentialsListDefinition', [])
                 ngClick: "editCredential(\{\{ credential.id \}\})",
                 icon: 'icon-edit',
                 label: 'Edit',
-                class: 'btn-small',
+                class: 'btn-small btn-success',
                 awToolTip: 'View/Edit credential'
                 },
 

@@ -43,7 +43,7 @@ angular.module('GroupListDefinition', [])
                 label: 'Edit',
                 ngClick: "editGroup(\{\{ group.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-small',
+                class: 'btn-small btn-success',
                 awToolTip: 'View/Edit group'
                 },
 

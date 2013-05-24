@@ -23,7 +23,7 @@ angular.module('JobEventsListDefinition', [])
                 desc: true,
                 searchType: 'int'   
                 },
-            event: {
+            event_display: {
                 label: 'Event',
                 link: true
                 },
@@ -57,16 +57,16 @@ angular.module('JobEventsListDefinition', [])
                 mode: 'all'
                 },
             edit: {
-                label: 'View',
+                label: 'Edit',
                 ngClick: "jobDetails()",
                 icon: 'icon-edit',
                 class: 'btn-small btn-success',
-                awToolTip: 'View/Edit detail',
+                awToolTip: 'Edit job details',
                 mode: 'all'
                 },
             summary: {
                 label: 'Hosts',
-                icon: 'icon-filter',
+                icon: 'icon-th-large',
                 ngClick: "jobSummary()",
                 class: 'btn-info btn-small',
                 awToolTip: 'View host summary',
@@ -78,9 +78,9 @@ angular.module('JobEventsListDefinition', [])
             edit: {
                 label: 'View',
                 ngClick: "editJobEvent(\{\{ jobevent.id \}\})",
-                icon: 'icon-edit',
+                icon: 'icon-zoom-in',
                 class: 'btn-small',
-                awToolTip: 'View event detail',
+                awToolTip: 'View event details',
                 },
             }
         });

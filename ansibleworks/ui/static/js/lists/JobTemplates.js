@@ -44,8 +44,8 @@ angular.module('JobTemplatesListDefinition', [])
                 label: 'Edit',
                 ngClick: "editJobTemplate(\{\{ job_template.id \}\})",
                 icon: 'icon-edit',
-                awToolTip: 'View/Edit template',
-                class: 'btn-small'
+                awToolTip: 'Edit template',
+                class: 'btn-small btn-success'
                 },
             submit: {
                 label: 'Launch',
@@ -53,7 +53,7 @@ angular.module('JobTemplatesListDefinition', [])
                 mode: 'all',
                 class: 'btn-small btn-success',
                 ngClick: 'submitJob(\{\{ job_template.id \}\})',
-                awToolTip: 'Create and run a job using this template'     
+                awToolTip: 'Start a job using this template'     
                 },
             delete: {
                 label: 'Delete',

@@ -42,7 +42,7 @@ angular.module('OrganizationListDefinition', [])
                 label: 'Edit',
                 ngClick: "editOrganization(\{\{ organization.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-small',
+                class: 'btn-small btn-success',
                 awToolTip: 'View/Edit organization'
                 },
 

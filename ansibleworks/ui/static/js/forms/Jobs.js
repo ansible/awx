@@ -154,7 +154,8 @@ angular.module('JobFormDefinition', [])
                 type: 'textarea', 
                 readonly: true,
                 rows: 10,
-                class: 'span12'
+                class: 'span12',
+                ngShow: "result_traceback != ''"
                 }
             },
 
@@ -169,7 +170,7 @@ angular.module('JobFormDefinition', [])
                 },
             summary: {
                 label: 'Hosts',
-                icon: 'icon-filter',
+                icon: 'icon-th-large',
                 ngClick: "jobSummary()",
                 class: 'btn-info btn-small',
                 awToolTip: 'View host summary',
@@ -180,7 +181,7 @@ angular.module('JobFormDefinition', [])
                 icon: 'icon-list-ul',
                 ngClick: "jobEvents()",
                 class: 'btn-info btn-small',
-                awToolTip: 'View job events',
+                awToolTip: 'Edit job events',
                 mode: 'all',             
                 }
             },

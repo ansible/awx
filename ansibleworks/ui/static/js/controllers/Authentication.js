@@ -25,12 +25,19 @@ function Authenticate($scope, $rootScope, $location, Authorization, ToggleClass,
    $scope.sessionExpired = Authorization.didSessionExpire();    //Display session timeout message
    $scope.sessionTimeout = ($AnsibleConfig.session_timeout / 60).toFixed(2)
 
+   $('#login-password').bind('keypress', function(e) {
+       var code = (e.keyCode ? e.keyCode : e.which);
+       if (code == 13) {
+          $('#login-button').click();
+       }
+       });
+
    // Display the login dialog
    $('#login-modal').modal({ show: true, keyboard: false, backdrop: false });
- 
+
    $scope.reset = function() { 
-      $('#login-form input').each( function(index) { $(this).val(''); });
-      };
+       $('#login-form input').each( function(index) { $(this).val(''); });
+       };
 
    // Call the API to get an auth token
    $scope.systemLogin = function(username, password) {
@@ -70,5 +77,5 @@ function Authenticate($scope, $rootScope, $location, Authorization, ToggleClass,
                 $('#alert-modal').modal({ show: true, keyboard: true,  backdrop: 'static' });
              }
              });
-    }
+       }
 }

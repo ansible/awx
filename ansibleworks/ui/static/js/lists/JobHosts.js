@@ -62,11 +62,11 @@ angular.module('JobHostDefinition', [])
                 mode: 'all'
                 },
             edit: {
-                label: 'View',
+                label: 'Edit',
                 icon: 'icon-edit',
                 ngClick: "jobDetails()",
                 class: 'btn-success btn-small',
-                awToolTip: 'View job detail',
+                awToolTip: 'Edit job details',
                 mode: 'all'
                 },
             events: {

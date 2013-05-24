@@ -49,7 +49,7 @@ angular.module('TeamsListDefinition', [])
                 label: 'Edit',
                 ngClick: "editTeam(\{\{ team.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-small',
+                class: 'btn-small btn-success',
                 awToolTip: 'View/Edit team'
                 },
 
