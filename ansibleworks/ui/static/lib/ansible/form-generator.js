@@ -619,7 +619,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                     html += "<div class=\"text-right actions\">\n";
                     for (var act in form.related[itm].actions) {
                         var action = form.related[itm].actions[act];
-                        html += "<button class=\"btn btn-mini btn-success\" ";
+                        html += "<button class=\"btn btn-small btn-success\" ";
                         html += this.attr(action,'ngClick');
                         html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
                         html += ">" + this.icon(action.icon) + "</button>\n";
@@ -635,7 +635,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                   html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true });
 
                   // Add actions(s)
-                  html += "<div class=\"text-right actions\">\n";
+                  html += "<div class=\"list-actions\">\n";
                   for (var action in form.related[itm].actions) {
                       html += "<button class=\"btn btn-mini btn-success\" ";
                       html += this.attr(form.related[itm]['actions'][action],'ngClick');
@@ -690,11 +690,12 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                   html += "<td class=\"actions\">";
                   for (action in form.related[itm].fieldActions) {
                       html += "<button class=\"btn btn-mini"; 
-                      if (form.related[itm]['fieldActions'][action].class) {
-                         html += " " + form.related[itm]['fieldActions'][action].class;
-                      }
+                      html += (form.related[itm]['fieldActions'][action].class) ?
+                          " " + form.related[itm]['fieldActions'][action].class : "";
                       html += "\" " + this.attr(form.related[itm]['fieldActions'][action],'ngClick') +
-                              ">" + this.icon(form.related[itm]['fieldActions'][action].icon) + "</button> ";
+                          ">" + this.icon(form.related[itm]['fieldActions'][action].icon);
+                      html += (form.related[itm].fieldActions[action].label) ?  " " + form.related[itm].fieldActions[action].label : ""; 
+                      html += "</button> ";
                   }
                   html += "</td>";
                   html += "</tr>\n";

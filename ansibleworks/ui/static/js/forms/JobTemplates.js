@@ -158,8 +158,9 @@ angular.module('JobTemplateFormDefinition', [])
                 
                 fieldActions: {
                     edit: {
+                        label: 'View',
                         ngClick: "edit('jobs', \{\{ job.id \}\}, '\{\{ job.name \}\}')",
-                        icon: 'icon-edit'
+                        icon: 'icon-zoom-in'
                         }
                     }
                 },

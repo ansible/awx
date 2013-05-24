@@ -86,10 +86,13 @@ angular.module('TeamFormDefinition', [])
                 
                 fieldActions: {
                     edit: {
+                        label: 'Edit',
                         ngClick: "edit('users', \{\{ user.id \}\}, '\{\{ user.username \}\}')",
-                        icon: 'icon-edit'
+                        icon: 'icon-edit',
+                        class: 'btn-success'
                         },
                     delete: {
+                        label: 'Delete',
                         ngClick: "delete('users', \{\{ user.id \}\}, '\{\{ user.username \}\}', 'users')",
                         icon: 'icon-remove',
                         class: 'btn-danger'
@@ -122,10 +125,13 @@ angular.module('TeamFormDefinition', [])
                 
                 fieldActions: {
                     edit: {
+                        label: 'Edit',
                         ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
-                        icon: 'icon-edit'
+                        icon: 'icon-edit',
+                        class: 'btn-success'
                         },
                     delete: {
+                        label: 'Delete',
                         ngClick: "delete('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}', 'credentials')",
                         icon: 'icon-remove',
                         class: 'btn-danger'
@@ -158,10 +164,13 @@ angular.module('TeamFormDefinition', [])
                 
                 fieldActions: {
                     edit: {
+                        label: 'Edit',
                         ngClick: "edit('projects', \{\{ project.id \}\}, '\{\{ project.name \}\}')",
-                        icon: 'icon-edit'
+                        icon: 'icon-edit',
+                        class: 'btn-success'
                         },
                     delete: {
+                        label: 'Delete',
                         ngClick: "delete('projects', \{\{ project.id \}\}, '\{\{ project.name \}\}', 'projects')",
                         icon: 'icon-remove',
                         class: 'btn-danger'

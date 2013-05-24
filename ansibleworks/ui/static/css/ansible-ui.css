@@ -259,6 +259,7 @@
  /* Display list actions next to search widget */
  .search-widget {
     display: inline-block;
+    vertical-align: bottom;
  }
 
  .list-actions {

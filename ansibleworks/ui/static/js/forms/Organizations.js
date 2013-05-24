@@ -77,10 +77,13 @@ angular.module('OrganizationFormDefinition', [])
                 
                 fieldActions: {
                     edit: {
+                        label: 'Edit',
                         ngClick: "edit('users', \{\{ user.id \}\}, '\{\{ user.username \}\}')",
-                        icon: 'icon-edit'
+                        icon: 'icon-edit',
+                        class: 'btn-success'
                         },
                     delete: {
+                        label: 'Delete',
                         ngClick: "delete('users', \{\{ user.id \}\}, '\{\{ user.username \}\}', 'users')",
                         icon: 'icon-remove',
                         class: 'btn-danger'
@@ -113,7 +116,14 @@ angular.module('OrganizationFormDefinition', [])
                         }
                     },
                 fieldActions: {                                           // Actions available on each row
+                    edit: {
+                        label: 'Edit',
+                        ngClick: "edit('users', \{\{ admin.id \}\}, '\{\{ admin.username \}\}')",
+                        icon: 'icon-edit',
+                        class: 'btn-success'
+                        },
                     delete: {
+                        label: 'Delete',
                         ngClick: "delete('admins', \{\{ admin.id \}\}, '\{\{ admin.username \}\}', 'administrators')",
                         icon: 'icon-remove',
                         class: 'btn-danger'

@@ -178,10 +178,13 @@ angular.module('UserFormDefinition', [])
 
                 fieldActions: {
                     edit: {
+                        label: 'Edit',
                         ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
-                        icon: 'icon-edit'
+                        icon: 'icon-edit',
+                        class: 'btn-success'
                         },
                     delete: {
+                        label: 'Delete',
                         ngClick: "delete('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}', 'credentials')",
                         icon: 'icon-remove',
                         class: 'btn-danger'
