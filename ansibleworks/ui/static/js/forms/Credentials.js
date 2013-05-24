@@ -53,7 +53,7 @@ angular.module('CredentialFormDefinition', [])
                 associated: 'ssh_password'
                 },
             "ssh_key_data": {
-                label: 'SSH Key',
+                label: 'SSH Private Key',
                 type: 'textarea',
                 addRequired: false,
                 editRequired: false,

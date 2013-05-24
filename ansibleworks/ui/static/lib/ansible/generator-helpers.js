@@ -32,11 +32,11 @@ angular.module('GeneratorHelpers', [])
         html += "<ul class=\"dropdown-menu\">\n";
         
         for ( var fld in form.fields) {
-          html += "<li><a href=\"\" ng-click=\"setSearchField('" + iterator + "','";
-          //html += (form.fields[fld].desc) ? '-' : '';
-          //html += (form.fields[fld].searchField) ? form.fields[fld].searchField : fld; 
-          html += fld + "','" + form.fields[fld].label + "')\">" 
-                  + form.fields[fld].label + "</a></li>\n";
+          if (form.fields[fld].notSearchable == undefined || form.fields[fld].notSearchable == false) {
+             html += "<li><a href=\"\" ng-click=\"setSearchField('" + iterator + "','";
+             html += fld + "','" + form.fields[fld].label + "')\">" 
+                 + form.fields[fld].label + "</a></li>\n";
+          }
         }
         html += "</ul>\n";
         html += "</div>\n";
@@ -44,13 +44,13 @@ angular.module('GeneratorHelpers', [])
         html += "<select ng-show=\"" + iterator + "SelectShow\" ng-model=\""+ iterator + "SearchSelectValue\" ng-change=\"search('" + iterator + "')\" ";
         html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts\" class=\"search-select\"></select>\n";
 
-        html += "<input ng-hide=\"" + iterator + "SelectShow\" class=\"input-medium";
+        html += "<input ng-hide=\"" + iterator + "SelectShow || " + iterator + "InputHide\" class=\"input-medium";
         html += (useMini) ? " field-mini-height" : "";
         html += "\" ng-model=\"" + iterator + "SearchValue\" ng-change=\"search('" + iterator + 
                 "')\" placeholder=\"Search\" type=\"text\" >\n";
 
         html += "<div class=\"btn-group\">\n";
-        html += "<button ng-hide=\"" + iterator + "SelectShow || " + iterator + "HideSearchType\" class=\"btn ";
+        html += "<button ng-hide=\"" + iterator + "SelectShow || " + iterator + "HideSearchType || " + iterator + "InputHide\" class=\"btn ";
         html += (useMini) ? "btn-mini " : "btn-small";
         html += "dropdown-toggle\" data-toggle=\"dropdown\">\n";
         html += "<span ng-bind=\"" + iterator + "SearchTypeLabel\"></span>\n";

@@ -26,29 +26,25 @@ angular.module('JobHostDefinition', [])
                 //linkTo: '/hosts/\{\{ jobhost.host \}\}'
                 ngClick:"viewHost(\{\{ jobhost.host \}\})"
                 },
+             ok: {
+                label: 'Success',
+                notSearchable: true
+                },
             changed: {
                 label: 'Changed',
-                searchType: 'math'
-                },
-            dark: {
-                label: 'Dark',
-                searchType: 'math'
+                notSearchable: true
                 },
             failures: {
-                label: 'Failures',
-                searchType: 'math'
+                label: 'Failure',
+                searchType: 'gtzero'
                 },
-            ok: {
-                label: 'OK',
-                searchType: 'math'
-                },
-            processed: {
-                label: 'Processed',
-                searchType: 'math'
+            dark: {
+                label: 'Unreachable',
+                notSearchable: true
                 },
             skipped: {
                 label: 'Skipped',
-                searchType: 'math'
+                notSearchable: true
                 }
             },
         

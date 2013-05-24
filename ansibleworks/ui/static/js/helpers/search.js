@@ -53,10 +53,13 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         if (list.fields[f].searchType && ( list.fields[f].searchType == 'boolean' 
               || list.fields[f].searchType == 'select')) {
            scope[iterator + 'SelectShow'] = true;
-           scope[iterator + 'SearchSelectOpts'] = list.fields[fld].searchOptions;
+           scope[iterator + 'SearchSelectOpts'] = list.fields[f].searchOptions;
         }
         if (list.fields[f].searchType && list.fields[f].searchType == 'int') {
            scope[iterator + 'HideSearchType'] = true;   
+        }
+        if (list.fields[f].searchType && list.fields[f].searchType == 'gtzero') {
+              scope[iterator + "InputHide"] = true;
         }
       
         // Functions to handle search widget changes
@@ -66,7 +69,11 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            scope[iterator + 'SearchValue'] = '';
            scope[iterator + 'SelectShow'] = false;
            scope[iterator + 'HideSearchType'] = false;
+           scope[iterator + 'InputHide'] = false;
            
+           if (list.fields[fld].searchType && list.fields[fld].searchType == 'gtzero') {
+              scope[iterator + "InputHide"] = true;
+           }
            if (list.fields[fld].searchType && (list.fields[fld].searchType == 'boolean' 
                 || list.fields[fld].searchType == 'select')) {
               scope[iterator + 'SelectShow'] = true;
@@ -93,7 +100,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            scope[iterator + 'SearchParms'] = '';
            var url = defaultUrl;
            if ( (scope[iterator + 'SelectShow'] == false && scope[iterator + 'SearchValue'] != '' && scope[iterator + 'SearchValue'] != undefined) ||
-                (scope[iterator + 'SelectShow'] && scope[iterator + 'SearchSelectValue']) ) {
+                (scope[iterator + 'SelectShow'] && scope[iterator + 'SearchSelectValue']) || 
+                (list.fields[scope[iterator + 'SearchField']].searchType && list.fields[scope[iterator + 'SearchField']].searchType == 'gtzero') ) {
               if (list.fields[scope[iterator + 'SearchField']].sourceModel) {
                  // handle fields whose source is a related model e.g. inventories.organization
                  scope[iterator + 'SearchParams'] = '?' + list.fields[scope[iterator + 'SearchField']].sourceModel + '__' + 
@@ -108,8 +116,12 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
               
               if ( list.fields[scope[iterator + 'SearchField']].searchType && 
                    (list.fields[scope[iterator + 'SearchField']].searchType == 'int' || 
-                    list.fields[scope[iterator + 'SearchField']].searchType == 'boolean') ) {
+                    list.fields[scope[iterator + 'SearchField']].searchType == 'boolean' ) ) {
                  scope[iterator + 'SearchParams'] += 'int=';  
+              }
+              else if ( list.fields[scope[iterator + 'SearchField']].searchType && 
+                        list.fields[scope[iterator + 'SearchField']].searchType == 'gtzero' ) {
+                 scope[iterator + 'SearchParams'] += 'gt=0'; 
               }
               else {
                  scope[iterator + 'SearchParams'] += scope[iterator + 'SearchType'] + '='; 
@@ -120,7 +132,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                        || list.fields[scope[iterator + 'SearchField']].searchType == 'select') ) { 
                    scope[iterator + 'SearchParams'] += scope[iterator + 'SearchSelectValue'].value;
               }
-              else {
+              else if ( list.fields[scope[iterator + 'SearchField']].searchType == undefined || 
+                        list.fields[scope[iterator + 'SearchField']].searchType == 'gtzero' ) {
                  scope[iterator + 'SearchParams'] += escape(scope[iterator + 'SearchValue']);
               }
               scope[iterator + 'SearchParams'] += (default_order) ? '&order_by=' + escape(default_order) : '';
