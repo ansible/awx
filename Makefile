@@ -50,7 +50,7 @@ dbchange:
 
 migrate: syncdb
 	# This command fixes migrations following the cleanup for the 1.2b1 release.
-	-(python manage.py migrate main 2>&1 | grep 0017_changes) && python manage.py migrate main --delete-ghost-migrations --fake 0001_v12b1_initial
+	-(python manage.py migrate main 2>&1 | grep 0017_changes) && (python manage.py migrate main --delete-ghost-migrations --fake 0001_v12b1_initial || python manage.py migrate main --fake)
         # run this to apply changes to the model
 	python manage.py migrate --noinput
 
