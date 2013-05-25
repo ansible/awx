@@ -13,7 +13,7 @@
 function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobTemplateList,
                            GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                            ClearScope, ProcessErrors, GetBasePath, PromptPasswords, JobTemplateForm, CredentialList,
-                           LookUpInit)
+                           LookUpInit, SubmitJob)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -133,100 +133,15 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
        }
        }
 
-    function postJob(data) {
-        // Create the job record
-        (scope.credentialWatchRemove) ? scope.credentialWatchRemove() : null;
-        var dt = new Date().toISOString();
-        Rest.setUrl(data.related.jobs);
-        Rest.post({
-            name: data.name + ' ' + dt,        // job name required and unique
-            description: data.description, 
-            job_template: data.id, 
-            inventory: data.inventory, 
-            project: data.project, 
-            playbook: data.playbook, 
-            credential: data.credential, 
-            forks: data.forks, 
-            limit: data.limit, 
-            verbosity: data.verbosity, 
-            extra_vars: data.extra_vars
-            })
-            .success( function(data, status, headers, config) {
-                if (data.passwords_needed_to_start.length > 0) {
-                   // Passwords needed. Prompt for passwords, then start job.
-                   PromptPasswords({
-                       scope: scope,
-                       passwords: data.passwords_needed_to_start,
-                       start_url: data.related.start
-                       });
-                }
-                else {
-                   // No passwords needed, start the job!
-                   Rest.setUrl(data.related.start); 
-                   Rest.post()
-                       .success( function(data, status, headers, config) {
-                           $location.path('/jobs');
-                           })
-                       .error( function(data, status, headers, config) { 
-                           ProcessErrors(scope, data, status, null,
-                               { hdr: 'Error!', msg: 'Failed to start job. POST returned status: ' + status });
-                           });
-                }
-                })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, null,
-                   { hdr: 'Error!', msg: 'Failed to create job. POST returned status: ' + status });
-                });
-        };
-
     scope.submitJob = function(id) {
-        // Get the job details
-        Rest.setUrl(defaultUrl + id + '/');
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                // Create a job record
-                scope.credential = '';
-                if (data.credential == '' || data.credential == null) {
-                   // Template does not have credential, prompt for one
-                   if (scope.credentialWatchRemove) {
-                      scope.credentialWatchRemove();
-                   }
-                   scope.credentialWatchRemove = scope.$watch('credential', function(newVal, oldVal) {
-                       if (newVal !== oldVal) {
-                          // After user selects a credential from the modal,
-                          // submit the job
-                          if (scope.credential != '' && scope.credential !== null && scope.credential !== undefined) {
-                             data.credential = scope.credential;
-                             postJob(data);
-                          }
-                       }
-                       });
-                   LookUpInit({
-                       scope: scope,
-                       form: JobTemplateForm,
-                       current_item: null,
-                       list: CredentialList, 
-                       field: 'credential',
-                       hdr: 'Credential Required'
-                       });
-                   scope.lookUpCredential();
-                }
-                else {
-                   // We have what we need, submit the job
-                   postJob(data);
-                }
-            })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, null,
-                    { hdr: 'Error!', msg: 'Failed to get job template details. GET returned status: ' + status });
-            });
-        };
-
+       SubmitJob({ scope: scope, id: id });
+       }
 }
 
 JobTemplatesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobTemplateList',
                              'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                             'ProcessErrors','GetBasePath', 'PromptPasswords', 'JobTemplateForm', 'CredentialList', 'LookUpInit'
+                             'ProcessErrors','GetBasePath', 'PromptPasswords', 'JobTemplateForm', 'CredentialList', 'LookUpInit',
+                             'SubmitJob'
                              ];
 
 function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, 

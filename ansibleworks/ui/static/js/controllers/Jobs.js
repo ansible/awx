@@ -12,7 +12,7 @@
 
 function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                       ClearScope, ProcessErrors, GetBasePath, LookUpInit)
+                       ClearScope, ProcessErrors, GetBasePath, LookUpInit, SubmitJob)
 {
     ClearScope('htmlTemplate');
     var list = JobList;
@@ -105,11 +105,14 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
             
         }
   
+    scope.submitJob = function(id, template) {
+        SubmitJob({ scope: scope, id: id, template: template });
+        }
 }
 
 JobsListCtrl.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobList',
                          'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                         'ProcessErrors','GetBasePath', 'LookUpInit'
+                         'ProcessErrors','GetBasePath', 'LookUpInit', 'SubmitJob'
                          ];
 
 

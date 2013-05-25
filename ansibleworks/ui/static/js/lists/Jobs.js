@@ -60,13 +60,6 @@ angular.module('JobsListDefinition', [])
             },
 
         fieldActions: {
-            edit: {
-                icon: 'icon-edit',
-                label: 'Edit',
-                ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.name \}\}')",
-                class: 'btn-success btn-small',
-                awToolTip: 'Edit job details',
-                },
             summary: {
                 label: 'Hosts',
                 icon: 'icon-th-large',
@@ -84,14 +77,27 @@ angular.module('JobsListDefinition', [])
                 awToolTip: 'View events',
                 ngDisabled: "job.status == 'new'"
                 },
+            edit: {
+                icon: 'icon-edit',
+                label: 'Edit',
+                ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.name \}\}')",
+                class: 'btn-success btn-small',
+                awToolTip: 'Edit job details',
+                },
+            rerun: {
+                icon: 'icon-retweet',
+                mode: 'all',             
+                ngClick: "submitJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}' )",
+                class: 'btn-success btn-small',
+                awToolTip: 'Re-run this job',
+                },
             cancel: {
                 icon: 'icon-minus-sign',
-                label: 'Cancel',
-                mode: 'all',             
+                mode: 'all',
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
                 class: 'btn-danger btn-small',
                 awToolTip: 'Cancel job',
                 ngDisabled: "job.status != 'new' && job.status != 'pending' && job.status != 'running'"
-                }
+                },
             }
         });
