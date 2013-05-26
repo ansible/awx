@@ -12,7 +12,6 @@ ipython
 markdown
 pexpect
 python-dateutil
-PyYAML
 South
 
 # You may also need to install the following extra packages using the OS
