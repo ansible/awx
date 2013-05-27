@@ -40,6 +40,15 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
            case 'awToolTip':
                result = "aw-tool-tip=\"" + obj[key] + "\" ";
                break;
+           case 'awPopOver':
+               result = "aw-pop-over='" + obj[key] + "' ";
+               break;
+           case 'dataTitle':
+               result = "data-title=\"" + obj[key] + "\" ";
+               break;
+           case 'dataPlacement':
+               result = "data-placement=\"" + obj[key] + "\" ";
+               break;
            default: 
                result = key + "=\"" + obj[key] + "\" ";
        }
@@ -226,7 +235,14 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              html += "<div class=\"control-group\""
              html += (field.ngShow) ? this.attr(field,'ngShow') : "";
              html += ">\n";
-             html += "<label class=\"control-label\" for=\"" + fld + '">' + field.label + '</label>' + "\n";
+             html += "<label class=\"control-label\" for=\"" + fld + '">';
+             if (field.awPopOver) {
+                html += "<a href=\"\" " + this.attr(field,'awPopOver');
+                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
+                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
+                html += "><i class=\"icon-info-sign\"></i></a> ";
+             }
+             html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n"; 
              html += "<textarea ";
              html += (field.rows) ? this.attr(field, 'rows') : "";

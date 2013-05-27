@@ -130,5 +130,43 @@ angular.module('AWDirectives', ['RestServices'])
                 })
             }
         }
-        }]);
+        }])
+    
+    /*  
+     *  Enable TB tooltips. To add a tooltip to an element, include the following directive in
+     *  the element's attributes:
+     *
+     *     aw-tool-tip="<< tooltip text here >>"
+     *
+     *  Include the standard TB data-XXX attributes to controll a tooltip's appearance.  We will 
+     *  default placement to the left and delay to 2 seconds.
+     */ 
+    .directive('awToolTip', function() {
+       return function(scope, element, attrs) {
+           var delay = (attrs.delay != undefined && attrs.delay != null) ? attrs.delay : $AnsibleConfig.tooltip_delay;
+           var placement = (attrs.placement != undefined && attrs.placement != null) ? attrs.placement : 'left';
+           $(element).tooltip({ placement: placement, delay: delay, title: attrs.awToolTip });
+       }
+       })
+     
+     /*  
+     *  Enable TB pop-overs. To add a pop-over to an element, include the following directive in
+     *  the element's attributes:
+     *
+     *     aw-pop-over="<< pop-over html here >>"
+     *
+     *  Include the standard TB data-XXX attributes to controll the pop-over's appearance.  We will 
+     *  default placement to the left, delay to 0 seconds, content type to HTML, and title to 'Help'.
+     */ 
+    .directive('awPopOver', function() {
+       return function(scope, element, attrs) {
+           var placement = (attrs.placement != undefined && attrs.placement != null) ? attrs.placement : 'left';
+           var title = (attrs.title != undefined && attrs.title != null) ? attrs.title : 'Help';
+           $(element).popover({ placement: placement, delay: 0, title: title, 
+               content: attrs.awPopOver, delay: 0, trigger: 'click', html: true });
+       }
+       });
+
+
+
 

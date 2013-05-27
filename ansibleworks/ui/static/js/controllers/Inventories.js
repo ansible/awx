@@ -218,13 +218,6 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    var id = $routeParams.id;
    var relatedSets = {}; 
   
-   // After inventory is loaded, retrieve each related set and any lookups
-   scope.$on('inventoryLoaded', function() {
-       for (var set in relatedSets) {
-           scope.search(relatedSets[set].iterator);
-       }     
-       });
-
    // Retrieve detail record and prepopulate the form
    Rest.setUrl(defaultUrl + ':id/'); 
    Rest.get({ params: {id: id} })

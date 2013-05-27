@@ -17,7 +17,6 @@ angular.module('ansible', [
     'OrganizationListDefinition',
     'UserListDefinition', 
     'ListGenerator', 
-    'AWToolTip', 
     'PromptDialog',
     'ApiLoader', 
     'RelatedSearchHelper', 

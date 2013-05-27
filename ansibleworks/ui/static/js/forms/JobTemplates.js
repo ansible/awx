@@ -115,7 +115,15 @@ angular.module('JobTemplateFormDefinition', [])
                 class: 'span12',
                 addRequired: false, 
                 editRequired: false,
-                column: 2
+                default: "\{\}",
+                column: 2,
+                awPopOver: "<p>Enter variables as JSON. Both the key and value must be wrapped in double quotes. " +
+                    "Separate variables with commas, and wrap the entire string with { }. " +
+                    "&nbsp;For example:</p><p>{<br\>&quot;ntp_server&quot;: &quot;ntp.example.com&quot;,<br \>" + 
+                    '&quot;proxy&quot;: &quot;proxy.example.com&quot;<br \>}</p><p>See additional JSON examples at <a href="' +
+                    'http://www.json.org" target="_blank">www.json.org</a></p>',
+                dataTitle: 'Extra Variables',
+                dataPlacement: 'left'
                 }
             },
 
