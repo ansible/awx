@@ -252,8 +252,13 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
        html += "</tr>\n";
             
        // Message for when a collection is empty
-       html += "<tr class=\"info\" ng-show=\"" + list.name + " == null || " + list.name + ".length == 0\">\n";
+       html += "<tr class=\"info\" ng-show=\"" + list.iterator + "Loading == false && (" + list.name + " == null || " + list.name + ".length == 0)\">\n";
        html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
+       html += "</tr>\n";
+       
+       // Message for loading
+       html += "<tr class=\"info\" ng-show=\"" + list.iterator + "Loading == true\">\n";
+       html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">Loading...</div></td>\n";
        html += "</tr>\n";
 
        // End List

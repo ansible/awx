@@ -701,8 +701,13 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                   html += "</tr>\n";
                   
                   // Message for when a related collection is empty
-                  html += "<tr class=\"info\" ng-show=\"" + itm + " == null || " + itm + ".length == 0\">\n";
+                  html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == false && (" + itm + " == null || " + itm + ".length == 0)\">\n";
                   html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
+                  html += "</tr>\n";
+
+                  // Message for loading
+                  html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == true\">\n";
+                  html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">Loading...</div></td>\n";
                   html += "</tr>\n";
 
                   // End List

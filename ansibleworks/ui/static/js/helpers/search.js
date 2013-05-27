@@ -97,6 +97,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            // need to be able to search by related set. Ex: /api/v1/inventories/?organization__name__icontains=
            //
            scope[iterator + 'SearchSpin'] = true;
+           scope[iterator + 'Loading'] = true;
            scope[iterator + 'SearchParms'] = '';
            var url = defaultUrl;
            if ( (scope[iterator + 'SelectShow'] == false && scope[iterator + 'SearchValue'] != '' && scope[iterator + 'SearchValue'] != undefined) ||

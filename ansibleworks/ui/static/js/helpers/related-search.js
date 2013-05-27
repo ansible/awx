@@ -53,6 +53,8 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
 
         scope.search = function(model) {
            scope[model + 'SearchSpin'] = true;
+           scope[model + 'Loading'] = true;
+           
            var set, url, iterator, default_order;
            for (var key in relatedSets) {
                if (relatedSets[key].iterator == model) {

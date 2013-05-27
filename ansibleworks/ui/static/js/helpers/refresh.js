@@ -30,6 +30,7 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities'])
                 scope[iterator + 'Count'] = data.count;
                 scope[iterator + 'PageCount'] = Math.ceil((data.count / scope[iterator + 'PageSize']));
                 scope[iterator + 'SearchSpin'] = false;
+                scope[iterator + 'Loading'] = false;
                 scope[set] = data['results'];
                 scope.$emit('PostRefresh');
                 })
