@@ -1,0 +1,20 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Forbidden" %}{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url "admin:index" %}">{% trans "Home" %}</a> &rsaquo;
+  {% trans "Forbidden" %}
+</div>
+{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 0.7em;">{% trans 'Forbidden' %}</h1>
+<p>{% trans "You don't have permission to access the requested page." %}</p>
+{% endblock %}

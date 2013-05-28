@@ -1,0 +1,18 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Not Found" %}{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url "admin:index" %}">{% trans "Home" %}</a> &rsaquo;
+  {% trans "Not Found" %}
+</div>
+{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 0.7em;">{% trans 'Not Found' %}</h1>
+<p>{% trans "We're sorry, but the requested page could not be found." %}</p>
+{% endblock %}

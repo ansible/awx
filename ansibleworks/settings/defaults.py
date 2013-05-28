@@ -110,7 +110,6 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 )
 
 MIDDLEWARE_CLASSES += (
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'ansibleworks.middleware.exceptions.ExceptionMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
     # middleware loaded after this point will be subject to transactions
@@ -221,24 +220,27 @@ LOGGING = {
     'handlers': {
         'console': {
             'level': 'DEBUG',
-            #'filters': ['require_debug_true'],
+            'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
         },
         'null': {
             'class': 'django.utils.log.NullHandler',
         },
+        'file': {
+            'class': 'django.utils.log.NullHandler',
+        },
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+            'class': 'django.utils.log.AdminEmailHandler',
+        },
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
         },
         'django.request': {
-            'handlers': ['mail_admins', 'console'],
+            'handlers': ['mail_admins', 'console', 'file'],
             'level': 'ERROR',
             'propagate': False,
         },

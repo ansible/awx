@@ -2,6 +2,8 @@
 # All Rights Reserved.
 
 from django.http import HttpResponse
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from ansibleworks.main.models import *
@@ -25,6 +27,25 @@ import sys
 import json as python_json
 from base_views import *
 from ansibleworks.main.access import *
+
+def handle_error(request, status=404):
+    context = {}
+    print request.path, status
+    if request.path.startswith('/admin/'):
+        template_name = 'admin/%d.html' % status
+    else:
+        template_name = '%d.html' % status
+    return render_to_response(template_name, context,
+                              context_instance=RequestContext(request))
+
+def handle_403(request):
+    return handle_error(request, 403)
+
+def handle_404(request):
+    return handle_error(request, 404)
+
+def handle_500(request):
+    return handle_error(request, 500)
 
 class ApiRootView(APIView):
     '''
