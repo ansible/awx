@@ -216,7 +216,20 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    var base = $location.path().replace(/^\//,'').split('/')[0];
    var master = {};
    var id = $routeParams.id;
-   var relatedSets = {}; 
+   var relatedSets = {};
+   var hostsUrl;
+
+   scope['inventory_id'] = id;
+
+   // Retrieve each related set and any lookups
+   if (scope.inventoryLoadedRemove) {
+      scope.inventoryLoadedRemove();
+   }
+   scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
+       scope.groupName = 'All Hosts';
+       scope.createButtonShow = false;
+       scope.search(relatedSets['hosts'].iterator);
+       });
   
    // Retrieve detail record and prepopulate the form
    Rest.setUrl(defaultUrl + ':id/'); 
@@ -244,19 +257,12 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                field: 'organization' 
                });
 
-           var related = data.related;
-           for (var set in form.related) {
-               if (related[set]) {
-                  relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
-               }
-           }
-           
            // Load the tree view
            TreeInit({ scope: scope, inventory: data });
-
-           // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
-           //RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
-           //RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
+           hostsUrl = data.related.hosts;
+           relatedSets['hosts'] = { url: hostsUrl, iterator: 'host' };
+           RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
+           RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
            scope.$emit('inventoryLoaded');
            })
        .error( function(data, status, headers, config) {
@@ -293,7 +299,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    // Related set: Add button
    scope.add = function(set) {
       $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.id + '/' + set + '/add');
+      $location.path('/' + base + '/' + $routeParams.id + '/groups/' + scope.group_id + '/' + set + '/add');
       };
 
    // Related set: Edit button
@@ -391,14 +397,14 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                     },
                 "_disabled": (nodeType == 'all-hosts-group') ? true : false
                 },
-             addHost: { 
-                 label: 'Add Host',
-                 action: function(obj) {
-                     LoadBreadCrumbs({ path: '/groups/' + $(obj).attr('id'), title: $(obj).attr('name') });
-                     changePath($location.path() + '/groups/' + $(obj).attr('id') + '/hosts'); 
-                     },
-                 "_disabled": (nodeType == 'all-hosts-group') ? true : false
-                 },
+             // addHost: { 
+             //     label: 'Add Host',
+             //     action: function(obj) {
+             //         LoadBreadCrumbs({ path: '/groups/' + $(obj).attr('id'), title: $(obj).attr('name') });
+             //         changePath($location.path() + '/groups/' + $(obj).attr('id') + '/hosts'); 
+             //         },
+             //     "_disabled": (nodeType == 'all-hosts-group') ? true : false
+             //     },
              edit: { 
                  label: 'Edit Group',
                  action: function(obj) { changePath($location.path() + '/groups/' + $(obj).attr('id')); },
@@ -440,11 +446,39 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
              }
       }
       }
-
+  
+  scope.$on('NodeSelect', function(e, n) {
+      var node = $('li[name="' + n.data + '"]');
+      var type = node.attr('type');
+      var url;
+      $('#tree-view').jstree('open_node',node);
+      if (type == 'group') {
+         url = node.attr('all');
+         scope.createButtonShow = true;
+         scope.group_id = node.attr('id');
+         scope.groupName = n.data;
+      }
+      else if (type == 'all-hosts-group') {
+         url = node.attr('url');
+         scope.createButtonShow = false;
+         scope.groupName = 'All Hosts';
+      }
+      else if (type == 'inventory-node') {
+         url = node.attr('hosts');
+         scope.createButtonShow = false;
+         scope.groupName = 'All Hosts';
+      }
+      relatedSets['hosts'] = { url: url, iterator: 'host' };
+      RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
+      RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
+      scope.search('host');
+      scope.$digest();
+      });
 }
 
 InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
-                            'OrganizationList', 'TreeInit', 'GetBasePath']; 
+                            'OrganizationList', 'TreeInit', 'GetBasePath'
+                            ]; 
   

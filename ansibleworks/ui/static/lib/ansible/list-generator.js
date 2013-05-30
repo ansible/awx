@@ -34,6 +34,9 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
            case 'ngShow':
                 result = "ng-show=\"" + obj[key] + "\" ";
                 break;
+           case 'ngHide':
+                result = "ng-hide=\"" + obj[key] + "\" ";
+                break;
            case 'awToolTip':
                 result = "aw-tool-tip=\"" + obj[key] + "\" ";
                 break;
@@ -68,6 +71,9 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
        if (options.mode == 'lookup') {
           var element = angular.element(document.getElementById('lookup-modal-body'));  
        }
+       else if (options.id) {
+          var element = angular.element(document.getElementById(options.id));  
+       }
        else {
           var element = angular.element(document.getElementById('htmlTemplate'));  
        }
@@ -94,7 +100,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
        var html = '';
        var list = this.list; 
 
-       if (options.mode != 'lookup') {
+       if (options.mode != 'lookup' && (options.breadCrumbs == undefined || options.breadCrumbs == true)) {
            //Breadcrumbs
            html += "<div class=\"nav-path\">\n";
            html += "<ul class=\"breadcrumb\">\n";
@@ -146,6 +152,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
                     html += "<button " + this.attr(list.actions[action], 'ngClick') + "class=\"btn";
                     html += (list.actions[action].class) ?  " " + list.actions[action].class : " btn-small";
                     html += "\" ";
+                    html += (list.actions[action].ngHide) ? this.attr(list.actions[action],'ngHide') : "";
                     html += (list.actions[action].awToolTip) ? this.attr(list.actions[action],'awToolTip') : "";
                     html += (list.actions[action].awToolTip) ? "data-placement=\"top\" " : "";
                     html += " >" + this.icon(list.actions[action].icon);

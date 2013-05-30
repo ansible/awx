@@ -19,16 +19,25 @@ function HostsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
    
     var list = HostList
     var base = $location.path().replace(/^\//,'').split('/')[0];
+    var base2 = $location.path().replace(/^\//,'').split('/')[2];
     var defaultUrl = GetBasePath('hosts');
     var view = GenerateList;
-    var mode = (base == 'hosts') ? 'edit' : 'select';
+    var mode = (base == 'hosts' || base2 == 'hosts') ? 'edit' : 'select';
     var scope = view.inject(list, { mode: mode });               // Inject our view
     scope.selected = [];
-  
+
+    scope['inventory_id'] = $routeParams.inventory_id;
+    
+    if (base == 'hosts' || base2 == 'hosts') {
+       scope['showAddButton'] = false;
+    }
+    else {
+       scope['showAddButton'] = true;  
+    }
+
     SearchInit({ scope: scope, set: 'hosts', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
-
     LoadBreadCrumbs();
     
     scope.addHost = function() {
@@ -36,7 +45,7 @@ function HostsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
        }
 
     scope.editHost = function(id) {
-       $location.path($location.path() + '/' + id);
+       $location.path('/inventories/' + $routeParams.inventory_id + '/hosts/' + id);
        }
  
     scope.deleteHost = function(id, name) {

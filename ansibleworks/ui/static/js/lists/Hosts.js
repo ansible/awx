@@ -20,7 +20,8 @@ angular.module('HostListDefinition', [])
         fields: {
             name: {
                 key: true,
-                label: 'Name'
+                label: 'Name',
+                linkTo: "/inventories/\{\{ inventory_id \}\}/hosts/\{\{ host.id \}\}"
                 },
             description: {
                 label: 'Description'
@@ -33,6 +34,7 @@ angular.module('HostListDefinition', [])
                 label: 'Add',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addHost()',
+                ngHide: 'showAddButton == false',
                 class: 'btn-success btn-small',
                 awToolTip: 'Create a new host'
                 }
@@ -42,8 +44,8 @@ angular.module('HostListDefinition', [])
             edit: {
                 label: 'Edit',
                 ngClick: "editHost(\{\{ host.id \}\})",
-                icon: 'icon-edit btn-success',
-                class: 'btn-small',
+                icon: 'icon-edit',
+                class: 'btn-small btn-success',
                 awToolTip: 'View/Edit host'
                 },
 

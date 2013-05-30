@@ -29,7 +29,7 @@ angular.module('GeneratorHelpers', [])
         html += "<span ng-bind=\"" + iterator + "SearchFieldLabel\"></span>\n";
         html += "<span class=\"caret\"></span>\n";
         html += "</button>\n";
-        html += "<ul class=\"dropdown-menu\">\n";
+        html += "<ul class=\"dropdown-menu\" id=\"" + iterator + "SearchDropdown\">\n";
         
         for ( var fld in form.fields) {
           if (form.fields[fld].notSearchable == undefined || form.fields[fld].notSearchable == false) {

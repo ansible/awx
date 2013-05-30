@@ -14,6 +14,9 @@ angular.module('InventoryFormDefinition', [])
         editTitle: '{{ name }}',                                  //Legend in edit mode
         name: 'inventory',
         well: true,
+        collapse: true,
+        collapseTitle: 'Edit Inventory',
+        collapseMode: 'edit',
 
         fields: {
             name: {
@@ -56,53 +59,56 @@ angular.module('InventoryFormDefinition', [])
                 }
             },
 
-        related: { //related colletions (and maybe items?)
-
-             // hosts:  {
-             //    type: 'collection',
-             //    title: 'Hosts',
-             //    iterator: 'host',
-             //    open: false,
-                
-             //    actions: { 
-             //        add: {
-             //            ngClick: "add('hosts')",
-             //            icon: 'icon-plus',
-             //            awToolTip: 'Create a new host'
-             //            },
-             //        },
-                
-             //    fields: {
-             //        name: {
-             //            key: true,
-             //            label: 'Name'
-             //            },
-             //        description: {
-             //            label: 'Description'
-             //            }
-             //        },
-                
-             //    fieldActions: {
-             //        edit: {
-             //            ngClick: "edit('hosts', \{\{ host.id \}\}, '\{\{ host.name \}\}')",
-             //            icon: 'icon-edit',
-             //            awToolTip: 'Edit host'
-             //            },
-             //        delete: {
-             //            ngClick: "delete('hosts', \{\{ host.id \}\}, '\{\{ host.name \}\}', 'hosts')",
-             //            icon: 'icon-remove',
-             //            class: 'btn-danger',
-             //            awToolTip: 'Create a new host'
-             //            }
-             //        }
-             //    
+        related: {
 
             groups: {
                 type: 'tree',
-                title: "{{ name }} Children",
-                instructions: "Right click on a host or subgroup to make changes or add additional children.",
                 open: true,
-                actions: { }
+                actions: { 
+                    }
+                },
+
+            hosts: {
+                type: 'treeview',
+                title: "{{ groupName }}",
+                iterator: 'host',
+                actions: { 
+                    add: {
+                        ngClick: "add('hosts')",
+                        icon: 'icon-plus',
+                        label: 'Add',
+                        awToolTip: 'Create a new host',
+                        ngHide: 'createButtonShow == false'
+                        },
+                    },
+                
+                fields: {
+                    name: {
+                        key: true,
+                        label: 'Name',
+                        linkTo: "/inventories/\{\{ inventory_id \}\}/hosts/\{\{ host.id \}\}"
+                        },
+                    description: {
+                        label: 'Description'
+                        }
+                    },
+                
+                fieldActions: {
+                    edit: {
+                        ngClick: "edit('hosts', \{\{ host.id \}\}, '\{\{ host.name \}\}')",
+                        icon: 'icon-edit',
+                        label: 'Edit',
+                        class: 'btn-success',
+                        awToolTip: 'Edit host'
+                        },
+                    delete: {
+                        ngClick: "delete('hosts', \{\{ host.id \}\}, '\{\{ host.name \}\}', 'hosts')",
+                        icon: 'icon-remove',
+                        label: 'Delete',
+                        class: 'btn-danger',
+                        awToolTip: 'Remove host'
+                        }
+                    }    
                 }
             }
 

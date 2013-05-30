@@ -49,6 +49,9 @@ angular.module('Utilities',[])
       else if (data.detail) {
          Alert(defaultMsg.hdr, defaultMsg.msg + ' ' + data.detail);
       }
+      else if (data['__all__']) {
+         Alert('Error!', data['__all__']);
+      }
       else if (form) {
          var fieldErrors = false; 
          for (var field in form.fields ) {
@@ -94,7 +97,12 @@ angular.module('Utilities',[])
          for (var i=0; i < paths.length - 1; i++) {
             if (i > 0 && paths[i].match(/\d+/)) {
                parent = paths[i-1];
-               child = parent.substring(0,parent.length - 1);  //assumes parent ends with 's'
+               if (parent == 'inventories') {
+                  child = 'inventory';
+               }
+               else {
+                  child = parent.substring(0,parent.length - 1);  //assumes parent ends with 's'
+               }
                // find the correct title
                for (var j=0; j < $rootScope.crumbCache.length; j++) {
                    if ($rootScope.crumbCache[j].path == '/' + parent + '/' + paths[i]) {

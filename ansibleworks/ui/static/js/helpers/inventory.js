@@ -74,6 +74,12 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             $(tree_id).jstree({
                 "core": { "initially_open":['inventory-node'] },
                 "plugins": ['themes', 'json_data', 'ui', 'contextmenu'],
+                "themes": {
+                    "theme": "ansible",
+                    "dots": false,
+                    "icons": true
+                    },
+                "ui": { "initially_select": [ 'all-hosts-group' ]},
                 "json_data": {
                     data: treeData,
                     ajax: {
@@ -96,14 +102,14 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                        description: data.results[i].description,
                                        inventory: data.results[i].inventory,
                                        all: data.results[i].related.all_hosts,
-                                       children: data.results[i].related.children,
+                                       children: data.results[i].related.children + '?order_by=name',
                                        hosts: data.results[i].related.hosts,
                                        variable: data.results[i].related.variable_data
                                        },
                                     state: 'closed'
                                     });
                             }
-                            scope.$emit('loadHosts');
+                            //scope.$emit('loadHosts');
                             return response;
                             }
                         }
@@ -112,9 +118,21 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     items: scope.treeController
                     }
                 });
+            
+            // When user clicks on a group, display the related hosts in the list view
+            $(tree_id).bind("select_node.jstree", function(evt, data){
+                //selected node object: data.inst.get_json()[0];
+                //selected node text: data.inst.get_json()[0].data
+                //console.log( data.inst.get_json()[0].data + ', ' + data.inst.get_json()[0].attr.id );
+                if (data.inst.get_json()[0].attr.id != 'inventory-node') {
+                   scope.$emit('NodeSelect',data.inst.get_json()[0]);   
+                }
+                else {
+                   $('#all-hosts-group a').click(); 
+                }
+                });
             });
         
-
         // Ater inventory top-level hosts, load top-level groups
         if (scope.HostLoadedRemove) {
             scope.HostLoadedRemove();
@@ -163,6 +181,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                         id: 'inventory-node',
                         url: inventory_url,
                         'inventory_id': inventory_id,
+                        hosts: hosts,
                         name: inventory_name
                         },
                     state: 'open',
@@ -176,30 +195,33 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     attr: {
                         type: 'all-hosts-group',
                         id: 'all-hosts-group',
-                        url: hosts + '?order_by=name',
+                        url: hosts,
                         name: 'All Hosts'
                         },
                     state: 'closed',
                     children: []
                     };
-                for (var i=0; i < data.results.length; i++ ) {
-                    all_hosts_node.children.push({
-                        data: {
-                            title: data.results[i].name, 
-                            icon: '/'
-                            },
-                        attr: {
-                            id: data.results[i].id,
-                            type: 'host',
-                            name: data.results[i].name, 
-                            description: data.results[i].description,
-                            url: data.results[i].url, 
-                            variable_data: data.results[i].varaible_data,
-                            inventory: data.results[i].related.inventory,
-                            job_events: data.results[i].related.job_events
-                            },
-                        });
-                }
+                //
+                // No longer loading hosts inside the tree. Instead, we'll show hosts in the list view. 
+                //
+                // for (var i=0; i < data.results.length; i++ ) {
+                //     all_hosts_node.children.push({
+                //         data: {
+                //             title: data.results[i].name, 
+                //             icon: '/'
+                //             },
+                //         attr: {
+                //             id: data.results[i].id,
+                //             type: 'host',
+                //             name: data.results[i].name, 
+                //             description: data.results[i].description,
+                //             url: data.results[i].url, 
+                //             variable_data: data.results[i].varaible_data,
+                //             inventory: data.results[i].related.inventory,
+                //             job_events: data.results[i].related.job_events
+                //             },
+                //         });
+                // }
                 treeData[0].children.push(all_hosts_node);
                 scope.$emit('hostsLoaded');
             })
@@ -207,8 +229,5 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 Alert('Error', 'Failed to laod tree data. Url: ' + hosts + ' GET status: ' + status);
             });
 
-   
         }
         }]);
-
-

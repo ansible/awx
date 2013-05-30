@@ -325,3 +325,11 @@
  }
 
  /* End Jobs Page */
+
+ /* Inventory detail */
+ 
+ .inventory-title {
+    margin-top: 15px;
+    color: #0088cc;
+    font-weight: bold;
+ }

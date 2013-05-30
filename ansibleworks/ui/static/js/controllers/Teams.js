@@ -230,7 +230,10 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    TeamLookUpOrganizationInit({ scope: scope });
 
    // Retrieve each related set and any lookups
-   scope.$on('teamLoaded', function() {
+   if (scope.teamLoadedRemove) {
+      scope.teamLoadedRemove();
+   }
+   scope.teamLoadedRemove = scope.$on('teamLoaded', function() {
        Rest.setUrl(scope['organization_url']);
        Rest.get()
            .success( function(data, status, headers, config) {

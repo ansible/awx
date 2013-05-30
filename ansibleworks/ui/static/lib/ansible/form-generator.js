@@ -31,6 +31,9 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
            case 'ngShow':
                result = "ng-show=\"" + obj[key] + "\" ";
                break;
+           case 'ngHide':
+               result = "ng-hide=\"" + obj[key] + "\" ";
+               break;
            case 'trueValue':
                result = "ng-true-value=\"" + obj[key] + "\" ";
                break;
@@ -473,6 +476,17 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           html += "</div>\n";
        }
        else { 
+          
+          if ( this.form.collapse && this.form.collapseMode == options.mode) {
+             html += "<div class=\"accordion-group\">\n";
+             html += "<div class=\"accordion-heading\">\n";
+             html += "<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#collapse1\">";
+             html += "<i class=\"icon-angle-down icon-white\"></i>" + this.form.collapseTitle + "</a>\n";
+             html += "</div>\n";
+             html += "<div id=\"collapse1\" class=\"accordion-body collapse\">\n";
+             html += "<div class=\"accordion-inner\">\n";
+          }
+          
           // Start the well
           if ( this.has('well') ) {
              html += "<div class=\"well\">\n";
@@ -558,8 +572,13 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           if ( this.has('well') ) {
              html += "</div>\n";
           }
-       }
 
+          if ( this.form.collapse && this.form.collapseMode == options.mode ) {
+             html += "</div>\n";
+             html += "</div>\n";
+             html += "</div>\n";  
+          }
+       }
 
        if ((!this.modal && this.form.items)) {
           for (itm in this.form.items) {
@@ -590,12 +609,144 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           }
        }
        
-       if ((!this.modal) && options.related && this.form.related) {
-          html += this.buildCollections();
+       if (this.form.name == 'inventory') {
+          html += this.buildTree();
        }
-       
+       else {
+          if ((!this.modal) && options.related && this.form.related) {
+             html += this.buildCollections();
+          }
+       }
+
        return html;
      
+       },
+
+    buildTree: function() {
+       //
+       // Used to create the inventory detail view
+       //
+       var idx = 1;
+       var form = this.form;
+       
+       var html = "<div class=\"accordion-group\">\n";
+       html += "<div class=\"accordion-heading\">\n";
+       html += "<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#collapse2\">";
+       html += "<i class=\"icon-angle-up icon-white\"></i>Inventory Content</a>\n";
+       html += "</div>\n";
+       html += "<div id=\"collapse2\" class=\"accordion-body collapse in\">\n";
+       html += "<div class=\"accordion-inner\">\n";
+       
+       for (var itm in form.related) {
+           if (form.related[itm].type == 'tree') {
+              html += "<div id=\"tree-view\" class=\"span5\"></div>\n";
+           }
+           else {
+              html += "<div id=\"group-view\" class=\"span7\">\n";
+              html += "<div class=\"well\">\n";
+              html += "<h5>" + form.related[itm].title + "</h5>\n";
+              html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true });
+
+              // Add actions(s)
+              html += "<div class=\"list-actions\">\n";
+              for (var action in form.related[itm].actions) {
+                  html += "<button class=\"btn btn-mini btn-success\" ";
+                  html += (form.related[itm]['actions'][action].id) ? this.attr(form.related[itm]['actions'][action],'id') : "";
+                  html += this.attr(form.related[itm]['actions'][action],'ngClick');
+                  html += (form.related[itm]['actions'][action].awToolTip) ? this.attr(form.related[itm]['actions'][action],'awToolTip') : "";
+                  html += (form.related[itm]['actions'][action].awToolTip) ? "data-placement=\"top\" " : "";
+                  html += (form.related[itm]['actions'][action].ngHide) ? this.attr(form.related[itm]['actions'][action],'ngHide') : "";
+                  html += "><i class=\"" + form.related[itm]['actions'][action].icon + "\"></i>";
+                  html += (form.related[itm]['actions'][action].label) ?  " " + form.related[itm]['actions'][action].label : ""; 
+                  html += "</button>\n";
+              }
+              html += "</div>\n";
+             
+              // Start the list
+              html += "<div class=\"list\">\n";
+              html += "<table class=\"table table-condensed\">\n";
+              html += "<thead>\n";
+              html += "<tr>\n";
+              html += "<th>#</th>\n";
+              for (var fld in form.related[itm].fields) {
+                  html += "<th>" + form.related[itm]['fields'][fld].label + "</th>\n";
+              }
+              html += "<th></th>\n";
+              html += "</tr>\n";
+              html += "</thead>";
+              html += "<tbody>\n";
+            
+              html += "<tr ng-repeat=\"" + form.related[itm].iterator + " in " + itm + "\" >\n";
+              html += "<td>{{ $index + (" + form.related[itm].iterator + "Page * " + 
+                 form.related[itm].iterator + "PageSize) + 1 }}.</td>\n";
+              var cnt = 1;
+              var rfield;
+              var base = (form.related[itm].base) ? form.related[itm].base : itm;
+              base = base.replace(/^\//,'');
+              for (var fld in form.related[itm].fields) {
+                  cnt++;
+                  rfield = form.related[itm].fields[fld];
+                  html += "<td>";
+                  if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
+                     if (rfield.linkTo) {
+                        html += "<a href=\"#" + rfield.linkTo + "\">";
+                     }
+                     else if (rfield.ngClick) {
+                        html += "<a href=\"\"" + this.attr(rfield, 'ngClick') + "\">";
+                     }
+                     else {
+                        html += "<a href=\"#/" + base + "/{{" + form.related[itm].iterator + ".id }}\">";
+                     }
+                  }
+                  html += "{{ " + form.related[itm].iterator + "." + fld + " }}";
+                  if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
+                     html += "</a>";
+                  }
+                  html += "</td>\n";
+              }
+             
+              // Row level actions
+              html += "<td class=\"actions\">";
+              for (action in form.related[itm].fieldActions) {
+                  html += "<button class=\"btn btn-mini"; 
+                  html += (form.related[itm]['fieldActions'][action].class) ?
+                      " " + form.related[itm]['fieldActions'][action].class : "";
+                  html += "\" ";
+                  html += (form.related[itm]['fieldActions'][action].awToolTip) ? this.attr(form.related[itm]['fieldActions'][action],'awToolTip') : "";
+                  html += this.attr(form.related[itm]['fieldActions'][action],'ngClick') +
+                      ">" + this.icon(form.related[itm]['fieldActions'][action].icon);
+                  html += (form.related[itm].fieldActions[action].label) ?  " " + form.related[itm].fieldActions[action].label : ""; 
+                  html += "</button> ";
+              }
+              html += "</td>";
+              html += "</tr>\n";
+              
+              // Message for when a related collection is empty
+              html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == false && (" + itm + " == null || " + itm + ".length == 0)\">\n";
+              html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
+              html += "</tr>\n";
+
+              // Message for loading
+              html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == true\">\n";
+              html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">Loading...</div></td>\n";
+              html += "</tr>\n";
+
+              // End List
+              html += "</tbody>\n";
+              html += "</table>\n";
+              html += "</div>\n";    // close well
+              html += "</div>\n";    // close group-view
+
+              html += PaginateWidget({ set: itm, iterator: form.related[itm].iterator, mini: true });      
+           }
+           idx++;
+       }
+       
+       html += "</div>\n";
+       html += "</div>\n";
+       html += "</div>\n"; 
+       
+       return html; 
        },
 
     buildCollections: function() {
@@ -638,110 +789,111 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                         html += "<button class=\"btn btn-small btn-success\" ";
                         html += this.attr(action,'ngClick');
                         html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
+                        html += (action.awToolTip) ? "data-placement=\"top\" " : "";
                         html += ">" + this.icon(action.icon) + "</button>\n";
                     }
                     html += "</div>\n";
                  }
-                 html += "<div id=\"tree-view\"></div>\n";
+                 html += "<div id=\"tree-view\" class=\"span6\"></div>\n";
+                 html += "<div id=\"group-view\" class=\"span6\"></div>\n";
                  html += "</div>\n";
               }
               else {
-                  html += "<div class=\"well\">\n";
-                  
-                  html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: false });
+                 html += "<div class=\"well\">\n";
+                 html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: false });
 
-                  // Add actions(s)
-                  html += "<div class=\"list-actions\">\n";
-                  for (var action in form.related[itm].actions) {
-                      html += "<button class=\"btn btn-small btn-success\" ";
-                      html += this.attr(form.related[itm]['actions'][action],'ngClick');
-                      html += "><i class=\"" + form.related[itm]['actions'][action].icon + "\"></i></button>\n";
-                  }
-                  html += "</div>\n";
-                  
-                  // Start the list
-                  html += "<div class=\"list\">\n";
-                  html += "<table class=\"table table-condensed\">\n";
-                  html += "<thead>\n";
-                  html += "<tr>\n";
-                  html += "<th>#</th>\n";
-                  for (var fld in form.related[itm].fields) {
-                      html += "<th>" + form.related[itm]['fields'][fld].label + "</th>\n";
-                  }
-                  html += "<th></th>\n";
-                  html += "</tr>\n";
-                  html += "</thead>";
-                  html += "<tbody>\n";
-                  
-                  html += "<tr ng-repeat=\"" + form.related[itm].iterator + " in " + itm + "\" >\n";
-                  html += "<td>{{ $index + (" + form.related[itm].iterator + "Page * " + 
-                          form.related[itm].iterator + "PageSize) + 1 }}.</td>\n";
-                  var cnt = 1;
-                  var rfield;
-                  var base = (form.related[itm].base) ? form.related[itm].base : itm;
-                  base = base.replace(/^\//,'');
-                  for (var fld in form.related[itm].fields) {
-                      cnt++;
-                      rfield = form.related[itm].fields[fld];
-                      html += "<td>";
-                      if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
-                         if (rfield.linkTo) {
-                            html += "<a href=\"#" + rfield.linkTo + "\">";
-                         }
-                         else if (rfield.ngClick) {
-                            html += "<a href=\"\"" + this.attr(rfield, 'ngClick') + "\">";
-                         }
-                         else {
-                            html += "<a href=\"#/" + base + "/{{" + form.related[itm].iterator + ".id }}\">";
-                         }
-                      }
-                      html += "{{ " + form.related[itm].iterator + "." + fld + " }}";
-                      if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
-                         html += "</a>";
-                      }
-                      html += "</td>\n";
-                  }
-                  
-                  // Row level actions
-                  html += "<td class=\"actions\">";
-                  for (action in form.related[itm].fieldActions) {
-                      html += "<button class=\"btn btn-small"; 
-                      html += (form.related[itm]['fieldActions'][action].class) ?
-                          " " + form.related[itm]['fieldActions'][action].class : "";
-                      html += "\" " + this.attr(form.related[itm]['fieldActions'][action],'ngClick') +
-                          ">" + this.icon(form.related[itm]['fieldActions'][action].icon);
-                      html += (form.related[itm].fieldActions[action].label) ?  " " + form.related[itm].fieldActions[action].label : ""; 
-                      html += "</button> ";
-                  }
-                  html += "</td>";
-                  html += "</tr>\n";
-                  
-                  // Message for when a related collection is empty
-                  html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == false && (" + itm + " == null || " + itm + ".length == 0)\">\n";
-                  html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
-                  html += "</tr>\n";
+                 // Add actions(s)
+                 html += "<div class=\"list-actions\">\n";
+                 for (var action in form.related[itm].actions) {
+                     html += "<button class=\"btn btn-small btn-success\" ";
+                     html += this.attr(form.related[itm]['actions'][action],'ngClick');
+                     html += "><i class=\"" + form.related[itm]['actions'][action].icon + "\"></i></button>\n";
+                 }
+                 html += "</div>\n";
+                
+                 // Start the list
+                 html += "<div class=\"list\">\n";
+                 html += "<table class=\"table table-condensed\">\n";
+                 html += "<thead>\n";
+                 html += "<tr>\n";
+                 html += "<th>#</th>\n";
+                 for (var fld in form.related[itm].fields) {
+                     html += "<th>" + form.related[itm]['fields'][fld].label + "</th>\n";
+                 }
+                 html += "<th></th>\n";
+                 html += "</tr>\n";
+                 html += "</thead>";
+                 html += "<tbody>\n";
+                
+                 html += "<tr ng-repeat=\"" + form.related[itm].iterator + " in " + itm + "\" >\n";
+                 html += "<td>{{ $index + (" + form.related[itm].iterator + "Page * " + 
+                         form.related[itm].iterator + "PageSize) + 1 }}.</td>\n";
+                 var cnt = 1;
+                 var rfield;
+                 var base = (form.related[itm].base) ? form.related[itm].base : itm;
+                 base = base.replace(/^\//,'');
+                 for (var fld in form.related[itm].fields) {
+                     cnt++;
+                     rfield = form.related[itm].fields[fld];
+                     html += "<td>";
+                     if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
+                        if (rfield.linkTo) {
+                           html += "<a href=\"#" + rfield.linkTo + "\">";
+                        }
+                        else if (rfield.ngClick) {
+                           html += "<a href=\"\"" + this.attr(rfield, 'ngClick') + "\">";
+                        }
+                        else {
+                           html += "<a href=\"#/" + base + "/{{" + form.related[itm].iterator + ".id }}\">";
+                        }
+                     }
+                     html += "{{ " + form.related[itm].iterator + "." + fld + " }}";
+                     if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
+                        html += "</a>";
+                     }
+                     html += "</td>\n";
+                 }
+                 
+                 // Row level actions
+                 html += "<td class=\"actions\">";
+                 for (action in form.related[itm].fieldActions) {
+                     html += "<button class=\"btn btn-small"; 
+                     html += (form.related[itm]['fieldActions'][action].class) ?
+                         " " + form.related[itm]['fieldActions'][action].class : "";
+                     html += "\" " + this.attr(form.related[itm]['fieldActions'][action],'ngClick') +
+                         ">" + this.icon(form.related[itm]['fieldActions'][action].icon);
+                     html += (form.related[itm].fieldActions[action].label) ?  " " + form.related[itm].fieldActions[action].label : ""; 
+                     html += "</button> ";
+                 }
+                 html += "</td>";
+                 html += "</tr>\n";
+                 
+                 // Message for when a related collection is empty
+                 html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == false && (" + itm + " == null || " + itm + ".length == 0)\">\n";
+                 html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
+                 html += "</tr>\n";
 
-                  // Message for loading
-                  html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == true\">\n";
-                  html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">Loading...</div></td>\n";
-                  html += "</tr>\n";
+                 // Message for loading
+                 html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == true\">\n";
+                 html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">Loading...</div></td>\n";
+                 html += "</tr>\n";
 
-                  // End List
-                  html += "</tbody>\n";
-                  html += "</table>\n";
-                  html += "</div>\n";    // close well
-                  html += "</div>\n";    // close list div
+                 // End List
+                 html += "</tbody>\n";
+                 html += "</table>\n";
+                 html += "</div>\n";    // close well
+                 html += "</div>\n";    // close list div
 
-                  html += PaginateWidget({ set: itm, iterator: form.related[itm].iterator, mini: true });      
-              }
+                 html += PaginateWidget({ set: itm, iterator: form.related[itm].iterator, mini: true });      
+               }
 
-              // End Accordion Group
-              html += "</div>\n";    // accordion inner
-              html += "</div>\n";    // accordion body
-              html += "</div>\n";    // accordion group
+               // End Accordion Group
+               html += "</div>\n";    // accordion inner
+               html += "</div>\n";    // accordion body
+               html += "</div>\n";    // accordion group 
 
-              idx++;
-           }
+               idx++;
+            }
        }
        html += "</div>\n";
 
