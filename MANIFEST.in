@@ -9,5 +9,5 @@ include *.py *.txt *.md
 include MANIFEST.in
 include COPYING
 prune ansibleworks/public
-prune ansibleworks/project
+prune ansibleworks/projects
 prune ansibleworks/ui/static/lib/jstree/_*

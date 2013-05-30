@@ -217,17 +217,30 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugTrue',
         },
     },
+    'formatters': {
+        'simple': {
+            'format': '%(asctime)s %(levelname)-8s %(name)s %(message)s',
+        },
+    },
     'handlers': {
         'console': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
         'null': {
             'class': 'django.utils.log.NullHandler',
         },
         'file': {
             'class': 'django.utils.log.NullHandler',
+            'formatter': 'simple',
+        },
+        'syslog': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.NullHandler',
+            'formatter': 'simple',
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -240,17 +253,16 @@ LOGGING = {
             'handlers': ['console'],
         },
         'django.request': {
-            'handlers': ['mail_admins', 'console', 'file'],
-            'level': 'ERROR',
+            'handlers': ['mail_admins', 'console', 'file', 'syslog'],
+            'level': 'WARNING',
             'propagate': False,
         },
         'py.warnings': {
             'handlers': ['console'],
         },
-        'ansibleworks.main': {
-            'handlers': ['console'],
+        'ansibleworks': {
+            'handlers': ['console', 'file', 'syslog'],
             'level': 'DEBUG',
-            'filters': []
         },
         'ansibleworks.main.rbac': {
             'handlers': ['null'],
