@@ -19,7 +19,7 @@ function GroupsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 
     var list = GroupList;
     var base = $location.path().replace(/^\//,'').split('/')[0];
-    var defaultUrl = GetBasePath('groups');
+    var defaultUrl = GetBasePath('inventory') + $routeParams.inventory_id + '/groups/';
     var view = GenerateList;
     
     var scope = view.inject(GroupList, { mode: 'select' });               // Inject our view
@@ -29,6 +29,10 @@ function GroupsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
        scope.PostRefreshRemove();
     }
     scope.PostRefresRemove = scope.$on('PostRefresh', function() {
+        $("tr.success").each(function(index) {
+            var ngc = $(this).attr('ng-class'); 
+            scope[ngc] = ""; 
+            });
         if ($routeParams.group_id) {
            // Remove the current group from the list of available groups, thus
            // preventing a group from being added to itself
@@ -38,6 +42,7 @@ function GroupsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                }
            }
         }
+        //scope.$digest();
         });
 
     SearchInit({ scope: scope, set: 'groups', list: list, url: defaultUrl });

@@ -609,7 +609,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           }
        }
        
-       if (this.form.name == 'inventory') {
+       if (this.form.name == 'inventory' && options.mode == 'edit') {
           html += this.buildTree();
        }
        else {

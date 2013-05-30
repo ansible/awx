@@ -20,12 +20,11 @@ function HostsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     var list = HostList
     var base = $location.path().replace(/^\//,'').split('/')[0];
     var base2 = $location.path().replace(/^\//,'').split('/')[2];
-    var defaultUrl = GetBasePath('hosts');
+    var defaultUrl = GetBasePath('inventory') + $routeParams.inventory_id + '/hosts/';
     var view = GenerateList;
     var mode = (base == 'hosts' || base2 == 'hosts') ? 'edit' : 'select';
     var scope = view.inject(list, { mode: mode });               // Inject our view
     scope.selected = [];
-
     scope['inventory_id'] = $routeParams.inventory_id;
     
     if (base == 'hosts' || base2 == 'hosts') {
@@ -34,7 +33,17 @@ function HostsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     else {
        scope['showAddButton'] = true;  
     }
-
+    
+    // if (scope.PostRefreshRemove) {
+    //    scope.PostRefreshRemove();
+    // }
+    // scope.PostRefresRemove = scope.$on('PostRefresh', function() {
+    //     $("tr.success").each(function(index) {
+    //         var ngc = $(this).attr('ng-class'); 
+    //         scope[ngc] = ""; 
+    //         });
+    //     });
+            
     SearchInit({ scope: scope, set: 'hosts', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);

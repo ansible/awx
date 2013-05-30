@@ -226,7 +226,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       scope.inventoryLoadedRemove();
    }
    scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
-       scope.groupName = 'All Hosts';
+       scope.groupTitle = 'All Hosts';
        scope.createButtonShow = false;
        scope.search(relatedSets['hosts'].iterator);
        });
@@ -342,44 +342,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 
    scope.treeController = function($node) {
       var nodeType = $($node).attr('type');
-      if (nodeType == 'host') {
-         return {
-             edit: { 
-                 label: 'Edit Host',
-                 action: function(obj) { changePath($location.path() + '/hosts/' + $(obj).attr('id')); }
-                 },
-             delete: {
-                 label: 'Delete Host', 
-                 action: function(obj) { 
-                     var action_to_take = function() {
-                         var url = defaultUrl + $routeParams.id + '/hosts/';
-                         Rest.setUrl(url);
-                         Rest.post({ id: $(obj).attr('id'), disassociate: 1 })
-                             .success( function(data, status, headers, config) {
-                                 $('#prompt-modal').modal('hide');
-                                 $('#tree-view').jstree("delete_node",obj);
-                                 })
-                             .error( function(data, status, headers, config) {
-                                 $('#prompt-modal').modal('hide');
-                                 ProcessErrors(scope, data, status, null,
-                                          { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                                 });      
-                         };
-                     //Force binds to work. Not working usual way.
-                     $('#prompt-header').text('Delete');
-                     $('#prompt-body').text('Are you sure you want to delete host ' + $(obj).attr('name') + '?');
-                     $('#prompt-action-btn').addClass('btn-danger');
-                     scope.promptAction = action_to_take;  // for some reason this binds?
-                     $('#prompt-modal').modal({
-                         backdrop: 'static',
-                         keyboard: true,
-                         show: true
-                         });
-                     }
-                 }
-             }
-      }
-      else if (nodeType == 'inventory') {
+      if (nodeType == 'inventory') {
           return {
               addGroup: {
                   label: 'Add Group',
@@ -392,22 +355,22 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
              addGroup: { 
                 label: 'Add Subgroup',
                 action: function(obj) { 
-                    LoadBreadCrumbs({ path: '/groups/' + $(obj).attr('id'), title: $(obj).attr('name') });
-                    changePath($location.path() + '/groups/' + $(obj).attr('id') + '/children');    
+                    LoadBreadCrumbs({ path: '/groups/' + $(obj).attr('group_id'), title: $(obj).attr('name') });
+                    changePath($location.path() + '/groups/' + $(obj).attr('group_id') + '/children');    
                     },
                 "_disabled": (nodeType == 'all-hosts-group') ? true : false
                 },
-             // addHost: { 
-             //     label: 'Add Host',
-             //     action: function(obj) {
-             //         LoadBreadCrumbs({ path: '/groups/' + $(obj).attr('id'), title: $(obj).attr('name') });
-             //         changePath($location.path() + '/groups/' + $(obj).attr('id') + '/hosts'); 
-             //         },
-             //     "_disabled": (nodeType == 'all-hosts-group') ? true : false
-             //     },
+             addHost: { 
+                label: 'Add Host',
+                    action: function(obj) {
+                        LoadBreadCrumbs({ path: '/groups/' + $(obj).attr('group_id'), title: $(obj).attr('name') });
+                        changePath($location.path() + '/groups/' + $(obj).attr('group_id') + '/hosts'); 
+                        },
+                    "_disabled": (nodeType == 'all-hosts-group') ? true : false
+                   },
              edit: { 
                  label: 'Edit Group',
-                 action: function(obj) { changePath($location.path() + '/groups/' + $(obj).attr('id')); },
+                 action: function(obj) { changePath($location.path() + '/groups/' + $(obj).attr('group_id')); },
                  separator_before: true,
                  "_disabled": (nodeType == 'all-hosts-group') ? true : false
                  },
@@ -455,18 +418,22 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       if (type == 'group') {
          url = node.attr('all');
          scope.createButtonShow = true;
-         scope.group_id = node.attr('id');
+         scope.group_id = node.attr('group_id');
          scope.groupName = n.data;
+         scope.groupTitle = 'Hosts: ' + n.data;
+         scope.groupTitle += (node.attr('description')) ? ' -' + node.attr('description') : '';
       }
       else if (type == 'all-hosts-group') {
          url = node.attr('url');
          scope.createButtonShow = false;
          scope.groupName = 'All Hosts';
+         scope.groupTitle = 'All Hosts';
       }
       else if (type == 'inventory-node') {
          url = node.attr('hosts');
          scope.createButtonShow = false;
          scope.groupName = 'All Hosts';
+         scope.groupTitle = 'All Hosts';
       }
       relatedSets['hosts'] = { url: url, iterator: 'host' };
       RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });

@@ -23,49 +23,11 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var inventory_name = inventory.name; 
         var inventory_url = inventory.url;
         var inventory_id = inventory.id;
+        var inventory_descr = inventory.description;
         var tree_id = '#tree-view';
-        
+        var idx=0;
         var treeData = [];
 
-        
-        // On group expand, fetch and add hosts
-        if (scope.loadHostsRemove) {
-           scope.loadHostsRemove();
-        }
-        scope.loadHostsRemove = scope.$on('loadHosts', function(){
-            var node = scope.selected_node; 
-            var url = $(node).attr('hosts');
-            var children = [];
-            // Rest and $http refuse to work. Seems we've hit a nesting limit at this point? 
-            $.ajax({
-                url: url, 
-                dataType: 'json', 
-                headers: { 'Authorization': 'Token ' + Authorization.getToken() }
-                }).done( function(data) { 
-                    for (var i=0; i < data.results.length; i++) {
-                        // Add each host to the group node
-                        $(tree_id).jstree("create_node", node, "inside", {
-                            data: {
-                                title: data.results[i].name, 
-                                icon: '/'
-                                },
-                            attr: {
-                                id: data.results[i].id,
-                                type: 'host',
-                                name: data.results[i].name, 
-                                description: data.results[i].description,
-                                url: data.results[i].url, 
-                                variable_data: data.results[i].varaible_data,
-                                inventory: data.results[i].related.inventory,
-                                job_events: data.results[i].related.job_events
-                                }
-                            });    
-                    }
-                    // Open the group node
-                    $(tree_id).jstree("open_node", node);  
-                    });            
-            });
-       
         // After loading the Inventory top-level data, initialize the tree
         if (scope.buildTreeRemove) {
            scope.buildTreeRemove();
@@ -96,7 +58,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                        title: data.results[i].name
                                        },
                                     attr: {
-                                       id: data.results[i].id,
+                                       id: idx,
+                                       group_id: data.results[i].id,
                                        type: 'group',
                                        name: data.results[i].name, 
                                        description: data.results[i].description,
@@ -108,6 +71,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                        },
                                     state: 'closed'
                                     });
+                                idx++;
                             }
                             //scope.$emit('loadHosts');
                             return response;
@@ -125,7 +89,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 //selected node text: data.inst.get_json()[0].data
                 //console.log( data.inst.get_json()[0].data + ', ' + data.inst.get_json()[0].attr.id );
                 if (data.inst.get_json()[0].attr.id != 'inventory-node') {
-                   scope.$emit('NodeSelect',data.inst.get_json()[0]);   
+                   scope.$emit('NodeSelect',data.inst.get_json()[0]);
                 }
                 else {
                    $('#all-hosts-group a').click(); 
@@ -147,7 +111,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                title: data.results[i].name
                                },
                            attr: {
-                               id: data.results[i].id,
+                               id: idx,
+                               group_id: data.results[i].id,
                                type: 'group',
                                name: data.results[i].name, 
                                description: data.results[i].description,
@@ -159,6 +124,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                },
                            state: 'closed'
                            });
+                        idx++;
                     }
                     scope.$emit('buildTree');
                     })
@@ -182,12 +148,13 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                         url: inventory_url,
                         'inventory_id': inventory_id,
                         hosts: hosts,
-                        name: inventory_name
+                        name: inventory_name,
+                        description: inventory_descr
                         },
                     state: 'open',
                     children:[] 
                     });
-                //treeData[0].children.push({
+                
                 var all_hosts_node = {
                     data: {
                         title: 'All Hosts'
@@ -198,30 +165,9 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                         url: hosts,
                         name: 'All Hosts'
                         },
-                    state: 'closed',
-                    children: []
+                    state: 'closed'
                     };
-                //
-                // No longer loading hosts inside the tree. Instead, we'll show hosts in the list view. 
-                //
-                // for (var i=0; i < data.results.length; i++ ) {
-                //     all_hosts_node.children.push({
-                //         data: {
-                //             title: data.results[i].name, 
-                //             icon: '/'
-                //             },
-                //         attr: {
-                //             id: data.results[i].id,
-                //             type: 'host',
-                //             name: data.results[i].name, 
-                //             description: data.results[i].description,
-                //             url: data.results[i].url, 
-                //             variable_data: data.results[i].varaible_data,
-                //             inventory: data.results[i].related.inventory,
-                //             job_events: data.results[i].related.job_events
-                //             },
-                //         });
-                // }
+                
                 treeData[0].children.push(all_hosts_node);
                 scope.$emit('hostsLoaded');
             })

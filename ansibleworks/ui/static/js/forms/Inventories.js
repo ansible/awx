@@ -70,7 +70,7 @@ angular.module('InventoryFormDefinition', [])
 
             hosts: {
                 type: 'treeview',
-                title: "{{ groupName }}",
+                title: "{{ groupTitle }}",
                 iterator: 'host',
                 actions: { 
                     add: {
