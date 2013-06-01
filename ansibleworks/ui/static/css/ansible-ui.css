@@ -333,3 +333,19 @@
     color: #0088cc;
     font-weight: bold;
  }
+
+ .inventory-buttons {
+    margin: 10px 10px 0 0;
+ }
+
+ .inventory-buttons button {
+    margin-left: 5px;
+ }
+
+ #hosts-well {
+    padding-top: 10px;
+ }
+
+ #hosts-title {
+    margin-bottom: 15px;
+ }

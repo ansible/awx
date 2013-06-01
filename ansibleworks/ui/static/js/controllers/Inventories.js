@@ -360,14 +360,14 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                     },
                 "_disabled": (nodeType == 'all-hosts-group') ? true : false
                 },
-             addHost: { 
+             /*addHost: { 
                 label: 'Add Host',
                     action: function(obj) {
                         LoadBreadCrumbs({ path: '/groups/' + $(obj).attr('group_id'), title: $(obj).attr('name') });
                         changePath($location.path() + '/groups/' + $(obj).attr('group_id') + '/hosts'); 
                         },
                     "_disabled": (nodeType == 'all-hosts-group') ? true : false
-                   },
+                   },*/
              edit: { 
                  label: 'Edit Group',
                  action: function(obj) { changePath($location.path() + '/groups/' + $(obj).attr('group_id')); },
@@ -411,16 +411,18 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       }
   
   scope.$on('NodeSelect', function(e, n) {
-      var node = $('li[name="' + n.data + '"]');
+      var node = $('li[id="' + n.attr.id + '"]');
       var type = node.attr('type');
       var url;
       $('#tree-view').jstree('open_node',node);
       if (type == 'group') {
          url = node.attr('all');
+         scope.groupAddHide = false; 
+         scope.groupEditHide =false;
          scope.createButtonShow = true;
          scope.group_id = node.attr('group_id');
          scope.groupName = n.data;
-         scope.groupTitle = 'Hosts: ' + n.data;
+         scope.groupTitle = n.data;
          scope.groupTitle += (node.attr('description')) ? ' -' + node.attr('description') : '';
       }
       else if (type == 'all-hosts-group') {
@@ -429,8 +431,10 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.groupName = 'All Hosts';
          scope.groupTitle = 'All Hosts';
       }
-      else if (type == 'inventory-node') {
+      else if (type == 'inventory') {
          url = node.attr('hosts');
+         scope.groupAddHide = false; 
+         scope.groupEditHide =true;
          scope.createButtonShow = false;
          scope.groupName = 'All Hosts';
          scope.groupTitle = 'All Hosts';

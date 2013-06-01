@@ -639,12 +639,18 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        
        for (var itm in form.related) {
            if (form.related[itm].type == 'tree') {
-              html += "<div id=\"tree-view\" class=\"span5\"></div>\n";
+              html += "<div class=\"span5\">";
+              html += "<div class=\"inventory-buttons pull-right\">";
+              html += "<button ng-hide=\"groupAddHide\" id=\"inv-group-add\" class=\"btn btn-mini btn-success\"><i class=\"icon-plus\"></i> Add Group</button>";
+              html += "<button ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-mini btn-success\"><i class=\"icon-edit\"></i> Edit Group</button>";
+              html += "</div>\n";  
+              html += "<div id=\"tree-view\"></div>\n";
+              html += "</div>\n";
            }
            else {
               html += "<div id=\"group-view\" class=\"span7\">\n";
-              html += "<div class=\"well\">\n";
-              html += "<h5>" + form.related[itm].title + "</h5>\n";
+              html += "<div id=\"hosts-well\" class=\"well\">\n";
+              html += "<h4 id=\"hosts-title\">" + form.related[itm].title + "</h4>\n";
               html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true });
 
               // Add actions(s)

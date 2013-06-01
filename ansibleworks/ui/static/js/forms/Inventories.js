@@ -76,10 +76,17 @@ angular.module('InventoryFormDefinition', [])
                     add: {
                         ngClick: "add('hosts')",
                         icon: 'icon-plus',
-                        label: 'Add',
+                        label: 'Create Host',
                         awToolTip: 'Create a new host',
                         ngHide: 'createButtonShow == false'
                         },
+                    select: {
+                        ngClick: "select('hosts')",
+                        icon: 'icon-th-large',
+                        label: 'Select Existing Host',
+                        awToolTip: 'Select an existing host',
+                        ngHide: 'createButtonShow == false'
+                        }
                     },
                 
                 fields: {

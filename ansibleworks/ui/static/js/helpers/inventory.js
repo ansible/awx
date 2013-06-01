@@ -41,7 +41,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     "dots": false,
                     "icons": true
                     },
-                "ui": { "initially_select": [ 'all-hosts-group' ]},
+                "ui": { "initially_select": [ 'inventory-node' ]},
                 "json_data": {
                     data: treeData,
                     ajax: {
@@ -73,7 +73,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                     });
                                 idx++;
                             }
-                            //scope.$emit('loadHosts');
                             return response;
                             }
                         }
@@ -87,13 +86,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             $(tree_id).bind("select_node.jstree", function(evt, data){
                 //selected node object: data.inst.get_json()[0];
                 //selected node text: data.inst.get_json()[0].data
-                //console.log( data.inst.get_json()[0].data + ', ' + data.inst.get_json()[0].attr.id );
-                if (data.inst.get_json()[0].attr.id != 'inventory-node') {
-                   scope.$emit('NodeSelect',data.inst.get_json()[0]);
-                }
-                else {
-                   $('#all-hosts-group a').click(); 
-                }
+                scope.$emit('NodeSelect',data.inst.get_json()[0]);
                 });
             });
         
@@ -133,12 +126,12 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     });
             });
 
-        // Load inventory all hosts
+        // Setup tree_data
         Rest.setUrl(hosts + '?order_by=name'); 
         Rest.get()
             .success ( function(data, status, headers, config) {
-                treeData = [];
-                treeData.push({ 
+                treeData =
+                    [{ 
                     data: {
                         title: inventory_name
                         }, 
@@ -153,22 +146,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                         },
                     state: 'open',
                     children:[] 
-                    });
-                
-                var all_hosts_node = {
-                    data: {
-                        title: 'All Hosts'
-                        },
-                    attr: {
-                        type: 'all-hosts-group',
-                        id: 'all-hosts-group',
-                        url: hosts,
-                        name: 'All Hosts'
-                        },
-                    state: 'closed'
-                    };
-                
-                treeData[0].children.push(all_hosts_node);
+                    }];
                 scope.$emit('hostsLoaded');
             })
             .error ( function(data, status, headers, config) {
