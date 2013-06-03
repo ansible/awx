@@ -67,7 +67,10 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
        // For options.mode == 'lookup', include the following:
        //
        //     hdr: <lookup dialog header>
-       // 
+       //
+       // Inject into a custom element using options.id: <'.selector'>
+       // Control breadcrumb creation with options.breadCrumbs: <true | false>
+       //
        if (options.mode == 'lookup') {
           var element = angular.element(document.getElementById('lookup-modal-body'));  
        }
@@ -130,7 +133,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
           html += "</div>\n";
        }
 
-       if (options.mode != 'lookup') {
+       if (options.mode != 'lookup' && (list.well == undefined || list.well == 'true')) {
           html += "<div class=\"well\">\n";
        }
     
@@ -161,7 +164,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
                  }
               }
           }
-          if (options.mode == 'select') {
+          if (options.mode == 'select' && (options.selectButton == undefined || options.selectButton == true)) {
              html += " <button class=\"btn btn-small btn-success\" aw-tool-tip=\"Complete your selection\" " +
                  "ng-click=\"finishSelection()\"><i class=\"icon-ok\"></i> Finished</button>\n";
           }
@@ -272,7 +275,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
        html += "</tbody>\n";
        html += "</table>\n";  
        
-       if (options.mode != 'lookup') {
+       if (options.mode != 'lookup' && (list.well == undefined || list.well == 'true')) {
           html += "</div>\n";    //well
        }
 

@@ -76,9 +76,12 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           element = angular.element(document.getElementById('form-modal-body'));
        }
        else {
-          var element = angular.element(document.getElementById('htmlTemplate'));
+          element = angular.element(document.getElementById('htmlTemplate'));
        }
 
+       this.mode = options.mode;
+       this.modal = (options.modal) ? true : false;
+       
        this.setForm(form);
        element.html(this.build(options));  // Inject the html
        this.scope = element.scope();       // Set scope specific to the element we're compiling, avoids circular reference
@@ -94,12 +97,9 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        }
 
        if (options.modal) {
-          (options.mode == 'add') ? scope.formHeader = form.addTitle : form.editTitle;
+          this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;
           $('#form-modal').modal();
        }
-
-       this.mode = options.mode;
-       this.modal = (options.modal) ? true : false;
        
        return this.scope;
        },
@@ -641,8 +641,12 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
            if (form.related[itm].type == 'tree') {
               html += "<div class=\"span5\">";
               html += "<div class=\"inventory-buttons pull-right\">";
-              html += "<button ng-hide=\"groupAddHide\" id=\"inv-group-add\" class=\"btn btn-mini btn-success\"><i class=\"icon-plus\"></i> Add Group</button>";
-              html += "<button ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-mini btn-success\"><i class=\"icon-edit\"></i> Edit Group</button>";
+              html += "<button ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" id=\"inv-group-add\" " + 
+                  "class=\"btn btn-mini btn-success\"><i class=\"icon-plus\"></i> Add Group</button>";
+              html += "<button ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-mini btn-success\">" +
+                  "<i class=\"icon-edit\"></i> Edit Group</button>";
+              html += "<button ng-hide=\"groupDeleteHide\" id=\"inv-group-delete\" class=\"btn btn-mini btn-danger\">" +
+                  "<i class=\"icon-remove\"></i> Delete Group</button>";
               html += "</div>\n";  
               html += "<div id=\"tree-view\"></div>\n";
               html += "</div>\n";

@@ -147,13 +147,13 @@ InventoriesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$route
 
 function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-                         GenerateList, OrganizationList, SearchInit, PaginateInit, LookUpInit) 
+                         GenerateList, OrganizationList, SearchInit, PaginateInit, LookUpInit, GetBasePath) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
 
    // Inject dynamic view
-   var defaultUrl = '/api/v1/inventories/';
+   var defaultUrl = GetBasePath('inventory');
    var form = InventoryForm;
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
@@ -197,13 +197,13 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
 InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm', 
                            'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
-                           'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit' ]; 
+                           'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit', 'GetBasePath' ]; 
 
 
 function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
-                          OrganizationList, TreeInit, GetBasePath) 
+                          OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsEdit, LoadInventory) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -214,11 +214,8 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    var scope = generator.inject(form, {mode: 'edit', related: true});
    generator.reset();
    var base = $location.path().replace(/^\//,'').split('/')[0];
-   var master = {};
    var id = $routeParams.id;
-   var relatedSets = {};
-   var hostsUrl;
-
+   
    scope['inventory_id'] = id;
 
    // Retrieve each related set and any lookups
@@ -228,47 +225,11 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
        scope.groupTitle = 'All Hosts';
        scope.createButtonShow = false;
-       scope.search(relatedSets['hosts'].iterator);
+       scope.search(scope.relatedSets['hosts'].iterator);
+       TreeInit(scope.TreeParams);
        });
   
-   // Retrieve detail record and prepopulate the form
-   Rest.setUrl(defaultUrl + ':id/'); 
-   Rest.get({ params: {id: id} })
-       .success( function(data, status, headers, config) {
-           LoadBreadCrumbs({ path: '/inventories/' + id, title: data.name });
-           for (var fld in form.fields) {
-              if (data[fld]) {
-                 scope[fld] = data[fld];
-                 master[fld] = scope[fld];
-              }
-              if (form.fields[fld].type == 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
-                  scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
-                      data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                  master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                      scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
-              }
-           }
-
-           LookUpInit({
-               scope: scope,
-               form: form,
-               current_item: data.organization,
-               list: OrganizationList, 
-               field: 'organization' 
-               });
-
-           // Load the tree view
-           TreeInit({ scope: scope, inventory: data });
-           hostsUrl = data.related.hosts;
-           relatedSets['hosts'] = { url: hostsUrl, iterator: 'host' };
-           RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
-           RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
-           scope.$emit('inventoryLoaded');
-           })
-       .error( function(data, status, headers, config) {
-           ProcessErrors(scope, data, status, form,
-                         { hdr: 'Error!', msg: 'Failed to retrieve inventory: ' + $routeParams.id + '. GET status: ' + status });
-           });
+   LoadInventory({ scope: scope });
 
    // Save changes to the parent
    scope.formSave = function() {
@@ -291,8 +252,8 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    // Cancel
    scope.formReset = function() {
       generator.reset();
-      for (var fld in master) {
-          scope[fld] = master[fld];
+      for (var fld in scope.master) {
+          scope[fld] = scope.master[fld];
       }
       };
 
@@ -419,37 +380,42 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          url = node.attr('all');
          scope.groupAddHide = false; 
          scope.groupEditHide =false;
+         scope.groupDeleteHide = false;
          scope.createButtonShow = true;
          scope.group_id = node.attr('group_id');
          scope.groupName = n.data;
          scope.groupTitle = n.data;
          scope.groupTitle += (node.attr('description')) ? ' -' + node.attr('description') : '';
       }
-      else if (type == 'all-hosts-group') {
-         url = node.attr('url');
-         scope.createButtonShow = false;
-         scope.groupName = 'All Hosts';
-         scope.groupTitle = 'All Hosts';
-      }
       else if (type == 'inventory') {
          url = node.attr('hosts');
          scope.groupAddHide = false; 
          scope.groupEditHide =true;
+         scope.groupDeleteHide = true;
          scope.createButtonShow = false;
          scope.groupName = 'All Hosts';
          scope.groupTitle = 'All Hosts';
+         scope.group_id = null;
       }
-      relatedSets['hosts'] = { url: url, iterator: 'host' };
-      RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
-      RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
+      scope.relatedSets['hosts'] = { url: url, iterator: 'host' };
+      RelatedSearchInit({ scope: scope, form: form, relatedSets: scope.relatedSets });
+      RelatedPaginateInit({ scope: scope, relatedSets: scope.relatedSets });
       scope.search('host');
       scope.$digest();
       });
+
+  scope.addGroup = function() {
+      GroupsList({ "inventory_id": id, group_id: scope.group_id });
+      }
+
+  scope.editGroup = function() {
+      GroupsEdit({ "inventory_id": id, group_id: scope.group_id });
+      }
 }
 
 InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
-                            'OrganizationList', 'TreeInit', 'GetBasePath'
+                            'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsEdit', 'LoadInventory' 
                             ]; 
   

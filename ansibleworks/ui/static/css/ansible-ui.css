@@ -349,3 +349,7 @@
  #hosts-title {
     margin-bottom: 15px;
  }
+
+ #tree-view {
+    min-height: 100px;
+ }
