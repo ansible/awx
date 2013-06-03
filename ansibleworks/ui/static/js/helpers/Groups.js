@@ -257,6 +257,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     return function(params) {
         
         var group_id = params.group_id;
+        var inventory_id = $routeParams.id;
         var generator = GenerateForm;
         var form = GroupForm;
         var defaultUrl =  GetBasePath('groups') + group_id + '/';
@@ -302,7 +303,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         Rest.setUrl(defaultUrl); 
         Rest.get()
             .success( function(data, status, headers, config) {
-                LoadBreadCrumbs();
                 for (var fld in form.fields) {
                     if (data[fld]) {
                        scope[fld] = data[fld];
@@ -315,12 +315,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
                     }
                 }
-               
                 scope.variable_url = data.related.variable_data;
-
-                // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
-                RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
-                RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
                 scope.$emit('groupLoaded');
                 })
             .error( function(data, status, headers, config) {
@@ -333,13 +328,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             try { 
                 // Make sure we have valid JSON
                 var myjson = JSON.parse(scope.variables);
-               
+
                 var data = {}
                 for (var fld in form.fields) {
                     data[fld] = scope[fld];   
                 }
-
-                Rest.setUrl(defaultUrl); 
+                data['inventory'] = inventory_id;
+                Rest.setUrl(defaultUrl);
                 Rest.put(data)
                     .success( function(data, status, headers, config) {
                         if (scope.variables) {
@@ -347,20 +342,18 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                            Rest.setUrl(GetBasePath('groups') + data.id + '/variable_data/');
                            Rest.put({data: scope.variables})
                                .success( function(data, status, headers, config) {
-                                   var base = $location.path().replace(/^\//,'').split('/')[0];
-                                   (base == 'groups') ? ReturnToCaller() : ReturnToCaller(1);
+                                   $('#form-modal').modal('hide');
                                    })
                                .error( function(data, status, headers, config) {
                                    ProcessErrors(scope, data, status, form,
                                        { hdr: 'Error!', msg: 'Failed to update group varaibles. PUT returned status: ' + status });
                                    });
                         }
-                        $('#form-modal').modal('hide');
-                             
+                        $('#form-modal').modal('hide');  
                         })
                     .error( function(data, status, headers, config) {
                         ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to update group: ' + id + '. PUT status: ' + status });
+                            { hdr: 'Error!', msg: 'Failed to update group: ' + group_id + '. PUT status: ' + status });
                         });
             }
             catch(err) {
@@ -376,6 +369,44 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            }
            }
         }
+        }])
+
+
+    .factory('GroupsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
+        'Prompt', 'ProcessErrors', 'GetBasePath',
+    function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
+        GetBasePath) {
+    return function(params) {
+        var scope = params.scope;
+        var obj = $('#tree-view li[group_id="' + scope.group_id + '"]');
+        var action_to_take = function() {
+            var url = GetBasePath('inventory') + $routeParams.id + '/groups/';
+            Rest.setUrl(url);
+            Rest.post({ id: scope.group_id, disassociate: 1 })
+               .success( function(data, status, headers, config) {
+                   $('#prompt-modal').modal('hide');
+                   $('#tree-view').jstree("delete_node",obj);
+                   })
+               .error( function(data, status, headers, config) {
+                   $('#prompt-modal').modal('hide');
+                   ProcessErrors(scope, data, status, null,
+                       { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                   });      
+            };
+        //Force binds to work. Not working usual way.
+        var parent = $.jstree._reference('#tree-view')._get_parent(obj);
+        $('#prompt-header').text('Delete Group');
+        $('#prompt-body').text('Are you sure you want to remove group ' + $(obj).attr('name') + 
+           ' from ' + $(parent).attr('name') + '?');
+        $('#prompt-action-btn').addClass('btn-danger');
+        scope.promptAction = action_to_take;  // for some reason this binds?
+        $('#prompt-modal').modal({
+            backdrop: 'static',
+            keyboard: true,
+            show: true
+            });
+        }
         }]);
+
 
 

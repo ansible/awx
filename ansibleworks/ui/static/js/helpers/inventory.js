@@ -208,9 +208,17 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             .success( function(data, status, headers, config) {
                 LoadBreadCrumbs({ path: '/inventories/' + $routeParams.id, title: data.name });
                 for (var fld in form.fields) {
-                  if (data[fld]) {
-                     scope[fld] = data[fld];
-                     scope.master[fld] = scope[fld];
+                  if (form.fields[fld].realName) {
+                     if (data[form.fields[fld].realName]) {
+                        scope[fld] = data[form.fields[fld].realName];
+                        scope.master[fld] = scope[fld];
+                     }
+                  }
+                  else {
+                     if (data[fld]) {
+                        scope[fld] = data[fld];
+                        scope.master[fld] = scope[fld];
+                     }
                   }
                   if (form.fields[fld].type == 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
                       scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 

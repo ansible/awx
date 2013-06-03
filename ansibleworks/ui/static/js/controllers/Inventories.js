@@ -173,10 +173,12 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
       Rest.setUrl(defaultUrl);
       var data = {}
       for (var fld in form.fields) {
-          data[fld] = scope[fld];
-      } 
-      if ($routeParams.inventory_id) {
-         data.inventory = $routeParams.inventory_id;
+          if (form.fields[fld].realName) {
+             data[form.fields[fld].realName] = scope[fld];
+          }
+          else {
+             data[fld] = scope[fld];  
+          }
       }
       Rest.post(data)
           .success( function(data, status, headers, config) {
@@ -203,7 +205,8 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
-                          OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsEdit, LoadInventory) 
+                          OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsEdit, LoadInventory,
+                          GroupsDelete) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -236,8 +239,13 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       Rest.setUrl(defaultUrl + $routeParams.id + '/');
       var data = {}
       for (var fld in form.fields) {
-          data[fld] = scope[fld];   
-      } 
+          if (form.fields[fld].realName) {
+             data[form.fields[fld].realName] = scope[fld];
+          }
+          else {
+             data[fld] = scope[fld];  
+          }
+      }
       Rest.put(data)
           .success( function(data, status, headers, config) {
               var base = $location.path().replace(/^\//,'').split('/')[0];
@@ -284,7 +292,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
               .error( function(data, status, headers, config) {
                   $('#prompt-modal').modal('hide');
                   ProcessErrors(scope, data, status, null,
-                            { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+                      { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
                   });      
           };
 
@@ -401,7 +409,9 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       RelatedSearchInit({ scope: scope, form: form, relatedSets: scope.relatedSets });
       RelatedPaginateInit({ scope: scope, relatedSets: scope.relatedSets });
       scope.search('host');
-      scope.$digest();
+      if (!scope.$$phase) {
+         scope.$digest();
+      }
       });
 
   scope.addGroup = function() {
@@ -411,11 +421,16 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
   scope.editGroup = function() {
       GroupsEdit({ "inventory_id": id, group_id: scope.group_id });
       }
+
+  scope.deleteGroup = function() {
+      GroupsDelete({ scope: scope });
+      }
 }
 
 InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
-                            'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsEdit', 'LoadInventory' 
+                            'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsEdit', 'LoadInventory',
+                            'GroupsDelete'
                             ]; 
   

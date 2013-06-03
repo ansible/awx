@@ -643,9 +643,9 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
               html += "<div class=\"inventory-buttons pull-right\">";
               html += "<button ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" id=\"inv-group-add\" " + 
                   "class=\"btn btn-mini btn-success\"><i class=\"icon-plus\"></i> Add Group</button>";
-              html += "<button ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-mini btn-success\">" +
+              html += "<button ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-mini btn-success\">" +
                   "<i class=\"icon-edit\"></i> Edit Group</button>";
-              html += "<button ng-hide=\"groupDeleteHide\" id=\"inv-group-delete\" class=\"btn btn-mini btn-danger\">" +
+              html += "<button ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" id=\"inv-group-delete\" class=\"btn btn-mini btn-danger\">" +
                   "<i class=\"icon-remove\"></i> Delete Group</button>";
               html += "</div>\n";  
               html += "<div id=\"tree-view\"></div>\n";

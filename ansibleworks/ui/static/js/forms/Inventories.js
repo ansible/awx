@@ -10,8 +10,8 @@ angular.module('InventoryFormDefinition', [])
     .value(
     'InventoryForm', {
         
-        addTitle: 'Create Inventory',                             //Legend in add mode
-        editTitle: '{{ name }}',                                  //Legend in edit mode
+        addTitle: 'Create Inventory',
+        editTitle: '{{ inventory_name }}',
         name: 'inventory',
         well: true,
         collapse: true,
@@ -19,14 +19,16 @@ angular.module('InventoryFormDefinition', [])
         collapseMode: 'edit',
 
         fields: {
-            name: {
+            inventory_name: {
+                realName: 'name',
                 label: 'Name',
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                capitalize: true
+                capitalize: false
                 },
-            description: { 
+            inventory_description: { 
+                realName: 'description',
                 label: 'Description',
                 type: 'text',
                 addRequired: false,

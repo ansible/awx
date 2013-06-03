@@ -55,9 +55,17 @@ angular.module('Utilities',[])
       else if (form) {
          var fieldErrors = false; 
          for (var field in form.fields ) {
-             if (data[field]) {
-                scope[field + '_api_error'] = data[field][0];
-                fieldErrors = true;
+             if (form.fields[field].realName) {
+                if (data[form.fields[field].realName]) {
+                   scope[field + '_api_error'] = data[form.fields[field]][0];
+                   fieldErrors = true;
+                }
+             }
+             else {
+                if (data[field]) {
+                   scope[field + '_api_error'] = data[field][0];
+                   fieldErrors = true;
+                }
              }
          }
          if ( (!fieldErrors) && defaultMsg) {
