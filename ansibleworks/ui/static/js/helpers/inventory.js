@@ -163,6 +163,10 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     items: scope.treeController
                     }
                 });
+  
+            $(tree_id).bind("loaded.jstree", function () {
+                scope.$emit('treeLoaded');
+                });
             
             // When user clicks on a group, display the related hosts in the list view
             $(tree_id).bind("select_node.jstree", function(e, data){
@@ -178,21 +182,9 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         }])
 
 
-    .factory('RefreshTree', ['Alert', 'Rest', 'Authorization', '$http', 'TreeInit',
-    function(Alert, Rest, Authorization, $http, TreeInit) {
-    return function(params) {
-
-        $('#tree-view').jstree('destroy');
-      
-        TreeInit(params);
-        
-        }
-        }])
-
-
-    .factory('LoadInventory', ['$routeParams', 'Alert', 'Rest', 'Authorization', '$http', 'RefreshTree', 'ProcessErrors',
+    .factory('LoadInventory', ['$routeParams', 'Alert', 'Rest', 'Authorization', '$http', 'ProcessErrors',
         'RelatedSearchInit', 'RelatedPaginateInit', 'GetBasePath', 'LoadBreadCrumbs', 'InventoryForm',
-    function($routeParams, Alert, Rest, Authorization, $http, RefreshTree ,ProcessErrors, RelatedSearchInit, RelatedPaginateInit,
+    function($routeParams, Alert, Rest, Authorization, $http, ProcessErrors, RelatedSearchInit, RelatedPaginateInit,
         GetBasePath, LoadBreadCrumbs, InventoryForm) {
     return function(params) {
         
@@ -240,6 +232,63 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     { hdr: 'Error!', msg: 'Failed to retrieve inventory: ' + $routeParams.id + '. GET status: ' + status });
                 });
 
+        }
+        }])
+
+
+    .factory('RefreshTree', ['Alert', 'Rest', 'Authorization', '$http', 'TreeInit', 'LoadInventory',
+    function(Alert, Rest, Authorization, $http, TreeInit, LoadInventory) {
+    return function(params) {
+
+        // Call after an Edit or Add to refresh tree data
+      
+        var scope = params.scope;
+        var openId = [];
+        var selectedId; 
+
+        if (scope.treeLoadedRemove) {
+           scope.treeLoadedRemove();
+        }
+        scope.treeLoadedRemove = scope.$on('treeLoaded', function() {
+            // Called recursively to pop the next openId node value and open it. 
+            // Opens the list in reverse so that nodes open in parent then child order,
+            // drilling down to the last selected node.
+            var id, node;
+            if (openId.length > 0) {
+               id = openId.pop();
+               node = $('#tree-view li[id="' + id + '"]');
+               $.jstree._reference('#tree-view').open_node(node, function(){ scope.$emit('treeLoaded'); }, true);
+            }
+            else {
+               if (selectedId !== null && selectedId !== undefined) {
+                  // Click on the previously selected node
+                  $('#tree-view li[id="' + selectedId + '"] a').first().click();
+               }
+            }
+            });
+
+        if (scope.inventoryLoadedRemove) {
+           scope.inventoryLoadedRemove();
+        }
+        scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
+            // Get the list of open tree nodes starting with the current group and going up 
+            // the tree until we hit the inventory or root node.
+            function findOpenNodes(node) {
+                if (node.attr('id') != 'inventory-node') {
+                   if (node.prop('tagName') == 'LI' && (node.hasClass('jstree-open') || node.find('.jstree-clicked'))) {
+                      openId.push(node.attr('id'));
+                   }
+                   findOpenNodes(node.parent());
+                }
+            }
+            selectedId = scope.selectedNode.attr('id');
+            findOpenNodes(scope.selectedNode);
+            $('#tree-view').jstree('destroy');
+            TreeInit(scope.TreeParams);        
+            });
+
+        LoadInventory({ scope: scope });
+        
         }
         }]);
 

@@ -11,12 +11,12 @@
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
                                  'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'GroupsHelper',
                                  'InventoryHelper'
-                                 ]) 
+                                 ])
 
     .factory('GroupsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupList', 'GenerateList', 
         'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'RefreshTree',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupList, GenerateList, LoadBreadCrumbs, SearchInit,
-             PaginateInit, ProcessErrors, GetBasePath, GroupsAdd, RefreshTree) {
+        PaginateInit, ProcessErrors, GetBasePath, GroupsAdd, RefreshTree) {
     return function(params) {
         
         var inventory_id = params.inventory_id;
@@ -45,6 +45,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
             $("tr.success").each(function(index) {
+                // Make sure no rows have a green background 
                 var ngc = $(this).attr('ng-class'); 
                 scope[ngc] = ""; 
                 });
@@ -63,35 +64,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         SearchInit({ scope: scope, set: 'groups', list: list, url: defaultUrl });
         PaginateInit({ scope: scope, list: list, url: defaultUrl });
         scope.search(list.iterator);
-
-        /*LoadBreadCrumbs();*/
-
-        scope.editGroup = function(id) {
-           $location.path($location.path() + '/' + id);
-           }
-     
-        scope.deleteGroup = function(id, name) {
-           
-           var action = function() {
-               var url = defaultUrl;
-               Rest.setUrl(url);
-               Rest.post({ id: id, disassociate: 1 })
-                   .success( function(data, status, headers, config) {
-                       $('#prompt-modal').modal('hide');
-                       scope.search(list.iterator);
-                       })
-                   .error( function(data, status, headers, config) {
-                       $('#prompt-modal').modal('hide');
-                       ProcessErrors(scope, data, status, null,
-                                { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                       });      
-               };
-
-           Prompt({ hdr: 'Delete', 
-                    body: 'Are you sure you want to remove group' + name + '?',
-                    action: action
-                    });
-           }
 
         scope.formModalAction = function() {
            var url = (group_id) ? GetBasePath('groups') + group_id + '/children/' :
@@ -120,6 +92,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                  }
                  else {
                     $('#form-modal').modal('hide');
+                    RefreshTree({ scope: scope });
                  }
               }
               });
@@ -173,16 +146,15 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             GroupsAdd({ inventory_id: inventory_id, group_id: group_id });
             }
 
-
         }
         }])
 
 
 
     .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath) {
+        GetBasePath, RefreshTree) {
     return function(params) {
 
         var inventory_id = params.inventory_id;
@@ -197,7 +169,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.formModalActionLabel = 'Save'
         scope.formModalHeader = 'Create Group'
         generator.reset();
-        var master={}; 
+        var master={};
 
         // Save
         scope.formModalAction  = function() {
@@ -224,11 +196,16 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                           Rest.put({data: scope.variables})
                               .success( function(data, status, headers, config) {
                                   $('#form-modal').modal('hide');
+                                  RefreshTree({ scope: scope });
                               })
                               .error( function(data, status, headers, config) {
                                   ProcessErrors(scope, data, status, form,
                                      { hdr: 'Error!', msg: 'Failed to add group varaibles. PUT returned status: ' + status });
                               });
+                       }
+                       else {
+                          $('#form-modal').modal('hide');
+                          RefreshTree({ scope: scope });
                        }
                        })
                    .error( function(data, status, headers, config) {
@@ -251,9 +228,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }])
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath) {
+        GetBasePath, RefreshTree) {
     return function(params) {
         
         var group_id = params.group_id;
@@ -343,13 +320,17 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                            Rest.put({data: scope.variables})
                                .success( function(data, status, headers, config) {
                                    $('#form-modal').modal('hide');
-                                   })
+                                   RefreshTree({ scope: scope }); 
+                               })
                                .error( function(data, status, headers, config) {
                                    ProcessErrors(scope, data, status, form,
                                        { hdr: 'Error!', msg: 'Failed to update group varaibles. PUT returned status: ' + status });
                                    });
                         }
-                        $('#form-modal').modal('hide');  
+                        else {
+                           $('#form-modal').modal('hide');
+                           RefreshTree({ scope: scope });
+                        }
                         })
                     .error( function(data, status, headers, config) {
                         ProcessErrors(scope, data, status, form,
@@ -389,6 +370,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    })
                .error( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
+                   RefreshTree({ scope: scope });
                    ProcessErrors(scope, data, status, null,
                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                    });      

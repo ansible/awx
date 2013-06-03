@@ -380,9 +380,13 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       }
   
   scope.$on('NodeSelect', function(e, n) {
+      
+      // Respond to user clicking on a tree node
+
       var node = $('li[id="' + n.attr.id + '"]');
       var type = node.attr('type');
       var url;
+      scope['selectedNode'] = node;
       $('#tree-view').jstree('open_node',node);
       if (type == 'group') {
          url = node.attr('all');
