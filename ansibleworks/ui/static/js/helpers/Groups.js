@@ -65,6 +65,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         PaginateInit({ scope: scope, list: list, url: defaultUrl });
         scope.search(list.iterator);
 
+        if (!scope.$$phase) {
+           scope.$digest();
+        }
+
         scope.formModalAction = function() {
            var url = (group_id) ? GetBasePath('groups') + group_id + '/children/' :
                GetBasePath('inventory') + inventory_id + '/groups/'; 
@@ -170,6 +174,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.formModalHeader = 'Create Group'
         generator.reset();
         var master={};
+
+        if (!scope.$$phase) {
+           scope.$digest();
+        }
 
         // Save
         scope.formModalAction  = function() {
@@ -300,6 +308,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     { hdr: 'Error!', msg: 'Failed to retrieve group: ' + id + '. GET status: ' + status });
                 });
        
+        if (!scope.$$phase) {
+           scope.$digest();
+        }
+        
         // Save changes to the parent
         scope.formModalAction = function() {
             try { 
@@ -358,12 +370,27 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath) {
     return function(params) {
+        // Delete the selected group node. Disassociates it from 
         var scope = params.scope;
-        var obj = $('#tree-view li[group_id="' + scope.group_id + '"]');
+        var group_id = params.group_id; 
+        var inventory_id = params.inventory_id; 
+        var obj = $('#tree-view li[group_id="' + group_id + '"]');
+        var parent = (obj.parent().last().prop('tagName') == 'LI') ? obj.parent().last() : obj.parent().parent().last();
+        //if (parent.length > 0) {
+        //   parent = parent.last();
+        //}
+        console.log(parent);
+        var url; 
+        
+        if (parent.attr('type') == 'group') {
+           url = GetBasePath('base') + 'groups/' + parent.attr('group_id') + '/children/';
+        }
+        else {
+           url = GetBasePath('inventory') + inventory_id + '/groups/';
+        }
         var action_to_take = function() {
-            var url = GetBasePath('inventory') + $routeParams.id + '/groups/';
             Rest.setUrl(url);
-            Rest.post({ id: scope.group_id, disassociate: 1 })
+            Rest.post({ id: group_id, disassociate: 1 })
                .success( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
                    $('#tree-view').jstree("delete_node",obj);
@@ -376,7 +403,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    });      
             };
         //Force binds to work. Not working usual way.
-        var parent = $.jstree._reference('#tree-view')._get_parent(obj);
         $('#prompt-header').text('Delete Group');
         $('#prompt-body').text('Are you sure you want to remove group ' + $(obj).attr('name') + 
            ' from ' + $(parent).attr('name') + '?');

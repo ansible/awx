@@ -315,7 +315,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
           return {
               addGroup: {
                   label: 'Add Group',
-                  action: function() { changePath($location.path() + '/groups'); }
+                  action: function(obj) { GroupsList({ "inventory_id": id, group_id: null }); }
                   }
               }
       }
@@ -323,11 +323,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          return {
              addGroup: { 
                 label: 'Add Subgroup',
-                action: function(obj) { 
-                    LoadBreadCrumbs({ path: '/groups/' + $(obj).attr('group_id'), title: $(obj).attr('name') });
-                    changePath($location.path() + '/groups/' + $(obj).attr('group_id') + '/children');    
-                    },
-                "_disabled": (nodeType == 'all-hosts-group') ? true : false
+                action: function(obj) { GroupsList({ "inventory_id": id, group_id: $(obj).attr('group_id') }); }    
                 },
              /*addHost: { 
                 label: 'Add Host',
@@ -339,41 +335,12 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                    },*/
              edit: { 
                  label: 'Edit Group',
-                 action: function(obj) { changePath($location.path() + '/groups/' + $(obj).attr('group_id')); },
-                 separator_before: true,
-                 "_disabled": (nodeType == 'all-hosts-group') ? true : false
+                 action: function(obj) { GroupsEdit({ "inventory_id": id, group_id: $(obj).attr('group_id') }); },
+                 separator_before: true
                  },
              delete: {
                  label: 'Delete Group',
-                 action: function(obj) { 
-                     var action_to_take = function() {
-                         var url = defaultUrl + $routeParams.id + '/groups/';
-                         Rest.setUrl(url);
-                         Rest.post({ id: $(obj).attr('id'), disassociate: 1 })
-                             .success( function(data, status, headers, config) {
-                                 $('#prompt-modal').modal('hide');
-                                 $('#tree-view').jstree("delete_node",obj);
-                                 })
-                             .error( function(data, status, headers, config) {
-                                 $('#prompt-modal').modal('hide');
-                                 ProcessErrors(scope, data, status, null,
-                                          { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                                 });      
-                         };
-                     //Force binds to work. Not working usual way.
-                     var parent = $.jstree._reference('#tree-view')._get_parent(obj);
-                     $('#prompt-header').text('Delete Group');
-                     $('#prompt-body').text('Are you sure you want to remove group ' + $(obj).attr('name') + 
-                         ' from ' + $(parent).attr('name') + '?');
-                     $('#prompt-action-btn').addClass('btn-danger');
-                     scope.promptAction = action_to_take;  // for some reason this binds?
-                     $('#prompt-modal').modal({
-                         backdrop: 'static',
-                         keyboard: true,
-                         show: true
-                         });
-                     },
-                 "_disabled": (nodeType == 'all-hosts-group') ? true : false
+                 action: function(obj) { GroupsDelete({ scope: scope, "inventory_id": id, group_id: $(obj).attr('group_id') }) }
                  }
              }
       }
@@ -427,7 +394,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       }
 
   scope.deleteGroup = function() {
-      GroupsDelete({ scope: scope });
+      GroupsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id });
       }
 }
 
