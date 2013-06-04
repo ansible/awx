@@ -206,7 +206,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                           OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsEdit, LoadInventory,
-                          GroupsDelete) 
+                          GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -302,13 +302,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                 });
        
       };
-
-   function changePath(path) {
-      // For reasons unknown, calling $location.path(<new path>) from inside 
-      // treeController fails to work. This is the work-around.
-      window.location = '/#' + path;
-      };
-
+        
    scope.treeController = function($node) {
       var nodeType = $($node).attr('type');
       if (nodeType == 'inventory') {
@@ -325,14 +319,6 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                 label: 'Add Subgroup',
                 action: function(obj) { GroupsList({ "inventory_id": id, group_id: $(obj).attr('group_id') }); }    
                 },
-             /*addHost: { 
-                label: 'Add Host',
-                    action: function(obj) {
-                        LoadBreadCrumbs({ path: '/groups/' + $(obj).attr('group_id'), title: $(obj).attr('name') });
-                        changePath($location.path() + '/groups/' + $(obj).attr('group_id') + '/hosts'); 
-                        },
-                    "_disabled": (nodeType == 'all-hosts-group') ? true : false
-                   },*/
              edit: { 
                  label: 'Edit Group',
                  action: function(obj) { GroupsEdit({ "inventory_id": id, group_id: $(obj).attr('group_id') }); },
@@ -396,12 +382,25 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
   scope.deleteGroup = function() {
       GroupsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id });
       }
+  
+  scope.addHost = function() {
+      HostsList({ scope: scope, "inventory_id": id, group_id: scope.group_id });
+      }
+
+  scope.editHost = function(host_id, host_name) {
+      HostsEdit({ scope: scope, "inventory_id": id, group_id: scope.group_id, host_id: host_id, host_name: host_name });
+      }
+
+  scope.deleteHost = function(host_id, host_name) {
+      HostsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id, host_id: host_id, host_name: host_name });
+      }
+
 }
 
 InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsEdit', 'LoadInventory',
-                            'GroupsDelete'
+                            'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete'
                             ]; 
   

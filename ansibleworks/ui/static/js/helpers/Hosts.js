@@ -1,41 +1,44 @@
 /*********************************************
  *  Copyright (c) 2013 AnsibleWorks, Inc.
  *
- *  GroupsHelper
+ *  HostsHelper
  *
- *  Routines that handle group add/edit/delete on the Inventory tree widget.
+ *  Routines that handle host add/edit/delete on the Inventory detail page.
  *  
  */
  
-angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
-                                 'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'GroupsHelper',
-                                 'InventoryHelper'
-                                 ])
+angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'HostListDefinition',
+                                'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'HostsHelper',
+                                'InventoryHelper', 'RelatedSearchHelper','RelatedPaginateHelper', 
+                                'InventoryFormDefinition'
+                                ])
 
-    .factory('GroupsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupList', 'GenerateList', 
-        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'RefreshTree',
-    function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupList, GenerateList, LoadBreadCrumbs, SearchInit,
-        PaginateInit, ProcessErrors, GetBasePath, GroupsAdd, RefreshTree) {
+    .factory('HostsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostList', 'GenerateList', 
+        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'HostsAdd', 'HostsReload',
+    function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, GenerateList, LoadBreadCrumbs, SearchInit,
+        PaginateInit, ProcessErrors, GetBasePath, HostsAdd, HostsReload) {
     return function(params) {
         
         var inventory_id = params.inventory_id;
-        var group_id = (params.group_id !== undefined) ? params.group_id : null;
-
-        var list = GroupList;
-        var defaultUrl = GetBasePath('inventory') + inventory_id + '/groups/';
+        var group_id = params.group_id;
+        
+        var list = HostList;
+        var defaultUrl = GetBasePath('inventory') + inventory_id + '/hosts/';
         var view = GenerateList;
         
-        var scope = view.inject(GroupList, {
+        var scope = view.inject(HostList, {
             id: 'form-modal-body', 
             mode: 'select',
             breadCrumbs: false,
-            selectButton: false 
+            selectButton: false
             });
 
         scope.formModalActionLabel = 'Finished';
-        scope.formModalHeader = 'Add Group';
+        scope.formModalHeader = 'Add Host';
         
         $('#form-modal').modal();
+        $('#form-modal').unbind('hidden');
+        $('#form-modal').on('hidden', function () { HostsReload(params); });
 
         scope.selected = [];
         
@@ -60,7 +63,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             //scope.$digest();
             });
 
-        SearchInit({ scope: scope, set: 'groups', list: list, url: defaultUrl });
+        SearchInit({ scope: scope, set: 'hosts', list: list, url: defaultUrl });
         PaginateInit({ scope: scope, list: list, url: defaultUrl, mode: 'lookup' });
         scope.search(list.iterator);
 
@@ -69,8 +72,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
 
         scope.formModalAction = function() {
-           var url = (group_id) ? GetBasePath('groups') + group_id + '/children/' :
-               GetBasePath('inventory') + inventory_id + '/groups/'; 
+           var url = GetBasePath('groups') + group_id + '/hosts/'; 
            Rest.setUrl(url);
            scope.queue = [];
 
@@ -91,11 +93,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                      }
                  }
                  if (errors > 0) {
-                    Alert('Error', 'There was an error while adding one or more of the selected groups.');  
+                    Alert('Error', 'There was an error while adding one or more of the selected hosts.');  
                  }
                  else {
                     $('#form-modal').modal('hide');
-                    RefreshTree({ scope: scope });
+                    HostsReload(params);
                  }
               }
               });
@@ -127,7 +129,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            }  
            }
 
-        scope.toggle_group = function(id) {
+        scope.toggle_host = function(id) {
            if (scope[list.iterator + "_" + id + "_class"] == "success") {
               scope[list.iterator + "_" + id + "_class"] = "";
               document.getElementById('check_' + id).checked = false;
@@ -144,33 +146,36 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            }
            }
 
-        scope.createGroup = function() {
+        scope.createHost = function() {
             $('#form-modal').modal('hide');
-            GroupsAdd({ inventory_id: inventory_id, group_id: group_id });
+            HostsAdd({ scope: params.scope, inventory_id: inventory_id, group_id: group_id });
             }
 
         }
         }])
 
 
-
-    .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree',
-    function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, RefreshTree) {
+    .factory('HostsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm', 
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload',
+    function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
+        GetBasePath, HostsReload) {
     return function(params) {
 
         var inventory_id = params.inventory_id;
         var group_id = (params.group_id !== undefined) ? params.group_id : null;
 
         // Inject dynamic view
-        var defaultUrl = (group_id !== null) ? GetBasePath('groups') + group_id + '/children/' : 
-            GetBasePath('inventory') + inventory_id + '/groups/';
-        var form = GroupForm;
+        var defaultUrl = GetBasePath('groups') + group_id + '/hosts/';
+        var form = HostForm;
         var generator = GenerateForm;
         var scope = generator.inject(form, {mode: 'add', modal: true, related: false});
+        
         scope.formModalActionLabel = 'Save'
-        scope.formModalHeader = 'Create Group'
+        scope.formModalHeader = 'Create Host'
+
+        $('#form-modal').unbind('hidden');
+        $('#form-modal').on('hidden', function () { HostsReload(params); });
+        
         generator.reset();
         var master={};
 
@@ -190,11 +195,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                       data[fld] = scope[fld];   
                    }
                }
-
-               if (inventory_id) {
-                  data['inventory'] = inventory_id;
-               }
-
+               data['inventory'] = inventory_id;
+               
                Rest.setUrl(defaultUrl);
                Rest.post(data)
                    .success( function(data, status, headers, config) {
@@ -203,16 +205,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                           Rest.put({data: scope.variables})
                               .success( function(data, status, headers, config) {
                                   $('#form-modal').modal('hide');
-                                  RefreshTree({ scope: scope });
                               })
                               .error( function(data, status, headers, config) {
                                   ProcessErrors(scope, data, status, form,
-                                     { hdr: 'Error!', msg: 'Failed to add group varaibles. PUT returned status: ' + status });
+                                     { hdr: 'Error!', msg: 'Failed to add host varaibles. PUT returned status: ' + status });
                               });
                        }
                        else {
                           $('#form-modal').modal('hide');
-                          RefreshTree({ scope: scope });
                        }
                        })
                    .error( function(data, status, headers, config) {
@@ -221,7 +221,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        });
            }
            catch(err) {
-               Alert("Error", "Error parsing group variables. Expecting valid JSON. Parser returned " + err);     
+               Alert("Error", "Error parsing host variables. Expecting valid JSON. Parser returned " + err);     
            }
            }
 
@@ -234,33 +234,36 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         }])
 
-    .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree',
-    function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, RefreshTree) {
+
+    .factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm', 
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload',
+    function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
+        GetBasePath, HostsReload) {
     return function(params) {
         
+        var host_id = params.host_id;
+        var inventory_id = params.inventory_id;
         var group_id = params.group_id;
-        var inventory_id = $routeParams.id;
+        
         var generator = GenerateForm;
-        var form = GroupForm;
-        var defaultUrl =  GetBasePath('groups') + group_id + '/';
+        var form = HostForm;
+        var defaultUrl =  GetBasePath('hosts') + host_id + '/';
         var scope = generator.inject(form, { mode: 'edit', modal: true, related: false});
         generator.reset();
         var master = {};
         var relatedSets = {};
 
         scope.formModalActionLabel = 'Save'
-        scope.formModalHeader = 'Edit Group'
+        scope.formModalHeader = 'Edit Host'
+  
+        $('#form-modal').unbind('hidden');
+        $('#form-modal').on('hidden', function () { HostsReload(params); });
 
         // After the group record is loaded, retrieve any group variables
-        if (scope.groupLoadedRemove) {
-           scope.groupLoadedRemove();
+        if (scope.hostLoadedRemove) {
+           scope.hostLoadedRemove();
         }
-        scope.groupLoadedRemove = scope.$on('groupLoaded', function() {
-            for (var set in relatedSets) {
-                scope.search(relatedSets[set].iterator);
-            }
+        scope.hostLoadedRemove = scope.$on('hostLoaded', function() {
             if (scope.variable_url) {
                Rest.setUrl(scope.variable_url);
                Rest.get()
@@ -275,7 +278,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    .error( function(data, status, headers, config) {
                        scope.variables = null;
                        ProcessErrors(scope, data, status, form,
-                           { hdr: 'Error!', msg: 'Failed to retrieve group variables. GET returned status: ' + status });
+                           { hdr: 'Error!', msg: 'Failed to retrieve host variables. GET returned status: ' + status });
                        });
             }
             else {
@@ -300,11 +303,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     }
                 }
                 scope.variable_url = data.related.variable_data;
-                scope.$emit('groupLoaded');
+                scope.$emit('hostLoaded');
                 })
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, form,
-                    { hdr: 'Error!', msg: 'Failed to retrieve group: ' + id + '. GET status: ' + status });
+                    { hdr: 'Error!', msg: 'Failed to retrieve host: ' + id + '. GET status: ' + status });
                 });
        
         if (!scope.$$phase) {
@@ -326,26 +329,24 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 Rest.put(data)
                     .success( function(data, status, headers, config) {
                         if (scope.variables) {
-                           //update group variables
-                           Rest.setUrl(GetBasePath('groups') + data.id + '/variable_data/');
+                           //update host variables
+                           Rest.setUrl(GetBasePath('hosts') + data.id + '/variable_data/');
                            Rest.put({data: scope.variables})
                                .success( function(data, status, headers, config) {
                                    $('#form-modal').modal('hide');
-                                   RefreshTree({ scope: scope }); 
                                })
                                .error( function(data, status, headers, config) {
                                    ProcessErrors(scope, data, status, form,
-                                       { hdr: 'Error!', msg: 'Failed to update group varaibles. PUT returned status: ' + status });
+                                       { hdr: 'Error!', msg: 'Failed to update host varaibles. PUT returned status: ' + status });
                                    });
                         }
                         else {
                            $('#form-modal').modal('hide');
-                           RefreshTree({ scope: scope });
                         }
                         })
                     .error( function(data, status, headers, config) {
                         ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to update group: ' + group_id + '. PUT status: ' + status });
+                            { hdr: 'Error!', msg: 'Failed to update host: ' + host_id + '. PUT status: ' + status });
                         });
             }
             catch(err) {
@@ -364,47 +365,38 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }])
 
 
-    .factory('GroupsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath',
-    function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath) {
+    .factory('HostsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'Prompt', 'ProcessErrors', 'GetBasePath',
+        'HostsReload',
+    function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload) {
     return function(params) {
-        // Delete the selected group node. Disassociates it from its parent.
+        
+        // Delete the selected host. Disassociates it from the group. 
+        
         var scope = params.scope;
         var group_id = params.group_id; 
-        var inventory_id = params.inventory_id; 
-        var obj = $('#tree-view li[group_id="' + group_id + '"]');
-        var parent = (obj.parent().last().prop('tagName') == 'LI') ? obj.parent().last() : obj.parent().parent().last();
-        //if (parent.length > 0) {
-        //   parent = parent.last();
-        //}
-        console.log(parent);
-        var url; 
+        var inventory_id = params.inventory_id;
+        var host_id = params.host_id;
+        var host_name = params.host_name; 
+        var url = (group_id !== null) ? GetBasePath('groups') + group_id + '/hosts/' : GetBasePath('inventory') + inventory_id + '/hosts/';
         
-        if (parent.attr('type') == 'group') {
-           url = GetBasePath('base') + 'groups/' + parent.attr('group_id') + '/children/';
-        }
-        else {
-           url = GetBasePath('inventory') + inventory_id + '/groups/';
-        }
         var action_to_take = function() {
             Rest.setUrl(url);
-            Rest.post({ id: group_id, disassociate: 1 })
+            Rest.post({ id: host_id, disassociate: 1 })
                .success( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
-                   $('#tree-view').jstree("delete_node",obj);
+                   HostsReload(params);
                    })
                .error( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
-                   RefreshTree({ scope: scope });
+                   HostsReload(params);
                    ProcessErrors(scope, data, status, null,
                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                    });      
             };
+
         //Force binds to work. Not working usual way.
-        $('#prompt-header').text('Delete Group');
-        $('#prompt-body').text('Are you sure you want to remove group ' + $(obj).attr('name') + 
-           ' from ' + $(parent).attr('name') + '?');
+        $('#prompt-header').text('Delete Host');
+        $('#prompt-body').text('Are you sure you want to delete host ' + host_name + '?');
         $('#prompt-action-btn').addClass('btn-danger');
         scope.promptAction = action_to_take;  // for some reason this binds?
         $('#prompt-modal').modal({
@@ -412,6 +404,23 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             keyboard: true,
             show: true
             });
+        }
+        }])
+
+
+    .factory('HostsReload', ['RelatedSearchInit', 'RelatedPaginateInit', 'InventoryForm', 'GetBasePath',
+    function(RelatedSearchInit, RelatedPaginateInit, InventoryForm, GetBasePath) {
+    return function(params) {
+        // Rerfresh the Hosts view on right side of page
+        var url = (params.group_id !== null) ? GetBasePath('groups') + params.group_id + '/hosts/' :
+            GetBasePath('inventory') + params.inventory_id + '/';
+        var relatedSets = { hosts: { url: url, iterator: 'host' } };
+        RelatedSearchInit({ scope: params.scope, form: InventoryForm, relatedSets: relatedSets });
+        RelatedPaginateInit({ scope: params.scope, relatedSets: relatedSets });
+        params.scope.search('host');
+         if (!params.scope.$$phase) {
+           params.scope.$digest();
+        }
         }
         }]);
 

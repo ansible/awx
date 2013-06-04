@@ -16,6 +16,7 @@ angular.module('HostListDefinition', [])
         selectInstructions: 'Click on a row to select it, and click Finished when done. Use the green <i class=\"icon-plus\"></i> button to create a new row.', 
         editTitle: 'Hosts',
         index: true,
+        well: true,
         
         fields: {
             name: {
@@ -33,7 +34,7 @@ angular.module('HostListDefinition', [])
                 icon: 'icon-plus',
                 label: 'Add',
                 mode: 'all',             // One of: edit, select, all
-                ngClick: 'addHost()',
+                ngClick: 'createHost()',
                 ngHide: 'showAddButton == false',
                 class: 'btn-success btn-small',
                 awToolTip: 'Create a new host'

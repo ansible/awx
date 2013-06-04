@@ -279,7 +279,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
           html += "</div>\n";    //well
        }
 
-       if (options.mode == 'lookup') {
+       if ( options.mode == 'lookup' || (options.id && options.id == "form-modal-body") ) {
           html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true, mode: 'lookup' });
        }
        else {

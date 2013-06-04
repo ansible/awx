@@ -76,17 +76,10 @@ angular.module('InventoryFormDefinition', [])
                 iterator: 'host',
                 actions: { 
                     add: {
-                        ngClick: "add('hosts')",
+                        ngClick: "addHost()",
                         icon: 'icon-plus',
-                        label: 'Create Host',
-                        awToolTip: 'Create a new host',
-                        ngHide: 'createButtonShow == false'
-                        },
-                    select: {
-                        ngClick: "select('hosts')",
-                        icon: 'icon-th-large',
-                        label: 'Select Existing Host',
-                        awToolTip: 'Select an existing host',
+                        label: 'Add Host',
+                        awToolTip: 'Add a host',
                         ngHide: 'createButtonShow == false'
                         }
                     },
@@ -104,14 +97,14 @@ angular.module('InventoryFormDefinition', [])
                 
                 fieldActions: {
                     edit: {
-                        ngClick: "edit('hosts', \{\{ host.id \}\}, '\{\{ host.name \}\}')",
+                        ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
                         icon: 'icon-edit',
                         label: 'Edit',
                         class: 'btn-success',
                         awToolTip: 'Edit host'
                         },
                     delete: {
-                        ngClick: "delete('hosts', \{\{ host.id \}\}, '\{\{ host.name \}\}', 'hosts')",
+                        ngClick: "deleteHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
                         icon: 'icon-remove',
                         label: 'Delete',
                         class: 'btn-danger',

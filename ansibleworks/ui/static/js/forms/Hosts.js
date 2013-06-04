@@ -13,7 +13,7 @@ angular.module('HostFormDefinition', [])
         addTitle: 'Create Host',                             //Legend in add mode
         editTitle: '{{ name }}',                             //Legend in edit mode
         name: 'host',                                        //Form name attribute
-        well: true,                                          //Wrap the form with TB well          
+        well: false,                                         //Wrap the form with TB well          
 
         fields: {
             name: {
@@ -39,7 +39,6 @@ angular.module('HostFormDefinition', [])
                 addRequired: false,
                 editRequird: false, 
                 rows: 10,
-                class: 'span12',
                 default: "\{\}",
                 awPopOver: "<p>Enter variables as JSON. Both the key and value must be wrapped in double quotes. " +
                     "Separate variables with commas, and wrap the entire string with { }. " +

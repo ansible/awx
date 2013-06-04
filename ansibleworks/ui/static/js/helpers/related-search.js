@@ -25,17 +25,19 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
 
         // Set default values
         for (var set in form.related) {
-            for (var fld in form.related[set].fields) {
-                if (form.related[set].fields[fld].key) {
-                   scope[form.related[set].iterator + 'SearchField'] = fld
-                   scope[form.related[set].iterator + 'SearchFieldLabel'] = form.related[set].fields[fld].label;
-                   break;
+            if (form.related[set].type != 'tree') {
+                for (var fld in form.related[set].fields) {
+                    if (form.related[set].fields[fld].key) {
+                       scope[form.related[set].iterator + 'SearchField'] = fld
+                       scope[form.related[set].iterator + 'SearchFieldLabel'] = form.related[set].fields[fld].label;
+                       break;
+                    }
                 }
+                scope[form.related[set].iterator + 'SearchType'] = 'contains';
+                scope[form.related[set].iterator + 'SearchTypeLabel'] = 'Contains';
+                scope[form.related[set].iterator + 'SelectShow'] = false;
+                scope[form.related[set].iterator + 'HideSearchType'] = false;
             }
-            scope[form.related[set].iterator + 'SearchType'] = 'contains';
-            scope[form.related[set].iterator + 'SearchTypeLabel'] = 'Contains';
-            scope[form.related[set].iterator + 'SelectShow'] = false;
-            scope[form.related[set].iterator + 'HideSearchType'] = false;
         } 
         
         // Functions to handle search widget changes

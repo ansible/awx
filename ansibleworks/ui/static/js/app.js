@@ -50,7 +50,8 @@ angular.module('ansible', [
     'JobEventsListDefinition',
     'JobEventFormDefinition',
     'JobHostDefinition',
-    'GroupsHelper'
+    'GroupsHelper',
+    'HostsHelper'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.
@@ -95,42 +96,6 @@ angular.module('ansible', [
 
             when('/inventories/:id', 
                 { templateUrl: urlPrefix + 'partials/inventories.html', controller: InventoriesEdit }).
-
-            when('/inventories/:inventory_id/hosts',
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: HostsList }).
-
-            when('/inventories/:inventory_id/hosts/add', 
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: HostsAdd }).
-
-            when('/inventories/:inventory_id/hosts/:host_id', 
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: HostsEdit }).
-
-            when('/inventories/:inventory_id/groups',
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: GroupsList }).
-
-            when('/inventories/:inventory_id/groups/add',
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: GroupsAdd }).
-
-            when('/inventories/:inventory_id/groups/:group_id',
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: GroupsEdit }).
-
-            when('/inventories/:inventory_id/groups/:group_id/children',
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: GroupsList }).
-
-            when('/inventories/:inventory_id/groups/:group_id/children/add',
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: GroupsAdd }).
-
-            when('/inventories/:inventory_id/groups/:group_id/children/:child_id', 
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: GroupsEdit }).
-
-            when('/inventories/:inventory_id/groups/:group_id/hosts',
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: HostsList }).
-
-            when('/inventories/:inventory_id/groups/:group_id/hosts/add',
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: HostsAdd }).
-
-            when('/inventories/:inventory_id/groups/:group_id/hosts/:host_id',
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: HostsEdit }).
 
             when('/organizations', { templateUrl: urlPrefix + 'partials/organizations.html',
                                      controller: OrganizationsList }).
