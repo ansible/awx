@@ -230,6 +230,13 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        scope.createButtonShow = false;
        scope.search(scope.relatedSets['hosts'].iterator);
        TreeInit(scope.TreeParams);
+       LookUpInit({
+           scope: scope,
+           form: form,
+           current_item: (scope.organization) ? scope.organization : null,
+           list: OrganizationList, 
+           field: 'organization' 
+           });
        });
   
    LoadInventory({ scope: scope });
@@ -302,7 +309,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                 });
        
       };
-        
+
    scope.treeController = function($node) {
       var nodeType = $($node).attr('type');
       if (nodeType == 'inventory') {
