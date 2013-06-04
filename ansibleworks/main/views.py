@@ -887,8 +887,7 @@ class InventoryRootGroupsList(BaseSubList):
         inventory = Inventory.objects.get(pk=self.kwargs['pk'])
         base = inventory.groups
         all_ids = base.values_list('id', flat=True)
-        base.exclude(parents__id__in = all_ids)
-        return base
+        return base.exclude(parents__pk__in = all_ids)
 
 class GroupsVariableDetail(VariableBaseDetail):
 
