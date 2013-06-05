@@ -67,7 +67,9 @@ angular.module('TeamFormDefinition', [])
                 actions: { 
                     add: {
                         ngClick: "add('users')",
-                        icon: 'icon-plus'
+                        icon: 'icon-plus',
+                        label: 'Add',
+                        awToolTip: 'Add a user'
                         },
                     },
                 
@@ -89,13 +91,15 @@ angular.module('TeamFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('users', \{\{ user.id \}\}, '\{\{ user.username \}\}')",
                         icon: 'icon-edit',
-                        class: 'btn-success'
+                        class: 'btn-success',
+                        awToolTip: 'Edit user'
                         },
                     delete: {
                         label: 'Delete',
                         ngClick: "delete('users', \{\{ user.id \}\}, '\{\{ user.username \}\}', 'users')",
                         icon: 'icon-remove',
-                        class: 'btn-danger'
+                        class: 'btn-danger',
+                        awToolTip: 'Remove user'
                         }
                     }
                 },
@@ -109,7 +113,9 @@ angular.module('TeamFormDefinition', [])
                 actions: { 
                     add: {
                         ngClick: "add('credentials')",
-                        icon: 'icon-plus'
+                        icon: 'icon-plus',
+                        label: 'Add',
+                        add: 'Add a new credential'
                         },
                     },
                 
@@ -128,13 +134,15 @@ angular.module('TeamFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
                         icon: 'icon-edit',
-                        class: 'btn-success'
+                        class: 'btn-success',
+                        awToolTip: 'Modify the credential'
                         },
                     delete: {
                         label: 'Delete',
                         ngClick: "delete('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}', 'credentials')",
                         icon: 'icon-remove',
-                        class: 'btn-danger'
+                        class: 'btn-danger',
+                        awToolTip: 'Remove the credential'
                         }
                     }
                 },
@@ -148,7 +156,8 @@ angular.module('TeamFormDefinition', [])
                 actions: { 
                     add: {
                         ngClick: "add('projects')",
-                        icon: 'icon-plus'
+                        icon: 'icon-plus',
+                        label: 'Add'
                         },
                     },
                 
@@ -167,13 +176,15 @@ angular.module('TeamFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('projects', \{\{ project.id \}\}, '\{\{ project.name \}\}')",
                         icon: 'icon-edit',
-                        class: 'btn-success'
+                        class: 'btn-success',
+                        awToolTip: 'Modify the project'
                         },
                     delete: {
                         label: 'Delete',
                         ngClick: "delete('projects', \{\{ project.id \}\}, '\{\{ project.name \}\}', 'projects')",
                         icon: 'icon-remove',
-                        class: 'btn-danger'
+                        class: 'btn-danger',
+                        awToolTip: 'Remove the project'
                         }
                     }
                 }
