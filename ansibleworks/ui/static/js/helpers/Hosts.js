@@ -413,7 +413,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
     return function(params) {
         // Rerfresh the Hosts view on right side of page
         var url = (params.group_id !== null) ? GetBasePath('groups') + params.group_id + '/hosts/' :
-            GetBasePath('inventory') + params.inventory_id + '/';
+            GetBasePath('inventory') + params.inventory_id + '/hosts/';
         var relatedSets = { hosts: { url: url, iterator: 'host' } };
         RelatedSearchInit({ scope: params.scope, form: InventoryForm, relatedSets: relatedSets });
         RelatedPaginateInit({ scope: params.scope, relatedSets: relatedSets });

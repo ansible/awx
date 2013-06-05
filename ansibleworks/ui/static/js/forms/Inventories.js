@@ -88,7 +88,7 @@ angular.module('InventoryFormDefinition', [])
                     name: {
                         key: true,
                         label: 'Name',
-                        linkTo: "/inventories/\{\{ inventory_id \}\}/hosts/\{\{ host.id \}\}"
+                        ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
                         },
                     description: {
                         label: 'Description'
