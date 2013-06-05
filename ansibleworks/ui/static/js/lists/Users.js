@@ -15,7 +15,6 @@ angular.module('UserListDefinition', [])
         selectTitle: 'Add Users',
         editTitle: 'Users',
         selectInstructions: 'Check the Select checkbox next to each user to be added, and click Finished when done. Use the green <i class=\"icon-plus\"></i> button to create a new user.', 
-        editInstructions: 'Create new users from the Organizations tab. Each Organization has an associated list of Users.',
         index: true,
         
         fields: {
