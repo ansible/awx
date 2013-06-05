@@ -24,7 +24,7 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     var mode = (base == 'users') ? 'edit' : 'select';      // if base path 'users', we're here to add/edit users
     var scope = view.inject(UserList, { mode: mode });         // Inject our view
     scope.selected = [];
-  
+    $rootScope.flashMessage = null;
     SearchInit({ scope: scope, set: 'users', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
@@ -140,13 +140,14 @@ UsersList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams
 
 
 function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
-                   GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope) 
+                   GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
+                   GetBasePath, LookUpInit, OrganizationList) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
 
    // Inject dynamic view
-   var defaultUrl = '/api/v1/organizations/';
+   var defaultUrl = GetBasePath('organizations');
    var form = UserForm;
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
@@ -154,20 +155,50 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
    LoadBreadCrumbs();
 
+   // Configure the lookup dialog. If we're adding a user through the Organizations tab, 
+   // default the Organization value.
+   LookUpInit({
+       scope: scope,
+       form: form,
+       current_item: ($routeParams.organization_id !== undefined) ? $routeParams.organization_id : null,
+       list: OrganizationList, 
+       field: 'organization' 
+       });
+
+   if ($routeParams.organization_id) {
+      scope.organization = $routeParams.organization_id;
+      Rest.setUrl(GetBasePath('organizations') + $routeParams.organization_id + '/');
+      Rest.get()
+          .success( function(data, status, headers, config) {
+              scope['organization_name'] = data.name;
+              })
+          .error( function(data, status, headers, config) {
+              ProcessErrors(scope, data, status, form,
+                  { hdr: 'Error!', msg: 'Failed to lookup Organization: ' + data.id + '. GET returned status: ' + status });
+              });
+   }
+
    // Save
    scope.formSave = function() {
-      Rest.setUrl(defaultUrl + $routeParams.organization_id + '/users/');
+      Rest.setUrl(defaultUrl + scope.organization + '/users/');
       var data = {}
       for (var fld in form.fields) {
           data[fld] = scope[fld];   
       } 
       Rest.post(data)
           .success( function(data, status, headers, config) {
-              ReturnToCaller(1);
+              var base = $location.path().replace(/^\//,'').split('/')[0];
+              if (base == 'users') {
+                $rootScope.flashMessage = 'New user successfully created!';
+                $location.path('/users/' + data.id);
+              }
+              else {
+                ReturnToCaller(1);
+              }
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to add new user. Post returned status: ' + status });
+                  { hdr: 'Error!', msg: 'Failed to add new user. POST returned status: ' + status });
               });
       };
 
@@ -186,7 +217,8 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 }
 
 UsersAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 'GenerateForm', 
-                     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope']; 
+                     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 
+                     'LookUpInit', 'OrganizationList' ]; 
 
 
 function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
@@ -194,7 +226,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
                     RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
-                             //scope.
+                                //scope.
 
    var defaultUrl=GetBasePath('users');
    var generator = GenerateForm;
@@ -205,8 +237,6 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    var master = {};
    var id = $routeParams.user_id;
    var relatedSets = {}; 
-
-   console.log('here!');
 
    // After the Organization is loaded, retrieve each related set
    scope.$on('userLoaded', function() {
@@ -222,13 +252,13 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
            LoadBreadCrumbs({ path: '/users/' + id, title: data.username });
            for (var fld in form.fields) {
               if (data[fld]) {
-                if (fld == 'is_superuser') {
-                   scope[fld] = (data[fld] == 'true' || data[fld] == true) ? 'true' : 'false';
-                }
-                else {
-                   scope[fld] = data[fld];
-                }
-                master[fld] = scope[fld];
+                 if (fld == 'is_superuser') {
+                    scope[fld] = (data[fld] == 'true' || data[fld] == true) ? 'true' : 'false';
+                 }
+                 else {
+                    scope[fld] = data[fld];
+                 }  
+                 master[fld] = scope[fld];
               }
            }
            var related = data.related;
@@ -237,6 +267,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
                   relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
                }
            }
+
            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
            RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
            RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
@@ -267,6 +298,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 
    // Cancel
    scope.formReset = function() {
+      $rootScope.flashMessage = null;
       generator.reset();
       for (var fld in master) {
           scope[fld] = master[fld];
@@ -278,6 +310,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
       // If password value changes, make sure password_confirm must be re-entered
       scope[fld] = '';
       scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
+      $rootScope.flashMessage = null;
       }
 
 

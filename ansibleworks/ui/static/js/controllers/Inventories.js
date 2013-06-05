@@ -62,7 +62,7 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
        }
     
     scope.lookupOrganization = function(organization_id) {
-       Rest.setUrl('/api/v1/organization/' + organization_id + '/');
+       Rest.setUrl(GetBasePath('organizations') + organization_id + '/');
        Rest.get()
            .success( function(data, status, headers, config) {
                return data.name;

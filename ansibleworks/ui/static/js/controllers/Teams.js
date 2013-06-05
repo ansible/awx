@@ -12,12 +12,12 @@
 
 function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, TeamList,
                     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                    ClearScope, ProcessErrors, SetTeamListeners)
+                    ClearScope, ProcessErrors, SetTeamListeners, GetBasePath)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
     var list = TeamList;
-    var defaultUrl = '/api/v1/teams/';
+    var defaultUrl = GetBasePath('teams');
     var view = GenerateList;
     var paths = $location.path().replace(/^\//,'').split('/');
     var mode = (paths[0] == 'teams') ? 'edit' : 'select';      // if base path 'teams', we're here to add/edit teams
@@ -73,7 +73,7 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
        }
     
     scope.lookupOrganization = function(organization_id) {
-       Rest.setUrl('/api/v1/organization/' + organization_id + '/');
+       Rest.setUrl(GetBasePath('organizations') + organization_id + '/');
        Rest.get()
            .success( function(data, status, headers, config) {
                return data.name;
@@ -81,7 +81,7 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
        }
 
     scope.finishSelection = function() {
-       Rest.setUrl('/api/v1' + $location.path() + '/');  // We're assuming the path matches the api path. 
+       Rest.setUrl(GetBasePath('base') + $location.path() + '/');  // We're assuming the path matches the api path. 
                                                          // Will this always be true??
        scope.queue = [];
 
@@ -160,18 +160,19 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
 
 TeamsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'TeamList', 'GenerateList', 
                       'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                       'SetTeamListeners' ];
+                       'SetTeamListeners', 'GetBasePath' ];
 
 
 function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, 
                    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-                   GenerateList, OrganizationList, SearchInit, PaginateInit, TeamLookUpOrganizationInit) 
+                   GenerateList, OrganizationList, SearchInit, PaginateInit, TeamLookUpOrganizationInit,
+                   GetBasePath) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
 
    // Inject dynamic view
-   var defaultUrl = '/api/v1/teams/';
+   var defaultUrl = GetBasePath('teams');
    var form = TeamForm;
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
@@ -205,7 +206,7 @@ function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
 TeamsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm', 'GenerateForm', 
                      'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
-                     'OrganizationList', 'SearchInit', 'PaginateInit', 'TeamLookUpOrganizationInit' ]; 
+                     'OrganizationList', 'SearchInit', 'PaginateInit', 'TeamLookUpOrganizationInit', 'GetBasePath']; 
 
 
 function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, 

@@ -146,7 +146,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
 
        if (options.mode != 'lookup') {
           //actions
-          base = $location.path().replace(/^\//,'').split('/')[0];
+          var base = $location.path().replace(/^\//,'').split('/')[0];
           html += "<div class=\"list-actions\">\n";
           for (action in list.actions) {
               if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {

@@ -377,7 +377,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        }
 
        //lookup type fields
-       if (field.type == 'lookup') {
+       if (field.type == 'lookup' && (field.excludeMode == undefined || field.excludeMode != options.mode)) {
           html += "<div class=\"control-group\""
           html += (field.ngShow) ? this.attr(field,'ngShow') : "";
           html += ">\n";

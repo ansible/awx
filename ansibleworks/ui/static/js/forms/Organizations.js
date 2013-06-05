@@ -58,7 +58,9 @@ angular.module('OrganizationFormDefinition', [])
                 actions: { 
                     add: {
                         ngClick: "add('users')",
-                        icon: 'icon-plus'
+                        label: 'Add',
+                        icon: 'icon-plus',
+                        awToolTip: 'Add a new user'
                         },
                     },
                 
@@ -80,13 +82,15 @@ angular.module('OrganizationFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('users', \{\{ user.id \}\}, '\{\{ user.username \}\}')",
                         icon: 'icon-edit',
-                        class: 'btn-success'
+                        class: 'btn-success',
+                        awToolTip: 'Edit user'
                         },
                     delete: {
                         label: 'Delete',
                         ngClick: "delete('users', \{\{ user.id \}\}, '\{\{ user.username \}\}', 'users')",
                         icon: 'icon-remove',
-                        class: 'btn-danger'
+                        class: 'btn-danger',
+                        awToolTip: 'Remove user'
                         }
                     }
                 },
@@ -100,7 +104,9 @@ angular.module('OrganizationFormDefinition', [])
                 actions: {                                                // Actions displayed top right of list
                     add: {
                         ngClick: "add('admins')",
-                        icon: 'icon-plus'
+                        icon: 'icon-plus',
+                        label: 'Add',
+                        awToolTip: 'Add new administrator'
                         }
                     },
                 fields: {
@@ -120,13 +126,15 @@ angular.module('OrganizationFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('users', \{\{ admin.id \}\}, '\{\{ admin.username \}\}')",
                         icon: 'icon-edit',
-                        class: 'btn-success'
+                        class: 'btn-success',
+                        awToolTip: 'Edit administrator'
                         },
                     delete: {
                         label: 'Delete',
                         ngClick: "delete('admins', \{\{ admin.id \}\}, '\{\{ admin.username \}\}', 'administrators')",
                         icon: 'icon-remove',
-                        class: 'btn-danger'
+                        class: 'btn-danger',
+                        awToolTip: 'Remove administrator'
                         }
                     }
                 }

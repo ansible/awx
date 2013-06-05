@@ -42,6 +42,16 @@ angular.module('UserFormDefinition', [])
                 addRequired: true,
                 editRequired: true
                 },
+            organization: {
+                label: 'Organization',
+                type: 'lookup',
+                sourceModel: 'organization',
+                sourceField: 'name',
+                addRequired: true,
+                editRequired: true,
+                ngClick: 'lookUpOrganization()',
+                excludeMode: 'edit'
+                },
             password: {
                 label: 'Password',
                 type: 'password',

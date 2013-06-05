@@ -35,9 +35,9 @@ angular.module('UserListDefinition', [])
             add: {
                 label: 'Add',
                 icon: 'icon-plus',
-                mode: 'select',                      // One of: edit, select, all
+                mode: 'all',                      // One of: edit, select, all
                 ngClick: 'addUser()',
-                basePaths: ['organizations'],        // base path must be in list, or action not available
+                basePaths: ['organizations','users'],        // base path must be in list, or action not available
                 class: 'btn-success btn-small',
                 awToolTip: 'Create a new user'
                 }
