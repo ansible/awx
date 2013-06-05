@@ -84,6 +84,50 @@ angular.module('UserFormDefinition', [])
             },
 
         related: { //related colletions (and maybe items?)
+            credentials: {
+                type: 'collection',
+                title: 'Credentials',
+                iterator: 'credential',
+                open: false,
+
+                actions: { 
+                    add: {
+                        ngClick: "add('credentials')",
+                        icon: 'icon-plus',
+                        label: 'Add',
+                        awToolTip: 'Add a credential for this user'
+                        },
+                    },
+
+                fields: {
+                    name: {
+                        key: true,
+                        label: 'Name'
+                        },
+                    description: {
+                        label: 'Description'
+                        }
+                    },
+
+                fieldActions: {
+                    edit: {
+                        label: 'Edit',
+                        ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
+                        icon: 'icon-edit',
+                        class: 'btn-success',
+                        awToolTip: 'Edit the credential'
+                        },
+                    delete: {
+                        label: 'Delete',
+                        ngClick: "delete('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}', 'credentials')",
+                        icon: 'icon-remove',
+                        class: 'btn-danger',
+                        awToolTip: 'Delete the credential'
+                        }
+                    }
+
+                },
+                
             admin_of_organizations: {                                       // Assumes a plural name (e.g. things)
                 type: 'collection',
                 title: 'Admin of Organizations',
@@ -151,51 +195,7 @@ angular.module('UserFormDefinition', [])
                         label: 'Description'
                         }
                     }
-                },
-
-            credentials: {
-                type: 'collection',
-                title: 'Credentials',
-                iterator: 'credential',
-                open: false,
-
-                actions: { 
-                    add: {
-                        ngClick: "add('credentials')",
-                        icon: 'icon-plus',
-                        label: 'Add',
-                        awToolTip: 'Add a credential for this user'
-                        },
-                    },
-
-                fields: {
-                    name: {
-                        key: true,
-                        label: 'Name'
-                        },
-                    description: {
-                        label: 'Description'
-                        }
-                    },
-
-                fieldActions: {
-                    edit: {
-                        label: 'Edit',
-                        ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
-                        icon: 'icon-edit',
-                        class: 'btn-success',
-                        awToolTip: 'Edit the credential'
-                        },
-                    delete: {
-                        label: 'Delete',
-                        ngClick: "delete('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}', 'credentials')",
-                        icon: 'icon-remove',
-                        class: 'btn-danger',
-                        awToolTip: 'Delete the credential'
-                        }
-                    }
-
-                },
+                }
                 
             }
 
