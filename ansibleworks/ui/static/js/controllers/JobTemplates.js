@@ -25,6 +25,18 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
     var scope = view.inject(list, { mode: mode });
     scope.selected = [];
   
+    if (scope.PostRefreshRemove) {
+       scope.PostRefreshRemove();
+    }
+    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
+        $("tr.success").each(function(index) {
+            // Make sure no rows have a green background 
+            var ngc = $(this).attr('ng-class'); 
+            scope[ngc] = ""; 
+            });
+        });
+
+    
     SearchInit({ scope: scope, set: 'job_templates', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);

@@ -24,6 +24,7 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     var mode = (base == 'users') ? 'edit' : 'select';      // if base path 'users', we're here to add/edit users
     var scope = view.inject(UserList, { mode: mode });         // Inject our view
     scope.selected = [];
+
     $rootScope.flashMessage = null;
     SearchInit({ scope: scope, set: 'users', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });

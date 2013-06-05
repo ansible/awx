@@ -24,14 +24,20 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
     var scope = view.inject(list, { mode: mode });    // Inject our view
     scope.selected = [];
   
-    // After a refresh, populate the organization name on each row
     if (scope.PostRefreshRemove) {
        scope.PostRefreshRemove();
     }
     scope.PostRefershRemove = scope.$on('PostRefresh', function() {
+         // After a refresh, populate the organization name on each row
         for( var i=0; i < scope.teams.length; i++) {
            scope.teams[i].organization_name = scope.teams[i].summary_fields.organization.name;  
         }
+
+        $("tr.success").each(function(index) {
+            // Make sure no rows have a green background 
+            var ngc = $(this).attr('ng-class'); 
+            scope[ngc] = ""; 
+            });
         });
 
     //SetTeamListeners({ scope: scope, set: 'teams', iterator: list.iterator });

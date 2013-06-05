@@ -21,12 +21,23 @@ function AdminsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     var scope = view.inject(AdminList, { mode: mode });         // Inject our view
     scope.selected = [];
 
+    if (scope.PostRefreshRemove) {
+       scope.PostRefreshRemove();
+    }
+    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
+        $("tr.success").each(function(index) {
+            // Make sure no rows have a green background 
+            var ngc = $(this).attr('ng-class'); 
+            scope[ngc] = ""; 
+            });
+        });
+    
     SearchInit({ scope: scope, set: 'admins', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
 
     LoadBreadCrumbs();
-    
+
     scope.finishSelection = function() {
        var url = GetBasePath('organizations') + $routeParams.organization_id + '/admins/'
        Rest.setUrl(url);

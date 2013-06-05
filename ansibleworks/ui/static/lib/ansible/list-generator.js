@@ -91,7 +91,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
           this.scope.lookupHeader = options.hdr;
           $('#lookup-modal').modal();
        }
-
+       
        return this.scope;
        },
 
