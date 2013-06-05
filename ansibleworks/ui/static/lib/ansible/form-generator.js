@@ -814,10 +814,15 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
 
                  // Add actions(s)
                  html += "<div class=\"list-actions\">\n";
-                 for (var action in form.related[itm].actions) {
+                 for (var act in form.related[itm].actions) {
+                     var action = form.related[itm].actions[act];
                      html += "<button class=\"btn btn-small btn-success\" ";
-                     html += this.attr(form.related[itm]['actions'][action],'ngClick');
-                     html += "><i class=\"" + form.related[itm]['actions'][action].icon + "\"></i></button>\n";
+                     html += this.attr(action,'ngClick');
+                     html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
+                     html += (action.awToolTip) ? "data-placement=\"right\" " : "";
+                     html += "><i class=\"" + action.icon + "\"></i>";
+                     html += (action.label) ? " " + action.label : "";
+                     html += "</button>\n";
                  }
                  html += "</div>\n";
                 
@@ -866,13 +871,15 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                  
                  // Row level actions
                  html += "<td class=\"actions\">";
-                 for (action in form.related[itm].fieldActions) {
+                 for (act in form.related[itm].fieldActions) {
+                     var action = form.related[itm].fieldActions[act];
                      html += "<button class=\"btn btn-small"; 
-                     html += (form.related[itm]['fieldActions'][action].class) ?
-                         " " + form.related[itm]['fieldActions'][action].class : "";
-                     html += "\" " + this.attr(form.related[itm]['fieldActions'][action],'ngClick') +
-                         ">" + this.icon(form.related[itm]['fieldActions'][action].icon);
-                     html += (form.related[itm].fieldActions[action].label) ?  " " + form.related[itm].fieldActions[action].label : ""; 
+                     html += (action.class) ? " " + action.class : "";
+                     html += "\" " + this.attr(action,'ngClick');
+                     html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
+                     html += (action.awToolTip) ? "data-placement=\"top\" " : "";
+                     html += ">" + this.icon(action.icon);
+                     html += (action.label) ?  " " + action.label : ""; 
                      html += "</button> ";
                  }
                  html += "</td>";

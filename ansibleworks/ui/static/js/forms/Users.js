@@ -162,7 +162,9 @@ angular.module('UserFormDefinition', [])
                 actions: { 
                     add: {
                         ngClick: "add('credentials')",
-                        icon: 'icon-plus'
+                        icon: 'icon-plus',
+                        label: 'Add',
+                        awToolTip: 'Add a credential for this user'
                         },
                     },
 
@@ -181,13 +183,15 @@ angular.module('UserFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
                         icon: 'icon-edit',
-                        class: 'btn-success'
+                        class: 'btn-success',
+                        awToolTip: 'Edit the credential'
                         },
                     delete: {
                         label: 'Delete',
                         ngClick: "delete('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}', 'credentials')",
                         icon: 'icon-remove',
-                        class: 'btn-danger'
+                        class: 'btn-danger',
+                        awToolTip: 'Delete the credential'
                         }
                     }
 
