@@ -97,7 +97,7 @@ angular.module('JobTemplateFormDefinition', [])
                 addRequired: false, 
                 editRequired: false,
                 column: 2,
-                awPopOver: "<p>Specify the number of parallel or simultaneous processes to use while executing the playbook. Provide a value between 0 and 100. " +
+                awPopOver: "<p>The number of parallel or simultaneous processes to use while executing the playbook. Provide a value between 0 and 100. " +
                     "A value of zero will use the ansible default setting of 5 parallel processes.</p>",
                 dataTitle: 'Forks',
                 dataPlacement: 'left'
@@ -123,8 +123,8 @@ angular.module('JobTemplateFormDefinition', [])
                 addRequired: true, 
                 editRequired: true,
                 column: 2,
-                awPopOver: "<p>Indicate the amount of debugging type information ansible should produce as the playbook executes.</p>",
-                dataTitle: 'Forks',
+                awPopOver: "<p>Control the level of output ansible will produce as the playbook executes.</p>",
+                dataTitle: 'Verbosity',
                 dataPlacement: 'left'
                 },
             extra_vars: {

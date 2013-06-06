@@ -171,10 +171,9 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
    
    scope.job_type_options = [{ value: 'run', label: 'Run' }, { value: 'check', label: 'Check' }];
    scope.verbosity_options = [
-       { value: '0', label: 'Silent' },
-       { value: '1', label: 'Whisper' },
-       { value: '2', label: 'Talk' },
-       { value: '3', label: 'Scream' }];
+       { value: '0', label: 'Default' },
+       { value: '1', label: 'Verbose' },
+       { value: '3', label: 'Debug' }];
    scope.playbook_options = []; 
 
    generator.reset();
@@ -291,10 +290,9 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
    // Our job type options
    scope.job_type_options = [{ value: 'run', label: 'Run' }, { value: 'check', label: 'Check' }];
    scope.verbosity_options = [
-       { value: '0', label: 'Silent' },
-       { value: '1', label: 'Whisper' },
-       { value: '2', label: 'Talk' },
-       { value: '3', label: 'Scream' }];
+       { value: '0', label: 'Default' },
+       { value: '1', label: 'Verbose' },
+       { value: '3', label: 'Debug' }];
    scope.playbook_options = null;
    scope.playbook = null; 
 

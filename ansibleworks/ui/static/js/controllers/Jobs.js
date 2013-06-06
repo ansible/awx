@@ -191,10 +191,16 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
        }
        // Set the playbook lookup
        getPlaybooks(scope.project);
+       $('#forks-slider').slider("option", "value", scope.forks);
+       $('#forks-slider').slider("disable");
        });
 
    // Our job type options
    scope.job_type_options = [{ value: 'run', label: 'Run' }, { value: 'check', label: 'Check' }];
+   scope.verbosity_options = [
+       { value: '0', label: 'Default' },
+       { value: '1', label: 'Verbose' },
+       { value: '3', label: 'Debug' }];
    scope.playbook_options = null;
    scope.playbook = null; 
 
@@ -313,6 +319,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
       for (var fld in master) {
           scope[fld] = master[fld];
       }
+      $('#forks-slider').slider("option", "value", scope.forks);
       };
 
    // Related set: Add button

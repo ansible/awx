@@ -194,7 +194,7 @@ angular.module('AWDirectives', ['RestServices'])
                    ctrl.$setValidity('max', true);
                    ctrl.$dirty = true;
                    ctrl.$render();
-                   scope['job_templates_form'].$dirty = true;
+                   //scope['job_templates_form'].$dirty = true;
                    if (!scope.$$phase) {
                        scope.$digest();
                    }

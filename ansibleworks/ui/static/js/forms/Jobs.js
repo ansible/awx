@@ -81,32 +81,46 @@ angular.module('JobFormDefinition', [])
                 },
             forks: {
                 label: 'Forks',
+                id: 'forks-number',
                 type: 'number', 
                 integer: true,
                 min: 0,
                 max: 100,
-                default: 0,
+                slider: true, 
+                class: 'input-mini',
+                default: '0',
                 addRequired: false, 
                 editRequired: false,
-                column: 2
+                column: 2,
+                awPopOver: "<p>The number of parallel or simultaneous processes to use while executing the playbook. Provide a value between 0 and 100. " +
+                    "A value of zero will use the ansible default setting of 5 parallel processes.</p>",
+                dataTitle: 'Forks',
+                dataPlacement: 'left'
                 },
             limit: {
                 label: 'Limit',
                 type: 'text', 
                 addRequired: false, 
                 editRequired: false,
-                column: 2
+                column: 2,
+                awPopOver: "<p>Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
+                    "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see the " +
+                    "<a href=\"http://ansible.cc/docs/patterns.html#selecting-targets\" target=\"_blank\">Selecting Targets section</a> under Inventory and Patterns " + 
+                    " in the Ansible documentation.</p>",
+                dataTitle: 'Forks',
+                dataPlacement: 'left'
                 },
             verbosity: {
                 label: 'Verbosity',
-                type: 'number',
-                integer: true,
+                type: 'select',
+                ngOptions: 'v.label for v in verbosity_options',
                 default: 0,
-                min: 0,
-                max: 3,
-                addRequired: false, 
-                editRequired: false,
-                column: 2
+                addRequired: true, 
+                editRequired: true,
+                column: 2,
+                awPopOver: "<p>Control the level of output ansible will produce as the playbook executes.</p>",
+                dataTitle: 'Verbosity',
+                dataPlacement: 'left'
                 },
             extra_vars: {
                 label: 'Extra Variables',
