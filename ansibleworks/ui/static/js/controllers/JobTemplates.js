@@ -266,6 +266,7 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
    scope.formReset = function() {
       // Defaults
       generator.reset();
+      $('#forks-slider').slider("option", "value", scope.forks);
       };
 }
 
