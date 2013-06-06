@@ -159,13 +159,18 @@ angular.module('AWDirectives', ['RestServices'])
      *  default placement to the left, delay to 0 seconds, content type to HTML, and title to 'Help'.
      */ 
     .directive('awPopOver', function() {
-       return function(scope, element, attrs) {
-           var placement = (attrs.placement != undefined && attrs.placement != null) ? attrs.placement : 'left';
-           var title = (attrs.title != undefined && attrs.title != null) ? attrs.title : 'Help';
-           $(element).popover({ placement: placement, delay: 0, title: title, 
-               content: attrs.awPopOver, delay: 0, trigger: 'click', html: true });
-       }
-       })
+        return function(scope, element, attrs) {
+            var placement = (attrs.placement != undefined && attrs.placement != null) ? attrs.placement : 'left';
+            var title = (attrs.title != undefined && attrs.title != null) ? attrs.title : 'Help';
+            $(element).popover({ placement: placement, delay: 0, title: title, 
+                content: attrs.awPopOver, delay: 0, trigger: 'click', html: true });
+            $(document).bind('keydown', function(e) {
+                if (e.keyCode === 27) {
+                   $(element).popover('hide');
+                }
+                });
+        }
+        })
 
     //
     // Enable jqueryui slider widget on a numeric input field
@@ -200,7 +205,7 @@ angular.module('AWDirectives', ['RestServices'])
                 $('#' + name + '-slider').slider('value', parseInt( $(this).val() ));
                 });
 
-            
+
             }
         }
         }]);
