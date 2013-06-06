@@ -14,6 +14,7 @@ angular.module('OrganizationListDefinition', [])
         iterator: 'organization',
         selectTitle: 'Add Organizations',
         editTitle: 'Organizations',
+        hover: true,
         index: true,
         
         fields: {

@@ -280,11 +280,13 @@
     padding-bottom: 0;
  }
 
- /* Jobs page */
- .jobs-table tbody tr:hover > td,
- .jobs-table tbody tr:hover > th {
+/* Enable table-hover to work when table is in a well */
+.table-hover tbody tr:hover > td,
+.table-hover tbody tr:hover > th {
     background-color: #fff;
  }
+
+ /* Jobs page */
 
  .job-error, .job-failed,
  input[type="text"].job-failed,

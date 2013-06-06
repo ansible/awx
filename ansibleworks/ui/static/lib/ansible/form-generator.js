@@ -709,7 +709,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              
               // Start the list
               html += "<div class=\"list\">\n";
-              html += "<table class=\"table table-condensed\">\n";
+              html += "<table class=\"table table-condensed table-hover\">\n";
               html += "<thead>\n";
               html += "<tr>\n";
               html += "<th>#</th>\n";
@@ -863,7 +863,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                 
                  // Start the list
                  html += "<div class=\"list\">\n";
-                 html += "<table class=\"table table-condensed\">\n";
+                 html += "<table class=\"table table-condensed table-hover\">\n";
                  html += "<thead>\n";
                  html += "<tr>\n";
                  html += "<th>#</th>\n";
