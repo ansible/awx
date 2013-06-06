@@ -168,6 +168,15 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
    var form = JobTemplateForm;
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
+   
+   scope.job_type_options = [{ value: 'run', label: 'Run' }, { value: 'check', label: 'Check' }];
+   scope.verbosity_options = [
+       { value: '0', label: 'Silent' },
+       { value: '1', label: 'Whisper' },
+       { value: '2', label: 'Talk' },
+       { value: '3', label: 'Scream' }];
+   scope.playbook_options = []; 
+
    generator.reset();
    LoadBreadCrumbs();
 
@@ -221,10 +230,7 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
        current_item: null,
        list: ProjectList, 
        field: 'project'
-       });
-
-   scope.job_type_options = [{ value: 'run', label: 'Run' }, { value: 'check', label: 'Check' }];
-   scope.playbook_options = [];         
+       });        
 
    // Save
    scope.formSave = function() {
@@ -261,7 +267,6 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
       // Defaults
       generator.reset();
       };
-
 }
 
 JobTemplatesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
@@ -281,12 +286,23 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
    var generator = GenerateForm;
    var form = JobTemplateForm;
    var scope = generator.inject(form, {mode: 'edit', related: true});
+
+   // Our job type options
+   scope.job_type_options = [{ value: 'run', label: 'Run' }, { value: 'check', label: 'Check' }];
+   scope.verbosity_options = [
+       { value: '0', label: 'Silent' },
+       { value: '1', label: 'Whisper' },
+       { value: '2', label: 'Talk' },
+       { value: '3', label: 'Scream' }];
+   scope.playbook_options = null;
+   scope.playbook = null; 
+
    generator.reset();
+
    var base = $location.path().replace(/^\//,'').split('/')[0];
    var master = {};
    var id = $routeParams.id;
    var relatedSets = {}; 
-
 
    function getPlaybooks(project) {
        if (project !== null && project !== '' && project !== undefined) {
@@ -326,12 +342,8 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
            scope.search(relatedSets[set].iterator);
        }
        getPlaybooks(scope.project);
+       $('#forks-slider').slider('value',scope.forks);   // align slider handle with value.
        });
-
-   // Our job type options
-   scope.job_type_options = [{ value: 'run', label: 'Run' }, { value: 'check', label: 'Check' }];
-   scope.playbook_options = null;
-   scope.playbook = null; 
 
    // Retrieve detail record and prepopulate the form
    Rest.setUrl(defaultUrl + ':id/'); 
@@ -442,6 +454,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
       for (var fld in master) {
           scope[fld] = master[fld];
       }
+      $('#forks-slider').slider("option", "value", scope.forks);
       };
 
    // Related set: Add button
@@ -481,7 +494,6 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                 });
        
       }
-
 }
 
 JobTemplatesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm', 

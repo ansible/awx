@@ -165,7 +165,45 @@ angular.module('AWDirectives', ['RestServices'])
            $(element).popover({ placement: placement, delay: 0, title: title, 
                content: attrs.awPopOver, delay: 0, trigger: 'click', html: true });
        }
-       });
+       })
+
+    //
+    // Enable jqueryui slider widget on a numeric input field
+    //
+    // <input type="number" ng-slider name="myfield" min="0" max="100" />
+    //
+    .directive('ngSlider', [ function() {
+        return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            var name = elm.attr('name');
+            $('#' + name + '-slider').slider({
+                value: 0,
+                step: 1,
+                min: elm.attr('min'),
+                max: elm.attr('max'),
+                slide: function(e, u) {
+                   ctrl.$setViewValue(u.value);
+                   ctrl.$setValidity('required',true);
+                   ctrl.$setValidity('min', true);
+                   ctrl.$setValidity('max', true);
+                   ctrl.$dirty = true;
+                   ctrl.$render();
+                   scope['job_templates_form'].$dirty = true;
+                   if (!scope.$$phase) {
+                       scope.$digest();
+                   }
+                   }
+                });
+
+            $('#' + name + '-number').change( function() {
+                $('#' + name + '-slider').slider('value', parseInt( $(this).val() ));
+                });
+
+            
+            }
+        }
+        }]);
 
 
 

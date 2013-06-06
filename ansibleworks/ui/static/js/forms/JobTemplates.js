@@ -35,7 +35,7 @@ angular.module('JobTemplateFormDefinition', [])
                 label: 'Job Type',
                 type: 'select',
                 ngOptions: 'type.label for type in job_type_options',
-                default: 'run',
+                default: 0,
                 addRequired: true, 
                 editRequired: true,
                 column: 1
@@ -81,11 +81,14 @@ angular.module('JobTemplateFormDefinition', [])
                 },
             forks: {
                 label: 'Forks',
+                id: 'forks-number',
                 type: 'number', 
                 integer: true,
                 min: 0,
                 max: 100,
-                default: 0,
+                slider: true, 
+                class: 'input-mini',
+                default: '0',
                 addRequired: false, 
                 editRequired: false,
                 column: 2
@@ -99,13 +102,11 @@ angular.module('JobTemplateFormDefinition', [])
                 },
             verbosity: {
                 label: 'Verbosity',
-                type: 'number',
-                integer: true,
+                type: 'select',
+                ngOptions: 'v.label for v in verbosity_options',
                 default: 0,
-                min: 0,
-                max: 3,
-                addRequired: false, 
-                editRequired: false,
+                addRequired: true, 
+                editRequired: true,
                 column: 2
                 },
             extra_vars: {

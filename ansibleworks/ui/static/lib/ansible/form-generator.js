@@ -107,7 +107,12 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
     applyDefaults: function() {
        for (fld in this.form.fields) {
            if (this.form.fields[fld].default || this.form.fields[fld].default == 0) {
-              this.scope[fld] = this.form.fields[fld].default;
+              if (this.form.fields[fld].type == 'select' && this.scope[fld + '_options']) {
+                 this.scope[fld] = this.scope[fld + '_options'][this.form.fields[fld].default];
+              }
+              else {
+                 this.scope[fld] = this.form.fields[fld].default;
+              }
            }
        }
        },
@@ -311,18 +316,22 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              html += "<label class=\"control-label\" for=\"" + fld + '">' + field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n"; 
              // Use 'text' rather than 'number' so that our integer directive works correctly
-             html += "<input type=\"text\" value=\"" + field.default + "\" class=\"spinner\" ";
+             html += (field.slider) ? "<div class=\"slider\" id=\"" + fld + "-slider\"></div>\n" : "";
+             html += "<input type=\"text\" value=\"" + field.default + "\" ";
+             html += (field.class) ? this.attr(field, 'class') : "";
+             html += (field.slider) ? "ng-slider=\"" + fld + "\" " : ""; 
              html += "ng-model=\"" + fld + '" ';
              html += 'name="' + fld + '" ';
              html += (field.min || field.min == 0) ? this.attr(field, 'min') : "";
              html += (field.max) ? this.attr(field, 'max') : "";
              html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-             html += (field.id) ? this.attr(field,'id') : "";
+             html += (field.slider) ? "id=\"" + fld + "-number\"" : (field.id) ? this.attr(field,'id') : "";
              html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
              html += (options.mode == 'add' && field.addRequired) ? "required " : "";
              html += (field.readonly) ? "readonly " : "";
              html += (field.integer) ? "integer " : "";
-             html += "/><br />\n";
+             html += "/>\n";
+             html += "<br />\n";
              // Add error messages
              if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
                 html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
@@ -535,8 +544,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                  var button = this.form.buttons[btn];
                  //button
                  html += "<button ";
-                 html += "class=\"btn"; 
-                 html += (this.form.twoColumns) ? "" : " btn-small";
+                 html += "class=\"btn btn-small";
                  html += (button.class) ? " " + button.class : "";
                  html += "\" ";
                  if (button.ngClick) {

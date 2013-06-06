@@ -353,3 +353,10 @@
  #tree-view {
     min-height: 100px;
  }
+
+ .slider {
+    display: inline-block;
+    vertical-align: middle;
+    width: 100px;
+    margin: 0 10px;
+ }
