@@ -51,16 +51,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                 var ngc = $(this).attr('ng-class'); 
                 scope[ngc] = ""; 
                 });
-            if ($routeParams.group_id) {
-               // Remove the current group from the list of available groups, thus
-               // preventing a group from being added to itself
-               for (var i=0; i < scope.groups.length; i++) {
-                   if (scope.groups[i].id == $routeParams.group_id) {
-                      scope.groups.splice(i,1);
-                   }
-               }
-            }
-            //scope.$digest();
             });
 
         SearchInit({ scope: scope, set: 'hosts', list: list, url: defaultUrl });
@@ -103,16 +93,16 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
               });
 
            if (scope.selected.length > 0 ) {
-              var group;
+              var host;
               for (var i=0; i < scope.selected.length; i++) {
-                  group = null;
-                  for (var j=0; j < scope.groups.length; j++) {
-                      if (scope.groups[j].id == scope.selected[i]) {
-                         group = scope.groups[j];
+                  host = null;
+                  for (var j=0; j < scope.hosts.length; j++) {
+                      if (scope.hosts[j].id == scope.selected[i]) {
+                         host = scope.hosts[j];
                       }
                   }
-                  if (group !== null) {
-                     Rest.post(group)
+                  if (host !== null) {
+                     Rest.post(host)
                          .success( function(data, status, headers, config) {
                              scope.queue.push({ result: 'success', data: data, status: status });
                              scope.$emit('callFinished');

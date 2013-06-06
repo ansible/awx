@@ -334,7 +334,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       else {
          return {
              addGroup: { 
-                label: 'Add Subgroup',
+                label: 'Add Group',
                 action: function(obj) { GroupsList({ "inventory_id": id, group_id: $(obj).attr('group_id') }); }    
                 },
              edit: { 
