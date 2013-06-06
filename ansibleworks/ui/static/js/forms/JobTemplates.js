@@ -38,7 +38,12 @@ angular.module('JobTemplateFormDefinition', [])
                 default: 0,
                 addRequired: true, 
                 editRequired: true,
-                column: 1
+                column: 1,
+                awPopOver: "<p>When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
+                    " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, ansible will check playbook " +
+                    " syntax, test environment setup and report problems.</p>",
+                dataTitle: 'Forks',
+                dataPlacement: 'right'
                 },
             inventory: {
                 label: 'Inventory',
@@ -91,14 +96,24 @@ angular.module('JobTemplateFormDefinition', [])
                 default: '0',
                 addRequired: false, 
                 editRequired: false,
-                column: 2
+                column: 2,
+                awPopOver: "<p>Specify the number of parallel or simultaneous processes to use while executing the playbook. Provide a value between 0 and 100. " +
+                    "A value of zero will use the ansible default setting of 5 parallel processes.</p>",
+                dataTitle: 'Forks',
+                dataPlacement: 'left'
                 },
             limit: {
                 label: 'Limit',
                 type: 'text', 
                 addRequired: false, 
                 editRequired: false,
-                column: 2
+                column: 2,
+                awPopOver: "<p>Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
+                    "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see the " +
+                    "<a href=\"http://ansible.cc/docs/patterns.html#selecting-targets\" target=\"_blank\">Selecting Targets section</a> under Inventory and Patterns " + 
+                    " in the Ansible documentation.</p>",
+                dataTitle: 'Forks',
+                dataPlacement: 'left'
                 },
             verbosity: {
                 label: 'Verbosity',
@@ -107,7 +122,10 @@ angular.module('JobTemplateFormDefinition', [])
                 default: 0,
                 addRequired: true, 
                 editRequired: true,
-                column: 2
+                column: 2,
+                awPopOver: "<p>Indicate the amount of debugging type information ansible should produce as the playbook executes.</p>",
+                dataTitle: 'Forks',
+                dataPlacement: 'left'
                 },
             extra_vars: {
                 label: 'Extra Variables',

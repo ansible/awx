@@ -186,6 +186,12 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              html += "<label class=\"control-label"; 
              html += (field.labelClass) ? " " + field.labelClass : "";
              html += "\" for=\"" + fld + '">';
+             if (field.awPopOver) {
+                html += "<a href=\"\" " + this.attr(field,'awPopOver');
+                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
+                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
+                html += "><i class=\"icon-info-sign\"></i></a> ";
+             }
              html += (field.icon) ? this.icon(field.icon) : "";
              html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n"; 
@@ -281,7 +287,14 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              html += "<div class=\"control-group\""
              html += (field.ngShow) ? this.attr(field,'ngShow') : "";
              html += ">\n";
-             html += "<label class=\"control-label\" for=\"" + fld + '">' + field.label + '</label>' + "\n";
+             html += "<label class=\"control-label\" for=\"" + fld + '">';
+             if (field.awPopOver) {
+                html += "<a href=\"\" " + this.attr(field,'awPopOver');
+                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
+                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
+                html += "><i class=\"icon-info-sign\"></i></a> ";
+             }
+             html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n"; 
              html += "<select ";
              html += "ng-model=\"" + fld + '" ';
@@ -313,7 +326,14 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              html += "<div class=\"control-group\""
              html += (field.ngShow) ? this.attr(field,'ngShow') : "";
              html += ">\n";
-             html += "<label class=\"control-label\" for=\"" + fld + '">' + field.label + '</label>' + "\n";
+             html += "<label class=\"control-label\" for=\"" + fld + '">';
+             if (field.awPopOver) {
+                html += "<a href=\"\" " + this.attr(field,'awPopOver');
+                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
+                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
+                html += "><i class=\"icon-info-sign\"></i></a> ";
+             }
+             html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n"; 
              // Use 'text' rather than 'number' so that our integer directive works correctly
              html += (field.slider) ? "<div class=\"slider\" id=\"" + fld + "-slider\"></div>\n" : "";
@@ -390,7 +410,14 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           html += "<div class=\"control-group\""
           html += (field.ngShow) ? this.attr(field,'ngShow') : "";
           html += ">\n";
-          html += "<label class=\"control-label\" for=\"" + fld + '">' + field.label + '</label>' + "\n";
+          html += "<label class=\"control-label\" for=\"" + fld + '">';
+          if (field.awPopOver) {
+                html += "<a href=\"\" " + this.attr(field,'awPopOver');
+                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
+                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
+                html += "><i class=\"icon-info-sign\"></i></a> ";
+          }
+          html +=  field.label + '</label>' + "\n";
           html += "<div class=\"controls\">\n";
           html += "<div class=\"input-prepend\">\n";
           html += "<button class=\"lookup-btn btn\" " + this.attr(field,'ngClick') + "><i class=\"icon-search\"></i></button>\n";
