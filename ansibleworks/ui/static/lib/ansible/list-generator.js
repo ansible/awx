@@ -182,7 +182,10 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
           html += "<th>#</th>\n";
        }
        for (var fld in list.fields) {
-           html += "<th>" + list.fields[fld].label + "</th>\n";
+           html += "<th class=\"list-header\" id=\"" + fld + "-header\" ng-click=\"sort('" + fld + "')\">" + list.fields[fld].label;
+           html += " <i class=\"";
+           html += (list.fields[fld].key) ? "icon-sort-up" : "icon-sort";
+           html += "\"></i></a></th>\n";
        }
        if (options.mode == 'select') {
           html += "<th>Select</th>";

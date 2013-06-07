@@ -709,12 +709,17 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              
               // Start the list
               html += "<div class=\"list\">\n";
-              html += "<table class=\"table table-condensed table-hover\">\n";
+              html += "<table class=\"" + form.related[itm].iterator + " table table-condensed table-hover\">\n";
               html += "<thead>\n";
               html += "<tr>\n";
               html += "<th>#</th>\n";
               for (var fld in form.related[itm].fields) {
-                  html += "<th>" + form.related[itm]['fields'][fld].label + "</th>\n";
+                  html += "<th class=\"list-header\" id=\"" + form.related[itm].iterator + '-' + fld + "-header\" " +
+                       "ng-click=\"sort('" + form.related[itm].iterator + "', '" + fld + "')\">" +
+                       form.related[itm]['fields'][fld].label;
+                  html += " <i class=\"";
+                  html += (form.related[itm].fields[fld].key) ? "icon-sort-up" : "icon-sort";
+                  html += "\"></i></a></th>\n";
               }
               html += "<th></th>\n";
               html += "</tr>\n";
@@ -863,12 +868,17 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                 
                  // Start the list
                  html += "<div class=\"list\">\n";
-                 html += "<table class=\"table table-condensed table-hover\">\n";
+                 html += "<table class=\"" + form.related[itm].iterator + " table table-condensed table-hover\">\n";
                  html += "<thead>\n";
                  html += "<tr>\n";
                  html += "<th>#</th>\n";
                  for (var fld in form.related[itm].fields) {
-                     html += "<th>" + form.related[itm]['fields'][fld].label + "</th>\n";
+                     html += "<th class=\"list-header\" id=\"" + form.related[itm].iterator + '-' + fld + "-header\" " +
+                         "ng-click=\"sort('" + form.related[itm].iterator + "', '" + fld + "')\">" +
+                         form.related[itm]['fields'][fld].label;
+                     html += " <i class=\"";
+                     html += (form.related[itm].fields[fld].key) ? "icon-sort-up" : "icon-sort";
+                     html += "\"></i></a></th>\n";
                  }
                  html += "<th></th>\n";
                  html += "</tr>\n";

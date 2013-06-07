@@ -25,17 +25,17 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         var defaultUrl = params.url;
         var list = params.list; 
         var iterator = (params.iterator) ? params.iterator : list.iterator;
-        var default_order;
+        var sort_order;
         
         // Set default values
         for (fld in list.fields) {
             if (list.fields[fld].key) {
                if (list.fields[fld].sourceModel) {
                   var fka = list.fields[fld].sourceModel + '__' + list.fields[fld].sourceField;
-                  default_order = (list.fields[fld].desc) ? '-' + fka : fka;
+                  sort_order = (list.fields[fld].desc) ? '-' + fka : fka;
                }
                else {
-                  default_order = (list.fields[fld].desc) ? '-' + fld : fld; 
+                  sort_order = (list.fields[fld].desc) ? '-' + fld : fld; 
                }
                scope[iterator + 'SearchField'] = fld
                scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
@@ -134,16 +134,55 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                         list.fields[scope[iterator + 'SearchField']].searchType == 'gtzero' ) {
                  scope[iterator + 'SearchParams'] += escape(scope[iterator + 'SearchValue']);
               }
-              scope[iterator + 'SearchParams'] += (default_order) ? '&order_by=' + escape(default_order) : '';
+              scope[iterator + 'SearchParams'] += (sort_order) ? '&order_by=' + escape(sort_order) : '';
            }
            else {
               scope[iterator + 'SearchParams'] = ''; 
-              scope[iterator + 'SearchParams'] += (default_order) ? '?order_by=' + escape(default_order) : '';
+              scope[iterator + 'SearchParams'] += (sort_order) ? '?order_by=' + escape(sort_order) : '';
            }
            scope[iterator + 'Page'] = 0;
            url += scope[iterator + 'SearchParams'];
            url += (scope[iterator + 'PageSize']) ? '&page_size=' + scope[iterator + 'PageSize'] : "";
            Refresh({ scope: scope, set: set, iterator: iterator, url: url });
            }
+
+        scope.sort = function(fld) {
+            // reset sort icons back to 'icon-sort' on all columns
+            // except the one clicked
+            $('.list-header').each(function(index) {
+                if ($(this).attr('id') != fld + '-header') {
+                   var icon = $(this).find('i');
+                   icon.attr('class','icon-sort');
+                }
+                });
+ 
+            // Toggle the icon for the clicked column
+            // and set the sort direction  
+            var icon = $('#' + fld + '-header i');
+            var direction = '';
+            if (icon.hasClass('icon-sort')) {
+               icon.removeClass('icon-sort');
+               icon.addClass('icon-sort-up');
+            }
+            else if (icon.hasClass('icon-sort-up')) {
+               icon.removeClass('icon-sort-up');
+               icon.addClass('icon-sort-down');
+               direction = '-';
+            }
+            else if (icon.hasClass('icon-sort-down')) {
+               icon.removeClass('icon-sort-down');
+               icon.addClass('icon-sort-up');
+            }
+
+            // Set the sorder order value and call the API to refresh the list with the new order
+            if (list.fields[fld].sourceModel) {
+               sort_order = direction + list.fields[fld].sourceModel + '__' + list.fields[fld].sourceField;
+            }
+            else {
+               sort_order = direction + fld; 
+            }
+            scope.search(list.iterator);
+            }
+
         }
         }]);

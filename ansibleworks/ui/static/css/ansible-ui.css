@@ -362,3 +362,23 @@
     width: 100px;
     margin: 0 10px;
  }
+
+
+ /* Sort link styles */
+
+ .list-header:hover {
+    cursor: pointer;  
+ }
+
+ .list-header i {
+    margin-left: 10px;
+ }
+
+ .list-header .icon-sort {
+    color: #ccc;
+ }
+
+ .list-header .icon-sort-down, 
+ .list-header .icon-sort-up {
+    color: #36454F;
+ }
