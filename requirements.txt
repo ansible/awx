@@ -7,6 +7,7 @@ django-devserver
 django-extensions
 django-filter
 django-jsonfield
+django-taggit
 djangorestframework
 ipython
 markdown

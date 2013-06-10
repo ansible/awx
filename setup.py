@@ -26,10 +26,10 @@ setup(
     install_requires=[
         'Django>=1.5',
         'django-celery',
-        'django-devserver',
         'django-extensions',
         'django-filter',
         'django-jsonfield',
+        'django-taggit',
         'djangorestframework',
         'pexpect',
         'python-dateutil',
@@ -40,10 +40,10 @@ setup(
     #tests_require=[
     #    'Django>=1.5',
     #    'django-celery',
-    #    'django-devserver',
     #    'django-extensions',
     #    'django-filter',
     #    'django-jsonfield',
+    #    'django-taggit',
     #    'django-setuptest',
     #    'djangorestframework',
     #    'pexpect',

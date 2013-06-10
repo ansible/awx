@@ -214,7 +214,7 @@ class BaseSubList(BaseList):
 class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def pre_save(self, obj):
-        if type(obj) not in [ User, Tag, AuditTrail ]:
+        if type(obj) not in [ User ]:
             obj.created_by = self.request.user
 
     def destroy(self, request, *args, **kwargs):
@@ -247,73 +247,3 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
     def put_filter(self, request, *args, **kwargs):
         ''' scrub any fields the user cannot/should not put, based on user context.  This runs after read-only serialization filtering '''
         pass
-
-class VariableBaseDetail(BaseDetail):
-    '''
-    an object that is always 1 to 1 with the foreign key of another object
-    and does not have it's own key, such as HostVariableDetail
-    '''
-
-    def destroy(self, request, *args, **kwargs):
-        raise PermissionDenied()
-
-    def put(self, request, *args, **kwargs):
-        # FIXME: lots of overlap between put and get here, need to refactor
-
-        through_obj = self.__class__.parent_model.objects.get(pk=kwargs['pk'])
-
-        #has_permission = Inventory._has_permission_types(request.user, through_obj.inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
-        #if not has_permission:
-        #    raise PermissionDenied()
-        if not check_user_access(request.user, Inventory, 'change', through_obj.inventory, None):
-            raise PermissionDenied
-
-        this_object = None
-
-        if hasattr(request.DATA, 'dict'):
-            data = request.DATA.dict()
-        else:
-            data = request.DATA
-
-        try:
-            this_object = getattr(through_obj, self.__class__.reverse_relationship, None)
-        except:
-            pass
-
-        if this_object is None:
-            this_object = self.__class__.model.objects.create(data=python_json.dumps(data))
-        else:
-            this_object.data = python_json.dumps(data)
-            this_object.save()
-        setattr(through_obj, self.__class__.reverse_relationship, this_object)
-        through_obj.save()
-
-        return Response(status=status.HTTP_200_OK, data=python_json.loads(this_object.data))
-
-
-    def get(self, request, *args, **kwargs):
-
-        # if null, recreate a blank object
-        through_obj = self.__class__.parent_model.objects.get(pk=kwargs['pk'])
-        this_object = None
-
-        try:
-            this_object = getattr(through_obj, self.__class__.reverse_relationship, None)
-        except Exception, e:
-            pass
-
-        if this_object is None:
-            new_args               = {}
-            new_args['data']       = python_json.dumps(dict())
-            this_object            = self.__class__.model.objects.create(**new_args)
-            setattr(through_obj, self.__class__.reverse_relationship, this_object)
-            through_obj.save()
-
-        #has_permission = Inventory._has_permission_types(request.user, through_obj.inventory, PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE)
-        #if not has_permission:
-        #    raise PermissionDenied()
-        if not check_user_access(request.user, Inventory, 'read', through_obj.inventory):
-            raise PermissionDenied
-
-        return Response(status=status.HTTP_200_OK, data=python_json.loads(this_object.data))
-

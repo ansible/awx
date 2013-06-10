@@ -124,6 +124,8 @@ class RunJob(Task):
             args.append('-%s' % ('v' * min(3, job.verbosity)))
         if job.extra_vars:
             args.extend(['-e', job.extra_vars])
+        if job.job_tags:
+            args.extend(['-t', job.job_tags])
         args.append(job.playbook) # relative path to project.local_path
         ssh_key_path = kwargs.get('ssh_key_path', '')
         if ssh_key_path:
@@ -192,6 +194,8 @@ class RunJob(Task):
                 raise RuntimeError('project local_path %s cannot be found' %
                                    project.local_path)
             env = self.build_env(job, **kwargs)
+            job = self.update_job(job_pk, job_args=args, job_cwd=cwd,
+                                  job_env=env)
             status, stdout = self.run_pexpect(job_pk, args, cwd, env,
                                               kwargs['passwords'])
         except Exception:

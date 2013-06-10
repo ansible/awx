@@ -1,6 +1,9 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Python
+import json
+
 # Django
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -126,26 +129,14 @@ class OrganizationSerializer(BaseSerializer):
     def get_related(self, obj):
         res = super(OrganizationSerializer, self).get_related(obj)
         res.update(dict(
-            audit_trail = reverse('main:organizations_audit_trail_list',    args=(obj.pk,)),
+            #audit_trail = reverse('main:organizations_audit_trail_list',    args=(obj.pk,)),
             projects    = reverse('main:organizations_projects_list',       args=(obj.pk,)),
             inventories = reverse('main:organizations_inventories_list',    args=(obj.pk,)),
             users       = reverse('main:organizations_users_list',          args=(obj.pk,)),
             admins      = reverse('main:organizations_admins_list',         args=(obj.pk,)),
-            tags        = reverse('main:organizations_tags_list',           args=(obj.pk,)),
+            #tags        = reverse('main:organizations_tags_list',           args=(obj.pk,)),
             teams       = reverse('main:organizations_teams_list',          args=(obj.pk,)),
         ))
-        return res
-
-class AuditTrailSerializer(BaseSerializer):
-
-    class Meta:
-        model = AuditTrail
-        fields = ('url', 'id', 'modified_by', 'delta', 'detail', 'comment')
-
-    def get_related(self, obj):
-        res = super(AuditTrailSerializer, self).get_related(obj)
-        if obj.modified_by:
-            res['modified_by']  = reverse('main:users_detail', args=(obj.modified_by.pk,))
         return res
 
 class ProjectSerializer(BaseSerializer):
@@ -197,9 +188,11 @@ class InventorySerializer(BaseSerializer):
 
 class HostSerializer(BaseSerializer):
 
+    has_active_failures = serializers.Field(source='has_active_failures')
+
     class Meta:
         model = Host
-        fields = BASE_FIELDS + ('inventory',)
+        fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures')
 
     def get_related(self, obj):
         res = super(HostSerializer, self).get_related(obj)
@@ -218,9 +211,11 @@ class HostSerializer(BaseSerializer):
 
 class GroupSerializer(BaseSerializer):
 
+    has_active_failures = serializers.Field(source='has_active_failures')
+
     class Meta:
         model = Group
-        fields = BASE_FIELDS + ('inventory',)
+        fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures')
 
     def get_related(self, obj):
         res = super(GroupSerializer, self).get_related(obj)
@@ -234,6 +229,28 @@ class GroupSerializer(BaseSerializer):
             job_host_summaries = reverse('main:group_job_host_summary_list', args=(obj.pk,)),
         ))
         return res
+
+class BaseVariableDataSerializer(BaseSerializer):
+
+    def to_native(self, obj):
+        ret = super(BaseVariableDataSerializer, self).to_native(obj)
+        return json.loads(ret.get('variables', '') or '{}')
+
+    def from_native(self, data, files):
+        data = {'variables': json.dumps(data)}
+        return super(BaseVariableDataSerializer, self).from_native(data, files)
+
+class HostVariableDataSerializer(BaseVariableDataSerializer):
+
+    class Meta:
+        model = Host
+        fields = ('variables',)
+
+class GroupVariableDataSerializer(BaseVariableDataSerializer):
+
+    class Meta:
+        model = Group
+        fields = ('variables',)
 
 class TeamSerializer(BaseSerializer):
 
@@ -319,42 +336,13 @@ class UserSerializer(BaseSerializer):
         ))
         return res
 
-class TagSerializer(BaseSerializer):
-
-    class Meta:
-        model = Tag
-        fields = ('id', 'url', 'name')
-
-    def get_related(self, obj):
-        res = super(TagSerializer, self).get_related(obj)
-        res.pop('created_by', None)
-        return res
-
-class VariableDataSerializer(BaseSerializer):
-
-    class Meta:
-        model = VariableData
-        fields = BASE_FIELDS + ('data',)
-
-    def get_related(self, obj):
-        res = super(VariableDataSerializer, self).get_related(obj)
-        try:
-            res['host'] = reverse('main:hosts_detail', args=(obj.host.pk,))
-        except Host.DoesNotExist:
-            pass
-        try:
-            res['group'] = reverse('main:groups_detail', args=(obj.group.pk,))
-        except Group.DoesNotExist:
-            pass
-        return res
-
 class JobTemplateSerializer(BaseSerializer):
 
     class Meta:
         model = JobTemplate
         fields = BASE_FIELDS + ('job_type', 'inventory', 'project', 'playbook',
                                 'credential', 'forks', 'limit', 'verbosity',
-                                'extra_vars')
+                                'extra_vars', 'job_tags')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -383,7 +371,7 @@ class JobSerializer(BaseSerializer):
         fields = BASE_FIELDS + ('job_template', 'job_type', 'inventory',
                                 'project', 'playbook', 'credential',
                                 'forks', 'limit', 'verbosity', 'extra_vars',
-                                'status', 'failed', 'result_stdout',
+                                'job_tags', 'status', 'failed', 'result_stdout',
                                 'result_traceback',
                                 'passwords_needed_to_start')
 
@@ -424,6 +412,7 @@ class JobSerializer(BaseSerializer):
             data.setdefault('limit', job_template.limit)
             data.setdefault('verbosity', job_template.verbosity)
             data.setdefault('extra_vars', job_template.extra_vars)
+            data.setdefault('job_tags', job_template.job_tags)
         return super(JobSerializer, self).from_native(data, files)
 
 class JobHostSummarySerializer(BaseSerializer):
@@ -431,7 +420,8 @@ class JobHostSummarySerializer(BaseSerializer):
     class Meta:
         model = JobHostSummary
         fields = ('id', 'url', 'job', 'host', 'summary_fields', 'related',
-                  'changed', 'dark', 'failures', 'ok', 'processed', 'skipped')
+                  'changed', 'dark', 'failures', 'ok', 'processed', 'skipped',
+                  'failed')
 
     def get_related(self, obj):
         res = super(JobHostSummarySerializer, self).get_related(obj)

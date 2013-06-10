@@ -39,10 +39,31 @@ class CallbackModule(object):
     Callback module for logging ansible-playbook events to the database.
     '''
 
+    # These events should never have an associated play.
+    EVENTS_WITHOUT_PLAY = [
+        'playbook_on_start',
+        'playbook_on_stats',
+    ]
+    # These events should never have an associated task.
+    EVENTS_WITHOUT_TASK = EVENTS_WITHOUT_PLAY + [
+        'playbook_on_setup',
+        'playbook_on_notify',
+        'playbook_on_import_for_host',
+        'playbook_on_not_import_for_host',
+        'playbook_on_no_hosts_matched',
+        'playbook_on_no_hosts_remaining',
+    ]
+
     def __init__(self):
         self.callback_script = os.getenv('ACOM_CALLBACK_EVENT_SCRIPT')
 
     def _log_event(self, event, **event_data):
+        play = getattr(getattr(self, 'play', None), 'name', '')
+        if play and event not in self.EVENTS_WITHOUT_PLAY:
+            event_data['play'] = play
+        task = getattr(getattr(self, 'task', None), 'name', '')
+        if task and event not in self.EVENTS_WITHOUT_TASK:
+            event_data['task'] = task
         event_data_json = json.dumps(event_data)
         cmdline = [self.callback_script, '-e', event, '-d', event_data_json]
         subprocess.check_call(cmdline)
@@ -79,11 +100,20 @@ class CallbackModule(object):
     def runner_on_async_failed(self, host, res, jid):
         self._log_event('runner_on_async_failed', host=host, res=res, jid=jid)
 
+    def runner_on_file_diff(self, host, diff):
+        self._log_event('runner_on_file_diff', host=host, diff=diff)
+
     def playbook_on_start(self):
         self._log_event('playbook_on_start')
 
     def playbook_on_notify(self, host, handler):
-        self._log_event('playbook_on_notify')
+        self._log_event('playbook_on_notify', host=host, handler=handler)
+
+    def playbook_on_no_hosts_matched(self):
+        self._log_event('playbook_on_no_hosts_matched')
+
+    def playbook_on_no_hosts_remaining(self):
+        self._log_event('playbook_on_no_hosts_remaining')
 
     def playbook_on_task_start(self, name, is_conditional):
         self._log_event('playbook_on_task_start', name=name,

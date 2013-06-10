@@ -29,9 +29,9 @@ REST_FRAMEWORK = {
     'PAGINATE_BY': 25,
     'PAGINATE_BY_PARAM': 'page_size',
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
     )
 }
 
@@ -137,6 +137,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'djcelery',
     'kombu.transport.django',
+    'taggit',
     'ansibleworks.main',
     'ansibleworks.ui',
 )

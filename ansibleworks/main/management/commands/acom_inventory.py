@@ -32,8 +32,8 @@ class Command(NoArgsCommand):
                 'hosts': list(group.hosts.values_list('name', flat=True)),
                 'children': list(group.children.values_list('name', flat=True)),
             }
-            if group.variable_data is not None:
-                group_info['vars'] = json.loads(group.variable_data.data)
+            if group.variables:
+                group_info['vars'] = group.variables_dict
 
             group_info = dict(filter(lambda x: bool(x[1]), group_info.items()))
             if group_info.keys() in ([], ['hosts']):
@@ -51,8 +51,8 @@ class Command(NoArgsCommand):
         except Host.DoesNotExist:
             raise CommandError('Host %s not found in the given inventory' % hostname)
         hostvars = {}
-        if host.variable_data is not None:
-            hostvars = json.loads(host.variable_data.data)
+        if host.variables:
+            hostvars = host.variables_dict
         self.stdout.write(json.dumps(hostvars, indent=indent))
 
     def handle_noargs(self, **options):

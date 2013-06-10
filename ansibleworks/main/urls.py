@@ -13,12 +13,10 @@ def url(regex, view, kwargs=None, name=None, prefix=''):
 organizations_urls = patterns('ansibleworks.main.views',
     url(r'^$',                                          'organizations_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'organizations_detail'),
-    url(r'^(?P<pk>[0-9]+)/audit_trail/$',               'organizations_audit_trail_list'),
     url(r'^(?P<pk>[0-9]+)/users/$',                     'organizations_users_list'),
     url(r'^(?P<pk>[0-9]+)/admins/$',                    'organizations_admins_list'),
     url(r'^(?P<pk>[0-9]+)/inventories/$',               'organizations_inventories_list'),
     url(r'^(?P<pk>[0-9]+)/projects/$',                  'organizations_projects_list'),
-    url(r'^(?P<pk>[0-9]+)/tags/$',                      'organizations_tags_list'),
     url(r'^(?P<pk>[0-9]+)/teams/$',                     'organizations_teams_list'),
 )
 
@@ -38,12 +36,6 @@ projects_urls = patterns('ansibleworks.main.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'projects_detail'),
     url(r'^(?P<pk>[0-9]+)/playbooks/$',                 'projects_detail_playbooks'),
     url(r'^(?P<pk>[0-9]+)/organizations/$',             'projects_organizations_list'),
-)
-
-audit_trails_urls = patterns('ansibleworks.main.views',
-    #url(r'^$',                                          'audit_trails_list'),
-    #url(r'^(?P<pk>[0-9]+)/$',                           'audit_trails_detail'),
-    # ... and ./audit_trails/ on all resources
 )
 
 teams_urls = patterns('ansibleworks.main.views',
@@ -80,11 +72,6 @@ groups_urls = patterns('ansibleworks.main.views',
     url(r'^(?P<pk>[0-9]+)/variable_data/$',             'groups_variable_detail'),
     url(r'^(?P<pk>[0-9]+)/job_events/$',                'group_job_event_list'),
     url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'group_job_host_summary_list'),
-)
-
-variable_data_urls = patterns('ansibleworks.main.views',
-    url(r'^(?P<pk>[0-9]+)/$',                           'variable_detail'),
-    # See also variable_data resources on hosts/groups.
 )
 
 credentials_urls = patterns('ansibleworks.main.views',
@@ -125,11 +112,6 @@ job_events_urls = patterns('ansibleworks.main.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'job_event_detail'),
 )
 
-tags_urls = patterns('ansibleworks.main.views',
-    url(r'^(?P<pk>[0-9]+)/$',                           'tags_detail'),
-    # ... and tag relations on all resources
-)
-
 v1_urls = patterns('ansibleworks.main.views',
     url(r'^$',              'api_v1_root_view'),
     url(r'^authtoken/$',    'auth_token_view'),
@@ -137,19 +119,16 @@ v1_urls = patterns('ansibleworks.main.views',
     url(r'^organizations/', include(organizations_urls)),
     url(r'^users/',         include(users_urls)),
     url(r'^projects/',      include(projects_urls)),
-    url(r'^audit_trails/',  include(audit_trails_urls)),
     url(r'^teams/',         include(teams_urls)),
     url(r'^inventories/',   include(inventory_urls)),
     url(r'^hosts/',         include(hosts_urls)),
     url(r'^groups/',        include(groups_urls)),
-    url(r'^variable_data/', include(variable_data_urls)),
     url(r'^credentials/',   include(credentials_urls)),
     url(r'^permissions/',   include(permissions_urls)),
     url(r'^job_templates/', include(job_templates_urls)),
     url(r'^jobs/',          include(jobs_urls)),
     url(r'^job_host_summaries/', include(job_host_summary_urls)),
     url(r'^job_events/',    include(job_events_urls)),
-    url(r'^tags/',          include(tags_urls)),
 )
 
 urlpatterns = patterns('ansibleworks.main.views',

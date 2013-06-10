@@ -8,6 +8,7 @@ from optparse import make_option
 import os
 import sys
 from django.core.management.base import NoArgsCommand, CommandError
+from django.db import transaction
 
 class Command(NoArgsCommand):
     '''
@@ -30,12 +31,13 @@ class Command(NoArgsCommand):
                     help='JSON-formatted callback event data'),
     )
 
+    @transaction.commit_on_success
     def handle_noargs(self, **options):
         from ansibleworks.main.models import Job, JobEvent
         event_type = options.get('event_type', None)
         if not event_type:
             raise CommandError('No event specified')
-        if event_type not in [x[0] for x in JobEvent.EVENT_TYPES]:
+        if event_type not in [x[0] for x in JobEvent.EVENT_CHOICES]:
             raise CommandError('Unsupported event')
         event_data_file = options.get('event_data_file', None)
         event_data_json = options.get('event_data_json', None)

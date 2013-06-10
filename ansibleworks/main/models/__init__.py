@@ -1,6 +1,7 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+import json
 import os
 import shlex
 from django.conf import settings
@@ -13,6 +14,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from jsonfield import JSONField
+from taggit.managers import TaggableManager
 from djcelery.models import TaskMeta
 from rest_framework.authtoken.models import Token
 import yaml
@@ -108,9 +110,9 @@ class PrimordialModel(models.Model):
     description   = models.TextField(blank=True, default='')
     created_by    = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, related_name='%s(class)s_created', editable=False) # not blank=False on purpose for admin!
     created       = models.DateTimeField(auto_now_add=True)
-    tags          = models.ManyToManyField('Tag', related_name='%(class)s_by_tag', blank=True)
-    audit_trail   = models.ManyToManyField('AuditTrail', related_name='%(class)s_by_audit_trail', blank=True)
     active        = models.BooleanField(default=True)
+
+    tags = TaggableManager(blank=True)
 
     def __unicode__(self):
         return unicode("%s-%s"% (self.name, self.id))
@@ -130,39 +132,6 @@ class CommonModelNameNotUnique(PrimordialModel):
         abstract = True
 
     name          = models.CharField(max_length=512, unique=False)
-
-class Tag(models.Model):
-    '''
-    any type of object can be given a search tag
-    '''
-
-    class Meta:
-        app_label = 'main'
-
-    name = models.CharField(max_length=512)
-
-    def __unicode__(self):
-        return unicode(self.name)
-
-    def get_absolute_url(self):
-        return reverse('main:tags_detail', args=(self.pk,))
-
-class AuditTrail(models.Model):
-    '''
-    changing any object records the change
-    '''
-
-    class Meta:
-        app_label = 'main'
-
-    resource_type = models.CharField(max_length=64)
-    modified_by   = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, blank=True)
-    delta         = models.TextField() # FIXME: switch to JSONField
-    detail        = models.TextField()
-    comment       = models.TextField()
-
-    # FIXME: this looks like this should be a ManyToMany
-    tag           = models.ForeignKey('Tag', on_delete=SET_NULL, null=True, blank=True)
 
 class Organization(CommonModel):
     '''
@@ -206,7 +175,7 @@ class Host(CommonModelNameNotUnique):
         app_label = 'main'
         unique_together = (("name", "inventory"),)
 
-    variable_data           = models.OneToOneField('VariableData', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='host')
+    variables               = models.TextField(blank=True, default='')
     inventory               = models.ForeignKey('Inventory', null=False, related_name='hosts')
     last_job                = models.ForeignKey('Job', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job+')
     last_job_host_summary   = models.ForeignKey('JobHostSummary', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job_summary+')
@@ -217,13 +186,37 @@ class Host(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('main:hosts_detail', args=(self.pk,))
 
+    @property
+    def variables_dict(self):
+        # FIXME: Add YAML support.
+        return json.loads(self.variables or '{}')
+
+    @property
+    def all_groups(self):
+        '''
+        Return all groups of which this host is a member, avoiding infinite
+        recursion in the case of cyclical group relations.
+        '''
+        qs = self.groups.distinct()
+        for group in self.groups.all():
+            qs = qs | group.all_parents
+        return qs
+
+    @property
+    def has_active_failures(self):
+        return self.last_job_host_summary and self.last_job_host_summary.failed
+
     # Use .job_host_summaries.all() to get jobs affecting this host.
     # Use .job_events.all() to get events affecting this host.
     # Use .job_host_summaries.order_by('-pk')[0] to get the last result.
 
+    # To get all hosts with active failures:
+    #   Host.objects.filter(last_job_host_summary__failed=True)
+
 class Group(CommonModelNameNotUnique):
     '''
-    A group of managed nodes.  May belong to multiple groups
+    A group containing managed hosts.  A group or host may belong to multiple
+    groups.
     '''
 
     class Meta:
@@ -231,8 +224,9 @@ class Group(CommonModelNameNotUnique):
         unique_together = (("name", "inventory"),)
 
     inventory     = models.ForeignKey('Inventory', null=False, related_name='groups')
+    # Can also be thought of as: parents == member_of, children == members
     parents       = models.ManyToManyField('self', symmetrical=False, related_name='children', blank=True)
-    variable_data = models.OneToOneField('VariableData', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='group')
+    variables     = models.TextField(blank=True, default='')
     hosts         = models.ManyToManyField('Host', related_name='groups', blank=True)
 
     def __unicode__(self):
@@ -242,11 +236,59 @@ class Group(CommonModelNameNotUnique):
         return reverse('main:groups_detail', args=(self.pk,))
 
     @property
-    def all_hosts(self):
-        qs = self.hosts.distinct()
-        for group in self.children.exclude(pk=self.pk):
-            qs = qs | group.all_hosts
+    def variables_dict(self):
+        # FIXME: Add YAML support.
+        return json.loads(self.variables or '{}')
+
+    def get_all_parents(self, except_pks=None):
+        '''
+        Return all parents of this group recursively, avoiding infinite
+        recursion in the case of cyclical relations.  The group itself will be
+        excluded unless there is a cycle leading back to it.
+        '''
+        except_pks = except_pks or set()
+        except_pks.add(self.pk)
+        qs = self.parents.distinct()
+        for group in self.parents.exclude(pk__in=except_pks):
+            qs = qs | group.get_all_parents(except_pks)
         return qs
+
+    @property
+    def all_parents(self):
+        return self.get_all_parents()
+
+    def get_all_children(self, except_pks=None):
+        '''
+        Return all children of this group recursively, avoiding infinite
+        recursion in the case of cyclical relations.  The group itself will be
+        excluded unless there is a cycle leading back to it.
+        '''
+        except_pks = except_pks or set()
+        except_pks.add(self.pk)
+        qs = self.children.distinct()
+        for group in self.children.exclude(pk__in=except_pks):
+            qs = qs | group.get_all_children(except_pks)
+        return qs
+
+    @property
+    def all_children(self):
+        return self.get_all_children()
+
+    def get_all_hosts(self, except_group_pks=None):
+        '''
+        Return all hosts associated with this group or any of its children,
+        avoiding infinite recursion in the case of cyclical group relations.
+        '''
+        except_group_pks = except_group_pks or set()
+        except_group_pks.add(self.pk)
+        qs = self.hosts.distinct()
+        for group in self.children.exclude(pk__in=except_group_pks):
+            qs = qs | group.get_all_hosts(except_group_pks)
+        return qs
+
+    @property
+    def all_hosts(self):
+        return self.get_all_hosts()
 
     @property
     def job_host_summaries(self):
@@ -256,27 +298,9 @@ class Group(CommonModelNameNotUnique):
     def job_events(self):
         return JobEvent.objects.filter(host__in=self.all_hosts)
 
-# FIXME: audit nullables
-# FIXME: audit cascades
-
-class VariableData(CommonModelNameNotUnique):
-    '''
-    A set of host or group variables
-    '''
-
-    class Meta:
-        app_label = 'main'
-        verbose_name_plural = _('variable data')
-
-    #host  = models.OneToOneField('Host', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
-    #group = models.OneToOneField('Group', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='variable_data')
-    data  = models.TextField(default='')
-
-    def __unicode__(self):
-        return '%s = %s' % (self.name, self.data)
-
-    def get_absolute_url(self):
-        return reverse('main:variable_detail', args=(self.pk,))
+    @property
+    def has_active_failures(self):
+        return bool(self.all_hosts.filter(last_job_host_summary__failed=True).count())
 
 class Credential(CommonModelNameNotUnique):
     '''
@@ -537,6 +561,16 @@ class JobTemplate(CommonModel):
         blank=True,
         default='',
     )
+    job_tags = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
+    host_config_key = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
 
     def create_job(self, **kwargs):
         '''
@@ -555,6 +589,7 @@ class JobTemplate(CommonModel):
         kwargs.setdefault('limit', self.limit)
         kwargs.setdefault('verbosity', self.verbosity)
         kwargs.setdefault('extra_vars', self.extra_vars)
+        kwargs.setdefault('job_tags', self.job_tags)
         job = Job(**kwargs)
         if save_job:
             job.save()
@@ -633,6 +668,11 @@ class Job(CommonModel):
         blank=True,
         default='',
     )
+    job_tags = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
     cancel_flag = models.BooleanField(
         blank=True,
         default=False,
@@ -645,6 +685,23 @@ class Job(CommonModel):
     )
     failed = models.BooleanField(
         default=False,
+        editable=False,
+    )
+    job_args = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+    )
+    job_cwd = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+    )
+    job_env = JSONField(
+        blank=True,
+        default={},
         editable=False,
     )
     result_stdout = models.TextField(
@@ -797,6 +854,7 @@ class JobHostSummary(models.Model):
     ok = models.PositiveIntegerField(default=0)
     processed = models.PositiveIntegerField(default=0)
     skipped = models.PositiveIntegerField(default=0)
+    failed = models.BooleanField(default=False)
 
     def __unicode__(self):
         return '%s changed=%d dark=%d failures=%d ok=%d processed=%d skipped=%s' % \
@@ -807,6 +865,7 @@ class JobHostSummary(models.Model):
         return reverse('main:job_host_summary_detail', args=(self.pk,))
 
     def save(self, *args, **kwargs):
+        self.failed = bool(self.dark or self.failures)
         super(JobHostSummary, self).save(*args, **kwargs)
         self.update_host_last_job_summary()
 
@@ -826,33 +885,58 @@ class JobEvent(models.Model):
     An event/message logged from the callback when running a job.
     '''
 
-    EVENT_TYPES = [
-        ('runner_on_failed', _('Runner on Failed')),
-        ('runner_on_ok', _('Runner on OK')),
-        ('runner_on_error', _('Runner on Error')),
-        ('runner_on_skipped', _('Runner on Skipped')),
-        ('runner_on_unreachable', _('Runner on Unreachable')),
-        ('runner_on_no_hosts', _('Runner on No Hosts')),
-        ('runner_on_async_poll', _('Runner on Async Poll')),
-        ('runner_on_async_ok', _('Runner on Async OK')),
-        ('runner_on_async_failed', _('Runner on Async Failed')),
-        ('playbook_on_start', _('Playbook on Start')),
-        ('playbook_on_notify', _('Playbook on Notify')),
-        ('playbook_on_task_start', _('Playbook on Task Start')),
-        ('playbook_on_vars_prompt', _('Playbook on Vars Prompt')),
-        ('playbook_on_setup', _('Playbook on Setup')),
-        ('playbook_on_import_for_host', _('Playbook on Import for Host')),
-        ('playbook_on_not_import_for_host', _('Playbook on Not Import for Host')),
-        ('playbook_on_play_start', _('Playbook on Play Start')),
-        ('playbook_on_stats', _('Playbook on Stats')),
-    ]
+    # Playbook events will be structured to form the following hierarchy:
+    # - playbook_on_start (once for each playbook file)
+    #   - playbook_on_vars_prompt (for each play, but before play starts, we
+    #     currently don't handle responding to these prompts)
+    #   - playbook_on_play_start
+    #     - playbook_on_import_for_host
+    #     - playbook_on_not_import_for_host
+    #     - playbook_on_no_hosts_matched
+    #     - playbook_on_no_hosts_remaining
+    #     - playbook_on_setup
+    #       - runner_on*
+    #     - playbook_on_task_start
+    #       - runner_on_failed
+    #       - runner_on_ok
+    #       - runner_on_error
+    #       - runner_on_skipped
+    #       - runner_on_unreachable
+    #       - runner_on_no_hosts
+    #       - runner_on_async_poll
+    #       - runner_on_async_ok
+    #       - runner_on_async_failed
+    #       - runner_on_file_diff
+    #     - playbook_on_notify
+    #   - playbook_on_stats
 
-    FAILED_EVENTS = [
-        'runner_on_failed',
-        'runner_on_error',
-        'runner_on_unreachable',
-        'runner_on_async_failed',
+    EVENT_TYPES = [
+        # (level, event, verbose name, failed)
+        (3, 'runner_on_failed', _('Runner on Failed'), True),
+        (3, 'runner_on_ok', _('Runner on OK'), False),
+        (3, 'runner_on_error', _('Runner on Error'), True),
+        (3, 'runner_on_skipped', _('Runner on Skipped'), False),
+        (3, 'runner_on_unreachable', _('Runner on Unreachable'), True),
+        (3, 'runner_on_no_hosts', _('Runner on No Hosts'), False),
+        (3, 'runner_on_async_poll', _('Runner on Async Poll'), False),
+        (3, 'runner_on_async_ok', _('Runner on Async OK'), False),
+        (3, 'runner_on_async_failed', _('Runner on Async Failed'), True),
+        (3, 'runner_on_file_diff', _('Runner on File Diff'), False),
+        (0, 'playbook_on_start', _('Playbook on Start'), False),
+        (2, 'playbook_on_notify', _('Playbook on Notify'), False),
+        (2, 'playbook_on_no_hosts_matched', _('Playbook on No Hosts Matched'), False),
+        (2, 'playbook_on_no_hosts_remaining', _('Playbook on No Hosts Remaining'), False),
+        (2, 'playbook_on_task_start', _('Playbook on Task Start'), False),
+        (1, 'playbook_on_vars_prompt', _('Playbook on Vars Prompt'), False),
+        (2, 'playbook_on_setup', _('Playbook on Setup'), False),
+        (2, 'playbook_on_import_for_host', _('Playbook on Import for Host'), False),
+        (2, 'playbook_on_not_import_for_host', _('Playbook on Not Import for Host'), False),
+        (1, 'playbook_on_play_start', _('Playbook on Play Start'), False),
+        (1, 'playbook_on_stats', _('Playbook on Stats'), False),
     ]
+    FAILED_EVENTS = [x[1] for x in EVENT_TYPES if x[3]]
+    EVENT_CHOICES = [(x[1], x[2]) for x in EVENT_TYPES]
+    LEVEL_FOR_EVENT = dict([(x[1], x[0]) for x in EVENT_TYPES])
 
     class Meta:
         app_label = 'main'
@@ -868,7 +952,7 @@ class JobEvent(models.Model):
     )
     event = models.CharField(
         max_length=100,
-        choices=EVENT_TYPES,
+        choices=EVENT_CHOICES,
     )
     event_data = JSONField(
         blank=True,
@@ -879,7 +963,30 @@ class JobEvent(models.Model):
     )
     host = models.ForeignKey(
         'Host',
+        related_name='job_events_as_primary_host',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
+    hosts = models.ManyToManyField(
+        'Host',
         related_name='job_events',
+        blank=True,
+    )
+    play = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
+    task = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
+    parent = models.ForeignKey(
+        'self',
+        related_name='children',
         blank=True,
         null=True,
         default=None,
@@ -892,25 +999,72 @@ class JobEvent(models.Model):
     def __unicode__(self):
         return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())
 
+    @property
+    def event_level(self):
+        return self.LEVEL_FOR_EVENT.get(self.event, 0)
+
+    def _find_parent(self):
+        parent_events = set()
+        if self.event in ('playbook_on_play_start', 'playbook_on_stats',
+                          'playbook_on_vars_prompt'):
+            parent_events.add('playbook_on_start')
+        elif self.event in ('playbook_on_notify', 'playbook_on_setup',
+                            'playbook_on_task_start',
+                            'playbook_on_no_hosts_matched',
+                            'playbook_on_no_hosts_remaining',
+                            'playbook_on_import_for_host',
+                            'playbook_on_not_import_for_host'):
+            parent_events.add('playbook_on_play_start')
+        elif self.event.startswith('runner_on_'):
+            parent_events.add('playbook_on_setup')
+            parent_events.add('playbook_on_task_start')
+        if parent_events:
+            try:
+                qs = self.job.job_events.all()
+                if self.pk:
+                    qs = qs.filter(pk__lt=self.pk, event__in=parent_events)
+                else:
+                    qs = qs.filter(event__in=parent_events)
+                return qs.order_by('-pk')[0]
+            except IndexError:
+                pass
+        return None
+
     def save(self, *args, **kwargs):
+        self.failed = bool(self.event in self.FAILED_EVENTS)
         try:
             if not self.host and self.event_data.get('host', ''):
                 self.host = self.job.inventory.hosts.get(name=self.event_data['host'])
         except (Host.DoesNotExist, AttributeError):
             pass
-        self.failed = bool(self.event in self.FAILED_EVENTS)
+        self.play = self.event_data.get('play', '')
+        self.task = self.event_data.get('task', '')
+        self.parent = self._find_parent()
         super(JobEvent, self).save(*args, **kwargs)
+        self.update_hosts()
         self.update_host_summary_from_stats()
-        self.update_host_last_job()
 
-    def update_host_last_job(self):
-        if self.host:
-            update_fields = []
-            if self.host.last_job != self.job:
-                self.host.last_job = self.job
-                update_fields.append('last_job')
-            if update_fields:
-                self.host.save(update_fields=update_fields)
+    def update_hosts(self, extra_hosts=None):
+        extra_hosts = extra_hosts or []
+        hostnames = set()
+        if self.event_data.get('host', ''):
+            hostnames.add(self.event_data['host'])
+        if self.event == 'playbook_on_stats':
+            try:
+                for v in self.event_data.values():
+                    hostnames.update(v.keys())
+            except AttributeError: # In case event_data or v isn't a dict.
+                pass
+        for hostname in hostnames:
+            try:
+                host = self.job.inventory.hosts.get(name=hostname)
+            except Host.DoesNotExist:
+                continue
+            self.hosts.add(host)
+        for host in extra_hosts:
+            self.hosts.add(host)
+        if self.parent:
+            self.parent.update_hosts(self.hosts.all())
 
     def update_host_summary_from_stats(self):
         if self.event != 'playbook_on_stats':

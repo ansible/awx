@@ -111,23 +111,23 @@ class AcomInventoryTest(BaseCommandTest):
             hosts = []
             for x in xrange(10):
                 if n > 0:
-                    variable_data = VariableData.objects.create(data=json.dumps({'ho': 'hum-%d' % x}))
+                    variables = json.dumps({'ho': 'hum-%d' % x})
                 else:
-                    variable_data = None
+                    variables = ''
                 host = inventory.hosts.create(name='host-%02d-%02d.example.com' % (n, x),
                                               inventory=inventory,
-                                              variable_data=variable_data)
+                                              variables=variables)
                 hosts.append(host)
             self.hosts.extend(hosts)
             groups = []
             for x in xrange(5):
                 if n > 0:
-                    variable_data = VariableData.objects.create(data=json.dumps({'gee': 'whiz-%d' % x}))
+                    variables = json.dumps({'gee': 'whiz-%d' % x})
                 else:
-                    variable_data = None
+                    variables = ''
                 group = inventory.groups.create(name='group-%d' % x,
                                                 inventory=inventory,
-                                                variable_data=variable_data)
+                                                variables=variables)
                 groups.append(group)
                 group.hosts.add(hosts[x])
                 group.hosts.add(hosts[x + 5])
@@ -184,9 +184,9 @@ class AcomInventoryTest(BaseCommandTest):
             group = inventory.groups.get(name=k)
             self.assertEqual(set(v.get('hosts', [])),
                              set(group.hosts.values_list('name', flat=True)))
-            if group.variable_data:
+            if group.variables:
                 self.assertEqual(v.get('vars', {}),
-                                 json.loads(group.variable_data.data))
+                                 json.loads(group.variables))
             if k == 'group-3':
                 self.assertEqual(set(v.get('children', [])),
                                  set(group.children.values_list('name', flat=True)))
@@ -211,7 +211,7 @@ class AcomInventoryTest(BaseCommandTest):
                                                   host=host.name)
         self.assertEqual(result, None)
         data = json.loads(stdout)
-        self.assertEqual(data, json.loads(host.variable_data.data))
+        self.assertEqual(data, json.loads(host.variables))
 
     def test_invalid_host(self):
         # Valid host, but not part of the specified inventory.

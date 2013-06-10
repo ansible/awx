@@ -139,18 +139,6 @@ class UserAccess(BaseAccess):
         return bool(self.user.is_superuser or 
                     obj.organizations.filter(admins__in=[self.user]).count())
 
-class TagAccess(BaseAccess):
-
-    model = Tag
-
-    def can_read(self, obj):
-        # anybody can read tags, we won't show much detail other than the names
-        return True
-
-    def can_add(self, data):
-        # anybody can make up tags
-        return True
-
 class OrganizationAccess(BaseAccess):
 
     model = Organization
@@ -259,6 +247,11 @@ class HostAccess(BaseAccess):
         # Checks for admin or change permission on inventory.
         return check_user_access(self.user, Inventory, 'change', inventory, None)
 
+    def can_change(self, obj, data):
+        # Checks for admin or change permission on inventory, controls whether
+        # the user can edit variable data.
+        return check_user_access(self.user, Inventory, 'change', obj.inventory, None)
+
 class GroupAccess(BaseAccess):
 
     model = Group
@@ -275,33 +268,8 @@ class GroupAccess(BaseAccess):
 
     def can_change(self, obj, data):
         # Checks for admin or change permission on inventory, controls whether
-        # the user can attach subgroups
+        # the user can attach subgroups or edit variable data.
         return check_user_access(self.user, Inventory, 'change', obj.inventory, None)
-
-class VariableDataAccess(BaseAccess):
-
-    model = VariableData
-
-    def can_read(self, obj):
-        if obj.host:
-            inventory = obj.host.inventory
-        elif obj.group:
-            inventory = obj.group.inventory
-        else:
-            return False
-        return check_user_access(self.user, Inventory, 'read', inventory)
-
-    def can_change(self, obj, data):
-        if obj.host:
-            inventory = obj.host.inventory
-        elif obj.group:
-            inventory = obj.group.inventory
-        else:
-            return False
-        return check_user_access(self.user, Inventory, 'change', inventory)
-
-    def can_delete(self, obj):
-        return False
 
 class CredentialAccess(BaseAccess):
 
@@ -538,12 +506,10 @@ class JobEventAccess(BaseAccess):
     model = JobEvent
 
 register_access(User, UserAccess)
-register_access(Tag, TagAccess)
 register_access(Organization, OrganizationAccess)
 register_access(Inventory, InventoryAccess)
 register_access(Host, HostAccess)
 register_access(Group, GroupAccess)
-register_access(VariableData, VariableDataAccess)
 register_access(Credential, CredentialAccess)
 register_access(Team, TeamAccess)
 register_access(Project, ProjectAccess)

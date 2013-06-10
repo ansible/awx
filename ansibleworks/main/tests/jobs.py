@@ -779,7 +779,8 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
                     self.assertFalse(response['passwords_needed_to_start'])
                     response = self.post(url, {}, expect=202)
                     job = Job.objects.get(pk=job.pk)
-                    self.assertEqual(job.status, 'successful')
+                    self.assertEqual(job.status, 'successful',
+                                     job.result_stdout)
                 else:
                     self.assertFalse(response['can_start'])
                     response = self.post(url, {}, expect=405)

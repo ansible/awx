@@ -1,4 +1,4 @@
-release = ansibleworks-1.2b1
+RELEASE = ansibleworks-1.2b2
 
 clean:
 	rm -rf build *.egg-info
@@ -81,16 +81,15 @@ release_build:
 release_ball: clean 
 	make release_build
 	(cd ../ansible-doc; make)
-	-(rm -rf $(release))
-	mkdir -p $(release)/dist
+	-(rm -rf $(RELEASE))
+	mkdir -p $(RELEASE)/dist
 	cp -a dist/* $(release)/dist
-	mkdir -p $(release)/setup
-	cp -a setup/* $(release)/setup
-	mkdir -p $(release)/docs
-	cp -a ../ansible-doc/*.pdf $(release)/docs
-	tar -cvf $(release)-all.tar $(release)
+	mkdir -p $(RELEASE)/setup
+	cp -a setup/* $(RELEASE)/setup
+	mkdir -p $(RELEASE)/docs
+	cp -a ../ansible-doc/*.pdf $(RELEASE)/docs
+	tar -cvf $(RELEASE)-all.tar $(RELEASE)
 
-clean:
+release_clean:
 	-(rm *.tar)
-	-(rm -rf ($release))
-
+	-(rm -rf ($RELEASE))

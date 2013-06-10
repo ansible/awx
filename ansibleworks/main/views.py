@@ -133,23 +133,6 @@ class OrganizationsDetail(BaseDetail):
     serializer_class = OrganizationSerializer
     permission_classes = (CustomRbac,)
 
-class OrganizationsAuditTrailList(BaseSubList):
-
-    model = AuditTrail
-    serializer_class = AuditTrailSerializer
-    permission_classes = (CustomRbac,)
-    parent_model = Organization
-    relationship = 'audit_trail'
-    postable = False
-
-    def get_queryset(self):
-        ''' to list tags in the organization, I must be a superuser or org admin '''
-        organization = Organization.objects.get(pk=self.kwargs['pk'])
-        if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
-            # FIXME: use: organization.can_user_administrate(...) ?
-            raise PermissionDenied()
-        return AuditTrail.objects.filter(organization_by_audit_trail__in = [ organization ])
-
 class OrganizationsInventoriesList(BaseSubList):
 
     model = Inventory
@@ -220,25 +203,6 @@ class OrganizationsProjectsList(BaseSubList):
         if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
             raise PermissionDenied()
         return Project.objects.filter(organizations__in = [ organization ])
-
-class OrganizationsTagsList(BaseSubList):
-
-    model = Tag
-    serializer_class = TagSerializer
-    permission_classes = (CustomRbac,)
-    parent_model = Organization  # for sub list
-    relationship = 'tags'        # " "
-    postable = True
-    inject_primary_key_on_post_as = 'organization'
-    filter_fields = ('name',)
-
-    def get_queryset(self):
-        ''' to list tags in the organization, I must be a superuser or org admin '''
-        organization = Organization.objects.get(pk=self.kwargs['pk'])
-        if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
-            # FIXME: use: organization.can_user_administrate(...) ?
-            raise PermissionDenied()
-        return Tag.objects.filter(organization_by_tag__in = [ organization ])
 
 class OrganizationsTeamsList(BaseSubList):
 
@@ -432,12 +396,6 @@ class ProjectsOrganizationsList(BaseSubList):
         if not self.request.user.is_superuser:
             raise PermissionDenied()
         return Organization.objects.filter(projects__in = [ project ])
-
-class TagsDetail(BaseDetail):
-
-    model = Tag
-    serializer_class = TagSerializer
-    permission_classes = (CustomRbac,)
 
 class UsersList(BaseList):
 
@@ -889,32 +847,19 @@ class InventoryRootGroupsList(BaseSubList):
         all_ids = base.values_list('id', flat=True)
         return base.exclude(parents__pk__in = all_ids)
 
-class GroupsVariableDetail(VariableBaseDetail):
+class HostsVariableDetail(BaseDetail):
 
-    model = VariableData
-    serializer_class = VariableDataSerializer
+    model = Host
+    serializer_class = HostVariableDataSerializer
     permission_classes = (CustomRbac,)
-    parent_model = Group
-    reverse_relationship = 'variable_data'
-    relationship = 'group'
+    is_variable_data = True # Special flag for RBAC
 
-class HostsVariableDetail(VariableBaseDetail):
+class GroupsVariableDetail(BaseDetail):
 
-    model = VariableData
-    serializer_class = VariableDataSerializer
+    model = Group
+    serializer_class = GroupVariableDataSerializer
     permission_classes = (CustomRbac,)
-    parent_model = Host
-    reverse_relationship = 'variable_data'
-    relationship = 'host'
-
-class VariableDetail(BaseDetail):
-
-    model = VariableData
-    serializer_class = VariableDataSerializer
-    permission_classes = (CustomRbac,)
-
-    def put(self, request, *args, **kwargs):
-        raise PermissionDenied()
+    is_variable_data = True # Special flag for RBAC
 
 class JobTemplateList(BaseList):
 

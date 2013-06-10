@@ -58,25 +58,23 @@ class OrganizationAdmin(BaseModelAdmin):
         (_('Members'), {'fields': ('users', 'admins',)}),
         (_('Projects'), {'fields': ('projects',)}),
         (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('created', 'created_by',
-                                       'audit_trail',)}),
+        (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by', 'audit_trail')
-    filter_horizontal = ('users', 'admins', 'projects', 'tags')
+    readonly_fields = ('created', 'created_by')
+    filter_horizontal = ('users', 'admins', 'projects')
 
 class InventoryHostInline(admin.StackedInline):
     
     model = Host
     extra = 0
     fields = ('name', 'description', 'active', 'tags')
-    filter_horizontal = ('tags',)
 
 class InventoryGroupInline(admin.StackedInline):
 
     model = Group
     extra = 0
     fields = ('name', 'description', 'active', 'parents', 'hosts', 'tags')
-    filter_horizontal = ('parents', 'hosts', 'tags')
+    filter_horizontal = ('parents', 'hosts')
 
 class InventoryAdmin(BaseModelAdmin):
 
@@ -85,15 +83,14 @@ class InventoryAdmin(BaseModelAdmin):
     fieldsets = (
         (None, {'fields': (('name', 'active'), 'organization', 'description',)}),
         (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('created', 'created_by', 'audit_trail',)}),
+        (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by', 'audit_trail')
-    filter_horizontal = ('tags',)
+    readonly_fields = ('created', 'created_by')
     inlines = [InventoryHostInline, InventoryGroupInline]
 
-class TagAdmin(BaseModelAdmin):
-
-    list_display = ('name',)
+#class TagAdmin(BaseModelAdmin):
+#
+#    list_display = ('name',)
 
 #class AuditTrailAdmin(admin.ModelAdmin):
 #
@@ -101,13 +98,6 @@ class TagAdmin(BaseModelAdmin):
 #    not currently on model, so disabling for now.
 #    filter_horizontal = ('tags',)
 
-class VariableDataInline(admin.StackedInline):
-
-    model = VariableData
-    extra = 0
-    max_num = 1
-    # FIXME: Doesn't yet work as inline due to the way the OneToOne field is
-    # defined.
 
 class JobHostSummaryInline(admin.TabularInline):
 
@@ -136,9 +126,9 @@ class JobEventInline(admin.StackedInline):
 class JobHostSummaryInlineForHost(JobHostSummaryInline):
 
     fields = ('job', 'changed', 'dark', 'failures', 'ok', 'processed',
-              'skipped')
+              'skipped', 'failed')
     readonly_fields = ('job', 'changed', 'dark', 'failures', 'ok', 'processed',
-                       'skipped')
+                       'skipped', 'failed')
 
 class JobEventInlineForHost(JobEventInline):
 
@@ -149,17 +139,15 @@ class HostAdmin(BaseModelAdmin):
 
     list_display = ('name', 'inventory', 'description', 'active')
     list_filter = ('inventory', 'active')
-    #form = HostAdminForm
     fieldsets = (
-        (None, {'fields': (('name', 'active'), 'inventory', 'description', 'variable_data',
+        (None, {'fields': (('name', 'active'), 'inventory', 'description',
+                           'variables',
         )}),
         (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('created', 'created_by', 'audit_trail',)}),
+        (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by', 'audit_trail')
-    filter_horizontal = ('tags',)
+    readonly_fields = ('created', 'created_by')
     # FIXME: Edit reverse of many to many for groups.
-    #inlines = [VariableDataInline]
     inlines = [JobHostSummaryInlineForHost, JobEventInlineForHost]
 
 class GroupAdmin(BaseModelAdmin):
@@ -167,18 +155,12 @@ class GroupAdmin(BaseModelAdmin):
     list_display = ('name', 'description', 'active')
     fieldsets = (
         (None, {'fields': (('name', 'active'), 'inventory', 'description',
-                            'parents')}),
+                            'parents', 'variables')}),
         (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('created', 'created_by', 'audit_trail',)}),
+        (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by', 'audit_trail')
-    filter_horizontal = ('parents', 'hosts', 'tags')
-    #inlines = [VariableDataInline]
-
-class VariableDataAdmin(BaseModelAdmin):
-
-    list_display = ('name', 'description', 'active')
-    filter_horizontal = ('tags',)
+    readonly_fields = ('created', 'created_by')
+    filter_horizontal = ('parents', 'hosts')
 
 class CredentialAdmin(BaseModelAdmin):
 
@@ -187,16 +169,15 @@ class CredentialAdmin(BaseModelAdmin):
         (_('Auth Info'), {'fields': (('ssh_username', 'ssh_password'),
                                      'ssh_key_data', 'ssh_key_unlock',
                                      ('sudo_username', 'sudo_password'))}),
-        #(_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('created', 'created_by', 'audit_trail',)}),
+        (_('Tags'), {'fields': ('tags',)}),
+        (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by', 'audit_trail')
-    filter_horizontal = ('tags',)
+    readonly_fields = ('created', 'created_by')
 
 class TeamAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
-    filter_horizontal = ('projects', 'users', 'tags')
+    filter_horizontal = ('projects', 'users')
 
 class ProjectAdmin(BaseModelAdmin):
 
@@ -205,11 +186,9 @@ class ProjectAdmin(BaseModelAdmin):
         (None, {'fields': (('name', 'active'), 'description', 'local_path',
                             'get_playbooks_display')}),
         (_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('created', 'created_by', 'audit_trail',)}),
+        (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by', 'audit_trail',
-                       'get_playbooks_display')
-    filter_horizontal = ('tags',)
+    readonly_fields = ('created', 'created_by', 'get_playbooks_display')
     form = ProjectAdminForm
 
     def get_playbooks_display(self, obj):
@@ -221,7 +200,6 @@ class ProjectAdmin(BaseModelAdmin):
 class PermissionAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
-    filter_horizontal = ('tags',)
 
 class JobTemplateAdmin(BaseModelAdmin):
 
@@ -232,17 +210,15 @@ class JobTemplateAdmin(BaseModelAdmin):
                            'get_create_link_display', 'get_jobs_link_display')}),
         (_('Job Parameters'), {'fields': ('inventory', 'project', 'playbook',
                                           'credential', 'job_type')}),
-        (_('More Options'), {'fields': ('forks', 'limit',
-                                        'verbosity', 'extra_vars'),
+        (_('More Options'), {'fields': ('forks', 'limit', 'verbosity',
+                             'extra_vars', 'job_tags', 'host_config_key'),
                              'classes': ('collapse',)}),
-        #(_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('created', 'created_by',
-                                       'audit_trail',)}),
+        (_('Tags'), {'fields': ('tags',)}),
+        (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by', 'audit_trail',
-                       'get_create_link_display', 'get_jobs_link_display')
+    readonly_fields = ('created', 'created_by', 'get_create_link_display',
+                       'get_jobs_link_display')
     form = JobTemplateAdminForm
-    #filter_horizontal = ('tags',)
 
     def get_create_link_display(self, obj):
         if not obj or not obj.pk:
@@ -272,6 +248,8 @@ class JobTemplateAdmin(BaseModelAdmin):
             create_opts['verbosity'] = obj.verbosity
         if obj.extra_vars:
             create_opts['extra_vars'] = obj.extra_vars
+        if obj.job_tags:
+            create_opts['job_tags'] = obj.job_tags
         create_url += '?%s' % urllib.urlencode(create_opts)
         return format_html('<a href="{0}">{1}</a>', create_url, 'Create Job')
     get_create_link_display.short_description = _('Create Job')
@@ -291,9 +269,9 @@ class JobTemplateAdmin(BaseModelAdmin):
 class JobHostSummaryInlineForJob(JobHostSummaryInline):
 
     fields = ('host', 'changed', 'dark', 'failures', 'ok', 'processed',
-              'skipped')
+              'skipped', 'failed')
     readonly_fields = ('host', 'changed', 'dark', 'failures', 'ok',
-                       'processed', 'skipped')
+                       'processed', 'skipped', 'failed')
 
 class JobEventInlineForJob(JobEventInline):
 
@@ -310,13 +288,12 @@ class JobAdmin(BaseModelAdmin):
         (_('Job Parameters'), {'fields': ('inventory', 'project', 'playbook',
                                           'credential', 'job_type')}),
         (_('More Options'), {'fields': ('forks', 'limit', 'verbosity',
-                                        'extra_vars'),
+                                        'extra_vars', 'job_tags'),
                              'classes': ('collapse',)}),
         (_('Start Job'), {'fields': ('start_job', 'ssh_password',
                                      'sudo_password', 'ssh_key_unlock')}),
-        #(_('Tags'), {'fields': ('tags',)}),
-        (_('Audit Trail'), {'fields': ('created', 'created_by',
-                            'audit_trail',)}),
+        (_('Tags'), {'fields': ('tags',)}),
+        (_('Audit'), {'fields': ('created', 'created_by',)}),
         (_('Job Status'), {'fields': (('status', 'failed', 'cancel_job'),
                                       'get_result_stdout_display',
                                       'get_result_traceback_display',
@@ -325,8 +302,7 @@ class JobAdmin(BaseModelAdmin):
     readonly_fields = ('status', 'failed', 'get_job_template_display',
                        'get_result_stdout_display',
                        'get_result_traceback_display', 'celery_task_id',
-                       'created', 'created_by', 'audit_trail',)
-    filter_horizontal = ('tags',)
+                       'created', 'created_by')
     form = JobAdminForm
     inlines = [JobHostSummaryInlineForJob, JobEventInlineForJob]
 
@@ -336,7 +312,7 @@ class JobAdmin(BaseModelAdmin):
             ro_fields.extend(['name', 'description', 'job_template',
                               'inventory', 'project', 'playbook', 'credential',
                               'job_type', 'forks', 'limit',
-                              'verbosity', 'extra_vars'])
+                              'verbosity', 'extra_vars', 'job_tags'])
         return ro_fields
 
     def get_fieldsets(self, request, obj=None):
@@ -386,16 +362,13 @@ class JobAdmin(BaseModelAdmin):
     get_result_traceback_display.short_description = _('Traceback')
     get_result_traceback_display.allow_tags = True
 
-
-# FIXME: Add the rest of the models...
-
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(Inventory, InventoryAdmin)
-admin.site.register(Tag, TagAdmin)
+#admin.site.register(Tag, TagAdmin)
 #admin.site.register(AuditTrail, AuditTrailAdmin)
 admin.site.register(Host, HostAdmin)
 admin.site.register(Group, GroupAdmin)
-admin.site.register(VariableData, VariableDataAdmin)
+#admin.site.register(VariableData, VariableDataAdmin)
 admin.site.register(Team, TeamAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(Credential, CredentialAdmin)
