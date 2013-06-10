@@ -54,7 +54,7 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
        var action = function() {
            var url = defaultUrl + id + '/';
            Rest.setUrl(url);
-           Rest.delete()
+           Rest.destroy()
                .success( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
@@ -347,7 +347,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       };
 
    // Related set: Delete button
-   scope.delete = function(set, itm_id, name, title) {
+   scope['delete'] = function(set, itm_id, name, title) {
       $rootScope.flashMessage = null;
       
       var action = function() {

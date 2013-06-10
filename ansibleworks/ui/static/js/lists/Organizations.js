@@ -4,7 +4,7 @@
  *  Organizations.js 
  *  List view object for Organizations data model.
  *
- *
+ * 
  */
 angular.module('OrganizationListDefinition', [])
     .value(
@@ -33,7 +33,7 @@ angular.module('OrganizationListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',                  // One of: edit, select, all
                 ngClick: 'addOrganization()',
-                class: 'btn-success btn-small',
+                "class": 'btn-success btn-small',
                 awToolTip: 'Create a new row'
                 }
             },
@@ -43,15 +43,15 @@ angular.module('OrganizationListDefinition', [])
                 label: 'Edit',
                 ngClick: "editOrganization(\{\{ organization.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-small btn-success',
+                "class": 'btn-small btn-success',
                 awToolTip: 'View/Edit organization'
                 },
 
-            delete: {
+            "delete": {
                 label: 'Delete',
                 ngClick: "deleteOrganization(\{\{ organization.id \}\},'\{\{ organization.name \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-small btn-danger',
+                "class": 'btn-small btn-danger',
                 awToolTip: 'Delete organization'
                 }
             }

@@ -4,7 +4,7 @@
  *  JobTemplates.js
  *  Form definition for Job Template model
  *
- *
+ *  
  */
 angular.module('JobTemplateFormDefinition', [])
     .value(
@@ -35,7 +35,7 @@ angular.module('JobTemplateFormDefinition', [])
                 label: 'Job Type',
                 type: 'select',
                 ngOptions: 'type.label for type in job_type_options',
-                default: 0,
+                "default": 0,
                 addRequired: true, 
                 editRequired: true,
                 column: 1,
@@ -92,8 +92,8 @@ angular.module('JobTemplateFormDefinition', [])
                 min: 0,
                 max: 100,
                 slider: true, 
-                class: 'input-mini',
-                default: '0',
+                "class": 'input-mini',
+                "default": '0',
                 addRequired: false, 
                 editRequired: false,
                 column: 2,
@@ -119,7 +119,7 @@ angular.module('JobTemplateFormDefinition', [])
                 label: 'Verbosity',
                 type: 'select',
                 ngOptions: 'v.label for v in verbosity_options',
-                default: 0,
+                "default": 0,
                 addRequired: true, 
                 editRequired: true,
                 column: 2,
@@ -131,10 +131,10 @@ angular.module('JobTemplateFormDefinition', [])
                 label: 'Extra Variables',
                 type: 'textarea',
                 rows: 6,
-                class: 'span12',
+                "class": 'span12',
                 addRequired: false, 
                 editRequired: false,
-                default: "\{\}",
+                "default": "\{\}",
                 column: 2,
                 awPopOver: "<p>Enter variables as JSON. Both the key and value must be wrapped in double quotes. " +
                     "Separate variables with commas, and wrap the entire string with { }. " +
@@ -150,7 +150,7 @@ angular.module('JobTemplateFormDefinition', [])
             save: { 
                 label: 'Save', 
                 icon: 'icon-ok',
-                class: 'btn-success',
+                "class": 'btn-success',
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: true          //Disable when $pristine or $invalid, optional
                 },
@@ -190,7 +190,7 @@ angular.module('JobTemplateFormDefinition', [])
                         icon: 'icon-zoom-in'
                         }
                     }
-                },
+                }
             }
             
     }); //InventoryForm

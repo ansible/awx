@@ -55,7 +55,7 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
        var action = function() {
            var url = defaultUrl + id + '/';
            Rest.setUrl(url);
-           Rest.delete()
+           Rest.destroy()
                .success( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
@@ -469,7 +469,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
       };
 
    // Related set: Delete button
-   scope.delete = function(set, itm_id, name, title) {
+   scope['delete'] = function(set, itm_id, name, title) {
       $rootScope.flashMessage = null;
       
       var action = function() {

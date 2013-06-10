@@ -4,7 +4,7 @@
  *  Teams.js 
  *  List view object for Team data model.
  *
- *
+ *  
  */
 angular.module('TeamsListDefinition', [])
     .value(
@@ -40,7 +40,7 @@ angular.module('TeamsListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addTeam()',
-                class: 'btn-success btn-small',
+                "class": 'btn-success btn-small',
                 awToolTip: 'Create a new team'
                 }
             },
@@ -50,15 +50,15 @@ angular.module('TeamsListDefinition', [])
                 label: 'Edit',
                 ngClick: "editTeam(\{\{ team.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-small btn-success',
+                "class": 'btn-small btn-success',
                 awToolTip: 'View/Edit team'
                 },
 
-            delete: {
+            "delete": {
                 label: 'Delete',
                 ngClick: "deleteTeam(\{\{ team.id \}\},'\{\{ team.name \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-small btn-danger',
+                "class": 'btn-small btn-danger',
                 awToolTip: 'Delete team'
                 }
             }

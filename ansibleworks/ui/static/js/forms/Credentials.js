@@ -4,6 +4,7 @@
  *  Credentials.js
  *  Form definition for Credential model
  *
+ * 
  *
  */
 angular.module('CredentialFormDefinition', [])
@@ -58,7 +59,7 @@ angular.module('CredentialFormDefinition', [])
                 addRequired: false,
                 editRequired: false,
                 rows: 10,
-                class: 'span10'
+                "class": 'span10'
                 },
             "ssh_key_unlock": {
                 label: 'Key Password',
@@ -102,32 +103,13 @@ angular.module('CredentialFormDefinition', [])
                 awPassMatch: true,
                 associated: 'sudo_password'
                 }
-            //     ,
-            // user: {
-            //     label: 'User',
-            //     type: 'lookup',
-            //     sourceModel: 'user',
-            //     sourceField: 'username',
-            //     addRequired: false,
-            //     editRequired: false,
-            //     ngClick: 'lookUpUser()'
-            //     },
-            // team: {
-            //     label: 'Team',
-            //     type: 'lookup',
-            //     sourceModel: 'team',
-            //     sourceField: 'name',
-            //     addRequired: false,
-            //     editRequired: false,
-            //     ngClick: 'lookUpTeam()'
-            //     }
             },
 
         buttons: { //for now always generates <button> tags 
             save: { 
                 label: 'Save', 
                 icon: 'icon-ok',
-                class: 'btn-success',
+                "class": 'btn-success',
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: true          //Disable when $pristine or $invalid, optional
                 },

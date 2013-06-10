@@ -54,7 +54,7 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
        var action = function() {
            var url = defaultUrl + id + '/';
            Rest.setUrl(url);
-           Rest.delete()
+           Rest.destroy()
                .success( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
@@ -296,7 +296,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       };
 
    // Related set: Delete button
-   scope.delete = function(set, itm_id, name, title) {
+   scope['delete'] = function(set, itm_id, name, title) {
       $rootScope.flashMessage = null;
       
       var action = function() {
@@ -342,7 +342,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                  action: function(obj) { GroupsEdit({ "inventory_id": id, group_id: $(obj).attr('group_id') }); },
                  separator_before: true
                  },
-             delete: {
+             "delete": {
                  label: 'Delete Group',
                  action: function(obj) { GroupsDelete({ scope: scope, "inventory_id": id, group_id: $(obj).attr('group_id') }) }
                  }

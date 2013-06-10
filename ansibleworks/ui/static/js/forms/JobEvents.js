@@ -4,7 +4,7 @@
  *  JobEvents.js
  *  Form definition for Job Events model
  *
- *
+ *  
  */
 angular.module('JobEventFormDefinition', [])
     .value(
@@ -19,7 +19,7 @@ angular.module('JobEventFormDefinition', [])
                 label: 'Event ID',
                 type: 'text',
                 readonly: true,
-                class: 'span2'
+                "class": 'span2'
                 },
             event_display: {
                 label: 'Event',
@@ -30,7 +30,7 @@ angular.module('JobEventFormDefinition', [])
                 label: 'Created',
                 type: 'text',
                 readonly: true,
-                class: 'span4'
+                "class": 'span4'
                 },
             host: {
                 label: 'Host',
@@ -40,13 +40,13 @@ angular.module('JobEventFormDefinition', [])
             status: {
                 label: 'Status',
                 type: 'text',
-                class: 'job-\{\{ event_status \}\}',
+                "class": 'job-\{\{ event_status \}\}',
                 readonly: true
                 },
             event_data: {
                 label: 'Event Data',
                 type: 'textarea',
-                class: 'span12',
+                "class": 'span12',
                 rows: 10,
                 readonly: true
                 } 

@@ -4,7 +4,7 @@
  *  Users.js
  *  Form definition for User model
  *
- *
+ *  
  */
 angular.module('UserFormDefinition', [])
     .value(
@@ -72,7 +72,7 @@ angular.module('UserFormDefinition', [])
                 type: 'checkbox',
                 trueValue: 'true',
                 falseValue: 'false',
-                default: 'false',
+                "default": 'false',
                 ngShow: "current_user['is_superuser'] == true"
                 }
             },
@@ -81,7 +81,7 @@ angular.module('UserFormDefinition', [])
             save: { 
                 label: 'Save', 
                 icon: 'icon-ok',
-                class: 'btn-success',
+                "class": 'btn-success',
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: true          //Disable when $pristine or $invalid, optional
                 },
@@ -106,7 +106,7 @@ angular.module('UserFormDefinition', [])
                         icon: 'icon-plus',
                         label: 'Add',
                         awToolTip: 'Add a credential for this user'
-                        },
+                        }
                     },
 
                 fields: {
@@ -124,14 +124,14 @@ angular.module('UserFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
                         icon: 'icon-edit',
-                        class: 'btn-success',
+                        "class": 'btn-success',
                         awToolTip: 'Edit the credential'
                         },
-                    delete: {
+                    "delete": {
                         label: 'Delete',
                         ngClick: "delete('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}', 'credentials')",
                         icon: 'icon-remove',
-                        class: 'btn-danger',
+                        "class": 'btn-danger',
                         awToolTip: 'Delete the credential'
                         }
                     }
@@ -152,7 +152,7 @@ angular.module('UserFormDefinition', [])
                         },
                     description: {
                         label: 'Description'
-                        },
+                        }
                     }
                 },
 

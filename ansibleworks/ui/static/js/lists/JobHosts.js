@@ -4,7 +4,7 @@
  *  JobHosts.js 
  *  List view object for Job Host Summary data model.
  *
- *
+ * 
  */
 angular.module('JobHostDefinition', [])
     .value(
@@ -53,7 +53,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Refresh',
                 icon: 'icon-refresh',
                 ngClick: "refresh()",
-                class: 'btn-success btn-small',
+                "class": 'btn-success btn-small',
                 awToolTip: 'Refresh the page',
                 mode: 'all'
                 },
@@ -61,7 +61,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Edit',
                 icon: 'icon-edit',
                 ngClick: "jobDetails()",
-                class: 'btn-success btn-small',
+                "class": 'btn-success btn-small',
                 awToolTip: 'Edit job details',
                 mode: 'all'
                 },
@@ -69,9 +69,9 @@ angular.module('JobHostDefinition', [])
                 label: 'Events',
                 icon: 'icon-list-ul',
                 ngClick: "jobEvents()",
-                class: 'btn-info btn-small',
+                "class": 'btn-info btn-small',
                 awToolTip: 'View job events',
-                mode: 'all',             
+                mode: 'all'            
                 }
             },
 

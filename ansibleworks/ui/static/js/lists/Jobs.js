@@ -4,7 +4,7 @@
  *  Jobs.js 
  *  List view object for Team data model.
  *
- *
+ * 
  */
 angular.module('JobsListDefinition', [])
     .value(
@@ -15,7 +15,7 @@ angular.module('JobsListDefinition', [])
         editTitle: 'Jobs',
         index: false,
         hover: true,
-        class: 'jobs-table',
+        "class": 'jobs-table',
         
         fields: {
             id: {
@@ -26,7 +26,7 @@ angular.module('JobsListDefinition', [])
                 },
             name: {
                 label: 'Name',
-                link: true,
+                link: true
                 },
             created: {
                 label: 'Creation Date',
@@ -35,7 +35,7 @@ angular.module('JobsListDefinition', [])
             status: {
                 label: 'Status',
                 icon: 'icon-circle',
-                class: 'job-\{\{ job.status \}\}',
+                "class": 'job-\{\{ job.status \}\}',
                 searchType: 'select',
                 searchOptions: [
                     { name: "new", value: "new" }, 
@@ -51,7 +51,7 @@ angular.module('JobsListDefinition', [])
         actions: {
             refresh: {
                 label: 'Refresh',
-                class: 'btn-success btn-small',
+                "class": 'btn-success btn-small',
                 ngClick: "refreshJob(\{\{ job.id \}\})",
                 icon: 'icon-refresh',
                 awToolTip: 'Refresh the page',
@@ -64,7 +64,7 @@ angular.module('JobsListDefinition', [])
                 label: 'Hosts',
                 icon: 'icon-th-large',
                 ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.name \}\}')",
-                class: 'btn-info btn-small',
+                "class": 'btn-info btn-small',
                 awToolTip: 'View host summary',
                 ngDisabled: "job.status == 'new'"
                 },
@@ -73,7 +73,7 @@ angular.module('JobsListDefinition', [])
                 icon: 'icon-list-ul',
                 mode: 'all',             
                 ngClick: "viewEvents(\{{ job.id \}\}, '\{\{ job.name \}\}')",
-                class: 'btn-info btn-small',
+                "class": 'btn-info btn-small',
                 awToolTip: 'View events',
                 ngDisabled: "job.status == 'new'"
                 },
@@ -81,23 +81,23 @@ angular.module('JobsListDefinition', [])
                 icon: 'icon-edit',
                 label: 'Edit',
                 ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.name \}\}')",
-                class: 'btn-success btn-small',
-                awToolTip: 'Edit job details',
+                "class": 'btn-success btn-small',
+                awToolTip: 'Edit job details'
                 },
             rerun: {
                 icon: 'icon-retweet',
                 mode: 'all',             
                 ngClick: "submitJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}' )",
-                class: 'btn-success btn-small',
-                awToolTip: 'Re-run this job',
+                "class": 'btn-success btn-small',
+                awToolTip: 'Re-run this job'
                 },
             cancel: {
                 icon: 'icon-minus-sign',
                 mode: 'all',
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
-                class: 'btn-danger btn-small',
+                "class": 'btn-danger btn-small',
                 awToolTip: 'Cancel job',
                 ngDisabled: "job.status != 'new' && job.status != 'pending' && job.status != 'running'"
-                },
+                }
             }
         });

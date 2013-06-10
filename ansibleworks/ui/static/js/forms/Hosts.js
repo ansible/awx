@@ -4,7 +4,7 @@
  *  Hosts.js
  *  Form definition for Host model
  *
- *
+ *  
  */
 angular.module('HostFormDefinition', [])
     .value(
@@ -39,7 +39,7 @@ angular.module('HostFormDefinition', [])
                 addRequired: false,
                 editRequird: false, 
                 rows: 10,
-                default: "\{\}",
+                "default": "\{\}",
                 awPopOver: "<p>Enter variables as JSON. Both the key and value must be wrapped in double quotes. " +
                     "Separate variables with commas, and wrap the entire string with { }. " +
                     "&nbsp;For example:</p><p>{<br\>&quot;ntp_server&quot;: &quot;ntp.example.com&quot;,<br \>" + 
@@ -54,7 +54,7 @@ angular.module('HostFormDefinition', [])
             save: { 
                 label: 'Save', 
                 icon: 'icon-ok',
-                class: 'btn-success',
+                "class": 'btn-success',
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: true          //Disable when $pristine or $invalid, optional
                 },

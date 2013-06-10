@@ -5,6 +5,7 @@
  *
  *  Form definition for Projects model
  *
+ *  
  */
 angular.module('ProjectFormDefinition', [])
     .value(
@@ -41,7 +42,7 @@ angular.module('ProjectFormDefinition', [])
             save: { 
                 label: 'Save', 
                 icon: 'icon-ok',
-                class: 'btn-success',
+                "class": 'btn-success',
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: true          //Disable when $pristine or $invalid, optional
                 },

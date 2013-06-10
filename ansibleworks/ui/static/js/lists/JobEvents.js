@@ -4,7 +4,7 @@
  *  Jobs.js 
  *  List view object for Team data model.
  *
- *
+ *  
  */
 angular.module('JobEventsListDefinition', [])
     .value(
@@ -28,7 +28,7 @@ angular.module('JobEventsListDefinition', [])
                 link: true
                 },
             created: {
-                label: 'Creation Date',
+                label: 'Creation Date'
                 },
             host: {
                 label: 'Host',
@@ -40,7 +40,7 @@ angular.module('JobEventsListDefinition', [])
             status: {
                 label: 'Status',
                 icon: 'icon-circle',
-                class: 'job-\{\{ jobevent.status \}\}',
+                "class": 'job-\{\{ jobevent.status \}\}',
                 searchField: 'failed',
                 searchType: 'boolean',
                 searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }]
@@ -53,14 +53,14 @@ angular.module('JobEventsListDefinition', [])
                 icon: 'icon-refresh',
                 label: 'Refresh',
                 awToolTip: 'Refresh the page',
-                class: 'btn-small btn-success',
+                "class": 'btn-small btn-success',
                 mode: 'all'
                 },
             edit: {
                 label: 'Edit',
                 ngClick: "jobDetails()",
                 icon: 'icon-edit',
-                class: 'btn-small btn-success',
+                "class": 'btn-small btn-success',
                 awToolTip: 'Edit job details',
                 mode: 'all'
                 },
@@ -68,7 +68,7 @@ angular.module('JobEventsListDefinition', [])
                 label: 'Hosts',
                 icon: 'icon-th-large',
                 ngClick: "jobSummary()",
-                class: 'btn-info btn-small',
+                "class": 'btn-info btn-small',
                 awToolTip: 'View host summary',
                 mode: 'all'
                 }
@@ -79,8 +79,8 @@ angular.module('JobEventsListDefinition', [])
                 label: 'View',
                 ngClick: "editJobEvent(\{\{ jobevent.id \}\})",
                 icon: 'icon-zoom-in',
-                class: 'btn-small',
-                awToolTip: 'View event details',
-                },
+                "class": 'btn-small',
+                awToolTip: 'View event details'
+                }
             }
         });

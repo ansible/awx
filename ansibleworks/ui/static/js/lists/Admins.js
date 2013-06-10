@@ -4,7 +4,7 @@
  *  Admins.js 
  *  List view object for Admins data model.
  *
- *
+ *  @dict
  */
 angular.module('AdminListDefinition', [])
     .value(

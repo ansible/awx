@@ -59,7 +59,7 @@ function OrganizationsList ($scope, $rootScope, $location, $log, Rest, Alert, Lo
        var action = function() {
            var url = defaultUrl + id + '/';
            Rest.setUrl(url);
-           Rest.delete()
+           Rest.destroy()
                .success( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
@@ -239,7 +239,7 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
       };
 
    // Related set: Delete button
-   scope.delete = function(set, itm_id, name, title) {
+   scope['delete'] = function(set, itm_id, name, title) {
       $rootScope.flashMessage = null;
       
       var action = function() {

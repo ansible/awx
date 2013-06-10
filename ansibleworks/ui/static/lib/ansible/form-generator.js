@@ -106,12 +106,12 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
 
     applyDefaults: function() {
        for (fld in this.form.fields) {
-           if (this.form.fields[fld].default || this.form.fields[fld].default == 0) {
+           if (this.form.fields[fld]['default'] || this.form.fields[fld]['default'] == 0) {
               if (this.form.fields[fld].type == 'select' && this.scope[fld + '_options']) {
-                 this.scope[fld] = this.scope[fld + '_options'][this.form.fields[fld].default];
+                 this.scope[fld] = this.scope[fld + '_options'][this.form.fields[fld]['default']];
               }
               else {
-                 this.scope[fld] = this.form.fields[fld].default;
+                 this.scope[fld] = this.form.fields[fld]['default'];
               }
            }
        }
@@ -166,7 +166,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        }
        html += "<input type=\"text\" name=\"" + fld + "\" ";
        html += "ng-model=\"" + fld + "\" ";
-       html += (field.class) ? this.attr(field, "class") : "";
+       html += (field['class']) ? this.attr(field, "class") : "";
        html += " readonly />\n";
        return html;
        },
@@ -203,7 +203,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                 html += 'name="' + fld + '" ';
                 html += (field.ngChange) ? this.attr(field,'ngChange') : "";
                 html += (field.id) ? this.attr(field,'id') : "";
-                html += (field.class) ? this.attr(field, 'class') : "";
+                html += (field['class']) ? this.attr(field, 'class') : "";
                 html += (field.placeholder) ? this.attr(field,'placeholder') : "";
                 html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
                 html += (options.mode == 'add' && field.addRequired) ? "required " : "";
@@ -262,7 +262,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              html += (field.rows) ? this.attr(field, 'rows') : "";
              html += "ng-model=\"" + fld + '" ';
              html += 'name="' + fld + '" ';
-             html += (field.class) ? this.attr(field,'class') : "";
+             html += (field['class']) ? this.attr(field,'class') : "";
              html += (field.ngChange) ? this.attr(field,'ngChange') : "";
              html += (field.id) ? this.attr(field,'id') : "";
              html += (field.placeholder) ? this.attr(field,'placeholder') : "";
@@ -337,8 +337,8 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              html += "<div class=\"controls\">\n"; 
              // Use 'text' rather than 'number' so that our integer directive works correctly
              html += (field.slider) ? "<div class=\"slider\" id=\"" + fld + "-slider\"></div>\n" : "";
-             html += "<input type=\"text\" value=\"" + field.default + "\" ";
-             html += (field.class) ? this.attr(field, 'class') : "";
+             html += "<input type=\"text\" value=\"" + field['default'] + "\" ";
+             html += (field['class']) ? this.attr(field, 'class') : "";
              html += (field.slider) ? "ng-slider=\"" + fld + "\" " : ""; 
              html += "ng-model=\"" + fld + '" ';
              html += 'name="' + fld + '" ';
@@ -483,7 +483,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              for (action in this.form.statusActions) {
                  act = this.form.statusActions[action];
                  html += "<button " + this.attr(act, 'ngClick') + "class=\"btn";
-                 html += (act.class) ? " " + act.class : "";
+                 html += (act['class']) ? " " + act['class'] : "";
                  html += "\" ";
                  html += (act.awToolTip) ? this.attr(act,'awToolTip') : "";
                  html += (act.awToolTip) ? "data-placement=\"top\" " : "";
@@ -572,7 +572,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                  //button
                  html += "<button ";
                  html += "class=\"btn btn-small";
-                 html += (button.class) ? " " + button.class : "";
+                 html += (button['class']) ? " " + button['class'] : "";
                  html += "\" ";
                  if (button.ngClick) {
                     html += this.attr(button,'ngClick');
@@ -759,8 +759,8 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
               html += "<td class=\"actions\">";
               for (action in form.related[itm].fieldActions) {
                   html += "<button class=\"btn btn-mini"; 
-                  html += (form.related[itm]['fieldActions'][action].class) ?
-                      " " + form.related[itm]['fieldActions'][action].class : "";
+                  html += (form.related[itm]['fieldActions'][action]['class']) ?
+                      " " + form.related[itm]['fieldActions'][action]['class'] : "";
                   html += "\" ";
                   html += (form.related[itm]['fieldActions'][action].awToolTip) ? this.attr(form.related[itm]['fieldActions'][action],'awToolTip') : "";
                   html += this.attr(form.related[itm]['fieldActions'][action],'ngClick') +
@@ -919,7 +919,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                  for (act in form.related[itm].fieldActions) {
                      var action = form.related[itm].fieldActions[act];
                      html += "<button class=\"btn btn-small"; 
-                     html += (action.class) ? " " + action.class : "";
+                     html += (action['class']) ? " " + action['class'] : "";
                      html += "\" " + this.attr(action,'ngClick');
                      html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
                      html += (action.awToolTip) ? "data-placement=\"top\" " : "";

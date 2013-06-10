@@ -20,7 +20,6 @@ angular.module('RestServices',['ngCookies','AuthService'])
         var key,rgx;
         for (key in this.params) {
           rgx = new RegExp("\\:" + key,'gm'); 
-          rgx.compile;
           if (rgx.test(this.url)) {
              this.url = this.url.replace(rgx,this.params[key]);
              delete this.params[key];
@@ -51,7 +50,7 @@ angular.module('RestServices',['ngCookies','AuthService'])
                       data: data });
 
         },
-    delete: function(data) {
+    destroy: function(data) {
         var url = this.url;
         return $http({method: 'DELETE',
                       url: url,

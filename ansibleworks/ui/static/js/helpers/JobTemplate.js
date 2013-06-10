@@ -98,9 +98,9 @@ angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFo
         }
     }])
     
-    .factory('SubmitJob',['PromptPasswords', 'CredentialForm', '$compile', 'Rest', '$location', 'GetBasePath', 'CredentialList',
+    .factory('SubmitJob',['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'CredentialList',
     'LookUpInit', 'JobTemplateForm', 'ProcessErrors',
-    function(PromptPasswords, JobTemplateForm, $compile, Rest, $location, GetBasePath, CredentialList, LookUpInit, JobTemplateForm,
+    function(PromptPasswords, $compile, Rest, $location, GetBasePath, CredentialList, LookUpInit, JobTemplateForm,
         ProcessErrors) {
     return function(params) {
         var scope = params.scope; 
@@ -111,7 +111,9 @@ angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFo
 
         function postJob(data) {
             // Create the job record
-            (scope.credentialWatchRemove) ? scope.credentialWatchRemove() : null;
+            if (scope.credentialWatchRemove) {
+                 scope.credentialWatchRemove();
+            }
             var dt = new Date().toISOString();
             var url = (data.related.jobs) ? data.related.jobs : data.related.job_template + 'jobs/';
             var name = (template_name) ? template_name : data.name;

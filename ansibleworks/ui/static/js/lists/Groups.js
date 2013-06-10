@@ -4,7 +4,7 @@
  *  Groups.js 
  *  List view object for Group data model.
  *
- *
+ *  
  */
 angular.module('GroupListDefinition', [])
     .value(
@@ -34,7 +34,7 @@ angular.module('GroupListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'createGroup()',
-                class: 'btn-success btn-small',
+                "class": 'btn-success btn-small',
                 awToolTip: 'Create a new group'
                 }
             },
@@ -44,15 +44,15 @@ angular.module('GroupListDefinition', [])
                 label: 'Edit',
                 ngClick: "editGroup(\{\{ group.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-small btn-success',
+                "class": 'btn-small btn-success',
                 awToolTip: 'View/Edit group'
                 },
 
-            delete: {
+            "delete": {
                 label: 'Delete',
                 ngClick: "deleteGroup(\{\{ group.id \}\},'\{\{ group.name \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-small btn-danger',
+                "class": 'btn-small btn-danger',
                 awToolTip: 'Delete group'
                 }
             }

@@ -73,7 +73,7 @@ angular.module('AuthService', ['ngCookies'])
            return $http({
                method: 'GET', 
                url: '/api/v1/me/',
-               headers: { 'Authorization': 'Token ' + this.getToken() },
+               headers: { 'Authorization': 'Token ' + this.getToken() }
                });
            },
 

@@ -4,7 +4,7 @@
  *  Groups.js
  *  Form definition for Group model
  *
- *
+ *  
  */
 angular.module('GroupFormDefinition', [])
     .value(
@@ -34,7 +34,7 @@ angular.module('GroupFormDefinition', [])
                 addRequired: false,
                 editRequird: false, 
                 rows: 10,
-                default: "\{\}",
+                "default": "\{\}",
                 dataTitle: 'Group Variables',
                 dataPlacement: 'right',
                 awPopOver: '<p>Enter variables as JSON. Both the key and value must be wrapped in double quotes. ' +
@@ -49,7 +49,7 @@ angular.module('GroupFormDefinition', [])
             save: { 
                 label: 'Save', 
                 icon: 'icon-ok',
-                class: 'btn btn-success',
+                "class": 'btn btn-success',
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: true          //Disable when $pristine or $invalid, optional
                 },

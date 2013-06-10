@@ -4,7 +4,7 @@
  *  JobTemplates.js 
  *  List view object for Job Templates data model.
  *
- *
+ *  
  */
 angular.module('JobTemplatesListDefinition', [])
     .value(
@@ -34,7 +34,7 @@ angular.module('JobTemplatesListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',                // One of: edit, select, all
                 ngClick: 'addJobTemplate()',
-                class: 'btn-success btn-small',
+                "class": 'btn-success btn-small',
                 basePaths: ['job_templates'], 
                 awToolTip: 'Create a new template'
                 }
@@ -46,21 +46,21 @@ angular.module('JobTemplatesListDefinition', [])
                 ngClick: "editJobTemplate(\{\{ job_template.id \}\})",
                 icon: 'icon-edit',
                 awToolTip: 'Edit template',
-                class: 'btn-small btn-success'
+                "class": 'btn-small btn-success'
                 },
             submit: {
                 label: 'Launch',
                 icon: 'icon-rocket',
                 mode: 'all',
-                class: 'btn-small btn-success',
+                "class": 'btn-small btn-success',
                 ngClick: 'submitJob(\{\{ job_template.id \}\})',
                 awToolTip: 'Start a job using this template'     
                 },
-            delete: {
+            "delete": {
                 label: 'Delete',
                 ngClick: "deleteJobTemplate(\{\{ job_template.id \}\},'\{\{ job_template.name \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-danger btn-small',
+                "class": 'btn-danger btn-small',
                 awToolTip: 'Delete template'
                 }
             }

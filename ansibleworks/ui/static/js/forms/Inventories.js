@@ -4,7 +4,7 @@
  *  Inventories.js
  *  Form definition for User model
  *
- *
+ * 
  */
 angular.module('InventoryFormDefinition', [])
     .value(
@@ -49,7 +49,7 @@ angular.module('InventoryFormDefinition', [])
             save: { 
                 label: 'Save', 
                 icon: 'icon-ok',
-                class: 'btn-success',
+                "class": 'btn-success',
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: true          //Disable when $pristine or $invalid, optional
                 },
@@ -100,14 +100,14 @@ angular.module('InventoryFormDefinition', [])
                         ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
                         icon: 'icon-edit',
                         label: 'Edit',
-                        class: 'btn-success',
+                        "class": 'btn-success',
                         awToolTip: 'Edit host'
                         },
-                    delete: {
+                    "delete": {
                         ngClick: "deleteHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
                         icon: 'icon-remove',
                         label: 'Delete',
-                        class: 'btn-danger',
+                        "class": 'btn-danger',
                         awToolTip: 'Remove host'
                         }
                     }    

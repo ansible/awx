@@ -4,7 +4,7 @@
  *  Jobs.js
  *  Form definition for Jobs model
  *
- *
+ *  @dict
  */
 angular.module('JobFormDefinition', [])
     .value(
@@ -35,7 +35,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Job Type',
                 type: 'select',
                 ngOptions: 'type.label for type in job_type_options',
-                default: 'run',
+                "default": 'run',
                 addRequired: true, 
                 editRequired: true,
                 column: 1
@@ -87,8 +87,8 @@ angular.module('JobFormDefinition', [])
                 min: 0,
                 max: 100,
                 slider: true, 
-                class: 'input-mini',
-                default: '0',
+                "class": 'input-mini',
+                "default": '0',
                 addRequired: false, 
                 editRequired: false,
                 column: 2,
@@ -114,7 +114,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Verbosity',
                 type: 'select',
                 ngOptions: 'v.label for v in verbosity_options',
-                default: 0,
+                "default": 0,
                 addRequired: true, 
                 editRequired: true,
                 column: 2,
@@ -126,7 +126,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Extra Variables',
                 type: 'textarea',
                 rows: 6,
-                class: 'span12',
+                "class": 'span12',
                 addRequired: false, 
                 editRequired: false,
                 column: 2
@@ -137,7 +137,7 @@ angular.module('JobFormDefinition', [])
             save: { 
                 label: 'Save', 
                 icon: 'icon-ok',
-                class: 'btn-success',
+                "class": 'btn-success',
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: true          //Disable when $pristine or $invalid, optional
                 },
@@ -161,14 +161,14 @@ angular.module('JobFormDefinition', [])
                 type: 'textarea',
                 readonly: true,
                 rows: 20,
-                class: 'span12'
+                "class": 'span12'
                 },
             result_traceback: {
                 label: 'Traceback',
                 type: 'textarea', 
                 readonly: true,
                 rows: 10,
-                class: 'span12',
+                "class": 'span12',
                 ngShow: "result_traceback != ''"
                 }
             },
@@ -178,7 +178,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Refresh',
                 icon: 'icon-refresh',
                 ngClick: "refresh()",
-                class: 'btn-small btn-success',
+                "class": 'btn-small btn-success',
                 awToolTip: 'Refresh job status &amp; output',
                 mode: 'all'
                 },
@@ -186,7 +186,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Hosts',
                 icon: 'icon-th-large',
                 ngClick: "jobSummary()",
-                class: 'btn-info btn-small',
+                "class": 'btn-info btn-small',
                 awToolTip: 'View host summary',
                 mode: 'all'
                 },
@@ -194,9 +194,9 @@ angular.module('JobFormDefinition', [])
                 label: 'Events',
                 icon: 'icon-list-ul',
                 ngClick: "jobEvents()",
-                class: 'btn-info btn-small',
+                "class": 'btn-info btn-small',
                 awToolTip: 'Edit job events',
-                mode: 'all',             
+                mode: 'all'        
                 }
             },
 

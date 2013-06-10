@@ -4,7 +4,7 @@
  *  Hosts.js 
  *  List view object for Users data model.
  *
- *
+ *  
  */
 angular.module('HostListDefinition', [])
     .value(
@@ -36,7 +36,7 @@ angular.module('HostListDefinition', [])
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'createHost()',
                 ngHide: 'showAddButton == false',
-                class: 'btn-success btn-small',
+                "class": 'btn-success btn-small',
                 awToolTip: 'Create a new host'
                 }
             },
@@ -46,15 +46,15 @@ angular.module('HostListDefinition', [])
                 label: 'Edit',
                 ngClick: "editHost(\{\{ host.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-small btn-success',
+                "class": 'btn-small btn-success',
                 awToolTip: 'View/Edit host'
                 },
 
-            delete: {
+            "delete": {
                 label: 'Delete',
                 ngClick: "deleteHost(\{\{ host.id \}\},'\{\{ host.name \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-small btn-danger',
+                "class": 'btn-small btn-danger',
                 awToolTip: 'Delete host'
                 }
             }

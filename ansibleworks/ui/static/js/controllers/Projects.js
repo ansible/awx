@@ -54,7 +54,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
        var action = function() {
            var url = defaultUrl + id + '/';
            Rest.setUrl(url);
-           Rest.delete()
+           Rest.destroy()
                .success( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
@@ -293,7 +293,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
       };
 
    // Related set: Delete button
-   scope.delete = function(set, itm_id, name, title) {
+   scope['delete'] = function(set, itm_id, name, title) {
       var action = function() {
           var url = GetBasePath('projects') + id + '/' + set + '/';
           Rest.setUrl(url);

@@ -4,7 +4,7 @@
  *  JobEvents.js
  *  Form definition for Job Events model
  *
- *
+ *  @dict
  */
 angular.module('JobEventFormDefinition', [])
     .value(

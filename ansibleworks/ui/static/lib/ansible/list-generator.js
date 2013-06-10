@@ -7,7 +7,7 @@
  *
  */
 
-angular.module('ListGenerator', ['GeneratorHelpers',])
+angular.module('ListGenerator', ['GeneratorHelpers'])
     .factory('GenerateList', [ '$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 
     function($location, $compile, $rootScope, SearchWidget, PaginateWidget) {
     return {
@@ -153,7 +153,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
                  if ( (list.actions[action].basePaths == undefined) || 
                       (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
                     html += "<button " + this.attr(list.actions[action], 'ngClick') + "class=\"btn";
-                    html += (list.actions[action].class) ?  " " + list.actions[action].class : " btn-small";
+                    html += (list.actions[action]['class']) ?  " " + list.actions[action]['class'] : " btn-small";
                     html += "\" ";
                     html += (list.actions[action].ngHide) ? this.attr(list.actions[action],'ngHide') : "";
                     html += (list.actions[action].awToolTip) ? this.attr(list.actions[action],'awToolTip') : "";
@@ -173,7 +173,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
 
        // table header row
        html += "<table class=\"table table-condensed"
-       html += (list.class) ? " " + list.class : "";
+       html += (list['class']) ? " " + list['class'] : "";
        html += (options.mode == 'lookup' || list.hover) ? " table-hover" : ""; 
        html += "\">\n";
        html += "<thead>\n";
@@ -213,7 +213,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
            cnt++;  
            html += "<td ";
            html += "<td class=\"" + fld + "-column"; 
-           html += (list.fields[fld].class) ? " " + list.fields[fld].class : "";
+           html += (list.fields[fld]['class']) ? " " + list.fields[fld]['class'] : "";
            html +=  "\" ";  
            html += (list.fields[fld].ngClass) ? this.attr(list.fields[fld], 'ngClass') : "";
            html += ">\n";
@@ -250,7 +250,7 @@ angular.module('ListGenerator', ['GeneratorHelpers',])
           html += "<td class=\"actions\">";
           for (action in list.fieldActions) {
               html += "<button class=\"btn"; 
-              html += (list.fieldActions[action].class) ? " " + list.fieldActions[action].class : " btn-small";
+              html += (list.fieldActions[action]['class']) ? " " + list.fieldActions[action]['class'] : " btn-small";
               html += "\" " + this.attr(list.fieldActions[action],'ngClick');
               html += (list.fieldActions[action].ngShow) ? this.attr(list.fieldActions[action],'ngShow') : "";
               html += (list.fieldActions[action].awToolTip) ? this.attr(list.fieldActions[action],'awToolTip') : "";

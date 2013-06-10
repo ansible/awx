@@ -4,7 +4,7 @@
  *  Inventories.js 
  *  List view object for Inventories data model.
  *
- *
+ * 
  */
 angular.module('InventoriesListDefinition', [])
     .value(
@@ -40,7 +40,7 @@ angular.module('InventoriesListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addInventory()',
-                class: 'btn-small btn-success',
+                "class": 'btn-small btn-success',
                 awToolTip: 'Create a new row'
                 }
             },
@@ -50,15 +50,15 @@ angular.module('InventoriesListDefinition', [])
                 label: 'Edit',
                 ngClick: "editInventory(\{\{ inventory.id \}\})",
                 icon: 'icon-edit',
-                class: 'btn-small btn-success',
+                "class": 'btn-small btn-success',
                 awToolTip: 'View/Edit inventory'
                 },
 
-            delete: {
+            "delete": {
                 label: 'Delete',
                 ngClick: "deleteInventory(\{\{ inventory.id \}\},'\{\{ inventory.name \}\}')",
                 icon: 'icon-remove',
-                class: 'btn-small btn-danger',
+                "class": 'btn-small btn-danger',
                 awToolTip: 'Delete'
                 }
             }

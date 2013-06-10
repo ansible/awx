@@ -4,7 +4,7 @@
  *  Credentials.js 
  *  List view object for Credential data model.
  *
- *
+ *  @dict
  */
 angular.module('CredentialsListDefinition', [])
     .value(
@@ -48,7 +48,7 @@ angular.module('CredentialsListDefinition', [])
                 mode: 'all',                         // One of: edit, select, all
                 ngClick: 'addCredential()',
                 basePaths: ['teams','users'],        // base path must be in list, or action not available
-                class: 'btn-success btn-small',
+                "class": 'btn-success btn-small',
                 awToolTip: 'Create a new credential'
                 }
             },
@@ -58,15 +58,15 @@ angular.module('CredentialsListDefinition', [])
                 ngClick: "editCredential(\{\{ credential.id \}\})",
                 icon: 'icon-edit',
                 label: 'Edit',
-                class: 'btn-small btn-success',
+                "class": 'btn-small btn-success',
                 awToolTip: 'View/Edit credential'
                 },
 
-            delete: {
+            "delete": {
                 ngClick: "deleteCredential(\{\{ credential.id \}\},'\{\{ credential.name \}\}')",
                 icon: 'icon-remove',
                 label: 'Delete',
-                class: 'btn-small btn-danger',
+                "class": 'btn-small btn-danger',
                 awToolTip: 'Delete credential'
                 }
             }
