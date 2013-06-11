@@ -51,7 +51,8 @@ angular.module('ansible', [
     'JobEventFormDefinition',
     'JobHostDefinition',
     'GroupsHelper',
-    'HostsHelper'
+    'HostsHelper',
+    'ParseHelper'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.

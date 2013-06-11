@@ -34,14 +34,13 @@ angular.module('GroupFormDefinition', [])
                 addRequired: false,
                 editRequird: false, 
                 rows: 10,
+                "class": 'modal-input-xlarge',
                 "default": "\{\}",
                 dataTitle: 'Group Variables',
                 dataPlacement: 'right',
-                awPopOver: '<p>Enter variables as JSON. Both the key and value must be wrapped in double quotes. ' +
-                    'Separate variables with commas, and wrap the entire string with { }. ' +
-                    '&nbsp;For example:</p><p>{<br\>&quot;ntp_server&quot;: &quot;ntp.example.com&quot;,<br \>' + 
-                    '&quot;proxy&quot;: &quot;proxy.example.com&quot;<br \>}</p><p>See additional JSON examples at <a href="' +
-                    'http://www.json.org" target="_blank">www.json.org</a></p>'
+                awPopOver: "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                    '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                    '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansiblewors.com</a></p>'
                 }
             },
 

@@ -146,9 +146,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
 
     .factory('HostsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, HostsReload) {
+        GetBasePath, HostsReload, ParseTypeChange) {
     return function(params) {
 
         var inventory_id = params.inventory_id;
@@ -160,9 +160,11 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var generator = GenerateForm;
         var scope = generator.inject(form, {mode: 'add', modal: true, related: false});
         
-        scope.formModalActionLabel = 'Save'
-        scope.formModalHeader = 'Create Host'
-
+        scope.formModalActionLabel = 'Save';
+        scope.formModalHeader = 'Create Host';
+        scope.parseType = 'json';
+        ParseTypeChange(scope);
+        
         $('#form-modal').unbind('hidden');
         $('#form-modal').on('hidden', function () { HostsReload(params); });
         
@@ -176,9 +178,15 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         // Save
         scope.formModalAction  = function() {
            try { 
-               // Make sure we have valid JSON
-               var myjson = JSON.parse(scope.variables);
-               
+               // Make sure we have valid variable data
+               if (scope.parseType == 'json') {
+                  var myjson = JSON.parse(scope.variables);  //make sure JSON parses
+                  var json_data = scope.variables;
+               }
+               else {
+                  var json_data = jsyaml.load(scope.variables);  //parse yaml
+               }
+
                var data = {}
                for (var fld in form.fields) {
                    if (fld != 'variables') {
@@ -192,7 +200,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                    .success( function(data, status, headers, config) {
                        if (scope.variables) {
                           Rest.setUrl(data.related.variable_data);
-                          Rest.put({data: scope.variables})
+                          Rest.put(json_data)
                               .success( function(data, status, headers, config) {
                                   $('#form-modal').modal('hide');
                               })
@@ -211,7 +219,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                        });
            }
            catch(err) {
-               Alert("Error", "Error parsing host variables. Expecting valid JSON. Parser returned " + err);     
+               Alert("Error", "Error parsing host variables. Parser returned " + err);  
            }
            }
 
@@ -226,9 +234,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
 
     .factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, HostsReload) {
+        GetBasePath, HostsReload, ParseTypeChange) {
     return function(params) {
         
         var host_id = params.host_id;
@@ -243,9 +251,11 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var master = {};
         var relatedSets = {};
 
-        scope.formModalActionLabel = 'Save'
-        scope.formModalHeader = 'Edit Host'
-  
+        scope.formModalActionLabel = 'Save';
+        scope.formModalHeader = 'Edit Host';
+        scope.parseType = 'json';
+        ParseTypeChange(scope);
+        
         $('#form-modal').unbind('hidden');
         $('#form-modal').on('hidden', function () { HostsReload(params); });
 
@@ -258,11 +268,11 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                Rest.setUrl(scope.variable_url);
                Rest.get()
                    .success( function(data, status, headers, config) {
-                       if ($.isEmptyObject(data.data)) {
+                       if ($.isEmptyObject(data)) {
                           scope.variables = "\{\}";
                        }
                        else {
-                          scope.variables = data.data;
+                          scope.variables = JSON.stringify(data, null, " ");
                        }
                        })
                    .error( function(data, status, headers, config) {
@@ -307,8 +317,15 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         // Save changes to the parent
         scope.formModalAction = function() {
             try { 
-                // Make sure we have valid JSON
-                var myjson = JSON.parse(scope.variables);
+                
+                // Make sure we have valid variable data
+                if (scope.parseType == 'json') {
+                   var myjson = JSON.parse(scope.variables);  //make sure JSON parses
+                   var json_data = scope.variables;
+                }
+                else {
+                   var json_data = jsyaml.load(scope.variables);  //parse yaml
+                }
 
                 var data = {}
                 for (var fld in form.fields) {
@@ -321,7 +338,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                         if (scope.variables) {
                            //update host variables
                            Rest.setUrl(GetBasePath('hosts') + data.id + '/variable_data/');
-                           Rest.put({data: scope.variables})
+                           Rest.put(json_data)
                                .success( function(data, status, headers, config) {
                                    $('#form-modal').modal('hide');
                                })

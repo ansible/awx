@@ -12,7 +12,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                                  'InventoryHelper'
                                  ])
 
- 
     .factory('GroupsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupList', 'GenerateList', 
         'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'RefreshTree',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupList, GenerateList, LoadBreadCrumbs, SearchInit,
@@ -155,9 +154,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree', 'ParseTypeChange',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, RefreshTree) {
+        GetBasePath, RefreshTree, ParseTypeChange) {
     return function(params) {
 
         var inventory_id = params.inventory_id;
@@ -169,8 +168,12 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var form = GroupForm;
         var generator = GenerateForm;
         var scope = generator.inject(form, {mode: 'add', modal: true, related: false});
-        scope.formModalActionLabel = 'Save'
-        scope.formModalHeader = 'Create Group'
+        
+        scope.formModalActionLabel = 'Save';
+        scope.formModalHeader = 'Create Group';
+        scope.parseType = 'json';
+        ParseTypeChange(scope);
+
         generator.reset();
         var master={};
 
@@ -181,8 +184,15 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         // Save
         scope.formModalAction  = function() {
            try { 
-               // Make sure we have valid JSON
-               var myjson = JSON.parse(scope.variables);
+
+               // Make sure we have valid variable data
+               if (scope.parseType == 'json') {
+                  var myjson = JSON.parse(scope.variables);  //make sure JSON parses
+                  var json_data = scope.variables;
+               }
+               else {
+                  var json_data = jsyaml.load(scope.variables);  //parse yaml
+               }
                
                var data = {}
                for (var fld in form.fields) {
@@ -200,7 +210,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    .success( function(data, status, headers, config) {
                        if (scope.variables) {
                           Rest.setUrl(data.related.variable_data);
-                          Rest.put({data: scope.variables})
+                          Rest.put(json_data)
                               .success( function(data, status, headers, config) {
                                   $('#form-modal').modal('hide');
                                   RefreshTree({ scope: scope });
@@ -236,9 +246,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree', 'ParseTypeChange',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, RefreshTree) {
+        GetBasePath, RefreshTree, ParseTypeChange) {
     return function(params) {
         
         var group_id = params.group_id;
@@ -251,8 +261,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var master = {};
         var relatedSets = {};
 
-        scope.formModalActionLabel = 'Save'
-        scope.formModalHeader = 'Edit Group'
+        scope.formModalActionLabel = 'Save';
+        scope.formModalHeader = 'Edit Group';
+        scope.parseType = 'json';
+        ParseTypeChange(scope);
 
         // After the group record is loaded, retrieve any group variables
         if (scope.groupLoadedRemove) {
@@ -266,11 +278,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                Rest.setUrl(scope.variable_url);
                Rest.get()
                    .success( function(data, status, headers, config) {
-                       if ($.isEmptyObject(data.data)) {
+                       if ($.isEmptyObject(data)) {
                           scope.variables = "\{\}";
                        }
                        else {
-                          scope.variables = data.data;
+                          scope.variables = JSON.stringify(data, null, " ");
                        }
                        })
                    .error( function(data, status, headers, config) {
@@ -315,8 +327,15 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         // Save changes to the parent
         scope.formModalAction = function() {
             try { 
-                // Make sure we have valid JSON
-                var myjson = JSON.parse(scope.variables);
+       
+                // Make sure we have valid variable data
+                if (scope.parseType == 'json') {
+                   var myjson = JSON.parse(scope.variables);  //make sure JSON parses
+                   var json_data = scope.variables;
+                }
+                else {
+                   var json_data = jsyaml.load(scope.variables);  //parse yaml
+                }
 
                 var data = {}
                 for (var fld in form.fields) {
@@ -329,7 +348,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         if (scope.variables) {
                            //update group variables
                            Rest.setUrl(GetBasePath('groups') + data.id + '/variable_data/');
-                           Rest.put({data: scope.variables})
+                           Rest.put(json_data)
                                .success( function(data, status, headers, config) {
                                    $('#form-modal').modal('hide');
                                    RefreshTree({ scope: scope }); 

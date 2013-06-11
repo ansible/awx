@@ -281,12 +281,13 @@
  }
 
 /* Enable table-hover to work when table is in a well */
-.table-hover tbody tr:hover > td,
-.table-hover tbody tr:hover > th {
+ .table-hover tbody tr:hover > td,
+ .table-hover tbody tr:hover > th {
     background-color: #fff;
  }
 
- /* Jobs page */
+
+/* Jobs page */
 
  .job-error, .job-failed,
  input[type="text"].job-failed,
@@ -328,6 +329,7 @@
 
  /* End Jobs Page */
 
+ 
  /* Inventory detail */
  
  .inventory-title {
@@ -350,6 +352,24 @@
 
  #hosts-title {
     margin-bottom: 15px;
+ }
+
+ .parse-selection {
+   font-size: 12px;
+   margin: 5px 0 10px 0;
+ }
+ 
+ .parse-selection .radio.inline {
+    padding-top: 0;
+    font-size: 12px;
+ }
+
+ .parse-selection label:first-child {
+   margin-left: 5px;
+ }
+
+ .modal-input-xlarge {
+   width: 325px;
  }
 
  #tree-view {

@@ -257,7 +257,11 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                 html += "><i class=\"icon-info-sign\"></i></a> ";
              }
              html += field.label + '</label>' + "\n";
-             html += "<div class=\"controls\">\n"; 
+             html += "<div class=\"controls\">\n";
+             if (fld == "variables") {
+                html += "<div class=\"parse-selection\">Parse as: <label class=\"radio inline\"><input type=\"radio\" ng-model=\"parseType\" value=\"json\"> JSON</label>\n";
+                html += "<label class=\"radio inline\"><input type=\"radio\" ng-model=\"parseType\" value=\"yaml\"> YAML</label></div>\n";
+             }
              html += "<textarea ";
              html += (field.rows) ? this.attr(field, 'rows') : "";
              html += "ng-model=\"" + fld + '" ';
