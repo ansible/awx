@@ -33,7 +33,7 @@
         pip: name=distribute state=latest
 
       - name: install python modules via pip
-        pip: requirements=${working_dir}/requirements.txt
+        pip: requirements=${working_dir}/requirements/dev.txt
 
       - name: configure the database authentication more or less open for setup
         template: src=templates/pg_hba_low.j2 dest=/var/lib/pgsql/data/pg_hba.conf owner=postgres

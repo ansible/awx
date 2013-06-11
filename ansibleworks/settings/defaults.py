@@ -172,6 +172,21 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 
+# Use Django-Debug-Toolbar if installed.
+try:
+    import debug_toolbar
+    INSTALLED_APPS += ('debug_toolbar',)
+    MIDDLEWARE_CLASSES += (
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
+except ImportError:
+    pass
+
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+    'ENABLE_STACKTRACES' : True,
+}
+
 # Use Django-devserver if installed.
 try:
     import devserver
