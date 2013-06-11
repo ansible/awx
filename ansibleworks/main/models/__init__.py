@@ -204,7 +204,8 @@ class Host(CommonModelNameNotUnique):
 
     @property
     def has_active_failures(self):
-        return self.last_job_host_summary and self.last_job_host_summary.failed
+        return bool(self.last_job_host_summary and
+                    self.last_job_host_summary.failed)
 
     # Use .job_host_summaries.all() to get jobs affecting this host.
     # Use .job_events.all() to get events affecting this host.
