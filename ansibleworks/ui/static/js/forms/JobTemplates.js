@@ -166,18 +166,39 @@ angular.module('JobTemplateFormDefinition', [])
                 type: 'collection',
                 title: 'Jobs',
                 iterator: 'job',
+                index: false,
                 open: false,
                 
                 actions: { 
                     },
                 
                 fields: {
-                    name: {
+                    id: {
+                        label: 'Job ID',
                         key: true,
-                        label: 'Name'
+                        desc: true,
+                        searchType: 'int'   
+                        },
+                    name: {
+                        label: 'Name',
+                        link: true
                         },
                     description: {
                         label: 'Description'
+                        },
+                    status: {
+                        label: 'Status',
+                        icon: 'icon-circle',
+                        "class": 'job-\{\{ job.status \}\}',
+                        searchType: 'select',
+                        searchOptions: [
+                            { name: "new", value: "new" }, 
+                            { name: "pending", value: "pending" },
+                            { name: "running", value: "running" }, 
+                            { name: "successful", value: "successful" },
+                            { name: "error", value: "error" },
+                            { name: "failed", value: "failed" },
+                            { name: "canceled", value: "canceled" } ]
                         }
                     },
                 

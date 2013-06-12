@@ -24,28 +24,67 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
         var form = params.form; 
         
         // Set default values
+        var iterator, f;
         for (var set in form.related) {
             if (form.related[set].type != 'tree') {
+                iterator = form.related[set].iterator;
                 for (var fld in form.related[set].fields) {
                     if (form.related[set].fields[fld].key) {
-                       scope[form.related[set].iterator + 'SearchField'] = fld
-                       scope[form.related[set].iterator + 'SearchFieldLabel'] = form.related[set].fields[fld].label;
+                       scope[iterator + 'SearchField'] = fld
+                       scope[iterator + 'SearchFieldLabel'] = form.related[set].fields[fld].label;
                        break;
                     }
                 }
-                scope[form.related[set].iterator + 'SortOrder'] = null;
-                scope[form.related[set].iterator + 'SearchType'] = 'contains';
-                scope[form.related[set].iterator + 'SearchTypeLabel'] = 'Contains';
-                scope[form.related[set].iterator + 'SelectShow'] = false;
-                scope[form.related[set].iterator + 'HideSearchType'] = false;
+                scope[iterator + 'SortOrder'] = null;
+                scope[iterator + 'SearchType'] = 'contains';
+                scope[iterator + 'SearchTypeLabel'] = 'Contains';
+                scope[iterator + 'SelectShow'] = false;
+                scope[iterator + 'HideSearchType'] = false;
+                f = scope[iterator + 'SearchField']
+                if (form.related[set].fields[f].searchType && ( form.related[set].fields[f].searchType == 'boolean' 
+                      || form.related[set].fields[f].searchType == 'select')) {
+                   scope[iterator + 'SelectShow'] = true;
+                   scope[iterator + 'SearchSelectOpts'] = list.fields[f].searchOptions;
+                }
+                if (form.related[set].fields[f].searchType && form.related[set].fields[f].searchType == 'int') {
+                   scope[iterator + 'HideSearchType'] = true;   
+                }
+                if (form.related[set].fields[f].searchType && form.related[set].fields[f].searchType == 'gtzero') {
+                      scope[iterator + "InputHide"] = true;
+                }
             }
         } 
         
         // Functions to handle search widget changes
-        scope.setSearchField = function(model, fld, label) {
-           scope[model + 'SearchFieldLabel'] = label;
-           scope[model + 'SearchField'] = fld;
-           scope.search(model);
+        scope.setSearchField = function(iterator, fld, label) {
+           
+           for (var related in form.related) {
+               if ( form.related[related].iterator == iterator ) {
+                  var f = form.related[set].fields[fld];
+               }
+           }
+           
+           scope[iterator + 'SearchFieldLabel'] = label;
+           scope[iterator + 'SearchField'] = fld;
+           scope[iterator + 'SearchValue'] = '';
+           scope[iterator + 'SelectShow'] = false;
+           scope[iterator + 'HideSearchType'] = false;
+           scope[iterator + 'InputHide'] = false;
+           
+           if (f.searchType && f.searchType == 'gtzero') {
+              scope[iterator + "InputHide"] = true;
+           }
+           if (f.searchType && (f.searchType == 'boolean' 
+                || f.searchType == 'select')) {
+              scope[iterator + 'SelectShow'] = true;
+              scope[iterator + 'SearchSelectOpts'] = f.searchOptions;
+           }
+           if (f.searchType && f.searchType == 'int') {
+              scope[iterator + 'HideSearchType'] = true;   
+           }
+
+           scope.search(iterator);
+
            }
 
         scope.setSearchType = function(model, type, label) {
@@ -54,38 +93,71 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
            scope.search(model);
            }
 
-        scope.search = function(model) {
-           scope[model + 'SearchSpin'] = true;
-           scope[model + 'Loading'] = true;
+        scope.search = function(iterator) {
+           scope[iterator + 'SearchSpin'] = true;
+           scope[iterator + 'Loading'] = true;
            
            var set, url, iterator, sort_order;
            for (var key in relatedSets) {
-               if (relatedSets[key].iterator == model) {
+               if (relatedSets[key].iterator == iterator) {
                   set = key;
-                  iterator = relatedSets[key].iterator;
                   url = relatedSets[key].url;
-                 
                   for (var fld in form.related[key].fields) {
                       if (form.related[key].fields[fld].key) {
-                         sort_order = fld;
+                         if (form.related[key].fields[fld].desc) {
+                            sort_order = '-' + fld;
+                         }
+                         else {
+                            sort_order = fld;
+                         }
                       }
                   }
                   break;
                }
            }
 
-           sort_order = (scope[model + 'SortOrder'] == null) ? sort_order : scope[model + 'SortOrder'];
+           sort_order = (scope[iterator + 'SortOrder'] == null) ? sort_order : scope[iterator + 'SortOrder'];
 
-           if (scope[model + 'SearchValue'] != '' && scope[model + 'SearchValue'] != undefined) {
-              scope[model + 'SearchParams'] = '?' + scope[model + 'SearchField'] + 
-                     '__' + scope[model + 'SearchType'] + '=' + escape(scope[model + 'SearchValue']);
-              scope[model + 'SearchParams'] += (sort_order) ? '&order_by=' + escape(sort_order) : '';
+           var f = form.related[set].fields[scope[iterator + 'SearchField']];
+           if ( (scope[iterator + 'SelectShow'] == false && scope[iterator + 'SearchValue'] != '' && scope[iterator + 'SearchValue'] != undefined) ||
+                (scope[iterator + 'SelectShow'] && scope[iterator + 'SearchSelectValue']) || (f.searchType && f.searchType == 'gtzero') ) {
+              if (f.sourceModel) {
+                 // handle fields whose source is a related model e.g. inventories.organization
+                 scope[iterator + 'SearchParams'] = '?' + f.sourceModel + '__' + f.sourceField + '__';
+              }
+              else if (f.searchField) {
+                 scope[iterator + 'SearchParams'] = '?' + f.searchField + '__'; 
+              }
+              else {
+                 scope[iterator + 'SearchParams'] = '?' + scope[iterator + 'SearchField'] + '__'; 
+              }
+              
+              if ( f.searchType && (f.searchType == 'int' || f.searchType == 'boolean' ) ) {
+                 scope[iterator + 'SearchParams'] += 'int=';  
+              }
+              else if ( f.searchType && f.searchType == 'gtzero' ) {
+                 scope[iterator + 'SearchParams'] += 'gt=0'; 
+              }
+              else {
+                 scope[iterator + 'SearchParams'] += scope[iterator + 'SearchType'] + '='; 
+              }             
+              
+              if ( f.searchType && (f.searchType == 'boolean' || f.searchType == 'select') ) { 
+                   scope[iterator + 'SearchParams'] += scope[iterator + 'SearchSelectValue'].value;
+              }
+              else if ( f.searchType == undefined || f.searchType == 'gtzero' ) {
+                 scope[iterator + 'SearchParams'] += escape(scope[iterator + 'SearchValue']);
+              }
+              scope[iterator + 'SearchParams'] += (sort_order) ? '&order_by=' + escape(sort_order) : '';
            }
            else {
-              scope[model + 'SearchParams'] = (sort_order) ? '?order_by=' + escape(sort_order) : '';
+              scope[iterator + 'SearchParams'] = ''; 
+              scope[iterator + 'SearchParams'] += (sort_order) ? '?order_by=' + escape(sort_order) : '';
            }
-           url += scope[model + 'SearchParams'];
-           url += (scope[model + 'PageSize']) ? '&page_size=' + scope[iterator + 'PageSize'] : "";
+
+           scope[iterator + 'Page'] = 0;
+           url += scope[iterator + 'SearchParams'];
+           url += (scope[iterator + 'PageSize']) ? '&page_size=' + scope[iterator + 'PageSize'] : "";
            RefreshRelated({ scope: scope, set: set, iterator: iterator, url: url });
            }
 

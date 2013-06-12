@@ -52,6 +52,9 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
            case 'dataPlacement':
                result = "data-placement=\"" + obj[key] + "\" ";
                break;
+           case 'icon':
+               result = "<i class=\"" + obj[key] +"\"></i> ";
+               break;
            default: 
                result = key + "=\"" + obj[key] + "\" ";
        }
@@ -885,7 +888,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                  html += "<table class=\"" + form.related[itm].iterator + " table table-condensed table-hover\">\n";
                  html += "<thead>\n";
                  html += "<tr>\n";
-                 html += "<th>#</th>\n";
+                 html += (form.related[itm].index == undefined || form.related[itm].index !== false) ? "<th>#</th>\n" : "";
                  for (var fld in form.related[itm].fields) {
                      html += "<th class=\"list-header\" id=\"" + form.related[itm].iterator + '-' + fld + "-header\" " +
                          "ng-click=\"sort('" + form.related[itm].iterator + "', '" + fld + "')\">" +
@@ -911,8 +914,10 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                  html += "<tbody>\n";
                 
                  html += "<tr ng-repeat=\"" + form.related[itm].iterator + " in " + itm + "\" >\n";
-                 html += "<td>{{ $index + (" + form.related[itm].iterator + "Page * " + 
-                         form.related[itm].iterator + "PageSize) + 1 }}.</td>\n";
+                 if (form.related[itm].index == undefined || form.related[itm].index !== false) {
+                    html += "<td>{{ $index + (" + form.related[itm].iterator + "Page * " + 
+                        form.related[itm].iterator + "PageSize) + 1 }}.</td>\n";
+                 }
                  var cnt = 1;
                  var rfield;
                  var base = (form.related[itm].base) ? form.related[itm].base : itm;
@@ -920,7 +925,10 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                  for (var fld in form.related[itm].fields) {
                      cnt++;
                      rfield = form.related[itm].fields[fld];
-                     html += "<td>";
+                     html += "<td "; 
+                     html += (rfield['class']) ? 'class="'+ rfield['class'] + '"' : "";
+                     html += ">";
+                     html += (rfield.icon) ? this.attr(rfield,'icon') : "";
                      if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
                         if (rfield.linkTo) {
                            html += "<a href=\"#" + rfield.linkTo + "\">";
