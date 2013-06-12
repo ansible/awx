@@ -722,7 +722,17 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                        "ng-click=\"sort('" + form.related[itm].iterator + "', '" + fld + "')\">" +
                        form.related[itm]['fields'][fld].label;
                   html += " <i class=\"";
-                  html += (form.related[itm].fields[fld].key) ? "icon-sort-up" : "icon-sort";
+                  if (form.related[itm].fields[fld].key) {
+                     if (form.related[itm].fields[fld].desc) {
+                        html += "icon-sort-down";
+                     }
+                     else {
+                        html += "icon-sort-up";
+                     }
+                  }
+                  else {
+                     html += "icon-sort";
+                  }
                   html += "\"></i></a></th>\n";
               }
               html += "<th></th>\n";
@@ -881,7 +891,18 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                          "ng-click=\"sort('" + form.related[itm].iterator + "', '" + fld + "')\">" +
                          form.related[itm]['fields'][fld].label;
                      html += " <i class=\"";
-                     html += (form.related[itm].fields[fld].key) ? "icon-sort-up" : "icon-sort";
+                     //html += (form.related[itm].fields[fld].key) ? "icon-sort-up" : "icon-sort";
+                     if (form.related[itm].fields[fld].key) {
+                        if (form.related[itm].fields[fld].desc) {
+                           html += "icon-sort-down";
+                        }
+                        else {
+                           html += "icon-sort-up";
+                        }
+                     }
+                     else {
+                        html += "icon-sort";
+                     }
                      html += "\"></i></a></th>\n";
                  }
                  html += "<th></th>\n";
