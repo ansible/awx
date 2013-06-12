@@ -83,7 +83,7 @@ release_ball: clean
 	(cd ../ansible-doc; make)
 	-(rm -rf $(RELEASE))
 	mkdir -p $(RELEASE)/dist
-	cp -a dist/* $(release)/dist
+	cp -a dist/* $(RELEASE)/dist
 	mkdir -p $(RELEASE)/setup
 	cp -a setup/* $(RELEASE)/setup
 	mkdir -p $(RELEASE)/docs
