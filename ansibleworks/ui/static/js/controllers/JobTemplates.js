@@ -233,33 +233,26 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
 
    // Save
    scope.formSave = function() {
-      try {
-          // Make sure we have valid JSON 
-          var myjson = JSON.parse(scope.extra_vars);
-          Rest.setUrl(defaultUrl);
-          var data = {}
-          for (var fld in form.fields) {
-              if (form.fields[fld].type == 'select' && fld != 'playbook') {
-                 data[fld] = scope[fld].value;
-              }
-              else {
-                 data[fld] = scope[fld];
-              }      
-          }
-          Rest.post(data)
-              .success( function(data, status, headers, config) {
-                  var base = $location.path().replace(/^\//,'').split('/')[0];
-                  (base == 'job_templates') ? ReturnToCaller() : ReturnToCaller(1);
-                  })
-              .error( function(data, status, headers, config) {
-                  ProcessErrors(scope, data, status, form,
-                      { hdr: 'Error!', msg: 'Failed to add new project. POST returned status: ' + status });
-                  });
-      }
-      catch(err) {
-          Alert("Error", "Error parsing extra variables. Expecting valid JSON. Parser returned " + err); 
-      }
-      };
+       Rest.setUrl(defaultUrl);
+       var data = {}
+       for (var fld in form.fields) {
+           if (form.fields[fld].type == 'select' && fld != 'playbook') {
+              data[fld] = scope[fld].value;
+           }
+           else {
+              data[fld] = scope[fld];
+           }      
+       }
+       Rest.post(data)
+           .success( function(data, status, headers, config) {
+               var base = $location.path().replace(/^\//,'').split('/')[0];
+               (base == 'job_templates') ? ReturnToCaller() : ReturnToCaller(1);
+               })
+           .error( function(data, status, headers, config) {
+               ProcessErrors(scope, data, status, form,
+                   { hdr: 'Error!', msg: 'Failed to add new project. POST returned status: ' + status });
+               });
+       };
 
    // Reset
    scope.formReset = function() {
@@ -419,33 +412,26 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
 
    // Save changes to the parent
    scope.formSave = function() {
-      try {
-          // Make sure we have valid JSON 
-          var myjson = JSON.parse(scope.extra_vars);
-          Rest.setUrl(defaultUrl + $routeParams.id + '/');
-          var data = {}
-          for (var fld in form.fields) {
-              if (form.fields[fld].type == 'select' && fld != 'playbook') {
-                 data[fld] = scope[fld].value;
-              }
-              else {
-                 data[fld] = scope[fld];
-              }   
-          } 
-          Rest.put(data)
-              .success( function(data, status, headers, config) {
-                  var base = $location.path().replace(/^\//,'').split('/')[0];
-                  (base == 'job_templates') ? ReturnToCaller() : ReturnToCaller(1);
-                  })
-              .error( function(data, status, headers, config) {
-                  ProcessErrors(scope, data, status, form,
-                      { hdr: 'Error!', msg: 'Failed to update team: ' + $routeParams.id + '. PUT status: ' + status });
-              });
-      }
-      catch(err) {
-          Alert("Error", "Error parsing extra variables. Expecting valid JSON. Parser returned " + err); 
-      }
-      };
+       var data = {}
+       for (var fld in form.fields) {
+           if (form.fields[fld].type == 'select' && fld != 'playbook') {
+              data[fld] = scope[fld].value;
+           }
+           else {
+              data[fld] = scope[fld];
+           }   
+       } 
+       Rest.setUrl(defaultUrl + $routeParams.id + '/');
+       Rest.put(data)
+           .success( function(data, status, headers, config) {
+               var base = $location.path().replace(/^\//,'').split('/')[0];
+               (base == 'job_templates') ? ReturnToCaller() : ReturnToCaller(1);
+               })
+           .error( function(data, status, headers, config) {
+               ProcessErrors(scope, data, status, form,
+                   { hdr: 'Error!', msg: 'Failed to update team: ' + $routeParams.id + '. PUT status: ' + status });
+           });
+       };
 
    // Cancel
    scope.formReset = function() {
