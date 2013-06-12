@@ -290,6 +290,7 @@
 /* Jobs page */
 
  .job-error, .job-failed,
+ .active-failures-true,
  input[type="text"].job-failed,
  input[type="text"].job-error 
  {
@@ -305,6 +306,7 @@
  .job-running, 
  .job-success,
  .job-successful,
+ .active-failures-false,
  input[type="text"].job-success,
  input[type="text"].job-successful
  {

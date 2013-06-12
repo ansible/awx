@@ -753,21 +753,33 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
               for (var fld in form.related[itm].fields) {
                   cnt++;
                   rfield = form.related[itm].fields[fld];
-                  html += "<td>";
-                  if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
-                     if (rfield.linkTo) {
-                        html += "<a href=\"#" + rfield.linkTo + "\">";
-                     }
-                     else if (rfield.ngClick) {
-                        html += "<a href=\"\"" + this.attr(rfield, 'ngClick') + "\">";
+                  html += "<td ";
+                  html += (rfield['class']) ? 'class="'+ rfield['class'] + '"' : "";
+                  html += ">";
+                  if (rfield.icon) {
+                     if (rfield.ngShow) {
+                        html += "<i ng-show=\"" + rfield.ngShow + "\" class=\"" + rfield.icon + "\"></i>";
                      }
                      else {
-                        html += "<a href=\"#/" + base + "/{{" + form.related[itm].iterator + ".id }}\">";
+                        html += this.attr(rfield,'icon');
                      }
                   }
-                  html += "{{ " + form.related[itm].iterator + "." + fld + " }}";
-                  if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
-                     html += "</a>";
+                  if (rfield.showValue == undefined || rfield.showValue == true) {
+                      if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
+                         if (rfield.linkTo) {
+                            html += "<a href=\"#" + rfield.linkTo + "\">";
+                         }
+                         else if (rfield.ngClick) {
+                            html += "<a href=\"\"" + this.attr(rfield, 'ngClick') + "\">";
+                         }
+                         else {
+                            html += "<a href=\"#/" + base + "/{{" + form.related[itm].iterator + ".id }}\">";
+                         }
+                      }
+                      html += "{{ " + form.related[itm].iterator + "." + fld + " }}";
+                      if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
+                         html += "</a>";
+                      }
                   }
                   html += "</td>\n";
               }

@@ -42,7 +42,9 @@ angular.module('GeneratorHelpers', [])
         html += "</div>\n";
 
         html += "<select ng-show=\"" + iterator + "SelectShow\" ng-model=\""+ iterator + "SearchSelectValue\" ng-change=\"search('" + iterator + "')\" ";
-        html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts\" class=\"search-select\"></select>\n";
+        html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts\" class=\"search-select";
+        html += (useMini) ? " field-mini-height" : "";
+        html += "\"></select>\n";
 
         html += "<input ng-hide=\"" + iterator + "SelectShow || " + iterator + "InputHide\" class=\"input-medium";
         html += (useMini) ? " field-mini-height" : "";

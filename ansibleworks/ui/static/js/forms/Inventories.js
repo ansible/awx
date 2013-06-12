@@ -92,6 +92,16 @@ angular.module('InventoryFormDefinition', [])
                         },
                     description: {
                         label: 'Description'
+                        },
+                    has_active_failures: {
+                        label: 'Failures',
+                        showValue: false,
+                        ngShow: "\{\{ host.has_active_failures \}\}",
+                        icon: 'icon-circle',
+                        "class": 'active-failures-\{\{ host.has_active_failures \}\}',
+                        searchField: 'has_active_failures',
+                        searchType: 'boolean',
+                        searchOptions: [{ name: "No", value: 0 }, { name: "Yes", value: 1 }]
                         }
                     },
                 
