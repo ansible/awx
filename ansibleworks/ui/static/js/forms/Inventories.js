@@ -44,7 +44,7 @@ angular.module('InventoryFormDefinition', [])
                 ngClick: 'lookUpOrganization()'
                 },
             has_active_failures: {
-                label: 'Active Failures',
+                label: 'Failures',
                 readonly: true,
                 type: 'text'
                 }
