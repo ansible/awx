@@ -174,7 +174,7 @@ class InventorySerializer(BaseSerializer):
 
     class Meta:
         model = Inventory
-        fields = BASE_FIELDS + ('organization',)
+        fields = BASE_FIELDS + ('organization', 'has_active_failures')
 
     def get_related(self, obj):
         res = super(InventorySerializer, self).get_related(obj)
@@ -187,8 +187,6 @@ class InventorySerializer(BaseSerializer):
         return res
 
 class HostSerializer(BaseSerializer):
-
-    has_active_failures = serializers.Field(source='has_active_failures')
 
     class Meta:
         model = Host
@@ -210,8 +208,6 @@ class HostSerializer(BaseSerializer):
         return res
 
 class GroupSerializer(BaseSerializer):
-
-    has_active_failures = serializers.Field(source='has_active_failures')
 
     class Meta:
         model = Group

@@ -171,9 +171,15 @@ class Inventory(CommonModel):
         unique_together = (("name", "organization"),)
 
     organization = models.ForeignKey(Organization, null=False, related_name='inventories')
+    has_active_failures = models.BooleanField(default=False)
 
     def get_absolute_url(self):
         return reverse('main:inventory_detail', args=(self.pk,))
+
+    def update_has_active_failures(self):
+        failed_hosts = self.hosts.filter(active=True, has_active_failures=True)
+        self.has_active_failures = bool(failed_hosts.count())
+        self.save()
 
 class Host(CommonModelNameNotUnique):
     '''
@@ -188,12 +194,24 @@ class Host(CommonModelNameNotUnique):
     inventory               = models.ForeignKey('Inventory', null=False, related_name='hosts')
     last_job                = models.ForeignKey('Job', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job+')
     last_job_host_summary   = models.ForeignKey('JobHostSummary', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job_summary+')
+    has_active_failures     = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
 
     def get_absolute_url(self):
         return reverse('main:hosts_detail', args=(self.pk,))
+
+    def update_has_active_failures(self, update_groups=True,
+                                   update_inventory=True):
+        self.has_active_failures = bool(self.last_job_host_summary and
+                                        self.last_job_host_summary.failed)
+        self.save()
+        if update_groups:
+            for group in self.all_groups.filter(active=True):
+                group.update_has_active_failures()
+        if update_inventory:
+            self.inventory.update_has_active_failures()
 
     @property
     def variables_dict(self):
@@ -211,17 +229,8 @@ class Host(CommonModelNameNotUnique):
             qs = qs | group.all_parents
         return qs
 
-    @property
-    def has_active_failures(self):
-        return bool(self.last_job_host_summary and
-                    self.last_job_host_summary.failed)
-
     # Use .job_host_summaries.all() to get jobs affecting this host.
     # Use .job_events.all() to get events affecting this host.
-    # Use .job_host_summaries.order_by('-pk')[0] to get the last result.
-
-    # To get all hosts with active failures:
-    #   Host.objects.filter(last_job_host_summary__failed=True)
 
 class Group(CommonModelNameNotUnique):
     '''
@@ -238,12 +247,19 @@ class Group(CommonModelNameNotUnique):
     parents       = models.ManyToManyField('self', symmetrical=False, related_name='children', blank=True)
     variables     = models.TextField(blank=True, default='')
     hosts         = models.ManyToManyField('Host', related_name='groups', blank=True)
+    has_active_failures = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
 
     def get_absolute_url(self):
         return reverse('main:groups_detail', args=(self.pk,))
+
+    def update_has_active_failures(self):
+        failed_hosts = self.all_hosts.filter(active=True,
+                                             last_job_host_summary__failed=True)
+        self.has_active_failures = bool(failed_hosts.count())
+        self.save()
 
     @property
     def variables_dict(self):
@@ -307,10 +323,6 @@ class Group(CommonModelNameNotUnique):
     @property
     def job_events(self):
         return JobEvent.objects.filter(host__in=self.all_hosts)
-
-    @property
-    def has_active_failures(self):
-        return bool(self.all_hosts.filter(last_job_host_summary__failed=True).count())
 
 class Credential(CommonModelNameNotUnique):
     '''
@@ -889,6 +901,7 @@ class JobHostSummary(models.Model):
             update_fields.append('last_job_host_summary')
         if update_fields:
             self.host.save(update_fields=update_fields)
+        self.host.update_has_active_failures()
 
 class JobEvent(models.Model):
     '''
@@ -1115,3 +1128,6 @@ def create_auth_token_for_user(sender, **kwargs):
             pass    
     # Only fails when creating a new superuser from syncdb on a
     # new database (before migrate has been called).
+
+# FIXME: Update Group.has_active_failures when a Host/Group is deleted or
+# marked inactive, or when a Host-Group or Group-Group relationship is updated.
