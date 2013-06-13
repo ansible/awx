@@ -201,9 +201,7 @@ class BaseSubList(BaseList):
                 relationship.remove(sub)
             else:
                 # resource is just a ForeignKey, can't remove it from the set, just set it inactive
-                sub.name   = "_deleted_%s_%s" % (str(datetime.time()), sub.name)
-                sub.active = False
-                sub.save()
+                sub.mark_inactive()
 
         if created:
             return Response(status=status.HTTP_201_CREATED, data=ser.data)
@@ -229,9 +227,7 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
         if not check_user_access(request.user, self.model, 'delete', obj):
             raise PermissionDenied()
         if isinstance(obj, PrimordialModel):
-            obj.name   = "_deleted_%s_%s" % (str(datetime.time()), obj.name)
-            obj.active = False
-            obj.save()
+            obj.mark_inactive()
         elif type(obj) == User:
             obj.username  = "_deleted_%s_%s" % (str(datetime.time()), obj.username)
             obj.is_active = False

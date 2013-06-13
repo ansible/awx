@@ -117,6 +117,15 @@ class PrimordialModel(models.Model):
     def __unicode__(self):
         return unicode("%s-%s"% (self.name, self.id))
 
+    def mark_inactive(self, save=True):
+        '''Use instead of delete to rename and mark inactive.'''
+        if self.active:
+            if 'name' in self._meta.get_all_field_names():
+                self.name   = "_deleted_%s_%s" % (now().isoformat(), self.name)
+            self.active = False
+            if save:
+                self.save()
+
 class CommonModel(PrimordialModel):
     ''' a base model where the name is unique '''
 

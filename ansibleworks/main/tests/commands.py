@@ -117,6 +117,8 @@ class AcomInventoryTest(BaseCommandTest):
                 host = inventory.hosts.create(name='host-%02d-%02d.example.com' % (n, x),
                                               inventory=inventory,
                                               variables=variables)
+                if x in (3, 7):
+                    host.mark_inactive()
                 hosts.append(host)
             self.hosts.extend(hosts)
             groups = []
@@ -128,6 +130,8 @@ class AcomInventoryTest(BaseCommandTest):
                 group = inventory.groups.create(name='group-%d' % x,
                                                 inventory=inventory,
                                                 variables=variables)
+                if x == 2:
+                    group.mark_inactive()
                 groups.append(group)
                 group.hosts.add(hosts[x])
                 group.hosts.add(hosts[x + 5])
@@ -146,19 +150,25 @@ class AcomInventoryTest(BaseCommandTest):
 
     def test_list_with_inventory_id_as_argument(self):
         inventory = self.inventories[0]
+        self.assertTrue(inventory.active)
         result, stdout, stderr = self.run_command('acom_inventory', list=True,
                                                   inventory_id=inventory.pk)
         self.assertEqual(result, None)
         data = json.loads(stdout)
-        self.assertEqual(set(data.keys()),
-                         set(inventory.groups.values_list('name', flat=True)))
+        groups = inventory.groups.filter(active=True)
+        groupnames = groups.values_list('name', flat=True)
+        self.assertEqual(set(data.keys()), set(groupnames))
         # Groups for this inventory should only have hosts, and no group
         # variable data or parent/child relationships.
         for k,v in data.items():
             self.assertTrue(isinstance(v, (list, tuple)))
-            group = inventory.groups.get(name=k)
-            self.assertEqual(set(v),
-                             set(group.hosts.values_list('name', flat=True)))
+            group = inventory.groups.get(active=True, name=k)
+            hosts = group.hosts.filter(active=True)
+            hostnames = hosts.values_list('name', flat=True)
+            self.assertEqual(set(v), set(hostnames))
+        for group in inventory.groups.filter(active=False):
+            self.assertFalse(group.name in data.keys(),
+                             'deleted group %s should not be in data' % group)
         # Command line argument for inventory ID should take precedence over
         # environment variable.
         inventory_pks = set(map(lambda x: x.pk, self.inventories))
@@ -171,32 +181,38 @@ class AcomInventoryTest(BaseCommandTest):
 
     def test_list_with_inventory_id_in_environment(self):
         inventory = self.inventories[1]
+        self.assertTrue(inventory.active)
         os.environ['ACOM_INVENTORY_ID'] = str(inventory.pk)
         result, stdout, stderr = self.run_command('acom_inventory', list=True)
         self.assertEqual(result, None)
         data = json.loads(stdout)
-        self.assertEqual(set(data.keys()),
-                         set(inventory.groups.values_list('name', flat=True)))
+        groups = inventory.groups.filter(active=True)
+        groupnames = groups.values_list('name', flat=True)
+        self.assertEqual(set(data.keys()), set(groupnames))
         # Groups for this inventory should have hosts, variable data, and one
         # parent/child relationship.
         for k,v in data.items():
             self.assertTrue(isinstance(v, dict))
-            group = inventory.groups.get(name=k)
-            self.assertEqual(set(v.get('hosts', [])),
-                             set(group.hosts.values_list('name', flat=True)))
+            group = inventory.groups.get(active=True, name=k)
+            hosts = group.hosts.filter(active=True)
+            hostnames = hosts.values_list('name', flat=True)
+            self.assertEqual(set(v.get('hosts', [])), set(hostnames))
             if group.variables:
                 self.assertEqual(v.get('vars', {}),
                                  json.loads(group.variables))
             if k == 'group-3':
-                self.assertEqual(set(v.get('children', [])),
-                                 set(group.children.values_list('name', flat=True)))
+                children = group.children.filter(active=True)
+                childnames = children.values_list('name', flat=True)
+                self.assertEqual(set(v.get('children', [])), set(childnames))
             else:
                 self.assertFalse('children' in v)
 
     def test_valid_host(self):
         # Host without variable data.
         inventory = self.inventories[0]
+        self.assertTrue(inventory.active)
         host = inventory.hosts.all()[2]
+        self.assertTrue(host.active)
         os.environ['ACOM_INVENTORY_ID'] = str(inventory.pk)
         result, stdout, stderr = self.run_command('acom_inventory',
                                                   host=host.name)
@@ -205,7 +221,9 @@ class AcomInventoryTest(BaseCommandTest):
         self.assertEqual(data, {})
         # Host with variable data.
         inventory = self.inventories[1]
-        host = inventory.hosts.all()[3]
+        self.assertTrue(inventory.active)
+        host = inventory.hosts.all()[4]
+        self.assertTrue(host.active)
         os.environ['ACOM_INVENTORY_ID'] = str(inventory.pk)
         result, stdout, stderr = self.run_command('acom_inventory',
                                                   host=host.name)
@@ -216,7 +234,9 @@ class AcomInventoryTest(BaseCommandTest):
     def test_invalid_host(self):
         # Valid host, but not part of the specified inventory.
         inventory = self.inventories[0]
+        self.assertTrue(inventory.active)
         host = Host.objects.exclude(inventory=inventory)[0]
+        self.assertTrue(host.active)
         os.environ['ACOM_INVENTORY_ID'] = str(inventory.pk)
         result, stdout, stderr = self.run_command('acom_inventory',
                                                   host=host.name)
@@ -250,8 +270,18 @@ class AcomInventoryTest(BaseCommandTest):
         self.assertTrue(isinstance(result, CommandError))
         self.assertEqual(json.loads(stdout), {})
 
+    def test_with_deleted_inventory(self):
+        inventory = self.inventories[0]
+        inventory.mark_inactive()
+        self.assertFalse(inventory.active)
+        os.environ['ACOM_INVENTORY_ID'] = str(inventory.pk)
+        result, stdout, stderr = self.run_command('acom_inventory', list=True)
+        self.assertTrue(isinstance(result, CommandError))
+        self.assertEqual(json.loads(stdout), {})
+
     def test_without_list_or_host_argument(self):
         inventory = self.inventories[0]
+        self.assertTrue(inventory.active)
         os.environ['ACOM_INVENTORY_ID'] = str(inventory.pk)
         result, stdout, stderr = self.run_command('acom_inventory')
         self.assertTrue(isinstance(result, CommandError))
@@ -259,6 +289,7 @@ class AcomInventoryTest(BaseCommandTest):
 
     def test_with_both_list_and_host_arguments(self):
         inventory = self.inventories[0]
+        self.assertTrue(inventory.active)
         os.environ['ACOM_INVENTORY_ID'] = str(inventory.pk)
         result, stdout, stderr = self.run_command('acom_inventory', list=True,
                                                   host='blah')

@@ -26,11 +26,12 @@ class Command(NoArgsCommand):
 
     def get_list(self, inventory, indent=None):
         groups = {}
-        for group in inventory.groups.all():
-            # FIXME: Check if group is active?
+        for group in inventory.groups.filter(active=True):
+            hosts = group.hosts.filter(active=True)
+            children = group.children.filter(active=True)
             group_info = {
-                'hosts': list(group.hosts.values_list('name', flat=True)),
-                'children': list(group.children.values_list('name', flat=True)),
+                'hosts': list(hosts.values_list('name', flat=True)),
+                'children': list(children.values_list('name', flat=True)),
             }
             if group.variables:
                 group_info['vars'] = group.variables_dict
@@ -46,8 +47,7 @@ class Command(NoArgsCommand):
         from ansibleworks.main.models import Host
         hostvars = {}
         try:
-            # FIXME: Check if active?
-            host = inventory.hosts.get(name=hostname)
+            host = inventory.hosts.get(active=True, name=hostname)
         except Host.DoesNotExist:
             raise CommandError('Host %s not found in the given inventory' % hostname)
         hostvars = {}
@@ -68,7 +68,7 @@ class Command(NoArgsCommand):
             if not inventory_id:
                 raise CommandError('No inventory ID specified')
             try:
-                inventory = Inventory.objects.get(id=inventory_id)
+                inventory = Inventory.objects.get(active=True, id=inventory_id)
             except Inventory.DoesNotExist:
                 raise CommandError('Inventory with ID %d not found' % inventory_id)
             host = options.get('host', '')
