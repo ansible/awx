@@ -25,6 +25,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var inventory_name = inventory.name; 
         var inventory_url = inventory.url;
         var inventory_id = inventory.id;
+        var has_active_failures = inventory.has_active_failures;
         var inventory_descr = inventory.description;
         var idx=0;
         var treeData = [];
@@ -34,7 +35,9 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             scope.HostLoadedRemove();
         }
         scope.HostLoadedRemove = scope.$on('hostsLoaded', function() {
-            Rest.setUrl(groups + '?order_by=name');
+            var filter = (scope.inventoryFailureFilter) ? "has_active_failures__int=1&" : ""; 
+            var url = groups + '?' + filter + 'order_by=name';
+            Rest.setUrl(url);
             Rest.get()
                 .success( function(data, status, headers, config) {    
                     for (var i=0; i < data.results.length; i++) {
@@ -52,7 +55,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                all: data.results[i].related.all_hosts,
                                children: data.results[i].related.children,
                                hosts: data.results[i].related.hosts,
-                               variable: data.results[i].related.variable_data
+                               variable: data.results[i].related.variable_data,
+                               "data-failures": data.results[i].has_active_failures
                                },
                            state: 'closed'
                            });
@@ -81,7 +85,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                         'inventory_id': inventory_id,
                         hosts: hosts,
                         name: inventory_name,
-                        description: inventory_descr
+                        description: inventory_descr,
+                        "data-failures": inventory.has_active_failures
                         },
                     state: 'open',
                     children:[] 
@@ -133,7 +138,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                             },
                         headers: { 'Authorization': 'Token ' + Authorization.getToken() },
                         success: function(data) {
-                            var response = []; 
+                            var response = [];
+                            var filter = (scope.inventoryFailureFilter) ? "has_active_failures__int=1&" : ""; 
                             for (var i=0; i < data.results.length; i++) {
                                 response.push({
                                     data: {
@@ -147,9 +153,10 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                        description: data.results[i].description,
                                        inventory: data.results[i].inventory,
                                        all: data.results[i].related.all_hosts,
-                                       children: data.results[i].related.children + '?order_by=name',
+                                       children: data.results[i].related.children + '?' + filter + 'order_by=name',
                                        hosts: data.results[i].related.hosts,
-                                       variable: data.results[i].related.variable_data
+                                       variable: data.results[i].related.variable_data,
+                                       "data-failures": data.results[i].has_active_failures
                                        },
                                     state: 'closed'
                                     });
@@ -244,7 +251,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
       
         var scope = params.scope;
         var openId = [];
-        var selectedId; 
+        var selectedId;
 
         if (scope.treeLoadedRemove) {
            scope.treeLoadedRemove();

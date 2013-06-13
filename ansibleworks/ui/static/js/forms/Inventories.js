@@ -42,6 +42,11 @@ angular.module('InventoryFormDefinition', [])
                 addRequired: true,
                 editRequired: true,
                 ngClick: 'lookUpOrganization()'
+                },
+            has_active_failures: {
+                label: 'Active Failures',
+                readonly: true,
+                type: 'text'
                 }
             },
 
@@ -96,7 +101,7 @@ angular.module('InventoryFormDefinition', [])
                     has_active_failures: {
                         label: 'Failures',
                         showValue: false,
-                        ngShow: "\{\{ host.has_active_failures \}\}",
+                        ngShowIcon: "\{\{ host.has_active_failures \}\}",
                         icon: 'icon-circle',
                         "class": 'active-failures-\{\{ host.has_active_failures \}\}',
                         searchField: 'has_active_failures',

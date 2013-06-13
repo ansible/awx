@@ -217,7 +217,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                           OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsEdit, LoadInventory,
-                          GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete) 
+                          GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshTree) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -231,7 +231,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    var id = $routeParams.id;
    
    scope['inventory_id'] = id;
-
+   
    // Retrieve each related set and any lookups
    if (scope.inventoryLoadedRemove) {
       scope.inventoryLoadedRemove();
@@ -251,6 +251,10 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        });
   
    LoadInventory({ scope: scope });
+
+   scope.filterInventory = function() {
+      RefreshTree({ scope: scope });
+   }
 
    // Save changes to the parent
    scope.formSave = function() {
@@ -419,6 +423,6 @@ InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$l
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsEdit', 'LoadInventory',
-                            'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete'
+                            'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete', 'RefreshTree'
                             ]; 
   

@@ -691,6 +691,8 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                   "<i class=\"icon-remove\"></i> Delete Group</button>";
               html += "</div>\n";  
               html += "<div id=\"tree-view\"></div>\n";
+              html += "<div class=\" inventory-filter\" ng-show=\"has_active_failures == true\"><label class=\"checkbox inline\">" +
+                  "<input ng-model=\"inventoryFailureFilter\" ng-change=\"filterInventory()\" type=\"checkbox\" >Only show groups with active failures</label></div>\n";
               html += "</div>\n";
            }
            else {
@@ -757,11 +759,11 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                   html += (rfield['class']) ? 'class="'+ rfield['class'] + '"' : "";
                   html += ">";
                   if (rfield.icon) {
-                     if (rfield.ngShow) {
-                        html += "<i ng-show=\"" + rfield.ngShow + "\" class=\"" + rfield.icon + "\"></i>";
+                     if (rfield.ngShowIcon) {
+                        html += "<i ng-show=\"" + rfield.ngShowIcon + "\" class=\"" + rfield.icon + "\"></i>";
                      }
                      else {
-                        html += this.attr(rfield,'icon');
+                        html += this.icon(rfield.icon);
                      }
                   }
                   if (rfield.showValue == undefined || rfield.showValue == true) {

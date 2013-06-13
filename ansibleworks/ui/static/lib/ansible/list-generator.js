@@ -239,13 +239,23 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
               }
            }
-           html += (list.fields[fld].icon) ? this.icon(list.fields[fld].icon) : "";
-           if (list.fields[fld].ngBind) {       
-              html += "{{ " + list.fields[fld].ngBind + " }}";
+          
+           if (list.fields[fld].ngShowIcon) {
+              html += "<i ng-show=\"" + list.fields[fld].ngShowIcon + "\" class=\"" + list.fields[fld].icon + "\"></i>";
            }
            else {
-              html += "{{" + list.iterator + "." + fld + "}}";    
+              html += this.icon(list.fields[fld].icon);
            }
+           
+           if (list.fields[fld].showValue == undefined || list.fields[fld].showValue == true) {
+              if (list.fields[fld].ngBind) {       
+                 html += "{{ " + list.fields[fld].ngBind + " }}";
+              }
+              else {
+                 html += "{{" + list.iterator + "." + fld + "}}";    
+              }
+           }
+           
            html += ((list.fields[fld].key || list.fields[fld].link) && options.mode != 'lookup' && options.mode != 'select') ? "</a>" : "";
            html += "</td>\n";
        }

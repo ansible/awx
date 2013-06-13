@@ -30,6 +30,13 @@
 
 .jstree-ansible .jstree-hovered { background:#e7f4f9; border:1px solid #e7f4f9; padding:0 2px 0 1px; }
 .jstree-ansible .jstree-clicked { background:#d9edf7; border:1px solid #3a87ad; padding:0 2px 0 1px; color: #000; }
+
+/* if data-failures=true (set usng has_active_failures on hosts, groups, inventory), link color is red */
+.jstree-ansible li[data-failures="true"] .jstree-clicked { color: #FF0000; }
+.jstree-ansible li[data-failures="false"] .jstree-clicked { color: #000; }
+.jstree-ansible li[data-failures="true"] a { color: #FF0000; }
+.jstree-ansible li[data-failures="false"] a { color: #000; }
+
 .jstree-ansible a .jstree-icon { background-position:-56px -19px; }
 .jstree-ansible .jstree-open > a .jstree-icon { background-position:-56px -36px; }
 .jstree-ansible a.jstree-loading .jstree-icon { background:url("throbber.gif") center center no-repeat !important; }
@@ -91,3 +98,4 @@
 .jstree-ansible .jstree-checked a .jstree-checkbox { _background-position:-38px -19px; }
 .jstree-ansible .jstree-unchecked a .jstree-checkbox { _background-position:-2px -19px; }
 /* IE6 END */
+

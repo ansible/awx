@@ -31,6 +31,16 @@ angular.module('InventoriesListDefinition', [])
                 ngBind: 'inventory.summary_fields.organization.name',
                 sourceModel: 'organization',
                 sourceField: 'name'
+                },
+            has_active_failures: {
+                label: 'Failures',
+                showValue: false,
+                ngShowIcon: "\{\{ inventory.has_active_failures \}\}",
+                icon: 'icon-circle',
+                "class": 'active-failures-\{\{ inventory.has_active_failures \}\}',
+                searchField: 'has_active_failures',
+                searchType: 'boolean',
+                searchOptions: [{ name: "No", value: 0 }, { name: "Yes", value: 1 }]
                 }
             },
         
