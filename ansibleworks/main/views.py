@@ -49,18 +49,18 @@ def handle_500(request):
 
 class ApiRootView(APIView):
     '''
-    Ansible Commander REST API
+    This resource is the root of the AnsibleWorks REST API and provides
+    information about the available API versions.
     '''
 
-    def get_name(self):
-        return 'REST API'
+    view_name = 'REST API'
 
     def get(self, request, format=None):
         ''' list supported API versions '''
 
         current = reverse('main:api_v1_root_view', args=[])
         data = dict(
-           description = 'Ansible Commander REST API',
+           description = 'AnsibleWorks REST API',
            current_version = current,
            available_versions = dict(
               v1 = current
@@ -71,10 +71,11 @@ class ApiRootView(APIView):
 class ApiV1RootView(APIView):
     '''
     Version 1 of the REST API.
+
+    Subject to change until the final 1.2 release.
     '''
 
-    def get_name(self):
-        return 'Version 1'
+    view_name = 'Version 1'
 
     def get(self, request, format=None):
         ''' list top level resources '''
@@ -431,8 +432,7 @@ class UsersMeList(BaseList):
     permission_classes = (CustomRbac,)
     filter_fields = ('username',)
 
-    def get_name(self):
-        return 'Me!'
+    view_name = 'Me!'
 
     def post(self, request, *args, **kwargs):
         raise PermissionDenied()
@@ -973,8 +973,7 @@ class BaseJobHostSummaryList(generics.ListAPIView):
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_host_summaries'
 
-    def get_name(self):
-        return 'Job Host Summary List'
+    view_name = 'Job Host Summary List'
 
     def get_queryset(self):
         # FIXME: Verify read permission on the parent object and job.

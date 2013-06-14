@@ -7,7 +7,7 @@ django-extensions
 django-filter
 django-jsonfield
 django-taggit
-djangorestframework
+djangorestframework>=2.3.0,<2.4.0
 Markdown
 pexpect
 python-dateutil
