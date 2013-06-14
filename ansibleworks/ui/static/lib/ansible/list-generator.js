@@ -227,6 +227,11 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            html +=  "\" ";  
            html += (list.fields[fld].ngClass) ? this.attr(list.fields[fld], 'ngClass') : "";
            html += ">\n";
+           
+           // Add ngShow
+           html += (list.fields[fld].ngShow) ? "<span " + this.attr(list.fields[fld],'ngShow') + ">" : "";
+
+           // Start the Link
            if ((list.fields[fld].key || list.fields[fld].link || list.fields[fld].linkTo || list.fields[fld].ngClick )
                 && options.mode != 'lookup' && options.mode != 'select') {
               if (list.fields[fld].linkTo) {
@@ -239,14 +244,16 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
               }
            }
-          
+
+           // Add icon:
            if (list.fields[fld].ngShowIcon) {
-              html += "<i ng-show=\"" + list.fields[fld].ngShowIcon + "\" class=\"" + list.fields[fld].icon + "\"></i>";
+              html += "<i ng-show=\"" + list.fields[fld].ngShowIcon + "\" class=\"" + list.fields[fld].icon + "\"></i> ";
            }
            else {
-              html += this.icon(list.fields[fld].icon);
+              html += this.icon(list.fields[fld].icon) + " ";
            }
            
+           // Add data binds 
            if (list.fields[fld].showValue == undefined || list.fields[fld].showValue == true) {
               if (list.fields[fld].ngBind) {       
                  html += "{{ " + list.fields[fld].ngBind + " }}";
@@ -255,8 +262,21 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  html += "{{" + list.iterator + "." + fld + "}}";    
               }
            }
+
+           // Add additional text:
+           if (list.fields[fld].text) {
+              html += list.fields[fld].text;
+           }
+
+           // close the link
+           if ((list.fields[fld].key || list.fields[fld].link || list.fields[fld].linkTo || list.fields[fld].ngClick )
+                && options.mode != 'lookup' && options.mode != 'select') {
+                html += "</a>";
+           }
            
-           html += ((list.fields[fld].key || list.fields[fld].link) && options.mode != 'lookup' && options.mode != 'select') ? "</a>" : "";
+           // close ngShow
+           html += (list.fields[fld].ngShow) ? "</span>" : "";
+           
            html += "</td>\n";
        }
 

@@ -758,31 +758,52 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                   html += "<td ";
                   html += (rfield['class']) ? 'class="'+ rfield['class'] + '"' : "";
                   html += ">";
-                  if (rfield.icon) {
-                     if (rfield.ngShowIcon) {
-                        html += "<i ng-show=\"" + rfield.ngShowIcon + "\" class=\"" + rfield.icon + "\"></i>";
+
+                  // Add ngShow
+                  html += (rfield.ngShow) ? "<span " + this.attr(rfield,'ngShow') + ">" : "";
+                  
+                  // Start link:/linkTo:/ngClick:
+                  if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
+                     if (rfield.linkTo) {
+                        html += "<a href=\"#" + rfield.linkTo + "\">";
+                     }
+                     else if (rfield.ngClick) {
+                        html += "<a href=\"\"" + this.attr(rfield, 'ngClick') + "\">";
                      }
                      else {
-                        html += this.icon(rfield.icon);
+                        html += "<a href=\"#/" + base + "/{{" + form.related[itm].iterator + ".id }}\">";
                      }
                   }
-                  if (rfield.showValue == undefined || rfield.showValue == true) {
-                      if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
-                         if (rfield.linkTo) {
-                            html += "<a href=\"#" + rfield.linkTo + "\">";
-                         }
-                         else if (rfield.ngClick) {
-                            html += "<a href=\"\"" + this.attr(rfield, 'ngClick') + "\">";
-                         }
-                         else {
-                            html += "<a href=\"#/" + base + "/{{" + form.related[itm].iterator + ".id }}\">";
-                         }
-                      }
-                      html += "{{ " + form.related[itm].iterator + "." + fld + " }}";
-                      if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
-                         html += "</a>";
-                      }
+
+                  // Add icon:
+                  if (rfield.ngShowIcon) {
+                    html += "<i ng-show=\"" + rfield.ngShowIcon + "\" class=\"" + rfield.icon + "\"></i> ";
                   }
+                  else {
+                    html += this.icon(rfield.icon) + " ";
+                  }
+
+                  // Add data binds 
+                  if (rfield.showValue == undefined || rfield.showValue == true) {
+                    if (rfield.ngBind) {       
+                       html += "{{ " + rfield.ngBind + " }}";
+                    }
+                    else {
+                       html += "{{" + form.related[itm].iterator + "." + fld + "}}";    
+                    }
+                  }
+
+                  // Add additional text:
+                  if (rfield.text) {
+                    html += rfield.text;
+                  }
+
+                  // close the link
+                  html += (rfield.key || rfield.link || rfield.linkTo || rfield.ngClick) ? "</a>" : "";
+
+                  // close ngShow
+                  html += (rfield.ngShow) ? "</span>" : "";
+                  
                   html += "</td>\n";
               }
              

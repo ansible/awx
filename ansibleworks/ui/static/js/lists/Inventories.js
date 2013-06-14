@@ -35,8 +35,9 @@ angular.module('InventoriesListDefinition', [])
             has_active_failures: {
                 label: 'Failures',
                 showValue: false,
-                ngShowIcon: "\{\{ inventory.has_active_failures \}\}",
-                icon: 'icon-circle',
+                text: 'Failed events',
+                ngShow: "\{\{ inventory.has_active_failures \}\}",
+                icon: 'icon-exclamation-sign',
                 "class": 'active-failures-\{\{ inventory.has_active_failures \}\}',
                 searchField: 'has_active_failures',
                 searchType: 'boolean',

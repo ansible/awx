@@ -96,14 +96,16 @@ angular.module('InventoryFormDefinition', [])
                         ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
                         },
                     description: {
-                        label: 'Description'
+                        label: 'Description',
+                        ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
                         },
                     has_active_failures: {
                         label: 'Failures',
                         showValue: false,
-                        ngShowIcon: "\{\{ host.has_active_failures \}\}",
-                        icon: 'icon-circle',
+                        ngShow: "\{\{ host.has_active_failures \}\}",
+                        icon: 'icon-exclamation-sign',
                         "class": 'active-failures-\{\{ host.has_active_failures \}\}',
+                        text: 'Failed events',
                         searchField: 'has_active_failures',
                         searchType: 'boolean',
                         searchOptions: [{ name: "No", value: 0 }, { name: "Yes", value: 1 }]
