@@ -611,7 +611,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        }
        else {
           if ((!this.modal) && options.related && this.form.related) {
-             html += this.buildCollections();
+             html += this.buildCollections(options);
           }
        }
 
@@ -757,7 +757,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        return html; 
        },
 
-    buildCollections: function() {
+    buildCollections: function(options) {
        //
        // Create TB accordians with imbedded lists for related collections
        // Should not be called directly. Called internally by build().
@@ -865,27 +865,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                  base = base.replace(/^\//,'');
                  for (var fld in form.related[itm].fields) {
                      cnt++;
-                     rfield = form.related[itm].fields[fld];
-                     html += "<td "; 
-                     html += (rfield['class']) ? 'class="'+ rfield['class'] + '"' : "";
-                     html += ">";
-                     html += (rfield.icon) ? this.attr(rfield,'icon') : "";
-                     if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
-                        if (rfield.linkTo) {
-                           html += "<a href=\"#" + rfield.linkTo + "\">";
-                        }
-                        else if (rfield.ngClick) {
-                           html += "<a href=\"\"" + this.attr(rfield, 'ngClick') + "\">";
-                        }
-                        else {
-                           html += "<a href=\"#/" + base + "/{{" + form.related[itm].iterator + ".id }}\">";
-                        }
-                     }
-                     html += "{{ " + form.related[itm].iterator + "." + fld + " }}";
-                     if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
-                        html += "</a>";
-                     }
-                     html += "</td>\n";
+                     html += Column({ list: form.related[itm], fld: fld, options: options, base: base });
                  }
                  
                  // Row level actions
