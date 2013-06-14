@@ -7,7 +7,142 @@
  * 
  */
 
-angular.module('GeneratorHelpers', [])  
+angular.module('GeneratorHelpers', ['GeneratorHelpers'])
+    
+    .factory('Attr', function() {
+    return function(obj, key) { 
+        var result;
+        switch(key) {
+            case 'ngClick':
+               result = "ng-click=\"" + obj[key] + "\" ";
+               break;
+            case 'ngOptions':
+               result = "ng-options=\"" + obj[key] + "\" ";
+               break;
+            case 'ngClass':
+                result = "ng-class=\"" + obj[key] + "\" ";
+                break;
+            case 'ngChange':
+               result = "ng-change=\"" + obj[key] + "\" ";
+               break;
+            case 'ngDisabled':
+                result = "ng-disabled=\"" + obj[key] + "\" ";
+                break;
+            case 'ngShow':
+               result = "ng-show=\"" + obj[key] + "\" ";
+               break;
+            case 'ngHide':
+               result = "ng-hide=\"" + obj[key] + "\" ";
+               break;
+            case 'ngBind':
+                result = "ng-bind=\"" + obj[key] + "\" ";
+                break;
+            case 'trueValue':
+               result = "ng-true-value=\"" + obj[key] + "\" ";
+               break;
+            case 'falseValue':
+               result = "ng-false-value=\"" + obj[key] + "\" ";
+               break;
+            case 'awToolTip':
+               result = "aw-tool-tip=\"" + obj[key] + "\" ";
+               break;
+            case 'awPopOver':
+               result = "aw-pop-over='" + obj[key] + "' ";
+               break;
+            case 'dataTitle':
+               result = "data-title=\"" + obj[key] + "\" ";
+               break;
+            case 'dataPlacement':
+               result = "data-placement=\"" + obj[key] + "\" ";
+               break;
+            case 'awToolTip':
+                result = "aw-tool-tip=\"" + obj[key] + "\" ";
+                break;
+            default: 
+               result = key + "=\"" + obj[key] + "\" ";
+        }
+        
+        return  result; 
+        
+        }
+        })
+
+    .factory('Icon', function() {
+    return function(icon) {
+       return "<i class=\"" + icon + "\"></i> ";
+        }
+        })
+
+    .factory('Column', ['Attr', 'Icon', function(Attr, Icon) {
+    return function(params) {
+        var list = params['list'];
+        var fld = params['fld'];
+        var options = params['options'];
+        var base = params['base'];
+
+        var field = list['fields'][fld];
+        var html = '';
+        
+        html += "<td ";
+        html += "<td class=\"" + fld + "-column"; 
+        html += (field['class']) ? " " + field['class'] : "";
+        html +=  "\" ";  
+        html += (field.ngClass) ? this.attr(field, 'ngClass') : "";
+        html += ">\n";
+
+        // Add ngShow
+        html += (field.ngShow) ? "<span " + Attr(field,'ngShow') + ">" : "";
+
+        // Start the Link
+        if ((field.key || field.link || field.linkTo || field.ngClick ) && options['mode'] != 'lookup' && options['mode'] != 'select') {
+          if (field.linkTo) {
+             html += "<a href=\"#" + field.linkTo + "\">";
+          }
+          else if (field.ngClick) {
+             html += "<a href=\"\"" + Attr(field, 'ngClick') + "\">";
+          }
+          else {
+             html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
+          }
+        }
+
+        // Add icon:
+        if (field.ngShowIcon) {
+          html += "<i ng-show=\"" + field.ngShowIcon + "\" class=\"" + field.icon + "\"></i> ";
+        }
+        else {
+          html += Icon(field.icon) + " ";
+        }
+
+        // Add data binds 
+        if (field.showValue == undefined || field.showValue == true) {
+          if (field.ngBind) {       
+             html += "{{ " + field.ngBind + " }}";
+          }
+          else {
+             html += "{{" + list.iterator + "." + fld + "}}";    
+          }
+        }
+
+        // Add additional text:
+        if (field.text) {
+          html += field.text;
+        }
+
+        // close the link
+        if ((field.key || field.link || field.linkTo || field.ngClick )
+            && options.mode != 'lookup' && options.mode != 'select') {
+            html += "</a>";
+        }
+
+        // close ngShow
+        html += (field.ngShow) ? "</span>" : "";
+
+        return html += "</td>\n";
+    
+        }
+        }])
+
     .factory('SearchWidget', function() {
     return function(params) {
         //

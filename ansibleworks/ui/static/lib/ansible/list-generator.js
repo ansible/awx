@@ -8,47 +8,18 @@
  */
 
 angular.module('ListGenerator', ['GeneratorHelpers'])
-    .factory('GenerateList', [ '$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 
-    function($location, $compile, $rootScope, SearchWidget, PaginateWidget) {
+    .factory('GenerateList', [ '$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
+        'Column', 
+    function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column) {
     return {
     
     setList: function(list) {
        this.list = list;
        },
  
-    attr: function(obj, key) { 
-       var result;
-       switch (key) {
-           case 'ngClick':
-                result = "ng-click=\"" + obj[key] + "\" ";
-                break;
-           case 'ngClass':
-                result = "ng-class=\"" + obj[key] + "\" ";
-                break;
-           case 'ngDisabled':
-                result = "ng-disabled=\"" + obj[key] + "\" ";
-                break;
-           case 'ngBind':
-                result = "ng-bind=\"" + obj[key] + "\" ";
-                break;
-           case 'ngShow':
-                result = "ng-show=\"" + obj[key] + "\" ";
-                break;
-           case 'ngHide':
-                result = "ng-hide=\"" + obj[key] + "\" ";
-                break;
-           case 'awToolTip':
-                result = "aw-tool-tip=\"" + obj[key] + "\" ";
-                break;
-           default:
-                result = key + "=\"" + obj[key] + "\" ";
-       }
-       return  result; 
-       },
+    attr: Attr,
 
-    icon: function(icon) {
-       return "<i class=\"" + icon + "\"></i> ";
-       },
+    icon: Icon,
 
     has: function(key) {
        return (this.form[key] && this.form[key] != null && this.form[key] != undefined) ? true : false;
@@ -221,63 +192,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        base = base.replace(/^\//,'');
        for (fld in list.fields) {
            cnt++;  
-           html += "<td ";
-           html += "<td class=\"" + fld + "-column"; 
-           html += (list.fields[fld]['class']) ? " " + list.fields[fld]['class'] : "";
-           html +=  "\" ";  
-           html += (list.fields[fld].ngClass) ? this.attr(list.fields[fld], 'ngClass') : "";
-           html += ">\n";
-           
-           // Add ngShow
-           html += (list.fields[fld].ngShow) ? "<span " + this.attr(list.fields[fld],'ngShow') + ">" : "";
-
-           // Start the Link
-           if ((list.fields[fld].key || list.fields[fld].link || list.fields[fld].linkTo || list.fields[fld].ngClick )
-                && options.mode != 'lookup' && options.mode != 'select') {
-              if (list.fields[fld].linkTo) {
-                 html += "<a href=\"#" + list.fields[fld].linkTo + "\">";
-              }
-              else if (list.fields[fld].ngClick) {
-                 html += "<a href=\"\"" + this.attr(list.fields[fld], 'ngClick') + "\">";
-              }
-              else {
-                 html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
-              }
-           }
-
-           // Add icon:
-           if (list.fields[fld].ngShowIcon) {
-              html += "<i ng-show=\"" + list.fields[fld].ngShowIcon + "\" class=\"" + list.fields[fld].icon + "\"></i> ";
-           }
-           else {
-              html += this.icon(list.fields[fld].icon) + " ";
-           }
-           
-           // Add data binds 
-           if (list.fields[fld].showValue == undefined || list.fields[fld].showValue == true) {
-              if (list.fields[fld].ngBind) {       
-                 html += "{{ " + list.fields[fld].ngBind + " }}";
-              }
-              else {
-                 html += "{{" + list.iterator + "." + fld + "}}";    
-              }
-           }
-
-           // Add additional text:
-           if (list.fields[fld].text) {
-              html += list.fields[fld].text;
-           }
-
-           // close the link
-           if ((list.fields[fld].key || list.fields[fld].link || list.fields[fld].linkTo || list.fields[fld].ngClick )
-                && options.mode != 'lookup' && options.mode != 'select') {
-                html += "</a>";
-           }
-           
-           // close ngShow
-           html += (list.fields[fld].ngShow) ? "</span>" : "";
-           
-           html += "</td>\n";
+           html += Column({ list: list, fld: fld, options: options, base: base });
        }
 
        if (options.mode == 'select' ) {

@@ -9,61 +9,17 @@
  */
 
 angular.module('FormGenerator', ['GeneratorHelpers'])
-    .factory('GenerateForm', [ '$compile', 'SearchWidget', 'PaginateWidget', function($compile, SearchWidget, PaginateWidget) {
+    .factory('GenerateForm', [ '$compile', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column', 
+    function($compile, SearchWidget, PaginateWidget, Attr, Icon, Column) {
     return {
     
     setForm: function(form) {
        this.form = form;
        },
  
-    attr: function(obj, key) { 
-       var result;
-       switch(key) {
-           case 'ngClick':
-               result = "ng-click=\"" + obj[key] + "\" ";
-               break;
-           case 'ngOptions':
-               result = "ng-options=\"" + obj[key] + "\" ";
-               break;
-           case 'ngChange':
-               result = "ng-change=\"" + obj[key] + "\" ";
-               break;
-           case 'ngShow':
-               result = "ng-show=\"" + obj[key] + "\" ";
-               break;
-           case 'ngHide':
-               result = "ng-hide=\"" + obj[key] + "\" ";
-               break;
-           case 'trueValue':
-               result = "ng-true-value=\"" + obj[key] + "\" ";
-               break;
-           case 'falseValue':
-               result = "ng-false-value=\"" + obj[key] + "\" ";
-               break;
-           case 'awToolTip':
-               result = "aw-tool-tip=\"" + obj[key] + "\" ";
-               break;
-           case 'awPopOver':
-               result = "aw-pop-over='" + obj[key] + "' ";
-               break;
-           case 'dataTitle':
-               result = "data-title=\"" + obj[key] + "\" ";
-               break;
-           case 'dataPlacement':
-               result = "data-placement=\"" + obj[key] + "\" ";
-               break;
-           case 'icon':
-               result = "<i class=\"" + obj[key] +"\"></i> ";
-               break;
-           default: 
-               result = key + "=\"" + obj[key] + "\" ";
-       }
-       return  result; 
-       },
+    attr: Attr,
 
-    icon: function(icon) {
-       return "<i class=\"" + icon + "\"></i> ";
-       },
+    icon: Icon,
 
     has: function(key) {
        return (this.form[key] && this.form[key] != null && this.form[key] != undefined) ? true : false;
@@ -103,7 +59,6 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;
           $('#form-modal').modal();
        }
-       
        return this.scope;
        },
 
@@ -652,7 +607,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        }
        
        if (this.form.name == 'inventory' && options.mode == 'edit') {
-          html += this.buildTree();
+          html += this.buildTree(options);
        }
        else {
           if ((!this.modal) && options.related && this.form.related) {
@@ -664,7 +619,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
      
        },
 
-    buildTree: function() {
+    buildTree: function(options) {
        //
        // Used to create the inventory detail view
        //
@@ -755,56 +710,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
               for (var fld in form.related[itm].fields) {
                   cnt++;
                   rfield = form.related[itm].fields[fld];
-                  html += "<td ";
-                  html += (rfield['class']) ? 'class="'+ rfield['class'] + '"' : "";
-                  html += ">";
-
-                  // Add ngShow
-                  html += (rfield.ngShow) ? "<span " + this.attr(rfield,'ngShow') + ">" : "";
-                  
-                  // Start link:/linkTo:/ngClick:
-                  if ((rfield.key || rfield.link || rfield.linkTo || rfield.ngClick )) {
-                     if (rfield.linkTo) {
-                        html += "<a href=\"#" + rfield.linkTo + "\">";
-                     }
-                     else if (rfield.ngClick) {
-                        html += "<a href=\"\"" + this.attr(rfield, 'ngClick') + "\">";
-                     }
-                     else {
-                        html += "<a href=\"#/" + base + "/{{" + form.related[itm].iterator + ".id }}\">";
-                     }
-                  }
-
-                  // Add icon:
-                  if (rfield.ngShowIcon) {
-                    html += "<i ng-show=\"" + rfield.ngShowIcon + "\" class=\"" + rfield.icon + "\"></i> ";
-                  }
-                  else {
-                    html += this.icon(rfield.icon) + " ";
-                  }
-
-                  // Add data binds 
-                  if (rfield.showValue == undefined || rfield.showValue == true) {
-                    if (rfield.ngBind) {       
-                       html += "{{ " + rfield.ngBind + " }}";
-                    }
-                    else {
-                       html += "{{" + form.related[itm].iterator + "." + fld + "}}";    
-                    }
-                  }
-
-                  // Add additional text:
-                  if (rfield.text) {
-                    html += rfield.text;
-                  }
-
-                  // close the link
-                  html += (rfield.key || rfield.link || rfield.linkTo || rfield.ngClick) ? "</a>" : "";
-
-                  // close ngShow
-                  html += (rfield.ngShow) ? "</span>" : "";
-                  
-                  html += "</td>\n";
+                  html += Column({ list: form.related[itm], fld: fld, options: options, base: base })
               }
              
               // Row level actions
