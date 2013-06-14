@@ -345,25 +345,36 @@
  }
 
  .inventory-buttons {
-    margin: 10px 10px 0 0;
+    text-align: right;
+    background-color: #f5f5f5;
+    border-left: 1px solid #e3e3e3;
+    border-right: 1px solid #e3e3e3;
+    border-top: 1px solid #e3e3e3;
+    -webkit-border-top-left-radius: 4px;
+      -moz-border-top-left-radius: 4px;
+           border-top-left-radius: 4px;
+    -webkit-border-top-right-radius: 4px;
+      -moz-border-top-right-radius: 4px;
+           border-top-right-radius: 4px;
  }
 
  .inventory-buttons button {
-    margin-left: 5px;
+    margin: 5px 5px 3px 0;
  }
 
  .inventory-filter {
     padding: 0 3px 3px 3px;
-    margin-top: 3px;
     text-align: right;
     background-color: #f5f5f5;
-    border: 1px solid #e3e3e3;
-    -webkit-border-radius: 4px;
-      -moz-border-radius: 4px;
-           border-radius: 4px;
-    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-      -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-           box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+    border-left: 1px solid #e3e3e3;
+    border-right: 1px solid #e3e3e3;
+    border-bottom: 1px solid #e3e3e3;
+    -webkit-border-bottom-left-radius: 4px;
+      -moz-border-bottom-left-radius: 4px;
+           border-bottom-left-radius: 4px;
+    -webkit-border-bottom-right-radius: 4px;
+      -moz-border-bottom-right-radius: 4px;
+           border-bottom-right-radius: 4px;
  }
 
  .inventory-filter label {
