@@ -16,6 +16,10 @@
     padding-top: 40px;
  }
 
+ .text-center {
+   text-align: center !important;
+ }
+
  hr {
     border-color: #e3e3e3;
  }
