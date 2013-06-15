@@ -32,15 +32,17 @@ class Command(NoArgsCommand):
             group_info = {
                 'hosts': list(hosts.values_list('name', flat=True)),
                 'children': list(children.values_list('name', flat=True)),
+                'vars': group.variables_dict,
             }
-            if group.variables:
-                group_info['vars'] = group.variables_dict
-
             group_info = dict(filter(lambda x: bool(x[1]), group_info.items()))
             if group_info.keys() in ([], ['hosts']):
                 groups[group.name] = group_info.get('hosts', [])
             else:
                 groups[group.name] = group_info
+        if inventory.variables_dict:
+            groups['all'] = {
+                'vars': inventory.variables_dict,
+            }
         self.stdout.write(json.dumps(groups, indent=indent))
 
     def get_host(self, inventory, hostname, indent=None):

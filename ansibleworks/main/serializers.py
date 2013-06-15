@@ -174,15 +174,17 @@ class InventorySerializer(BaseSerializer):
 
     class Meta:
         model = Inventory
-        fields = BASE_FIELDS + ('organization', 'has_active_failures')
+        fields = BASE_FIELDS + ('organization', 'variables',
+                                'has_active_failures')
 
     def get_related(self, obj):
         res = super(InventorySerializer, self).get_related(obj)
         res.update(dict(
-            hosts        = reverse('main:inventory_hosts_list',           args=(obj.pk,)),
-            groups       = reverse('main:inventory_groups_list',          args=(obj.pk,)),
-            root_groups  = reverse('main:inventory_root_groups_list',     args=(obj.pk,)),
-            organization = reverse('main:organizations_detail', args=(obj.organization.pk,)),
+            hosts         = reverse('main:inventory_hosts_list',        args=(obj.pk,)),
+            groups        = reverse('main:inventory_groups_list',       args=(obj.pk,)),
+            root_groups   = reverse('main:inventory_root_groups_list',  args=(obj.pk,)),
+            variable_data = reverse('main:inventory_variable_detail',   args=(obj.pk,)),
+            organization  = reverse('main:organizations_detail',        args=(obj.organization.pk,)),
         ))
         return res
 
@@ -235,6 +237,12 @@ class BaseVariableDataSerializer(BaseSerializer):
     def from_native(self, data, files):
         data = {'variables': json.dumps(data)}
         return super(BaseVariableDataSerializer, self).from_native(data, files)
+
+class InventoryVariableDataSerializer(BaseVariableDataSerializer):
+
+    class Meta:
+        model = Inventory
+        fields = ('variables',)
 
 class HostVariableDataSerializer(BaseVariableDataSerializer):
 

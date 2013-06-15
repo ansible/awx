@@ -305,6 +305,30 @@ class InventoryTest(BaseTest):
         put = self.put(vdata1_url, data=vars_c, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(put, vars_c)
 
+        ###################################################
+        # VARIABLES -> INVENTORY
+        
+        vars_a = dict(asdf=9873, dog='lassie',  cat='heathcliff', unstructured=dict(a=[1,1,1],b=dict(x=1,y=2)))
+        vars_b = dict(asdf=2736, dog='benji',   cat='garfield',   unstructured=dict(a=[2,2,2],b=dict(x=3,y=4)))
+        vars_c = dict(asdf=7692, dog='buck',    cat='sylvester',  unstructured=dict(a=[3,3,3],b=dict(z=5)))
+         
+        vdata_url = "/api/v1/inventories/%s/variable_data/" % (self.inventory_a.pk)
+
+        # a super user can associate variable objects with inventory
+        got = self.get(vdata_url, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(got, {})
+        put = self.put(vdata_url, data=vars_a, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(put, vars_a)
+
+        # an org admin can associate variable objects with inventory
+        put = self.put(vdata_url, data=vars_b, expect=200, auth=self.get_normal_credentials())
+ 
+        # a normal user cannot associate variable objects with inventory
+        put = self.put(vdata_url, data=vars_b, expect=403, auth=self.get_nobody_credentials())
+
+        # a normal user with inventory edit permissions can associate variable objects with inventory
+        put = self.put(vdata_url, data=vars_c, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(put, vars_c)
 
         ####################################################
         # ADDING HOSTS TO GROUPS

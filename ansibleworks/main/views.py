@@ -847,6 +847,13 @@ class InventoryRootGroupsList(BaseSubList):
         all_ids = base.values_list('id', flat=True)
         return base.exclude(parents__pk__in = all_ids)
 
+class InventoryVariableDetail(BaseDetail):
+
+    model = Inventory
+    serializer_class = InventoryVariableDataSerializer
+    permission_classes = (CustomRbac,)
+    is_variable_data = True # Special flag for RBAC
+
 class HostsVariableDetail(BaseDetail):
 
     model = Host

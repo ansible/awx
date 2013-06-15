@@ -81,7 +81,8 @@ class InventoryAdmin(BaseModelAdmin):
     list_display = ('name', 'organization', 'description', 'active')
     list_filter = ('organization', 'active')
     fieldsets = (
-        (None, {'fields': (('name', 'active'), 'organization', 'description',)}),
+        (None, {'fields': (('name', 'active'), 'organization', 'description',
+                           'variables')}),
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit'), {'fields': ('created', 'created_by',)}),
     )

@@ -8,34 +8,18 @@ from django.db import models
 class Migration(SchemaMigration):
     '''
     Schema migration for AnsibleWorks 1.2-b2 release.
-    - Add has_active_failures field on Inventory, Group and Host models.
+    - Add variables field on Inventory model.
     '''
 
     def forwards(self, orm):
-        # Adding field 'Inventory.has_active_failures'
-        db.add_column(u'main_inventory', 'has_active_failures',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
-
-        # Adding field 'Host.has_active_failures'
-        db.add_column(u'main_host', 'has_active_failures',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
-
-        # Adding field 'Group.has_active_failures'
-        db.add_column(u'main_group', 'has_active_failures',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
+        # Adding field 'Inventory.variables'
+        db.add_column(u'main_inventory', 'variables',
+                      self.gf('django.db.models.fields.TextField')(default='', null=True, blank=True),
                       keep_default=False)
 
     def backwards(self, orm):
-        # Deleting field 'Inventory.has_active_failures'
-        db.delete_column(u'main_inventory', 'has_active_failures')
-
-        # Deleting field 'Host.has_active_failures'
-        db.delete_column(u'main_host', 'has_active_failures')
-
-        # Deleting field 'Group.has_active_failures'
-        db.delete_column(u'main_group', 'has_active_failures')
+        # Deleting field 'Inventory.variables'
+        db.delete_column(u'main_inventory', 'variables')
 
     models = {
         u'auth.group': {
@@ -128,7 +112,8 @@ class Migration(SchemaMigration):
             'has_active_failures': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
-            'organization': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'inventories'", 'to': "orm['main.Organization']"})
+            'organization': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'inventories'", 'to': "orm['main.Organization']"}),
+            'variables': ('django.db.models.fields.TextField', [], {'default': "''", 'null': 'True', 'blank': 'True'})
         },
         'main.job': {
             'Meta': {'object_name': 'Job'},

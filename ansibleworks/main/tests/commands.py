@@ -106,7 +106,8 @@ class AcomInventoryTest(BaseCommandTest):
         for n, organization in enumerate(self.organizations):
             inventory = Inventory.objects.create(name='inventory-%d' % n,
                                                  description='description for inventory %d' % n,
-                                                 organization=organization)
+                                                 organization=organization,
+                                                 variables=json.dumps({'n': n}) if n else '')
             self.inventories.append(inventory)
             hosts = []
             for x in xrange(10):
@@ -187,12 +188,15 @@ class AcomInventoryTest(BaseCommandTest):
         self.assertEqual(result, None)
         data = json.loads(stdout)
         groups = inventory.groups.filter(active=True)
-        groupnames = groups.values_list('name', flat=True)
+        groupnames = list(groups.values_list('name', flat=True)) + ['all']
         self.assertEqual(set(data.keys()), set(groupnames))
         # Groups for this inventory should have hosts, variable data, and one
         # parent/child relationship.
         for k,v in data.items():
             self.assertTrue(isinstance(v, dict))
+            if k == 'all':
+                self.assertEqual(v.get('vars', {}), inventory.variables_dict)
+                continue
             group = inventory.groups.get(active=True, name=k)
             hosts = group.hosts.filter(active=True)
             hostnames = hosts.values_list('name', flat=True)

@@ -171,10 +171,16 @@ class Inventory(CommonModel):
         unique_together = (("name", "organization"),)
 
     organization = models.ForeignKey(Organization, null=False, related_name='inventories')
+    variables = models.TextField(blank=True, default='', null=True)
     has_active_failures = models.BooleanField(default=False)
 
     def get_absolute_url(self):
         return reverse('main:inventory_detail', args=(self.pk,))
+
+    @property
+    def variables_dict(self):
+        # FIXME: Add YAML support.
+        return json.loads(self.variables or '{}')
 
     def update_has_active_failures(self):
         failed_hosts = self.hosts.filter(active=True, has_active_failures=True)
