@@ -114,6 +114,7 @@ job_events_urls = patterns('ansibleworks.main.views',
 
 v1_urls = patterns('ansibleworks.main.views',
     url(r'^$',              'api_v1_root_view'),
+    url(r'^config/$',       'api_v1_config_view'),
     url(r'^authtoken/$',    'auth_token_view'),
     url(r'^me/$',           'users_me_list'),
     url(r'^organizations/', include(organizations_urls)),

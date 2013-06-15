@@ -1,6 +1,10 @@
-import rest_framework.renderers
+# Copyright (c) 2013 AnsibleWorks, Inc.
+# All Rights Reserved.
 
-class BrowsableAPIRenderer(rest_framework.renderers.BrowsableAPIRenderer):
+# Django REST Framework
+from rest_framework import renderers
+
+class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
     '''
     Customizations to the default browsable API renderer.
     '''

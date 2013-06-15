@@ -23,22 +23,6 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-REST_FRAMEWORK = {
-    'FILTER_BACKEND': 'ansibleworks.main.custom_filters.CustomFilterBackend',
-    'DEFAULT_PAGINATION_SERIALIZER_CLASS': 'ansibleworks.main.serializers.PaginationSerializer',
-    'PAGINATE_BY': 25,
-    'PAGINATE_BY_PARAM': 'page_size',
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ),
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-        'ansibleworks.main.renderers.BrowsableAPIRenderer',
-    ),
-}
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -147,6 +131,22 @@ INSTALLED_APPS = (
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
+
+REST_FRAMEWORK = {
+    'FILTER_BACKEND': 'ansibleworks.main.custom_filters.CustomFilterBackend',
+    'DEFAULT_PAGINATION_SERIALIZER_CLASS': 'ansibleworks.main.pagination.PaginationSerializer',
+    'PAGINATE_BY': 25,
+    'PAGINATE_BY_PARAM': 'page_size',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'ansibleworks.main.renderers.BrowsableAPIRenderer',
+    ),
+}
 
 # Email address that error messages come from.
 SERVER_EMAIL = 'root@localhost'

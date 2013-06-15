@@ -4,10 +4,12 @@
 import datetime
 import json
 
+from django.conf import settings
 from django.contrib.auth.models import User as DjangoUser
 import django.test
 from django.test.client import Client
 from django.core.urlresolvers import reverse
+
 from ansibleworks.main.models import *
 from ansibleworks.main.tests.base import BaseTest
 
@@ -138,6 +140,30 @@ class ProjectsTest(BaseTest):
         self.assertEqual(len(project.playbooks), 1)
         write_test_file(project, 'tasks/blah.yml', TEST_PLAYBOOK)
         self.assertEqual(len(project.playbooks), 1)
+
+    def test_api_config(self):
+        # superuser can read all config data.
+        url = reverse('main:api_v1_config_view')
+        response = self.get(url, expect=200, auth=self.get_super_credentials())
+        self.assertTrue('project_base_dir' in response)
+        self.assertEqual(response['project_base_dir'], settings.PROJECTS_ROOT)
+        self.assertTrue('project_local_paths' in response)
+        self.assertEqual(set(response['project_local_paths']),
+                         set(Project.get_local_path_choices()))
+
+        # org admin can read config and will get project fields.
+        response = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertTrue('project_base_dir' in response)
+        self.assertTrue('project_local_paths' in response)
+
+        # regular user can read configuration, but won't have project fields.
+        response = self.get(url, expect=200, auth=self.get_nobody_credentials())
+        self.assertFalse('project_base_dir' in response)
+        self.assertFalse('project_local_paths' in response)
+
+        # anonymous/invalid user can't access config.
+        self.get(url, expect=401)
+        self.get(url, expect=401, auth=self.get_invalid_credentials())
 
     def test_mainline(self):
 

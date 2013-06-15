@@ -9,46 +9,14 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
 
-# Django REST framework
-from rest_framework import serializers, pagination
-from rest_framework.templatetags.rest_framework import replace_query_param
+# Django REST Framework
+from rest_framework import serializers
 
 # AnsibleWorks
 from ansibleworks.main.models import *
 
 BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created',
                'creation_date', 'name', 'description')
-
-class NextPageField(pagination.NextPageField):
-    ''' makes the pagination relative URL not full URL '''
-
-    def to_native(self, value):
-        if not value.has_next():
-            return None
-        page = value.next_page_number()
-        request = self.context.get('request')
-        url = request and request.get_full_path() or ''
-        return replace_query_param(url, self.page_field, page)
-
-class PreviousPageField(pagination.NextPageField):
-    ''' makes the pagination relative URL not full URL '''
-
-    def to_native(self, value):
-        if not value.has_previous():
-            return None
-        page = value.previous_page_number()
-        request = self.context.get('request')
-        url = request and request.get_full_path() or ''
-        return replace_query_param(url, self.page_field, page)
-
-class PaginationSerializer(pagination.BasePaginationSerializer):
-    '''
-    Custom pagination serializer to output only URL path (without host/port).
-    '''
-
-    count = serializers.Field(source='paginator.count')
-    next = NextPageField(source='*')
-    previous = PreviousPageField(source='*')
 
 # objects that if found we should add summary info for them
 SUMMARIZABLE_FKS = ( 
@@ -142,11 +110,10 @@ class OrganizationSerializer(BaseSerializer):
 class ProjectSerializer(BaseSerializer):
 
     playbooks = serializers.Field(source='playbooks')
-    local_path_choices = serializers.SerializerMethodField('get_local_path_choices')
 
     class Meta:
         model = Project
-        fields = BASE_FIELDS + ('local_path', 'local_path_choices')
+        fields = BASE_FIELDS + ('local_path',)
                                 # 'default_playbook', 'scm_type')
 
     def get_related(self, obj):
@@ -156,9 +123,6 @@ class ProjectSerializer(BaseSerializer):
             playbooks = reverse('main:projects_detail_playbooks', args=(obj.pk,)),
         ))
         return res
-
-    def get_local_path_choices(self, obj):
-        return Project.get_local_path_choices()
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
 

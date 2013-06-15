@@ -1,32 +1,33 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
-from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404
-from ansibleworks.main.models import *
-from django.contrib.auth.models import User
-from ansibleworks.main.serializers import *
-from ansibleworks.main.rbac import *
-from django.core.urlresolvers import reverse
-from rest_framework.exceptions import PermissionDenied
-from rest_framework import mixins
-from rest_framework import generics
-from rest_framework import permissions
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.settings import api_settings
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.views import APIView
-import exceptions
+# Python
 import datetime
 import re
 import sys
-import json as python_json
-from base_views import *
+
+# Django
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404, render_to_response
+from django.template import RequestContext
+
+# Django REST Framework
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.exceptions import PermissionDenied
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.settings import api_settings
+from rest_framework.views import APIView
+
+# AnsibleWorks
 from ansibleworks.main.access import *
+from ansibleworks.main.base_views import *
+from ansibleworks.main.models import *
+from ansibleworks.main.rbac import *
+from ansibleworks.main.serializers import *
 
 def handle_error(request, status=404):
     context = {}
@@ -93,17 +94,63 @@ class ApiV1RootView(APIView):
             jobs          = reverse('main:job_list'),
             authtoken     = reverse('main:auth_token_view'),
             me            = reverse('main:users_me_list'),
+            config        = reverse('main:api_v1_config_view'),
         )
+        return Response(data)
+
+class ApiV1ConfigView(APIView):
+    '''
+    Various sitewide configuration settings (some may only be visible to
+    superusers or organization admins):
+
+    * `project_base_dir`: Path on the server where projects and playbooks are \
+      stored.
+    * `project_local_paths`: List of directories beneath `project_base_dir` to
+      use when creating/editing a project.
+    * `time_zone`: The configured time zone for the server.
+    '''
+
+    permission_classes = (IsAuthenticated,)
+    view_name = 'Configuration'
+
+    def get(self, request, format=None):
+        '''Return various sitewide configuration settings.'''
+
+        data = dict(
+            time_zone = settings.TIME_ZONE,
+        )
+        if request.user.is_superuser or request.user.admin_of_organizations.filter(active=True).count():
+            data.update(dict(
+                project_base_dir = settings.PROJECTS_ROOT,
+                project_local_paths = Project.get_local_path_choices(),
+            ))
         return Response(data)
 
 class AuthTokenView(ObtainAuthToken):
     '''
-    POST username and password to obtain an auth token for subsequent requests.
+    POST username and password to this resource to obtain an authentication
+    token for subsequent requests.
+    
+    Example JSON to post (application/json):
+
+        {"username": "user", "password": "my pass"}
+
+    Example form data to post (application/x-www-form-urlencoded):
+
+        username=user&password=my%20pass
+
+    If the username and password are valid, the response should be:
+
+        {"token": "8f17825cf08a7efea124f2638f3896f6637f8745"}
+
+    Otherwise, the response will indicate the error that occurred.
+
+    For subsequent requests, pass the token via the HTTP request headers:
+
+        Authenticate: Token 8f17825cf08a7efea124f2638f3896f6637f8745
     '''
 
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
-    # FIXME: Show a better form for HTML view
-    # FIXME: How to make this view discoverable?
 
 class OrganizationsList(BaseList):
 
