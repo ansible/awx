@@ -3,16 +3,57 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
-import datetime
+import os, datetime, glob
 from setuptools import setup, find_packages
 
 from ansibleworks import __version__
 
 build_timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M')
 
+# Paths we'll use later
+etcpath = "/etc/ansibleworks"
+homedir = "/var/lib/ansibleworks"
+if os.path.exists("/etc/debian_version"):
+    webconfig  = "/etc/apache2/conf.d"
+else:
+    webconfig  = "/etc/httpd/conf.d"
+
+#####################################################################
+# Helper Functions
+
+def explode_glob_path(path):
+    """Take a glob and hand back the full recursive expansion,
+    ignoring links.
+    """
+
+    result = []
+    includes = glob.glob(path)
+    for item in includes:
+        if os.path.isdir(item) and not os.path.islink(item):
+            result.extend(explode_glob_path(os.path.join(item, "*")))
+        else:
+            result.append(item)
+    return result
+
+
+def proc_data_files(data_files):
+    """Because data_files doesn't natively support globs...
+    let's add them.
+    """
+
+    result = []
+    for dir,files in data_files:
+        includes = []
+        for item in files:
+            includes.extend(explode_glob_path(item))
+        result.append((dir, includes))
+    return result
+
+#####################################################################
+
 setup(
     name='ansibleworks',
-    version=__version__,
+    version=__version__.split("-")[0],
     author='AnsibleWorks, Inc.',
     author_email='support@ansibleworks.com',
     description='AnsibleWorks API, UI and Task Engine',
@@ -57,6 +98,14 @@ setup(
             'ansibleworks-manage = ansibleworks:manage',
         ],
     },
+    data_files = proc_data_files([
+            ("%s" % homedir,        ["ansibleworks/wsgi.py",
+                                     "ansibleworks/static/favicon.ico",
+                                    ]),
+            ("%s" % etcpath,        ["config/settings.py"]),
+            ("%s" % webconfig,      ["config/ansibleworks.conf"]),
+        ]
+    ),
     options={
         'egg_info': {
             'tag_build': '-dev%s' % build_timestamp,
@@ -67,3 +116,4 @@ setup(
         },
     },
 )
+

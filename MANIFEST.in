@@ -4,6 +4,7 @@ recursive-include ansibleworks/templates *.html
 recursive-include ansibleworks/ui *.html *.js
 recursive-include ansibleworks/ui/static *.css *.ico *.png *.gif *.jpg
 recursive-include ansibleworks/ui/static *.eot *.svg *.ttf *.woff *.otf
+recursive-include config *
 recursive-exclude ansibleworks/settings local_settings.py
 include *.py *.txt *.md
 include MANIFEST.in

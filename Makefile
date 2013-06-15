@@ -1,7 +1,9 @@
-RELEASE = ansibleworks-1.2b2
+PYTHON=python
+SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
+RELEASE=ansibleworks-1.2b2
 
 clean:
-	rm -rf build *.egg-info
+	rm -rf build rpm-build *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
 
 rebase:
@@ -93,3 +95,19 @@ release_ball: clean
 release_clean:
 	-(rm *.tar)
 	-(rm -rf ($RELEASE))
+
+sdist: clean
+	$(PYTHON) setup.py release_build
+
+rpm: sdist
+	@mkdir -p rpm-build
+	@cp dist/*.gz rpm-build/
+	@rpmbuild --define "_topdir %(pwd)/rpm-build" \
+	--define "_builddir %{_topdir}" \
+	--define "_rpmdir %{_topdir}" \
+	--define "_srcrpmdir %{_topdir}" \
+	--define "_specdir %{_topdir}" \
+	--define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
+	--define "_sourcedir  %{_topdir}" \
+	-ba packaging/rpm/ansibleworks.spec
+
