@@ -422,7 +422,7 @@ class ProjectsTest(BaseTest):
         self.get(team_creds, expect=403, auth=self.get_nobody_credentials())
 
         # Check /api/v1/credentials (GET)
-        url = reverse('main:credentials_list')
+        url = reverse('main:credential_list')
         with self.current_user(self.super_django_user):
             self.options(url)
             self.head(url)

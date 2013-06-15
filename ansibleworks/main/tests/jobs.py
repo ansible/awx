@@ -558,7 +558,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_get_job_template_job_list(self):
         jt = self.jt_eng_run
-        url = reverse('main:job_template_job_list', args=(jt.pk,))
+        url = reverse('main:job_template_jobs_list', args=(jt.pk,))
 
         # Test with no auth and with invalid login.
         self._test_invalid_creds(url)
@@ -576,7 +576,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_post_job_template_job_list(self):
         jt = self.jt_eng_run
-        url = reverse('main:job_template_job_list', args=(jt.pk,))
+        url = reverse('main:job_template_jobs_list', args=(jt.pk,))
         data = dict(
             name='new job from template',
             credential=self.cred_bob.pk,
@@ -882,7 +882,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
             self.assertTrue(response['result_stdout'])
 
         # Test job events for completed job.
-        url = reverse('main:job_job_event_list', args=(job.pk,))
+        url = reverse('main:job_job_events_list', args=(job.pk,))
         with self.current_user(self.user_sue):
             response = self.get(url)
             qs = job.job_events.all()
@@ -901,7 +901,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
         # Also test job event list for each host.
         for host in Host.objects.filter(pk__in=host_ids):
-            url = reverse('main:host_job_event_list', args=(host.pk,))
+            url = reverse('main:host_job_events_list', args=(host.pk,))
             with self.current_user(self.user_sue):
                 response = self.get(url)
                 qs = host.job_events.all()
@@ -911,7 +911,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
         # Test job event list for groups.
         for group in self.inv_ops_east.groups.all():
-            url = reverse('main:group_job_event_list', args=(group.pk,))
+            url = reverse('main:group_job_events_list', args=(group.pk,))
             with self.current_user(self.user_sue):
                 response = self.get(url)
                 qs = group.job_events.all()
@@ -929,7 +929,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
             self.check_list_ids(response, qs)
 
         # Test job host summaries for completed job.
-        url = reverse('main:job_job_host_summary_list', args=(job.pk,))
+        url = reverse('main:job_job_host_summaries_list', args=(job.pk,))
         with self.current_user(self.user_sue):
             response = self.get(url)
             qs = job.job_host_summaries.all()
@@ -950,7 +950,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
         # Test job host summaries for each host.
         for host in Host.objects.filter(pk__in=host_ids):
-            url = reverse('main:host_job_host_summary_list', args=(host.pk,))
+            url = reverse('main:host_job_host_summaries_list', args=(host.pk,))
             with self.current_user(self.user_sue):
                 response = self.get(url)
                 qs = host.job_host_summaries.all()
@@ -960,7 +960,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
 
         # Test job host summaries for groups.
         for group in self.inv_ops_east.groups.all():
-            url = reverse('main:group_job_host_summary_list', args=(group.pk,))
+            url = reverse('main:group_job_host_summaries_list', args=(group.pk,))
             with self.current_user(self.user_sue):
                 response = self.get(url)
                 qs = group.job_host_summaries.all()

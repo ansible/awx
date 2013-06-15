@@ -82,18 +82,18 @@ class ApiV1RootView(APIView):
         ''' list top level resources '''
 
         data = dict(
-            organizations = reverse('main:organizations_list'),
-            users         = reverse('main:users_list'),
-            projects      = reverse('main:projects_list'),
-            teams         = reverse('main:teams_list'),
-            credentials   = reverse('main:credentials_list'),
+            organizations = reverse('main:organization_list'),
+            users         = reverse('main:user_list'),
+            projects      = reverse('main:project_list'),
+            teams         = reverse('main:team_list'),
+            credentials   = reverse('main:credential_list'),
             inventory     = reverse('main:inventory_list'),
-            groups        = reverse('main:groups_list'),
-            hosts         = reverse('main:hosts_list'),
+            groups        = reverse('main:group_list'),
+            hosts         = reverse('main:host_list'),
             job_templates = reverse('main:job_template_list'),
             jobs          = reverse('main:job_list'),
             authtoken     = reverse('main:auth_token_view'),
-            me            = reverse('main:users_me_list'),
+            me            = reverse('main:user_me_list'),
             config        = reverse('main:api_v1_config_view'),
         )
         return Response(data)
@@ -152,7 +152,7 @@ class AuthTokenView(ObtainAuthToken):
 
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
-class OrganizationsList(BaseList):
+class OrganizationList(BaseList):
 
     model = Organization
     serializer_class = OrganizationSerializer
@@ -175,13 +175,13 @@ class OrganizationsList(BaseList):
             users__in = [ self.request.user ]
         ).distinct()
 
-class OrganizationsDetail(BaseDetail):
+class OrganizationDetail(BaseDetail):
 
     model = Organization
     serializer_class = OrganizationSerializer
     permission_classes = (CustomRbac,)
 
-class OrganizationsInventoriesList(BaseSubList):
+class OrganizationInventoriesList(BaseSubList):
 
     model = Inventory
     serializer_class = InventorySerializer
@@ -198,7 +198,7 @@ class OrganizationsInventoriesList(BaseSubList):
             raise PermissionDenied()
         return Inventory.objects.filter(organization__in=[organization])
 
-class OrganizationsUsersList(BaseSubList):
+class OrganizationUsersList(BaseSubList):
 
     model = User
     serializer_class = UserSerializer
@@ -216,7 +216,7 @@ class OrganizationsUsersList(BaseSubList):
             raise PermissionDenied()
         return User.objects.filter(organizations__in = [ organization ])
 
-class OrganizationsAdminsList(BaseSubList):
+class OrganizationAdminsList(BaseSubList):
 
     model = User
     serializer_class = UserSerializer
@@ -234,7 +234,7 @@ class OrganizationsAdminsList(BaseSubList):
             raise PermissionDenied()
         return User.objects.filter(admin_of_organizations__in = [ organization ])
 
-class OrganizationsProjectsList(BaseSubList):
+class OrganizationProjectsList(BaseSubList):
 
     model = Project
     serializer_class = ProjectSerializer
@@ -252,7 +252,7 @@ class OrganizationsProjectsList(BaseSubList):
             raise PermissionDenied()
         return Project.objects.filter(organizations__in = [ organization ])
 
-class OrganizationsTeamsList(BaseSubList):
+class OrganizationTeamsList(BaseSubList):
 
     model = Team
     serializer_class = TeamSerializer
@@ -271,7 +271,7 @@ class OrganizationsTeamsList(BaseSubList):
             raise PermissionDenied()
         return Team.objects.filter(organization = organization)
 
-class TeamsList(BaseList):
+class TeamList(BaseList):
 
     model = Team
     serializer_class = TeamSerializer
@@ -294,13 +294,13 @@ class TeamsList(BaseList):
             users__in = [ self.request.user ]
         ).distinct()
 
-class TeamsDetail(BaseDetail):
+class TeamDetail(BaseDetail):
 
     model = Team
     serializer_class = TeamSerializer
     permission_classes = (CustomRbac,)
 
-class TeamsUsersList(BaseSubList):
+class TeamUsersList(BaseSubList):
 
     model = User
     serializer_class = UserSerializer
@@ -323,7 +323,7 @@ class TeamsUsersList(BaseSubList):
             return base
         raise PermissionDenied()
 
-class TeamsPermissionsList(BaseSubList):
+class TeamPermissionsList(BaseSubList):
 
     model = Permission
     serializer_class = PermissionSerializer
@@ -345,7 +345,7 @@ class TeamsPermissionsList(BaseSubList):
         raise PermissionDenied()
 
 
-class TeamsProjectsList(BaseSubList):
+class TeamProjectsList(BaseSubList):
 
     model = Project
     serializer_class = ProjectSerializer
@@ -369,7 +369,7 @@ class TeamsProjectsList(BaseSubList):
         raise PermissionDenied()
 
 
-class TeamsCredentialsList(BaseSubList):
+class TeamCredentialsList(BaseSubList):
 
     model = Credential
     serializer_class = CredentialSerializer
@@ -392,7 +392,7 @@ class TeamsCredentialsList(BaseSubList):
         return project_credentials.distinct()
 
 
-class ProjectsList(BaseList):
+class ProjectList(BaseList):
 
     model = Project
     serializer_class = ProjectSerializer
@@ -417,19 +417,19 @@ class ProjectsList(BaseList):
             organizations__in = my_orgs
         ).distinct()
 
-class ProjectsDetail(BaseDetail):
+class ProjectDetail(BaseDetail):
 
     model = Project
     serializer_class = ProjectSerializer
     permission_classes = (CustomRbac,)
 
-class ProjectsDetailPlaybooks(generics.RetrieveAPIView):
+class ProjectDetailPlaybooks(generics.RetrieveAPIView):
 
     model = Project
     serializer_class = ProjectPlaybooksSerializer
     permission_classes = (CustomRbac,)
 
-class ProjectsOrganizationsList(BaseSubList):
+class ProjectOrganizationsList(BaseSubList):
 
     model = Organization
     serializer_class = OrganizationSerializer
@@ -445,7 +445,7 @@ class ProjectsOrganizationsList(BaseSubList):
             raise PermissionDenied()
         return Organization.objects.filter(projects__in = [ project ])
 
-class UsersList(BaseList):
+class UserList(BaseList):
 
     model = User
     serializer_class = UserSerializer
@@ -454,7 +454,7 @@ class UsersList(BaseList):
 
     def post(self, request, *args, **kwargs):
         password = request.DATA.get('password', None)
-        result = super(UsersList, self).post(request, *args, **kwargs)
+        result = super(UserList, self).post(request, *args, **kwargs)
         if password:
             pk = result.data['id']
             user = User.objects.get(pk=pk)
@@ -472,7 +472,7 @@ class UsersList(BaseList):
         same_team = base.filter(teams__in = self.request.user.teams.all()).distinct()
         return mine | admin_of | same_team
 
-class UsersMeList(BaseList):
+class UserMeList(BaseList):
 
     model = User
     serializer_class = UserSerializer
@@ -488,7 +488,7 @@ class UsersMeList(BaseList):
         ''' a quick way to find my user record '''
         return User.objects.filter(pk=self.request.user.pk)
 
-class UsersTeamsList(BaseSubList):
+class UserTeamsList(BaseSubList):
 
     model = Team
     serializer_class = TeamSerializer
@@ -505,7 +505,7 @@ class UsersTeamsList(BaseSubList):
             raise PermissionDenied()
         return Team.objects.filter(users__in = [ user ])
 
-class UsersPermissionsList(BaseSubList):
+class UserPermissionsList(BaseSubList):
 
     model = Permission
     serializer_class = PermissionSerializer
@@ -523,7 +523,7 @@ class UsersPermissionsList(BaseSubList):
             raise PermissionDenied()
         return Permission.objects.filter(user=user)
 
-class UsersProjectsList(BaseSubList):
+class UserProjectsList(BaseSubList):
 
     model = Project
     serializer_class = ProjectSerializer
@@ -541,7 +541,7 @@ class UsersProjectsList(BaseSubList):
         teams = user.teams.all()
         return Project.objects.filter(teams__in = teams)
 
-class UsersCredentialsList(BaseSubList):
+class UserCredentialsList(BaseSubList):
 
     model = Credential
     serializer_class = CredentialSerializer
@@ -562,7 +562,7 @@ class UsersCredentialsList(BaseSubList):
         )
         return user.credentials.distinct() | project_credentials.distinct()
 
-class UsersOrganizationsList(BaseSubList):
+class UserOrganizationsList(BaseSubList):
 
     model = Organization
     serializer_class = OrganizationSerializer
@@ -579,7 +579,7 @@ class UsersOrganizationsList(BaseSubList):
             raise PermissionDenied()
         return Organization.objects.filter(users__in = [ user ])
 
-class UsersAdminOrganizationsList(BaseSubList):
+class UserAdminOfOrganizationsList(BaseSubList):
 
     model = Organization
     serializer_class = OrganizationSerializer
@@ -596,7 +596,7 @@ class UsersAdminOrganizationsList(BaseSubList):
             raise PermissionDenied()
         return Organization.objects.filter(admins__in = [ user ])
 
-class UsersDetail(BaseDetail):
+class UserDetail(BaseDetail):
 
     model = User
     serializer_class = UserSerializer
@@ -612,7 +612,7 @@ class UsersDetail(BaseDetail):
             obj.save()
             request.DATA.pop('password')
 
-class CredentialsList(BaseList):
+class CredentialList(BaseList):
 
     model = Credential
     serializer_class = CredentialSerializer
@@ -622,13 +622,13 @@ class CredentialsList(BaseList):
     def get_queryset(self):
         return get_user_queryset(self.request.user, self.model)
 
-class CredentialsDetail(BaseDetail):
+class CredentialDetail(BaseDetail):
 
     model = Credential
     serializer_class = CredentialSerializer
     permission_classes = (CustomRbac,)
 
-class PermissionsDetail(BaseDetail):
+class PermissionDetail(BaseDetail):
 
     model = Permission
     serializer_class = PermissionSerializer
@@ -666,7 +666,7 @@ class InventoryDetail(BaseDetail):
     serializer_class = InventorySerializer
     permission_classes = (CustomRbac,)
 
-class HostsList(BaseList):
+class HostList(BaseList):
 
     model = Host
     serializer_class = HostSerializer
@@ -694,7 +694,7 @@ class HostsList(BaseList):
         ).distinct()
         return admin_of | has_user_perms | has_team_perms
 
-class HostsDetail(BaseDetail):
+class HostDetail(BaseDetail):
 
     model = Host
     serializer_class = HostSerializer
@@ -721,7 +721,71 @@ class InventoryHostsList(BaseSubList):
         # FIXME: verify that you can can_read permission on the inventory is required
         return base.all()
 
-class GroupsList(BaseList):
+class HostGroupsList(BaseSubList):
+    ''' the list of groups a host is directly a member of '''
+
+    model = Group
+    serializer_class = GroupSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Host
+    relationship = 'groups'
+    postable = True
+    inject_primary_key_on_post_as = 'host'
+    filter_fields = ('name',)
+
+    def get_queryset(self):
+
+        parent = Host.objects.get(pk=self.kwargs['pk'])
+
+        # FIXME: verify read permissions on this object are still required at a higher level
+
+        base = parent.groups
+        if self.request.user.is_superuser:
+            return base.all()
+        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
+        has_user_perms = base.filter(
+            inventory__permissions__user__in = [ self.request.user ],
+            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        has_team_perms = base.filter(
+            inventory__permissions__team__in = self.request.user.teams.all(),
+            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        return admin_of | has_user_perms | has_team_perms
+
+class HostAllGroupsList(BaseSubList):
+    ''' the list of all groups of which the host is directly or indirectly a member '''
+
+    model = Group
+    serializer_class = GroupSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Host
+    relationship = 'groups'
+    filter_fields = ('name',)
+
+    def get_queryset(self):
+
+        parent = Host.objects.get(pk=self.kwargs['pk'])
+
+        # FIXME: verify read permissions on this object are still required at a higher level
+
+        base = parent.all_groups
+
+        if self.request.user.is_superuser:
+            return base.all()
+
+        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
+        has_user_perms = base.filter(
+            inventory__permissions__user__in = [ self.request.user ],
+            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        has_team_perms = base.filter(
+            inventory__permissions__team__in = self.request.user.teams.all(),
+            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
+        ).distinct()
+        return admin_of | has_user_perms | has_team_perms
+
+class GroupList(BaseList):
 
     model = Group
     serializer_class = GroupSerializer
@@ -749,7 +813,7 @@ class GroupsList(BaseList):
         ).distinct()
         return admin_of | has_user_perms | has_team_perms
 
-class GroupsChildrenList(BaseSubList):
+class GroupChildrenList(BaseSubList):
 
     model = Group
     serializer_class = GroupSerializer
@@ -782,7 +846,7 @@ class GroupsChildrenList(BaseSubList):
         ).distinct()
         return admin_of | has_user_perms | has_team_perms
 
-class GroupsHostsList(BaseSubList):
+class GroupHostsList(BaseSubList):
     ''' the list of hosts directly below a group '''
 
     model = Host
@@ -815,7 +879,7 @@ class GroupsHostsList(BaseSubList):
         return admin_of | has_user_perms | has_team_perms
 
 
-class GroupsAllHostsList(BaseSubList):
+class GroupAllHostsList(BaseSubList):
     ''' the list of all hosts below a group, even including subgroups '''
 
     model = Host
@@ -848,7 +912,7 @@ class GroupsAllHostsList(BaseSubList):
         return admin_of | has_user_perms | has_team_perms
 
 
-class GroupsDetail(BaseDetail):
+class GroupDetail(BaseDetail):
 
     model = Group
     serializer_class = GroupSerializer
@@ -901,14 +965,14 @@ class InventoryVariableDetail(BaseDetail):
     permission_classes = (CustomRbac,)
     is_variable_data = True # Special flag for RBAC
 
-class HostsVariableDetail(BaseDetail):
+class HostVariableDetail(BaseDetail):
 
     model = Host
     serializer_class = HostVariableDataSerializer
     permission_classes = (CustomRbac,)
     is_variable_data = True # Special flag for RBAC
 
-class GroupsVariableDetail(BaseDetail):
+class GroupVariableDetail(BaseDetail):
 
     model = Group
     serializer_class = GroupVariableDataSerializer
@@ -931,7 +995,7 @@ class JobTemplateDetail(BaseDetail):
     serializer_class = JobTemplateSerializer
     permission_classes = (CustomRbac,)
 
-class JobTemplateJobList(BaseSubList):
+class JobTemplateJobsList(BaseSubList):
 
     model = Job
     serializer_class = JobSerializer
@@ -1019,7 +1083,7 @@ class JobCancel(generics.RetrieveAPIView):
         else:
             return Response(status=405)
 
-class BaseJobHostSummaryList(generics.ListAPIView):
+class BaseJobHostSummariesList(generics.ListAPIView):
 
     model = JobHostSummary
     serializer_class = JobHostSummarySerializer
@@ -1034,15 +1098,15 @@ class BaseJobHostSummaryList(generics.ListAPIView):
         parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
         return getattr(parent_obj, self.relationship)
 
-class HostJobHostSummaryList(BaseJobHostSummaryList):
+class HostJobHostSummariesList(BaseJobHostSummariesList):
 
     parent_model = Host
 
-class GroupJobHostSummaryList(BaseJobHostSummaryList):
+class GroupJobHostSummariesList(BaseJobHostSummariesList):
 
     parent_model = Group
 
-class JobJobHostSummaryList(BaseJobHostSummaryList):
+class JobJobHostSummariesList(BaseJobHostSummariesList):
 
     parent_model = Job
 
@@ -1069,7 +1133,7 @@ class JobEventDetail(generics.RetrieveAPIView):
     serializer_class = JobEventSerializer
     permission_classes = (CustomRbac,)
 
-class BaseJobEventList(generics.ListAPIView):
+class BaseJobEventsList(generics.ListAPIView):
 
     model = JobEvent
     serializer_class = JobEventSerializer
@@ -1082,15 +1146,15 @@ class BaseJobEventList(generics.ListAPIView):
         parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
         return getattr(parent_obj, self.relationship)
 
-class HostJobEventList(BaseJobEventList):
+class HostJobEventsList(BaseJobEventsList):
 
     parent_model = Host
 
-class GroupJobEventList(BaseJobEventList):
+class GroupJobEventsList(BaseJobEventsList):
 
     parent_model = Group
 
-class JobJobEventList(BaseJobEventList):
+class JobJobEventsList(BaseJobEventsList):
 
     parent_model = Job
 

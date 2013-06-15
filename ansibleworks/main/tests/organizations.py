@@ -52,7 +52,7 @@ class OrganizationsTest(BaseTest):
         self.organizations[1].admins.add(self.normal_django_user)
 
     def test_get_list(self):
-        url = reverse('main:organizations_list')
+        url = reverse('main:organization_list')
 
         # no credentials == 401
         self.options(url, expect=401)

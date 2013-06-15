@@ -142,9 +142,9 @@ class BaseSubList(BaseList):
                         if self.__class__.parent_model == Organization:
                              organization = Organization.objects.get(pk=data[inject_primary_key])
                              import ansibleworks.main.views
-                             if self.__class__ == ansibleworks.main.views.OrganizationsUsersList:
+                             if self.__class__ == ansibleworks.main.views.OrganizationUsersList:
                                  organization.users.add(obj)
-                             elif self.__class__ == ansibleworks.main.views.OrganizationsAdminsList:
+                             elif self.__class__ == ansibleworks.main.views.OrganizationAdminsList:
                                  organization.admins.add(obj)
 
                     else:

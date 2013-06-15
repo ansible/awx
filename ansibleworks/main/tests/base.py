@@ -162,8 +162,8 @@ class BaseTestMixin(object):
         else:
             response = method(url)
 
-        if response.status_code == 500 and expect != 500:
-            assert False, "Failed: %s" % response.content
+        self.assertFalse(response.status_code == 500 and expect != 500,
+                         'Failed (500): %s' % response.content)
         if expect is not None:
             assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, response.content)
         if method_name == 'head':

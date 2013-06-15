@@ -155,7 +155,7 @@ class Organization(CommonModel):
     projects = models.ManyToManyField('Project', blank=True, related_name='organizations')
 
     def get_absolute_url(self):
-        return reverse('main:organizations_detail', args=(self.pk,))
+        return reverse('main:organization_detail', args=(self.pk,))
 
     def __unicode__(self):
         return self.name
@@ -206,7 +206,7 @@ class Host(CommonModelNameNotUnique):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('main:hosts_detail', args=(self.pk,))
+        return reverse('main:host_detail', args=(self.pk,))
 
     def update_has_active_failures(self, update_groups=True,
                                    update_inventory=True):
@@ -259,7 +259,7 @@ class Group(CommonModelNameNotUnique):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('main:groups_detail', args=(self.pk,))
+        return reverse('main:group_detail', args=(self.pk,))
 
     def update_has_active_failures(self):
         failed_hosts = self.all_hosts.filter(active=True,
@@ -398,7 +398,7 @@ class Credential(CommonModelNameNotUnique):
         return self.sudo_password == 'ASK'
 
     def get_absolute_url(self):
-        return reverse('main:credentials_detail', args=(self.pk,))
+        return reverse('main:credential_detail', args=(self.pk,))
 
 class Team(CommonModel):
     '''
@@ -413,7 +413,7 @@ class Team(CommonModel):
     organization    = models.ForeignKey('Organization', blank=False, null=True, on_delete=SET_NULL, related_name='teams')
 
     def get_absolute_url(self):
-        return reverse('main:teams_detail', args=(self.pk,))
+        return reverse('main:team_detail', args=(self.pk,))
 
 class Project(CommonModel):
     '''
@@ -449,7 +449,7 @@ class Project(CommonModel):
     #default_playbook = models.CharField(max_length=1024)
 
     def get_absolute_url(self):
-        return reverse('main:projects_detail', args=(self.pk,))
+        return reverse('main:project_detail', args=(self.pk,))
 
     def get_project_path(self):
         local_path = os.path.basename(self.local_path)
@@ -531,7 +531,7 @@ class Permission(CommonModelNameNotUnique):
         ))
 
     def get_absolute_url(self):
-        return reverse('main:permissions_detail', args=(self.pk,))
+        return reverse('main:permission_detail', args=(self.pk,))
 
 # TODO: other job types (later)
 
