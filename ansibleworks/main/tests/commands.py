@@ -215,8 +215,7 @@ class AcomInventoryTest(BaseCommandTest):
         # Host without variable data.
         inventory = self.inventories[0]
         self.assertTrue(inventory.active)
-        host = inventory.hosts.all()[2]
-        self.assertTrue(host.active)
+        host = inventory.hosts.filter(active=True)[2]
         os.environ['ACOM_INVENTORY_ID'] = str(inventory.pk)
         result, stdout, stderr = self.run_command('acom_inventory',
                                                   host=host.name)
@@ -226,8 +225,7 @@ class AcomInventoryTest(BaseCommandTest):
         # Host with variable data.
         inventory = self.inventories[1]
         self.assertTrue(inventory.active)
-        host = inventory.hosts.all()[4]
-        self.assertTrue(host.active)
+        host = inventory.hosts.filter(active=True)[4]
         os.environ['ACOM_INVENTORY_ID'] = str(inventory.pk)
         result, stdout, stderr = self.run_command('acom_inventory',
                                                   host=host.name)

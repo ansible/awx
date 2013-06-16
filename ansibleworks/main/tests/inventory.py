@@ -5,8 +5,7 @@ import datetime
 import json
 
 from django.contrib.auth.models import User as DjangoUser
-import django.test
-from django.test.client import Client
+from django.core.urlresolvers import reverse
 from ansibleworks.main.models import *
 from ansibleworks.main.tests.base import BaseTest
 
@@ -47,12 +46,11 @@ class InventoryTest(BaseTest):
     def test_main_line(self):
        
         # some basic URLs... 
-        inventories   = '/api/v1/inventories/'
-        inventories_1 = '/api/v1/inventories/1/'
-        inventories_2 = '/api/v1/inventories/2/'
-        hosts         = '/api/v1/hosts/'
-        groups        = '/api/v1/groups/'
-        variables     = '/api/v1/variables/'
+        inventories   = reverse('main:inventory_list')
+        inventories_1 = reverse('main:inventory_detail', args=(self.inventory_a.pk,))
+        inventories_2 = reverse('main:inventory_detail', args=(self.inventory_b.pk,))
+        hosts         = reverse('main:host_list')
+        groups        = reverse('main:group_list')
 
         # a super user can list inventories
         data = self.get(inventories, expect=200, auth=self.get_super_credentials())
@@ -88,22 +86,23 @@ class InventoryTest(BaseTest):
         data = self.get(inventories_2, expect=403, auth=self.get_nobody_credentials())
 
         # a super user can create inventory
-        new_inv_1 = dict(name='inventory-c', description='baz', organization=1)
+        new_inv_1 = dict(name='inventory-c', description='baz', organization=self.organizations[0].pk)
+        new_id = max(Inventory.objects.values_list('pk', flat=True)) + 1
         data = self.post(inventories, data=new_inv_1, expect=201, auth=self.get_super_credentials())
-        self.assertEquals(data['id'], 3)
+        self.assertEquals(data['id'], new_id)
 
         # an org admin of any org can create inventory, if it is one of his organizations
         # the organization parameter is required!
         new_inv_incomplete = dict(name='inventory-d', description='baz')
         data = self.post(inventories, data=new_inv_incomplete, expect=400,  auth=self.get_normal_credentials())
-        new_inv_not_my_org = dict(name='inventory-d', description='baz', organization=3)
+        new_inv_not_my_org = dict(name='inventory-d', description='baz', organization=self.organizations[2].pk)
 
         data = self.post(inventories, data=new_inv_not_my_org, expect=403,  auth=self.get_normal_credentials())
-        new_inv_my_org = dict(name='inventory-d', description='baz', organization=1)
+        new_inv_my_org = dict(name='inventory-d', description='baz', organization=self.organizations[0].pk)
         data = self.post(inventories, data=new_inv_my_org, expect=201, auth=self.get_normal_credentials())
 
         # a regular user cannot create inventory
-        new_inv_denied = dict(name='inventory-e', description='glorp', organization=1)
+        new_inv_denied = dict(name='inventory-e', description='glorp', organization=self.organizations[0].pk)
         data = self.post(inventories, data=new_inv_denied, expect=403, auth=self.get_other_credentials())
 
         # a super user can add hosts (but inventory ID is required)
@@ -146,18 +145,18 @@ class InventoryTest(BaseTest):
         new_group_c   = dict(name='web4', inventory=inv.pk)
         new_group_d   = dict(name='web5', inventory=inv.pk)
         new_group_e   = dict(name='web6', inventory=inv.pk)
-        groups = '/api/v1/groups/'
+        groups = reverse('main:group_list')
 
         data0 = self.post(groups, data=invalid, expect=400, auth=self.get_super_credentials())
         data0 = self.post(groups, data=new_group_a, expect=201, auth=self.get_super_credentials())
 
-        # an org admin can add hosts
+        # an org admin can add groups
         group_data1 = self.post(groups, data=new_group_e, expect=201, auth=self.get_normal_credentials())
 
-        # a normal user cannot add hosts
+        # a normal user cannot add groups
         group_data2 = self.post(groups, data=new_group_b, expect=403, auth=self.get_nobody_credentials())
 
-        # a normal user with inventory edit permissions (on any inventory) can create hosts
+        # a normal user with inventory edit permissions (on any inventory) can create groups
         # already done!
         #edit_perm = Permission.objects.create(
         #     user            = self.other_django_user,
@@ -172,7 +171,7 @@ class InventoryTest(BaseTest):
         #################################################
         # HOSTS->inventories POST via subcollection
        
-        url = '/api/v1/inventories/1/hosts/'
+        url = reverse('main:inventory_hosts_list', args=(self.inventory_a.pk,))
         new_host_a = dict(name='web100.example.com')
         new_host_b = dict(name='web101.example.com')
         new_host_c = dict(name='web102.example.com')
@@ -189,7 +188,7 @@ class InventoryTest(BaseTest):
         added_by_collection_c = self.post(url, data=new_host_c, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with edit permission on the inventory can associate hosts with inventories
-        url5 = '/api/v1/inventories/5/hosts/'
+        url5 = reverse('main:inventory_hosts_list', args=(inv.pk,))
         added_by_collection_d = self.post(url5, data=new_host_d, expect=201, auth=self.get_other_credentials())
         got = self.get(url5, expect=200, auth=self.get_other_credentials())
         self.assertEquals(got['count'], 4)
@@ -204,9 +203,9 @@ class InventoryTest(BaseTest):
         ##################################################
         # GROUPS->inventories POST via subcollection
         
-        root_groups = '/api/v1/inventories/1/root_groups/'
-        
-        url = '/api/v1/inventories/1/groups/'
+        root_groups = reverse('main:inventory_root_groups_list', args=(self.inventory_a.pk,))
+
+        url = reverse('main:inventory_groups_list', args=(self.inventory_a.pk,))
         new_group_a = dict(name='web100')
         new_group_b = dict(name='web101')
         new_group_c = dict(name='web102')
@@ -223,7 +222,7 @@ class InventoryTest(BaseTest):
         added_by_collection = self.post(url, data=new_group_c, expect=403, auth=self.get_nobody_credentials())
 
         # a normal user with edit permissions on the inventory can associate groups with inventories
-        url5 = '/api/v1/inventories/5/groups/'
+        url5 = reverse('main:inventory_groups_list', args=(inv.pk,))
         added_by_collection = self.post(url5, data=new_group_d, expect=201, auth=self.get_other_credentials())
         # make sure duplicates give 400s
         self.post(url5, data=new_group_d, expect=400, auth=self.get_other_credentials())
@@ -248,7 +247,8 @@ class InventoryTest(BaseTest):
         vars_c = dict(asdf=5555, dog='mouse', cat='mogwai', unstructured=dict(a=[3,0,3],b=dict(z=2600)))
 
         # attempting to get a variable object creates it, even though it does not already exist
-        vdata_url = "/api/v1/hosts/%s/variable_data/" % (added_by_collection_a['id'])
+        vdata_url = reverse('main:host_variable_detail', args=(added_by_collection_a['id'],))
+        
         got = self.get(vdata_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(got, {})
 
@@ -266,17 +266,10 @@ class InventoryTest(BaseTest):
         # a normal user cannot edit variable objects
         self.put(vdata_url, data=vars_a, expect=403, auth=self.get_nobody_credentials())
 
-        # a normal user with inventory write permissions can edit variable objects
+        # a normal user with inventory write permissions can edit variable objects... FIXME
         #vdata_url = "/api/v1/hosts/1/variable_data/" 
         #got = self.put(vdata_url, data=vars_b, expect=200, auth=self.get_normal_credentials())
         #self.assertEquals(got, vars_b)        
-
-        # this URL is not one end users will use, but is what you get back from a put
-        # as a result, it also needs to be access controlled and working.  You will not
-        # be able to put to it.
-        #backend_url = '/api/v1/variable_data/1/'
-        #got = self.get(backend_url, expect=200, auth=self.get_normal_credentials())
-        #got = self.put(backend_url, data=dict(), expect=403, auth=self.get_super_credentials())
 
         ###################################################
         # VARIABLES -> GROUPS
@@ -285,9 +278,9 @@ class InventoryTest(BaseTest):
         vars_b = dict(asdf=8888, dog='snoopy',   cat='cheshire',  unstructured=dict(a=[2,2,2],b=dict(x=3,y=4)))
         vars_c = dict(asdf=9999, dog='pluto',    cat='five',      unstructured=dict(a=[3,3,3],b=dict(z=5)))
         groups = Group.objects.all()
-         
-        vdata1_url = "/api/v1/groups/%s/variable_data/" % (groups[0].pk)
-        vdata2_url = "/api/v1/groups/%s/variable_data/" % (groups[1].pk)
+
+        vdata1_url = reverse('main:group_variable_detail', args=(groups[0].pk,))
+        vdata2_url = reverse('main:group_variable_detail', args=(groups[1].pk,))
 
         # a super user can associate variable objects with groups
         got = self.get(vdata1_url, expect=200, auth=self.get_super_credentials())
@@ -312,7 +305,7 @@ class InventoryTest(BaseTest):
         vars_b = dict(asdf=2736, dog='benji',   cat='garfield',   unstructured=dict(a=[2,2,2],b=dict(x=3,y=4)))
         vars_c = dict(asdf=7692, dog='buck',    cat='sylvester',  unstructured=dict(a=[3,3,3],b=dict(z=5)))
          
-        vdata_url = "/api/v1/inventories/%s/variable_data/" % (self.inventory_a.pk)
+        vdata_url = reverse('main:inventory_variable_detail', args=(self.inventory_a.pk,))
 
         # a super user can associate variable objects with inventory
         got = self.get(vdata_url, expect=200, auth=self.get_super_credentials())
@@ -333,40 +326,44 @@ class InventoryTest(BaseTest):
         ####################################################
         # ADDING HOSTS TO GROUPS
 
-        groups = Group.objects.all()
-        hosts = Host.objects.all()
-        groups[0].hosts.add(Host.objects.get(pk=1))
-        groups[0].hosts.add(Host.objects.get(pk=3)) 
+        groups = Group.objects.order_by('pk')
+        hosts = Host.objects.order_by('pk')
+        host1 = hosts[0]
+        host2 = hosts[1]
+        host3 = hosts[2]
+        groups[0].hosts.add(host1)
+        groups[0].hosts.add(host3) 
         groups[0].save()
 
         # access        
-        url1 = '/api/v1/groups/1/hosts/'
+        url1 = reverse('main:group_hosts_list', args=(groups[0].pk,))
         data = self.get(url1, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 2)
-        self.assertEquals(data['results'][0]['id'], 1)
-        self.assertEquals(data['results'][1]['id'], 3)
+        self.assertTrue(host1.pk in [x['id'] for x in data['results']])
+        self.assertTrue(host3.pk in [x['id'] for x in data['results']])
 
         # addition
-        got = self.get('/api/v1/hosts/2/', expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(got['id'], 2)
-        posted = self.post('/api/v1/groups/1/hosts/', data=got, expect=204, auth=self.get_normal_credentials())
+        url = reverse('main:host_detail', args=(host2.pk,))
+        got = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(got['id'], host2.pk)
+        posted = self.post(url1, data=got, expect=204, auth=self.get_normal_credentials())
         data = self.get(url1, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 3)
-        self.assertEquals(data['results'][1]['id'], 2)
+        self.assertTrue(host2.pk in [x['id'] for x in data['results']])
 
         # now add one new completely new host, to test creation+association in one go
         new_host = dict(inventory=got['inventory'], name='completelynewhost.example.com', description='...')
-        posted = self.post('/api/v1/groups/1/hosts/', data=new_host, expect=201, auth=self.get_normal_credentials())
+        posted = self.post(url1, data=new_host, expect=201, auth=self.get_normal_credentials())
         
         data = self.get(url1, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 4)
 
         # removal
         got['disassociate'] = 1
-        posted = self.post('/api/v1/groups/1/hosts/', data=got, expect=204, auth=self.get_normal_credentials())
+        posted = self.post(url1, data=got, expect=204, auth=self.get_normal_credentials())
         data = self.get(url1, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 3)
-        self.assertEquals(data['results'][1]['id'], 3)
+        self.assertFalse(host2.pk in [x['id'] for x in data['results']])
 
         ####################################################
         # SUBGROUPS
@@ -374,7 +371,7 @@ class InventoryTest(BaseTest):
         groups = Group.objects.all()
 
         # just some more groups for kicks
-        inv  = Inventory.objects.get(pk=1)
+        inv  = Inventory.objects.get(pk=self.inventory_a.pk)
         Group.objects.create(name='group-X1', inventory=inv)
         Group.objects.create(name='group-X2', inventory=inv)
         Group.objects.create(name='group-X3', inventory=inv)
@@ -388,20 +385,26 @@ class InventoryTest(BaseTest):
         )
 
         # data used for testing listing all hosts that are transitive members of a group
-        g2 = Group.objects.get(pk=2)
-        nh = Host.objects.create(name='newhost.example.com', inventory=inv, created_by=User.objects.get(pk=1))
+        g2 = Group.objects.get(name='web4')
+        nh = Host.objects.create(name='newhost.example.com', inventory=inv,
+                                 created_by=self.super_django_user)
         g2.hosts.add(nh)
         g2.save()
 
         # a super user can set subgroups
-        subgroups_url     = '/api/v1/groups/1/children/'
-        child_url         = '/api/v1/groups/2/'
-        subgroups_url2    = '/api/v1/groups/3/children/'
-        subgroups_url3    = '/api/v1/groups/4/children/'
-        subgroups_url4    = '/api/v1/groups/5/children/'
+        subgroups_url     = reverse('main:group_children_list',
+                                     args=(Group.objects.get(name='web2').pk,))
+        child_url         = reverse('main:group_detail',
+                                    args=(Group.objects.get(name='web4').pk,))
+        subgroups_url2    = reverse('main:group_children_list',
+                                    args=(Group.objects.get(name='web6').pk,))
+        subgroups_url3    = reverse('main:group_children_list',
+                                    args=(Group.objects.get(name='web100').pk,))
+        subgroups_url4    = reverse('main:group_children_list',
+                                    args=(Group.objects.get(name='web101').pk,))
         got = self.get(child_url, expect=200, auth=self.get_super_credentials())
         self.post(subgroups_url, data=got, expect=204, auth=self.get_super_credentials())
-        kids = Group.objects.get(pk=1).children.all()
+        kids = Group.objects.get(name='web2').children.all()
         self.assertEqual(len(kids), 1)
         checked = self.get(subgroups_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(checked['count'], 1)
@@ -410,7 +413,7 @@ class InventoryTest(BaseTest):
         posted = self.post(subgroups_url2, data=got, expect=204, auth=self.get_normal_credentials())
 
         # see if we can post a completely new subgroup
-        new_data = dict(inventory=5, name='completely new', description='blarg?')
+        new_data = dict(inventory=inv.pk, name='completely new', description='blarg?')
         kids = self.get(subgroups_url2, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(kids['count'], 1)
         posted2 = self.post(subgroups_url2, data=new_data, expect=201, auth=self.get_normal_credentials()) 
@@ -432,8 +435,9 @@ class InventoryTest(BaseTest):
         # slight detour
         # can see all hosts under a group, even if it has subgroups
         # this URL is NOT postable
-        all_hosts = '/api/v1/groups/1/all_hosts/'
-        self.assertEqual(Group.objects.get(pk=1).hosts.count(), 3)
+        all_hosts = reverse('main:group_all_hosts_list',
+                            args=(Group.objects.get(name='web2').pk,))
+        self.assertEqual(Group.objects.get(name='web2').hosts.count(), 3)
         data = self.get(all_hosts, expect=200, auth=self.get_normal_credentials())
         self.post(all_hosts, data=dict(id=123456, msg='spam'), expect=405, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 4)

@@ -6,13 +6,15 @@ import json
 from django.contrib.auth.models import User as DjangoUser
 import django.test
 from django.test.client import Client
+from django.core.urlresolvers import reverse
+
 from ansibleworks.main.models import *
 from ansibleworks.main.tests.base import BaseTest
 
 class UsersTest(BaseTest):
 
     def collection(self):
-        return '/api/v1/users/'
+        return reverse('main:user_list')
 
     def setUp(self):
         super(UsersTest, self).setUp()
@@ -23,7 +25,7 @@ class UsersTest(BaseTest):
         self.organizations[0].users.add(self.normal_django_user)
  
     def test_only_super_user_or_org_admin_can_add_users(self):
-        url = '/api/v1/users/'
+        url = reverse('main:user_list')
         new_user = dict(username='blippy')
         new_user2 = dict(username='blippy2')
         self.post(url, expect=401, data=new_user, auth=None)
@@ -35,7 +37,7 @@ class UsersTest(BaseTest):
         self.post(url, expect=400, data=new_user2, auth=self.get_normal_credentials())
 
     def test_auth_token_login(self):
-        auth_token_url = '/api/v1/authtoken/'
+        auth_token_url = reverse('main:auth_token_view')
 
         # Always returns a 405 for any GET request, regardless of credentials.
         self.get(auth_token_url, expect=405, auth=None)
@@ -57,13 +59,13 @@ class UsersTest(BaseTest):
         auth_token = result['token']
 
         # Verify we can access our own user information with the auth token.
-        data = self.get('/api/v1/me/', expect=200, auth=auth_token)
+        data = self.get(reverse('main:user_me_list'), expect=200, auth=auth_token)
         self.assertEquals(data['results'][0]['username'], 'normal')
         self.assertEquals(data['count'], 1)
 
     def test_ordinary_user_can_modify_some_fields_about_himself_but_not_all_and_passwords_work(self):
 
-        detail_url = '/api/v1/users/%s/' % self.other_django_user.pk
+        detail_url = reverse('main:user_detail', args=(self.other_django_user.pk,))
         data = self.get(detail_url, expect=200, auth=self.get_other_credentials())
 
         # can't change first_name, last_name, etc
@@ -105,7 +107,7 @@ class UsersTest(BaseTest):
     def test_user_created_with_password_can_login(self):
 
         # this is something an org admin can do...
-        url = '/api/v1/users/'
+        url = reverse('main:user_list')
         data  = dict(username='username',  password='password')
         data2 = dict(username='username2', password='password2')
         data = self.post(url, expect=201, data=data, auth=self.get_normal_credentials())
@@ -123,22 +125,22 @@ class UsersTest(BaseTest):
         self.get(url, expect=200, auth=('username2', 'password2'))
 
         # verify that if you post a user with a pk, you do not alter that user's password info
-        mod = dict(id=1, username='change', password='change')
+        mod = dict(id=self.super_django_user.pk, username='change', password='change')
         data = self.post(url, expect=201, data=mod, auth=self.get_super_credentials())
-        orig = User.objects.get(pk=1)
+        orig = User.objects.get(pk=self.super_django_user.pk)
         self.assertTrue(orig.username != 'change')
  
     def test_password_not_shown_in_get_operations_for_list_or_detail(self):
-        url = '/api/v1/users/1/'
+        url = reverse('main:user_detail', args=(self.super_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_super_credentials())
         self.assertTrue('password' not in data)
 
-        url = '/api/v1/users/'
+        url = reverse('main:user_list')
         data = self.get(url, expect=200, auth=self.get_super_credentials())
         self.assertTrue('password' not in data['results'][0])
 
     def test_user_list_filtered(self):
-        url = '/api/v1/users/'
+        url = reverse('main:user_list')
         data3 = self.get(url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(data3['count'], 3)
         data2 = self.get(url, expect=200, auth=self.get_normal_credentials())
@@ -147,23 +149,23 @@ class UsersTest(BaseTest):
         self.assertEquals(data1['count'], 1)
 
     def test_super_user_can_delete_a_user_but_only_marked_inactive(self):
-        url = '/api/v1/users/2/'
+        user_pk = self.normal_django_user.pk
+        url = reverse('main:user_detail', args=(user_pk,))
         data = self.delete(url, expect=204, auth=self.get_super_credentials())
         data = self.get(url, expect=404, auth=self.get_super_credentials())
-        url = '/api/v1/users/2/'
-        obj = User.objects.get(pk=2)
+        obj = User.objects.get(pk=user_pk)
         self.assertEquals(obj.is_active, False)
  
     def test_non_org_admin_user_cannot_delete_any_user_including_himself(self):
-        url1 = '/api/v1/users/1/'
-        url2 = '/api/v1/users/2/'
-        url3 = '/api/v1/users/3/'
+        url1 = reverse('main:user_detail', args=(self.super_django_user.pk,))
+        url2 = reverse('main:user_detail', args=(self.normal_django_user.pk,))
+        url3 = reverse('main:user_detail', args=(self.other_django_user.pk,))
         data = self.delete(url1, expect=403, auth=self.get_other_credentials())
         data = self.delete(url2, expect=403, auth=self.get_other_credentials())
         data = self.delete(url3, expect=403, auth=self.get_other_credentials())
 
     def test_there_exists_an_obvious_url_where_a_user_may_find_his_user_record(self):
-        url = '/api/v1/me/'
+        url = reverse('main:user_me_list')
         data = self.get(url, expect=401, auth=None)
         data = self.get(url, expect=401, auth=self.get_invalid_credentials())
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
@@ -179,7 +181,8 @@ class UsersTest(BaseTest):
     def test_user_related_resources(self):
 
         # organizations the user is a member of, should be 1
-        url = '/api/v1/users/2/organizations/'
+        url = reverse('main:user_organizations_list',
+                      args=(self.normal_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 1) 
         # also accessible via superuser
@@ -189,7 +192,8 @@ class UsersTest(BaseTest):
         data = self.get(url, expect=403, auth=self.get_other_credentials())
 
         # organizations the user is an admin of, should be 1
-        url = '/api/v1/users/2/admin_of_organizations/'
+        url = reverse('main:user_admin_of_organizations_list',
+                      args=(self.normal_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 1)
         # also accessible via superuser
@@ -199,7 +203,7 @@ class UsersTest(BaseTest):
         data = self.get(url, expect=403, auth=self.get_other_credentials())
  
         # teams the user is on, should be 0
-        url = '/api/v1/users/2/teams/'
+        url = reverse('main:user_teams_list', args=(self.normal_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 0)
         # also accessible via superuser
@@ -209,13 +213,16 @@ class UsersTest(BaseTest):
         data = self.get(url, expect=403, auth=self.get_other_credentials())
 
         # verify org admin can still read other user data too
-        url = '/api/v1/users/3/organizations/'
+        url = reverse('main:user_organizations_list',
+                      args=(self.other_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 1)
-        url = '/api/v1/users/3/admin_of_organizations/'
+        url = reverse('main:user_admin_of_organizations_list',
+                      args=(self.other_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 0)
-        url = '/api/v1/users/3/teams/'
+        url = reverse('main:user_teams_list',
+                      args=(self.other_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 0)
 

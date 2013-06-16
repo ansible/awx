@@ -14,7 +14,7 @@ from ansibleworks.main.tests.base import BaseTest
 class OrganizationsTest(BaseTest):
 
     def collection(self):
-        return '/api/v1/organizations/'
+        return reverse('main:organization_list')
 
     def setUp(self):
         super(OrganizationsTest, self).setUp()
@@ -205,7 +205,8 @@ class OrganizationsTest(BaseTest):
         data2 = self.post(self.collection(), new_org, expect=400, auth=self.get_super_credentials())
 
         # look at what we got back from the post, make sure we added an org
-        self.assertTrue(data1['url'].endswith("/11/"))
+        last_org = Organization.objects.order_by('-pk')[0]
+        self.assertTrue(data1['url'].endswith("/%d/" % last_org.pk))
 
     def test_post_item_subobjects_projects(self):
         
@@ -262,20 +263,20 @@ class OrganizationsTest(BaseTest):
 
     def test_post_item_subobjects_users(self):
 
-        url = '/api/v1/organizations/2/users/'
+        url = reverse('main:organization_users_list', args=(self.organizations[1].pk,))
         users = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(users['count'], 1)
-        self.post(url, dict(id=2), expect=204, auth=self.get_normal_credentials())
+        self.post(url, dict(id=self.normal_django_user.pk), expect=204, auth=self.get_normal_credentials())
         users = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(users['count'], 2)
-        self.post(url, dict(id=2, disassociate=True), expect=204, auth=self.get_normal_credentials())
+        self.post(url, dict(id=self.normal_django_user.pk, disassociate=True), expect=204, auth=self.get_normal_credentials())
         users = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(users['count'], 1)
 
         # post a completely new user to verify we can add users to the subcollection directly
         new_user = dict(username='NewUser9000')
         which_org = self.normal_django_user.admin_of_organizations.all()[0]
-        url = '/api/v1/organizations/%s/users/' % (which_org.pk)
+        url = reverse('main:organization_users_list', args=(which_org.pk,))
         posted = self.post(url, new_user, expect=201, auth=self.get_normal_credentials())
 
         all_users = self.get(url, expect=200, auth=self.get_normal_credentials())
@@ -283,13 +284,13 @@ class OrganizationsTest(BaseTest):
 
     def test_post_item_subobjects_admins(self):
 
-        url = '/api/v1/organizations/2/admins/'
+        url = reverse('main:organization_admins_list', args=(self.organizations[1].pk,))
         admins = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(admins['count'], 1)
-        self.post(url, dict(id=1), expect=204, auth=self.get_normal_credentials())
+        self.post(url, dict(id=self.super_django_user.pk), expect=204, auth=self.get_normal_credentials())
         admins = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(admins['count'], 2)
-        self.post(url, dict(id=1, disassociate=1), expect=204, auth=self.get_normal_credentials())
+        self.post(url, dict(id=self.super_django_user.pk, disassociate=1), expect=204, auth=self.get_normal_credentials())
         admins = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(admins['count'], 1)
 
