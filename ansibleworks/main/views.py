@@ -1125,13 +1125,43 @@ class JobEventList(BaseList):
     permission_classes = (CustomRbac,)
 
     def get_queryset(self):
-        return self.model.objects.all() # FIXME
+        return self.model.objects.distinct() # FIXME: Permissions?
 
 class JobEventDetail(generics.RetrieveAPIView):
 
     model = JobEvent
     serializer_class = JobEventSerializer
     permission_classes = (CustomRbac,)
+
+class JobEventChildrenList(generics.ListAPIView):
+
+    model = JobEvent
+    serializer_class = JobEventSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = JobEvent
+    relationship = 'children'
+
+    view_name = 'Job Event Children List'
+
+    def get_queryset(self):
+        # FIXME: Verify read permission on the parent object and job.
+        parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        return getattr(parent_obj, self.relationship)
+
+class JobEventHostsList(generics.ListAPIView):
+
+    model = Host
+    serializer_class = HostSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = JobEvent
+    relationship = 'hosts'
+
+    view_name = 'Job Event Hosts List'
+
+    def get_queryset(self):
+        # FIXME: Verify read permission on the parent object and job.
+        parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        return getattr(parent_obj, self.relationship)
 
 class BaseJobEventsList(generics.ListAPIView):
 
@@ -1144,7 +1174,7 @@ class BaseJobEventsList(generics.ListAPIView):
     def get_queryset(self):
         # FIXME: Verify read permission on the parent object and job.
         parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        return getattr(parent_obj, self.relationship)
+        return getattr(parent_obj, self.relationship).distinct()
 
 class HostJobEventsList(BaseJobEventsList):
 

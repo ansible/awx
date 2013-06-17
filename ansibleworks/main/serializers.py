@@ -302,7 +302,7 @@ class JobTemplateSerializer(BaseSerializer):
         model = JobTemplate
         fields = BASE_FIELDS + ('job_type', 'inventory', 'project', 'playbook',
                                 'credential', 'forks', 'limit', 'verbosity',
-                                'extra_vars', 'job_tags')
+                                'extra_vars', 'job_tags', 'host_config_key')
 
     def get_related(self, obj):
         res = super(JobTemplateSerializer, self).get_related(obj)
@@ -393,18 +393,27 @@ class JobHostSummarySerializer(BaseSerializer):
 
 class JobEventSerializer(BaseSerializer):
 
-    event_display = serializers.Field(source='get_event_display')
+    event_display = serializers.Field(source='get_event_display2')
 
     class Meta:
         model = JobEvent
         fields = ('id', 'url', 'created', 'job', 'event', 'event_display',
-                  'event_data', 'failed', 'host', 'related', 'summary_fields')
+                  'event_data', 'failed', 'host', 'related', 'summary_fields',
+                  'parent')
 
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)
         res.update(dict(
             job = reverse('main:job_detail', args=(obj.job.pk,)),
+            #children = reverse('main:job_event_children_list', args=(obj.pk,)),
         ))
+        if obj.parent:
+            res['parent'] = reverse('main:job_event_detail', args=(obj.parent.pk,))
+        if obj.children.count():
+            res['children'] = reverse('main:job_event_children_list', args=(obj.pk,))
         if obj.host:
             res['host'] = reverse('main:host_detail', args=(obj.host.pk,))
+        if obj.hosts.count():
+            # FIXME: Why are hosts not set for top level playbook events.
+            res['hosts'] = reverse('main:job_event_hosts_list', args=(obj.pk,))
         return res

@@ -192,7 +192,7 @@ class RunJob(Task):
             cwd = job.project.get_project_path()
             if not cwd:
                 raise RuntimeError('project local_path %s cannot be found' %
-                                   project.local_path)
+                                   job.project.local_path)
             env = self.build_env(job, **kwargs)
             job = self.update_job(job_pk, job_args=args, job_cwd=cwd,
                                   job_env=env)

@@ -108,6 +108,8 @@ job_host_summary_urls = patterns('ansibleworks.main.views',
 job_event_urls = patterns('ansibleworks.main.views',
     url(r'^$',                                          'job_event_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'job_event_detail'),
+    url(r'^(?P<pk>[0-9]+)/children/$',                  'job_event_children_list'),
+    url(r'^(?P<pk>[0-9]+)/hosts/$',                     'job_event_hosts_list'),
 )
 
 v1_urls = patterns('ansibleworks.main.views',

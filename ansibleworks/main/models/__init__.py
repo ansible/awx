@@ -1032,6 +1032,10 @@ class JobEvent(models.Model):
     def event_level(self):
         return self.LEVEL_FOR_EVENT.get(self.event, 0)
 
+    def get_event_display2(self):
+        # FIXME: Remove extra spaces once hierarchy view is in place.
+        return '%s%s' % (u'\u00a0\u00a0\u00a0\u00a0' * self.event_level, self.get_event_display())
+
     def _find_parent(self):
         parent_events = set()
         if self.event in ('playbook_on_play_start', 'playbook_on_stats',
@@ -1061,6 +1065,7 @@ class JobEvent(models.Model):
 
     def save(self, *args, **kwargs):
         self.failed = bool(self.event in self.FAILED_EVENTS)
+        # FIXME: Propagage failed flag to parent events.
         try:
             if not self.host and self.event_data.get('host', ''):
                 self.host = self.job.inventory.hosts.get(name=self.event_data['host'])
