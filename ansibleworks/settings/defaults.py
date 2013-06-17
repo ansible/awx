@@ -148,6 +148,9 @@ REST_FRAMEWORK = {
     ),
 }
 
+# If set, serve only minified JS for UI.
+USE_MINIFIED_JS = False
+
 # Email address that error messages come from.
 SERVER_EMAIL = 'root@localhost'
 

@@ -14,7 +14,7 @@
   <script src="{{ STATIC_URL }}lib/angular/angular.js"></script>
   <script src="{{ STATIC_URL }}lib/angular/angular-resource.js"></script>
   <script src="{{ STATIC_URL }}lib/angular/angular-cookies.js"></script>
-  {% if 0 and not settings.DEBUG %} {# FIXME: Change to use minified JS once we are building it. #}
+  {% if settings.USE_MINIFIED_JS %} {# FIXME: Change to use minified JS once we are building it. #}
   <script src="{{ STATIC_URL }}js/ansibleworks-min.js"></script> <!-- FIXME: Change to whatever we end up calling the minified file. -->
   {% else %}
   <script src="{{ STATIC_URL }}js/app.js"></script>
