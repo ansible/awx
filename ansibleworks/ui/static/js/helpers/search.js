@@ -100,13 +100,14 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            if ( (scope[iterator + 'SelectShow'] == false && scope[iterator + 'SearchValue'] != '' && scope[iterator + 'SearchValue'] != undefined) ||
                 (scope[iterator + 'SelectShow'] && scope[iterator + 'SearchSelectValue']) || 
                 (list.fields[scope[iterator + 'SearchField']].searchType && list.fields[scope[iterator + 'SearchField']].searchType == 'gtzero') ) {
-              if (list.fields[scope[iterator + 'SearchField']].sourceModel) {
+              
+              if (list.fields[scope[iterator + 'SearchField']].searchField) {
+                 scope[iterator + 'SearchParams'] = '?' + list.fields[scope[iterator + 'SearchField']].searchField + '__'; 
+              }
+              else if (list.fields[scope[iterator + 'SearchField']].sourceModel) {
                  // handle fields whose source is a related model e.g. inventories.organization
                  scope[iterator + 'SearchParams'] = '?' + list.fields[scope[iterator + 'SearchField']].sourceModel + '__' + 
                  list.fields[scope[iterator + 'SearchField']].sourceField + '__';
-              }
-              else if (list.fields[scope[iterator + 'SearchField']].searchField) {
-                 scope[iterator + 'SearchParams'] = '?' + list.fields[scope[iterator + 'SearchField']].searchField + '__'; 
               }
               else {
                  scope[iterator + 'SearchParams'] = '?' + scope[iterator + 'SearchField'] + '__'; 
