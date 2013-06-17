@@ -192,6 +192,7 @@ class RunJobTest(BaseCeleryTest):
     def check_job_result(self, job, expected='successful', expect_stdout=True,
                          expect_traceback=False):
         msg = 'job status is %s, expected %s' % (job.status, expected)
+        msg = '%s\nargs:\n%s' % (msg, job.job_args)
         if job.result_traceback:
             msg = '%s\ngot traceback:\n%s' % (msg, job.result_traceback)
         if job.result_stdout:

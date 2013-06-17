@@ -103,8 +103,11 @@ class RunJob(Task):
         if creds:
             ssh_username = kwargs.get('ssh_username', creds.ssh_username)
             sudo_username = kwargs.get('sudo_username', creds.sudo_username)
+        # Always specify the normal SSH user as root by default.  Since this
+        # task is normally running in the background under a service account,
+        # it doesn't make sense to rely on ansible-playbook's default of using
+        # the current user.
         ssh_username = ssh_username or 'root'
-        sudo_username = sudo_username or 'root'
         inventory_script = self.get_path_to('management', 'commands',
                                             'acom_inventory.py')
         args = ['ansible-playbook', '-i', inventory_script]
@@ -113,7 +116,11 @@ class RunJob(Task):
         args.extend(['-u', ssh_username])
         if 'ssh_password' in kwargs.get('passwords', {}):
             args.append('--ask-pass')
-        args.extend(['-U', sudo_username])
+        # However, we should only specify sudo user if explicitly given by the
+        # credentials, otherwise, the playbook will be forced to run using
+        # sudo, which may not always be the desired behavior.
+        if sudo_username:
+            args.extend(['-U', sudo_username])
         if 'sudo_password' in kwargs.get('passwords', {}):
             args.append('--ask-sudo-pass')
         if job.forks:  # FIXME: Max limit?
