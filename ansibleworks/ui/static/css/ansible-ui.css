@@ -437,3 +437,16 @@
  .list-header .icon-sort-up {
     color: #36454F;
  }
+
+ /* job_events syles */
+ tr td i {
+    float: none;
+    margin-right: 10px;
+    padding-top: 3px;
+    padding-left: 0;
+    margin-left: 0;
+ }
+
+ #event_display-header {
+    min-width: 250px;
+ }

@@ -102,15 +102,15 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 (list.fields[scope[iterator + 'SearchField']].searchType && list.fields[scope[iterator + 'SearchField']].searchType == 'gtzero') ) {
               
               if (list.fields[scope[iterator + 'SearchField']].searchField) {
-                 scope[iterator + 'SearchParams'] = '?' + list.fields[scope[iterator + 'SearchField']].searchField + '__'; 
+                 scope[iterator + 'SearchParams'] = list.fields[scope[iterator + 'SearchField']].searchField + '__'; 
               }
               else if (list.fields[scope[iterator + 'SearchField']].sourceModel) {
                  // handle fields whose source is a related model e.g. inventories.organization
-                 scope[iterator + 'SearchParams'] = '?' + list.fields[scope[iterator + 'SearchField']].sourceModel + '__' + 
+                 scope[iterator + 'SearchParams'] = list.fields[scope[iterator + 'SearchField']].sourceModel + '__' + 
                  list.fields[scope[iterator + 'SearchField']].sourceField + '__';
               }
               else {
-                 scope[iterator + 'SearchParams'] = '?' + scope[iterator + 'SearchField'] + '__'; 
+                 scope[iterator + 'SearchParams'] = scope[iterator + 'SearchField'] + '__'; 
               }
               
               if ( list.fields[scope[iterator + 'SearchField']].searchType && 
@@ -138,11 +138,16 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
               scope[iterator + 'SearchParams'] += (sort_order) ? '&order_by=' + escape(sort_order) : '';
            }
            else {
-              scope[iterator + 'SearchParams'] = ''; 
-              scope[iterator + 'SearchParams'] += (sort_order) ? '?order_by=' + escape(sort_order) : '';
+              scope[iterator + 'SearchParams'] = (sort_order) ? 'order_by=' + escape(sort_order) : "";
            }
            scope[iterator + 'Page'] = 0;
-           url += scope[iterator + 'SearchParams'];
+           if (/\/$/.test(url)) {
+              url += '?' + scope[iterator + 'SearchParams'];
+           }
+           else {
+              url += '&' + scope[iterator + 'SearchParams'];
+           }
+           url = url.replace(/\&\&/,'&');
            url += (scope[iterator + 'PageSize']) ? '&page_size=' + scope[iterator + 'PageSize'] : "";
            Refresh({ scope: scope, set: set, iterator: iterator, url: url });
            }

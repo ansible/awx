@@ -15,20 +15,19 @@ angular.module('JobEventsListDefinition', [])
         editTitle: 'Job Events',
         index: false,
         hover: true,
+        hasChildren: true,
         
         fields: {
-            id: {
-                label: 'Event ID',
+            created: {
+                label: 'Creation Date',
                 key: true,
-                desc: true,
-                searchType: 'int'   
+                nosort: true
                 },
             event_display: {
                 label: 'Event',
-                link: true
-                },
-            created: {
-                label: 'Creation Date'
+                hasChildren: true,
+                link: true,
+                nosort: true
                 },
             host: {
                 label: 'Host',
@@ -36,7 +35,8 @@ angular.module('JobEventsListDefinition', [])
                 ngBind: 'jobevent.host_name',
                 sourceModel: 'host',
                 sourceField: 'name',
-                searchField: 'hosts__name'
+                searchField: 'hosts__name',
+                nosort: true
                 },
             status: {
                 label: 'Status',
@@ -44,7 +44,8 @@ angular.module('JobEventsListDefinition', [])
                 "class": 'job-\{\{ jobevent.status \}\}',
                 searchField: 'failed',
                 searchType: 'boolean',
-                searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }]
+                searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }],
+                nosort: true
                 }
             },
         

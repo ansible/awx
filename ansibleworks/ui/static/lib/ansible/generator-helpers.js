@@ -84,7 +84,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var html = '';
         
         html += "<td ";
-        html += "<td class=\"" + fld + "-column"; 
+        html += "<td class=\"" + fld + "-column";
         html += (field['class']) ? " " + field['class'] : "";
         html +=  "\" ";  
         html += (field.ngClass) ? this.attr(field, 'ngClass') : "";
@@ -92,6 +92,13 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
 
         // Add ngShow
         html += (field.ngShow) ? "<span " + Attr(field,'ngShow') + ">" : "";
+        
+        // Add collapse/expand icon  --used on job_events page
+        if (list['hasChildren'] && field.hasChildren) {
+           html += "<span style=\"padding-left: \{\{ " + list.iterator + ".spaces \}\}px\"><a href=\"\" ng-click=\"\{\{ " + list.iterator + ".ngclick \}\}\"> " +
+               "<i class=\"\{\{ " + list.iterator + ".ngicon \}\}\" ng-show=\"'\{\{ " + 
+               list.iterator + ".related.children \}\}' !== ''\" ></i></a> ";
+        }
 
         // Start the Link
         if ((field.key || field.link || field.linkTo || field.ngClick ) && options['mode'] != 'lookup' && options['mode'] != 'select') {
@@ -111,7 +118,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
           html += "<i ng-show=\"" + field.ngShowIcon + "\" class=\"" + field.icon + "\"></i> ";
         }
         else {
-          html += Icon(field.icon) + " ";
+          if (field.icon) {
+             html += Icon(field.icon) + " ";
+          }
         }
 
         // Add data binds 
@@ -120,15 +129,19 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
              html += "{{ " + field.ngBind + " }}";
           }
           else {
-             html += "{{" + list.iterator + "." + fld + "}}";    
+             html += "{{" + list.iterator + "." + fld + "}}";   
           }
         }
-
+        
         // Add additional text:
         if (field.text) {
           html += field.text;
         }
 
+        if (list['hasChildren'] && field.hasChildren) {
+           html += "</span>";
+        }
+        
         // close the link
         if ((field.key || field.link || field.linkTo || field.ngClick )
             && options.mode != 'lookup' && options.mode != 'select') {

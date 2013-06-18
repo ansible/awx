@@ -12,20 +12,49 @@
 
 function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList,
                         GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                        ClearScope, ProcessErrors, GetBasePath, LookUpInit)
+                        ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren)
 {
     ClearScope('htmlTemplate');
     var list = JobEventList;
     list.base = $location.path();
-    var defaultUrl = GetBasePath('jobs') + $routeParams.id + '/job_events/';
+    
+    var defaultUrl = GetBasePath('jobs') + $routeParams.id + '/job_events/?parent__isnull=1';
+    
     var view = GenerateList;
     var base = $location.path().replace(/^\//,'').split('/')[0];
     var scope = view.inject(list, { mode: 'edit' });
     scope.selected = [];
   
+    if (scope.RemovePostRefresh) {
+       scope.RemovePostRefresh();
+    }
+    scope.RemovePostRefresh = scope.$on('PostRefresh', function() {
+        // Initialize the parent levels
+        var set = scope[list.name];
+        for (var i=0; i < set.length; i++) {
+            set[i].event_display = set[i].event_display.replace(/^\u00a0*/g,'');
+            if (set[i].parent == null && set[i]['ngclick'] === undefined && set[i]['ngicon'] == undefined) {
+               set[i].parent = 0;
+               set[i]['ngclick'] = "toggleChildren(" + set[i].id + ", \"" + set[i].related.children + "\")";
+               set[i]['ngicon'] = 'icon-expand-alt';
+               set[i]['level'] = 0;
+               set[i]['spaces'] = 0;
+            }
+        }
+        });
+
     SearchInit({ scope: scope, set: 'jobevents', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
+
+    scope.toggleChildren = function(id, children) {
+        ToggleChildren({
+            scope: scope, 
+            list: list,
+            id: id,
+            children: children
+            });
+        }
 
     LoadBreadCrumbs();
 
@@ -76,7 +105,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 
 JobEventsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
                            'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                           'ProcessErrors','GetBasePath', 'LookUpInit'
+                           'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren'
                            ];
 
 function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventForm, 

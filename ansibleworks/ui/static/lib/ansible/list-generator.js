@@ -153,20 +153,25 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "<th>#</th>\n";
        }
        for (var fld in list.fields) {
-           html += "<th class=\"list-header\" id=\"" + fld + "-header\" ng-click=\"sort('" + fld + "')\">" + list.fields[fld].label;
-           html += " <i class=\"";
-           if (list.fields[fld].key) {
-              if (list.fields[fld].desc) {
-                 html += "icon-sort-down";
+           html += "<th class=\"list-header\" id=\"" + fld + "-header\" ";
+           html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? "ng-click=\"sort('" + fld + "')\"" : "";
+           html += ">" + list.fields[fld].label;
+           if (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) {
+              html += " <i class=\"";
+              if (list.fields[fld].key) {
+                 if (list.fields[fld].desc) {
+                    html += "icon-sort-down";
+                 }
+                 else {
+                    html += "icon-sort-up";
+                 }
               }
-              else {
-                 html += "icon-sort-up";
+               else {
+                   html += "icon-sort";
               }
+               html += "\"></i></a>";
            }
-           else {
-               html += "icon-sort";
-           }
-           html += "\"></i></a></th>\n";
+           html += "</th>\n";
        }
        if (options.mode == 'select') {
           html += "<th>Select</th>";
