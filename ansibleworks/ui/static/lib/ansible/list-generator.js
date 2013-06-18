@@ -153,7 +153,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "<th>#</th>\n";
        }
        for (var fld in list.fields) {
-           html += "<th class=\"list-header\" id=\"" + fld + "-header\" ";
+           html += "<th class=\"list-header\" id=\""; 
+           html += (list.fields[fld].id) ? list.fields[fld].id : fld + "-header";
+           html += "\"";
            html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? "ng-click=\"sort('" + fld + "')\"" : "";
            html += ">" + list.fields[fld].label;
            if (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) {

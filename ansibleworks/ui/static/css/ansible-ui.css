@@ -450,3 +450,7 @@
  #event_display-header {
     min-width: 250px;
  }
+
+ #job-event-host-header {
+    min-width: 200px;
+ }
