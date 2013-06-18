@@ -40,6 +40,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                set[i]['level'] = 0;
                set[i]['spaces'] = 0;
             }
+            scope.jobevents[i].status = (scope.jobevents[i].failed) ? 'error' : 'success';
         }
         });
 
@@ -57,18 +58,6 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
         }
 
     LoadBreadCrumbs();
-
-    if (scope.PostRefreshRemove) {
-       scope.PostRefreshRemove();
-    }
-    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
-        for (var i=0; i < scope.jobevents.length; i++) {
-            scope.jobevents[i].status = (scope.jobevents[i].failed) ? 'error' : 'success';
-            if (scope.jobevents[i].host !== null) {
-               scope.jobevents[i].host_name = scope.jobevents[i].summary_fields.host.name;
-            }
-        }
-        });
     
     scope.editJobEvent = function(id) {
        $location.path($location.path() + '/' + id);

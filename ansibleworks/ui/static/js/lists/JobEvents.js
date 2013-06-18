@@ -32,7 +32,7 @@ angular.module('JobEventsListDefinition', [])
             host: {
                 label: 'Host',
                 ngClick: "viewHost(\{\{ jobevent.host \}\})",
-                ngBind: 'jobevent.host_name',
+                ngBind: 'jobevent.summary_fields.host.name',
                 sourceModel: 'host',
                 sourceField: 'name',
                 searchField: 'hosts__name',

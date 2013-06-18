@@ -43,9 +43,7 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
                    for (var j=0; j < data.results.length; j++) {
                        data.results[j].level = level;
                        data.results[j].spaces = spaces;
-                       //if (data.results[j].related.children === undefined) {
-                       //   data.results[j].spaces += 12
-                       //}
+                       data.results[j].status = (data.results[j].failed) ? 'error' : 'success';
                        data.results[j].event_display = data.results[j].event_display.replace(/^\u00a0*/g,'');
                        if (data.results[j].related.children) {
                           data.results[j]['ngclick'] = "toggleChildren(" + data.results[j].id + ", \"" + data.results[j].related.children + "\")";

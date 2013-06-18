@@ -27,9 +27,9 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     }
     scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
         $("tr.success").each(function(index) {
-            // Make sure no rows have a green background 
-            var ngc = $(this).attr('ng-class'); 
-            scope[ngc] = ""; 
+            // Make sure no rows have a green background
+            var ngc = $(this).attr('ng-class');
+            scope[ngc] = "";
             });
         });
     
@@ -61,10 +61,8 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     scope.deleteJob = function(id, name) {
        Rest.setUrl(defaultUrl + id + '/');
        Rest.get()
-           .success( function(data, status, headers, config) {
-               
+           .success( function(data, status, headers, config) { 
                var url, action_label, restcall, hdr; 
-
                if (data.status == 'pending' || data.status == 'running') {
                   url = data.related.cancel;
                   action_label = 'cancel';
@@ -80,34 +78,35 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                    Rest.setUrl(url);
                    if (action_label == 'cancel') {
                       Rest.post()
-                       .success( function(data, status, headers, config) {
-                           $('#prompt-modal').modal('hide');
-                           scope.search(list.iterator);
-                           })
-                       .error( function(data, status, headers, config) {
-                           $('#prompt-modal').modal('hide');
-                           ProcessErrors(scope, data, status, null,
-                                    { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
-                           });
+                          .success( function(data, status, headers, config) {
+                              $('#prompt-modal').modal('hide');
+                              scope.search(list.iterator);
+                              })
+                          .error( function(data, status, headers, config) {
+                              $('#prompt-modal').modal('hide');
+                              ProcessErrors(scope, data, status, null,
+                                  { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+                              });
                    }
                    else {
                       Rest.destroy()
-                       .success( function(data, status, headers, config) {
-                           $('#prompt-modal').modal('hide');
-                           scope.search(list.iterator);
-                           })
-                       .error( function(data, status, headers, config) {
-                           $('#prompt-modal').modal('hide');
-                           ProcessErrors(scope, data, status, null,
-                                    { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                           });
+                          .success( function(data, status, headers, config) {
+                              $('#prompt-modal').modal('hide');
+                              scope.search(list.iterator);
+                              })
+                          .error( function(data, status, headers, config) {
+                              $('#prompt-modal').modal('hide');
+                              ProcessErrors(scope, data, status, null,
+                                 { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                              });
                    } 
                    };
 
-               Prompt({ hdr: hdr, 
-                        body: 'Are you sure you want to ' + action_label + ' job ' + id + '?',
-                        action: action
-                        });
+               Prompt({
+                   hdr: hdr, 
+                   body: 'Are you sure you want to ' + action_label + ' job ' + id + '?',
+                   action: action
+                   });
            })
            .error( function(data, status, headers, config) {
                ProcessErrors(scope, data, status, null,
