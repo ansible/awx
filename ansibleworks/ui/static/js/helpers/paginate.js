@@ -53,10 +53,12 @@ angular.module('PaginateHelper', ['RefreshHelper'])
         scope.changePageSize = function(set, iterator) {
            // Called when a new page size is selected
            scope[iterator + 'Page'] = 0;
-           url = url.replace(/\/\?.*$/,'/').replace(/\/\&.*$/,'/');
-           url += (scope[iterator + 'SearchParams']) ? '?' + scope[iterator + 'SearchParams'] + '&page_size=' + scope[iterator + 'PageSize' ] :
-               '?page_size=' + scope[iterator + 'PageSize' ];
-           Refresh({ scope: scope, set: set, iterator: iterator, url: url });  
+           //url = url.replace(/\/\?.*$/,'/').replace(/\/\&.*$/,'/');
+           var new_url = url.replace(/\?page_size\=\d+/,'');
+           var connect = (/\/$/.test(new_url)) ? '?' : '&'; 
+           new_url += (scope[iterator + 'SearchParams']) ? connect + scope[iterator + 'SearchParams'] + '&page_size=' + scope[iterator + 'PageSize' ] :
+                + connect + 'page_size=' + scope[iterator + 'PageSize' ];
+           Refresh({ scope: scope, set: set, iterator: iterator, url: new_url });  
            }
         }
         }]);
