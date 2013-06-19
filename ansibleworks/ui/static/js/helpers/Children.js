@@ -33,7 +33,10 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
         // Expand or collapse children based on clicked element's icon
         if (set[clicked]['ngicon'] == 'icon-expand-alt') {
            // Expand: lookup and display children 
-           Rest.setUrl(children); 
+           var url = children;
+           var search = scope[list.iterator + 'SearchParams'].replace(/^\&/,'').replace(/^\?/,'');
+           url += (search) ? '?' + search : "";
+           Rest.setUrl(url); 
            Rest.get()
                .success( function(data, status, headers, config) {
                    var found = false;

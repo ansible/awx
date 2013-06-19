@@ -21,13 +21,15 @@ angular.module('JobEventsListDefinition', [])
             created: {
                 label: 'Creation Date',
                 key: true,
-                nosort: true
+                nosort: true,
+                notSearchable: true
                 },
             event_display: {
                 label: 'Event',
                 hasChildren: true,
                 link: true,
-                nosort: true
+                nosort: true,
+                notSearchable: true
                 },
             host: {
                 label: 'Host',

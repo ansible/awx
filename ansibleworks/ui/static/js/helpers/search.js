@@ -37,11 +37,25 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                else {
                   sort_order = (list.fields[fld].desc) ? '-' + fld : fld; 
                }
-               scope[iterator + 'SearchField'] = fld
-               scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
+               if (list.fields[fld].notSearchable == undefined || list.fields[fld].notSearchable == false) {
+                  scope[iterator + 'SearchField'] = fld;
+                  scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
+               }
                break;
             }
         }
+
+        if (!scope[iterator + 'SearchField']) {
+           // A field marked as key may also be notSearchable
+           for (fld in list.fields) {
+               if (list.fields[fld].notSearchable == undefined || list.fields[fld].notSearchable == false) { 
+                  scope[iterator + 'SearchField'] = fld;
+                  scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
+                  break;
+               }
+           }
+        }
+
         scope[iterator + 'SearchType'] = 'icontains';
         scope[iterator + 'SearchTypeLabel'] = 'Contains';
         scope[iterator + 'SearchParams'] = '';
