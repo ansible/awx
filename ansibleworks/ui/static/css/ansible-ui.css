@@ -487,3 +487,33 @@
 .modal-input-xlarge {
    width: 400px;
 }
+
+
+/* overrides to TB modal */
+.modal-header {
+  padding: 15px 15px;
+  border-bottom: 1px solid #eee;
+  background-color: #36454F;
+  color: #A9A9A9;
+  -webkit-border-top-left-radius: 3px;
+     -moz-border-top-left-radius: 3px;
+          border-top-left-radius: 3px;
+  -webkit-border-top-right-radius: 3px;
+     -moz-border-top-right-radius: 3px;
+          border-top-right-radius: 3px;
+}
+
+.modal {
+  border: 1px solid #36454F;
+}
+
+.close {
+  color: #A9A9A9;
+  opacity: .7;
+  filter: alpha(opacity=70);
+}
+
+.modal-header h3 {
+  margin: 0;
+  text-rendering: optimizeLegibility;
+}

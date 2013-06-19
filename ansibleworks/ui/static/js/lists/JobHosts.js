@@ -23,8 +23,7 @@ angular.module('JobHostDefinition', [])
                 sourceModel: 'host',
                 sourceField: 'name',
                 ngBind: 'jobhost.host_name',
-                //linkTo: '/hosts/\{\{ jobhost.host \}\}'
-                ngClick:"viewHost(\{\{ jobhost.host \}\})"
+                ngClick:"showEvents('\{\{ jobhost.summary_fields.host.name \}\}','\{\{ jobhost.related.job \}\}')"
                 },
              ok: {
                 label: 'Success',

@@ -18,14 +18,16 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventFormDefini
         var scope = generator.inject(form, { mode: 'edit', modal: true, related: false});
         generator.reset();
         var master = {};
-        
-        scope.formModalActionLabel = 'OK';
-        scope.formModalHeader = 'View Event';
-        scope.formModalCancelShow = false;
-
+       
         scope.formModalAction = function() {
             $('#form-modal').modal("hide");
             }
+
+        scope.formModalActionLabel = 'OK';
+        scope.formModalHeader = 'View Event';
+        scope.formModalCancelShow = false;
+        
+        $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-info');
         
         // Retrieve detail record and prepopulate the form
         Rest.setUrl(defaultUrl);

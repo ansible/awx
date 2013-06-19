@@ -37,19 +37,20 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
     scope.search(list.iterator);
 
     LoadBreadCrumbs();
-
-    scope.viewHost = function(id) {
-        Rest.setUrl(GetBasePath('jobs') + $routeParams.id + '/'); 
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                LoadBreadCrumbs({ path: '/inventories/' + data.inventory, title: data.summary_fields.inventory.name });
-                $location.path('/inventories/' + data.inventory + /hosts/ + id);
-                })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, null,
-                   { hdr: 'Error!', msg: 'Failed to lookup job record for job ' + $routeParams.id + ' GET returned status: ' + status });
-                });
-        };
+    
+    scope.showEvents = function(host_name, last_job) {
+      // When click on !Failed Events link, redirect to latest job/job_events for the host
+      Rest.setUrl(last_job);
+      Rest.get()
+          .success( function(data, status, headers, config) {
+              LoadBreadCrumbs({ path: '/jobs/' + data.id, title: data.name });
+              $location.url('/jobs/' + data.id + '/job_events/?host=' + escape(host_name));
+              })
+          .error( function(data, status, headers, config) {
+              ProcessErrors(scope, data, status, form,
+                  { hdr: 'Error!', msg: 'Failed to lookup last job: ' + last_job + '. GET status: ' + status });
+              });
+      }
 
     scope.refresh = function() {
        scope.search(list.iterator);
