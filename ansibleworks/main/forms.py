@@ -1,10 +1,17 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Python
 import json
+
+# PyYAML
+import yaml
+
+# Django
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from jsonfield.fields import JSONFormField
+
+# AnsibleWorks
 from ansibleworks.main.models import *
 
 EMPTY_CHOICE = ('', '---------')
@@ -28,6 +35,38 @@ class PlaybookSelect(forms.Select):
         if hasattr(obj, 'project'):
             opt = opt.replace('">', '" class="project-%s">' % obj.project.pk)
         return opt
+
+class ModelFormWithVariables(forms.ModelForm):
+    '''Custom model form to validate variable data.'''
+
+    def clean_variables(self):
+        value = self.cleaned_data.get('variables', '')
+        try:
+            json.loads(value.strip() or '{}')
+        except ValueError:
+            try:
+                yaml.safe_load(value)
+            except yaml.YAMLError:
+                raise forms.ValidationError('Must be valid JSON or YAML')
+        return value
+
+class InventoryAdminForm(ModelFormWithVariables):
+    '''Custom model form for Inventory.'''
+
+    class Meta:
+        model = Inventory
+
+class HostAdminForm(ModelFormWithVariables):
+    '''Custom model form for Hosts.'''
+
+    class Meta:
+        model = Host
+
+class GroupAdminForm(ModelFormWithVariables):
+    '''Custom model form for Groups.'''
+
+    class Meta:
+        model = Group
 
 class ProjectAdminForm(forms.ModelForm):
     '''Custom admin form for Projects.'''

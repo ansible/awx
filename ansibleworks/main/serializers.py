@@ -4,6 +4,9 @@
 # Python
 import json
 
+# PyYAML
+import yaml
+
 # Django
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -125,8 +128,20 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
     def to_native(self, obj):
         ret = super(ProjectPlaybooksSerializer, self).to_native(obj)
         return ret.get('playbooks', [])
-    
-class InventorySerializer(BaseSerializer):
+
+class BaseSerializerWithVariables(BaseSerializer):
+
+    def validate_variables(self, attrs, source):
+        try:
+            json.loads(attrs[source].strip() or '{}')
+        except ValueError:
+            try:
+                yaml.safe_load(attrs[source])
+            except yaml.YAMLError:
+                raise serializers.ValidationError('Must be valid JSON or YAML')
+        return attrs
+
+class InventorySerializer(BaseSerializerWithVariables):
 
     class Meta:
         model = Inventory
@@ -144,7 +159,7 @@ class InventorySerializer(BaseSerializer):
         ))
         return res
 
-class HostSerializer(BaseSerializer):
+class HostSerializer(BaseSerializerWithVariables):
 
     class Meta:
         model = Host
@@ -166,7 +181,7 @@ class HostSerializer(BaseSerializer):
             res['last_job_host_summary'] = reverse('main:job_host_summary_detail', args=(obj.last_job_host_summary.pk,))
         return res
 
-class GroupSerializer(BaseSerializer):
+class GroupSerializer(BaseSerializerWithVariables):
 
     class Meta:
         model = Group
@@ -189,7 +204,10 @@ class BaseVariableDataSerializer(BaseSerializer):
 
     def to_native(self, obj):
         ret = super(BaseVariableDataSerializer, self).to_native(obj)
-        return json.loads(ret.get('variables', '') or '{}')
+        try:
+            return json.loads(ret.get('variables', '') or '{}')
+        except ValueError:
+            return yaml.safe_load(ret.get('variables', ''))
 
     def from_native(self, data, files):
         data = {'variables': json.dumps(data)}
@@ -414,6 +432,5 @@ class JobEventSerializer(BaseSerializer):
         if obj.host:
             res['host'] = reverse('main:host_detail', args=(obj.host.pk,))
         if obj.hosts.count():
-            # FIXME: Why are hosts not set for top level playbook events.
             res['hosts'] = reverse('main:job_event_hosts_list', args=(obj.pk,))
         return res

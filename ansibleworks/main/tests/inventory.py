@@ -136,6 +136,28 @@ class InventoryTest(BaseTest):
         # hostnames must be unique inside an organization
         host_data4 = self.post(hosts, data=new_host_c, expect=400, auth=self.get_other_credentials())
 
+        # Verify we can update host via PUT.
+        host_url3 = host_data3['url']
+        host_data3['variables'] = ''
+        host_data3 = self.put(host_url3, data=host_data3, expect=200, auth=self.get_other_credentials())
+        self.assertEqual(Host.objects.get(id=host_data3['id']).variables, '')
+        self.assertEqual(Host.objects.get(id=host_data3['id']).variables_dict, {})
+        
+        # Should reject invalid data.
+        host_data3['variables'] = 'foo: [bar'
+        self.put(host_url3, data=host_data3, expect=400, auth=self.get_other_credentials())
+
+        # Should accept valid JSON or YAML.
+        host_data3['variables'] = 'bad: monkey'
+        self.put(host_url3, data=host_data3, expect=200, auth=self.get_other_credentials())
+        self.assertEqual(Host.objects.get(id=host_data3['id']).variables, host_data3['variables'])
+        self.assertEqual(Host.objects.get(id=host_data3['id']).variables_dict, {'bad': 'monkey'})
+        
+        host_data3['variables'] = '{"angry": "penguin"}'
+        self.put(host_url3, data=host_data3, expect=200, auth=self.get_other_credentials())
+        self.assertEqual(Host.objects.get(id=host_data3['id']).variables, host_data3['variables'])
+        self.assertEqual(Host.objects.get(id=host_data3['id']).variables_dict, {'angry': 'penguin'})
+
         ###########################################
         # GROUPS
 
@@ -321,6 +343,18 @@ class InventoryTest(BaseTest):
 
         # a normal user with inventory edit permissions can associate variable objects with inventory
         put = self.put(vdata_url, data=vars_c, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(put, vars_c)
+        
+        # repeat but request variables in yaml
+        got = self.get(vdata_url, expect=200,
+                       auth=self.get_normal_credentials(),
+                       accept='application/yaml')
+        self.assertEquals(got, vars_c)
+
+        # repeat but updates variables in yaml
+        put = self.put(vdata_url, data=vars_c, expect=200,
+                       auth=self.get_normal_credentials(), data_type='yaml',
+                       accept='application/yaml')
         self.assertEquals(put, vars_c)
 
         ####################################################

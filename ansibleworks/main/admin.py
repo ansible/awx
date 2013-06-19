@@ -80,6 +80,7 @@ class InventoryAdmin(BaseModelAdmin):
 
     list_display = ('name', 'organization', 'description', 'active')
     list_filter = ('organization', 'active')
+    form = InventoryAdminForm
     fieldsets = (
         (None, {'fields': (('name', 'active'), 'organization', 'description',
                            'variables')}),
@@ -88,17 +89,6 @@ class InventoryAdmin(BaseModelAdmin):
     )
     readonly_fields = ('created', 'created_by')
     inlines = [InventoryHostInline, InventoryGroupInline]
-
-#class TagAdmin(BaseModelAdmin):
-#
-#    list_display = ('name',)
-
-#class AuditTrailAdmin(admin.ModelAdmin):
-#
-#    list_display = ('name', 'description', 'active')
-#    not currently on model, so disabling for now.
-#    filter_horizontal = ('tags',)
-
 
 class JobHostSummaryInline(admin.TabularInline):
 
@@ -140,6 +130,7 @@ class HostAdmin(BaseModelAdmin):
 
     list_display = ('name', 'inventory', 'description', 'active')
     list_filter = ('inventory', 'active')
+    form = HostAdminForm
     fieldsets = (
         (None, {'fields': (('name', 'active'), 'inventory', 'description',
                            'variables',
@@ -154,6 +145,7 @@ class HostAdmin(BaseModelAdmin):
 class GroupAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
+    form = GroupAdminForm
     fieldsets = (
         (None, {'fields': (('name', 'active'), 'inventory', 'description',
                             'parents', 'variables')}),

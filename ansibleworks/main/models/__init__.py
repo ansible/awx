@@ -1,9 +1,15 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Python
 import json
 import os
 import shlex
+
+# PyYAML
+import yaml
+
+# Django
 from django.conf import settings
 from django.db import models, DatabaseError
 from django.db.models import CASCADE, SET_NULL, PROTECT
@@ -13,11 +19,18 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.utils.timezone import now
+
+# Django-JSONField
 from jsonfield import JSONField
+
+# Django-Taggit
 from taggit.managers import TaggableManager
+
+# Django-Celery
 from djcelery.models import TaskMeta
+
+# Django-REST-Framework
 from rest_framework.authtoken.models import Token
-import yaml
 
 # TODO: reporting model TBD
 
@@ -171,7 +184,12 @@ class Inventory(CommonModel):
         unique_together = (("name", "organization"),)
 
     organization = models.ForeignKey(Organization, null=False, related_name='inventories')
-    variables = models.TextField(blank=True, default='', null=True)
+    variables = models.TextField(
+        blank=True,
+        default='',
+        null=True,
+        help_text=_('Variables in JSON or YAML format.'),
+    )
     has_active_failures = models.BooleanField(default=False)
 
     def get_absolute_url(self):
@@ -179,8 +197,10 @@ class Inventory(CommonModel):
 
     @property
     def variables_dict(self):
-        # FIXME: Add YAML support.
-        return json.loads(self.variables or '{}')
+        try:
+            return json.loads(self.variables.strip() or '{}')
+        except ValueError:
+            return yaml.safe_load(self.variables)
 
     def update_has_active_failures(self):
         failed_hosts = self.hosts.filter(active=True, has_active_failures=True)
@@ -196,7 +216,11 @@ class Host(CommonModelNameNotUnique):
         app_label = 'main'
         unique_together = (("name", "inventory"),)
 
-    variables               = models.TextField(blank=True, default='')
+    variables = models.TextField(
+        blank=True,
+        default='',
+        help_text=_('Variables in JSON or YAML format.'),
+    )
     inventory               = models.ForeignKey('Inventory', null=False, related_name='hosts')
     last_job                = models.ForeignKey('Job', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job+')
     last_job_host_summary   = models.ForeignKey('JobHostSummary', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job_summary+')
@@ -221,8 +245,10 @@ class Host(CommonModelNameNotUnique):
 
     @property
     def variables_dict(self):
-        # FIXME: Add YAML support.
-        return json.loads(self.variables or '{}')
+        try:
+            return json.loads(self.variables.strip() or '{}')
+        except ValueError:
+            return yaml.safe_load(self.variables)
 
     @property
     def all_groups(self):
@@ -251,7 +277,11 @@ class Group(CommonModelNameNotUnique):
     inventory     = models.ForeignKey('Inventory', null=False, related_name='groups')
     # Can also be thought of as: parents == member_of, children == members
     parents       = models.ManyToManyField('self', symmetrical=False, related_name='children', blank=True)
-    variables     = models.TextField(blank=True, default='')
+    variables = models.TextField(
+        blank=True,
+        default='',
+        help_text=_('Variables in JSON or YAML format.'),
+    )
     hosts         = models.ManyToManyField('Host', related_name='groups', blank=True)
     has_active_failures = models.BooleanField(default=False)
 
@@ -269,8 +299,10 @@ class Group(CommonModelNameNotUnique):
 
     @property
     def variables_dict(self):
-        # FIXME: Add YAML support.
-        return json.loads(self.variables or '{}')
+        try:
+            return json.loads(self.variables.strip() or '{}')
+        except ValueError:
+            return yaml.safe_load(self.variables)
 
     def get_all_parents(self, except_pks=None):
         '''

@@ -17,7 +17,9 @@ from django.template import RequestContext
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import generics
+from rest_framework.parsers import YAMLParser
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import YAMLRenderer
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import APIView
@@ -118,6 +120,7 @@ class ApiV1ConfigView(APIView):
 
         data = dict(
             time_zone = settings.TIME_ZONE,
+            # FIXME: Special variables for inventory/group/host variable_data.
         )
         if request.user.is_superuser or request.user.admin_of_organizations.filter(active=True).count():
             data.update(dict(
@@ -958,26 +961,27 @@ class InventoryRootGroupsList(BaseSubList):
         all_ids = base.values_list('id', flat=True)
         return base.exclude(parents__pk__in = all_ids)
 
-class InventoryVariableDetail(BaseDetail):
+class BaseVariableDetail(BaseDetail):
+
+    permission_classes = (CustomRbac,)
+    parser_classes = api_settings.DEFAULT_PARSER_CLASSES + [YAMLParser]
+    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES + [YAMLRenderer]
+    is_variable_data = True # Special flag for RBAC
+    
+class InventoryVariableDetail(BaseVariableDetail):
 
     model = Inventory
     serializer_class = InventoryVariableDataSerializer
-    permission_classes = (CustomRbac,)
-    is_variable_data = True # Special flag for RBAC
 
-class HostVariableDetail(BaseDetail):
+class HostVariableDetail(BaseVariableDetail):
 
     model = Host
     serializer_class = HostVariableDataSerializer
-    permission_classes = (CustomRbac,)
-    is_variable_data = True # Special flag for RBAC
 
-class GroupVariableDetail(BaseDetail):
+class GroupVariableDetail(BaseVariableDetail):
 
     model = Group
     serializer_class = GroupVariableDataSerializer
-    permission_classes = (CustomRbac,)
-    is_variable_data = True # Special flag for RBAC
 
 class JobTemplateList(BaseList):
 

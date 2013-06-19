@@ -64,7 +64,7 @@ class Migration(DataMigration):
                 job_host_summary.failed = True
                 job_host_summary.save()
 
-        for job_event in orm.JobEvent.objects.all():
+        for job_event in orm.JobEvent.objects.order_by('pk'):
             job_event.play = job_event.event_data.get('play', '')
             job_event.task = job_event.event_data.get('task', '')
             job_event.parent = None

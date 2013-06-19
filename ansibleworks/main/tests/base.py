@@ -8,6 +8,7 @@ import os
 import shutil
 import tempfile
 
+import yaml
 from django.conf import settings
 from django.contrib.auth.models import User
 import django.test
@@ -143,22 +144,33 @@ class BaseTestMixin(object):
     def get_invalid_credentials(self):
         return ('random', 'combination')
         
-    def _generic_rest(self, url, data=None, expect=204, auth=None, method=None):
+    def _generic_rest(self, url, data=None, expect=204, auth=None, method=None,
+                      data_type=None, accept=None):
         assert method is not None
         method_name = method.lower()
         if method_name not in ('options', 'head', 'get', 'delete'):
             assert data is not None
-        client = Client()
+        client_kwargs = {}
+        if accept:
+            client_kwargs['HTTP_ACCEPT'] = accept
+        client = Client(**client_kwargs)
         auth = auth or self._current_auth
         if auth:
             if isinstance(auth, (list, tuple)):
                 client.login(username=auth[0], password=auth[1])
             elif isinstance(auth, basestring):
-                client = Client(HTTP_AUTHORIZATION='Token %s' % auth)
+                client_kwargs['HTTP_AUTHORIZATION'] = 'Token %s' % auth
+                client = Client(**client_kwargs)
         method = getattr(client, method_name)
         response = None
         if data is not None:
-            response = method(url, json.dumps(data), 'application/json')
+            data_type = data_type or 'json'
+            if data_type == 'json':
+                response = method(url, json.dumps(data), 'application/json')
+            elif data_type == 'yaml':
+                response = method(url, yaml.safe_dump(data), 'application/yaml')
+            else:
+                self.fail('Unsupported data_type %s' % data_type)
         else:
             response = method(url)
 
@@ -170,30 +182,48 @@ class BaseTestMixin(object):
             self.assertFalse(response.content)
         if response.status_code not in [ 202, 204, 405 ] and method_name != 'head' and response.content:
             # no JSON responses in these at least for now, 409 should probably return some (FIXME)
-            return json.loads(response.content)
+            if response['Content-Type'].startswith('application/json'):
+                return json.loads(response.content)
+            elif response['Content-Type'].startswith('application/yaml'):
+                return yaml.safe_load(response.content)
+            else:
+                self.fail('Unsupport response content type %s' % response['Content-Type'])
         else:
             return None
 
-    def options(self, url, expect=200, auth=None):
-        return self._generic_rest(url, data=None, expect=expect, auth=auth, method='options')
+    def options(self, url, expect=200, auth=None, accept=None):
+        return self._generic_rest(url, data=None, expect=expect, auth=auth,
+                                  method='options', accept=accept)
 
-    def head(self, url, expect=200, auth=None):
-        return self._generic_rest(url, data=None, expect=expect, auth=auth, method='head')
+    def head(self, url, expect=200, auth=None, accept=None):
+        return self._generic_rest(url, data=None, expect=expect, auth=auth,
+                                  method='head', accept=accept)
  
-    def get(self, url, expect=200, auth=None):
-        return self._generic_rest(url, data=None, expect=expect, auth=auth, method='get')
+    def get(self, url, expect=200, auth=None, accept=None):
+        return self._generic_rest(url, data=None, expect=expect, auth=auth,
+                                  method='get', accept=accept)
 
-    def post(self, url, data, expect=204, auth=None):
-        return self._generic_rest(url, data=data, expect=expect, auth=auth, method='post')
+    def post(self, url, data, expect=204, auth=None, data_type=None,
+             accept=None):
+        return self._generic_rest(url, data=data, expect=expect, auth=auth,
+                                  method='post', data_type=data_type,
+                                  accept=accept)
 
-    def put(self, url, data, expect=200, auth=None):
-        return self._generic_rest(url, data=data, expect=expect, auth=auth, method='put')
+    def put(self, url, data, expect=200, auth=None, data_type=None,
+            accept=None):
+        return self._generic_rest(url, data=data, expect=expect, auth=auth,
+                                  method='put', data_type=data_type,
+                                  accept=accept)
 
-    def patch(self, url, data, expect=200, auth=None):
-        return self._generic_rest(url, data=data, expect=expect, auth=auth, method='patch')
+    def patch(self, url, data, expect=200, auth=None, data_type=None,
+              accept=None):
+        return self._generic_rest(url, data=data, expect=expect, auth=auth,
+                                  method='patch', data_type=data_type,
+                                  accept=accept)
 
-    def delete(self, url, expect=201, auth=None):
-        return self._generic_rest(url, data=None, expect=expect, auth=auth, method='delete')
+    def delete(self, url, expect=201, auth=None, data_type=None, accept=None):
+        return self._generic_rest(url, data=None, expect=expect, auth=auth,
+                                  method='delete', accept=accept)
 
     def get_urls(self, collection_url, auth=None):
         # TODO: this test helper function doesn't support pagination
