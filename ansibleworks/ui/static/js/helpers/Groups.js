@@ -34,6 +34,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
         scope.formModalActionLabel = 'Finished';
         scope.formModalHeader = 'Add Group';
+        scope.formModalCancelShow = true;
         
         $('#form-modal').modal();
 
@@ -171,6 +172,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         
         scope.formModalActionLabel = 'Save';
         scope.formModalHeader = 'Create Group';
+        scope.formModalCancelShow = true;
         scope.parseType = 'json';
         ParseTypeChange(scope);
 
@@ -263,6 +265,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
         scope.formModalActionLabel = 'Save';
         scope.formModalHeader = 'Edit Group';
+        scope.formModalCancelShow = true;
         scope.parseType = 'json';
         ParseTypeChange(scope);
 

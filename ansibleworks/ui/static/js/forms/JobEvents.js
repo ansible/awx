@@ -12,15 +12,9 @@ angular.module('JobEventFormDefinition', [])
         
         editTitle: '{{ id }} - {{ event }}',                         //Legend in edit mode
         name: 'job_events',
-        well: true,
+        well: false,
         
         fields: {
-            id: {
-                label: 'Event ID',
-                type: 'text',
-                readonly: true,
-                "class": 'span2'
-                },
             event_display: {
                 label: 'Event',
                 type: 'text',
@@ -30,7 +24,7 @@ angular.module('JobEventFormDefinition', [])
                 label: 'Created',
                 type: 'text',
                 readonly: true,
-                "class": 'span4'
+                "class": 'span3'
                 },
             host: {
                 label: 'Host',
@@ -46,7 +40,7 @@ angular.module('JobEventFormDefinition', [])
             event_data: {
                 label: 'Event Data',
                 type: 'textarea',
-                "class": 'span12',
+                "class": "modal-input-xlarge",
                 rows: 10,
                 readonly: true
                 } 

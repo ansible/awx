@@ -22,18 +22,19 @@ angular.module('JobEventsListDefinition', [])
                 label: 'Creation Date',
                 key: true,
                 nosort: true,
-                notSearchable: true
+                notSearchable: true,
+                ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
                 },
             event_display: {
                 label: 'Event',
                 hasChildren: true,
-                link: true,
+                ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
                 nosort: true,
                 notSearchable: true
                 },
             host: {
                 label: 'Host',
-                ngClick: "viewHost(\{\{ jobevent.host \}\})",
+                ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
                 ngBind: 'jobevent.summary_fields.host.name',
                 searchField: 'hosts__name',
                 nosort: true,
@@ -80,7 +81,7 @@ angular.module('JobEventsListDefinition', [])
         fieldActions: {
             edit: {
                 label: 'View',
-                ngClick: "editJobEvent(\{\{ jobevent.id \}\})",
+                ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
                 icon: 'icon-zoom-in',
                 "class": 'btn-small',
                 awToolTip: 'View event details'

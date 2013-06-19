@@ -53,7 +53,8 @@ angular.module('ansible', [
     'GroupsHelper',
     'HostsHelper',
     'ParseHelper',
-    'ChildrenHelper'
+    'ChildrenHelper',
+    'EventsHelper'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.

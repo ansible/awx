@@ -35,6 +35,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         scope.formModalActionLabel = 'Finished';
         scope.formModalHeader = 'Add Host';
+        scope.formModalCancelShow = true;
         
         $('#form-modal').modal();
         $('#form-modal').unbind('hidden');
@@ -162,6 +163,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         
         scope.formModalActionLabel = 'Save';
         scope.formModalHeader = 'Create Host';
+        scope.formModalCancelShow = true;
         scope.parseType = 'json';
         ParseTypeChange(scope);
         
@@ -253,6 +255,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         scope.formModalActionLabel = 'Save';
         scope.formModalHeader = 'Edit Host';
+        scope.formModalCancelShow = true;
         scope.parseType = 'json';
         ParseTypeChange(scope);
         

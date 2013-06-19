@@ -12,7 +12,7 @@
 
 function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList,
                         GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                        ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren)
+                        ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren, EventView)
 {
     ClearScope('htmlTemplate');
     var list = JobEventList;
@@ -59,24 +59,9 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 
     LoadBreadCrumbs();
     
-    scope.editJobEvent = function(id) {
-       $location.path($location.path() + '/' + id);
+    scope.viewJobEvent = function(id) {
+       EventView({"event_id": id });
        }
-
-    scope.viewHost = function(id) {
-        if (id !== undefined && id !== null) {
-            Rest.setUrl(GetBasePath('jobs') + $routeParams.id + '/'); 
-            Rest.get()
-                .success( function(data, status, headers, config) {
-                    LoadBreadCrumbs({ path: '/inventories/' + data.inventory, title: data.summary_fields.inventory.name });
-                    $location.path('/inventories/' + data.inventory + /hosts/ + id);
-                    })
-                .error( function(data, status, headers, config) {
-                    ProcessErrors(scope, data, status, null,
-                       { hdr: 'Error!', msg: 'Failed to lookup job record for job ' + $routeParams.id + ' GET returned status: ' + status });
-                    });
-            };
-        }
 
     scope.refresh = function() {
        scope.search(list.iterator);
@@ -94,11 +79,11 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 
 JobEventsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
                            'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                           'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren'
+                           'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren', 'EventView'
                            ];
 
-function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventForm, 
-                        GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath) 
+function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventForm, GenerateForm,
+                        Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.

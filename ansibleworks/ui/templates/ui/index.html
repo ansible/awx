@@ -74,6 +74,7 @@
   <script src="{{ STATIC_URL }}js/helpers/Groups.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/Parse.js"></script>
+  <script src="{{ STATIC_URL }}js/helpers/Events.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/Children.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/directives.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/filters.js"></script>
@@ -177,7 +178,7 @@
       </div>
       <div class="modal-body" id="form-modal-body"></div>
       <div class="modal-footer">
-        <a href="#" data-target="#form-modal" data-dismiss="modal" class="btn btn">Cancel</a>
+        <a href="#" ng-show="formModalCancelShow" data-target="#form-modal" data-dismiss="modal" class="btn btn">Cancel</a>
         <a href="" ng-bind="formModalActionLabel" ng-click="formModalAction()" class="btn btn-success"></a>
       </div>
     </div>
