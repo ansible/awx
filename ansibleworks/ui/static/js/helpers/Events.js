@@ -1,4 +1,11 @@
-
+/*********************************************
+ *  Copyright (c) 2013 AnsibleWorks, Inc.
+ *
+ *  EventsHelper
+ *
+ *  EventView - show the job_events form in a modal dialog
+ *
+ */
 angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventFormDefinition'])
 .factory('EventView', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventForm', 'GenerateForm', 
          'Prompt', 'ProcessErrors', 'GetBasePath',

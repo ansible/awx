@@ -295,10 +295,16 @@
 
  .job-error, .job-failed,
  .active-failures-true,
+ .active-failures-true a,
+ .active-failures-true a:active,
  input[type="text"].job-failed,
  input[type="text"].job-error 
  {
     color: #da4f49;
+ }
+
+ .active-failures-true a:hover {
+    color: #FF0000;
  }
 
  .job-new,  input[type="text"].job-new,
@@ -441,6 +447,11 @@
     padding-top: 3px;
     padding-left: 0;
     margin-left: 0;
+ }
+
+ tr td button i {
+    margin-right: 0;
+    padding-top: 0;
  }
 
  #event_display-header {

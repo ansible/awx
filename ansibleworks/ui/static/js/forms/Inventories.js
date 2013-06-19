@@ -102,6 +102,7 @@ angular.module('InventoryFormDefinition', [])
                     has_active_failures: {
                         label: 'Failures',
                         showValue: false,
+                        ngClick: "showEvents('\{\{ host.name \}\}', '\{\{ host.related.last_job \}\}')",
                         ngShow: "\{\{ host.has_active_failures \}\}",
                         icon: 'icon-exclamation-sign',
                         "class": 'active-failures-\{\{ host.has_active_failures \}\}',

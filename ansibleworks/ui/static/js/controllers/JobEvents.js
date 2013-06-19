@@ -46,8 +46,16 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 
     SearchInit({ scope: scope, set: 'jobevents', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
-    scope.search(list.iterator);
 
+    // Called from Inventories tab host failed events link:
+    if ($routeParams.host) {
+       scope[list.iterator + 'SearchField'] = 'host'; 
+       scope[list.iterator + 'SearchValue'] = $routeParams.host;
+       scope[list.iterator + 'SearchFieldLabel'] = list.fields['host'].label;
+    }
+    
+    scope.search(list.iterator);
+    
     scope.toggleChildren = function(id, children) {
         ToggleChildren({
             scope: scope, 

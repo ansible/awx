@@ -417,6 +417,20 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       HostsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id, host_id: host_id, host_name: host_name });
       }
 
+  scope.showEvents = function(host_name, last_job) {
+      // When click on !Failed Events link, redirect to latest job/job_events for the host
+      Rest.setUrl(last_job);
+      Rest.get()
+          .success( function(data, status, headers, config) {
+              LoadBreadCrumbs({ path: '/jobs/' + data.id, title: data.name });
+              $location.url('/jobs/' + data.id + '/job_events/?host=' + escape(host_name));
+              })
+          .error( function(data, status, headers, config) {
+              ProcessErrors(scope, data, status, form,
+                  { hdr: 'Error!', msg: 'Failed to lookup last job: ' + last_job + '. GET status: ' + status });
+              });
+      }
+
 }
 
 InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 
