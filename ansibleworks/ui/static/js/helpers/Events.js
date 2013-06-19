@@ -27,7 +27,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventFormDefini
         scope.formModalHeader = 'View Event';
         scope.formModalCancelShow = false;
         
-        $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-info');
+        $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
         
         // Retrieve detail record and prepopulate the form
         Rest.setUrl(defaultUrl);

@@ -37,7 +37,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.formModalHeader = 'Add Host';
         scope.formModalCancelShow = true;
 
-        $('#form-modal .btn-info').removeClass('btn-info').addClass('btn-success');
+        $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').modal();
         $('#form-modal').unbind('hidden');
         $('#form-modal').on('hidden', function () { HostsReload(params); });
@@ -168,7 +168,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.parseType = 'json';
         ParseTypeChange(scope);
         
-        $('#form-modal .btn-info').removeClass('btn-info').addClass('btn-success');
+        $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').unbind('hidden');
         $('#form-modal').on('hidden', function () { HostsReload(params); });
         
@@ -261,7 +261,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.parseType = 'json';
         ParseTypeChange(scope);
         
-        $('#form-modal .btn-info').removeClass('btn-info').addClass('btn-success');
+        $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').unbind('hidden');
         $('#form-modal').on('hidden', function () { HostsReload(params); });
 

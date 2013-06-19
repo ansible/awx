@@ -37,7 +37,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.formModalCancelShow = true;
         scope.formModalActionClass = 'btn btn-success';
 
-        $('#form-modal .btn-info').removeClass('btn-info').addClass('btn-success');
+        $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').modal();
 
         scope.selected = [];
@@ -178,7 +178,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.parseType = 'json';
         ParseTypeChange(scope);
         
-        $('#form-modal .btn-info').removeClass('btn-info').addClass('btn-success');
+        $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
 
         generator.reset();
         var master={};
@@ -273,7 +273,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.parseType = 'json';
         ParseTypeChange(scope);
 
-        $('#form-modal .btn-info').removeClass('btn-info').addClass('btn-success');
+        $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
 
         // After the group record is loaded, retrieve any group variables
         if (scope.groupLoadedRemove) {
