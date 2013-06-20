@@ -119,13 +119,13 @@ angular.module('InventoryFormDefinition', [])
                         ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
                         },
                     has_active_failures: {
-                        label: 'Failures',
+                        label: 'Failed jobs?',
                         showValue: false,
                         ngClick: "showEvents('\{\{ host.name \}\}', '\{\{ host.related.last_job \}\}')",
                         ngShow: "\{\{ host.has_active_failures \}\}",
                         icon: 'icon-exclamation-sign',
                         "class": 'active-failures-\{\{ host.has_active_failures \}\}',
-                        text: 'Failed events',
+                        text: 'View failures',
                         searchField: 'has_active_failures',
                         searchType: 'boolean',
                         searchOptions: [{ name: "No", value: 0 }, { name: "Yes", value: 1 }]
