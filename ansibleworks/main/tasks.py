@@ -86,10 +86,13 @@ class RunJob(Task):
         # answer: TBD
         env['ACOM_JOB_ID'] = str(job.pk)
         env['ACOM_INVENTORY_ID'] = str(job.inventory.pk)
+        env['INVENTORY_ID'] = str(job.inventory.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
         env['ACOM_CALLBACK_EVENT_SCRIPT'] = callback_script
         if hasattr(settings, 'ANSIBLE_TRANSPORT'):
             env['ANSIBLE_TRANSPORT'] = getattr(settings, 'ANSIBLE_TRANSPORT')
+        env['REST_API_URL'] = settings.INTERNAL_API_URL
+        env['REST_API_TOKEN'] = job.callback_auth_token or ''
         env['ANSIBLE_NOCOLOR'] = '1' # Prevent output of escape sequences.
         return env
 
@@ -108,8 +111,11 @@ class RunJob(Task):
         # it doesn't make sense to rely on ansible-playbook's default of using
         # the current user.
         ssh_username = ssh_username or 'root'
-        inventory_script = self.get_path_to('management', 'commands',
-                                            'acom_inventory.py')
+        if False:
+            inventory_script = self.get_path_to('management', 'commands',
+                                                'acom_inventory.py')
+        else:
+            inventory_script = self.get_path_to('..', 'scripts', 'inventory.py')
         args = ['ansible-playbook', '-i', inventory_script]
         if job.job_type == 'check':
             args.append('--check')

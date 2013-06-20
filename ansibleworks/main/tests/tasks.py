@@ -7,7 +7,7 @@ import tempfile
 from django.conf import settings
 from django.test.utils import override_settings
 from ansibleworks.main.models import *
-from ansibleworks.main.tests.base import BaseTransactionTest
+from ansibleworks.main.tests.base import BaseTransactionTest, BaseLiveServerTest
 from ansibleworks.main.tasks import RunJob
 
 TEST_PLAYBOOK = '''- hosts: test-group
@@ -90,7 +90,7 @@ TEST_SSH_KEY_DATA_UNLOCK = 'unlockme'
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
-class BaseCeleryTest(BaseTransactionTest):
+class BaseCeleryTest(BaseLiveServerTest):#BaseTransactionTest):
     '''
     Base class for celery task tests.
     '''
@@ -128,6 +128,7 @@ class RunJobTest(BaseCeleryTest):
             self.build_args_callback()
             return args
         RunJob.build_args = new_build_args
+        settings.INTERNAL_API_URL = self.live_server_url
 
     def tearDown(self):
         super(RunJobTest, self).tearDown()
@@ -193,6 +194,7 @@ class RunJobTest(BaseCeleryTest):
                          expect_traceback=False):
         msg = 'job status is %s, expected %s' % (job.status, expected)
         msg = '%s\nargs:\n%s' % (msg, job.job_args)
+        msg = '%s\nenv:\n%s' % (msg, job.job_env)
         if job.result_traceback:
             msg = '%s\ngot traceback:\n%s' % (msg, job.result_traceback)
         if job.result_stdout:

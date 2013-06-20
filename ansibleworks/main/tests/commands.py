@@ -13,7 +13,7 @@ from django.utils.timezone import now
 from ansibleworks.main.models import *
 from ansibleworks.main.tests.base import BaseTest
 
-__all__ = ['RunCommandAsScriptTest', 'AcomInventoryTest',
+__all__ = ['RunCommandAsScriptTest',# 'AcomInventoryTest',
            'AcomCallbackEventTest']
 
 class BaseCommandTest(BaseTest):

@@ -26,6 +26,7 @@ from rest_framework.views import APIView
 
 # AnsibleWorks
 from ansibleworks.main.access import *
+from ansibleworks.main.authentication import JobCallbackAuthentication
 from ansibleworks.main.base_views import *
 from ansibleworks.main.models import *
 from ansibleworks.main.rbac import *
@@ -982,6 +983,53 @@ class GroupVariableDetail(BaseVariableDetail):
 
     model = Group
     serializer_class = GroupVariableDataSerializer
+
+class InventoryScriptView(generics.RetrieveAPIView):
+    '''
+    Return inventory group and host data as needed for an inventory script.
+    
+    Without query parameters, return groups with hosts, children and vars
+    (equivalent to the --list parameter to an inventory script).
+    
+    With ?host=HOSTNAME, return host vars for the given host (equivalent to the
+    --host HOSTNAME parameter to an inventory script).
+    '''
+
+    model = Inventory
+    authentication_classes = [JobCallbackAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    permission_classes = (JobCallbackPermission,)
+    filter_backends = ()
+
+    def retrieve(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        hostname = request.QUERY_PARAMS.get('host', '')
+        if hostname:
+            try:
+                host = self.object.hosts.get(active=True, name=hostname)
+                data = host.variables_dict
+            except Host.DoesNotExist:
+                raise Http404
+        else:
+            data = {}
+            for group in self.object.groups.filter(active=True):
+                hosts = group.hosts.filter(active=True)
+                children = group.children.filter(active=True)
+                group_info = {
+                    'hosts': list(hosts.values_list('name', flat=True)),
+                    'children': list(children.values_list('name', flat=True)),
+                    'vars': group.variables_dict,
+                }
+                group_info = dict(filter(lambda x: bool(x[1]),
+                                         group_info.items()))
+                if group_info.keys() in ([], ['hosts']):
+                    data[group.name] = group_info.get('hosts', [])
+                else:
+                    data[group.name] = group_info
+            if self.object.variables_dict:
+                data['all'] = {
+                    'vars': self.object.variables_dict,
+                }
+        return Response(data)
 
 class JobTemplateList(BaseList):
 

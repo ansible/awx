@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import hmac
 import json
 import os
 import shlex
@@ -813,6 +814,13 @@ class Job(CommonModel):
                 return TaskMeta.objects.get(task_id=self.celery_task_id)
         except TaskMeta.DoesNotExist:
             pass
+
+    @property
+    def callback_auth_token(self):
+        '''Return temporary auth token used for task callbacks via API.'''
+        if self.status == 'running':
+            h = hmac.new(settings.SECRET_KEY, self.created.isoformat())
+            return '%d-%s' % (self.pk, h.hexdigest())
 
     def get_passwords_needed_to_start(self):
         '''Return list of password field names needed to start the job.'''

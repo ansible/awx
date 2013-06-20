@@ -53,7 +53,7 @@ def proc_data_files(data_files):
 
 setup(
     name='ansibleworks',
-    version=__version__.split("-")[0],
+    version=__version__.split("-")[0], # FIXME: Should keep full version here?
     author='AnsibleWorks, Inc.',
     author_email='support@ansibleworks.com',
     description='AnsibleWorks API, UI and Task Engine',
@@ -75,6 +75,7 @@ setup(
         'pexpect',
         'python-dateutil',
         'PyYAML',
+        'requests',
         'South>=0.8,<2.0',
     ],
     setup_requires=[],

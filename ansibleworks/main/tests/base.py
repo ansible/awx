@@ -240,3 +240,8 @@ class BaseTransactionTest(BaseTestMixin, django.test.TransactionTestCase):
     Base class for tests requiring transactions (or where the test database
     needs to be accessed by subprocesses).
     '''
+
+class BaseLiveServerTest(BaseTestMixin, django.test.LiveServerTestCase):
+    '''
+    Base class for tests requiring a live test server.
+    '''

@@ -116,3 +116,15 @@ class CustomRbac(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return self.has_permission(request, view, obj)
+
+class JobCallbackPermission(CustomRbac):
+
+    def has_permission(self, request, view, obj=None):
+        # If another authentication method was used other than the one for job
+        # callbacks, return True to fall through to the next permission class.
+        if request.user or not request.auth:
+            return super(JobCallbackPermission, self).has_permission(request, view, obj)
+        # FIXME: Verify that inventory or job event requested are for the same
+        # job ID present in the auth token, etc.
+        return True
+

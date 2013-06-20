@@ -21,6 +21,8 @@ ALLOWED_HOSTS = []
 # Production should only use minified JS for UI.
 USE_MINIFIED_JS = True
 
+INTERNAL_API_URL = 'http://127.0.0.1:80'
+
 # If a local_settings.py file is present here, use it and ignore the global
 # settings.  Normally, local settings would only be present during development.
 try:

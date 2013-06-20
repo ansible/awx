@@ -133,7 +133,6 @@ INSTALLED_APPS = (
 INTERNAL_IPS = ('127.0.0.1',)
 
 REST_FRAMEWORK = {
-    'FILTER_BACKEND': 'ansibleworks.main.custom_filters.CustomFilterBackend',
     'DEFAULT_PAGINATION_SERIALIZER_CLASS': 'ansibleworks.main.pagination.PaginationSerializer',
     'PAGINATE_BY': 25,
     'PAGINATE_BY_PARAM': 'page_size',
@@ -141,6 +140,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'ansibleworks.main.custom_filters.CustomFilterBackend',
     ),
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
@@ -218,6 +220,9 @@ DEVSERVER_MODULES = (
     #'devserver.modules.profile.LineProfilerModule',
 )
 
+# Set default ports for live server tests.
+os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
+
 # Skip migrations when running tests.
 SOUTH_TESTS_MIGRATE = False
 
@@ -233,6 +238,11 @@ CELERYD_TASK_TIME_LIMIT = 3600
 CELERYD_TASK_SOFT_TIME_LIMIT = 3540
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
+
+if 'devserver' in INSTALLED_APPS:
+    INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
+else:
+    INTERNAL_API_URL = 'http://127.0.0.1:8000'
 
 LOGGING = {
     'version': 1,

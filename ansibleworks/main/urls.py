@@ -53,6 +53,7 @@ inventory_urls = patterns('ansibleworks.main.views',
     url(r'^(?P<pk>[0-9]+)/groups/$',                    'inventory_groups_list'),
     url(r'^(?P<pk>[0-9]+)/root_groups/$',               'inventory_root_groups_list'),
     url(r'^(?P<pk>[0-9]+)/variable_data/$',             'inventory_variable_detail'),
+    url(r'^(?P<pk>[0-9]+)/script/$',                    'inventory_script_view'),
 )
 
 host_urls = patterns('ansibleworks.main.views',
