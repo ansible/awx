@@ -2,81 +2,94 @@ PYTHON=python
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 RELEASE=ansibleworks-1.2b2
 
+.PHONY: clean rebase push setup requirements requirements_pypi develop refresh \
+	adduser syncdb migrate dbchange dbshell runserver celeryd test \
+	test_coverage coverage_html dev_build release_build release_ball \
+	release_clean sdist rpm
+
+# Remove temporary build files, compiled Python files.
 clean:
 	rm -rf build rpm-build *.egg-info
 	find . -type f -regex ".*\.py[co]$$" -delete
 
+# Fetch from origin, rebase local commits on top of origin commits.
 rebase:
 	git pull --rebase origin master
 
+# Push changes to origin.
 push:
-	git push
+	git push origin master
 
-zero:
-	# go back to original database state, be careful!
-	python manage.py migrate main zero 
-
+# Use Ansible to setup AnsibleWorks development environment.
 setup:
-	# use ansible to ansible ansible commander locally
 	ansible-playbook app_setup/setup.yml --verbose -i "127.0.0.1," -c local -e working_dir=`pwd`
 
+# Install third-party requirements needed for development environment (using
+# locally downloaded packages).
+requirements:
+	(cd requirements && pip install --no-index -r dev_local.txt)
+
+# Install third-party requirements needed for development environment
+# (downloading from PyPI if necessary).
+requirements_pypi:
+	pip install -r requirements/dev.txt
+
+# "Install" ansibleworks package in development mode.  Creates link to working
+# copy in site-packages and installs ansibleworks-manage command.
 develop:
-	# "Install" ansibleworks package in development mode.  Creates link to
-	# working copy in site-packages, 
 	python setup.py develop
 
-refresh: clean develop syncdb migrate
-	# update/refresh development environment after pulling new code
+# Refresh development environment after pulling new code.
+refresh: clean requirements develop migrate
 
+# Create Django superuser.
 adduser:
 	python manage.py createsuperuser
 
+# Create initial database tables (excluding migrations).
 syncdb:
-	# only run from initial setup
 	python manage.py syncdb --noinput
 
-runserver:
-	# run for testing the server
-	python manage.py runserver
-
-celeryd:
-	# run to start the background celery worker
-	python manage.py celeryd -l DEBUG -B --autoreload
-
-# already done and should not have to happen again:
-#
-#south_init:
-#	python manage.py schemamigration main --initial
-
-dbchange:
-	# run this each time we make changes to the model
-	python manage.py schemamigration main changes --auto
-
+# Create database tables and apply any new migrations.
+# The first command fixes migrations following cleanup for the 1.2b1 release.
 migrate: syncdb
-	# This command fixes migrations following the cleanup for the 1.2b1 release.
 	-(python manage.py migrate main 2>&1 | grep 0017_changes) && (python manage.py migrate main --delete-ghost-migrations --fake 0001_v12b1_initial || python manage.py migrate main --fake)
-        # run this to apply changes to the model
 	python manage.py migrate --noinput
 
+# Run after making changes to the models to create a new migration.
+dbchange:
+	python manage.py schemamigration main v12b2_changes --auto
+
+# access database shell
+# asks for password # PYTHON_PATH=./acom python acom/manage.py dbshell
 dbshell:
-	# access database shell
-	# asks for password # PYTHON_PATH=./acom python acom/manage.py dbshell
 	sudo -u postgres psql -d acom
 
+# Run the built-in development webserver (by default on http://localhost:8013).
+runserver:
+	python manage.py runserver
+
+# Run to start the background celery worker for development.
+celeryd:
+	python manage.py celeryd -l DEBUG -B --autoreload
+
+# Run all unit tests.
 test:
 	python manage.py test main
 
+# Run all unit tests with coverage enabled.
 test_coverage:
-	# Run tests with coverage enabled.
 	coverage run manage.py test main
 
+# Output test coverage as HTML (into htmlcov directory).
 coverage_html:
-	# Output test coverage as HTML (into htmlcov directory).
 	coverage html
 
+# Build a pip-installable package into dist/ with a timestamped version number.
 dev_build:
 	python setup.py dev_build
 
+# Build a pip-installable package into dist/ with the release version number.
 release_build:
 	python setup.py release_build
 

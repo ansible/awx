@@ -1,0 +1,19 @@
+# PIP requirements for AnsibleWorks production environment (downloaded from
+# PyPI). Install using "pip -r prod.txt".
+
+Django>=1.5
+django-celery
+django-extensions
+django-jsonfield
+django-taggit
+djangorestframework>=2.3.0,<2.4.0
+Markdown
+pexpect
+python-dateutil
+requests
+South>=0.8,<2.0
+
+# You may also need to install the following extra packages using the OS
+# package manager, or pip if you're running inside a virtualenv.
+# - ansible (via yum, pip or source checkout)
+# - psycopg2 (via "yum install python-psycopg2")
