@@ -29,14 +29,27 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Python
 import json
 import os
-import subprocess
-import sys
+import urllib
+import urlparse
+
+# Requests
+import requests
+
+class TokenAuth(requests.auth.AuthBase):
+
+    def __init__(self, token):
+        self.token = token
+
+    def __call__(self, request):
+        request.headers['Authorization'] = 'Token %s' % self.token
+        return request
 
 class CallbackModule(object):
     '''
-    Callback module for logging ansible-playbook events to the database.
+    Callback module for logging ansible-playbook job events via the REST API.
     '''
 
     # These events should never have an associated play.
@@ -55,7 +68,31 @@ class CallbackModule(object):
     ]
 
     def __init__(self):
-        self.callback_script = os.getenv('ACOM_CALLBACK_EVENT_SCRIPT')
+        self.job_id = int(os.getenv('JOB_ID'))
+        self.base_url = os.getenv('REST_API_URL')
+        self.auth_token = os.getenv('REST_API_TOKEN', '')
+
+    def _post_data(self, event, event_data):
+        data = json.dumps({
+            'event': event,
+            'event_data': event_data,
+        })
+        parts = urlparse.urlsplit(self.base_url)
+        if parts.username and parts.password:
+            auth = (parts.username, parts.password)
+        elif self.auth_token:
+            auth = TokenAuth(self.auth_token)
+        else:
+            auth = None
+        url = urlparse.urlunsplit([parts.scheme,
+                                   '%s:%d' % (parts.hostname, parts.port),
+                                   parts.path, parts.query, parts.fragment])
+        url_path = '/api/v1/jobs/%d/job_events/' % self.job_id
+        url = urlparse.urljoin(url, url_path)
+        headers = {'content-type': 'application/json'}
+        response = requests.post(url, data=data, headers=headers, auth=auth)
+        print response.content
+        response.raise_for_status()
 
     def _log_event(self, event, **event_data):
         play = getattr(getattr(self, 'play', None), 'name', '')
@@ -64,9 +101,7 @@ class CallbackModule(object):
         task = getattr(getattr(self, 'task', None), 'name', '')
         if task and event not in self.EVENTS_WITHOUT_TASK:
             event_data['task'] = task
-        event_data_json = json.dumps(event_data)
-        cmdline = [self.callback_script, '-e', event, '-d', event_data_json]
-        subprocess.check_call(cmdline)
+        self._post_data(event, event_data)
 
     def on_any(self, *args, **kwargs):
         pass

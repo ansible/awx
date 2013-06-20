@@ -79,16 +79,12 @@ class RunJob(Task):
         Build environment dictionary for ansible-playbook.
         '''
         plugin_dir = self.get_path_to('..', 'plugins', 'callback')
-        callback_script = self.get_path_to('management', 'commands',
-                                           'acom_callback_event.py')
         env = dict(os.environ.items())
         # question: when running over CLI, generate a random ID or grab next, etc?
         # answer: TBD
-        env['ACOM_JOB_ID'] = str(job.pk)
-        env['ACOM_INVENTORY_ID'] = str(job.inventory.pk)
+        env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
-        env['ACOM_CALLBACK_EVENT_SCRIPT'] = callback_script
         if hasattr(settings, 'ANSIBLE_TRANSPORT'):
             env['ANSIBLE_TRANSPORT'] = getattr(settings, 'ANSIBLE_TRANSPORT')
         env['REST_API_URL'] = settings.INTERNAL_API_URL

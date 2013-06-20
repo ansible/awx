@@ -5,7 +5,6 @@ from ansibleworks.main.tests.organizations import OrganizationsTest
 from ansibleworks.main.tests.users import UsersTest
 from ansibleworks.main.tests.inventory import InventoryTest
 from ansibleworks.main.tests.projects import ProjectsTest
-from ansibleworks.main.tests.commands import *
 from ansibleworks.main.tests.scripts import *
 from ansibleworks.main.tests.tasks import RunJobTest
 from ansibleworks.main.tests.jobs import *

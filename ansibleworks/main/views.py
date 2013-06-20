@@ -996,7 +996,8 @@ class InventoryScriptView(generics.RetrieveAPIView):
     '''
 
     model = Inventory
-    authentication_classes = [JobCallbackAuthentication] + api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    authentication_classes = [JobCallbackAuthentication] + \
+                             api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobCallbackPermission,)
     filter_backends = ()
 
@@ -1239,6 +1240,25 @@ class GroupJobEventsList(BaseJobEventsList):
 class JobJobEventsList(BaseJobEventsList):
 
     parent_model = Job
+    authentication_classes = [JobCallbackAuthentication] + \
+                             api_settings.DEFAULT_AUTHENTICATION_CLASSES
+    permission_classes = (JobCallbackPermission,)
+    
+    # Post allowed for job event callback only.
+    def post(self, request, *args, **kwargs):
+        parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
+        data = request.DATA.copy()
+        data['job'] = parent_obj.pk
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid():
+            self.pre_save(serializer.object)
+            self.object = serializer.save(force_insert=True)
+            self.post_save(self.object, created=True)
+            headers = {'Location': serializer.data['url']}
+            return Response(serializer.data, status=status.HTTP_201_CREATED,
+                            headers=headers)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to

@@ -6,6 +6,7 @@ from django.http import Http404
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import permissions
 from ansibleworks.main.access import *
+from ansibleworks.main.models import *
 
 logger = logging.getLogger('ansibleworks.main.rbac')
 
@@ -126,5 +127,13 @@ class JobCallbackPermission(CustomRbac):
             return super(JobCallbackPermission, self).has_permission(request, view, obj)
         # FIXME: Verify that inventory or job event requested are for the same
         # job ID present in the auth token, etc.
-        return True
-
+        #try:
+        #    job = Job.objects.get(active=True, status='running', pk=int(request.auth.split('-')[0]))
+        #except Job.DoesNotExist:
+        #    return False
+        if view.model == Inventory and request.method.lower() in ('head', 'get'):
+            return True
+        elif view.model == JobEvent and request.method.lower() == 'post':
+            return True
+        else:
+            return False

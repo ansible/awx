@@ -7,7 +7,7 @@ import tempfile
 from django.conf import settings
 from django.test.utils import override_settings
 from ansibleworks.main.models import *
-from ansibleworks.main.tests.base import BaseTransactionTest, BaseLiveServerTest
+from ansibleworks.main.tests.base import BaseLiveServerTest
 from ansibleworks.main.tasks import RunJob
 
 TEST_PLAYBOOK = '''- hosts: test-group
@@ -90,7 +90,7 @@ TEST_SSH_KEY_DATA_UNLOCK = 'unlockme'
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
-class BaseCeleryTest(BaseLiveServerTest):#BaseTransactionTest):
+class BaseCeleryTest(BaseLiveServerTest):
     '''
     Base class for celery task tests.
     '''
@@ -116,8 +116,6 @@ class RunJobTest(BaseCeleryTest):
         self.group.hosts.add(self.host)
         self.project = None
         self.credential = None
-        # Pass test database name in environment for use by the inventory script.
-        os.environ['ACOM_TEST_DATABASE_NAME'] = settings.DATABASES['default']['NAME']
         # Monkeypatch RunJob to capture list of command line arguments.
         self.original_build_args = RunJob.build_args
         self.run_job_args = None
@@ -132,7 +130,6 @@ class RunJobTest(BaseCeleryTest):
 
     def tearDown(self):
         super(RunJobTest, self).tearDown()
-        os.environ.pop('ACOM_TEST_DATABASE_NAME', None)
         if self.test_project_path:
             shutil.rmtree(self.test_project_path, True)
         RunJob.build_args = self.original_build_args

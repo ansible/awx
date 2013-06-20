@@ -747,17 +747,15 @@ MIDDLEWARE_CLASSES = filter(lambda x: not x.endswith('TransactionMiddleware'),
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                    ANSIBLE_TRANSPORT='local',
                    MIDDLEWARE_CLASSES=MIDDLEWARE_CLASSES)
-class JobStartCancelTest(BaseJobTestMixin, django.test.TransactionTestCase):
+class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
     '''Job API tests that need to use the celery task backend.'''
 
     def setUp(self):
         super(JobStartCancelTest, self).setUp()
-        # Pass test database name in environment for use by the inventory script.
-        os.environ['ACOM_TEST_DATABASE_NAME'] = settings.DATABASES['default']['NAME']
+        settings.INTERNAL_API_URL = self.live_server_url
 
     def tearDown(self):
         super(JobStartCancelTest, self).tearDown()
-        os.environ.pop('ACOM_TEST_DATABASE_NAME', None)
 
     def test_job_start(self):
         job = self.job_ops_east_run
