@@ -82,6 +82,7 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
                    listScope[list.iterator + "_" + id + "_class"] = "success";
                 }
                 }
+                
             SearchInit({ scope: listScope, set: list.name, list: list, url: defaultUrl });
             PaginateInit({ scope: listScope, list: list, url: defaultUrl, mode: 'lookup' });
             listScope.search(list.iterator);

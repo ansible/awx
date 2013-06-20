@@ -61,12 +61,6 @@
     width: 130px;
  }
 
- /*.modal-header {
-    border-bottom: 1px solid #000;
-    padding-top: 15px;
-    padding-bottom: 15px;
- }*/
-
  a:hover {
     text-decoration: none;
  }
@@ -496,7 +490,7 @@
 
 /* overrides to TB modal */
 .modal-header {
-  padding: 15px 15px;
+  padding: 10px 10;
   border-bottom: 1px solid #eee;
   background-color: #36454F;
   color: #A9A9A9;
@@ -519,6 +513,11 @@
 }
 
 .modal-header h3 {
+  font-size: 20px;
   margin: 0;
   text-rendering: optimizeLegibility;
+}
+
+.modal-body {
+  padding-top: 30px;
 }
