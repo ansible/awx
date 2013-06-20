@@ -410,6 +410,30 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           html += "</div>\n";
        }
 
+       //text fields
+       if (field.type == 'custom') {
+          if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {
+             html += "<div class=\"control-group\""
+             html += (field.ngShow) ? this.attr(field,'ngShow') : "";
+             html += ">\n";
+             html += "<label class=\"control-label"; 
+             html += (field.labelClass) ? " " + field.labelClass : "";
+             html += "\" for=\"" + fld + '">';
+             if (field.awPopOver) {
+                html += "<a href=\"\" " + this.attr(field,'awPopOver');
+                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
+                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
+                html += "><i class=\"icon-info-sign\"></i></a> ";
+             }
+             html += (field.icon) ? this.icon(field.icon) : "";
+             html += field.label + '</label>' + "\n";
+             html += "<div class=\"controls\">\n"; 
+             html += field.control;
+             html += "</div>\n";
+             html += "</div>\n";
+           }
+        }
+
        return html;
        },
 

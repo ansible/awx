@@ -40,7 +40,7 @@ angular.module('GroupFormDefinition', [])
                 dataPlacement: 'right',
                 awPopOver: "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                     '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
-                    '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansiblewors.com</a></p>'
+                    '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>'
                 }
             },
 

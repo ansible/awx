@@ -149,7 +149,7 @@ angular.module('AWDirectives', ['RestServices'])
        }
        })
      
-     /*  
+    /*  
      *  Enable TB pop-overs. To add a pop-over to an element, include the following directive in
      *  the element's attributes:
      *

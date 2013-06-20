@@ -307,6 +307,11 @@
     color: #FF0000;
  }
 
+ .job-failures-true {
+    padding-top: 5px;
+    color: #da4f49;
+ }
+
  .job-new,  input[type="text"].job-new,
  .job-canceled,  input[type="text"].job-canceled {
     color: #778899;

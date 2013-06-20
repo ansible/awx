@@ -19,7 +19,8 @@ SECRET_KEY = None
 ALLOWED_HOSTS = []
 
 # Production should only use minified JS for UI.
-USE_MINIFIED_JS = True
+# CLH 6/20/13 - leave the following set to False until we actually have minified js ready
+USE_MINIFIED_JS = False
 
 INTERNAL_API_URL = 'http://127.0.0.1:80'
 

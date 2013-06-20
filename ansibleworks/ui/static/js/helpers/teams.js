@@ -68,7 +68,7 @@ angular.module('TeamHelper', [ 'RestServices', 'Utilities', 'OrganizationListDef
             var list = OrganizationList; 
             var listGenerator = GenerateList;
             var listScope = listGenerator.inject(list, { mode: 'lookup', hdr: 'Select Organization' });
-            var defaultUrl = '/api/v1/organizations';
+            var defaultUrl = '/api/v1/organizations/';
 
             listScope.selectAction = function() {
                 var found = false;

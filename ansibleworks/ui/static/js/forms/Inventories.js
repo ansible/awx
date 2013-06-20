@@ -17,22 +17,34 @@ angular.module('InventoryFormDefinition', [])
         collapse: true,
         collapseTitle: 'Edit Inventory',
         collapseMode: 'edit',
+        twoColumns: true,
 
         fields: {
+            has_active_failures: {
+                label: 'Host Status',
+                control: '<div class="job-failures-\{\{ has_active_failures \}\}">' +
+                    '<i class="icon-exclamation-sign"></i> Failed jobs</div>',
+                type: 'custom',
+                ngShow: 'has_active_failures',
+                readonly: true,
+                column: 1
+                },
             inventory_name: {
                 realName: 'name',
                 label: 'Name',
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                capitalize: false
+                capitalize: false,
+                column: 1
                 },
             inventory_description: { 
                 realName: 'description',
                 label: 'Description',
                 type: 'text',
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                column: 1
                 },
             organization: {
                 label: 'Organization',
@@ -41,12 +53,23 @@ angular.module('InventoryFormDefinition', [])
                 sourceField: 'name',
                 addRequired: true,
                 editRequired: true,
-                ngClick: 'lookUpOrganization()'
+                ngClick: 'lookUpOrganization()',
+                column: 1
                 },
-            has_active_failures: {
-                label: 'Failures',
-                readonly: true,
-                type: 'text'
+            variables: {
+                label: 'Variables',
+                type: 'textarea',
+                addRequired: false,
+                editRequird: false, 
+                rows: 10,
+                "class": "modal-input-xlarge",
+                "default": "\{\}",
+                awPopOver: "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                    '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                    '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
+                dataTitle: 'Inventory Variables',
+                dataPlacement: 'bottom',
+                column: 2
                 }
             },
 
