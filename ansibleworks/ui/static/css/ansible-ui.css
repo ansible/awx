@@ -513,7 +513,8 @@
 }
 
 .modal-header h3 {
-  font-size: 20px;
+  font-size: 22px;
+  font-weight: normal;
   margin: 0;
   text-rendering: optimizeLegibility;
 }

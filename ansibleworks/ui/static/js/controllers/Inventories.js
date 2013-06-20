@@ -158,7 +158,8 @@ InventoriesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$route
 
 function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-                         GenerateList, OrganizationList, SearchInit, PaginateInit, LookUpInit, GetBasePath) 
+                         GenerateList, OrganizationList, SearchInit, PaginateInit, LookUpInit, GetBasePath,
+                         ParseTypeChange) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -168,9 +169,12 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    var form = InventoryForm;
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
+   scope.parseType = 'json';
+   
    generator.reset();
    LoadBreadCrumbs();
-   
+   ParseTypeChange(scope);
+
    LookUpInit({
        scope: scope,
        form: form,
@@ -181,43 +185,76 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    
    // Save
    scope.formSave = function() {
-      Rest.setUrl(defaultUrl);
-      var data = {}
-      for (var fld in form.fields) {
-          if (form.fields[fld].realName) {
-             data[form.fields[fld].realName] = scope[fld];
-          }
-          else {
-             data[fld] = scope[fld];  
-          }
-      }
-      Rest.post(data)
-          .success( function(data, status, headers, config) {
-              $location.path('/inventories/' + data.id);
-              })
-          .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to add new inventory. Post returned status: ' + status });
-              });
-      };
+
+       try { 
+           // Make sure we have valid variable data
+           if (scope.parseType == 'json') {
+              var myjson = JSON.parse(scope.variables);  //make sure JSON parses
+              var json_data = scope.variables;
+           }
+           else {
+              var json_data = jsyaml.load(scope.variables);  //parse yaml
+           }
+          
+           var data = {}
+           for (var fld in form.fields) {
+               if (fld != 'variables') {
+                  if (form.fields[fld].realName) {
+                     data[form.fields[fld].realName] = scope[fld];
+                  }
+                  else {
+                     data[fld] = scope[fld];  
+                  }
+               }
+           }
+
+           Rest.setUrl(defaultUrl);
+           Rest.post(data)
+               .success( function(data, status, headers, config) {
+                   var inventory_id = data.id;
+                   if (scope.variables) {
+                      Rest.setUrl(data.related.variable_data);
+                      Rest.put(json_data)
+                          .success( function(data, status, headers, config) {
+                              $location.path('/inventories/' + inventory_id);           
+                              })
+                          .error( function(data, status, headers, config) {
+                              ProcessErrors(scope, data, status, form,
+                                 { hdr: 'Error!', msg: 'Failed to add inventory varaibles. PUT returned status: ' + status });
+                          });
+                   }
+                   else {
+                      $location.path('/inventories/' + inventory_id);
+                   }
+                   })
+               .error( function(data, status, headers, config) {
+                   ProcessErrors(scope, data, status, form,
+                       { hdr: 'Error!', msg: 'Failed to add new inventory. Post returned status: ' + status });
+                   });
+       }
+       catch(err) {
+           Alert("Error", "Error parsing inventory variables. Parser returned " + err);  
+           }      
+       
+       };
 
    // Reset
    scope.formReset = function() {
-      // Defaults
-      generator.reset();
-      }; 
+       // Defaults
+       generator.reset();
+       }; 
 }
 
 InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm', 
                            'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
-                           'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit', 'GetBasePath' ]; 
+                           'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange']; 
 
 
-function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 
+function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm,
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                           OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsEdit, LoadInventory,
-                          GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshTree) 
+                          GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshTree, ParseTypeChange) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -230,6 +267,9 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    var base = $location.path().replace(/^\//,'').split('/')[0];
    var id = $routeParams.id;
    
+   ParseTypeChange(scope);
+
+   scope.parseType = 'json';
    scope['inventory_id'] = id;
    
    // Retrieve each related set and any lookups
@@ -248,6 +288,27 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
            list: OrganizationList, 
            field: 'organization' 
            });
+
+       if (scope.variable_url) {
+          Rest.setUrl(scope.variable_url);
+          Rest.get()
+              .success( function(data, status, headers, config) {
+                  if ($.isEmptyObject(data)) {
+                     scope.variables = "\{\}";
+                  }
+                  else {
+                     scope.variables = JSON.stringify(data, null, " ");
+                  }
+                  })
+              .error( function(data, status, headers, config) {
+                  scope.variables = null;
+                  ProcessErrors(scope, data, status, form,
+                      { hdr: 'Error!', msg: 'Failed to retrieve inventory variables. GET returned status: ' + status });
+                  });
+          }
+          else {
+              scope.variables = "\{\}";
+          }
        });
   
    LoadInventory({ scope: scope });
@@ -256,28 +317,58 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       RefreshTree({ scope: scope });
    }
 
-   // Save changes to the parent
+   // Save
    scope.formSave = function() {
-      Rest.setUrl(defaultUrl + $routeParams.id + '/');
-      var data = {}
-      for (var fld in form.fields) {
-          if (form.fields[fld].realName) {
-             data[form.fields[fld].realName] = scope[fld];
-          }
-          else {
-             data[fld] = scope[fld];  
-          }
-      }
-      Rest.put(data)
-          .success( function(data, status, headers, config) {
-              var base = $location.path().replace(/^\//,'').split('/')[0];
-              (base == 'inventories') ? ReturnToCaller() : ReturnToCaller(1);
-              })
-          .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to update inventory: ' + $routeParams.id + '. PUT status: ' + status });
-              });
-      };
+       try { 
+           // Make sure we have valid variable data
+           if (scope.parseType == 'json') {
+              var myjson = JSON.parse(scope.variables);  //make sure JSON parses
+              var json_data = scope.variables;
+           }
+           else {
+              var json_data = jsyaml.load(scope.variables);  //parse yaml
+           }
+          
+           var data = {}
+           for (var fld in form.fields) {
+               if (fld != 'variables') {
+                  if (form.fields[fld].realName) {
+                     data[form.fields[fld].realName] = scope[fld];
+                  }
+                  else {
+                     data[fld] = scope[fld];  
+                  }
+               }
+           }
+
+           Rest.setUrl(defaultUrl + id + '/');
+           Rest.put(data)
+               .success( function(data, status, headers, config) {
+                   if (scope.variables) {
+                      Rest.setUrl(data.related.variable_data);
+                      Rest.put(json_data)
+                          .success( function(data, status, headers, config) {
+                              $location.path('/inventories');           
+                              })
+                          .error( function(data, status, headers, config) {
+                              ProcessErrors(scope, data, status, form,
+                                 { hdr: 'Error!', msg: 'Failed to update inventory varaibles. PUT returned status: ' + status });
+                          });
+                   }
+                   else {
+                      $location.path('/inventories');
+                   }
+                   })
+               .error( function(data, status, headers, config) {
+                   ProcessErrors(scope, data, status, form,
+                       { hdr: 'Error!', msg: 'Failed to update new inventory. Post returned status: ' + status });
+                   });
+       }
+       catch(err) {
+           Alert("Error", "Error parsing inventory variables. Parser returned " + err);  
+           }      
+       
+       };
 
    // Cancel
    scope.formReset = function() {
@@ -437,6 +528,7 @@ InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$l
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsEdit', 'LoadInventory',
-                            'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete', 'RefreshTree'
+                            'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete', 'RefreshTree',
+                            'ParseTypeChange'
                             ]; 
   

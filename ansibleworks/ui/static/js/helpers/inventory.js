@@ -229,6 +229,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
 
                 // Load the tree view
                 scope.TreeParams = { scope: scope, inventory: data };
+                scope.variable_url = data.related.variable_data;
                 scope.relatedSets['hosts'] = { url: data.related.hosts, iterator: 'host' };
                 RelatedSearchInit({ scope: scope, form: form, relatedSets: scope.relatedSets });
                 RelatedPaginateInit({ scope: scope, relatedSets: scope.relatedSets });
