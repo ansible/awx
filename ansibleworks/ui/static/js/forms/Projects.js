@@ -30,11 +30,29 @@ angular.module('ProjectFormDefinition', [])
                 addRequired: false,
                 editRequired: false
                 },
+            base_dir: {
+                label: 'Project Base Path',
+                type: 'textarea',
+                "class": 'span6',
+                showonly: true,
+                awPopOver: '<p>Base path used for locating playbooks. Directories found inside this path will be listed in the Project Path drop-down. ' +
+                  'Together the base path and selected project path provide the full path used to locate playbooks for this project.</p>' + 
+                  '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
+                dataTitle: 'Project Base Path',
+                dataPlacement: 'right'
+                },
             local_path: { 
-                label: 'Local Path',
-                type: 'text',
+                label: 'Project Path',
+                type: 'select',
+                id: 'local-path-select',
+                ngOptions: 'path for path in project_local_paths',
                 addRequired: true,
-                editRequired: true
+                editRequired: true,
+                awPopOver: '<p>Select from the list of directories found in the base path.' +
+                  'Together the base path and selected project path provide the full path used to locate playbooks for this project.</p>' + 
+                  '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
+                dataTitle: 'Project Path',
+                dataPlacement: 'right'
                 }
             },
 

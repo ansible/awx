@@ -165,7 +165,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                 html += (field.placeholder) ? this.attr(field,'placeholder') : "";
                 html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
                 html += (options.mode == 'add' && field.addRequired) ? "required " : "";
-                html += (field.readonly) ? "readonly " : "";
+                html += (field.readonly || field.showonly) ? "readonly " : "";
                 html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
                 html += (field.capitalize) ? "capitalize " : "";
                 html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
@@ -230,7 +230,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              html += (field.placeholder) ? this.attr(field,'placeholder') : "";
              html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
              html += (options.mode == 'add' && field.addRequired) ? "required " : "";
-             html += (field.readonly) ? "readonly " : "";
+             html += (field.readonly || field.showonly) ? "readonly " : "";
              html += "></textarea><br />\n";
              // Add error messages
              if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {

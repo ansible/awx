@@ -153,7 +153,7 @@ ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routePar
 
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
                       GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, 
-                      GetBasePath, ReturnToCaller) 
+                      GetBasePath, ReturnToCaller, GetProjectPath) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -165,9 +165,11 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    var defaultUrl = GetBasePath('projects');
    var scope = generator.inject(form, {mode: 'add', related: false});
    var id = $routeParams.id;
+   var master = {};
+
    generator.reset();
-   
    LoadBreadCrumbs();
+   GetProjectPath({ scope: scope, master: master });
 
    // Save
    scope.formSave = function() {
@@ -190,19 +192,22 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    // Cancel
    scope.formReset = function() {
       $rootScope.flashMessage = null;
-      form.reset();
+      generator.reset();
+      for (var fld in master) {
+          scope[fld] = master[fld];
+      }
       }; 
 }
 
 ProjectsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
                         'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
-                        'ReturnToCaller'
+                        'ReturnToCaller', 'GetProjectPath'
                         ];
 
 
 function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
                        GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
-                       RelatedPaginateInit, Prompt, ClearScope, GetBasePath, ReturnToCaller) 
+                       RelatedPaginateInit, Prompt, ClearScope, GetBasePath, ReturnToCaller, GetProjectPath) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -218,6 +223,9 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    var master = {};
    var id = $routeParams.id;
    var relatedSets = {}; 
+   
+   scope.project_local_paths = [];
+   scope.base_dir = ''; 
 
    // After the project is loaded, retrieve each related set
    if (scope.projectLoadedRemove) {
@@ -227,6 +235,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
        for (var set in relatedSets) {
            scope.search(relatedSets[set].iterator);
        }
+       GetProjectPath({ scope: scope, master: master });
        });
 
    // Retrieve detail record and prepopulate the form
@@ -276,7 +285,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
 
    // Reset the form
    scope.formReset = function() {
-      form.reset();
+      generator.reset();
       for (var fld in master) {
           scope[fld] = master[fld];
       }
@@ -319,5 +328,6 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
 
 ProjectsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
                          'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit',
-                         'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath', 'ReturnToCaller'
+                         'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 
+                         'GetProjectPath'
                           ];
