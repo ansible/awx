@@ -129,7 +129,7 @@ JobsListCtrl.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routePar
 function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, 
                   GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
                   RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList, CredentialList,
-                  ProjectList, LookUpInit, PromptPasswords, GetBasePath) 
+                  ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -190,8 +190,19 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
        }
        // Set the playbook lookup
        getPlaybooks(scope.project);
+
+       // display/hide host callback fields
+       var dft = (scope['host_config_key']) ? 'true' : 'false';
+       md5Setup({
+           scope: scope, 
+           master: master, 
+           check_field: 'allow_callbacks',
+           default_val: dft
+           });
+
        $('#forks-slider').slider("option", "value", scope.forks);
        $('#forks-slider').slider("disable");
+       $('input[type="checkbox"]').attr('disabled','disabled');
        });
 
    // Our job type options
@@ -387,5 +398,5 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 JobsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobForm', 
                      'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList',
-                     'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath'
+                     'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup'
                      ];

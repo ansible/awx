@@ -140,6 +140,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {
              html += "<div class=\"control-group\""
              html += (field.ngShow) ? this.attr(field,'ngShow') : "";
+             html += (field.ngHide) ? this.attr(field,'ngHide') : "";
              html += ">\n";
              html += "<label class=\"control-label"; 
              html += (field.labelClass) ? " " + field.labelClass : "";
@@ -153,7 +154,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              html += (field.icon) ? this.icon(field.icon) : "";
              html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n"; 
-             html += (field.clear) ? "<div class=\"input-append\">\n" : "";
+             html += (field.clear || field.genMD5) ? "<div class=\"input-append\">\n" : "";
              if (field.control === null || field.control === undefined || field.control) {
                 html += "<input ";
                 html += this.attr(field,'type');
@@ -174,6 +175,13 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                 if (field.clear) {
                    html += " \n<button class=\"btn\" ng-click=\"clear('" + fld + "','" + field.associated + "')\" " + 
                        "aw-tool-tip=\"Clear " + field.label + "\" id=\"" + fld + "-clear-btn\"><i class=\"icon-undo\"></i></button>\n";
+                   html += "</div>\n";
+                }
+                if (field.genMD5) {
+                   html += " \n<button class=\"btn\" ng-click=\"genMD5('" + fld + "')\" " + 
+                       "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + fld + "-gen-btn\"><i class=\"icon-repeat\"></i></button>\n";
+                   html += " \n<button style=\"margin-left: 10px;\" class=\"btn\" ng-click=\"selectAll('" + fld + "')\" " + 
+                       "aw-tool-tip=\"Select " + field.label + " for copy\" data-placement=\"top\" id=\"" + fld + "-gen-btn\"><i class=\"icon-copy\"></i></button>\n";
                    html += "</div>\n";
                 }
                 if (field.ask) {

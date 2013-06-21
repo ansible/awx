@@ -158,7 +158,7 @@ JobTemplatesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$rout
 
 function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-                          GetBasePath, InventoryList, CredentialList, ProjectList, LookUpInit) 
+                          GetBasePath, InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -168,16 +168,25 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
    var form = JobTemplateForm;
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
-   
+   var master = {};
+
    scope.job_type_options = [{ value: 'run', label: 'Run' }, { value: 'check', label: 'Check' }];
    scope.verbosity_options = [
        { value: '0', label: 'Default' },
        { value: '1', label: 'Verbose' },
        { value: '3', label: 'Debug' }];
    scope.playbook_options = []; 
+   scope.allow_callbacks = 'false';
 
    generator.reset();
    LoadBreadCrumbs();
+
+   md5Setup({
+      scope: scope, 
+      master: master, 
+      check_field: 'allow_callbacks',
+      default_val: false
+      });
 
    LookUpInit({
       scope: scope,
@@ -259,18 +268,21 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
       // Defaults
       generator.reset();
       $('#forks-slider').slider("option", "value", scope.forks);
+      for (var fld in master) {
+          scope[fld] = master[fld];
+      }
       };
 }
 
 JobTemplatesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
-                            'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit' ]; 
+                            'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit', 'md5Setup' ]; 
 
 
 function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, 
                            GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                            RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList, CredentialList,
-                           ProjectList, LookUpInit, PromptPasswords, GetBasePath) 
+                           ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -335,6 +347,15 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
        }
        getPlaybooks(scope.project);
        $('#forks-slider').slider('value',scope.forks);   // align slider handle with value.
+
+       var dft = (scope['host_config_key']) ? 'true' : 'false';
+       md5Setup({
+           scope: scope, 
+           master: master, 
+           check_field: 'allow_callbacks',
+           default_val: dft
+           });
+
        });
 
    // Retrieve detail record and prepopulate the form
@@ -484,5 +505,5 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
 JobTemplatesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm', 
                              'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                              'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList',
-                             'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath'
+                             'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup'
                              ]; 

@@ -141,6 +141,24 @@ angular.module('JobTemplateFormDefinition', [])
                     "#passing-variables-on-the-command-line\" target=\"_blank\">Click here to view documentation and examples.</a></p>",
                 dataTitle: 'Extra Variables',
                 dataPlacement: 'left'
+                },
+            allow_callbacks: {
+                label: 'Allow Callbacks',
+                type: 'checkbox',
+                addRequired: false, 
+                editRequird: false,
+                trueValue: 'true',
+                falseValue: 'false',
+                ngChange: "toggleCallback('host_config_key')",
+                "class": "span12",
+                column: 2
+                },
+            host_config_key: {
+                label: 'Host Config Key',
+                type: 'text',
+                ngShow: "allow_callbacks",
+                genMD5: true,
+                column: 2
                 }
             },
 
