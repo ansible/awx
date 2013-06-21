@@ -42,7 +42,7 @@ angular.module('JobTemplateFormDefinition', [])
                 awPopOver: "<p>When this template is submitted as a job, setting the type to <em>run</em> will execute the playbook, running tasks " +
                     " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, ansible will check playbook " +
                     " syntax, test environment setup and report problems.</p>",
-                dataTitle: 'Forks',
+                dataTitle: 'Job Type',
                 dataPlacement: 'right'
                 },
             inventory: {
@@ -112,7 +112,7 @@ angular.module('JobTemplateFormDefinition', [])
                     "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see the " +
                     "<a href=\"http://ansible.cc/docs/patterns.html#selecting-targets\" target=\"_blank\">Selecting Targets section</a> under Inventory and Patterns " + 
                     " in the Ansible documentation.</p>",
-                dataTitle: 'Forks',
+                dataTitle: 'Limit',
                 dataPlacement: 'left'
                 },
             verbosity: {
