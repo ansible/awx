@@ -181,7 +181,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                    html += " \n<button class=\"btn\" ng-click=\"genMD5('" + fld + "')\" " + 
                        "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + fld + "-gen-btn\"><i class=\"icon-repeat\"></i></button>\n";
                    html += " \n<button style=\"margin-left: 10px;\" class=\"btn\" ng-click=\"selectAll('" + fld + "')\" " + 
-                       "aw-tool-tip=\"Select " + field.label + " for copy\" data-placement=\"top\" id=\"" + fld + "-gen-btn\"><i class=\"icon-copy\"></i></button>\n";
+                       "aw-tool-tip=\"Select " + field.label + " for copy\" data-placement=\"top\" id=\"" + fld + "-copy-btn\"><i class=\"icon-copy\"></i></button>\n";
                    html += "</div>\n";
                 }
                 if (field.ask) {

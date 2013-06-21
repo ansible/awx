@@ -191,18 +191,29 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
        // Set the playbook lookup
        getPlaybooks(scope.project);
 
-       // display/hide host callback fields
-       var dft = (scope['host_config_key']) ? 'true' : 'false';
-       md5Setup({
-           scope: scope, 
-           master: master, 
-           check_field: 'allow_callbacks',
-           default_val: dft
-           });
-
        $('#forks-slider').slider("option", "value", scope.forks);
        $('#forks-slider').slider("disable");
-       $('input[type="checkbox"]').attr('disabled','disabled');
+      
+       // Get job template and display/hide host callback fields
+       Rest.setUrl(scope.template_url);
+       Rest.get()
+           .success( function(data, status, headers, config) {
+               var dft = (data['host_config_key']) ? 'true' : 'false';
+               scope['host_config_key'] = data['host_config_key'];
+               md5Setup({
+                   scope: scope, 
+                   master: master, 
+                   check_field: 'allow_callbacks',
+                   default_val: dft
+                   });
+               $('input[type="checkbox"]').attr('disabled','disabled');
+               $('#host_config_key-gen-btn').attr('disabled','disabled');
+               })
+           .error( function(data, status, headers, config) {
+               ProcessErrors(scope, data, status, form,
+                   { hdr: 'Error!', msg: 'Failed to retrieve job: ' + $routeParams.id + '. GET status: ' + status });
+               });
+       
        });
 
    // Our job type options
@@ -293,11 +304,12 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
            RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
            RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
+           scope.template_url = data.related.job_template;
            scope.$emit('jobLoaded');
            })
        .error( function(data, status, headers, config) {
            ProcessErrors(scope, data, status, form,
-                         { hdr: 'Error!', msg: 'Failed to retrieve job template: ' + $routeParams.id + '. GET status: ' + status });
+               { hdr: 'Error!', msg: 'Failed to retrieve job: ' + $routeParams.id + '. GET status: ' + status });
            });
 
    // Save changes to the parent
