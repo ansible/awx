@@ -43,7 +43,7 @@ def proc_data_files(data_files):
 
     result = []
 
-    # Ff running in a virtualenv, don't return data files that would install to
+    # If running in a virtualenv, don't return data files that would install to
     # system paths (mainly useful for running tests via tox).
     if hasattr(sys, 'real_prefix'):
         return result

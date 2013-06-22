@@ -857,7 +857,7 @@ class Job(CommonModel):
         self.save(update_fields=['status'])
         task_result = RunJob().delay(self.pk, **opts)
         # Reload job from database so we don't clobber results from RunJob
-        # (mainly from tests when using Djanog 1.4.x).
+        # (mainly from tests when using Django 1.4.x).
         job = Job.objects.get(pk=self.pk)
         # The TaskMeta instance in the database isn't created until the worker
         # starts processing the task, so we can only store the task ID here.
