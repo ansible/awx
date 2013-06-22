@@ -252,7 +252,7 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse',
         },
         'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
+            '()': 'ansibleworks.main.compat.RequireDebugTrue',
         },
     },
     'formatters': {

@@ -15,4 +15,4 @@ rpm-build
 coverage.xml
 pep8.txt
 .vagrant*
-
+.tox

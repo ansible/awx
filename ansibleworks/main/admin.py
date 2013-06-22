@@ -12,12 +12,13 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from django.utils.html import format_html
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin
+
+from ansibleworks.main.compat import format_html
 from ansibleworks.main.models import *
 from ansibleworks.main.forms import *
 
-from django.contrib.auth.models import User
-from django.contrib.auth.admin import UserAdmin
 
 class UserAdmin(UserAdmin):
     fieldsets = (

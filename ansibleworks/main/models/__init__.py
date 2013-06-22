@@ -131,6 +131,17 @@ class PrimordialModel(models.Model):
     def __unicode__(self):
         return unicode("%s-%s"% (self.name, self.id))
 
+    def save(self, *args, **kwargs):
+        # For compatibility with Django 1.4.x, attempt to handle any calls to
+        # save that pass update_fields.
+        try:
+            super(PrimordialModel, self).save(*args, **kwargs)
+        except TypeError:
+            if 'update_fields' not in kwargs:
+                raise
+            kwargs.pop('update_fields')
+            super(PrimordialModel, self).save(*args, **kwargs)
+
     def mark_inactive(self, save=True):
         '''Use instead of delete to rename and mark inactive.'''
         if self.active:
@@ -845,10 +856,13 @@ class Job(CommonModel):
         self.status = 'pending'
         self.save(update_fields=['status'])
         task_result = RunJob().delay(self.pk, **opts)
+        # Reload job from database so we don't clobber results from RunJob
+        # (mainly from tests when using Djanog 1.4.x).
+        job = Job.objects.get(pk=self.pk)
         # The TaskMeta instance in the database isn't created until the worker
         # starts processing the task, so we can only store the task ID here.
-        self.celery_task_id = task_result.task_id
-        self.save(update_fields=['celery_task_id'])
+        job.celery_task_id = task_result.task_id
+        job.save(update_fields=['celery_task_id'])
         return True
 
     @property

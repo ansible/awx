@@ -1,0 +1,15 @@
+# PIP requirements for AnsibleWorks testing using Tox (downloaded from
+# PyPI). Install using "pip -r test.txt".
+
+ansible==1.2
+django-celery
+django-extensions
+django-jsonfield
+django-taggit
+djangorestframework>=2.3.0,<2.4.0
+Markdown
+pexpect
+PyYAML
+python-dateutil
+requests
+South>=0.8,<2.0

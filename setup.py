@@ -3,7 +3,7 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
-import os, datetime, glob
+import os, datetime, glob, sys
 from setuptools import setup, find_packages
 
 from ansibleworks import __version__
@@ -42,6 +42,12 @@ def proc_data_files(data_files):
     """
 
     result = []
+
+    # Ff running in a virtualenv, don't return data files that would install to
+    # system paths (mainly useful for running tests via tox).
+    if hasattr(sys, 'real_prefix'):
+        return result
+    
     for dir,files in data_files:
         includes = []
         for item in files:
