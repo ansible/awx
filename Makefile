@@ -9,7 +9,9 @@ RELEASE=awx-1.2b2
 
 # Remove temporary build files, compiled Python files.
 clean:
+	rm -rf dist/*
 	rm -rf build rpm-build *.egg-info
+	rm -rf debian deb-build
 	find . -type f -regex ".*\.py[co]$$" -delete
 
 # Fetch from origin, rebase local commits on top of origin commits.
@@ -122,3 +124,13 @@ rpm: sdist
 	--define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
 	--define "_sourcedir  %{_topdir}" \
 	-ba packaging/rpm/awx.spec
+
+deb: sdist
+	cp -r packaging/debian ./
+	chmod 755 debian/rules
+	fakeroot debian/rules clean
+	fakeroot dh_install
+	fakeroot debian/rules binary
+
+install:
+	$(PYTHON) setup.py install egg_info -b ""

@@ -5,8 +5,10 @@ recursive-include awx/ui *.html *.js
 recursive-include awx/ui/static *.css *.ico *.png *.gif *.jpg
 recursive-include awx/ui/static *.eot *.svg *.ttf *.woff *.otf
 recursive-include config *
+recursive-include config/deb *
+recursive-include config/rpm *
 recursive-exclude awx devonly.py
-recursive-exclude awx/settings local_settings.py*
+recursive-exclude awx/settings local_settings.py
 include *.py *.txt *.md
 include MANIFEST.in
 include COPYING

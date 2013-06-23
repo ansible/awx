@@ -32,7 +32,7 @@ LOGGING['handlers']['syslog'] = {
 
 SERVER_EMAIL = 'root@localhost'
 DEFAULT_FROM_EMAIL = 'webmaster@localhost'
-EMAIL_SUBJECT_PREFIX = '[AWX] '
+EMAIL_SUBJECT_PREFIX = '[AnsibleWorks] '
 
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = 25

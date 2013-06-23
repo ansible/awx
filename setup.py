@@ -15,8 +15,10 @@ etcpath = "/etc/awx"
 homedir = "/var/lib/awx"
 if os.path.exists("/etc/debian_version"):
     webconfig  = "/etc/apache2/conf.d"
+    settingsconf = "config/deb/settings.py"
 else:
     webconfig  = "/etc/httpd/conf.d"
+    settingsconf = "config/rpm/settings.py"
 
 #####################################################################
 # Helper Functions
@@ -71,20 +73,19 @@ setup(
     packages=['awx'],
     include_package_data=True,
     zip_safe=False,
-    install_requires=[
-        'Django>=1.5',
-        'django-celery',
-        'django-extensions',
-        'django-filter',
-        'django-jsonfield',
-        'django-taggit',
-        'djangorestframework>=2.3.0,<2.4.0',
-        'pexpect',
-        'python-dateutil',
-        'PyYAML',
-        'requests',
-        'South>=0.8,<2.0',
-    ],
+    #install_requires=[
+    #    'Django>=1.5', yes
+    #    'django-celery', yes
+    #    'django-extensions', yes
+    #    'django-filter',
+    #    'django-jsonfield',
+    #    'django-taggit',
+    #    'djangorestframework>=2.3.0,<2.4.0',
+    #    'pexpect',
+    #    'python-dateutil', yes
+    #    'PyYAML', yes
+    #    'South>=0.8,<2.0',
+    #],
     setup_requires=[],
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -110,7 +111,7 @@ setup(
             ("%s" % homedir,        ["awx/wsgi.py",
                                      "awx/static/favicon.ico",
                                     ]),
-            ("%s" % etcpath,        ["config/settings.py"]),
+            ("%s" % etcpath,        [settingsconf,]),
             ("%s" % webconfig,      ["config/awx.conf"]),
         ]
     ),
