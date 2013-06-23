@@ -1,0 +1,84 @@
+# Copyright (c) 2013 AnsibleWorks, Inc.
+# All Rights Reserved.
+
+# Local Django settings for AWX project.  Rename to "local_settings.py" and
+# edit as needed for your development environment.
+
+ADMINS = (
+    # ('Your Name', 'your_email@domain.com'),
+)
+
+MANAGERS = ADMINS
+
+# Database settings to use PostgreSQL for development.
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'awx',
+        'USER': 'awx',
+        'PASSWORD': 'AWXsome!',
+        'HOST': '',
+        'PORT': '',
+    }
+}
+
+# Continue to use SQLite for unit tests instead of PostgreSQL.
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'),
+            # Test database cannot be :memory: for celery/inventory tests to work.
+            'TEST_NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3'),
+        }
+    }
+
+# Absolute filesystem path to the directory to host projects (with playbooks).
+# This directory should NOT be web-accessible.
+PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
+
+# Local time zone for this installation. Choices can be found here:
+# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+# although not all choices may be available on all operating systems.
+# On Unix systems, a value of None will cause Django to use the same
+# timezone as the operating system.
+# If running in a Windows environment this must be set to the same as your
+# system time zone.
+TIME_ZONE = 'America/New_York'
+
+# Language code for this installation. All choices can be found here:
+# http://www.i18nguy.com/unicode/language-identifiers.html
+LANGUAGE_CODE = 'en-us'
+
+# SECURITY WARNING: keep the secret key used in production secret!
+# Hardcoded values can leak through source control. Consider loading
+# the secret key from an environment variable or a file instead.
+SECRET_KEY = 'p7z7g1ql4%6+(6nlebb6hdk7sd^&fnjpal308%n%+p^_e6vo1y'
+
+# Email address that error messages come from.
+SERVER_EMAIL = 'root@localhost'
+
+# The email backend to use. For possible shortcuts see django.core.mail.
+# The default is to use the SMTP backend.
+# Third-party backends can be specified by providing a Python path
+# to a module that defines an EmailBackend class.
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Host for sending email.
+EMAIL_HOST = 'localhost'
+
+# Port for sending email.
+EMAIL_PORT = 25
+
+# Optional SMTP authentication information for EMAIL_HOST.
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = False
+
+# Default email address to use for various automated correspondence from
+# the site managers.
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+
+# Subject-line prefix for email messages send with django.core.mail.mail_admins
+# or ...mail_managers.  Make sure to include the trailing space.
+EMAIL_SUBJECT_PREFIX = '[AWX] '

@@ -6,13 +6,13 @@
 import os, datetime, glob, sys
 from setuptools import setup, find_packages
 
-from ansibleworks import __version__
+from awx import __version__
 
 build_timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M')
 
 # Paths we'll use later
-etcpath = "/etc/ansibleworks"
-homedir = "/var/lib/ansibleworks"
+etcpath = "/etc/awx"
+homedir = "/var/lib/awx"
 if os.path.exists("/etc/debian_version"):
     webconfig  = "/etc/apache2/conf.d"
 else:
@@ -58,16 +58,17 @@ def proc_data_files(data_files):
 #####################################################################
 
 setup(
-    name='ansibleworks',
+    name='awx',
     version=__version__.split("-")[0], # FIXME: Should keep full version here?
     author='AnsibleWorks, Inc.',
     author_email='support@ansibleworks.com',
-    description='AnsibleWorks API, UI and Task Engine',
-    long_description='AnsibleWorks API, UI and Task Engine',
+    description='AWX: API, UI and Task Engine for Ansible',
+    long_description='AWX provides a web-based user interface, REST API and '
+                     'task engine built on top of Ansible',
     license='Proprietary',
     keywords='ansible',
     url='http://github.com/ansible/ansible-commander',
-    packages=['ansibleworks'],
+    packages=['awx'],
     include_package_data=True,
     zip_safe=False,
     install_requires=[
@@ -102,15 +103,15 @@ setup(
     ],
     entry_points = {
         'console_scripts': [
-            'ansibleworks-manage = ansibleworks:manage',
+            'awx-manage = awx:manage',
         ],
     },
     data_files = proc_data_files([
-            ("%s" % homedir,        ["ansibleworks/wsgi.py",
-                                     "ansibleworks/static/favicon.ico",
+            ("%s" % homedir,        ["awx/wsgi.py",
+                                     "awx/static/favicon.ico",
                                     ]),
             ("%s" % etcpath,        ["config/settings.py"]),
-            ("%s" % webconfig,      ["config/ansibleworks.conf"]),
+            ("%s" % webconfig,      ["config/awx.conf"]),
         ]
     ),
     options={
@@ -123,4 +124,3 @@ setup(
         },
     },
 )
-

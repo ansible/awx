@@ -1,5 +1,5 @@
-# PIP requirements for AnsibleWorks development/build environment (using only
-# local packages).  Install using "pip --no-index -r dev_local.txt".
+# PIP requirements for AWX development/build environment (using only local
+packages).  Install using "pip --no-index -r dev_local.txt".
 
 distribute-0.6.45.tar.gz
 

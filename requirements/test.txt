@@ -1,5 +1,5 @@
-# PIP requirements for AnsibleWorks testing using Tox (downloaded from
-# PyPI). Install using "pip -r test.txt".
+# PIP requirements for AWX testing using Tox (downloaded from PyPI). Install
+# using "pip -r test.txt".
 
 ansible==1.2
 django-celery

@@ -1,0 +1,191 @@
+{# Admin site customizations. #}
+{% extends "admin/base.html" %}
+{% load i18n %}
+ 
+{% block title %}{{ title }} | {% trans 'AWX Admin' %}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link href="{{ STATIC_URL }}favicon.ico" rel="shortcut icon" />
+<style type="text/css">
+/* Heading and button background colors. */
+#header
+{
+  background: #1778C3 !important;
+}
+.module h2,
+#content-related .module h2,
+.module caption,
+.inline-group h2,
+.button.default,
+input[type="submit"].default,
+.submit-row input.default
+{
+  background: #2773ae !important;
+}
+body
+{
+  background-color: #f5f5f5;
+}
+
+/* Heading and button foreground colors. */
+#branding h1
+{
+  color: white !important;
+}
+.module h2,
+.module h2 a,
+#content-related .module h2,
+.module caption,
+.inline-group h2,
+a.section,
+a.section:link,
+a.section:visited,
+a.section:hover,
+.button.default,
+input[type="submit"].default,
+.submit-row input.default
+{
+  color: white !important;
+}
+
+/* Link color. */
+a,
+a:link,
+a:visited,
+#changelist-filter a:hover,
+a:hover
+{
+  color: #2773ae;
+}
+
+/* Button border color. */
+.button.default,
+input[type="submit"].default,
+.submit-row input.default,
+.selector h2
+{
+  border-color: #074979 !important;
+}
+#header {
+  color: #ddd;
+  border-bottom: solid 2px #074979;
+}
+
+a:hover,
+a.section:hover
+{
+  text-decoration: underline;
+}
+
+tr.row1 {
+  background-color: #f5f5f5;
+}
+
+ul.messagelist li {
+  background-color: #ccddee;
+}
+.errornote {
+  border-color: #b22222 !important;
+  color: #b22222 !important;
+  background-color: #fdc !important;
+}
+.errorlist li {
+  border-color: #b22222 !important;
+  background-color: #d24242 !important;
+}
+.errors {
+  background-color: #fdc !important;
+}
+.errors input,
+.errors select,
+.errors textarea {
+  border: 1px solid #b22222 !important;
+}
+pre.json-display, pre.result-display {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  font-size: 0.9em;
+}
+pre.result-display {
+  width: 75%;
+  border: 1px solid #ccc;
+  background: #444;
+  color: #eee;
+  max-height: 300px;
+  overflow: auto;
+}
+#job_host_summaries-group table td.original p {
+  display: none
+}
+#job_host_summaries-group table tr.has_original td {
+  padding-top: 5px;
+}
+</style>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+{% endblock %}
+
+{% block blockbots %}
+{{ block.super }}
+<script type="text/javascript">
+var django = django || {};
+if (django.jQuery) {
+  (function($) {
+    window.refreshJobStatus = function() {
+      var status = $('.field-status p').text();
+      if (status == 'Running' || status == 'Pending') {
+        var url = '{{ request.path }}';
+        $.get(url, function(data) {
+          var selectors = [
+            '.form-row.field-status',
+            '.field-get_result_stdout_display pre',
+            '.field-get_result_stderr_display pre',
+            '.field-get_result_traceback_display pre',
+            '.field-get_result_stdout_display pre',
+            '#job_host_summaries-group',
+            '#job_events-group',
+          ]
+          $.each(selectors, function(index, selector) {
+            $(selector).html($(data).find(selector).html());
+          });
+          setTimeout('window.refreshJobStatus()', 5000);
+        });
+      }
+    }
+    // Update playbook list based on project selected.
+    function onProjectChange() {
+      var project_pk = $('select[name="project"]').val() || 0;
+      $('select[name="playbook"] span option').unwrap();
+      $('select[name="playbook"] option:not(.project-' + project_pk + '):not([value=""])').wrap('<span/>');
+    }
+    $(function() {
+      $('select[name="project"]').each(onProjectChange).change(onProjectChange);
+    })
+    setTimeout('window.refreshJobStatus()', 2000);
+  })(django.jQuery);
+}
+</script>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">{% trans 'AWX Admin' %}</h1>
+{% endblock %}
+
+{% block userlinks %}
+{{ block.super }}
+{% endblock %}
+
+{% block nav-global %}
+{% if user.is_active and user.is_staff and not is_popup %}
+{# Placeholder for version/hostname info. #}
+{% endif %}
+{{ block.super }}
+{% endblock %}
+
+{% block content_title %}
+{{ block.super }}
+{% endblock %}

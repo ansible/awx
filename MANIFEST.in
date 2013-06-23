@@ -1,14 +1,15 @@
-recursive-include ansibleworks *.py
-recursive-include ansibleworks/static *.ico
-recursive-include ansibleworks/templates *.html
-recursive-include ansibleworks/ui *.html *.js
-recursive-include ansibleworks/ui/static *.css *.ico *.png *.gif *.jpg
-recursive-include ansibleworks/ui/static *.eot *.svg *.ttf *.woff *.otf
+recursive-include awx *.py
+recursive-include awx/static *.ico
+recursive-include awx/templates *.html
+recursive-include awx/ui *.html *.js
+recursive-include awx/ui/static *.css *.ico *.png *.gif *.jpg
+recursive-include awx/ui/static *.eot *.svg *.ttf *.woff *.otf
 recursive-include config *
-recursive-exclude ansibleworks/settings local_settings.py
+recursive-exclude awx devonly.py
+recursive-exclude awx/settings local_settings.py*
 include *.py *.txt *.md
 include MANIFEST.in
 include COPYING
-prune ansibleworks/public
-prune ansibleworks/projects
-prune ansibleworks/ui/static/lib/jstree/_*
+prune awx/public
+prune awx/projects
+prune awx/ui/static/lib/jstree/_*

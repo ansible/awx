@@ -1,6 +1,6 @@
 PYTHON=python
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
-RELEASE=ansibleworks-1.2b2
+RELEASE=awx-1.2b2
 
 .PHONY: clean rebase push setup requirements requirements_pypi develop refresh \
 	adduser syncdb migrate dbchange dbshell runserver celeryd test \
@@ -20,7 +20,7 @@ rebase:
 push:
 	git push origin master
 
-# Use Ansible to setup AnsibleWorks development environment.
+# Use Ansible to setup AWX development environment.
 setup:
 	ansible-playbook app_setup/setup.yml --verbose -i "127.0.0.1," -c local -e working_dir=`pwd`
 
@@ -34,8 +34,8 @@ requirements:
 requirements_pypi:
 	pip install -r requirements/dev.txt
 
-# "Install" ansibleworks package in development mode.  Creates link to working
-# copy in site-packages and installs ansibleworks-manage command.
+# "Install" awx package in development mode.  Creates link to working
+# copy in site-packages and installs awx-manage command.
 develop:
 	python setup.py develop
 
@@ -60,10 +60,9 @@ migrate: syncdb
 dbchange:
 	python manage.py schemamigration main v12b2_changes --auto
 
-# access database shell
-# asks for password # PYTHON_PATH=./acom python acom/manage.py dbshell
+# access database shell, asks for password
 dbshell:
-	sudo -u postgres psql -d acom
+	sudo -u postgres psql -d awx
 
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
@@ -122,5 +121,4 @@ rpm: sdist
 	--define "_specdir %{_topdir}" \
 	--define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
 	--define "_sourcedir  %{_topdir}" \
-	-ba packaging/rpm/ansibleworks.spec
-
+	-ba packaging/rpm/awx.spec

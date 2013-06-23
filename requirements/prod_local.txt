@@ -1,5 +1,5 @@
-# PIP requirements for AnsibleWorks production environment (using only local
-# packages).  Install using "pip --no-index -r prod_local.txt".
+# PIP requirements for AWX production environment (using only local packages).
+# Install using "pip --no-index -r prod_local.txt".
 
 Django-1.5.1.tar.gz
 

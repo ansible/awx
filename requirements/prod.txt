@@ -1,5 +1,5 @@
-# PIP requirements for AnsibleWorks production environment (downloaded from
-# PyPI). Install using "pip -r prod.txt".
+# PIP requirements for AWX production environment (downloaded from PyPI).
+# Install using "pip -r prod.txt".
 
 Django>=1.5
 django-celery

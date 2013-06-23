@@ -5,19 +5,19 @@ ADMINS = (
 DATABASES = {
    'default': {
        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-       'NAME': 'ansibleworks',
-       'USER': 'ansibleworks',
+       'NAME': 'awx',
+       'USER': 'awx',
        'PASSWORD': 'AWsecret',
        'HOST': '',
        'PORT': '',
    }
 }
 
-STATIC_ROOT = '/var/lib/ansibleworks/public/static'
+STATIC_ROOT = '/var/lib/awx/public/static'
 
-PROJECTS_ROOT = '/var/lib/ansibleworks/projects'
+PROJECTS_ROOT = '/var/lib/awx/projects'
 
-SECRET_KEY = file('/etc/ansibleworks/SECRET_KEY', 'rb').read().strip()
+SECRET_KEY = file('/etc/awx/SECRET_KEY', 'rb').read().strip()
 
 ALLOWED_HOSTS = ['*']
 
@@ -32,7 +32,7 @@ LOGGING['handlers']['syslog'] = {
 
 SERVER_EMAIL = 'root@localhost'
 DEFAULT_FROM_EMAIL = 'webmaster@localhost'
-EMAIL_SUBJECT_PREFIX = '[AnsibleWorks] '
+EMAIL_SUBJECT_PREFIX = '[AWX] '
 
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = 25

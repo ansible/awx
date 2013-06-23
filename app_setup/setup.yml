@@ -44,13 +44,13 @@
       # took out parameter... db=acom priv=ALL
       - name: setup the postgresql user
         postgresql_user: >
-          name=ansible_commander 
+          name=awx 
           password=${database_password} 
           login_user=postgres
         sudo_user: postgres
 
       - name: create the database
-        postgresql_db: name=acom state=present
+        postgresql_db: name=awx state=present
 
       - name: configure the database authentication for runtime mode
         template: src=templates/pg_hba.j2 dest=/var/lib/pgsql/data/pg_hba.conf owner=postgres
@@ -59,7 +59,7 @@
         service: name=postgresql state=restarted
 
       - name: configure python settings (with database password)
-        template: src=templates/local_settings.py.j2 dest=${working_dir}/ansibleworks/settings/local_settings.py
+        template: src=templates/local_settings.py.j2 dest=${working_dir}/awx/settings/local_settings.py
 
       - name: sync django database
         command: python ${working_dir}/manage.py syncdb --noinput

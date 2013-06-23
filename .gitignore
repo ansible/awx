@@ -1,8 +1,8 @@
-ansibleworks/settings/local_settings.py*
-ansibleworks/*.sqlite3
-ansibleworks/projects
-ansibleworks/public/media
-ansibleworks/public/static
+awx/settings/local_settings.py*
+awx/*.sqlite3
+awx/projects
+awx/public/media
+awx/public/static
 env/*
 build
 dist

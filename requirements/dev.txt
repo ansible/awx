@@ -1,5 +1,5 @@
-# PIP requirements for AnsibleWorks development/build environment (downloaded
-# from PyPI). Install using "pip -r dev.txt".
+# PIP requirements for AWX development/build environment (downloaded from
+# PyPI). Install using "pip -r dev.txt".
 
 -U distribute
 
