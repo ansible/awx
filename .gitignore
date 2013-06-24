@@ -5,6 +5,7 @@ awx/public/media
 awx/public/static
 env/*
 build
+deb-build
 dist
 htmlcov
 rpm-build

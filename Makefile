@@ -1,6 +1,7 @@
 PYTHON=python
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 RELEASE=awx-1.2b2
+VERSION=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
 
 .PHONY: clean rebase push setup requirements requirements_pypi develop refresh \
 	adduser syncdb migrate dbchange dbshell runserver celeryd test \
@@ -126,11 +127,13 @@ rpm: sdist
 	-ba packaging/rpm/awx.spec
 
 deb: sdist
-	cp -r packaging/debian ./
-	chmod 755 debian/rules
-	fakeroot debian/rules clean
-	fakeroot dh_install
-	fakeroot debian/rules binary
+	@mkdir -p deb-build
+	@cp dist/*.gz deb-build/
+	(cd deb-build && tar zxf awx-$(VERSION).tar.gz)
+	(cd deb-build/awx-$(VERSION) && dh_make --single --yes -f ../awx-$(VERSION).tar.gz)
+	@rm -rf deb-build/awx-$(VERSION)/debian
+	@cp -a packaging/debian deb-build/awx-$(VERSION)/
+	(cd deb-build/awx-$(VERSION) && dpkg-buildpackage -nc -us -uc -b)
 
 install:
 	$(PYTHON) setup.py install egg_info -b ""
