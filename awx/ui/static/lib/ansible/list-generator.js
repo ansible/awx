@@ -153,27 +153,29 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "<th>#</th>\n";
        }
        for (var fld in list.fields) {
-           html += "<th class=\"list-header\" id=\""; 
-           html += (list.fields[fld].id) ? list.fields[fld].id : fld + "-header";
-           html += "\"";
-           html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? "ng-click=\"sort('" + fld + "')\"" : "";
-           html += ">" + list.fields[fld].label;
-           if (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) {
-              html += " <i class=\"";
-              if (list.fields[fld].key) {
-                 if (list.fields[fld].desc) {
-                    html += "icon-sort-down";
+           if (list.fields[fld].searchOnly == undefined || list.fields[fld].searchOnly == false) {
+              html += "<th class=\"list-header\" id=\""; 
+              html += (list.fields[fld].id) ? list.fields[fld].id : fld + "-header";
+              html += "\"";
+              html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? "ng-click=\"sort('" + fld + "')\"" : "";
+              html += ">" + list.fields[fld].label;
+              if (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) {
+                 html += " <i class=\"";
+                 if (list.fields[fld].key) {
+                    if (list.fields[fld].desc) {
+                       html += "icon-sort-down";
+                    }
+                    else {
+                       html += "icon-sort-up";
+                    }
                  }
                  else {
-                    html += "icon-sort-up";
+                    html += "icon-sort";
                  }
+                 html += "\"></i></a>";
               }
-               else {
-                   html += "icon-sort";
-              }
-               html += "\"></i></a>";
+              html += "</th>\n";
            }
-           html += "</th>\n";
        }
        if (options.mode == 'select') {
           html += "<th>Select</th>";
@@ -199,7 +201,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        base = base.replace(/^\//,'');
        for (fld in list.fields) {
            cnt++;  
-           html += Column({ list: list, fld: fld, options: options, base: base });
+           if (list.fields[fld].searchOnly == undefined || list.fields[fld].searchOnly == false) {
+              html += Column({ list: list, fld: fld, options: options, base: base });
+           }
        }
 
        if (options.mode == 'select' ) {

@@ -150,6 +150,11 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
           }
        }
        }
+
+    // Failed jobs link. Go to the jobs tabs, find all jobs for the inventory and sort by status
+    scope.viewJobs = function(id) {
+       $location.url('/jobs/?inventory__int=' + id + '&order_by=status');
+       }
 }
 
 InventoriesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'InventoryList', 'GenerateList', 

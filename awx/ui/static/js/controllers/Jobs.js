@@ -36,7 +36,19 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     
     SearchInit({ scope: scope, set: 'jobs', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
+
+    // Called from Inventories page, failed jobs link. Find jobs for selected inventory.
+    if ($routeParams['inventory__int']) {
+       scope[list.iterator + 'SearchField'] = 'inventory'; 
+       scope[list.iterator + 'SearchValue'] = $routeParams['inventory__int'];
+       scope[list.iterator + 'SearchFieldLabel'] = 'Inventory';
+    }
     scope.search(list.iterator);
+
+    // Called from Inventories page, failed jobs link. Now sort by status so faild jobs appear at top of list
+    if ($routeParams.order_by) {
+       scope.sort($routeParams.order_by);
+    }
 
     LoadBreadCrumbs();
 

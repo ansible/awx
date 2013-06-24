@@ -145,8 +145,9 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                        || list.fields[scope[iterator + 'SearchField']].searchType == 'select') ) { 
                    scope[iterator + 'SearchParams'] += scope[iterator + 'SearchSelectValue'].value;
               }
-              else if ( list.fields[scope[iterator + 'SearchField']].searchType == undefined || 
-                        list.fields[scope[iterator + 'SearchField']].searchType == 'gtzero' ) {
+              else {
+                //if ( list.fields[scope[iterator + 'SearchField']].searchType == undefined || 
+                //        list.fields[scope[iterator + 'SearchField']].searchType == 'gtzero' ) {
                  scope[iterator + 'SearchParams'] += escape(scope[iterator + 'SearchValue']);
               }
               scope[iterator + 'SearchParams'] += (sort_order) ? '&order_by=' + escape(sort_order) : '';

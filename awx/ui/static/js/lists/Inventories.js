@@ -39,6 +39,7 @@ angular.module('InventoriesListDefinition', [])
                 ngShow: "\{\{ inventory.has_active_failures \}\}",
                 icon: 'icon-exclamation-sign',
                 "class": 'active-failures-\{\{ inventory.has_active_failures \}\}',
+                ngClick: 'viewJobs(\{\{ inventory.id \}\})',
                 searchField: 'has_active_failures',
                 searchType: 'boolean',
                 searchOptions: [{ name: "No", value: 0 }, { name: "Yes", value: 1 }]

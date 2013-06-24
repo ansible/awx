@@ -23,6 +23,11 @@ angular.module('JobsListDefinition', [])
                 key: true,
                 desc: true,
                 searchType: 'int'   
+                },         
+            inventory: {
+                label: 'Inventory ID',
+                searchType: 'int',
+                searchOnly: true
                 },
             name: {
                 label: 'Name',
