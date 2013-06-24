@@ -1,0 +1,70 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Django Taggit\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-06-11 11:28+0700\n"
+"PO-Revision-Date: 2010-06-11 11:30+0700\n"
+"Last-Translator: Igor 'idle sign' Starikov <idlesign@yandex.ru>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Poedit-Language: Russian\n"
+
+#: forms.py:20
+msgid "Please provide a comma-separated list of tags."
+msgstr "Укажите метки через запятую."
+
+#: managers.py:41
+#: managers.py:101
+#: models.py:17
+msgid "Tags"
+msgstr "Метки"
+
+#: managers.py:102
+msgid "A comma-separated list of tags."
+msgstr "Список меток через запятую."
+
+#: models.py:9
+msgid "Name"
+msgstr "Название"
+
+#: models.py:10
+msgid "Slug"
+msgstr "Слаг"
+
+#: models.py:16
+msgid "Tag"
+msgstr "Метка"
+
+#: models.py:55
+#, python-format
+msgid "%(object)s tagged with %(tag)s"
+msgstr "элемент «%(object)s» с меткой «%(tag)s»"
+
+#: models.py:82
+msgid "Object id"
+msgstr "ID объекта"
+
+#: models.py:83
+msgid "Content type"
+msgstr "Тип содержимого"
+
+#: models.py:87
+msgid "Tagged Item"
+msgstr "Элемент с меткой"
+
+#: models.py:88
+msgid "Tagged Items"
+msgstr "Элементы с меткой"
+
+#: contrib/suggest/models.py:57
+msgid "Enter a valid Regular Expression. To make it case-insensitive include \"(?i)\" in your expression."
+msgstr "Введите регулярное выражение. Чтобы сделать его чувствительным к регистру укажите \"(?i)\"."
+

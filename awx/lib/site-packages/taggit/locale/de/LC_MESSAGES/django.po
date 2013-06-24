@@ -1,0 +1,67 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-taggit\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-09-07 09:26-0700\n"
+"PO-Revision-Date: 2010-09-07 09:26-0700\n"
+"Last-Translator: Jannis Leidel <jannis@leidel.info>\n"
+"Language-Team: German <de@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#: forms.py:20
+msgid "Please provide a comma-separated list of tags."
+msgstr "Bitte eine durch Komma getrennte Schlagwortliste eingeben."
+
+#: managers.py:39 managers.py:83 models.py:50
+msgid "Tags"
+msgstr "Schlagwörter"
+
+#: managers.py:84
+msgid "A comma-separated list of tags."
+msgstr "Eine durch Komma getrennte Schlagwortliste."
+
+#: models.py:10
+msgid "Name"
+msgstr "Name"
+
+#: models.py:11
+msgid "Slug"
+msgstr "Kürzel"
+
+#: models.py:49
+msgid "Tag"
+msgstr "Schlagwort"
+
+#: models.py:56
+#, python-format
+msgid "%(object)s tagged with %(tag)s"
+msgstr "%(object)s verschlagwortet mit %(tag)s"
+
+#: models.py:100
+msgid "Object id"
+msgstr "Objekt-ID"
+
+#: models.py:104 models.py:110
+msgid "Content type"
+msgstr "Inhaltstyp"
+
+#: models.py:138
+msgid "Tagged Item"
+msgstr "Verschlagwortetes Objekt"
+
+#: models.py:139
+msgid "Tagged Items"
+msgstr "Verschlagwortete Objekte"
+
+#: contrib/suggest/models.py:57
+msgid ""
+"Enter a valid Regular Expression. To make it case-insensitive include \"(?i)"
+"\" in your expression."
+msgstr ""
+"Bitte einen regulären Ausdruck eingeben. Fügen Sie \"(?i) \" dem "
+"Ausdruck hinzu, um nicht zwischen Groß- und Kleinschreibung zu "
+"unterscheiden."

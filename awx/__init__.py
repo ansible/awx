@@ -19,6 +19,10 @@ except ImportError:
 def manage():
     # Update the default settings environment variable based on current mode.
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'awx.settings.%s' % MODE)
+    # Add local site-packages directory to path.
+    local_site_packages = os.path.join(os.path.dirname(__file__), 'lib',
+                                       'site-packages')
+    sys.path.insert(0, local_site_packages)
     from django.core.management import execute_from_command_line
     if len(sys.argv) >= 2 and sys.argv[1] in ('version', '--version'):
         sys.stdout.write('awx-%s\n' % __version__)

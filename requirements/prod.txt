@@ -1,17 +1,19 @@
 # PIP requirements for AWX production environment (downloaded from PyPI).
 # Install using "pip -r prod.txt".
 
-Django>=1.5
-django-celery
-django-extensions
-django-jsonfield
-django-taggit
-djangorestframework>=2.3.0,<2.4.0
-Markdown
-pexpect
-python-dateutil
-requests
-South>=0.8,<2.0
+Django>=1.4
+
+# The following packages are now bundled with AWX (awx/lib/site-packages):
+  #django-celery
+  #django-extensions
+  #django-jsonfield
+  #django-taggit
+  #djangorestframework>=2.3.0,<2.4.0
+  #Markdown
+  #pexpect
+  #python-dateutil
+  #requests
+  #South>=0.8,<2.0
 
 # You may also need to install the following extra packages using the OS
 # package manager, or pip if you're running inside a virtualenv.

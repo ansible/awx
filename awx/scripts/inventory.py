@@ -40,7 +40,15 @@ import urllib
 import urlparse
 
 # Requests
-import requests
+try:
+    import requests
+except ImportError:
+    # If running from an AWX installation, use the local version of requests if
+    # if cannot be found globally.
+    local_site_packages = os.path.join(os.path.dirname(__file__), '..', 'lib',
+                                       'site-packages')
+    sys.path.insert(0, local_site_packages)
+    import requests
 
 class TokenAuth(requests.auth.AuthBase):
     def __init__(self, token):

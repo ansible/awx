@@ -74,17 +74,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     #install_requires=[
-    #    'Django>=1.5', yes
-    #    'django-celery', yes
-    #    'django-extensions', yes
-    #    'django-filter',
-    #    'django-jsonfield',
-    #    'django-taggit',
-    #    'djangorestframework>=2.3.0,<2.4.0',
-    #    'pexpect',
-    #    'python-dateutil', yes
-    #    'PyYAML', yes
-    #    'South>=0.8,<2.0',
+    #    'Django>=1.4',
+    #    'PyYAML',
     #],
     setup_requires=[],
     classifiers=[

@@ -226,9 +226,9 @@ os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 # Skip migrations when running tests.
 SOUTH_TESTS_MIGRATE = False
 
-if 'djcelery' in INSTALLED_APPS:
-    import djcelery
-    djcelery.setup_loader()
+# Initialize Django-Celery.
+import djcelery
+djcelery.setup_loader()
 
 BROKER_URL = 'django://'
 CELERY_TASK_SERIALIZER = 'json'

@@ -1,0 +1,64 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: django-taggit\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-09-07 09:45-0700\n"
+"PO-Revision-Date: 2010-09-07 23:04+0100\n"
+"Last-Translator: Jeffrey Gelens <jeffrey@gelens.org>\n"
+"Language-Team: Dutch\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: forms.py:20
+msgid "Please provide a comma-separated list of tags."
+msgstr "Geef een door komma gescheiden lijst van tags."
+
+#: managers.py:39
+#: managers.py:83
+#: models.py:50
+msgid "Tags"
+msgstr "Tags"
+
+#: managers.py:84
+msgid "A comma-separated list of tags."
+msgstr "Een door komma gescheiden lijst van tags."
+
+#: models.py:10
+msgid "Name"
+msgstr "Naam"
+
+#: models.py:11
+msgid "Slug"
+msgstr "Slug"
+
+#: models.py:49
+msgid "Tag"
+msgstr "Tag"
+
+#: models.py:56
+#, python-format
+msgid "%(object)s tagged with %(tag)s"
+msgstr "%(object)s getagged met %(tag)s"
+
+#: models.py:100
+msgid "Object id"
+msgstr "Object-id"
+
+#: models.py:104
+#: models.py:110
+msgid "Content type"
+msgstr "Inhoudstype"
+
+#: models.py:138
+msgid "Tagged Item"
+msgstr "Object getagged"
+
+#: models.py:139
+msgid "Tagged Items"
+msgstr "Objecten getagged"
+
+#: contrib/suggest/models.py:57
+msgid "Enter a valid Regular Expression. To make it case-insensitive include \"(?i)\" in your expression."
+msgstr "Voer een valide reguliere expressie in. Voeg \"(?i)\" aan de expressie toe om deze hoofdletter ongevoelig te maken."
+

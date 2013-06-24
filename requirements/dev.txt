@@ -3,18 +3,20 @@
 
 -U distribute
 
-# Packages used for development and production:
-Django>=1.5
-django-celery
-django-extensions
-django-jsonfield
-django-taggit
-djangorestframework>=2.3.0,<2.4.0
-Markdown
-pexpect
-python-dateutil
-requests
-South>=0.8,<2.0
+# Packages used for both development and production:
+Django>=1.4
+
+# The following packages are now bundled with AWX (awx/lib/site-packages):
+  #django-celery
+  #django-extensions
+  #django-jsonfield
+  #django-taggit
+  #djangorestframework>=2.3.0,<2.4.0
+  #Markdown
+  #pexpect
+  #python-dateutil
+  #requests
+  #South>=0.8,<2.0
 
 # Development-only packages:
 django-debug-toolbar

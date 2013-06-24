@@ -11,8 +11,17 @@ https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/
 """
 
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE',
-                      'awx.settings.production')
+import sys
+from awx import MODE
 
+# Update the default settings environment variable based on current mode.
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'awx.settings.%s' % MODE)
+
+# Add local site-packages directory to path.
+local_site_packages = os.path.join(os.path.dirname(__file__), 'lib',
+                                   'site-packages')
+sys.path.insert(0, local_site_packages)
+
+# Return the default Django WSGI application.
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
