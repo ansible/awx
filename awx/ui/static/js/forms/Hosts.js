@@ -13,6 +13,7 @@ angular.module('HostFormDefinition', [])
         addTitle: 'Create Host',                             //Legend in add mode
         editTitle: '{{ name }}',                             //Legend in edit mode
         name: 'host',                                        //Form name attribute
+        "class": 'horizontal-narrow',
         well: false,                                         //Wrap the form with TB well          
 
         fields: {

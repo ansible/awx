@@ -13,7 +13,8 @@ angular.module('GroupFormDefinition', [])
         addTitle: 'Create Group',                            //Legend in add mode
         editTitle: '{{ name }}',                             //Legend in edit mode
         name: 'group',                                       //Form name attribute
-        well: false,                                         //Wrap the form with TB well          
+        well: false,                                         //Wrap the form with TB well
+        "class": 'horizontal-narrow',       
 
         fields: {
             name: {
