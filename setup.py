@@ -8,7 +8,8 @@ from setuptools import setup, find_packages
 
 from awx import __version__
 
-build_timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M')
+#build_timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M')
+build_timestamp = os.getenv("BUILD",datetime.datetime.now().strftime('-%Y%m%d%H%M'))
 
 # Paths we'll use later
 etcpath = "/etc/awx"
@@ -99,7 +100,7 @@ setup(
         ],
     },
     data_files = proc_data_files([
-            ("%s" % homedir,        ["awx/wsgi.py",
+            ("%s" % homedir,        ["config/wsgi.py",
                                      "awx/static/favicon.ico",
                                     ]),
             ("%s" % etcpath,        [settingsconf,]),
@@ -108,7 +109,7 @@ setup(
     ),
     options={
         'egg_info': {
-            'tag_build': '-dev%s' % build_timestamp,
+            'tag_build': '%s' % build_timestamp,
         },
         'aliases': {
             'dev_build': 'clean --all egg_info sdist',

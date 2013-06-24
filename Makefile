@@ -1,7 +1,23 @@
 PYTHON=python
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
-RELEASE=awx-1.2b2
+
+# Get the branch information from git
+GIT_DATE := $(shell git log -n 1 --format="%ai")
+DATE := $(shell date --utc +%Y%m%d%H%M)
+
 VERSION=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
+RELEASE=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[1])")
+ifneq ($(OFFICIAL),yes)
+BUILD=-dev$(DATE)
+SDIST_TAR_FILE=awx-$(VERSION)$(BUILD).tar.gz
+DEB_BUILD_DIR=deb-build/awx-$(VERSION)$(BUILD)
+DEB_PKG_RELEASE=$(VERSION)$(BUILD)
+else
+BUILD=
+SDIST_TAR_FILE=awx-$(VERSION).tar.gz
+DEB_BUILD_DIR=deb-build/awx-$(VERSION)
+DEB_PKG_RELEASE=$(VERSION)-$(RELEASE)
+endif
 
 .PHONY: clean rebase push setup requirements requirements_pypi develop refresh \
 	adduser syncdb migrate dbchange dbshell runserver celeryd test \
@@ -112,7 +128,11 @@ release_clean:
 	-(rm -rf ($RELEASE))
 
 sdist: clean
-	$(PYTHON) setup.py release_build
+	if [ "$(OFFICIAL)" = "yes" ] ; then \
+	   $(PYTHON) setup.py release_build; \
+	else \
+	   BUILD=$(BUILD) $(PYTHON) setup.py sdist; \
+	fi
 
 rpm: sdist
 	@mkdir -p rpm-build
@@ -128,12 +148,13 @@ rpm: sdist
 
 deb: sdist
 	@mkdir -p deb-build
-	@cp dist/*.gz deb-build/
-	(cd deb-build && tar zxf awx-$(VERSION).tar.gz)
-	(cd deb-build/awx-$(VERSION) && dh_make --single --yes -f ../awx-$(VERSION).tar.gz)
-	@rm -rf deb-build/awx-$(VERSION)/debian
-	@cp -a packaging/debian deb-build/awx-$(VERSION)/
-	(cd deb-build/awx-$(VERSION) && dpkg-buildpackage -nc -us -uc -b)
+	@cp dist/$(SDIST_TAR_FILE) deb-build/
+	(cd deb-build && tar zxf $(SDIST_TAR_FILE))
+	(cd $(DEB_BUILD_DIR) && dh_make --indep --yes -f ../awx-$(VERSION)$(BUILD).tar.gz -p awx-$(VERSION)$(BUILD))
+	@rm -rf $(DEB_BUILD_DIR)/debian
+	@cp -a packaging/debian $(DEB_BUILD_DIR)/
+	@echo "awx_$(DEB_PKG_RELEASE).deb admin optional" > $(DEB_BUILD_DIR)/debian/realfiles
+	(cd $(DEB_BUILD_DIR) && PKG_RELEASE=$(DEB_PKG_RELEASE) dpkg-buildpackage -nc -us -uc -b --changes-option="-fdebian/realfiles")
 
 install:
 	$(PYTHON) setup.py install egg_info -b ""

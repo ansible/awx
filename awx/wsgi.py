@@ -19,7 +19,7 @@ from distutils.sysconfig import get_python_lib
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'awx.settings.%s' % MODE)
 
 # Add local site-packages directory to path.
-local_site_packages = os.path.join(get_python_lib(), 'awx', 'lib',
+local_site_packages = os.path.join(os.path.dirname(__file__), 'lib',
                                    'site-packages')
 sys.path.insert(0, local_site_packages)
 
