@@ -522,7 +522,9 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              html += "<div class=\"well\">\n";
           }
 
-          html += "<form class=\"form-horizontal\" name=\"" + this.form.name + '_form" id="' + this.form.name + '" novalidate>' + "\n";
+          html += "<form class=\"form-horizontal";
+          html += (this.form['class']) ? ' ' + this.form.class : '';
+          html += "\" name=\"" + this.form.name + '_form" id="' + this.form.name + '" novalidate>' + "\n";
           html += "<div ng-show=\"flashMessage != null && flashMessage != undefined\" class=\"alert alert-info\">{{ flashMessage }}</div>\n";
 
           var field;

@@ -12,6 +12,7 @@ angular.module('JobEventFormDefinition', [])
         
         editTitle: '{{ id }} - {{ event }}',                         //Legend in edit mode
         name: 'job_events',
+        "class": 'horizontal-narrow',
         well: false,
         
         fields: {

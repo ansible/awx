@@ -281,6 +281,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    
    // Save changes to the parent
    scope.formSave = function() {
+      $rootScope.flashMessage = null;
       Rest.setUrl(defaultUrl + id + '/');
       var data = {}
       for (var fld in form.fields) {

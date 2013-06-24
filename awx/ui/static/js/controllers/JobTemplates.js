@@ -23,6 +23,7 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
     var base = $location.path().replace(/^\//,'').split('/')[0];
     var mode = (base == 'job_templates') ? 'edit' : 'select'; 
     var scope = view.inject(list, { mode: mode });
+    $rootScope.flashMessage = null;
     scope.selected = [];
   
     if (scope.PostRefreshRemove) {

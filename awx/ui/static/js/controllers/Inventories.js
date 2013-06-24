@@ -23,6 +23,7 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
     var mode = (paths[0] == 'inventories') ? 'edit' : 'select';      // if base path 'users', we're here to add/edit users
     var scope = view.inject(InventoryList, { mode: mode });          // Inject our view
     scope.selected = [];
+    $rootScope.flashMessage = null;
   
     if (scope.PostRefreshRemove) {
        scope.PostRefreshRemove();

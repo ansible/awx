@@ -20,6 +20,7 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     var view = GenerateList;
     var base = $location.path().replace(/^\//,'').split('/')[0];
     var scope = view.inject(list, { mode: 'edit' });
+    $rootScope.flashMessage = null;
     scope.selected = [];
   
     if (scope.PostRefreshRemove) {

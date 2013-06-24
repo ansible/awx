@@ -23,6 +23,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     var mode = (base == 'projects') ? 'edit' : 'select';
     var scope = view.inject(list, { mode: mode });
     scope.selected = [];
+    $rootScope.flashMessage = null;
   
     if (scope.PostRefreshRemove) {
        scope.PostRefreshRemove();
@@ -181,6 +182,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
       Rest.setUrl(url);
       Rest.post(data)
           .success( function(data, status, headers, config) {
+              $rootScope.flashMessage = "New project successfully created!";
               (base == 'projects') ? ReturnToCaller() : ReturnToCaller(1);
               })
           .error( function(data, status, headers, config) {
@@ -268,6 +270,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    
    // Save changes to the parent
    scope.formSave = function() {
+      $rootScope.flashMessage = null;
       var params = {};
       for (var fld in form.fields) {
           params[fld] = scope[fld];
@@ -285,6 +288,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
 
    // Reset the form
    scope.formReset = function() {
+      $rootScope.flashMessage = null;
       generator.reset();
       for (var fld in master) {
           scope[fld] = master[fld];
@@ -293,36 +297,38 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
 
    // Related set: Add button
    scope.add = function(set) {
+      $rootScope.flashMessage = null;
       $location.path('/' + base + '/' + $routeParams.id + '/' + set);
       };
 
    // Related set: Edit button
    scope.edit = function(set, id, name) {
+      $rootScope.flashMessage = null;
       $location.path('/' + base + '/' + $routeParams.id + '/' + set + '/' + id);
       };
 
    // Related set: Delete button
    scope['delete'] = function(set, itm_id, name, title) {
       var action = function() {
-          var url = GetBasePath('projects') + id + '/' + set + '/';
-          Rest.setUrl(url);
-          Rest.post({ id: itm_id, disassociate: 1 })
-              .success( function(data, status, headers, config) {
-                  $('#prompt-modal').modal('hide');
-                  scope.search(form.related[set].iterator);
-                  })
-              .error( function(data, status, headers, config) {
-                  $('#prompt-modal').modal('hide');
-                  ProcessErrors(scope, data, status, null,
-                            { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
-                  });      
-          };
+      var url = GetBasePath('projects') + id + '/' + set + '/';
+      $rootScope.flashMessage = null;
+      Rest.setUrl(url);
+      Rest.post({ id: itm_id, disassociate: 1 })
+          .success( function(data, status, headers, config) {
+              $('#prompt-modal').modal('hide');
+              scope.search(form.related[set].iterator);
+              })
+          .error( function(data, status, headers, config) {
+              $('#prompt-modal').modal('hide');
+              ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+              });      
+      };
 
-       Prompt({ hdr: 'Delete', 
-                body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
-                action: action
-                });
-       
+      Prompt({ hdr: 'Delete',
+          body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
+          action: action
+          }); 
       }
 }
 

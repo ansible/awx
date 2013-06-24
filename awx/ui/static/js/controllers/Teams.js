@@ -182,6 +182,7 @@ function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    var form = TeamForm;
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
+   $rootScope.flashMessage = null;
    generator.reset();
    LoadBreadCrumbs();
    TeamLookUpOrganizationInit({ scope: scope });
@@ -195,6 +196,7 @@ function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
       } 
       Rest.post(data)
           .success( function(data, status, headers, config) {
+              $rootScope.flashMessage = "New team successfully created!";
               $location.path('/teams/' + data.id);
               })
           .error( function(data, status, headers, config) {
@@ -286,6 +288,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 
    // Save changes to the parent
    scope.formSave = function() {
+      $rootScope.flashMessage = null;
       Rest.setUrl(defaultUrl + $routeParams.id +'/');
       var data = {}
       for (var fld in form.fields) {
@@ -304,6 +307,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 
    // Cancel
    scope.formReset = function() {
+      $rootScope.flashMessage = null;
       generator.reset();
       for (var fld in master) {
           scope[fld] = master[fld];

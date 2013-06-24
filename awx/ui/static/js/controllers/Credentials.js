@@ -218,6 +218,14 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
          scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
       }
       }
+
+   // Click clear button
+   scope.clear = function(fld, associated) {
+      scope[fld] = '';
+      scope[associated] = '';
+      scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+      }
+      
 }
 
 CredentialsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 'GenerateForm', 
