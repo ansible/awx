@@ -134,7 +134,13 @@ sdist: clean
 	   BUILD=$(BUILD) $(PYTHON) setup.py sdist; \
 	fi
 
-rpm: sdist
+compiled: sdist
+	(cd dist/ && tar zxf $(SDIST_TAR_FILE))
+	(cd dist/ && $(PYTHON) -m compileall -f -x "(plugins/callback/job_event_callback.py|scripts/inventory.py|settings/*.py|site-packages/*.py)" ./awx-$(VERSION)$(BUILD)/awx)
+	(cd dist/ && find ./awx-$(VERSION)$(BUILD)/awx \( -name "*.py" ! -path "*/plugins/callback/job_event_callback.py" ! -path "*/scripts/inventory.py" ! -path "*/settings/*.py" ! -path "*/site-packages/*.py" \) -delete)
+	(cd dist/ && tar zcf $(SDIST_TAR_FILE) awx-$(VERSION)$(BUILD))
+
+rpm: compiled
 	@mkdir -p rpm-build
 	@cp dist/*.gz rpm-build/
 	@rpmbuild --define "_topdir %(pwd)/rpm-build" \
@@ -146,7 +152,7 @@ rpm: sdist
 	--define "_sourcedir  %{_topdir}" \
 	-ba packaging/rpm/awx.spec
 
-deb: sdist
+deb: compiled
 	@mkdir -p deb-build
 	@cp dist/$(SDIST_TAR_FILE) deb-build/
 	(cd deb-build && tar zxf $(SDIST_TAR_FILE))
