@@ -267,6 +267,21 @@ class PermissionSerializer(BaseSerializer):
             res['inventory']   = reverse('main:inventory_detail', args=(obj.inventory.pk,))
         return res
 
+    def validate(self, attrs):
+        # Can only set either user or team.
+        if attrs['user'] and attrs['team']:
+            raise serializers.ValidationError('permission can only be assigned'
+                                              ' to a user OR a team, not both')
+        # Cannot assign admit/read/write permissions for a project.
+        if attrs['permission_type'] in ('admin', 'read', 'write') and attrs['project']:
+            raise serializers.ValidationError('project cannot be assigned for '
+                                              'inventory-only permissions')
+        # Project is required when setting deployment permissions.
+        if attrs['permission_type'] in ('run', 'check') and not attrs['project']:
+            raise serializers.ValidationError('project is required when '
+                                              'assigning deployment permissions')
+        return attrs
+
 class CredentialSerializer(BaseSerializer):
 
     # FIXME: may want to make some of these filtered based on user accessing

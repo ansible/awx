@@ -510,13 +510,37 @@ class ProjectsTest(BaseTest):
         posted = self.post(url, user_permission, expect=201, auth=self.get_super_credentials())
         url2 = posted['url']
         got = self.get(url2, expect=200, auth=self.get_other_credentials())
-        
+
+        # cannot add permissions that apply to both team and user
+        url = reverse('main:user_permissions_list', args=(user.pk,))
+        user_permission['name'] = 'user permission 2'
+        user_permission['team'] = team.pk
+        self.post(url, user_permission, expect=400, auth=self.get_super_credentials())
+
+        # cannot set admin/read/write permissions when a project is involved.
+        user_permission.pop('team')
+        user_permission['name'] = 'user permission 3'
+        user_permission['permission_type'] = PERM_INVENTORY_ADMIN
+        self.post(url, user_permission, expect=400, auth=self.get_super_credentials())
+
+        # project is required for a deployment permission
+        user_permission['name'] = 'user permission 4'
+        user_permission['permission_type'] = PERM_INVENTORY_DEPLOY
+        user_permission.pop('project')
+        self.post(url, user_permission, expect=400, auth=self.get_super_credentials())
+
         # can add permissions on a team
         url = reverse('main:team_permissions_list', args=(team.pk,))
         posted = self.post(url, team_permission, expect=201, auth=self.get_super_credentials())
         url2 = posted['url']
         # check we can get that permission back
         got = self.get(url2, expect=200, auth=self.get_other_credentials())
+
+        # cannot add permissions that apply to both team and user
+        url = reverse('main:team_permissions_list', args=(team.pk,))
+        team_permission['name'] += '2'
+        team_permission['user'] = user.pk
+        self.post(url, team_permission, expect=400, auth=self.get_super_credentials())
 
         # can list permissions on a user
         url = reverse('main:user_permissions_list', args=(user.pk,))
