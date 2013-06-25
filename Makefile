@@ -111,17 +111,17 @@ dev_build:
 release_build:
 	python setup.py release_build
 
-release_ball: clean 
-	make release_build
+release_ball: clean sdist
+	#make release_build
 	(cd ../ansible-doc; make)
-	-(rm -rf $(RELEASE))
-	mkdir -p $(RELEASE)/dist
-	cp -a dist/* $(RELEASE)/dist
-	mkdir -p $(RELEASE)/setup
-	cp -a setup/* $(RELEASE)/setup
-	mkdir -p $(RELEASE)/docs
-	cp -a ../ansible-doc/*.pdf $(RELEASE)/docs
-	tar -cvf $(RELEASE)-all.tar $(RELEASE)
+	-(rm -rf awx-$(VERSION)-$(RELEASE))
+	mkdir -p awx-$(VERSION)-$(RELEASE)/dist
+	cp -a dist/* awx-$(VERSION)-$(RELEASE)/dist
+	mkdir -p awx-$(VERSION)-$(RELEASE)/setup
+	cp -a setup/* awx-$(VERSION)-$(RELEASE)/setup
+	mkdir -p awx-$(VERSION)-$(RELEASE)/docs
+	cp -a ../ansible-doc/*.pdf awx-$(VERSION)-$(RELEASE)/docs
+	tar -cvf awx-$(VERSION)-$(RELEASE)-all.tar awx-$(VERSION)-$(RELEASE)
 
 release_clean:
 	-(rm *.tar)
