@@ -82,7 +82,10 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        for (var fld in this.form.fields) {
            this.scope[fld] = '';        
            this.scope[fld + '_api_error'] = '';
-           this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField] = '';
+           if (this.form.fields[fld].sourceModel) {
+              this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField] = '';
+              this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '_api_error'] = '';
+           }
            if ( this.form.fields[fld].type == 'lookup' &&
                 this.scope[this.form.name + '_form'][this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField] ) {
               this.scope[this.form.name + '_form'][this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField].$setPristine();
@@ -384,17 +387,19 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
              html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n";
              for (var i=0; i < field.options.length; i++) {
-                 html += "<label class=\"radio inline\">";
+                 html += "<label class=\"radio inline\" ";
+                 html += (field.options[i].ngShow) ? this.attr(field.options[i],'ngShow') : "";
+                 html += ">";
                  html += "<input type=\"radio\" "; 
                  html += "name=\"" + fld + "\" ";
+                 html += "value=\"" + field.options[i].value + "\" ";
                  html += "ng-model=\"" + fld + "\" ";
                  html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-                 html += "value=\"" + field.options[i].value + "\" ";
                  html += (field.readonly) ? "readonly " : "";
                  html += " /> " + field.options[i].label + "\n";
                  html += "</label>\n";
              }
-             html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
+             html += "<p><span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span></p>\n";
              html += "</div>\n";
              html += "</div>\n";  
           }

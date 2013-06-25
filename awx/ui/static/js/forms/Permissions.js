@@ -20,7 +20,7 @@ angular.module('PermissionFormDefinition', [])
             category: {
                 label: 'Permission Type',
                 type: 'radio',
-                options: [{ label: 'Inventory', value: 'i' }, { label: 'Deployment', value: 'd'}],
+                options: [{ label: 'Inventory', value: 'Inventory' }, { label: 'Deployment', value: 'Deploy'}],
                 ngChange: 'selectCategory()'
                 },
             name: {
@@ -49,8 +49,10 @@ angular.module('PermissionFormDefinition', [])
                 type: 'lookup',
                 sourceModel: 'project',
                 sourceField: 'name',
-                ngShow: "category == 'd'",
+                ngShow: "category == 'Deploy'",
                 ngClick: 'lookUpProject()',
+                addRequired: false,
+                editRequired: false
                 },
             inventory: {
                 label: 'Inventory',
@@ -58,26 +60,30 @@ angular.module('PermissionFormDefinition', [])
                 sourceModel: 'inventory',
                 sourceField: 'name',
                 ngClick: 'lookUpInventory()',
+                addRequired: false,
+                editRequired: false
                 },
-            inventory_permission_type: {
+            permission_type: {
                 label: 'Permission',
                 type: 'radio',
-                ngShow: "category == 'i'",
                 options: [
-                    {label: 'Admin', value: 'PERM_INVENTORY_ADMIN'},
-                    {label: 'Read', value: 'PERM_INVENTORY_READ'},
-                    {label: 'Write', value: 'PERM_INVENTORY_WRITE'}
+                    {label: 'Admin', value: 'admin', ngShow: "category == 'Inventory'" },
+                    {label: 'Read', value: 'read', ngShow: "category == 'Inventory'" },
+                    {label: 'Write', value: 'write', ngShow: "category == 'Inventory'" },
+                    {label: 'Run', value: 'run', ngShow: "category == 'Deploy'" },
+                    {label: 'Check', value: 'check', ngShow: "category == 'Deploy'" }
                     ]
-                },
+                }
+                /* ,
             deployment_permission_type: {
                 label: 'Permission',
                 type: 'radio',
-                ngShow: "category == 'd'",
+                ngShow: "category == 'Deploy'",
                 options: [
                     {label: 'Deploy', value: 'PERM_INVENTORY_DEPLOY'},
                     {label: 'Check', value: 'PERM_INVENTORY_CHECK'}
                     ]
-                }
+                }*/
             },
 
         buttons: { //for now always generates <button> tags 

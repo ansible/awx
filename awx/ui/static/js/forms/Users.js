@@ -156,13 +156,20 @@ angular.module('UserFormDefinition', [])
                 fields: {
                     name: {
                         key: true, 
-                        label: 'Name'
+                        label: 'Name',
+                        ngClick: "edit('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}')"
                         },
                     project: {
-                        label: 'Project'
+                        label: 'Project',
+                        sourceModel: 'project',
+                        sourceField: 'name',
+                        ngBind: 'permission.summary_fields.project.name',
                         },
                     inventory: {
-                        label: 'Inventory'
+                        label: 'Inventory',
+                        sourceModel: 'inventory',
+                        sourceField: 'name',
+                        ngBind: 'permission.summary_fields.inventory.name',
                         }
                     },
                 

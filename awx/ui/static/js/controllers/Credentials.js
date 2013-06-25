@@ -21,7 +21,7 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
     var view = GenerateList;
     var base = $location.path().replace(/^\//,'').split('/')[0];
     var mode = (base == 'credentials') ? 'edit' : 'select';      // if base path 'credentials', we're here to add/edit
-    var scope = view.inject(CredentialList, { mode: mode });         // Inject our view
+    var scope = view.inject(list, { mode: mode });         // Inject our view
     scope.selected = [];
   
     if (scope.PostRefreshRemove) {

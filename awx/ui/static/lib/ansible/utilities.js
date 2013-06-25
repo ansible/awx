@@ -61,6 +61,13 @@ angular.module('Utilities',[])
                    fieldErrors = true;
                 }
              }
+             if (form.fields[field].sourceModel) {
+                if (data[field]) {
+                   scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '_api_error'] = 
+                       data[field][0];
+                   fieldErrors = true;
+                }
+             }
              else {
                 if (data[field]) {
                    scope[field + '_api_error'] = data[field][0];

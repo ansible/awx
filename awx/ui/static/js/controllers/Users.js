@@ -224,7 +224,7 @@ UsersAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$
 
 function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
                     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
-                    RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath) 
+                    RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath, Prompt) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -330,7 +330,12 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    // Related set: Edit button
    scope.edit = function(set, id, name) {
       $rootScope.flashMessage = null;
-      $location.path('/' + set + '/' + id);
+      if (set == 'permissions') {
+         $location.path('/users/' + $routeParams.user_id + '/permissions/' + id);
+      }
+      else {
+         $location.path('/' + set + '/' + id);
+      }
       };
 
    // Related set: Delete button
@@ -338,22 +343,39 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
       $rootScope.flashMessage = null;
       
       var action = function() {
-          var url = defaultUrl + $routeParams.user_id + '/' + set + '/';
-          Rest.setUrl(url);
-          Rest.post({ id: itm_id, disassociate: 1 })
-              .success( function(data, status, headers, config) {
-                  $('#prompt-modal').modal('hide');
-                  scope.search(form.related[set].iterator);
-                  })
-              .error( function(data, status, headers, config) {
-                  $('#prompt-modal').modal('hide');
-                  ProcessErrors(scope, data, status, null,
-                            { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
-                  });      
-          };
+          var url;
+          if (set == 'permissions') {
+              url = GetBasePath('base') + 'permissions/' + itm_id + '/';
+              Rest.setUrl(url);
+              Rest.destroy()
+                  .success( function(data, status, headers, config) {
+                      $('#prompt-modal').modal('hide');
+                      scope.search(form.related[set].iterator);
+                      })
+                  .error( function(data, status, headers, config) {
+                      $('#prompt-modal').modal('hide');
+                      ProcessErrors(scope, data, status, null,
+                          { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                      });    
+          }
+          else {
+              url = defaultUrl + $routeParams.user_id + '/' + set + '/';
+              Rest.setUrl(url);
+              Rest.post({ id: itm_id, disassociate: 1 })
+                  .success( function(data, status, headers, config) {
+                      $('#prompt-modal').modal('hide');
+                      scope.search(form.related[set].iterator);
+                      })
+                  .error( function(data, status, headers, config) {
+                      $('#prompt-modal').modal('hide');
+                      ProcessErrors(scope, data, status, null,
+                          { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+                      });      
+          }
+          }
 
        Prompt({ hdr: 'Delete', 
-                body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
+                body: 'Are you sure you want to remove ' + name + ' from ' + scope.username + ' ' + title + '?',
                 action: action
                 });
       }
@@ -362,5 +384,5 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 
 UsersEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 
                       'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
-                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'GetBasePath']; 
+                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Prompt']; 
   
