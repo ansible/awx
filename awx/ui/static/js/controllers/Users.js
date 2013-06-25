@@ -319,7 +319,12 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    // Related set: Add button
    scope.add = function(set) {
       $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.user_id + '/' + set);
+      if (set == 'permissions') {
+         $location.path('/' + base + '/' + $routeParams.user_id + '/' + set + '/add');  
+      }
+      else {
+         $location.path('/' + base + '/' + $routeParams.user_id + '/' + set);
+      }
       };
 
    // Related set: Edit button

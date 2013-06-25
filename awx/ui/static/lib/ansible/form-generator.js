@@ -368,6 +368,38 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           }
        }
 
+       //radio
+       if (field.type == 'radio') {
+          if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {
+             html += "<div class=\"control-group\" "
+             html += (field.ngShow) ? this.attr(field,'ngShow') : "";
+             html += ">\n";
+             html += "<label class=\"control-label\" for=\"" + fld + '">';
+             if (field.awPopOver) {
+                html += "<a href=\"\" " + this.attr(field,'awPopOver');
+                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
+                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
+                html += "><i class=\"icon-info-sign\"></i></a> ";
+             }
+             html += field.label + '</label>' + "\n";
+             html += "<div class=\"controls\">\n";
+             for (var i=0; i < field.options.length; i++) {
+                 html += "<label class=\"radio inline\">";
+                 html += "<input type=\"radio\" "; 
+                 html += "name=\"" + fld + "\" ";
+                 html += "ng-model=\"" + fld + "\" ";
+                 html += (field.ngChange) ? this.attr(field,'ngChange') : "";
+                 html += "value=\"" + field.options[i].value + "\" ";
+                 html += (field.readonly) ? "readonly " : "";
+                 html += " /> " + field.options[i].label + "\n";
+                 html += "</label>\n";
+             }
+             html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
+             html += "</div>\n";
+             html += "</div>\n";  
+          }
+       }
+
        if (field.type == 'hidden') {
           if ( (options.mode == 'edit' && field.includeOnEdit) ||
                (options.mode == 'add' && field.includeOnAdd) ) {

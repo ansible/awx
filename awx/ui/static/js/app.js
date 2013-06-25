@@ -45,6 +45,7 @@ angular.module('ansible', [
     'JobTemplateHelper',
     'ProjectsListDefinition',
     'ProjectFormDefinition',
+    'PermissionFormDefinition',
     'JobsListDefinition',
     'JobFormDefinition',
     'JobEventsListDefinition',
@@ -171,8 +172,11 @@ angular.module('ansible', [
             when('/users/:user_id', { templateUrl: urlPrefix + 'partials/users.html',
                                       controller: UsersEdit }).
 
-            when('/users/:user_id/credentials', { templateUrl: urlPrefix + 'partials/teams.html',
-                                                 controller: CredentialsList }).
+            when('/users/:user_id/credentials', { templateUrl: urlPrefix + 'partials/users.html',
+                                                  controller: CredentialsList }).
+
+            when('/users/:user_id/permissions/add', { templateUrl: urlPrefix + 'partials/users.html',
+                                                      controller: PermissionsAdd }).
 
             when('/users/:user_id/credentials/add', { templateUrl: urlPrefix + 'partials/teams.html',
                                                       controller: CredentialsAdd }).

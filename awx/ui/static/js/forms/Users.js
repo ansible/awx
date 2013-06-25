@@ -94,6 +94,7 @@ angular.module('UserFormDefinition', [])
             },
 
         related: { //related colletions (and maybe items?)
+            
             credentials: {
                 type: 'collection',
                 title: 'Credentials',
@@ -133,6 +134,53 @@ angular.module('UserFormDefinition', [])
                         icon: 'icon-remove',
                         "class": 'btn-danger',
                         awToolTip: 'Delete the credential'
+                        }
+                    }
+                },
+ 
+            permissions: {
+                type: 'collection',
+                title: 'Permissions',
+                iterator: 'permission',
+                open: false,
+                
+                actions: { 
+                    add: {
+                        ngClick: "add('permissions')",
+                        icon: 'icon-plus',
+                        label: 'Add',
+                        awToolTip: 'Add a permission for this user'
+                        }
+                    },
+
+                fields: {
+                    name: {
+                        key: true, 
+                        label: 'Name'
+                        },
+                    project: {
+                        label: 'Project'
+                        },
+                    inventory: {
+                        label: 'Inventory'
+                        }
+                    },
+                
+                fieldActions: {
+                    edit: {
+                        label: 'Edit',
+                        ngClick: "edit('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}')",
+                        icon: 'icon-edit',
+                        "class": 'btn-success',
+                        awToolTip: 'Edit the permission'
+                        },
+                    
+                    "delete": {
+                        label: 'Delete',
+                        ngClick: "delete('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}', 'permissions')",
+                        icon: 'icon-remove',
+                        "class": 'btn-danger',
+                        awToolTip: 'Delete the permission'
                         }
                     }
 

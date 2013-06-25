@@ -153,7 +153,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "<th>#</th>\n";
        }
        for (var fld in list.fields) {
-           if (list.fields[fld].searchOnly == undefined || list.fields[fld].searchOnly == false) {
+           if ( (list.fields[fld].searchOnly == undefined || list.fields[fld].searchOnly == false) &&
+                !(options.mode == 'lookup' && list.fields[fld].excludeModal !== undefined && list.fields[fld].excludeModal == true) ) {
               html += "<th class=\"list-header\" id=\""; 
               html += (list.fields[fld].id) ? list.fields[fld].id : fld + "-header";
               html += "\"";
@@ -201,7 +202,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        base = base.replace(/^\//,'');
        for (fld in list.fields) {
            cnt++;  
-           if (list.fields[fld].searchOnly == undefined || list.fields[fld].searchOnly == false) {
+           if ( (list.fields[fld].searchOnly == undefined || list.fields[fld].searchOnly == false) &&
+                !(options.mode == 'lookup' && list.fields[fld].excludeModal !== undefined && list.fields[fld].excludeModal == true) ) {
               html += Column({ list: list, fld: fld, options: options, base: base });
            }
        }

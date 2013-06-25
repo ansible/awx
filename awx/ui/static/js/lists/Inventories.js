@@ -42,7 +42,8 @@ angular.module('InventoriesListDefinition', [])
                 ngClick: 'viewJobs(\{\{ inventory.id \}\})',
                 searchField: 'has_active_failures',
                 searchType: 'boolean',
-                searchOptions: [{ name: "No", value: 0 }, { name: "Yes", value: 1 }]
+                searchOptions: [{ name: "No", value: 0 }, { name: "Yes", value: 1 }],
+                excludeModal: true
                 }
             },
         
