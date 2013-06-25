@@ -107,11 +107,7 @@ class RunJob(Task):
         # it doesn't make sense to rely on ansible-playbook's default of using
         # the current user.
         ssh_username = ssh_username or 'root'
-        if False:
-            inventory_script = self.get_path_to('management', 'commands',
-                                                'acom_inventory.py')
-        else:
-            inventory_script = self.get_path_to('..', 'scripts', 'inventory.py')
+        inventory_script = self.get_path_to('..', 'scripts', 'inventory.py')
         args = ['ansible-playbook', '-i', inventory_script]
         if job.job_type == 'check':
             args.append('--check')
