@@ -25,6 +25,7 @@ ALLOWED_HOSTS = []
 # CLH 6/20/13 - leave the following set to False until we actually have minified js ready
 USE_MINIFIED_JS = False
 
+# URL used by inventory script and callback plugin to access API.
 INTERNAL_API_URL = 'http://127.0.0.1:80'
 
 # Load remaining settings from the global settings file specified in the
@@ -35,5 +36,8 @@ try:
     execfile(settings_file)
 except IOError:
     from django.core.exceptions import ImproperlyConfigured
-    raise ImproperlyConfigured('No AWX configuration found in %s'\
-                               % settings_file)
+    msg = 'No AWX configuration found at %s.' % settings_file
+    if 'AWX_SETTINGS_FILE' not in os.environ:
+        msg += '\nDefine the AWX_SETTINGS_FILE environment variable to specify'
+        msg += ' an alternate path.'
+    raise ImproperlyConfigured(msg)

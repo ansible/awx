@@ -3,7 +3,7 @@ SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; pr
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
-DATE := $(shell date --utc +%Y%m%d%H%M)
+DATE := $(shell date -u +%Y%m%d%H%M)
 
 VERSION=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
 RELEASE=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[1])")
@@ -131,14 +131,11 @@ sdist: clean
 	if [ "$(OFFICIAL)" = "yes" ] ; then \
 	   $(PYTHON) setup.py release_build; \
 	else \
-	   BUILD=$(BUILD) $(PYTHON) setup.py sdist; \
+	   BUILD=$(BUILD) $(PYTHON) setup.py sdist_awx; \
 	fi
 
 compiled: sdist
-	(cd dist/ && tar zxf $(SDIST_TAR_FILE))
-	(cd dist/ && $(PYTHON) -m compileall -f -x "(plugins/callback/job_event_callback.py|scripts/inventory.py|settings/*.py|site-packages/*.py)" ./awx-$(VERSION)$(BUILD)/awx)
-	(cd dist/ && find ./awx-$(VERSION)$(BUILD)/awx \( -name "*.py" ! -path "*/plugins/callback/job_event_callback.py" ! -path "*/scripts/inventory.py" ! -path "*/settings/*.py" ! -path "*/site-packages/*.py" \) -delete)
-	(cd dist/ && tar zcf $(SDIST_TAR_FILE) awx-$(VERSION)$(BUILD))
+	#(cd dist/ && tar zxf $(SDIST_TAR_FILE))
 
 rpm: compiled
 	@mkdir -p rpm-build

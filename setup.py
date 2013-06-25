@@ -4,7 +4,10 @@
 # All Rights Reserved.
 
 import os, datetime, glob, sys
+from distutils import log
 from setuptools import setup, find_packages
+from setuptools.command.sdist import sdist as _sdist
+
 
 from awx import __version__
 
@@ -60,6 +63,48 @@ def proc_data_files(data_files):
 
 #####################################################################
 
+class sdist_awx(_sdist, object):
+    '''
+    Custom sdist command to distribute some files as .pyc only.
+    '''
+
+    def make_release_tree(self, base_dir, files):
+        for f in files[:]:
+            if f.endswith('.egg-info/SOURCES.txt'):
+                files.remove(f)
+                sources_txt_path = f
+        super(sdist_awx, self).make_release_tree(base_dir, files)
+        new_sources_path = os.path.join(base_dir, sources_txt_path)
+        if os.path.isfile(new_sources_path):
+            log.warn('unlinking previous %s', new_sources_path)
+            os.unlink(new_sources_path)
+        log.info('writing new %s', new_sources_path)
+        new_sources = file(new_sources_path, 'w')
+        for line in file(sources_txt_path, 'r'):
+            line = line.strip()
+            if line in self.pyc_only_files:
+                line = line + 'c'
+            new_sources.write(line + '\n')
+
+    def make_distribution(self):
+        self.pyc_only_files = []
+        import py_compile
+        for n, f in enumerate(self.filelist.files[:]):
+            if not f.startswith('awx/'):
+                continue
+            if f.startswith('awx/lib/site-packages'):
+                continue
+            if f.startswith('awx/scripts'):
+                continue
+            if f.startswith('awx/plugins'):
+                continue
+            if f.endswith('.py'):
+                log.info('using pyc for: %s', f)
+                py_compile.compile(f, doraise=True)
+                self.filelist.files[n] = f + 'c'
+                self.pyc_only_files.append(f)
+        super(sdist_awx, self).make_distribution()
+
 setup(
     name='awx',
     version=__version__.split("-")[0], # FIXME: Should keep full version here?
@@ -107,13 +152,16 @@ setup(
             ("%s" % webconfig,      ["config/awx.conf"]),
         ]
     ),
-    options={
+    options = {
         'egg_info': {
             'tag_build': '%s' % build_timestamp,
         },
         'aliases': {
-            'dev_build': 'clean --all egg_info sdist',
-            'release_build': 'clean --all egg_info -b "" sdist',
+            'dev_build': 'clean --all egg_info sdist_awx',
+            'release_build': 'clean --all egg_info -b "" sdist_awx',
         },
+    },
+    cmdclass = {
+        'sdist_awx': sdist_awx,
     },
 )
