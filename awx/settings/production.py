@@ -11,6 +11,9 @@ TEMPLATE_DEBUG = DEBUG
 # Clear database settings to force production environment to define them.
 DATABASES = {}
 
+# Enable South to look for migrations in .pyc files.
+SOUTH_USE_PYC = True
+
 # Clear the secret key to force production environment to define it.
 SECRET_KEY = None
 
