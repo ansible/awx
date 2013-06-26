@@ -16,7 +16,7 @@ DEB_PKG_RELEASE=$(VERSION)-$(BUILD)
 else
 BUILD=
 SDIST_TAR_FILE=awx-$(VERSION).tar.gz
-RPM_PKG_RELEASE=
+RPM_PKG_RELEASE=$(RELEASE)
 DEB_BUILD_DIR=deb-build/awx-$(VERSION)
 DEB_PKG_RELEASE=$(VERSION)-$(RELEASE)
 endif
@@ -137,9 +137,11 @@ sdist: clean
 	fi
 
 rpmtar: sdist
-	(cd dist/ && tar zxf $(SDIST_TAR_FILE))
-	(cd dist/ && mv awx-$(VERSION)-$(BUILD) awx-$(VERSION))
-	(cd dist/ && tar czf awx-$(VERSION).tar.gz awx-$(VERSION))
+	if [ "$(OFFICIAL)" != "yes" ] ; then \
+	   (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
+	   (cd dist/ && mv awx-$(VERSION)-$(BUILD) awx-$(VERSION)) ; \
+	   (cd dist/ && tar czf awx-$(VERSION).tar.gz awx-$(VERSION)) ; \
+	fi
 
 rpm: rpmtar
 	@mkdir -p rpm-build
@@ -151,7 +153,7 @@ rpm: rpmtar
 	--define "_specdir %{_topdir}" \
 	--define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
 	--define "_sourcedir  %{_topdir}" \
-	--define "_pkgrelease  $(BUILD)" \
+	--define "_pkgrelease  $(RPM_PKG_RELEASE)" \
 	-ba packaging/rpm/awx.spec
 
 deb: sdist
