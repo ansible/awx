@@ -41,7 +41,7 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     if ($routeParams['inventory__int']) {
        scope[list.iterator + 'SearchField'] = 'inventory'; 
        scope[list.iterator + 'SearchValue'] = $routeParams['inventory__int'];
-       scope[list.iterator + 'SearchFieldLabel'] = 'Inventory';
+       scope[list.iterator + 'SearchFieldLabel'] = 'Inventory ID';
     }
     scope.search(list.iterator);
 

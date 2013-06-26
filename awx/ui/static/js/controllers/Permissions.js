@@ -78,8 +78,12 @@ function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    generator.reset();
    LoadBreadCrumbs();
    
+   scope['inventoryrequired'] = true;
+   scope['projectrequired'] = false;
    scope.category = 'Inventory';
    master.category = 'Inventory';
+   master.inventoryrequired = true;
+   master.projectrequired = false
 
    LookUpInit({
       scope: scope,
@@ -122,7 +126,16 @@ function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
       for (var fld in master) {
           scope[fld] = master[fld];
       }
-      }; 
+      };
+
+   scope.selectCategory = function() {
+       if (scope.category == 'Inventory') {
+          scope.projectrequired = false;
+       }
+       else {
+          scope.projectrequired = true;
+       }
+       }
 }
 
 PermissionsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'PermissionsForm', 
@@ -224,6 +237,16 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
           scope[fld] = master[fld];
       }
       };
+
+
+   scope.selectCategory = function() {
+       if (scope.category == 'Inventory') {
+          scope.projectrequired = false;
+       }
+       else {
+          scope.projectrequired = true;
+       }
+       }
 
 }
 

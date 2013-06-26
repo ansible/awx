@@ -520,6 +520,10 @@
   text-rendering: optimizeLegibility;
 }
 
-#form-modal-body, #password-body {
+.modal-body {
   padding-top: 30px;
+}
+
+#prompt-modal .modal-body {
+  padding-bottom: 30px;
 }

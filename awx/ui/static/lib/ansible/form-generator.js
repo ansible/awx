@@ -173,6 +173,8 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                 html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
                 html += (field.capitalize) ? "capitalize " : "";
                 html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
+                html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
+                    field.awRequiredWhen.variable + "\" " : "";
                 html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled=\"" + field.associated + "_ask\" " : "";
                 html += "/>";
                 if (field.clear) {
@@ -193,7 +195,8 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                 }
                 html += "<br />\n";
                 // Add error messages
-                if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
+                if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ||
+                     field.awRequiredWhen ) {
                    html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
                    this.form.name + '_form.' + fld + ".$error.required\">A value is required!</span>\n";
                 }
@@ -435,11 +438,13 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
           html += (field.id) ? this.attr(field,'id') : "";
           html += (field.placeholder) ? this.attr(field,'placeholder') : "";
           html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
-          html += (options.mode == 'add' && field.addRequired) ? "required " : "";
+          html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
+              field.awRequiredWhen.variable + "\" " : "";
           html += " awlookup />\n";
           html += "</div><br />\n";
           // Add error messages
-          if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
+          if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ||
+               field.awRequiredWhen ) {
              html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + 
                  field.sourceModel + '_' + field.sourceField  + ".$dirty && " + 
                  this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField + 

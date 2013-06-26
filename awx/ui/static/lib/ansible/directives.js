@@ -93,6 +93,48 @@ angular.module('AWDirectives', ['RestServices'])
             }
         }
         })
+  
+    //
+    // awRequiredWhen: { variable: "<variable to watch for true|false>", init:"true|false" }
+    //
+    // Make a field required conditionally using a scope variable. If the scope variable is true, the
+    // field will be required. Otherwise, the required attribute will be removed. 
+    //  
+    .directive('awRequiredWhen', function() {
+        return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            
+            function checkIt () {
+               var viewValue = elm.val();
+               validity = true;
+               if ( scope[attrs.awRequiredWhen] && (elm.attr('required') == null || elm.attr('required') == undefined) ) {
+                  $(elm).attr('required','required');
+               }
+               else if (!scope[attrs.awRequiredWhen]) {
+                  elm.removeAttr('required'); 
+               }
+               if (scope[attrs.awRequiredWhen] && (viewValue == undefined || viewValue == null || viewValue == '')) {
+                  validity = false;
+               }
+               ctrl.$setValidity('required', validity);
+               }
+            
+            scope[attrs.awRequiredWhen] = attrs.awrequiredInit;
+            checkIt();
+            
+            scope.$watch(attrs.awRequiredWhen, function() {
+                // watch for the aw-required-when expression to change value
+                checkIt();
+                });
+
+            scope.$watch($(elm).attr('name'), function() {
+                // watch for the field to change value
+                checkIt();
+                });
+            }
+        }
+        })
 
     // lookup   Validate lookup value against API
     //           

@@ -55,9 +55,6 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             case 'dataPlacement':
                result = "data-placement=\"" + obj[key] + "\" ";
                break;
-            case 'awToolTip':
-                result = "aw-tool-tip=\"" + obj[key] + "\" ";
-                break;
             default: 
                result = key + "=\"" + obj[key] + "\" ";
         }

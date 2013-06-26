@@ -51,8 +51,7 @@ angular.module('PermissionFormDefinition', [])
                 sourceField: 'name',
                 ngShow: "category == 'Deploy'",
                 ngClick: 'lookUpProject()',
-                addRequired: false,
-                editRequired: false
+                awRequiredWhen: { variable: "projectrequired", init: "false" }
                 },
             inventory: {
                 label: 'Inventory',
@@ -60,8 +59,7 @@ angular.module('PermissionFormDefinition', [])
                 sourceModel: 'inventory',
                 sourceField: 'name',
                 ngClick: 'lookUpInventory()',
-                addRequired: false,
-                editRequired: false
+                awRequiredWhen: {variable: "inventoryrequired", init: "true" }
                 },
             permission_type: {
                 label: 'Permission',
