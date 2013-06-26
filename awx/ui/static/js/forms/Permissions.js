@@ -70,7 +70,9 @@ angular.module('PermissionFormDefinition', [])
                     {label: 'Write', value: 'write', ngShow: "category == 'Inventory'" },
                     {label: 'Run', value: 'run', ngShow: "category == 'Deploy'" },
                     {label: 'Check', value: 'check', ngShow: "category == 'Deploy'" }
-                    ]
+                    ],
+                addRequired: true,
+                editRequired: true
                 }
                 /* ,
             deployment_permission_type: {

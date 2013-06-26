@@ -399,8 +399,14 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
                  html += "ng-model=\"" + fld + "\" ";
                  html += (field.ngChange) ? this.attr(field,'ngChange') : "";
                  html += (field.readonly) ? "readonly " : "";
+                 html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
+                 html += (options.mode == 'add' && field.addRequired) ? "required " : "";
                  html += " /> " + field.options[i].label + "\n";
                  html += "</label>\n";
+             }
+             if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
+                html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
+                this.form.name + '_form.' + fld + ".$error.required\">A value is required!</span>\n";
              }
              html += "<p><span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span></p>\n";
              html += "</div>\n";

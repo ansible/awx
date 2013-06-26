@@ -135,6 +135,7 @@ function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
        else {
           scope.projectrequired = true;
        }
+       scope.permission_type = null;
        }
 }
 
@@ -246,6 +247,7 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        else {
           scope.projectrequired = true;
        }
+       scope.permission_type = null;
        }
 
 }
