@@ -154,7 +154,7 @@ setup(
     ),
     options = {
         'egg_info': {
-            'tag_build': '%s' % build_timestamp,
+            'tag_build': '-%s' % build_timestamp,
         },
         'aliases': {
             'dev_build': 'clean --all egg_info sdist_awx',

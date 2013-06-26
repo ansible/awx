@@ -8,13 +8,15 @@ DATE := $(shell date -u +%Y%m%d%H%M)
 VERSION=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
 RELEASE=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[1])")
 ifneq ($(OFFICIAL),yes)
-BUILD=-dev$(DATE)
-SDIST_TAR_FILE=awx-$(VERSION)$(BUILD).tar.gz
-DEB_BUILD_DIR=deb-build/awx-$(VERSION)$(BUILD)
-DEB_PKG_RELEASE=$(VERSION)$(BUILD)
+BUILD=dev$(DATE)
+SDIST_TAR_FILE=awx-$(VERSION)-$(BUILD).tar.gz
+RPM_PKG_RELEASE=$(BUILD)
+DEB_BUILD_DIR=deb-build/awx-$(VERSION)-$(BUILD)
+DEB_PKG_RELEASE=$(VERSION)-$(BUILD)
 else
 BUILD=
 SDIST_TAR_FILE=awx-$(VERSION).tar.gz
+RPM_PKG_RELEASE=
 DEB_BUILD_DIR=deb-build/awx-$(VERSION)
 DEB_PKG_RELEASE=$(VERSION)-$(RELEASE)
 endif
@@ -134,12 +136,14 @@ sdist: clean
 	   BUILD=$(BUILD) $(PYTHON) setup.py sdist_awx; \
 	fi
 
-compiled: sdist
-	#(cd dist/ && tar zxf $(SDIST_TAR_FILE))
+rpmtar: sdist
+	(cd dist/ && tar zxf $(SDIST_TAR_FILE))
+	(cd dist/ && mv awx-$(VERSION)-$(BUILD) awx-$(VERSION))
+	(cd dist/ && tar czf awx-$(VERSION).tar.gz awx-$(VERSION))
 
-rpm: compiled
+rpm: rpmtar
 	@mkdir -p rpm-build
-	@cp dist/*.gz rpm-build/
+	@cp dist/awx-$(VERSION).tar.gz rpm-build/
 	@rpmbuild --define "_topdir %(pwd)/rpm-build" \
 	--define "_builddir %{_topdir}" \
 	--define "_rpmdir %{_topdir}" \
@@ -147,9 +151,10 @@ rpm: compiled
 	--define "_specdir %{_topdir}" \
 	--define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
 	--define "_sourcedir  %{_topdir}" \
+	--define "_pkgrelease  $(BUILD)" \
 	-ba packaging/rpm/awx.spec
 
-deb: compiled
+deb: sdist
 	@mkdir -p deb-build
 	@cp dist/$(SDIST_TAR_FILE) deb-build/
 	(cd deb-build && tar zxf $(SDIST_TAR_FILE))
