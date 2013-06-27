@@ -42,6 +42,7 @@
     background-repeat: repeat-x;
     border-color: #36454F;
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#36454F', endColorstr='#36454F', GradientType=0);
+    padding-right: 15px;
  }
 
  .navbar-inverse .nav > li > a {
@@ -60,6 +61,10 @@
 
  .navbar .brand img {
     width: 243px;
+ }
+
+ .navbar .nav {
+    margin-top: 15px;
  }
 
  a:hover {
