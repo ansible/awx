@@ -137,7 +137,8 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 }
 
 UsersList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'UserList', 'GenerateList', 
-                      'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors' ];
+                      'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors'
+                      ];
 
 
 function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
@@ -224,7 +225,7 @@ UsersAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$
 
 function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
                     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
-                    RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath, Prompt) 
+                    RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath, Prompt, CheckAccess) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -320,7 +321,9 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    scope.add = function(set) {
       $rootScope.flashMessage = null;
       if (set == 'permissions') {
-         $location.path('/' + base + '/' + $routeParams.user_id + '/' + set + '/add');  
+         if (CheckAccess()) {
+            $location.path('/' + base + '/' + $routeParams.user_id + '/' + set + '/add');  
+         }
       }
       else {
          $location.path('/' + base + '/' + $routeParams.user_id + '/' + set);
@@ -331,7 +334,9 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    scope.edit = function(set, id, name) {
       $rootScope.flashMessage = null;
       if (set == 'permissions') {
-         $location.path('/users/' + $routeParams.user_id + '/permissions/' + id);
+         if (CheckAccess()) {
+            $location.path('/users/' + $routeParams.user_id + '/permissions/' + id);
+         }
       }
       else {
          $location.path('/' + set + '/' + id);
@@ -345,18 +350,20 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
       var action = function() {
           var url;
           if (set == 'permissions') {
-              url = GetBasePath('base') + 'permissions/' + itm_id + '/';
-              Rest.setUrl(url);
-              Rest.destroy()
-                  .success( function(data, status, headers, config) {
-                      $('#prompt-modal').modal('hide');
-                      scope.search(form.related[set].iterator);
-                      })
-                  .error( function(data, status, headers, config) {
-                      $('#prompt-modal').modal('hide');
-                      ProcessErrors(scope, data, status, null,
+             if (CheckAccess()) {
+                url = GetBasePath('base') + 'permissions/' + itm_id + '/';
+                Rest.setUrl(url);
+                Rest.destroy()
+                    .success( function(data, status, headers, config) {
+                        $('#prompt-modal').modal('hide');
+                        scope.search(form.related[set].iterator);
+                        })
+                    .error( function(data, status, headers, config) {
+                        $('#prompt-modal').modal('hide');
+                        ProcessErrors(scope, data, status, null,
                           { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                      });    
+                        });
+              }   
           }
           else {
               url = defaultUrl + $routeParams.user_id + '/' + set + '/';
@@ -384,5 +391,5 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 
 UsersEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 
                       'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
-                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Prompt']; 
+                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Prompt', 'CheckAccess']; 
   

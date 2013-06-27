@@ -220,7 +220,7 @@ TeamsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$
 function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, 
                     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                     RelatedPaginateInit, ReturnToCaller, ClearScope, TeamLookUpOrganizationInit, Prompt, 
-                    GetBasePath) 
+                    GetBasePath, CheckAccess) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -318,7 +318,9 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    scope.add = function(set) {
       $rootScope.flashMessage = null;
       if (set == 'permissions') {
-         $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/add');
+         if (CheckAccess()) {
+            $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/add');
+         }
       }
       else {
          $location.path('/' + base + '/' + $routeParams.team_id + '/' + set);  
@@ -329,7 +331,9 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    scope.edit = function(set, id, name) {
       $rootScope.flashMessage = null;
       if (set == 'permissions') {
-         $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/' + id);   
+         if (CheckAccess()) {  
+            $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/' + id);   
+          }
       }
       else {
          $location.path('/' + set + '/' + id);
@@ -343,18 +347,20 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
       var action = function() {
           var url;
           if (set == 'permissions') {
-              url = GetBasePath('base') + 'permissions/' + itm_id + '/';
-              Rest.setUrl(url);
-              Rest.destroy()
-                  .success( function(data, status, headers, config) {
-                      $('#prompt-modal').modal('hide');
-                      scope.search(form.related[set].iterator);
-                      })
-                  .error( function(data, status, headers, config) {
-                      $('#prompt-modal').modal('hide');
-                      ProcessErrors(scope, data, status, null,
-                          { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                      });    
+              if (CheckAccess()) {
+                 url = GetBasePath('base') + 'permissions/' + itm_id + '/';
+                 Rest.setUrl(url);
+                 Rest.destroy()
+                     .success( function(data, status, headers, config) {
+                         $('#prompt-modal').modal('hide');
+                             scope.search(form.related[set].iterator);
+                             })
+                       .error( function(data, status, headers, config) {
+                        $('#prompt-modal').modal('hide');
+                        ProcessErrors(scope, data, status, null,
+                            { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                        });
+              }    
           }
           else {
               var url = defaultUrl + $routeParams.team_id + '/' + set + '/';
@@ -383,6 +389,6 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 TeamsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm', 
                       'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                       'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'TeamLookUpOrganizationInit', 'Prompt',
-                      'GetBasePath'
+                      'GetBasePath', 'CheckAccess'
                       ]; 
   

@@ -20,17 +20,20 @@ function PermissionsList ($scope, $rootScope, $location, $log, $routeParams, Res
     scope.search(list.iterator);
 
     LoadBreadCrumbs();
-    
+
     scope.addPermission = function() {
-       $location.path($location.path() + '/add');
+       if (checkAccess()) {
+          $location.path($location.path() + '/add');
+       }
        }
 
     scope.editPermission = function(id) {
-       $location.path($location.path() + '/' + id);
+       if (checkAccess()) {
+          $location.path($location.path() + '/' + id);
+       }
        }
  
     scope.deletePermission = function(id, name) {
-       
        var action = function() {
            var url = GetBasePath('base') + 'permissions/' + id + '/';
            Rest.setUrl(url);
@@ -45,11 +48,13 @@ function PermissionsList ($scope, $rootScope, $location, $log, $routeParams, Res
                       { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                    });      
            };
-
-       Prompt({ hdr: 'Delete', 
-                body: 'Are you sure you want to delete ' + name + '?',
-                action: action
-                });
+       
+       if (checkAccess()) {
+           Prompt({ hdr: 'Delete', 
+                    body: 'Are you sure you want to delete ' + name + '?',
+                    action: action
+                    });
+       }
        }
 }
 
