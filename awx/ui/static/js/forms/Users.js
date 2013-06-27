@@ -13,7 +13,11 @@ angular.module('UserFormDefinition', [])
         addTitle: 'Create User',                             //Legend in add mode
         editTitle: '{{ username }}',                         //Legend in edit mode
         name: 'user',                                        //Form name attribute
-        well: true,                                          //Wrap the form with TB well          
+        well: true,                                          //Wrap the form with TB well        
+        collapse: true,
+        collapseTitle: 'User Settings',
+        collapseMode: 'edit',
+        collapseOpen: true,
 
         fields: {
             username: {

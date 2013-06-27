@@ -11,9 +11,13 @@ angular.module('TeamFormDefinition', [])
     'TeamForm', {
         
         addTitle: 'Create Team',                             //Legend in add mode
-        editTitle: '{{ name }}',                                  //Legend in edit mode
+        editTitle: '{{ name }}',                             //Legend in edit mode
         name: 'team',
         well: true,
+        collapse: true,
+        collapseTitle: 'Team Settings',
+        collapseMode: 'edit',
+        collapseOpen: true,
 
         fields: {
             name: {
@@ -58,52 +62,6 @@ angular.module('TeamFormDefinition', [])
 
         related: { //related colletions (and maybe items?)
             
-            users:  {
-                type: 'collection',
-                title: 'Users',
-                iterator: 'user',
-                open: false,
-
-                actions: { 
-                    add: {
-                        ngClick: "add('users')",
-                        icon: 'icon-plus',
-                        label: 'Add',
-                        awToolTip: 'Add a user'
-                        }
-                    },
-                
-                fields: {
-                    username: {
-                        key: true,
-                        label: 'Username'
-                        },
-                    first_name: {
-                        label: 'First Name'
-                        },
-                    last_name: {
-                        label: 'Last Name'
-                        }
-                    },
-                
-                fieldActions: {
-                    edit: {
-                        label: 'Edit',
-                        ngClick: "edit('users', \{\{ user.id \}\}, '\{\{ user.username \}\}')",
-                        icon: 'icon-edit',
-                        "class": 'btn-success',
-                        awToolTip: 'Edit user'
-                        },
-                    "delete": {
-                        label: 'Delete',
-                        ngClick: "delete('users', \{\{ user.id \}\}, '\{\{ user.username \}\}', 'users')",
-                        icon: 'icon-remove',
-                        "class": 'btn-danger',
-                        awToolTip: 'Remove user'
-                        }
-                    }
-                },
-
             credentials:  {
                 type: 'collection',
                 title: 'Credentials',
@@ -147,6 +105,61 @@ angular.module('TeamFormDefinition', [])
                     }
                 },
 
+            permissions: {
+                type: 'collection',
+                title: 'Permissions',
+                iterator: 'permission',
+                open: false,
+                
+                actions: { 
+                    add: {
+                        ngClick: "add('permissions')",
+                        icon: 'icon-plus',
+                        label: 'Add',
+                        awToolTip: 'Add a permission for this user'
+                        }
+                    },
+
+                fields: {
+                    name: {
+                        key: true, 
+                        label: 'Name',
+                        ngClick: "edit('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}')"
+                        },
+                    project: {
+                        label: 'Project',
+                        sourceModel: 'project',
+                        sourceField: 'name',
+                        ngBind: 'permission.summary_fields.project.name',
+                        },
+                    inventory: {
+                        label: 'Inventory',
+                        sourceModel: 'inventory',
+                        sourceField: 'name',
+                        ngBind: 'permission.summary_fields.inventory.name',
+                        }
+                    },
+                
+                fieldActions: {
+                    edit: {
+                        label: 'Edit',
+                        ngClick: "edit('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}')",
+                        icon: 'icon-edit',
+                        "class": 'btn-success',
+                        awToolTip: 'Edit the permission'
+                        },
+                    
+                    "delete": {
+                        label: 'Delete',
+                        ngClick: "delete('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}', 'permissions')",
+                        icon: 'icon-remove',
+                        "class": 'btn-danger',
+                        awToolTip: 'Delete the permission'
+                        }
+                    }
+
+                },
+
             projects:  {
                 type: 'collection',
                 title: 'Projects',
@@ -185,6 +198,52 @@ angular.module('TeamFormDefinition', [])
                         icon: 'icon-remove',
                         "class": 'btn-danger',
                         awToolTip: 'Remove the project'
+                        }
+                    }
+                },
+
+             users:  {
+                type: 'collection',
+                title: 'Users',
+                iterator: 'user',
+                open: false,
+
+                actions: { 
+                    add: {
+                        ngClick: "add('users')",
+                        icon: 'icon-plus',
+                        label: 'Add',
+                        awToolTip: 'Add a user'
+                        }
+                    },
+                
+                fields: {
+                    username: {
+                        key: true,
+                        label: 'Username'
+                        },
+                    first_name: {
+                        label: 'First Name'
+                        },
+                    last_name: {
+                        label: 'Last Name'
+                        }
+                    },
+                
+                fieldActions: {
+                    edit: {
+                        label: 'Edit',
+                        ngClick: "edit('users', \{\{ user.id \}\}, '\{\{ user.username \}\}')",
+                        icon: 'icon-edit',
+                        "class": 'btn-success',
+                        awToolTip: 'Edit user'
+                        },
+                    "delete": {
+                        label: 'Delete',
+                        ngClick: "delete('users', \{\{ user.id \}\}, '\{\{ user.username \}\}', 'users')",
+                        icon: 'icon-remove',
+                        "class": 'btn-danger',
+                        awToolTip: 'Remove user'
                         }
                     }
                 }

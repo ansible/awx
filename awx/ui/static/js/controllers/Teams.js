@@ -317,13 +317,23 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    // Related set: Add button
    scope.add = function(set) {
       $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.team_id + '/' + set);
+      if (set == 'permissions') {
+         $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/add');
+      }
+      else {
+         $location.path('/' + base + '/' + $routeParams.team_id + '/' + set);  
+      }
       };
 
    // Related set: Edit button
    scope.edit = function(set, id, name) {
       $rootScope.flashMessage = null;
-      $location.path('/' + set + '/' + id);
+      if (set == 'permissions') {
+         $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/' + id);   
+      }
+      else {
+         $location.path('/' + set + '/' + id);
+      }
       };
 
    // Related set: Delete button
@@ -331,25 +341,41 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
       $rootScope.flashMessage = null;
       
       var action = function() {
-          var url = defaultUrl + $routeParams.team_id + '/' + set + '/';
-          Rest.setUrl(url);
-          Rest.post({ id: itm_id, disassociate: 1 })
-              .success( function(data, status, headers, config) {
-                  $('#prompt-modal').modal('hide');
-                  scope.search(form.related[set].iterator);
-                  })
-              .error( function(data, status, headers, config) {
-                  $('#prompt-modal').modal('hide');
-                  ProcessErrors(scope, data, status, null,
-                            { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
-                  });      
+          var url;
+          if (set == 'permissions') {
+              url = GetBasePath('base') + 'permissions/' + itm_id + '/';
+              Rest.setUrl(url);
+              Rest.destroy()
+                  .success( function(data, status, headers, config) {
+                      $('#prompt-modal').modal('hide');
+                      scope.search(form.related[set].iterator);
+                      })
+                  .error( function(data, status, headers, config) {
+                      $('#prompt-modal').modal('hide');
+                      ProcessErrors(scope, data, status, null,
+                          { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                      });    
+          }
+          else {
+              var url = defaultUrl + $routeParams.team_id + '/' + set + '/';
+              Rest.setUrl(url);
+              Rest.post({ id: itm_id, disassociate: 1 })
+                  .success( function(data, status, headers, config) {
+                      $('#prompt-modal').modal('hide');
+                      scope.search(form.related[set].iterator);
+                      })
+                  .error( function(data, status, headers, config) {
+                      $('#prompt-modal').modal('hide');
+                      ProcessErrors(scope, data, status, null,
+                         { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+                      });      
+          }
           };
 
-       Prompt({ hdr: 'Delete', 
-                body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
-                action: action
-                });
-       
+      Prompt({ hdr: 'Delete', 
+               body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
+               action: action
+               });
       }
 
 }

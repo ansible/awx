@@ -133,6 +133,15 @@ angular.module('ansible', [
 
             when('/teams/:team_id', { templateUrl: urlPrefix + 'partials/teams.html',
                                       controller: TeamsEdit }).
+            
+            when('/teams/:team_id/permissions/add', { templateUrl: urlPrefix + 'partials/teams.html',
+                                                      controller: PermissionsAdd }).
+
+            when('/teams/:team_id/permissions', { templateUrl: urlPrefix + 'partials/teams.html',
+                                                  controller: PermissionsList }).
+
+            when('/teams/:team_id/permissions/:permission_id', { templateUrl: urlPrefix + 'partials/teams.html',
+                                                                 controller: PermissionsEdit }).
 
             when('/teams/:team_id/users', { templateUrl: urlPrefix + 'partials/teams.html',
                                             controller: UsersList }).

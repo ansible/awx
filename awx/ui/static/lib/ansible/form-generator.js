@@ -8,9 +8,9 @@
  * 
  */
 
-angular.module('FormGenerator', ['GeneratorHelpers'])
-    .factory('GenerateForm', [ '$compile', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column', 
-    function($compile, SearchWidget, PaginateWidget, Attr, Icon, Column) {
+angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
+    .factory('GenerateForm', [ '$location', '$cookieStore', '$compile', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column', 
+    function($location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column) {
     return {
     
     setForm: function(form) {
@@ -106,18 +106,66 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        },
 
     addListeners: function() {
-       // Listen for accordion collapse events and toggle the header icon
-       $('.collapse')
-           .on('show', function() {
-               var element = $(this).parent().find('.accordion-heading i');
-               element.removeClass('icon-angle-down');
-               element.addClass('icon-angle-up');
-               })
-           .on('hide', function() {
-               var element = $(this).parent().find('.accordion-heading i');
-               element.removeClass('icon-angle-up');
-               element.addClass('icon-angle-down');
-               });
+        
+        $('.jqui-accordion').each( function(index) {
+            
+            var active = false;
+            var list = $cookieStore.get('accordions');
+            var found = false;
+            if (list) {
+               var id = $(this).attr('id');
+               var base = ($location.path().replace(/^\//,'').split('/')[0]);
+               for (var i=0; i < list.length && found == false; i++) {
+                   if (list[i].base == base && list[i].id == id) {
+                      found = true;
+                      active = list[i].active; 
+                   }
+               }
+            }
+
+            if (found == false && $(this).attr('data-open') == 'true') {
+               active = 0;
+            }
+            
+            $(this).accordion({
+                collapsible: true,
+                heightStyle: 'content',
+                active: active,
+                activate: function( event, ui ) {
+                    $('.jqui-accordion').each( function(index) {
+                        var active = $(this).accordion('option', 'active');
+                        var id = $(this).attr('id');
+                        var base = ($location.path().replace(/^\//,'').split('/')[0]);
+                        var list = $cookieStore.get('accordions');
+                        if (list == null || list == undefined) {
+                           list = [];
+                        }
+                        var found = false;
+                        for (var i=0; i < list.length && found == false; i++) {
+                            if ( list[i].base == base && list[i].id == id) {
+                               found = true; 
+                               list[i].active = active; 
+                            }
+                        }
+                        if (found == false) {
+                           list.push({ base: base, id: id, active: active });
+                        }
+                        $cookieStore.put('accordions',list);
+                        });
+                    }
+                });
+            
+            
+
+            });
+
+  
+
+       },
+     
+    genID: function() {
+       var id = new Date();
+       return id.getTime();
        },
 
     headerField: function(fld, field, options) {
@@ -556,13 +604,21 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        else { 
           
           if ( this.form.collapse && this.form.collapseMode == options.mode) {
-             html += "<div class=\"accordion-group\">\n";
+             /*html += "<div class=\"accordion-group\">\n";
              html += "<div class=\"accordion-heading\">\n";
-             html += "<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#collapse1\">";
+             html += "<a id=\"" + this.form.name + "-collapse-0\" class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#collapse0\">";
              html += "<i class=\"icon-angle-down icon-white\"></i>" + this.form.collapseTitle + "</a>\n";
              html += "</div>\n";
-             html += "<div id=\"collapse1\" class=\"accordion-body collapse\">\n";
+             html += "<div id=\"collapse0\" class=\"accordion-body collapse"; 
+             html += (this.form.collapseOpen) ? " in" : "";
+             html += "\">\n";
              html += "<div class=\"accordion-inner\">\n";
+             */
+             html += "<div id=\"" + this.form.name + "-collapse-0\" ";
+             html += (this.form.collapseOpen) ? "data-open=\"true\" " : "";
+             html += "class=\"jqui-accordion\">\n";
+             html += "<h3>" + this.form.collapseTitle + "<h3>\n"; 
+             html += "<div>\n";
           }
           
           // Start the well
@@ -654,8 +710,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
 
           if ( this.form.collapse && this.form.collapseMode == options.mode ) {
              html += "</div>\n";
-             html += "</div>\n";
-             html += "</div>\n";  
+             html += "</div>\n"; 
           }
        }
 
@@ -708,13 +763,17 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        var idx = 1;
        var form = this.form;
        
-       var html = "<div class=\"accordion-group\">\n";
+      /* var html = "<div class=\"accordion-group\">\n";
        html += "<div class=\"accordion-heading\">\n";
-       html += "<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#collapse2\">";
+       html += "<a id=\"" + form.name + "-collapse-2\" class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#collapse2\">";
        html += "<i class=\"icon-angle-up icon-white\"></i>Inventory Content</a>\n";
        html += "</div>\n";
        html += "<div id=\"collapse2\" class=\"accordion-body collapse in\">\n";
        html += "<div class=\"accordion-inner\">\n";
+       */
+       html = "<div id=\"" + this.form.name + "-collapse-2\" data-open=\"true\" class=\"jqui-accordion\">\n";
+       html += "<h3>Inventory Content<h3>\n"; 
+       html += "<div>\n";
        
        for (var itm in form.related) {
            if (form.related[itm].type == 'tree') {
@@ -834,7 +893,7 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        
        html += "</div>\n";
        html += "</div>\n";
-       html += "</div>\n"; 
+       //html += "</div>\n"; 
        
        return html; 
        },
@@ -846,13 +905,14 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
        //
        var idx = 1;
        var form = this.form;
-       var html = "<div class=\"accordion\" id=\"accordion\">\n";
+       html = "<div id=\"" + this.form.name + "-collapse-" + idx + "\" class=\"jqui-accordion\">\n";
        for (var itm in form.related) {
-           if (form.related[itm].type == 'collection' || form.related[itm].type == 'tree') {
+           if (form.related[itm].type == 'collection') {
+
               // Start the accordion group
-              html += "<div class=\"accordion-group\">\n";
+             /* html += "<div class=\"accordion-group\">\n";
               html += "<div class=\"accordion-heading\">\n";
-              html += "<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#collapse" + idx + "\">";
+              html += "<a id=\"" + form.name + "-collapse-" + idx + "\" class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#collapse" + idx + "\">";
               html += "<i class=\"icon-angle-down icon-white\"></i>" + form.related[itm].title + "</a>\n";
               html += "</div>\n";
               html += "<div id=\"collapse" + idx + "\" class=\"accordion-body collapse";
@@ -861,6 +921,11 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
               }
               html += "\">\n";
               html += "<div class=\"accordion-inner\">\n";
+              */
+             
+              
+              html += "<h3>" + form.related[itm].title + "<h3>\n"; 
+              html += "<div>\n";
 
               if (form.related[itm].instructions) {
                  html += "<div class=\"alert alert-info alert-block\">\n";
@@ -964,14 +1029,13 @@ angular.module('FormGenerator', ['GeneratorHelpers'])
 
               html += PaginateWidget({ set: itm, iterator: form.related[itm].iterator, mini: true });      
 
-              // End Accordion Group
+              // End Accordion
               html += "</div>\n";    // accordion inner
-              html += "</div>\n";    // accordion body
-              html += "</div>\n";    // accordion group 
 
               idx++;
             }
        }
+       html += "</div>\n";    // accordion body
        html += "</div>\n";
 
        return html; 
