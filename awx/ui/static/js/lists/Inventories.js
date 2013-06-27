@@ -33,7 +33,7 @@ angular.module('InventoriesListDefinition', [])
                 sourceField: 'name'
                 },
             has_active_failures: {
-                label: 'Host Status',
+                label: 'Failed Jobs?',
                 showValue: false,
                 text: 'Failed jobs',
                 ngShow: "\{\{ inventory.has_active_failures \}\}",
