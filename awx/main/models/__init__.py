@@ -1119,7 +1119,6 @@ class JobEvent(models.Model):
 
     def save(self, *args, **kwargs):
         self.failed = bool(self.event in self.FAILED_EVENTS)
-        # FIXME: Propagage failed flag to parent events.
         try:
             if not self.host and self.event_data.get('host', ''):
                 self.host = self.job.inventory.hosts.get(name=self.event_data['host'])
@@ -1129,8 +1128,17 @@ class JobEvent(models.Model):
         self.task = self.event_data.get('task', '')
         self.parent = self._find_parent()
         super(JobEvent, self).save(*args, **kwargs)
+        self.update_parent_failed()
         self.update_hosts()
         self.update_host_summary_from_stats()
+
+    def update_parent_failed(self):
+        # Propagage failed flag to parent events.
+        if self.failed and self.parent and not self.parent.failed:
+            p = self.parent
+            p.failed = True
+            p.save()
+            p.update_parent_failed()
 
     def update_hosts(self, extra_hosts=None):
         extra_hosts = extra_hosts or []
