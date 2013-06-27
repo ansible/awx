@@ -13,7 +13,7 @@
 
  body {
     color: #36454F;
-    padding-top: 40px;
+    padding-top: 60px;
  }
 
  .text-center {
@@ -55,10 +55,11 @@
 
  .navbar .brand {
     margin-left: 15px;
+    padding: 0;
  }  
 
  .navbar .brand img {
-    width: 130px;
+    width: 243px;
  }
 
  a:hover {
