@@ -60,7 +60,7 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
            
            for (var related in form.related) {
                if ( form.related[related].iterator == iterator ) {
-                  var f = form.related[set].fields[fld];
+                  var f = form.related[related].fields[fld];
                }
            }
            
@@ -71,15 +71,15 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
            scope[iterator + 'HideSearchType'] = false;
            scope[iterator + 'InputHide'] = false;
            
-           if (f.searchType && f.searchType == 'gtzero') {
+           if (f.searchType !== undefined && f.searchType == 'gtzero') {
               scope[iterator + "InputHide"] = true;
            }
-           if (f.searchType && (f.searchType == 'boolean' 
+           if (f.searchType !== undefined && (f.searchType == 'boolean' 
                 || f.searchType == 'select')) {
               scope[iterator + 'SelectShow'] = true;
               scope[iterator + 'SearchSelectOpts'] = f.searchOptions;
            }
-           if (f.searchType && f.searchType == 'int') {
+           if (f.searchType !== undefined && f.searchType == 'int') {
               scope[iterator + 'HideSearchType'] = true;   
            }
 

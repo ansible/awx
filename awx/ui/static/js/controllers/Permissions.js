@@ -1,7 +1,7 @@
 
 function PermissionsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, PermissionList,
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                          ClearScope, ProcessErrors, GetBasePath)
+                          ClearScope, ProcessErrors, GetBasePath, CheckAccess)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -22,13 +22,13 @@ function PermissionsList ($scope, $rootScope, $location, $log, $routeParams, Res
     LoadBreadCrumbs();
 
     scope.addPermission = function() {
-       if (checkAccess()) {
+       if (CheckAccess()) {
           $location.path($location.path() + '/add');
        }
        }
 
     scope.editPermission = function(id) {
-       if (checkAccess()) {
+       if (CheckAccess()) {
           $location.path($location.path() + '/' + id);
        }
        }
@@ -60,7 +60,7 @@ function PermissionsList ($scope, $rootScope, $location, $log, $routeParams, Res
 
 PermissionsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'PermissionList',
                             'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller',
-                            'ClearScope', 'ProcessErrors', 'GetBasePath'
+                            'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess'
                             ];
 
 
