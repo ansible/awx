@@ -9,6 +9,7 @@ deb-build
 dist
 htmlcov
 rpm-build
+*.DS_Store
 *.egg-info
 *.py[c,o]
 *.swp
