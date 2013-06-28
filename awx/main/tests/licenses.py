@@ -13,7 +13,7 @@ from awx.main.models import *
 from awx.main.tests.base import BaseTest
 from awx.main.licenses import *
 
-class LicensesTest(BaseTest):
+class LicenseTest(BaseTest):
 
     def setUp(self):
         super(LicensesTest, self).setUp()
