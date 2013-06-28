@@ -22,7 +22,7 @@ angular.module('JobEventsListDefinition', [])
                 label: 'Date',
                 key: true,
                 nosort: true,
-                notSearchable: true,
+                searchable: false,
                 ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
                 },
             event_display: {
@@ -30,7 +30,7 @@ angular.module('JobEventsListDefinition', [])
                 hasChildren: true,
                 ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
                 nosort: true,
-                notSearchable: true
+                searchable: false
                 },
             host: {
                 label: 'Host',
@@ -47,7 +47,8 @@ angular.module('JobEventsListDefinition', [])
                 searchField: 'failed',
                 searchType: 'boolean',
                 searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }],
-                nosort: true
+                nosort: true,
+                searchable: false,
                 }
             },
         
