@@ -278,10 +278,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              }
              html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n";
-             if (fld == "variables") {
-                html += "<div class=\"parse-selection\">Parse as: <label class=\"radio inline\"><input type=\"radio\" ng-model=\"parseType\" value=\"json\"> JSON</label>\n";
-                html += "<label class=\"radio inline\"><input type=\"radio\" ng-model=\"parseType\" value=\"yaml\"> YAML</label></div>\n";
+             
+             // Variable editing
+             if (fld == "variables" || fld == "extra_vars") {
+                html += "<div class=\"parse-selection\">Parse as: " +
+                    "<label class=\"radio inline\"><input type=\"radio\" ng-model=\"parseType\" value=\"yaml\"> YAML</label>\n" +
+                    "<label class=\"radio inline\"><input type=\"radio\" ng-model=\"parseType\" value=\"json\"> JSON</label></div>\n";
              }
+             
              html += "<textarea ";
              html += (field.rows) ? this.attr(field, 'rows') : "";
              html += "ng-model=\"" + fld + '" ';

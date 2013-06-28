@@ -36,7 +36,7 @@ angular.module('GroupFormDefinition', [])
                 editRequird: false, 
                 rows: 10,
                 "class": 'modal-input-xlarge',
-                "default": "\{\}",
+                "default": "---",
                 dataTitle: 'Group Variables',
                 dataPlacement: 'right',
                 awPopOver: "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +

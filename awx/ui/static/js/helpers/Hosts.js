@@ -165,7 +165,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.formModalActionLabel = 'Save';
         scope.formModalHeader = 'Create Host';
         scope.formModalCancelShow = true;
-        scope.parseType = 'json';
+        scope.parseType = 'yaml';
         ParseTypeChange(scope);
         
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
@@ -223,7 +223,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                        });
            }
            catch(err) {
-               Alert("Error", "Error parsing host variables. Parser returned " + err);  
+               Alert("Error", "Error parsing host variables. Parser returned: " + err);  
            }
            }
 
@@ -258,7 +258,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.formModalActionLabel = 'Save';
         scope.formModalHeader = 'Edit Host';
         scope.formModalCancelShow = true;
-        scope.parseType = 'json';
+        scope.parseType = 'yaml';
         ParseTypeChange(scope);
         
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
@@ -275,10 +275,10 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                Rest.get()
                    .success( function(data, status, headers, config) {
                        if ($.isEmptyObject(data)) {
-                          scope.variables = "\{\}";
+                          scope.variables = "---";
                        }
                        else {
-                          scope.variables = JSON.stringify(data, null, " ");
+                          scope.variables = jsyaml.safeDump(data);
                        }
                        })
                    .error( function(data, status, headers, config) {
@@ -288,8 +288,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                        });
             }
             else {
-               scope.variables = "\{\}";
+               scope.variables = "---";
             }
+            master.variables = scope.variables;
             });
 
         // Retrieve detail record and prepopulate the form
@@ -363,7 +364,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                         });
             }
             catch(err) {
-               Alert("Error", "Error parsing group variables. Expecting valid JSON. Parser returned " + err);     
+               Alert("Error", "Error parsing group variables. Parser returned: " + err);     
             }
             };
 
@@ -373,6 +374,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            for (var fld in master) {
                scope[fld] = master[fld];
            }
+           scope.parseType = 'yaml';
            }
         }
         }])
