@@ -71,8 +71,9 @@ class InventoryScript(object):
             auth = TokenAuth(self.auth_token)
         else:
             auth = None
+        port = parts.port or (443 if parts.scheme == 'https' else 80)
         url = urlparse.urlunsplit([parts.scheme,
-                                   '%s:%d' % (parts.hostname, parts.port),
+                                   '%s:%d' % (parts.hostname, port),
                                    parts.path, parts.query, parts.fragment])
         url_path = '/api/v1/inventories/%d/script/' % self.inventory_id
         if self.hostname:
