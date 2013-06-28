@@ -19,6 +19,18 @@ class LicenseTests(BaseTest):
         super(LicenseTests, self).setUp()
 
     def test_license_writer(self):
+
+        writer = LicenseWriter( 
+           company_name='acmecorp',
+           contact_name='Michael DeHaan',
+           contact_email='michael@ansibleworks.com',
+           license_date=25000, # seconds since epoch
+           instance_count=500
+        )
+
+        print writer.get_data()
+        print writer.get_string()
+
         assert 2 == 4
 
     def test_license_reader(self):
