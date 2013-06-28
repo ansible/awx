@@ -18,14 +18,15 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     var list = JobEventList;
     list.base = $location.path();
     
-    var defaultUrl = GetBasePath('jobs') + $routeParams.id + '/job_events/?parent__isnull=1';
+    var defaultUrl = GetBasePath('jobs') + $routeParams.id  + '/job_events/?parent__isnull=1';
     
     var view = GenerateList;
     var base = $location.path().replace(/^\//,'').split('/')[0];
     var scope = view.inject(list, { mode: 'edit' });
     $rootScope.flashMessage = null;
     scope.selected = [];
-  
+    scope.expand = true;    //on load, automatically expand all nodes
+
     if (scope.RemovePostRefresh) {
        scope.RemovePostRefresh();
     }
@@ -43,6 +44,44 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
             }
             scope.jobevents[i].status = (scope.jobevents[i].failed) ? 'error' : 'success';
         }
+
+        // Expand all parent nodes
+        if (scope.removeSetExpanded) {
+           scope.removeSetExpanded();
+        }
+        scope.removeSetExpanded = scope.$on('setExpanded', function() {
+            // After ToggleChildren completes, look for the next parent that needs to be expanded
+            var found = false; 
+            for (var i=0; i < set.length && found == false && scope.expand; i++) {
+                if (set[i]['related']['children'] && (set[i]['ngicon'] == undefined || set[i]['ngicon'] == 'icon-expand-alt')) {
+                   found = true;
+                   ToggleChildren({
+                   scope: scope, 
+                   list: list, 
+                   id: set[i].id,
+                   children: set[i]['related']['children']
+                   });
+                }
+            }
+            if (found == false) {
+               // After looping through all the nodes and finding nothing to expand, turn off 
+               // auto-expand. From now on user will manually collapse and expand nodes.
+               scope.expand = false;
+            }
+            });
+        // Start the auto expansion
+        set = scope[list.name];
+        for (var i=0; i < set.length; i++) {
+            if (set[i]['related']['children'] && (set[i]['ngicon'] == undefined || set[i]['ngicon'] == 'icon-expand-alt')) {
+               ToggleChildren({
+               scope: scope, 
+               list: list, 
+               id: set[i].id,
+               children: set[i]['related']['children']
+               });
+            }
+        }
+
         });
 
     SearchInit({ scope: scope, set: 'jobevents', list: list, url: defaultUrl });

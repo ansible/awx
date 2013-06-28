@@ -25,6 +25,16 @@ angular.module('JobEventsListDefinition', [])
                 searchable: false,
                 ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
                 },
+            status: {
+                label: 'Status',
+                icon: 'icon-circle',
+                "class": 'job-\{\{ jobevent.status \}\}',
+                searchField: 'failed',
+                searchType: 'boolean',
+                searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }],
+                nosort: true,
+                searchable: false,
+                },
             event_display: {
                 label: 'Event',
                 hasChildren: true,
@@ -39,16 +49,6 @@ angular.module('JobEventsListDefinition', [])
                 searchField: 'hosts__name',
                 nosort: true,
                 id: 'job-event-host-header'
-                },
-            status: {
-                label: 'Status',
-                icon: 'icon-circle',
-                "class": 'job-\{\{ jobevent.status \}\}',
-                searchField: 'failed',
-                searchType: 'boolean',
-                searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }],
-                nosort: true,
-                searchable: false,
                 }
             },
         

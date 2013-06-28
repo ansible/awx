@@ -27,6 +27,12 @@ angular.module('JobEventFormDefinition', [])
                 readonly: true,
                 "class": 'span3'
                 },
+             status: {
+                label: 'Status',
+                type: 'text',
+                "class": 'job-\{\{ event_status \}\}',
+                readonly: true
+                },
             host: {
                 label: 'Host',
                 type: 'text',

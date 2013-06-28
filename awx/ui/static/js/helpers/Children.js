@@ -59,7 +59,8 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
                           set.splice(clicked + 1, 0, data.results[j]);
                        }
                        clicked++;
-                   }           
+                   } 
+                   scope.$emit('setExpanded');          
                    })
                .error( function(data, status, headers, config) {
                    ProcessErrors(scope, data, status, null,
