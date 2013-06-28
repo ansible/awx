@@ -1118,7 +1118,8 @@ class JobEvent(models.Model):
         return None
 
     def save(self, *args, **kwargs):
-        self.failed = bool(self.event in self.FAILED_EVENTS)
+        if self.event in self.FAILED_EVENTS:
+            self.failed = True
         try:
             if not self.host and self.event_data.get('host', ''):
                 self.host = self.job.inventory.hosts.get(name=self.event_data['host'])

@@ -213,6 +213,53 @@ class RunJobTest(BaseCeleryTest):
                              'expected no traceback, got:\n%s' %
                              job.result_traceback)
 
+    def check_job_events(self, job, runner_status='ok', plays=1, tasks=1):
+        job_events = job.job_events.all()
+        for job_event in job_events:
+            unicode(job_event)  # For test coverage.
+            job_event.save()
+        should_be_failed = bool(runner_status not in ('ok', 'skipped'))
+        host_pks = set([self.host.pk])
+        qs = job_events.filter(event='playbook_on_start')
+        self.assertEqual(qs.count(), 1)
+        for evt in qs:
+            self.assertFalse(evt.host, evt)
+            self.assertFalse(evt.play, evt)
+            self.assertFalse(evt.task, evt)
+            self.assertEqual(evt.failed, should_be_failed)
+            self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
+                             host_pks)
+        qs = job_events.filter(event='playbook_on_play_start')
+        self.assertEqual(qs.count(), plays)
+        for evt in qs:
+            self.assertFalse(evt.host, evt)
+            self.assertTrue(evt.play, evt)
+            self.assertFalse(evt.task, evt)
+            self.assertEqual(evt.failed, should_be_failed)
+            self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
+                             host_pks)
+        qs = job_events.filter(event='playbook_on_task_start')
+        self.assertEqual(qs.count(), tasks)
+        for evt in qs:
+            self.assertFalse(evt.host, evt)
+            self.assertTrue(evt.play, evt)
+            self.assertTrue(evt.task, evt)
+            self.assertEqual(evt.failed, should_be_failed)
+            self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
+                             host_pks)
+        qs = job_events.filter(event=('runner_on_%s' % runner_status))
+        self.assertEqual(qs.count(), tasks)
+        for evt in qs:
+            self.assertEqual(evt.host, self.host)
+            self.assertTrue(evt.play, evt)
+            self.assertTrue(evt.task, evt)
+            self.assertEqual(evt.failed, should_be_failed)
+            self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
+                             host_pks)
+        qs = job_events.filter(event__startswith='runner_')
+        qs = qs.exclude(event=('runner_on_%s' % runner_status))
+        self.assertEqual(qs.count(), 0)
+
     def test_run_job(self):
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
@@ -223,17 +270,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        job_events = job.job_events.all()
-        for job_event in job_events:
-            unicode(job_event)  # For test coverage.
-            job_event.save()
-        self.assertEqual(job_events.filter(event='playbook_on_start').count(), 1)
-        self.assertEqual(job_events.filter(event='playbook_on_play_start').count(), 1)
-        self.assertEqual(job_events.filter(event='playbook_on_task_start').count(), 2)
-        self.assertEqual(job_events.filter(event='runner_on_ok').count(), 2)
-        for evt in job_events.filter(event='runner_on_ok'):
-            self.assertEqual(evt.host, self.host)
-        self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
+        self.check_job_events(job, 'ok', 1, 2)
         for job_host_summary in job.job_host_summaries.all():
             unicode(job_host_summary)  # For test coverage.
             self.assertFalse(job_host_summary.failed)
@@ -261,14 +298,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        job_events = job.job_events.all()
-        self.assertEqual(job_events.filter(event='playbook_on_start').count(), 1)
-        self.assertEqual(job_events.filter(event='playbook_on_play_start').count(), 1)
-        self.assertEqual(job_events.filter(event='playbook_on_task_start').count(), 2)
-        self.assertEqual(job_events.filter(event='runner_on_skipped').count(), 2)
-        for evt in job_events.filter(event='runner_on_skipped'):
-            self.assertEqual(evt.host, self.host)
-        self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
+        self.check_job_events(job, 'skipped', 1, 2)
         for job_host_summary in job.job_host_summaries.all():
             self.assertFalse(job_host_summary.failed)
             self.assertEqual(job_host_summary.host.last_job_host_summary, job_host_summary)
@@ -295,13 +325,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'failed')
-        job_events = job.job_events.all()
-        self.assertEqual(job_events.filter(event='playbook_on_start').count(), 1)
-        self.assertEqual(job_events.filter(event='playbook_on_play_start').count(), 1)
-        self.assertEqual(job_events.filter(event='playbook_on_task_start').count(), 1)
-        self.assertEqual(job_events.filter(event='runner_on_failed').count(), 1)
-        self.assertEqual(job_events.get(event='runner_on_failed').host, self.host)
-        self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
+        self.check_job_events(job, 'failed', 1, 1)
         for job_host_summary in job.job_host_summaries.all():
             self.assertTrue(job_host_summary.failed)
             self.assertEqual(job_host_summary.host.last_job_host_summary, job_host_summary)
@@ -330,13 +354,7 @@ class RunJobTest(BaseCeleryTest):
         # Since we don't actually run the task, the --check should indicate
         # everything is successful.
         self.check_job_result(job, 'successful')
-        job_events = job.job_events.all()
-        self.assertEqual(job_events.filter(event='playbook_on_start').count(), 1)
-        self.assertEqual(job_events.filter(event='playbook_on_play_start').count(), 1)
-        self.assertEqual(job_events.filter(event='playbook_on_task_start').count(), 1)
-        self.assertEqual(job_events.filter(event='runner_on_skipped').count(), 1)
-        self.assertEqual(job_events.get(event='runner_on_skipped').host, self.host)
-        self.assertEqual(job_events.filter(event='playbook_on_stats').count(), 1)
+        self.check_job_events(job, 'skipped', 1, 1)
         for job_host_summary in job.job_host_summaries.all():
             self.assertFalse(job_host_summary.failed)
             self.assertEqual(job_host_summary.host.last_job_host_summary, job_host_summary)

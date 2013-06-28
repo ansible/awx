@@ -100,7 +100,6 @@ class CallbackModule(object):
         url = urlparse.urljoin(url, url_path)
         headers = {'content-type': 'application/json'}
         response = requests.post(url, data=data, headers=headers, auth=auth)
-        print response.content
         response.raise_for_status()
 
     def _log_event(self, event, **event_data):
