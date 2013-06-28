@@ -13,6 +13,17 @@ DATABASES = {
    }
 }
 
+# Use SQLite for unit tests instead of PostgreSQL.
+if len(sys.argv) >= 2 and sys.argv[1] == 'test':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'var/lib/awx/awx.sqlite3',
+            # Test database cannot be :memory: for celery/inventory tests.
+            'TEST_NAME': '/var/lib/awx/awx_test.sqlite3',
+        }
+    }
+
 STATIC_ROOT = '/var/lib/awx/public/static'
 
 PROJECTS_ROOT = '/var/lib/awx/projects'

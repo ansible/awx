@@ -22,13 +22,13 @@ DATABASES = {
     }
 }
 
-# Continue to use SQLite for unit tests instead of PostgreSQL.
-if 'test' in sys.argv:
+# Use SQLite for unit tests instead of PostgreSQL.
+if len(sys.argv) >= 2 and sys.argv[1] == 'test':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': os.path.join(BASE_DIR, 'awx.sqlite3'),
-            # Test database cannot be :memory: for celery/inventory tests to work.
+            # Test database cannot be :memory: for celery/inventory tests.
             'TEST_NAME': os.path.join(BASE_DIR, 'awx_test.sqlite3'),
         }
     }
