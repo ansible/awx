@@ -13,10 +13,10 @@ from awx.main.models import *
 from awx.main.tests.base import BaseTest
 from awx.main.licenses import *
 
-class LicenseTest(BaseTest):
+class LicenseTests(BaseTest):
 
     def setUp(self):
-        super(LicensesTest, self).setUp()
+        super(LicenseTests, self).setUp()
 
     def test_license_writer(self):
         assert 2 == 4
