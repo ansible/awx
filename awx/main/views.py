@@ -27,6 +27,7 @@ from rest_framework.views import APIView
 # AWX
 from awx.main.access import *
 from awx.main.authentication import JobCallbackAuthentication
+from awx.main.licenses import LicenseReader
 from awx.main.base_views import *
 from awx.main.models import *
 from awx.main.rbac import *
@@ -111,6 +112,7 @@ class ApiV1ConfigView(APIView):
     * `project_local_paths`: List of directories beneath `project_base_dir` to
       use when creating/editing a project.
     * `time_zone`: The configured time zone for the server.
+    * `license_info`: Information about the current license.
     '''
 
     permission_classes = (IsAuthenticated,)
@@ -118,6 +120,9 @@ class ApiV1ConfigView(APIView):
 
     def get(self, request, format=None):
         '''Return various sitewide configuration settings.'''
+
+        license_reader = LicenseReader()
+        license_data   = license_reader.from_file()
 
         data = dict(
             time_zone = settings.TIME_ZONE,
@@ -128,6 +133,8 @@ class ApiV1ConfigView(APIView):
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
             ))
+        data['license_info'] = license_data
+
         return Response(data)
 
 class AuthTokenView(ObtainAuthToken):
