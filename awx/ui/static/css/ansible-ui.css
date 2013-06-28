@@ -24,8 +24,42 @@
     border-color: #e3e3e3;
  }
 
+
+/* Attempt to make button heights consistent. For some reason success, info, etc. are
+   taller than plain .btn */
+ .btn-success, .btn-danger, .btn-info, .btn-primary {
+    padding-top: 1px;
+    padding-bottom: 1px;
+ }
+
+ .btn {
+    padding-left: 5px;
+    padding-right: 5px;
+    min-width: 28px;
+ }
+
+ .modal-footer .btn-success, 
+ .modal-footer .btn-danger, 
+ .modal-footer .btn-info, 
+ .modal-footer .btn-primary {
+    padding-top: 3px;
+    padding-bottom: 4px;
+ }
+
+ .modal-footer .btn {
+    padding-left: 10px;
+    padding-right: 10px;
+ }
+
+/* End btn heights */
+
+
+ .icon-plus {
+    font-size: 10px;
+ }
+
  .container-fluid {
-    min-height: 700px ;
+    min-height: 700px;
  }
 
  .navbar-fixed-top .container {

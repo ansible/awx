@@ -62,10 +62,10 @@ angular.module('JobEventsListDefinition', [])
                 mode: 'all'
                 },
             edit: {
-                label: 'Edit',
+                label: 'Details',
                 ngClick: "jobDetails()",
-                icon: 'icon-edit',
-                "class": 'btn-small btn-success',
+                icon: 'icon-zoom-in',
+                "class": 'btn btn-small',
                 awToolTip: 'Edit job details',
                 mode: 'all'
                 },
@@ -73,7 +73,7 @@ angular.module('JobEventsListDefinition', [])
                 label: 'Hosts',
                 icon: 'icon-th-large',
                 ngClick: "jobSummary()",
-                "class": 'btn-info btn-small',
+                "class": 'btn btn-small',
                 awToolTip: 'View host summary',
                 mode: 'all'
                 }

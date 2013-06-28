@@ -576,7 +576,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              var act;
              for (action in this.form.statusActions) {
                  act = this.form.statusActions[action];
-                 html += "<button " + this.attr(act, 'ngClick') + "class=\"btn";
+                 html += "<button " + this.attr(act, 'ngClick') + "class=\"btn btn-small";
                  html += (act['class']) ? " " + act['class'] : "";
                  html += "\" ";
                  html += (act.awToolTip) ? this.attr(act,'awToolTip') : "";

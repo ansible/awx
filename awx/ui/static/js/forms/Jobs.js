@@ -212,7 +212,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Hosts',
                 icon: 'icon-th-large',
                 ngClick: "jobSummary()",
-                "class": 'btn-info btn-small',
+                "class": 'btn btn-small',
                 awToolTip: 'View host summary',
                 mode: 'all'
                 },
@@ -220,7 +220,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Events',
                 icon: 'icon-list-ul',
                 ngClick: "jobEvents()",
-                "class": 'btn-info btn-small',
+                "class": 'btn btn-small',
                 awToolTip: 'Edit job events',
                 mode: 'all'        
                 }
