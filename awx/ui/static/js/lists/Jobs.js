@@ -34,7 +34,7 @@ angular.module('JobsListDefinition', [])
                 link: true
                 },
             created: {
-                label: 'Creation Date',
+                label: 'Date',
                 link: true
                 },
             status: {

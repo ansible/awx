@@ -175,7 +175,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.formModalActionLabel = 'Save';
         scope.formModalHeader = 'Create Group';
         scope.formModalCancelShow = true;
-        scope.parseType = 'json';
+        scope.parseType = 'yaml';
         ParseTypeChange(scope);
         
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
@@ -237,7 +237,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        });
            }
            catch(err) {
-               Alert("Error", "Error parsing group variables. Expecting valid JSON. Parser returned " + err);     
+               Alert("Error", "Error parsing group variables. Parser returned: " + err);     
            }
            }
 
@@ -270,7 +270,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.formModalActionLabel = 'Save';
         scope.formModalHeader = 'Edit Group';
         scope.formModalCancelShow = true;
-        scope.parseType = 'json';
+        scope.parseType = 'yaml';
         ParseTypeChange(scope);
 
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
@@ -288,10 +288,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                Rest.get()
                    .success( function(data, status, headers, config) {
                        if ($.isEmptyObject(data)) {
-                          scope.variables = "\{\}";
+                          scope.variables = "---";
                        }
                        else {
-                          scope.variables = JSON.stringify(data, null, " ");
+                          scope.variables = jsyaml.safeDump(data);
                        }
                        })
                    .error( function(data, status, headers, config) {
@@ -301,8 +301,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        });
             }
             else {
-               scope.variables = "\{\}";
+               scope.variables = "---";
             }
+            master.variables = scope.variables;
             });
 
         // Retrieve detail record and prepopulate the form
@@ -378,7 +379,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         });
             }
             catch(err) {
-               Alert("Error", "Error parsing group variables. Expecting valid JSON. Parser returned " + err);     
+               Alert("Error", "Error parsing group variables. Parser returned: " + err);     
             }
             };
 
@@ -388,6 +389,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            for (var fld in master) {
                scope[fld] = master[fld];
            }
+           scope.parseType = 'yaml';
            }
         }
         }])

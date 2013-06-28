@@ -175,7 +175,7 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    var form = InventoryForm;
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
-   scope.parseType = 'json';
+   scope.parseType = 'yaml';
    
    generator.reset();
    LoadBreadCrumbs();
@@ -239,7 +239,7 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
                    });
        }
        catch(err) {
-           Alert("Error", "Error parsing inventory variables. Parser returned " + err);  
+           Alert("Error", "Error parsing inventory variables. Parser returned: " + err);  
            }      
        
        };
@@ -275,7 +275,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    
    ParseTypeChange(scope);
 
-   scope.parseType = 'json';
+   scope.parseType = 'yaml';
    scope['inventory_id'] = id;
    
    // Retrieve each related set and any lookups
@@ -300,10 +300,10 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
           Rest.get()
               .success( function(data, status, headers, config) {
                   if ($.isEmptyObject(data)) {
-                     scope.variables = "\{\}";
+                     scope.variables = "---";
                   }
                   else {
-                     scope.variables = JSON.stringify(data, null, " ");
+                     scope.variables = jsyaml.safeDump(data);
                   }
                   })
               .error( function(data, status, headers, config) {
@@ -313,7 +313,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                   });
           }
           else {
-              scope.variables = "\{\}";
+              scope.variables = "---";
           }
        });
   
@@ -371,7 +371,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                    });
        }
        catch(err) {
-           Alert("Error", "Error parsing inventory variables. Parser returned " + err);  
+           Alert("Error", "Error parsing inventory variables. Parser returned: " + err);  
            }      
        
        };

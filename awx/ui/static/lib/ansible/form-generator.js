@@ -233,8 +233,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 if (field.genMD5) {
                    html += " \n<button class=\"btn\" ng-click=\"genMD5('" + fld + "')\" " + 
                        "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + fld + "-gen-btn\"><i class=\"icon-repeat\"></i></button>\n";
-                   html += " \n<button style=\"margin-left: 10px;\" class=\"btn\" ng-click=\"selectAll('" + fld + "')\" " + 
-                       "aw-tool-tip=\"Select " + field.label + " for copy\" data-placement=\"top\" id=\"" + fld + "-copy-btn\"><i class=\"icon-copy\"></i></button>\n";
+                   /*html += " \n<button style=\"margin-left: 10px;\" class=\"btn\" ng-click=\"selectAll('" + fld + "')\" " + 
+                       "aw-tool-tip=\"Select " + field.label + " for copy\" data-placement=\"top\" id=\"" + fld + "-copy-btn\"><i class=\"icon-copy\"></i></button>\n";*/
                    html += "</div>\n";
                 }
                 if (field.ask) {
@@ -278,10 +278,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              }
              html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n";
-             if (fld == "variables") {
-                html += "<div class=\"parse-selection\">Parse as: <label class=\"radio inline\"><input type=\"radio\" ng-model=\"parseType\" value=\"json\"> JSON</label>\n";
-                html += "<label class=\"radio inline\"><input type=\"radio\" ng-model=\"parseType\" value=\"yaml\"> YAML</label></div>\n";
+             
+             // Variable editing
+             if (fld == "variables" || fld == "extra_vars") {
+                html += "<div class=\"parse-selection\">Parse as: " +
+                    "<label class=\"radio inline\"><input type=\"radio\" ng-model=\"parseType\" value=\"yaml\"> YAML</label>\n" +
+                    "<label class=\"radio inline\"><input type=\"radio\" ng-model=\"parseType\" value=\"json\"> JSON</label></div>\n";
              }
+             
              html += "<textarea ";
              html += (field.rows) ? this.attr(field, 'rows') : "";
              html += "ng-model=\"" + fld + '" ';

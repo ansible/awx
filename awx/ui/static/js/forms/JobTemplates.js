@@ -127,17 +127,17 @@ angular.module('JobTemplateFormDefinition', [])
                 dataTitle: 'Verbosity',
                 dataPlacement: 'left'
                 },
-            extra_vars: {
+            variables: {
                 label: 'Extra Variables',
                 type: 'textarea',
                 rows: 6,
                 "class": 'span12',
                 addRequired: false, 
                 editRequired: false,
-                "default": "\{\}",
+                "default": "---",
                 column: 2,
                 awPopOver: "<p>Pass extra command line variables to the playbook. This is the -e or --extra-vars command line parameter " +
-                    "for ansible-playbook. Provide key=value pairs or JSON. <p><a href=\"http://www.ansibleworks.com/docs/playbooks2.html" + 
+                    "for ansible-playbook. Provide key/value pairs using either YAML or JSON. <p><a href=\"http://www.ansibleworks.com/docs/playbooks2.html" + 
                     "#passing-variables-on-the-command-line\" target=\"_blank\">Click here to view documentation and examples.</a></p>",
                 dataTitle: 'Extra Variables',
                 dataPlacement: 'left'

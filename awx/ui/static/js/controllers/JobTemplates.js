@@ -159,7 +159,7 @@ JobTemplatesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$rout
 
 function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-                          GetBasePath, InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup) 
+                          GetBasePath, InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -170,6 +170,9 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
    var master = {};
+   
+   scope.parseType = 'yaml';
+   ParseTypeChange(scope);
 
    scope.job_type_options = [{ value: 'run', label: 'Run' }, { value: 'check', label: 'Check' }];
    scope.verbosity_options = [
@@ -243,25 +246,43 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
 
    // Save
    scope.formSave = function() {
-       Rest.setUrl(defaultUrl);
        var data = {}
-       for (var fld in form.fields) {
-           if (form.fields[fld].type == 'select' && fld != 'playbook') {
-              data[fld] = scope[fld].value;
+       try {
+           // Make sure we have valid variable data
+           if (scope.parseType == 'json') {
+              var myjson = JSON.parse(scope.variables);  //make sure JSON parses
+              var json_data = scope.variables;
            }
            else {
-              data[fld] = scope[fld];
-           }      
+              var json_data = jsyaml.load(scope.variables);  //parse yaml
+           }
+
+           for (var fld in form.fields) {
+               if (form.fields[fld].type == 'select' && fld != 'playbook') {
+                  data[fld] = scope[fld].value;
+               }
+               else {
+                  if (fld != 'variables') {
+                     data[fld] = scope[fld];
+                  }
+               }      
+           }
+           data.extra_vars = json_data;
+           Rest.setUrl(defaultUrl);
+           Rest.post(data)
+               .success( function(data, status, headers, config) {
+                   var base = $location.path().replace(/^\//,'').split('/')[0];
+                   (base == 'job_templates') ? ReturnToCaller() : ReturnToCaller(1);
+                   })
+               .error( function(data, status, headers, config) {
+                   ProcessErrors(scope, data, status, form,
+                       { hdr: 'Error!', msg: 'Failed to add new job template. POST returned status: ' + status });
+                   });
+
        }
-       Rest.post(data)
-           .success( function(data, status, headers, config) {
-               var base = $location.path().replace(/^\//,'').split('/')[0];
-               (base == 'job_templates') ? ReturnToCaller() : ReturnToCaller(1);
-               })
-           .error( function(data, status, headers, config) {
-               ProcessErrors(scope, data, status, form,
-                   { hdr: 'Error!', msg: 'Failed to add new project. POST returned status: ' + status });
-               });
+       catch(err) {
+           Alert("Error", "Error parsing extra variables. Parser returned: " + err);     
+       }
        };
 
    // Reset
@@ -277,13 +298,13 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
 
 JobTemplatesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
-                            'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit', 'md5Setup' ]; 
+                            'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit', 'md5Setup', 'ParseTypeChange' ]; 
 
 
 function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, 
                            GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                            RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList, CredentialList,
-                           ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup) 
+                           ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, ParseTypeChange) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -292,6 +313,9 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
    var generator = GenerateForm;
    var form = JobTemplateForm;
    var scope = generator.inject(form, {mode: 'edit', related: true});
+
+   scope.parseType = 'yaml';
+   ParseTypeChange(scope);
 
    // Our job type options
    scope.job_type_options = [{ value: 'run', label: 'Run' }, { value: 'check', label: 'Check' }];
@@ -365,7 +389,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
        .success( function(data, status, headers, config) {
            LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.name });
            for (var fld in form.fields) {
-              if (data[fld] !== null && data[fld] !== undefined) {  
+              if (fld != 'variables' && data[fld] !== null && data[fld] !== undefined) {  
                  if (form.fields[fld].type == 'select') {
                     if (scope[fld + '_options'] && scope[fld + '_options'].length > 0) {
                        for (var i=0; i < scope[fld + '_options'].length; i++) {
@@ -382,6 +406,16 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                     scope[fld] = data[fld];
                  }
                  master[fld] = scope[fld];
+              }
+              if (fld == 'variables') {
+                 // Parse extra_vars, converting to YAML.  
+                 if ($.isEmptyObject(data.extra_vars) || data.extra_vars == "\{\}") {
+                    scope.variables = "---";
+                 }
+                 else {
+                    scope.variables = jsyaml.safeDump(JSON.parse(data.extra_vars));
+                 }
+                 master.variables = scope.variables;
               }
               if (form.fields[fld].type == 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
                   scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
@@ -435,24 +469,42 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
    // Save changes to the parent
    scope.formSave = function() {
        var data = {}
-       for (var fld in form.fields) {
-           if (form.fields[fld].type == 'select' && fld != 'playbook') {
-              data[fld] = scope[fld].value;
+       try {
+           // Make sure we have valid variable data
+           if (scope.parseType == 'json') {
+              var myjson = JSON.parse(scope.variables);  //make sure JSON parses
+              var json_data = scope.variables;
            }
            else {
-              data[fld] = scope[fld];
-           }   
-       } 
-       Rest.setUrl(defaultUrl + $routeParams.id + '/');
-       Rest.put(data)
-           .success( function(data, status, headers, config) {
-               var base = $location.path().replace(/^\//,'').split('/')[0];
-               (base == 'job_templates') ? ReturnToCaller() : ReturnToCaller(1);
-               })
-           .error( function(data, status, headers, config) {
-               ProcessErrors(scope, data, status, form,
-                   { hdr: 'Error!', msg: 'Failed to update team: ' + $routeParams.id + '. PUT status: ' + status });
-           });
+              var json_data = jsyaml.load(scope.variables);  //parse yaml
+           }
+
+           for (var fld in form.fields) {
+               if (form.fields[fld].type == 'select' && fld != 'playbook') {
+                  data[fld] = scope[fld].value;
+               }
+               else {
+                  if (fld != 'variables') {
+                     data[fld] = scope[fld];
+                  }
+               }      
+           }
+           data.extra_vars = json_data;
+           Rest.setUrl(defaultUrl + id + '/');
+           Rest.put(data)
+               .success( function(data, status, headers, config) {
+                   var base = $location.path().replace(/^\//,'').split('/')[0];
+                   (base == 'job_templates') ? ReturnToCaller() : ReturnToCaller(1);
+                   })
+               .error( function(data, status, headers, config) {
+                   ProcessErrors(scope, data, status, form,
+                       { hdr: 'Error!', msg: 'Failed to update job template. PUT returned status: ' + status });
+                   });
+
+       }
+       catch(err) {
+           Alert("Error", "Error parsing extra variables. Parser returned: " + err);     
+       }
        };
 
    // Cancel
@@ -461,6 +513,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
       for (var fld in master) {
           scope[fld] = master[fld];
       }
+      scope.parseType = 'yaml';
       $('#forks-slider').slider("option", "value", scope.forks);
       };
 
@@ -506,5 +559,5 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
 JobTemplatesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm', 
                              'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                              'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList',
-                             'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup'
+                             'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup', 'ParseTypeChange'
                              ]; 

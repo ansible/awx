@@ -27,11 +27,11 @@ angular.module('JobHostDefinition', [])
                 },
              ok: {
                 label: 'Success',
-                notSearchable: true
+                searchable: false
                 },
             changed: {
                 label: 'Changed',
-                notSearchable: true
+                searchable: false
                 },
             failures: {
                 label: 'Failure',
@@ -39,11 +39,11 @@ angular.module('JobHostDefinition', [])
                 },
             dark: {
                 label: 'Unreachable',
-                notSearchable: true
+                searchable: false
                 },
             skipped: {
                 label: 'Skipped',
-                notSearchable: true
+                searchable: false
                 }
             },
         

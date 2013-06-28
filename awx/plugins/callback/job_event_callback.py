@@ -93,14 +93,14 @@ class CallbackModule(object):
             auth = TokenAuth(self.auth_token)
         else:
             auth = None
+        port = parts.port or (443 if parts.scheme == 'https' else 80)
         url = urlparse.urlunsplit([parts.scheme,
-                                   '%s:%d' % (parts.hostname, parts.port),
+                                   '%s:%d' % (parts.hostname, port),
                                    parts.path, parts.query, parts.fragment])
         url_path = '/api/v1/jobs/%d/job_events/' % self.job_id
         url = urlparse.urljoin(url, url_path)
         headers = {'content-type': 'application/json'}
         response = requests.post(url, data=data, headers=headers, auth=auth)
-        print response.content
         response.raise_for_status()
 
     def _log_event(self, event, **event_data):

@@ -177,7 +177,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "<ul class=\"dropdown-menu\" id=\"" + iterator + "SearchDropdown\">\n";
         
         for ( var fld in form.fields) {
-          if (form.fields[fld].notSearchable == undefined || form.fields[fld].notSearchable == false) {
+          if (form.fields[fld].searchable == undefined || form.fields[fld].searchable == true) {
              html += "<li><a href=\"\" ng-click=\"setSearchField('" + iterator + "','";
              html += fld + "','" + form.fields[fld].label + "')\">" 
                  + form.fields[fld].label + "</a></li>\n";

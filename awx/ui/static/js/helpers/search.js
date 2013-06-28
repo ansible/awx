@@ -37,7 +37,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                else {
                   sort_order = (list.fields[fld].desc) ? '-' + fld : fld; 
                }
-               if (list.fields[fld].notSearchable == undefined || list.fields[fld].notSearchable == false) {
+               if (list.fields[fld].searchable == undefined || list.fields[fld].searchable == true) {
                   scope[iterator + 'SearchField'] = fld;
                   scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
                }
@@ -46,9 +46,9 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         }
 
         if (!scope[iterator + 'SearchField']) {
-           // A field marked as key may also be notSearchable
+           // A field marked as key may not be 'searchable'
            for (fld in list.fields) {
-               if (list.fields[fld].notSearchable == undefined || list.fields[fld].notSearchable == false) { 
+               if (list.fields[fld].searchable == undefined || list.fields[fld].searchable == true) { 
                   scope[iterator + 'SearchField'] = fld;
                   scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
                   break;
