@@ -182,6 +182,11 @@ angular.module('JobFormDefinition', [])
                 readonly: true,
                 control: false
                 },
+            created: {
+                label: 'Date',
+                type: 'text',
+                readonly: true
+                },
             result_stdout: {
                 label: 'Standard Out', 
                 type: 'textarea',

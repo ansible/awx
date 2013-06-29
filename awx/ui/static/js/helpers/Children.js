@@ -6,11 +6,12 @@
  *  Used in job_events to expand/collapse children
  *
  */
-
+                       
 angular.module('ChildrenHelper', ['RestServices', 'Utilities'])  
-    .factory('ToggleChildren', ['Alert', 'Rest', 'GetBasePath','ProcessErrors', 
-    function(Alert, Rest, GetBasePath, ProcessErrors) {
+    .factory('ToggleChildren', ['Alert', 'Rest', 'GetBasePath','ProcessErrors','FormatDate',
+    function(Alert, Rest, GetBasePath, ProcessErrors, FormatDate) {
     return function(params) {
+        
         var scope = params.scope;
         var list = params.list;
         var id = params.id; 
@@ -48,6 +49,8 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
                        data.results[j].spaces = spaces;
                        data.results[j].status = (data.results[j].failed) ? 'error' : 'success';
                        data.results[j].event_display = data.results[j].event_display.replace(/^\u00a0*/g,'');
+                       cDate = new Date(data.results[j].created);
+                       data.results[j].created = FormatDate(cDate);
                        if (data.results[j].related.children) {
                           data.results[j]['ngclick'] = "toggleChildren(" + data.results[j].id + ", \"" + data.results[j].related.children + "\")";
                           data.results[j]['ngicon'] = 'icon-expand-alt';
@@ -60,7 +63,7 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
                        }
                        clicked++;
                    } 
-                   scope.$emit('setExpanded');          
+                   scope.$emit('setExpanded', clicked - 1);          
                    })
                .error( function(data, status, headers, config) {
                    ProcessErrors(scope, data, status, null,

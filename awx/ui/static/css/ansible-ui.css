@@ -51,11 +51,15 @@
     padding-right: 10px;
  }
 
-/* End btn heights */
-
-
  .icon-plus {
     font-size: 10px;
+ }
+
+/* End btn heights */
+
+ 
+ .controls {
+    min-height: 15px;
  }
 
  .container-fluid {
@@ -230,6 +234,10 @@
     vertical-align: middle;
     margin-left: 15px;
     font-size: 22px;
+ }
+
+ .status-fields {
+    margin-top: 15px;
  }
 
  .search-widget label {

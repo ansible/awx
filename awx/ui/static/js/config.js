@@ -16,4 +16,5 @@ var $AnsibleConfig =
    tooltip_delay: 2000,               // Default number of milliseconds to delay displaying/hiding tooltips    
 
    debug_mode: true                   // Enable console logging messages
+   
 }

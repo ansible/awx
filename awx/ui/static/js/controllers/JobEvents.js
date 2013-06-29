@@ -12,7 +12,8 @@
 
 function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList,
                         GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                        ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren, EventView)
+                        ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren, EventView,
+                        FormatDate)
 {
     ClearScope('htmlTemplate');
     var list = JobEventList;
@@ -23,6 +24,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     var view = GenerateList;
     var base = $location.path().replace(/^\//,'').split('/')[0];
     var scope = view.inject(list, { mode: 'edit' });
+    
     $rootScope.flashMessage = null;
     scope.selected = [];
     scope.expand = true;    //on load, automatically expand all nodes
@@ -33,6 +35,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     scope.RemovePostRefresh = scope.$on('PostRefresh', function() {
         // Initialize the parent levels
         var set = scope[list.name];
+        var cDate;
         for (var i=0; i < set.length; i++) {
             set[i].event_display = set[i].event_display.replace(/^\u00a0*/g,'');
             if (set[i].parent == null && set[i]['ngclick'] === undefined && set[i]['ngicon'] == undefined) {
@@ -43,16 +46,19 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                set[i]['spaces'] = 0;
             }
             scope.jobevents[i].status = (scope.jobevents[i].failed) ? 'error' : 'success';
+            cDate = new Date(set[i].created);
+            set[i].created = FormatDate(cDate);
         }
 
         // Expand all parent nodes
         if (scope.removeSetExpanded) {
            scope.removeSetExpanded();
         }
-        scope.removeSetExpanded = scope.$on('setExpanded', function() {
+        scope.removeSetExpanded = scope.$on('setExpanded', function(event, latest_node) {
             // After ToggleChildren completes, look for the next parent that needs to be expanded
             var found = false; 
-            for (var i=0; i < set.length && found == false && scope.expand; i++) {
+            var start = (latest_node) ? latest_node : 0;
+            for (var i=start; i < set.length && found == false && scope.expand; i++) {
                 if (set[i]['related']['children'] && (set[i]['ngicon'] == undefined || set[i]['ngicon'] == 'icon-expand-alt')) {
                    found = true;
                    ToggleChildren({
@@ -127,7 +133,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 
 JobEventsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
                            'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                           'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren', 'EventView'
+                           'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren', 'EventView', 'FormatDate'
                            ];
 
 function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventForm, GenerateForm,

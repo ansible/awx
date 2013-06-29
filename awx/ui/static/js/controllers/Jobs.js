@@ -12,7 +12,7 @@
 
 function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                       ClearScope, ProcessErrors, GetBasePath, LookUpInit, SubmitJob)
+                       ClearScope, ProcessErrors, GetBasePath, LookUpInit, SubmitJob, FormatDate)
 {
     ClearScope('htmlTemplate');
     var list = JobList;
@@ -32,6 +32,13 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
             var ngc = $(this).attr('ng-class');
             scope[ngc] = "";
             });
+
+        // Convert created date to local time zone 
+        var cDate;
+        for (var i=0; i < scope[list.name].length; i++) {
+            cDate = new Date(scope[list.name][i].created);
+            scope[list.name][i].created = FormatDate(cDate);
+        }
         });
     
     SearchInit({ scope: scope, set: 'jobs', list: list, url: defaultUrl });
@@ -135,14 +142,14 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
 JobsListCtrl.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobList',
                          'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                         'ProcessErrors','GetBasePath', 'LookUpInit', 'SubmitJob'
+                         'ProcessErrors','GetBasePath', 'LookUpInit', 'SubmitJob', 'FormatDate'
                          ];
 
 
 function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, 
                   GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
                   RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList, CredentialList,
-                  ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup) 
+                  ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, FormatDate) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -274,13 +281,21 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
            
            for (var fld in form.statusFields) {
                if (data[fld] !== null && data[fld] !== undefined) {
-                  scope[fld] = data[fld];
+                  if (fld == 'created') {
+                     // Convert created date to local time zone 
+                     var cDate = new Date(data.created);
+                     scope.created = FormatDate(cDate);
+                  }
+                  else {
+                     scope[fld] = data[fld];
+                  }
                }
            }
             
            $('input[type="text"], textarea').attr('readonly','readonly');
            $('select').prop('disabled', 'disabled');
            $('.lookup-btn').prop('disabled', 'disabled');
+           $('.controls.buttons, hr').hide();
 
            scope.url = data.url; 
            var related = data.related;
@@ -423,5 +438,5 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 JobsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobForm', 
                      'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList',
-                     'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup'
+                     'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup', 'FormatDate'
                      ];
