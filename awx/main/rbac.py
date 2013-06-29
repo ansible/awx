@@ -33,10 +33,6 @@ class CustomRbac(permissions.BasePermission):
     def _check_post_permissions(self, request, view, obj=None):
         if hasattr(view, 'parent_model'):
             parent_obj = view.parent_model.objects.get(pk=view.kwargs['pk'])
-            #if not check_user_access(request.user, view.parent_model, 'change',
-            #                         parent_obj, None):
-            #    return False
-            # FIXME: attach/unattach
             return True
         else:
             if obj:
