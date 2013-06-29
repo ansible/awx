@@ -267,7 +267,7 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
                   }
                }      
            }
-           data.extra_vars = json_data;
+           data.extra_vars = JSON.stringify(json_data, undefined, '\t');
            Rest.setUrl(defaultUrl);
            Rest.post(data)
                .success( function(data, status, headers, config) {
@@ -489,7 +489,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                   }
                }      
            }
-           data.extra_vars = json_data;
+           data.extra_vars = JSON.stringify(json_data, undefined, '\t');
            Rest.setUrl(defaultUrl + id + '/');
            Rest.put(data)
                .success( function(data, status, headers, config) {
