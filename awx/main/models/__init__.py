@@ -89,7 +89,10 @@ class PrimordialModel(models.Model):
         abstract = True
 
     description   = models.TextField(blank=True, default='')
-    created_by    = models.ForeignKey('auth.User', on_delete=SET_NULL, null=True, related_name='%s(class)s_created', editable=False) # not blank=False on purpose for admin!
+    created_by    = models.ForeignKey('auth.User', 
+                        on_delete=SET_NULL, null=True, 
+                        related_name='%s(class)s_created', 
+                        editable=False) # not blank=False on purpose for admin!
     created       = models.DateTimeField(auto_now_add=True)
     active        = models.BooleanField(default=True)
 
@@ -101,6 +104,7 @@ class PrimordialModel(models.Model):
     def save(self, *args, **kwargs):
         # For compatibility with Django 1.4.x, attempt to handle any calls to
         # save that pass update_fields.
+
         try:
             super(PrimordialModel, self).save(*args, **kwargs)
         except TypeError:
@@ -111,6 +115,7 @@ class PrimordialModel(models.Model):
 
     def mark_inactive(self, save=True):
         '''Use instead of delete to rename and mark inactive.'''
+
         if self.active:
             if 'name' in self._meta.get_all_field_names():
                 self.name   = "_deleted_%s_%s" % (now().isoformat(), self.name)
@@ -200,6 +205,7 @@ class Host(CommonModelNameNotUnique):
         default='',
         help_text=_('Variables in JSON or YAML format.'),
     )
+
     inventory               = models.ForeignKey('Inventory', null=False, related_name='hosts')
     last_job                = models.ForeignKey('Job', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job+')
     last_job_host_summary   = models.ForeignKey('JobHostSummary', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job_summary+')
@@ -211,8 +217,7 @@ class Host(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('main:host_detail', args=(self.pk,))
 
-    def update_has_active_failures(self, update_groups=True,
-                                   update_inventory=True):
+    def update_has_active_failures(self, update_groups=True, update_inventory=True):
         self.has_active_failures = bool(self.last_job_host_summary and
                                         self.last_job_host_summary.failed)
         self.save()

@@ -113,8 +113,7 @@ dev_build:
 release_build:
 	python setup.py release_build
 
-release_ball: clean sdist
-	#make release_build
+release_ball: clean sdist 
 	(cd ../ansible-doc; make)
 	-(rm -rf awx-$(VERSION)-$(RELEASE))
 	mkdir -p awx-$(VERSION)-$(RELEASE)/dist
