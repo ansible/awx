@@ -78,39 +78,6 @@ PERMISSION_TYPE_CHOICES = [
     (PERM_INVENTORY_CHECK, _('Deploy To Inventory (Dry Run)')),
 ]
 
-class EditHelper(object):
-
-    @classmethod
-    def illegal_changes(cls, request, obj, model_class):
-        ''' have any illegal changes been made (for a PUT request)? '''
-        from awx.main.access import check_user_access
-        #can_admin = model_class.can_user_administrate(request.user, obj, request.DATA)
-        can_admin = check_user_access(request.user, User, 'change', obj, request.DATA)
-        if (not can_admin) or (can_admin == 'partial'):
-            check_fields = model_class.admin_only_edit_fields
-            changed = cls.fields_changed(check_fields, obj, request.DATA)
-            if len(changed.keys()) > 0:
-                return True
-        return False
-
-    @classmethod
-    def fields_changed(cls, fields, obj, data):
-        ''' return the fields that would be changed by a prospective PUT operation '''
-        changed = {}
-        for f in fields:
-            left = getattr(obj, f, None)
-            if left is None:
-                raise Exception("internal error, %s is not a member of %s" % (f, obj))
-            right = data.get(f, None)
-            if (right is not None) and (left != right):
-                changed[f] = (left, right)
-        return changed
-
-class UserHelper(object):
-
-    # fields that the user themselves cannot edit, but are not actually read only
-    admin_only_edit_fields = ('last_name', 'first_name', 'username', 'is_active', 'is_superuser')
-
 class PrimordialModel(models.Model):
     '''
     common model for all object types that have these standard fields

@@ -609,8 +609,19 @@ class UserDetail(BaseDetail):
     def put_filter(self, request, *args, **kwargs):
         ''' make sure non-read-only fields that can only be edited by admins, are only edited by admins '''
         obj = User.objects.get(pk=kwargs['pk'])
-        if EditHelper.illegal_changes(request, obj, UserHelper):
-            raise PermissionDenied()
+        can_admin = check_user_access(request.user, User, 'admin', obj, request.DATA)
+        if not can_admin or can_admin == 'partial':
+            admin_only_edit_fields = ('last_name', 'first_name', 'username',
+                                      'is_active', 'is_superuser')
+            changed = {}
+            for field in admin_only_edit_fields:
+                left = getattr(obj, field, None)
+                right = request.DATA.get(field, None)
+                if left is not None and right is not None and left != right:
+                    changed[field] = (left, right)
+            if changed:
+                raise PermissionDenied('Cannot change %s' % ', '.join(changed.keys()))
+
         if 'password' in request.DATA:
             obj.set_password(request.DATA['password'])
             obj.save()

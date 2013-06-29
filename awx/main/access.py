@@ -130,10 +130,11 @@ class UserAccess(BaseAccess):
     def can_change(self, obj, data):
         # A user can be changed if they are themselves, or by org admins or
         # superusers.
+        if self.user.is_superuser:
+            return True
         if self.user == obj:
             return 'partial'
-        return bool(self.user.is_superuser or 
-                    obj.organizations.filter(admins__in=[self.user]).count())
+        return bool(obj.organizations.filter(admins__in=[self.user]).count())
 
     def can_delete(self, obj):
         return bool(self.user.is_superuser or 

@@ -178,6 +178,17 @@ class UsersTest(BaseTest):
         self.assertEquals(data['results'][0]['username'], 'admin')
         self.assertEquals(data['count'], 1)
 
+    def test_superuser_can_change_admin_only_fields_about_himself(self):
+        url = reverse('main:user_detail', args=(self.super_django_user.pk,))
+        data = self.get(url, expect=200, auth=self.get_super_credentials())
+        data['username'] += '2'
+        data['first_name'] += ' Awesome'
+        data['last_name'] += ', Jr.'
+        response = self.put(url, data, expect=200,
+                            auth=self.get_super_credentials())
+        # FIXME: Test if super user mark himself as no longer a super user, or
+        # delete himself.
+
     def test_user_related_resources(self):
 
         # organizations the user is a member of, should be 1
