@@ -475,9 +475,12 @@ class Project(CommonModel):
     @classmethod
     def get_local_path_choices(cls):
         if os.path.exists(settings.PROJECTS_ROOT):
-            return [x for x in os.listdir(settings.PROJECTS_ROOT)
-                    if os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x))
-                    and not x.startswith('.')]
+            paths = [x for x in os.listdir(settings.PROJECTS_ROOT)
+                     if os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x))
+                     and not x.startswith('.')]
+            qs = Project.objects.filter(active=True)
+            used_paths = qs.values_list('local_path', flat=True)
+            return [x for x in paths if x not in used_paths]
         else:
             return []
 

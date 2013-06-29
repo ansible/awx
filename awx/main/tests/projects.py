@@ -151,6 +151,18 @@ class ProjectsTest(BaseTest):
         self.assertEqual(set(response['project_local_paths']),
                          set(Project.get_local_path_choices()))
 
+        # return local paths are only the ones not used by any active project.
+        qs = Project.objects.filter(active=True)
+        used_paths = qs.values_list('local_path', flat=True)
+        self.assertFalse(set(response['project_local_paths']) & set(used_paths))
+        for project in self.projects:
+            local_path = project.local_path
+            response = self.get(url, expect=200, auth=self.get_super_credentials())
+            self.assertTrue(local_path not in response['project_local_paths'])
+            project.mark_inactive()
+            response = self.get(url, expect=200, auth=self.get_super_credentials())
+            self.assertTrue(local_path in response['project_local_paths'])
+
         # org admin can read config and will get project fields.
         response = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertTrue('project_base_dir' in response)
