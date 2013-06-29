@@ -81,7 +81,8 @@ class InventoryScript(object):
         url = urlparse.urljoin(url, url_path)
         response = requests.get(url, auth=auth)
         response.raise_for_status()
-        sys.stdout.write(response.content)
+        sys.stdout.write(json.dumps(json.loads(response.content),
+                                    indent=self.indent) + '\n')
 
     def run(self):
         try:
