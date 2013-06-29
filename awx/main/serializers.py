@@ -119,6 +119,15 @@ class ProjectSerializer(BaseSerializer):
         ))
         return res
 
+    def validate_local_path(self, attrs, source):
+        # Don't allow assigning a local_path used by another project.
+        valid_local_paths = Project.get_local_path_choices()
+        if self.object:
+            valid_local_paths.append(self.object.local_path)
+        if attrs[source] not in valid_local_paths:
+            raise serializers.ValidationError('Invalid path choice')
+        return attrs
+
 class ProjectPlaybooksSerializer(ProjectSerializer):
 
     class Meta:

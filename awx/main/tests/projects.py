@@ -3,6 +3,8 @@
 
 import datetime
 import json
+import os
+import tempfile
 
 from django.conf import settings
 from django.contrib.auth.models import User as DjangoUser
@@ -199,6 +201,34 @@ class ProjectsTest(BaseTest):
         # user not on any teams
         results = self.get(projects, expect=200, auth=self.get_nobody_credentials())
         self.assertEquals(results['count'], 0)
+
+        # can add projects (super user)
+        project_dir = tempfile.mkdtemp(dir=settings.PROJECTS_ROOT)
+        self._temp_project_dirs.append(project_dir)
+        project_data = {
+            'name': 'My Test Project',
+            'description': 'Does amazing things',
+            'local_path': os.path.basename(project_dir),
+        }
+        response = self.post(projects, project_data, expect=201,
+                             auth=self.get_super_credentials())
+
+        # can edit project using same local path.
+        project_detail = reverse('main:project_detail', args=(response['id'],))
+        project_data = self.get(project_detail, expect=200,
+                                auth=self.get_super_credentials())
+        response = self.put(project_detail, project_data, expect=200,
+                            auth=self.get_super_credentials())
+        
+        # cannot update using local_path from another project.
+        project_data['local_path'] = self.projects[2].local_path
+        response = self.put(project_detail, project_data, expect=400,
+                            auth=self.get_super_credentials())
+
+        # cannot update using a path that doesn't exist.
+        project_data['local_path'] = 'my_secret_invisible_project_path'
+        response = self.put(project_detail, project_data, expect=400,
+                            auth=self.get_super_credentials())
 
         # =====================================================================
         # PROJECTS - ACCESS
