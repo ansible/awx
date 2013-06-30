@@ -118,6 +118,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
        }
 
     scope.refresh = function() {
+       scope.expand = true;
        scope.search(list.iterator);
        }
 
