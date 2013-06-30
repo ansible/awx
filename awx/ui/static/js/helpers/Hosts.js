@@ -219,7 +219,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                        })
                    .error( function(data, status, headers, config) {
                        ProcessErrors(scope, data, status, form,
-                           { hdr: 'Error!', msg: 'Failed to add new group. Post returned status: ' + status });
+                           { hdr: 'Error!', msg: 'Failed to add new host. POST returned status: ' + status });
                        });
            }
            catch(err) {
@@ -314,7 +314,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                 })
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, form,
-                    { hdr: 'Error!', msg: 'Failed to retrieve host: ' + id + '. GET status: ' + status });
+                    { hdr: 'Error!', msg: 'Failed to retrieve host: ' + id + '. GET returned status: ' + status });
                 });
        
         if (!scope.$$phase) {
@@ -360,11 +360,11 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                         })
                     .error( function(data, status, headers, config) {
                         ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to update host: ' + host_id + '. PUT status: ' + status });
+                            { hdr: 'Error!', msg: 'Failed to update host: ' + host_id + '. PUT returned status: ' + status });
                         });
             }
             catch(err) {
-               Alert("Error", "Error parsing group variables. Parser returned: " + err);     
+               Alert("Error", "Error parsing host variables. Parser returned: " + err);     
             }
             };
 
