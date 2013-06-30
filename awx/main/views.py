@@ -629,7 +629,7 @@ class UserDetail(BaseDetail):
             if changed:
                 raise PermissionDenied('Cannot change %s' % ', '.join(changed.keys()))
 
-        if 'password' in request.DATA:
+        if 'password' in request.DATA and request.DATA['password']:
             obj.set_password(request.DATA['password'])
             obj.save()
             request.DATA.pop('password')
