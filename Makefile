@@ -159,7 +159,7 @@ deb: sdist
 	@mkdir -p deb-build
 	@cp dist/$(SDIST_TAR_FILE) deb-build/
 	(cd deb-build && tar zxf $(SDIST_TAR_FILE))
-	(cd $(DEB_BUILD_DIR) && dh_make --indep --yes -f ../awx-$(VERSION)$(BUILD).tar.gz -p awx-$(VERSION)$(BUILD))
+	(cd $(DEB_BUILD_DIR) && dh_make --indep --yes -f ../awx-$(VERSION)-$(BUILD).tar.gz -p awx-$(VERSION)-$(BUILD))
 	@rm -rf $(DEB_BUILD_DIR)/debian
 	@cp -a packaging/debian $(DEB_BUILD_DIR)/
 	@echo "awx_$(DEB_PKG_RELEASE).deb admin optional" > $(DEB_BUILD_DIR)/debian/realfiles
