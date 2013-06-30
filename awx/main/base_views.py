@@ -1,23 +1,28 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Python
+import json
 
+# Django
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
-from awx.main.models import *
 from django.contrib.auth.models import User
-from awx.main.serializers import *
-from awx.main.rbac import *
-from awx.main.access import *
+from django.utils.timezone import now
+
+# Django REST Framework
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import status
-import exceptions
-import datetime
-import json as python_json
+
+# AWX
+from awx.main.models import *
+from awx.main.serializers import *
+from awx.main.rbac import *
+from awx.main.access import *
 
 # FIXME: machinery for auto-adding audit trail logs to all CREATE/EDITS
 
@@ -128,7 +133,7 @@ class BaseSubList(BaseList):
                                     if not organization.admins.filter(pk=request.user.pk).count() > 0:
                                         raise PermissionDenied()
                             else:
-                                raise exceptions.NotImplementedError()
+                                raise NotImplementedError()
                         else:
                             if not check_user_access(request.user, type(obj), 'read', obj):
                                 raise PermissionDenied()
@@ -162,7 +167,7 @@ class BaseSubList(BaseList):
                 else:
 
                     # view didn't specify a way to get the pk from the URL, so not even trying
-                    return Response(status=status.HTTP_400_BAD_REQUEST, data=python_json.dumps(dict(msg='object cannot be created')))
+                    return Response(status=status.HTTP_400_BAD_REQUEST, data=json.dumps(dict(msg='object cannot be created')))
 
         # we didn't have to create the object, so this is just associating the two objects together now...
         # (or disassociating them)
@@ -229,7 +234,7 @@ class BaseDetail(generics.RetrieveUpdateDestroyAPIView):
         if isinstance(obj, PrimordialModel):
             obj.mark_inactive()
         elif type(obj) == User:
-            obj.username  = "_deleted_%s_%s" % (str(datetime.time()), obj.username)
+            obj.username  = "_deleted_%s_%s" % (now().isoformat(), obj.username)
             obj.is_active = False
             obj.save()
         else:
