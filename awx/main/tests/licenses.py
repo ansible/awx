@@ -54,7 +54,6 @@ class LicenseTests(BaseTest):
         
         vdata = reader.from_string(strdata)
 
-        print vdata
         assert vdata['available_instances'] == 500
         assert vdata['current_instances'] == 6
         assert vdata['free_instances'] == 494
