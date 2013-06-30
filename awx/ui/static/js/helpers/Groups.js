@@ -233,7 +233,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        })
                    .error( function(data, status, headers, config) {
                        ProcessErrors(scope, data, status, form,
-                           { hdr: 'Error!', msg: 'Failed to add new group. Post returned status: ' + status });
+                           { hdr: 'Error!', msg: 'Failed to add new group. POST returned status: ' + status });
                        });
            }
            catch(err) {
