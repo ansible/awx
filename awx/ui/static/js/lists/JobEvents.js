@@ -40,7 +40,8 @@ angular.module('JobEventsListDefinition', [])
                 hasChildren: true,
                 ngClick: "toggleChildren(\{\{ jobevent.id \}\}, '\{\{ jobevent.related.children \}\}')",
                 nosort: true,
-                searchable: false
+                searchable: false,
+                ngClass: '\{\{ jobevent.class \}\}'
                 },
             host: {
                 label: 'Host',

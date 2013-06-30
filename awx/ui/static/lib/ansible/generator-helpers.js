@@ -84,7 +84,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "<td class=\"" + fld + "-column";
         html += (field['class']) ? " " + field['class'] : "";
         html +=  "\" ";  
-        html += (field.ngClass) ? this.attr(field, 'ngClass') : "";
+        html += (field.ngClass) ? Attr(field, 'ngClass') : "";
         html += ">\n";
 
         // Add ngShow

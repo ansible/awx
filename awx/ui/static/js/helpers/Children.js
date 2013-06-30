@@ -54,6 +54,10 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
                        if (data.results[j].related.children) {
                           data.results[j]['ngclick'] = "toggleChildren(" + data.results[j].id + ", \"" + data.results[j].related.children + "\")";
                           data.results[j]['ngicon'] = 'icon-expand-alt';
+                          data.results[j]['class'] = 'parentNode';
+                       }
+                       else {
+                          data.results[j]['class'] = 'childNode';
                        }
                        if (clicked == (set.length - 1)) {
                           set.push(data.results[j]);

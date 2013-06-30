@@ -28,6 +28,9 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     $rootScope.flashMessage = null;
     scope.selected = [];
     scope.expand = true;    //on load, automatically expand all nodes
+    
+    scope.parentNode = 'parent-event';  // used in ngClass to dynamicall set row level class and control
+    scope.childNode = 'child-event';    // link color and cursor
 
     if (scope.RemovePostRefresh) {
        scope.RemovePostRefresh();
@@ -44,6 +47,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                set[i]['ngicon'] = 'icon-expand-alt';
                set[i]['level'] = 0;
                set[i]['spaces'] = 0;
+               set[i]['class'] = 'parentNode';
             }
             scope.jobevents[i].status = (scope.jobevents[i].failed) ? 'error' : 'success';
             cDate = new Date(set[i].created);

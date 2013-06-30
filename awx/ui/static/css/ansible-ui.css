@@ -386,6 +386,11 @@
     margin-top: 25px;
  }
 
+ .child-event a {
+    color: #36454F;
+    cursor: default;
+ }
+
  /* End Jobs Page */
 
  
