@@ -23,7 +23,7 @@ angular.module('JobEventsListDefinition', [])
                 key: true,
                 nosort: true,
                 searchable: false,
-                ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
+                link: false
                 },
             status: {
                 label: 'Status',
@@ -38,13 +38,12 @@ angular.module('JobEventsListDefinition', [])
             event_display: {
                 label: 'Event',
                 hasChildren: true,
-                ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
+                ngClick: "toggleChildren(\{\{ jobevent.id \}\}, '\{\{ jobevent.related.children \}\}')",
                 nosort: true,
                 searchable: false
                 },
             host: {
                 label: 'Host',
-                ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
                 ngBind: 'jobevent.summary_fields.host.name',
                 searchField: 'hosts__name',
                 nosort: true,

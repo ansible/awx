@@ -105,7 +105,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
           else if (field.ngClick) {
              html += "<a href=\"\"" + Attr(field, 'ngClick') + "\">";
           }
-          else {
+          else if (field.link == undefined || field.link) {
              html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
           }
         }
