@@ -145,7 +145,7 @@ JobEventsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routePa
                            ];
 
 function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventForm, GenerateForm,
-                        Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath) 
+                        Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, FormatDate) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -172,8 +172,14 @@ function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routePar
                   scope['event_data'] = JSON.stringify(data['event_data'], undefined, '\t');
                }
                else {
-                  if (data[fld]) {
-                     scope[fld] = data[fld];
+                  if (fld == 'created') {
+                     var cDate = new Date(data['created']);
+                     scope['created'] = FormatDate(cDate);
+                  }
+                  else {
+                      if (data[fld]) {
+                         scope[fld] = data[fld];
+                      }
                   }
                }
            }
@@ -186,4 +192,6 @@ function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routePar
 }
 
 JobEventsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobEventForm', 
-                          'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath'];
+                          'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
+                          'FormatDate'
+                          ];

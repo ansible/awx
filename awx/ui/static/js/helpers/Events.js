@@ -8,8 +8,9 @@
  */
 angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventFormDefinition'])
 .factory('EventView', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventForm', 'GenerateForm', 
-         'Prompt', 'ProcessErrors', 'GetBasePath',
-    function($rootScope, $location, $log, $routeParams, Rest, Alert, JobEventForm, GenerateForm, Prompt, ProcessErrors, GetBasePath) {
+         'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate',
+    function($rootScope, $location, $log, $routeParams, Rest, Alert, JobEventForm, GenerateForm, Prompt, ProcessErrors, GetBasePath,
+          FormatDate) {
     return function(params) {
         var event_id = params.event_id;
         var generator = GenerateForm;
@@ -49,8 +50,14 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventFormDefini
                        scope['event_display'] = data.event_display.replace(/^\u00a0*/g,'')
                     }
                     else {
-                       if (data[fld]) {
-                          scope[fld] = data[fld];
+                       if (fld == 'created') {
+                          var cDate = new Date(data['created']);
+                          scope['created'] = FormatDate(cDate);
+                       }
+                       else {
+                          if (data[fld]) {
+                             scope[fld] = data[fld];
+                          }
                        }
                     }
                  }
