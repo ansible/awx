@@ -196,11 +196,16 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             }
 
             // Set the sorder order value and call the API to refresh the list with the new order
-            if (list.fields[fld].sourceModel) {
-               sort_order = direction + list.fields[fld].sourceModel + '__' + list.fields[fld].sourceField;
+            if (list.fields[fld].searchField) {
+               sort_order = direction + list.fields[fld].searchField;
             }
             else {
-               sort_order = direction + fld; 
+               if (list.fields[fld].sourceModel) {
+                  sort_order = direction + list.fields[fld].sourceModel + '__' + list.fields[fld].sourceField;
+               }
+               else {
+                  sort_order = direction + fld; 
+               }
             }
             scope.search(list.iterator);
             }

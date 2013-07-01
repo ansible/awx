@@ -25,7 +25,15 @@ angular.module('JobHostDefinition', [])
                 ngBind: 'jobhost.host_name',
                 ngClick:"showEvents('\{\{ jobhost.summary_fields.host.name \}\}','\{\{ jobhost.related.job \}\}')"
                 },
-             ok: {
+            status: {
+                label: 'Status',
+                icon: 'icon-circle',
+                "class": 'job-\{\{ jobhost.status \}\}',
+                searchField: 'failed',
+                searchType: 'boolean',
+                searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }]
+                },
+            ok: {
                 label: 'Success',
                 searchable: false
                 },

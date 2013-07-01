@@ -28,8 +28,9 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
     }
     scope.PostRefershRemove = scope.$on('PostRefresh', function() {
         for( var i=0; i < scope.jobhosts.length; i++) {
-           scope.jobhosts[i].host_name = scope.jobhosts[i].summary_fields.host.name; 
-        }     
+           scope.jobhosts[i].host_name = scope.jobhosts[i].summary_fields.host.name;
+           scope.jobhosts[i].status = (scope.jobhosts[i].failed) ? 'error' : 'success';  
+        }  
         });
   
     SearchInit({ scope: scope, set: 'jobhosts', list: list, url: defaultUrl });
