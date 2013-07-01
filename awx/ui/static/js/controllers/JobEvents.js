@@ -28,7 +28,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     $rootScope.flashMessage = null;
     scope.selected = [];
     scope.expand = true;    //on load, automatically expand all nodes
-    
+
     scope.parentNode = 'parent-event';  // used in ngClass to dynamicall set row level class and control
     scope.childNode = 'child-event';    // link color and cursor
 
@@ -48,6 +48,9 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                set[i]['level'] = 0;
                set[i]['spaces'] = 0;
                set[i]['class'] = 'parentNode';
+               if (set[i]['event_data']['name']) {
+                  set[i]['event_display'] = set[i]['event_data']['name'];
+               }
             }
             scope.jobevents[i].status = (scope.jobevents[i].failed) ? 'error' : 'success';
             cDate = new Date(set[i].created);
@@ -66,11 +69,11 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                 if (set[i]['related']['children'] && (set[i]['ngicon'] == undefined || set[i]['ngicon'] == 'icon-expand-alt')) {
                    found = true;
                    ToggleChildren({
-                   scope: scope, 
-                   list: list, 
-                   id: set[i].id,
-                   children: set[i]['related']['children']
-                   });
+                       scope: scope, 
+                       list: list, 
+                       id: set[i].id,
+                       children: set[i]['related']['children']
+                       });
                 }
             }
             if (found == false) {

@@ -59,6 +59,24 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
                        else {
                           data.results[j]['class'] = 'childNode';
                        }
+                       if (data.results[j]['event_data']['name']) {
+                          // Display the actual task name
+                          data.results[j]['event_display'] = data.results[j]['event_data']['name'];
+                       }
+                       if (data.results[j]['event_data']['res'] && data.results[j]['event_data']['res']['msg']) {
+                          // Display the actual result message
+                          data.results[j]['event_display'] = data.results[j]['event_data']['res']['msg'];
+                       }
+                       if (data.results[j]['event'] == 'playbook_on_stats') {
+                          data.results[j]['event_display'] = 'Play Recap ****** ';
+                          for (var key in data.results[j]['event_data']) {
+                              var count = 0;
+                              for (var itm in data.results[j]['event_data'][key]) {
+                                  count += data.results[j]['event_data'][key][itm];
+                              }
+                              data.results[j]['event_display'] += key + ": " + count + " ";
+                          }
+                       }
                        if (clicked == (set.length - 1)) {
                           set.push(data.results[j]);
                        }
