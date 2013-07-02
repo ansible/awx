@@ -1087,7 +1087,7 @@ class JobTemplateCallback(generics.RetrieveAPIView):
         # FIXME: Find host from request.
         limit = obj.limit
         # FIXME: Update limit based on host.
-        job = obj.create_job(limit=limit)
+        job = obj.create_job(limit=limit, launch_type='callback')
         result = job.start()
         if not result:
             data = dict(passwords_needed_to_start=job.get_passwords_needed_to_start())

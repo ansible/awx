@@ -662,6 +662,12 @@ class Job(CommonModel):
     given parameters.
     '''
 
+    LAUNCH_TYPE_CHOICES = [
+        ('manual', _('Manual')),
+        ('callback', _('Callback')),
+        ('scheduled', _('Scheduled')),
+    ]
+
     STATUS_CHOICES = [
         ('new', _('New')),                  # Job has been created, but not started.
         ('pending', _('Pending')),          # Job has been queued, but is not yet running.
@@ -733,6 +739,12 @@ class Job(CommonModel):
     cancel_flag = models.BooleanField(
         blank=True,
         default=False,
+    )
+    launch_type = models.CharField(
+        max_length=20,
+        choices=LAUNCH_TYPE_CHOICES,
+        default='manual',
+        editable=False,
     )
     status = models.CharField(
         max_length=20,
@@ -1033,6 +1045,9 @@ class JobEvent(models.Model):
     failed = models.BooleanField(
         default=False,
     )
+    changed = models.BooleanField(
+        default=False,
+    )
     host = models.ForeignKey(
         'Host',
         related_name='job_events_as_primary_host',
@@ -1116,6 +1131,11 @@ class JobEvent(models.Model):
         if self.event in self.FAILED_EVENTS:
             self.failed = True
         try:
+            if self.event_data['res']['changed']:
+                self.changed = True
+        except (KeyError, IndexError, AttributeError):
+            pass
+        try:
             if not self.host and self.event_data.get('host', ''):
                 self.host = self.job.inventory.hosts.get(name=self.event_data['host'])
         except (Host.DoesNotExist, AttributeError):
@@ -1124,17 +1144,24 @@ class JobEvent(models.Model):
         self.task = self.event_data.get('task', '')
         self.parent = self._find_parent()
         super(JobEvent, self).save(*args, **kwargs)
-        self.update_parent_failed()
+        self.update_parent_failed_and_changed()
         self.update_hosts()
         self.update_host_summary_from_stats()
 
-    def update_parent_failed(self):
-        # Propagage failed flag to parent events.
-        if self.failed and self.parent and not self.parent.failed:
-            p = self.parent
-            p.failed = True
-            p.save()
-            p.update_parent_failed()
+    def update_parent_failed_and_changed(self):
+        # Propagage failed and changed flags to parent events.
+        if self.parent:
+            parent = self.parent
+            save_parent = False
+            if self.failed and not parent.failed:
+                parent.failed = True
+                save_parent = True
+            if self.changed and not parent.changed:
+                parent.changed = True
+                save_parent = True
+            if save_parent:
+                parent.save()
+                parent.update_parent_failed_and_changed()
 
     def update_hosts(self, extra_hosts=None):
         extra_hosts = extra_hosts or []

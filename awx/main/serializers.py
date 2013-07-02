@@ -375,8 +375,8 @@ class JobSerializer(BaseSerializer):
         fields = BASE_FIELDS + ('job_template', 'job_type', 'inventory',
                                 'project', 'playbook', 'credential',
                                 'forks', 'limit', 'verbosity', 'extra_vars',
-                                'job_tags', 'status', 'failed', 'result_stdout',
-                                'result_traceback',
+                                'job_tags', 'launch_type', 'status', 'failed',
+                                'result_stdout', 'result_traceback',
                                 'passwords_needed_to_start')
 
     def get_related(self, obj):
@@ -442,8 +442,8 @@ class JobEventSerializer(BaseSerializer):
     class Meta:
         model = JobEvent
         fields = ('id', 'url', 'created', 'job', 'event', 'event_display',
-                  'event_data', 'failed', 'host', 'related', 'summary_fields',
-                  'parent', 'play', 'task')
+                  'event_data', 'failed', 'changed', 'host', 'related',
+                  'summary_fields', 'parent', 'play', 'task')
 
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)
