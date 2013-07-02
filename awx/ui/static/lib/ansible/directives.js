@@ -144,7 +144,7 @@ angular.module('AWDirectives', ['RestServices'])
         link: function(scope, elm, attrs, ctrl) {
             ctrl.$parsers.unshift( function(viewValue) {
                 if (viewValue !== '') {
-                   url = elm.attr('data-url');
+                   var url = elm.attr('data-url');
                    url = url.replace(/\:value/,escape(viewValue));
                    scope[elm.attr('data-source')] = null;
                    Rest.setUrl(url);

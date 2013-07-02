@@ -48,9 +48,6 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                set[i]['level'] = 0;
                set[i]['spaces'] = 0;
                set[i]['class'] = 'parentNode';
-               if (set[i]['event_data']['name']) {
-                  set[i]['event_display'] = set[i]['event_data']['name'];
-               }
             }
             scope.jobevents[i].status = (scope.jobevents[i].failed) ? 'error' : 'success';
             cDate = new Date(set[i].created);

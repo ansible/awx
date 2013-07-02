@@ -59,10 +59,6 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
                        else {
                           data.results[j]['class'] = 'childNode';
                        }
-                       if (data.results[j]['event_data']['name']) {
-                          // Display the actual task name
-                          data.results[j]['event_display'] = data.results[j]['event_data']['name'];
-                       }
                        if (data.results[j]['event_data']['res'] && data.results[j]['event_data']['res']['msg']) {
                           // Display the actual result message
                           data.results[j]['event_display'] = data.results[j]['event_data']['res']['msg'];
