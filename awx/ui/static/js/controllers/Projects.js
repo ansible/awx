@@ -187,7 +187,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, ProjectsForm,
-                            { hdr: 'Error!', msg: 'Failed to create new project. Post returned status: ' + status });
+                  { hdr: 'Error!', msg: 'Failed to create new project. Post returned status: ' + status });
               });
       };
 

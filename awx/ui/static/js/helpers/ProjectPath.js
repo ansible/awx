@@ -10,8 +10,8 @@
  */
 
 angular.module('ProjectPathHelper', ['RestServices', 'Utilities'])  
-    .factory('GetProjectPath', ['Alert', 'Rest', 'GetBasePath','ProcessErrors', 
-    function(Alert, Rest, GetBasePath, ProcessErrors) {
+    .factory('GetProjectPath', ['Alert', 'Rest', 'GetBasePath','ProcessErrors', 'Alert', 
+    function(Alert, Rest, GetBasePath, ProcessErrors, Alert) {
     return function(params) {
         
         var scope = params.scope;
@@ -23,11 +23,19 @@ angular.module('ProjectPathHelper', ['RestServices', 'Utilities'])
                 var opts = [];
                 for (var i=0; i < data.project_local_paths.length; i++) {
                    opts.push(data.project_local_paths[i]);
+                } 
+                if (scope.local_path) {
+                   opts.push(scope.local_path);
                 }
                 scope.project_local_paths = opts;
                 scope.base_dir = data.project_base_dir;
                 master.base_dir = scope.base_dir;  // Keep in master object so that it doesn't get
                                                    // wiped out on form reset.
+                if (opts.length == 0) {
+                   Alert('Missing project path', 'All of the project paths have been assigned to existing projects, or ' +
+                       'there are no directories found in the base path. You will need to add a project path before creating ' +
+                       'a new project.', 'alert-info');
+                }
                 })
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, null,
