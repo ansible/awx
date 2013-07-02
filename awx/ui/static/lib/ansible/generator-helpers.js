@@ -147,6 +147,12 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
 
         // close ngShow
         html += (field.ngShow) ? "</span>" : "";
+ 
+        // Specific to Job Events page -showing event detail/results
+        html += (field.appendHTML) ? "<div ng-show=\"" +  field.appendHTML + " !== null\" " + 
+            "ng-bind-html-unsafe=\"" + field.appendHTML + "\" " +
+            "style=\"padding-left: \{\{ " + list.iterator + ".spaces + 12 \}\}px\" " +
+            "></div>\n" : "";
 
         return html += "</td>\n";
     

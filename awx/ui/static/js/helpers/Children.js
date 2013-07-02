@@ -22,6 +22,35 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
           return lvl * 24;
         }
 
+        function formatJSON(eventData) {
+            //turn JSON event data into an html form
+            var html = '';
+            if (eventData.res) {
+               var found = false;
+               for (var fld in eventData.res) {
+                   if ( (fld == 'msg' || fld == 'stdout' || fld == 'stderr') && 
+                        (eventData.res[fld] !== null && eventData.res[fld] !== '') ) {
+                        html += "<label>"; 
+                        switch(fld) {
+                          case 'msg':
+                          case 'stdout':
+                             html += 'Output:';
+                             break;
+                          case 'stderr':
+                             html += 'Error:';
+                             break;
+                        }
+                        html += "</label>\n";
+                        html += "<textarea readonly class=\"input-xxlarge\">" + eventData.res[fld] + "</textarea>\n";
+                        found = true;
+                   }
+               }
+               html = (found) ? "<form class=\"event-detail\">\n" + html + "</form>\n" : '';
+            }
+            html = (html == '' ) ? null : html;
+            return html;
+        }
+
         // Scan the array list and find the clicked element
         var clicked;
         var found = false;
@@ -58,8 +87,10 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
                        }
                        else {
                           data.results[j]['class'] = 'childNode';
+                          // For child nodes, include some of the even_data detail, but in a nicer non-JSONy format
+                          data.results[j]['event_detail'] = formatJSON(data.results[j]['event_data']);
                        }
-                       if (data.results[j]['event_data']['res'] && data.results[j]['event_data']['res']['msg']) {
+                       /*if (data.results[j]['event_data']['res'] && data.results[j]['event_data']['res']['msg']) {
                           // Display the actual result message
                           data.results[j]['event_display'] = data.results[j]['event_data']['res']['msg'];
                        }
@@ -73,6 +104,7 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
                               data.results[j]['event_display'] += key + ": " + count + " ";
                           }
                        }
+                       */
                        if (clicked == (set.length - 1)) {
                           set.push(data.results[j]);
                        }

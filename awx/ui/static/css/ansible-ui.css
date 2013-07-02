@@ -514,8 +514,10 @@
     min-width: 200px;
  }
 
-
-
+ .event-detail {
+    margin-top: 15px;
+ }
+ 
 /* form displayed in modal window */
 
 .horizontal-narrow .control-label {
