@@ -14,6 +14,7 @@
   <script src="{{ STATIC_URL }}lib/angular/angular.js"></script>
   <script src="{{ STATIC_URL }}lib/angular/angular-resource.js"></script>
   <script src="{{ STATIC_URL }}lib/angular/angular-cookies.js"></script>
+  <script src="{{ STATIC_URL }}lib/angular/angular-sanitize.min.js"></script>
   {% if settings.USE_MINIFIED_JS %} {# FIXME: Change to use minified JS once we are building it. #}
   <script src="{{ STATIC_URL }}js/awx-min.js"></script> <!-- FIXME: Change to whatever we end up calling the minified file. -->
   {% else %}
@@ -189,18 +190,31 @@
       </div>
     </div>
 
-    <!-- Alerts/error handling dialog -->
+    <!-- Alerts/error handling dialogs -->
     <div id="alert-modal" class="modal hide">
       <div class="modal-header">
-        <button type="button" class="close" data-target="#alert-modal" 
-                        data-dismiss="modal" aria-hidden="true">&times;</button>
+        <button type="button" class="close" ng-hide="disableButtons" data-target="#alert-modal" 
+            data-dismiss="modal" class="modal" aria-hidden="true">&times;</button>
         <h3 ng-bind="alertHeader"></h3>
       </div>
       <div class="modal-body">
-        <div class="alert alert-error" ng-bind="alertBody"></div>
+        <div class="alert" ng-class="alertClass" ng-bind-html-unsafe="alertBody"></div>
       </div>
       <div class="modal-footer">
-        <a href="#" data-target="#alert-modal" data-dismiss="modal" class="btn">OK</a>
+        <a href="#" ng-hide="disableButtons" data-target="#form-modal" data-dismiss="modal" class="btn">OK</a>
+      </div>
+    </div>
+    <div id="alert-modal2" class="modal hide">
+      <div class="modal-header">
+        <button type="button" class="close" data-target="#alert-modal2" 
+                        data-dismiss="modal" ng-hide="disableButtons2" aria-hidden="true">&times;</button>
+        <h3 ng-bind="alertHeader2"></h3>
+      </div>
+      <div class="modal-body">
+        <div class="alert" ng-class="alertClass2" ng-bind-html-unsafe="alertBody2"></div>
+      </div>
+      <div class="modal-footer">
+        <a href="#" ng-hide="disableButtons2" data-target="#form-modal2" data-dismiss="modal" class="alert-button2" class="btn">OK</a>
       </div>
     </div>
   

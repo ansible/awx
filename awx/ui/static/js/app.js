@@ -207,8 +207,8 @@ angular.module('ansible', [
             
             otherwise({redirectTo: '/'});
     }])
-    .run(['$rootScope', '$location', 'Authorization','LoadBasePaths', 
-         function($rootScope, $location, Authorization, LoadBasePaths) {
+    .run(['$rootScope', 'CheckLicense', '$location', 'Authorization','LoadBasePaths', 
+         function($rootScope, CheckLicense, $location, Authorization, LoadBasePaths) {
         
         LoadBasePaths(); 
 
@@ -226,6 +226,7 @@ angular.module('ansible', [
                if ($rootScope.current_user == undefined || $rootScope.current_user == null) {
                   Authorization.restoreUserInfo();   //user must have hit browser refresh 
                }
+               CheckLicense();
             }
             // Make the correct tab active
             var base = ($location.path().replace(/^\//,'').split('/')[0]);
@@ -236,13 +237,13 @@ angular.module('ansible', [
                 base.replace(/\_/g,' ');
                 $('.nav-tabs a[href="#' + base + '"]').tab('show');
             }
-        });
+            });
 
         if (! Authorization.isTokenValid() ) {
            // When the app first loads, redirect to login page
            $location.path('/login');
         }
-
+        
         // If browser refresh, activate the correct tab
         var base = ($location.path().replace(/^\//,'').split('/')[0]);
         if  (base == '') {

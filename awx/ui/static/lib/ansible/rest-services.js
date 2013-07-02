@@ -16,7 +16,7 @@ angular.module('RestServices',['ngCookies','AuthService'])
     
     pReplace: function() {
         //in our url, replace :xx params with a value, assuming
-        // we can find it in user supplied params.
+        //we can find it in user supplied params.
         var key,rgx;
         for (key in this.params) {
           rgx = new RegExp("\\:" + key,'gm'); 

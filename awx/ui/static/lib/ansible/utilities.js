@@ -27,13 +27,36 @@ angular.module('Utilities',[])
       } 
    })
 
-   .factory('Alert', ['$rootScope', function($rootScope) {
-      return function(hdr, msg) {
+   .factory('Alert', ['$rootScope', '$location', function($rootScope, $location) {
+      return function(hdr, msg, cls, action, secondAlert, disableButtons) {
       // Pass in the header and message you want displayed on TB modal dialog found in index.html.
-      // Assumes an id of 'alert-modal'
-      $rootScope.alertHeader = hdr;
-      $rootScope.alertBody = msg;
-      $('#alert-modal').modal({ show: true, keyboard: true,  backdrop: 'static' });
+      // Assumes an #id of 'alert-modal'. Pass in an optional TB alert class (i.e. alert-error, alert-success,
+      // alert-info...). Pass an optional function(){}, if you want a specific action to occur when user
+      // clicks 'OK' button. Set secondAlert to true, when a second dialog is needed.
+      if (secondAlert) {
+         $rootScope.alertHeader2 = hdr;
+         $rootScope.alertBody2 = msg;
+         $rootScope.alertClass2 = (cls) ? cls : 'alert-error';  //default alert class is alert-error
+         $('#alert-modal2').modal({ show: true, keyboard: true , backdrop: 'static' });
+         $rootScope.disableButtons2 = (disableButtons) ? true : false;
+         if (action) {
+            $('#alert-modal2').on('hidden', function() {
+                action();
+                });
+         }
+      }
+      else {
+         $rootScope.alertHeader = hdr;
+         $rootScope.alertBody = msg;
+         $rootScope.alertClass = (cls) ? cls : 'alert-error';  //default alert class is alert-error
+         $('#alert-modal').modal({ show: true, keyboard: true , backdrop: 'static' });
+         $rootScope.disableButtons = (disableButtons) ? true : false;
+         if (action) {
+            $('#alert-modal').on('hidden', function() {
+                action();
+                });
+         }
+      }
       }
    }])
 

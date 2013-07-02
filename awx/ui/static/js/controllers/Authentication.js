@@ -41,20 +41,32 @@ function Authenticate($scope, $rootScope, $location, Authorization, ToggleClass,
 
    // Call the API to get an auth token
    $scope.systemLogin = function(username, password) {
+       
        $('.api-error').empty();
+       var token;
+       
        Authorization.retrieveToken(username, password)
          .success( function(data, status, headers, config) {
+             token = data.token;
              Authorization.setToken(data.token);
              $scope.reset();
+
              // Get all the profile/access info regarding the logged in user
              Authorization.getUser()
                  .success(function(data, status, headers, config) {
                      $('#login-modal').modal('hide');
                      Authorization.setUserInfo(data);
-                     $location.path('/organizations');
+                     Authorization.getLicense()
+                         .success(function(data, status, headers, config) {
+                             Authorization.setLicense(data['license_info']);
+                             $location.path('/organizations');
+                             })
+                         .error(function(data, status, headers, config) {
+                             Alert('Error', 'Failed to access user information. GET returned status: ' + status);
+                             });
                      })
                  .error( function(data, status, headers, config) {
-                     Alert('Error', 'Failed to get user data from /api/v1/me. GET status: ' + status);
+                     Alert('Error', 'Failed to access license information. GET returned status: ' + status);
                      });
              })
          .error( function(data, status, headers, config) {
@@ -79,3 +91,6 @@ function Authenticate($scope, $rootScope, $location, Authorization, ToggleClass,
              });
        }
 }
+
+Authenticate.$inject = ['$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert'];
+

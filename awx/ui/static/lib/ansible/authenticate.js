@@ -69,6 +69,36 @@ angular.module('AuthService', ['ngCookies'])
            $rootScope.userLoggedIn = false;
            },
   
+       getLicense: function() {
+           return $http({
+               method: 'GET',
+               url: '/api/v1/config/',
+               headers: { 'Authorization': 'Token ' + this.getToken() }
+               });
+           },
+
+       setLicense: function(license) {
+           license['tested'] = false;
+           $cookieStore.put('license', license);
+           },
+
+       licenseTested: function() {
+           var result;
+           if ($rootScope.license_test !== undefined) {
+              result = $rootScope.license_test;
+           }
+           else {          
+              var license = $cookieStore.get('license');
+              if (license && license.tested !== undefined) {
+                 result = license.tested;
+              }
+              else {
+                 result = false;
+              }
+           }
+           return result;
+           },
+
        getUser:  function() {
            return $http({
                method: 'GET', 
