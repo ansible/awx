@@ -5,7 +5,7 @@ from rest_framework import exceptions
 # AWX
 from awx.main.models import Job
 
-class JobCallbackAuthentication(authentication.BaseAuthentication):
+class JobTaskAuthentication(authentication.BaseAuthentication):
     '''
     Custom authentication used for views accessed by the inventory and callback
     scripts when running a job.
@@ -20,9 +20,9 @@ class JobCallbackAuthentication(authentication.BaseAuthentication):
             job = Job.objects.get(pk=job_id, status='running')
         except Job.DoesNotExist:
             return None
-        token = job.callback_auth_token
+        token = job.task_auth_token
         if auth[1] != token:
-            raise exceptions.AuthenticationFailed('Invalid job callback token')
+            raise exceptions.AuthenticationFailed('Invalid job task token')
         return (None, token)
 
     def authenticate_header(self, request):

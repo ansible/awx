@@ -645,6 +645,16 @@ class JobTemplate(CommonModel):
     def get_absolute_url(self):
         return reverse('main:job_template_detail', args=(self.pk,))
 
+    def can_start_without_user_input(self):
+        '''Return whether job template can be used to start a new job without
+        requiring any user input.'''
+        if not self.credential:
+            return False
+        for field in ('ssh_password', 'sudo_password', 'ssh_key_unlock'):
+            if getattr(self.credential, 'needs_%s' % field):
+                return False
+        return True
+
 class Job(CommonModel):
     '''
     A job applies a project (with playbook) to an inventory source with a given
@@ -802,8 +812,8 @@ class Job(CommonModel):
             pass
 
     @property
-    def callback_auth_token(self):
-        '''Return temporary auth token used for task callbacks via API.'''
+    def task_auth_token(self):
+        '''Return temporary auth token used for task requests via API.'''
         if self.status == 'running':
             h = hmac.new(settings.SECRET_KEY, self.created.isoformat())
             return '%d-%s' % (self.pk, h.hexdigest())

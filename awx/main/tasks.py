@@ -88,7 +88,7 @@ class RunJob(Task):
         if hasattr(settings, 'ANSIBLE_TRANSPORT'):
             env['ANSIBLE_TRANSPORT'] = getattr(settings, 'ANSIBLE_TRANSPORT')
         env['REST_API_URL'] = settings.INTERNAL_API_URL
-        env['REST_API_TOKEN'] = job.callback_auth_token or ''
+        env['REST_API_TOKEN'] = job.task_auth_token or ''
         env['ANSIBLE_NOCOLOR'] = '1' # Prevent output of escape sequences.
         return env
 

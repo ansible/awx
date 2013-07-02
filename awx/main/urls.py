@@ -91,6 +91,7 @@ job_template_urls = patterns('awx.main.views',
     url(r'^$',                                          'job_template_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'job_template_detail'),
     url(r'^(?P<pk>[0-9]+)/jobs/$',                      'job_template_jobs_list'),
+    url(r'^(?P<pk>[0-9]+)/callback/$',                  'job_template_callback'),
 )
 
 job_urls = patterns('awx.main.views',

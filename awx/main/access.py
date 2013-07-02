@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 
 from rest_framework.exceptions import PermissionDenied
 
+from awx import MODE
 from awx.main.models import *
 from awx.main.licenses import LicenseReader
 

@@ -355,6 +355,8 @@ class JobTemplateSerializer(BaseSerializer):
         ))
         if obj.credential:
             res['credential'] = reverse('main:credential_detail', args=(obj.credential.pk,))
+        if obj.host_config_key:
+            res['callback'] = reverse('main:job_template_callback', args=(obj.pk,))
         return res
 
     def validate_playbook(self, attrs, source):

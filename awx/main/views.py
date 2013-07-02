@@ -26,7 +26,7 @@ from rest_framework.views import APIView
 
 # AWX
 from awx.main.access import *
-from awx.main.authentication import JobCallbackAuthentication
+from awx.main.authentication import JobTaskAuthentication
 from awx.main.licenses import LicenseReader
 from awx.main.base_views import *
 from awx.main.models import *
@@ -1014,9 +1014,9 @@ class InventoryScriptView(generics.RetrieveAPIView):
     '''
 
     model = Inventory
-    authentication_classes = [JobCallbackAuthentication] + \
+    authentication_classes = [JobTaskAuthentication] + \
                              api_settings.DEFAULT_AUTHENTICATION_CLASSES
-    permission_classes = (JobCallbackPermission,)
+    permission_classes = (JobTaskPermission,)
     filter_backends = ()
 
     def retrieve(self, request, *args, **kwargs):
@@ -1065,6 +1065,35 @@ class JobTemplateDetail(BaseDetail):
     model = JobTemplate
     serializer_class = JobTemplateSerializer
     permission_classes = (CustomRbac,)
+
+class JobTemplateCallback(generics.RetrieveAPIView):
+    '''
+    Configure a host to POST to this resource using the `host_config_key`.
+    '''
+    
+    model = JobTemplate
+    permission_classes = (JobTemplateCallbackPermission,)
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        data = dict(
+            host_config_key=obj.host_config_key,
+        )
+        return Response(data)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # Permission class should have already validated host_config_key.
+        # FIXME: Find host from request.
+        limit = obj.limit
+        # FIXME: Update limit based on host.
+        job = obj.create_job(limit=limit)
+        result = job.start()
+        if not result:
+            data = dict(passwords_needed_to_start=job.get_passwords_needed_to_start())
+            return Response(data, status=400)
+        else:
+            return Response(status=202)
 
 class JobTemplateJobsList(BaseSubList):
 
@@ -1258,9 +1287,9 @@ class GroupJobEventsList(BaseJobEventsList):
 class JobJobEventsList(BaseJobEventsList):
 
     parent_model = Job
-    authentication_classes = [JobCallbackAuthentication] + \
+    authentication_classes = [JobTaskAuthentication] + \
                              api_settings.DEFAULT_AUTHENTICATION_CLASSES
-    permission_classes = (JobCallbackPermission,)
+    permission_classes = (JobTaskPermission,)
     
     # Post allowed for job event callback only.
     def post(self, request, *args, **kwargs):
