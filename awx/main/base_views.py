@@ -118,6 +118,7 @@ class BaseSubList(BaseList):
                         # no attaching to yourself
                         raise PermissionDenied()
 
+
                     if self.__class__.parent_model != User:
 
                         # FIXME: refactor into smaller functions
@@ -207,6 +208,14 @@ class BaseSubList(BaseList):
             else:
                 # resource is just a ForeignKey, can't remove it from the set, just set it inactive
                 sub.mark_inactive()
+                    
+
+        # verify we didn't add anything to it's own children
+        if type(main) == Group:
+            all_children = main.get_all_children().all()
+            if main in all_children:
+                # no attaching to child objects (in the case of groups)
+                raise PermissionDenied()
 
         if created:
             return Response(status=status.HTTP_201_CREATED, data=ser.data)

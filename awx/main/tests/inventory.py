@@ -451,6 +451,15 @@ class InventoryTest(BaseTest):
         kids = self.get(subgroups_url2, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(kids['count'], 1)
         posted2 = self.post(subgroups_url2, data=new_data, expect=201, auth=self.get_normal_credentials()) 
+
+        # a group can't be it's own grandparent
+        subsub = posted2['related']['children']
+        # this is the grandparent
+        original_url = reverse('main:group_detail', args=(Group.objects.get(name='web6').pk,))
+        parent_data = self.get(original_url, expect=200, auth=self.get_super_credentials())
+        # now posting to kid's children collection...
+        self.post(subsub, data=parent_data, expect=403, auth=self.get_super_credentials())
+
         with_one_more_kid = self.get(subgroups_url2, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(with_one_more_kid['count'], 2)
 
