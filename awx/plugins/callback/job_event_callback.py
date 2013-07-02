@@ -175,12 +175,16 @@ class CallbackModule(object):
         self._log_event('playbook_on_setup')
 
     def playbook_on_import_for_host(self, host, imported_file):
-        self._log_event('playbook_on_import_for_host', host=host,
-                        imported_file=imported_file)
+        # don't care about recording this one
+        # self._log_event('playbook_on_import_for_host', host=host,
+        #                imported_file=imported_file)
+        pass
 
     def playbook_on_not_import_for_host(self, host, missing_file):
-        self._log_event('playbook_on_not_import_for_host', host=host,
-                        missing_file=missing_file)
+        # don't care about recording this one
+        #self._log_event('playbook_on_not_import_for_host', host=host,
+        #                missing_file=missing_file)
+        pass
 
     def playbook_on_play_start(self, pattern):
         self._log_event('playbook_on_play_start', pattern=pattern)

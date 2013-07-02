@@ -98,7 +98,8 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 )
 
 MIDDLEWARE_CLASSES += (
-    'awx.middleware.exceptions.ExceptionMiddleware',
+# masking 500 errors do not use for now?
+#    'awx.middleware.exceptions.ExceptionMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
     # middleware loaded after this point will be subject to transactions
 )

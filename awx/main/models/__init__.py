@@ -970,27 +970,31 @@ class JobEvent(models.Model):
 
     EVENT_TYPES = [
         # (level, event, verbose name, failed)
-        (3, 'runner_on_failed', _('Runner on Failed'), True),
-        (3, 'runner_on_ok', _('Runner on OK'), False),
-        (3, 'runner_on_error', _('Runner on Error'), True),
-        (3, 'runner_on_skipped', _('Runner on Skipped'), False),
-        (3, 'runner_on_unreachable', _('Runner on Unreachable'), True),
-        (3, 'runner_on_no_hosts', _('Runner on No Hosts'), False),
-        (3, 'runner_on_async_poll', _('Runner on Async Poll'), False),
-        (3, 'runner_on_async_ok', _('Runner on Async OK'), False),
-        (3, 'runner_on_async_failed', _('Runner on Async Failed'), True),
-        (3, 'runner_on_file_diff', _('Runner on File Diff'), False),
-        (0, 'playbook_on_start', _('Playbook on Start'), False),
-        (2, 'playbook_on_notify', _('Playbook on Notify'), False),
-        (2, 'playbook_on_no_hosts_matched', _('Playbook on No Hosts Matched'), False),
-        (2, 'playbook_on_no_hosts_remaining', _('Playbook on No Hosts Remaining'), False),
-        (2, 'playbook_on_task_start', _('Playbook on Task Start'), False),
-        (1, 'playbook_on_vars_prompt', _('Playbook on Vars Prompt'), False),
-        (2, 'playbook_on_setup', _('Playbook on Setup'), False),
-        (2, 'playbook_on_import_for_host', _('Playbook on Import for Host'), False),
-        (2, 'playbook_on_not_import_for_host', _('Playbook on Not Import for Host'), False),
-        (1, 'playbook_on_play_start', _('Playbook on Play Start'), False),
-        (1, 'playbook_on_stats', _('Playbook on Stats'), False),
+        (3, 'runner_on_failed', _('Host Failed'), True),
+        (3, 'runner_on_ok', _('Host OK'), False),
+        (3, 'runner_on_error', _('Host Failure'), True),
+        (3, 'runner_on_skipped', _('Host Skipped'), False),
+        (3, 'runner_on_unreachable', _('Host Unreachable'), True),
+        (3, 'runner_on_no_hosts', _('No Hosts Remaining'), False),
+        (3, 'runner_on_async_poll', _('Host Polling'), False),
+        (3, 'runner_on_async_ok', _('Host OK'), False),
+        (3, 'runner_on_async_failed', _('Host Failure'), True),
+        # AWX does not yet support --diff mode
+        (3, 'runner_on_file_diff', _('File Difference'), False),
+        (0, 'playbook_on_start', _('Playbook Started'), False),
+        (2, 'playbook_on_notify', _('Running Handlers'), False),
+        (2, 'playbook_on_no_hosts_matched', _('No Hosts Matched'), False),
+        (2, 'playbook_on_no_hosts_remaining', _('No Hosts Remaining'), False),
+        (2, 'playbook_on_task_start', _('Task Started'), False),
+        # AWX does not yet support vars_prompt (and will probably hang :)
+        (1, 'playbook_on_vars_prompt', _('Variables Prompted'), False),
+        (2, 'playbook_on_setup', _('Gathering Facts'), False),
+        # callback will not record this
+        (2, 'playbook_on_import_for_host', _('internal: on Import for Host'), False),
+        # callback will not record this
+        (2, 'playbook_on_not_import_for_host', _('internal: on Not Import for Host'), False),
+        (1, 'playbook_on_play_start', _('Play Started'), False),
+        (1, 'playbook_on_stats', _('Playbook Complete'), False),
     ]
     FAILED_EVENTS = [x[1] for x in EVENT_TYPES if x[3]]
     EVENT_CHOICES = [(x[1], x[2]) for x in EVENT_TYPES]
@@ -1062,8 +1066,7 @@ class JobEvent(models.Model):
         return self.LEVEL_FOR_EVENT.get(self.event, 0)
 
     def get_event_display2(self):
-        # FIXME: Remove extra spaces once hierarchy view is in place.
-        return '%s%s' % (u'\u00a0\u00a0\u00a0\u00a0' * self.event_level, self.get_event_display())
+        return self.get_event_display()
 
     def _find_parent(self):
         parent_events = set()
