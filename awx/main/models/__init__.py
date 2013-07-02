@@ -1130,11 +1130,9 @@ class JobEvent(models.Model):
     def save(self, *args, **kwargs):
         if self.event in self.FAILED_EVENTS:
             self.failed = True
-        try:
-            if self.event_data['res']['changed']:
-                self.changed = True
-        except (KeyError, IndexError, AttributeError):
-            pass
+        res = self.event_data.get('res', None)
+        if isinstance(res, dict) and res.get('changed', False):
+            self.changed = True
         try:
             if not self.host and self.event_data.get('host', ''):
                 self.host = self.job.inventory.hosts.get(name=self.event_data['host'])

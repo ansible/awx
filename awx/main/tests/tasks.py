@@ -159,6 +159,7 @@ class RunJobTest(BaseCeleryTest):
             'inventory': self.inventory,
             'project': self.project,
             'credential': self.credential,
+            'job_type': 'run',
         }
         try:
             opts['playbook'] = self.project.playbooks[0]
@@ -178,6 +179,7 @@ class RunJobTest(BaseCeleryTest):
                 'inventory': self.inventory,
                 'project': self.project,
                 'credential': self.credential,
+                'job_type': 'run',
             }
             try:
                 opts['playbook'] = self.project.playbooks[0]
@@ -219,6 +221,8 @@ class RunJobTest(BaseCeleryTest):
             unicode(job_event)  # For test coverage.
             job_event.save()
         should_be_failed = bool(runner_status not in ('ok', 'skipped'))
+        should_be_changed = bool(runner_status in ('ok', 'failed') and
+                                 job.job_type == 'run')
         host_pks = set([self.host.pk])
         qs = job_events.filter(event='playbook_on_start')
         self.assertEqual(qs.count(), 1)
@@ -227,6 +231,7 @@ class RunJobTest(BaseCeleryTest):
             self.assertFalse(evt.play, evt)
             self.assertFalse(evt.task, evt)
             self.assertEqual(evt.failed, should_be_failed)
+            self.assertEqual(evt.changed, should_be_changed)
             self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
                              host_pks)
         qs = job_events.filter(event='playbook_on_play_start')
@@ -236,6 +241,7 @@ class RunJobTest(BaseCeleryTest):
             self.assertTrue(evt.play, evt)
             self.assertFalse(evt.task, evt)
             self.assertEqual(evt.failed, should_be_failed)
+            self.assertEqual(evt.changed, should_be_changed)
             self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
                              host_pks)
         qs = job_events.filter(event='playbook_on_task_start')
@@ -245,6 +251,7 @@ class RunJobTest(BaseCeleryTest):
             self.assertTrue(evt.play, evt)
             self.assertTrue(evt.task, evt)
             self.assertEqual(evt.failed, should_be_failed)
+            self.assertEqual(evt.changed, should_be_changed)
             self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
                              host_pks)
         qs = job_events.filter(event=('runner_on_%s' % runner_status))
@@ -254,6 +261,7 @@ class RunJobTest(BaseCeleryTest):
             self.assertTrue(evt.play, evt)
             self.assertTrue(evt.task, evt)
             self.assertEqual(evt.failed, should_be_failed)
+            self.assertEqual(evt.changed, should_be_changed)
             self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
                              host_pks)
         qs = job_events.filter(event__startswith='runner_')

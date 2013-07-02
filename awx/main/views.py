@@ -35,7 +35,7 @@ from awx.main.serializers import *
 
 def handle_error(request, status=404):
     context = {}
-    print request.path, status
+    #print request.path, status
     if request.path.startswith('/admin/'):
         template_name = 'admin/%d.html' % status
     else:
