@@ -1066,7 +1066,14 @@ class JobEvent(models.Model):
         return self.LEVEL_FOR_EVENT.get(self.event, 0)
 
     def get_event_display2(self):
-        return self.get_event_display()
+        msg = self.get_event_display()
+        if self.event == 'playbook_on_play_start':
+            if self.play is not None:
+                msg = "%s (%s)" % (msg, self.play)
+        elif self.event == 'playbook_on_task_start':
+            if self.task is not None:
+                msg = "%s (%s)" % (msg, self.task)
+        return msg
 
     def _find_parent(self):
         parent_events = set()
