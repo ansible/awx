@@ -58,11 +58,10 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
         if (scope.removeSetExpanded) {
            scope.removeSetExpanded();
         }
-        scope.removeSetExpanded = scope.$on('setExpanded', function(event, latest_node) {
+        scope.removeSetExpanded = scope.$on('setExpanded', function(event) {
             // After ToggleChildren completes, look for the next parent that needs to be expanded
             var found = false; 
-            var start = (latest_node) ? latest_node : 0;
-            for (var i=start; i < set.length && found == false && scope.expand; i++) {
+            for (var i=0; i < set.length && found == false && scope.expand; i++) {
                 if (set[i]['related']['children'] && (set[i]['ngicon'] == undefined || set[i]['ngicon'] == 'icon-expand-alt')) {
                    found = true;
                    ToggleChildren({
