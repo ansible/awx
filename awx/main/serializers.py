@@ -438,12 +438,13 @@ class JobHostSummarySerializer(BaseSerializer):
 class JobEventSerializer(BaseSerializer):
 
     event_display = serializers.Field(source='get_event_display2')
+    event_level = serializers.Field(source='event_level')
 
     class Meta:
         model = JobEvent
         fields = ('id', 'url', 'created', 'job', 'event', 'event_display',
-                  'event_data', 'failed', 'changed', 'host', 'related',
-                  'summary_fields', 'parent', 'play', 'task')
+                  'event_data', 'event_level', 'failed', 'changed', 'host',
+                  'related', 'summary_fields', 'parent', 'play', 'task')
 
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)
