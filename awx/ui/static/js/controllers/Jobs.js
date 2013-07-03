@@ -292,10 +292,10 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                }
            }
             
-           $('input[type="text"], textarea').attr('readonly','readonly');
-           $('select').prop('disabled', 'disabled');
-           $('.lookup-btn').prop('disabled', 'disabled');
-           $('.controls.buttons, hr').hide();
+           $('form[name="jobs_form"] input[type="text"], form[name="jobs_form"] jobs_form textarea').attr('readonly','readonly');
+           $('form[name="jobs_form"] select').prop('disabled', 'disabled');
+           $('form[name="jobs_form"] .lookup-btn').prop('disabled', 'disabled');
+           $('form[name="jobs_form"] .buttons, form[name="jobs_form"] hr').hide();
 
            scope.url = data.url; 
            var related = data.related;
