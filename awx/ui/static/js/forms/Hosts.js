@@ -18,10 +18,19 @@ angular.module('HostFormDefinition', [])
 
         fields: {
             name: {
-                label: 'Name',
+                label: 'Host Name',
                 type: 'text',
                 addRequired: true,
-                editRequired: true
+                editRequired: true,
+                awPopOver: "<p>Provide a host name, ip address, or ip address:port. Examples include:</p>" +
+                     "<blockquote>myserver.domain.com<br/>" +
+                     "127.0.0.1<br />" + 
+                     "10.1.0.140:25<br />" +
+                     "server.example.com:25" +
+                     "</blockquote>", 
+                dataTitle: 'Host Name',
+                dataPlacement: 'right',
+                dataContainer: '#form-modal'
                 },
             description: { 
                 label: 'Description',

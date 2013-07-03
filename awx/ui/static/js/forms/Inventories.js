@@ -115,7 +115,7 @@ angular.module('InventoryFormDefinition', [])
                 fields: {
                     name: {
                         key: true,
-                        label: 'Name',
+                        label: 'Host Name',
                         ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
                         },
                     has_active_failures: {

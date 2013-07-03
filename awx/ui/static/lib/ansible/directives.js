@@ -204,8 +204,9 @@ angular.module('AWDirectives', ['RestServices'])
         return function(scope, element, attrs) {
             var placement = (attrs.placement != undefined && attrs.placement != null) ? attrs.placement : 'left';
             var title = (attrs.title != undefined && attrs.title != null) ? attrs.title : 'Help';
+            var container = (attrs.container !== undefined) ? attrs.container : false;
             $(element).popover({ placement: placement, delay: 0, title: title, 
-                content: attrs.awPopOver, delay: 0, trigger: 'click', html: true });
+                content: attrs.awPopOver, delay: 0, trigger: 'click', html: true, container: container });
             $(document).bind('keydown', function(e) {
                 if (e.keyCode === 27) {
                    $(element).popover('hide');

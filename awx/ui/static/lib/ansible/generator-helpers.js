@@ -55,6 +55,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             case 'dataPlacement':
                result = "data-placement=\"" + obj[key] + "\" ";
                break;
+            case 'dataContainer':
+               result = "data-container=\"" + obj[key] + "\" ";
+               break;
             default: 
                result = key + "=\"" + obj[key] + "\" ";
         }

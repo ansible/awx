@@ -24,7 +24,6 @@
     border-color: #e3e3e3;
  }
 
-
 /* Attempt to make button heights consistent. For some reason success, info, etc. are
    taller than plain .btn */
  .btn-success, .btn-danger, .btn-info, .btn-primary {
@@ -532,7 +531,7 @@
 
 .horizontal-narrow .control-label {
   float: left;
-  width: 80px;
+  width: 120px;
   padding-top: 5px;
   text-align: right;
 }
@@ -540,16 +539,16 @@
 .horizontal-narrow .controls {
   *display: inline-block;
   *padding-left: 20px;
-  margin-left: 100px;
+  margin-left: 140px;
   *margin-left: 0;
 }
 
 .horizontal-narrow .controls:first-child {
-  *padding-left: 100px;
+  *padding-left: 140px;
 }
 
 .modal-input-xlarge {
-   width: 400px;
+   width: 350px;
 }
 
 
