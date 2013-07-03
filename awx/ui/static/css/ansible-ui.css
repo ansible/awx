@@ -57,6 +57,12 @@
 
 /* End btn heights */
 
+ .login-alert {
+    font-weight: bold;
+    text-align: center;
+    color: #0088cc;
+    margin-bottom: 15px;
+ }
  
  .controls {
     min-height: 15px;

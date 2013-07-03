@@ -6,9 +6,7 @@
           <h3>Ansible Login</h3>
         </div>
         <div class="modal-body">
-          <div style="padding-bottom: 20px;" class="alert alert-warning alert-block" ng-show="(sessionExpired == true)">
-            Your session timed out due to inactivity. Please sign in again.
-          </div>
+          <div class="login-alert" ng-show="(sessionExpired == true)">Your session timed out due to inactivity. Please sign in again.</div>
           <form id="login-form" name="loginForm" class="form-horizontal" novalidate>
             <div class="control-group">
               <label class="control-label">Username:</label>
