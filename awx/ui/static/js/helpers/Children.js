@@ -25,9 +25,9 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
            for (var i = node + 1; i < set.length; i++) {
                if (set[i].parent == set[node].id) {
                   set[i]['show'] = true;
-                  if (set[i].related.children) {
-                     expand(i);
-                  }
+                  //if (set[i].related.children) {
+                  //   expand(i);
+                  //}
                }
            }
         }
