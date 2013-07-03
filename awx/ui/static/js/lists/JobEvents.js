@@ -16,6 +16,7 @@ angular.module('JobEventsListDefinition', [])
         index: false,
         hover: true,
         hasChildren: true,
+        filterBy: '\{ show: true \}',
         
         fields: {
             created: {

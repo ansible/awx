@@ -193,6 +193,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += (options.mode == 'lookup' || options.mode == 'select') ? "ng-class=\"" + list.iterator + "_\{\{ " + list.iterator + ".id \}\}_class\" " : "";
        html += "class=\"" + list.iterator + "_class\" ng-repeat=\"" + list.iterator + " in " + list.name; 
        html += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
+       html += (list.filterBy) ? " | filter: " + list.filterBy : ""; 
        html += "\"";
        html += (options.mode == 'lookup' || options.mode == 'select') ? " ng-click=\"toggle_" + list.iterator +"({{ " + list.iterator + ".id }})\"" : "";
        html += ">\n";

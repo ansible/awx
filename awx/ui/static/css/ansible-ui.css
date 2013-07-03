@@ -370,6 +370,10 @@
     color: #5bb75b;
  }
 
+ .job-changed {
+    color: #FF9900;
+ }
+
  .job-detail-status {
     font-size: 15px;
     font-weight: bold;

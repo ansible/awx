@@ -19,7 +19,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     var list = JobEventList;
     list.base = $location.path();
     
-    var defaultUrl = GetBasePath('jobs') + $routeParams.id  + '/job_events/?parent__isnull=1';
+    var defaultUrl = GetBasePath('jobs') + $routeParams.id  + '/job_events/'; //?parent__isnull=1';
     
     var view = GenerateList;
     var base = $location.path().replace(/^\//,'').split('/')[0];
@@ -32,6 +32,47 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     scope.parentNode = 'parent-event';  // used in ngClass to dynamicall set row level class and control
     scope.childNode = 'child-event';    // link color and cursor
 
+    function formatJSON(eventData) {
+        //turn JSON event data into an html form
+        var html = '';
+        if (eventData.res) {
+           var found = false;
+           var n, rows;
+           if (typeof eventData.res == 'string') {
+              n = eventData['res'].match(/\n/g);
+              rows = (n) ? n.length : 1;
+              found = true;
+              html += "<label>Traceback:</label>\n";
+              html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + rows + "\">" + eventData.res + "</textarea>\n";
+           }
+           else {
+              for (var fld in eventData.res) {
+                  if ( (fld == 'msg' || fld == 'stdout' || fld == 'stderr') && 
+                       (eventData.res[fld] !== null && eventData.res[fld] !== '') ) {
+                       html += "<label>"; 
+                       switch(fld) {
+                          case 'msg':
+                          case 'stdout':
+                             html += 'Output:';
+                             break;
+                          case 'stderr':
+                             html += 'Error:';
+                             break;
+                       }
+                       html += "</label>\n";
+                       n = eventData['res'][fld].match(/\n/g);
+                       rows = (n) ? n.length : 1;
+                       html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + rows + "\">" + eventData.res[fld] + "</textarea>\n";
+                       found = true;
+                  }
+              }
+           }
+           html = (found) ? "<form class=\"event-detail\">\n" + html + "</form>\n" : '';
+        }
+        html = (html == '' ) ? null : html;
+        return html;
+        }
+
     if (scope.RemovePostRefresh) {
        scope.RemovePostRefresh();
     }
@@ -41,62 +82,35 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
         var cDate;
         for (var i=0; i < set.length; i++) {
             set[i].event_display = set[i].event_display.replace(/^\u00a0*/g,'');
-            if (set[i].parent == null && set[i]['ngclick'] === undefined && set[i]['ngicon'] == undefined) {
-               set[i].parent = 0;
+            if (set[i].event_level < 3 ) {
                set[i]['ngclick'] = "toggleChildren(" + set[i].id + ", \"" + set[i].related.children + "\")";
-               set[i]['ngicon'] = 'icon-expand-alt';
-               set[i]['level'] = 0;
-               set[i]['spaces'] = 0;
+               set[i]['ngicon'] = 'icon-collapse-alt';
                set[i]['class'] = 'parentNode';
             }
-            scope.jobevents[i].status = (scope.jobevents[i].failed) ? 'error' : 'success';
+            else {
+               set[i]['class'] = 'childNode';
+               set[i]['event_detail'] = formatJSON(set[i].event_data);
+            }
+            set[i]['show'] = true;
+            set[i]['spaces'] = set[i].event_level * 24;
+            if (scope.jobevents[i].failed) {
+               scope.jobevents[i].status = 'error';
+            }
+            else if (scope.jobevents[i].changed) {
+               scope.jobevents[i].status = 'changed';
+            }
+            else {
+               scope.jobevents[i].status = 'success';
+            }
             cDate = new Date(set[i].created);
             set[i].created = FormatDate(cDate);
         }
-
-        // Expand all parent nodes
-        if (scope.removeSetExpanded) {
-           scope.removeSetExpanded();
-        }
-        scope.removeSetExpanded = scope.$on('setExpanded', function(event) {
-            // After ToggleChildren completes, look for the next parent that needs to be expanded
-            var found = false; 
-            for (var i=0; i < set.length && found == false && scope.expand; i++) {
-                if (set[i]['related']['children'] && (set[i]['ngicon'] == undefined || set[i]['ngicon'] == 'icon-expand-alt')) {
-                   found = true;
-                   ToggleChildren({
-                       scope: scope, 
-                       list: list, 
-                       id: set[i].id,
-                       children: set[i]['related']['children']
-                       });
-                }
-            }
-            if (found == false) {
-               // After looping through all the nodes and finding nothing to expand, turn off 
-               // auto-expand. From now on user will manually collapse and expand nodes.
-               scope.expand = false;
-            }
-            });
-        // Start the auto expansion
-        set = scope[list.name];
-        for (var i=0; i < set.length; i++) {
-            if (set[i]['related']['children'] && (set[i]['ngicon'] == undefined || set[i]['ngicon'] == 'icon-expand-alt')) {
-               ToggleChildren({
-               scope: scope, 
-               list: list, 
-               id: set[i].id,
-               children: set[i]['related']['children']
-               });
-            }
-        }
-
         });
 
     SearchInit({ scope: scope, set: 'jobevents', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
 
-    // Called from Inventories tab host failed events link:
+    // Called from Inventories tab, host failed events link:
     if ($routeParams.host) {
        scope[list.iterator + 'SearchField'] = 'host'; 
        scope[list.iterator + 'SearchValue'] = $routeParams.host;

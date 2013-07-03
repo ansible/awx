@@ -3,7 +3,9 @@
  *
  *  ChildrenHelper
  *
- *  Used in job_events to expand/collapse children
+ *  Used in job_events to expand/collapse children by setting the 
+ *  'show' attribute of each job_event in the set of job_events.
+ *  See the filter in job_events.js list.
  *
  */
                        
@@ -18,37 +20,28 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
         var children = params.children; 
         var set = scope[list.name];   // set is now a pointer to scope[list.name]
         
-        function calcSpaces(lvl) {
-          return lvl * 24;
+        function expand(node) {
+           set[node]['ngicon'] = 'icon-collapse-alt'; 
+           for (var i = node + 1; i < set.length; i++) {
+               if (set[i].parent == set[node].id) {
+                  set[i]['show'] = true;
+                  if (set[i].related.children) {
+                     expand(i);
+                  }
+               }
+           }
         }
 
-        function formatJSON(eventData) {
-            //turn JSON event data into an html form
-            var html = '';
-            if (eventData.res) {
-               var found = false;
-               for (var fld in eventData.res) {
-                   if ( (fld == 'msg' || fld == 'stdout' || fld == 'stderr') && 
-                        (eventData.res[fld] !== null && eventData.res[fld] !== '') ) {
-                        html += "<label>"; 
-                        switch(fld) {
-                          case 'msg':
-                          case 'stdout':
-                             html += 'Output:';
-                             break;
-                          case 'stderr':
-                             html += 'Error:';
-                             break;
-                        }
-                        html += "</label>\n";
-                        html += "<textarea readonly class=\"input-xxlarge\">" + eventData.res[fld] + "</textarea>\n";
-                        found = true;
-                   }
+        function collapse(node) {
+           set[node]['ngicon'] = 'icon-expand-alt';
+           for (var i = node + 1; i < set.length; i++) {
+               if (set[i].parent == set[node].id) {
+                  set[i]['show'] = false;
+                  if (set[i]['related']['children']) {
+                     collapse(i);
+                  }
                }
-               html = (found) ? "<form class=\"event-detail\">\n" + html + "</form>\n" : '';
-            }
-            html = (html == '' ) ? null : html;
-            return html;
+           }
         }
 
         // Scan the array list and find the clicked element
@@ -62,90 +55,11 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
         }
         // Expand or collapse children based on clicked element's icon
         if (set[clicked]['ngicon'] == 'icon-expand-alt') {
-           // Expand: lookup and display children 
-           var url = children;
-           var search = scope[list.iterator + 'SearchParams'].replace(/^\&/,'').replace(/^\?/,'');
-           url += (search) ? '?' + search : "";
-           Rest.setUrl(url); 
-           Rest.get()
-               .success( function(data, status, headers, config) {
-                   var found = false;
-                   var level = (set[clicked].level !== undefined) ? set[clicked].level + 1 : 1;
-                   var spaces = calcSpaces(level); 
-                   set[clicked]['ngicon'] = 'icon-collapse-alt';
-                   for (var j=0; j < data.results.length; j++) {
-                       data.results[j].level = level;
-                       data.results[j].spaces = spaces;
-                       data.results[j].status = (data.results[j].failed) ? 'error' : 'success';
-                       data.results[j].event_display = data.results[j].event_display.replace(/^\u00a0*/g,'');
-                       cDate = new Date(data.results[j].created);
-                       data.results[j].created = FormatDate(cDate);
-                       if (data.results[j].related.children) {
-                          data.results[j]['ngclick'] = "toggleChildren(" + data.results[j].id + ", \"" + data.results[j].related.children + "\")";
-                          data.results[j]['ngicon'] = 'icon-expand-alt';
-                          data.results[j]['class'] = 'parentNode';
-                       }
-                       else {
-                          data.results[j]['class'] = 'childNode';
-                          // For child nodes, include some of the even_data detail, but in a nicer non-JSONy format
-                          data.results[j]['event_detail'] = formatJSON(data.results[j]['event_data']);
-                       }
-                       /*if (data.results[j]['event_data']['res'] && data.results[j]['event_data']['res']['msg']) {
-                          // Display the actual result message
-                          data.results[j]['event_display'] = data.results[j]['event_data']['res']['msg'];
-                       }
-                       if (data.results[j]['event'] == 'playbook_on_stats') {
-                          data.results[j]['event_display'] = 'Play Recap ****** ';
-                          for (var key in data.results[j]['event_data']) {
-                              var count = 0;
-                              for (var itm in data.results[j]['event_data'][key]) {
-                                  count += data.results[j]['event_data'][key][itm];
-                              }
-                              data.results[j]['event_display'] += key + ": " + count + " ";
-                          }
-                       }
-                       */
-                       if (clicked == (set.length - 1)) {
-                          set.push(data.results[j]);
-                       }
-                       else {
-                          set.splice(clicked + 1, 0, data.results[j]);
-                       }
-                       clicked++;
-                   } 
-                   scope.$emit('setExpanded');          
-                   })
-               .error( function(data, status, headers, config) {
-                   ProcessErrors(scope, data, status, null,
-                       { hdr: 'Error!', msg: 'Call to ' + children + ' failed. GET returned status: ' + status });
-                   });
+           // Expand: lookup and display children
+           expand(clicked);
         }
         else {
-           // Collapse: find and remove children
-           var parents = [];
-           function findChildren(parent, idx) {
-              // recursive look through the tree finding all
-              // parents including and related the clicked element
-              for (var i=idx; i < set.length; i++) {
-                  if (set[i].parent == parent) {
-                     parents.push(parent);
-                     findChildren(set[i].id, i + 1);
-                  }
-              }
-           }
-           findChildren(id, clicked + 1);
-           // Remove all the children of the clicked element
-           var count;
-           for (var i=0; i < parents.length; i++) {
-               count = 0;
-               for (var j=clicked + 1; j< set.length; j++) {
-                   if (set[j].parent == parents[i]) {
-                      set.splice(j,1);
-                      j=clicked; // start back a the top of the list
-                   }
-               }      
-           }
-           set[clicked]['ngicon'] = 'icon-expand-alt'; 
+           collapse(clicked);
         }
     }
     }]);
