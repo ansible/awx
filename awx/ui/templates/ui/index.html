@@ -150,14 +150,13 @@
     <!-- Password Dialog -->
     <div id="password-modal" class="modal hide">
       <div class="modal-header">
-        <button type="button" class="close" data-target="#prompt-modal" 
-                        data-dismiss="modal" aria-hidden="true">&times;</button>
+        <button type="button" class="close" ng-click="cancelJob()" aria-hidden="true">&times;</button>
         <h3>Password Required</h3>
       </div>
       <div class="modal-body" id="password-body">
       </div>
       <div class="modal-footer">
-        <a href="#" data-target="#password-modal" data-dismiss="modal" class="btn">Cancel</a>
+        <a href="#" ng-click="cancelJob()" class="btn">Cancel</a>
         <a href="" ng-click="startJob()" class="btn btn-primary" ng-disabled="password_form.$pristine || password_form.$invalid">Continue</a>
       </div>
     </div>

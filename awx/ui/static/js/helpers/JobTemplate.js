@@ -7,8 +7,8 @@
 angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
     'LookUpHelper', 'JobTemplateFormDefinition' ])
 
-    .factory('PromptPasswords',['CredentialForm', '$compile', 'Rest', '$location',
-    function(JobTemplateForm, $compile, Rest, $location) {
+    .factory('PromptPasswords',['CredentialForm', '$compile', 'Rest', '$location', 'ProcessErrors', 'GetBasePath',
+    function(JobTemplateForm, $compile, Rest, $location, ProcessErrors, GetBasePath) {
     return function(params) {
         
         var scope = params.scope; 
@@ -17,28 +17,64 @@ angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFo
         var form = JobTemplateForm;
         var html = '';
         var field, element, dialogScope, fld;
+        var base = $location.path().replace(/^\//,'').split('/')[0];
+        
+        function navigate(canceled) {
+            //Decide where to send the user once the modal dialog closes
+            if (!canceled && base == 'jobs') {
+               scope.refreshJob();
+            } 
+            else {
+               $location.path('/' + base);
+            }
+            }
+
+        function cancelJob() {
+            // Delete a job
+            var url = GetBasePath('jobs') + scope.job_id +'/'
+            Rest.setUrl(url);
+            Rest.destroy()
+                .success ( function(data, status, headers, config) {
+                    navigate(true);
+                    })
+                .error( function(data, status, headers, config) {
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                    });
+            }
+
+        scope.cancelJob = function() {
+            // User clicked cancel button
+            $('#password-modal').modal('hide');
+            cancelJob();
+            }
         
         scope.startJob = function() {
             $('#password-modal').modal('hide');
-            var pswd = {};  
+            var pswd = {};
+            var value_supplied = false;
             $('.password-field').each(function(index) {
                 pswd[$(this).attr('name')] = $(this).val();
+                if ($(this).val() != '' && $(this).val() !== null) {
+                   value_supplied = true;
+                }
                 });
-            Rest.setUrl(start_url); 
-            Rest.post(pswd)
-                .success( function(data, status, headers, config) {
-                    var base = $location.path().replace(/^\//,'').split('/')[0];
-                    if (base == 'jobs') {
-                       scope.refreshJob();
-                    } 
-                    else {
-                       $location.path('/jobs');
-                    }
-                    })
-                .error( function(data, status, headers, config) { 
-                    ProcessErrors(scope, data, status, null,
-                        { hdr: 'Error!', msg: 'Failed to start job. POST returned status: ' + status });
-                    });
+            if (value_supplied) {
+               Rest.setUrl(start_url);
+               Rest.post(pswd)
+                   .success( function(data, status, headers, config) {
+                       navigate(false);
+                       })
+                   .error( function(data, status, headers, config) { 
+                       ProcessErrors(scope, data, status, null,
+                           { hdr: 'Error!', msg: 'Failed to start job. POST returned status: ' + status });
+                       });
+            }
+            else {
+               // No passwords provided, so we can't start the job. Rather than leave the job in a 'new'
+               // state, let's delete it. 
+               scope.cancelJob();   
+            }
             }
         
 
@@ -94,7 +130,7 @@ angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFo
         element = angular.element(document.getElementById('password-body'));
         element.html(html);
         $compile(element.contents())(scope);
-        $('#password-modal').modal();
+        $('#password-modal').modal({ });
         }
     }])
     
@@ -132,6 +168,7 @@ angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFo
                 extra_vars: data.extra_vars
                 })
                 .success( function(data, status, headers, config) {
+                    scope.job_id = data.id;
                     if (data.passwords_needed_to_start.length > 0) {
                        // Passwords needed. Prompt for passwords, then start job.
                        PromptPasswords({
