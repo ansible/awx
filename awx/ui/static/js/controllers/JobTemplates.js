@@ -409,11 +409,13 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
               }
               if (fld == 'variables') {
                  // Parse extra_vars, converting to YAML.  
-                 if ($.isEmptyObject(data.extra_vars) || data.extra_vars == "\{\}") {
+                 if ($.isEmptyObject(data.extra_vars) || data.extra_vars == "\{\}" || data.extra_vars == "null") {
                     scope.variables = "---";
                  }
                  else {
-                    scope.variables = jsyaml.safeDump(JSON.parse(data.extra_vars));
+                    var json_obj = JSON.parse(data.extra_vars);
+                    scope.variables = jsyaml.safeDump(json_obj);
+                    console.log(json_obj);
                  }
                  master.variables = scope.variables;
               }
@@ -472,8 +474,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
        try {
            // Make sure we have valid variable data
            if (scope.parseType == 'json') {
-              var myjson = JSON.parse(scope.variables);  //make sure JSON parses
-              var json_data = scope.variables;
+              var json_data = JSON.parse(scope.variables);  //make sure JSON parses
            }
            else {
               var json_data = jsyaml.load(scope.variables);  //parse yaml

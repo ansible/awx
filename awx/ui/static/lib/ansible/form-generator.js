@@ -275,6 +275,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 html += "<a href=\"\" " + this.attr(field,'awPopOver');
                 html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
                 html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
+                html += (field.dataContainer) ? this.attr(field, 'dataContainer') : "";
                 html += "><i class=\"icon-info-sign\"></i></a> ";
              }
              html += field.label + '</label>' + "\n";
