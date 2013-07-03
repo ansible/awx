@@ -457,8 +457,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  html += "</label>\n";
              }
              if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
-                html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
-                this.form.name + '_form.' + fld + ".$error.required\">A value is required!</span>\n";
+                html += "<p><span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
+                this.form.name + '_form.' + fld + ".$error.required\">A value is required!</span></p>\n";
              }
              html += "<p><span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span></p>\n";
              html += "</div>\n";

@@ -193,6 +193,10 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
            scope.category = 'Deploy';
            if (data['permission_type'] != 'run' && data['permission_type'] != 'check' ) {
               scope.category = 'Inventory';
+              scope.projectrequired = false;
+           }
+           else {
+              scope.projectrequired = true;
            }
            master['category'] = scope.category;
            
