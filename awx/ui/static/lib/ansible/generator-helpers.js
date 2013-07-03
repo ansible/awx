@@ -263,7 +263,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            html += "</select>\n";
         }
 
-        html += "<div class=\"page-number-small\"";
+        html += "<div class=\"page-number-small\" ng-show=\"" + iterator + "PageCount > 0\" ";
         html += ">Page: {{ " + iterator + "Page + 1 }} of {{ " + iterator + "PageCount }}</div>\n";
         html += "</form>\n";
         html += "</div>\n";
