@@ -90,7 +90,10 @@ class RunJob(Task):
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
         env['ANSIBLE_NOCOLOR'] = '1' # Prevent output of escape sequences.
+        # do not want AWX to ask interactive questions and want it to be friendly with reprovisioning
         env['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
+        # RHEL has too old of an SSH so ansible will select paramiko and this is VERY slow
+        env['ANSIBLE_PARAMIKO_RECORD_HOST_KEYS'] = False
         return env
 
     def build_args(self, job, **kwargs):
