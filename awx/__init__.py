@@ -1,7 +1,7 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
-__version__ = '1.2-b2'
+__version__ = '1.2.2-0'
 
 import os
 import sys
