@@ -12,54 +12,55 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
     .factory('Attr', function() {
     return function(obj, key) { 
         var result;
+        var value = (typeof obj[key] === "string") ? obj[key].replace(/\'/g, '&quot;') : obj[key];
         switch(key) {
             case 'ngClick':
-               result = "ng-click=\"" + obj[key] + "\" ";
+               result = "ng-click=\"" + value + "\" ";
                break;
             case 'ngOptions':
-               result = "ng-options=\"" + obj[key] + "\" ";
+               result = "ng-options=\"" + value + "\" ";
                break;
             case 'ngClass':
-                result = "ng-class=\"" + obj[key] + "\" ";
+                result = "ng-class=\"" + value + "\" ";
                 break;
             case 'ngChange':
-               result = "ng-change=\"" + obj[key] + "\" ";
+               result = "ng-change=\"" + value + "\" ";
                break;
             case 'ngDisabled':
-                result = "ng-disabled=\"" + obj[key] + "\" ";
+                result = "ng-disabled=\"" + value + "\" ";
                 break;
             case 'ngShow':
-               result = "ng-show=\"" + obj[key] + "\" ";
+               result = "ng-show=\"" + value + "\" ";
                break;
             case 'ngHide':
-               result = "ng-hide=\"" + obj[key] + "\" ";
+               result = "ng-hide=\"" + value + "\" ";
                break;
             case 'ngBind':
-                result = "ng-bind=\"" + obj[key] + "\" ";
+                result = "ng-bind=\"" + value + "\" ";
                 break;
             case 'trueValue':
-               result = "ng-true-value=\"" + obj[key] + "\" ";
+               result = "ng-true-value=\"" + value + "\" ";
                break;
             case 'falseValue':
-               result = "ng-false-value=\"" + obj[key] + "\" ";
+               result = "ng-false-value=\"" + value + "\" ";
                break;
             case 'awToolTip':
-               result = "aw-tool-tip=\"" + obj[key] + "\" ";
+               result = "aw-tool-tip=\"" + value + "\" ";
                break;
             case 'awPopOver':
-               result = "aw-pop-over='" + obj[key] + "' ";
+               result = "aw-pop-over='" + value + "' ";
                break;
             case 'dataTitle':
-               result = "data-title=\"" + obj[key] + "\" ";
+               result = "data-title=\"" + value + "\" ";
                break;
             case 'dataPlacement':
-               result = "data-placement=\"" + obj[key] + "\" ";
+               result = "data-placement=\"" + value + "\" ";
                break;
             case 'dataContainer':
-               result = "data-container=\"" + obj[key] + "\" ";
+               result = "data-container=\"" + value + "\" ";
                break;
             default: 
-               result = key + "=\"" + obj[key] + "\" ";
+               result = key + "=\"" + value + "\" ";
         }
         
         return  result; 

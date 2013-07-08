@@ -63,6 +63,7 @@ angular.module('AuthService', ['ngCookies'])
        
        logout: function() {
            $rootScope.current_user = {};
+           $rootScope.license_tested = undefined;
            $cookieStore.remove('token'); 
            $cookieStore.remove('token_expire');
            $cookieStore.remove('current_user');
