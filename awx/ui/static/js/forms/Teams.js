@@ -130,13 +130,13 @@ angular.module('TeamFormDefinition', [])
                         label: 'Inventory',
                         sourceModel: 'inventory',
                         sourceField: 'name',
-                        ngBind: 'permission.summary_fields.inventory.name',
+                        ngBind: 'permission.summary_fields.inventory.name'
                         },
                     project: {
                         label: 'Project',
                         sourceModel: 'project',
                         sourceField: 'name',
-                        ngBind: 'permission.summary_fields.project.name',
+                        ngBind: 'permission.summary_fields.project.name'
                         },
                      permission_type: {
                         label: 'Permission'

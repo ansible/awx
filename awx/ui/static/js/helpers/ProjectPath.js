@@ -10,8 +10,8 @@
  */
 
 angular.module('ProjectPathHelper', ['RestServices', 'Utilities'])  
-    .factory('GetProjectPath', ['Alert', 'Rest', 'GetBasePath','ProcessErrors', 'Alert', 
-    function(Alert, Rest, GetBasePath, ProcessErrors, Alert) {
+    .factory('GetProjectPath', ['Alert', 'Rest', 'GetBasePath','ProcessErrors',
+    function(Alert, Rest, GetBasePath, ProcessErrors) {
     return function(params) {
         
         var scope = params.scope;

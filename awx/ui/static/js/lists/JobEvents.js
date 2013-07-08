@@ -34,7 +34,7 @@ angular.module('JobEventsListDefinition', [])
                 searchType: 'boolean',
                 searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }],
                 nosort: true,
-                searchable: false,
+                searchable: false
                 },
             event_display: {
                 label: 'Event',

@@ -635,7 +635,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           }
 
           html += "<form class=\"form-horizontal";
-          html += (this.form['class']) ? ' ' + this.form.class : '';
+          html += (this.form['class']) ? ' ' + this.form['class'] : '';
           html += "\" name=\"" + this.form.name + '_form" id="' + this.form.name + '" novalidate>' + "\n";
           html += "<div ng-show=\"flashMessage != null && flashMessage != undefined\" class=\"alert alert-info\">{{ flashMessage }}</div>\n";
 

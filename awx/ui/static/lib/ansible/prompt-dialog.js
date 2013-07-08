@@ -14,8 +14,8 @@
  *           }
  */
 
-angular.module('PromptDialog', [])
-    .factory('Prompt', function(Alert) {
+angular.module('PromptDialog', ['Utilities'])
+    .factory('Prompt', ['Alert', function(Alert) {
     return function(params) {
         //  
 
@@ -35,7 +35,7 @@ angular.module('PromptDialog', [])
             show: true
             });
         }
-    });
+    }]);
     
 
 
