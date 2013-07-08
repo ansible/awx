@@ -22,8 +22,7 @@ SECRET_KEY = None
 ALLOWED_HOSTS = []
 
 # Production should only use minified JS for UI.
-# CLH 6/20/13 - leave the following set to False until we actually have minified js ready
-USE_MINIFIED_JS = False
+USE_MINIFIED_JS = True 
 
 # URL used by inventory script and callback plugin to access API.
 INTERNAL_API_URL = 'http://127.0.0.1:80'

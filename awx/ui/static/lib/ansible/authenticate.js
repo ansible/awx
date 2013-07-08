@@ -84,8 +84,8 @@ angular.module('AuthService', ['ngCookies'])
 
        licenseTested: function() {
            var result;
-           if ($rootScope.license_test !== undefined) {
-              result = $rootScope.license_test;
+           if ($rootScope.license_tested !== undefined) {
+              result = $rootScope.license_tested;
            }
            else {          
               var license = $cookieStore.get('license');
