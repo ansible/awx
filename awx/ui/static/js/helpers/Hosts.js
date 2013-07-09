@@ -413,7 +413,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var inventory_id = params.inventory_id;
         var host_id = params.host_id;
         var host_name = params.host_name; 
-        var url = (group_id !== null) ? GetBasePath('groups') + group_id + '/hosts/' : GetBasePath('inventory') + inventory_id + '/hosts/';
+        var url = (scope.group_id !== null) ? GetBasePath('groups') + scope.group_id + '/hosts/' : 
+            GetBasePath('inventory') + inventory_id + '/hosts/';
         
         var action_to_take = function() {
             if (scope.removeHostsReload) {
@@ -437,8 +438,14 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             };
 
         //Force binds to work. Not working usual way.
-        $('#prompt-header').text('Delete Host');
-        $('#prompt-body').text('Are you sure you want to delete host ' + host_name + '?');
+        if (scope.group_id !== null) {
+           $('#prompt-header').text('Remove Host from Group');
+           $('#prompt-body').text('Are you sure you want to remove host ' + host_name + ' from the group?');
+        }
+        else {
+           $('#prompt-header').text('Delete Host');
+           $('#prompt-body').text('Are you sure you want to permenantly remove host ' + host_name + '?');
+        }
         $('#prompt-action-btn').addClass('btn-danger');
         scope.promptAction = action_to_take;  // for some reason this binds?
         $('#prompt-modal').modal({
