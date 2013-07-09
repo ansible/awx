@@ -65,6 +65,21 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                        html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + rows + "\">" + eventData.res[fld] + "</textarea>\n";
                        found = true;
                   }
+                  if ( fld == "results" && Array.isArray(eventData.res[fld]) && eventData.res[fld].length > 0 ) {
+                     html += "<label>Results:</label>\n";
+                     //html += "<textarea readonly class="
+                     var txt = '';
+                     for (var i=0; i < eventData.res[fld].length; i++) {
+                         txt += eventData.res[fld][i];
+                     }
+                     html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + i + "\">" + txt + "</textarea>\n";
+                     found = true;
+                  }
+                  if (fld == "rc" && eventData.res[fld] != 0) {
+                     html += "<label>Return Code:</label>\n";
+                     html += "<input type=\"text\" value=\"" + eventData.res[fld] + "\" readonly >\n";
+                     found = true;
+                  }
               }
            }
            html = (found) ? "<form class=\"event-detail\">\n" + html + "</form>\n" : '';
