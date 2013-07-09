@@ -25,7 +25,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var list = HostList;
         var defaultUrl = GetBasePath('inventory') + inventory_id + '/hosts/';
         var view = GenerateList;
-        
+
         var scope = view.inject(HostList, {
             id: 'form-modal-body', 
             mode: 'select',

@@ -128,7 +128,11 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     html += "\" ";
                     html += (list.actions[action].ngHide) ? this.attr(list.actions[action],'ngHide') : "";
                     html += (list.actions[action].awToolTip) ? this.attr(list.actions[action],'awToolTip') : "";
-                    html += (list.actions[action].awToolTip) ? "data-placement=\"top\" " : "";
+                    html += (list.actions[action].awToolTip && list.actions[action].dataPlacement == undefined) ? "data-placement=\"top\" " : "";
+                    html += (list.actions[action].awPopOver) ? this.attr(list.actions[action],'awPopOver') : "";
+                    html += (list.actions[action].dataPlacement) ? this.attr(list.actions[action], 'dataPlacement') : "";
+                    html += (list.actions[action].dataContainer) ? this.attr(list.actions[action], 'dataContainer') : "";
+                    html += (list.actions[action].dataTitle) ? this.attr(list.actions[action], 'dataTitle') : "";
                     html += " >" + this.icon(list.actions[action].icon);
                     html += (list.actions[action].label) ? " " + list.actions[action].label : ""; 
                     html += "</button> ";

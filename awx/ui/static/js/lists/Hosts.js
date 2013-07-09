@@ -16,7 +16,7 @@ angular.module('HostListDefinition', [])
         editTitle: 'Hosts',
         index: true,
         well: true,
-        
+
         fields: {
             name: {
                 key: true,
@@ -29,6 +29,16 @@ angular.module('HostListDefinition', [])
             },
         
         actions: {
+            help: {
+                awPopOver: "Select hosts by clicking on each host you wish to add. Add the selected hosts to the group by clicking the Select button.",
+                dataPlacement: 'left',
+                dataContainer: "#form-modal",
+                icon: "icon-question-sign",
+                mode: 'all',
+                'class': 'btn-small btn-info',
+                awToolTip: 'Click for help',
+                dataTitle: 'Selecting Hosts'
+                }
             },
 
         fieldActions: {
