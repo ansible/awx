@@ -93,7 +93,7 @@ class RunJob(Task):
         # do not want AWX to ask interactive questions and want it to be friendly with reprovisioning
         env['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
         # RHEL has too old of an SSH so ansible will select paramiko and this is VERY slow
-        env['ANSIBLE_PARAMIKO_RECORD_HOST_KEYS'] = False
+        env['ANSIBLE_PARAMIKO_RECORD_HOST_KEYS'] = 'False'
         return env
 
     def build_args(self, job, **kwargs):
