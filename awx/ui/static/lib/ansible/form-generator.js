@@ -788,10 +788,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += "<div class=\"span5\">";
               html += "<div class=\"inventory-buttons\">";
               html += "<button ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" id=\"inv-group-add\" " + 
-                  "class=\"btn btn-mini btn-success\"><i class=\"icon-plus\"></i> Add Group</button>";
-              html += "<button ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-mini btn-success\">" +
+                  "class=\"btn btn-mini btn-success\" aw-tool-tip=\"Add existing groups or create a new group\" " +
+                  "data-placement=\"bottom\"><i class=\"icon-plus\"></i> Add Groups</button>";
+              html += "<button ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-mini btn-success\" " +
+                  "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\" " +
                   "<i class=\"icon-edit\"></i> Edit Group</button>";
-              html += "<button ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" id=\"inv-group-delete\" class=\"btn btn-mini btn-danger\">" +
+              html += "<button ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" id=\"inv-group-delete\" " +
+                  "aw-tool-tip=\"Delete the selected group\" data-placement=\"bottom\" " +
+                  "class=\"btn btn-mini btn-danger\">" +
                   "<i class=\"icon-remove\"></i> Delete Group</button>";
               html += "</div>\n";  
               html += "<div id=\"tree-view\"></div>\n";
