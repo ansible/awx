@@ -502,8 +502,12 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       GroupsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id });
       }
   
-  scope.addHost = function() {
+  scope.selectHost = function() {
       HostsList({ scope: scope, "inventory_id": id, group_id: scope.group_id });
+      }
+
+  scope.createHost = function() {
+      HostsAdd({ scope: scope, "inventory_id": id, group_id: scope.group_id });
       }
 
   scope.editHost = function(host_id, host_name) {

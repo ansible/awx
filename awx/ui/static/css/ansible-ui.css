@@ -26,6 +26,7 @@
 
 /* Attempt to make button heights consistent. For some reason success, info, etc. are
    taller than plain .btn */
+ 
  .btn-success, .btn-danger, .btn-info, .btn-primary {
     padding-top: 1px;
     padding-bottom: 1px;
@@ -35,6 +36,11 @@
     padding-left: 5px;
     padding-right: 5px;
     min-width: 28px;
+ }
+
+ .btn-pad {
+    padding-top: 3px;
+    padding-bottom: 1px;
  }
 
  .modal-footer .btn-success, 
@@ -318,7 +324,11 @@
     display: inline-block;
     vertical-align: top;
     margin-left: 10px;
-    margin-top: 3px;
+    padding-bottom: 22px;
+ }
+
+ .list-actions .btn {
+    margin-right: 10px;
  }
 
  .status-actions {

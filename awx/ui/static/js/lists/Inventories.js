@@ -54,7 +54,7 @@ angular.module('InventoriesListDefinition', [])
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addInventory()',
                 "class": 'btn-small btn-success',
-                awToolTip: 'Create a new row'
+                awToolTip: 'Create a new inventory'
                 }
             },
 

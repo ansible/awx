@@ -43,8 +43,6 @@ angular.module('TeamHelper', [ 'RestServices', 'Utilities', 'OrganizationListDef
                 Rest.setUrl('/api/v1/organizations/' + results[i].organization + '/');
                 Rest.get()
                    .success( function( data, status, headers, config) {
-                      console.log('here!');
-                      console.log(data);
                       lookup_results.push({ id: data.id, value: data.name });
                       scope.$emit('TeamResultFound', results, lookup_results);
                       })

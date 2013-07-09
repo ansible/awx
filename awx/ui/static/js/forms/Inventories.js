@@ -102,13 +102,22 @@ angular.module('InventoryFormDefinition', [])
                 type: 'treeview',
                 title: "{{ groupTitle }}",
                 iterator: 'host',
-                actions: { 
-                    add: {
-                        ngClick: "addHost()",
+                actions: {
+                    select: {
+                        ngClick: "selectHost()",
+                        icon: 'icon-check',
+                        label: 'Add Existing Host',
+                        awToolTip: 'Select existing host',
+                        ngHide: 'createButtonShow == false',
+                        "class": 'btn btn-pad'
+                        }, 
+                    create: {
+                        ngClick: "createHost()",
                         icon: 'icon-plus',
-                        label: 'Add Host',
-                        awToolTip: 'Add a host',
-                        ngHide: 'createButtonShow == false'
+                        label: 'Create New Host',
+                        awToolTip: 'Create a new host',
+                        ngHide: 'createButtonShow == false',
+                        "class": 'btn-success'
                         }
                     },
                 

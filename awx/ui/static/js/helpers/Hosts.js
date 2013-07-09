@@ -33,14 +33,21 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             selectButton: false
             });
         
-        scope.formModalActionLabel = 'Finished';
-        scope.formModalHeader = 'Add Host';
+        scope.formModalActionLabel = 'Select';
+        scope.formModalHeader = 'Select Hosts';
         scope.formModalCancelShow = true;
+
+        if (scope.removeHostsReload) {
+           scope.removeHostsReload();
+        }
+        scope.removeHostsReload = scope.$on('hostsReload', function() {
+            HostsReload(params);
+        });
 
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').modal();
         $('#form-modal').unbind('hidden');
-        $('#form-modal').on('hidden', function () { HostsReload(params); });
+        $('#form-modal').on('hidden', function () { scope.$emit('hostsReload'); });
 
         scope.selected = [];
         
@@ -89,7 +96,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                  }
                  else {
                     $('#form-modal').modal('hide');
-                    HostsReload(params);
+                    scope.$emit('hostsReload');
                  }
               }
               });
@@ -168,9 +175,16 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.parseType = 'yaml';
         ParseTypeChange(scope);
         
+        if (scope.removeHostsReload) {
+           scope.removeHostsReload();
+        }
+        scope.removeHostsReload = scope.$on('hostsReload', function() {
+            HostsReload(params);
+        });
+
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').unbind('hidden');
-        $('#form-modal').on('hidden', function () { HostsReload(params); });
+        $('#form-modal').on('hidden', function () { scope.$emit('hostsReload'); });
         
         generator.reset();
         var master={};
@@ -260,10 +274,17 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.formModalCancelShow = true;
         scope.parseType = 'yaml';
         ParseTypeChange(scope);
+
+        if (scope.removeHostsReload) {
+           scope.removeHostsReload();
+        }
+        scope.removeHostsReload = scope.$on('hostsReload', function() {
+            HostsReload(params);
+        });
         
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').unbind('hidden');
-        $('#form-modal').on('hidden', function () { HostsReload(params); });
+        $('#form-modal').on('hidden', function () { scope.$emit('hostsReload'); });
 
         // After the group record is loaded, retrieve any group variables
         if (scope.hostLoadedRemove) {
@@ -395,15 +416,21 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var url = (group_id !== null) ? GetBasePath('groups') + group_id + '/hosts/' : GetBasePath('inventory') + inventory_id + '/hosts/';
         
         var action_to_take = function() {
+            if (scope.removeHostsReload) {
+               scope.removeHostsReload();
+            }
+            scope.removeHostsReload = scope.$on('hostsReload', function() {
+                HostsReload(params);
+                });
             Rest.setUrl(url);
             Rest.post({ id: host_id, disassociate: 1 })
                .success( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
-                   HostsReload(params);
+                   scope.$emit('hostsReload');
                    })
                .error( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
-                   HostsReload(params);
+                   scope.$emit('hostsReload');
                    ProcessErrors(scope, data, status, null,
                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                    });      
@@ -427,13 +454,14 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
     function(RelatedSearchInit, RelatedPaginateInit, InventoryForm, GetBasePath) {
     return function(params) {
         // Rerfresh the Hosts view on right side of page
-        var url = (params.group_id !== null) ? GetBasePath('groups') + params.group_id + '/hosts/' :
-            GetBasePath('inventory') + params.inventory_id + '/hosts/';
+        scope = params.scope;
+        var url = (scope.group_id !== null) ? GetBasePath('groups') + scope.group_id + '/hosts/' :
+                  GetBasePath('inventory') + params.inventory_id + '/hosts/';
         var relatedSets = { hosts: { url: url, iterator: 'host' } };
         RelatedSearchInit({ scope: params.scope, form: InventoryForm, relatedSets: relatedSets });
         RelatedPaginateInit({ scope: params.scope, relatedSets: relatedSets });
         params.scope.search('host');
-         if (!params.scope.$$phase) {
+        if (!params.scope.$$phase) {
            params.scope.$digest();
         }
         }

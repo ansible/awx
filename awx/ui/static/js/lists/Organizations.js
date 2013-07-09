@@ -34,7 +34,7 @@ angular.module('OrganizationListDefinition', [])
                 mode: 'all',                  // One of: edit, select, all
                 ngClick: 'addOrganization()',
                 "class": 'btn-success btn-small',
-                awToolTip: 'Create a new row'
+                awToolTip: 'Create a new organization'
                 }
             },
 

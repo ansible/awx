@@ -32,8 +32,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             selectButton: false 
             });
 
-        scope.formModalActionLabel = 'Finished';
-        scope.formModalHeader = 'Add Group';
+        scope.formModalActionLabel = 'Select';
+        scope.formModalHeader = 'Add Groups';
         scope.formModalCancelShow = true;
         scope.formModalActionClass = 'btn btn-success';
 
@@ -409,7 +409,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         //if (parent.length > 0) {
         //   parent = parent.last();
         //}
-        console.log(parent);
         var url; 
         
         if (parent.attr('type') == 'group') {

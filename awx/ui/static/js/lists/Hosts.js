@@ -12,8 +12,7 @@ angular.module('HostListDefinition', [])
         
         name: 'hosts',
         iterator: 'host',
-        selectTitle: 'Add Host',
-        selectInstructions: 'Click on a row to select it, and click Finished when done. Use the green <i class=\"icon-plus\"></i> button to create a new row.', 
+        selectTitle: 'Select Host',
         editTitle: 'Hosts',
         index: true,
         well: true,
@@ -21,7 +20,7 @@ angular.module('HostListDefinition', [])
         fields: {
             name: {
                 key: true,
-                label: 'Name',
+                label: 'Host Name',
                 linkTo: "/inventories/\{\{ inventory_id \}\}/hosts/\{\{ host.id \}\}"
                 },
             description: {
@@ -30,15 +29,6 @@ angular.module('HostListDefinition', [])
             },
         
         actions: {
-            add: {
-                icon: 'icon-plus',
-                label: 'Add',
-                mode: 'all',             // One of: edit, select, all
-                ngClick: 'createHost()',
-                ngHide: 'showAddButton == false',
-                "class": 'btn-success btn-small',
-                awToolTip: 'Create a new host'
-                }
             },
 
         fieldActions: {

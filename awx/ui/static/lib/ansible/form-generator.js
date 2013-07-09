@@ -808,7 +808,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               // Add actions(s)
               html += "<div class=\"list-actions\">\n";
               for (var action in form.related[itm].actions) {
-                  html += "<button class=\"btn btn-mini btn-success\" ";
+                  html += "<button class=\"btn btn-mini ";
+                  html += (form.related[itm].actions[action]['class']) ? form.related[itm].actions[action]['class'] : "btn-success";
+                  html += "\" ";
                   html += (form.related[itm]['actions'][action].id) ? this.attr(form.related[itm]['actions'][action],'id') : "";
                   html += this.attr(form.related[itm]['actions'][action],'ngClick');
                   html += (form.related[itm]['actions'][action].awToolTip) ? this.attr(form.related[itm]['actions'][action],'awToolTip') : "";
@@ -943,13 +945,15 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               }
 
               html += "<div class=\"well\">\n";
-              html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: false });
+              html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true });
 
               // Add actions(s)
               html += "<div class=\"list-actions\">\n";
               for (var act in form.related[itm].actions) {
                  var action = form.related[itm].actions[act];
-                 html += "<button class=\"btn btn-small btn-success\" ";
+                 html += "<button class=\"btn btn-small ";
+                 html += (form.related[itm].actions[act]['class']) ? form.related[itm].actions[act]['class'] : "btn-success";
+                 html += "\" ";
                  html += this.attr(action,'ngClick');
                  html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
                  html += (action.awToolTip) ? "data-placement=\"right\" " : "";

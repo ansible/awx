@@ -14,7 +14,6 @@ angular.module('GroupListDefinition', [])
         iterator: 'group',
         selectTitle: 'Add Group',
         editTitle: 'Groups',
-        selectInstructions: 'Click on a row to select it, and Finished when done. Click the green <i class=\"icon-plus\"></i> Add to create a new row.', 
         index: true,
         well: false,
         
@@ -30,7 +29,7 @@ angular.module('GroupListDefinition', [])
         
         actions: {
             add: {
-                label: 'Add',
+                label: 'Create New Group',
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'createGroup()',

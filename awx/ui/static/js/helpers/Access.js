@@ -1,7 +1,7 @@
 /*********************************************
  *  Copyright (c) 2013 AnsibleWorks, Inc.
  *
-*/
+ */
 
 angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])  
     .factory('CheckAccess', ['$rootScope', 'Alert', 'Rest', 'GetBasePath','ProcessErrors', 

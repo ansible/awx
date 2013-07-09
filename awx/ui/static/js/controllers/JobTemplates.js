@@ -415,7 +415,6 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                  else {
                     var json_obj = JSON.parse(data.extra_vars);
                     scope.variables = jsyaml.safeDump(json_obj);
-                    console.log(json_obj);
                  }
                  master.variables = scope.variables;
               }

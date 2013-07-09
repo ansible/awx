@@ -108,7 +108,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "<div class=\"well\">\n";
        }
     
-       if (options.mode == 'lookup') {
+       if (options.mode == 'lookup' || options.id != undefined) {
           html += SearchWidget({ iterator: list.iterator, template: list, mini: true });
        }
        else {
