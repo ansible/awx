@@ -9,7 +9,7 @@ software repositories which are used by the default playbook setup.
 Packaging Details
 -----------------------------
 
-*** Version and Release Determination ***
+### Version and Release Determination ###
 
 The VERSION and RELEASE variables used by the build process are configured
 in the Makefile, and are based on the __version__ field contained within
@@ -19,7 +19,7 @@ the awx/__init__.py file. This string should always be of the format:
 
 There should only be one "-" contained in the string.
 
-*** OFFICIAL vs. Non-OFFICIAL Builds ***
+### OFFICIAL vs. Non-OFFICIAL Builds ###
 
 An "official" build is one that does not include a development timestamp
 in the release field. This is controlled by setting the environment variable
@@ -33,7 +33,7 @@ Non-official builds should only be used for development purposes, and are
 copied into the nightly repos. Official builds will be copied out to the 
 production servers via the automated Jenkins build process (described below).
 
-*** Python sdist Process ***
+### Python sdist Process ###
 
 The sdist build is the first step in the packaging process. This step is 
 responsible for assembling the files to be packaged into a .tar.gz, which
@@ -47,7 +47,7 @@ The resulting tar.gz file will be named:
 
     awx-${VERSION}-${RELEASE}.tar.gz
 
-*** RPM Build Process ***
+### RPM Build Process ###
 
 The first step of the RPM build process is to remove the $RELEASE from the 
 tar.gz, since the spec file does not like to include the release. This is 
@@ -65,7 +65,7 @@ other aspects of the file (source, version, release, etc.) are picked up via
 variables that are set by the Makefile and do not need to be updated during 
 packaging.
 
-*** DEB Build Process ***
+### DEB Build Process ###
 
 The process to build a .deb is somewhat more involved, and I will not get too
 involved in the specifics of how the debian packaging works. The main files used
@@ -116,83 +116,82 @@ Finally dpkg-buildpackage is called to build the .deb.
 Jenkins
 -----------------------------
 
-*** Server Information ***
+### Server Information ###
 
 The AnsibleWorks Jenkins server can be found at http://50.116.42.103:8080/
 
 This is a standard Jenkins installation, with the following additional 
 plugins installed:
 
- - Build Authorization Token Root Plugin
+ - Build Authorization Token Root Plugin: 
    This plugin allows build and related REST build triggers be accessed even 
    when anonymous users cannot see Jenkins.
 
- - Git Client Plugin
+ - Git Client Plugin:
    The standard git client plugin.
-
 	
- - Git Parameter Plug-In
+ - Git Parameter Plug-In:
    This plugin adds the ability to choose from git repository revisions or tags
 	
- - GitHub API Plugin
+ - GitHub API Plugin:
    This plugin provides GitHub API for other plugins.
 	
- - GitHub Plugin
+ - GitHub Plugin:
    This plugin integrates GitHub to Jenkins.
 	
- - Workspace Cleanup Plugin
+ - Workspace Cleanup Plugin:
    This plugin ensures that the root of the workspace is cleaned out between
    builds to prevent files from previous builds leaking or breaking future builds.
 
-*** Server Installation and Configuration *** 
+### Server Installation and Configuration ### 
 
 The base Jenkins server was installed via apt:
 
-$ apt-get install jenkins
+    $ apt-get install jenkins
 
 Since the server OS for the Jenkins server is Ubuntu Raring (13.04). In order to 
 execute RPM builds on this server, mock was installed from source as follows:
 
-$ apt-get install \
-  automake \
-  git \
-  libpython2.7 \
-  libsqlite0 \
-  libuser1 \
-  make \
-  python-decoratortools \
-  python-libxml2 \
-  python-peak.util.decorators \
-  python-pycurl \
-  python-rpm \
-  python-sqlite \
-  python-sqlitecachec \
-  python-support \
-  python-urlgrabber \
-  usermode \
-  yum \
-  yum-utils 
-
-$ git clone git://git.fedorahosted.org/git/mock.git mock
-$ cd mock
-$ ./autogen.sh
-$ automake
-$ ./configure \
-  --bindir=/usr/bin \
-  --sbindir=/usr/sbin \
-  --sysconfdir=/etc \
-  --localstatedir=/var/lib \
-  --libdir=/usr/lib \
-  --includedir=/usr/include \
-  --mandir=/usr/man
-$ make install
-$ ln -s /usr/bin/consolehelper /usr/bin/mock
+    $ apt-get install \
+      automake \
+      git \
+      libpython2.7 \
+      libsqlite0 \
+      libuser1 \
+      make \
+      python-decoratortools \
+      python-libxml2 \
+      python-peak.util.decorators \
+      python-pycurl \
+      python-rpm \
+      python-sqlite \
+      python-sqlitecachec \
+      python-support \
+      python-urlgrabber \
+      usermode \
+      yum \
+      yum-utils 
+    
+    $ git clone git://git.fedorahosted.org/git/mock.git mock
+    $ cd mock
+    $ ./autogen.sh
+    $ automake
+    $ ./configure \
+      --bindir=/usr/bin \
+      --sbindir=/usr/sbin \
+      --sysconfdir=/etc \
+      --localstatedir=/var/lib \
+      --libdir=/usr/lib \
+      --includedir=/usr/include \
+      --mandir=/usr/man
+    $ make install
+    $ ln -s /usr/bin/consolehelper /usr/bin/mock
 
 In order to create apt repositories, the reprepro package was also installed.
 
-$ apt-get install reprepro
+    $ apt-get install reprepro
 
-*** Configured Jobs ***
+### Configured Jobs ###
 
 There are currently three classes of jobs configured in Jenkins:
 
@@ -213,7 +212,7 @@ repositories (documented below).
 > the most recent commit at that time. Likewise, the resultant packages are only
 > copied to the relevant nightlies repo (also documented below).
 
-*** Manual Builds ***
+### Manual Builds ###
 
 Manual builds can be triggered via the Jenkins GUI. Simply log in and select the
 appropriate job, and then click on the "Build with Parameters" link to the left
@@ -236,7 +235,7 @@ which controls the mock environment for the build.
 Repositories
 -----------------------------
 
-*** Nightlies ***
+### Nightlies ###
 
 The nightly repositories are hosted on the AnsibleWorks Jenkins server, and can
 be found at the following location:
@@ -265,7 +264,7 @@ setup.sh shell script with the following option:
 > Note that if this is not a fresh installation, you should run the following:
 > "yum clean all --enablerepo=ansibleworks-awx" in order to clean out the yum cache.
 
-*** Official Releases ***
+### Official Releases ###
 
 As noted above, OFFICIAL builds are copied out to the production server, and can be
 found at the following location:
