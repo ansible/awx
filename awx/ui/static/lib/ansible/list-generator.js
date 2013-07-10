@@ -159,7 +159,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        for (var fld in list.fields) {
            if ( (list.fields[fld].searchOnly == undefined || list.fields[fld].searchOnly == false) &&
                 !(options.mode == 'lookup' && list.fields[fld].excludeModal !== undefined && list.fields[fld].excludeModal == true) ) {
-              html += "<th class=\"list-header\" id=\""; 
+              html += "<th class=\"list-header";
+              html += (list.fields[fld].columnClass) ? " " + list.fields[fld].columnClass : "";
+              html += "\" id=\""; 
               html += (list.fields[fld].id) ? list.fields[fld].id : fld + "-header";
               html += "\"";
               html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? "ng-click=\"sort('" + fld + "')\"" : "";

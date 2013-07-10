@@ -188,8 +188,8 @@ angular.module('Utilities',[])
       result += ('0' + dt.getDate()).slice(-2) + ' ';
       result += ('0' + dt.getHours()).slice(-2) + ':';
       result += ('0' + dt.getMinutes()).slice(-2) + ':';
-      result += ('0' + dt.getSeconds()).slice(-2) + ':';
-      result += ('000' + dt.getMilliseconds()).slice(-3);
+      result += ('0' + dt.getSeconds()).slice(-2);
+      //result += ('000' + dt.getMilliseconds()).slice(-3);
       return result;
       }
    }]);

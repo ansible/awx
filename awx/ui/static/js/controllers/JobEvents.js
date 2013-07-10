@@ -35,7 +35,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     function formatJSON(eventData) {
         //turn JSON event data into an html form
         var html = '';
-        if (eventData.res) {
+        if (eventData['res']) {
            var found = false;
            var n, rows;
            if (typeof eventData.res == 'string') {
@@ -77,14 +77,19 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                   }
                   if (fld == "rc" && eventData.res[fld] != 0) {
                      html += "<label>Return Code:</label>\n";
-                     html += "<input type=\"text\" value=\"" + eventData.res[fld] + "\" readonly >\n";
+                     html += "<input type=\"text\" class=\"input-mini\" value=\"" + eventData.res[fld] + "\" readonly >\n";
                      found = true;
                   }
               }
            }
-           html = (found) ? "<form class=\"event-detail\">\n" + html + "</form>\n" : '';
+           html = (found) ? "<form class=\"event-form\">\n" + html + "</form>\n" : '';
         }
-        html = (html == '' ) ? null : html;
+        if (eventData['host']) {
+           html = "<span class=\"event-detail-host visible-phone visible-tablet\">" + eventData['host'] + "</span>\n" + html;
+        }
+        else {
+           html = (html == '' ) ? null : html;
+        }
         return html;
         }
 

@@ -29,6 +29,7 @@ angular.module('JobEventsListDefinition', [])
             status: {
                 label: 'Status',
                 icon: 'icon-circle',
+                showValue: true,
                 "class": 'job-\{\{ jobevent.status \}\}',
                 searchField: 'failed',
                 searchType: 'boolean',
@@ -50,7 +51,9 @@ angular.module('JobEventsListDefinition', [])
                 ngBind: 'jobevent.summary_fields.host.name',
                 searchField: 'hosts__name',
                 nosort: true,
-                id: 'job-event-host-header'
+                searchOnly: false,
+                id: 'job-event-host-header',
+                columnClass: 'hidden-phone hidden-tablet'
                 }
             },
         

@@ -87,6 +87,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "<td ";
         html += "<td class=\"" + fld + "-column";
         html += (field['class']) ? " " + field['class'] : "";
+        html += (field['columnClass']) ? " " + field['columnClass'] : "";
         html +=  "\" ";  
         html += (field.ngClass) ? Attr(field, 'ngClass') : "";
         html += ">\n";
@@ -96,7 +97,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         
         // Add collapse/expand icon  --used on job_events page
         if (list['hasChildren'] && field.hasChildren) {
-           html += "<span style=\"padding-left: \{\{ " + list.iterator + ".spaces \}\}px\"><a href=\"\" ng-click=\"\{\{ " + list.iterator + ".ngclick \}\}\"> " +
+           html += "<span class=\"level-\{\{ " + list.iterator + ".event_level \}\}\"><a href=\"\" ng-click=\"\{\{ " + list.iterator + ".ngclick \}\}\"> " +
                "<i class=\"\{\{ " + list.iterator + ".ngicon \}\}\" ng-show=\"'\{\{ " + 
                list.iterator + ".related.children \}\}' !== ''\" ></i></a> ";
         }
@@ -155,7 +156,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         // Specific to Job Events page -showing event detail/results
         html += (field.appendHTML) ? "<div ng-show=\"" +  field.appendHTML + " !== null\" " + 
             "ng-bind-html-unsafe=\"" + field.appendHTML + "\" " +
-            "style=\"padding-left: \{\{ " + list.iterator + ".spaces + 12 \}\}px\" " +
+            "class=\"level-\{\{ " + list.iterator + ".event_level \}\}-detail\" " +
             "></div>\n" : "";
 
         return html += "</td>\n";

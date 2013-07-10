@@ -347,7 +347,7 @@
     background-color: #fff;
  }
 
-
+ 
 /* Jobs page */
 
  .job-error, .job-failed,
@@ -408,6 +408,20 @@
  .child-event a {
     color: #36454F;
     cursor: default;
+ }
+
+ .level-1 {
+    padding-left: 24px;
+ }
+ .level-2 {
+    padding-left: 48px;
+ }
+ .level-3 {
+    padding-left: 72px;
+ }
+
+ .level-3-detail {
+    padding-left: 72px;
  }
 
  /* End Jobs Page */
@@ -525,41 +539,39 @@
     padding-top: 0;
  }
 
- #event_display-header {
-    min-width: 250px;
+ .event-form {
+    margin-top: 10px;
+    margin-bottom: 5px;
  }
 
- #job-event-host-header {
-    min-width: 200px;
- }
-
- .event-detail {
-    margin-top: 15px;
+ .event-detail-host {
+    padding-top: 10px;
+    padding-bottom: 5px;
  }
  
 /* form displayed in modal window */
 
-.horizontal-narrow .control-label {
-  float: left;
-  width: 120px;
-  padding-top: 5px;
-  text-align: right;
-}
+ .horizontal-narrow .control-label {
+   float: left;
+   width: 120px;
+   padding-top: 5px;
+   text-align: right;
+ }
 
-.horizontal-narrow .controls {
-  *display: inline-block;
-  *padding-left: 20px;
-  margin-left: 140px;
-  *margin-left: 0;
-}
+ .horizontal-narrow .controls {
+   *display: inline-block;
+   *padding-left: 20px;
+   margin-left: 140px;
+   *margin-left: 0;
+ }
 
-.horizontal-narrow .controls:first-child {
-  *padding-left: 140px;
-}
+ .horizontal-narrow .controls:first-child {
+   *padding-left: 140px;
+ }
 
-.modal-input-xlarge {
+ .modal-input-xlarge {
    width: 350px;
-}
+ }
 
 
 /* overrides to TB modal */
@@ -600,4 +612,58 @@
 
 #prompt-modal .modal-body {
   padding-bottom: 30px;
+}
+
+
+/* Large desktop */
+@media (min-width: 1200px) {
+
+}
+ 
+/* Portrait tablet to landscape and desktop */
+@media (min-width: 768px) and (max-width: 979px) {
+   body {
+      padding-top: 0px;
+   }
+}
+ 
+/* Landscape phone to portrait tablet */
+@media (max-width: 767px) {
+   body {
+      padding-top: 0px;
+   }
+}
+ 
+/* Landscape phones and down */
+@media (max-width: 480px) {
+   body {
+      padding-top: 0px;
+   }
+   
+   /* Job events */
+   .level-1, .level-2, .level-3,  .level-3-detail {
+      padding-left: 0;
+   }
+
+   table {
+      table-layout: fixed;
+      word-wrap: break-word;
+   }
+
+   /* form displayed in modal window */
+   .horizontal-narrow .control-label {
+      width: 105px;
+   }
+
+   .horizontal-narrow .controls {
+      margin-left: 125px;
+   }
+
+   .horizontal-narrow .controls:first-child {
+      *padding-left: 125px;
+   }
+
+   .modal-input-xlarge {
+      width: 200px;
+   }
 }
