@@ -259,7 +259,7 @@ directory contains the distribution-specific information.
 These nightly repositories can be used by the AWX setup playbook by running the
 setup.sh shell script with the following option:
 
-   ./setup.sh -e "aw_repo_url=http://50.116.42.103/awx_nightlies_RTYUIOPOIUYTYU/..."
+    ./setup.sh -e "aw_repo_url=http://50.116.42.103/awx_nightlies_RTYUIOPOIUYTYU/..."
 
 > Note that if this is not a fresh installation, you should run the following:
 > "yum clean all --enablerepo=ansibleworks-awx" in order to clean out the yum cache.
@@ -269,7 +269,7 @@ setup.sh shell script with the following option:
 As noted above, OFFICIAL builds are copied out to the production server, and can be
 found at the following location:
 
-AWX: http://ansibleworks.com/awx_releases_SDFOIFWOIEFJWEOFIWEF/
+    http://ansibleworks.com/awx_releases_SDFOIFWOIEFJWEOFIWEF/
 
 The AWX setup playbook will use this repo location by default.
 
