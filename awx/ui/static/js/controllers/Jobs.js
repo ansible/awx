@@ -53,9 +53,9 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     scope.search(list.iterator);
 
     // Called from Inventories page, failed jobs link. Now sort by status so faild jobs appear at top of list
-    if ($routeParams.order_by) {
-       scope.sort($routeParams.order_by);
-    }
+    //if ($routeParams.order_by) {
+    //   scope.sort($routeParams.order_by);
+    //}
 
     LoadBreadCrumbs();
 
