@@ -91,7 +91,7 @@ contains things like the package name, requirements, etc.
 The `rules` file is really a Makefile, and contains the rules for the build 
 process. These rules are based on the type of build you're executing (binary
 vs. source, for instance). Since we are building a binary-only .deb package,
-the only tarket we use is the `binary` target.
+the only target we use is the `binary` target.
 
 The pre/post scripts are analogous to the %pre/%post macros in the RPM spec,
 and are executed at the various stages of the installation/removal. For 
@@ -138,7 +138,7 @@ plugins installed:
    This plugin ensures that the root of the workspace is cleaned out between
    builds to prevent files from previous builds leaking or breaking future builds.
 
-### Server Installation and Configuration ### 
+### Server Installation and Configuration ###
 
 The base Jenkins server was installed via apt:
 
