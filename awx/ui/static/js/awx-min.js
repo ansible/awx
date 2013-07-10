@@ -4,7 +4,7 @@
  *
  *  awx-min.js
  *
- *  master-0036515, Tue Jul 9 17:07:02 2013 -0400
+ *  master-d4c7b51, Wed Jul 10 13:46:43 2013 -0400
  *
  */
 var urlPrefix="/static/";
@@ -371,5 +371,5 @@ params:this.params})},post:function(c){return h({method:"POST",url:this.url,head
 e?!0:!1,m)$("#alert-modal2").on("hidden",function(){m()})}else if(h.alertHeader=k,h.alertBody=g,h.alertClass=c?c:"alert-error",$("#alert-modal").modal({show:!0,keyboard:!0,backdrop:"static"}),h.disableButtons=e?!0:!1,m)$("#alert-modal").on("hidden",function(){m()})}}]).factory("ProcessErrors",["$log","Alert",function(h,m){return function(h,g,c,p,f){if(403==c)h="The API responded with a 403 Access Denied error. You do not have permission to perform the requested action. ",h=g.detail?h+("Detail: "+
 g.detail):h+"Please contact your system administrator.",m("Access Denied",h);else if(g.non_field_errors)m("Error!",g.non_field_errors);else if(g.detail)m(f.hdr,f.msg+" "+g.detail);else if(g.__all__)m("Error!",g.__all__);else if(p){c=!1;for(var e in p.fields)p.fields[e].realName&&g[p.fields[e].realName]&&(h[e+"_api_error"]=g[p.fields[e]][0],c=!0),p.fields[e].sourceModel?g[e]&&(h[p.fields[e].sourceModel+"_"+p.fields[e].sourceField+"_api_error"]=g[e][0],c=!0):g[e]&&(h[e+"_api_error"]=g[e][0],c=!0);!c&&
 f&&m(f.hdr,f.msg)}else m(f.hdr,f.msg)}}]).factory("LoadBreadCrumbs",["$rootScope","$routeParams","$location",function(h,m,k,g){return function(c){if(null!==c&&void 0!==c){for(var g=!1,f=0;f<h.crumbCache.length;f++)if(h.crumbCache[f].path==c.path){g=!0;h.crumbCache[f]=c;break}!1==g&&h.crumbCache.push(c)}c=k.path().replace(/^\//,"").split("/");g="";h.breadcrumbs=[];if(1<c.length)for(var e,l,f=0;f<c.length-1;f++){if(0<f&&c[f].match(/\d+/)){e=c[f-1];l="inventories"==e?"inventory":e.substring(0,e.length-
-1);for(var a=0;a<h.crumbCache.length;a++)if(h.crumbCache[a].path=="/"+e+"/"+c[f]){l=h.crumbCache[a].title;break}h.breadcrumbs.push({title:l,path:g+"/"+c[f]})}else h.breadcrumbs.push({title:c[f],path:g+"/"+c[f]});g+="/"+c[f]}}}]).factory("ReturnToCaller",["$location",function(h){return function(m){var k=h.path().replace(/^\//,"").split("/"),g="";m=null==m||void 0==m?k.length-1:m+1;for(var c=0;c<m;c++)g+="/"+k[c];h.path(g)}}]).factory("FormatDate",[function(){return function(h){var m=h.getFullYear()+
-"-",m=m+(("0"+(h.getMonth()+1)).slice(-2)+"-"),m=m+(("0"+h.getDate()).slice(-2)+" "),m=m+(("0"+h.getHours()).slice(-2)+":"),m=m+(("0"+h.getMinutes()).slice(-2)+":");return m+=("0"+h.getSeconds()).slice(-2)}}]);
+1);for(var a=0;a<h.crumbCache.length;a++)if(h.crumbCache[a].path=="/"+e+"/"+c[f]){l=h.crumbCache[a].title;break}h.breadcrumbs.push({title:l,path:g+"/"+c[f]})}else h.breadcrumbs.push({title:c[f],path:g+"/"+c[f]});g+="/"+c[f]}}}]).factory("ReturnToCaller",["$location",function(h){return function(m){var k=h.path().replace(/^\//,"").split("/"),g="";m=null==m||void 0==m?k.length-1:m+1;for(var c=0;c<m;c++)g+="/"+k[c];h.path(g)}}]).factory("FormatDate",[function(){return function(h){var m=("0"+(h.getMonth()+
+1)).slice(-2)+"/",m=m+(("0"+h.getDate()).slice(-2)+"/"),m=m+(("0"+(h.getFullYear()-2E3)).slice(-2)+" "),m=m+(("0"+h.getHours()).slice(-2)+":"),m=m+(("0"+h.getMinutes()).slice(-2)+":");return m+=("0"+h.getSeconds()).slice(-2)}}]);

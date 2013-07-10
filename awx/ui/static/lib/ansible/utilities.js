@@ -183,9 +183,9 @@ angular.module('Utilities',[])
 
    .factory('FormatDate', [ function() {
       return function(dt) {
-      var result = dt.getFullYear() + '-'; 
-      result += ('0' + (dt.getMonth() + 1)).slice(-2) + '-';
-      result += ('0' + dt.getDate()).slice(-2) + ' ';
+      var result = ('0' + (dt.getMonth() + 1)).slice(-2) + '/';
+      result += ('0' + dt.getDate()).slice(-2) + '/';
+      result += ('0' + (dt.getFullYear() - 2000)).slice(-2) + ' ';
       result += ('0' + dt.getHours()).slice(-2) + ':';
       result += ('0' + dt.getMinutes()).slice(-2) + ':';
       result += ('0' + dt.getSeconds()).slice(-2);
