@@ -200,9 +200,10 @@ class RunJob(Task):
             kwargs['passwords'] = self.build_passwords(job, **kwargs)
             args = self.build_args(job, **kwargs)
             cwd = job.project.get_project_path()
+            root = settings.PROJECTS_ROOT
             if not cwd:
-                raise RuntimeError('project local_path %s cannot be found' %
-                                   job.project.local_path)
+                raise RuntimeError('project local_path %s cannot be found in %s' %
+                                   (job.project.local_path, root))
             env = self.build_env(job, **kwargs)
             job = self.update_job(job_pk, job_args=args, job_cwd=cwd,
                                   job_env=env)
