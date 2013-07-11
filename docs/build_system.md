@@ -257,7 +257,7 @@ directory contains the distribution-specific information.
 These nightly repositories can be used by the AWX setup playbook by running the
 `setup.sh` shell script with the following option:
 
-    ./setup.sh -e "aw_repo_url=http://50.116.42.103/awx_nightlies_RTYUIOPOIUYTYU/..."
+    ./setup.sh -e "aw_repo_url=http://50.116.42.103/awx_nightlies_RTYUIOPOIUYTYU"
 
 Alternatively you can also install from the tarball produced by "make release_ball" ...
 
