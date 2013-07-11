@@ -17,7 +17,10 @@ the `awx/__init__.py file.` This string should always be of the format:
 
     version-release
 
-There should only be one "-" contained in the string.
+There should only be one "-" contained in the string.  (Which can represent
+a build/rev type release number).  Example:
+ 
+   1.2.2-0
 
 ### OFFICIAL vs. Non-OFFICIAL Builds ###
 
@@ -256,6 +259,10 @@ These nightly repositories can be used by the AWX setup playbook by running the
 
     ./setup.sh -e "aw_repo_url=http://50.116.42.103/awx_nightlies_RTYUIOPOIUYTYU/..."
 
+Alternatively you can also install from the tarball produced by "make release_ball" ...
+
+    ./setup.sh -e "tarball=<path_to_tarball>"
+
 > Note that if this is not a fresh installation, you should run the following:
 > "yum clean all --enablerepo=ansibleworks-awx" in order to clean out the yum cache.
 
@@ -267,5 +274,8 @@ found at the following location:
     http://ansibleworks.com/awx_releases_SDFOIFWOIEFJWEOFIWEF/
 
 The AWX setup playbook will use this repo location by default.
+
+NOTE: These release paths will need to change once the product is actually released.
+
 
 
