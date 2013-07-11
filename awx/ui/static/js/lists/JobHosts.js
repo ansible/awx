@@ -79,6 +79,22 @@ angular.module('JobHostDefinition', [])
                 "class": 'btn btn-small',
                 awToolTip: 'View job events',
                 mode: 'all'            
+                },
+            help: {
+                awPopOver: "<dl>\n<dt>Success</dt><dd>Tasks successfully executed on the host.</dd>\n" +
+                    "<dt>Changed</dt><dd>Actions taken on the host.</dd>\n" +
+                    "<dt>Failure</dt><dd>Tasks that failed on the host.</dd>\n" +
+                    "<dt>Unreachable</dt><dd>Times the ansible server could not reach the host.</dd>\n" +
+                    "<dt>Skipped</dt><dd>Tasks bypassed and not performed on the host due to prior task failure or the host being unreachable.</dd>\n" +
+                    "</dl>\n",
+                dataPlacement: 'right',
+                dataContainer: ".container",
+                icon: "icon-question-sign",
+                mode: 'all',
+                'class': 'btn-info btn-mini btn-help',
+                awToolTip: 'Click for help',
+                dataTitle: 'Job Host Summary',
+                iconSize: 'large'
                 }
             },
 

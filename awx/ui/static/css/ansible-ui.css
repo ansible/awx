@@ -328,7 +328,12 @@
  }
 
  .list-actions .btn {
-    margin-right: 10px;
+    margin-right: 3px;
+ }
+
+ .list-actions .btn-help {
+    margin-left: 20px;
+    margin-top: 2px;
  }
 
  .status-actions {

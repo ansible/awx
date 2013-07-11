@@ -59,6 +59,12 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             case 'dataContainer':
                result = "data-container=\"" + value + "\" ";
                break;
+            case 'icon':
+               // new method of constructing <i> icon tag. Replces Icon method.
+               result = "<i class=\"" + value; 
+               result += (obj['iconSize']) ? " icon-" + obj['iconSize'] : "";
+               result += "\"></i>";
+               break;
             default: 
                result = key + "=\"" + value + "\" ";
         }

@@ -133,7 +133,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     html += (list.actions[action].dataPlacement) ? this.attr(list.actions[action], 'dataPlacement') : "";
                     html += (list.actions[action].dataContainer) ? this.attr(list.actions[action], 'dataContainer') : "";
                     html += (list.actions[action].dataTitle) ? this.attr(list.actions[action], 'dataTitle') : "";
-                    html += " >" + this.icon(list.actions[action].icon);
+                    html += " >" + this.attr(list.actions[action],'icon');
                     html += (list.actions[action].label) ? " " + list.actions[action].label : ""; 
                     html += "</button> ";
                  }
@@ -165,7 +165,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               html += (list.fields[fld].id) ? list.fields[fld].id : fld + "-header";
               html += "\"";
               html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? "ng-click=\"sort('" + fld + "')\"" : "";
-              html += ">" + list.fields[fld].label;
+              html += ">";
+              html += list.fields[fld].label; 
               if (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) {
                  html += " <i class=\"";
                  if (list.fields[fld].key) {
