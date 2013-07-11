@@ -144,6 +144,13 @@ class UserAccess(BaseAccess):
         return bool(obj.organizations.filter(admins__in=[self.user]).count())
 
     def can_delete(self, obj):
+        if obj == self.user:
+            # cannot delete yourself
+            return False
+        super_users = User.objects.filter(is_superuser=True)
+        if obj.is_superuser and super_users.count() == 1:
+            # cannot delete the last superuser
+            return False
         return bool(self.user.is_superuser or 
                     obj.organizations.filter(admins__in=[self.user]).count())
 
