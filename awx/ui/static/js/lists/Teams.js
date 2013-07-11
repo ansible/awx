@@ -24,7 +24,7 @@ angular.module('TeamsListDefinition', [])
                 label: 'Name'
                 },
             description: {
-                label: 'Descriptions'
+                label: 'Description'
                 },
             organization: {
                 label: 'Organization',

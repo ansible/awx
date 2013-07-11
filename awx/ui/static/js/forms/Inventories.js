@@ -18,6 +18,7 @@ angular.module('InventoryFormDefinition', [])
         collapseTitle: 'Edit Inventory',
         collapseMode: 'edit',
         twoColumns: true,
+        parseTypeName: 'inventoryParseType',
 
         fields: {
             has_active_failures: {
@@ -56,7 +57,8 @@ angular.module('InventoryFormDefinition', [])
                 ngClick: 'lookUpOrganization()',
                 column: 1
                 },
-            variables: {
+            inventory_variables: {
+                realName: 'variables',
                 label: 'Variables',
                 type: 'textarea',
                 addRequired: false,

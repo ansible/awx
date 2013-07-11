@@ -48,7 +48,7 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
            $cookieStore.remove('license');
            $cookieStore.put('license', license);
            $rootScope.license_tested = true; 
-           if (license['key_valid'] !== undefined && license['key_valid'] == false) {
+           if (license['valid_key'] !== undefined && license['valid_key'] == false) {
               // The license is invalid. Stop the user from logging in.
               status = 'alert-error';
               hdr = 'License Error';

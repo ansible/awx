@@ -7,11 +7,11 @@
         </div>
         <div class="modal-body">
           <div class="login-alert" ng-show="(sessionExpired == true)">Your session timed out due to inactivity. Please sign in again.</div>
-          <form id="login-form" name="loginForm" class="form-horizontal" novalidate>
+          <form id="login-form" name="loginForm" class="form-horizontal" autocomplete="off" novalidate >
             <div class="control-group">
               <label class="control-label">Username:</label>
               <div class="controls">
-                <input type="text" name="username" ng-model="username" id="login-username" required><br />
+                <input type="text" name="username" ng-model="username" id="login-username" autocomplete="off" required><br />
                 <span class="error" ng-show="loginForm.username.$dirty && loginForm.username.$error.required">A value is required!</span>
                 <span class="errora api-error" ng-bind="usernameError"></span>
               </div>
@@ -19,7 +19,7 @@
             <div class="control-group">
               <label class="control-label">Password:</label>
               <div class="controls">
-                <input type="password" name="password" id="login-password" ng-model="password"><br />
+                <input type="password" name="password" id="login-password" ng-model="password" autocomplete="off"><br />
                 <span class="error" ng-show="loginForm.password.$dirty && loginForm.password.$error.required">A value is required!</span>
                 <span class="error api-error" ng-bind="passwordError"></span>
               </div>

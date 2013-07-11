@@ -24,7 +24,7 @@ angular.module('ProjectsListDefinition', [])
                 label: 'Name'
                 },
             description: {
-                label: 'Descriptions'
+                label: 'Description'
                 }
             },
         

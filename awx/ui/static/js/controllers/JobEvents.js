@@ -36,8 +36,8 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
         //turn JSON event data into an html form
         var html = '';
         if (eventData['res']) {
-           var found = false;
            var n, rows;
+           var found =  false;
            if (typeof eventData.res == 'string') {
               n = eventData['res'].match(/\n/g);
               rows = (n) ? n.length : 1;
@@ -72,9 +72,11 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                      for (var i=0; i < eventData.res[fld].length; i++) {
                          txt += eventData.res[fld][i];
                      }
-                     html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + i + "\">" + txt + "</textarea>\n";
+                     n = txt.match(/\n/g);
+                     rows = (n) ? n.length : 1;
+                     html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + rows + "\">" + txt + "</textarea>\n";
                      found = true;
-                  }
+                  } 
                   if (fld == "rc" && eventData.res[fld] != 0) {
                      html += "<label>Return Code:</label>\n";
                      html += "<input type=\"text\" class=\"input-mini\" value=\"" + eventData.res[fld] + "\" readonly >\n";

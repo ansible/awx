@@ -10,9 +10,12 @@
 
 angular.module('ParseHelper', [])  
     .factory('ParseTypeChange', [function() {
-    return function(scope) {
+    return function(scope, varName, parseTypeName) {
 
         // Toggle displayed variable string between JSON and YAML
+
+        var fld = (varName) ? varName : 'variables';
+        var pfld = (parseTypeName) ? parseTypeName : 'parseType';
         
         scope.blockParseTypeWatch = false; 
         scope.blockVariableDataWatch = false; 
@@ -20,14 +23,14 @@ angular.module('ParseHelper', [])
         if (scope.removeParseTypeWatch) {
            scope.removeParseTypeWatch();
         }
-        scope.removeParseTypeWatch = scope.$watch('parseType', function(newVal, oldVal) {
+        scope.removeParseTypeWatch = scope.$watch(pfld, function(newVal, oldVal) {
             if (newVal !== oldVal) {
                if (newVal == 'json') {
-                  if ( scope.variables && !/^---$/.test(scope.variables)) { 
+                  if ( scope[fld] && !/^---$/.test(scope[fld])) { 
                      // convert YAML to JSON
                      try {
-                        var json_obj = jsyaml.load(scope.variables);  //parse yaml into an obj
-                        scope.variables = JSON.stringify(json_obj, null, " ");
+                        var json_obj = jsyaml.load(scope[fld]);  //parse yaml into an obj
+                        scope[fld] = JSON.stringify(json_obj, null, " ");
                      }
                      catch (err) {
                         // ignore parse errors. allow the user to paste values in and sync the
@@ -35,15 +38,15 @@ angular.module('ParseHelper', [])
                      }
                   }
                   else {   
-                     scope.variables = "\{\}";
+                     scope[fld] = "\{\}";
                   }
                }
                else {
-                  if ( scope.variables && !/^\{\}$/.test(scope.variables) ) {
+                  if ( scope[fld] && !/^\{\}$/.test(scope[fld]) ) {
                      // convert JSON to YAML
                      try {
-                        var json_obj = JSON.parse(scope.variables);
-                        scope.variables = jsyaml.safeDump(json_obj);
+                        var json_obj = JSON.parse(scope[fld]);
+                        scope[fld] = jsyaml.safeDump(json_obj);
                      }
                      catch (err) {
                         // ignore the errors. allow the user to paste values in and sync the
@@ -51,7 +54,7 @@ angular.module('ParseHelper', [])
                      }
                   }
                   else {
-                     scope.variables = "---";
+                     scope[fld] = "---";
                   }
                }
             }

@@ -198,11 +198,15 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            try { 
                // Make sure we have valid variable data
                if (scope.parseType == 'json') {
-                  var myjson = JSON.parse(scope.variables);  //make sure JSON parses
-                  var json_data = scope.variables;
+                  var json_data = JSON.parse(scope.variables);  //make sure JSON parses
                }
                else {
                   var json_data = jsyaml.load(scope.variables);  //parse yaml
+               }
+
+               // Make sure our JSON is actually an object
+               if (typeof json_data !== 'object') {
+                  throw "failed to return an object!";
                }
 
                var data = {}
@@ -348,11 +352,15 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                 
                 // Make sure we have valid variable data
                 if (scope.parseType == 'json') {
-                   var myjson = JSON.parse(scope.variables);  //make sure JSON parses
-                   var json_data = scope.variables;
+                   var json_data = JSON.parse(scope.variables);  //make sure JSON parses
                 }
                 else {
                    var json_data = jsyaml.load(scope.variables);  //parse yaml
+                }
+
+                // Make sure our JSON is actually an object
+                if (typeof json_data !== 'object') {
+                   throw "failed to return an object!";
                 }
 
                 var data = {}

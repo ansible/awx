@@ -24,7 +24,7 @@ angular.module('InventoriesListDefinition', [])
                 label: 'Name'
                 },
             description: {
-                label: 'Descriptions'
+                label: 'Description'
                 },
             organization: {
                 label: 'Organization',

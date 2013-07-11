@@ -175,11 +175,11 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    var form = InventoryForm;
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
-   scope.parseType = 'yaml';
+   scope.inventoryParseType = 'yaml';
    
    generator.reset();
    LoadBreadCrumbs();
-   ParseTypeChange(scope);
+   ParseTypeChange(scope,'inventory_variables', 'inventoryParseType');
 
    LookUpInit({
        scope: scope,
@@ -194,17 +194,21 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
        try { 
            // Make sure we have valid variable data
-           if (scope.parseType == 'json') {
-              var myjson = JSON.parse(scope.variables);  //make sure JSON parses
-              var json_data = scope.variables;
+           if (scope.inventoryParseType == 'json') {
+              var json_data = JSON.parse(scope.inventory_variables);  //make sure JSON parses
            }
            else {
-              var json_data = jsyaml.load(scope.variables);  //parse yaml
+              var json_data = jsyaml.load(scope.inventory_variables);  //parse yaml
            }
           
+           // Make sure our JSON is actually an object
+           if (typeof json_data !== 'object') {
+              throw "failed to return an object!";
+           }
+
            var data = {}
            for (var fld in form.fields) {
-               if (fld != 'variables') {
+               if (fld != 'inventory_variables') {
                   if (form.fields[fld].realName) {
                      data[form.fields[fld].realName] = scope[fld];
                   }
@@ -218,7 +222,7 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
            Rest.post(data)
                .success( function(data, status, headers, config) {
                    var inventory_id = data.id;
-                   if (scope.variables) {
+                   if (scope.inventory_variables) {
                       Rest.setUrl(data.related.variable_data);
                       Rest.put(json_data)
                           .success( function(data, status, headers, config) {
@@ -273,9 +277,9 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    var base = $location.path().replace(/^\//,'').split('/')[0];
    var id = $routeParams.id;
    
-   ParseTypeChange(scope);
+   ParseTypeChange(scope,'inventory_variables', 'inventoryParseType');
 
-   scope.parseType = 'yaml';
+   scope.inventoryParseType = 'yaml';
    scope['inventory_id'] = id;
    
    // Retrieve each related set and any lookups
@@ -300,20 +304,20 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
           Rest.get()
               .success( function(data, status, headers, config) {
                   if ($.isEmptyObject(data)) {
-                     scope.variables = "---";
+                     scope.inventory_variables = "---";
                   }
                   else {
-                     scope.variables = jsyaml.safeDump(data);
+                     scope.inventory_variables = jsyaml.safeDump(data);
                   }
                   })
               .error( function(data, status, headers, config) {
-                  scope.variables = null;
+                  scope.inventory_variables = null;
                   ProcessErrors(scope, data, status, form,
                       { hdr: 'Error!', msg: 'Failed to retrieve inventory variables. GET returned status: ' + status });
                   });
           }
           else {
-              scope.variables = "---";
+              scope.inventory_variables = "---";
           }
        });
   
@@ -327,17 +331,21 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    scope.formSave = function() {
        try { 
            // Make sure we have valid variable data
-           if (scope.parseType == 'json') {
-              var myjson = JSON.parse(scope.variables);  //make sure JSON parses
-              var json_data = scope.variables;
+           if (scope.inventoryParseType == 'json') {
+              var json_data = JSON.parse(scope.inventory_variables);  //make sure JSON parses
            }
            else {
-              var json_data = jsyaml.load(scope.variables);  //parse yaml
+              var json_data = jsyaml.load(scope.inventory_variables);  //parse yaml
            }
-          
+
+           // Make sure our JSON is actually an object
+           if (typeof json_data !== 'object') {
+              throw "failed to return an object!";
+           }
+
            var data = {}
            for (var fld in form.fields) {
-               if (fld != 'variables') {
+               if (fld != 'inventory_variables') {
                   if (form.fields[fld].realName) {
                      data[form.fields[fld].realName] = scope[fld];
                   }
@@ -350,7 +358,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
            Rest.setUrl(defaultUrl + id + '/');
            Rest.put(data)
                .success( function(data, status, headers, config) {
-                   if (scope.variables) {
+                   if (scope.inventory_variables) {
                       Rest.setUrl(data.related.variable_data);
                       Rest.put(json_data)
                           .success( function(data, status, headers, config) {
