@@ -55,6 +55,11 @@ LANGUAGE_CODE = 'en-us'
 # the secret key from an environment variable or a file instead.
 SECRET_KEY = 'p7z7g1ql4%6+(6nlebb6hdk7sd^&fnjpal308%n%+p^_e6vo1y'
 
+# HTTP headers and meta keys to search to determine remote host name or IP. Add
+# additional items to this list, such as "HTTP_X_FORWARDED_FOR", if behind a
+# reverse proxy.
+REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
+
 # Email address that error messages come from.
 SERVER_EMAIL = 'root@localhost'
 

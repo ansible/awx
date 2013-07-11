@@ -127,36 +127,46 @@ class JobTemplateCallbackPermission(CustomRbac):
     def has_permission(self, request, view, obj=None):
         # If another authentication method was used and it's not a POST, return
         # True to fall through to the next permission class.
-        if request.user or request.auth and request.method.lower() != 'post':
+        if (request.user or request.auth) and request.method.lower() != 'post':
             return super(JobTemplateCallbackPermission, self).has_permission(request, view, obj)
         
-        return False
-        # FIXME
-        #try:
-        #    job_template = JobTemplate.objects.get(active=True, pk=int(request.auth.split('-')[0]))
-        #except Job.DoesNotExist:
-        #    return False
+        # Require method to be POST, host_config_key to be specified and match
+        # the requested job template, and require the job template to be
+        # active in order to proceed.
+        host_config_key = request.DATA.get('host_config_key', '')
+        if request.method.lower() != 'post':
+            return False
+        elif not host_config_key:
+            return False
+        elif obj and not obj.active:
+            return False
+        elif obj and obj.host_config_key != host_config_key:
+            return False
+        else:
+            return True
 
 class JobTaskPermission(CustomRbac):
 
     def has_permission(self, request, view, obj=None):
-
         # If another authentication method was used other than the one for job
-        # callbacks, return True to fall through to the next permission class.
+        # callbacks, default to the superclass permissions checking.
         if request.user or not request.auth:
             return super(JobTaskPermission, self).has_permission(request, view, obj)
 
-        # FIXME: Verify that inventory or job event requested are for the same
-        # job ID present in the auth token, etc.
+        # Verify that the job ID present in the auth token is for a valid,
+        # active job.
+        try:
+            job = Job.objects.get(active=True, status='running',
+                                  pk=int(request.auth.split('-')[0]))
+        except (Job.DoesNotExist, TypeError):
+            return False
 
-        #try:
-        #    job = Job.objects.get(active=True, status='running', pk=int(request.auth.split('-')[0]))
-        #except Job.DoesNotExist:
-        #    return False
-
+        # Verify that the request method is one of those allowed for the given
+        # view, also that the job or inventory being accessed matches the auth
+        # token.
         if view.model == Inventory and request.method.lower() in ('head', 'get'):
-            return True
+            return bool(not obj or obj.pk == job.inventory.pk)
         elif view.model == JobEvent and request.method.lower() == 'post':
-            return True
+            return bool(not obj or obj.pk == job.pk)
         else:
             return False

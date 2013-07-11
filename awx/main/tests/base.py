@@ -145,7 +145,7 @@ class BaseTestMixin(object):
         return ('random', 'combination')
         
     def _generic_rest(self, url, data=None, expect=204, auth=None, method=None,
-                      data_type=None, accept=None):
+                      data_type=None, accept=None, remote_addr=None):
         assert method is not None
         method_name = method.lower()
         if method_name not in ('options', 'head', 'get', 'delete'):
@@ -153,6 +153,8 @@ class BaseTestMixin(object):
         client_kwargs = {}
         if accept:
             client_kwargs['HTTP_ACCEPT'] = accept
+        if remote_addr:
+            client_kwargs['REMOTE_ADDR'] = remote_addr
         client = Client(**client_kwargs)
         auth = auth or self._current_auth
         if auth:
@@ -191,39 +193,46 @@ class BaseTestMixin(object):
         else:
             return None
 
-    def options(self, url, expect=200, auth=None, accept=None):
+    def options(self, url, expect=200, auth=None, accept=None,
+                remote_addr=None):
         return self._generic_rest(url, data=None, expect=expect, auth=auth,
-                                  method='options', accept=accept)
+                                  method='options', accept=accept,
+                                  remote_addr=remote_addr)
 
-    def head(self, url, expect=200, auth=None, accept=None):
+    def head(self, url, expect=200, auth=None, accept=None, remote_addr=None):
         return self._generic_rest(url, data=None, expect=expect, auth=auth,
-                                  method='head', accept=accept)
+                                  method='head', accept=accept,
+                                  remote_addr=remote_addr)
  
-    def get(self, url, expect=200, auth=None, accept=None):
+    def get(self, url, expect=200, auth=None, accept=None, remote_addr=None):
         return self._generic_rest(url, data=None, expect=expect, auth=auth,
-                                  method='get', accept=accept)
+                                  method='get', accept=accept,
+                                  remote_addr=remote_addr)
 
     def post(self, url, data, expect=204, auth=None, data_type=None,
-             accept=None):
+             accept=None, remote_addr=None):
         return self._generic_rest(url, data=data, expect=expect, auth=auth,
                                   method='post', data_type=data_type,
-                                  accept=accept)
+                                  accept=accept,
+                                  remote_addr=remote_addr)
 
     def put(self, url, data, expect=200, auth=None, data_type=None,
-            accept=None):
+            accept=None, remote_addr=None):
         return self._generic_rest(url, data=data, expect=expect, auth=auth,
                                   method='put', data_type=data_type,
-                                  accept=accept)
+                                  accept=accept, remote_addr=remote_addr)
 
     def patch(self, url, data, expect=200, auth=None, data_type=None,
-              accept=None):
+              accept=None, remote_addr=None):
         return self._generic_rest(url, data=data, expect=expect, auth=auth,
                                   method='patch', data_type=data_type,
-                                  accept=accept)
+                                  accept=accept, remote_addr=remote_addr)
 
-    def delete(self, url, expect=201, auth=None, data_type=None, accept=None):
+    def delete(self, url, expect=201, auth=None, data_type=None, accept=None,
+               remote_addr=None):
         return self._generic_rest(url, data=None, expect=expect, auth=auth,
-                                  method='delete', accept=accept)
+                                  method='delete', accept=accept,
+                                  remote_addr=remote_addr)
 
     def get_urls(self, collection_url, auth=None):
         # TODO: this test helper function doesn't support pagination

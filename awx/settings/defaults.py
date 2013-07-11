@@ -92,6 +92,11 @@ SECRET_KEY = 'p7z7g1ql4%6+(6nlebb6hdk7sd^&fnjpal308%n%+p^_e6vo1y'
 # See https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
 
+# HTTP headers and meta keys to search to determine remote host name or IP. Add
+# additional items to this list, such as "HTTP_X_FORWARDED_FOR", if behind a
+# reverse proxy.
+REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
+
 TEMPLATE_CONTEXT_PROCESSORS += (
     'django.core.context_processors.request',
     'awx.ui.context_processors.settings',

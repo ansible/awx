@@ -1,18 +1,27 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Python
 import datetime
 import json
+import socket
+import struct
+import uuid
+
+# Django
 from django.contrib.auth.models import User as DjangoUser
 from django.core.urlresolvers import reverse
 from django.db import transaction
 import django.test
 from django.test.client import Client
 from django.test.utils import override_settings
+
+# AWX
 from awx.main.models import *
 from awx.main.tests.base import BaseTestMixin
 
-__all__ = ['JobTemplateTest', 'JobTest', 'JobStartCancelTest']
+__all__ = ['JobTemplateTest', 'JobTest', 'JobStartCancelTest',
+           'JobTemplateCallbackTest']
 
 TEST_PLAYBOOK = '''- hosts: all
   gather_facts: false
@@ -308,6 +317,7 @@ class BaseJobTestMixin(BaseTestMixin):
             inventory= self.inv_eng,
             project=self.proj_dev,
             playbook=self.proj_dev.playbooks[0],
+            host_config_key=uuid.uuid4().hex,
             created_by=self.user_sue,
         )
         self.job_eng_check = self.jt_eng_check.create_job(
@@ -320,6 +330,7 @@ class BaseJobTestMixin(BaseTestMixin):
             inventory= self.inv_eng,
             project=self.proj_dev,
             playbook=self.proj_dev.playbooks[0],
+            host_config_key=uuid.uuid4().hex,
             created_by=self.user_sue,
         )
         self.job_eng_run = self.jt_eng_run.create_job(
@@ -335,6 +346,7 @@ class BaseJobTestMixin(BaseTestMixin):
             inventory= self.inv_sup,
             project=self.proj_test,
             playbook=self.proj_test.playbooks[0],
+            host_config_key=uuid.uuid4().hex,
             created_by=self.user_sue,
         )
         self.job_sup_check = self.jt_sup_check.create_job(
@@ -347,6 +359,7 @@ class BaseJobTestMixin(BaseTestMixin):
             inventory= self.inv_sup,
             project=self.proj_test,
             playbook=self.proj_test.playbooks[0],
+            host_config_key=uuid.uuid4().hex,
             created_by=self.user_sue,
         )
         self.job_sup_run = self.jt_sup_run.create_job(
@@ -363,6 +376,7 @@ class BaseJobTestMixin(BaseTestMixin):
             project=self.proj_prod,
             playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_east,
+            host_config_key=uuid.uuid4().hex,
             created_by=self.user_sue,
         )
         self.job_ops_east_check = self.jt_ops_east_check.create_job(
@@ -375,6 +389,7 @@ class BaseJobTestMixin(BaseTestMixin):
             project=self.proj_prod,
             playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_east,
+            host_config_key=uuid.uuid4().hex,
             created_by=self.user_sue,
         )
         self.job_ops_east_run = self.jt_ops_east_run.create_job(
@@ -387,6 +402,7 @@ class BaseJobTestMixin(BaseTestMixin):
             project=self.proj_prod,
             playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_west,
+            host_config_key=uuid.uuid4().hex,
             created_by=self.user_sue,
         )
         self.job_ops_west_check = self.jt_ops_west_check.create_job(
@@ -399,6 +415,7 @@ class BaseJobTestMixin(BaseTestMixin):
             project=self.proj_prod,
             playbook=self.proj_prod.playbooks[0],
             credential=self.cred_ops_west,
+            host_config_key=uuid.uuid4().hex,
             created_by=self.user_sue,
         )
         self.job_ops_west_run = self.jt_ops_west_run.create_job(
@@ -965,3 +982,142 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 self.assertTrue(qs.count())
                 self.check_pagination_and_size(response, qs.count())
                 self.check_list_ids(response, qs)
+
+@override_settings(CELERY_ALWAYS_EAGER=True,
+                   CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                   ANSIBLE_TRANSPORT='local',
+                   MIDDLEWARE_CLASSES=MIDDLEWARE_CLASSES)
+class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
+    '''Job template callback tests for empheral hosts.'''
+
+    def setUp(self):
+        super(JobTemplateCallbackTest, self).setUp()
+        settings.INTERNAL_API_URL = self.live_server_url
+        # Monkeypatch socket module DNS lookup functions for testing.
+        self._original_gethostbyaddr = socket.gethostbyaddr
+        self._original_getaddrinfo = socket.getaddrinfo
+        socket.gethostbyaddr = self.gethostbyaddr
+        socket.getaddrinfo = self.getaddrinfo
+
+    def tearDown(self):
+        super(JobTemplateCallbackTest, self).tearDown()
+        socket.gethostbyaddr = self._original_gethostbyaddr
+        socket.getaddrinfo = self._original_getaddrinfo
+
+    def atoh(self, a):
+        '''Convert IP address to integer in host byte order.'''
+        return socket.ntohl(struct.unpack('I', socket.inet_aton(a))[0])
+
+    def htoa(self, n):
+        '''Convert integer in host byte order to IP address.'''
+        return socket.inet_ntoa(struct.pack('I', socket.htonl(n)))
+
+    def get_test_ips_for_host(self, host):
+        '''Return test IP address(es) for given test hostname.'''
+        ips = []
+        try:
+            h = Host.objects.get(name=host)
+            # Primary IP for host (both forward/reverse lookups work).
+            val = self.atoh('127.10.0.0') + h.pk
+            ips.append(self.htoa(val))
+            # Secondary IP for host (both forward/reverse lookups work).
+            if h.pk % 2 == 0:
+                val = self.atoh('127.20.0.0') + h.pk
+                ips.append(self.htoa(val))
+            # Additional IP for host (only forward lookups work).
+            if h.pk % 3 == 0:
+                val = self.atoh('127.30.0.0') + h.pk
+                ips.append(self.htoa(val))
+        except Host.DoesNotExist:
+            pass
+        return ips
+
+    def get_test_host_for_ip(self, ip):
+        '''Return test hostname for given test IP address.'''
+        if not ip.startswith('127.10.') and not ip.startswith('127.20.'):
+            return None
+        val = self.atoh(ip)
+        try:
+            return Host.objects.get(pk=(val & 0x0ffff)).name
+        except Host.DoesNotExist:
+            return None
+
+    def test_dummy_host_ip_lookup(self):
+        all_ips = set()
+        for host in Host.objects.all():
+            ips = self.get_test_ips_for_host(host.name)
+            #print host, ips
+            self.assertTrue(ips)
+            all_ips.update(ips)
+        ips = self.get_test_ips_for_host('invalid_host_name')
+        self.assertFalse(ips)
+        for ip in all_ips:
+            host = self.get_test_host_for_ip(ip)
+            #print ip, host
+            if ip.startswith('127.30.'):
+                continue
+            self.assertTrue(host)
+            ips = self.get_test_ips_for_host(host)
+            self.assertTrue(ip in ips)
+        host = self.get_test_host_for_ip('127.10.254.254')
+        self.assertFalse(host)
+
+    def gethostbyaddr(self, ip):
+        #print 'gethostbyaddr', ip
+        if not ip.startswith('127.'):
+            return self._original_gethostbyaddr(ip)
+        host = self.get_test_host_for_ip(ip)
+        if not host:
+            raise socket.herror('unknown test host')
+        raddr = '.'.join(list(reversed(ip.split('.'))) + ['in-addr', 'arpa'])
+        return (host, [raddr], [ip])
+         
+    def getaddrinfo(self, host, port, family=0, socktype=0, proto=0, flags=0):
+        #print 'getaddrinfo', host, port, family, socktype, proto, flags
+        if family or socktype or proto or flags:
+            return self._original_getaddrinfo(host, port, family, socktype,
+                                              proto, flags)
+        port = port or 0
+        try:
+            socket.inet_aton(host)
+            addrs = [host]
+        except socket.error:
+            addrs = self.get_test_ips_for_host(host)
+        if not addrs:
+            raise socket.gaierror('test host not found')
+        results = []
+        for addr in addrs:
+            results.append((socket.AF_INET, socket.SOCK_STREAM,
+                            socket.IPPROTO_TCP, '', (addr, port)))
+            results.append((socket.AF_INET, socket.SOCK_DGRAM,
+                            socket.IPPROTO_UDP, '', (addr, port)))
+        return results
+
+    def test_job_template_callback(self):
+        # Find a valid job template to use to test the callback.
+        job_template = None
+        qs = JobTemplate.objects.filter(job_type='run',
+                                        credential__isnull=False)
+        qs = qs.exclude(host_config_key='')
+        for jt in qs:
+            if not jt.can_start_without_user_input():
+                continue
+            job_template = jt
+            break
+        self.assertTrue(job_template)
+        url = reverse('main:job_template_callback', args=(job_template.pk,))
+
+        # Test a POST to start a new job.
+        with self.current_user(None):
+            data = dict(host_config_key=job_template.host_config_key)
+            host = job_template.inventory.hosts.order_by('-pk')[0]
+            ip = self.get_test_ips_for_host(host.name)[0]
+            jobs_qs = job_template.jobs.filter(launch_type='callback')
+            self.assertEqual(jobs_qs.count(), 0)
+            self.post(url, data, expect=202, remote_addr=ip)
+            self.assertEqual(jobs_qs.count(), 1)
+            job = jobs_qs[0]
+            self.assertEqual(job.launch_type, 'callback')
+            self.assertEqual(job.limit, host.name)
+            self.assertEqual(job.hosts.count(), 1)
+            self.assertEqual(job.hosts.all()[0], host)

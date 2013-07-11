@@ -412,6 +412,14 @@ class Credential(CommonModelNameNotUnique):
     @property
     def needs_sudo_password(self):
         return self.sudo_password == 'ASK'
+    
+    @property
+    def passwords_needed(self):
+        needed = []
+        for field in ('ssh_password', 'sudo_password', 'ssh_key_unlock'):
+            if getattr(self, 'needs_%s' % field):
+                needed.append(field)
+        return needed
 
     def get_absolute_url(self):
         return reverse('main:credential_detail', args=(self.pk,))
@@ -646,14 +654,11 @@ class JobTemplate(CommonModel):
         return reverse('main:job_template_detail', args=(self.pk,))
 
     def can_start_without_user_input(self):
-        '''Return whether job template can be used to start a new job without
-        requiring any user input.'''
-        if not self.credential:
-            return False
-        for field in ('ssh_password', 'sudo_password', 'ssh_key_unlock'):
-            if getattr(self.credential, 'needs_%s' % field):
-                return False
-        return True
+        '''
+        Return whether job template can be used to start a new job without
+        requiring any user input.
+        '''
+        return bool(self.credential and not self.credential.passwords_needed)
 
 class Job(CommonModel):
     '''
@@ -832,11 +837,7 @@ class Job(CommonModel):
 
     def get_passwords_needed_to_start(self):
         '''Return list of password field names needed to start the job.'''
-        needed = []
-        for field in ('ssh_password', 'sudo_password', 'ssh_key_unlock'):
-            if self.credential and getattr(self.credential, 'needs_%s' % field):
-                needed.append(field)
-        return needed
+        return (self.credential and self.credential.passwords_needed) or []
 
     @property
     def can_start(self):

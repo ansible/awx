@@ -1,7 +1,9 @@
 [run]
-source = ansibleworks
+source = awx
 branch = True
-omit = ansibleworks/main/migrations/*
+omit =
+    awx/main/migrations/*
+    awx/lib/site-packages/*
 
 [report]
 # Regexes for lines to exclude from consideration

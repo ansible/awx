@@ -38,6 +38,7 @@ class RunJob(Task):
                 if field == 'status':
                     update_fields.append('failed')
             job.save(update_fields=update_fields)
+            # FIXME: Commit transaction?
         return job
 
     def get_path_to(self, *args):

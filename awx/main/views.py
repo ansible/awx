@@ -4,6 +4,7 @@
 # Python
 import datetime
 import re
+import socket
 import sys
 
 # Django
@@ -1070,27 +1071,107 @@ class JobTemplateCallback(generics.RetrieveAPIView):
     '''
     Configure a host to POST to this resource using the `host_config_key`.
     '''
-    
+
     model = JobTemplate
     permission_classes = (JobTemplateCallbackPermission,)
 
-    def get(self, request, *args, **kwargs):
+    def find_host(self):
+        '''
+        Find the host in the job template's inventory that matches the remote
+        host for the current request.
+        '''
+        # Find the list of remote host names/IPs to check.
+        remote_hosts = set()
+        for header in settings.REMOTE_HOST_HEADERS:
+            value = self.request.META.get(header, '').strip()
+            if value:
+                remote_hosts.add(value)
+        # Add the reverse lookup of IP addresses.
+        for rh in list(remote_hosts):
+            try:
+                result = socket.gethostbyaddr(rh)
+            except socket.herror:
+                continue
+            remote_hosts.add(result[0])
+            remote_hosts.update(result[1])
+        # Filter out any .arpa results.
+        for rh in list(remote_hosts):
+            if rh.endswith('.arpa'):
+                remote_hosts.remove(rh)
+        if not remote_hosts:
+            return
+        # Find the host objects to search for a match.
         obj = self.get_object()
+        qs = obj.inventory.hosts.filter(active=True)
+        # First try for an exact match on the name.
+        try:
+            return qs.get(name__in=remote_hosts)
+        except (Host.DoesNotExist, Host.MultipleObjectsReturned):
+            pass
+        # Next, try matching based on name or ansible_ssh_host variable.
+        matches = dict()
+        for host in qs:
+            ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
+            if ansible_ssh_host in remote_hosts:
+                if host not in matches:
+                    matches[host] = 0
+                matches[host] += 2
+            if host.name != ansible_ssh_host and host.name in remote_hosts:
+                if host not in matches:
+                    matches[host] = 0
+                matches[host] += 1
+        if len(matches) == 1:
+            return matches.keys()[0]
+        # Try to resolve forward addresses for each host to find a match.
+        for host in qs:
+            hostnames = set([host.name])
+            ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
+            if ansible_ssh_host:
+                hostnames.add(ansible_ssh_host)
+            for hostname in hostnames:
+                try:
+                    result = socket.getaddrinfo(hostname, None)
+                    possible_ips = set(x[4][0] for x in result)
+                    possible_ips.discard(hostname)
+                    if possible_ips and possible_ips & remote_hosts:
+                        if host in matches:
+                            matches[host] += 1
+                        else:
+                            matches[host] = 1
+                except socket.gaierror:
+                    pass
+        # Return the host with the highest match weight (in case of multiple
+        # matches).
+        if matches:
+            return sorted(matches.items(), key=lambda x: x[1])[-1][0]
+
+    def get(self, request, *args, **kwargs):
+        job_template = self.get_object()
         data = dict(
-            host_config_key=obj.host_config_key,
+            host_config_key=job_template.host_config_key,
+            matched_host=getattr(self.find_host(), 'name', None),
         )
+        if settings.DEBUG:
+            d = dict([(k,v) for k,v in request.META.items()
+                      if k.startswith('HTTP_') or k.startswith('REMOTE_')])
+            data['request_meta'] = d
         return Response(data)
 
     def post(self, request, *args, **kwargs):
-        obj = self.get_object()
+        job_template = self.get_object()
         # Permission class should have already validated host_config_key.
-        # FIXME: Find host from request.
-        limit = obj.limit
-        # FIXME: Update limit based on host.
-        job = obj.create_job(limit=limit, launch_type='callback')
+        host = self.find_host()
+        if not host:
+            data = dict(msg='No matching host could be found!')
+            return Response(data, status=400)
+        if not job_template.can_start_without_user_input():
+            data = dict(msg='Cannot start automatically, user input required!')
+            return Response(data, status=400)
+        limit = ':'.join(filter(None, [job_template.limit, host.name]))
+        job = job_template.create_job(limit=limit, launch_type='callback')
         result = job.start()
         if not result:
-            data = dict(passwords_needed_to_start=job.get_passwords_needed_to_start())
+            data = dict(msg='Error starting job!')
             return Response(data, status=400)
         else:
             return Response(status=202)
