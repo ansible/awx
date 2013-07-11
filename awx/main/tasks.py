@@ -94,7 +94,6 @@ class RunJob(Task):
         env['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
         # RHEL has too old of an SSH so ansible will select paramiko and this is VERY slow
         env['ANSIBLE_PARAMIKO_RECORD_HOST_KEYS'] = 'False'
-        env['HOME'] = '/var/lib/awx'
         return env
 
     def build_args(self, job, **kwargs):
