@@ -803,8 +803,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                   "<i class=\"icon-remove\"></i> Delete Group</button>";
               html += "</div>\n";  
               html += "<div id=\"tree-view\"></div>\n";
-              html += "<div class=\" inventory-filter\" ng-show=\"has_active_failures == true\"><label class=\"checkbox inline\">" +
-                  "<input ng-model=\"inventoryFailureFilter\" ng-change=\"filterInventory()\" type=\"checkbox\" >Show only groups with failures</label></div>\n";
+              html += "<div class=\" inventory-filter\">";
+              html += "<span ng-show=\"has_active_failures == true\"><label class=\"checkbox inline\">";
+              html += "<input ng-model=\"inventoryFailureFilter\" ng-change=\"filterInventory()\" type=\"checkbox\"" +
+                  ">Show only groups with failures</label></span></div>\n";
               html += "</div>\n";
            }
            else {
