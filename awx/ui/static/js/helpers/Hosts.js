@@ -23,10 +23,14 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var group_id = params.group_id;
         
         var list = HostList;
+
+        list.iterator = 'subhost';  //Override the iterator and name so the scope of the modal dialog
+        list.name = 'subhosts';     //will not conflict with the parent scope
+
         var defaultUrl = GetBasePath('inventory') + inventory_id + '/hosts/';
         var view = GenerateList;
 
-        var scope = view.inject(HostList, {
+        var scope = view.inject(list, {
             id: 'form-modal-body', 
             mode: 'select',
             breadCrumbs: false,
@@ -45,10 +49,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         });
 
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
-        $('#form-modal').modal();
-        $('#form-modal').unbind('hidden');
-        $('#form-modal').on('hidden', function () { scope.$emit('hostsReload'); });
-
+        $('#form-modal').modal({ backdrop: 'static', keyboard: false });
+        
         scope.selected = [];
         
         if (scope.PostRefreshRemove) {
@@ -62,7 +64,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                 });
             });
 
-        SearchInit({ scope: scope, set: 'hosts', list: list, url: defaultUrl });
+        SearchInit({ scope: scope, set: 'subhosts', list: list, url: defaultUrl });
         PaginateInit({ scope: scope, list: list, url: defaultUrl, mode: 'lookup' });
         scope.search(list.iterator);
 
@@ -94,10 +96,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                  if (errors > 0) {
                     Alert('Error', 'There was an error while adding one or more of the selected hosts.');  
                  }
-                 else {
-                    $('#form-modal').modal('hide');
-                    scope.$emit('hostsReload');
-                 }
+                 $('#form-modal').modal('hide');
+                 scope.$emit('hostsReload');
               }
               });
 
@@ -105,9 +105,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
               var host;
               for (var i=0; i < scope.selected.length; i++) {
                   host = null;
-                  for (var j=0; j < scope.hosts.length; j++) {
-                      if (scope.hosts[j].id == scope.selected[i]) {
-                         host = scope.hosts[j];
+                  for (var j=0; j < scope.subhosts.length; j++) {
+                      if (scope.subhosts[j].id == scope.selected[i]) {
+                         host = scope.subhosts[j];
                       }
                   }
                   if (host !== null) {
@@ -125,10 +125,12 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            }
            else {
               $('#form-modal').modal('hide');
+              scope.$emit('hostsReload');
            }  
            }
 
-        scope.toggle_host = function(id) {
+        scope.toggle_subhost = function(id) {
+           console.log(list.iterator);
            if (scope[list.iterator + "_" + id + "_class"] == "success") {
               scope[list.iterator + "_" + id + "_class"] = "";
               document.getElementById('check_' + id).checked = false;
@@ -183,8 +185,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         });
 
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
-        $('#form-modal').unbind('hidden');
-        $('#form-modal').on('hidden', function () { scope.$emit('hostsReload'); });
+        //$('#form-modal').unbind('hidden');
+        //$('#form-modal').on('hidden', function () { scope.$emit('hostsReload'); });
         
         generator.reset();
         var master={};
@@ -233,6 +235,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                        }
                        else {
                           $('#form-modal').modal('hide');
+                          scope.$emit('hostsReload');
                        }
                        })
                    .error( function(data, status, headers, config) {
@@ -287,8 +290,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         });
         
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
-        $('#form-modal').unbind('hidden');
-        $('#form-modal').on('hidden', function () { scope.$emit('hostsReload'); });
+        //$('#form-modal').unbind('hidden');
+        //$('#form-modal').on('hidden', function () { scope.$emit('hostsReload'); });
 
         // After the group record is loaded, retrieve any group variables
         if (scope.hostLoadedRemove) {
@@ -377,6 +380,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                            Rest.put(json_data)
                                .success( function(data, status, headers, config) {
                                    $('#form-modal').modal('hide');
+                                   scope.$emit('hostsReload');
                                })
                                .error( function(data, status, headers, config) {
                                    ProcessErrors(scope, data, status, form,
@@ -385,6 +389,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                         }
                         else {
                            $('#form-modal').modal('hide');
+                           scope.$emit('hostsReload');
                         }
                         })
                     .error( function(data, status, headers, config) {

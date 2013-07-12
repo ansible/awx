@@ -60,7 +60,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        if (options.mode == 'lookup') {
           // options should include {hdr: <dialog header>, action: <function...> }
           this.scope.lookupHeader = options.hdr;
-          $('#lookup-modal').modal();
+          $('#lookup-modal').modal({ backdrop: 'static', keyboard: false });
        }
        
        return this.scope;

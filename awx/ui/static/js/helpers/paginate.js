@@ -27,7 +27,7 @@ angular.module('PaginateHelper', ['RefreshHelper', 'ngCookies'])
         
         scope[iterator + 'Page'] = 0;
         
-        if (cookieSize) {
+        if (cookieSize && mode != 'lookup') {
            // use the size found in session cookie, when available
            scope[iterator + 'PageSize'] = cookieSize;
         }

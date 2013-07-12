@@ -38,7 +38,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.formModalActionClass = 'btn btn-success';
 
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
-        $('#form-modal').modal();
+        $('#form-modal').modal({ backdrop: 'static', keyboard: false });
 
         scope.selected = [];
         
