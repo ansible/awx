@@ -360,11 +360,11 @@ class BaseJobTestMixin(BaseTestMixin):
             project=self.proj_test,
             playbook=self.proj_test.playbooks[0],
             host_config_key=uuid.uuid4().hex,
+            credential=self.cred_eve,
             created_by=self.user_sue,
         )
         self.job_sup_run = self.jt_sup_run.create_job(
             created_by=self.user_sue,
-            credential=self.cred_eve,
         )
 
         # Operations has job templates to check/run the prod project onto
@@ -1016,7 +1016,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         '''Return test IP address(es) for given test hostname.'''
         ips = []
         try:
-            h = Host.objects.get(name=host)
+            h = Host.objects.exclude(name__endswith='-alias').get(name=host)
             # Primary IP for host (both forward/reverse lookups work).
             val = self.atoh('127.10.0.0') + h.pk
             ips.append(self.htoa(val))
@@ -1027,6 +1027,10 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             # Additional IP for host (only forward lookups work).
             if h.pk % 3 == 0:
                 val = self.atoh('127.30.0.0') + h.pk
+                ips.append(self.htoa(val))
+            # Additional IP for host (neither forward/reverse lookups work).
+            if h.pk % 3 == 1:
+                val = self.atoh('127.40.0.0') + h.pk
                 ips.append(self.htoa(val))
         except Host.DoesNotExist:
             pass
@@ -1046,15 +1050,13 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         all_ips = set()
         for host in Host.objects.all():
             ips = self.get_test_ips_for_host(host.name)
-            #print host, ips
             self.assertTrue(ips)
             all_ips.update(ips)
         ips = self.get_test_ips_for_host('invalid_host_name')
         self.assertFalse(ips)
         for ip in all_ips:
             host = self.get_test_host_for_ip(ip)
-            #print ip, host
-            if ip.startswith('127.30.'):
+            if ip.startswith('127.30.') or ip.startswith('127.40.'):
                 continue
             self.assertTrue(host)
             ips = self.get_test_ips_for_host(host)
@@ -1063,7 +1065,6 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         self.assertFalse(host)
 
     def gethostbyaddr(self, ip):
-        #print 'gethostbyaddr', ip
         if not ip.startswith('127.'):
             return self._original_gethostbyaddr(ip)
         host = self.get_test_host_for_ip(ip)
@@ -1073,7 +1074,6 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         return (host, [raddr], [ip])
          
     def getaddrinfo(self, host, port, family=0, socktype=0, proto=0, flags=0):
-        #print 'getaddrinfo', host, port, family, socktype, proto, flags
         if family or socktype or proto or flags:
             return self._original_getaddrinfo(host, port, family, socktype,
                                               proto, flags)
@@ -1083,6 +1083,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             addrs = [host]
         except socket.error:
             addrs = self.get_test_ips_for_host(host)
+            addrs = [x for x in addrs if not x.startswith('127.40.')]
         if not addrs:
             raise socket.gaierror('test host not found')
         results = []
@@ -1094,6 +1095,17 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         return results
 
     def test_job_template_callback(self):
+        # Set ansible_ssh_host for certain hosts, update name to be an alias.
+        for host in Host.objects.all():
+            ips = self.get_test_ips_for_host(host.name)
+            for ip in ips:
+                if ip.startswith('127.40.'):
+                    host.name = '%s-alias' % host.name
+                    host_vars = host.variables_dict
+                    host_vars['ansible_ssh_host'] = ip
+                    host.variables = json.dumps(host_vars)
+                    host.save()
+        
         # Find a valid job template to use to test the callback.
         job_template = None
         qs = JobTemplate.objects.filter(job_type='run',
@@ -1106,18 +1118,197 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             break
         self.assertTrue(job_template)
         url = reverse('main:job_template_callback', args=(job_template.pk,))
+        data = dict(host_config_key=job_template.host_config_key)
 
         # Test a POST to start a new job.
-        with self.current_user(None):
-            data = dict(host_config_key=job_template.host_config_key)
-            host = job_template.inventory.hosts.order_by('-pk')[0]
-            ip = self.get_test_ips_for_host(host.name)[0]
-            jobs_qs = job_template.jobs.filter(launch_type='callback')
-            self.assertEqual(jobs_qs.count(), 0)
-            self.post(url, data, expect=202, remote_addr=ip)
-            self.assertEqual(jobs_qs.count(), 1)
-            job = jobs_qs[0]
-            self.assertEqual(job.launch_type, 'callback')
-            self.assertEqual(job.limit, host.name)
-            self.assertEqual(job.hosts.count(), 1)
-            self.assertEqual(job.hosts.all()[0], host)
+        host_qs = job_template.inventory.hosts.order_by('pk')
+        host_qs = host_qs.exclude(variables__icontains='ansible_ssh_host')
+        host = host_qs[0]
+        host_ip = self.get_test_ips_for_host(host.name)[0]
+        jobs_qs = job_template.jobs.filter(launch_type='callback').order_by('-pk')
+        self.assertEqual(jobs_qs.count(), 0)
+        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.assertEqual(jobs_qs.count(), 1)
+        job = jobs_qs[0]
+        self.assertEqual(job.launch_type, 'callback')
+        self.assertEqual(job.limit, host.name)
+        self.assertEqual(job.hosts.count(), 1)
+        self.assertEqual(job.hosts.all()[0], host)
+
+        # GET as unauthenticated user will prompt for authentication.
+        self.get(url, expect=401, remote_addr=host_ip)
+
+        # Test GET (as super user) to validate host.
+        with self.current_user(self.user_sue):
+            response = self.get(url, expect=200, remote_addr=host_ip)
+            self.assertEqual(response['host_config_key'],
+                             job_template.host_config_key)
+            self.assertEqual(response['matching_hosts'], [host.name])
+
+        # POST but leave out the host_config_key.
+        self.post(url, {}, expect=403, remote_addr=host_ip)
+
+        # Try with REMOTE_ADDR empty.
+        self.post(url, data, expect=400, remote_addr='')
+
+        # Try with REMOTE_ADDR set to an unknown address.
+        self.post(url, data, expect=400, remote_addr='127.127.0.1')
+
+        # Try using an alternate IP for the host (but one that also resolves
+        # via reverse lookup).
+        host = None
+        host_ip = None
+        host_qs = job_template.inventory.hosts.order_by('pk')
+        host_qs = host_qs.exclude(variables__icontains='ansible_ssh_host')
+        for h in host_qs:
+            ips = self.get_test_ips_for_host(h.name)
+            for ip in ips:
+                if ip.startswith('127.20.'):
+                    host = h
+                    host_ip = ip
+                    break
+            if host_ip:
+                break
+        self.assertTrue(host)
+        self.assertEqual(jobs_qs.count(), 1)
+        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.assertEqual(jobs_qs.count(), 2)
+        job = jobs_qs[0]
+        self.assertEqual(job.launch_type, 'callback')
+        self.assertEqual(job.limit, host.name)
+        self.assertEqual(job.hosts.count(), 1)
+        self.assertEqual(job.hosts.all()[0], host)
+
+        # Try using an IP for the host that doesn't resolve via reverse lookup,
+        # but can be found by doing a forward lookup on the host name.
+        host = None
+        host_ip = None
+        host_qs = job_template.inventory.hosts.order_by('pk')
+        host_qs = host_qs.exclude(variables__icontains='ansible_ssh_host')
+        for h in host_qs:
+            ips = self.get_test_ips_for_host(h.name)
+            for ip in ips:
+                if ip.startswith('127.30.'):
+                    host = h
+                    host_ip = ip
+                    break
+            if host_ip:
+                break
+        self.assertTrue(host)
+        self.assertEqual(jobs_qs.count(), 2)
+        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.assertEqual(jobs_qs.count(), 3)
+        job = jobs_qs[0]
+        self.assertEqual(job.launch_type, 'callback')
+        self.assertEqual(job.limit, host.name)
+        self.assertEqual(job.hosts.count(), 1)
+        self.assertEqual(job.hosts.all()[0], host)
+
+        # Try using address only specified via ansible_ssh_host.
+        host_qs = job_template.inventory.hosts.order_by('pk')
+        host_qs = host_qs.filter(variables__icontains='ansible_ssh_host')
+        host = host_qs[0]
+        host_ip = host.variables_dict['ansible_ssh_host']
+        self.assertEqual(jobs_qs.count(), 3)
+        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.assertEqual(jobs_qs.count(), 4)
+        job = jobs_qs[0]
+        self.assertEqual(job.launch_type, 'callback')
+        self.assertEqual(job.limit, host.name)
+        self.assertEqual(job.hosts.count(), 1)
+        self.assertEqual(job.hosts.all()[0], host)
+
+        # Try when hostname is also an IP address, even if a different one is
+        # specified via ansible_ssh_host.
+        host_qs = job_template.inventory.hosts.order_by('pk')
+        host_qs = host_qs.exclude(variables__icontains='ansible_ssh_host')
+        host = None
+        host_ip = None
+        for h in host_qs:
+            ips = self.get_test_ips_for_host(h.name)
+            if len(ips) > 1:
+                host = h
+                host.name = list(ips)[0]
+                host_vars = host.variables_dict
+                host_vars['ansible_ssh_host'] = list(ips)[1]
+                host.variables = json.dumps(host_vars)
+                host.save()
+                host_ip = list(ips)[0]
+                break
+        self.assertTrue(host)
+        self.assertEqual(jobs_qs.count(), 4)
+        self.post(url, data, expect=202, remote_addr=host_ip)
+        self.assertEqual(jobs_qs.count(), 5)
+        job = jobs_qs[0]
+        self.assertEqual(job.launch_type, 'callback')
+        self.assertEqual(job.limit, host.name)
+        self.assertEqual(job.hosts.count(), 1)
+        self.assertEqual(job.hosts.all()[0], host)
+
+        # Find a new job template to use.
+        job_template = None
+        qs = JobTemplate.objects.filter(job_type='check',
+                                        credential__isnull=False)
+        qs = qs.exclude(host_config_key='')
+        for jt in qs:
+            if not jt.can_start_without_user_input():
+                continue
+            job_template = jt
+            break
+        self.assertTrue(job_template)
+        url = reverse('main:job_template_callback', args=(job_template.pk,))
+        data = dict(host_config_key=job_template.host_config_key)
+
+        # Should get an error when multiple hosts match to the same IP.
+        host_qs = job_template.inventory.hosts.order_by('pk')
+        host_qs = host_qs.exclude(name__endswith='-alias')
+        for host in host_qs:
+            host_vars = host.variables_dict
+            host_vars['ansible_ssh_host'] = '127.50.0.1'
+            host.variables = json.dumps(host_vars)
+            host.save()
+        host = host_qs[0]
+        host_ip = host.variables_dict['ansible_ssh_host']
+        self.post(url, data, expect=400, remote_addr=host_ip)
+
+        # Find a job template to run that doesn't have a credential.
+        job_template = None
+        qs = JobTemplate.objects.filter(job_type='run',
+                                        credential__isnull=True)
+        qs = qs.exclude(host_config_key='')
+        for jt in qs:
+            job_template = jt
+            break
+        self.assertTrue(job_template)
+        url = reverse('main:job_template_callback', args=(job_template.pk,))
+        data = dict(host_config_key=job_template.host_config_key)
+
+        # Test POST to start a new job when the template has no credential.
+        host_qs = job_template.inventory.hosts.order_by('pk')
+        host_qs = host_qs.exclude(variables__icontains='ansible_ssh_host')
+        host = host_qs[0]
+        host_ip = self.get_test_ips_for_host(host.name)[0]
+        self.post(url, data, expect=400, remote_addr=host_ip)
+
+        # Find a job template to run that has a credential but would require
+        # user input.
+        job_template = None
+        qs = JobTemplate.objects.filter(job_type='run',
+                                        credential__isnull=False)
+        qs = qs.exclude(host_config_key='')
+        for jt in qs:
+            if jt.can_start_without_user_input():
+                continue
+            job_template = jt
+            break
+        self.assertTrue(job_template)
+        url = reverse('main:job_template_callback', args=(job_template.pk,))
+        data = dict(host_config_key=job_template.host_config_key)
+
+        # Test POST to start a new job when the credential would require user
+        # input.
+        host_qs = job_template.inventory.hosts.order_by('pk')
+        host_qs = host_qs.exclude(variables__icontains='ansible_ssh_host')
+        host = host_qs[0]
+        host_ip = self.get_test_ips_for_host(host.name)[0]
+        self.post(url, data, expect=400, remote_addr=host_ip)

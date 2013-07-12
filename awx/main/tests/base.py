@@ -153,7 +153,7 @@ class BaseTestMixin(object):
         client_kwargs = {}
         if accept:
             client_kwargs['HTTP_ACCEPT'] = accept
-        if remote_addr:
+        if remote_addr is not None:
             client_kwargs['REMOTE_ADDR'] = remote_addr
         client = Client(**client_kwargs)
         auth = auth or self._current_auth
