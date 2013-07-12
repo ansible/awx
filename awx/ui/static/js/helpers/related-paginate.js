@@ -14,16 +14,23 @@
  *
  */
 
-angular.module('RelatedPaginateHelper', ['RefreshRelatedHelper'])  
-    .factory('RelatedPaginateInit', [ 'RefreshRelated', function(RefreshRelated) {
+angular.module('RelatedPaginateHelper', ['RefreshRelatedHelper', 'ngCookies'])  
+    .factory('RelatedPaginateInit', [ 'RefreshRelated', '$cookieStore', function(RefreshRelated, $cookieStore) {
     return function(params) {
         
         var scope = params.scope;
         var relatedSets = params.relatedSets; 
 
-        for (var key in relatedSets){
-            scope[relatedSets[key].iterator + 'Page'] = 0;
-            scope[relatedSets[key].iterator + 'PageSize'] = 10;
+        for (var key in relatedSets){ 
+            cookieSize = $cookieStore.get(relatedSets[key].iterator + 'PageSize');
+            if (cookieSize) {
+              // use the size found in session cookie, when available
+              scope[relatedSets[key].iterator + 'PageSize'] = cookieSize;
+            }
+            else {
+              scope[relatedSets[key].iterator + 'Page'] = 0;
+              scope[relatedSets[key].iterator + 'PageSize'] = 10;
+            }
         }
 
         scope.nextSet = function(set, iterator) {
@@ -46,6 +53,10 @@ angular.module('RelatedPaginateHelper', ['RefreshRelatedHelper'])
                   break;
                }
            }
+           
+           // Using the session cookie, keep track of user rows per page selection
+           $cookieStore.put(iterator + 'PageSize', scope[iterator + 'PageSize']);
+           
            url = url.replace(/\/\?.*$/,'/');
            url += (scope[iterator + 'SearchParams']) ? scope[iterator + 'SearchParams'] + '&page_size=' + scope[iterator + 'PageSize' ] :
                '?page_size=' + scope[iterator + 'PageSize' ];

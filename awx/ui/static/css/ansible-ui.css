@@ -352,6 +352,11 @@
     background-color: #fff;
  }
 
+ .table-hover-inverse tbody tr:hover > td,
+ .table-hover-inverse tbody tr:hover > th {
+    background-color: #dff0d8;
+ }
+
  
 /* Jobs page */
 

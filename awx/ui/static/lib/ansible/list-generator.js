@@ -149,7 +149,15 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        // table header row
        html += "<table class=\"table table-condensed"
        html += (list['class']) ? " " + list['class'] : "";
-       html += (options.mode == 'lookup' || list.hover) ? " table-hover" : ""; 
+
+       // Add the correct hover class
+       if (options.id) {
+          html += " table-hover-inverse";
+       }
+       else if (options.mode == 'lookup' || list.hover) {
+          html += " table-hover";
+       }
+
        html += "\">\n";
        html += "<thead>\n";
        html += "<tr>\n";
