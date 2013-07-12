@@ -77,16 +77,17 @@ function Authenticate($scope, $rootScope, $location, Authorization, ToggleClass,
                 }
              }
              else {
-                if ( data.non_field_errors && data.non_field_errors.length > 0 ) { 
-                   $rootScope.alertHeader = 'Error!';
-                   $rootScope.alertBody = data.non_field_errors[0];
+                var hdr, msg;
+                if ( data.non_field_errors && data.non_field_errors.length > 0 ) {
+                   hdr = 'Error';
+                   msg = data.non_field_errors[0];
                 }
                 else {
-                   $rootScope.alertHeader = 'Error!';
-                   $rootScope.alertBody = 'The login attempt failed with a status of: ' + status;
+                   hdr = 'Error';
+                   msg = 'The login attempt failed with a status of: ' + status;
                 }
                 $scope.reset();
-                $('#alert-modal').modal({ show: true, keyboard: true,  backdrop: 'static' });
+                Alert(hdr, msg);
              }
              });
        }
