@@ -222,6 +222,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
                 html += (field.capitalize) ? "capitalize " : "";
                 html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
+                html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
                 html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
                     field.awRequiredWhen.variable + "\" " : "";
                 html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled=\"" + field.associated + "_ask\" " : "";
@@ -640,7 +641,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
           html += "<form class=\"form-horizontal";
           html += (this.form['class']) ? ' ' + this.form['class'] : '';
-          html += "\" name=\"" + this.form.name + '_form" id="' + this.form.name + '" novalidate>' + "\n";
+          html += "\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "\" autocomplete=\"false\" novalidate>\n";
           html += "<div ng-show=\"flashMessage != null && flashMessage != undefined\" class=\"alert alert-info\">{{ flashMessage }}</div>\n";
 
           var field;

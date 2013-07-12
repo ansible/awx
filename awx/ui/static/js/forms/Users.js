@@ -20,12 +20,6 @@ angular.module('UserFormDefinition', [])
         collapseOpen: true,
 
         fields: {
-            username: {
-                label: 'Username',
-                type: 'text',
-                addRequired: true,
-                editRequired: true
-                },
             first_name: { 
                 label: 'First Name',
                 type: 'text',
@@ -44,7 +38,8 @@ angular.module('UserFormDefinition', [])
                 label: 'Email',
                 type: 'email',
                 addRequired: true,
-                editRequired: true
+                editRequired: true,
+                autocomplete: false
                 },
             organization: {
                 label: 'Organization',
@@ -56,12 +51,20 @@ angular.module('UserFormDefinition', [])
                 ngClick: 'lookUpOrganization()',
                 excludeMode: 'edit'
                 },
+            username: {
+                label: 'Username',
+                type: 'text',
+                addRequired: true,
+                editRequired: true,
+                autocomplete: false
+                },
             password: {
                 label: 'Password',
                 type: 'password',
                 addRequired: true,
                 editRequired: false,
-                ngChange: "clearPWConfirm('password_confirm')"
+                ngChange: "clearPWConfirm('password_confirm')",
+                autocomplete: false
                 },
             password_confirm: {
                 label: 'Confirm Password',
@@ -69,7 +72,8 @@ angular.module('UserFormDefinition', [])
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,
-                associated: 'password'
+                associated: 'password',
+                autocomplete: false
                 },
             is_superuser: {
                 label: 'Superuser?',

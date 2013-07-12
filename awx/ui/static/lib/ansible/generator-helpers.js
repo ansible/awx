@@ -65,6 +65,11 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                result += (obj['iconSize']) ? " icon-" + obj['iconSize'] : "";
                result += "\"></i>";
                break;
+            case 'autocomplete':
+               result = "autocomplete=\""; 
+               result += (value) ? 'true' : 'false';
+               result += "\" ";
+               break;
             default: 
                result = key + "=\"" + value + "\" ";
         }

@@ -12,13 +12,13 @@
 
 function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                     Alert, UserList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit,
-                    ReturnToCaller, ClearScope, ProcessErrors)
+                    ReturnToCaller, ClearScope, ProcessErrors, GetBasePath)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
-                              //scope.
+                                 //scope.
 
     var list = UserList;
-    var defaultUrl = '/api/v1/users/';
+    var defaultUrl = GetBasePath('users');
     var view = GenerateList;
     var base = $location.path().replace(/^\//,'').split('/')[0];
     var mode = (base == 'users') ? 'edit' : 'select';      // if base path 'users', we're here to add/edit users
@@ -32,6 +32,16 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 
 
     LoadBreadCrumbs();
+
+    if (scope.PostRefreshRemove) {
+       scope.PostRefreshRemove();
+    }
+    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
+        // Remove the 'success' class, which makes green or selected rows, from each row
+        for (var i=0; i < scope[list.name].length; i++) { 
+            scope[list.iterator + '_' + scope[list.name][i].id + '_class'] = '';
+        }
+        });
     
     scope.addUser = function() {
        $location.path($location.path() + '/add');
@@ -65,10 +75,14 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
        }
 
     scope.finishSelection = function() {
-       Rest.setUrl('/api/v1' + $location.path() + '/');  // We're assuming the path matches the api path. 
-                                                         // Will this always be true??
+       var url;
+       if (base == 'organizations') {
+          url = GetBasePath('organizations') + $routeParams.organization_id + '/users/';
+       }
+       else {
+          url = GetBasePath('teams') + $routeParams.team_id + '/users/';
+       }
        scope.queue = [];
-
        scope.$on('callFinished', function() {
           // We call the API for each selected user. We need to hang out until all the api
           // calls are finished.
@@ -101,6 +115,7 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                   }
               }
               if (user !== null) {
+                 Rest.setUrl(url);
                  Rest.post(user)
                      .success( function(data, status, headers, config) {
                          scope.queue.push({ result: 'success', data: data, status: status });
@@ -137,8 +152,8 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 }
 
 UsersList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'UserList', 'GenerateList', 
-                      'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors'
-                      ];
+                      'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+                      'GetBasePath' ];
 
 
 function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
@@ -182,26 +197,36 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
    // Save
    scope.formSave = function() {
-      Rest.setUrl(defaultUrl + scope.organization + '/users/');
-      var data = {}
-      for (var fld in form.fields) {
-          data[fld] = scope[fld];   
-      } 
-      Rest.post(data)
-          .success( function(data, status, headers, config) {
-              var base = $location.path().replace(/^\//,'').split('/')[0];
-              if (base == 'users') {
-                $rootScope.flashMessage = 'New user successfully created!';
-                $location.path('/users/' + data.id);
-              }
-              else {
-                ReturnToCaller(1);
-              }
-              })
-          .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, form,
-                  { hdr: 'Error!', msg: 'Failed to add new user. POST returned status: ' + status });
-              });
+      if (scope.organization !== undefined && scope.organization !== null && scope.organization !== '') {
+         Rest.setUrl(defaultUrl + scope.organization + '/users/');
+             var data = {}
+             for (var fld in form.fields) {
+                 if (form.fields[fld].realName) {
+                    data[form.fields[fld].realName] = scope[fld];
+                 }
+                 else {
+                    data[fld] = scope[fld];
+                 }   
+             } 
+             Rest.post(data)
+                 .success( function(data, status, headers, config) {
+                     var base = $location.path().replace(/^\//,'').split('/')[0];
+                     if (base == 'users') {
+                        $rootScope.flashMessage = 'New user successfully created!';
+                        $location.path('/users/' + data.id);
+                     }
+                     else {
+                        ReturnToCaller(1);
+                     }
+                     })
+                 .error( function(data, status, headers, config) {
+                     ProcessErrors(scope, data, status, form,
+                         { hdr: 'Error!', msg: 'Failed to add new user. POST returned status: ' + status });
+             });
+      }
+      else {
+         scope.organization_name_api_error = 'A value is required';
+      }
       };
 
    // Cancel

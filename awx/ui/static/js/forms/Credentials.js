@@ -21,7 +21,8 @@ angular.module('CredentialFormDefinition', [])
                 label: 'Name',
                 type: 'text',
                 addRequired: true,
-                editRequired: true
+                editRequired: true,
+                autocomplete: false
                 },
             description: { 
                 label: 'Description',
@@ -33,7 +34,8 @@ angular.module('CredentialFormDefinition', [])
                 label: 'SSH Username',
                 type: 'text',
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                autocomplete: false
                 },
             "ssh_password": {
                 label: 'SSH Password',
@@ -43,7 +45,8 @@ angular.module('CredentialFormDefinition', [])
                 ngChange: "clearPWConfirm('ssh_password_confirm')",
                 ask: true,
                 clear: true,
-                associated: 'ssh_password_confirm'
+                associated: 'ssh_password_confirm',
+                autocomplete: false
                 },
             "ssh_password_confirm": {
                 label: 'Confirm SSH Password',
@@ -51,7 +54,8 @@ angular.module('CredentialFormDefinition', [])
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,
-                associated: 'ssh_password'
+                associated: 'ssh_password',
+                autocomplete: false
                 },
             "ssh_key_data": {
                 label: 'SSH Private Key',
@@ -83,7 +87,8 @@ angular.module('CredentialFormDefinition', [])
                 label: 'Sudo Username',
                 type: 'text',
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                autocomplete: false
                 },
             "sudo_password": {
                 label: 'Sudo Password',
@@ -93,7 +98,8 @@ angular.module('CredentialFormDefinition', [])
                 ngChange: "clearPWConfirm('sudo_password_confirm')",
                 ask: true,
                 clear: true,
-                associated: 'sudo_password_confirm'
+                associated: 'sudo_password_confirm',
+                autocomplete: false
                 },
             "sudo_password_confirm": {
                 label: 'Confirm Sudo Password',
@@ -101,7 +107,8 @@ angular.module('CredentialFormDefinition', [])
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,
-                associated: 'sudo_password'
+                associated: 'sudo_password',
+                autocomplete: false
                 }
             },
 
