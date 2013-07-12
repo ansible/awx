@@ -130,7 +130,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            }
 
         scope.toggle_subhost = function(id) {
-           console.log(list.iterator);
            if (scope[list.iterator + "_" + id + "_class"] == "success") {
               scope[list.iterator + "_" + id + "_class"] = "";
               document.getElementById('check_' + id).checked = false;
