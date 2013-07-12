@@ -384,7 +384,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
            check_field: 'allow_callbacks',
            default_val: dft
            });
-
+    
        });
 
    // Retrieve detail record and prepopulate the form
@@ -436,6 +436,9 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                   relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
                }
            }
+
+           scope['callback_url'] = data.related['callback'];
+           master['callback_url'] = scope['callback_url'];
 
            LookUpInit({
                scope: scope,
@@ -493,7 +496,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                   data[fld] = scope[fld].value;
                }
                else {
-                  if (fld != 'variables') {
+                  if (fld != 'variables' && fld != 'callback_url') {
                      data[fld] = scope[fld];
                   }
                }      

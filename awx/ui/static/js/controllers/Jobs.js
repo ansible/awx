@@ -226,6 +226,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                    check_field: 'allow_callbacks',
                    default_val: dft
                    });
+               scope['callback_url'] = data.related['callback'];
                $('input[type="checkbox"]').attr('disabled','disabled');
                $('#host_config_key-gen-btn').attr('disabled','disabled');
                })

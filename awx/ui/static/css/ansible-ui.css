@@ -62,6 +62,12 @@
 
 /* End btn heights */
 
+/* Use code-breakable in pop-over text to indent and wrap code segments */
+ .code-breakable {
+    word-wrap: break-word;
+    padding-left: 10px;
+ }
+
  .login-alert {
     font-weight: bold;
     text-align: center;

@@ -425,6 +425,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += (field.checked) ? "checked " : "";
              html += (field.readonly) ? "readonly " : "";
              html += " /> " + field.label + "\n";
+             if (field.awPopOver) {
+                html += "<a href=\"\" " + this.attr(field,'awPopOver');
+                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
+                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
+                html += (field.dataContainer) ? this.attr(field, 'dataContainer') : "";
+                html += "><i class=\"icon-info-sign\"></i></a> ";
+             }
              html += "</label>\n";
              html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
 
