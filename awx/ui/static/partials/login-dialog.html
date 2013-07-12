@@ -11,29 +11,26 @@
             <div class="control-group">
               <label class="control-label">Username:</label>
               <div class="controls">
-                <input type="text" name="username" ng-model="username" id="login-username" autocomplete="off" required><br />
-                <span class="error" ng-show="loginForm.username.$dirty && loginForm.username.$error.required">A value is required!</span>
-                <span class="errora api-error" ng-bind="usernameError"></span>
+                <input type="text" name="login_username" ng-model="login_username" id="login-username" autocomplete="off" required><br />
+                <span class="error" ng-show="loginForm.login_username.$dirty && loginForm.login_username.$error.required">A value is required!</span>
+                <span class="error api-error" ng-bind="usernameError"></span>
               </div>
             </div>
             <div class="control-group">
               <label class="control-label">Password:</label>
               <div class="controls">
-                <input type="password" name="password" id="login-password" ng-model="password" autocomplete="off"><br />
-                <span class="error" ng-show="loginForm.password.$dirty && loginForm.password.$error.required">A value is required!</span>
+                <input type="password" name="login_password" id="login-password" ng-model="login_password" required autocomplete="off"><br />
+                <span class="error" ng-show="loginForm.login_password.$dirty && loginForm.login_password.$error.required">A value is required!</span>
                 <span class="error api-error" ng-bind="passwordError"></span>
               </div>
             </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button ng-click="systemLogin(loginForm.username.$modelValue,loginForm.password.$modelValue)"
-                  ng-disabled="loginForm.$invalid || $loginForm.$pristine" 
+          <button ng-click="systemLogin(login_username, login_password)"
                   id="login-button" class="btn btn-primary">Sign In</button>
         </div>
       </div><!-- modal -->
       
     </div><!-- span -->
   </div><!-- row -->
-
-  
