@@ -123,7 +123,11 @@ class CustomRbac(permissions.BasePermission):
         return self.has_permission(request, view, obj)
 
 class JobTemplateCallbackPermission(CustomRbac):
-    
+    '''
+    Permission check used by job template callback view for requests from
+    empheral hosts.
+    '''
+
     def has_permission(self, request, view, obj=None):
         # If another authentication method was used and it's not a POST, return
         # True to fall through to the next permission class.
@@ -135,17 +139,20 @@ class JobTemplateCallbackPermission(CustomRbac):
         # active in order to proceed.
         host_config_key = request.DATA.get('host_config_key', '')
         if request.method.lower() != 'post':
-            return False
+            raise PermissionDenied()
         elif not host_config_key:
-            return False
+            raise PermissionDenied()
         elif obj and not obj.active:
-            return False
+            raise PermissionDenied()
         elif obj and obj.host_config_key != host_config_key:
-            return False
+            raise PermissionDenied()
         else:
             return True
 
 class JobTaskPermission(CustomRbac):
+    '''
+    Permission checks used for API callbacks from running a task.
+    '''
 
     def has_permission(self, request, view, obj=None):
         # If another authentication method was used other than the one for job

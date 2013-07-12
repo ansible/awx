@@ -1069,15 +1069,48 @@ class JobTemplateDetail(BaseDetail):
 
 class JobTemplateCallback(generics.RetrieveAPIView):
     '''
-    Configure a host to POST to this resource using the `host_config_key`.
+    The job template callback allows for empheral hosts to launch a new job.
+    
+    Configure a host to POST to this resource, passing the `host_config_key`
+    parameter, to start a new job limited to only the requesting host.  In the
+    examples below, replace the `N` parameter with the `id` of the job template
+    and the `HOST_CONFIG_KEY` with the `host_config_key` associated with the
+    job template.
+
+    For example, using curl:
+
+        curl --data-urlencode host_config_key=HOST_CONFIG_KEY http://server/api/v1/job_templates/N/callback/
+
+    Or using wget:
+
+        wget -O /dev/null --post-data="host_config_key=HOST_CONFIG_KEY" http://server/api/v1/job_templates/N/callback/
+        
+    The response will return status 202 if the request is valid, 403 for an
+    invalid host config key, or 400 if the host cannot be determined from the
+    address making the request.
+    
+    A GET request may be used to verify that the correct host will be selected.
+    This request must authenticate as a valid user with permission to edit the
+    job template.  For example:
+    
+        curl http://user:password@server/api/v1/job_templates/N/callback/
+    
+    The response will include the host config key as well as the host name(s)
+    that would match the request:
+    
+        {
+            "host_config_key": "HOST_CONFIG_KEY",
+            "matching_hosts": ["hostname"]
+        }
+
     '''
 
     model = JobTemplate
     permission_classes = (JobTemplateCallbackPermission,)
 
-    def find_host(self):
+    def find_matching_hosts(self):
         '''
-        Find the host in the job template's inventory that matches the remote
+        Find the host(s) in the job template's inventory that match the remote
         host for the current request.
         '''
         # Find the list of remote host names/IPs to check.
@@ -1099,30 +1132,27 @@ class JobTemplateCallback(generics.RetrieveAPIView):
             if rh.endswith('.arpa'):
                 remote_hosts.remove(rh)
         if not remote_hosts:
-            return
+            return set()
         # Find the host objects to search for a match.
         obj = self.get_object()
         qs = obj.inventory.hosts.filter(active=True)
         # First try for an exact match on the name.
         try:
-            return qs.get(name__in=remote_hosts)
+            return set([qs.get(name__in=remote_hosts)])
         except (Host.DoesNotExist, Host.MultipleObjectsReturned):
             pass
         # Next, try matching based on name or ansible_ssh_host variable.
-        matches = dict()
+        matches = set()
         for host in qs:
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
             if ansible_ssh_host in remote_hosts:
-                if host not in matches:
-                    matches[host] = 0
-                matches[host] += 2
+                matches.add(host)
+            # FIXME: Not entirely sure if this statement will ever be needed?
             if host.name != ansible_ssh_host and host.name in remote_hosts:
-                if host not in matches:
-                    matches[host] = 0
-                matches[host] += 1
+                matches.add(host)
         if len(matches) == 1:
-            return matches.keys()[0]
-        # Try to resolve forward addresses for each host to find a match.
+            return matches
+        # Try to resolve forward addresses for each host to find matches.
         for host in qs:
             hostnames = set([host.name])
             ansible_ssh_host = host.variables_dict.get('ansible_ssh_host', '')
@@ -1134,22 +1164,18 @@ class JobTemplateCallback(generics.RetrieveAPIView):
                     possible_ips = set(x[4][0] for x in result)
                     possible_ips.discard(hostname)
                     if possible_ips and possible_ips & remote_hosts:
-                        if host in matches:
-                            matches[host] += 1
-                        else:
-                            matches[host] = 1
+                        matches.add(host)
                 except socket.gaierror:
                     pass
-        # Return the host with the highest match weight (in case of multiple
-        # matches).
-        if matches:
-            return sorted(matches.items(), key=lambda x: x[1])[-1][0]
+        # Return all matches found.
+        return matches
 
     def get(self, request, *args, **kwargs):
         job_template = self.get_object()
+        matching_hosts = self.find_matching_hosts()
         data = dict(
             host_config_key=job_template.host_config_key,
-            matched_host=getattr(self.find_host(), 'name', None),
+            matching_hosts=[x.name for x in matching_hosts],
         )
         if settings.DEBUG:
             d = dict([(k,v) for k,v in request.META.items()
@@ -1160,12 +1186,20 @@ class JobTemplateCallback(generics.RetrieveAPIView):
     def post(self, request, *args, **kwargs):
         job_template = self.get_object()
         # Permission class should have already validated host_config_key.
-        host = self.find_host()
-        if not host:
+        matching_hosts = self.find_matching_hosts()
+        if not matching_hosts:
             data = dict(msg='No matching host could be found!')
+            # FIXME: Log!
             return Response(data, status=400)
+        elif len(matching_hosts) > 1:
+            data = dict(msg='Multiple hosts matched the request!')
+            # FIXME: Log!
+            return Response(data, status=400)
+        else:
+            host = list(matching_hosts)[0]
         if not job_template.can_start_without_user_input():
             data = dict(msg='Cannot start automatically, user input required!')
+            # FIXME: Log!
             return Response(data, status=400)
         limit = ':'.join(filter(None, [job_template.limit, host.name]))
         job = job_template.create_job(limit=limit, launch_type='callback')
