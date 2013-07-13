@@ -60,6 +60,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        if (options.mode == 'lookup') {
           // options should include {hdr: <dialog header>, action: <function...> }
           this.scope.lookupHeader = options.hdr;
+          $('.popover').remove();  //remove any lingering pop-overs
           $('#lookup-modal').modal({ backdrop: 'static', keyboard: false });
        }
        

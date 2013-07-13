@@ -57,6 +57,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
        if (options.modal) {
           this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;
+          $('.popover').remove();  //remove any lingering pop-overs
           $('#form-modal').modal({ backdrop: 'static', keyboard: false });
        }
        return this.scope;

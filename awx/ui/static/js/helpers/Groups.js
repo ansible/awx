@@ -36,7 +36,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.formModalHeader = 'Add Groups';
         scope.formModalCancelShow = true;
         scope.formModalActionClass = 'btn btn-success';
-
+        
+        $('.popover').remove();  //remove any lingering pop-overs
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').modal({ backdrop: 'static', keyboard: false });
 

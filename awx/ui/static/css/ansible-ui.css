@@ -126,7 +126,7 @@
     text-decoration: none;
  }
 
- .help-link { 
+ .help-link, .help-link:active, .help-link:visited { 
     color: #49afcd;
  }
 
