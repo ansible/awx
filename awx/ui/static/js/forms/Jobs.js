@@ -162,7 +162,7 @@ angular.module('JobFormDefinition', [])
                 dataContainer: '#jobs',
                 dataTitle: 'Callback URL'
                 },
-            callback_url: {d
+            callback_url: {
                 label: 'Callback URL', 
                 type: 'text',
                 addRequired: false, 

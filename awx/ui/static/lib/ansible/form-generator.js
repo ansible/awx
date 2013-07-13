@@ -196,13 +196,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += "<label class=\"control-label"; 
              html += (field.labelClass) ? " " + field.labelClass : "";
              html += "\" for=\"" + fld + '">';
-             if (field.awPopOver) {
-                html += "<a href=\"\" " + this.attr(field,'awPopOver');
-                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
-                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
-                html += (field.dataContainer) ? this.attr(field, 'dataContainer') : "";
-                html += "><i class=\"icon-info-sign\"></i></a> ";
-             }
+             html += (field.awPopOver) ? this.attr(field, 'awPopOver') : "";
              html += (field.icon) ? this.icon(field.icon) : "";
              html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n"; 
@@ -272,13 +266,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += (field.ngShow) ? this.attr(field,'ngShow') : "";
              html += ">\n";
              html += "<label class=\"control-label\" for=\"" + fld + '">';
-             if (field.awPopOver) {
-                html += "<a href=\"\" " + this.attr(field,'awPopOver');
-                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
-                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
-                html += (field.dataContainer) ? this.attr(field, 'dataContainer') : "";
-                html += "><i class=\"icon-info-sign\"></i></a> ";
-             }
+             html += (field.awPopOver) ? this.attr(field, 'awPopOver') : "";
              html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n";
              
@@ -323,12 +311,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += (field.ngShow) ? this.attr(field,'ngShow') : "";
              html += ">\n";
              html += "<label class=\"control-label\" for=\"" + fld + '">';
-             if (field.awPopOver) {
-                html += "<a href=\"\" " + this.attr(field,'awPopOver');
-                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
-                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
-                html += "><i class=\"icon-info-sign\"></i></a> ";
-             }
+             html += (field.awPopOver) ? this.attr(field, 'awPopOver') : "";
              html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n"; 
              html += "<select ";
@@ -362,12 +345,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += (field.ngShow) ? this.attr(field,'ngShow') : "";
              html += ">\n";
              html += "<label class=\"control-label\" for=\"" + fld + '">';
-             if (field.awPopOver) {
-                html += "<a href=\"\" " + this.attr(field,'awPopOver');
-                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
-                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
-                html += "><i class=\"icon-info-sign\"></i></a> ";
-             }
+             html += (field.awPopOver) ? this.attr(field, 'awPopOver') : "";
              html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n"; 
              // Use 'text' rather than 'number' so that our integer directive works correctly
@@ -425,16 +403,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += (field.checked) ? "checked " : "";
              html += (field.readonly) ? "readonly " : "";
              html += " /> " + field.label + "\n";
-             if (field.awPopOver) {
-                html += "<a href=\"\" " + this.attr(field,'awPopOver');
-                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
-                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
-                html += (field.dataContainer) ? this.attr(field, 'dataContainer') : "";
-                html += "><i class=\"icon-info-sign\"></i></a> ";
-             }
+             html += (field.awPopOver) ? this.attr(field, 'awPopOver') : "";
              html += "</label>\n";
              html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
-
              html += "</div>\n";
              html += "</div>\n";
           }
@@ -447,12 +418,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += (field.ngShow) ? this.attr(field,'ngShow') : "";
              html += ">\n";
              html += "<label class=\"control-label\" for=\"" + fld + '">';
-             if (field.awPopOver) {
-                html += "<a href=\"\" " + this.attr(field,'awPopOver');
-                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
-                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
-                html += "><i class=\"icon-info-sign\"></i></a> ";
-             }
+             html += (field.awPopOver) ? this.attr(field, 'awPopOver') : "";
              html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n";
              for (var i=0; i < field.options.length; i++) {
@@ -493,12 +459,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += (field.ngShow) ? this.attr(field,'ngShow') : "";
           html += ">\n";
           html += "<label class=\"control-label\" for=\"" + fld + '">';
-          if (field.awPopOver) {
-                html += "<a href=\"\" " + this.attr(field,'awPopOver');
-                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
-                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
-                html += "><i class=\"icon-info-sign\"></i></a> ";
-          }
+          html += (field.awPopOver) ? this.attr(field, 'awPopOver') : "";
           html +=  field.label + '</label>' + "\n";
           html += "<div class=\"controls\">\n";
           html += "<div class=\"input-prepend\">\n";
@@ -541,12 +502,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += "<label class=\"control-label"; 
              html += (field.labelClass) ? " " + field.labelClass : "";
              html += "\" for=\"" + fld + '">';
-             if (field.awPopOver) {
-                html += "<a href=\"\" " + this.attr(field,'awPopOver');
-                html += (field.dataTitle) ? this.attr(field, 'dataTitle') : ""; 
-                html += (field.dataPlacement) ? this.attr(field, 'dataPlacement') : "";
-                html += "><i class=\"icon-info-sign\"></i></a> ";
-             }
+             html += (field.awPopOver) ? this.attr(field, 'awPopOver') : "";
              html += (field.icon) ? this.icon(field.icon) : "";
              html += field.label + '</label>' + "\n";
              html += "<div class=\"controls\">\n"; 

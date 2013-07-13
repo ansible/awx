@@ -12,7 +12,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
     .factory('Attr', function() {
     return function(obj, key) { 
         var result;
-        var value = (typeof obj[key] === "string") ? obj[key].replace(/\'/g, '&quot;') : obj[key];
+        var value = (typeof obj[key] === "string") ? obj[key].replace(/[\'\"]/g, '&quot;') : obj[key];
         switch(key) {
             case 'ngClick':
                result = "ng-click=\"" + value + "\" ";
@@ -48,7 +48,13 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                result = "aw-tool-tip=\"" + value + "\" ";
                break;
             case 'awPopOver':
-               result = "aw-pop-over='" + value + "' ";
+               // construct the entire help link
+               result = "<a href=\"\" aw-pop-over=\"" + value + "\" ";
+               result += (obj.dataTitle) ? "data-title=\"" + obj['dataTitle'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
+               result += (obj.dataPlacement) ? "data-placement=\"" + obj['dataPlacement'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
+               result += (obj.dataContainer) ? "data-container=\"" + obj['dataContainer'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
+               result += "class=\"help-link\" ";
+               result += "><i class=\"icon-question-sign\"></i></a> ";
                break;
             case 'dataTitle':
                result = "data-title=\"" + value + "\" ";
