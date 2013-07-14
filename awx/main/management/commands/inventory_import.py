@@ -98,11 +98,20 @@ class MemHost(object):
         LOGGER.debug("adding host name: %s" % name)
         assert name is not None
         assert inventory_base is not None
-        # FIXME: set ansible_ssh_port if ":" in name
+
+        # set ansible_ssh_port if ":" in name
         self.name = name
         self.variables = {}
         self.inventory_base = inventory_base
-       
+      
+        if name.find(":") != -1:
+            tokens = name.split(":")
+            self.name = tokens[0]
+            self.variables['ansible_ssh_port'] = tokens[1]
+
+        if "[" in name:
+            raise ImportException("block ranges like host[0:50].example.com are not yet supported by the importer")
+
         host_vars = os.path.join(inventory_base, 'host_vars', name)
         if os.path.exists(host_vars):
             LOGGER.debug("loading host_vars")
