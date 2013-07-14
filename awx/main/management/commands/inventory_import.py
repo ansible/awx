@@ -6,6 +6,8 @@ import datetime
 import logging
 import sys
 from optparse import make_option
+import subprocess
+import traceback
 
 # Django
 from django.core.management.base import BaseCommand, CommandError
@@ -18,6 +20,10 @@ from django.utils.timezone import now
 from awx.main.models import *
 
 LOGGER = None
+
+# maps host and group names to hosts to prevent redudant additions
+group_names = {}
+host_names = {}
 
 class ImportException(object):
 
@@ -41,6 +47,7 @@ class MemGroup(object):
         self.parents = []
 
         group_vars = os.path.join(inventory_base, 'group_vars', name)
+        print "LOOKING FOR: %s" % group_vars
         if os.path.exists(group_vars):
             LOGGER.debug("loading group_vars")
             self.variables = yaml.load(open(group_vars).read())
@@ -121,7 +128,29 @@ class MemHost(object):
         LOGGER.debug("setting variables %s on host %s" % (values, self.name))
         self.variables = values
 
-class DirectoryLoader(object):
+class BaseLoader(object):
+
+    def get_host(self, name):
+        global host_names
+        host = None
+        if not name in host_names:
+            host = MemHost(name, self.inventory_base)
+            host_names[name] = host
+        return host_names[name]
+
+    def get_group(self, name, all_group, child=False):
+        global group_names
+        if name == 'all':
+            return all_group
+        if not name in group_names:
+            group = MemGroup(name, self.inventory_base) 
+            if not child:
+                all_group.add_child_group(group)
+            group_names[name] = group
+        return group_names[name]
+
+
+class DirectoryLoader(BaseLoader):
 
     def __init__(self):
         LOGGER.debug("processing directory")
@@ -133,25 +162,11 @@ class DirectoryLoader(object):
         # now go through converts and use IniLoader or ExecutableJsonLoader
         # as needed but pass them in the inventory_base or src so group_vars can load
 
-class IniLoader(object):
-
+class IniLoader(BaseLoader):
     
     def __init__(self, inventory_base=None):
         LOGGER.debug("processing ini")
         self.inventory_base = inventory_base
-        self.group_names = {}
-
-    def get_group(self, name, all_group):
-        group = None
-        if name == 'all':
-            return all_group
-        if not name in self.group_names:
-            group = MemGroup(name, self.inventory_base)
-            all_group.add_child_group(group)
-            self.group_names[name] = group
-        else:
-            group = self.group_names[name]
-        return group
 
     def load(self, src, all_group):
         LOGGER.debug("loading: %s on %s" % (src, all_group))
@@ -206,27 +221,113 @@ class IniLoader(object):
                          (k, v) = t.split("=", 1)
                          group.variables[k] = v
      
-                                           
-
-
             # TODO: expansion patterns are probably not going to be supported
 
- 
-        
+# from API documentation:
+#
+# if called with --list, inventory outputs like so:
+#        
+# {
+#    "databases"   : {
+#        "hosts"   : [ "host1.example.com", "host2.example.com" ],
+#        "vars"    : {
+#            "a"   : true
+#        }
+#    },
+#    "webservers"  : [ "host2.example.com", "host3.example.com" ],
+#    "atlanta"     : {
+#        "hosts"   : [ "host1.example.com", "host4.example.com", "host5.example.com" ],
+#        "vars"    : {
+#            "b"   : false
+#        },
+#        "children": [ "marietta", "5points" ],
+#    },
+#    "marietta"    : [ "host6.example.com" ],
+#    "5points"     : [ "host7.example.com" ]
+# }
+#
+# if called with --host <host_record_name> outputs JSON for that host
 
-
-class ExecutableJsonLoader(object):
+class ExecutableJsonLoader(BaseLoader):
 
     def __init__(self, inventory_base=None):
 
         LOGGER.debug("processing executable JSON source")
         self.inventory_base = inventory_base
+        self.child_group_names = {}
+
+    def command_to_json(self, cmd):
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (stdout, stderr) = proc.communicate()
+        if proc.returncode != 0:
+            raise ImportException("%s list failed %s with output: %s" % (src, stderr, proc.returncode))
+        data = {}
+        try:
+            data = json.loads(stdout)
+        except:
+            traceback.print_exc()
+            raise Exception("failed to load JSON output: %s" % stdout)
+        assert type(data) == dict
+        return data
 
     def load(self, src, all_group):
 
         LOGGER.debug("loading %s onto %s" % (src, all_group))
+
         if self.inventory_base is None:
             self.inventory_base = os.path.dirname(src)
+
+        data = self.command_to_json([src, "--list"])
+
+        group = None
+
+        for (k,v) in data.iteritems():
+ 
+            group = self.get_group(k, all_group)
+
+            if type(v) == dict:
+
+                # process hosts
+                host_details = v.get('hosts', None)
+                if host_details is not None:
+                    if type(host_details) == dict:
+                        for (hk, hv) in host_details.iteritems():
+                             host = self.get_host(hk)
+                             host.variables.update(hv)
+                             group.add_host(host)
+                    if type(host_details) == list:
+                        for hk in host_details:
+                            host = self.get_host(hk)
+                            group.add_host(host)
+
+                # process variables
+                vars = v.get('vars', None)
+                if vars is not None:
+                    group.variables.update(vars)
+
+                # process child groups
+                children_details = v.get('children', None)
+                if children_details is not None:
+                    for x in children_details:
+                        child = self.get_group(x, self.inventory_base, child=True)
+                        group.add_child_group(child)
+                        self.child_group_names[x] = child
+
+            if type(v) == list:
+               for x in v:
+                   host = self.get_host(x)
+                   group.add_host(host)
+
+            all_group.add_child_group(group)
+           
+
+        # then we invoke the executable once for each host name we've built up
+        # to set their variables
+        global host_names
+        for (k,v) in host_names.iteritems():
+            data = self.command_to_json([src, "--host", k])
+            v.variables.update(data)
+
 
 class GenericLoader(object):
     def __init__(self, src):
@@ -242,10 +343,10 @@ class GenericLoader(object):
             self.memGroup = memGroup = MemGroup('all', src)
             DirectoryLoader().load(src, memGroup)
         elif os.access(src, os.X_OK):
-            self.memGroup = memGroup = MemGroup('all', os.path.basename(src))
+            self.memGroup = memGroup = MemGroup('all', os.path.dirname(src))
             ExecutableJsonLoader().load(src, memGroup)
         else:
-            self.memGroup = memGroup = MemGroup('all', os.path.basename(src))
+            self.memGroup = memGroup = MemGroup('all', os.path.dirname(src))
             IniLoader().load(src, memGroup)
 
         LOGGER.debug("loading process complete")
