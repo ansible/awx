@@ -134,6 +134,9 @@ class MemHost(object):
 class BaseLoader(object):
 
     def get_host(self, name):
+        if ":" in name:
+            tokens = name.split(":")
+            name = tokens[0]
         global host_names
         host = None
         if not name in host_names:
