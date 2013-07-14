@@ -561,20 +561,21 @@ class Command(BaseCommand):
                if obj.name in mem_hash:
                    mem_group = mem_hash[obj.name]
                    db_variables = json.loads(obj.variables)
-                   mem_variables = json.loads(mem_group.variables)
+                   mem_variables = mem_group.variables
                    if overwrite_vars or overwrite:
                        db_variables = mem_variables
                    else:
                        db_variables.update(mem_variables)
                    db_variables = json.dumps(db_variables)
-                   obj.update(variables=db_variables)
+                   obj.variables = db_variables
+                   obj.save()
 
         variable_mangler(Group, group_names, overwrite, overwrite_vars)
         variable_mangler(Host,  host_names,  overwrite, overwrite_vars)
   
         # for each group, draw in child group arrangements
         # FIXME: where they do not already exist
-        for (k,v) in group_names:
+        for (k,v) in group_names.iteritems():
             db_group = Group.objects.get(inventory=inventory, name=k)
             for mem_child_group in v.child_groups:
                 db_child = Group.objects.get(inventory=inventory, name=mem_child_group.name)
