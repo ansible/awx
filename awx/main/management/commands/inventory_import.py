@@ -582,7 +582,11 @@ class Command(BaseCommand):
                 db_child = Group.objects.get(inventory=inventory, name=mem_child_group.name)
                 db_group.children.add(db_child)
             db_group.save()
-        
+
+        # TODO:  test that UI can display what we import
+        # TODO:  test overwrite and non-overwrite modes (and --overwrite-vars)       
+        # FIXME: also test that variables are valid
+ 
         LOGGER.info("inventory import complete, %s, id=%s" % (inventory.name, inventory.id))
 
 
