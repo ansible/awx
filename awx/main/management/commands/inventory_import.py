@@ -547,12 +547,13 @@ class Command(BaseCommand):
         # for each host in a mem group, add it to the parents to which it belongs
         # FIXME: where it does not already exist
         for (k,v) in group_names.iteritems():
-            LOGGER.info("adding parent arrangements")
+            LOGGER.info("adding parent arrangements for %s k")
             db_group = Group.objects.get(name=k, inventory__pk=inventory.pk)
             mem_hosts = v.hosts
             for h in mem_hosts:
                 db_host = Host.objects.get(name=h.name, inventory__pk=inventory.pk)
                 db_group.hosts.add(db_host)
+                print "*** ADDING %s to %s ***" % (db_host, db_group) 
             db_group.save()
 
         def variable_mangler(model, mem_hash, overwrite, overwrite_vars):
