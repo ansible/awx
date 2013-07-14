@@ -8,6 +8,7 @@ import sys
 from optparse import make_option
 import subprocess
 import traceback
+import glob
 
 # Django
 from django.core.management.base import BaseCommand, CommandError
@@ -47,7 +48,6 @@ class MemGroup(object):
         self.parents = []
 
         group_vars = os.path.join(inventory_base, 'group_vars', name)
-        print "LOOKING FOR: %s" % group_vars
         if os.path.exists(group_vars):
             LOGGER.debug("loading group_vars")
             self.variables = yaml.load(open(group_vars).read())
@@ -148,19 +148,6 @@ class BaseLoader(object):
                 all_group.add_child_group(group)
             group_names[name] = group
         return group_names[name]
-
-
-class DirectoryLoader(BaseLoader):
-
-    def __init__(self):
-        LOGGER.debug("processing directory")
-        pass
-
-    def load(self, src, all_group):
-        self.inventory_base = dirname
-
-        # now go through converts and use IniLoader or ExecutableJsonLoader
-        # as needed but pass them in the inventory_base or src so group_vars can load
 
 class IniLoader(BaseLoader):
     
@@ -341,7 +328,15 @@ class GenericLoader(object):
             raise ImportException("source does not exist")
         if os.path.isdir(src):
             self.memGroup = memGroup = MemGroup('all', src)
-            DirectoryLoader().load(src, memGroup)
+            for f in glob.glob("%s/*" % src):
+                if f.endswith(".ini"):
+                    # config files for inventory scripts should be ignored
+                    pass
+                if not os.path.isdir(f):
+                    if os.access(f, os.X_OK):
+                        ExecutableJsonLoader().load(f, memGroup)
+                    else:
+                        IniLoader().load(f, memGroup)
         elif os.access(src, os.X_OK):
             self.memGroup = memGroup = MemGroup('all', os.path.dirname(src))
             ExecutableJsonLoader().load(src, memGroup)
