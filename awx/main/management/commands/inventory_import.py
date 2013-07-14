@@ -196,7 +196,7 @@ class IniLoader(BaseLoader):
                  tokens = shlex.split(line)
 
                  if input_mode == 'host':
-                     new_host = MemHost(tokens[0], self.inventory_base)
+                     new_host = self.get_host(tokens[0])
                      if len(tokens) > 1:
                          variables = {}
                          for t in tokens[1:]:
