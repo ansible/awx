@@ -32,9 +32,6 @@ class MemGroup(object):
     def __init__(self, name, inventory_base):
 
         assert inventory_base is not None
-        LOGGER.debug("creating memgroup: %s, basedir %s" % (name, inventory_base))
-
-                
 
         self.name = name
         self.child_groups = []
@@ -48,16 +45,17 @@ class MemGroup(object):
             self.variables = yaml.load(open(group_vars).read())
 
     def child_group_by_name(self, grp_name):
-        LOGGER.debug("adding child group by name: %s" % grp_name)
+        LOGGER.debug("looking for child group: %s" % grp_name)
         for x in self.child_groups:
             if x.name == grp_name:
                  return x
         grp = MemGroup(grp_name, self.inventory_base)       
+        LOGGER.debug("adding child group %s to group %s" % (grp.name, self.name))
         self.child_groups.append(grp)
         return grp
 
     def add_child_group(self, grp):
-        LOGGER.debug("adding child group object: %s" % grp.name)
+        LOGGER.debug("adding child group %s to group %s" % (grp.name, self.name))
  
         assert type(grp) == MemGroup
         if grp not in self.child_groups:
@@ -66,18 +64,18 @@ class MemGroup(object):
             grp.parents.append(self)
 
     def add_host(self, host):
-        LOGGER.debug("adding host: %s" % host)
+        LOGGER.debug("adding host %s to group %s" % (host.name, self.name))
        
         assert type(host) == MemHost
         if host not in self.hosts:
             self.hosts.append(host)
 
     def set_variables(self, values):
-        LOGGER.debug("setting variables: %s" % values)
+        LOGGER.debug("setting variables %s on group %s" % (values, self.name))
         self.variables = values
 
     def debug_tree(self):
-        LOGGER.debug("debugging tree")
+        LOGGER.debug("debugging tree of group %s" % self.name)
  
         print "group: %s, %s" % (self.name, self.variables)
         for x in self.child_groups:
@@ -106,7 +104,7 @@ class MemHost(object):
             self.variables = yaml.load(open(host_vars).read())
     
     def set_variables(self, values):
-        LOGGER.debug("setting variables: %s" % values)
+        LOGGER.debug("setting variables %s on host %s" % (values, self.name))
         self.variables = values
 
 class DirectoryLoader(object):
@@ -131,6 +129,9 @@ class IniLoader(object):
     def load(self, src, all_group):
         LOGGER.debug("loading: %s on %s" % (src, all_group))
 
+        # a cache to make sure we don't create groups more than once
+        group_names = {}
+
         if self.inventory_base is None:
             self.inventory_base = os.path.dirname(src)  
 
@@ -153,8 +154,12 @@ class IniLoader(object):
                      input_mode = 'children' 
                  else:
                      input_mode = 'host'
-                     group = MemGroup(line, self.inventory_base)                     
-
+                     if not line in group_names:
+                         group = MemGroup(line, self.inventory_base)                     
+                         all_group.add_child_group(group)
+                         group_names[line] = group
+                     else:
+                         group = group_names[line]
             else:
                  line = line.lstrip().rstrip()
                  if line == "":
