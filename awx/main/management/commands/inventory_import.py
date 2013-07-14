@@ -52,14 +52,16 @@ class MemGroup(object):
             LOGGER.debug("loading group_vars")
             self.variables = yaml.load(open(group_vars).read())
 
-    def child_group_by_name(self, grp_name):
+    def child_group_by_name(self, grp_name, loader):
         LOGGER.debug("looking for child group: %s" % grp_name)
         if grp_name == 'all':
             return
+        # slight hack here, passing in 'self' for all_group but child=True won't use it
+        grp = loader.get_group(grp_name, self, child=True)
+        # don't add to child groups if already there
         for x in self.child_groups:
             if x.name == grp_name:
                  return x
-        grp = MemGroup(grp_name, self.inventory_base)       
         LOGGER.debug("adding child group %s to group %s" % (grp.name, self.name))
         self.child_groups.append(grp)
         return grp
@@ -202,7 +204,7 @@ class IniLoader(BaseLoader):
                      group.add_host(new_host) 
 
                  elif input_mode == 'children':
-                     group.child_group_by_name(line)
+                     group.child_group_by_name(line, self)
                  elif input_mode == 'vars':
                      for t in tokens:
                          (k, v) = t.split("=", 1)
