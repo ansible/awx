@@ -32,6 +32,7 @@ class MemGroup(object):
     def __init__(self, name, inventory_base):
 
         assert inventory_base is not None
+        self.inventory_base = inventory_base
 
         self.name = name
         self.child_groups = []
@@ -46,6 +47,8 @@ class MemGroup(object):
 
     def child_group_by_name(self, grp_name):
         LOGGER.debug("looking for child group: %s" % grp_name)
+        if grp_name == 'all':
+            return
         for x in self.child_groups:
             if x.name == grp_name:
                  return x
@@ -55,6 +58,8 @@ class MemGroup(object):
         return grp
 
     def add_child_group(self, grp):
+        assert grp.name is not 'all'
+
         LOGGER.debug("adding child group %s to group %s" % (grp.name, self.name))
  
         assert type(grp) == MemGroup
@@ -75,7 +80,7 @@ class MemGroup(object):
         self.variables = values
 
     def debug_tree(self):
-        LOGGER.debug("debugging tree of group %s" % self.name)
+        LOGGER.debug("debugging tree of group (%s)" % self.name)
  
         print "group: %s, %s" % (self.name, self.variables)
         for x in self.child_groups:
@@ -125,12 +130,22 @@ class IniLoader(object):
     def __init__(self, inventory_base=None):
         LOGGER.debug("processing ini")
         self.inventory_base = inventory_base
+        self.group_names = {}
+
+    def get_group(self, name, all_group):
+        group = None
+        if name == 'all':
+            return all_group
+        if not name in self.group_names:
+            group = MemGroup(name, self.inventory_base)
+            all_group.add_child_group(group)
+            self.group_names[name] = group
+        else:
+            group = self.group_names[name]
+        return group
 
     def load(self, src, all_group):
         LOGGER.debug("loading: %s on %s" % (src, all_group))
-
-        # a cache to make sure we don't create groups more than once
-        group_names = {}
 
         if self.inventory_base is None:
             self.inventory_base = os.path.dirname(src)  
@@ -146,21 +161,21 @@ class IniLoader(object):
                  line = tokens[0]
 
             if line.startswith("["):
-                 line = line.replace("[","").replace("]","")
-
+                 # mode change, possible new group name
+                 line = line.replace("[","").replace("]","").lstrip().rstrip()
                  if line.find(":vars") != -1:
                      input_mode = 'vars'
+                     line = line.replace(":vars","")
+                     group = self.get_group(line, all_group)
                  elif line.find(":children") != -1:
                      input_mode = 'children' 
+                     line = line.replace(":children","")
+                     group = self.get_group(line, all_group)
                  else:
                      input_mode = 'host'
-                     if not line in group_names:
-                         group = MemGroup(line, self.inventory_base)                     
-                         all_group.add_child_group(group)
-                         group_names[line] = group
-                     else:
-                         group = group_names[line]
+                     group = self.get_group(line, all_group)
             else:
+                 # add a host or variable to the existing group/host
                  line = line.lstrip().rstrip()
                  if line == "":
                      continue
