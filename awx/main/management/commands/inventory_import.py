@@ -9,6 +9,7 @@ from optparse import make_option
 import subprocess
 import traceback
 import glob
+import exceptions
 
 # Django
 from django.core.management.base import BaseCommand, CommandError
@@ -26,7 +27,7 @@ LOGGER = None
 group_names = {}
 host_names = {}
 
-class ImportException(object):
+class ImportException(BaseException):
 
     def __init__(self, msg):
         self.msg = msg
@@ -428,21 +429,27 @@ class Command(BaseCommand):
 
     @transaction.commit_on_success
     def handle(self, *args, **options):
+        try:
+            self.main(args, options)
+        except ImportException, ie:
+            print ie.msg
+
+    def main(self, args, options):
         
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()
 
-        name = options.get('inventory_name', None)
-        id   = options.get('inventory_id', None)
-        overwrite = options.get('overwrite', False)
+        name           = options.get('inventory_name', None)
+        id             = options.get('inventory_id', None)
+        overwrite      = options.get('overwrite', False)
         overwrite_vars = options.get('overwrite_vars', False)
-        keep_vars = options.get('keep_vars', False)
-        source = options.get('source', None)
+        keep_vars      = options.get('keep_vars', False)
+        source         = options.get('source', None)
 
         LOGGER.debug("name=%s" % name)
         LOGGER.debug("id=%s" % id)
 
-        if name is None and id is None:
+        if name is not None and id is not None:
             self.logger.error("--inventory-name and --inventory-id are mutually exclusive")
             sys.exit(1)
         if name is None and id is None:
@@ -466,12 +473,111 @@ class Command(BaseCommand):
         # now that memGroup is correct and supports JSON executables, INI, and trees
         # now merge and/or overwrite with the database itself!
 
+        if id:
+            inventory = Inventory.objects.filter(pk=id)
+        else:
+            inventory = Inventory.objects.filter(name=name)
+        count = inventory.count()
+        if count != 1:
+            raise ImportException("%d inventory objects matched, expected 1" % count)        
+        inventory = inventory.all()[0]
 
-        #self.days = int(options.get('days', 90))
-        #self.dry_run = bool(options.get('dry_run', False))
-        ## FIXME: Handle args to select models.
-        #self.cutoff = now() - datetime.timedelta(days=self.days)
-        #self.cleanup_model(User)
-        #for model in self.get_models(PrimordialModel):
-        #    self.cleanup_model(model)
+        print "MODIFYING INVENTORY: %s" % inventory.name
+
+        # if overwrite is set, for each host in the database but NOT in the local
+        # list, delete it
+        if overwrite:
+            LOGGER.info("deleting any hosts not in the remote source")
+            Host.objects.exclude(name___in = host_names.keys()).delete()
+
+        # if overwrite is set, for each group in the database but NOT in the local
+        # list, delete it
+        if overwrite:
+            LOGGER.info("deleting any groups not in the remote source")
+            Group.objects.exclude(name__in = group_names.keys()).delete()
+
+        # if overwrite is set, throw away all child relationships for groups as we will
+        # be drawing new ones in.
+        # FIXME: only clear the ones that should not exist
+        if overwrite:
+            LOGGER.info("clearing any child relationships to rebuild from remote source")
+            groups = Group.objects.all()
+            for g in groups:
+                g.children.clear()
+                g.save()
+
+        # this will be slightly inaccurate, but attribute to first superuser.
+        user = User.objects.filter(is_superuser=True)[0]
+
+        db_groups = Group.objects.all()
+        db_hosts  = Host.objects.all()
+        db_group_names = [ g.name for g in db_groups ]
+        db_host_names  = [ h.name for h in db_hosts  ] 
+
+        # for each group not in the database but in the local list, create it
+        for (k,v) in group_names.iteritems():
+            if k not in db_group_names:
+                variables = json.dumps(v.variables)
+                LOGGER.info("inserting new group %s" % k)
+                host = Group.objects.create(inventory=inventory, name=k, variables=variables, created_by=user,
+                   description="imported")                
+                host.save()
+
+        # for each host not in the database but in the local list, create it
+        for (k,v) in host_names.iteritems():
+            if k not in db_host_names:
+                variables = json.dumps(v.variables)
+                LOGGER.info("inserting new host %s" % k)
+                group = Host.objects.create(inventory=inventory, name=k, variables=variables, created_by=user,
+                    description="imported")
+                group.save()
+
+        # if overwrite is set, clear any host membership on all hosts
+        # FIXME: where it should not exist
+        if overwrite:
+            LOGGER.info("purging host group memberships")
+            db_groups = Group.objects.all()
+            for g in db_groups:
+                g.hosts.clear()
+                g.save()
+
+        # for each host in a mem group, add it to the parents to which it belongs
+        # FIXME: where it does not already exist
+        for (k,v) in group_names.iteritems():
+            LOGGER.info("adding parent arrangements")
+            db_group = Group.objects.get(name=k, inventory__pk=inventory.pk)
+            mem_hosts = v.hosts
+            for h in mem_hosts:
+                db_host = Host.objects.get(name=h.name, inventory__pk=inventory.pk)
+                db_group.hosts.add(db_host)
+            db_group.save()
+
+        def variable_mangler(model, mem_hash, overwrite, overwrite_vars):
+            db_collection = model.objects.all()
+            for obj in db_collection:
+               if obj.name in mem_hash:
+                   mem_group = mem_hash[obj.name]
+                   db_variables = json.loads(obj.variables)
+                   mem_variables = json.loads(mem_group.variables)
+                   if overwrite_vars or overwrite:
+                       db_variables = mem_variables
+                   else:
+                       db_variables.update(mem_variables)
+                   db_variables = json.dumps(db_variables)
+                   obj.update(variables=db_variables)
+
+        variable_mangler(Group, group_names, overwrite, overwrite_vars)
+        variable_mangler(Host,  host_names,  overwrite, overwrite_vars)
+  
+        # for each group, draw in child group arrangements
+        # FIXME: where they do not already exist
+        for (k,v) in group_names:
+            db_group = Group.objects.get(inventory=inventory, name=k)
+            for mem_child_group in v.child_groups:
+                db_child = Group.objects.get(inventory=inventory, name=mem_child_group.name)
+                db_group.children.add(db_child)
+            db_group.save()
+        
+        LOGGER.info("inventory import complete, %s, id=%s" % (inventory.name, inventory.id))
+
 
