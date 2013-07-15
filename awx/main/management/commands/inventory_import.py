@@ -547,7 +547,7 @@ class Command(BaseCommand):
         # for each host in a mem group, add it to the parents to which it belongs
         # FIXME: where it does not already exist
         for (k,v) in group_names.iteritems():
-            LOGGER.info("adding parent arrangements for %s k")
+            LOGGER.info("adding parent arrangements for %s" % k)
             db_group = Group.objects.get(name=k, inventory__pk=inventory.pk)
             mem_hosts = v.hosts
             for h in mem_hosts:
