@@ -16,40 +16,87 @@ angular.module('JobEventFormDefinition', [])
         well: false,
         
         fields: {
-            event_display: {
-                label: 'Event',
-                type: 'text',
-                readonly: true
-                },
             created: {
                 label: 'Created',
                 type: 'text',
                 readonly: true,
-                "class": 'span3'
+                "class": 'span3',
+                section: 'Event Info'
                 },
-             status: {
-                label: 'Status',
-                type: 'text',
-                "class": 'job-\{\{ event_status \}\}',
-                readonly: true
+            status: {
+                labelClass: 'job-\{\{ status \}\}',
+                icon: 'icon-circle',
+                type: 'custom',
+                control: '<div class=\"job-event-status job-\{\{ status \}\}\">\{\{ status \}\}</div>',
+                section: 'Event'
                 },
             host: {
                 label: 'Host',
                 type: 'text',
-                readonly: true
+                readonly: true,
+                section: 'Event'
                 },
-            status: {
-                label: 'Status',
+            task: {
+                label: 'Task',
                 type: 'text',
-                "class": 'job-\{\{ event_status \}\}',
+                readonly: true,
+                section: 'Event'
+                },
+            conditional: {
+                label: 'Conditional?',
+                type: 'checkbox',
                 readonly: true
                 },
-            event_data: {
-                label: 'Event Data',
+            msg: {
+                label: 'Message',
                 type: 'textarea',
-                "class": "modal-input-xlarge",
-                rows: 10,
-                readonly: true
+                readonly: true,
+                section: 'Results',
+                rows: 5
+                },
+            stdout: {
+                label: 'Standard Out',
+                type: 'textarea',
+                readonly: true,
+                section: 'Results',
+                rows: 5
+                },
+            stderr: {
+                label: 'Standard Error',
+                type: 'textarea',
+                readonly: true,
+                section: 'Results',
+                rows: 5
+                },
+            start: {
+                label: 'Start',
+                type: 'text',
+                readonly: true, 
+                section: 'Timing'
+                },
+            end: {
+                label: 'End',
+                type: 'text',
+                readonly: true, 
+                section: 'Timing'
+                },
+            delta: {
+                label: 'Elapsed',
+                type: 'text',
+                readonly: true, 
+                section: 'Timing'
+                },
+            module_name: {
+                label: 'Name',
+                type: 'text',
+                readonly: true,
+                section: 'Module'
+                },
+            module_args: {
+                label: 'Arguments',
+                type: 'text',
+                readonly: true,
+                section: 'Module'
                 } 
             },
 

@@ -505,7 +505,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += "\" for=\"" + fld + '">';
              html += (field.awPopOver) ? this.attr(field, 'awPopOver') : "";
              html += (field.icon) ? this.icon(field.icon) : "";
-             html += field.label + '</label>' + "\n";
+             html += (field.label) ? field.label : '';
+             html += '</label>' + "\n";
              html += "<div class=\"controls\">\n"; 
              html += field.control;
              html += "</div>\n";

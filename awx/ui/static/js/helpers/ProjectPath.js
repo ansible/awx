@@ -32,9 +32,11 @@ angular.module('ProjectPathHelper', ['RestServices', 'Utilities'])
                 master.base_dir = scope.base_dir;  // Keep in master object so that it doesn't get
                                                    // wiped out on form reset.
                 if (opts.length == 0) {
-                   Alert('Missing project path', 'All of the project paths have been assigned to existing projects, or ' +
-                       'there are no directories found in the base path. You will need to add a project path before creating ' +
-                       'a new project.', 'alert-info');
+                   Alert('Missing Playbooks',
+                       '<p>There are no unassigned playbook directories in the base project path (' + scope.base_dir + '). ' + 
+                       'Either the project directory is empty, or all of the contents are already assigned to other AWX projects.</p>' +
+                       '<p>To fix this, log into the AWX server and check out another playbook project from your SCM repository into ' + 
+                       scope.base_dir + '.</p>', 'alert-info');
                 }
                 })
             .error( function(data, status, headers, config) {

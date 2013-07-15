@@ -389,6 +389,10 @@
     color: #da4f49;
  }
 
+ .job-event-status {
+    padding-top: 5px;
+ }
+
  .job-new,  input[type="text"].job-new,
  .job-canceled,  input[type="text"].job-canceled {
     color: #778899;

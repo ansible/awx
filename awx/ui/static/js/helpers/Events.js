@@ -25,7 +25,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventFormDefini
             }
 
         scope.formModalActionLabel = 'OK';
-        scope.formModalHeader = 'View Event';
+        //scope.formModalHeader = 'View Event';
         scope.formModalCancelShow = false;
         
         $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
@@ -36,7 +36,15 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventFormDefini
             .success( function(data, status, headers, config) {
                 for (var fld in form.fields) {
                     if (fld == 'status') {
-                       scope['status'] = (data.failed) ? 'error' : 'success';
+                       if (data['failed']) {
+                          scope['status'] = 'error';
+                       }
+                       else if (data['changed']) {
+                          scope['status'] = 'changed';
+                       }
+                       else {
+                          scope['status'] = 'success';
+                       }
                     }
                     else if (fld == 'event_data') {
                        scope['event_data'] = JSON.stringify(data['event_data'], undefined, '\t');
@@ -45,9 +53,6 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventFormDefini
                        if (data['summary_fields'] && data['summary_fields']['host']) {
                           scope['host'] = data['summary_fields']['host']['name'];
                        }
-                    }
-                    else if (fld == 'event_display') {
-                       scope['event_display'] = data.event_display.replace(/^\u00a0*/g,'')
                     }
                     else {
                        if (fld == 'created') {
@@ -61,6 +66,9 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventFormDefini
                        }
                     }
                  }
+                 
+                 scope['formModalHeader'] = data.event_display.replace(/^\u00a0*/g,'');
+
                 })
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, form,
