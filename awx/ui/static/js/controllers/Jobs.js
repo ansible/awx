@@ -165,6 +165,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    var id = $routeParams.id;
    var relatedSets = {};
 
+   scope.parseType = 'yaml';
    scope.statusSearchSpin = false;
 
    function getPlaybooks(project) {
@@ -228,6 +229,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                    });
                scope['callback_url'] = data.related['callback'];
                $('input[type="checkbox"]').attr('disabled','disabled');
+               $('input[type="radio"]').attr('disabled','disabled');
                $('#host_config_key-gen-btn').attr('disabled','disabled');
                })
            .error( function(data, status, headers, config) {
@@ -254,7 +256,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
            LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.name });
            
            for (var fld in form.fields) {
-              if (data[fld] !== null && data[fld] !== undefined) {  
+              if (fld != 'variables' && data[fld] !== null && data[fld] !== undefined) {  
                  if (form.fields[fld].type == 'select') {
                     if (scope[fld + '_options'] && scope[fld + '_options'].length > 0) {
                        for (var i=0; i < scope[fld + '_options'].length; i++) {
@@ -271,6 +273,17 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                     scope[fld] = data[fld];
                  }
                  master[fld] = scope[fld];
+              }
+              if (fld == 'variables') {
+                 // Parse extra_vars, converting to YAML.  
+                 if ($.isEmptyObject(data.extra_vars) || data.extra_vars == "\{\}" || data.extra_vars == "null") {
+                    scope.variables = "---";
+                 }
+                 else {
+                    var json_obj = JSON.parse(data.extra_vars);
+                    scope.variables = jsyaml.safeDump(json_obj);
+                 }
+                 master.variables = scope.variables;
               }
               if (form.fields[fld].type == 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
                   scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 

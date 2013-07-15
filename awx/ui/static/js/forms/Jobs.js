@@ -127,7 +127,7 @@ angular.module('JobFormDefinition', [])
                 dataTitle: 'Verbosity',
                 dataPlacement: 'left'
                 },
-            extra_vars: {
+            variables: {
                 label: 'Extra Variables',
                 type: 'textarea',
                 rows: 6,
