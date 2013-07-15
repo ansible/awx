@@ -378,7 +378,7 @@ class Command(BaseCommand):
                     help='inventory id to sync'),
         make_option('--overwrite', dest='overwrite', action='store_true', metavar="o",
                     default=False, help='overwrite the destination'),
-        make_option('--overwite-vars', dest='overwrite_vars', action='store_true', metavar="V",
+        make_option('--overwrite-vars', dest='overwrite_vars', action='store_true', metavar="V",
                     default=False, help='overwrite (rather than merge) variables'),
         make_option('--keep-vars', dest='keep_vars', action='store_true', metavar="k",
                     default=False, help='use database variables if set'),
