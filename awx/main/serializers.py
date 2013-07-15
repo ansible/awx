@@ -377,7 +377,8 @@ class JobSerializer(BaseSerializer):
                                 'forks', 'limit', 'verbosity', 'extra_vars',
                                 'job_tags', 'launch_type', 'status', 'failed',
                                 'result_stdout', 'result_traceback',
-                                'passwords_needed_to_start')
+                                'passwords_needed_to_start', 'job_args',
+                                'job_cwd', 'job_env')
 
     def get_related(self, obj):
         res = super(JobSerializer, self).get_related(obj)

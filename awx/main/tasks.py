@@ -205,8 +205,8 @@ class RunJob(Task):
                 raise RuntimeError('project local_path %s cannot be found in %s' %
                                    (job.project.local_path, root))
             env = self.build_env(job, **kwargs)
-            job = self.update_job(job_pk, job_args=args, job_cwd=cwd,
-                                  job_env=env)
+            job = self.update_job(job_pk, job_args=json.dumps(args),
+                                  job_cwd=cwd, job_env=env)
             status, stdout = self.run_pexpect(job_pk, args, cwd, env,
                                               kwargs['passwords'])
         except Exception:
