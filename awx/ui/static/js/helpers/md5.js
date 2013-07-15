@@ -28,7 +28,7 @@ angular.module('md5Helper', ['RestServices', 'Utilities'])
 
         scope.toggleCallback = function(fld) {
            if (scope.allow_callbacks == 'false') {
-              scope[fld] = null;
+              scope[fld] = '';
            }
            }
 

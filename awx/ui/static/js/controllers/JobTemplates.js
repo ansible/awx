@@ -377,7 +377,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
        getPlaybooks(scope.project);
        $('#forks-slider').slider('value',scope.forks);   // align slider handle with value.
 
-       var dft = (scope['host_config_key']) ? 'true' : 'false';
+       var dft = (scope['host_config_key'] === "" || scope['host_config_key'] === null) ? 'false' : 'true';
        md5Setup({
            scope: scope, 
            master: master, 
