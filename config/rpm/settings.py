@@ -33,6 +33,7 @@ SECRET_KEY = file('/etc/awx/SECRET_KEY', 'rb').read().strip()
 ALLOWED_HOSTS = ['*']
 
 LOGGING['handlers']['syslog'] = {
+    # ERROR captures 500 errors, WARNING also logs 4xx responses.
     'level': 'ERROR',
     'filters': ['require_debug_false'],
     'class': 'logging.handlers.SysLogHandler',

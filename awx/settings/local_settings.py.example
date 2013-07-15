@@ -87,3 +87,21 @@ DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 # Subject-line prefix for email messages send with django.core.mail.mail_admins
 # or ...mail_managers.  Make sure to include the trailing space.
 EMAIL_SUBJECT_PREFIX = '[AWX] '
+
+# Enable logging to syslog. Setting level to ERROR captures 500 errors,
+# WARNING also logs 4xx responses.
+LOGGING['handlers']['syslog'] = {
+    'level': 'WARNING',
+    'filters': [],
+    'class': 'logging.handlers.SysLogHandler',
+    'address': '/dev/log',
+    'facility': 'local0',
+    'formatter': 'simple',
+}
+
+# Enable the following lines to also log to a file.
+#LOGGING['handlers']['file'] = {
+#    'class': 'logging.FileHandler',
+#    'filename': os.path.join(BASE_DIR, 'awx.log'),
+#    'formatter': 'simple',
+#}

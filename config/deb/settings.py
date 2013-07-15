@@ -32,8 +32,14 @@ SECRET_KEY = file('/etc/awx/SECRET_KEY', 'rb').read().strip()
 
 ALLOWED_HOSTS = ['*']
 
-LOGGING = {
-    'version': 1,
+LOGGING['handlers']['syslog'] = {
+    # ERROR captures 500 errors, WARNING also logs 4xx responses.
+    'level': 'ERROR',
+    'filters': ['require_debug_false'],
+    'class': 'logging.handlers.SysLogHandler',
+    'address': '/dev/log',
+    'facility': 'local0',
+    'formatter': 'simple',
 }
 
 SERVER_EMAIL = 'root@localhost'

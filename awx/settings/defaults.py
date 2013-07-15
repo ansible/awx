@@ -281,7 +281,7 @@ LOGGING = {
             'formatter': 'simple',
         },
         'syslog': {
-            'level': 'ERROR',
+            'level': 'WARNING',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.NullHandler',
             'formatter': 'simple',
