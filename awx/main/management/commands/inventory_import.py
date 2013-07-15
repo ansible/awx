@@ -471,10 +471,24 @@ class Command(BaseCommand):
         # FIXME: only clear the ones that should not exist
         if overwrite:
             LOGGER.info("clearing any child relationships to rebuild from remote source")
-            groups = Group.objects.all()
-            for g in groups:
-                g.children.clear()
-                g.save()
+            db_groups = Group.objects.all()
+            #for g in db_groups:
+            #    g.children.clear()
+            #    g.save()
+
+            for db_group in db_groups:
+                 db_kids = db_group.children.all()
+                 mem_kids = group_names[db_group.name].child_groups
+                 mem_kid_names = [ k.name for k in mem_kids ]
+                 removed = False
+                 for db_kid in db_kids:
+                     if db_kid.name not in mem_kid_names:
+                         removed = True
+                         print "DEBUG: removing non-DB kid: %s" % (db_kid.name)
+                         db_group.children.remove(db_kid)
+                 if removed:
+                     db_group.save()
+
 
         # this will be slightly inaccurate, but attribute to first superuser.
         user = User.objects.filter(is_superuser=True)[0]
