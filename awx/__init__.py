@@ -5,6 +5,7 @@ __version__ = '1.2.2-0'
 
 import os
 import sys
+import warnings
 
 __all__ = ['__version__']
 
@@ -39,6 +40,11 @@ def manage():
     local_site_packages = os.path.join(os.path.dirname(__file__), 'lib',
                                        'site-packages')
     sys.path.insert(0, local_site_packages)
+    # Hide DeprecationWarnings when running in production.  Need to first load
+    # settings to apply our filter after Django's own warnings filter.
+    from django.conf import settings
+    if not settings.DEBUG:
+        warnings.simplefilter('ignore', DeprecationWarning)
     # Monkeypatch Django find_commands to also work with .pyc files.
     import django.core.management
     django.core.management.find_commands = find_commands
