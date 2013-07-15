@@ -386,51 +386,11 @@ class Command(BaseCommand):
                     help='inventory directory, file, or script to load'),
     )
 
-    #def get_models(self, model):
-    #    if not model._meta.abstract:
-    #        yield model
-    #    for sub in model.__subclasses__():
-    #        for submodel in self.get_models(sub):
-    #            yield submodel
-
-    #def cleanup_model(self, model):
-    #    name_field = None
-    #    active_field = None
-    #    for field in model._meta.fields:
-    #        if field.name in ('name', 'username'):
-    #            name_field = field.name
-    #        if field.name in ('is_active', 'active'):
-    #            active_field = field.name
-    #    if not name_field:
-    #        self.logger.warning('skipping model %s, no name field', model)
-    #        return
-    #    if not active_field:
-    #        self.logger.warning('skipping model %s, no active field', model)
-    #        return
-    #    qs = model.objects.filter(**{
-    #        active_field: False,
-    #        '%s__startswith' % name_field: '_deleted_',
-    #    })
-    #    self.logger.debug('cleaning up model %s', model)
-    #    for instance in qs:
-    #        dt = parse_datetime(getattr(instance, name_field).split('_')[2])
-    #        if not dt:
-    #            self.logger.warning('unable to find deleted timestamp in %s '
-    #                                'field', name_field)
-    #        elif dt >= self.cutoff:
-    #            action_text = 'would skip' if self.dry_run else 'skipping'
-    #            self.logger.debug('%s %s', action_text, instance)
-    #        else:
-    #            action_text = 'would delete' if self.dry_run else 'deleting'
-    #            self.logger.info('%s %s', action_text, instance)
-    #            if not self.dry_run:
-    #                instance.delete()
-
     def init_logging(self):
         log_levels = dict(enumerate([logging.ERROR, logging.INFO,
                                      logging.DEBUG, 0]))
         global LOGGER
-        LOGGER = self.logger = logging.getLogger('awx.main.commands.cleanup_deleted')
+        LOGGER = self.logger = logging.getLogger('awx.main.commands.inventory_import')
         self.logger.setLevel(log_levels.get(self.verbosity, 0))
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter('%(message)s'))
