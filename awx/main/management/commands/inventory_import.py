@@ -521,9 +521,23 @@ class Command(BaseCommand):
         if overwrite:
             LOGGER.info("purging host group memberships")
             db_groups = Group.objects.filter(inventory=inventory)
-            for g in db_groups:
-                g.hosts.clear()
-                g.save()
+            #for g in db_groups:
+            #    g.hosts.clear()
+            #    g.save()
+
+            for db_group in db_groups:
+                 db_hosts = db_group.hosts.all()
+                 mem_hosts = group_names[db_group.name].hosts
+                 mem_host_names = [ h.name for h in mem_hosts ]
+                 removed = False
+                 for db_host in db_hosts:
+                     if db_host.name not in mem_host_names:
+                         removed = True
+                         print "DEBUG: removing non-DB host: %s" % (db_host.name)
+                         db_group.hosts.remove(db_host)
+                 if removed:
+                     db_group.save()
+
 
         # for each host in a mem group, add it to the parents to which it belongs
         # FIXME: where it does not already exist
