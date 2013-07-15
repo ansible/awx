@@ -272,11 +272,15 @@ class ExecutableJsonLoader(BaseLoader):
 
         data = self.command_to_json([src, "--list"])
 
+        print "RAW: %s" % data
+
         group = None
 
         for (k,v) in data.iteritems():
  
             group = self.get_group(k, all_group)
+
+            print "TYPE %s => %s" % (k, v)
 
             if type(v) == dict:
 
@@ -290,6 +294,7 @@ class ExecutableJsonLoader(BaseLoader):
                              group.add_host(host)
                     if type(host_details) == list:
                         for hk in host_details:
+                            print "?? getting host: %s" % hk
                             host = self.get_host(hk)
                             group.add_host(host)
 
@@ -306,8 +311,10 @@ class ExecutableJsonLoader(BaseLoader):
                         group.add_child_group(child)
                         self.child_group_names[x] = child
 
-            if type(v) == list:
+            if type(v) in (tuple, list):
+               print "<><><><><><><><><><><><><><><><>><><><> GOT A LIST: %s" % (v) 
                for x in v:
+                   print ">>>>>>>>> ADDING HOST FROM AN EXECUTABLE LIST = %s to %s" % (x, group.name)
                    host = self.get_host(x)
                    group.add_host(host)
 
@@ -490,8 +497,8 @@ class Command(BaseCommand):
         # if overwrite is set, for each host in the database but NOT in the local
         # list, delete it
         if overwrite:
-            LOGGER.info("deleting any hosts not in the remote source")
-            Host.objects.exclude(name___in = host_names.keys()).delete()
+            LOGGER.info("deleting any hosts not in the remote source: %s" % host_names.keys())
+            Host.objects.exclude(name__in = host_names.keys()).delete()
 
         # if overwrite is set, for each group in the database but NOT in the local
         # list, delete it
