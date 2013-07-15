@@ -512,8 +512,8 @@ class Command(BaseCommand):
         # this will be slightly inaccurate, but attribute to first superuser.
         user = User.objects.filter(is_superuser=True)[0]
 
-        db_groups = Group.objects.all()
-        db_hosts  = Host.objects.all()
+        db_groups = Group.objects.filter(inventory=inventory)
+        db_hosts  = Host.objects.filter(inventory=inventory)
         db_group_names = [ g.name for g in db_groups ]
         db_host_names  = [ h.name for h in db_hosts  ] 
 
@@ -539,7 +539,7 @@ class Command(BaseCommand):
         # FIXME: where it should not exist
         if overwrite:
             LOGGER.info("purging host group memberships")
-            db_groups = Group.objects.all()
+            db_groups = Group.objects.filter(inventory=inventory)
             for g in db_groups:
                 g.hosts.clear()
                 g.save()
@@ -557,7 +557,7 @@ class Command(BaseCommand):
             db_group.save()
 
         def variable_mangler(model, mem_hash, overwrite, overwrite_vars):
-            db_collection = model.objects.all()
+            db_collection = model.objects.filter(inventory=inventory)
             for obj in db_collection:
                if obj.name in mem_hash:
                    mem_group = mem_hash[obj.name]
