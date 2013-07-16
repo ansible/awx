@@ -20,6 +20,7 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models import *
+from awx.main.licenses import LicenseReader
 
 LOGGER = None
 
@@ -466,9 +467,7 @@ class Command(BaseCommand):
             LOGGER.info("deleting any groups not in the remote source")
             Group.objects.exclude(name__in = group_names.keys()).delete()
 
-        # if overwrite is set, throw away all child relationships for groups as we will
-        # be drawing new ones in.
-        # FIXME: only clear the ones that should not exist
+        # if overwrite is set, throw away all invalid child relationships for groups
         if overwrite:
             LOGGER.info("clearing any child relationships to rebuild from remote source")
             db_groups = Group.objects.all()
@@ -516,14 +515,10 @@ class Command(BaseCommand):
                     description="imported")
                 group.save()
 
-        # if overwrite is set, clear any host membership on all hosts
-        # FIXME: where it should not exist
+        # if overwrite is set, clear any host membership on all hosts that should not exist
         if overwrite:
             LOGGER.info("purging host group memberships")
             db_groups = Group.objects.filter(inventory=inventory)
-            #for g in db_groups:
-            #    g.hosts.clear()
-            #    g.save()
 
             for db_group in db_groups:
                  db_hosts = db_group.hosts.all()
@@ -540,7 +535,7 @@ class Command(BaseCommand):
 
 
         # for each host in a mem group, add it to the parents to which it belongs
-        # FIXME: where it does not already exist
+        # FIXME: confirm Django is ok with calling add twice and not making two rows
         for (k,v) in group_names.iteritems():
             LOGGER.info("adding parent arrangements for %s" % k)
             db_group = Group.objects.get(name=k, inventory__pk=inventory.pk)
@@ -570,7 +565,7 @@ class Command(BaseCommand):
         variable_mangler(Host,  host_names,  overwrite, overwrite_vars)
   
         # for each group, draw in child group arrangements
-        # FIXME: where they do not already exist
+        # FIXME: confirm django add behavior as above
         for (k,v) in group_names.iteritems():
             db_group = Group.objects.get(inventory=inventory, name=k)
             for mem_child_group in v.child_groups:
@@ -578,9 +573,16 @@ class Command(BaseCommand):
                 db_group.children.add(db_child)
             db_group.save()
 
-        # TODO:  test that UI can display what we import
-        # TODO:  test overwrite and non-overwrite modes (and --overwrite-vars)       
-        # FIXME: also test that variables are valid
+        reader = LicenseReader()
+        license_info = reader.from_file()
+        available_instances = license_info.get('available_instances', 0)
+        free_instances = license_info.get('free_instances', 0)
+        new_count = Host.objects.filter(active=True).count()
+        if free_instances < 0:
+            if license_info.get('demo', False):
+                raise ImportError("demo mode free license count exceeded, would bring available instances to %s, demo mode allows %s, see http://ansibleworks.com/ansibleworks-awx for licensing information" % (new_count, available_instances))
+            else:
+                raise ImportError("number of licensed instances exceeded, would bring available instances to %s, system is licensed for %s, see http://ansibleworks.com/ansibleworks-awx for license extension information" % (new_count, available_instances))
  
         LOGGER.info("inventory import complete, %s, id=%s" % (inventory.name, inventory.id))
 
