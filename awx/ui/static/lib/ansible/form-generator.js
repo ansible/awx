@@ -181,6 +181,21 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        return html;
        },
 
+    button: function(btn) {
+       // pass in a button object and get back an html string containing
+       // a <button> element.
+       var html = '';
+       html += "<button "; 
+       html += "class=\"btn"; 
+       html += (btn['class']) ?  " " + btn['class'] : "";
+       html += "\" ";
+       html += (btn.ngClick) ? this.attr(btn, 'ngClick') : "";
+       html += ">" + this.attr(btn, 'icon');
+       html += " " + btn.label;
+       html += "</button>\n";
+       return html;
+    },
+
     buildField: function(fld, field, options) {
            
        var html='';
@@ -582,21 +597,22 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        else { 
           
           if ( this.form.collapse && this.form.collapseMode == options.mode) {
-             /*html += "<div class=\"accordion-group\">\n";
-             html += "<div class=\"accordion-heading\">\n";
-             html += "<a id=\"" + this.form.name + "-collapse-0\" class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#collapse0\">";
-             html += "<i class=\"icon-angle-down icon-white\"></i>" + this.form.collapseTitle + "</a>\n";
-             html += "</div>\n";
-             html += "<div id=\"collapse0\" class=\"accordion-body collapse"; 
-             html += (this.form.collapseOpen) ? " in" : "";
-             html += "\">\n";
-             html += "<div class=\"accordion-inner\">\n";
-             */
              html += "<div id=\"" + this.form.name + "-collapse-0\" ";
              html += (this.form.collapseOpen) ? "data-open=\"true\" " : "";
              html += "class=\"jqui-accordion\">\n";
-             html += "<h3>" + this.form.collapseTitle + "<h3>\n"; 
+             html += "<h3>" + this.form.collapseTitle + "</h3>\n"; 
              html += "<div>\n";
+          }
+
+          if (this.form.navigation) {
+             html += "<div class=\"navigation-buttons navigation-buttons-top\">\n";
+             for (btn in this.form.navigation) {
+                 var btn = this.form.navigation[btn];
+                 if (btn.position == 'top') {
+                    html += this.button(btn);
+                 }
+             }
+             html += "</div>\n";
           }
           
           // Start the well
@@ -632,14 +648,25 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           }
           else {
              // original, single-column form
-             var section = '';
+             var section = '';             
              for (var fld in this.form.fields) {
                  var field = this.form.fields[fld];
                  if (field.section && field.section != section) {
-                    html += "<div class=\"form-section-title\">" + field.section + "</div>\n";
-                    section  = field.section;
+                    if (section !== '') {
+                       html += "</div>\n</div>\n";
+                    }
+                    else {
+                       html += "<div id=\"" + this.form.name + "-collapse\" class=\"jqui-accordion\" data-open=\"true\">\n";
+                    }
+                    html += "<h3>" + field.section + "</h3>\n"; 
+                    html += "<div>\n";
+                    html += "<div class=\"well\">\n";
+                    section = field.section;
                  }
                  html += this.buildField(fld, field, options);
+             }
+             if (section !== '') {
+                html += "</div>\n</div>\n</div>\n";
              }
           }
 
@@ -688,6 +715,17 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           }
 
           if ( this.has('well') ) {
+             html += "</div>\n";
+          }
+
+          if (this.form.navigation) {
+             html += "<div class=\"navigation-buttons navigation-buttons-bottom\">\n";
+             for (btn in this.form.navigation) {
+                 var btn = this.form.navigation[btn];
+                 if (btn.position == 'bottom') {
+                    html += this.button(btn);
+                 }
+             }
              html += "</div>\n";
           }
 

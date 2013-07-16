@@ -12,7 +12,7 @@
 
 function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList,
                         GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                        ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren, EventView,
+                        ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,
                         FormatDate)
 {
     ClearScope('htmlTemplate');
@@ -153,7 +153,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     LoadBreadCrumbs();
     
     scope.viewJobEvent = function(id) {
-       EventView({"event_id": id });
+       $location.path('/jobs/' + $routeParams.id + '/job_events/' + id);
        }
 
     scope.refresh = function() {
@@ -173,15 +173,14 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 
 JobEventsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
                            'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                           'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren', 'EventView', 'FormatDate'
+                           'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate'
                            ];
 
 function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventForm, GenerateForm,
-                        Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, FormatDate) 
+                        Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, FormatDate, EventView) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
-
    // Inject dynamic view
    var form = JobEventForm;
    var generator = GenerateForm;
@@ -195,35 +194,82 @@ function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routePar
    Rest.setUrl(defaultUrl); 
    Rest.get()
        .success( function(data, status, headers, config) {
-           LoadBreadCrumbs({ path: '/job_events/' + $routeParams.event_id, title: data.event });
-           for (var fld in form.fields) {
-               if (fld == 'status') {
-                  scope['status'] = (data.failed) ? 'error' : 'success';
-               }
-               else if (fld == 'event_data') {
-                  scope['event_data'] = JSON.stringify(data['event_data'], undefined, '\t');
-               }
-               else {
-                  if (fld == 'created') {
+          scope['event_display'] = data['event_display'].replace(/^\u00a0*/g,'');
+          LoadBreadCrumbs({ path: '/jobs/' + $routeParams.job_id + '/job_events/' + $routeParams.event_id,
+                title: scope['event_display'] });
+          for (var fld in form.fields) {
+              switch(fld) {
+                  case 'status':
+                     if (data['failed']) {
+                        scope['status'] = 'error';
+                     }
+                     else if (data['changed']) {
+                        scope['status'] = 'changed';
+                     }
+                     else {
+                        scope['status'] = 'success';
+                     }
+                     break;
+                  case 'created':
                      var cDate = new Date(data['created']);
                      scope['created'] = FormatDate(cDate);
-                  }
-                  else {
-                      if (data[fld]) {
-                         scope[fld] = data[fld];
+                     break;
+                  case 'host':
+                     if (data['summary_fields'] && data['summary_fields']['host']) {
+                        scope['host'] = data['summary_fields']['host']['name'];
+                     }
+                     break;
+                  case 'id':
+                  case 'task':
+                     scope[fld] = data[fld];
+                     break;
+                  case 'msg':
+                  case 'stdout':
+                  case 'stderr':
+                  case 'start':
+                  case 'end':
+                  case 'delta':
+                  case 'rc':
+                     if (data['event_data'] && data['event_data']['res'] && data['event_data']['res'][fld] !== undefined) {
+                        scope[fld] = data['event_data']['res'][fld];
+                        if (form.fields[fld].type == 'textarea') {
+                           var n = data['event_data']['res'][fld].match(/\n/g);
+                           rows = (n) ? n.length : 1;
+                           rows = (rows > 15) ? 5 : rows;
+                           $('textarea[name="' + fld + '"]').attr('rows',rows);
+                        }
                       }
-                  }
-               }
-           }
-           })
-       .error( function(data, status, headers, config) {
-           ProcessErrors(scope, data, status, form,
-                         { hdr: 'Error!', msg: 'Failed to retrieve event detail: ' + $routeParams.event_id + '. GET status: ' + status });
-           });
+                     break;
+                  case 'conditional':
+                     if (data['event_data']['res']) {
+                        scope[fld] = data['event_data']['res']['is_conditional'];
+                     }
+                     break;
+                  case 'module_name':
+                  case 'module_args':
+                     if (data['event_data']['res'] && data['event_data']['res']['invocation']) {
+                        scope[fld] = data['event_data']['res']['invocation'][fld];
+                     }
+                     break;
+              }
+          }
+          })
+      .error( function(data, status, headers, config) {
+          ProcessErrors(scope, data, status, null,
+              { hdr: 'Error!', msg: 'Failed to retrieve host: ' + $routeParams.event_id + '. GET status: ' + status });
+          });
+
+      scope.navigateBack = function() {
+          window.history.back();
+          }
+
+      scope.rawView = function() {
+          EventView({"event_id": scope.id });
+          }
    
 }
 
 JobEventsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobEventForm', 
                           'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
-                          'FormatDate'
+                          'FormatDate', 'EventView'
                           ];

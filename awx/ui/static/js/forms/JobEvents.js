@@ -10,9 +10,8 @@ angular.module('JobEventFormDefinition', [])
     .value(
     'JobEventForm', {
         
-        editTitle: '{{ id }} - {{ event }}',                         //Legend in edit mode
+        editTitle: '{{ id }} - {{ event_display }}',                         //Legend in edit mode
         name: 'job_events',
-        "class": 'horizontal-narrow',
         well: false,
         
         fields: {
@@ -66,7 +65,7 @@ angular.module('JobEventFormDefinition', [])
                 type: 'textarea',
                 readonly: true,
                 section: 'Results',
-                'class': 'modal-input-xlarge',
+                'class': 'span12',
                 rows: 1
                 },
             stdout: {
@@ -74,7 +73,7 @@ angular.module('JobEventFormDefinition', [])
                 type: 'textarea',
                 readonly: true,
                 section: 'Results',
-                'class': 'modal-input-xlarge',
+                'class': 'span12',
                 rows: 1
                 },
             stderr: {
@@ -82,7 +81,7 @@ angular.module('JobEventFormDefinition', [])
                 type: 'textarea',
                 readonly: true,
                 section: 'Results',
-                'class': 'modal-input-xlarge',
+                'class': 'span12',
                 rows: 1
                 },
             start: {
@@ -117,8 +116,31 @@ angular.module('JobEventFormDefinition', [])
                 } 
             },
 
-        buttons: { 
+        navigation: {
+            back_top: {
+                label: 'Back', 
+                position: 'top',
+                'class': 'btn-small pull-right',
+                icon:  'icon-arrow-left',
+                ngClick: 'navigateBack()'
+                },
+            back_bottom: {
+                label: 'Back', 
+                position: 'bottom',
+                'class': 'btn-small pull-right',
+                icon:  'icon-arrow-left',
+                ngClick: 'navigateBack()'
+                },
+            raw_view: {
+                label: 'View raw JSON results', 
+                icon: 'icon-zoom-in',
+                position: 'bottom',
+                'class': 'btn-small',
+                ngClick: 'rawView()'
+                }
+            },
 
+        buttons: {
             },
 
         related: { //related colletions (and maybe items?)
