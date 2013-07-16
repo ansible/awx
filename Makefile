@@ -31,6 +31,7 @@ clean:
 	rm -rf dist/*
 	rm -rf build rpm-build *.egg-info
 	rm -rf debian deb-build
+	rm -f awx/ui/static/js/awx-min.js
 	find . -type f -regex ".*\.py[co]$$" -delete
 
 # Fetch from origin, rebase local commits on top of origin commits.
@@ -128,7 +129,10 @@ release_clean:
 	-(rm *.tar)
 	-(rm -rf ($RELEASE))
 
-sdist: clean
+minjs: clean
+	(cd tools/ui/ && ./compile.sh)
+
+sdist: clean minjs
 	if [ "$(OFFICIAL)" = "yes" ] ; then \
 	   $(PYTHON) setup.py release_build; \
 	else \

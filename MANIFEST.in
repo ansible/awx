@@ -1,7 +1,7 @@
 recursive-include awx *.py
 recursive-include awx/static *.ico
 recursive-include awx/templates *.html
-recursive-include awx/ui *.html *.js
+recursive-include awx/ui *.html
 recursive-include awx/ui/static *.css *.ico *.png *.gif *.jpg
 recursive-include awx/ui/static *.eot *.svg *.ttf *.woff *.otf
 recursive-include awx/lib/site-packages *
@@ -10,6 +10,7 @@ recursive-include config/deb *
 recursive-include config/rpm *
 recursive-exclude awx devonly.py*
 recursive-exclude awx/settings local_settings.py*
+include awx/ui/static/js/awx-min.js
 include COPYING
 prune awx/public
 prune awx/projects
