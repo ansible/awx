@@ -283,13 +283,13 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
            })
        .error( function(data, status, headers, config) {
            ProcessErrors(scope, data, status, form,
-                         { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $routeParams.id + '. GET status: ' + status });
+               { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $routeParams.team_id + '. GET status: ' + status });
            });
 
    // Save changes to the parent
    scope.formSave = function() {
       $rootScope.flashMessage = null;
-      Rest.setUrl(defaultUrl + $routeParams.id +'/');
+      Rest.setUrl(defaultUrl + $routeParams.team_id +'/');
       var data = {}
       for (var fld in form.fields) {
           data[fld] = scope[fld];   
@@ -301,7 +301,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to update team: ' + $routeParams.id + '. PUT status: ' + status });
+                  { hdr: 'Error!', msg: 'Failed to update team: ' + $routeParams.team_id + '. PUT status: ' + status });
               });
       };
 

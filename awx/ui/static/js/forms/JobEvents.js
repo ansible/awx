@@ -16,18 +16,24 @@ angular.module('JobEventFormDefinition', [])
         well: false,
         
         fields: {
-            created: {
-                label: 'Created',
-                type: 'text',
-                readonly: true,
-                "class": 'span3',
-                section: 'Event Info'
-                },
             status: {
                 labelClass: 'job-\{\{ status \}\}',
                 icon: 'icon-circle',
                 type: 'custom',
                 control: '<div class=\"job-event-status job-\{\{ status \}\}\">\{\{ status \}\}</div>',
+                section: 'Event'
+                },
+            id: {
+                label: 'ID',
+                type: 'text',
+                readonly: true,
+                section: 'Event',
+                'class': 'span1'
+                },
+            created: {
+                label: 'Created',
+                type: 'text',
+                readonly: true,
                 section: 'Event'
                 },
             host: {
@@ -45,28 +51,39 @@ angular.module('JobEventFormDefinition', [])
             conditional: {
                 label: 'Conditional?',
                 type: 'checkbox',
-                readonly: true
+                readonly: true,
+                section: 'Event'
                 },
+            rc: {
+                label: 'Return Code',
+                type: 'text',
+                readonly: true,
+                section: 'Results',
+                'class': 'span1'
+                }, 
             msg: {
                 label: 'Message',
                 type: 'textarea',
                 readonly: true,
                 section: 'Results',
-                rows: 5
+                'class': 'modal-input-xlarge',
+                rows: 1
                 },
             stdout: {
-                label: 'Standard Out',
+                label: 'Std Out',
                 type: 'textarea',
                 readonly: true,
                 section: 'Results',
-                rows: 5
+                'class': 'modal-input-xlarge',
+                rows: 1
                 },
             stderr: {
-                label: 'Standard Error',
+                label: 'Std Error',
                 type: 'textarea',
                 readonly: true,
                 section: 'Results',
-                rows: 5
+                'class': 'modal-input-xlarge',
+                rows: 1
                 },
             start: {
                 label: 'Start',

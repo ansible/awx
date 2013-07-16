@@ -402,7 +402,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += this.attr(field,'trueValue');
              html += this.attr(field,'falseValue');
              html += (field.checked) ? "checked " : "";
-             html += (field.readonly) ? "readonly " : "";
+             html += (field.readonly) ? "disabled " : "";
              html += " /> " + field.label + "\n";
              html += (field.awPopOver) ? this.attr(field, 'awPopOver') : "";
              html += "</label>\n";
@@ -431,7 +431,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  html += "value=\"" + field.options[i].value + "\" ";
                  html += "ng-model=\"" + fld + "\" ";
                  html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-                 html += (field.readonly) ? "readonly " : "";
+                 html += (field.readonly) ? "disabled " : "";
                  html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
                  html += (options.mode == 'add' && field.addRequired) ? "required " : "";
                  html += " /> " + field.options[i].label + "\n";
@@ -632,8 +632,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           }
           else {
              // original, single-column form
+             var section = '';
              for (var fld in this.form.fields) {
                  var field = this.form.fields[fld];
+                 if (field.section && field.section != section) {
+                    html += "<div class=\"form-section-title\">" + field.section + "</div>\n";
+                    section  = field.section;
+                 }
                  html += this.buildField(fld, field, options);
              }
           }

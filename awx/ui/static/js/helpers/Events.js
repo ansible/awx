@@ -35,40 +35,62 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventFormDefini
         Rest.get()
             .success( function(data, status, headers, config) {
                 for (var fld in form.fields) {
-                    if (fld == 'status') {
-                       if (data['failed']) {
-                          scope['status'] = 'error';
-                       }
-                       else if (data['changed']) {
-                          scope['status'] = 'changed';
-                       }
-                       else {
-                          scope['status'] = 'success';
-                       }
-                    }
-                    else if (fld == 'event_data') {
-                       scope['event_data'] = JSON.stringify(data['event_data'], undefined, '\t');
-                    }
-                    else if (fld == 'host') {
-                       if (data['summary_fields'] && data['summary_fields']['host']) {
-                          scope['host'] = data['summary_fields']['host']['name'];
-                       }
-                    }
-                    else {
-                       if (fld == 'created') {
-                          var cDate = new Date(data['created']);
-                          scope['created'] = FormatDate(cDate);
-                       }
-                       else {
-                          if (data[fld]) {
-                             scope[fld] = data[fld];
-                          }
-                       }
+                    switch(fld) {
+                        case 'status':
+                           if (data['failed']) {
+                              scope['status'] = 'error';
+                           }
+                           else if (data['changed']) {
+                              scope['status'] = 'changed';
+                           }
+                           else {
+                              scope['status'] = 'success';
+                           }
+                           break;
+                        case 'created':
+                           var cDate = new Date(data['created']);
+                           scope['created'] = FormatDate(cDate);
+                           break;
+                        case 'host':
+                           if (data['summary_fields'] && data['summary_fields']['host']) {
+                              scope['host'] = data['summary_fields']['host']['name'];
+                           }
+                           break;
+                        case 'id':
+                        case 'task':
+                           scope[fld] = data[fld];
+                           break;
+                        case 'msg':
+                        case 'stdout':
+                        case 'stderr':
+                        case 'start':
+                        case 'end':
+                        case 'delta':
+                        case 'rc':
+                           if (data['event_data'] && data['event_data']['res'] && data['event_data']['res'][fld] !== undefined) {
+                              scope[fld] = data['event_data']['res'][fld];
+                              if (form.fields[fld].type == 'textarea') {
+                                 var n = data['event_data']['res'][fld].match(/\n/g);
+                                 rows = (n) ? n.length : 1;
+                                 rows = (rows > 5) ? 5 : rows;
+                                 $('textarea[name="' + fld + '"]').attr('rows',rows);
+                              }
+                            }
+                           break;
+                        case 'conditional':
+                           if (data['event_data']['res']) {
+                              scope[fld] = data['event_data']['res']['is_conditional'];
+                           }
+                           break;
+                        case 'module_name':
+                        case 'module_args':
+                           if (data['event_data']['res'] && data['event_data']['res']['invocation']) {
+                              scope[fld] = data['event_data']['res']['invocation'][fld];
+                           }
+                           break;
                     }
                  }
-                 
                  scope['formModalHeader'] = data.event_display.replace(/^\u00a0*/g,'');
-
                 })
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, form,

@@ -368,7 +368,7 @@
  }
 
  
-/* Jobs page */
+/* Jobs pages */
 
  .job-error, .job-failed,
  .active-failures-true,
@@ -446,6 +446,11 @@
 
  .level-3-detail {
     padding-left: 72px;
+ }
+
+ #job_events .control-group {
+    margin-top: 0;
+    margin-bottom: 10px;
  }
 
  /* End Jobs Page */
@@ -577,7 +582,7 @@
 
  .horizontal-narrow .control-label {
    float: left;
-   width: 120px;
+   width: 100px;
    padding-top: 5px;
    text-align: right;
  }
@@ -585,18 +590,24 @@
  .horizontal-narrow .controls {
    *display: inline-block;
    *padding-left: 20px;
-   margin-left: 140px;
+   margin-left: 120px;
    *margin-left: 0;
  }
 
  .horizontal-narrow .controls:first-child {
-   *padding-left: 140px;
+   *padding-left: 120px;
  }
 
  .modal-input-xlarge {
    width: 350px;
  }
 
+ .form-section-title {
+   font-weight: bold;
+   width: 100%;
+   border-bottom: 1px solid #d8d8d8;
+   margin-bottom: 5px;
+ }
 
 /* overrides to TB modal */
 .modal-header {
