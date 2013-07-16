@@ -3,7 +3,7 @@ awx/*.sqlite3
 awx/projects
 awx/public/media
 awx/public/static
-awx/ui/awx-min.js
+awx/ui/static/js/awx-min.js
 env/*
 build
 deb-build
