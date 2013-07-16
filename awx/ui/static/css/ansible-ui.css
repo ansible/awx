@@ -606,7 +606,8 @@
    font-weight: bold;
    width: 100%;
    border-bottom: 1px solid #d8d8d8;
-   margin-bottom: 5px;
+   margin-bottom: 10px;
+   margin-top: 0;
  }
 
 /* overrides to TB modal */
@@ -647,6 +648,11 @@
 
 #prompt-modal .modal-body {
   padding-bottom: 30px;
+}
+
+/* form navigation */ 
+.navigation-buttons {
+  height: 40px;  
 }
 
 
