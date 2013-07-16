@@ -130,7 +130,9 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
         });
 
     SearchInit({ scope: scope, set: 'jobevents', list: list, url: defaultUrl });
-    PaginateInit({ scope: scope, list: list, url: defaultUrl });
+    
+    var page = ($routeParams.page) ? parseInt($routeParams.page) - 1 : null;
+    PaginateInit({ scope: scope, list: list, url: defaultUrl, page: page });
 
     // Called from Inventories tab, host failed events link:
     if ($routeParams.host) {
@@ -139,7 +141,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
        scope[list.iterator + 'SearchFieldLabel'] = list.fields['host'].label;
     }
     
-    scope.search(list.iterator);
+    scope.search(list.iterator, $routeParams.page);
     
     scope.toggleChildren = function(id, children) {
         ToggleChildren({
@@ -153,7 +155,11 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     LoadBreadCrumbs();
     
     scope.viewJobEvent = function(id) {
-       $location.path('/jobs/' + $routeParams.id + '/job_events/' + id);
+       var url = '/jobs/' + $routeParams.id + '/job_events/' + id;
+       if (scope['jobeventPage']) {
+          url += '?&page=' + (scope['jobeventPage'] + 1);
+       }
+       $location.url(url);
        }
 
     scope.refresh = function() {
@@ -260,7 +266,11 @@ function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routePar
           });
 
       scope.navigateBack = function() {
-          window.history.back();
+          var url = '/jobs/' + $routeParams.job_id + '/job_events';
+          if ($routeParams.page) {
+             url += '?page=' + $routeParams.page;
+          }
+          $location.url(url);
           }
 
       scope.rawView = function() {

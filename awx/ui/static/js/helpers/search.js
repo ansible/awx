@@ -106,7 +106,9 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            scope.search(iterator);
            }
 
-        scope.search = function(iterator) {
+        scope.search = function(iterator, page) {
+           // Page is optional. Added to accomodate back function on Job Events detail. 
+
            scope[iterator + 'SearchSpin'] = true;
            scope[iterator + 'Loading'] = true;
            scope[iterator + 'SearchParms'] = '';
@@ -155,7 +157,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            else {
               scope[iterator + 'SearchParams'] = (sort_order) ? 'order_by=' + escape(sort_order) : "";
            }
-           scope[iterator + 'Page'] = 0;
+           scope[iterator + 'Page'] = (page) ? parseInt(page) - 1 : 0;
            if (/\/$/.test(url)) {
               url += '?' + scope[iterator + 'SearchParams'];
            }
@@ -164,6 +166,9 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            }
            url = url.replace(/\&\&/,'&');
            url += (scope[iterator + 'PageSize']) ? '&page_size=' + scope[iterator + 'PageSize'] : "";
+           if (page) {
+              url += '&page=' + page;
+           }
            Refresh({ scope: scope, set: set, iterator: iterator, url: url });
            }
 
