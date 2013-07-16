@@ -84,18 +84,21 @@ class RunJob(Task):
         env = dict(os.environ.items())
         # question: when running over CLI, generate a random ID or grab next, etc?
         # answer: TBD
+        # Add ANSIBLE_* settings to the subprocess environment.
+        for attr in dir(settings):
+            if attr == attr.upper() and attr.startswith('ANSIBLE_'):
+                env[attr] = str(getattr(settings, attr))
+        # Also set environment variables configured in AWX_TASK_ENV setting.
+        for key, value in settings.AWX_TASK_ENV.items():
+            env[key] = str(value)
+        # Set environment variables needed for inventory and job event
+        # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
-        if hasattr(settings, 'ANSIBLE_TRANSPORT'):
-            env['ANSIBLE_TRANSPORT'] = getattr(settings, 'ANSIBLE_TRANSPORT')
+        env['ANSIBLE_NOCOLOR'] = '1' # Prevent output of escape sequences.
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
-        env['ANSIBLE_NOCOLOR'] = '1' # Prevent output of escape sequences.
-        # do not want AWX to ask interactive questions and want it to be friendly with reprovisioning
-        env['ANSIBLE_HOST_KEY_CHECKING'] = 'False'
-        # RHEL has too old of an SSH so ansible will select paramiko and this is VERY slow
-        env['ANSIBLE_PARAMIKO_RECORD_HOST_KEYS'] = 'False'
         return env
 
     def build_args(self, job, **kwargs):

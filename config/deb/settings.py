@@ -42,6 +42,9 @@ LOGGING['handlers']['syslog'] = {
     'formatter': 'simple',
 }
 
+AWX_TASK_ENV['HOME'] = '/var/lib/awx'
+AWX_TASK_ENV['USER'] = 'awx'
+
 SERVER_EMAIL = 'root@localhost'
 DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 EMAIL_SUBJECT_PREFIX = '[AnsibleWorks] '

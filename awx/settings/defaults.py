@@ -245,6 +245,21 @@ CELERYD_TASK_SOFT_TIME_LIMIT = 3540
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
 
+# Any ANSIBLE_* settings will be passed to the subprocess environment by the
+# celery task.
+
+# Do not want AWX to ask interactive questions and want it to be friendly with
+# reprovisioning
+ANSIBLE_HOST_KEY_CHECKING = False
+
+# RHEL has too old of an SSH so ansible will select paramiko and this is VERY
+# .slow
+ANSIBLE_PARAMIKO_RECORD_HOST_KEYS = False
+
+# Additional environment variables to be passed to the subprocess started by
+# the celery task.
+AWX_TASK_ENV = {}
+
 if 'devserver' in INSTALLED_APPS:
     INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
 else:

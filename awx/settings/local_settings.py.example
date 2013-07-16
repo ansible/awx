@@ -105,3 +105,7 @@ LOGGING['handlers']['syslog'] = {
 #    'filename': os.path.join(BASE_DIR, 'awx.log'),
 #    'formatter': 'simple',
 #}
+
+# Define additional environment variables to be passed to subprocess started by
+# the celery task.
+#AWX_TASK_ENV['FOO'] = 'BAR'
