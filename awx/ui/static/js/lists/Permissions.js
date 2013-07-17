@@ -44,7 +44,7 @@ angular.module('PermissionListDefinition', [])
         actions: {
             add: {
                 icon: 'icon-plus',
-                label: 'Add',
+                label: 'Create New',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addPermission()',
                 "class": 'btn-success btn-small',
@@ -57,7 +57,7 @@ angular.module('PermissionListDefinition', [])
                 label: 'Edit',
                 ngClick: "editPermission(\{\{ permission.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-small btn-success',
+                "class": 'btn-small',
                 awToolTip: 'View/Edit permission'
                 },
 

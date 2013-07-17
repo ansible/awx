@@ -92,7 +92,6 @@ angular.module('TeamFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
                         icon: 'icon-edit',
-                        "class": 'btn-success',
                         awToolTip: 'Modify the credential'
                         },
                     "delete": {
@@ -148,7 +147,6 @@ angular.module('TeamFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}')",
                         icon: 'icon-edit',
-                        "class": 'btn-success',
                         awToolTip: 'Edit the permission'
                         },
                     
@@ -192,7 +190,6 @@ angular.module('TeamFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('projects', \{\{ project.id \}\}, '\{\{ project.name \}\}')",
                         icon: 'icon-edit',
-                        "class": 'btn-success',
                         awToolTip: 'Modify the project'
                         },
                     "delete": {
@@ -238,7 +235,6 @@ angular.module('TeamFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('users', \{\{ user.id \}\}, '\{\{ user.username \}\}')",
                         icon: 'icon-edit',
-                        "class": 'btn-success',
                         awToolTip: 'Edit user'
                         },
                     "delete": {

@@ -45,7 +45,7 @@ angular.module('ProjectsListDefinition', [])
                 label: 'Edit',
                 ngClick: "editProject(\{\{ project.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-small btn-success',
+                "class": 'btn-small',
                 awToolTip: 'View/edit project'
                 },
 

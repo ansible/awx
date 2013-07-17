@@ -133,7 +133,6 @@ angular.module('UserFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
                         icon: 'icon-edit',
-                        "class": 'btn-success',
                         awToolTip: 'Edit the credential'
                         },
                     "delete": {
@@ -190,7 +189,6 @@ angular.module('UserFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}')",
                         icon: 'icon-edit',
-                        "class": 'btn-success',
                         awToolTip: 'Edit the permission'
                         },
                     

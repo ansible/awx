@@ -152,7 +152,6 @@ angular.module('InventoryFormDefinition', [])
                         ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
                         icon: 'icon-edit',
                         label: 'Edit',
-                        "class": 'btn-success',
                         awToolTip: 'Edit host'
                         },
                     "delete": {
