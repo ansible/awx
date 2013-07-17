@@ -41,6 +41,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
            if (typeof eventData.res == 'string') {
               n = eventData['res'].match(/\n/g);
               rows = (n) ? n.length : 1;
+              rows = (rows > 10) ? 10 : rows;
               found = true;
               html += "<label>Traceback:</label>\n";
               html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + rows + "\">" + eventData.res + "</textarea>\n";
@@ -62,6 +63,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                        html += "</label>\n";
                        n = eventData['res'][fld].match(/\n/g);
                        rows = (n) ? n.length : 1;
+                       rows = (rows > 10) ? 10 : rows;
                        html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + rows + "\">" + eventData.res[fld] + "</textarea>\n";
                        found = true;
                   }
@@ -74,6 +76,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                      }
                      n = txt.match(/\n/g);
                      rows = (n) ? n.length : 1;
+                     rows = (rows > 10) ? 10 : rows;
                      html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + rows + "\">" + txt + "</textarea>\n";
                      found = true;
                   } 
