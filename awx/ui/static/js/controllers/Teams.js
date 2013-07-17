@@ -12,7 +12,7 @@
 
 function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, TeamList,
                     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                    ClearScope, ProcessErrors, SetTeamListeners, GetBasePath)
+                    ClearScope, ProcessErrors, SetTeamListeners, GetBasePath, SelectionInit)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -23,7 +23,9 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
     var mode = (paths[0] == 'teams') ? 'edit' : 'select';      // if base path 'teams', we're here to add/edit teams
     var scope = view.inject(list, { mode: mode });    // Inject our view
     scope.selected = [];
-  
+    
+    SelectionInit({ scope: scope, list: list });
+    
     if (scope.PostRefreshRemove) {
        scope.PostRefreshRemove();
     }
@@ -32,12 +34,6 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
         for( var i=0; i < scope.teams.length; i++) {
            scope.teams[i].organization_name = scope.teams[i].summary_fields.organization.name;  
         }
-
-        $("tr.success").each(function(index) {
-            // Make sure no rows have a green background 
-            var ngc = $(this).attr('ng-class'); 
-            scope[ngc] = ""; 
-            });
         });
 
     //SetTeamListeners({ scope: scope, set: 'teams', iterator: list.iterator });
@@ -145,28 +141,11 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
           ReturnToCaller();
        }  
        }
-
-    scope.toggle_team = function(id) {
-       if (scope[list.iterator + "_" + id + "_class"] == "success") {
-          scope[list.iterator + "_" + id + "_class"] = "";
-          document.getElementById('check_' + id).checked = false;
-          if (scope.selected.indexOf(id) > -1) {
-             scope.selected.splice(scope.selected.indexOf(id),1);
-          }
-       }
-       else {
-          scope[list.iterator + "_" + id + "_class"] = "success";
-          document.getElementById('check_' + id).checked = true;
-          if (scope.selected.indexOf(id) == -1) {
-             scope.selected.push(id);
-          }
-       }
-       }
 }
 
 TeamsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'TeamList', 'GenerateList', 
                       'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                       'SetTeamListeners', 'GetBasePath' ];
+                       'SetTeamListeners', 'GetBasePath', 'SelectionInit'];
 
 
 function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, 

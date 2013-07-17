@@ -60,7 +60,8 @@ angular.module('ansible', [
     'EventsHelper',
     'ProjectPathHelper',
     'md5Helper',
-    'AccessHelper'
+    'AccessHelper',
+    'SelectionHelper'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.

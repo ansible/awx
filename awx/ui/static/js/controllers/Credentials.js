@@ -12,7 +12,7 @@
 
 function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, CredentialList,
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                          ClearScope, ProcessErrors, GetBasePath)
+                          ClearScope, ProcessErrors, GetBasePath, SelectionInit)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -24,16 +24,7 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
     var scope = view.inject(list, { mode: mode });         // Inject our view
     scope.selected = [];
   
-    if (scope.PostRefreshRemove) {
-       scope.PostRefreshRemove();
-    }
-    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
-        $("tr.success").each(function(index) {
-            // Make sure no rows have a green background 
-            var ngc = $(this).attr('ng-class'); 
-            scope[ngc] = ""; 
-            });
-        });
+    SelectionInit({ scope: scope, list: list });
     
     SearchInit({ scope: scope, set: 'credentials', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
@@ -125,28 +116,11 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
           ReturnToCaller();
        }  
        }
-
-    scope.toggle_credential = function(id) {
-       if (scope[list.iterator + "_" + id + "_class"] == "success") {
-          scope[list.iterator + "_" + id + "_class"] = "";
-          document.getElementById('check_' + id).checked = false;
-          if (scope.selected.indexOf(id) > -1) {
-             scope.selected.splice(scope.selected.indexOf(id),1);
-          }
-       }
-       else {
-          scope[list.iterator + "_" + id + "_class"] = "success";
-          document.getElementById('check_' + id).checked = true;
-          if (scope.selected.indexOf(id) == -1) {
-             scope.selected.push(id);
-          }
-       }
-       }
 }
 
 CredentialsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'CredentialList', 'GenerateList', 
                             'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                            'GetBasePath'];
+                            'GetBasePath', 'SelectionInit'];
 
 
 function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 

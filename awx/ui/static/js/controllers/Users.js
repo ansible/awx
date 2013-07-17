@@ -12,7 +12,7 @@
 
 function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                     Alert, UserList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit,
-                    ReturnToCaller, ClearScope, ProcessErrors, GetBasePath)
+                    ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -30,18 +30,9 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
 
-
     LoadBreadCrumbs();
 
-    if (scope.PostRefreshRemove) {
-       scope.PostRefreshRemove();
-    }
-    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
-        // Remove the 'success' class, which makes green or selected rows, from each row
-        for (var i=0; i < scope[list.name].length; i++) { 
-            scope[list.iterator + '_' + scope[list.name][i].id + '_class'] = '';
-        }
-        });
+    SelectionInit({ scope: scope, list: list });
     
     scope.addUser = function() {
        $location.path($location.path() + '/add');
@@ -88,7 +79,6 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
           // calls are finished.
           if (scope.queue.length == scope.selected.length) {
              // All the api calls finished
-             $('input[type="checkbox"]').prop("checked",false);
              scope.selected = [];
              var errors = 0;   
              for (var i=0; i < scope.queue.length; i++) {
@@ -133,27 +123,11 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
        }  
        }
 
-    scope.toggle_user = function(id) {
-       if (scope[list.iterator + "_" + id + "_class"] == "success") {
-          scope[list.iterator + "_" + id + "_class"] = "";
-          document.getElementById('check_' + id).checked = false;
-          if (scope.selected.indexOf(id) > -1) {
-             scope.selected.splice(scope.selected.indexOf(id),1);
-          }
-       }
-       else {
-          scope[list.iterator + "_" + id + "_class"] = "success";
-          document.getElementById('check_' + id).checked = true;
-          if (scope.selected.indexOf(id) == -1) {
-             scope.selected.push(id);
-          }
-       }
-       }
 }
 
 UsersList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'UserList', 'GenerateList', 
                       'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                      'GetBasePath' ];
+                      'GetBasePath', 'SelectionInit'];
 
 
 function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 

@@ -294,7 +294,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        LookUpInit({
            scope: scope,
            form: form,
-           current_item: (scope.organization) ? scope.organization : null,
+           current_item: (scope.organization !== undefined) ? scope.organization : null,
            list: OrganizationList, 
            field: 'organization' 
            });

@@ -25,18 +25,6 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
     var scope = view.inject(list, { mode: mode });
     $rootScope.flashMessage = null;
     scope.selected = [];
-  
-    if (scope.PostRefreshRemove) {
-       scope.PostRefreshRemove();
-    }
-    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
-        $("tr.success").each(function(index) {
-            // Make sure no rows have a green background 
-            var ngc = $(this).attr('ng-class'); 
-            scope[ngc] = ""; 
-            });
-        });
-
     
     SearchInit({ scope: scope, set: 'job_templates', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
@@ -127,23 +115,6 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
        else {
           ReturnToCaller(1);
        }  
-       }
-
-    scope.toggle_job_template = function(id) {
-      if (scope[list.iterator + "_" + id + "_class"] == "success") {
-          scope[list.iterator + "_" + id + "_class"] = "";
-          document.getElementById('check_' + id).checked = false;
-          if (scope.selected.indexOf(id) > -1) {
-             scope.selected.splice(scope.selected.indexOf(id),1);
-          }
-       }
-       else {
-          scope[list.iterator + "_" + id + "_class"] = "success";
-          document.getElementById('check_' + id).checked = true;
-          if (scope.selected.indexOf(id) == -1) {
-             scope.selected.push(id);
-          }
-       }
        }
 
     scope.submitJob = function(id) {
@@ -346,6 +317,9 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                    scope.playbook_options = [];
                    for (var i=0; i < data.length; i++) {
                        scope.playbook_options.push(data[i]);
+                   }
+                   if (!scope.$$phase) {
+                      scope.$digest();
                    }
                    })
                .error( function(data, status, headers, config) {

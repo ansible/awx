@@ -201,7 +201,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               html += "</th>\n";
            }
        }
-       if (options.mode == 'select') {
+       if (options.mode == 'select' || options.mode == 'lookup') {
           html += "<th>Select</th>";
        }
        else if (options.mode == 'edit') {
@@ -213,7 +213,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        // table body
        html += "<tbody>\n";     
        html += "<tr ";
-       html += (options.mode == 'lookup' || options.mode == 'select') ? "ng-class=\"" + list.iterator + "_\{\{ " + list.iterator + ".id \}\}_class\" " : "";
+       html += (options.mode == 'lookup' || options.mode == 'select') ? "ng-class=\"" + list.iterator + ".success_class\" " : "";
        html += "class=\"" + list.iterator + "_class\" ng-repeat=\"" + list.iterator + " in " + list.name; 
        html += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
        html += (list.filterBy) ? " | filter: " + list.filterBy : ""; 
@@ -234,8 +234,12 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            }
        }
 
-       if (options.mode == 'select' ) {
-          html += "<td><input type=\"checkbox\" name=\"check_{{" + list.iterator + ".id}}\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
+       if (options.mode == 'select' || options.mode == 'lookup') {
+          //html += "<td><input type=\"checkbox\" name=\"check_{{" + list.iterator + ".id }}\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
+          
+          html += "<td><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" + 
+              list.iterator + ".id }}\" ng-true-value=\"1\" ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
+          
           //ng-click=\"toggle_" + list.iterator +
           //        "({{ " + list.iterator + ".id }}, true)\" 
        }

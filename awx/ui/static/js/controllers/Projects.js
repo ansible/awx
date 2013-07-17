@@ -12,7 +12,7 @@
 
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                       ClearScope, ProcessErrors, GetBasePath)
+                       ClearScope, ProcessErrors, GetBasePath, SelectionInit)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -25,16 +25,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     scope.selected = [];
     $rootScope.flashMessage = null;
   
-    if (scope.PostRefreshRemove) {
-       scope.PostRefreshRemove();
-    }
-    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
-        $("tr.success").each(function(index) {
-            // Make sure no rows have a green background 
-            var ngc = $(this).attr('ng-class'); 
-            scope[ngc] = ""; 
-            });
-        });
+    SelectionInit({ scope: scope, list: list });
     
     SearchInit({ scope: scope, set: 'projects', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
@@ -128,28 +119,11 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
           ReturnToCaller(1);
        }  
     }
-
-    scope.toggle_project = function(id) {
-       if (scope[list.iterator + "_" + id + "_class"] == "success") {
-          scope[list.iterator + "_" + id + "_class"] = "";
-          document.getElementById('check_' + id).checked = false;
-          if (scope.selected.indexOf(id) > -1) {
-             scope.selected.splice(scope.selected.indexOf(id),1);
-          }
-       }
-       else {
-          scope[list.iterator + "_" + id + "_class"] = "success";
-          document.getElementById('check_' + id).checked = true;
-          if (scope.selected.indexOf(id) == -1) {
-             scope.selected.push(id);
-          }
-       }
-       }
 }
 
 ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList', 
                          'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                         'GetBasePath' ];
+                         'GetBasePath', 'SelectionInit'];
 
 
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 

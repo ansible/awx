@@ -27,18 +27,7 @@ function OrganizationsList ($scope, $rootScope, $location, $log, Rest, Alert, Lo
     $rootScope.flashMessage = null;
 
     LoadBreadCrumbs();
-
-    if (scope.PostRefreshRemove) {
-       scope.PostRefreshRemove();
-    }
-    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
-        $("tr.success").each(function(index) {
-            // Make sure no rows have a green background 
-            var ngc = $(this).attr('ng-class'); 
-            scope[ngc] = ""; 
-            });
-        });
-
+    
     // Initialize search and paginate pieces and load data
     SearchInit({ scope: scope, set: list.name, list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
@@ -75,23 +64,6 @@ function OrganizationsList ($scope, $rootScope, $location, $log, Rest, Alert, Lo
                 body: 'Are you sure you want to delete ' + name + '?',
                 action: action
                 });
-       }
-
-    scope.toggle_organization = function(id) {
-       if (scope[list.iterator + "_" + id + "_class"] == "success") {
-          scope[list.iterator + "_" + id + "_class"] = "";
-          document.getElementById('check_' + id).checked = false;
-          if (scope.selected.indexOf(id) > -1) {
-             scope.selected.splice(scope.selected.indexOf(id),1);
-          }
-       }
-       else {
-          scope[list.iterator + "_" + id + "_class"] = "success";
-          document.getElementById('check_' + id).checked = true;
-          if (scope.selected.indexOf(id) == -1) {
-             scope.selected.push(id);
-          }
-       }
        }
 }
 

@@ -43,7 +43,7 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
                 var found = false;
                 var name;
                 for (var i=0; i < listScope[list.name].length; i++) {
-                    if (listScope[list.iterator + "_" + listScope[list.name][i].id + "_class"] == "success") {
+                    if (listScope[list.name][i]['checked'] == '1') {
                        found = true;
                        scope[field] = listScope[list.name][i].id;
                        if (scope[form.name + '_form'] && form.fields[field] && form.fields[field].sourceModel) {
@@ -72,23 +72,31 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
                 }
 
             listScope['toggle_' + list.iterator] = function(id) {
-                // when user clicks a row, remove 'success' class from all rows except clicked-on row
-                if (listScope[list.name]) {
-                   for (var i=0; i < listScope[list.name].length; i++) {
-                       listScope[list.iterator + "_" + listScope[list.name][i].id + "_class"] = ""; 
-                   }
-                }
-                if (id != null && id != undefined) {
-                   listScope[list.iterator + "_" + id + "_class"] = "success";
+                for (var i=0; i < scope[list.name].length; i++) {
+                    if (listScope[list.name][i]['id'] == id) {
+                       listScope[list.name][i]['checked'] = '1';
+                       listScope[list.name][i]['success_class'] = 'success';
+                    }
+                    else {
+                       listScope[list.name][i]['checked'] = '0';
+                       listScope[list.name][i]['success_class'] = '';
+                    }
                 }
                 }
                 
             SearchInit({ scope: listScope, set: list.name, list: list, url: defaultUrl });
             PaginateInit({ scope: listScope, list: list, url: defaultUrl, mode: 'lookup' });
-            listScope.search(list.iterator);
-            if (current_item) {
-               listScope['toggle_' + list.iterator](current_item);
+            
+            // If user made a selection previously, mark it as selected when modal loads 
+            if (listScope.lookupPostRefreshRemove) {
+                listScope.lookupPostRefreshRemove();
             }
+            listScope.lookupPostRefreshRemove = scope.$on('PostRefresh', function() {
+                listScope['toggle_' + list.iterator](scope[field]);
+                });
+
+            listScope.search(list.iterator);
+            
             }
         }
         }]);
