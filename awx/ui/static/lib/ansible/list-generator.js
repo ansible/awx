@@ -26,7 +26,27 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        },
 
     hide: function() {
-          $('#lookup-modal').modal('hide');
+       $('#lookup-modal').modal('hide');
+       },
+
+    button: function(btn) {
+       // pass in button object, get back html
+       var html = '';
+       html += "<button " + this.attr(btn, 'ngClick') + "class=\"btn";
+       html += (btn['class']) ?  " " + btn['class'] : " btn-small";
+       html += "\" ";
+       html += (btn.ngHide) ? this.attr(btn,'ngHide') : "";
+       html += (btn.awToolTip) ? this.attr(btn,'awToolTip') : "";
+       html += (btn.awToolTip && btn.dataPlacement == undefined) ? "data-placement=\"top\" " : "";
+       html += (btn.awPopOver) ? "aw-pop-over=\"" + 
+           btn.awPopOver.replace(/[\'\"]/g, '&quot;') + "\" " : "";
+       html += (btn.dataPlacement) ? this.attr(btn, 'dataPlacement') : "";
+       html += (btn.dataContainer) ? this.attr(btn, 'dataContainer') : "";
+       html += (btn.dataTitle) ? this.attr(btn, 'dataTitle') : "";
+       html += " >" + this.attr(btn,'icon');
+       html += (btn.label) ? " " + btn.label : ""; 
+       html += "</button> ";
+       return html;
        },
  
     inject: function(list, options) {
@@ -90,15 +110,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            }
            html += "</li>\n</ul>\n</div>\n";
        }
-      
-       //select instructions
-       if (options.mode == 'select' && list.selectInstructions) {
-          html += "<div class=\"alert alert-info alert-block\">\n";
-          html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>\n";
-          html += "<strong>Hint: </strong>" + list.selectInstructions + "\n";
-          html += "</div>\n"
-       }
-       else if (options.mode == 'edit' && list.editInstructions) {
+       
+       if (options.mode == 'edit' && list.editInstructions) {
           html += "<div class=\"alert alert-info alert-block\">\n";
           html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>\n";
           html += "<strong>Hint: </strong>" + list.editInstructions + "\n"; 
@@ -124,42 +137,35 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
                  if ( (list.actions[action].basePaths == undefined) || 
                       (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
-                    html += "<button " + this.attr(list.actions[action], 'ngClick') + "class=\"btn";
-                    html += (list.actions[action]['class']) ?  " " + list.actions[action]['class'] : " btn-small";
-                    html += "\" ";
-                    html += (list.actions[action].ngHide) ? this.attr(list.actions[action],'ngHide') : "";
-                    html += (list.actions[action].awToolTip) ? this.attr(list.actions[action],'awToolTip') : "";
-                    html += (list.actions[action].awToolTip && list.actions[action].dataPlacement == undefined) ? "data-placement=\"top\" " : "";
-                    html += (list.actions[action].awPopOver) ? "aw-pop-over=\"" + 
-                        list.actions[action].awPopOver.replace(/[\'\"]/g, '&quot;') + "\" " : "";
-                    html += (list.actions[action].dataPlacement) ? this.attr(list.actions[action], 'dataPlacement') : "";
-                    html += (list.actions[action].dataContainer) ? this.attr(list.actions[action], 'dataContainer') : "";
-                    html += (list.actions[action].dataTitle) ? this.attr(list.actions[action], 'dataTitle') : "";
-                    html += " >" + this.attr(list.actions[action],'icon');
-                    html += (list.actions[action].label) ? " " + list.actions[action].label : ""; 
-                    html += "</button> ";
+                    html += this.button(list.actions[action]);
                  }
               }
           }
-          if (options.mode == 'select' && (options.selectButton == undefined || options.selectButton == true)) {
-             html += " <button class=\"btn btn-small btn-success\" aw-tool-tip=\"Complete your selection\" " +
-                 "ng-click=\"finishSelection()\"><i class=\"icon-ok\"></i> Finished</button>\n";
+          
+          //select instructions
+          if (options.mode == 'select' && list.selectInstructions) {
+             var btn = {
+                 awPopOver: list.selectInstructions,
+                 dataPlacement: 'left',
+                 dataContainer: '.container',
+                 icon: "icon-question-sign",
+                 'class': 'btn-small btn-info',
+                 awToolTip: 'Click for help',
+                 dataTitle: 'Help',
+                 iconSize: 'large'
+                 };
+             html += this.button(btn);
           }
+          
           html += "</div>\n";
        }
 
        // table header row
        html += "<table class=\"table table-condensed"
        html += (list['class']) ? " " + list['class'] : "";
-
-       // Add the correct hover class
-       if (options.id) {
-          html += " table-hover-inverse";
-       }
-       else if (options.mode == 'lookup' || list.hover) {
-          html += " table-hover";
-       }
-
+       html += (options.mode == 'lookup' || options.id) ? ' table-hover-inverse' : '';
+       html += (list.hover) ? ' table-hover' : '';
+       
        html += "\">\n";
        html += "<thead>\n";
        html += "<tr>\n";
@@ -237,16 +243,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           // Row level actions
           html += "<td class=\"actions\">";
           for (action in list.fieldActions) {
-              html += "<button class=\"btn"; 
-              html += (list.fieldActions[action]['class']) ? " " + list.fieldActions[action]['class'] : " btn-small";
-              html += "\" " + this.attr(list.fieldActions[action],'ngClick');
-              html += (list.fieldActions[action].ngShow) ? this.attr(list.fieldActions[action],'ngShow') : "";
-              html += (list.fieldActions[action].awToolTip) ? this.attr(list.fieldActions[action],'awToolTip') : "";
-              html += (list.fieldActions[action].ngDisabled) ? this.attr(list.fieldActions[action],'ngDisabled') : ""
-              html +=">";
-              html += (list.fieldActions[action].icon) ? this.icon(list.fieldActions[action].icon) : "";
-              html += (list.fieldActions[action].label) ? " " + list.fieldActions[action].label : "";
-              html +="</button> ";
+              html += this.button(list.fieldActions[action]);
           }
           html += "</td>";
        }
@@ -264,7 +261,14 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
 
        // End List
        html += "</tbody>\n";
-       html += "</table>\n";  
+       html += "</table>\n";
+
+       if (options.mode == 'select' && (options.selectButton == undefined || options.selectButton == true)) {
+          html += "<div class=\"navigation-buttons\">\n";
+          html += " <button class=\"btn btn-small btn-primary pull-right\" aw-tool-tip=\"Complete your selection\" " +
+              "ng-click=\"finishSelection()\" ng-disabled=\"selected.length == 0\"><i class=\"icon-check\"></i> Select</button>\n";
+          html += "</div>\n";
+       }
        
        if (options.mode != 'lookup' && (list.well == undefined || list.well == 'true')) {
           html += "</div>\n";    //well

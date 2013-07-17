@@ -14,7 +14,8 @@ angular.module('ProjectsListDefinition', [])
         iterator: 'project',
         selectTitle: 'Add Project',
         editTitle: '{{ name }}',
-        selectInstructions: 'Click on a row to select it, and click Finished when done. Use the green <i class=\"icon-plus\"></i> button to create a new row.', 
+        selectInstructions: '<p>Select existing projects by clicking each project or checking the related checkbox. When finished, click the blue ' +
+            'Select button, located bottom right.</p> <p>Create a brand new project by clicking the green <i class=\"icon-plus\"></i>Create New button.</p>', 
         index: true,
         hover: true, 
         
@@ -30,7 +31,7 @@ angular.module('ProjectsListDefinition', [])
         
         actions: {
             add: {
-                label: 'Add',
+                label: 'Create New',
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addProject()',

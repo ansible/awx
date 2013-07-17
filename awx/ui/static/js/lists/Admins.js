@@ -14,9 +14,11 @@ angular.module('AdminListDefinition', [])
         iterator: 'admin',
         selectTitle: 'Add Administrators',
         editTitle: 'Admins',
-        selectInstructions: 'Click on a row to select it. Click the Finished button when done.', 
+        selectInstructions: '<p>Select existing users by clicking each user or checking the related checkbox. When finished, click the blue ' +
+            'Select button, located bottom right.</p>', 
         base: 'users',
         index: true,
+        hover: true, 
         
         fields: {
             username: {

@@ -29,7 +29,7 @@ angular.module('OrganizationListDefinition', [])
         
         actions: {
             add: {
-                label: 'Add',
+                label: 'Create New',
                 icon: 'icon-plus',
                 mode: 'all',                  // One of: edit, select, all
                 ngClick: 'addOrganization()',

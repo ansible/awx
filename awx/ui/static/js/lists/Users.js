@@ -14,7 +14,9 @@ angular.module('UserListDefinition', [])
         iterator: 'user',
         selectTitle: 'Add Users',
         editTitle: 'Users',
-        selectInstructions: 'Check the Select checkbox next to each user to be added, and click Finished when done. Use the green <i class=\"icon-plus\"></i> button to create a new user.', 
+        selectInstructions: '<p>Select existing users by clicking each user or checking the related checkbox. When finished, click the blue ' +
+            'Select button, located bottom right.</p> <p>When available, a brand new user can be created by clicking the green ' +
+            '<i class=\"icon-plus\"></i>Create New button.</p>', 
         index: true,
         hover: true, 
         
@@ -33,7 +35,7 @@ angular.module('UserListDefinition', [])
         
         actions: {
             add: {
-                label: 'Add',
+                label: 'Create New',
                 icon: 'icon-plus',
                 mode: 'all',                      // One of: edit, select, all
                 ngClick: 'addUser()',
