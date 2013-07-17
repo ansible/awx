@@ -263,7 +263,7 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm,
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
-                          OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsEdit, LoadInventory,
+                          OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
                           GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshTree, ParseTypeChange) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
@@ -436,7 +436,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
           return {
               addGroup: {
                   label: 'Add Group',
-                  action: function(obj) { GroupsList({ "inventory_id": id, group_id: null }); }
+                  action: function(obj) { GroupsAdd({ "inventory_id": id, group_id: null }); }
                   }
               }
       }
@@ -499,7 +499,12 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       });
 
   scope.addGroup = function() {
-      GroupsList({ "inventory_id": id, group_id: scope.group_id });
+      if (scope.group_id == null) {
+         GroupsAdd({ "inventory_id": id, group_id: null });
+      }
+      else {
+         GroupsList({ "inventory_id": id, group_id: scope.group_id });
+      }
       }
 
   scope.editGroup = function() {
@@ -545,7 +550,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
-                            'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsEdit', 'LoadInventory',
+                            'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
                             'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete', 'RefreshTree',
                             'ParseTypeChange'
                             ]; 

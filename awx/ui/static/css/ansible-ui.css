@@ -43,6 +43,11 @@
     padding-bottom: 1px;
  }
 
+ .btn-inventory-edit {
+    padding-top: 2px;
+    padding-bottom: 1px;
+ }
+
  .modal-footer .btn-success, 
  .modal-footer .btn-danger, 
  .modal-footer .btn-info, 
