@@ -41,6 +41,12 @@ angular.module('JobEventFormDefinition', [])
                 readonly: true,
                 section: 'Event'
                 },
+            play: {
+                label: 'Play',
+                type: 'text',
+                readonly: true,
+                section: 'Event'
+                },
             task: {
                 label: 'Task',
                 type: 'text',
@@ -119,22 +125,15 @@ angular.module('JobEventFormDefinition', [])
         navigation: {
             back_top: {
                 label: 'Back', 
-                position: 'top',
-                'class': 'btn-small pull-right',
-                icon:  'icon-arrow-left',
-                ngClick: 'navigateBack()'
-                },
-            back_bottom: {
-                label: 'Back', 
-                position: 'bottom',
-                'class': 'btn-small pull-right',
+                position: ['top-left','top-right', 'bottom-left', 'bottom-right'],
+                'class': 'btn-small',
                 icon:  'icon-arrow-left',
                 ngClick: 'navigateBack()'
                 },
             raw_view: {
                 label: 'View raw JSON results', 
                 icon: 'icon-zoom-in',
-                position: 'bottom',
+                position: ['bottom-left'],
                 'class': 'btn-small',
                 ngClick: 'rawView()'
                 }

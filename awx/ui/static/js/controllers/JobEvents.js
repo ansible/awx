@@ -227,13 +227,19 @@ function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routePar
                      break;
                   case 'id':
                   case 'task':
+                  case 'play':
                      scope[fld] = data[fld];
                      break;
+                  case 'start':
+                  case 'end':
+                    if (data['event_data'] && data['event_data']['res'] && data['event_data']['res'][fld] !== undefined) {
+                       var cDate = new Date(data['event_data']['res'][fld]);
+                       scope[fld] = FormatDate(cDate);
+                    }
+                    break;
                   case 'msg':
                   case 'stdout':
                   case 'stderr':
-                  case 'start':
-                  case 'end':
                   case 'delta':
                   case 'rc':
                      if (data['event_data'] && data['event_data']['res'] && data['event_data']['res'][fld] !== undefined) {

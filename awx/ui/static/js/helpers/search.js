@@ -8,8 +8,7 @@
  *
  *  SearchInit({
  *      scope:       <scope>,
- *      set:         <model name (i.e. organizations),
- *                   name was given in ng-repeat>
+ *      set:         <model name (i.e. organizations) used in ng-repeat>
  *      url:         <default api url used to load data>
  *      list:        <list object used by ListGenerator>
  *      });   

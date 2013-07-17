@@ -181,18 +181,25 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        return html;
        },
 
-    button: function(btn) {
+    button: function(btn, topOrBottom) {
        // pass in a button object and get back an html string containing
        // a <button> element.
        var html = '';
-       html += "<button "; 
-       html += "class=\"btn"; 
-       html += (btn['class']) ?  " " + btn['class'] : "";
-       html += "\" ";
-       html += (btn.ngClick) ? this.attr(btn, 'ngClick') : "";
-       html += ">" + this.attr(btn, 'icon');
-       html += " " + btn.label;
-       html += "</button>\n";
+       for (var i=0; i < btn.position.length; i++) {
+           if (btn.position[i].indexOf(topOrBottom) >= 0) {
+              html += "<button "; 
+              html += "class=\"btn";
+              html += (btn['class']) ?  " " + btn['class'] : "";
+              if (btn.position[i] == 'top-right' || btn.position[i] == 'bottom-right') {
+                 html += " " + "pull-right";  
+              }
+              html += "\" ";
+              html += (btn.ngClick) ? this.attr(btn, 'ngClick') : "";
+              html += ">" + this.attr(btn, 'icon');
+              html += " " + btn.label;
+              html += "</button>\n";
+           }
+       }
        return html;
     },
 
@@ -608,8 +615,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += "<div class=\"navigation-buttons navigation-buttons-top\">\n";
              for (btn in this.form.navigation) {
                  var btn = this.form.navigation[btn];
-                 if (btn.position == 'top') {
-                    html += this.button(btn);
+                 if ( btn.position.indexOf('top-left') >= 0 || btn.position.indexOf('top-right') >= 0 ) {
+                    html += this.button(btn, 'top');
                  }
              }
              html += "</div>\n";
@@ -722,8 +729,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += "<div class=\"navigation-buttons navigation-buttons-bottom\">\n";
              for (btn in this.form.navigation) {
                  var btn = this.form.navigation[btn];
-                 if (btn.position == 'bottom') {
-                    html += this.button(btn);
+                 if ( btn.position.indexOf('bottom-left') >= 0 || btn.position.indexOf('bottom-right') >= 0 ) {
+                    html += this.button(btn, 'bottom');
                  }
              }
              html += "</div>\n";
