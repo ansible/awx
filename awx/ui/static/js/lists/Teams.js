@@ -40,7 +40,7 @@ angular.module('TeamsListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addTeam()',
-                "class": 'btn-small',
+                "class": 'btn-small btn-success',
                 awToolTip: 'Create a new team'
                 }
             },
@@ -50,7 +50,7 @@ angular.module('TeamsListDefinition', [])
                 label: 'Edit',
                 ngClick: "editTeam(\{\{ team.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-small btn-success',
+                "class": 'btn-small',
                 awToolTip: 'View/Edit team'
                 },
 
