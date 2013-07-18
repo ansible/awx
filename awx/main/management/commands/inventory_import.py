@@ -331,6 +331,7 @@ class ExecutableJsonLoader(BaseLoader):
 
 
 class GenericLoader(object):
+
     def __init__(self, src):
 
         LOGGER.debug("preparing loaders")
@@ -459,21 +460,18 @@ class Command(BaseCommand):
         # list, delete it
         if overwrite:
             LOGGER.info("deleting any hosts not in the remote source: %s" % host_names.keys())
-            Host.objects.exclude(name__in = host_names.keys()).delete()
+            Host.objects.exclude(name__in = host_names.keys()).filter(inventory=inventory).delete()
 
         # if overwrite is set, for each group in the database but NOT in the local
         # list, delete it
         if overwrite:
             LOGGER.info("deleting any groups not in the remote source")
-            Group.objects.exclude(name__in = group_names.keys()).delete()
+            Group.objects.exclude(name__in = group_names.keys()).filter(inventory=inventory).delete()
 
         # if overwrite is set, throw away all invalid child relationships for groups
         if overwrite:
             LOGGER.info("clearing any child relationships to rebuild from remote source")
-            db_groups = Group.objects.all()
-            #for g in db_groups:
-            #    g.children.clear()
-            #    g.save()
+            db_groups = Group.objects.filter(inventory=inventory)
 
             for db_group in db_groups:
                  db_kids = db_group.children.all()
