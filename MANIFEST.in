@@ -4,6 +4,7 @@ recursive-include awx/templates *.html
 recursive-include awx/ui *.html
 recursive-include awx/ui/static *.css *.ico *.png *.gif *.jpg
 recursive-include awx/ui/static *.eot *.svg *.ttf *.woff *.otf
+recursive-include awx/ui/static/lib *
 recursive-include awx/lib/site-packages *
 recursive-include config *
 recursive-include config/deb *
