@@ -23,8 +23,9 @@ function Authenticate($scope, $rootScope, $location, Authorization, ToggleClass,
                                      //gets set back to true by Authorization.setToken().
    
    $scope.sessionExpired = Authorization.didSessionExpire();    //Display session timeout message
-   $scope.sessionTimeout = ($AnsibleConfig.session_timeout / 60).toFixed(2)
-
+   $scope.sessionTimeout = ($AnsibleConfig.session_timeout / 60).toFixed(2);
+   $scope.AWXLoginLogo = $staticURL + 'img/AWX_logo.png';
+   
    $('#login-password').bind('keypress', function(e) {
        var code = (e.keyCode ? e.keyCode : e.which);
        if (code == 13) {
@@ -33,7 +34,7 @@ function Authenticate($scope, $rootScope, $location, Authorization, ToggleClass,
        });
 
    // Display the login dialog
-   $('#login-modal').modal({ show: true, keyboard: false, backdrop: false });
+   $('#login-modal').modal({ show: true, keyboard: false, backdrop: 'static' });
 
    $scope.reset = function() { 
        $('#login-form input').each( function(index) { $(this).val(''); });

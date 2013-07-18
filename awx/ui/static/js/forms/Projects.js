@@ -73,7 +73,47 @@ angular.module('ProjectFormDefinition', [])
             },
 
         related: { //related colletions (and maybe items?)
+            organizations: {
+                type: 'collection',
+                title: 'Organizations',
+                iterator: 'organization',
+                open: false,
 
+                actions: { 
+                    add: {
+                        ngClick: "add('organizations')",
+                        icon: 'icon-plus',
+                        label: 'Add',
+                        awToolTip: 'Add an organization'
+                        }
+                    },
+
+                fields: {
+                    name: {
+                        key: true,
+                        label: 'Name'
+                        },
+                    description: {
+                        label: 'Description'
+                        }
+                    },
+
+                fieldActions: {
+                    edit: {
+                        label: 'Edit',
+                        ngClick: "edit('organizations', \{\{ organization.id \}\}, '\{\{ organization.name \}\}')",
+                        icon: 'icon-edit',
+                        awToolTip: 'Edit the credential'
+                        },
+                    "delete": {
+                        label: 'Delete',
+                        ngClick: "delete('organizations', \{\{ organization.id \}\}, '\{\{ organization.name \}\}', 'organizations')",
+                        icon: 'icon-remove',
+                        "class": 'btn-danger',
+                        awToolTip: 'Delete the credential'
+                        }
+                    }
+                },
             }
 
     }); // Form

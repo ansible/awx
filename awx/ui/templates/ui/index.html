@@ -10,6 +10,9 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}css/font-awesome.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/ansible-ui.css" />
   <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" />
+  <script> 
+     var $staticURL = "{{ STATIC_URL }}";
+  </script>
   <script src="{{ STATIC_URL }}js/config.js"></script>
   <script src="{{ STATIC_URL }}lib/angular/angular.js"></script>
   <script src="{{ STATIC_URL }}lib/angular/angular-resource.js"></script>
@@ -223,19 +226,21 @@
 
   <div class="site-footer">
     <div>
-      <div class="social">
+      <div class="social pull-left">
         <a href="https://github.com/ansible" target="_blank"><i class="icon-github"></i></a>
         <a href="https://www.facebook.com/pages/Ansibleworks/258737970923512?ref=hl" target="_blanck"><i class="icon-facebook"></i></a>
         <a href="http://www.twitter.com/ansibleworks" target="_blanck"><i class="icon-twitter"></i></a>
         <a href="http://www.linkedin.com/company/ansibleworks" target="_blanck"><i class="icon-linkedin"></i></a>
         <a href="mailto://info@ansibleworks.com"><i class="icon-envelope"></i></a>
       </div>
+      <div class="copyright">
+        Copyright &copy; 2013 AnsibleWorks, Inc. All rights reservied.<br />
+        1482 East Valley Road, Suite 888 &middot; Montecito, California 9308 &middot; +1-800-825-0212
+      </div>
       <div class="logo pull-right">
-        <a href="http://www.ansibleworks.com" target="_blank"><img src="{{ STATIC_URL }}img/ansible-logo-bw-invert.png" /></a>
-        <div class="tag-line">Radically simple IT orchestration.</div>
+        <a href="http://www.ansibleworks.com" target="_blank"><img src="{{ STATIC_URL }}img/AWX_logo.png" /></a>
       </div>
     </div>
-    <div class="copyright">Copyright &copy; 2013 AnsibleWorks, Inc. All rights reservied.<br />1482 East Valley Road, Suite 888 &middot; Montecito, California 9308 &middot; +1-800-825-0212</div>
   </div><!-- site footer --> 
   
   <script src="{{ STATIC_URL }}lib/jquery/jquery-1.9.1.min.js"></script>

@@ -141,10 +141,12 @@
     background-color: #36454F;
     color: #A9A9A9;
     padding-top: 20px;
+    padding-bottom: 40px;
+    text-align: center;
  }
 
  .copyright {
-    margin-top: 40px;
+    display: inline-block;
     font-size: 11px;
     font-weight: normal;
     text-align: center;
@@ -166,19 +168,19 @@
 
  .site-footer .logo {
     display: inline-block;
-    text-align: left;
-    font-size: 12px;
-    margin-right: 20px;
+    margin-right: 35px;
  }
 
  .site-footer .logo img {
-    max-width: 165px;
+    max-width: 125px;
  }
 
- .site-footer .logo .tag-line {
-    line-height: normal;
-    margin-top: 5px;
-    margin-left: 15px;
+ .login-header {
+    text-align: center;
+ }
+
+ .login-header img {
+    max-width: 100px;
  }
 
  .error {
@@ -614,6 +616,15 @@
    margin-bottom: 10px;
    margin-top: 0;
  }
+
+
+.modal-backdrop,
+.modal-backdrop.fade.in {
+  opacity: 0.6;
+  filter: alpha(opacity=60);
+}
+
+
 
 /* overrides to TB modal */
 .modal-header {
