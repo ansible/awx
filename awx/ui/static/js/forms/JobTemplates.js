@@ -145,6 +145,24 @@ angular.module('JobTemplateFormDefinition', [])
                 dataTitle: 'Extra Variables',
                 dataPlacement: 'left'
                 },
+            job_tags: {
+                label: 'Job Tags',
+                type: 'textarea', 
+                rows: 1, 
+                addRequired: false, 
+                editRequired: false, 
+                'class': 'span12',
+                column: 2,
+                awPopOver: "<p>Provide a comma separated list of tags.</p>\n" +
+                    "<p>Tags are useful when you have a large playbook, and you want to run a specific part of a play or task.</p>" +
+                    "<p>For example, you might have a task consisiting of a long list of actions. Tag values can be assigned to each action. " +
+                    "Suppose the actions have been assigned tag values of &quot;configuration&quot;, &quot;packages&quot; and &quot;install&quot;.</p>" +
+                    "<p>If you just want to run the &quot;configuration&quot; and &quot;packages&quot; actions, you would enter the following here " +
+                    "in the Job Tags field:<\p>\n" +
+                    "<blockquote>configuration,packages</blockquote>\n",
+                dataTitle: "Job Tags",
+                dataPlacement: "left"
+                },
             allow_callbacks: {
                 label: 'Allow Callbacks',
                 type: 'checkbox',

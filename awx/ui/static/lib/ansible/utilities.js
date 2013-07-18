@@ -63,15 +63,14 @@ angular.module('Utilities',[])
    .factory('ProcessErrors', ['$log', 'Alert', function($log, Alert) {
       return function(scope, data, status, form, defaultMsg) {
       if (status == 403) {
-         var msg = 'The API responded with a 403 Access Denied error. You do not have permission to perform the ' +
-               'requested action. ';
+         var msg = 'The API responded with a 403 Access Denied error. ';
          if (data['detail']) {
             msg += 'Detail: ' + data['detail'];
          }
          else {
             msg += 'Please contact your system administrator.';
          }
-         Alert('Access Denied', msg);
+         Alert(defaultMsg.hdr, msg);
       }
       else if (data.non_field_errors) {
          Alert('Error!', data.non_field_errors);

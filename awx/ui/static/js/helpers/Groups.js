@@ -9,13 +9,13 @@
  
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
                                  'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'GroupsHelper',
-                                 'InventoryHelper'
+                                 'InventoryHelper', 'SelectionHelper'
                                  ])
 
     .factory('GroupsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupList', 'GenerateList', 
-        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'RefreshTree',
+        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'RefreshTree', 'SelectionInit',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupList, GenerateList, LoadBreadCrumbs, SearchInit,
-        PaginateInit, ProcessErrors, GetBasePath, GroupsAdd, RefreshTree) {
+        PaginateInit, ProcessErrors, GetBasePath, GroupsAdd, RefreshTree, SelectionInit) {
     return function(params) {
         
         var inventory_id = params.inventory_id;
@@ -41,27 +41,17 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').modal({ backdrop: 'static', keyboard: false });
 
-        scope.selected = [];
-        
+        SelectionInit({ scope: scope, list: list });
+
         if (scope.PostRefreshRemove) {
            scope.PostRefreshRemove();
         }
         scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
-            $("tr.success").each(function(index) {
-                // Make sure no rows have a green background 
-                var ngc = $(this).attr('ng-class'); 
-                scope[ngc] = ""; 
-                });
-            if ($routeParams.group_id) {
-               // Remove the current group from the list of available groups, thus
-               // preventing a group from being added to itself
-               for (var i=0; i < scope.groups.length; i++) {
-                   if (scope.groups[i].id == $routeParams.group_id) {
-                      scope.groups.splice(i,1);
-                   }
-               }
+            for (var i=0; i < scope.groups.length; i++) {
+                if (scope.groups[i].id == group_id) {
+                   scope.groups.splice(i,1);
+                }
             }
-            //scope.$digest();
             });
 
         SearchInit({ scope: scope, set: 'groups', list: list, url: defaultUrl });
@@ -91,13 +81,12 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                  var errors = 0;   
                  for (var i=0; i < scope.queue.length; i++) {
                      if (scope.queue[i].result == 'error') {
+                        ProcessErrors(scope, scope.queue[i].data, scope.queue[i].status, null,
+                            { hdr: 'Group: ' + scope.queue[i].value.name, msg: 'Failed to add group. POST returned status: ' + scope.queue[i].status });
                         errors++;
                      }
                  }
-                 if (errors > 0) {
-                    Alert('Error', 'There was an error while adding one or more of the selected groups.');  
-                 }
-                 else {
+                 if (errors == 0) {
                     $('#form-modal').modal('hide');
                     RefreshTree({ scope: scope });
                  }
@@ -120,7 +109,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                              scope.$emit('callFinished');
                              })
                          .error( function(data, status, headers, config) {
-                             scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
+                             scope.queue.push({ result: 'error', data: data, status: status, headers: headers, value: group });
                              scope.$emit('callFinished');
                              });
                   }
@@ -129,23 +118,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            else {
               $('#form-modal').modal('hide');
            }  
-           }
-
-        scope.toggle_group = function(id) {
-           if (scope[list.iterator + "_" + id + "_class"] == "success") {
-              scope[list.iterator + "_" + id + "_class"] = "";
-              document.getElementById('check_' + id).checked = false;
-              if (scope.selected.indexOf(id) > -1) {
-                 scope.selected.splice(scope.selected.indexOf(id),1);
-              }
-           }
-           else {
-              scope[list.iterator + "_" + id + "_class"] = "success";
-              document.getElementById('check_' + id).checked = true;
-              if (scope.selected.indexOf(id) == -1) {
-                 scope.selected.push(id);
-              }
-           }
            }
 
         scope.createGroup = function() {
