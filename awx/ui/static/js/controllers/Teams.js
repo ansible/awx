@@ -24,7 +24,8 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
     var scope = view.inject(list, { mode: mode });    // Inject our view
     scope.selected = [];
     
-    SelectionInit({ scope: scope, list: list });
+    var url = GetBasePath('base') + $location.path() + '/';
+    SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
     
     if (scope.PostRefreshRemove) {
        scope.PostRefreshRemove();
@@ -36,7 +37,6 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
         }
         });
 
-    //SetTeamListeners({ scope: scope, set: 'teams', iterator: list.iterator });
     SearchInit({ scope: scope, set: 'teams', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
@@ -74,6 +74,7 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
                 });
        }
     
+    /*
     scope.lookupOrganization = function(organization_id) {
        Rest.setUrl(GetBasePath('organizations') + organization_id + '/');
        Rest.get()
@@ -81,66 +82,8 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
                return data.name;
                });
        }
-
-    scope.finishSelection = function() {
-       Rest.setUrl(GetBasePath('base') + $location.path() + '/');  // We're assuming the path matches the api path. 
-                                                         // Will this always be true??
-       scope.queue = [];
-
-       scope.$on('callFinished', function() {
-          // We call the API for each selected user. We need to hang out until all the api
-          // calls are finished.
-          if (scope.queue.length == scope.selected.length) {
-             // All the api calls finished
-             $('input[type="checkbox"]').prop("checked",false);
-             scope.selected = [];
-             var errors = 0;   
-             for (var i=0; i < scope.queue.length; i++) {
-                 if (scope.queue[i].result == 'error') {
-                    errors++;
-                    // there is no way to know which user raised the error. no data comes
-                    // back from the api call. 
-                    //   $('td.username-column').each(function(index) {
-                    //      if ($(this).text() == scope.queue[i].username) {
-                    //         $(this).addClass("error");
-                    //      }
-                    //   });
-                 }
-             }
-             if (errors > 0) {
-                Alert('Error', 'There was an error while adding one or more of the selected teams.');  
-             }
-             else {
-                ReturnToCaller(1);
-             }
-          }
-          });
-       
-       if (scope.selected.length > 0 ) {
-          var team = null;
-          for (var i=0; i < scope.selected.length; i++) {
-              for (var j=0; j < scope.teams.length; j++) {
-                  if (scope.teams[j].id == scope.selected[i]) {
-                     team = scope.teams[j];
-                  }
-              }
-              if (team !== null) {
-                 Rest.post(team)
-                     .success( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'success', data: data, status: status });
-                         scope.$emit('callFinished');
-                         })
-                     .error( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
-                         scope.$emit('callFinished');
-                         });
-              }
-          }
-       }
-       else {
-          ReturnToCaller();
-       }  
-       }
+    */
+    
 }
 
 TeamsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'TeamList', 'GenerateList', 
@@ -150,8 +93,7 @@ TeamsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams
 
 function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, 
                    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-                   GenerateList, OrganizationList, SearchInit, PaginateInit, TeamLookUpOrganizationInit,
-                   GetBasePath) 
+                   GenerateList, OrganizationList, SearchInit, PaginateInit, GetBasePath, LookUpInit) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -164,7 +106,14 @@ function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    $rootScope.flashMessage = null;
    generator.reset();
    LoadBreadCrumbs();
-   TeamLookUpOrganizationInit({ scope: scope });
+   
+   LookUpInit({
+       scope: scope,
+       form: form,
+       current_item: null,
+       list: OrganizationList, 
+       field: 'organization' 
+       });
    
    // Save
    scope.formSave = function() {
@@ -193,13 +142,14 @@ function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
 TeamsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm', 'GenerateForm', 
                      'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
-                     'OrganizationList', 'SearchInit', 'PaginateInit', 'TeamLookUpOrganizationInit', 'GetBasePath']; 
+                     'OrganizationList', 'SearchInit', 'PaginateInit', 'TeamLookUpOrganizationInit', 'GetBasePath', 
+                     'LookUpInit' ]; 
 
 
 function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, 
                     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
-                    RelatedPaginateInit, ReturnToCaller, ClearScope, TeamLookUpOrganizationInit, Prompt, 
-                    GetBasePath, CheckAccess) 
+                    RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, 
+                    GetBasePath, CheckAccess, OrganizationList) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -215,8 +165,6 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    var id = $routeParams.team_id;
    var relatedSets = {}; 
    
-   TeamLookUpOrganizationInit({ scope: scope });
-
    // Retrieve each related set and any lookups
    if (scope.teamLoadedRemove) {
       scope.teamLoadedRemove();
@@ -257,6 +205,15 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
            RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
            RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
+
+           LookUpInit({
+             scope: scope,
+             form: form,
+             current_item: data['organization'],
+             list: OrganizationList, 
+             field: 'organization' 
+             });
+
            scope['organization_url'] = data.related.organization;
            scope.$emit('teamLoaded');
            })
@@ -367,7 +324,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 
 TeamsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm', 
                       'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
-                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'TeamLookUpOrganizationInit', 'Prompt',
-                      'GetBasePath', 'CheckAccess'
+                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
+                      'GetBasePath', 'CheckAccess', 'OrganizationList'
                       ]; 
   

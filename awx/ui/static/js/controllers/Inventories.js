@@ -22,20 +22,9 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
     var paths = $location.path().replace(/^\//,'').split('/');
     var mode = (paths[0] == 'inventories') ? 'edit' : 'select';      // if base path 'users', we're here to add/edit users
     var scope = view.inject(InventoryList, { mode: mode });          // Inject our view
-    scope.selected = [];
+    
     $rootScope.flashMessage = null;
   
-    if (scope.PostRefreshRemove) {
-       scope.PostRefreshRemove();
-    }
-    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
-        $("tr.success").each(function(index) {
-            // Make sure no rows have a green background 
-            var ngc = $(this).attr('ng-class'); 
-            scope[ngc] = ""; 
-            });
-        });
-    
     SearchInit({ scope: scope, set: 'inventories', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
@@ -81,75 +70,6 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
                });
        }
 
-    scope.finishSelection = function() {
-       Rest.setUrl('/api/v1' + $location.path() + '/');  // We're assuming the path matches the api path. 
-                                                         // Will this always be true??
-       scope.queue = [];
-
-       scope.$on('callFinished', function() {
-          // We call the API for each selected user. We need to hang out until all the api
-          // calls are finished.
-          if (scope.queue.length == scope.selected.length) {
-             // All the api calls finished
-             $('input[type="checkbox"]').prop("checked",false);
-             scope.selected = [];
-             var errors = 0;   
-             for (var i=0; i < scope.queue.length; i++) {
-                 if (scope.queue[i].result == 'error') {
-                    errors++;
-                 }
-             }
-             if (errors > 0) {
-                Alert('Error', 'There was an error while adding one or more of the selected inventories.');  
-             }
-             else {
-                ReturnToCaller(1);
-             }
-          }
-          });
-
-       if (scope.selected.length > 0 ) {
-          var inventory = null;
-          for (var i=0; i < scope.selected.length; i++) {
-              for (var j=0; j < scope.inventories.length; j++) {
-                  if (scope.inventories[j].id == scope.selected[i]) {
-                     inventory = scope.inventories[j];
-                  }
-              }
-              if (inventory !== null) {
-                 Rest.post(inventory)
-                     .success( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'success', data: data, status: status });
-                         scope.$emit('callFinished');
-                         })
-                     .error( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
-                         scope.$emit('callFinished');
-                         });
-              }
-          }
-       }
-       else {
-          ReturnToCaller();
-       }  
-       }
-
-    scope.toggle_inventory = function(id) {
-       if (scope[list.iterator + "_" + id + "_class"] == "success") {
-          scope[list.iterator + "_" + id + "_class"] = "";
-          document.getElementById('check_' + id).checked = false;
-          if (scope.selected.indexOf(id) > -1) {
-             scope.selected.splice(scope.selected.indexOf(id),1);
-          }
-       }
-       else {
-          scope[list.iterator + "_" + id + "_class"] = "success";
-          document.getElementById('check_' + id).checked = true;
-          if (scope.selected.indexOf(id) == -1) {
-             scope.selected.push(id);
-          }
-       }
-       }
 
     // Failed jobs link. Go to the jobs tabs, find all jobs for the inventory and sort by status
     scope.viewJobs = function(id) {

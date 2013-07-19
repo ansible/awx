@@ -10,13 +10,14 @@
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'HostListDefinition',
                                 'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'HostsHelper',
                                 'InventoryHelper', 'RelatedSearchHelper','RelatedPaginateHelper', 
-                                'InventoryFormDefinition'
+                                'InventoryFormDefinition', 'SelectionHelper'
                                 ])
 
     .factory('HostsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostList', 'GenerateList', 
-        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'HostsAdd', 'HostsReload',
+        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'HostsAdd', 'HostsReload', 'SearchInit',
+        'SelectionInit',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, GenerateList, LoadBreadCrumbs, SearchInit,
-        PaginateInit, ProcessErrors, GetBasePath, HostsAdd, HostsReload) {
+        PaginateInit, ProcessErrors, GetBasePath, HostsAdd, HostsReload, SearchInit, SelectionInit) {
     return function(params) {
         
         var inventory_id = params.inventory_id;
@@ -40,11 +41,14 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.formModalActionLabel = 'Select';
         scope.formModalHeader = 'Select Hosts';
         scope.formModalCancelShow = true;
+    
+        SelectionInit({ scope: scope, list: list, url: GetBasePath('groups') + group_id + '/hosts/' });
 
-        if (scope.removeHostsReload) {
-           scope.removeHostsReload();
+        if (scope.removeModalClosed) {
+           scope.removeModalClosed();
         }
-        scope.removeHostsReload = scope.$on('hostsReload', function() {
+        scope.removeModalClosed = scope.$on('modalClosed', function() {
+            // if the modal cloased, assume something got changed and reload the host list
             HostsReload(params);
         });
         
@@ -52,19 +56,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').modal({ backdrop: 'static', keyboard: false });
         
-        scope.selected = [];
-        
-        if (scope.PostRefreshRemove) {
-           scope.PostRefreshRemove();
-        }
-        scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
-            $("tr.success").each(function(index) {
-                // Make sure no rows have a green background 
-                var ngc = $(this).attr('ng-class'); 
-                scope[ngc] = ""; 
-                });
-            });
-
         SearchInit({ scope: scope, set: 'subhosts', list: list, url: defaultUrl });
         PaginateInit({ scope: scope, list: list, url: defaultUrl, mode: 'lookup' });
         scope.search(list.iterator);
@@ -72,80 +63,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         if (!scope.$$phase) {
            scope.$digest();
         }
-
-        scope.formModalAction = function() {
-           var url = GetBasePath('groups') + group_id + '/hosts/'; 
-           Rest.setUrl(url);
-           scope.queue = [];
-
-           if (scope.callFinishedRemove) {
-              scope.callFinishedRemove();
-           }
-           scope.callFinishedRemove = scope.$on('callFinished', function() {
-              // We call the API for each selected item. We need to hang out until all the api
-              // calls are finished.
-              if (scope.queue.length == scope.selected.length) {
-                 // All the api calls finished
-                 $('input[type="checkbox"]').prop("checked",false);
-                 scope.selected = [];
-                 var errors = 0;   
-                 for (var i=0; i < scope.queue.length; i++) {
-                     if (scope.queue[i].result == 'error') {
-                        errors++;
-                     }
-                 }
-                 if (errors > 0) {
-                    Alert('Error', 'There was an error while adding one or more of the selected hosts.');  
-                 }
-                 $('#form-modal').modal('hide');
-                 scope.$emit('hostsReload');
-              }
-              });
-
-           if (scope.selected.length > 0 ) {
-              var host;
-              for (var i=0; i < scope.selected.length; i++) {
-                  host = null;
-                  for (var j=0; j < scope.subhosts.length; j++) {
-                      if (scope.subhosts[j].id == scope.selected[i]) {
-                         host = scope.subhosts[j];
-                      }
-                  }
-                  if (host !== null) {
-                     Rest.post(host)
-                         .success( function(data, status, headers, config) {
-                             scope.queue.push({ result: 'success', data: data, status: status });
-                             scope.$emit('callFinished');
-                             })
-                         .error( function(data, status, headers, config) {
-                             scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
-                             scope.$emit('callFinished');
-                             });
-                  }
-              }
-           }
-           else {
-              $('#form-modal').modal('hide');
-              scope.$emit('hostsReload');
-           }  
-           }
-
-        scope.toggle_subhost = function(id) {
-           if (scope[list.iterator + "_" + id + "_class"] == "success") {
-              scope[list.iterator + "_" + id + "_class"] = "";
-              document.getElementById('check_' + id).checked = false;
-              if (scope.selected.indexOf(id) > -1) {
-                 scope.selected.splice(scope.selected.indexOf(id),1);
-              }
-           }
-           else {
-              scope[list.iterator + "_" + id + "_class"] = "success";
-              document.getElementById('check_' + id).checked = true;
-              if (scope.selected.indexOf(id) == -1) {
-                 scope.selected.push(id);
-              }
-           }
-           }
 
         scope.createHost = function() {
             $('#form-modal').modal('hide');
@@ -197,6 +114,12 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         // Save
         scope.formModalAction  = function() {
+           
+           function finished() {
+               $('#form-modal').modal('hide');
+               scope.$emit('hostsReload'); 
+               }
+
            try { 
                // Make sure we have valid variable data
                if (scope.parseType == 'json') {
@@ -226,7 +149,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                           Rest.setUrl(data.related.variable_data);
                           Rest.put(json_data)
                               .success( function(data, status, headers, config) {
-                                  $('#form-modal').modal('hide');
+                                  finished();
                               })
                               .error( function(data, status, headers, config) {
                                   ProcessErrors(scope, data, status, form,
@@ -234,8 +157,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                               });
                        }
                        else {
-                          $('#form-modal').modal('hide');
-                          scope.$emit('hostsReload');
+                          finished();
                        }
                        })
                    .error( function(data, status, headers, config) {
@@ -351,6 +273,12 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         
         // Save changes to the parent
         scope.formModalAction = function() {
+            
+            function finished() {
+                $('#form-modal').modal('hide');
+                scope.$emit('hostsReload');
+                }
+
             try { 
                 
                 // Make sure we have valid variable data
@@ -379,8 +307,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                            Rest.setUrl(GetBasePath('hosts') + data.id + '/variable_data/');
                            Rest.put(json_data)
                                .success( function(data, status, headers, config) {
-                                   $('#form-modal').modal('hide');
-                                   scope.$emit('hostsReload');
+                                   finished();
                                })
                                .error( function(data, status, headers, config) {
                                    ProcessErrors(scope, data, status, form,
@@ -388,8 +315,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                                    });
                         }
                         else {
-                           $('#form-modal').modal('hide');
-                           scope.$emit('hostsReload');
+                           finished();
                         }
                         })
                     .error( function(data, status, headers, config) {
@@ -422,7 +348,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         // Delete the selected host. Disassociates it from the group. 
         
         var scope = params.scope;
-        var group_id = params.group_id; 
+        var group_id = scope.group_id; 
         var inventory_id = params.inventory_id;
         var host_id = params.host_id;
         var host_name = params.host_name; 
@@ -475,7 +401,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
     return function(params) {
         // Rerfresh the Hosts view on right side of page
         scope = params.scope;
-        var url = (scope.group_id !== null) ? GetBasePath('groups') + scope.group_id + '/hosts/' :
+        var url = (scope.group_id !== null) ? GetBasePath('groups') + scope.group_id + '/all_hosts/' :
                   GetBasePath('inventory') + params.inventory_id + '/hosts/';
         var relatedSets = { hosts: { url: url, iterator: 'host' } };
         RelatedSearchInit({ scope: params.scope, form: InventoryForm, relatedSets: relatedSets });

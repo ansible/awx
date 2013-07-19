@@ -10,12 +10,16 @@
  *      })
  */
  
-angular.module('SelectionHelper', [])  
-    .factory('SelectionInit', [ function() {
+angular.module('SelectionHelper', ['Utilities', 'RestServices'])
+
+    .factory('SelectionInit', [ 'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 
+    function(Rest, Alert, ProcessErrors, ReturnToCaller) {
     return function(params) {
          
-        var scope = params.scope;  // form scope
-        var list = params.list;    // list object
+        var scope = params.scope;     // current scope
+        var list = params.list;       // list object
+        var target_url = params.url;  // URL to POST selected objects
+        var returnToCaller = params.returnToCaller;
         
         scope.selected = [];   //array of selected row IDs
 
@@ -27,30 +31,96 @@ angular.module('SelectionHelper', [])
                       // select the row
                       scope[list.name][i]['checked'] = '1';
                       scope[list.name][i]['success_class'] = 'success';
-                      if (scope.selected.indexOf(id) == -1) {
-                         // add id to the array
-                         scope.selected.push(id);
+                      // add selected object to the array
+                      var found = false;
+                      for  (var j=0; j < scope.selected.length; j++) {
+                           if (scope.selected[j].id == id) {
+                              found = true;
+                              break;
+                           }
+                      }
+                      if (!found) {
+                         scope.selected.push(scope[list.name][i]);
                       }
                    }
                    else {
                       // unselect the row
                       scope[list.name][i]['checked'] = '0';
                       scope[list.name][i]['success_class'] = '';
-                      if (scope.selected.indexOf(id) > -1) {
-                         // remove id from the array
-                         scope.selected.splice(scope.selected.indexOf(id),1);
+                      // remove selected object from the array
+                      for  (var j=0; j < scope.selected.length; j++) {
+                           if (scope.selected[j].id == id) {
+                              scope.selected.splice(j,1);
+                              break;
+                           }
                       }
                    }
                 }
             }
             }
 
+        scope.finishSelection = function() {
+           Rest.setUrl(target_url);
+           scope.queue = [];
+           
+           function finished() {
+               scope.selected = [];
+               if (returnToCaller !== undefined) {
+                  ReturnToCaller(returnToCaller);
+               }
+               else {
+                  $('#form-modal').modal('hide');
+                  scope.$emit('modalClosed');
+               }
+               }
+           
+           if (scope.callFinishedRemove) {
+              scope.callFinishedRemove();
+           }
+           scope.callFinishedRemove = scope.$on('callFinished', function() {
+              // We call the API for each selected item. We need to hang out until all the api
+              // calls are finished.
+              if (scope.queue.length == scope.selected.length) {
+                 var errors = 0;   
+                 for (var i=0; i < scope.queue.length; i++) {
+                     if (scope.queue[i].result == 'error') {
+                        ProcessErrors(scope, scope.queue[i].data, scope.queue[i].status, null,
+                            { hdr: 'POST Failure', msg: 'Failed to add ' + list.iterator + 
+                            '. POST returned status: ' + scope.queue[i].status });
+                        errors++;
+                     }
+                 }
+                 if (errors == 0) {
+                    finished();
+                 }
+              }
+              });
+
+           if (scope.selected.length > 0 ) {
+              for (var j=0; j < scope.selected.length; j++) {
+                  Rest.post(scope.selected[j])
+                      .success( function(data, status, headers, config) {
+                          scope.queue.push({ result: 'success', data: data, status: status });
+                          scope.$emit('callFinished');
+                          })
+                      .error( function(data, status, headers, config) {
+                          scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
+                          scope.$emit('callFinished');
+                          });
+              }
+           }
+           else {
+              finished();
+           }  
+           }
+
+        scope.formModalAction = scope.finishSelection;
+
         // Initialize our data set after a refresh
         if (scope.SelectPostRefreshRemove) {
            scope.SelectPostRefreshRemove();
         }
         scope.SelectPostRefreshRemove = scope.$on('PostRefresh', function() {
-            scope.selected = [];
             for (var i=0; i < scope[list.name].length; i++) {
                 scope[list.name][i]['checked'] = '0';
                 scope[list.name][i]['success_class'] = '';

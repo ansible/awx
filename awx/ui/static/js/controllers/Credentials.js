@@ -24,7 +24,10 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
     var scope = view.inject(list, { mode: mode });         // Inject our view
     scope.selected = [];
   
-    SelectionInit({ scope: scope, list: list });
+    var url = GetBasePath(base);
+       url += (base == 'users') ? $routeParams.user_id + '/credentials/' : $routeParams.team_id + '/credentials/';
+
+    SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
     
     SearchInit({ scope: scope, set: 'credentials', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
@@ -61,60 +64,6 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
                 body: 'Are you sure you want to delete ' + name + '?',
                 action: action
                 });
-       }
-    
-    scope.finishSelection = function() {
-       var url = GetBasePath(base);
-       url += (base == 'users') ? $routeParams.user_id + '/credentials/' : $routeParams.team_id + '/credentials/';
-       Rest.setUrl(url);
-       scope.queue = [];
-
-       scope.$on('callFinished', function() {
-          // We call the API for each selected user. We need to hang out until all the api
-          // calls are finished.
-          if (scope.queue.length == scope.selected.length) {
-             // All the api calls finished
-             $('input[type="checkbox"]').prop("checked",false);
-             scope.selected = [];
-             var errors = 0;   
-             for (var i=0; i < scope.queue.length; i++) {
-                 if (scope.queue[i].result == 'error') {
-                    errors++;
-                 }
-             }
-             if (errors > 0) {
-                Alert('Error', 'There was an error while adding one or more of the selected Credentials.');  
-             }
-             else {
-                ReturnToCaller(1);
-             }
-          }
-          });
-
-       if (scope.selected.length > 0 ) {
-          var credential = null;
-          for (var i=0; i < scope.selected.length; i++) {
-              for (var j=0; j < scope.credentials.length; j++) {
-                  if (scope.credentials[j].id == scope.selected[i]) {
-                     credential = scope.credentials[j];
-                  }
-              }
-              if (credential !== null) {
-                 Rest.post(credential)
-                     .success( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'success', data: data, status: status });
-                         scope.$emit('callFinished');
-                         })
-                     .error( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
-                         scope.$emit('callFinished');
-                         });
-              }
-          }
-       }
-       else {
-          ReturnToCaller();
-       }  
        }
 }
 

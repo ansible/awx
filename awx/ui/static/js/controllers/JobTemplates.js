@@ -24,7 +24,6 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
     var mode = (base == 'job_templates') ? 'edit' : 'select'; 
     var scope = view.inject(list, { mode: mode });
     $rootScope.flashMessage = null;
-    scope.selected = [];
     
     SearchInit({ scope: scope, set: 'job_templates', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
@@ -62,61 +61,6 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
                 });
        }
     
-    scope.finishSelection = function() {
-       Rest.setUrl(defaultUrl);
-       scope.queue = [];
-
-       if (scope.callFinishedRemove) {
-          scope.callFinishedRemove();
-       }
-       scope.callFinishedRemove = scope.$on('callFinished', function() {
-          // We call the API for each selected user. We need to hang out until all the api
-          // calls are finished.
-          if (scope.queue.length == scope.selected.length) {
-             // All the api calls finished
-             $('input[type="checkbox"]').prop("checked",false);
-             scope.selected = [];
-             var errors = 0;   
-             for (var i=0; i < scope.queue.length; i++) {
-                 if (scope.queue[i].result == 'error') {
-                    errors++;
-                 }
-             }
-             if (errors > 0) {
-                Alert('Error', 'There was an error while adding one or more of the selected templates.');  
-             }
-             else {
-                ReturnToCaller(1);
-             }
-          }
-          });
-
-       if (scope.selected.length > 0 ) {
-          var template = null;
-          for (var i=0; i < scope.selected.length; i++) {
-              for (var j=0; j < scope.job_templates.length; j++) {
-                  if (scope.job_templates[j].id == scope.selected[i]) {
-                     template = scope.job_templates[j];
-                  }
-              }
-              if (template !== null) {
-                 Rest.post(template)
-                     .success( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'success', data: data, status: status });
-                         scope.$emit('callFinished');
-                         })
-                     .error( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
-                         scope.$emit('callFinished');
-                         });
-              }
-          }
-       }
-       else {
-          ReturnToCaller(1);
-       }  
-       }
-
     scope.submitJob = function(id) {
        SubmitJob({ scope: scope, id: id });
        }

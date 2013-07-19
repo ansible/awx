@@ -22,10 +22,10 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     var base = $location.path().replace(/^\//,'').split('/')[0];
     var mode = (base == 'projects') ? 'edit' : 'select';
     var scope = view.inject(list, { mode: mode });
-    scope.selected = [];
     $rootScope.flashMessage = null;
-  
-    SelectionInit({ scope: scope, list: list });
+    
+    var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
+    SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
     
     SearchInit({ scope: scope, set: 'projects', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
@@ -63,62 +63,6 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                 action: action
                 });
        }
-    
-    scope.finishSelection = function() {
-       var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
-       Rest.setUrl(url);
-       scope.queue = [];
-     
-       if (scope.callFinishedRemove) {
-          scope.callFinishedRemove();
-       }
-       scope.callFinishedRemoved = scope.$on('callFinished', function() {
-          // We call the API for each selected user. We need to hang out until all the api
-          // calls are finished.
-          if (scope.queue.length == scope.selected.length) {
-             // All the api calls finished
-             $('input[type="checkbox"]').prop("checked",false);
-             scope.selected = [];
-             var errors = 0;   
-             for (var i=0; i < scope.queue.length; i++) {
-                 if (scope.queue[i].result == 'error') {
-                    errors++;
-                 }
-             }
-             if (errors > 0) {
-                Alert('Error', 'There was an error while adding one or more of the selected Pojects.');  
-             }
-             else {
-                ReturnToCaller(1);
-             }
-          }
-          });
-
-       if (scope.selected.length > 0 ) {
-          var project = null;
-          for (var i=0; i < scope.selected.length; i++) {
-              for (var j=0; j < scope.projects.length; j++) {
-                  if (scope.projects[j].id == scope.selected[i]) {
-                     project = scope.projects[j];
-                  }
-              }
-              if (project !== null) {
-                 Rest.post(project)
-                     .success( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'success', data: data, status: status });
-                         scope.$emit('callFinished');
-                         })
-                     .error( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
-                         scope.$emit('callFinished');
-                         });
-              }
-          }
-       }
-       else {
-          ReturnToCaller(1);
-       }  
-    }
 }
 
 ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList', 

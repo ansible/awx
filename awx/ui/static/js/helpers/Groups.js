@@ -41,7 +41,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').modal({ backdrop: 'static', keyboard: false });
 
-        SelectionInit({ scope: scope, list: list });
+        var url = (group_id) ? GetBasePath('groups') + group_id + '/children/' :
+            GetBasePath('inventory') + inventory_id + '/groups/'; 
+        SelectionInit({ scope: scope, list: list, url: url });
 
         if (scope.PostRefreshRemove) {
            scope.PostRefreshRemove();
@@ -62,63 +64,12 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            scope.$digest();
         }
 
-        scope.formModalAction = function() {
-           var url = (group_id) ? GetBasePath('groups') + group_id + '/children/' :
-               GetBasePath('inventory') + inventory_id + '/groups/'; 
-           Rest.setUrl(url);
-           scope.queue = [];
-
-           if (scope.callFinishedRemove) {
-              scope.callFinishedRemove();
-           }
-           scope.callFinishedRemove = scope.$on('callFinished', function() {
-              // We call the API for each selected item. We need to hang out until all the api
-              // calls are finished.
-              if (scope.queue.length == scope.selected.length) {
-                 // All the api calls finished
-                 $('input[type="checkbox"]').prop("checked",false);
-                 scope.selected = [];
-                 var errors = 0;   
-                 for (var i=0; i < scope.queue.length; i++) {
-                     if (scope.queue[i].result == 'error') {
-                        ProcessErrors(scope, scope.queue[i].data, scope.queue[i].status, null,
-                            { hdr: 'Group: ' + scope.queue[i].value.name, msg: 'Failed to add group. POST returned status: ' + scope.queue[i].status });
-                        errors++;
-                     }
-                 }
-                 if (errors == 0) {
-                    $('#form-modal').modal('hide');
-                    RefreshTree({ scope: scope });
-                 }
-              }
-              });
-
-           if (scope.selected.length > 0 ) {
-              var group;
-              for (var i=0; i < scope.selected.length; i++) {
-                  group = null;
-                  for (var j=0; j < scope.groups.length; j++) {
-                      if (scope.groups[j].id == scope.selected[i]) {
-                         group = scope.groups[j];
-                      }
-                  }
-                  if (group !== null) {
-                     Rest.post(group)
-                         .success( function(data, status, headers, config) {
-                             scope.queue.push({ result: 'success', data: data, status: status });
-                             scope.$emit('callFinished');
-                             })
-                         .error( function(data, status, headers, config) {
-                             scope.queue.push({ result: 'error', data: data, status: status, headers: headers, value: group });
-                             scope.$emit('callFinished');
-                             });
-                  }
-              }
-           }
-           else {
-              $('#form-modal').modal('hide');
-           }  
-           }
+        if (scope.removeModalClosed) {
+           scope.removeModalClosed();
+        }
+        scope.removeModalClosed = scope.$on('modalClosed', function() {
+            RefreshTree({ scope: scope });
+            });
 
         scope.createGroup = function() {
             $('#form-modal').modal('hide');

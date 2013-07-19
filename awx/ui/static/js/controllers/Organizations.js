@@ -28,14 +28,13 @@ function OrganizationsList ($routeParams, $scope, $rootScope, $location, $log, R
 
     LoadBreadCrumbs();
     
-    SelectionInit({ scope: scope, list: list });
+    var url = GetBasePath('projects') + $routeParams.project_id + '/organizations/';
+    SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
 
     // Initialize search and paginate pieces and load data
     SearchInit({ scope: scope, set: list.name, list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
-
-    //getData();
 
     scope.addOrganization = function() {
        $location.path($location.path() + '/add');
@@ -66,60 +65,6 @@ function OrganizationsList ($routeParams, $scope, $rootScope, $location, $log, R
                 body: 'Are you sure you want to delete ' + name + '?',
                 action: action
                 });
-       }
-
-
-    scope.finishSelection = function() {
-       var url;
-       url = GetBasePath('projects') + $routeParams.project_id + '/organizations/';
-       scope.queue = [];
-       scope.$on('callFinished', function() {
-          // We call the API for each selected row. We need to hang out until all the api
-          // calls are finished.
-          if (scope.queue.length == scope.selected.length) {
-             // All the api calls finished
-             scope.selected = [];
-             var errors = 0;   
-             for (var i=0; i < scope.queue.length; i++) {
-                 if (scope.queue[i].result == 'error') {
-                    errors++;
-                 }
-             }
-             if (errors > 0) {
-                Alert('Error', 'There was an error while adding one or more of the selected organizations.');  
-             }
-             else {
-                ReturnToCaller(1);
-             }
-          }
-          });
-
-       if (scope.selected.length > 0 ) {
-          var org;
-          for (var i=0; i < scope.selected.length; i++) {
-              org = null;
-              for (var j=0; j < scope.organizations.length; j++) {
-                  if (scope.organizations[j].id == scope.selected[i]) {
-                     org = scope.organizations[j];
-                  }
-              }
-              if (org !== null) {
-                 Rest.setUrl(url);
-                 Rest.post(org)
-                     .success( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'success', data: data, status: status });
-                         scope.$emit('callFinished');
-                         })
-                     .error( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
-                         scope.$emit('callFinished');
-                         });
-              }
-          }
-       }
-       else {
-          ReturnToCaller();
-       }  
        }
 }
 

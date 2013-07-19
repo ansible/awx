@@ -31,8 +31,10 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     scope.search(list.iterator);
 
     LoadBreadCrumbs();
-
-    SelectionInit({ scope: scope, list: list });
+    
+    var url = (base == 'organizations') ? GetBasePath('organizations') + $routeParams.organization_id + '/users/' :
+        GetBasePath('teams') + $routeParams.team_id + '/users/';
+    SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
     
     scope.addUser = function() {
        $location.path($location.path() + '/add');
@@ -64,65 +66,6 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                 action: action
                 });
        }
-
-    scope.finishSelection = function() {
-       var url;
-       if (base == 'organizations') {
-          url = GetBasePath('organizations') + $routeParams.organization_id + '/users/';
-       }
-       else {
-          url = GetBasePath('teams') + $routeParams.team_id + '/users/';
-       }
-       scope.queue = [];
-       scope.$on('callFinished', function() {
-          // We call the API for each selected user. We need to hang out until all the api
-          // calls are finished.
-          if (scope.queue.length == scope.selected.length) {
-             // All the api calls finished
-             scope.selected = [];
-             var errors = 0;   
-             for (var i=0; i < scope.queue.length; i++) {
-                 if (scope.queue[i].result == 'error') {
-                    errors++;
-                 }
-             }
-             if (errors > 0) {
-                Alert('Error', 'There was an error while adding one or more of the selected users.');  
-             }
-             else {
-                ReturnToCaller(1);
-             }
-          }
-          });
-
-       if (scope.selected.length > 0 ) {
-          var user;
-          for (var i=0; i < scope.selected.length; i++) {
-              user = null;
-              for (var j=0; j < scope.users.length; j++) {
-                  if (scope.users[j].id == scope.selected[i]) {
-                     user = scope.users[j];
-                  }
-              }
-              if (user !== null) {
-                 Rest.setUrl(url);
-                 Rest.post(user)
-                     .success( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'success', data: data, status: status });
-                         scope.$emit('callFinished');
-                         })
-                     .error( function(data, status, headers, config) {
-                         scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
-                         scope.$emit('callFinished');
-                         });
-              }
-          }
-       }
-       else {
-          ReturnToCaller();
-       }  
-       }
-
 }
 
 UsersList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'UserList', 'GenerateList', 
