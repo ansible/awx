@@ -138,6 +138,7 @@ function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $route
    // Inject dynamic view
    var form = GenerateForm;
    var scope = form.inject(OrganizationForm, {mode: 'add', related: false});
+   var base = $location.path().replace(/^\//,'').split('/')[0];
    var defaultUrl = GetBasePath('organizations');
    form.reset();
 
@@ -145,12 +146,19 @@ function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $route
 
    // Save
    scope.formSave = function() {
-      Rest.setUrl(defaultUrl);
+      var url = GetBasePath(base);
+      url += (base != 'organizations') ? $routeParams['project_id'] + '/organizations/' : '';
+      Rest.setUrl(url);
       Rest.post({ name: $scope.name, 
                   description: $scope.description })
-          .success( function(data, status, headers, config) {
-              $rootScope.flashMessage = "New organization successfully created!";
-              $location.path('/organizations/' + data.id);
+          .success( function(data, status, headers, config) {  
+              if (base == 'organizations') {
+                 $rootScope.flashMessage = "New organization successfully created!";
+                 $location.path('/organizations/' + data.id);
+              }
+              else {
+                 ReturnToCaller(1);
+              }
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, OrganizationForm,

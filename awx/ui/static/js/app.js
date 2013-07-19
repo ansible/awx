@@ -101,6 +101,9 @@ angular.module('ansible', [
             when('/projects/:project_id/organizations',
                 { templateUrl: urlPrefix + 'partials/projects.html', controller: OrganizationsList }).
 
+            when('/projects/:project_id/organizations/add',
+                { templateUrl: urlPrefix + 'partials/projects.html', controller: OrganizationsAdd }).
+
             when('/inventories', 
                 { templateUrl: urlPrefix + 'partials/inventories.html', controller: InventoriesList }).
 
