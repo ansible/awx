@@ -21,8 +21,13 @@ angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFo
         
         function navigate(canceled) {
             //Decide where to send the user once the modal dialog closes
-            if (!canceled && base == 'jobs') {
-               scope.refreshJob();
+            if (!canceled) {
+               if (base == 'jobs') {
+                  scope.refreshJob();
+               }
+               else {
+                  $location.path('/jobs');
+               }
             } 
             else {
                $location.path('/' + base);
