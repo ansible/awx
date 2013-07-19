@@ -1,26 +1,38 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Python
 import logging
+
+# Django
 from django.http import Http404
+
+# Django REST Framework
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import permissions
+
+# AWX
 from awx.main.access import *
 from awx.main.models import *
 
-logger = logging.getLogger('awx.main.rbac')
+logger = logging.getLogger('awx.main.permissions')
 
-# FIXME: this will probably need to be subclassed by object type
+__all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
+           'JobTaskPermission']
 
-class CustomRbac(permissions.BasePermission):
+class ModelAccessPermission(permissions.BasePermission):
+    '''
+    Default permissions class to check user access based on the model and
+    request method, optionally verifying the request data.
+    '''
 
-    def _check_options_permissions(self, request, view, obj=None):
-        return self._check_get_permissions(request, view, obj)
+    def check_options_permissions(self, request, view, obj=None):
+        return self.check_get_permissions(request, view, obj)
 
-    def _check_head_permissions(self, request, view, obj=None):
-        return self._check_get_permissions(request, view, obj)
+    def check_head_permissions(self, request, view, obj=None):
+        return self.check_get_permissions(request, view, obj)
 
-    def _check_get_permissions(self, request, view, obj=None):
+    def check_get_permissions(self, request, view, obj=None):
         if hasattr(view, 'parent_model'):
             parent_obj = view.parent_model.objects.get(pk=view.kwargs['pk'])
             if not check_user_access(request.user, view.parent_model, 'read',
@@ -30,7 +42,7 @@ class CustomRbac(permissions.BasePermission):
             return True
         return check_user_access(request.user, view.model, 'read', obj)
 
-    def _check_post_permissions(self, request, view, obj=None):
+    def check_post_permissions(self, request, view, obj=None):
         if hasattr(view, 'parent_model'):
             parent_obj = view.parent_model.objects.get(pk=view.kwargs['pk'])
             return True
@@ -39,7 +51,7 @@ class CustomRbac(permissions.BasePermission):
                 return True
             return check_user_access(request.user, view.model, 'add', request.DATA)
 
-    def _check_put_permissions(self, request, view, obj=None):
+    def check_put_permissions(self, request, view, obj=None):
         if not obj:
             return True # FIXME: For some reason this needs to return True
                         # because it is first called with obj=None?
@@ -50,13 +62,20 @@ class CustomRbac(permissions.BasePermission):
             return check_user_access(request.user, view.model, 'change', obj,
                                      request.DATA)
 
-    def _check_delete_permissions(self, request, view, obj=None):
+    def check_patch_permissions(self, request, view, obj=None):
+        return self.check_put_permissions(request, view, obj)
+
+    def check_delete_permissions(self, request, view, obj=None):
         if not obj:
             return True # FIXME: For some reason this needs to return True
                         # because it is first called with obj=None?
         return check_user_access(request.user, view.model, 'delete', obj)
 
-    def _check_permissions(self, request, view, obj=None):
+    def check_permissions(self, request, view, obj=None):
+        '''
+        Perform basic permissions checking before delegating to the appropriate
+        method based on the request method.
+        '''
 
         # Check that obj (if given) is active, otherwise raise a 404.
         active = getattr(obj, 'active', getattr(obj, 'is_active', True))
@@ -79,39 +98,20 @@ class CustomRbac(permissions.BasePermission):
 
         # Check permissions for the given view and object, based on the request
         # method used.
-        check_method = getattr(self, '_check_%s_permissions' % \
+        check_method = getattr(self, 'check_%s_permissions' % \
                                request.method.lower(), None)
         result = check_method and check_method(request, view, obj)
         if not result:
             raise PermissionDenied()
 
         return result
-            
-        # If no obj is given, check list permissions.
-
-        if obj is None:
-            if getattr(view, 'list_permissions_check', None):
-                if not view.list_permissions_check(request):
-                    raise PermissionDenied()
-            elif not getattr(view, 'item_permissions_check', None):
-                raise Exception('internal error, list_permissions_check or '
-                                'item_permissions_check must be defined')
-            return True
-
-        # Otherwise, check the item permissions for the given obj.
-
-        else:
-            if not view.item_permissions_check(request, obj):
-                raise PermissionDenied()
-            return True
 
     def has_permission(self, request, view, obj=None):
-
         logger.debug('has_permission(user=%s method=%s data=%r, %s, %r)',
                      request.user, request.method, request.DATA,
                      view.__class__.__name__, obj)
         try:
-            response = self._check_permissions(request, view, obj)
+            response = self.check_permissions(request, view, obj)
         except Exception, e:
             logger.debug('has_permission raised %r', e, exc_info=True)
             raise
@@ -122,7 +122,7 @@ class CustomRbac(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return self.has_permission(request, view, obj)
 
-class JobTemplateCallbackPermission(CustomRbac):
+class JobTemplateCallbackPermission(ModelAccessPermission):
     '''
     Permission check used by job template callback view for requests from
     empheral hosts.
@@ -149,7 +149,7 @@ class JobTemplateCallbackPermission(CustomRbac):
         else:
             return True
 
-class JobTaskPermission(CustomRbac):
+class JobTaskPermission(ModelAccessPermission):
     '''
     Permission checks used for API callbacks from running a task.
     '''

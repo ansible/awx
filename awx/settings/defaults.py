@@ -147,8 +147,11 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'awx.main.permissions.ModelAccessPermission',
+    ),
     'DEFAULT_FILTER_BACKENDS': (
-        'awx.main.custom_filters.CustomFilterBackend',
+        'awx.main.filters.DefaultFilterBackend',
     ),
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
@@ -323,7 +326,7 @@ LOGGING = {
             'handlers': ['console', 'file', 'syslog'],
             'level': 'DEBUG',
         },
-        'awx.main.rbac': {
+        'awx.main.permissions': {
             'handlers': ['null'],
             # Comment the line below to show lots of permissions logging.
             'propagate': False,

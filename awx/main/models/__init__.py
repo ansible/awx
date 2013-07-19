@@ -33,6 +33,10 @@ from djcelery.models import TaskMeta
 # Django-REST-Framework
 from rest_framework.authtoken.models import Token
 
+__all__ = ['Organization', 'Team', 'Project', 'Credential', 'Inventory',
+           'Host', 'Group', 'Permission', 'JobTemplate', 'Job',
+           'JobHostSummary', 'JobEvent']
+
 # TODO: reporting model TBD
 
 PERM_INVENTORY_ADMIN  = 'admin'
@@ -1212,6 +1216,21 @@ class JobEvent(models.Model):
                 host_summary.save()
 
 # TODO: reporting (MPD)
+
+# Add mark_inactive method to User model.
+def user_mark_inactive(user, save=True):
+    '''Use instead of delete to rename and mark users inactive.'''
+    if user.is_active:
+        user.username   = "_deleted_%s_%s" % (now().isoformat(), user.username)
+        user.is_active = False
+        if save:
+            user.save()
+User.add_to_class('mark_inactive', user_mark_inactive)
+
+# Add custom methods to User model for permissions checks.
+from awx.main.access import *
+User.add_to_class('get_queryset', get_user_queryset)
+User.add_to_class('can_access', check_user_access)
 
 @receiver(post_save, sender=User)
 def create_auth_token_for_user(sender, **kwargs):

@@ -1,3 +1,6 @@
+# Copyright (c) 2013 AnsibleWorks, Inc.
+# All Rights Reserved.
+
 '''
 Compability library for support of both Django 1.4.x and Django 1.5.x.
 '''

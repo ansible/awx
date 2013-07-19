@@ -1,19 +1,26 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Python
 import cStringIO
 import json
 import logging
 import os
-import select
 import subprocess
 import tempfile
-import time
 import traceback
-from celery import Task
-from django.conf import settings
+
+# Pexpect
 import pexpect
-from awx.main.models import *
+
+# Celery
+from celery import Task
+
+# Django
+from django.conf import settings
+
+# AWX
+from awx.main.models import Job
 
 __all__ = ['RunJob']
 
@@ -39,7 +46,6 @@ class RunJob(Task):
                 if field == 'status':
                     update_fields.append('failed')
             job.save(update_fields=update_fields)
-            # FIXME: Commit transaction?
         return job
 
     def get_path_to(self, *args):
@@ -165,6 +171,7 @@ class RunJob(Task):
                 r'Bad passphrase, try again for .*:',
                 r'sudo password.*:',
                 r'SSH password:',
+                r'Password:',
                 pexpect.TIMEOUT,
                 pexpect.EOF,
             ]
@@ -175,7 +182,7 @@ class RunJob(Task):
                 child.sendline('')
             elif result_id == 2:
                 child.sendline(passwords.get('sudo_password', ''))
-            elif result_id == 3:
+            elif result_id in (3, 4):
                 child.sendline(passwords.get('ssh_password', ''))
             job_updates = {}
             if logfile_pos != logfile.tell():

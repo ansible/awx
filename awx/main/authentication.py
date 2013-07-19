@@ -1,3 +1,6 @@
+# Copyright (c) 2013 AnsibleWorks, Inc.
+# All Rights Reserved.
+
 # Django REST Framework
 from rest_framework import authentication
 from rest_framework import exceptions

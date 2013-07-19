@@ -1,10 +1,10 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Django REST Framework
 from rest_framework.filters import BaseFilterBackend
-from django.core.exceptions import PermissionDenied
 
-class CustomFilterBackend(object):
+class DefaultFilterBackend(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
 

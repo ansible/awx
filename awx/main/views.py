@@ -19,19 +19,18 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import generics
 from rest_framework.parsers import YAMLParser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.renderers import YAMLRenderer
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 
 # AWX
-from awx.main.access import *
 from awx.main.authentication import JobTaskAuthentication
 from awx.main.licenses import LicenseReader
 from awx.main.base_views import *
 from awx.main.models import *
-from awx.main.rbac import *
+from awx.main.permissions import *
 from awx.main.serializers import *
 
 def handle_error(request, status=404):
@@ -59,6 +58,7 @@ class ApiRootView(APIView):
     information about the available API versions.
     '''
 
+    permission_classes = (AllowAny,)
     view_name = 'REST API'
 
     def get(self, request, format=None):
@@ -81,6 +81,7 @@ class ApiV1RootView(APIView):
     Subject to change until the final 1.2 release.
     '''
 
+    permission_classes = (AllowAny,)
     view_name = 'Version 1'
 
     def get(self, request, format=None):
@@ -162,297 +163,140 @@ class AuthTokenView(ObtainAuthToken):
         Authenticate: Token 8f17825cf08a7efea124f2638f3896f6637f8745
     '''
 
+    permission_classes = (AllowAny,)
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
-class OrganizationList(BaseList):
+class OrganizationList(ListCreateAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
-    permission_classes = (CustomRbac,)
-    filter_fields = ('name',)
 
-    # I can see the organizations if:
-    #   I am a superuser
-    #   I am an admin of the organization
-    #   I am a member of the organization
-
-    def get_queryset(self):
-        ''' I can see organizations when I am a superuser, or I am an admin or user in that organization '''
-        base = Organization.objects
-        if self.request.user.is_superuser:
-            return base.all()
-        return base.filter(
-            admins__in = [ self.request.user ]
-        ).distinct() | base.filter(
-            users__in = [ self.request.user ]
-        ).distinct()
-
-class OrganizationDetail(BaseDetail):
+class OrganizationDetail(RetrieveUpdateDestroyAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
-    permission_classes = (CustomRbac,)
 
-class OrganizationInventoriesList(BaseSubList):
+class OrganizationInventoriesList(SubListAPIView):
 
     model = Inventory
     serializer_class = InventorySerializer
-    permission_classes = (CustomRbac,)
     parent_model = Organization
     relationship = 'inventories'
-    postable = False
 
-    def get_queryset(self):
-        ''' to list inventories in the organization, I must be a superuser or org admin '''
-        organization = Organization.objects.get(pk=self.kwargs['pk'])
-        if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
-            # FIXME: use: organization.can_user_administrate(...) ?
-            raise PermissionDenied()
-        return Inventory.objects.filter(organization__in=[organization])
-
-class OrganizationUsersList(BaseSubList):
+class OrganizationUsersList(SubListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Organization
     relationship = 'users'
-    postable = True
     inject_primary_key_on_post_as = 'organization'
-    filter_fields = ('username',)
 
-    def get_queryset(self):
-        ''' to list users in the organization, I must be a superuser or org admin '''
-        organization = Organization.objects.get(pk=self.kwargs['pk'])
-        if not self.request.user.is_superuser and not self.request.user in organization.admins.all():
-            raise PermissionDenied()
-        return User.objects.filter(organizations__in = [ organization ])
-
-class OrganizationAdminsList(BaseSubList):
+class OrganizationAdminsList(SubListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Organization
     relationship = 'admins'
-    postable = True
     inject_primary_key_on_post_as = 'organization'
-    filter_fields = ('username',)
 
-    def get_queryset(self):
-        ''' to list admins in the organization, I must be a superuser or org admin '''
-        organization = Organization.objects.get(pk=self.kwargs['pk'])
-        if not self.request.user.is_superuser and not self.request.user in organization.admins.all():
-            raise PermissionDenied()
-        return User.objects.filter(admin_of_organizations__in = [ organization ])
 
-class OrganizationProjectsList(BaseSubList):
+class OrganizationProjectsList(SubListCreateAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
-    permission_classes = (CustomRbac,)
-    parent_model = Organization  # for sub list
-    relationship = 'projects'    # " "
-    postable = True
+    parent_model = Organization
+    relationship = 'projects'
     inject_primary_key_on_post_as = 'organization'
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-        ''' to list projects in the organization, I must be a superuser or org admin '''
-        organization = Organization.objects.get(pk=self.kwargs['pk'])
-        if not (self.request.user.is_superuser or self.request.user in organization.admins.all()):
-            raise PermissionDenied()
-        return Project.objects.filter(organizations__in = [ organization ])
-
-class OrganizationTeamsList(BaseSubList):
+class OrganizationTeamsList(SubListCreateAPIView):
 
     model = Team
     serializer_class = TeamSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Organization
     relationship = 'teams'
-    postable = True
     inject_primary_key_on_post_as = 'organization'
     severable = False
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-        ''' to list users in the organization, I must be a superuser or org admin '''
-        organization = Organization.objects.get(pk=self.kwargs['pk'])
-        if not self.request.user.is_superuser and not self.request.user in organization.admins.all():
-            raise PermissionDenied()
-        return Team.objects.filter(organization = organization)
-
-class TeamList(BaseList):
+class TeamList(ListCreateAPIView):
 
     model = Team
     serializer_class = TeamSerializer
-    permission_classes = (CustomRbac,)
-    filter_fields = ('name',)
 
-    # I can see a team if:
-    #   I am a superuser
-    #   I am an admin of the organization that the team is
-    #   I am on that team
-
-    def get_queryset(self):
-        ''' I can see organizations when I am a superuser, or I am an admin or user in that organization '''
-        base = Team.objects
-        if self.request.user.is_superuser:
-            return base.all()
-        return base.filter(
-            organization__admins__in = [ self.request.user ]
-        ).distinct() | base.filter(
-            users__in = [ self.request.user ]
-        ).distinct()
-
-class TeamDetail(BaseDetail):
+class TeamDetail(RetrieveUpdateDestroyAPIView):
 
     model = Team
     serializer_class = TeamSerializer
-    permission_classes = (CustomRbac,)
 
-class TeamUsersList(BaseSubList):
+class TeamUsersList(SubListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Team
     relationship = 'users'
-    postable = True
     inject_primary_key_on_post_as = 'team'
     severable = True
-    filter_fields = ('username',)
 
-    def get_queryset(self):
-        # FIXME: audit all BaseSubLists to check for permissions on the original object too
-        'team members can see the whole team, as can org admins or superusers'
-        team = Team.objects.get(pk=self.kwargs['pk'])
-        base = team.users.all()
-        if self.request.user.is_superuser or self.request.user in team.organization.admins.all():
-            return base
-        if self.request.user in team.users.all():
-            return base
-        raise PermissionDenied()
-
-class TeamPermissionsList(BaseSubList):
+class TeamPermissionsList(SubListCreateAPIView):
 
     model = Permission
     serializer_class = PermissionSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Team
     relationship = 'permissions'
-    postable = True
-    filter_fields = ('name',)
     inject_primary_key_on_post_as = 'team'
 
     def get_queryset(self):
+        # FIXME
         team = Team.objects.get(pk=self.kwargs['pk'])
         base = Permission.objects.filter(team = team)
         #if Team.can_user_administrate(self.request.user, team, None):
-        if check_user_access(self.request.user, Team, 'change', team, None):
+        if self.request.user.can_access(Team, 'change', team, None):
             return base
         elif team.users.filter(pk=self.request.user.pk).count() > 0:
             return base
         raise PermissionDenied()
 
-
-class TeamProjectsList(BaseSubList):
+class TeamProjectsList(SubListCreateAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Team
     relationship = 'projects'
-    postable = True
     inject_primary_key_on_post_as = 'team'
     severable = True
 
-    # FIXME: filter_fields is no longer used, think we can remove these references everywhere given new custom filtering -- MPD
-    filter_fields = ('name',)
-
-    def get_queryset(self):
-        team = Team.objects.get(pk=self.kwargs['pk'])
-        base = team.projects.all()
-        if self.request.user.is_superuser or self.request.user in team.organization.admins.all():
-            return base
-        if self.request.user in team.users.all():
-            return base
-        raise PermissionDenied()
-
-
-class TeamCredentialsList(BaseSubList):
+class TeamCredentialsList(SubListCreateAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Team
     relationship = 'credentials'
-    postable = True
     inject_primary_key_on_post_as = 'team'
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-        team = Team.objects.get(pk=self.kwargs['pk'])
-        #if not Team.can_user_administrate(self.request.user, team, None):
-        if not check_user_access(self.request.user, Team, 'change', team, None):
-            if not (self.request.user.is_superuser or self.request.user in team.users.all()):
-                raise PermissionDenied()
-        project_credentials = Credential.objects.filter(
-            team = team
-        )
-        return project_credentials.distinct()
-
-
-class ProjectList(BaseList):
+class ProjectList(ListCreateAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
-    permission_classes = (CustomRbac,)
-    filter_fields = ('name',)
 
-    # I can see a project if
-    #   I am a superuser
-    #   I am an admin of the organization that contains the project
-    #   I am a member of a team that also contains the project
-
-    def get_queryset(self):
-        ''' I can see organizations when I am a superuser, or I am an admin or user in that organization '''
-        base = Project.objects
-        if self.request.user.is_superuser:
-            return base.all()
-        my_teams = Team.objects.filter(users__in = [ self.request.user])
-        my_orgs  = Organization.objects.filter(admins__in = [ self.request.user ])
-        return base.filter(
-            teams__in = my_teams
-        ).distinct() | base.filter(
-            organizations__in = my_orgs
-        ).distinct()
-
-class ProjectDetail(BaseDetail):
+class ProjectDetail(RetrieveUpdateDestroyAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
-    permission_classes = (CustomRbac,)
 
-class ProjectDetailPlaybooks(generics.RetrieveAPIView):
+class ProjectDetailPlaybooks(RetrieveAPIView):
 
     model = Project
     serializer_class = ProjectPlaybooksSerializer
-    permission_classes = (CustomRbac,)
 
-class ProjectOrganizationsList(BaseSubList):
+class ProjectOrganizationsList(SubListAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Project
     relationship = 'organizations'
-    postable = True
     inject_primary_key_on_post_as = 'project' # Not correct, but needed for the post to work?
-    filter_fields = ('name',)
 
     def get_queryset(self):
+        # FIXME
         project = Project.objects.get(pk=self.kwargs['pk'])
         if not self.request.user.is_superuser:
             raise PermissionDenied()
@@ -462,12 +306,9 @@ class ProjectTeamsList(BaseSubList):
 
     model = Team
     serializer_class = TeamSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Project
     relationship = 'teams'
-    postable = True
     inject_primary_key_on_post_as = 'project' # Not correct, but needed for the post to work?
-    filter_fields = ('name',)
 
     def get_queryset(self):
         project = Project.objects.get(pk=self.kwargs['pk'])
@@ -475,167 +316,90 @@ class ProjectTeamsList(BaseSubList):
             raise PermissionDenied()
         return Team.objects.filter(projects__in = [ project ])
 
-class UserList(BaseList):
+class UserList(ListCreateAPIView):
 
     model = User
     serializer_class = UserSerializer
-    permission_classes = (CustomRbac,)
-    filter_fields = ('username',)
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         password = request.DATA.get('password', None)
-        result = super(UserList, self).post(request, *args, **kwargs)
+        response = super(UserList, self).create(request, *args, **kwargs)
         if password:
-            pk = result.data['id']
+            pk = response.data['id']
             user = User.objects.get(pk=pk)
             user.set_password(password)
             user.save()
-        return result
+        return response
 
-    def get_queryset(self):
-        ''' I can see user records when I'm a superuser, I'm that user, I'm their org admin, or I'm on a team with that user '''
-        base = User.objects
-        if self.request.user.is_superuser:
-            return base.all()
-        mine = base.filter(pk = self.request.user.pk).distinct()
-        admin_of = base.filter(organizations__in = self.request.user.admin_of_organizations.all()).distinct()
-        same_team = base.filter(teams__in = self.request.user.teams.all()).distinct()
-        return mine | admin_of | same_team
-
-class UserMeList(BaseList):
+class UserMeList(ListAPIView):
 
     model = User
     serializer_class = UserSerializer
-    permission_classes = (CustomRbac,)
-    filter_fields = ('username',)
 
     view_name = 'Me!'
 
-    def post(self, request, *args, **kwargs):
-        raise PermissionDenied()
-
     def get_queryset(self):
-        ''' a quick way to find my user record '''
-        return User.objects.filter(pk=self.request.user.pk)
+        return self.model.objects.filter(pk=self.request.user.pk)
 
-class UserTeamsList(BaseSubList):
+class UserTeamsList(SubListAPIView):
 
     model = Team
     serializer_class = TeamSerializer
-    permission_classes = (CustomRbac,)
     parent_model = User
     relationship = 'teams'
-    postable = False
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-        user = User.objects.get(pk=self.kwargs['pk'])
-        #if not UserHelper.can_user_administrate(self.request.user, user, None):
-        if not check_user_access(self.request.user, User, 'change', user, None):
-            raise PermissionDenied()
-        return Team.objects.filter(users__in = [ user ])
-
-class UserPermissionsList(BaseSubList):
+class UserPermissionsList(SubListCreateAPIView):
 
     model = Permission
     serializer_class = PermissionSerializer
-    permission_classes = (CustomRbac,)
     parent_model = User
     relationship = 'permissions'
-    postable = True
-    filter_fields = ('name',)
     inject_primary_key_on_post_as = 'user'
 
-    def get_queryset(self):
-        user = User.objects.get(pk=self.kwargs['pk'])
-        #if not UserHelper.can_user_administrate(self.request.user, user, None):
-        if not check_user_access(self.request.user, User, 'change', user, None):
-            raise PermissionDenied()
-        return Permission.objects.filter(user=user)
-
-class UserProjectsList(BaseSubList):
+class UserProjectsList(SubListAPIView):
 
     model = Project
     serializer_class = ProjectSerializer
-    permission_classes = (CustomRbac,)
     parent_model = User
-    relationship = 'teams'
-    postable = False
-    filter_fields = ('name',)
+    relationship = 'projects'
 
     def get_queryset(self):
-        user = User.objects.get(pk=self.kwargs['pk'])
-        #if not UserHelper.can_user_administrate(self.request.user, user, None):
-        if not check_user_access(self.request.user, User, 'change', user, None):
-            raise PermissionDenied()
-        teams = user.teams.all()
-        return Project.objects.filter(teams__in = teams)
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(teams__in=parent.teams.distinct())
 
-class UserCredentialsList(BaseSubList):
+class UserCredentialsList(SubListCreateAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
-    permission_classes = (CustomRbac,)
     parent_model = User
     relationship = 'credentials'
-    postable = True
     inject_primary_key_on_post_as = 'user'
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-        user = User.objects.get(pk=self.kwargs['pk'])
-        #if not UserHelper.can_user_administrate(self.request.user, user, None):
-        if not check_user_access(self.request.user, User, 'change', user, None):
-            raise PermissionDenied()
-        project_credentials = Credential.objects.filter(
-            team__users__in = [ user ]
-        )
-        return user.credentials.distinct() | project_credentials.distinct()
-
-class UserOrganizationsList(BaseSubList):
+class UserOrganizationsList(SubListAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
-    permission_classes = (CustomRbac,)
     parent_model = User
     relationship = 'organizations'
-    postable = False
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-        user = User.objects.get(pk=self.kwargs['pk'])
-        #if not UserHelper.can_user_administrate(self.request.user, user, None):
-        if not check_user_access(self.request.user, User, 'change', user, None):
-            raise PermissionDenied()
-        return Organization.objects.filter(users__in = [ user ])
-
-class UserAdminOfOrganizationsList(BaseSubList):
+class UserAdminOfOrganizationsList(SubListAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
-    permission_classes = (CustomRbac,)
     parent_model = User
     relationship = 'admin_of_organizations'
-    postable = False
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-        user = User.objects.get(pk=self.kwargs['pk'])
-        #if not UserHelper.can_user_administrate(self.request.user, user, None):
-        if not check_user_access(self.request.user, User, 'change', user, None):
-            raise PermissionDenied()
-        return Organization.objects.filter(admins__in = [ user ])
-
-class UserDetail(BaseDetail):
+class UserDetail(RetrieveUpdateDestroyAPIView):
 
     model = User
     serializer_class = UserSerializer
-    permission_classes = (CustomRbac,)
 
-    def put_filter(self, request, *args, **kwargs):
+    def update_filter(self, request, *args, **kwargs):
         ''' make sure non-read-only fields that can only be edited by admins, are only edited by admins '''
         obj = User.objects.get(pk=kwargs['pk'])
-        can_admin = check_user_access(request.user, User, 'admin', obj, request.DATA)
+        can_admin = request.user.can_access(User, 'admin', obj, request.DATA)
         if not can_admin or can_admin == 'partial':
             admin_only_edit_fields = ('last_name', 'first_name', 'username',
                                       'is_active', 'is_superuser')
@@ -653,358 +417,155 @@ class UserDetail(BaseDetail):
             obj.save()
             request.DATA.pop('password')
 
-class CredentialList(BaseList):
+class CredentialList(ListAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
-    permission_classes = (CustomRbac,)
-    postable = False
 
-    def get_queryset(self):
-        return get_user_queryset(self.request.user, self.model)
-
-class CredentialDetail(BaseDetail):
+class CredentialDetail(RetrieveUpdateDestroyAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
-    permission_classes = (CustomRbac,)
 
-class PermissionDetail(BaseDetail):
+class PermissionDetail(RetrieveUpdateDestroyAPIView):
 
     model = Permission
     serializer_class = PermissionSerializer
-    permission_classes = (CustomRbac,)
 
-class InventoryList(BaseList):
-
-    model = Inventory
-    serializer_class = InventorySerializer
-    permission_classes = (CustomRbac,)
-    filter_fields = ('name',)
-
-    def _filter_queryset(self, base):
-        if self.request.user.is_superuser:
-            return base.all()
-        admin_of  = base.filter(organization__admins__in = [ self.request.user ]).distinct()
-        has_user_perms = base.filter(
-            permissions__user__in = [ self.request.user ],
-            permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        has_team_perms = base.filter(
-            permissions__team__in = self.request.user.teams.all(),
-            permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        return admin_of | has_user_perms | has_team_perms
-
-    def get_queryset(self):
-        ''' I can see inventory when I'm a superuser, an org admin of the inventory, or I have permissions on it '''
-        base = Inventory.objects
-        return self._filter_queryset(base)
-
-class InventoryDetail(BaseDetail):
+class InventoryList(ListCreateAPIView):
 
     model = Inventory
     serializer_class = InventorySerializer
-    permission_classes = (CustomRbac,)
 
-class HostList(BaseList):
+class InventoryDetail(RetrieveUpdateDestroyAPIView):
 
-    model = Host
-    serializer_class = HostSerializer
-    permission_classes = (CustomRbac,)
-    filter_fields = ('name',)
+    model = Inventory
+    serializer_class = InventorySerializer
 
-    def get_queryset(self):
-        '''
-        I can see hosts when:
-           I'm a superuser,
-           or an organization admin of an inventory they are in
-           or when I have allowing read permissions via a user or team on an inventory they are in
-        '''
-        base = Host.objects
-        if self.request.user.is_superuser:
-            return base.all()
-        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
-        has_user_perms = base.filter(
-            inventory__permissions__user__in = [ self.request.user ],
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        has_team_perms = base.filter(
-            inventory__permissions__team__in = self.request.user.teams.all(),
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        return admin_of | has_user_perms | has_team_perms
-
-class HostDetail(BaseDetail):
+class HostList(ListCreateAPIView):
 
     model = Host
     serializer_class = HostSerializer
-    permission_classes = (CustomRbac,)
 
-class InventoryHostsList(BaseSubList):
+class HostDetail(RetrieveUpdateDestroyAPIView):
 
     model = Host
     serializer_class = HostSerializer
-    permission_classes = (CustomRbac,)
-    # to allow the sub-aspect listing
+
+class InventoryHostsList(SubListCreateAPIView):
+
+    model = Host
+    serializer_class = HostSerializer
     parent_model = Inventory
     relationship = 'hosts'
-    # to allow posting to this resource to create resources
-    postable = True
-    # FIXME: go back and add these to other SubLists
+    parent_access = 'read'
     inject_primary_key_on_post_as = 'inventory'
     severable = False
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-        inventory = Inventory.objects.get(pk=self.kwargs['pk'])
-        base = inventory.hosts
-        # FIXME: verify that you can can_read permission on the inventory is required
-        return base.all()
-
-class HostGroupsList(BaseSubList):
+class HostGroupsList(SubListCreateAPIView):
     ''' the list of groups a host is directly a member of '''
 
     model = Group
     serializer_class = GroupSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Host
     relationship = 'groups'
-    postable = True
+    parent_access = 'read'
     inject_primary_key_on_post_as = 'host'
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-
-        parent = Host.objects.get(pk=self.kwargs['pk'])
-
-        # FIXME: verify read permissions on this object are still required at a higher level
-
-        base = parent.groups
-        if self.request.user.is_superuser:
-            return base.all()
-        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
-        has_user_perms = base.filter(
-            inventory__permissions__user__in = [ self.request.user ],
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        has_team_perms = base.filter(
-            inventory__permissions__team__in = self.request.user.teams.all(),
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        return admin_of | has_user_perms | has_team_perms
-
-class HostAllGroupsList(BaseSubList):
+class HostAllGroupsList(SubListAPIView):
     ''' the list of all groups of which the host is directly or indirectly a member '''
 
     model = Group
     serializer_class = GroupSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Host
     relationship = 'groups'
-    filter_fields = ('name',)
+    parent_access = 'read'
 
     def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        sublist_qs = parent.all_groups.distinct()
+        return qs & sublist_qs
 
-        parent = Host.objects.get(pk=self.kwargs['pk'])
-
-        # FIXME: verify read permissions on this object are still required at a higher level
-
-        base = parent.all_groups
-
-        if self.request.user.is_superuser:
-            return base.all()
-
-        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
-        has_user_perms = base.filter(
-            inventory__permissions__user__in = [ self.request.user ],
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        has_team_perms = base.filter(
-            inventory__permissions__team__in = self.request.user.teams.all(),
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        return admin_of | has_user_perms | has_team_perms
-
-class GroupList(BaseList):
+class GroupList(ListCreateAPIView):
 
     model = Group
     serializer_class = GroupSerializer
-    permission_classes = (CustomRbac,)
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-        '''
-        I can see groups  when:
-           I'm a superuser,
-           or an organization admin of an inventory they are in
-           or when I have allowing read permissions via a user or team on an inventory they are in
-        '''
-        base = Group.objects
-        if self.request.user.is_superuser:
-            return base.all()
-        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
-        has_user_perms = base.filter(
-            inventory__permissions__user__in = [ self.request.user ],
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        has_team_perms = base.filter(
-            inventory__permissions__team__in = self.request.user.teams.all(),
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        return admin_of | has_user_perms | has_team_perms
-
-class GroupChildrenList(BaseSubList):
+class GroupChildrenList(SubListCreateAPIView):
 
     model = Group
     serializer_class = GroupSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Group
     relationship = 'children'
-    postable = True
+    parent_access = 'read'
     inject_primary_key_on_post_as = 'parent'
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-
-        # FIXME: this is the mostly the same as GroupsList, share code similar to how done with Host and Group objects.
-
-        parent = Group.objects.get(pk=self.kwargs['pk'])
-
-        # FIXME: verify read permissions on this object are still required at a higher level
-
-        base = parent.children
-        if self.request.user.is_superuser:
-            return base.all()
-        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
-        has_user_perms = base.filter(
-            inventory__permissions__user__in = [ self.request.user ],
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        has_team_perms = base.filter(
-            inventory__permissions__team__in = self.request.user.teams.all(),
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        return admin_of | has_user_perms | has_team_perms
-
-class GroupHostsList(BaseSubList):
+class GroupHostsList(SubListCreateAPIView):
     ''' the list of hosts directly below a group '''
 
     model = Host
     serializer_class = HostSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Group
     relationship = 'hosts'
-    postable = True
+    parent_access = 'read'
     inject_primary_key_on_post_as = 'group'
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-
-        parent = Group.objects.get(pk=self.kwargs['pk'])
-
-        # FIXME: verify read permissions on this object are still required at a higher level
-
-        base = parent.hosts
-        if self.request.user.is_superuser:
-            return base.all()
-        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
-        has_user_perms = base.filter(
-            inventory__permissions__user__in = [ self.request.user ],
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        has_team_perms = base.filter(
-            inventory__permissions__team__in = self.request.user.teams.all(),
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        return admin_of | has_user_perms | has_team_perms
-
-
-class GroupAllHostsList(BaseSubList):
+class GroupAllHostsList(SubListAPIView):
     ''' the list of all hosts below a group, even including subgroups '''
 
     model = Host
     serializer_class = HostSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Group
     relationship = 'hosts'
-    filter_fields = ('name',)
+    parent_access = 'read'
 
     def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        sublist_qs = parent.all_hosts.distinct()
+        return qs & sublist_qs
 
-        parent = Group.objects.get(pk=self.kwargs['pk'])
-
-        # FIXME: verify read permissions on this object are still required at a higher level
-
-        base = parent.all_hosts
-
-        if self.request.user.is_superuser:
-            return base.all()
-
-        admin_of  = base.filter(inventory__organization__admins__in = [ self.request.user ]).distinct()
-        has_user_perms = base.filter(
-            inventory__permissions__user__in = [ self.request.user ],
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        has_team_perms = base.filter(
-            inventory__permissions__team__in = self.request.user.teams.all(),
-            inventory__permissions__permission_type__in = PERMISSION_TYPES_ALLOWING_INVENTORY_READ,
-        ).distinct()
-        return admin_of | has_user_perms | has_team_perms
-
-
-class GroupDetail(BaseDetail):
+class GroupDetail(RetrieveUpdateDestroyAPIView):
 
     model = Group
     serializer_class = GroupSerializer
-    permission_classes = (CustomRbac,)
 
-class InventoryGroupsList(BaseSubList):
+class InventoryGroupsList(SubListCreateAPIView):
 
     model = Group
     serializer_class = GroupSerializer
-    permission_classes = (CustomRbac,)
-    # to allow the sub-aspect listing
     parent_model = Inventory
     relationship = 'groups'
-    # to allow posting to this resource to create resources
-    postable = True
-    # FIXME: go back and add these to other SubLists
+    parent_access = 'read'
     inject_primary_key_on_post_as = 'inventory'
     severable = False
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-        # FIXME: share code with inventory filter queryset methods (make that a classmethod)
-        inventory = Inventory.objects.get(pk=self.kwargs['pk'])
-        base = inventory.groups
-        # FIXME: verify that you can can_read permission on the inventory is required
-        return base
-
-class InventoryRootGroupsList(BaseSubList):
+class InventoryRootGroupsList(SubListCreateAPIView):
 
     model = Group
     serializer_class = GroupSerializer
-    permission_classes = (CustomRbac,)
     parent_model = Inventory
     relationship = 'groups'
-    postable = True
+    parent_access = 'read'
     inject_primary_key_on_post_as = 'inventory'
     severable = False
-    filter_fields = ('name',)
 
     def get_queryset(self):
-        inventory = Inventory.objects.get(pk=self.kwargs['pk'])
-        base = inventory.groups
-        all_ids = base.values_list('id', flat=True)
-        return base.exclude(parents__pk__in = all_ids)
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        all_pks = parent.groups.values_list('pk', flat=True)
+        sublist_qs = parent.groups.exclude(parents__pk__in=all_pks).distinct()
+        return qs & sublist_qs
 
-class BaseVariableDetail(BaseDetail):
+class BaseVariableDetail(RetrieveUpdateDestroyAPIView):
 
-    permission_classes = (CustomRbac,)
     parser_classes = api_settings.DEFAULT_PARSER_CLASSES + [YAMLParser]
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES + [YAMLRenderer]
-    is_variable_data = True # Special flag for RBAC
+    is_variable_data = True # Special flag for permissions check.
     
 class InventoryVariableDetail(BaseVariableDetail):
 
@@ -1021,7 +582,7 @@ class GroupVariableDetail(BaseVariableDetail):
     model = Group
     serializer_class = GroupVariableDataSerializer
 
-class InventoryScriptView(generics.RetrieveAPIView):
+class InventoryScriptView(RetrieveAPIView):
     '''
     Return inventory group and host data as needed for an inventory script.
     
@@ -1042,11 +603,9 @@ class InventoryScriptView(generics.RetrieveAPIView):
         self.object = self.get_object()
         hostname = request.QUERY_PARAMS.get('host', '')
         if hostname:
-            try:
-                host = self.object.hosts.get(active=True, name=hostname)
-                data = host.variables_dict
-            except Host.DoesNotExist:
-                raise Http404
+            host = get_object_or_404(self.object.hosts, active=True,
+                                     name=hostname)
+            data = host.variables_dict
         else:
             data = {}
             for group in self.object.groups.filter(active=True):
@@ -1069,23 +628,20 @@ class InventoryScriptView(generics.RetrieveAPIView):
                 }
         return Response(data)
 
-class JobTemplateList(BaseList):
+class JobTemplateList(ListCreateAPIView):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
-    permission_classes = (CustomRbac,)
-    filter_fields = ('name',)
 
-    def get_queryset(self):
-        return get_user_queryset(self.request.user, self.model)
+    def _get_queryset(self):
+        return self.request.user.get_queryset(self.model)
 
-class JobTemplateDetail(BaseDetail):
+class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
-    permission_classes = (CustomRbac,)
 
-class JobTemplateCallback(generics.RetrieveAPIView):
+class JobTemplateCallback(generics.GenericAPIView):
     '''
     The job template callback allows for empheral hosts to launch a new job.
     
@@ -1208,60 +764,47 @@ class JobTemplateCallback(generics.RetrieveAPIView):
         if not matching_hosts:
             data = dict(msg='No matching host could be found!')
             # FIXME: Log!
-            return Response(data, status=400)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
         elif len(matching_hosts) > 1:
             data = dict(msg='Multiple hosts matched the request!')
             # FIXME: Log!
-            return Response(data, status=400)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
             host = list(matching_hosts)[0]
         if not job_template.can_start_without_user_input():
             data = dict(msg='Cannot start automatically, user input required!')
             # FIXME: Log!
-            return Response(data, status=400)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
         limit = ':'.join(filter(None, [job_template.limit, host.name]))
         job = job_template.create_job(limit=limit, launch_type='callback')
         result = job.start()
         if not result:
             data = dict(msg='Error starting job!')
-            return Response(data, status=400)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(status=202)
+            return Response(status=status.HTTP_202_ACCEPTED)
 
-class JobTemplateJobsList(BaseSubList):
+class JobTemplateJobsList(SubListCreateAPIView):
 
     model = Job
     serializer_class = JobSerializer
-    permission_classes = (CustomRbac,)
-    # to allow the sub-aspect listing
     parent_model = JobTemplate
     relationship = 'jobs'
-    # to allow posting to this resource to create resources
-    postable = True
-    # FIXME: go back and add these to other SubLists
     inject_primary_key_on_post_as = 'job_template'
     severable = False
-    #filter_fields = ('name',)
 
-    def get_queryset(self):
-        # FIXME: Verify read permission on the job template.
-        job_template = get_object_or_404(JobTemplate, pk=self.kwargs['pk'])
-        return job_template.jobs
-
-class JobList(BaseList):
+class JobList(ListCreateAPIView):
 
     model = Job
     serializer_class = JobSerializer
-    permission_classes = (CustomRbac,)
 
-    def get_queryset(self):
+    def _get_queryset(self):
         return self.model.objects.all() # FIXME
 
-class JobDetail(BaseDetail):
+class JobDetail(RetrieveUpdateDestroyAPIView):
 
     model = Job
     serializer_class = JobSerializer
-    permission_classes = (CustomRbac,)
 
     def update(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -1270,10 +813,9 @@ class JobDetail(BaseDetail):
             return self.http_method_not_allowed(request, *args, **kwargs)
         return super(JobDetail, self).update(request, *args, **kwargs)
 
-class JobStart(generics.RetrieveAPIView):
+class JobStart(generics.GenericAPIView):
 
     model = Job
-    permission_classes = (CustomRbac,)
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -1290,16 +832,15 @@ class JobStart(generics.RetrieveAPIView):
             result = obj.start(**request.DATA)
             if not result:
                 data = dict(passwords_needed_to_start=obj.get_passwords_needed_to_start())
-                return Response(data, status=400)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response(status=202)
+                return Response(status=status.HTTP_202_ACCEPTED)
         else:
-            return Response(status=405)
+            return self.http_method_not_allowed(request, *args, **kwargs)
 
-class JobCancel(generics.RetrieveAPIView):
+class JobCancel(generics.GenericAPIView):
 
     model = Job
-    permission_classes = (CustomRbac,)
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -1312,24 +853,19 @@ class JobCancel(generics.RetrieveAPIView):
         obj = self.get_object()
         if obj.can_cancel:
             result = obj.cancel()
-            return Response(status=202)
+            return Response(status=status.HTTP_202_ACCEPTED)
         else:
-            return Response(status=405)
+            return self.http_method_not_allowed(request, *args, **kwargs)
 
-class BaseJobHostSummariesList(generics.ListAPIView):
+class BaseJobHostSummariesList(SubListAPIView):
 
     model = JobHostSummary
     serializer_class = JobHostSummarySerializer
-    permission_classes = (CustomRbac,)
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_host_summaries'
+    parent_access = 'read'
 
     view_name = 'Job Host Summary List'
-
-    def get_queryset(self):
-        # FIXME: Verify read permission on the parent object and job.
-        parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        return getattr(parent_obj, self.relationship)
 
 class HostJobHostSummariesList(BaseJobHostSummariesList):
 
@@ -1343,71 +879,46 @@ class JobJobHostSummariesList(BaseJobHostSummariesList):
 
     parent_model = Job
 
-# FIXME: Subclasses of XJobHostSummaryList for failed/successful/etc.
-
-class JobHostSummaryDetail(generics.RetrieveAPIView):
+class JobHostSummaryDetail(RetrieveAPIView):
 
     model = JobHostSummary
     serializer_class = JobHostSummarySerializer
-    permission_classes = (CustomRbac,)
 
-class JobEventList(BaseList):
-
-    model = JobEvent
-    serializer_class = JobEventSerializer
-    permission_classes = (CustomRbac,)
-
-    def get_queryset(self):
-        return self.model.objects.distinct() # FIXME: Permissions?
-
-class JobEventDetail(generics.RetrieveAPIView):
+class JobEventList(ListAPIView):
 
     model = JobEvent
     serializer_class = JobEventSerializer
-    permission_classes = (CustomRbac,)
 
-class JobEventChildrenList(generics.ListAPIView):
+class JobEventDetail(RetrieveAPIView):
 
     model = JobEvent
     serializer_class = JobEventSerializer
-    permission_classes = (CustomRbac,)
+
+class JobEventChildrenList(SubListAPIView):
+
+    model = JobEvent
+    serializer_class = JobEventSerializer
     parent_model = JobEvent
     relationship = 'children'
 
     view_name = 'Job Event Children List'
 
-    def get_queryset(self):
-        # FIXME: Verify read permission on the parent object and job.
-        parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        return getattr(parent_obj, self.relationship)
-
-class JobEventHostsList(generics.ListAPIView):
+class JobEventHostsList(SubListAPIView):
 
     model = Host
     serializer_class = HostSerializer
-    permission_classes = (CustomRbac,)
     parent_model = JobEvent
     relationship = 'hosts'
 
     view_name = 'Job Event Hosts List'
 
-    def get_queryset(self):
-        # FIXME: Verify read permission on the parent object and job.
-        parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        return getattr(parent_obj, self.relationship)
-
-class BaseJobEventsList(generics.ListAPIView):
+class BaseJobEventsList(SubListAPIView):
 
     model = JobEvent
     serializer_class = JobEventSerializer
-    permission_classes = (CustomRbac,)
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_events'
-
-    def get_queryset(self):
-        # FIXME: Verify read permission on the parent object and job.
-        parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
-        return getattr(parent_obj, self.relationship).distinct()
+    parent_access = 'read'
 
 class HostJobEventsList(BaseJobEventsList):
 
