@@ -35,6 +35,7 @@ project_urls = patterns('awx.main.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'project_detail'),
     url(r'^(?P<pk>[0-9]+)/playbooks/$',                 'project_detail_playbooks'),
     url(r'^(?P<pk>[0-9]+)/organizations/$',             'project_organizations_list'),
+    url(r'^(?P<pk>[0-9]+)/teams/$',                     'project_teams_list'),
 )
 
 team_urls = patterns('awx.main.views',

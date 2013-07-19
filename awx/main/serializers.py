@@ -115,6 +115,7 @@ class ProjectSerializer(BaseSerializer):
         res = super(ProjectSerializer, self).get_related(obj)
         res.update(dict(
             organizations = reverse('main:project_organizations_list', args=(obj.pk,)),
+            teams = reverse('main:project_teams_list', args=(obj.pk,)),
             playbooks = reverse('main:project_detail_playbooks', args=(obj.pk,)),
         ))
         return res

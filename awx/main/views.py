@@ -448,7 +448,7 @@ class ProjectOrganizationsList(BaseSubList):
     permission_classes = (CustomRbac,)
     parent_model = Project
     relationship = 'organizations'
-    postable = False
+    postable = True
     filter_fields = ('name',)
 
     def get_queryset(self):
@@ -456,6 +456,22 @@ class ProjectOrganizationsList(BaseSubList):
         if not self.request.user.is_superuser:
             raise PermissionDenied()
         return Organization.objects.filter(projects__in = [ project ])
+
+class ProjectTeamsList(BaseSubList):
+
+    model = Team
+    serializer_class = TeamSerializer
+    permission_classes = (CustomRbac,)
+    parent_model = Project
+    relationship = 'teams'
+    postable = True
+    filter_fields = ('name',)
+
+    def get_queryset(self):
+        project = Project.objects.get(pk=self.kwargs['pk'])
+        if not self.request.user.is_superuser:
+            raise PermissionDenied()
+        return Team.objects.filter(projects__in = [ project ])
 
 class UserList(BaseList):
 
