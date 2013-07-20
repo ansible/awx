@@ -257,6 +257,11 @@ class ProjectsTest(BaseTest):
         # you can't add organizations to projects here, verify that this is true (405)
         #self.post(proj_orgs, data={}, expect=405, auth=self.get_super_credentials())
 
+        # yes you can post now.
+        self.post(proj_orgs, data={'name': 'New Org'}, expect=201, auth=self.get_super_credentials())
+        got = self.get(proj_orgs, expect=200, auth=self.get_super_credentials())
+        self.assertEquals(got['count'], 2)
+
         # =====================================================================
         # TEAMS
 
