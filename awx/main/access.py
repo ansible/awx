@@ -18,6 +18,29 @@ from awx.main.licenses import LicenseReader
 
 __all__ = ['get_user_queryset', 'check_user_access']
 
+PERMISSION_TYPES = [
+    PERM_INVENTORY_ADMIN,
+    PERM_INVENTORY_READ,
+    PERM_INVENTORY_WRITE,
+    PERM_INVENTORY_DEPLOY,
+    PERM_INVENTORY_CHECK,
+]
+
+PERMISSION_TYPES_ALLOWING_INVENTORY_READ = [
+    PERM_INVENTORY_ADMIN,
+    PERM_INVENTORY_WRITE,
+    PERM_INVENTORY_READ,
+]
+
+PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE = [
+    PERM_INVENTORY_ADMIN,
+    PERM_INVENTORY_WRITE,
+]
+
+PERMISSION_TYPES_ALLOWING_INVENTORY_ADMIN = [
+    PERM_INVENTORY_ADMIN,
+]
+
 logger = logging.getLogger('awx.main.access')
 
 access_registry = {

@@ -287,7 +287,7 @@ class ProjectDetailPlaybooks(RetrieveAPIView):
     model = Project
     serializer_class = ProjectPlaybooksSerializer
 
-class ProjectOrganizationsList(SubListAPIView):
+class ProjectOrganizationsList(SubListCreateAPIView):
 
     model = Organization
     serializer_class = OrganizationSerializer
@@ -302,7 +302,7 @@ class ProjectOrganizationsList(SubListAPIView):
             raise PermissionDenied()
         return Organization.objects.filter(projects__in = [ project ])
 
-class ProjectTeamsList(BaseSubList):
+class ProjectTeamsList(SubListCreateAPIView):
 
     model = Team
     serializer_class = TeamSerializer

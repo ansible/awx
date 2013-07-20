@@ -7,7 +7,7 @@ import os
 import tempfile
 
 from django.conf import settings
-from django.contrib.auth.models import User as DjangoUser
+from django.contrib.auth.models import User
 import django.test
 from django.test.client import Client
 from django.core.urlresolvers import reverse
@@ -254,10 +254,8 @@ class ProjectsTest(BaseTest):
         got = self.get(proj_orgs, expect=200, auth=self.get_super_credentials())
         self.assertEquals(got['count'], 1)
         self.assertEquals(got['results'][0]['url'], reverse('main:organization_detail', args=(self.organizations[0].pk,)))
-        # you can't add organizations to projects here, verify that this is true (405)
-        #self.post(proj_orgs, data={}, expect=405, auth=self.get_super_credentials())
 
-        # yes you can post now.
+        # post to create new org associated with this project.
         self.post(proj_orgs, data={'name': 'New Org'}, expect=201, auth=self.get_super_credentials())
         got = self.get(proj_orgs, expect=200, auth=self.get_super_credentials())
         self.assertEquals(got['count'], 2)

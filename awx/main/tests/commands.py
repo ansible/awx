@@ -10,6 +10,7 @@ import tempfile
 
 # Django
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.utils.timezone import now

@@ -4,7 +4,7 @@
 import datetime
 import json
 
-from django.contrib.auth.models import User as DjangoUser
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from awx.main.models import *
 from awx.main.tests.base import BaseTest

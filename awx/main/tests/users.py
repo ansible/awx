@@ -3,7 +3,7 @@
 
 import json
 
-from django.contrib.auth.models import User as DjangoUser
+from django.contrib.auth.models import User
 import django.test
 from django.test.client import Client
 from django.core.urlresolvers import reverse

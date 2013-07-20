@@ -10,6 +10,7 @@ import uuid
 
 # Django
 from django.contrib.auth.models import User as DjangoUser
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db import transaction
 import django.test

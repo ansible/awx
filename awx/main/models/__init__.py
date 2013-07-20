@@ -33,9 +33,11 @@ from djcelery.models import TaskMeta
 # Django-REST-Framework
 from rest_framework.authtoken.models import Token
 
-__all__ = ['Organization', 'Team', 'Project', 'Credential', 'Inventory',
-           'Host', 'Group', 'Permission', 'JobTemplate', 'Job',
-           'JobHostSummary', 'JobEvent']
+__all__ = ['PrimordialModel', 'Organization', 'Team', 'Project', 'Credential',
+           'Inventory', 'Host', 'Group', 'Permission', 'JobTemplate', 'Job',
+           'JobHostSummary', 'JobEvent', 'PERM_INVENTORY_ADMIN',
+           'PERM_INVENTORY_READ', 'PERM_INVENTORY_WRITE',
+           'PERM_INVENTORY_DEPLOY', 'PERM_INVENTORY_CHECK']
 
 # TODO: reporting model TBD
 
@@ -48,29 +50,6 @@ PERM_INVENTORY_CHECK  = 'check'
 JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_DEPLOY, _('Run')),
     (PERM_INVENTORY_CHECK, _('Check')),
-]
-
-PERMISSION_TYPES = [
-    PERM_INVENTORY_ADMIN,
-    PERM_INVENTORY_READ,
-    PERM_INVENTORY_WRITE,
-    PERM_INVENTORY_DEPLOY,
-    PERM_INVENTORY_CHECK,
-]
-
-PERMISSION_TYPES_ALLOWING_INVENTORY_READ = [
-    PERM_INVENTORY_ADMIN,
-    PERM_INVENTORY_WRITE,
-    PERM_INVENTORY_READ,
-]
-
-PERMISSION_TYPES_ALLOWING_INVENTORY_WRITE = [
-    PERM_INVENTORY_ADMIN,
-    PERM_INVENTORY_WRITE,
-]
-
-PERMISSION_TYPES_ALLOWING_INVENTORY_ADMIN = [
-    PERM_INVENTORY_ADMIN,
 ]
 
 # FIXME: TODO: make sure all of these are used and consistent
