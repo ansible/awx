@@ -2,21 +2,20 @@
 # All Rights Reserved.
 
 # Python
-import datetime
-import logging
-import sys
-from optparse import make_option
-import subprocess
-import traceback
 import glob
-import exceptions
+import json
+import logging
+from optparse import make_option
+import os
+import shlex
+import subprocess
+import sys
+import traceback
 
 # Django
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import NoArgsCommand, CommandError
 from django.db import transaction
 from django.contrib.auth.models import User
-from django.utils.dateparse import parse_datetime
-from django.utils.timezone import now
 
 # AWX
 from awx.main.models import *
@@ -340,7 +339,7 @@ class GenericLoader(object):
         LOGGER.debug("analyzing type of source")
         if not os.path.exists(src):
             LOGGER.debug("source missing")
-            raise ImportException("source does not exist")
+            raise CommandError("source does not exist")
         if os.path.isdir(src):
             self.memGroup = memGroup = MemGroup('all', src)
             for f in glob.glob("%s/*" % src):
@@ -365,15 +364,14 @@ class GenericLoader(object):
     def result(self):
         return self.memGroup
 
-class Command(BaseCommand):
+class Command(NoArgsCommand):
     '''
     Management command to import directory, INI, or dynamic inventory
     '''
 
     help = 'Import or sync external inventory sources'
-    args = '[<appname>, <appname.ModelName>, ...]'
 
-    option_list = BaseCommand.option_list + (
+    option_list = NoArgsCommand.option_list + (
         make_option('--inventory-name', dest='inventory_name', type='str', default=None, metavar='n',
                     help='name of inventory source to sync'),
         make_option('--inventory-id', dest='inventory_id', type='int', default=None, metavar='i',
@@ -400,14 +398,7 @@ class Command(BaseCommand):
         self.logger.propagate = False
 
     @transaction.commit_on_success
-    def handle(self, *args, **options):
-        try:
-            self.main(args, options)
-        except ImportException, ie:
-            print ie.msg
-
-    def main(self, args, options):
-        
+    def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()
 
@@ -422,17 +413,13 @@ class Command(BaseCommand):
         LOGGER.debug("id=%s" % id)
 
         if name is not None and id is not None:
-            self.logger.error("--inventory-name and --inventory-id are mutually exclusive")
-            sys.exit(1)
+            raise CommandError("--inventory-name and --inventory-id are mutually exclusive")
         if name is None and id is None:
-            self.logger.error("--inventory-name or --inventory-id are required")
-            sys.exit(1)
+            raise CommandError("--inventory-name or --inventory-id is required")
         if (overwrite or overwrite_vars) and keep_vars:
-            self.logger.error("--overwrite/--overwrite-vars and --keep-vars are mutually exclusive")
-            sys.exit(1)
+            raise CommandError("--overwrite/--overwrite-vars and --keep-vars are mutually exclusive")
         if not source:
-            self.logger.error("--source is required")
-            sys.exit(1)
+            raise CommandError("--source is required")
 
         LOGGER.debug("preparing loader")
 
@@ -451,7 +438,7 @@ class Command(BaseCommand):
             inventory = Inventory.objects.filter(name=name)
         count = inventory.count()
         if count != 1:
-            raise ImportException("%d inventory objects matched, expected 1" % count)        
+            raise CommandError("%d inventory objects matched, expected 1" % count)        
         inventory = inventory.all()[0]
 
         print "MODIFYING INVENTORY: %s" % inventory.name
