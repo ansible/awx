@@ -449,6 +449,7 @@ class ProjectOrganizationsList(BaseSubList):
     parent_model = Project
     relationship = 'organizations'
     postable = True
+    inject_primary_key_on_post_as = 'project' # Not correct, but needed for the post to work?
     filter_fields = ('name',)
 
     def get_queryset(self):
@@ -465,6 +466,7 @@ class ProjectTeamsList(BaseSubList):
     parent_model = Project
     relationship = 'teams'
     postable = True
+    inject_primary_key_on_post_as = 'project' # Not correct, but needed for the post to work?
     filter_fields = ('name',)
 
     def get_queryset(self):
