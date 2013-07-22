@@ -90,15 +90,15 @@ class MemGroup(object):
         self.variables = values
 
     def debug_tree(self):
-        LOGGER.debug("debugging tree of group (%s)" % self.name)
+        LOGGER.debug("describing tree of group (%s)" % self.name)
  
-        print "group: %s, %s" % (self.name, self.variables)
+        LOGGER.debug("group: %s, %s" % (self.name, self.variables))
         for x in self.child_groups:
-            print "   child: %s" % (x.name)
+            LOGGER.debug("   child: %s" % (x.name))
         for x in self.hosts:
-            print "   host: %s, %s" % (x.name, x.variables)
+            LOGGER.debug("   host: %s, %s" % (x.name, x.variables))
 
-        print "---"
+        LOGGER.debug("---")
         for x in self.child_groups:
             x.debug_tree()
 
@@ -272,15 +272,11 @@ class ExecutableJsonLoader(BaseLoader):
 
         data = self.command_to_json([src, "--list"])
 
-        print "RAW: %s" % data
-
         group = None
 
         for (k,v) in data.iteritems():
  
             group = self.get_group(k, all_group)
-
-            print "TYPE %s => %s" % (k, v)
 
             if type(v) == dict:
 
@@ -294,7 +290,6 @@ class ExecutableJsonLoader(BaseLoader):
                              group.add_host(host)
                     if type(host_details) == list:
                         for hk in host_details:
-                            print "?? getting host: %s" % hk
                             host = self.get_host(hk)
                             group.add_host(host)
 
@@ -312,9 +307,7 @@ class ExecutableJsonLoader(BaseLoader):
                         self.child_group_names[x] = child
 
             if type(v) in (tuple, list):
-               print "<><><><><><><><><><><><><><><><>><><><> GOT A LIST: %s" % (v) 
                for x in v:
-                   print ">>>>>>>>> ADDING HOST FROM AN EXECUTABLE LIST = %s to %s" % (x, group.name)
                    host = self.get_host(x)
                    group.add_host(host)
 
@@ -441,7 +434,7 @@ class Command(NoArgsCommand):
             raise CommandError("%d inventory objects matched, expected 1" % count)        
         inventory = inventory.all()[0]
 
-        print "MODIFYING INVENTORY: %s" % inventory.name
+        LOGGER.info("MODIFYING INVENTORY: %s" % inventory.name)
 
         # if overwrite is set, for each host in the database but NOT in the local
         # list, delete it
@@ -468,7 +461,7 @@ class Command(NoArgsCommand):
                  for db_kid in db_kids:
                      if db_kid.name not in mem_kid_names:
                          removed = True
-                         print "DEBUG: removing non-DB kid: %s" % (db_kid.name)
+                         LOGGER.debug("removing non-DB kid: %s" % (db_kid.name))
                          db_group.children.remove(db_kid)
                  if removed:
                      db_group.save()
@@ -513,7 +506,7 @@ class Command(NoArgsCommand):
                  for db_host in db_hosts:
                      if db_host.name not in mem_host_names:
                          removed = True
-                         print "DEBUG: removing non-DB host: %s" % (db_host.name)
+                         LOGGER.debug("removing non-DB host: %s" % (db_host.name))
                          db_group.hosts.remove(db_host)
                  if removed:
                      db_group.save()
@@ -528,7 +521,7 @@ class Command(NoArgsCommand):
             for h in mem_hosts:
                 db_host = Host.objects.get(name=h.name, inventory__pk=inventory.pk)
                 db_group.hosts.add(db_host)
-                print "*** ADDING %s to %s ***" % (db_host, db_group) 
+                LOGGER.debug("*** ADDING %s to %s ***" % (db_host, db_group))
             db_group.save()
 
         def variable_mangler(model, mem_hash, overwrite, overwrite_vars):
