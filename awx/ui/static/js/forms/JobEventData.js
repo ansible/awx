@@ -1,14 +1,14 @@
 /*********************************************
  *  Copyright (c) 2013 AnsibleWorks, Inc.
  *
- *  JobModalEvent.js
- *  Form definition for Job Events model
+ *  JobEventData.js
+ *  Form definition for Job Events -JSON view
  *
  *  
  */
-angular.module('JobModalEventDefinition', [])
+angular.module('JobEventDataDefinition', [])
     .value(
-    'JobModalEventForm', {
+    'JobEventDataForm', {
         
         editTitle: '{{ id }} - {{ event_display }}',                         //Legend in edit mode
         name: 'job_events',
@@ -17,19 +17,12 @@ angular.module('JobModalEventDefinition', [])
 
         fields: {
             event_data: {
-                label: 'Event Data',
+                label: false,
                 type: 'textarea',
                 readonly: true,
-                rows: 10,
-                'class': 'modal-input-xlarge'
+                rows: 18,
+                'class': 'modal-input-xxxlarge'
                 } 
-            },
-
-        buttons: {
-            },
-
-        related: { //related colletions (and maybe items?)   
             }
             
     }); //Form
-

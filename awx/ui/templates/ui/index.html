@@ -56,7 +56,7 @@
   <script src="{{ STATIC_URL }}js/forms/Jobs.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Projects.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Permissions.js"></script>
-  <script src="{{ STATIC_URL }}js/forms/JobModalEvent.js"></script>
+  <script src="{{ STATIC_URL }}js/forms/JobEventData.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Users.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Admins.js"></script>
@@ -188,8 +188,25 @@
       </div>
       <div class="modal-body" id="form-modal-body"></div>
       <div class="modal-footer">
+        <a href="" ng-bind="formModalInfo" ng-show="formModalInfo !== undefined && formModalInfo != ''" ng-click="formModalInfoAction()" 
+            class="btn btn-small pull-left"></a>
         <a href="#" ng-show="formModalCancelShow" data-target="#form-modal" data-dismiss="modal" class="btn btn">Cancel</a>
         <a href="" ng-bind="formModalActionLabel" ng-click="formModalAction()" class="btn btn-primary"></a>
+      </div>
+    </div>
+
+    <div id="form-modal2" class="modal hide">
+      <div class="modal-header">
+        <button type="button" class="close" data-target="#alert-modal" 
+                        data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 ng-bind="formModal2Header"></h3>
+      </div>
+      <div class="modal-body" id="form-modal2-body"></div>
+      <div class="modal-footer">
+        <a href="" ng-bind="formModal2Info" ng-show="formModal2Info !== undefined && formModal2Info != ''" ng-click="formModal2InfoAction()" 
+            class="btn btn-small pull-left"></a>
+        <a href="#" ng-show="formModal2CancelShow" data-target="#form-modal2" data-dismiss="modal" class="btn btn">Cancel</a>
+        <a href="" ng-bind="formModal2ActionLabel" ng-click="formModal2Action()" class="btn btn-primary"></a>
       </div>
     </div>
 

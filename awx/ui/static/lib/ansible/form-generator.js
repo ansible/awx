@@ -32,7 +32,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        //
        var element;
        if (options.modal) {
-          element = angular.element(document.getElementById('form-modal-body'));
+          if (options.modal_body_id) {
+             element = angular.element(document.getElementById(options.modal_body_id));
+          }
+          else {
+             // use default dialog
+             element = angular.element(document.getElementById('form-modal-body'));
+          }
        }
        else {
           element = angular.element(document.getElementById('htmlTemplate'));
@@ -56,10 +62,17 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        }
 
        if (options.modal) {
-          this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;
+          this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;  //Default title for default modal
+          this.scope.formModalInfo = false  //Disable info button for default modal
           $('.popover').remove();  //remove any lingering pop-overs
-          $('#form-modal').removeClass('skinny-modal'); //Used in job_events to remove white space
-          $('#form-modal').modal({ backdrop: 'static', keyboard: false });
+          if (options.modal_selector) {
+             $(options.modal_selector).removeClass('skinny-modal'); //Used in job_events to remove white space
+             $(options.modal_selector).modal({ backdrop: 'static', keyboard: false });
+          }
+          else {
+             $('#form-modal').removeClass('skinny-modal'); //Used in job_events to remove white space
+             $('#form-modal').modal({ backdrop: 'static', keyboard: false });
+          }
        }
        return this.scope;
        },

@@ -6,16 +6,20 @@
  *  EventView - show the job_events form in a modal dialog
  *
  */
-angular.module('EventsHelper', ['RestServices', 'Utilities'])
+angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefinition'])
 .factory('EventView', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm', 
-         'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate',
+         'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'JobEventDataForm',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
-          FormatDate) {
+          FormatDate, JobEventDataForm) {
     return function(params) {
         
-        // We're going to manipulate the form object each time user clicks on View button. We can't rely on what's
+        // We're going to manipulate the form object each time the user clicks on View button. We can't rely on what's
         // left of the form in memory each time. Instead we have to define the form from scratch, so for now we're
-        // keeping it here inline rather than in a separate file.
+        // keeping it here inline rather than a separate file.
+        //
+        // Form manipulation is done to remove any empty values. In order for a section (or accordion) to not be drawn,
+        // it needs to be removed prior to call jqueryui. Otherwise, attempting to hide accordion pieces after the 
+        // the accordion is rendered creates undesired behavior.
         var form = {
             name: 'job_events',
             well: false,
@@ -163,7 +167,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities'])
         Rest.get()
             .success( function(data, status, headers, config) {
                 
-                // If event_data is not available or not very useful
+                // If event_data is not available, removed fields that depend on it
                 if ($.isEmptyObject(data['event_data']) || !data['event_data']['res'] || typeof data['event_data']['res'] == 'string') {
                    for (var fld in form.fields) {
                        switch(fld) {
@@ -182,7 +186,8 @@ angular.module('EventsHelper', ['RestServices', 'Utilities'])
                        }
                    }
                 }
-                else if (typeof data['event_data']['res'] != 'string') {
+                
+                if ($.isEmptyObject(data['event_data']) || !data['event_data']['res'] || typeof data['event_data']['res'] != 'string') {
                    delete form.fields['traceback'];
                 }
                 
@@ -257,16 +262,33 @@ angular.module('EventsHelper', ['RestServices', 'Utilities'])
                     }
                 scope.formModalActionLabel = 'OK';
                 scope.formModalCancelShow = false;
+                scope.formModalInfo = 'View JSON';
                 $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
                 $('#form-modal').addClass('skinny-modal');
-
                 scope.formModalHeader = data['event_display'].replace(/^\u00a0*/g,'');
                 
+                // Respond to View JSON button
+                scope.formModalInfoAction = function() {
+                    var generator = GenerateForm;
+                    var scope = generator.inject(JobEventDataForm, { mode: 'edit', modal: true, related: false, 
+                        modal_selector: '#form-modal2', modal_body_id: 'form-modal2-body' });
+                    generator.reset();
+                    scope.formModal2Action = function() {
+                        $('#form-modal2').modal("hide");
+                        }
+                    scope.formModal2ActionLabel = 'OK';
+                    scope.formModal2CancelShow = false;
+                    scope.formModal2Info = false;
+                    $('#form-modal2 .btn-success').removeClass('btn-success').addClass('btn-none');
+                    //$('#form-modal2').addClass('skinny-modal');
+                    scope.formModal2Header = data['event_display'].replace(/^\u00a0*/g,'');
+                    scope.event_data = JSON.stringify(data['event_data'], null, '\t');
+                    }
+
                 if (typeof data['event_data']['res'] == 'string') {
                    scope['traceback'] = data['event_data']['res'];
                 }
-
-                //scope.event_data = JSON.stringify(data['event_data'], null, '\t');
+                
                 for (var fld in form.fields) {
                     switch(fld) {
                         case 'status':

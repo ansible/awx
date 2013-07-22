@@ -613,6 +613,10 @@
    width: 460px;
  }
 
+ .modal-input-xxxlarge {
+   width: 98%;
+ }
+
  .form-section-title {
    font-weight: bold;
    width: 100%;
