@@ -21,7 +21,7 @@ angular.module('JobEventDataDefinition', [])
                 type: 'textarea',
                 readonly: true,
                 rows: 18,
-                'class': 'modal-input-xxxlarge nowrap'
+                'class': 'modal-input-xxlarge'
                 } 
             }
             

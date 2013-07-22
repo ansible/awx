@@ -181,6 +181,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                            case 'results':
                            case 'module_name': 
                            case 'module_args':
+                           case 'rc':
                            delete form.fields[fld];
                            break;
                        }
@@ -201,6 +202,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                         case 'stdout':
                         case 'stderr':
                         case 'msg':
+                        case 'rc':
                             if (data['event_data'] && data['event_data']['res'] && data['event_data']['res'][fld] == undefined) {
                                delete form.fields[fld];
                             }
@@ -273,6 +275,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                     var scope = generator.inject(JobEventDataForm, { mode: 'edit', modal: true, related: false, 
                         modal_selector: '#form-modal2', modal_body_id: 'form-modal2-body' });
                     generator.reset();
+                    scope.formModalInfo = 'View JSON';
                     scope.formModal2Action = function() {
                         $('#form-modal2').modal("hide");
                         }

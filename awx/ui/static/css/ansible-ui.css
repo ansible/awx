@@ -614,10 +614,6 @@
  }
 
  .modal-input-xxlarge {
-   width: 460px;
- }
-
- .modal-input-xxxlarge {
    width: 98%;
  }
 
@@ -629,13 +625,15 @@
    margin-top: 0;
  }
 
-
 .modal-backdrop,
 .modal-backdrop.fade.in {
   opacity: 0.6;
   filter: alpha(opacity=60);
 }
 
+.modal-body .ui-accordion .ui-accordion-content {
+  padding: 10px; 
+}
 
 
 /* overrides to TB modal */
