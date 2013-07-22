@@ -177,7 +177,6 @@ angular.module('EventsHelper', ['RestServices', 'Utilities'])
                            case 'results':
                            case 'module_name': 
                            case 'module_args':
-                           case 'traceback': 
                            delete form.fields[fld];
                            break;
                        }
