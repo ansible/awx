@@ -79,6 +79,7 @@
 
  .login-alert {
     font-weight: bold;
+    font-size: 16px;
     text-align: center;
     color: #0088cc;
     margin-bottom: 15px;
@@ -259,6 +260,7 @@
  .status-actions {
     display: inline-block;
     height: 25px;
+    margin-bottom: 20px;
  }
 
  .status-spin {
@@ -266,10 +268,6 @@
     vertical-align: middle;
     margin-left: 15px;
     font-size: 22px;
- }
-
- .status-fields {
-    margin-top: 15px;
  }
 
  .search-widget label {
@@ -357,10 +355,6 @@
     margin-top: 2px;
  }
 
- .status-actions {
-    margin-bottom: 20px;
- }
-
  /* End Display list actions */
 
  .well {
@@ -425,9 +419,10 @@
  }
 
  .job-detail-status {
+    display: inline-block;
     font-size: 15px;
     font-weight: bold;
-    padding-left: 15px;
+    margin-top:5px;
  }
 
  .form-items .search-widget {

@@ -96,24 +96,24 @@ angular.module('JobTemplateFormDefinition', [])
                 "default": '0',
                 addRequired: false, 
                 editRequired: false,
-                column: 2,
+                column: 1,
                 awPopOver: "<p>The number of parallel or simultaneous processes to use while executing the playbook. Provide a value between 0 and 100. " +
                     "A value of zero will use the ansible default setting of 5 parallel processes.</p>",
                 dataTitle: 'Forks',
-                dataPlacement: 'left'
+                dataPlacement: 'right'
                 },
             limit: {
                 label: 'Limit',
                 type: 'text', 
                 addRequired: false, 
                 editRequired: false,
-                column: 2,
+                column: 1,
                 awPopOver: "<p>Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
                     "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see the " +
                     "<a href=\"http://ansible.cc/docs/patterns.html#selecting-targets\" target=\"_blank\">Selecting Targets section</a> under Inventory and Patterns " + 
                     " in the Ansible documentation.</p>",
                 dataTitle: 'Limit',
-                dataPlacement: 'left'
+                dataPlacement: 'right'
                 },
             verbosity: {
                 label: 'Verbosity',
@@ -122,10 +122,10 @@ angular.module('JobTemplateFormDefinition', [])
                 "default": 0,
                 addRequired: true, 
                 editRequired: true,
-                column: 2,
+                column: 1,
                 awPopOver: "<p>Control the level of output ansible will produce as the playbook executes.</p>",
                 dataTitle: 'Verbosity',
-                dataPlacement: 'left'
+                dataPlacement: 'right'
                 },
             variables: {
                 label: 'Extra Variables',

@@ -231,6 +231,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                $('input[type="checkbox"]').attr('disabled','disabled');
                $('input[type="radio"]').attr('disabled','disabled');
                $('#host_config_key-gen-btn').attr('disabled','disabled');
+               $('textarea').attr('disabled','disabled');
                })
            .error( function(data, status, headers, config) {
                ProcessErrors(scope, data, status, form,
@@ -318,6 +319,17 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                   relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
                }
            }
+
+           // Calc row size of stdout and traceback textarea fields
+           var n = scope['result_stdout'].match(/\n/g);
+           var rows = (n) ? n.length : 1;
+           rows = (rows > 15) ? 15 : rows;
+           scope['stdout_rows'] = rows;
+
+           n = scope['result_traceback'].match(/\n/g);
+           var rows = (n) ? n.length : 1;
+           rows = (rows > 15) ? 15 : rows;
+           scope['traceback_rows'] = rows;
 
            LookUpInit({
                scope: scope,

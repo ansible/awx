@@ -82,7 +82,7 @@ angular.module('JobFormDefinition', [])
                 ngClick: 'lookUpCredential()',
                 addRequired: false, 
                 editRequired: false,
-                column: 2
+                column: 1
                 },
             forks: {
                 label: 'Forks',
@@ -96,24 +96,24 @@ angular.module('JobFormDefinition', [])
                 "default": '0',
                 addRequired: false, 
                 editRequired: false,
-                column: 2,
+                column: 1,
                 awPopOver: "<p>The number of parallel or simultaneous processes to use while executing the playbook. Provide a value between 0 and 100. " +
                     "A value of zero will use the ansible default setting of 5 parallel processes.</p>",
                 dataTitle: 'Forks',
-                dataPlacement: 'left'
+                dataPlacement: 'right'
                 },
             limit: {
                 label: 'Limit',
                 type: 'text', 
                 addRequired: false, 
                 editRequired: false,
-                column: 2,
+                column: 1,
                 awPopOver: "<p>Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
                     "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see the " +
                     "<a href=\"http://ansible.cc/docs/patterns.html#selecting-targets\" target=\"_blank\">Selecting Targets section</a> under Inventory and Patterns " + 
                     " in the Ansible documentation.</p>",
                 dataTitle: 'Limit',
-                dataPlacement: 'left'
+                dataPlacement: 'right'
                 },
             verbosity: {
                 label: 'Verbosity',
@@ -122,10 +122,10 @@ angular.module('JobFormDefinition', [])
                 "default": 0,
                 addRequired: true, 
                 editRequired: true,
-                column: 2,
+                column: 1,
                 awPopOver: "<p>Control the level of output ansible will produce as the playbook executes.</p>",
                 dataTitle: 'Verbosity',
-                dataPlacement: 'left'
+                dataPlacement: 'right'
                 },
             variables: {
                 label: 'Extra Variables',
@@ -238,10 +238,10 @@ angular.module('JobFormDefinition', [])
 
         statusFields: {
             status: {
-                label: 'Job Status <span class="job-detail-status job-\{\{ status \}\}"><i class="icon-circle"></i> \{\{ status \}\}</span>',
-                type: 'text',
+                label: 'Job Status',
+                type: 'custom',
+                control: '<div class="job-detail-status job-\{\{ status \}\}"><i class="icon-circle"></i> \{\{ status \}\}</div>',
                 readonly: true,
-                control: false
                 },
             created: {
                 label: 'Date',
@@ -252,15 +252,16 @@ angular.module('JobFormDefinition', [])
                 label: 'Standard Out', 
                 type: 'textarea',
                 readonly: true,
-                rows: 20,
-                "class": 'span12'
+                rows: "\{\{ stdout_rows \}\}",
+                "class": 'span12 nowrap',
+                ngShow: "result_stdout != ''"
                 },
             result_traceback: {
                 label: 'Traceback',
                 type: 'textarea', 
                 readonly: true,
-                rows: 10,
-                "class": 'span12',
+                rows: "\{\{ traceback_rows \}\}",
+                "class": 'span12 nowrap',
                 ngShow: "result_traceback != ''"
                 }
             },

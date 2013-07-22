@@ -604,7 +604,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += "</div>\n";
               html += "<div class=\"status-spin\"><i class=\"icon-spinner icon-spin\" ng-show=\"statusSearchSpin == true\"></i></div>\n";
           }
-          html += "<div class=\"status-fields\">\n";
+          html += "<div class=\"form-horizontal status-fields\">\n";
           for (var fld in this.form.statusFields) {
               field = this.form.statusFields[fld];
               html += this.buildField(fld, field, options);
