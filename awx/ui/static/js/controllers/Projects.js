@@ -222,7 +222,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    // Related set: Edit button
    scope.edit = function(set, id, name) {
       $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.id + '/' + set + '/' + id);
+      $location.path('/' + set + '/' + id);
       };
 
    // Related set: Delete button
