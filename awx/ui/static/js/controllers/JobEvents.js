@@ -13,7 +13,7 @@
 function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList,
                         GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                         ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,
-                        FormatDate)
+                        FormatDate, EventView)
 {
     ClearScope('htmlTemplate');
     var list = JobEventList;
@@ -68,7 +68,6 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                        found = true;
                   }
                   if ( fld == "results" && Array.isArray(eventData.res[fld]) && eventData.res[fld].length > 0 ) {
-                     html += "<label>Results:</label>\n";
                      //html += "<textarea readonly class="
                      var txt = '';
                      for (var i=0; i < eventData.res[fld].length; i++) {
@@ -77,10 +76,13 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                      n = txt.match(/\n/g);
                      rows = (n) ? n.length : 1;
                      rows = (rows > 10) ? 10 : rows;
-                     html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + rows + "\">" + txt + "</textarea>\n";
-                     found = true;
+                     if (txt !== '') {
+                        html += "<label>Results:</label>\n";
+                        html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + rows + "\">" + txt + "</textarea>\n";
+                        found = true;
+                     }
                   } 
-                  if (fld == "rc" && eventData.res[fld] != 0) {
+                  if (fld == "rc" && eventData.res[fld] != '') {
                      html += "<label>Return Code:</label>\n";
                      html += "<input type=\"text\" class=\"input-mini\" value=\"" + eventData.res[fld] + "\" readonly >\n";
                      found = true;
@@ -158,11 +160,12 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     LoadBreadCrumbs();
     
     scope.viewJobEvent = function(id) {
-       var url = '/jobs/' + $routeParams.id + '/job_events/' + id;
-       if (scope['jobeventPage']) {
-          url += '?&page=' + (scope['jobeventPage'] + 1);
-       }
-       $location.url(url);
+       //var url = '/jobs/' + $routeParams.id + '/job_events/' + id;
+       //if (scope['jobeventPage']) {
+       //   url += '?&page=' + (scope['jobeventPage'] + 1);
+       //}
+       //$location.url(url);
+       EventView({ event_id: id });
        }
 
     scope.refresh = function() {
@@ -182,7 +185,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 
 JobEventsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
                            'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                           'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate'
+                           'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView'
                            ];
 
 function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventForm, GenerateForm,
@@ -249,16 +252,11 @@ function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routePar
                         scope[fld] = data['event_data']['res'][fld];
                         if (form.fields[fld].type == 'textarea') {
                            var n = data['event_data']['res'][fld].match(/\n/g);
-                           rows = (n) ? n.length : 1;
+                           var rows = (n) ? n.length : 1;
                            rows = (rows > 15) ? 5 : rows;
                            $('textarea[name="' + fld + '"]').attr('rows',rows);
                         }
                       }
-                     break;
-                  case 'conditional':
-                     if (data['event_data']['res']) {
-                        scope[fld] = data['event_data']['res']['is_conditional'];
-                     }
                      break;
                   case 'module_name':
                   case 'module_args':

@@ -47,7 +47,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                                            // From here use 'scope' to manipulate the form, as the form is not in '$scope'
        $compile(element)(this.scope);
 
-       if ((!options.modal) && options.related) {
+       if ( ((!options.modal) && options.related) || this.form.forceListeners ) {
           this.addListeners();
        }
 
@@ -58,6 +58,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        if (options.modal) {
           this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;
           $('.popover').remove();  //remove any lingering pop-overs
+          $('#form-modal').removeClass('skinny-modal'); //Used in job_events to remove white space
           $('#form-modal').modal({ backdrop: 'static', keyboard: false });
        }
        return this.scope;
@@ -107,61 +108,64 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        },
 
     addListeners: function() {
-        
-        $('.jqui-accordion').each( function(index) {
-            
-            var active = false;
-            var list = $cookieStore.get('accordions');
-            var found = false;
-            if (list) {
-               var id = $(this).attr('id');
-               var base = ($location.path().replace(/^\//,'').split('/')[0]);
-               for (var i=0; i < list.length && found == false; i++) {
-                   if (list[i].base == base && list[i].id == id) {
-                      found = true;
-                      active = list[i].active; 
-                   }
-               }
-            }
 
-            if (found == false && $(this).attr('data-open') == 'true') {
-               active = 0;
-            }
-            
-            $(this).accordion({
-                collapsible: true,
+        if (this.modal) {
+           $('.jqui-accordion-modal').accordion({
+                collapsible: false,
                 heightStyle: 'content',
-                active: active,
-                activate: function( event, ui ) {
-                    $('.jqui-accordion').each( function(index) {
-                        var active = $(this).accordion('option', 'active');
-                        var id = $(this).attr('id');
-                        var base = ($location.path().replace(/^\//,'').split('/')[0]);
-                        var list = $cookieStore.get('accordions');
-                        if (list == null || list == undefined) {
-                           list = [];
-                        }
-                        var found = false;
-                        for (var i=0; i < list.length && found == false; i++) {
-                            if ( list[i].base == base && list[i].id == id) {
-                               found = true; 
-                               list[i].active = active; 
-                            }
-                        }
-                        if (found == false) {
-                           list.push({ base: base, id: id, active: active });
-                        }
-                        $cookieStore.put('accordions',list);
-                        });
-                    }
+                active: 0
                 });
-            
-            
+        }
+        else {
+           $('.jqui-accordion').each( function(index) {
+              
+               var active = false;
+               var list = $cookieStore.get('accordions');
+               var found = false;
+               if (list) {
+                  var id = $(this).attr('id');
+                  var base = ($location.path().replace(/^\//,'').split('/')[0]);
+                  for (var i=0; i < list.length && found == false; i++) {
+                      if (list[i].base == base && list[i].id == id) {
+                         found = true;
+                        active = list[i].active; 
+                      }
+                  }
+               }
 
-            });
-
-  
-
+               if (found == false && $(this).attr('data-open') == 'true') {
+                  active = 0;
+               }
+              
+               $(this).accordion({
+                   collapsible: true,
+                   heightStyle: 'content',
+                   active: active,
+                   activate: function( event, ui ) {
+                       $('.jqui-accordion').each( function(index) {
+                           var active = $(this).accordion('option', 'active');
+                           var id = $(this).attr('id');
+                           var base = ($location.path().replace(/^\//,'').split('/')[0]);
+                           var list = $cookieStore.get('accordions');
+                           if (list == null || list == undefined) {
+                              list = [];
+                           }
+                           var found = false;
+                           for (var i=0; i < list.length && found == false; i++) {
+                               if ( list[i].base == base && list[i].id == id) {
+                                  found = true; 
+                                  list[i].active = active; 
+                               }
+                           }
+                           if (found == false) {
+                              list.push({ base: base, id: id, active: active });
+                           }
+                           $cookieStore.put('accordions',list);
+                           });
+                       }
+                       });
+                   });
+          }
        },
      
     genID: function() {
@@ -288,11 +292,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += "<div class=\"control-group\""
              html += (field.ngShow) ? this.attr(field,'ngShow') : "";
              html += ">\n";
-             html += "<label class=\"control-label\" for=\"" + fld + '">';
-             html += (field.awPopOver) ? this.attr(field, 'awPopOver') : "";
-             html += field.label + '</label>' + "\n";
-             html += "<div class=\"controls\">\n";
              
+             if (field.label !== false) {
+                html += "<label class=\"control-label\" for=\"" + fld + '">';
+                html += (field.awPopOver) ? this.attr(field, 'awPopOver') : "";
+                html += field.label + '</label>' + "\n";
+                html += "<div class=\"controls\">\n";
+             }
+
              // Variable editing
              if (fld == "variables" || fld == "extra_vars" || fld == 'inventory_variables') {
                 html += "<div class=\"parse-selection\">Parse as: " +
@@ -322,7 +329,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 this.form.name + '_form.' + fld + ".$error.required\">A value is required!</span>\n";
              }
              html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
-             html += "</div>\n";
+             if (field.label !== false) {
+                html += "</div>\n";
+             }
              html += "</div>\n";
           }
        }
@@ -660,20 +669,21 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  var field = this.form.fields[fld];
                  if (field.section && field.section != section) {
                     if (section !== '') {
-                       html += "</div>\n</div>\n";
+                       html += "</div>\n";
                     }
                     else {
-                       html += "<div id=\"" + this.form.name + "-collapse\" class=\"jqui-accordion\" data-open=\"true\">\n";
+                        html += "</div>";
+                        html += "<div id=\"" + this.form.name + "-collapse\" class=\"jqui-accordion-modal\">\n";
                     }
-                    html += "<h3>" + field.section + "</h3>\n"; 
-                    html += "<div>\n";
-                    html += "<div class=\"well\">\n";
+                    var sectionShow = (this.form[field.section + 'Show']) ? " ng-show=\"" + this.form[field.section + 'Show'] + "\"" : "";
+                    html += "<h3" + sectionShow + ">" + field.section + "</h3>\n"; 
+                    html += "<div" + sectionShow + ">\n";
                     section = field.section;
                  }
                  html += this.buildField(fld, field, options);
              }
              if (section !== '') {
-                html += "</div>\n</div>\n</div>\n";
+                html += "</div>\n</div>\n";
              }
           }
 

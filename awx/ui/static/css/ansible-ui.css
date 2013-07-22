@@ -609,6 +609,10 @@
    width: 350px;
  }
 
+ .modal-input-xxlarge {
+   width: 460px;
+ }
+
  .form-section-title {
    font-weight: bold;
    width: 100%;
@@ -664,6 +668,10 @@
 
 #prompt-modal .modal-body {
   padding-bottom: 30px;
+}
+
+.skinny-modal .modal-body {
+  padding: 5px 10px 0px 10px;
 }
 
 /* form navigation */ 

@@ -50,7 +50,6 @@ angular.module('ansible', [
     'JobsListDefinition',
     'JobFormDefinition',
     'JobEventsListDefinition',
-    'JobEventFormDefinition',
     'JobModalEventDefinition',
     'JobHostDefinition',
     'GroupsHelper',
