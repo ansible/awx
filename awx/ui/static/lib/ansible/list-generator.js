@@ -34,7 +34,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        var html = '';
        html += "<button " + this.attr(btn, 'ngClick') + "class=\"btn";
        html += (btn['class']) ?  " " + btn['class'] : " btn-small";
+       html += (btn['awPopOver']) ? " help-link-white" : "";
        html += "\" ";
+       html += (btn.id) ? "id=\"" + btn.id + "\" " : "";
        html += (btn.ngHide) ? this.attr(btn,'ngHide') : "";
        html += (btn.awToolTip) ? this.attr(btn,'awToolTip') : "";
        html += (btn.awToolTip && btn.dataPlacement == undefined) ? "data-placement=\"top\" " : "";

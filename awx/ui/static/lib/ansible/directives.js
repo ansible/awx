@@ -206,7 +206,18 @@ angular.module('AWDirectives', ['RestServices'])
             var title = (attrs.title != undefined && attrs.title != null) ? attrs.title : 'Help';
             var container = (attrs.container !== undefined) ? attrs.container : false;
             $(element).popover({ placement: placement, delay: 0, title: title, 
-                content: attrs.awPopOver, delay: 0, trigger: 'click', html: true, container: container });
+                content: attrs.awPopOver, trigger: 'manual', html: true, container: container });
+            $(element).click(function() {
+                var me = $(this).attr('id');
+                $('.help-link, .help-link-white').each( function(index) {
+                    if (me != $(this).attr('id')) {
+                       $(this).popover('hide');
+                    }
+                    else {
+                       $(this).popover('toggle');
+                    }
+                    });
+                });
             $(document).bind('keydown', function(e) {
                 if (e.keyCode === 27) {
                    $(element).popover('hide');

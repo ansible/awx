@@ -10,7 +10,7 @@
 angular.module('GeneratorHelpers', ['GeneratorHelpers'])
     
     .factory('Attr', function() {
-    return function(obj, key) { 
+    return function(obj, key, fld) { 
         var result;
         var value = (typeof obj[key] === "string") ? obj[key].replace(/[\'\"]/g, '&quot;') : obj[key];
         switch(key) {
@@ -49,7 +49,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                break;
             case 'awPopOver':
                // construct the entire help link
-               result = "<a href=\"\" aw-pop-over=\"" + value + "\" ";
+               result = "<a id=\"awp-" + fld + "\" href=\"\" aw-pop-over=\"" + value + "\" ";
                result += (obj.dataTitle) ? "data-title=\"" + obj['dataTitle'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
                result += (obj.dataPlacement) ? "data-placement=\"" + obj['dataPlacement'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
                result += (obj.dataContainer) ? "data-container=\"" + obj['dataContainer'].replace(/[\'\"]/g, '&quot;') + "\" " : "";

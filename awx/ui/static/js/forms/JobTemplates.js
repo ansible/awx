@@ -90,7 +90,7 @@ angular.module('JobTemplateFormDefinition', [])
                 type: 'number', 
                 integer: true,
                 min: 0,
-                max: 100,
+                max: 100000000,
                 slider: true, 
                 "class": 'input-mini',
                 "default": '0',

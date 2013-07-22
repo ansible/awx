@@ -38,7 +38,8 @@ angular.module('HostListDefinition', [])
                 'class': 'btn-small btn-info',
                 awToolTip: 'Click for help',
                 dataTitle: 'Selecting Hosts',
-                iconSize: 'large'
+                iconSize: 'large',
+                id: 'host-help-button'
                 }
             },
 

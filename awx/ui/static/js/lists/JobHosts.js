@@ -94,7 +94,8 @@ angular.module('JobHostDefinition', [])
                 'class': 'btn-info btn-mini btn-help',
                 awToolTip: 'Click for help',
                 dataTitle: 'Job Host Summary',
-                iconSize: 'large'
+                iconSize: 'large',
+                id: 'jobhost-help-button'
                 }
             },
 
