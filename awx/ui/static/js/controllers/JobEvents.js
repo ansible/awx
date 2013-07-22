@@ -44,7 +44,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
               rows = (rows > 10) ? 10 : rows;
               found = true;
               html += "<label>Traceback:</label>\n";
-              html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + rows + "\">" + eventData.res + "</textarea>\n";
+              html += "<textarea readonly class=\"input-xxlarge nowrap\" rows=\"" + rows + "\">" + eventData.res + "</textarea>\n";
            }
            else {
               for (var fld in eventData.res) {
@@ -64,7 +64,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                        n = eventData['res'][fld].match(/\n/g);
                        rows = (n) ? n.length : 1;
                        rows = (rows > 10) ? 10 : rows;
-                       html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + rows + "\">" + eventData.res[fld] + "</textarea>\n";
+                       html += "<textarea readonly class=\"input-xxlarge nowrap\" rows=\"" + rows + "\">" + eventData.res[fld] + "</textarea>\n";
                        found = true;
                   }
                   if ( fld == "results" && Array.isArray(eventData.res[fld]) && eventData.res[fld].length > 0 ) {
@@ -78,7 +78,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                      rows = (rows > 10) ? 10 : rows;
                      if (txt !== '') {
                         html += "<label>Results:</label>\n";
-                        html += "<textarea readonly class=\"input-xxlarge\" rows=\"" + rows + "\">" + txt + "</textarea>\n";
+                        html += "<textarea readonly class=\"input-xxlarge nowrap\" rows=\"" + rows + "\">" + txt + "</textarea>\n";
                         found = true;
                      }
                   } 

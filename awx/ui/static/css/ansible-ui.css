@@ -24,6 +24,10 @@
     border-color: #e3e3e3;
  }
 
+ .nowrap {
+    white-space: nowrap;
+ }
+
 /* Attempt to make button heights consistent. For some reason success, info, etc. are
    taller than plain .btn */
  

@@ -71,7 +71,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                     label: 'Return Code',
                     type: 'text',
                     readonly: true,
-                    section: 'Event',
+                    section: 'Results',
                     'class': 'span1',
                     ngShow: "rc !== ''"
                     }, 
@@ -79,8 +79,8 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                     label: false,
                     type: 'textarea',
                     readonly: true,
-                    section: 'Output',
-                    'class': 'modal-input-xxlarge',
+                    section: 'Results',
+                    'class': 'modal-input-xxlarge nowrap',
                     ngShow: "msg !== ''",
                     rows: 10
                     },
@@ -88,8 +88,8 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                     label: false,
                     type: 'textarea',
                     readonly: true,
-                    section: 'Output',
-                    'class': 'modal-input-xxlarge',
+                    section: 'Results',
+                    'class': 'modal-input-xxlarge nowrap',
                     ngShow: "stdout !== ''",
                     rows: 10
                     },
@@ -97,8 +97,8 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                     label: false,
                     type: 'textarea',
                     readonly: true,
-                    section: 'Output',
-                    'class': 'modal-input-xxlarge',
+                    section: 'Results',
+                    'class': 'modal-input-xxlarge nowrap',
                     ngShow: "stderr !== ''",
                     rows: 10
                     },
@@ -106,7 +106,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                     label: false,
                     type: 'textarea',
                     readonly: true,
-                     'class': 'modal-input-xxlarge',
+                     'class': 'modal-input-xxlarge nowrap',
                     ngShow: "results !== ''",
                     rows: 10
                     },
@@ -122,7 +122,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                     type: 'textarea',
                     readonly: true,
                     section: 'Traceback',
-                    'class': 'modal-input-xxlarge',
+                    'class': 'modal-input-xxlarge nowrap',
                     ngShow: "traceback !== ''",
                     rows: 10
                     },
