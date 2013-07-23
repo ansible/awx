@@ -208,7 +208,7 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
    scope.formReset = function() {
       // Defaults
       generator.reset();
-      $('#forks-slider').slider("option", "value", scope.forks);
+      //$('#forks-slider').slider("option", "value", scope.forks);
       for (var fld in master) {
           scope[fld] = master[fld];
       }
@@ -293,7 +293,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
            scope.search(relatedSets[set].iterator);
        }
        getPlaybooks(scope.project);
-       $('#forks-slider').slider('value',scope.forks);   // align slider handle with value.
+       //$('#forks-slider').slider('value',scope.forks);   // align slider handle with value.
 
        var dft = (scope['host_config_key'] === "" || scope['host_config_key'] === null) ? 'false' : 'true';
        md5Setup({
@@ -444,7 +444,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
           scope[fld] = master[fld];
       }
       scope.parseType = 'yaml';
-      $('#forks-slider').slider("option", "value", scope.forks);
+      //$('#forks-slider').slider("option", "value", scope.forks);
       };
 
    // Related set: Add button

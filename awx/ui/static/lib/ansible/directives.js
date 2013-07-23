@@ -262,6 +262,51 @@ angular.module('AWDirectives', ['RestServices'])
 
             }
         }
+        }])
+
+    //
+    // Enable jqueryui spinner widget on a numeric input field
+    //
+    // <input type="number" ng-spinner name="myfield" min="0" max="100" />
+    //
+    .directive('ngSpinner', [ function() {
+        return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            var name = elm.attr('name');
+            var disabled = elm.attr('data-disabled');
+            var opts = {
+                value: 0,
+                step: 1,
+                min: elm.attr('min'),
+                max: elm.attr('max'),
+                numberFormat: "d",
+                spin: function(e, u) {
+                   ctrl.$setViewValue(u.value);
+                   ctrl.$setValidity('required',true);
+                   ctrl.$setValidity('min', true);
+                   ctrl.$setValidity('max', true);
+                   ctrl.$dirty = true;
+                   ctrl.$render();
+                   scope['job_templates_form'].$dirty = true;
+                   if (!scope.$$phase) {
+                       scope.$digest();
+                   }
+                   }
+                };
+            if (disabled) { 
+               opts['disabled'] = true;
+            }   
+
+            $(elm).spinner(opts);
+
+            /*$('#' + name + '-number').change( function() {
+                $('#' + name + '-slider').slider('value', parseInt( $(this).val() ));
+                });*/
+
+
+            }
+        }
         }]);
 
 

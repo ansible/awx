@@ -90,12 +90,12 @@ angular.module('JobTemplateFormDefinition', [])
                 type: 'number', 
                 integer: true,
                 min: 0,
-                max: 100000000,
-                slider: true, 
-                "class": 'input-mini',
+                max: null,
+                spinner: true, 
                 "default": '0',
                 addRequired: false, 
                 editRequired: false,
+                class: "input-small",
                 column: 1,
                 awPopOver: "<p>The number of parallel or simultaneous processes to use while executing the playbook. Provide a value between 0 and 100. " +
                     "A value of zero will use the ansible default setting of 5 parallel processes.</p>",
@@ -171,7 +171,6 @@ angular.module('JobTemplateFormDefinition', [])
                 trueValue: 'true',
                 falseValue: 'false',
                 ngChange: "toggleCallback('host_config_key')",
-                "class": "span12",
                 column: 2,
                 awPopOver: "<p>Create a callback URL a host can use to contact the AWX server and request a configuration update " + 
                     "using the job template.  The URL will look like the following:</p>\n" +

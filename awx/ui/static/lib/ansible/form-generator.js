@@ -395,9 +395,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += "<div class=\"controls\">\n"; 
              // Use 'text' rather than 'number' so that our integer directive works correctly
              html += (field.slider) ? "<div class=\"slider\" id=\"" + fld + "-slider\"></div>\n" : "";
-             html += "<input type=\"text\" value=\"" + field['default'] + "\" ";
+             html += "<input type=\""; 
+             html += (field.spinner) ? "spinner" : "text";
+             html += "\" value=\"" + field['default'] + "\" ";
              html += (field['class']) ? this.attr(field, 'class') : "";
              html += (field.slider) ? "ng-slider=\"" + fld + "\" " : ""; 
+             html += (field.spinner) ? "ng-spinner=\"" + fld + "\" " : ""; 
              html += "ng-model=\"" + fld + '" ';
              html += 'name="' + fld + '" ';
              html += (field.min || field.min == 0) ? this.attr(field, 'min') : "";
@@ -408,6 +411,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += (options.mode == 'add' && field.addRequired) ? "required " : "";
              html += (field.readonly) ? "readonly " : "";
              html += (field.integer) ? "integer " : "";
+             html += (field.disabled) ? "data-disabled=\"true\" " : "";
              html += "/>\n";
              html += "<br />\n";
              // Add error messages
@@ -436,7 +440,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += (field.ngShow) ? this.attr(field,'ngShow') : "";
              html += ">\n";
              html += "<div class=\"controls\">\n";
-             html += "<label class=\"checkbox\">";
+             html += "<label class=\"checkbox inline\">";
              html += "<input "; 
              html += this.attr(field,'type');
              html += "ng-model=\"" + fld + '" ';
