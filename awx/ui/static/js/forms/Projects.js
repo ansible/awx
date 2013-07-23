@@ -113,7 +113,7 @@ angular.module('ProjectFormDefinition', [])
                         awToolTip: 'Delete the credential'
                         }
                     }
-                },
+                }
             }
 
     }); // Form

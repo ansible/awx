@@ -14,10 +14,10 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                                 ])
 
     .factory('HostsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostList', 'GenerateList', 
-        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'HostsAdd', 'HostsReload', 'SearchInit',
+        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'HostsAdd', 'HostsReload',
         'SelectionInit',
-    function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, GenerateList, LoadBreadCrumbs, SearchInit,
-        PaginateInit, ProcessErrors, GetBasePath, HostsAdd, HostsReload, SearchInit, SelectionInit) {
+    function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, GenerateList, Prompt, SearchInit,
+        PaginateInit, ProcessErrors, GetBasePath, HostsAdd, HostsReload, SelectionInit) {
     return function(params) {
         
         var inventory_id = params.inventory_id;

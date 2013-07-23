@@ -95,7 +95,7 @@ angular.module('JobTemplateFormDefinition', [])
                 "default": '0',
                 addRequired: false, 
                 editRequired: false,
-                class: "input-small",
+                'class': "input-small",
                 column: 1,
                 awPopOver: "<p>The number of parallel or simultaneous processes to use while executing the playbook. Provide a value between 0 and 100. " +
                     "A value of zero will use the ansible default setting of 5 parallel processes.</p>",
