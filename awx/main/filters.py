@@ -1,15 +1,16 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Django
+from django.core.exceptions import FieldError
+
 # Django REST Framework
+from rest_framework.exceptions import ParseError
 from rest_framework.filters import BaseFilterBackend
 
 class DefaultFilterBackend(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
-
-        terms = {}
-        order_by = None
 
         # Filtering by is_active/active that was previously in BaseList.
         qs = queryset
@@ -19,25 +20,34 @@ class DefaultFilterBackend(BaseFilterBackend):
             elif field.name == 'active':
                 qs = qs.filter(active=True)
 
-        for key, value in request.QUERY_PARAMS.items():
+        # Apply filters and ordering specified via QUERY_PARAMS.
+        try:
 
-            if key in [ 'page', 'page_size', 'format' ]:
-                continue
+            filters = {}
+            order_by = None
 
-            if key in ('order', 'order_by'):
-                order_by = value
-                continue
+            for key, value in request.QUERY_PARAMS.items():
 
-            key2 = key
-            if key2.endswith("__int"):
-                key2 = key.replace("__int","")
-                value = int(value)
+                if key in ('page', 'page_size', 'format'):
+                    continue
 
-            terms[key2] = value
+                if key in ('order', 'order_by'):
+                    order_by = value
+                    continue
 
-        qs = qs.filter(**terms)
+                if key.endswith('__int'):
+                    key = key.replace('__int', '')
+                    value = int(value)
 
-        if order_by:
-            qs = qs.order_by(order_by)
+                filters[key] = value
+
+            qs = qs.filter(**filters)
+
+            if order_by:
+                qs = qs.order_by(order_by)
+
+        except (FieldError, ValueError), e:
+            # Handle invalid field names or values and return a 400.
+            raise ParseError(*e.args)
 
         return qs

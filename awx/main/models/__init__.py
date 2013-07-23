@@ -898,7 +898,7 @@ class JobHostSummary(models.Model):
 
     class Meta:
         unique_together = [('job', 'host')]
-        verbose_name_plural = _('Job Host Summaries')
+        verbose_name_plural = _('job host summaries')
         ordering = ('-pk',)
 
     job = models.ForeignKey(

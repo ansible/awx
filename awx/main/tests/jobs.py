@@ -12,7 +12,7 @@ import uuid
 from django.contrib.auth.models import User as DjangoUser
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.db import transaction
+from django.db.models import Q
 import django.test
 from django.test.client import Client
 from django.test.utils import override_settings
@@ -427,57 +427,49 @@ class BaseJobTestMixin(BaseTestMixin):
         super(BaseJobTestMixin, self).setUp()
         self.populate()
 
-    def _test_invalid_creds(self, url, data=None, methods=None):
-        data = data or {}
-        methods = methods or ('options', 'head', 'get')
-        for auth in [(None,), ('invalid', 'password')]:
-            with self.current_user(*auth):
-                for method in methods:
-                    f = getattr(self, method)
-                    if method in ('post', 'put', 'patch'):
-                        f(url, data, expect=401)
-                    else:
-                        f(url, expect=401)
-
 class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
+
+    JOB_TEMPLATE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created',
+                           'name', 'description', 'job_type', 'inventory',
+                           'project', 'playbook', 'credential', 'forks',
+                           'limit', 'verbosity', 'extra_vars', 'job_tags',
+                           'host_config_key',)
 
     def test_get_job_template_list(self):
         url = reverse('main:job_template_list')
+        qs = JobTemplate.objects.distinct()
+        fields = self.JOB_TEMPLATE_FIELDS
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url)
+        self.check_invalid_auth(url)
 
-        # sue's credentials (superuser) == 200, full list
-        with self.current_user(self.user_sue):
-            self.options(url)
-            self.head(url)
-            response = self.get(url)
-        qs = JobTemplate.objects.all()
-        self.check_pagination_and_size(response, qs.count())
-        self.check_list_ids(response, qs)
+        # Sue's credentials (superuser) == 200, full list
+        self.check_get_list(url, self.user_sue, qs, fields)
+        
+        # Alex's credentials (admin of all orgs) == 200, full list
+        self.check_get_list(url, self.user_alex, qs, fields)
 
-        # FIXME: Check individual job template result fields.
-
-        # alex's credentials (admin of all orgs) == 200, full list
-        with self.current_user(self.user_alex):
-            self.options(url)
-            self.head(url)
-            response = self.get(url)
-        qs = JobTemplate.objects.all()
-        self.check_pagination_and_size(response, qs.count())
-        self.check_list_ids(response, qs)
-
-        # bob's credentials (admin of eng, user of ops) == 200, all from
+        # Bob's credentials (admin of eng, user of ops) == 200, all from
         # engineering and operations.
-        with self.current_user(self.user_bob):
-            self.options(url)
-            self.head(url)
-            response = self.get(url)
-        qs = JobTemplate.objects.filter(
-            inventory__organization__in=[self.org_eng, self.org_ops],
+        bob_qs = qs.filter(
+            Q(project__organizations__admins__in=[self.user_bob]) |
+            Q(project__teams__users__in=[self.user_bob]),
         )
-        #self.check_pagination_and_size(response, qs.count())
-        #self.check_list_ids(response, qs)
+        self.check_get_list(url, self.user_bob, bob_qs, fields)
+
+        # Chuck's credentials (admin of eng) == 200, all from engineering.
+        chuck_qs = qs.filter(
+            Q(project__organizations__admins__in=[self.user_chuck]) |
+            Q(project__teams__users__in=[self.user_chuck]),
+        )
+        self.check_get_list(url, self.user_chuck, chuck_qs, fields)
+
+        # Doug's credentials (user of eng) == 200, none?.
+        doug_qs = qs.filter(
+            Q(project__organizations__admins__in=[self.user_doug]) |
+            Q(project__teams__users__in=[self.user_doug]),
+        )
+        self.check_get_list(url, self.user_doug, doug_qs, fields)
 
         # FIXME: Check with other credentials.
 
@@ -492,7 +484,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         )
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url, data, methods=('post',))
+        self.check_invalid_auth(url, data, methods=('post',))
 
         # sue can always add job templates.
         with self.current_user(self.user_sue):
@@ -541,7 +533,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         url = reverse('main:job_template_detail', args=(jt.pk,))
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url)
+        self.check_invalid_auth(url)
 
         # sue can read the job template detail.
         with self.current_user(self.user_sue):
@@ -562,7 +554,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         url = reverse('main:job_template_detail', args=(jt.pk,))
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url, methods=('put',))# 'patch'))
+        self.check_invalid_auth(url, methods=('put',))# 'patch'))
 
         # sue can update the job template detail.
         with self.current_user(self.user_sue):
@@ -579,7 +571,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         url = reverse('main:job_template_jobs_list', args=(jt.pk,))
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url)
+        self.check_invalid_auth(url)
 
         # sue can read the job template job list.
         with self.current_user(self.user_sue):
@@ -601,7 +593,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         )
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url, data, methods=('post',))
+        self.check_invalid_auth(url, data, methods=('post',))
 
         # sue can create a new job from the template.
         with self.current_user(self.user_sue):
@@ -615,7 +607,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         url = reverse('main:job_list')
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url)
+        self.check_invalid_auth(url)
 
         # sue's credentials (superuser) == 200, full list
         with self.current_user(self.user_sue):
@@ -641,7 +633,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         )
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url, data, methods=('post',))
+        self.check_invalid_auth(url, data, methods=('post',))
 
         # sue can create a new job without a template.
         with self.current_user(self.user_sue):
@@ -663,7 +655,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         url = reverse('main:job_detail', args=(job.pk,))
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url)
+        self.check_invalid_auth(url)
 
         # sue can read the job detail.
         with self.current_user(self.user_sue):
@@ -679,7 +671,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         url = reverse('main:job_detail', args=(job.pk,))
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url, methods=('put',))# 'patch'))
+        self.check_invalid_auth(url, methods=('put',))# 'patch'))
 
         # sue can update the job detail only if the job is new.
         self.assertEqual(job.status, 'new')
@@ -780,8 +772,8 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         url = reverse('main:job_start', args=(job.pk,))
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url)
-        self._test_invalid_creds(url, methods=('post',))
+        self.check_invalid_auth(url)
+        self.check_invalid_auth(url, methods=('post',))
 
         # Sue can start a job (when passwords are already saved) as long as the
         # status is new.  Reverse list so "new" will be last.
@@ -867,8 +859,8 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         url = reverse('main:job_cancel', args=(job.pk,))
 
         # Test with no auth and with invalid login.
-        self._test_invalid_creds(url)
-        self._test_invalid_creds(url, methods=('post',))
+        self.check_invalid_auth(url)
+        self.check_invalid_auth(url, methods=('post',))
 
         # sue can cancel the job, but only when it is pending or running.
         for status in [x[0] for x in Job.STATUS_CHOICES]:

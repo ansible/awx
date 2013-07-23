@@ -31,9 +31,23 @@ class ListAPIView(generics.ListAPIView):
     def get_queryset(self):
         return self.request.user.get_queryset(self.model)
 
+    def get_description_vars(self):
+        return {
+            'model_verbose_name': unicode(self.model._meta.verbose_name),
+            'model_verbose_name_plural': unicode(self.model._meta.verbose_name_plural),
+        }
+
+    def get_description(self, html=False):
+        s = 'Use a GET request to retrieve a list of %(model_verbose_name_plural)s.'
+        return s % self.get_description_vars()
+
 class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):
     # Base class for a list view that allows creating new objects.
-    pass
+
+    def get_description(self, html=False):
+        s = 'Use a GET request to retrieve a list of %(model_verbose_name_plural)s.'
+        s2 = 'Use a POST request with required %(model_verbose_name)s fields to create a new %(model_verbose_name)s.'
+        return '\n\n'.join([s, s2]) % self.get_description_vars()
 
 class SubListAPIView(ListAPIView):
     # Base class for a read-only sublist view.
@@ -46,6 +60,18 @@ class SubListAPIView(ListAPIView):
     # And optionally (user must have given access permission on parent object
     # to view sublist):
     #   parent_access = 'admin'
+
+    def get_description_vars(self):
+        d = super(SubListAPIView, self).get_description_vars()
+        d.update({
+            'parent_model_verbose_name': unicode(self.parent_model._meta.verbose_name),
+            'parent_model_verbose_name_plural': unicode(self.parent_model._meta.verbose_name_plural),
+        })
+        return d
+
+    def get_description(self, html=False):
+        s = 'Use a GET request to retrieve a list of %(model_verbose_name_plural)s associated with the selected %(parent_model_verbose_name)s.'
+        return s % self.get_description_vars()
 
     def get_parent_object(self):
         parent_filter = {
@@ -70,26 +96,29 @@ class SubListAPIView(ListAPIView):
         sublist_qs = getattr(parent, self.relationship).distinct()
         return qs & sublist_qs
 
-class SubListCreateAPIView(SubListAPIView, generics.ListCreateAPIView):
+class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
     # Base class for a sublist view that allows for creating subobjects and
     # attaching/detaching them from the parent.
 
     # In addition to SubListAPIView properties, subclasses may define:
-    #   inject_primary_key_on_post_as = 'field_on_model_referring_to_parent'
-    #   severable = True/False
+    #   parent_key = 'field_on_model_referring_to_parent'
+
+    def get_description(self, html=False):
+        s = 'Use a GET request to retrieve a list of %(model_verbose_name_plural)s associated with the selected %(parent_model_verbose_name)s.'
+        s2 = 'Use a POST request with required %(model_verbose_name)s fields to create a new %(model_verbose_name)s.'
+        if getattr(self, 'parent_key', None):
+            s3 = 'Use a POST request with an `id` field and `disassociate` set to delete the associated %(model_verbose_name)s.'
+            s4 = ''
+        else:
+            s3 = 'Use a POST request with only an `id` field to associate an existing %(model_verbose_name)s with this %(parent_model_verbose_name)s.'
+            s4 = 'Use a POST request with an `id` field and `disassociate` set to remove the %(model_verbose_name)s from this %(parent_model_verbose_name)s without deleting the %(model_verbose_name)s.'
+        return '\n\n'.join(filter(None, [s, s2, s3, s4])) % self.get_description_vars()
 
     def create(self, request, *args, **kwargs):
         # If the object ID was not specified, it probably doesn't exist in the
         # DB yet. We want to see if we can create it.  The URL may choose to
         # inject it's primary key into the object because we are posting to a
         # subcollection. Use all the normal access control mechanisms.
-
-        inject_primary_key = getattr(self, 'inject_primary_key_on_post_as', None)
-
-        if inject_primary_key is None:
-            # view didn't specify a way to get the pk from the URL, so not even trying
-            return Response(status=status.HTTP_400_BAD_REQUEST,
-                            data=dict(msg='object cannot be created'))
 
         # Make a copy of the data provided (since it's readonly) in order to
         # inject additional data.
@@ -98,8 +127,10 @@ class SubListCreateAPIView(SubListAPIView, generics.ListCreateAPIView):
         else:
             data = request.DATA
 
-        # add the key to the post data using the pk from the URL
-        data[inject_primary_key] = kwargs['pk']
+        # add the parent key to the post data using the pk from the URL
+        parent_key = getattr(self, 'parent_key', None)
+        if parent_key:
+            data[parent_key] = self.kwargs['pk']
 
         # attempt to deserialize the object
         serializer = self.serializer_class(data=data)
@@ -160,7 +191,7 @@ class SubListCreateAPIView(SubListAPIView, generics.ListCreateAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         parent = self.get_parent_object()
-        severable = getattr(self, 'severable', True)
+        parent_key = getattr(self, 'parent_key', None)
         relationship = getattr(parent, self.relationship)
 
         try:
@@ -172,11 +203,12 @@ class SubListCreateAPIView(SubListAPIView, generics.ListCreateAPIView):
         if not request.user.can_access(self.parent_model, 'unattach', parent, sub, self.relationship):
             raise PermissionDenied()
 
-        if severable:
-            relationship.remove(sub)
-        else:
-            # resource is just a ForeignKey, can't remove it from the set, just set it inactive
+        if parent_key:
+            # sub object has a ForeignKey to the parent, so we can't remove it
+            # from the set, only mark it as inactive.
             sub.mark_inactive()
+        else:
+            relationship.remove(sub)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -185,7 +217,6 @@ class SubListCreateAPIView(SubListAPIView, generics.ListCreateAPIView):
             return self.unattach(request, *args, **kwargs)
         else:
             return self.attach(request, *args, **kwargs)
-
 
 class RetrieveAPIView(generics.RetrieveAPIView):
     pass

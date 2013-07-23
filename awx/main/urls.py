@@ -170,6 +170,7 @@ try:
         # Support for get_description method on views compatible with 2.2.x. 
         if hasattr(cls, 'get_description') and callable(cls.get_description):
             desc = cls().get_description(html=html)
+            cls = type(cls.__name__, (object,), {'__doc__': desc})
         elif hasattr(cls, 'view_description'):
             if callable(cls.view_description):
                 view_desc = cls.view_description()

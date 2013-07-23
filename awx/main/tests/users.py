@@ -142,7 +142,7 @@ class UsersTest(BaseTest):
     def test_user_list_filtered(self):
         url = reverse('main:user_list')
         data3 = self.get(url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(data3['count'], 3)
+        self.assertEquals(data3['count'], 4)
         data2 = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data2['count'], 2)
         data1 = self.get(url, expect=200, auth=self.get_other_credentials())

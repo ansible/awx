@@ -32,6 +32,7 @@ from awx.main.base_views import *
 from awx.main.models import *
 from awx.main.permissions import *
 from awx.main.serializers import *
+from awx.main.utils import *
 
 def handle_error(request, status=404):
     context = {}
@@ -189,7 +190,6 @@ class OrganizationUsersList(SubListCreateAPIView):
     serializer_class = UserSerializer
     parent_model = Organization
     relationship = 'users'
-    inject_primary_key_on_post_as = 'organization'
 
 class OrganizationAdminsList(SubListCreateAPIView):
 
@@ -197,8 +197,6 @@ class OrganizationAdminsList(SubListCreateAPIView):
     serializer_class = UserSerializer
     parent_model = Organization
     relationship = 'admins'
-    inject_primary_key_on_post_as = 'organization'
-
 
 class OrganizationProjectsList(SubListCreateAPIView):
 
@@ -206,7 +204,6 @@ class OrganizationProjectsList(SubListCreateAPIView):
     serializer_class = ProjectSerializer
     parent_model = Organization
     relationship = 'projects'
-    inject_primary_key_on_post_as = 'organization'
 
 class OrganizationTeamsList(SubListCreateAPIView):
 
@@ -214,8 +211,7 @@ class OrganizationTeamsList(SubListCreateAPIView):
     serializer_class = TeamSerializer
     parent_model = Organization
     relationship = 'teams'
-    inject_primary_key_on_post_as = 'organization'
-    severable = False
+    parent_key = 'organization'
 
 class TeamList(ListCreateAPIView):
 
@@ -233,8 +229,6 @@ class TeamUsersList(SubListCreateAPIView):
     serializer_class = UserSerializer
     parent_model = Team
     relationship = 'users'
-    inject_primary_key_on_post_as = 'team'
-    severable = True
 
 class TeamPermissionsList(SubListCreateAPIView):
 
@@ -242,7 +236,7 @@ class TeamPermissionsList(SubListCreateAPIView):
     serializer_class = PermissionSerializer
     parent_model = Team
     relationship = 'permissions'
-    inject_primary_key_on_post_as = 'team'
+    parent_key = 'team'
 
     def get_queryset(self):
         # FIXME
@@ -261,8 +255,6 @@ class TeamProjectsList(SubListCreateAPIView):
     serializer_class = ProjectSerializer
     parent_model = Team
     relationship = 'projects'
-    inject_primary_key_on_post_as = 'team'
-    severable = True
 
 class TeamCredentialsList(SubListCreateAPIView):
 
@@ -270,7 +262,7 @@ class TeamCredentialsList(SubListCreateAPIView):
     serializer_class = CredentialSerializer
     parent_model = Team
     relationship = 'credentials'
-    inject_primary_key_on_post_as = 'team'
+    parent_key = 'team'
 
 class ProjectList(ListCreateAPIView):
 
@@ -293,7 +285,6 @@ class ProjectOrganizationsList(SubListCreateAPIView):
     serializer_class = OrganizationSerializer
     parent_model = Project
     relationship = 'organizations'
-    inject_primary_key_on_post_as = 'project' # Not correct, but needed for the post to work?
 
     def get_queryset(self):
         # FIXME
@@ -308,7 +299,6 @@ class ProjectTeamsList(SubListCreateAPIView):
     serializer_class = TeamSerializer
     parent_model = Project
     relationship = 'teams'
-    inject_primary_key_on_post_as = 'project' # Not correct, but needed for the post to work?
 
     def get_queryset(self):
         project = Project.objects.get(pk=self.kwargs['pk'])
@@ -347,6 +337,7 @@ class UserTeamsList(SubListAPIView):
     serializer_class = TeamSerializer
     parent_model = User
     relationship = 'teams'
+    parent_access = 'read'
 
 class UserPermissionsList(SubListCreateAPIView):
 
@@ -354,7 +345,8 @@ class UserPermissionsList(SubListCreateAPIView):
     serializer_class = PermissionSerializer
     parent_model = User
     relationship = 'permissions'
-    inject_primary_key_on_post_as = 'user'
+    parent_key = 'user'
+    parent_access = 'read'
 
 class UserProjectsList(SubListAPIView):
 
@@ -362,6 +354,7 @@ class UserProjectsList(SubListAPIView):
     serializer_class = ProjectSerializer
     parent_model = User
     relationship = 'projects'
+    parent_access = 'read'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -375,7 +368,8 @@ class UserCredentialsList(SubListCreateAPIView):
     serializer_class = CredentialSerializer
     parent_model = User
     relationship = 'credentials'
-    inject_primary_key_on_post_as = 'user'
+    parent_key = 'user'
+    parent_access = 'read'
 
 class UserOrganizationsList(SubListAPIView):
 
@@ -383,6 +377,7 @@ class UserOrganizationsList(SubListAPIView):
     serializer_class = OrganizationSerializer
     parent_model = User
     relationship = 'organizations'
+    parent_access = 'read'
 
 class UserAdminOfOrganizationsList(SubListAPIView):
 
@@ -390,6 +385,7 @@ class UserAdminOfOrganizationsList(SubListAPIView):
     serializer_class = OrganizationSerializer
     parent_model = User
     relationship = 'admin_of_organizations'
+    parent_access = 'read'
 
 class UserDetail(RetrieveUpdateDestroyAPIView):
 
@@ -399,8 +395,9 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
     def update_filter(self, request, *args, **kwargs):
         ''' make sure non-read-only fields that can only be edited by admins, are only edited by admins '''
         obj = User.objects.get(pk=kwargs['pk'])
+        can_change = request.user.can_access(User, 'change', obj, request.DATA)
         can_admin = request.user.can_access(User, 'admin', obj, request.DATA)
-        if not can_admin or can_admin == 'partial':
+        if can_change and not can_admin:
             admin_only_edit_fields = ('last_name', 'first_name', 'username',
                                       'is_active', 'is_superuser')
             changed = {}
@@ -412,10 +409,10 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
             if changed:
                 raise PermissionDenied('Cannot change %s' % ', '.join(changed.keys()))
 
-        if 'password' in request.DATA and request.DATA['password']:
-            obj.set_password(request.DATA['password'])
+        new_password = request.DATA.get('password', '')
+        if can_change and new_password:
+            obj.set_password(new_password)
             obj.save()
-            request.DATA.pop('password')
 
 class CredentialList(ListAPIView):
 
@@ -459,8 +456,7 @@ class InventoryHostsList(SubListCreateAPIView):
     parent_model = Inventory
     relationship = 'hosts'
     parent_access = 'read'
-    inject_primary_key_on_post_as = 'inventory'
-    severable = False
+    parent_key = 'inventory'
 
 class HostGroupsList(SubListCreateAPIView):
     ''' the list of groups a host is directly a member of '''
@@ -470,7 +466,6 @@ class HostGroupsList(SubListCreateAPIView):
     parent_model = Host
     relationship = 'groups'
     parent_access = 'read'
-    inject_primary_key_on_post_as = 'host'
 
 class HostAllGroupsList(SubListAPIView):
     ''' the list of all groups of which the host is directly or indirectly a member '''
@@ -500,7 +495,6 @@ class GroupChildrenList(SubListCreateAPIView):
     parent_model = Group
     relationship = 'children'
     parent_access = 'read'
-    inject_primary_key_on_post_as = 'parent'
 
 class GroupHostsList(SubListCreateAPIView):
     ''' the list of hosts directly below a group '''
@@ -510,7 +504,6 @@ class GroupHostsList(SubListCreateAPIView):
     parent_model = Group
     relationship = 'hosts'
     parent_access = 'read'
-    inject_primary_key_on_post_as = 'group'
 
 class GroupAllHostsList(SubListAPIView):
     ''' the list of all hosts below a group, even including subgroups '''
@@ -540,8 +533,7 @@ class InventoryGroupsList(SubListCreateAPIView):
     parent_model = Inventory
     relationship = 'groups'
     parent_access = 'read'
-    inject_primary_key_on_post_as = 'inventory'
-    severable = False
+    parent_key = 'inventory'
 
 class InventoryRootGroupsList(SubListCreateAPIView):
 
@@ -550,8 +542,7 @@ class InventoryRootGroupsList(SubListCreateAPIView):
     parent_model = Inventory
     relationship = 'groups'
     parent_access = 'read'
-    inject_primary_key_on_post_as = 'inventory'
-    severable = False
+    parent_key = 'inventory'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -790,8 +781,7 @@ class JobTemplateJobsList(SubListCreateAPIView):
     serializer_class = JobSerializer
     parent_model = JobTemplate
     relationship = 'jobs'
-    inject_primary_key_on_post_as = 'job_template'
-    severable = False
+    parent_key = 'job_template'
 
 class JobList(ListCreateAPIView):
 
@@ -955,7 +945,6 @@ class JobJobEventsList(BaseJobEventsList):
 # in URL patterns and reverse URL lookups, converting CamelCase names to
 # lowercase_with_underscore (e.g. MyView.as_view() becomes my_view).
 this_module = sys.modules[__name__]
-camelcase_to_underscore = lambda str: re.sub(r'(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))', '_\\1', str).lower().strip('_')
 for attr, value in locals().items():
     if isinstance(value, type) and issubclass(value, APIView):
         name = camelcase_to_underscore(attr)

@@ -33,15 +33,137 @@ class InventoryTest(BaseTest):
              permission_type = 'read'
         )
 
-        # and make one more user that won't be a part of any org, just for negative-access testing
+    def test_get_inventory_list(self):
+        url = reverse('main:inventory_list')
+        qs = Inventory.objects.filter(active=True).distinct()
 
-        self.nobody_django_user = User.objects.create(username='nobody')
-        self.nobody_django_user.set_password('nobody')
-        self.nobody_django_user.save()
+        # Check list view with invalid authentication.
+        self.check_invalid_auth(url)
 
-    def get_nobody_credentials(self):
-        # here is a user without any permissions...
-        return ('nobody', 'nobody')
+        # a super user can list all inventories
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # an org admin can list inventories but is filtered to what he adminsters
+        normal_qs = qs.filter(organization__admins__in=[self.normal_django_user])
+        self.check_get_list(url, self.normal_django_user, normal_qs)
+
+        # a user who is on a team who has a read permissions on an inventory can see filtered inventories
+        other_qs = qs.filter(permissions__user__in=[self.other_django_user])
+        self.check_get_list(url, self.other_django_user, other_qs)
+
+        # a regular user not part of anything cannot see any inventories
+        nobody_qs = qs.none()
+        self.check_get_list(url, self.nobody_django_user, nobody_qs)
+
+    def test_post_inventory_list(self):
+        url = reverse('main:inventory_list')
+
+        # Check post to list view with invalid authentication.
+        new_inv_0 = dict(name='inventory-c', description='baz', organization=self.organizations[0].pk)
+        self.check_invalid_auth(url, new_inv_0, methods=('post',))
+
+        # a super user can create inventory
+        new_inv_1 = dict(name='inventory-c', description='baz', organization=self.organizations[0].pk)
+        new_id = max(Inventory.objects.values_list('pk', flat=True)) + 1
+        with self.current_user(self.super_django_user):
+            data = self.post(url, data=new_inv_1, expect=201)
+            self.assertEquals(data['id'], new_id)
+
+        # an org admin of any org can create inventory, if it is one of his organizations
+        # the organization parameter is required!
+        new_inv_incomplete = dict(name='inventory-d', description='baz')
+        new_inv_not_my_org = dict(name='inventory-d', description='baz', organization=self.organizations[2].pk)
+        new_inv_my_org = dict(name='inventory-d', description='baz', organization=self.organizations[0].pk)
+        with self.current_user(self.normal_django_user):
+            data = self.post(url, data=new_inv_incomplete, expect=400)
+            data = self.post(url, data=new_inv_not_my_org, expect=403)
+            data = self.post(url, data=new_inv_my_org, expect=201)
+
+        # a regular user cannot create inventory
+        new_inv_denied = dict(name='inventory-e', description='glorp', organization=self.organizations[0].pk)
+        with self.current_user(self.other_django_user):
+            data = self.post(url, data=new_inv_denied, expect=403)
+
+    def test_get_inventory_detail(self):
+        url_a = reverse('main:inventory_detail', args=(self.inventory_a.pk,))
+        url_b = reverse('main:inventory_detail', args=(self.inventory_b.pk,))
+
+        # Check detail view with invalid authentication.
+        self.check_invalid_auth(url_a)
+        self.check_invalid_auth(url_b)
+
+        # a super user can get inventory records
+        with self.current_user(self.super_django_user):
+            data = self.get(url_a, expect=200)
+            self.assertEquals(data['name'], 'inventory-a')
+
+        # an org admin can get inventory records for his orgs only
+        with self.current_user(self.normal_django_user):
+            data = self.get(url_a, expect=200)
+            self.assertEquals(data['name'], 'inventory-a')
+            data = self.get(url_b, expect=403)
+
+        # a user who is on a team who has read permissions on an inventory can see inventory records
+        with self.current_user(self.other_django_user):
+            data = self.get(url_a, expect=403)
+            data = self.get(url_b, expect=200)
+            self.assertEquals(data['name'], 'inventory-b')
+
+        # a regular user cannot read any inventory records
+        with self.current_user(self.nobody_django_user):
+            data = self.get(url_a, expect=403)
+            data = self.get(url_b, expect=403)
+
+    def test_put_inventory_detail(self):
+        url_a = reverse('main:inventory_detail', args=(self.inventory_a.pk,))
+        url_b = reverse('main:inventory_detail', args=(self.inventory_b.pk,))
+        
+        # Check put to detail view with invalid authentication.
+        self.check_invalid_auth(url_a, methods=('put',))
+        self.check_invalid_auth(url_b, methods=('put',))
+        
+        # a super user can update inventory records
+        with self.current_user(self.super_django_user):
+            data = self.get(url_a, expect=200)
+            data['name'] = 'inventory-a-update1'
+            self.put(url_a, data, expect=200)
+            data = self.get(url_b, expect=200)
+            data['name'] = 'inventory-b-update1'
+            self.put(url_b, data, expect=200)
+
+        # an org admin can update inventory records for his orgs only.
+        with self.current_user(self.normal_django_user):
+            data = self.get(url_a, expect=200)
+            data['name'] = 'inventory-a-update2'
+            self.put(url_a, data, expect=200)
+            self.put(url_b, data, expect=403)
+
+        # a user who is on a team who has read permissions on an inventory can
+        # see inventory records, but not update.
+        with self.current_user(self.other_django_user):
+            data = self.get(url_b, expect=200)
+            data['name'] = 'inventory-b-update3'
+            self.put(url_b, data, expect=403)
+
+        # a regular user cannot update any inventory records
+        with self.current_user(self.nobody_django_user):
+            self.put(url_a, {}, expect=403)
+            self.put(url_b, {}, expect=403)
+
+        # a superuser can reassign an inventory to another organization.
+        with self.current_user(self.super_django_user):
+            data = self.get(url_b, expect=200)
+            self.assertEqual(data['organization'], self.organizations[1].pk)
+            data['organization'] = self.organizations[0].pk
+            self.put(url_b, data, expect=200)
+
+        # a normal user can't reassign an inventory to an organization where
+        # he isn't an admin.
+        with self.current_user(self.normal_django_user):
+            data = self.get(url_a, expect=200)
+            self.assertEqual(data['organization'], self.organizations[0].pk)
+            data['organization'] = self.organizations[1].pk
+            self.put(url_a, data, expect=403)
 
     def test_main_line(self):
        
@@ -53,57 +175,57 @@ class InventoryTest(BaseTest):
         groups        = reverse('main:group_list')
 
         # a super user can list inventories
-        data = self.get(inventories, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(data['count'], 2)
+        #data = self.get(inventories, expect=200, auth=self.get_super_credentials())
+        #self.assertEquals(data['count'], 2)
 
         # an org admin can list inventories but is filtered to what he adminsters
-        data = self.get(inventories, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(data['count'], 1)
+        #data = self.get(inventories, expect=200, auth=self.get_normal_credentials())
+        #self.assertEquals(data['count'], 1)
 
         # a user who is on a team who has a read permissions on an inventory can see filtered inventories
-        data = self.get(inventories, expect=200, auth=self.get_other_credentials())
-        self.assertEquals(data['count'], 1)      
+        #data = self.get(inventories, expect=200, auth=self.get_other_credentials())
+        #self.assertEquals(data['count'], 1)      
 
         # a regular user not part of anything cannot see any inventories
-        data = self.get(inventories, expect=200, auth=self.get_nobody_credentials())
-        self.assertEquals(data['count'], 0)
+        #data = self.get(inventories, expect=200, auth=self.get_nobody_credentials())
+        #self.assertEquals(data['count'], 0)
 
         # a super user can get inventory records
-        data = self.get(inventories_1, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(data['name'], 'inventory-a')
+        #data = self.get(inventories_1, expect=200, auth=self.get_super_credentials())
+        #self.assertEquals(data['name'], 'inventory-a')
 
         # an org admin can get inventory records
-        data = self.get(inventories_1, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(data['name'], 'inventory-a')
+        #data = self.get(inventories_1, expect=200, auth=self.get_normal_credentials())
+        #self.assertEquals(data['name'], 'inventory-a')
 
         # a user who is on a team who has read permissions on an inventory can see inventory records
-        data = self.get(inventories_1, expect=403, auth=self.get_other_credentials())
-        data = self.get(inventories_2, expect=200, auth=self.get_other_credentials())
-        self.assertEquals(data['name'], 'inventory-b')
+        #data = self.get(inventories_1, expect=403, auth=self.get_other_credentials())
+        #data = self.get(inventories_2, expect=200, auth=self.get_other_credentials())
+        #self.assertEquals(data['name'], 'inventory-b')
 
         # a regular user cannot read any inventory records
-        data = self.get(inventories_1, expect=403, auth=self.get_nobody_credentials())
-        data = self.get(inventories_2, expect=403, auth=self.get_nobody_credentials())
+        #data = self.get(inventories_1, expect=403, auth=self.get_nobody_credentials())
+        #data = self.get(inventories_2, expect=403, auth=self.get_nobody_credentials())
 
         # a super user can create inventory
-        new_inv_1 = dict(name='inventory-c', description='baz', organization=self.organizations[0].pk)
-        new_id = max(Inventory.objects.values_list('pk', flat=True)) + 1
-        data = self.post(inventories, data=new_inv_1, expect=201, auth=self.get_super_credentials())
-        self.assertEquals(data['id'], new_id)
+        #new_inv_1 = dict(name='inventory-c', description='baz', organization=self.organizations[0].pk)
+        #new_id = max(Inventory.objects.values_list('pk', flat=True)) + 1
+        #data = self.post(inventories, data=new_inv_1, expect=201, auth=self.get_super_credentials())
+        #self.assertEquals(data['id'], new_id)
 
         # an org admin of any org can create inventory, if it is one of his organizations
         # the organization parameter is required!
-        new_inv_incomplete = dict(name='inventory-d', description='baz')
-        data = self.post(inventories, data=new_inv_incomplete, expect=400,  auth=self.get_normal_credentials())
-        new_inv_not_my_org = dict(name='inventory-d', description='baz', organization=self.organizations[2].pk)
+        #new_inv_incomplete = dict(name='inventory-d', description='baz')
+        #data = self.post(inventories, data=new_inv_incomplete, expect=400,  auth=self.get_normal_credentials())
+        #new_inv_not_my_org = dict(name='inventory-d', description='baz', organization=self.organizations[2].pk)
 
-        data = self.post(inventories, data=new_inv_not_my_org, expect=403,  auth=self.get_normal_credentials())
-        new_inv_my_org = dict(name='inventory-d', description='baz', organization=self.organizations[0].pk)
-        data = self.post(inventories, data=new_inv_my_org, expect=201, auth=self.get_normal_credentials())
+        #data = self.post(inventories, data=new_inv_not_my_org, expect=403,  auth=self.get_normal_credentials())
+        #new_inv_my_org = dict(name='inventory-d', description='baz', organization=self.organizations[0].pk)
+        #data = self.post(inventories, data=new_inv_my_org, expect=201, auth=self.get_normal_credentials())
 
         # a regular user cannot create inventory
-        new_inv_denied = dict(name='inventory-e', description='glorp', organization=self.organizations[0].pk)
-        data = self.post(inventories, data=new_inv_denied, expect=403, auth=self.get_other_credentials())
+        #new_inv_denied = dict(name='inventory-e', description='glorp', organization=self.organizations[0].pk)
+        #data = self.post(inventories, data=new_inv_denied, expect=403, auth=self.get_other_credentials())
 
         # a super user can add hosts (but inventory ID is required)
         inv = Inventory.objects.create(

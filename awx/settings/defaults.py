@@ -278,6 +278,9 @@ LOGGING = {
         'require_debug_true': {
             '()': 'awx.main.compat.RequireDebugTrue',
         },
+        'require_debug_true_or_test': {
+            '()': 'awx.main.utils.RequireDebugTrueOrTest',
+        },
     },
     'formatters': {
         'simple': {
@@ -287,7 +290,7 @@ LOGGING = {
     'handlers': {
         'console': {
             'level': 'DEBUG',
-            'filters': ['require_debug_true'],
+            'filters': ['require_debug_true_or_test'],
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
@@ -328,12 +331,10 @@ LOGGING = {
         },
         'awx.main.permissions': {
             'handlers': ['null'],
-            # Comment the line below to show lots of permissions logging.
             'propagate': False,
         },
         'awx.main.access': {
             'handlers': ['null'],
-            # Comment the line below to show lots of permissions logging.
             'propagate': False,
         },
     }

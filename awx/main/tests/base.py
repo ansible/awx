@@ -124,13 +124,15 @@ class BaseTestMixin(object):
         self.normal_password = 'normal'
         self.other_username  = 'other'
         self.other_password  = 'other'
+        self.nobody_username = 'nobody'
+        self.nobody_password = 'nobody'
 
         self.super_django_user  = self.make_user(self.super_username,  self.super_password, super_user=True)
 
         if not just_super_user:
-
             self.normal_django_user = self.make_user(self.normal_username, self.normal_password, super_user=False)
             self.other_django_user  = self.make_user(self.other_username,  self.other_password, super_user=False)
+            self.nobody_django_user  = self.make_user(self.nobody_username,  self.nobody_password, super_user=False)
 
     def get_super_credentials(self):
         return (self.super_username, self.super_password)
@@ -140,6 +142,10 @@ class BaseTestMixin(object):
 
     def get_other_credentials(self):
         return (self.other_username, self.other_password)
+
+    def get_nobody_credentials(self):
+        # here is a user without any permissions...
+        return (self.nobody_username, self.nobody_password)
 
     def get_invalid_credentials(self):
         return ('random', 'combination')
@@ -238,6 +244,39 @@ class BaseTestMixin(object):
         # TODO: this test helper function doesn't support pagination
         data = self.get(collection_url, expect=200, auth=auth)
         return [item['url'] for item in data['results']]
+
+    def check_invalid_auth(self, url, data=None, methods=None):
+        '''
+        Check various methods of accessing the given URL with invalid
+        authentication credentials.
+        '''
+        data = data or {}
+        methods = methods or ('options', 'head', 'get')
+        for auth in [(None,), ('invalid', 'password')]:
+            with self.current_user(*auth):
+                for method in methods:
+                    f = getattr(self, method)
+                    if method in ('post', 'put', 'patch'):
+                        f(url, data, expect=401)
+                    else:
+                        f(url, expect=401)
+
+    def check_get_list(self, url, user, qs, fields=None, expect=200):
+        '''
+        Check that the given list view URL returns results for the given user
+        that match the given queryset.
+        '''
+        with self.current_user(user):
+            self.options(url, expect=expect)
+            self.head(url, expect=expect)
+            response = self.get(url, expect=expect)
+        if expect != 200:
+            return
+        self.check_pagination_and_size(response, qs.count())
+        self.check_list_ids(response, qs)
+        if fields:
+            for obj in response['results']:
+                self.assertTrue(set(obj.keys()) <= set(fields))
 
 class BaseTest(BaseTestMixin, django.test.TestCase):
     '''

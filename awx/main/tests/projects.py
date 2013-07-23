@@ -84,14 +84,6 @@ class ProjectsTest(BaseTest):
         self.team1.users.add(self.normal_django_user)
         self.team2.users.add(self.other_django_user)
 
-        self.nobody_django_user = User.objects.create(username='nobody')
-        self.nobody_django_user.set_password('nobody')
-        self.nobody_django_user.save()
-
-    def get_nobody_credentials(self):
-        # here is a user without any permissions...
-        return ('nobody', 'nobody')
-
     def test_playbooks(self):
         def write_test_file(project, name, content):
             full_path = os.path.join(project.get_project_path(), name)
@@ -395,11 +387,13 @@ class ProjectsTest(BaseTest):
         self.get(url, expect=401, auth=self.get_invalid_credentials())
         self.get(url, expect=403, auth=self.get_nobody_credentials())
         other.organizations.add(Organization.objects.get(pk=self.organizations[1].pk))
-        other.save()
+        # Normal user can only see some teams that other user is a part of,
+        # since normal user is not an admin of that organization.
         my_teams1 = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(my_teams1['count'], 1)
+        # Other user should be able to see all his own teams.
         my_teams2 = self.get(url, expect=200, auth=self.get_other_credentials())
-        self.assertEqual(my_teams1['count'], 2)
-        self.assertEqual(my_teams1, my_teams2)
+        self.assertEqual(my_teams2['count'], 2)
 
         # =====================================================================
         # USER PROJECTS
@@ -511,14 +505,14 @@ class ProjectsTest(BaseTest):
         team_url = reverse('main:team_credentials_list', args=(cred_put_t['team'],))
         self.post(team_url, data=cred_put_t, expect=204, auth=self.get_normal_credentials())
 
-        # can remove credentials from a user (via disassociate)
+        # can remove credentials from a user (via disassociate) - this will delete the credential.
         cred_put_u['disassociate'] = 1
         url = cred_put_u['url']
         user_url = reverse('main:user_credentials_list', args=(cred_put_u['user'],))
         self.post(user_url, data=cred_put_u, expect=204, auth=self.get_normal_credentials())
 
         # can delete a credential directly -- probably won't be used too often
-        data = self.delete(url, expect=204, auth=self.get_other_credentials())
+        #data = self.delete(url, expect=204, auth=self.get_other_credentials())
         data = self.delete(url, expect=404, auth=self.get_other_credentials())
 
         # =====================================================================
