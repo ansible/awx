@@ -511,13 +511,20 @@
     padding-top: 10px;
  }
 
- #hosts-title {
-    margin-bottom: 15px;
+ #hosts-title p {
+   font-size: 12px;
  }
 
+ #hosts-title h4 {
+   margin: 5px 0;
+ }
+
+ #hosts-well .search-widget {
+   margin-top: 10px;
+ }
  .parse-selection {
    font-size: 12px;
-   margin: 5px 0 10px 0;
+   margin: 5px 0 8px 0;
  }
  
  .parse-selection .radio.inline {

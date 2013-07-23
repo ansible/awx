@@ -207,7 +207,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       scope.inventoryLoadedRemove();
    }
    scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
-       scope.groupTitle = 'All Hosts';
+       scope.groupTitle = '<h4>All Hosts</h4>';
        scope.createButtonShow = false;
        scope.search(scope.relatedSets['hosts'].iterator);
        TreeInit(scope.TreeParams);
@@ -396,8 +396,8 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.createButtonShow = true;
          scope.group_id = node.attr('group_id');
          scope.groupName = n.data;
-         scope.groupTitle = n.data;
-         scope.groupTitle += (node.attr('description')) ? ' -' + node.attr('description') : '';
+         scope.groupTitle = '<h4>' + n.data + '</h4>';
+         scope.groupTitle += (node.attr('description')) ? '<p>' + node.attr('description') + '</p>' : '';
       }
       else if (type == 'inventory') {
          url = node.attr('hosts');
@@ -406,7 +406,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.groupDeleteHide = true;
          scope.createButtonShow = false;
          scope.groupName = 'All Hosts';
-         scope.groupTitle = 'All Hosts';
+         scope.groupTitle = '<h4>All Hosts</h4>';
          scope.group_id = null;
       }
       scope.relatedSets['hosts'] = { url: url, iterator: 'host' };

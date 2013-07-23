@@ -106,7 +106,7 @@ angular.module('InventoryFormDefinition', [])
 
             hosts: {
                 type: 'treeview',
-                title: "{{ groupTitle }}",
+                title: "groupTitle",
                 iterator: 'host',
                 actions: {
                     select: {

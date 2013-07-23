@@ -855,7 +855,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            else {
               html += "<div id=\"group-view\" class=\"span7\">\n";
               html += "<div id=\"hosts-well\" class=\"well\">\n";
-              html += "<h4 id=\"hosts-title\">" + form.related[itm].title + "</h4>\n";
+              html += "<div id=\"hosts-title\" ng-bind-html-unsafe=\"" + form.related[itm].title + "\"></div>\n";
               html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true });
 
               // Add actions(s)
