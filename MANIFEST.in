@@ -10,6 +10,7 @@ recursive-include config *
 recursive-include config/deb *
 recursive-include config/rpm *
 recursive-exclude awx devonly.py*
+recursive-exclude awx/ui/static/lib/ansible *
 recursive-exclude awx/settings local_settings.py*
 include awx/ui/static/js/awx-min.js
 include awx/ui/static/js/config.js
