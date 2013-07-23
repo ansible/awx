@@ -184,7 +184,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                           OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
-                          GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshTree, ParseTypeChange) 
+                          GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshGroupName, ParseTypeChange) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -247,6 +247,23 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       RefreshTree({ scope: scope });
    }
 
+   function PostSave() {
+       // Make sure the inventory name in the tree is correct
+       RefreshGroupName($('#inventory-node'), scope['inventory_name'], scope['inventory_description']);
+      
+       // Reset the form to disable the form action buttons
+       scope[form.name + '_form'].$setPristine();
+
+       // Show the flash message for 5 seconds, letting the user know the save worked
+       scope['flashMessage'] = 'Your changes were successfully saved!';
+       setTimeout(function() {
+           scope['flashMessage'] = null;
+           if (!scope.$$phase) {
+              scope.$digest();
+           } 
+           }, 5000);
+       }
+
    // Save
    scope.formSave = function() {
        try { 
@@ -282,7 +299,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                       Rest.setUrl(data.related.variable_data);
                       Rest.put(json_data)
                           .success( function(data, status, headers, config) {
-                              $location.path('/inventories');           
+                              PostSave();
                               })
                           .error( function(data, status, headers, config) {
                               ProcessErrors(scope, data, status, form,
@@ -290,7 +307,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                           });
                    }
                    else {
-                      $location.path('/inventories');
+                      PostSave();
                    }
                    })
                .error( function(data, status, headers, config) {
@@ -471,7 +488,7 @@ InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$l
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
-                            'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete', 'RefreshTree',
+                            'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete', 'RefreshGroupName',
                             'ParseTypeChange'
                             ]; 
   

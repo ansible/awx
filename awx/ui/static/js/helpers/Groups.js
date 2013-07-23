@@ -180,9 +180,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree', 'ParseTypeChange',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshGroupName', 'ParseTypeChange',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, RefreshTree, ParseTypeChange) {
+        GetBasePath, RefreshGroupName, ParseTypeChange) {
     return function(params) {
         
         var group_id = params.group_id;
@@ -293,7 +293,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                            Rest.put(json_data)
                                .success( function(data, status, headers, config) {
                                    $('#form-modal').modal('hide');
-                                   RefreshTree({ scope: scope }); 
+                                   RefreshGroupName($('li[group_id="' + group_id + '"]'), scope['name'])
                                })
                                .error( function(data, status, headers, config) {
                                    ProcessErrors(scope, data, status, form,
@@ -302,7 +302,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         }
                         else {
                            $('#form-modal').modal('hide');
-                           RefreshTree({ scope: scope });
+                           RefreshGroupName($('li[group_id="' + group_id + '"]'), scope['name']);
                         }
                         })
                     .error( function(data, status, headers, config) {

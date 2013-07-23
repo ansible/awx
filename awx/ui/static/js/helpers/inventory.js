@@ -243,6 +243,13 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         }
         }])
 
+    .factory('RefreshGroupName', [ function() {
+    return function(node, name, description) {
+        // Call after GroupsEdit controller saves changes
+        $('#tree-view').jstree('rename_node', node, name);
+        node.attr('description', description);
+        }
+        }])
 
     .factory('RefreshTree', ['Alert', 'Rest', 'Authorization', '$http', 'TreeInit', 'LoadInventory',
     function(Alert, Rest, Authorization, $http, TreeInit, LoadInventory) {
