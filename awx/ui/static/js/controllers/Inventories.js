@@ -373,7 +373,13 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
           return {
               addGroup: {
                   label: 'Add Group',
-                  action: function(obj) { GroupsAdd({ "inventory_id": id, group_id: null }); }
+                  action: function(obj) {
+                      scope.group_id = null;
+                      if (!scope.$$phase) {
+                         scope.$digest();
+                      }
+                      GroupsAdd({ "inventory_id": id, group_id: null });
+                      }
                   }
               }
       }
@@ -381,16 +387,34 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          return {
              addGroup: { 
                 label: 'Add Group',
-                action: function(obj) { GroupsList({ "inventory_id": id, group_id: $(obj).attr('group_id') }); }    
+                action: function(obj) {
+                    scope.group_id = $(obj).attr('group_id');
+                    if (!scope.$$phase) {
+                       scope.$digest();
+                    }
+                    GroupsList({ "inventory_id": id, group_id: $(obj).attr('group_id') });
+                    }    
                 },
              edit: { 
                  label: 'Edit Group',
-                 action: function(obj) { GroupsEdit({ "inventory_id": id, group_id: $(obj).attr('group_id') }); },
+                 action: function(obj) {
+                     scope.group_id = $(obj).attr('group_id');
+                     if (!scope.$$phase) {
+                        scope.$digest();
+                     }
+                     GroupsEdit({ "inventory_id": id, group_id: $(obj).attr('group_id') }); 
+                     },
                  separator_before: true
                  },
              "delete": {
                  label: 'Delete Group',
-                 action: function(obj) { GroupsDelete({ scope: scope, "inventory_id": id, group_id: $(obj).attr('group_id') }) }
+                 action: function(obj) {
+                     scope.group_id = $(obj).attr('group_id');
+                     if (!scope.$$phase) {
+                        scope.$digest();
+                     }
+                     GroupsDelete({ scope: scope, "inventory_id": id, group_id: $(obj).attr('group_id') });
+                     }
                  }
              }
       }

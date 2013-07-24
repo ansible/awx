@@ -328,9 +328,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('GroupsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath) {
+        GetBasePath, RefreshTree) {
     return function(params) {
         // Delete the selected group node. Disassociates it from its parent.
         var scope = params.scope;
@@ -338,9 +338,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var inventory_id = params.inventory_id; 
         var obj = $('#tree-view li[group_id="' + group_id + '"]');
         var parent = (obj.parent().last().prop('tagName') == 'LI') ? obj.parent().last() : obj.parent().parent().last();
-        //if (parent.length > 0) {
-        //   parent = parent.last();
-        //}
         var url; 
         
         if (parent.attr('type') == 'group') {
@@ -354,7 +351,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             Rest.post({ id: group_id, disassociate: 1 })
                .success( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
-                   $('#tree-view').jstree("delete_node",obj);
+                   RefreshTree({ scope: scope });
+                   //$('#tree-view').jstree("delete_node",obj);
                    })
                .error( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
