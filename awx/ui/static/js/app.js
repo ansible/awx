@@ -60,7 +60,9 @@ angular.module('ansible', [
     'ProjectPathHelper',
     'md5Helper',
     'AccessHelper',
-    'SelectionHelper'
+    'SelectionHelper',
+    'LicenseFormDefinition',
+    'License'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.
@@ -214,8 +216,8 @@ angular.module('ansible', [
             
             otherwise({redirectTo: '/'});
     }])
-    .run(['$rootScope', 'CheckLicense', '$location', 'Authorization','LoadBasePaths', 
-         function($rootScope, CheckLicense, $location, Authorization, LoadBasePaths) {
+    .run(['$rootScope', 'CheckLicense', '$location', 'Authorization','LoadBasePaths', 'ViewLicense',
+         function($rootScope, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense) {
         
         LoadBasePaths(); 
 
@@ -265,5 +267,10 @@ angular.module('ansible', [
 
         $rootScope.viewCurrentUser = function() {
             $location.path('/users/' + $rootScope.current_user.id);
-            }    
+            }
+
+        $rootScope.viewLicense = function() {
+            //$location.path('/license');
+            ViewLicense();
+            }   
     }]);

@@ -32,6 +32,7 @@
   <script src="{{ STATIC_URL }}lib/ansible/directives.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/filters.js"></script>
   <script src="{{ STATIC_URL }}lib/ansible/api-loader.js"></script>
+  <script src="{{ STATIC_URL }}lib/ansible/LicenseView.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Authentication.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Users.js"></script>
@@ -57,6 +58,7 @@
   <script src="{{ STATIC_URL }}js/forms/Projects.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Permissions.js"></script>
   <script src="{{ STATIC_URL }}js/forms/JobEventData.js"></script>
+  <script src="{{ STATIC_URL }}js/forms/License.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Users.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Admins.js"></script>
@@ -102,6 +104,7 @@
            <ul class="nav pull-right">
              <li ng-show="current_user.username != null && current_user.username != undefined">
               <a href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
+             <li ng-show="userLoggedIn == true"><a href="" ng-click="viewLicense()">View License</a></li>
              <li ng-show="userLoggedIn == true"><a href="#/logout">Logout</a></li>
            </ul>
          </div><!-- container -->

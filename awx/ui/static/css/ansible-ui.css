@@ -78,8 +78,8 @@
  }
 
  .login-alert {
-    font-weight: bold;
-    font-size: 16px;
+    font-weight: normal;
+    font-size: 14px;
     text-align: center;
     color: #0088cc;
     margin-bottom: 25px;
@@ -375,7 +375,10 @@
  
 /* Jobs pages */
 
- .job-error, .job-failed,
+ .job-error, 
+ .job-failed,
+ .license-expired,
+ .license-invalid,
  .active-failures-true,
  .active-failures-true a,
  .active-failures-true a:active,
@@ -394,7 +397,8 @@
     color: #da4f49;
  }
 
- .job-event-status {
+ .job-event-status,
+ .license-status {
     padding-top: 5px;
  }
 
@@ -408,13 +412,16 @@
  .job-success,
  .job-successful,
  .active-failures-false,
+ .license-valid,
  input[type="text"].job-success,
  input[type="text"].job-successful
  {
     color: #5bb75b;
  }
 
- .job-changed {
+ .job-changed,
+ .license-warning,
+ .license-demo {
     color: #FF9900;
  }
 
@@ -508,7 +515,7 @@
  }
 
  #hosts-well {
-    padding-top: 10px;
+    padding-top: 5px;
  }
 
  #hosts-title p {
@@ -522,6 +529,11 @@
  #hosts-well .search-widget {
    margin-top: 10px;
  }
+
+ #hosts-well .list-actions {
+   padding-top: 10px;
+ }
+
  .parse-selection {
    font-size: 12px;
    margin: 5px 0 8px 0;

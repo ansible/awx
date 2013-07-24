@@ -681,15 +681,26 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           }
           else {
              // original, single-column form
-             var section = '';             
+             var section = '';        
+             var group = '';     
              for (var fld in this.form.fields) {
                  var field = this.form.fields[fld];
+                 
+                 if (field.group && field.group != group) {
+                    if (group !== '') {
+                       html += "</div>\n";
+                    }
+                    html += "<div class=\"well\">\n";
+                    html += "<h5>" + field.group + "</h5>\n"; 
+                    group = field.group;
+                 }
+
                  if (field.section && field.section != section) {
                     if (section !== '') {
                        html += "</div>\n";
                     }
                     else {
-                        html += "</div>";
+                        html += "</div>\n";
                         html += "<div id=\"" + this.form.name + "-collapse\" class=\"jqui-accordion-modal\">\n";
                     }
                     var sectionShow = (this.form[field.section + 'Show']) ? " ng-show=\"" + this.form[field.section + 'Show'] + "\"" : "";
@@ -697,10 +708,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                     html += "<div" + sectionShow + ">\n";
                     section = field.section;
                  }
+
                  html += this.buildField(fld, field, options);
              }
              if (section !== '') {
                 html += "</div>\n</div>\n";
+             }
+             if (group !== '') {
+                html += "</div>\n";
              }
           }
 
