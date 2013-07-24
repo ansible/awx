@@ -32,34 +32,36 @@ angular.module('LicenseFormDefinition', [])
                 readonly: true
                 },
             license_date: {
-                label: 'Activated On',
+                label: 'Expires On',
                 type: 'text',
                 readonly: true,
                 section: 'License'
                 },
             time_remaining: {
-                label: 'Days Left',
+                label: 'Time Left',
                 type: 'text',
                 readonly: true,
                 section: 'License'
                 },
             available_instances: {
-                label: 'License Count',
+                label: 'Available',
                 type: 'text',
                 readonly: true,
-                section: 'Available Servers'
+                section: 'Managed Hosts'
                 },
             current_instances: {
                 label: 'Used',
                 type: 'text',
                 readonly: true,
-                section: 'Available Servers'
+                section: 'Managed Hosts'
                 },
             free_instances: {
                 label: 'Remaining',
                 type: 'text',
                 readonly: true,
-                section: 'Available Servers'
+                section: 'Managed Hosts',
+                controlNGClass: 'free_instances_class',
+                labelNGClass: 'free_instances_class'
                 },
             company_name: {
                 label: 'Company',

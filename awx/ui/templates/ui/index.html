@@ -139,21 +139,6 @@
       </div>
     </div>
 
-    <!-- Confirmation Dialog -->
-    <div id="prompt-modal" class="modal hide">
-      <div class="modal-header">
-        <button type="button" class="close" data-target="#prompt-modal" 
-                        data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3 ng-bind="promptHeader" id="prompt-header"></h3>
-      </div>
-      <div class="modal-body" ng-bind="promptBody" id="prompt-body">
-      </div>
-      <div class="modal-footer">
-        <a href="#" data-target="#prompt-modal" data-dismiss="modal" class="btn">No</a>
-        <a href="" ng-click="promptAction()" id="prompt-action-btn" class="btn">Yes</a>
-      </div>
-    </div>
-
     <!-- Password Dialog -->
     <div id="password-modal" class="modal hide">
       <div class="modal-header">
@@ -210,6 +195,21 @@
             class="btn btn-small pull-left"><i class="icon-zoom-in"></i> <span ng-bind="formModal2Info"></span></a>
         <a href="#" ng-show="formModal2CancelShow" data-target="#form-modal2" data-dismiss="modal" class="btn btn">Cancel</a>
         <a href="" ng-bind="formModal2ActionLabel" ng-click="formModal2Action()" class="btn btn-primary"></a>
+      </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div id="prompt-modal" class="modal hide">
+      <div class="modal-header">
+        <button type="button" class="close" data-target="#prompt-modal" 
+                        data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 ng-bind="promptHeader" id="prompt-header"></h3>
+      </div>
+      <div class="modal-body" ng-bind-html-unsafe="promptBody" id="prompt-body">
+      </div>
+      <div class="modal-footer">
+        <a href="#" data-target="#prompt-modal" data-dismiss="modal" class="btn">No</a>
+        <a href="" ng-click="promptAction()" id="prompt-action-btn" class="btn">Yes</a>
       </div>
     </div>
 

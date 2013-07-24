@@ -72,7 +72,6 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
                 }
 
             listScope['toggle_' + list.iterator] = function(id) {
-                console.log('here!');
                 for (var i=0; i < scope[list.name].length; i++) {
                     if (listScope[list.name][i]['id'] == id) {
                        listScope[list.name][i]['checked'] = '1';

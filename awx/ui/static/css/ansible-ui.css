@@ -77,6 +77,10 @@
     padding-left: 10px;
  }
 
+ .break {
+    word-wrap: break-word;
+ }
+
  .login-alert {
     font-weight: normal;
     font-size: 14px;
@@ -419,6 +423,22 @@
     color: #5bb75b;
  }
 
+ .field-success {
+    color: #5bb75b;
+ }
+
+ .field-success input {
+    border-color: #5bb75b;
+ }
+
+ .field-failure {
+    color: #FF0000;
+ }
+
+ .field-failure input {
+    border-color: #FF0000;
+ } 
+ 
  .job-changed,
  .license-warning,
  .license-demo {

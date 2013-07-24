@@ -233,13 +233,17 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += (field.ngShow) ? this.attr(field,'ngShow') : "";
              html += (field.ngHide) ? this.attr(field,'ngHide') : "";
              html += ">\n";
-             html += "<label class=\"control-label"; 
+             html += "<label ";
+             html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
+             html += "class=\"control-label"; 
              html += (field.labelClass) ? " " + field.labelClass : "";
              html += "\" for=\"" + fld + '">';
              html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
              html += (field.icon) ? this.icon(field.icon) : "";
              html += field.label + '</label>' + "\n";
-             html += "<div class=\"controls\">\n"; 
+             html += "<div ";
+             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
+             html += "class=\"controls\">\n"; 
              html += (field.clear || field.genMD5) ? "<div class=\"input-append\">\n" : "";
              if (field.control === null || field.control === undefined || field.control) {
                 html += "<input ";
