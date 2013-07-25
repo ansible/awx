@@ -264,7 +264,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         
         // Save changes to the parent
         scope.formModalAction = function() {
-            try { 
+            try {
+                var refreshHosts = false;
        
                 // Make sure we have valid variable data
                 if (scope.parseType == 'json') {
@@ -284,6 +285,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     data[fld] = scope[fld];   
                 }
                 data['inventory'] = inventory_id;
+
+                if (master['description'] != data['description']) {
+                   refreshHosts = true;
+                }
+
                 Rest.setUrl(defaultUrl);
                 Rest.put(data)
                     .success( function(data, status, headers, config) {
@@ -294,6 +300,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                                .success( function(data, status, headers, config) {
                                    $('#form-modal').modal('hide');
                                    RefreshGroupName($('li[group_id="' + group_id + '"]'), scope['name'])
+                                   if (refreshHosts) {
+                                      scope.$emit('hostsReload');
+                                   }
                                })
                                .error( function(data, status, headers, config) {
                                    ProcessErrors(scope, data, status, form,
@@ -303,6 +312,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         else {
                            $('#form-modal').modal('hide');
                            RefreshGroupName($('li[group_id="' + group_id + '"]'), scope['name']);
+                           if (refreshHosts) {
+                              scope.$emit('hostsReload');
+                           }
                         }
                         })
                     .error( function(data, status, headers, config) {
