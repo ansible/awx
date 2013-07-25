@@ -84,6 +84,53 @@ class BaseSerializer(serializers.ModelSerializer):
         else:
             return obj.active
 
+class UserSerializer(BaseSerializer):
+
+    password = serializers.WritableField(required=False, default='')
+
+    class Meta:
+        model = User
+        fields = ('id', 'url', 'related', 'created', 'username', 'first_name',
+                  'last_name', 'email', 'is_active', 'is_superuser',
+                  'password')
+
+    def to_native(self, obj):
+        ret = super(UserSerializer, self).to_native(obj)
+        ret.pop('password', None)
+        ret.fields.pop('password', None)
+        return ret
+
+    def get_validation_exclusions(self):
+        ret = super(UserSerializer, self).get_validation_exclusions()
+        ret.append('password')
+        return ret
+
+    def restore_object(self, attrs, instance=None):
+        new_password = attrs.pop('password', None)
+        instance = super(UserSerializer, self).restore_object(attrs, instance)
+        instance._new_password = new_password
+        return instance
+
+    def save_object(self, obj, **kwargs):
+        new_password = getattr(obj, '_new_password', None)
+        if new_password:
+            obj.set_password(new_password)
+        if not obj.password:
+            obj.set_unusable_password()
+        return super(UserSerializer, self).save_object(obj, **kwargs)
+    
+    def get_related(self, obj):
+        res = super(UserSerializer, self).get_related(obj)
+        res.update(dict(
+            teams                  = reverse('main:user_teams_list',               args=(obj.pk,)),
+            organizations          = reverse('main:user_organizations_list',       args=(obj.pk,)),
+            admin_of_organizations = reverse('main:user_admin_of_organizations_list', args=(obj.pk,)),
+            projects               = reverse('main:user_projects_list',            args=(obj.pk,)),
+            credentials            = reverse('main:user_credentials_list',         args=(obj.pk,)),
+            permissions            = reverse('main:user_permissions_list',         args=(obj.pk,)),
+        ))
+        return res
+
 class OrganizationSerializer(BaseSerializer):
 
     class Meta:
@@ -319,27 +366,6 @@ class CredentialSerializer(BaseSerializer):
             if self.object.team != attrs['team']:
                 raise serializers.ValidationError("team cannot be changed")
         return attrs
-
-class UserSerializer(BaseSerializer):
-
-    class Meta:
-        model = User
-        fields = ('id', 'url', 'related', 'created', 'username', 'first_name',
-                  'last_name', 'email', 'is_active', 'is_superuser',)
-    
-    # FIXME: Add password as write-only serializer field.
-
-    def get_related(self, obj):
-        res = super(UserSerializer, self).get_related(obj)
-        res.update(dict(
-            teams                  = reverse('main:user_teams_list',               args=(obj.pk,)),
-            organizations          = reverse('main:user_organizations_list',       args=(obj.pk,)),
-            admin_of_organizations = reverse('main:user_admin_of_organizations_list', args=(obj.pk,)),
-            projects               = reverse('main:user_projects_list',            args=(obj.pk,)),
-            credentials            = reverse('main:user_credentials_list',         args=(obj.pk,)),
-            permissions            = reverse('main:user_permissions_list',         args=(obj.pk,)),
-        ))
-        return res
 
 class JobTemplateSerializer(BaseSerializer):
 

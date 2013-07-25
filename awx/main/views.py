@@ -310,16 +310,6 @@ class UserList(ListCreateAPIView):
     model = User
     serializer_class = UserSerializer
 
-    def create(self, request, *args, **kwargs):
-        password = request.DATA.get('password', None)
-        response = super(UserList, self).create(request, *args, **kwargs)
-        if password:
-            pk = response.data['id']
-            user = User.objects.get(pk=pk)
-            user.set_password(password)
-            user.save()
-        return response
-
 class UserMeList(ListAPIView):
 
     model = User
@@ -407,11 +397,6 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
                     changed[field] = (left, right)
             if changed:
                 raise PermissionDenied('Cannot change %s' % ', '.join(changed.keys()))
-
-        new_password = request.DATA.get('password', '')
-        if can_change and new_password:
-            obj.set_password(new_password)
-            obj.save()
 
 class CredentialList(ListAPIView):
 
