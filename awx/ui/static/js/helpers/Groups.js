@@ -285,9 +285,12 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     data[fld] = scope[fld];   
                 }
                 data['inventory'] = inventory_id;
-
-                if (master['description'] != data['description']) {
-                   refreshHosts = true;
+                
+                // Update hosts with new group name/description
+                if (master['description'] != data['description'] || 
+                    master['name'] != data['name']) {
+                    scope.groupTitle = '<h4>' + data['name'] + '</h4>';
+                    scope.groupTitle += '<p>' + data['description'] + '</p>';   
                 }
 
                 Rest.setUrl(defaultUrl);

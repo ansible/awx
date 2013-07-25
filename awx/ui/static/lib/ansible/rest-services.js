@@ -12,7 +12,11 @@ angular.module('RestServices',['ngCookies','AuthService'])
         this.url = url;
         },
 
-    auth: { 'Authorization': 'Token ' + Authorization.getToken() },
+    //auth: { 'Authorization': 'Token ' + Authorization.getToken() },
+    auth: function() {
+        var token = Authorization.getToken();
+        return { 'Authorization': 'Token ' + token }
+        },
     
     pReplace: function() {
         //in our url, replace :xx params with a value, assuming
@@ -33,20 +37,20 @@ angular.module('RestServices',['ngCookies','AuthService'])
         this.pReplace();
         return $http({method: 'GET', 
                       url: this.url,
-                      headers: this.auth,
+                      headers: this.auth(),
                       params: this.params
                       });
         },
     post: function(data) {
         return $http({method: 'POST', 
                       url: this.url,
-                      headers: this.auth, 
+                      headers: this.auth(), 
                       data: data });
         },
     put: function(data) {
         return $http({method: 'PUT', 
                       url: this.url,
-                      headers: this.auth, 
+                      headers: this.auth(), 
                       data: data });
 
         },
@@ -54,7 +58,7 @@ angular.module('RestServices',['ngCookies','AuthService'])
         var url = this.url;
         return $http({method: 'DELETE',
                       url: url,
-                      headers: this.auth,
+                      headers: this.auth(),
                       data: data});
         }
     }

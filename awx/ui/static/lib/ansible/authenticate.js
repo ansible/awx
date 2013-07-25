@@ -16,15 +16,18 @@ angular.module('AuthService', ['ngCookies'])
            $cookieStore.remove('token_expire');
            $cookieStore.put('token', token);
            $cookieStore.put('token_expire', today.getTime());
+           $rootScope.token = token;
            $rootScope.userLoggedIn = true;
+           $rootScope.token_expire = today.getTime();
            },
 
        isTokenValid: function() {
            // check if token exists and is not expired
            var response = false;
-           if ( $cookieStore.get('token') && $cookieStore.get('token_expire') ) {
-              var token = $cookieStore.get('token');
-              var exp = new Date($cookieStore.get('token_expire'));
+           var token = ($rootScope.token) ? $rootScope.token : $cookieStore.get('token'); 
+           var token_expire = ($rootScope.token_expire) ? $rootScope.token_expire : $cookieStore.get('token_expire');
+           if (token && token_expire) {
+              var exp = new Date(token_expire);
               var today = new Date();
               if (today < exp) {
                  this.setToken(token);  //push expiration into the future while user is active
@@ -37,8 +40,9 @@ angular.module('AuthService', ['ngCookies'])
        didSessionExpire: function() {
            // use only to test why user was sent to login page. 
            var response = false;
-           if ($cookieStore.get('token_expire')) {
-              var exp = new Date($cookieStore.get('token_expire'));
+           var token_expire = ($rootScope.token_expire) ? $rootScope.token_expire : $cookieStore.get('token_expire');
+           if (token_expire) {
+              var exp = new Date(token_expire);
               var today = new Date();
               if (exp < today) {
                  response = true;
@@ -49,7 +53,7 @@ angular.module('AuthService', ['ngCookies'])
        
        getToken: function() {
            if ( this.isTokenValid() ) {
-              return $cookieStore.get('token');
+              return ($rootScope.token) ? $rootScope.token : $cookieStore.get('token'); 
            }
            else {
               return null;
@@ -68,6 +72,8 @@ angular.module('AuthService', ['ngCookies'])
            $cookieStore.remove('token_expire');
            $cookieStore.remove('current_user');
            $rootScope.userLoggedIn = false;
+           $rootScope.token = null;
+           $rootScope.token_expire = new Date(1970, 0, 1, 0, 0, 0, 0);
            },
   
        getLicense: function() {

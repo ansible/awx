@@ -11,7 +11,7 @@ angular.module('Utilities',[])
       return function(id) {
       var element = document.getElementById(id);
       var scope = angular.element(element).scope();
-      scope.$destroy();  
+      scope.$destroy();
       }
    })
 

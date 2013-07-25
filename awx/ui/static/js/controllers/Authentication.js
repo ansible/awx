@@ -10,7 +10,7 @@
 
 'use strict';
 
-function Authenticate($scope, $rootScope, $location, Authorization, ToggleClass, Alert)
+function Authenticate($window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert)
 {
    // Authorization is injected from AuthService found in services.js
   
@@ -52,6 +52,14 @@ function Authenticate($scope, $rootScope, $location, Authorization, ToggleClass,
              Authorization.setToken(data.token);
              $scope.reset();
 
+             // Force request to /organizations to query with the correct token -in the event a new user
+             // has logged in.
+             var today = new Date();
+             today.setTime(today.getTime() + ($AnsibleConfig.session_timeout * 1000));
+             $rootScope.token = token;
+             $rootScope.userLoggedIn = true;
+             $rootScope.token_expire = today.getTime();
+             
              // Get all the profile/access info regarding the logged in user
              Authorization.getUser()
                  .success(function(data, status, headers, config) {
@@ -94,5 +102,5 @@ function Authenticate($scope, $rootScope, $location, Authorization, ToggleClass,
        }
 }
 
-Authenticate.$inject = ['$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert'];
+Authenticate.$inject = ['$window', '$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert'];
 

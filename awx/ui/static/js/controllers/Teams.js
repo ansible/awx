@@ -142,8 +142,7 @@ function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
 TeamsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm', 'GenerateForm', 
                      'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
-                     'OrganizationList', 'SearchInit', 'PaginateInit', 'TeamLookUpOrganizationInit', 'GetBasePath', 
-                     'LookUpInit' ]; 
+                     'OrganizationList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'LookUpInit' ]; 
 
 
 function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, 
