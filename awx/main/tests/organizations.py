@@ -51,7 +51,7 @@ class OrganizationsTest(BaseTest):
         self.organizations[0].users.add(self.normal_django_user)
         self.organizations[1].admins.add(self.normal_django_user)
 
-    def test_get_list(self):
+    def test_get_organization_list(self):
         url = reverse('main:organization_list')
 
         # no credentials == 401
@@ -162,6 +162,9 @@ class OrganizationsTest(BaseTest):
         self.assertEquals(org1_users['count'], 1)
         org1_users = self.get(org1_users_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(org1_users['count'], 1)
+
+    def test_get_organization_inventories_list(self):
+        pass
 
     def _test_get_item_subobjects_tags(self):
         # FIXME: Update to support taggit!

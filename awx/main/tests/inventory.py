@@ -165,6 +165,9 @@ class InventoryTest(BaseTest):
             data['organization'] = self.organizations[1].pk
             self.put(url_a, data, expect=403)
 
+    def test_delete_inventory_detail(self):
+        pass # FIXME
+
     def test_main_line(self):
        
         # some basic URLs... 
@@ -174,58 +177,6 @@ class InventoryTest(BaseTest):
         hosts         = reverse('main:host_list')
         groups        = reverse('main:group_list')
 
-        # a super user can list inventories
-        #data = self.get(inventories, expect=200, auth=self.get_super_credentials())
-        #self.assertEquals(data['count'], 2)
-
-        # an org admin can list inventories but is filtered to what he adminsters
-        #data = self.get(inventories, expect=200, auth=self.get_normal_credentials())
-        #self.assertEquals(data['count'], 1)
-
-        # a user who is on a team who has a read permissions on an inventory can see filtered inventories
-        #data = self.get(inventories, expect=200, auth=self.get_other_credentials())
-        #self.assertEquals(data['count'], 1)      
-
-        # a regular user not part of anything cannot see any inventories
-        #data = self.get(inventories, expect=200, auth=self.get_nobody_credentials())
-        #self.assertEquals(data['count'], 0)
-
-        # a super user can get inventory records
-        #data = self.get(inventories_1, expect=200, auth=self.get_super_credentials())
-        #self.assertEquals(data['name'], 'inventory-a')
-
-        # an org admin can get inventory records
-        #data = self.get(inventories_1, expect=200, auth=self.get_normal_credentials())
-        #self.assertEquals(data['name'], 'inventory-a')
-
-        # a user who is on a team who has read permissions on an inventory can see inventory records
-        #data = self.get(inventories_1, expect=403, auth=self.get_other_credentials())
-        #data = self.get(inventories_2, expect=200, auth=self.get_other_credentials())
-        #self.assertEquals(data['name'], 'inventory-b')
-
-        # a regular user cannot read any inventory records
-        #data = self.get(inventories_1, expect=403, auth=self.get_nobody_credentials())
-        #data = self.get(inventories_2, expect=403, auth=self.get_nobody_credentials())
-
-        # a super user can create inventory
-        #new_inv_1 = dict(name='inventory-c', description='baz', organization=self.organizations[0].pk)
-        #new_id = max(Inventory.objects.values_list('pk', flat=True)) + 1
-        #data = self.post(inventories, data=new_inv_1, expect=201, auth=self.get_super_credentials())
-        #self.assertEquals(data['id'], new_id)
-
-        # an org admin of any org can create inventory, if it is one of his organizations
-        # the organization parameter is required!
-        #new_inv_incomplete = dict(name='inventory-d', description='baz')
-        #data = self.post(inventories, data=new_inv_incomplete, expect=400,  auth=self.get_normal_credentials())
-        #new_inv_not_my_org = dict(name='inventory-d', description='baz', organization=self.organizations[2].pk)
-
-        #data = self.post(inventories, data=new_inv_not_my_org, expect=403,  auth=self.get_normal_credentials())
-        #new_inv_my_org = dict(name='inventory-d', description='baz', organization=self.organizations[0].pk)
-        #data = self.post(inventories, data=new_inv_my_org, expect=201, auth=self.get_normal_credentials())
-
-        # a regular user cannot create inventory
-        #new_inv_denied = dict(name='inventory-e', description='glorp', organization=self.organizations[0].pk)
-        #data = self.post(inventories, data=new_inv_denied, expect=403, auth=self.get_other_credentials())
 
         # a super user can add hosts (but inventory ID is required)
         inv = Inventory.objects.create(
@@ -410,10 +361,9 @@ class InventoryTest(BaseTest):
         # a normal user cannot edit variable objects
         self.put(vdata_url, data=vars_a, expect=403, auth=self.get_nobody_credentials())
 
-        # a normal user with inventory write permissions can edit variable objects... FIXME
-        #vdata_url = "/api/v1/hosts/1/variable_data/" 
-        #got = self.put(vdata_url, data=vars_b, expect=200, auth=self.get_normal_credentials())
-        #self.assertEquals(got, vars_b)        
+        # a normal user with inventory write permissions can edit variable objects...
+        got = self.put(vdata_url, data=vars_b, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(got, vars_b)        
 
         ###################################################
         # VARIABLES -> GROUPS
@@ -527,22 +477,22 @@ class InventoryTest(BaseTest):
         groups = Group.objects.all()
 
         # just some more groups for kicks
-        inv  = Inventory.objects.get(pk=self.inventory_a.pk)
-        Group.objects.create(name='group-X1', inventory=inv)
-        Group.objects.create(name='group-X2', inventory=inv)
-        Group.objects.create(name='group-X3', inventory=inv)
-        Group.objects.create(name='group-X4', inventory=inv)
-        Group.objects.create(name='group-X5', inventory=inv)
+        inva  = Inventory.objects.get(pk=self.inventory_a.pk)
+        Group.objects.create(name='group-X1', inventory=inva)
+        Group.objects.create(name='group-X2', inventory=inva)
+        Group.objects.create(name='group-X3', inventory=inva)
+        Group.objects.create(name='group-X4', inventory=inva)
+        Group.objects.create(name='group-X5', inventory=inva)
 
         Permission.objects.create(
-            inventory       = inv,
+            inventory       = inva,
             user            = self.other_django_user,
             permission_type = PERM_INVENTORY_WRITE
         )
 
         # data used for testing listing all hosts that are transitive members of a group
         g2 = Group.objects.get(name='web4')
-        nh = Host.objects.create(name='newhost.example.com', inventory=inv,
+        nh = Host.objects.create(name='newhost.example.com', inventory=inva,
                                  created_by=self.super_django_user)
         g2.hosts.add(nh)
         g2.save()
@@ -592,10 +542,10 @@ class InventoryTest(BaseTest):
         # a normal user cannot set subgroups
         self.post(subgroups_url3, data=got, expect=403, auth=self.get_nobody_credentials())
 
-        # a normal user with inventory edit permissions can associate subgroups
-        self.post(subgroups_url3, data=got, expect=204, auth=self.get_other_credentials())
-        checked = self.get(subgroups_url3, expect=200, auth=self.get_normal_credentials()) 
-        self.assertEqual(checked['count'], 1)
+        # a normal user with inventory edit permissions can associate subgroups (but not when they belong to different inventories!)
+        #self.post(subgroups_url3, data=got, expect=204, auth=self.get_other_credentials())
+        #checked = self.get(subgroups_url3, expect=200, auth=self.get_normal_credentials()) 
+        #self.assertEqual(checked['count'], 1)
         
         # slight detour
         # can see all hosts under a group, even if it has subgroups

@@ -128,15 +128,14 @@ class ApiV1ConfigView(APIView):
         license_data   = license_reader.from_file()
 
         data = dict(
-            time_zone = settings.TIME_ZONE,
-            # FIXME: Special variables for inventory/group/host variable_data.
+            time_zone=settings.TIME_ZONE,
+            license_info=license_data,
         )
         if request.user.is_superuser or request.user.admin_of_organizations.filter(active=True).count():
             data.update(dict(
                 project_base_dir = settings.PROJECTS_ROOT,
                 project_local_paths = Project.get_local_path_choices(),
             ))
-        data['license_info'] = license_data
 
         return Response(data)
 
@@ -239,7 +238,7 @@ class TeamPermissionsList(SubListCreateAPIView):
     parent_key = 'team'
 
     def get_queryset(self):
-        # FIXME
+        # FIXME: Default get_queryset should handle this.
         team = Team.objects.get(pk=self.kwargs['pk'])
         base = Permission.objects.filter(team = team)
         #if Team.can_user_administrate(self.request.user, team, None):
@@ -287,7 +286,7 @@ class ProjectOrganizationsList(SubListCreateAPIView):
     relationship = 'organizations'
 
     def get_queryset(self):
-        # FIXME
+        # FIXME: Default get_queryset should handle this.
         project = Project.objects.get(pk=self.kwargs['pk'])
         if not self.request.user.is_superuser:
             raise PermissionDenied()

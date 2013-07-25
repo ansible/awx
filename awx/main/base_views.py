@@ -100,7 +100,8 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
     # Base class for a sublist view that allows for creating subobjects and
     # attaching/detaching them from the parent.
 
-    # In addition to SubListAPIView properties, subclasses may define:
+    # In addition to SubListAPIView properties, subclasses may define (if the
+    # sub_obj requires a foreign key to the parent):
     #   parent_key = 'field_on_model_referring_to_parent'
 
     def get_description(self, html=False):

@@ -186,7 +186,7 @@ class ProjectsTest(BaseTest):
         self.assertEquals(results['count'], 10)
         # org admin
         results = self.get(projects, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(results['count'], 6)
+        self.assertEquals(results['count'], 10)
         # user on a team
         results = self.get(projects, expect=200, auth=self.get_other_credentials())
         self.assertEquals(results['count'], 5)
@@ -227,7 +227,7 @@ class ProjectsTest(BaseTest):
         project = reverse('main:project_detail', args=(self.projects[3].pk,))
         self.get(project, expect=200, auth=self.get_super_credentials())
         self.get(project, expect=200, auth=self.get_normal_credentials())
-        self.get(project, expect=403, auth=self.get_other_credentials())
+        self.get(project, expect=200, auth=self.get_other_credentials())
         self.get(project, expect=403, auth=self.get_nobody_credentials())
 
         # can delete projects
@@ -280,6 +280,9 @@ class ProjectsTest(BaseTest):
         # can add teams
         posted1 = self.post(all_teams, data=new_team, expect=201, auth=self.get_super_credentials())
         posted2 = self.post(all_teams, data=new_team, expect=400, auth=self.get_super_credentials())
+        # normal user is not an admin of organizations[0], but is for [1].
+        posted3 = self.post(all_teams, data=new_team2, expect=403, auth=self.get_normal_credentials())
+        new_team2['organization'] = self.organizations[1].pk
         posted3 = self.post(all_teams, data=new_team2, expect=201, auth=self.get_normal_credentials())
         posted4 = self.post(all_teams, data=new_team2, expect=400, auth=self.get_normal_credentials())
         posted5 = self.post(all_teams, data=new_team3, expect=403, auth=self.get_other_credentials())
@@ -347,7 +350,7 @@ class ProjectsTest(BaseTest):
         # =====================================================================
         # TEAMS USER MEMBERSHIP
 
-        team = Team.objects.filter(organization__pk=self.organizations[1].pk)[0]
+        team = Team.objects.filter(active=True, organization__pk=self.organizations[1].pk)[0]
         team_users = reverse('main:team_users_list', args=(team.pk,))
         for x in team.users.all():
             team.users.remove(x)
@@ -361,13 +364,13 @@ class ProjectsTest(BaseTest):
         self.get(team_users, expect=200, auth=self.get_normal_credentials())
         self.get(team_users, expect=200, auth=self.get_super_credentials())
 
-        # can add users to teams
-        all_users = self.get(reverse('main:user_list'), expect=200, auth=self.get_super_credentials())
+        # can add users to teams (but only users I can see)
+        all_users = self.get(reverse('main:user_list'), expect=200, auth=self.get_normal_credentials())
         for x in all_users['results']:
             self.post(team_users, data=x, expect=403, auth=self.get_nobody_credentials())
             self.post(team_users, data=x, expect=204, auth=self.get_normal_credentials())
 
-        self.assertEqual(Team.objects.get(pk=team.pk).users.count(), 4)
+        self.assertEqual(Team.objects.get(pk=team.pk).users.count(), 3)
 
         # can remove users from teams
         for x in all_users['results']:
@@ -492,7 +495,7 @@ class ProjectsTest(BaseTest):
         self.put(edit_creds1, data=d_cred_user, expect=200, auth=self.get_normal_credentials())
         # editing a credential to edit the user record is not legal, this is a test of the .validate
         # method on the serializer to allow 'write once' fields
-        self.put(edit_creds1, data=d_cred_user2, expect=400, auth=self.get_normal_credentials())
+        self.put(edit_creds1, data=d_cred_user2, expect=403, auth=self.get_normal_credentials())
         cred_put_u = self.put(edit_creds1, data=d_cred_user, expect=200, auth=self.get_other_credentials())
 
         self.put(edit_creds2, data=d_cred_team, expect=401)

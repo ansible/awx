@@ -157,7 +157,7 @@ class Inventory(CommonModel):
         null=True,
         help_text=_('Variables in JSON or YAML format.'),
     )
-    has_active_failures = models.BooleanField(default=False)
+    has_active_failures = models.BooleanField(default=False, editable=False)
 
     def get_absolute_url(self):
         return reverse('main:inventory_detail', args=(self.pk,))
@@ -192,7 +192,7 @@ class Host(CommonModelNameNotUnique):
     inventory               = models.ForeignKey('Inventory', null=False, related_name='hosts')
     last_job                = models.ForeignKey('Job', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job+')
     last_job_host_summary   = models.ForeignKey('JobHostSummary', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job_summary+')
-    has_active_failures     = models.BooleanField(default=False)
+    has_active_failures     = models.BooleanField(default=False, editable=False)
 
     def __unicode__(self):
         return self.name
@@ -250,7 +250,7 @@ class Group(CommonModelNameNotUnique):
         help_text=_('Variables in JSON or YAML format.'),
     )
     hosts         = models.ManyToManyField('Host', related_name='groups', blank=True)
-    has_active_failures = models.BooleanField(default=False)
+    has_active_failures = models.BooleanField(default=False, editable=False)
 
     def __unicode__(self):
         return self.name
@@ -727,6 +727,7 @@ class Job(CommonModel):
     cancel_flag = models.BooleanField(
         blank=True,
         default=False,
+        editable=False,
     )
     launch_type = models.CharField(
         max_length=20,
@@ -905,19 +906,21 @@ class JobHostSummary(models.Model):
         'Job',
         related_name='job_host_summaries',
         on_delete=models.CASCADE,
+        editable=False,
     )
     host = models.ForeignKey('Host',
         related_name='job_host_summaries',
         on_delete=models.CASCADE,
+        editable=False,
     )
 
-    changed = models.PositiveIntegerField(default=0)
-    dark = models.PositiveIntegerField(default=0)
-    failures = models.PositiveIntegerField(default=0)
-    ok = models.PositiveIntegerField(default=0)
-    processed = models.PositiveIntegerField(default=0)
-    skipped = models.PositiveIntegerField(default=0)
-    failed = models.BooleanField(default=False)
+    changed = models.PositiveIntegerField(default=0, editable=False)
+    dark = models.PositiveIntegerField(default=0, editable=False)
+    failures = models.PositiveIntegerField(default=0, editable=False)
+    ok = models.PositiveIntegerField(default=0, editable=False)
+    processed = models.PositiveIntegerField(default=0, editable=False)
+    skipped = models.PositiveIntegerField(default=0, editable=False)
+    failed = models.BooleanField(default=False, editable=False)
 
     def __unicode__(self):
         return '%s changed=%d dark=%d failures=%d ok=%d processed=%d skipped=%s' % \
@@ -1014,6 +1017,7 @@ class JobEvent(models.Model):
         'Job',
         related_name='job_events',
         on_delete=models.CASCADE,
+        editable=False,
     )
     created = models.DateTimeField(
         auto_now_add=True,
@@ -1028,9 +1032,11 @@ class JobEvent(models.Model):
     )
     failed = models.BooleanField(
         default=False,
+        editable=False,
     )
     changed = models.BooleanField(
         default=False,
+        editable=False,
     )
     host = models.ForeignKey(
         'Host',
@@ -1039,21 +1045,25 @@ class JobEvent(models.Model):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        editable=False,
     )
     hosts = models.ManyToManyField(
         'Host',
         related_name='job_events',
         blank=True,
+        editable=False,
     )
     play = models.CharField(
         max_length=1024,
         blank=True,
         default='',
+        editable=False,
     )
     task = models.CharField(
         max_length=1024,
         blank=True,
         default='',
+        editable=False,
     )
     parent = models.ForeignKey(
         'self',
@@ -1062,6 +1072,7 @@ class JobEvent(models.Model):
         null=True,
         default=None,
         on_delete=models.SET_NULL,
+        editable=False,
     )
 
     def get_absolute_url(self):

@@ -326,6 +326,8 @@ class UserSerializer(BaseSerializer):
         model = User
         fields = ('id', 'url', 'related', 'created', 'username', 'first_name',
                   'last_name', 'email', 'is_active', 'is_superuser',)
+    
+    # FIXME: Add password as write-only serializer field.
 
     def get_related(self, obj):
         res = super(UserSerializer, self).get_related(obj)
