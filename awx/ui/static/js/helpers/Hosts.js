@@ -406,6 +406,20 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var relatedSets = { hosts: { url: url, iterator: 'host' } };
         RelatedSearchInit({ scope: params.scope, form: InventoryForm, relatedSets: relatedSets });
         RelatedPaginateInit({ scope: params.scope, relatedSets: relatedSets });
+        
+        if (scope['hostFailureFilter']) {
+           // If the user checked 'show only hosts with failures', filter for hosts with failed jobs
+           scope['hostSearchFieldLabel'] = 'Failed jobs?';
+           scope['hostSearchField'] = 'has_active_failures';
+           scope['hostSelectShow'] = true;
+           scope.setSearchField('host','has_active_failures','Failed jobs?');
+           for (var i=0; i < scope['hostSearchSelectOpts'].length; i++) {
+               if (scope['hostSearchSelectOpts'][i].value == 1) {
+                  scope['hostSearchSelectValue'] = scope['hostSearchSelectOpts'][i];
+               }
+           }
+        }
+        
         params.scope.search('host');
         if (!params.scope.$$phase) {
            params.scope.$digest();

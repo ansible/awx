@@ -965,6 +965,15 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               // End List
               html += "</tbody>\n";
               html += "</table>\n";
+              
+              // Failure filter checkbox
+              html += "<div class=\"host-filter\">\n";
+              html += "<span ng-show=\"has_active_failures == true\">";
+              html += "<label class=\"checkbox inline\">";
+              html += "<input ng-model=\"hostFailureFilter\" ng-change=\"filterHosts()\" type=\"checkbox\"" +
+                  ">Show only hosts with failures</label></span>\n"
+              html += "</div>\n";
+
               html += "</div>\n";    // close well
               html += "</div>\n";    // close group-view
 

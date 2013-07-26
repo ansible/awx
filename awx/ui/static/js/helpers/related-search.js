@@ -70,7 +70,7 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
            scope[iterator + 'SelectShow'] = false;
            scope[iterator + 'HideSearchType'] = false;
            scope[iterator + 'InputHide'] = false;
-           
+
            if (f.searchType !== undefined && f.searchType == 'gtzero') {
               scope[iterator + "InputHide"] = true;
            }
@@ -81,6 +81,15 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
            }
            if (f.searchType !== undefined && f.searchType == 'int') {
               scope[iterator + 'HideSearchType'] = true;   
+           }
+
+           if (iterator == 'host') {
+              if (fld == 'has_active_failures') {
+                 scope['hostFailureFilter'] = true;
+              }
+              else {
+                 scope['hostFailureFilter'] = false;
+              }
            }
 
            scope.search(iterator);
@@ -96,7 +105,18 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
         scope.search = function(iterator) {
            scope[iterator + 'SearchSpin'] = true;
            scope[iterator + 'Loading'] = true;
-           
+
+           if (iterator == 'host') {
+              if (scope['hostSearchField'] == 'has_active_failures') {
+                 if (scope['hostSearchSelectValue'] && scope['hostSearchSelectValue'].value == 1) {
+                    scope['hostFailureFilter'] = true;
+                 }
+                 else {
+                    scope['hostFailureFilter'] = false;
+                 }
+              }
+           }
+
            var set, url, iterator, sort_order;
            for (var key in relatedSets) {
                if (relatedSets[key].iterator == iterator) {

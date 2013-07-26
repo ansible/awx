@@ -184,7 +184,8 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                           OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
-                          GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshGroupName, ParseTypeChange) 
+                          GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshGroupName, ParseTypeChange,
+                          HostsReload) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -245,6 +246,10 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 
    scope.filterInventory = function() {
       RefreshTree({ scope: scope });
+   }
+
+   scope.filterHosts = function() {
+      HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
    }
 
    function PostSave() {
@@ -450,13 +455,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.groupTitle = '<h4>All Hosts</h4>';
          scope.group_id = null;
       }
-      scope.relatedSets['hosts'] = { url: url, iterator: 'host' };
-      RelatedSearchInit({ scope: scope, form: form, relatedSets: scope.relatedSets });
-      RelatedPaginateInit({ scope: scope, relatedSets: scope.relatedSets });
-      scope.search('host');
-      if (!scope.$$phase) {
-         scope.$digest();
-      }
+      HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
       });
 
   scope.addGroup = function() {
@@ -513,6 +512,6 @@ InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$l
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
                             'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete', 'RefreshGroupName',
-                            'ParseTypeChange'
+                            'ParseTypeChange', 'HostsReload'
                             ]; 
   
