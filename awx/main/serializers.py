@@ -24,7 +24,7 @@ BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created', 'name',
 # objects that if found we should add summary info for them
 SUMMARIZABLE_FKS = ( 
    'organization', 'host', 'group', 'inventory', 'project', 'team', 'job',
-   'job_template', 'credential', 'permission',
+   'job_template', 'credential', 'permission', 'user',
 )
 # fields that should be summarized regardless of object type
 SUMMARIZABLE_FIELDS = (
