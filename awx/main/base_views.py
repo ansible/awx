@@ -44,6 +44,11 @@ class ListAPIView(generics.ListAPIView):
 class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):
     # Base class for a list view that allows creating new objects.
 
+    def pre_save(self, obj):
+        super(ListCreateAPIView, self).pre_save(obj)
+        if isinstance(obj, PrimordialModel):
+            obj.created_by = self.request.user
+
     def get_description(self, html=False):
         s = 'Use a GET request to retrieve a list of %(model_verbose_name_plural)s.'
         s2 = 'Use a POST request with required %(model_verbose_name)s fields to create a new %(model_verbose_name)s.'
@@ -225,7 +230,8 @@ class RetrieveAPIView(generics.RetrieveAPIView):
 class RetrieveUpdateDestroyAPIView(RetrieveAPIView, generics.RetrieveUpdateDestroyAPIView):
 
     def pre_save(self, obj):
-        if type(obj) not in [ User ]:
+        super(RetrieveUpdateDestroyAPIView, self).pre_save(obj)
+        if isinstance(obj, PrimordialModel):
             obj.created_by = self.request.user
 
     def destroy(self, request, *args, **kwargs):

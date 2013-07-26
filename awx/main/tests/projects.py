@@ -242,8 +242,9 @@ class ProjectsTest(BaseTest):
         # can list member organizations for projects
         proj_orgs = reverse('main:project_organizations_list', args=(self.projects[0].pk,))
         # only usable as superuser
-        got = self.get(proj_orgs, expect=403, auth=self.get_normal_credentials())
+        got = self.get(proj_orgs, expect=200, auth=self.get_normal_credentials())
         got = self.get(proj_orgs, expect=200, auth=self.get_super_credentials())
+        self.get(proj_orgs, expect=403, auth=self.get_other_credentials())
         self.assertEquals(got['count'], 1)
         self.assertEquals(got['results'][0]['url'], reverse('main:organization_detail', args=(self.organizations[0].pk,)))
 

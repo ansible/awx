@@ -285,25 +285,12 @@ class ProjectOrganizationsList(SubListCreateAPIView):
     parent_model = Project
     relationship = 'organizations'
 
-    def get_queryset(self):
-        # FIXME: Default get_queryset should handle this.
-        project = Project.objects.get(pk=self.kwargs['pk'])
-        if not self.request.user.is_superuser:
-            raise PermissionDenied()
-        return Organization.objects.filter(projects__in = [ project ])
-
 class ProjectTeamsList(SubListCreateAPIView):
 
     model = Team
     serializer_class = TeamSerializer
     parent_model = Project
     relationship = 'teams'
-
-    def get_queryset(self):
-        project = Project.objects.get(pk=self.kwargs['pk'])
-        if not self.request.user.is_superuser:
-            raise PermissionDenied()
-        return Team.objects.filter(projects__in = [ project ])
 
 class UserList(ListCreateAPIView):
 

@@ -87,7 +87,6 @@ class PrimordialModel(models.Model):
     def save(self, *args, **kwargs):
         # For compatibility with Django 1.4.x, attempt to handle any calls to
         # save that pass update_fields.
-
         try:
             super(PrimordialModel, self).save(*args, **kwargs)
         except TypeError:
