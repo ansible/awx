@@ -758,7 +758,7 @@ class JobTemplateAccess(BaseAccess):
         # be able to proceed without additional checks.
         project_pk = get_pk_from_dict(data, 'project')
         project = get_object_or_400(Project, pk=project_pk)
-        if self.user.can_access(Project, 'admin', project):
+        if self.user.can_access(Project, 'admin', project, None):
             return True
 
         # Otherwise, check for explicitly granted permissions for the project
