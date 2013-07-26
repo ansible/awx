@@ -42,11 +42,12 @@ class OrganizationsTest(BaseTest):
         #   admin_user is an admin and regular user in all organizations
         #   other_user is all organizations
         #   normal_user is a user in organization 0, and an admin of organization 1
+        #   nobody_user is a user not a member of any organizations
 
         for x in self.organizations:
-            # NOTE: superuser does not have to be explicitly added to admin group
-            # x.admins.add(self.super_django_user)
+            x.admins.add(self.super_django_user)
             x.users.add(self.super_django_user)
+            x.users.add(self.other_django_user)
  
         self.organizations[0].users.add(self.normal_django_user)
         self.organizations[1].admins.add(self.normal_django_user)
@@ -92,6 +93,11 @@ class OrganizationsTest(BaseTest):
         # no admin rights? get empty list
         with self.current_user(self.other_django_user):
             response = self.get(url, expect=200)
+            self.check_pagination_and_size(response, self.other_django_user.organizations.count(), previous=None, next=None)
+
+        # not a member of any orgs? get empty list
+        with self.current_user(self.nobody_django_user):
+            response = self.get(url, expect=200)
             self.check_pagination_and_size(response, 0, previous=None, next=None)
 
     def test_get_item(self):
@@ -112,8 +118,11 @@ class OrganizationsTest(BaseTest):
         data = self.get(urls[1], expect=200, auth=self.get_normal_credentials())
         data = self.get(urls[9], expect=403, auth=self.get_normal_credentials())
 
-        # other user isn't a user or admin of anything, and similarly can't get in
-        data = self.get(urls[0], expect=403, auth=self.get_other_credentials())
+        # other user is a member, but not admin, can access org
+        data = self.get(urls[0], expect=200, auth=self.get_other_credentials())
+
+        # nobody user is not a member, cannot access org
+        data = self.get(urls[0], expect=403, auth=self.get_nobody_credentials())
 
     def test_get_item_subobjects_projects(self):
 
@@ -128,20 +137,23 @@ class OrganizationsTest(BaseTest):
         self.get(projects0_url, expect=401, auth=None)
         self.get(projects0_url, expect=401, auth=self.get_invalid_credentials())
    
-        # normal user is just a member of the first org, but can't see any projects under the org
-        projects0a = self.get(projects0_url, expect=403, auth=self.get_normal_credentials())
+        # normal user is just a member of the first org, so can see all projects under the org
+        projects0a = self.get(projects0_url, expect=200, auth=self.get_normal_credentials())
 
         # however in the second org, he's an admin and should see all of them
         projects1a = self.get(projects1_url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(projects1a['count'], 5)
 
         # but the non-admin cannot access the list of projects in the org.  He should use /projects/ instead!
-        projects1b = self.get(projects1_url, expect=403, auth=self.get_other_credentials())
+        projects1b = self.get(projects1_url, expect=200, auth=self.get_other_credentials())
  
         # superuser should be able to read anything
         projects9a = self.get(projects9_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(projects9a['count'], 1)
 
+        # nobody user is not a member of any org, so can't see projects...
+        projects0a = self.get(projects0_url, expect=403, auth=self.get_nobody_credentials())
+        projects1a = self.get(projects1_url, expect=403, auth=self.get_nobody_credentials())
 
     def test_get_item_subobjects_users(self):
 
@@ -149,9 +161,11 @@ class OrganizationsTest(BaseTest):
         orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
         org1_users_url = orgs['results'][1]['related']['users']
         org1_users = self.get(org1_users_url, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(org1_users['count'], 1)
+        self.assertEquals(org1_users['count'], 2)
         org1_users = self.get(org1_users_url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(org1_users['count'], 1)
+        self.assertEquals(org1_users['count'], 2)
+        org1_users = self.get(org1_users_url, expect=200, auth=self.get_other_credentials())
+        self.assertEquals(org1_users['count'], 2)
 
     def test_get_item_subobjects_admins(self):
 
@@ -159,9 +173,9 @@ class OrganizationsTest(BaseTest):
         orgs = self.get(self.collection(), expect=200, auth=self.get_super_credentials())
         org1_users_url = orgs['results'][1]['related']['admins']
         org1_users = self.get(org1_users_url, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(org1_users['count'], 1)
+        self.assertEquals(org1_users['count'], 2)
         org1_users = self.get(org1_users_url, expect=200, auth=self.get_super_credentials())
-        self.assertEquals(org1_users['count'], 1)
+        self.assertEquals(org1_users['count'], 2)
 
     def test_get_organization_inventories_list(self):
         pass
@@ -268,13 +282,13 @@ class OrganizationsTest(BaseTest):
 
         url = reverse('main:organization_users_list', args=(self.organizations[1].pk,))
         users = self.get(url, expect=200, auth=self.get_normal_credentials())
-        self.assertEqual(users['count'], 1)
+        self.assertEqual(users['count'], 2)
         self.post(url, dict(id=self.normal_django_user.pk), expect=204, auth=self.get_normal_credentials())
         users = self.get(url, expect=200, auth=self.get_normal_credentials())
-        self.assertEqual(users['count'], 2)
+        self.assertEqual(users['count'], 3)
         self.post(url, dict(id=self.normal_django_user.pk, disassociate=True), expect=204, auth=self.get_normal_credentials())
         users = self.get(url, expect=200, auth=self.get_normal_credentials())
-        self.assertEqual(users['count'], 1)
+        self.assertEqual(users['count'], 2)
 
         # post a completely new user to verify we can add users to the subcollection directly
         new_user = dict(username='NewUser9000')
@@ -283,19 +297,19 @@ class OrganizationsTest(BaseTest):
         posted = self.post(url, new_user, expect=201, auth=self.get_normal_credentials())
 
         all_users = self.get(url, expect=200, auth=self.get_normal_credentials())
-        self.assertEqual(all_users['count'], 2)
+        self.assertEqual(all_users['count'], 3)
 
     def test_post_item_subobjects_admins(self):
 
         url = reverse('main:organization_admins_list', args=(self.organizations[1].pk,))
         admins = self.get(url, expect=200, auth=self.get_normal_credentials())
-        self.assertEqual(admins['count'], 1)
-        self.post(url, dict(id=self.super_django_user.pk), expect=204, auth=self.get_normal_credentials())
+        self.assertEqual(admins['count'], 2)
+        self.post(url, dict(id=self.other_django_user.pk), expect=204, auth=self.get_normal_credentials())
+        admins = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEqual(admins['count'], 3)
+        self.post(url, dict(id=self.other_django_user.pk, disassociate=1), expect=204, auth=self.get_normal_credentials())
         admins = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(admins['count'], 2)
-        self.post(url, dict(id=self.super_django_user.pk, disassociate=1), expect=204, auth=self.get_normal_credentials())
-        admins = self.get(url, expect=200, auth=self.get_normal_credentials())
-        self.assertEqual(admins['count'], 1)
 
     def _test_post_item_subobjects_tags(self):
         # FIXME: Update to support taggit!

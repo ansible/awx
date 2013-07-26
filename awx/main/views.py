@@ -326,7 +326,6 @@ class UserTeamsList(SubListAPIView):
     serializer_class = TeamSerializer
     parent_model = User
     relationship = 'teams'
-    parent_access = 'read'
 
 class UserPermissionsList(SubListCreateAPIView):
 
@@ -335,7 +334,6 @@ class UserPermissionsList(SubListCreateAPIView):
     parent_model = User
     relationship = 'permissions'
     parent_key = 'user'
-    parent_access = 'read'
 
 class UserProjectsList(SubListAPIView):
 
@@ -343,7 +341,6 @@ class UserProjectsList(SubListAPIView):
     serializer_class = ProjectSerializer
     parent_model = User
     relationship = 'projects'
-    parent_access = 'read'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -358,7 +355,6 @@ class UserCredentialsList(SubListCreateAPIView):
     parent_model = User
     relationship = 'credentials'
     parent_key = 'user'
-    parent_access = 'read'
 
 class UserOrganizationsList(SubListAPIView):
 
@@ -366,7 +362,6 @@ class UserOrganizationsList(SubListAPIView):
     serializer_class = OrganizationSerializer
     parent_model = User
     relationship = 'organizations'
-    parent_access = 'read'
 
 class UserAdminOfOrganizationsList(SubListAPIView):
 
@@ -374,7 +369,6 @@ class UserAdminOfOrganizationsList(SubListAPIView):
     serializer_class = OrganizationSerializer
     parent_model = User
     relationship = 'admin_of_organizations'
-    parent_access = 'read'
 
 class UserDetail(RetrieveUpdateDestroyAPIView):
 
@@ -439,7 +433,6 @@ class InventoryHostsList(SubListCreateAPIView):
     serializer_class = HostSerializer
     parent_model = Inventory
     relationship = 'hosts'
-    parent_access = 'read'
     parent_key = 'inventory'
 
 class HostGroupsList(SubListCreateAPIView):
@@ -449,7 +442,6 @@ class HostGroupsList(SubListCreateAPIView):
     serializer_class = GroupSerializer
     parent_model = Host
     relationship = 'groups'
-    parent_access = 'read'
 
 class HostAllGroupsList(SubListAPIView):
     ''' the list of all groups of which the host is directly or indirectly a member '''
@@ -458,7 +450,6 @@ class HostAllGroupsList(SubListAPIView):
     serializer_class = GroupSerializer
     parent_model = Host
     relationship = 'groups'
-    parent_access = 'read'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -478,7 +469,6 @@ class GroupChildrenList(SubListCreateAPIView):
     serializer_class = GroupSerializer
     parent_model = Group
     relationship = 'children'
-    parent_access = 'read'
 
 class GroupHostsList(SubListCreateAPIView):
     ''' the list of hosts directly below a group '''
@@ -487,7 +477,6 @@ class GroupHostsList(SubListCreateAPIView):
     serializer_class = HostSerializer
     parent_model = Group
     relationship = 'hosts'
-    parent_access = 'read'
 
 class GroupAllHostsList(SubListAPIView):
     ''' the list of all hosts below a group, even including subgroups '''
@@ -496,7 +485,6 @@ class GroupAllHostsList(SubListAPIView):
     serializer_class = HostSerializer
     parent_model = Group
     relationship = 'hosts'
-    parent_access = 'read'
 
     def get_queryset(self):
         parent = self.get_parent_object()
@@ -516,7 +504,6 @@ class InventoryGroupsList(SubListCreateAPIView):
     serializer_class = GroupSerializer
     parent_model = Inventory
     relationship = 'groups'
-    parent_access = 'read'
     parent_key = 'inventory'
 
 class InventoryRootGroupsList(SubListCreateAPIView):
@@ -525,7 +512,6 @@ class InventoryRootGroupsList(SubListCreateAPIView):
     serializer_class = GroupSerializer
     parent_model = Inventory
     relationship = 'groups'
-    parent_access = 'read'
     parent_key = 'inventory'
 
     def get_queryset(self):
@@ -837,7 +823,6 @@ class BaseJobHostSummariesList(SubListAPIView):
     serializer_class = JobHostSummarySerializer
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_host_summaries'
-    parent_access = 'read'
 
     view_name = 'Job Host Summary List'
 
@@ -892,7 +877,6 @@ class BaseJobEventsList(SubListAPIView):
     serializer_class = JobEventSerializer
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_events'
-    parent_access = 'read'
 
 class HostJobEventsList(BaseJobEventsList):
 

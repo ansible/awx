@@ -146,7 +146,7 @@ class UsersTest(BaseTest):
         data2 = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data2['count'], 2)
         data1 = self.get(url, expect=200, auth=self.get_other_credentials())
-        self.assertEquals(data1['count'], 1)
+        self.assertEquals(data1['count'], 2)
 
     def test_super_user_can_delete_a_user_but_only_marked_inactive(self):
         user_pk = self.normal_django_user.pk
@@ -199,8 +199,10 @@ class UsersTest(BaseTest):
         # also accessible via superuser
         data = self.get(url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(data['count'], 1) 
-        # but not by other user
-        data = self.get(url, expect=403, auth=self.get_other_credentials())
+        # and also by other user... 
+        data = self.get(url, expect=200, auth=self.get_other_credentials())
+        # but not by nobody user
+        data = self.get(url, expect=403, auth=self.get_nobody_credentials())
 
         # organizations the user is an admin of, should be 1
         url = reverse('main:user_admin_of_organizations_list',
@@ -210,8 +212,10 @@ class UsersTest(BaseTest):
         # also accessible via superuser
         data = self.get(url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(data['count'], 1)
-        # but not by other user
-        data = self.get(url, expect=403, auth=self.get_other_credentials())
+        # and also by other user
+        data = self.get(url, expect=200, auth=self.get_other_credentials())
+        # but not by nobody user
+        data = self.get(url, expect=403, auth=self.get_nobody_credentials())
  
         # teams the user is on, should be 0
         url = reverse('main:user_teams_list', args=(self.normal_django_user.pk,))
@@ -220,8 +224,10 @@ class UsersTest(BaseTest):
         # also accessible via superuser
         data = self.get(url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(data['count'], 0)
-        # but not by other user
-        data = self.get(url, expect=403, auth=self.get_other_credentials())
+        # and also by other user
+        data = self.get(url, expect=200, auth=self.get_other_credentials())
+        # but not by nobody user
+        data = self.get(url, expect=403, auth=self.get_nobody_credentials())
 
         # verify org admin can still read other user data too
         url = reverse('main:user_organizations_list',

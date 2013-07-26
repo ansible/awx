@@ -146,6 +146,7 @@ class UserAccess(BaseAccess):
      - I'm a superuser.
      - I'm that user.
      - I'm their org admin.
+     - I'm in an org with that user.
      - I'm on a team with that user.
     I can change some fields for a user (mainly password) when I am that user.
     I can change all fields for a user (admin access) or delete when:
@@ -162,6 +163,7 @@ class UserAccess(BaseAccess):
         return qs.filter(
             Q(pk=self.user.pk) |
             Q(organizations__in=self.user.admin_of_organizations.all()) |
+            Q(organizations__in=self.user.organizations.all()) |
             Q(teams__in=self.user.teams.all())
         ).distinct()
 
@@ -521,6 +523,7 @@ class ProjectAccess(BaseAccess):
     I can see projects when:
      - I am a superuser.
      - I am an admin in an organization associated with the project.
+     - I am a user in an organization associated with the project.
      - I am on a team associated with the project.
      - I have been explicitly granted permission to run/check jobs using the
        project.
@@ -529,7 +532,6 @@ class ProjectAccess(BaseAccess):
      - I am a superuser.
      - I am an admin in an organization associated with the project.
     '''
-    # FIXME: Also just a user of the org, or not?
 
     model = Project
 
@@ -541,6 +543,7 @@ class ProjectAccess(BaseAccess):
         return qs.filter(
             Q(created_by=self.user) |
             Q(organizations__admins__in=[self.user]) |
+            Q(organizations__users__in=[self.user]) |
             Q(teams__users__in=[self.user]) |
             Q(permissions__user=self.user, permissions__permission_type__in=allowed) |
             Q(permissions__team__users__in=[self.user], permissions__permission_type__in=allowed)

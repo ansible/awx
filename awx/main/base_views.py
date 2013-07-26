@@ -59,7 +59,7 @@ class SubListAPIView(ListAPIView):
     #   relationship = 'rel_name_from_parent_to_model'
     # And optionally (user must have given access permission on parent object
     # to view sublist):
-    #   parent_access = 'admin'
+    #   parent_access = 'read'
 
     def get_description_vars(self):
         d = super(SubListAPIView, self).get_description_vars()
@@ -81,7 +81,7 @@ class SubListAPIView(ListAPIView):
 
     def check_parent_access(self, parent=None):
         parent = parent or self.get_parent_object()
-        parent_access = getattr(self, 'parent_access', 'admin')
+        parent_access = getattr(self, 'parent_access', 'read')
         if parent_access in ('read', 'delete'):
             args = (self.parent_model, parent_access, parent)
         else:

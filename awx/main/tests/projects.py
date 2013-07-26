@@ -333,7 +333,7 @@ class ProjectsTest(BaseTest):
         # =====================================================================
         # TEAM PROJECTS
  
-        team = Team.objects.filter(organization__pk=self.organizations[1].pk)[0]
+        team = Team.objects.filter(active=True, organization__pk=self.organizations[1].pk)[0]
         team_projects = reverse('main:team_projects_list', args=(team.pk,))
       
         p1 = self.projects[0]
