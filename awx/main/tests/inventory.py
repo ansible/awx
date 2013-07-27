@@ -585,7 +585,55 @@ class InventoryTest(BaseTest):
         #  and these work
         #  on a group resource, I can see related resources for variables, inventories, and children
         #  and these work
-                
+
+    def test_migrate_children_when_group_removed(self):
+        # Group A is parent of B, B is parent of C, C is parent of D.
+        g_a = self.inventory_a.groups.create(name='A')
+        g_b = self.inventory_a.groups.create(name='B')
+        g_b.parents.add(g_a)
+        g_c = self.inventory_a.groups.create(name='C')
+        g_c.parents.add(g_b)
+        g_d = self.inventory_a.groups.create(name='D')
+        g_d.parents.add(g_c)
+        # Each group "X" contains one host "x".
+        h_a = self.inventory_a.hosts.create(name='a')
+        h_a.groups.add(g_a)
+        h_b = self.inventory_a.hosts.create(name='b')
+        h_b.groups.add(g_b)
+        h_c = self.inventory_a.hosts.create(name='c')
+        h_c.groups.add(g_c)
+        h_d = self.inventory_a.hosts.create(name='d')
+        h_d.groups.add(g_d)
+
+        # Verify that grand-child groups/hosts are not direct children of the
+        # parent groups.
+        self.assertFalse(g_c in g_a.children.all())
+        self.assertFalse(g_d in g_a.children.all())
+        self.assertFalse(g_d in g_b.children.all())
+        self.assertFalse(h_b in g_a.hosts.all())
+        self.assertFalse(h_c in g_a.hosts.all())
+        self.assertFalse(h_c in g_b.hosts.all())
+        self.assertFalse(h_d in g_a.hosts.all())
+        self.assertFalse(h_d in g_b.hosts.all())
+        self.assertFalse(h_d in g_c.hosts.all())
+
+        # Delete group B. Its child groups and hosts should now be attached to
+        # group A. Group C and D hosts and child groups should be unchanged.
+        g_b.delete()
+        self.assertTrue(g_c in g_a.children.all())
+        self.assertTrue(h_b in g_a.hosts.all())
+        self.assertFalse(g_d in g_a.children.all())
+        self.assertFalse(h_c in g_a.hosts.all())
+        self.assertFalse(h_d in g_a.hosts.all())
+        self.assertFalse(h_d in g_c.hosts.all())
+
+        # Mark group C inactive. Its child groups and hosts should now also be
+        # attached to group A. Group D hosts should be unchanged.
+        g_c.mark_inactive()
+        self.assertTrue(g_d in g_a.children.all())
+        self.assertTrue(h_c in g_a.hosts.all())
+        self.assertFalse(h_d in g_a.hosts.all())
+
     def test_group_parents_and_children(self):
         # Test for various levels of group parent/child relations, with hosts,
         # to verify that helper properties return the correct querysets.
