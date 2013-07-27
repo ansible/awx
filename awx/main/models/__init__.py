@@ -615,7 +615,10 @@ class JobTemplate(CommonModel):
         '''
         save_job = kwargs.pop('save', True)
         kwargs['job_template'] = self
-        kwargs.setdefault('name', '%s %s' % (self.name, now().isoformat()))
+        # Create new name with timestamp format to match jobs launched by the UI.
+        new_name = '%s %s' % (self.name, now().strftime('%Y-%m-%dT%H:%M:%S.%fZ'))
+        new_name = new_name[:-4] + 'Z'
+        kwargs.setdefault('name', new_name)
         kwargs.setdefault('description', self.description)
         kwargs.setdefault('job_type', self.job_type)
         kwargs.setdefault('inventory', self.inventory)
@@ -642,7 +645,7 @@ class JobTemplate(CommonModel):
         '''
         return bool(self.credential and not self.credential.passwords_needed)
 
-class Job(CommonModel):
+class Job(CommonModelNameNotUnique):
     '''
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the
