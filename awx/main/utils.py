@@ -3,10 +3,6 @@ import logging
 import re
 import sys
 
-# Django
-from django.conf import settings
-from django.shortcuts import _get_queryset
-
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
 
@@ -17,6 +13,7 @@ def get_object_or_400(klass, *args, **kwargs):
     Return a single object from the given model or queryset based on the query
     params, otherwise raise an exception that will return in a 400 response.
     '''
+    from django.shortcuts import _get_queryset
     queryset = _get_queryset(klass)
     try:
         return queryset.get(*args, **kwargs)
@@ -30,6 +27,7 @@ def get_object_or_403(klass, *args, **kwargs):
     Return a single object from the given model or queryset based on the query
     params, otherwise raise an exception that will return in a 403 response.
     '''
+    from django.shortcuts import _get_queryset
     queryset = _get_queryset(klass)
     try:
         return queryset.get(*args, **kwargs)
@@ -51,4 +49,5 @@ class RequireDebugTrueOrTest(logging.Filter):
     '''
 
     def filter(self, record):
+        from django.conf import settings
         return settings.DEBUG or 'test' in sys.argv
