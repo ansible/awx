@@ -108,6 +108,7 @@ LOGGING['handlers']['syslog'] = {
 
 # Enable the following lines to turn on lots of permissions-related logging.
 #LOGGING['loggers']['awx.main.access']['propagate'] = True
+#LOGGING['loggers']['awx.main.signals']['propagate'] = True
 #LOGGING['loggers']['awx.main.permissions']['propagate'] = True
 
 # Define additional environment variables to be passed to subprocess started by

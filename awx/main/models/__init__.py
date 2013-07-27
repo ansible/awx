@@ -4,6 +4,7 @@
 # Python
 import hmac
 import json
+import logging
 import os
 import shlex
 
@@ -12,10 +13,8 @@ import yaml
 
 # Django
 from django.conf import settings
-from django.db import models, DatabaseError
+from django.db import models
 from django.db.models import CASCADE, SET_NULL, PROTECT
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -30,14 +29,13 @@ from taggit.managers import TaggableManager
 # Django-Celery
 from djcelery.models import TaskMeta
 
-# Django-REST-Framework
-from rest_framework.authtoken.models import Token
-
 __all__ = ['PrimordialModel', 'Organization', 'Team', 'Project', 'Credential',
            'Inventory', 'Host', 'Group', 'Permission', 'JobTemplate', 'Job',
            'JobHostSummary', 'JobEvent', 'PERM_INVENTORY_ADMIN',
            'PERM_INVENTORY_READ', 'PERM_INVENTORY_WRITE',
            'PERM_INVENTORY_DEPLOY', 'PERM_INVENTORY_CHECK']
+
+logger = logging.getLogger('awx.main.models')
 
 # TODO: reporting model TBD
 
@@ -168,10 +166,19 @@ class Inventory(CommonModel):
         except ValueError:
             return yaml.safe_load(self.variables)
 
-    def update_has_active_failures(self):
+    def update_has_active_failures(self, update_groups=True, update_hosts=True):
+        if update_hosts:
+            for host in self.hosts.filter(active=True):
+                host.update_has_active_failures(update_inventory=False,
+                                                update_groups=False)
+        if update_groups:
+            for group in self.groups.filter(active=True):
+                group.update_has_active_failures()
         failed_hosts = self.hosts.filter(active=True, has_active_failures=True)
-        self.has_active_failures = bool(failed_hosts.count())
-        self.save()
+        has_active_failures = bool(failed_hosts.count())
+        if self.has_active_failures != has_active_failures:
+            self.has_active_failures = has_active_failures
+            self.save()
 
 class Host(CommonModelNameNotUnique):
     '''
@@ -199,15 +206,20 @@ class Host(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('main:host_detail', args=(self.pk,))
 
-    def update_has_active_failures(self, update_groups=True, update_inventory=True):
-        self.has_active_failures = bool(self.last_job_host_summary and
-                                        self.last_job_host_summary.failed)
-        self.save()
+    def update_has_active_failures(self, update_inventory=True,
+                                   update_groups=True):
+        has_active_failures = bool(self.last_job_host_summary and
+                                   self.last_job_host_summary.job.active and
+                                   self.last_job_host_summary.failed)
+        if self.has_active_failures != has_active_failures:
+            self.has_active_failures = has_active_failures
+            self.save()
+        if update_inventory:
+            self.inventory.update_has_active_failures(update_groups=False,
+                                                      update_hosts=False)
         if update_groups:
             for group in self.all_groups.filter(active=True):
                 group.update_has_active_failures()
-        if update_inventory:
-            self.inventory.update_has_active_failures()
 
     @property
     def variables_dict(self):
@@ -259,9 +271,12 @@ class Group(CommonModelNameNotUnique):
 
     def update_has_active_failures(self):
         failed_hosts = self.all_hosts.filter(active=True,
+                                             last_job_host_summary__job__active=True,
                                              last_job_host_summary__failed=True)
-        self.has_active_failures = bool(failed_hosts.count())
-        self.save()
+        has_active_failures = bool(failed_hosts.count())
+        if self.has_active_failures != has_active_failures:
+            self.has_active_failures = has_active_failures
+            self.save()
 
     @property
     def variables_dict(self):
@@ -1224,16 +1239,5 @@ from awx.main.access import *
 User.add_to_class('get_queryset', get_user_queryset)
 User.add_to_class('can_access', check_user_access)
 
-@receiver(post_save, sender=User)
-def create_auth_token_for_user(sender, **kwargs):
-    instance = kwargs.get('instance', None)
-    if instance:
-        try:
-            Token.objects.get_or_create(user=instance)
-        except DatabaseError:
-            pass    
-    # Only fails when creating a new superuser from syncdb on a
-    # new database (before migrate has been called).
-
-# FIXME: Update Group.has_active_failures when a Host/Group is deleted or
-# marked inactive, or when a Host-Group or Group-Group relationship is updated.
+# Import signal handlers only after models have been defined.
+import awx.main.signals

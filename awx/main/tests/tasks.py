@@ -349,6 +349,79 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.unreachable_hosts.count(), 0)
         self.assertEqual(job.skipped_hosts.count(), 0)
         self.assertEqual(job.processed_hosts.count(), 1)
+        return job
+
+    def test_update_has_active_failures_when_inventory_changes(self):
+        job = self.test_run_job_that_fails()
+        # Add host to new group (should set has_active_failures)
+        new_group = self.inventory.groups.create(name='new group')
+        self.assertFalse(new_group.has_active_failures)
+        new_group.hosts.add(self.host)
+        new_group = Group.objects.get(pk=new_group.pk)
+        self.assertTrue(new_group.has_active_failures)
+        # Remove host from new group (should clear has_active_failures)
+        new_group.hosts.remove(self.host)
+        new_group = Group.objects.get(pk=new_group.pk)
+        self.assertFalse(new_group.has_active_failures)
+        # Add existing group to new group (should set flag)
+        new_group.children.add(self.group)
+        new_group = Group.objects.get(pk=new_group.pk)
+        self.assertTrue(new_group.has_active_failures)
+        # Remove existing group from new group (should clear flag)
+        new_group.children.remove(self.group)
+        new_group = Group.objects.get(pk=new_group.pk)
+        self.assertFalse(new_group.has_active_failures)
+        # Mark host inactive (should clear flag on parent group and inventory)
+        self.host.mark_inactive()
+        self.group = Group.objects.get(pk=self.group.pk)
+        self.assertFalse(self.group.has_active_failures)
+        self.inventory = Inventory.objects.get(pk=self.inventory.pk)
+        self.assertFalse(self.inventory.has_active_failures)
+        # Un-mark host as inactive (should set flag on group and inventory)
+        host = self.host
+        host.name = '_'.join(host.name.split('_')[3:]) or 'undeleted host'
+        host.active = True
+        host.save()
+        self.group = Group.objects.get(pk=self.group.pk)
+        self.assertTrue(self.group.has_active_failures)
+        self.inventory = Inventory.objects.get(pk=self.inventory.pk)
+        self.assertTrue(self.inventory.has_active_failures)
+        # Delete host. (should clear flag)
+        self.host.delete()
+        self.host = None
+        self.group = Group.objects.get(pk=self.group.pk)
+        self.assertFalse(self.group.has_active_failures)
+        self.inventory = Inventory.objects.get(pk=self.inventory.pk)
+        self.assertFalse(self.inventory.has_active_failures)
+
+    def test_update_has_active_failures_when_job_removed(self):
+        job = self.test_run_job_that_fails()
+        # Mark job as inactive (should clear flags).
+        job.mark_inactive()
+        self.host = Host.objects.get(pk=self.host.pk)
+        self.assertFalse(self.host.has_active_failures)
+        self.group = Group.objects.get(pk=self.group.pk)
+        self.assertFalse(self.group.has_active_failures)
+        self.inventory = Inventory.objects.get(pk=self.inventory.pk)
+        self.assertFalse(self.inventory.has_active_failures)
+        # Un-mark job as inactive (should set flag on host, group and inventory)
+        job.name = '_'.join(job.name.split('_')[3:]) or 'undeleted job'
+        job.active = True
+        job.save()
+        self.host = Host.objects.get(pk=self.host.pk)
+        self.assertTrue(self.host.has_active_failures)
+        self.group = Group.objects.get(pk=self.group.pk)
+        self.assertTrue(self.group.has_active_failures)
+        self.inventory = Inventory.objects.get(pk=self.inventory.pk)
+        self.assertTrue(self.inventory.has_active_failures)
+        # Delete job entirely.
+        job.delete()
+        self.host = Host.objects.get(pk=self.host.pk)
+        self.assertFalse(self.host.has_active_failures)
+        self.group = Group.objects.get(pk=self.group.pk)
+        self.assertFalse(self.group.has_active_failures)
+        self.inventory = Inventory.objects.get(pk=self.inventory.pk)
+        self.assertFalse(self.inventory.has_active_failures)
 
     def test_check_job_where_task_would_fail(self):
         self.create_test_project(TEST_PLAYBOOK2)

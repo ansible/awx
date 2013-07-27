@@ -437,16 +437,18 @@ class Command(NoArgsCommand):
         LOGGER.info("MODIFYING INVENTORY: %s" % inventory.name)
 
         # if overwrite is set, for each host in the database but NOT in the local
-        # list, delete it
+        # list, delete it. Delete individually so signal handlers will run.
         if overwrite:
             LOGGER.info("deleting any hosts not in the remote source: %s" % host_names.keys())
-            Host.objects.exclude(name__in = host_names.keys()).filter(inventory=inventory).delete()
+            for host in Host.objects.exclude(name__in = host_names.keys()).filter(inventory=inventory):
+                host.delete()
 
         # if overwrite is set, for each group in the database but NOT in the local
-        # list, delete it
+        # list, delete it. Delete individually so signal handlers will run.
         if overwrite:
             LOGGER.info("deleting any groups not in the remote source")
-            Group.objects.exclude(name__in = group_names.keys()).filter(inventory=inventory).delete()
+            for group in Group.objects.exclude(name__in = group_names.keys()).filter(inventory=inventory):
+                group.delete()
 
         # if overwrite is set, throw away all invalid child relationships for groups
         if overwrite:

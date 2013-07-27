@@ -329,11 +329,15 @@ LOGGING = {
             'handlers': ['console', 'file', 'syslog'],
             'level': 'DEBUG',
         },
+        'awx.main.access': {
+            'handlers': ['null'],
+            'propagate': False,
+        },
         'awx.main.permissions': {
             'handlers': ['null'],
             'propagate': False,
         },
-        'awx.main.access': {
+        'awx.main.signals': {
             'handlers': ['null'],
             'propagate': False,
         },
