@@ -61,7 +61,7 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
               // demo
               status = 'alert-info';
               hdr = 'AWX Demo';
-              msg = 'Thank you for trying AnsibleWorks AWX. You can use this edition to manage up to 5 hosts. ' +
+              msg = 'Thank you for trying AnsibleWorks AWX. You can use this edition to manage up to 10 hosts free. ' +
                     'Should you wish to acquire a license for additional servers, please visit ' + 
                     '<a href="http://ansibleworks.com/ansibleworks-awx" target="_blank"><strong>ansibleworks.com/ansibleworks-awx</strong></a>, or ' +
                     'contact <a href="mailto:info@ansibleworks.com"><strong>info@ansibleworks.com</strong></a> for assistance.';
