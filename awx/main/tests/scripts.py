@@ -141,11 +141,14 @@ class InventoryScriptTest(BaseScriptTest):
         # Groups for this inventory should only have hosts, and no group
         # variable data or parent/child relationships.
         for k,v in data.items():
-            self.assertTrue(isinstance(v, (list, tuple)))
+            self.assertTrue(isinstance(v, dict))
+            self.assertTrue(isinstance(v['children'], (list,tuple)))
+            self.assertTrue(isinstance(v['hosts'], (list,tuple)))
+            self.assertTrue(isinstance(v['vars'], (dict)))
             group = inventory.groups.get(active=True, name=k)
             hosts = group.hosts.filter(active=True)
             hostnames = hosts.values_list('name', flat=True)
-            self.assertEqual(set(v), set(hostnames))
+            self.assertEqual(set(v['hosts']), set(hostnames))
         for group in inventory.groups.filter(active=False):
             self.assertFalse(group.name in data.keys(),
                              'deleted group %s should not be in data' % group)
@@ -187,7 +190,7 @@ class InventoryScriptTest(BaseScriptTest):
                 childnames = children.values_list('name', flat=True)
                 self.assertEqual(set(v.get('children', [])), set(childnames))
             else:
-                self.assertFalse('children' in v)
+                self.assertTrue(len(v['children']) == 0)
 
     def test_valid_host(self):
         # Host without variable data.

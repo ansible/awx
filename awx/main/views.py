@@ -564,8 +564,14 @@ class InventoryScriptView(RetrieveAPIView):
                     'children': list(children.values_list('name', flat=True)),
                     'vars': group.variables_dict,
                 }
-                group_info = dict(filter(lambda x: bool(x[1]),
-                                         group_info.items()))
+
+                # this confuses the inventory script if the group
+                # has children set and no variables or hosts.
+                # no other reason to do this right?
+                #
+                # group_info = dict(filter(lambda x: bool(x[1]),
+                #                          group_info.items()))
+
                 if group_info.keys() in ([], ['hosts']):
                     data[group.name] = group_info.get('hosts', [])
                 else:
