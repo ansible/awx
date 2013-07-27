@@ -27,6 +27,12 @@ class LicenseTests(BaseTest):
         host = Host.objects.create(name='a4', inventory=inventory, created_by=u)
         host = Host.objects.create(name='a5', inventory=inventory, created_by=u)
         host = Host.objects.create(name='a6', inventory=inventory, created_by=u)
+        host = Host.objects.create(name='a7', inventory=inventory, created_by=u)
+        host = Host.objects.create(name='a8', inventory=inventory, created_by=u)
+        host = Host.objects.create(name='a9', inventory=inventory, created_by=u)
+        host = Host.objects.create(name='a10', inventory=inventory, created_by=u)
+        host = Host.objects.create(name='a11', inventory=inventory, created_by=u)
+        host = Host.objects.create(name='a12', inventory=inventory, created_by=u)
 
     def test_license_writer(self):
 
@@ -55,8 +61,8 @@ class LicenseTests(BaseTest):
         vdata = reader.from_string(strdata)
 
         assert vdata['available_instances'] == 500
-        assert vdata['current_instances'] == 6
-        assert vdata['free_instances'] == 494
+        assert vdata['current_instances'] == 12
+        assert vdata['free_instances'] == 488
         assert vdata['date_warning'] == True
         assert vdata['date_expired'] == True
         assert vdata['license_date'] == 25000
