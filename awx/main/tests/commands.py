@@ -146,6 +146,10 @@ class BaseCommandTest(BaseTest):
             sys.stdin = original_stdin
             sys.stdout = original_stdout
             sys.stderr = original_stderr
+        # For Django 1.4.x, convert sys.exit(1) and stderr message to the
+        # CommandError(msg) exception used by Django 1.5 and later.
+        if isinstance(result, SystemExit) and captured_stderr:
+            result = CommandError(captured_stderr)
         return result, captured_stdout, captured_stderr
 
 class CleanupDeletedTest(BaseCommandTest):
