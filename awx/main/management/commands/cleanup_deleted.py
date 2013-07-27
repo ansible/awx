@@ -55,7 +55,7 @@ class Command(BaseCommand):
             return
         qs = model.objects.filter(**{
             active_field: False,
-            '%s__startswith' % name_field: '_deleted_',
+            '%s__startswith' % name_field: '_d',
         })
         self.logger.debug('cleaning up model %s', model)
         for instance in qs:
