@@ -100,10 +100,15 @@ class PrimordialModel(models.Model):
             if 'name' in self._meta.get_all_field_names():
                 #              0         1
                 #              01234567890123
-                old_desc = self.description
-                self.description = "deleted: %s" % self.name
-                if old_desc:
-                   self.description = "%s (%s)" % (self.description, old_desc)
+                has_description = False
+                if 'description' in self._meta.get_all_field_names():
+                    has_description = True
+                old_desc = ''
+                if has_description:
+                    old_desc = self.description
+                    self.description = "deleted: %s" % self.name
+                    if old_desc:
+                        self.description = "%s (%s)" % (self.description, old_desc)
                 self.name   = "_d_%s" % (now().isoformat())
             self.active = False
             if save:
