@@ -30,13 +30,13 @@ angular.module('CredentialsListDefinition', [])
                 },
             team: {
                 label: 'Team',
-                ngBind: 'credential.summary_fields.team.name',
+                ngBind: 'credential.team_name',
                 sourceModel: 'team',
                 sourceField: 'name'
                 },
             user: {
                 label: 'User',
-                ngBind: 'credential.summary_fields.user.usename',
+                ngBind: 'credential.user_username',
                 sourceModel: 'user',
                 sourceField: 'username'
                 }

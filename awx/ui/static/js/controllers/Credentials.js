@@ -29,6 +29,18 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
 
     SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
     
+    scope.PostRefershRemove = scope.$on('PostRefresh', function() {
+         // After a refresh, populate the organization name on each row
+        for(var i=0; i < scope.credentials.length; i++) {
+           if (scope.credentials[i].summary_fields.user) {
+              scope.credentials[i].user_username = scope.credentials[i].summary_fields.user.username;
+           }
+           if (scope.credentials[i].summary_fields.team) {
+              scope.credentials[i].team_name = scope.credentials[i].summary_fields.team.name;  
+           }
+        }
+        });
+
     SearchInit({ scope: scope, set: 'credentials', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
