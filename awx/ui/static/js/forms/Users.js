@@ -49,7 +49,8 @@ angular.module('UserFormDefinition', [])
                 addRequired: true,
                 editRequired: true,
                 ngClick: 'lookUpOrganization()',
-                excludeMode: 'edit'
+                excludeMode: 'edit',
+                awRequiredWhen: {variable: "orgrequired", init: "true" }
                 },
             username: {
                 label: 'Username',

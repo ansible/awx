@@ -40,7 +40,8 @@ angular.module('TeamFormDefinition', [])
                 sourceField: 'name',
                 addRequired: true,
                 editRequired: true,
-                ngClick: 'lookUpOrganization()'
+                ngClick: 'lookUpOrganization()',
+                awRequiredWhen: {variable: "teamrequired", init: "true" }
                 }
             },
 

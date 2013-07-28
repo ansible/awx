@@ -129,7 +129,7 @@ function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to add new inventory. Post returned status: ' + status });
+                            { hdr: 'Error!', msg: 'Failed to add new team. Post returned status: ' + status });
               });
       };
 
