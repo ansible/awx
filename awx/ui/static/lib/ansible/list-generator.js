@@ -220,7 +220,6 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
        html += (list.filterBy) ? " | filter: " + list.filterBy : ""; 
        html += "\"";
-       html += (options.mode == 'lookup' || options.mode == 'select') ? " ng-click=\"toggle_" + list.iterator +"({{ " + list.iterator + ".id }})\"" : "";
        html += ">\n";
        if (list.index) {
           html += "<td class=\"index-column\">{{ $index + (" + list.iterator + "Page * " + list.iterator + "PageSize) + 1 }}.</td>\n";
@@ -237,13 +236,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        }
 
        if (options.mode == 'select' || options.mode == 'lookup') {
-          //html += "<td><input type=\"checkbox\" name=\"check_{{" + list.iterator + ".id }}\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
-          
           html += "<td><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" + 
-              list.iterator + ".id }}\" ng-true-value=\"1\" ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
-          
-          //ng-click=\"toggle_" + list.iterator +
-          //        "({{ " + list.iterator + ".id }}, true)\" 
+              list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator +"({{ " + list.iterator + ".id }}, true)\" ng-true-value=\"1\" " +
+              "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
        }
        else if (options.mode == 'edit') {
           // Row level actions

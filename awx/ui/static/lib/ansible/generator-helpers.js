@@ -101,12 +101,13 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var field = list['fields'][fld];
         var html = '';
         
-        html += "<td ";
+        //html += "<td ";
         html += "<td class=\"" + fld + "-column";
         html += (field['class']) ? " " + field['class'] : "";
         html += (field['columnClass']) ? " " + field['columnClass'] : "";
         html +=  "\" ";  
         html += (field.ngClass) ? Attr(field, 'ngClass') : "";
+        html += (options.mode == 'lookup' || options.mode == 'select') ? " ng-click=\"toggle_" + list.iterator +"({{ " + list.iterator + ".id }})\"" : "";
         html += ">\n";
 
         // Add ngShow

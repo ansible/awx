@@ -24,13 +24,14 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
         scope.selected = [];   //array of selected row IDs
 
         // toggle row selection
-        scope['toggle_' + list.iterator] = function(id) {
+        scope['toggle_' + list.iterator] = function(id, ischeckbox) {
             for (var i=0; i < scope[list.name].length; i++) {
                 if (scope[list.name][i]['id'] == id) {
-                   if (scope[list.name][i]['checked'] == '0') {
+                   if ( (scope[list.name][i]['checked'] == '0' && !ischeckbox) || (scope[list.name][i]['checked'] == 1 && ischeckbox) ) {
                       // select the row
                       scope[list.name][i]['checked'] = '1';
                       scope[list.name][i]['success_class'] = 'success';
+                      
                       // add selected object to the array
                       var found = false;
                       for  (var j=0; j < scope.selected.length; j++) {
@@ -47,6 +48,7 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
                       // unselect the row
                       scope[list.name][i]['checked'] = '0';
                       scope[list.name][i]['success_class'] = '';
+                      
                       // remove selected object from the array
                       for  (var j=0; j < scope.selected.length; j++) {
                            if (scope.selected[j].id == id) {

@@ -231,7 +231,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                $('input[type="checkbox"]').attr('disabled','disabled');
                $('input[type="radio"]').attr('disabled','disabled');
                $('#host_config_key-gen-btn').attr('disabled','disabled');
-               $('textarea').attr('disabled','disabled');
+               $('textarea').attr('readonly','readonly');
                })
            .error( function(data, status, headers, config) {
                ProcessErrors(scope, data, status, form,
