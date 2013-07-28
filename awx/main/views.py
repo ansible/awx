@@ -782,6 +782,7 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
 class JobStart(generics.GenericAPIView):
 
     model = Job
+    is_job_start = True
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -807,6 +808,7 @@ class JobStart(generics.GenericAPIView):
 class JobCancel(generics.GenericAPIView):
 
     model = Job
+    is_job_cancel = True
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()

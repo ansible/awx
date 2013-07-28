@@ -14,6 +14,7 @@ from rest_framework import permissions
 # AWX
 from awx.main.access import *
 from awx.main.models import *
+from awx.main.utils import get_object_or_400
 
 logger = logging.getLogger('awx.main.permissions')
 
@@ -34,7 +35,7 @@ class ModelAccessPermission(permissions.BasePermission):
 
     def check_get_permissions(self, request, view, obj=None):
         if hasattr(view, 'parent_model'):
-            parent_obj = view.parent_model.objects.get(pk=view.kwargs['pk'])
+            parent_obj = get_object_or_400(view.parent_model, pk=view.kwargs['pk'])
             if not check_user_access(request.user, view.parent_model, 'read',
                                      parent_obj):
                 return False
@@ -44,8 +45,16 @@ class ModelAccessPermission(permissions.BasePermission):
 
     def check_post_permissions(self, request, view, obj=None):
         if hasattr(view, 'parent_model'):
-            parent_obj = view.parent_model.objects.get(pk=view.kwargs['pk'])
+            parent_obj = get_object_or_400(view.parent_model, pk=view.kwargs['pk'])
             return True
+        elif getattr(view, 'is_job_start', False):
+            if not obj:
+                return True
+            return check_user_access(request.user, view.model, 'start', obj)
+        elif getattr(view, 'is_job_cancel', False):
+            if not obj:
+                return True
+            return check_user_access(request.user, view.model, 'cancel', obj)
         else:
             if obj:
                 return True
