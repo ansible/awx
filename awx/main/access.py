@@ -784,8 +784,8 @@ class JobTemplateAccess(BaseAccess):
         # shouldn't really matter with permissions given, but make sure the user
         # is also currently on the team in case they were added a per-user permission and then removed
         # from the project.
-        if not project.teams.filter(users__in=[self.user]).count():
-            return False
+        #if not project.teams.filter(users__in=[self.user]).count():
+        #    return False
 
         return True
 
