@@ -127,7 +127,8 @@ ProjectsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log',
 
 function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
                        GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
-                       RelatedPaginateInit, Prompt, ClearScope, GetBasePath, ReturnToCaller, GetProjectPath) 
+                       RelatedPaginateInit, Prompt, ClearScope, GetBasePath, ReturnToCaller, GetProjectPath,
+                       Authorization) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -155,7 +156,15 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
        for (var set in relatedSets) {
            scope.search(relatedSets[set].iterator);
        }
-       GetProjectPath({ scope: scope, master: master });
+       if (Authorization.getUserInfo('is_superuser') == true) {
+          GetProjectPath({ scope: scope, master: master });
+       }
+       else {
+          var opts = [];
+          opts.push(scope['local_path']);
+          scope.project_local_paths = opts;
+          scope.base_dir = 'You do not have access to view this property';
+       }
        });
 
    // Retrieve detail record and prepopulate the form
@@ -253,5 +262,5 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
 ProjectsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
                          'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit',
                          'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 
-                         'GetProjectPath'
+                         'GetProjectPath', 'Authorization'
                           ];
