@@ -217,7 +217,7 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
                 if (form.related[set].iterator == iterator) {
                    if (form.related[set].fields[fld].sourceModel) {
                       sort_order = direction + form.related[set].fields[fld].sourceModel + '__' + 
-                          form.related[set].fields[fld].sourceModel;
+                          form.related[set].fields[fld].sourceField;
                    }
                    else {
                      sort_order = direction + fld; 
