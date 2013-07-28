@@ -36,7 +36,8 @@ angular.module('ProjectPathHelper', ['RestServices', 'Utilities'])
                        '<p>There are no unassigned playbook directories in the base project path (' + scope.base_dir + '). ' + 
                        'Either the project directory is empty, or all of the contents are already assigned to other AWX projects.</p>' +
                        '<p>To fix this, log into the AWX server and check out another playbook project from your SCM repository into ' + 
-                       scope.base_dir + '.</p>', 'alert-info');
+                       scope.base_dir + '. After checking out the project, run &quot;chown -R awx&quot; on the content directory to ' +
+                       'ensure awx can read the playbooks.</p>', 'alert-info');
                 }
                 })
             .error( function(data, status, headers, config) {
