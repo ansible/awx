@@ -33,7 +33,7 @@ def find_commands(management_dir):
         pass
     return commands
 
-def manage():
+def prepare_env():
     # Update the default settings environment variable based on current mode.
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'awx.settings.%s' % MODE)
     # Add local site-packages directory to path.
@@ -48,6 +48,20 @@ def manage():
     # Monkeypatch Django find_commands to also work with .pyc files.
     import django.core.management
     django.core.management.find_commands = find_commands
+    # Fixup sys.modules reference to django.utils.six to allow jsonfield to
+    # work when using Django 1.4.
+    import django.utils
+    try:
+        import django.utils.six
+    except ImportError:
+        import six
+        sys.modules['django.utils.six'] = sys.modules['six']
+        django.utils.six = sys.modules['django.utils.six']
+        from django.utils import six
+
+def manage():
+    # Prepare the AWX environment.
+    prepare_env()
     # Now run the command (or display the version).
     from django.core.management import execute_from_command_line
     if len(sys.argv) >= 2 and sys.argv[1] in ('version', '--version'):

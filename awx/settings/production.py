@@ -33,10 +33,13 @@ settings_file = os.environ.get('AWX_SETTINGS_FILE',
                                '/etc/awx/settings.py')
 try:
     execfile(settings_file)
-except IOError:
+except IOError, e:
     from django.core.exceptions import ImproperlyConfigured
-    msg = 'No AWX configuration found at %s.' % settings_file
-    if 'AWX_SETTINGS_FILE' not in os.environ:
-        msg += '\nDefine the AWX_SETTINGS_FILE environment variable to specify'
-        msg += ' an alternate path.'
+    if not os.path.exists(settings_file):
+        msg = 'No AWX configuration found at %s.' % settings_file
+        if 'AWX_SETTINGS_FILE' not in os.environ:
+            msg += '\nDefine the AWX_SETTINGS_FILE environment variable to '
+            msg += 'specify an alternate path.'
+    else:
+        msg = 'Unable to load %s: %s' % (settings_file, str(e))
     raise ImproperlyConfigured(msg)
