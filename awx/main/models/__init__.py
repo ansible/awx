@@ -1156,6 +1156,14 @@ class JobEvent(models.Model):
         res = self.event_data.get('res', None)
         if isinstance(res, dict) and res.get('changed', False):
             self.changed = True
+        if self.event == 'playbook_on_stats':
+            try:
+                failures_dict = self.event_data.get('failures', {})
+                self.failed = bool(sum(failures_dict.values()))
+                changed_dict = self.event_data.get('changed', {})
+                self.changed = bool(sum(changed_dict.values()))
+            except (AttributeError, TypeError):
+                pass
         try:
             if not self.host and self.event_data.get('host', ''):
                 self.host = self.job.inventory.hosts.get(name=self.event_data['host'])
