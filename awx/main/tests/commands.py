@@ -226,6 +226,8 @@ class CleanupDeletedTest(BaseCommandTest):
         # "Delete some users".
         for user in User.objects.all():
             user.mark_inactive()
+            self.assertTrue(len(user.username) <= 30,
+                            'len(%r) == %d' % (user.username, len(user.username)))
         # With days=1, no users will be deleted.
         counts_before = self.get_user_counts()
         self.assertTrue(counts_before[1])

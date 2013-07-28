@@ -98,18 +98,7 @@ class PrimordialModel(models.Model):
 
         if self.active:
             if 'name' in self._meta.get_all_field_names():
-                #              0         1
-                #              01234567890123
-                has_description = False
-                if 'description' in self._meta.get_all_field_names():
-                    has_description = True
-                old_desc = ''
-                if has_description:
-                    old_desc = self.description
-                    self.description = "deleted: %s" % self.name
-                    if old_desc:
-                        self.description = "%s (%s)" % (self.description, old_desc)
-                self.name   = "_d_%s" % (now().isoformat())
+                self.name   = "_deleted_%s_%s" % (now().isoformat(), self.name)
             self.active = False
             if save:
                 self.save()
@@ -1247,7 +1236,10 @@ class JobEvent(models.Model):
 def user_mark_inactive(user, save=True):
     '''Use instead of delete to rename and mark users inactive.'''
     if user.is_active:
-        user.username   = "_deleted_%s_%s" % (now().isoformat(), user.username)
+        # Set timestamp to datetime.isoformat() but without the time zone
+        # offse to stay withint the 30 character username limit.
+        deleted_ts = now().strftime('%Y-%m-%dT%H:%M:%S.%f')
+        user.username = '_d_%s' % deleted_ts
         user.is_active = False
         if save:
             user.save()
