@@ -8,7 +8,7 @@ import threading
 # Django
 from django.contrib.auth.models import User
 from django.db import DatabaseError
-from django.db.models.signals import post_save, pre_delete, post_delete, m2m_changed
+from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
 
 # Django-REST-Framework
@@ -45,6 +45,7 @@ def update_inventory_has_active_failures(sender, **kwargs):
     prevent unnecessary recursive calls.
     '''
     if not getattr(_inventory_updating, 'is_updating', False):
+        instance = kwargs['instance']
         if sender == Group.hosts.through:
             sender_name = 'group.hosts'
         elif sender == Group.parents.through:
@@ -53,15 +54,19 @@ def update_inventory_has_active_failures(sender, **kwargs):
             sender_name = unicode(sender._meta.verbose_name)
         if kwargs['signal'] == post_save:
             sender_action = 'saved'
+            if instance.active: # No need to update for active instances.
+                return
         elif kwargs['signal'] == post_delete:
             sender_action = 'deleted'
-        else:
+        elif kwargs['signal'] == m2m_changed and kwargs['action'] in ('post_add', 'post_remove', 'post_clear'):
             sender_action = 'changed'
+        else:
+            return
         logger.debug('%s %s, updating inventory has_active_failures: %r %r',
                      sender_name, sender_action, sender, kwargs)
         try:
             _inventory_updating.is_updating = True
-            inventory = kwargs['instance'].inventory
+            inventory = instance.inventory
             update_hosts = issubclass(sender, Job)
             inventory.update_has_active_failures(update_hosts=update_hosts)
         finally:
@@ -102,18 +107,30 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
                          child_group, parent_group)
             parent_group.children.add(child_group)
 
+@receiver(pre_save, sender=Group)
+def save_related_pks_before_group_marked_inactive(sender, **kwargs):
+    instance = kwargs['instance']
+    if not instance.pk:
+        return
+    instance._saved_parents_pks = set(instance.parents.values_list('pk', flat=True))
+    instance._saved_hosts_pks = set(instance.hosts.values_list('pk', flat=True))
+    instance._saved_children_pks = set(instance.children.values_list('pk', flat=True))
+
 @receiver(post_save, sender=Group)
 def migrate_children_from_inactive_group_to_parent_groups(sender, **kwargs):
     instance = kwargs['instance']
     if instance.active:
         return
-    for parent_group in instance.parents.all():
-        for child_host in instance.hosts.all():
-            logger.debug('moving host %s to parent %s after making group %s inactive',
+    parents_pks = getattr(instance, '_saved_parents_pks', [])
+    hosts_pks = getattr(instance, '_saved_hosts_pks', [])
+    children_pks = getattr(instance, '_saved_children_pks', [])
+    for parent_group in Group.objects.filter(pk__in=parents_pks):
+        for child_host in Host.objects.filter(pk__in=hosts_pks):
+            logger.debug('moving host %s to parent %s after marking group %s inactive',
                          child_host, parent_group, instance)
             parent_group.hosts.add(child_host)
-        for child_group in instance.children.all():
-            logger.debug('moving group %s to parent %s after making group %s inactive',
+        for child_group in Group.objects.filter(pk__in=children_pks):
+            logger.debug('moving group %s to parent %s after marking group %s inactive',
                          child_group, parent_group, instance)
             parent_group.children.add(child_group)
         parent_group.children.remove(instance)

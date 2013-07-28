@@ -269,6 +269,16 @@ class Group(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('main:group_detail', args=(self.pk,))
 
+    def mark_inactive(self, save=True):
+        '''
+        When marking groups inactive, remove all associations to related
+        groups/hosts.
+        '''
+        super(Group, self).mark_inactive(save=save)
+        self.parents.clear()
+        self.children.clear()
+        self.hosts.clear()
+
     def update_has_active_failures(self):
         failed_hosts = self.all_hosts.filter(active=True,
                                              last_job_host_summary__job__active=True,

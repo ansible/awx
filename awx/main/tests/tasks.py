@@ -377,11 +377,13 @@ class RunJobTest(BaseCeleryTest):
         self.assertFalse(self.group.has_active_failures)
         self.inventory = Inventory.objects.get(pk=self.inventory.pk)
         self.assertFalse(self.inventory.has_active_failures)
-        # Un-mark host as inactive (should set flag on group and inventory)
+        # Un-mark host as inactive (need to force update of flag on group and
+        # inventory)
         host = self.host
         host.name = '_'.join(host.name.split('_')[3:]) or 'undeleted host'
         host.active = True
         host.save()
+        host.update_has_active_failures()
         self.group = Group.objects.get(pk=self.group.pk)
         self.assertTrue(self.group.has_active_failures)
         self.inventory = Inventory.objects.get(pk=self.inventory.pk)
@@ -404,10 +406,11 @@ class RunJobTest(BaseCeleryTest):
         self.assertFalse(self.group.has_active_failures)
         self.inventory = Inventory.objects.get(pk=self.inventory.pk)
         self.assertFalse(self.inventory.has_active_failures)
-        # Un-mark job as inactive (should set flag on host, group and inventory)
+        # Un-mark job as inactive (need to force update of flag)
         job.name = '_'.join(job.name.split('_')[3:]) or 'undeleted job'
         job.active = True
         job.save()
+        job.inventory.update_has_active_failures()
         self.host = Host.objects.get(pk=self.host.pk)
         self.assertTrue(self.host.has_active_failures)
         self.group = Group.objects.get(pk=self.group.pk)

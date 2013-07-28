@@ -457,6 +457,19 @@ class GroupChildrenList(SubListCreateAPIView):
     parent_model = Group
     relationship = 'children'
 
+    def unattach(self, request, *args, **kwargs):
+        '''
+        Special case for disassociating a child group from the parent. If the
+        child group has no more parents, then automatically mark it inactive.
+        '''
+        response = super(GroupChildrenList, self).unattach(request, *args, **kwargs)
+        if response.status_code != status.HTTP_204_NO_CONTENT:
+            return response
+        sub = self.model.objects.get(pk=request.DATA.get('id', None))
+        if sub.parents.filter(active=True).count() == 0:
+            sub.mark_inactive()
+        return response
+
 class GroupHostsList(SubListCreateAPIView):
     ''' the list of hosts directly below a group '''
 

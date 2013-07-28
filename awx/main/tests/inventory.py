@@ -333,7 +333,7 @@ class InventoryTest(BaseTest):
         self.post(url5, data=remove_me, expect=204, auth=self.get_other_credentials())
         got = self.get(url5, expect=200, auth=self.get_other_credentials())
         self.assertEquals(got['count'], 3)
-
+        
         ###################################################
         # VARIABLES
 
@@ -566,6 +566,17 @@ class InventoryTest(BaseTest):
         # try to double disassociate to see what happens (should no-op)
         self.post(subgroups_url3, data=result, expect=204, auth=self.get_other_credentials())
 
+        # removed group should be automatically marked inactive once it no longer has any parents.
+        removed_group = Group.objects.get(pk=result['id'])
+        self.assertTrue(removed_group.parents.count())
+        self.assertTrue(removed_group.active)
+        for parent in removed_group.parents.all():
+            parent_children_url = reverse('main:group_children_list', args=(parent.pk,))
+            data = {'id': removed_group.pk, 'disassociate': 1}
+            self.post(parent_children_url, data, expect=204, auth=self.get_super_credentials())
+        removed_group = Group.objects.get(pk=result['id'])
+        self.assertFalse(removed_group.active)
+
         #########################################################
         # FIXME: TAGS
 
@@ -628,11 +639,15 @@ class InventoryTest(BaseTest):
         self.assertFalse(h_d in g_c.hosts.all())
 
         # Mark group C inactive. Its child groups and hosts should now also be
-        # attached to group A. Group D hosts should be unchanged.
+        # attached to group A. Group D hosts should be unchanged.  Group C
+        # should also no longer have any group or host relationships.
         g_c.mark_inactive()
         self.assertTrue(g_d in g_a.children.all())
         self.assertTrue(h_c in g_a.hosts.all())
         self.assertFalse(h_d in g_a.hosts.all())
+        self.assertFalse(g_c.parents.all())
+        self.assertFalse(g_c.children.all())
+        self.assertFalse(g_c.hosts.all())
 
     def test_group_parents_and_children(self):
         # Test for various levels of group parent/child relations, with hosts,
