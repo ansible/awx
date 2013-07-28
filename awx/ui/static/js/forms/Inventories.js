@@ -55,6 +55,7 @@ angular.module('InventoryFormDefinition', [])
                 addRequired: true,
                 editRequired: true,
                 ngClick: 'lookUpOrganization()',
+                awRequiredWhen: {variable: "organizationrequired", init: "true" },
                 column: 1
                 },
             inventory_variables: {
