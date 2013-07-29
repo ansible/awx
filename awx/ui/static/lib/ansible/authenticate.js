@@ -68,7 +68,7 @@ angular.module('AuthService', ['ngCookies'])
        logout: function() {
            // the following puts our primary scope up for garbage collection, which
            // should prevent content flash  from the prior user.
-           var scope = angular.element(getElementById('main-view')).scope();
+           var scope = angular.element(document.getElementById('main-view')).scope();
            scope.$destroy();
            
            // but just in case, clear the organization bits
