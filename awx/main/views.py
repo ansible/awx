@@ -589,10 +589,28 @@ class InventoryScriptView(RetrieveAPIView):
                     data[group.name] = group_info.get('hosts', [])
                 else:
                     data[group.name] = group_info
+
             if self.object.variables_dict:
                 data['all'] = {
                     'vars': self.object.variables_dict,
                 }
+
+            
+            # workaround for Ansible inventory bug (github #3687), localhost must
+            # be explicitly listed in the all group for dynamic inventory
+            # scripts to pick it up
+
+            localhost  = Host.objects.filter(inventory=self.object, name='localhost').count()
+            localhost2 = Host.objects.filter(inventory=self.object, name='127.0.0.1').count()
+            if localhost or localhost2:
+                if not 'all' in data:
+                    data['all'] = {}
+                data['all']['hosts'] = []
+                if localhost:
+                    data['all']['hosts'].append('localhost')
+                if localhost2:
+                    data['all']['hosts'].append('127.0.0.1')
+
         return Response(data)
 
 class JobTemplateList(ListCreateAPIView):

@@ -93,6 +93,11 @@ class InventoryScriptTest(BaseScriptTest):
                 if x in (3, 7):
                     host.mark_inactive()
                 hosts.append(host)
+
+            # add localhost just to make sure it's thrown into all (Ansible github bug)
+            local = inventory.hosts.create(name='localhost', inventory=inventory, variables={})
+            hosts.append(local)    
+
             self.hosts.extend(hosts)
             groups = []
             for x in xrange(5):
@@ -110,6 +115,8 @@ class InventoryScriptTest(BaseScriptTest):
                 group.hosts.add(hosts[x + 5])
                 if n > 0 and x == 4:
                     group.parents.add(groups[3])
+                if x == 4:
+                    group.hosts.add(local)
             self.groups.extend(groups)
 
     def run_inventory_script(self, *args, **options):
@@ -136,19 +143,28 @@ class InventoryScriptTest(BaseScriptTest):
         self.assertEqual(rc, 0, stderr)
         data = json.loads(stdout)
         groups = inventory.groups.filter(active=True)
-        groupnames = groups.values_list('name', flat=True)
+        groupnames = [ x for x in groups.values_list('name', flat=True)]
+
+        # it's ok for all to be here because due to an Ansible inventory workaround
+        # 127.0.0.1/localhost must show up in the all group
+        groupnames.append('all')
         self.assertEqual(set(data.keys()), set(groupnames))
+
         # Groups for this inventory should only have hosts, and no group
         # variable data or parent/child relationships.
         for k,v in data.items():
-            self.assertTrue(isinstance(v, dict))
-            self.assertTrue(isinstance(v['children'], (list,tuple)))
-            self.assertTrue(isinstance(v['hosts'], (list,tuple)))
-            self.assertTrue(isinstance(v['vars'], (dict)))
-            group = inventory.groups.get(active=True, name=k)
-            hosts = group.hosts.filter(active=True)
-            hostnames = hosts.values_list('name', flat=True)
-            self.assertEqual(set(v['hosts']), set(hostnames))
+            if k != 'all':
+                self.assertTrue(isinstance(v, dict))
+                self.assertTrue(isinstance(v['children'], (list,tuple)))
+                self.assertTrue(isinstance(v['hosts'], (list,tuple)))
+                self.assertTrue(isinstance(v['vars'], (dict)))
+                group = inventory.groups.get(active=True, name=k)
+                hosts = group.hosts.filter(active=True)
+                hostnames = hosts.values_list('name', flat=True)
+                self.assertEqual(set(v['hosts']), set(hostnames))
+            else:
+                self.assertTrue(v['hosts'] == [ 'localhost' ])
+
         for group in inventory.groups.filter(active=False):
             self.assertFalse(group.name in data.keys(),
                              'deleted group %s should not be in data' % group)
