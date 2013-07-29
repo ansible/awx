@@ -66,6 +66,14 @@ angular.module('AuthService', ['ngCookies'])
            },
        
        logout: function() {
+           // the following puts our primary scope up for garbage collection, which
+           // should prevent content flash  from the prior user.
+           var scope = angular.element(getElementById('main-view')).scope();
+           scope.$destroy();
+           
+           // but just in case, clear the organization bits
+           scope.organizations = null;
+
            $rootScope.current_user = {};
            $rootScope.license_tested = undefined;
            $cookieStore.remove('token'); 
