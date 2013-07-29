@@ -4,8 +4,6 @@
  *  Credentials.js
  *  Form definition for Credential model
  *
- * 
- *
  */
 angular.module('CredentialFormDefinition', [])
     .value(

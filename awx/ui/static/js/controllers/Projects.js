@@ -72,7 +72,7 @@ ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routePar
 
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
                       GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, 
-                      GetBasePath, ReturnToCaller, GetProjectPath) 
+                      GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -90,6 +90,14 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    LoadBreadCrumbs();
    GetProjectPath({ scope: scope, master: master });
 
+   LookUpInit({
+       scope: scope,
+       form: form,
+       current_item: null,
+       list: OrganizationList, 
+       field: 'organization' 
+       });
+
    // Save
    scope.formSave = function() {
       var data = {};
@@ -100,12 +108,23 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
       Rest.setUrl(url);
       Rest.post(data)
           .success( function(data, status, headers, config) {
-              $rootScope.flashMessage = "New project successfully created!";
-              (base == 'projects') ? ReturnToCaller() : ReturnToCaller(1);
+              var id = data.id;
+              var url = GetBasePath('projects') + id + '/organizations/';
+              var org = { id: scope.organization };
+              Rest.setUrl(url);
+              Rest.post(org)
+                  .success( function(data, status, headers, config) {
+                      $rootScope.flashMessage = "New project successfully created!";
+                      (base == 'projects') ? ReturnToCaller() : ReturnToCaller(1);
+                      })
+                  .error( function(data, status, headers, config) {
+                      ProcessErrors(scope, data, status, ProjectsForm,
+                          { hdr: 'Error!', msg: 'Failed to add organization to project. POST returned status: ' + status });
+                      });
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, ProjectsForm,
-                  { hdr: 'Error!', msg: 'Failed to create new project. Post returned status: ' + status });
+                  { hdr: 'Error!', msg: 'Failed to create new project. POST returned status: ' + status });
               });
       };
 
@@ -121,7 +140,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
 
 ProjectsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
                         'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
-                        'ReturnToCaller', 'GetProjectPath'
+                        'ReturnToCaller', 'GetProjectPath', 'LookUpInit', 'OrganizationList'
                         ];
 
 

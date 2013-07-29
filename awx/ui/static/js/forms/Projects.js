@@ -30,6 +30,21 @@ angular.module('ProjectFormDefinition', [])
                 addRequired: false,
                 editRequired: false
                 },
+             organization: {
+                label: 'Organization',
+                type: 'lookup',
+                sourceModel: 'organization',
+                sourceField: 'name',
+                addRequired: true,
+                editRequired: false,
+                excludeMode: 'edit',
+                ngClick: 'lookUpOrganization()',
+                awRequiredWhen: {variable: "organizationrequired", init: "true" },
+                awPopOver: '<p>A project must have at least one organization. Pick one organization now to create the project, and then after ' +
+                  'the project is created you can add additional organizations.' ,
+                dataTitle: 'Organization',
+                dataPlacement: 'right'
+                },
             base_dir: {
                 label: 'Project Base Path',
                 type: 'textarea',
@@ -103,14 +118,14 @@ angular.module('ProjectFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('organizations', \{\{ organization.id \}\}, '\{\{ organization.name \}\}')",
                         icon: 'icon-edit',
-                        awToolTip: 'Edit the credential'
+                        awToolTip: 'Edit the organization'
                         },
                     "delete": {
                         label: 'Delete',
                         ngClick: "delete('organizations', \{\{ organization.id \}\}, '\{\{ organization.name \}\}', 'organizations')",
                         icon: 'icon-remove',
                         "class": 'btn-danger',
-                        awToolTip: 'Delete the credential'
+                        awToolTip: 'Delete the organization'
                         }
                     }
                 }
