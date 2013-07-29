@@ -19,13 +19,20 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
       Authorization.logout();
    }
 
-   $rootScope.userLoggedIn = false;  //hide the logout link. if you got here, your logged out.
-                                     //gets set back to true by Authorization.setToken().
-   
-   $scope.sessionExpired = Authorization.didSessionExpire();    //Display session timeout message
    $scope.sessionTimeout = ($AnsibleConfig.session_timeout / 60).toFixed(2);
    $scope.AWXLoginLogo = $staticURL + 'img/AWX_logo.png';
    
+   if ($rootScope.userLoggedIn) { 
+      // If we're logged in, check for session timeout
+      $scope.sessionExpired = Authorization.didSessionExpire();
+   }
+   else {
+      $scope.sessionExpired = false;
+   }
+
+   $rootScope.userLoggedIn = false;  //hide the logout link. if you got here, your logged out.
+                                     //gets set back to true by Authorization.setToken().
+
    $('#login-password').bind('keypress', function(e) {
        var code = (e.keyCode ? e.keyCode : e.which);
        if (code == 13) {
