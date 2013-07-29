@@ -7,10 +7,13 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
     .factory('CheckAccess', ['$rootScope', 'Alert', 'Rest', 'GetBasePath','ProcessErrors', 
     function($rootScope, Alert, Rest, GetBasePath, ProcessErrors) {
     return function(params) {
+       // set PermissionAddAllowed to true or false based on user access. admins and org admins are granted
+       // accesss.
        var me = $rootScope.current_user;
-       var access = false;
+       var scope = params.scope;
+
        if (me.is_superuser) {
-          access = true;
+          scope.PermissionAddAllowed = true;
        }
        else {
           if (me.related.admin_of_organizations) {
@@ -18,7 +21,10 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
              Rest.get()
                  .success( function(data, status, headers, config) {
                      if (data.results.length > 0) {
-                        access = true;
+                        scope.PermissionAddAllowed = true;
+                     }
+                     else {
+                        scope.PermissionAddAllowed = false;
                      }
                  })
                  .error( function(data, status, headers, config) {
@@ -28,10 +34,10 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
                      });  
           }
        }
-       if (!access) {
-          Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
-       }
-       return access;
+       //if (!access) {
+       //   Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
+       //}
+       //return access;
     }
     }])
    

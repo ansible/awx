@@ -1036,6 +1036,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  html += (form.related[itm].actions[act]['class']) ? form.related[itm].actions[act]['class'] : "btn-success";
                  html += "\" ";
                  html += this.attr(action,'ngClick');
+                 html += (action['ngShow']) ? this.attr(action,'ngShow') : "";
                  html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
                  html += (action.awToolTip) ? "data-placement=\"right\" " : "";
                  html += "><i class=\"" + action.icon + "\"></i>";

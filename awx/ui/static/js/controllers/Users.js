@@ -182,11 +182,14 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    var id = $routeParams.user_id;
    var relatedSets = {}; 
 
+   scope.PermissionAddAllowed =  false; 
+
    // After the Organization is loaded, retrieve each related set
    scope.$on('userLoaded', function() {
        for (var set in relatedSets) {
            scope.search(relatedSets[set].iterator);
        }
+       CheckAccess({ scope: scope });  //Does the user have access add Permissions?
        });
 
    // Retrieve detail record and prepopulate the form
@@ -263,8 +266,11 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    scope.add = function(set) {
       $rootScope.flashMessage = null;
       if (set == 'permissions') {
-         if (CheckAccess()) {
+         if (scope.PermissionAddAllowed) {
             $location.path('/' + base + '/' + $routeParams.user_id + '/' + set + '/add');  
+         }
+         else {
+            Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
          }
       }
       else {
@@ -276,8 +282,11 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    scope.edit = function(set, id, name) {
       $rootScope.flashMessage = null;
       if (set == 'permissions') {
-         if (CheckAccess()) {
+         if (scope.PermissionAddAllowed) {
             $location.path('/users/' + $routeParams.user_id + '/permissions/' + id);
+         }
+         else {
+            Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
          }
       }
       else {
@@ -292,7 +301,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
       var action = function() {
           var url;
           if (set == 'permissions') {
-             if (CheckAccess()) {
+             if (scope.PermissionAddAllowed) {
                 url = GetBasePath('base') + 'permissions/' + itm_id + '/';
                 Rest.setUrl(url);
                 Rest.destroy()
@@ -305,7 +314,10 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
                         ProcessErrors(scope, data, status, null,
                           { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                         });
-              }   
+              }
+              else {
+                 Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.'); 
+              } 
           }
           else {
               url = defaultUrl + $routeParams.user_id + '/' + set + '/';

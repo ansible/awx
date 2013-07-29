@@ -163,12 +163,15 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    var master = {};
    var id = $routeParams.team_id;
    var relatedSets = {}; 
+
+   scope.PermissionAddAllowed =  false; 
    
    // Retrieve each related set and any lookups
    if (scope.teamLoadedRemove) {
       scope.teamLoadedRemove();
    }
    scope.teamLoadedRemove = scope.$on('teamLoaded', function() {
+       CheckAccess({ scope: scope });
        Rest.setUrl(scope['organization_url']);
        Rest.get()
            .success( function(data, status, headers, config) {
@@ -177,7 +180,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
                })
            .error( function(data, status, headers, config) {
                ProcessErrors(scope, data, status, null,
-                             { hdr: 'Error!', msg: 'Failed to retrieve: ' + scope.orgnization_url + '. GET status: ' + status });
+                   { hdr: 'Error!', msg: 'Failed to retrieve organization: ' + scope.orgnization_url + '. GET status: ' + status });
                });
        for (var set in relatedSets) {
            scope.search(relatedSets[set].iterator);
@@ -253,8 +256,11 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    scope.add = function(set) {
       $rootScope.flashMessage = null;
       if (set == 'permissions') {
-         if (CheckAccess()) {
+         if (scope.PermissionAddAllowed) {
             $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/add');
+         }
+         else {
+            Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.'); 
          }
       }
       else {
@@ -266,9 +272,12 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    scope.edit = function(set, id, name) {
       $rootScope.flashMessage = null;
       if (set == 'permissions') {
-         if (CheckAccess()) {  
+         if (scope.PermissionAddAllowed) {  
             $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/' + id);   
-          }
+         }
+         else {
+            Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
+         }
       }
       else {
          $location.path('/' + set + '/' + id);
@@ -282,7 +291,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
       var action = function() {
           var url;
           if (set == 'permissions') {
-              if (CheckAccess()) {
+              if (scope.PermissionAddAllowed) {
                  url = GetBasePath('base') + 'permissions/' + itm_id + '/';
                  Rest.setUrl(url);
                  Rest.destroy()
@@ -295,7 +304,10 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
                         ProcessErrors(scope, data, status, null,
                             { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                         });
-              }    
+              }
+              else {
+                 Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
+              }   
           }
           else {
               var url = defaultUrl + $routeParams.team_id + '/' + set + '/';

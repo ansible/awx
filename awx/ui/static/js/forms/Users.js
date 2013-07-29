@@ -157,7 +157,8 @@ angular.module('UserFormDefinition', [])
                         ngClick: "add('permissions')",
                         icon: 'icon-plus',
                         label: 'Add',
-                        awToolTip: 'Add a permission for this user'
+                        awToolTip: 'Add a permission for this user',
+                        ngShow: 'PermissionAddAllowed == true'
                         }
                     },
 
