@@ -72,7 +72,7 @@ angular.module('AuthService', ['ngCookies'])
            scope.$destroy();
            
            // but just in case, clear the organization bits
-           scope.organizations = null;
+           $rootScope.organizations = null;
 
            $rootScope.current_user = {};
            $rootScope.license_tested = undefined;
