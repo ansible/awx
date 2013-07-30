@@ -201,6 +201,11 @@
     font-size: 12px;
  }
 
+ .note {
+    font-size: 12px;
+    padding-top: 15px;
+ }
+
  legend {
     font-size: medium;
     font-weight: bold; 

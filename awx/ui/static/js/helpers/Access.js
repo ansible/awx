@@ -68,8 +68,8 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
               status = 'alert-info';
               hdr = 'AWX Demo';
               msg = 'Thank you for trying AnsibleWorks AWX. You can use this edition to manage up to 10 hosts free. ' +
-                    'Should you wish to acquire a license for additional servers, please visit ' + 
-                    '<a href="http://ansibleworks.com/ansibleworks-awx" target="_blank"><strong>ansibleworks.com/ansibleworks-awx</strong></a>, or ' +
+                    'Should you wish to acquire a license for additional servers, please ' + 
+                    '<a href="http://store.ansibleworks.com" target="_blank"><strong>visit the AnsibleWorks online store</strong></a>, or ' +
                     'contact <a href="mailto:info@ansibleworks.com"><strong>info@ansibleworks.com</strong></a> for assistance.';
               Alert(hdr, msg, status);
            }
@@ -78,7 +78,7 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
               hdr = 'License Expired';
               msg = 'Your AnsibleWorks AWX License has expired and is no longer compliant. ' + 
                     'You can continue, but you will be unable to add any additional hosts. Please ' +
-                    'visit <a href="http://ansibleworks.com/ansibleworks-awx" target="_blank"><strong>ansibleworks.com/ansibleworks-awx</strong></a> ' +
+                    '<a href="http://store.ansibleworks.com" target="_blank"><strong>visit the AnsibleWorks online store</strong></a> ' +
                     'for license and renewal information, or contact <a href="mailto:info@ansibleworks.com"><strong>info@ansibleworks.com</strong></a> ' +
                     'for assistance.';
               Alert(hdr, msg, status);
@@ -87,8 +87,8 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
               status = 'alert-info';
               hdr = 'License Warning'; 
               msg = 'Your AnsibleWorks AWX License has reached capacity for the number of managed ' +
-                    'hosts allowed. You will not be able to add any additional hosts. To extend your license, please visit ' + 
-                    '<a href="http://ansibleworks.com/ansibleworks-awx" target="_blank"><strong>ansibleworks.com/ansibleworks-awx.</strong></a>, or ' +
+                    'hosts allowed. You will not be able to add any additional hosts. To extend your license, please ' + 
+                    '<a href="http://store.ansibleworks.com" target="_blank"><strong>visit the AnsibleWorks online store</strong></a>, or ' +
                     'contact <a href="mailto:info@ansibleworks.com"><strong>info@ansibleworks.com</strong></a> for more information.';
               Alert(hdr, msg, status, null, true);
            } 
