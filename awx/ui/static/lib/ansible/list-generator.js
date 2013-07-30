@@ -79,6 +79,10 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                                              // From here use 'scope' to manipulate the form, as the form is not in '$scope'
        $compile(element)(this.scope);
 
+       // Reset the scope to prevent displaying old data from our last visit to this list 
+       this.scope[list.name] = null;
+       this.scope[list.iterator] = null;
+
        if (options.mode == 'lookup') {
           // options should include {hdr: <dialog header>, action: <function...> }
           this.scope.lookupHeader = options.hdr;

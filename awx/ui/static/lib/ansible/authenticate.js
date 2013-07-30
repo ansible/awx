@@ -5,9 +5,8 @@
  *
  */
 
-angular.module('AuthService', ['ngCookies', 'OrganizationFormDefinition'])
-   .factory('Authorization', ['$http', '$rootScope', '$location', '$cookieStore', 'OrganizationForm', 
-   function($http, $rootScope, $location, $cookieStore, OrganizationForm) {
+angular.module('AuthService', ['ngCookies'])
+   .factory('Authorization', ['$http', '$rootScope', '$location', '$cookieStore', function($http, $rootScope, $location, $cookieStore) {
    return {
        setToken: function(token) {
            // set the session cookie
@@ -72,13 +71,6 @@ angular.module('AuthService', ['ngCookies', 'OrganizationFormDefinition'])
            var scope = angular.element(document.getElementById('main-view')).scope();
            scope.$destroy();
            $rootScope.$destroy();
-           
-           // Reset the scope for organizations. No matter what we have tried, nothing seems
-           // to clear the scope fast enough to prevent prior user's content from displaying
-           $rootScope['organizations'] = null;
-           for (var set in OrganizationForm.related) {
-               $rootScope[set] = null;
-           }
            
            $cookieStore.remove('accordions');
            $cookieStore.remove('token'); 

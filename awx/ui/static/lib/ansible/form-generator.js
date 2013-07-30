@@ -52,6 +52,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        this.scope = element.scope();       // Set scope specific to the element we're compiling, avoids circular reference
                                            // From here use 'scope' to manipulate the form, as the form is not in '$scope'
        $compile(element)(this.scope);
+ 
+       // Reset the scope to prevent displaying old data from our last visit to this form
+       for (var fld in form.fields) {
+           this.scope[fld] = null;
+       }
+       for (var set in form.related) {
+           this.scope[set] = null;
+       }
 
        if ( ((!options.modal) && options.related) || this.form.forceListeners ) {
           this.addListeners();

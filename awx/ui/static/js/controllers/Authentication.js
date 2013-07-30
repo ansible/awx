@@ -30,7 +30,7 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
       $scope.sessionExpired = false;
    }
 
-   $rootScope.userLoggedIn = false;  //hide the logout link. if you got here, your logged out.
+   $rootScope.userLoggedIn = false;  //hide the logout link. if you got here, you're logged out.
                                      //gets set back to true by Authorization.setToken().
 
    $('#login-password').bind('keypress', function(e) {
