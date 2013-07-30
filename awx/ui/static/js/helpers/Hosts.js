@@ -385,7 +385,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }
         else {
            scope['promptHeader'] = 'Remove Host from Group';
-           scope['promptBody'] = 'Are you sure you want to remove ' + host_name + ' from the group?';
+           scope['promptBody'] = 'Are you sure you want to remove ' + host_name + ' from the group? ' + 
+               host_name + ' will continue to be part of the inventory under All Hosts.';
            scope['promptActionBtnClass'] = 'btn-success';  
         }
         
