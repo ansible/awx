@@ -861,12 +861,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            if (form.related[itm].type == 'tree') {
               html += "<div class=\"span5\">";
               html += "<div class=\"inventory-buttons\">";
+              html += "<button ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-pad btn-mini\" " +
+                  "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\">" +
+                  "<i class=\"icon-edit\"></i> Edit Group</button>";
               html += "<button ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" id=\"inv-group-add\" " + 
                   "class=\"btn btn-mini btn-success\" aw-tool-tip=\"Add a new group\" " +
                   "data-placement=\"bottom\"><i class=\"icon-plus\"></i> Add Group</button>";
-              html += "<button ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-mini btn-success\" " +
-                  "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\" " +
-                  "<i class=\"icon-edit\"></i> Edit Group</button>";
               html += "<button ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" id=\"inv-group-delete\" " +
                   "aw-tool-tip=\"Delete the selected group\" data-placement=\"bottom\" " +
                   "class=\"btn btn-mini btn-danger\">" +
@@ -952,6 +952,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                       " " + form.related[itm]['fieldActions'][action]['class'] : "";
                   html += "\" ";
                   html += (form.related[itm]['fieldActions'][action].awToolTip) ? this.attr(form.related[itm]['fieldActions'][action],'awToolTip') : "";
+                  html += (form.related[itm]['fieldActions'][action].ngHide) ? this.attr(form.related[itm]['fieldActions'][action],'ngHide') : "";
                   html += this.attr(form.related[itm]['fieldActions'][action],'ngClick') +
                       ">" + this.icon(form.related[itm]['fieldActions'][action].icon);
                   html += (form.related[itm].fieldActions[action].label) ?  " " + form.related[itm].fieldActions[action].label : ""; 

@@ -156,12 +156,20 @@ angular.module('InventoryFormDefinition', [])
                         awToolTip: 'Edit host',
                         'class': 'btn-inventory-edit'
                         },
+                    "remove": {
+                        ngClick: "removeHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
+                        icon: 'icon-minus-sign',
+                        label: 'Remove',
+                        "class": 'btn-success',
+                        ngHide: "group_id === null || group_id === undefined",
+                        awToolTip: 'Remove this host from the group, but leave it as part of the inventory under All Hosts'
+                        },
                     "delete": {
                         ngClick: "deleteHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
                         icon: 'icon-remove',
                         label: 'Delete',
                         "class": 'btn-danger',
-                        awToolTip: 'Remove host'
+                        awToolTip: 'Permanently remove this host from the inventory'
                         }
                     }    
                 }

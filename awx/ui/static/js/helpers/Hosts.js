@@ -345,53 +345,62 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
     function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload) {
     return function(params) {
         
-        // Delete the selected host. Disassociates it from the group. 
-        
+        // Remove the selected host from the current group by dissaciating
+
         var scope = params.scope;
         var group_id = scope.group_id; 
         var inventory_id = params.inventory_id;
         var host_id = params.host_id;
-        var host_name = params.host_name; 
-        var url = (scope.group_id !== null) ? GetBasePath('groups') + scope.group_id + '/hosts/' : 
-            GetBasePath('inventory') + inventory_id + '/hosts/';
-        
+        var host_name = params.host_name;
+        var req = (params.request) ? params.request : null;
+
+        var url = (scope.group_id == null || req == 'delete') ? GetBasePath('inventory') + inventory_id + '/hosts/' : 
+            GetBasePath('groups') + scope.group_id + '/hosts/';
+
         var action_to_take = function() {
             if (scope.removeHostsReload) {
                scope.removeHostsReload();
             }
             scope.removeHostsReload = scope.$on('hostsReload', function() {
+                $('#prompt-modal').modal('hide');
                 HostsReload(params);
                 });
             Rest.setUrl(url);
             Rest.post({ id: host_id, disassociate: 1 })
-               .success( function(data, status, headers, config) {
-                   $('#prompt-modal').modal('hide');
-                   scope.$emit('hostsReload');
-                   })
-               .error( function(data, status, headers, config) {
-                   $('#prompt-modal').modal('hide');
-                   scope.$emit('hostsReload');
-                   ProcessErrors(scope, data, status, null,
-                       { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                   });      
-            };
+                .success( function(data, status, headers, config) {
+                    scope.$emit('hostsReload');
+                    })
+                .error( function(data, status, headers, config) {
+                    scope.$emit('hostsReload');
+                    ProcessErrors(scope, data, status, null,
+                       { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+                    });      
+            }
 
         //Force binds to work. Not working usual way.
-        if (scope.group_id !== null) {
-           $('#prompt-header').text('Remove Host from Group');
-           $('#prompt-body').text('Are you sure you want to remove host ' + host_name + ' from the group?');
+        if (scope.group_id == null || req == 'delete') {
+           scope['promptHeader'] = 'Delete Host';
+           scope['promptBody'] = 'Are you sure you want to permanently delete ' + host_name + ' from the inventory?';
+           scope['promptActionBtnClass'] = 'btn-danger';
         }
         else {
-           $('#prompt-header').text('Delete Host');
-           $('#prompt-body').text('Are you sure you want to permenantly remove host ' + host_name + '?');
+           scope['promptHeader'] = 'Remove Host from Group';
+           scope['promptBody'] = 'Are you sure you want to remove ' + host_name + ' from the group?';
+           scope['promptActionBtnClass'] = 'btn-success';  
         }
-        $('#prompt-action-btn').addClass('btn-danger');
-        scope.promptAction = action_to_take;  // for some reason this binds?
+        
+        scope.promptAction = action_to_take;
+
         $('#prompt-modal').modal({
             backdrop: 'static',
             keyboard: true,
             show: true
             });
+
+        if (!scope.$$phase) {
+           scope.$digest();
+        }
+
         }
         }])
 
@@ -401,8 +410,11 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
     return function(params) {
         // Rerfresh the Hosts view on right side of page
         scope = params.scope;
+        scope['hosts'] = null;
+        
         var url = (scope.group_id !== null) ? GetBasePath('groups') + scope.group_id + '/all_hosts/' :
                   GetBasePath('inventory') + params.inventory_id + '/hosts/';
+
         var relatedSets = { hosts: { url: url, iterator: 'host' } };
         RelatedSearchInit({ scope: params.scope, form: InventoryForm, relatedSets: relatedSets });
         RelatedPaginateInit({ scope: params.scope, relatedSets: relatedSets });

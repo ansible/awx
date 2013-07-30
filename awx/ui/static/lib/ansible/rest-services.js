@@ -55,9 +55,8 @@ angular.module('RestServices',['ngCookies','AuthService'])
 
         },
     destroy: function(data) {
-        var url = this.url;
         return $http({method: 'DELETE',
-                      url: url,
+                      url: this.url,
                       headers: this.auth(),
                       data: data});
         }

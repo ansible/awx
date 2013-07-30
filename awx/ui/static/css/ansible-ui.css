@@ -31,7 +31,7 @@
 /* Attempt to make button heights consistent. For some reason success, info, etc. are
    taller than plain .btn */
  
- .btn-success, .btn-danger, .btn-info, .btn-primary {
+ .btn-success, .btn-danger, .btn-info, .btn-primary, .btn-warning {
     padding-top: 1px;
     padding-bottom: 2px;
  }

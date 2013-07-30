@@ -488,7 +488,13 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       }
 
   scope.deleteHost = function(host_id, host_name) {
-      HostsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id, host_id: host_id, host_name: host_name });
+      HostsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id, host_id: host_id, host_name: host_name,
+          request: 'delete' });
+      }
+
+  scope.removeHost = function(host_id, host_name) {
+      HostsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id, host_id: host_id, host_name: host_name,
+          request: 'remove' });
       }
 
   scope.showEvents = function(host_name, last_job) {
