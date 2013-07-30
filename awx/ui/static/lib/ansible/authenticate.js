@@ -5,8 +5,9 @@
  *
  */
 
-angular.module('AuthService', ['ngCookies'])
-   .factory('Authorization', ['$http', '$rootScope', '$location', '$cookieStore', function($http, $rootScope, $location, $cookieStore) {
+angular.module('AuthService', ['ngCookies', 'OrganizationFormDefinition'])
+   .factory('Authorization', ['$http', '$rootScope', '$location', '$cookieStore', 'OrganizationForm', 
+   function($http, $rootScope, $location, $cookieStore, OrganizationForm) {
    return {
        setToken: function(token) {
            // set the session cookie
@@ -67,23 +68,29 @@ angular.module('AuthService', ['ngCookies'])
        
        logout: function() {
            // the following puts our primary scope up for garbage collection, which
-           // should prevent content flash  from the prior user.
+           // should prevent content flash from the prior user.
            var scope = angular.element(document.getElementById('main-view')).scope();
            scope.$destroy();
+           $rootScope.$destroy();
            
-           // but just in case, clear the organization bits
-           $rootScope.organizations = null;
-
-           $rootScope.current_user = {};
-           $rootScope.license_tested = undefined;
+           // Reset the scope for organizations. No matter what we have tried, nothing seems
+           // to clear the scope fast enough to prevent prior user's content from displaying
+           $rootScope['organizations'] = null;
+           for (var set in OrganizationForm.related) {
+               $rootScope[set] = null;
+           }
+           
+           $cookieStore.remove('accordions');
            $cookieStore.remove('token'); 
            $cookieStore.remove('token_expire');
            $cookieStore.remove('current_user');
+           $rootScope.current_user = {};
+           $rootScope.license_tested = undefined;
            $rootScope.userLoggedIn = false;
            $rootScope.token = null;
            $rootScope.token_expire = new Date(1970, 0, 1, 0, 0, 0, 0);
            },
-  
+
        getLicense: function() {
            return $http({
                method: 'GET',

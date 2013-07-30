@@ -15,7 +15,7 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
    // Authorization is injected from AuthService found in services.js
   
    if ($location.path() == '/logout') {
-      //if logout request, clear AuthToken and user session data 
+      //if logout request, clear AuthToken and user session data
       Authorization.logout();
    }
 
@@ -48,11 +48,9 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
        };
 
    // Call the API to get an auth token
-   $scope.systemLogin = function(username, password) {
-       
+   $scope.systemLogin = function(username, password) {   
        $('.api-error').empty();
        var token;
-       
        Authorization.retrieveToken(username, password)
          .success( function(data, status, headers, config) {
              token = data.token;
