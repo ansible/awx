@@ -94,7 +94,7 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
 
    function empty(x) {
        var result = false;
-       if (x === null || x === undefined || x == '') {
+       if (x != 0 && (x === null || x === undefined || x == '') ) {
           result = true;
        }
        return result;
@@ -146,9 +146,8 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
                    });
                }
 
-           // Remove anything form the form that is empty
            for (var fld in form.fields) {
-               if (data['license_info'][fld]) {
+               if (data['license_info'][fld] !== undefined) {
                   scope[fld] = data['license_info'][fld];
                }
            }
