@@ -6,7 +6,7 @@ user interface, REST API and task engine built on top of Ansible.
 
 The current version under development is 1.3, and uses the master branch.
 
-1.2.2 was the last released version on July 31st, 2012.
+1.2.2 was the last released version on July 31st, 2013.
 
 Hotfixes should go on the appropriate release branch and be cherry-picked to master.
 
