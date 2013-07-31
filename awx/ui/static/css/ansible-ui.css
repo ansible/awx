@@ -8,11 +8,12 @@
  */
 
  html {
-    background-color: #36454F;
+    background-color: #171717;
  }
 
  body {
-    color: #36454F;
+    //color: #171717;
+    color: #171717;
     padding-top: 60px;
  }
 
@@ -102,15 +103,8 @@
  }
 
  .navbar-inverse .navbar-inner {
-    background-color: #36454F;
-    background-image: -moz-linear-gradient(top, #36454F, #36454F);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#36454F), to(#36454F));
-    background-image: -webkit-linear-gradient(top, #36454F, #36454F);
-    background-image: -o-linear-gradient(top, #36454F, #36454F);
-    background-image: linear-gradient(to bottom, #36454F, #36454F);
-    background-repeat: repeat-x;
-    border-color: #36454F;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#36454F', endColorstr='#36454F', GradientType=0);
+    background-color: #171717;
+    border-color: #171717;
     padding-right: 15px;
  }
 
@@ -147,7 +141,7 @@
  .site-footer {
     width: 100%;
     margin-top: 60px;
-    background-color: #36454F;
+    background-color: #171717;
     color: #A9A9A9;
     padding-top: 20px;
     padding-bottom: 40px;
@@ -310,7 +304,7 @@
  }
 
  .breadcrumb .active {
-    color: #36454F;
+    color: #171717;
  }
 
  .nav-tabs > li > a {
@@ -468,7 +462,7 @@
  }
 
  .child-event a {
-    color: #36454F;
+    color: #171717;
     cursor: default;
  }
 
@@ -601,7 +595,7 @@
 
  .list-header .icon-sort-down, 
  .list-header .icon-sort-up {
-    color: #36454F;
+    color: #171717;
  }
 
  /* job_events syles */
@@ -679,8 +673,6 @@
 .modal-header {
   padding: 15px 10px;
   border-bottom: 1px solid #eee;
-  /* background-color: #A9A9A9; #/
-  /*color: #36454F;*/
   color: #2078be;
   -webkit-border-top-left-radius: 3px;
      -moz-border-top-left-radius: 3px;
@@ -691,7 +683,7 @@
 }
 
 .modal {
-  border: 1px solid #36454F;
+  border: 1px solid #171717;
 }
 
 .close {

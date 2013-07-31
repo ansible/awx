@@ -870,7 +870,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += "<button ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" id=\"inv-group-delete\" " +
                   "aw-tool-tip=\"Delete the selected group\" data-placement=\"bottom\" " +
                   "class=\"btn btn-mini btn-danger\">" +
-                  "<i class=\"icon-remove\"></i> Delete Group</button>";
+                  "<i class=\"icon-trash\"></i> Delete Group</button>";
               html += "</div>\n";  
               html += "<div id=\"tree-view\"></div>\n";
               html += "<div class=\" inventory-filter\">";
