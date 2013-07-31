@@ -53,6 +53,7 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
        var token;
        Authorization.retrieveToken(username, password)
          .success( function(data, status, headers, config) {
+             $('#login-modal').modal('hide');
              token = data.token;
              Authorization.setToken(data.token);
              $scope.reset();
@@ -64,11 +65,10 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
              $rootScope.token = token;
              $rootScope.userLoggedIn = true;
              $rootScope.token_expire = today.getTime();
-             
+
              // Get all the profile/access info regarding the logged in user
              Authorization.getUser()
                  .success(function(data, status, headers, config) {
-                     $('#login-modal').modal('hide');
                      Authorization.setUserInfo(data);
                      Authorization.getLicense()
                          .success(function(data, status, headers, config) {
