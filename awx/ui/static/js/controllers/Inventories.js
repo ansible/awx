@@ -455,6 +455,9 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.groupTitle = '<h4>All Hosts</h4>';
          scope.group_id = null;
       }
+      if (!scope.$$phase) {
+         scope.$digest();
+      }
       HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
       });
 
