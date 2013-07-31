@@ -30,7 +30,8 @@ angular.module('InventoriesListDefinition', [])
                 label: 'Organization',
                 ngBind: 'inventory.summary_fields.organization.name',
                 sourceModel: 'organization',
-                sourceField: 'name'
+                sourceField: 'name',
+                excludeModal: true
                 },
             has_active_failures: {
                 label: 'Failed Jobs?',
