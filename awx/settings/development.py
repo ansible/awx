@@ -18,6 +18,6 @@ try:
     sys.modules['local_settings'] = dummymodule(local_settings_file)
 except IOError, e:
     from django.core.exceptions import ImproperlyConfigured
-    if os.path.exists(settings_file):
+    if os.path.exists(local_settings_file):
         msg = 'Unable to load %s: %s' % (local_settings_file, str(e))
         raise ImproperlyConfigured(msg)
