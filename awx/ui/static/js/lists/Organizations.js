@@ -50,7 +50,7 @@ angular.module('OrganizationListDefinition', [])
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteOrganization(\{\{ organization.id \}\},'\{\{ organization.name \}\}')",
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 "class": 'btn-small btn-danger',
                 awToolTip: 'Delete organization'
                 }

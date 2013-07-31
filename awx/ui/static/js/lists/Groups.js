@@ -64,7 +64,7 @@ angular.module('GroupListDefinition', [])
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteGroup(\{\{ group.id \}\},'\{\{ group.name \}\}')",
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 "class": 'btn-small btn-danger',
                 awToolTip: 'Delete group'
                 }

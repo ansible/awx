@@ -45,6 +45,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += (btn.dataPlacement) ? this.attr(btn, 'dataPlacement') : "";
        html += (btn.dataContainer) ? this.attr(btn, 'dataContainer') : "";
        html += (btn.dataTitle) ? this.attr(btn, 'dataTitle') : "";
+       html += (btn.ngShow) ? this.attr(btn, 'ngShow') : "";
+       html += (btn.ngHide) ? this.attr(btn, 'ngHide') : "";
        html += " >" + this.attr(btn,'icon');
        html += (btn.label) ? " " + btn.label : ""; 
        html += "</button> ";

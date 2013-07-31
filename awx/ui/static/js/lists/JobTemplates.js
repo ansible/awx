@@ -59,7 +59,7 @@ angular.module('JobTemplatesListDefinition', [])
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteJobTemplate(\{\{ job_template.id \}\},'\{\{ job_template.name \}\}')",
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 "class": 'btn-danger btn-small',
                 awToolTip: 'Delete template'
                 }

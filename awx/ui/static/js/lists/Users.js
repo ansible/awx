@@ -57,7 +57,7 @@ angular.module('UserListDefinition', [])
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteUser(\{\{ user.id \}\},'\{\{ user.username \}\}')",
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 "class": 'btn-small btn-danger',
                 awToolTip: 'Delete user'
                 }

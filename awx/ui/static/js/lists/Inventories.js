@@ -70,7 +70,7 @@ angular.module('InventoriesListDefinition', [])
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteInventory(\{\{ inventory.id \}\},'\{\{ inventory.name \}\}')",
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 "class": 'btn-small btn-danger',
                 awToolTip: 'Delete inventory'
                 }

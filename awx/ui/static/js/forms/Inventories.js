@@ -91,7 +91,7 @@ angular.module('InventoryFormDefinition', [])
             reset: { 
                 ngClick: 'formReset()',
                 label: 'Reset',
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },
@@ -166,7 +166,7 @@ angular.module('InventoryFormDefinition', [])
                         },
                     "delete": {
                         ngClick: "deleteHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
-                        icon: 'icon-remove',
+                        icon: 'icon-trash',
                         label: 'Delete',
                         "class": 'btn-danger',
                         awToolTip: 'Permanently remove this host from the inventory'

@@ -52,7 +52,7 @@ angular.module('ProjectsListDefinition', [])
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteProject(\{\{ project.id \}\},'\{\{ project.name \}\}')",
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 "class": 'btn-small btn-danger',
                 awToolTip: 'Delete project'
                 }

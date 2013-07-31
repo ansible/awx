@@ -56,7 +56,7 @@ angular.module('TeamFormDefinition', [])
             reset: { 
                 ngClick: 'formReset()',
                 label: 'Reset',
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },
@@ -98,7 +98,7 @@ angular.module('TeamFormDefinition', [])
                     "delete": {
                         label: 'Delete',
                         ngClick: "delete('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}', 'credentials')",
-                        icon: 'icon-remove',
+                        icon: 'icon-trash',
                         "class": 'btn-danger',
                         awToolTip: 'Remove the credential'
                         }
@@ -154,7 +154,7 @@ angular.module('TeamFormDefinition', [])
                     "delete": {
                         label: 'Delete',
                         ngClick: "delete('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}', 'permissions')",
-                        icon: 'icon-remove',
+                        icon: 'icon-trash',
                         "class": 'btn-danger',
                         awToolTip: 'Delete the permission'
                         }
@@ -196,7 +196,7 @@ angular.module('TeamFormDefinition', [])
                     "delete": {
                         label: 'Delete',
                         ngClick: "delete('projects', \{\{ project.id \}\}, '\{\{ project.name \}\}', 'projects')",
-                        icon: 'icon-remove',
+                        icon: 'icon-trash',
                         "class": 'btn-danger',
                         awToolTip: 'Remove the project'
                         }
@@ -241,7 +241,7 @@ angular.module('TeamFormDefinition', [])
                     "delete": {
                         label: 'Delete',
                         ngClick: "delete('users', \{\{ user.id \}\}, '\{\{ user.username \}\}', 'users')",
-                        icon: 'icon-remove',
+                        icon: 'icon-terash',
                         "class": 'btn-danger',
                         awToolTip: 'Remove user'
                         }

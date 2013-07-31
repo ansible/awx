@@ -57,7 +57,7 @@ angular.module('TeamsListDefinition', [])
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteTeam(\{\{ team.id \}\},'\{\{ team.name \}\}')",
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 "class": 'btn-small btn-danger',
                 awToolTip: 'Delete team'
                 }

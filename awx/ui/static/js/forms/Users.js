@@ -97,7 +97,7 @@ angular.module('UserFormDefinition', [])
             reset: { 
                 ngClick: 'formReset()',
                 label: 'Reset',
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },
@@ -139,7 +139,7 @@ angular.module('UserFormDefinition', [])
                     "delete": {
                         label: 'Delete',
                         ngClick: "delete('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}', 'credentials')",
-                        icon: 'icon-remove',
+                        icon: 'icon-trash',
                         "class": 'btn-danger',
                         awToolTip: 'Delete the credential'
                         }
@@ -197,7 +197,7 @@ angular.module('UserFormDefinition', [])
                     "delete": {
                         label: 'Delete',
                         ngClick: "delete('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}', 'permissions')",
-                        icon: 'icon-remove',
+                        icon: 'icon-trash',
                         "class": 'btn-danger',
                         awToolTip: 'Delete the permission'
                         }

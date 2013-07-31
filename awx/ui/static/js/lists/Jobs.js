@@ -103,7 +103,15 @@ angular.module('JobsListDefinition', [])
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
                 "class": 'btn-danger btn-small',
                 awToolTip: 'Cancel job',
-                ngDisabled: "job.status != 'new' && job.status != 'pending' && job.status != 'running'"
+                ngShow: "job.status == 'pending' || job.status == 'running'"
+                },
+            "delete": {
+                icon: 'icon-trash',
+                mode: 'all',
+                ngClick: 'deleteJob(\{\{ job.id \}\})',
+                "class": 'btn-danger btn-small',
+                awToolTip: 'Delete this job',
+                ngShow: "job.status != 'pending' && job.status != 'running'"
                 }
             }
         });

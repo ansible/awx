@@ -82,7 +82,7 @@ angular.module('ProjectFormDefinition', [])
             reset: { 
                 ngClick: 'formReset()',
                 label: 'Reset',
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },
@@ -123,7 +123,7 @@ angular.module('ProjectFormDefinition', [])
                     "delete": {
                         label: 'Delete',
                         ngClick: "delete('organizations', \{\{ organization.id \}\}, '\{\{ organization.name \}\}', 'organizations')",
-                        icon: 'icon-remove',
+                        icon: 'icon-trash',
                         "class": 'btn-danger',
                         awToolTip: 'Delete the organization'
                         }

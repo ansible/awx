@@ -65,7 +65,7 @@ angular.module('CredentialsListDefinition', [])
 
             "delete": {
                 ngClick: "deleteCredential(\{\{ credential.id \}\},'\{\{ credential.name \}\}')",
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 label: 'Delete',
                 "class": 'btn-small btn-danger',
                 awToolTip: 'Delete credential'

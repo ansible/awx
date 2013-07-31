@@ -64,7 +64,7 @@ angular.module('PermissionListDefinition', [])
             "delete": {
                 label: 'Delete',
                 ngClick: "deletePermission(\{\{ permission.id \}\},'\{\{ permission.name \}\}')",
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 "class": 'btn-small btn-danger',
                 awToolTip: 'Delete permission'
                 }

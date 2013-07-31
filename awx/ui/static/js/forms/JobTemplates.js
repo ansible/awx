@@ -231,7 +231,7 @@ angular.module('JobTemplateFormDefinition', [])
             reset: { 
                 ngClick: 'formReset()',
                 label: 'Reset',
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },

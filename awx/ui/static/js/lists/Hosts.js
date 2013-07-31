@@ -55,7 +55,7 @@ angular.module('HostListDefinition', [])
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteHost(\{\{ host.id \}\},'\{\{ host.name \}\}')",
-                icon: 'icon-remove',
+                icon: 'icon-trash',
                 "class": 'btn-small btn-danger',
                 awToolTip: 'Delete host'
                 }
