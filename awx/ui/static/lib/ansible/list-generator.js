@@ -32,7 +32,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
     button: function(btn) {
        // pass in button object, get back html
        var html = '';
-       html += "<button " + this.attr(btn, 'ngClick') + "class=\"btn";
+       html += "<button type=\"button\" " + this.attr(btn, 'ngClick') + "class=\"btn";
        html += (btn['class']) ?  " " + btn['class'] : " btn-small";
        html += (btn['awPopOver']) ? " help-link-white" : "";
        html += "\" ";
@@ -88,7 +88,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        if (options.mode == 'lookup') {
           // options should include {hdr: <dialog header>, action: <function...> }
           this.scope.lookupHeader = options.hdr;
-          $('.popover').remove();  //remove any lingering pop-overs
+          $('.popover').popover('hide');  //remove any lingering pop-overs
           $('#lookup-modal').modal({ backdrop: 'static', keyboard: false });
        }
        
@@ -107,8 +107,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            //Breadcrumbs
            html += "<div class=\"nav-path\">\n";
            html += "<ul class=\"breadcrumb\">\n";
-           html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title | capitalize }}</a> " +
-                   "<span class=\"divider\">/</span></li>\n";
+           html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title | capitalize }}</a></li>\n";
            html += "<li class=\"active\">";
            if (options.mode == 'select') {
               html += list.selectTitle; 
@@ -131,7 +130,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        }
     
        if (options.mode == 'lookup' || options.id != undefined) {
-          html += SearchWidget({ iterator: list.iterator, template: list, mini: true });
+          html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-7' });
        }
        else {
           html += SearchWidget({ iterator: list.iterator, template: list, mini: false });

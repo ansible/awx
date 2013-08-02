@@ -6,7 +6,7 @@
  */
  
 var urlPrefix = '/static/';
- 
+
 angular.module('ansible', [
     'RestServices',
     'AuthService',
@@ -210,9 +210,9 @@ angular.module('ansible', [
             when('/teams/:user_id/credentials/:credential_id', { templateUrl: urlPrefix + 'partials/teams.html',
                                                                  controller: CredentialsEdit }).
 
-            when('/login', { templateUrl: urlPrefix + 'partials/login-dialog.html', controller: Authenticate }). 
+            when('/login', { templateUrl: urlPrefix + 'partials/organizations.html', controller: Authenticate }). 
 
-            when('/logout', { templateUrl: urlPrefix + 'partials/login-dialog.html', controller: Authenticate }).
+            when('/logout', { templateUrl: urlPrefix + 'partials/organizations.html', controller: Authenticate }).
             
             otherwise({redirectTo: '/'});
     }])

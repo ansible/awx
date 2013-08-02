@@ -35,7 +35,7 @@ angular.module('ProjectsListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addProject()',
-                "class": 'btn-success btn-small',
+                "class": 'btn-success btn-mini',
                 awToolTip: 'Create a new project'
                 }
             },
@@ -45,7 +45,7 @@ angular.module('ProjectsListDefinition', [])
                 label: 'Edit',
                 ngClick: "editProject(\{\{ project.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-small',
+                "class": 'btn-mini',
                 awToolTip: 'View/edit project'
                 },
 
@@ -53,7 +53,7 @@ angular.module('ProjectsListDefinition', [])
                 label: 'Delete',
                 ngClick: "deleteProject(\{\{ project.id \}\},'\{\{ project.name \}\}')",
                 icon: 'icon-trash',
-                "class": 'btn-small btn-danger',
+                "class": 'btn-mini btn-danger',
                 awToolTip: 'Delete project'
                 }
             }

@@ -43,13 +43,16 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
               rows = (n) ? n.length : 1;
               rows = (rows > 10) ? 10 : rows;
               found = true;
+              html += "<div class=\"form-group\">\n";
               html += "<label>Traceback:</label>\n";
-              html += "<textarea readonly class=\"input-xxlarge nowrap\" rows=\"" + rows + "\">" + eventData.res + "</textarea>\n";
+              html += "<textarea readonly class=\"form-control nowrap\" rows=\"" + rows + "\">" + eventData.res + "</textarea>\n";
+              html += "</div>\n";
            }
            else {
               for (var fld in eventData.res) {
                   if ( (fld == 'msg' || fld == 'stdout' || fld == 'stderr') && 
                        (eventData.res[fld] !== null && eventData.res[fld] !== '') ) {
+                       html += "<div class=\"form-group\">\n";
                        html += "<label>"; 
                        switch(fld) {
                           case 'msg':
@@ -64,7 +67,8 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                        n = eventData['res'][fld].match(/\n/g);
                        rows = (n) ? n.length : 1;
                        rows = (rows > 10) ? 10 : rows;
-                       html += "<textarea readonly class=\"input-xxlarge nowrap\" rows=\"" + rows + "\">" + eventData.res[fld] + "</textarea>\n";
+                       html += "<textarea readonly class=\"form-control nowrap\" rows=\"" + rows + "\">" + eventData.res[fld] + "</textarea>\n";
+                       html += "</div>\n";
                        found = true;
                   }
                   if ( fld == "results" && Array.isArray(eventData.res[fld]) && eventData.res[fld].length > 0 ) {
@@ -77,14 +81,18 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                      rows = (n) ? n.length : 1;
                      rows = (rows > 10) ? 10 : rows;
                      if (txt !== '') {
+                        html += "<div class=\"form-group\">\n";
                         html += "<label>Results:</label>\n";
-                        html += "<textarea readonly class=\"input-xxlarge nowrap\" rows=\"" + rows + "\">" + txt + "</textarea>\n";
+                        html += "<textarea readonly class=\"form-control nowrap\" rows=\"" + rows + "\">" + txt + "</textarea>\n";
+                        html += "</div>\n";
                         found = true;
                      }
                   } 
                   if (fld == "rc" && eventData.res[fld] != '') {
+                     html += "<div class=\"form-group\">\n";
                      html += "<label>Return Code:</label>\n";
-                     html += "<input type=\"text\" class=\"input-mini\" value=\"" + eventData.res[fld] + "\" readonly >\n";
+                     html += "<input type=\"text\" class=\"form-control\" value=\"" + eventData.res[fld] + "\" readonly >\n";
+                     html += "</div>\n";
                      found = true;
                   }
               }
@@ -92,7 +100,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
            html = (found) ? "<form class=\"event-form\">\n" + html + "</form>\n" : '';
         }
         if (eventData['host']) {
-           html = "<span class=\"event-detail-host visible-phone visible-tablet\">" + eventData['host'] + "</span>\n" + html;
+           html = "<span class=\"event-detail-host visible-sm\">" + eventData['host'] + "</span>\n" + html;
         }
         else {
            html = (html == '' ) ? null : html;

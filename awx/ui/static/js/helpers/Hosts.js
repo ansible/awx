@@ -52,7 +52,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             HostsReload(params);
         });
         
-        $('.popover').remove();  //remove any lingering pop-overs
+        $('.popover').popover('hide');  //remove any lingering pop-overs
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').modal({ backdrop: 'static', keyboard: false });
         

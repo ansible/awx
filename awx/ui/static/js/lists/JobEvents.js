@@ -53,7 +53,7 @@ angular.module('JobEventsListDefinition', [])
                 nosort: true,
                 searchOnly: false,
                 id: 'job-event-host-header',
-                columnClass: 'hidden-phone hidden-tablet'
+                columnClass: 'hidden-sm'
                 }
             },
         
@@ -63,14 +63,14 @@ angular.module('JobEventsListDefinition', [])
                 icon: 'icon-refresh',
                 label: 'Refresh',
                 awToolTip: 'Refresh the page',
-                "class": 'btn-small btn-success',
+                "class": 'btn-mini btn-success',
                 mode: 'all'
                 },
             edit: {
                 label: 'Details',
                 ngClick: "jobDetails()",
                 icon: 'icon-zoom-in',
-                "class": 'btn btn-small',
+                "class": 'btn btn-mini',
                 awToolTip: 'Edit job details',
                 mode: 'all'
                 },
@@ -78,7 +78,7 @@ angular.module('JobEventsListDefinition', [])
                 label: 'Hosts',
                 icon: 'icon-th-large',
                 ngClick: "jobSummary()",
-                "class": 'btn btn-small',
+                "class": 'btn btn-mini',
                 awToolTip: 'View host summary',
                 mode: 'all'
                 }
@@ -89,7 +89,7 @@ angular.module('JobEventsListDefinition', [])
                 label: 'View',
                 ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
                 icon: 'icon-zoom-in',
-                "class": 'btn-small',
+                "class": 'btn-mini',
                 awToolTip: 'View event details'
                 }
             }

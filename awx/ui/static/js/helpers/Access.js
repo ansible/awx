@@ -56,7 +56,7 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
            $rootScope.license_tested = true; 
            if (license['valid_key'] !== undefined && license['valid_key'] == false) {
               // The license is invalid. Stop the user from logging in.
-              status = 'alert-error';
+              status = 'alert-danger';
               hdr = 'License Error';
               msg = 'Something is wrong with your /etc/awx/license file on this server. ' +
                     'Please contact <a href="mailto:info@ansibleworks.com">info@ansibleworks.com</a> for assistance.';

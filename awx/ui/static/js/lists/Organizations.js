@@ -33,7 +33,7 @@ angular.module('OrganizationListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',                  // One of: edit, select, all
                 ngClick: 'addOrganization()',
-                "class": 'btn-success btn-small',
+                "class": 'btn-success btn-mini',
                 awToolTip: 'Create a new organization'
                 }
             },
@@ -43,7 +43,7 @@ angular.module('OrganizationListDefinition', [])
                 label: 'Edit',
                 ngClick: "editOrganization(\{\{ organization.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-small',
+                "class": 'btn-mini',
                 awToolTip: 'View/Edit organization'
                 },
 
@@ -51,7 +51,7 @@ angular.module('OrganizationListDefinition', [])
                 label: 'Delete',
                 ngClick: "deleteOrganization(\{\{ organization.id \}\},'\{\{ organization.name \}\}')",
                 icon: 'icon-trash',
-                "class": 'btn-small btn-danger',
+                "class": 'btn-mini btn-danger',
                 awToolTip: 'Delete organization'
                 }
             }

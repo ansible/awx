@@ -1,36 +1,34 @@
-  <div class="row-fluid">
-    <div class="span12">
-      
-      <div id="login-modal" class="modal hide">
-        <div class="modal-header login-header">
-          <img ng-src="{{ AWXLoginLogo }}" />
-        </div>
-        <div class="modal-body">
-          <div class="login-alert" ng-show="(sessionExpired == false)">Welcome to AnsibleWorks AWX! &nbsp;Please sign in.</div>
-          <div class="login-alert" ng-show="(sessionExpired == true)">Your session timed out due to inactivity. Please sign in.</div>
-          <form id="login-form" name="loginForm" class="form-horizontal" autocomplete="off" novalidate >
-            <div class="control-group">
-              <label class="control-label">Username:</label>
-              <div class="controls">
-                <input type="text" name="login_username" ng-model="login_username" id="login-username" autocomplete="off" required><br />
-                <span class="error" ng-show="loginForm.login_username.$dirty && loginForm.login_username.$error.required">A value is required!</span>
-                <span class="error api-error" ng-bind="usernameError"></span>
+<div id="login-modal" class="modal hide">
+   <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header login-header">
+            <img ng-src="{{ AWXLoginLogo }}" />
+          </div>
+          <div class="modal-body">
+            <div class="login-alert" ng-show="(sessionExpired == false)">Welcome to AnsibleWorks AWX! &nbsp;Please sign in.</div>
+            <div class="login-alert" ng-show="(sessionExpired == true)">Your session timed out due to inactivity. Please sign in.</div>
+            <form id="login-form" name="loginForm" class="form-horizontal" autocomplete="off" novalidate >
+              <div class="control-group">
+                <label class="control-label">Username:</label>
+                <div class="controls">
+                  <input type="text" name="login_username" ng-model="login_username" id="login-username" autocomplete="off" required><br />
+                  <span class="error" ng-show="loginForm.login_username.$dirty && loginForm.login_username.$error.required">A value is required!</span>
+                  <span class="error api-error" ng-bind="usernameError"></span>
+                </div>
               </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">Password:</label>
-              <div class="controls">
-                <input type="password" name="login_password" id="login-password" ng-model="login_password" required autocomplete="off"><br />
-                <span class="error" ng-show="loginForm.login_password.$dirty && loginForm.login_password.$error.required">A value is required!</span>
-                <span class="error api-error" ng-bind="passwordError"></span>
+              <div class="control-group">
+                <label class="control-label">Password:</label>
+                <div class="controls">
+                  <input type="password" name="login_password" id="login-password" ng-model="login_password" required autocomplete="off"><br />
+                  <span class="error" ng-show="loginForm.login_password.$dirty && loginForm.login_password.$error.required">A value is required!</span>
+                  <span class="error api-error" ng-bind="passwordError"></span>
+                </div>
               </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button ng-click="systemLogin(login_username, login_password)" id="login-button" class="btn btn-primary"><i class="icon-signin"></i> Sign In</button>
-        </div>
-      </div><!-- modal -->
-      
-    </div><!-- span -->
-  </div><!-- row -->
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button ng-click="systemLogin(login_username, login_password)" id="login-button" class="btn btn-primary"><i class="icon-signin"></i> Sign In</button>
+          </div>
+      </div><!-- modal-content -->
+   </div><!-- modal-dialog -->
+</div><!-- modal -->

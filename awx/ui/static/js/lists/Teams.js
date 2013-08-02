@@ -40,7 +40,7 @@ angular.module('TeamsListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addTeam()',
-                "class": 'btn-small btn-success',
+                "class": 'btn-mini btn-success',
                 awToolTip: 'Create a new team'
                 }
             },
@@ -50,7 +50,7 @@ angular.module('TeamsListDefinition', [])
                 label: 'Edit',
                 ngClick: "editTeam(\{\{ team.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-small',
+                "class": 'btn-mini',
                 awToolTip: 'View/Edit team'
                 },
 
@@ -58,7 +58,7 @@ angular.module('TeamsListDefinition', [])
                 label: 'Delete',
                 ngClick: "deleteTeam(\{\{ team.id \}\},'\{\{ team.name \}\}')",
                 icon: 'icon-trash',
-                "class": 'btn-small btn-danger',
+                "class": 'btn-mini btn-danger',
                 awToolTip: 'Delete team'
                 }
             }

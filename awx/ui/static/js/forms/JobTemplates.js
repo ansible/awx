@@ -43,7 +43,8 @@ angular.module('JobTemplateFormDefinition', [])
                     " on the selected hosts.</p> <p>Setting the type to <em>check</em> will not execute the playbook. Instead, ansible will check playbook " +
                     " syntax, test environment setup and report problems.</p>",
                 dataTitle: 'Job Type',
-                dataPlacement: 'right'
+                dataPlacement: 'right',
+                dataContainer: "body"
                 },
             inventory: {
                 label: 'Inventory',
@@ -100,7 +101,8 @@ angular.module('JobTemplateFormDefinition', [])
                 awPopOver: "<p>The number of parallel or simultaneous processes to use while executing the playbook. Provide a value between 0 and 100. " +
                     "A value of zero will use the ansible default setting of 5 parallel processes.</p>",
                 dataTitle: 'Forks',
-                dataPlacement: 'right'
+                dataPlacement: 'right',
+                dataContainer: "body"
                 },
             limit: {
                 label: 'Limit',
@@ -113,7 +115,8 @@ angular.module('JobTemplateFormDefinition', [])
                     "<a href=\"http://ansible.cc/docs/patterns.html#selecting-targets\" target=\"_blank\">Selecting Targets section</a> under Inventory and Patterns " + 
                     " in the Ansible documentation.</p>",
                 dataTitle: 'Limit',
-                dataPlacement: 'right'
+                dataPlacement: 'right',
+                dataContainer: "body"
                 },
             verbosity: {
                 label: 'Verbosity',
@@ -125,7 +128,8 @@ angular.module('JobTemplateFormDefinition', [])
                 column: 1,
                 awPopOver: "<p>Control the level of output ansible will produce as the playbook executes.</p>",
                 dataTitle: 'Verbosity',
-                dataPlacement: 'right'
+                dataPlacement: 'right',
+                dataContainer: "body"
                 },
             variables: {
                 label: 'Extra Variables',
@@ -143,7 +147,8 @@ angular.module('JobTemplateFormDefinition', [])
                     "YAML:<br />\n" +
                     "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
                 dataTitle: 'Extra Variables',
-                dataPlacement: 'left'
+                dataPlacement: 'left',
+                dataContainer: "body"
                 },
             job_tags: {
                 label: 'Job Tags',
@@ -161,7 +166,8 @@ angular.module('JobTemplateFormDefinition', [])
                     "in the Job Tags field:<\p>\n" +
                     "<blockquote>configuration,packages</blockquote>\n",
                 dataTitle: "Job Tags",
-                dataPlacement: "left"
+                dataPlacement: "left",
+                dataContainer: "body"
                 },
             allow_callbacks: {
                 label: 'Allow Callbacks',
@@ -182,8 +188,8 @@ angular.module('JobTemplateFormDefinition', [])
                     "in one of your defined inventories, the request will be denied.</p>" +
                     "<p>Successful requests will result in an entry on the Jobs tab, where the results and history can be viewed.</p>",
                 detailPlacement: 'left',
-                dataContainer: '#job_templates',
-                dataTitle: 'Callback URL'
+                dataTitle: 'Callback URL',
+                dataContainer: "body"
                 },
             callback_url: {
                 label: 'Callback URL', 
@@ -202,8 +208,8 @@ angular.module('JobTemplateFormDefinition', [])
                     "in one of your defined inventories, the request will be denied.</p>" +
                     "<p>Successful requests will result in an entry on the Jobs tab, where the results and history can be viewed.</p>",
                 detailPlacement: 'left',
-                dataContainer: '#job_templates',
-                dataTitle: 'Callback URL'
+                dataTitle: 'Callback URL',
+                dataContainer: "body"
                 },
             host_config_key: {
                 label: 'Host Config Key',
@@ -216,7 +222,7 @@ angular.module('JobTemplateFormDefinition', [])
                     "<p class=\"code-breakable\">curl --data \"host_config_key=5a8ec154832b780b9bdef1061764ae5a\" " + 
                     "http://your.server.com:999/api/v1/job_templates/1/callback/</p>\n",
                 detailPlacement: 'left',
-                dataContainer: '#job_templates'
+                dataContainer: "body"
                 }
             },
 

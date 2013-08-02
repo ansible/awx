@@ -49,7 +49,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                break;
             case 'awPopOver':
                // construct the entire help link
-               result = "<a id=\"awp-" + fld + "\" href=\"\" aw-pop-over=\"" + value + "\" ";
+               result = "<a id=\"awp-" + fld + "\" href=\"\" aw-pop-over=\'" + value + "\' ";
                result += (obj.dataTitle) ? "data-title=\"" + obj['dataTitle'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
                result += (obj.dataPlacement) ? "data-placement=\"" + obj['dataPlacement'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
                result += (obj.dataContainer) ? "data-container=\"" + obj['dataContainer'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
@@ -193,12 +193,14 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var label = (params.label) ? params.label : null;
         var html= '';
    
-        html += "<div class=\"search-widget\">\n";
+        html += "<div class=\"search-widget ";
+        html += (params.size) ? params.size : "col-lg-4";
+        html += "\">\n";
         html += (label) ? "<label>" + label +"</label>" : "";
-        html += "<div class=\"input-prepend input-append\">\n";
-        html += "<div class=\"btn-group\">\n";
-        html += "<button class=\"btn "; 
-        html += (useMini) ? "btn-mini " : "btn-small";
+        html += "<div class=\"input-group\">\n";
+        html += "<div class=\"input-group-btn\">\n";
+        html += "<button type=\"button\" class=\"btn "; 
+        html += (useMini) ? "btn-mini " : "btn-small ";
         html += "dropdown-toggle\" data-toggle=\"dropdown\">\n";
         html += "<span ng-bind=\"" + iterator + "SearchFieldLabel\"></span>\n";
         html += "<span class=\"caret\"></span>\n";
@@ -214,20 +216,20 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         }
         html += "</ul>\n";
         html += "</div>\n";
-
+        
         html += "<select ng-show=\"" + iterator + "SelectShow\" ng-model=\""+ iterator + "SearchSelectValue\" ng-change=\"search('" + iterator + "')\" ";
         html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts\" class=\"search-select";
-        html += (useMini) ? " field-mini-height" : "";
+        html += (useMini) ? " input-mini" : " input-small";
         html += "\"></select>\n";
 
-        html += "<input ng-hide=\"" + iterator + "SelectShow || " + iterator + "InputHide\" class=\"input-medium";
-        html += (useMini) ? " field-mini-height" : "";
+        html += "<input type=\"text\" ng-hide=\"" + iterator + "SelectShow || " + iterator + "InputHide\" class=\"form-control ";
+        html += (useMini) ? " input-mini" : " input-small";
         html += "\" ng-model=\"" + iterator + "SearchValue\" ng-change=\"search('" + iterator + 
                 "')\" placeholder=\"Search\" type=\"text\" >\n";
-
-        html += "<div class=\"btn-group\">\n";
-        html += "<button ng-hide=\"" + iterator + "SelectShow || " + iterator + "HideSearchType || " + iterator + "InputHide\" class=\"btn ";
-        html += (useMini) ? "btn-mini " : "btn-small";
+        
+        html += "<div class=\"input-group-btn\">\n";
+        html += "<button type=\"button\" ng-hide=\"" + iterator + "SelectShow || " + iterator + "HideSearchType || " + iterator + "InputHide\" class=\"btn ";
+        html += (useMini) ? "btn-mini " : "btn-small ";
         html += "dropdown-toggle\" data-toggle=\"dropdown\">\n";
         html += "<span ng-bind=\"" + iterator + "SearchTypeLabel\"></span>\n";
         html += "<span class=\"caret\"></span>\n";

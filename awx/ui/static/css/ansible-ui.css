@@ -13,7 +13,7 @@
 
  body {
     color: #171717;
-    padding-top: 60px;
+    padding-top: 100px;
  }
 
  .text-center {
@@ -28,9 +28,18 @@
     white-space: nowrap;
  }
 
+ .tab-content {
+    padding-top: 20px;
+ }
+
+ .btn .caret {
+    border-top-color: #787878;
+ }
+
 /* Attempt to make button heights consistent. For some reason success, info, etc. are
    taller than plain .btn */
  
+ /*
  .btn-success, .btn-danger, .btn-info, .btn-primary, .btn-warning {
     padding-top: 1px;
     padding-bottom: 2px;
@@ -46,7 +55,9 @@
     padding-top: 3px;
     padding-bottom: 1px;
  }
+ */
 
+ /*
  .btn-inventory-edit {
     padding-top: 2px;
     padding-bottom: 1px;
@@ -64,11 +75,8 @@
     padding-left: 10px;
     padding-right: 10px;
  }
-
- .icon-plus {
-    font-size: 10px;
- }
-
+ */
+ 
 /* End btn heights */
 
 /* Use code-breakable in pop-over text to indent and wrap code segments */
@@ -93,18 +101,16 @@
     min-height: 15px;
  }
 
- .container-fluid {
+ .main-container {
     min-height: 700px;
  }
 
- .navbar-fixed-top .container {
-    width: 100%;
+ .navbar {
+   background-color: #171717;
  }
 
- .navbar-inverse .navbar-inner {
-    background-color: #171717;
-    border-color: #171717;
-    padding-right: 15px;
+ .navbar .nav {
+   margin-top: 15px;
  }
 
  .navbar-inverse .nav > li > a {
@@ -116,25 +122,30 @@
    color: #2078be;
  }
 
- .navbar .brand {
-    margin-left: 15px;
+ /* Using inline-block rather than block keeps 
+    brand img from right aligning into the collapse button
+    on mobile screens */
+ .navbar-brand {
+    display: inline-block;
     padding: 0;
  }  
 
- .navbar .brand img {
-    width: 260px;
+ .navbar-brand img {
+    max-width: 260px;
  }
-
- .navbar .nav {
-    margin-top: 15px;
- }
-
+ß
  a:hover {
     text-decoration: none;
  }
 
  .help-link, .help-link:active, .help-link:visited { 
     color: #49afcd;
+    text-decoration: none;
+ }
+
+ .help-link:hover {
+    text-decoration: none;
+    color: #1778c3;
  }
 
  .site-footer {
@@ -185,7 +196,25 @@
     max-width: 100px;
  }
 
+ /* Outline required fields in Red when focused */
+ .form-control[required]:focus {
+    border-color: rgba(204, 0, 0, 0.8);
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(204, 0, 0, 0.6);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(204, 0, 0, 0.6);
+ }
+
+ /* For some reason TB 3 RC1 does not provide an input-mini */
+ .input-mini {
+   height: 26px;
+   padding: 3px 8px;
+   font-size: 12px;
+   border-radius: 3px;
+ }
+
  .error {
+    margin-top: 5px;
+    line-height: normal;
     font-size: 12px;
     color: #FF0000;
  }
@@ -339,6 +368,7 @@
     display: inline-block;
     vertical-align: bottom;
     margin-bottom: 15px;
+    padding-left: 0;
  }
 
  .list-actions {
@@ -450,6 +480,7 @@
     margin-top:5px;
  }
 
+
  .form-items .search-widget {
     margin-top: 15px;
  }
@@ -553,17 +584,18 @@
  }
 
  .parse-selection {
+   display: inline-block;
    font-size: 12px;
+   line-height: normal;
    margin: 5px 0 8px 0;
  }
  
- .parse-selection .radio.inline {
-    padding-top: 0;
-    font-size: 12px;
+ .parse-selection input {
+   margin-left: 5px;
  }
 
- .parse-selection label:first-child {
-   margin-left: 5px;
+ .parse-select .parse-label {
+   margin-left: 3px;
  }
 
  #tree-view {
@@ -621,34 +653,6 @@
     padding-bottom: 5px;
  }
  
-/* form displayed in modal window */
-
- .horizontal-narrow .control-label {
-   float: left;
-   width: 100px;
-   padding-top: 5px;
-   text-align: right;
- }
-
- .horizontal-narrow .controls {
-   *display: inline-block;
-   *padding-left: 20px;
-   margin-left: 120px;
-   *margin-left: 0;
- }
-
- .horizontal-narrow .controls:first-child {
-   *padding-left: 120px;
- }
-
- .modal-input-xlarge {
-   width: 350px;
- }
-
- .modal-input-xxlarge {
-   width: 98%;
- }
-
  .form-section-title {
    font-weight: bold;
    width: 100%;
@@ -723,23 +727,16 @@
  
 /* Portrait tablet to landscape and desktop */
 @media (min-width: 768px) and (max-width: 979px) {
-   body {
-      padding-top: 0px;
-   }
+
 }
  
 /* Landscape phone to portrait tablet */
 @media (max-width: 767px) {
-   body {
-      padding-top: 0px;
-   }
+   
 }
  
 /* Landscape phones and down */
 @media (max-width: 480px) {
-   body {
-      padding-top: 0px;
-   }
    
    /* Job events */
    .level-1, .level-2, .level-3,  .level-3-detail {
@@ -749,22 +746,5 @@
    table {
       table-layout: fixed;
       word-wrap: break-word;
-   }
-
-   /* form displayed in modal window */
-   .horizontal-narrow .control-label {
-      width: 105px;
-   }
-
-   .horizontal-narrow .controls {
-      margin-left: 125px;
-   }
-
-   .horizontal-narrow .controls:first-child {
-      *padding-left: 125px;
-   }
-
-   .modal-input-xlarge {
-      width: 200px;
    }
 }

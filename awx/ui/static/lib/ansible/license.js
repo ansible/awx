@@ -20,7 +20,6 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
        name: 'license',
        well: false,
        forceListeners: true,
-       'class': 'horizontal-narrow',                                            
        fields: {
            license_status: {
                label: 'Status',

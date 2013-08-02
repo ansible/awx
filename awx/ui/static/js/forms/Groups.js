@@ -14,8 +14,9 @@ angular.module('GroupFormDefinition', [])
         editTitle: '{{ name }}',                             //Legend in edit mode
         name: 'group',                                       //Form name attribute
         well: false,                                         //Wrap the form with TB well
-        "class": 'horizontal-narrow',       
-
+        formLabelSize: 'col-lg-3',
+        formFieldSize: 'col-lg-9',
+        
         fields: {
             name: {
                 label: 'Name',

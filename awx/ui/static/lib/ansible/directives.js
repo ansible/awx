@@ -209,18 +209,21 @@ angular.module('AWDirectives', ['RestServices'])
                 content: attrs.awPopOver, trigger: 'manual', html: true, container: container });
             $(element).click(function() {
                 var me = $(this).attr('id');
+                var e = $(this);
                 $('.help-link, .help-link-white').each( function(index) {
                     if (me != $(this).attr('id')) {
                        $(this).popover('hide');
                     }
-                    else {
-                       $(this).popover('toggle');
-                    }
                     });
+                $('.popover').each(function(index) {
+                    // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+                    $(this).remove();
+                    });
+                $(this).popover('toggle');
                 });
             $(document).bind('keydown', function(e) {
                 if (e.keyCode === 27) {
-                   $(element).popover('hide');
+                   $(element).popover('destroy');
                 }
                 });
         }

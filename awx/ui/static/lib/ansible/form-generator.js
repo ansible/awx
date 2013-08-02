@@ -72,14 +72,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        if (options.modal) {
           this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;  //Default title for default modal
           this.scope.formModalInfo = false  //Disable info button for default modal
-          $('.popover').remove();  //remove any lingering pop-overs
+          $('.popover').popover('hide');  //remove any lingering pop-overs
           if (options.modal_selector) {
              $(options.modal_selector).removeClass('skinny-modal'); //Used in job_events to remove white space
-             $(options.modal_selector).modal({ backdrop: 'static', keyboard: false });
+             $(options.modal_selector).modal({ show: true, backdrop: 'static', keyboard: false });
           }
           else {
-             $('#form-modal').removeClass('skinny-modal'); //Used in job_events to remove white space
-             $('#form-modal').modal({ backdrop: 'static', keyboard: false });
+             //$('#form-modal').removeClass('skinny-modal'); //Used in job_events to remove white space
+             $('#form-modal').modal({ show: true, backdrop: 'static', keyboard: false });
           }
        }
        return this.scope;
@@ -212,7 +212,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        var html = '';
        for (var i=0; i < btn.position.length; i++) {
            if (btn.position[i].indexOf(topOrBottom) >= 0) {
-              html += "<button "; 
+              html += "<button type=\"button\" "; 
               html += "class=\"btn";
               html += (btn['class']) ?  " " + btn['class'] : "";
               if (btn.position[i] == 'top-right' || btn.position[i] == 'bottom-right') {
@@ -228,22 +228,65 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        return html;
     },
 
-    buildField: function(fld, field, options) {
-           
-       var html='';
+    buildField: function(fld, field, options, form) {
 
-       //Assuming horizontal form for now. This will need to be more flexible later.
+       function getFieldWidth() {
+          var x;
+          if (form.formFieldSize) {
+             x = form.formFieldSize;
+          }
+          else if (field.xtraWide) {
+             x = "col-lg-10";
+          }
+          else if (field.column) {
+             x = "col-lg-8";
+          }
+          else if (!form.formFieldSize && options.modal) {
+             x = "col-lg-10";
+          }
+          else {
+             x = "col-lg-6";
+          }
+          return x;
+       }
 
-       //text fields
-       if (field.type == 'text' || field.type == 'password' || field.type == 'email') {
-          if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {
-             html += "<div class=\"control-group\""
-             html += (field.ngShow) ? this.attr(field,'ngShow') : "";
-             html += (field.ngHide) ? this.attr(field,'ngHide') : "";
-             html += ">\n";
+       function getLabelWidth() {
+          var x;
+          if (form.formLabelSize) {
+             x = form.formLabelSize;
+          }
+          else if (field.column) {
+             x = "col-lg-4";
+          }
+          else if (!form.formLabelSize && options.modal) {
+             x = "col-lg-2";
+          }
+          else {
+             x = "col-lg-2";
+          }
+          return x;
+       }
+       
+       var html = '';
+
+       if (field.type == 'hidden') {
+          if ( (options.mode == 'edit' && field.includeOnEdit) ||
+               (options.mode == 'add' && field.includeOnAdd) ) {
+             html += "<input type=\"hidden\" ng-model=\"" + fld + "\" name=\"" + fld + "\" />";
+          }
+       }
+       
+       if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {  
+          html += "<div class=\"form-group\" ";
+          html += (field.ngShow) ? this.attr(field,'ngShow') : "";
+          html += (field.ngHide) ? this.attr(field,'ngHide') : "";
+          html += ">\n";      
+
+          //text fields
+          if (field.type == 'text' || field.type == 'password' || field.type == 'email') {
              html += "<label ";
              html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
-             html += "class=\"control-label"; 
+             html += "class=\"control-label " + getLabelWidth();
              html += (field.labelClass) ? " " + field.labelClass : "";
              html += "\" for=\"" + fld + '">';
              html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
@@ -251,8 +294,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += field.label + '</label>' + "\n";
              html += "<div ";
              html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-             html += "class=\"controls\">\n"; 
-             html += (field.clear || field.genMD5) ? "<div class=\"input-append\">\n" : "";
+             html += "class=\"" + getFieldWidth() + "\">\n";
+             html += (field.clear || field.genMD5) ? "<div class=\"input-group\">\n" : "";
+             
              if (field.control === null || field.control === undefined || field.control) {
                 html += "<input ";
                 html += this.attr(field,'type');
@@ -260,7 +304,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 html += 'name="' + fld + '" ';
                 html += (field.ngChange) ? this.attr(field,'ngChange') : "";
                 html += (field.id) ? this.attr(field,'id') : "";
-                html += (field['class']) ? this.attr(field, 'class') : "";
+                html += "class=\"form-control";
+                html += (field['class']) ? " " + this.attr(field, 'class') : "";
+                html += "\" ";
                 html += (field.placeholder) ? this.attr(field,'placeholder') : "";
                 html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
                 html += (options.mode == 'add' && field.addRequired) ? "required " : "";
@@ -270,310 +316,288 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
                 html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
                 html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
-                    field.awRequiredWhen.variable + "\" " : "";
+                  field.awRequiredWhen.variable + "\" " : "";
                 html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled=\"" + field.associated + "_ask\" " : "";
-                html += "/>";
-                if (field.clear) {
-                   html += " \n<button class=\"btn\" ng-click=\"clear('" + fld + "','" + field.associated + "')\" " + 
-                       "aw-tool-tip=\"Clear " + field.label + "\" id=\"" + fld + "-clear-btn\"><i class=\"icon-undo\"></i></button>\n";
-                   html += "</div>\n";
-                }
-                if (field.genMD5) {
-                   html += " \n<button class=\"btn\" ng-click=\"genMD5('" + fld + "')\" " + 
-                       "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + fld + "-gen-btn\"><i class=\"icon-repeat\"></i></button>\n";
-                   /*html += " \n<button style=\"margin-left: 10px;\" class=\"btn\" ng-click=\"selectAll('" + fld + "')\" " + 
-                       "aw-tool-tip=\"Select " + field.label + " for copy\" data-placement=\"top\" id=\"" + fld + "-copy-btn\"><i class=\"icon-copy\"></i></button>\n";*/
-                   html += "</div>\n";
-                }
+                html += " >\n";
+             }
+             
+             if (field.clear) {
+                html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn\" ng-click=\"clear('" + fld + "','" + field.associated + "')\" " + 
+                   "aw-tool-tip=\"Clear " + field.label + "\" id=\"" + fld + "-clear-btn\"><i class=\"icon-undo\"></i></button>\n";
                 if (field.ask) {
-                   html += " \n<label class=\"checkbox inline ask-checkbox\"><input type=\"checkbox\" ng-model=\"" + 
-                       fld + "_ask\" ng-change=\"ask('" + fld + "','" + field.associated + "')\" /> Ask at runtime?</label>";
+                   html += "<label class=\"checkbox-inline ask-checkbox\"><input type=\"checkbox\" ng-model=\"" + 
+                       fld + "_ask\" ng-change=\"ask('" + fld + "','" + field.associated + "')\" > Ask at runtime?</label>";
                 }
-                html += "<br />\n";
-                // Add error messages
-                if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ||
-                     field.awRequiredWhen ) {
-                   html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
-                   this.form.name + '_form.' + fld + ".$error.required\">A value is required!</span>\n";
-                }
-                if (field.type == "email") {
-                   html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
-                   this.form.name + '_form.' + fld + ".$error.email\">A valid email address is required!</span>\n";
-                }
-                if (field.awPassMatch) {
-                   html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + 
-                         ".$error.awpassmatch\">Must match Password value</span>\n";
-                }
-                html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
-             }
-             html += "</div>\n";
-             html += "</div>\n";
-           }
-        }
-
-       //textarea fields
-       if (field.type == 'textarea') { 
-          if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {
-             html += "<div class=\"control-group\""
-             html += (field.ngShow) ? this.attr(field,'ngShow') : "";
-             html += ">\n";
-             
-             if (field.label !== false) {
-                html += "<label class=\"control-label\" for=\"" + fld + '">';
-                html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-                html += field.label + '</label>' + "\n";
-                html += "<div class=\"controls\">\n";
-             }
-
-             // Variable editing
-             if (fld == "variables" || fld == "extra_vars" || fld == 'inventory_variables') {
-                html += "<div class=\"parse-selection\">Parse as: " +
-                    "<label class=\"radio inline\"><input type=\"radio\" ng-model=\"";
-                html += (this.form.parseTypeName) ? this.form.parseTypeName : 'parseType'; 
-                html += "\" value=\"yaml\"> YAML</label>\n";
-                html += "<label class=\"radio inline\"><input type=\"radio\" ng-model=\"";
-                html += (this.form.parseTypeName) ? this.form.parseTypeName : 'parseType';
-                html += "\" value=\"json\"> JSON</label></div>\n";
+                html += "</span>\n</div>\n";
              }
              
-             html += "<textarea ";
-             html += (field.rows) ? this.attr(field, 'rows') : "";
-             html += "ng-model=\"" + fld + '" ';
-             html += 'name="' + fld + '" ';
-             html += (field['class']) ? this.attr(field,'class') : "";
-             html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-             html += (field.id) ? this.attr(field,'id') : "";
-             html += (field.placeholder) ? this.attr(field,'placeholder') : "";
-             html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
-             html += (options.mode == 'add' && field.addRequired) ? "required " : "";
-             html += (field.readonly || field.showonly) ? "readonly " : "";
-             html += "></textarea><br />\n";
+             if (field.genMD5) {
+                html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn\" ng-click=\"genMD5('" + fld + "')\" " + 
+                   "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + fld + "-gen-btn\"><i class=\"icon-repeat\">" + 
+                   "</i></button></span>\n</div>\n";
+             }
+             
              // Add error messages
-             if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
-                html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
-                this.form.name + '_form.' + fld + ".$error.required\">A value is required!</span>\n";
+             if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ||
+                field.awRequiredWhen ) {
+                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
+                this.form.name + '_form.' + fld + ".$error.required\">A value is required!</div>\n";
              }
-             html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
-             if (field.label !== false) {
-                html += "</div>\n";
+             if (field.type == "email") {
+                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
+                this.form.name + '_form.' + fld + ".$error.email\">A valid email address is required!</div>\n";
              }
+             if (field.awPassMatch) {
+                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + 
+                    ".$error.awpassmatch\">Must match Password value</div>\n";
+             }
+             
+             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
              html += "</div>\n";
-          }
+         }
+
+         //textarea fields
+         if (field.type == 'textarea') { 
+             
+            if (field.label !== false) {
+               html += "<label class=\"control-label " + getLabelWidth() + "\" for=\"" + fld + '">';
+               html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
+               html += field.label + '</label>' + "\n";
+               html += "<div ";
+               html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
+               html += "class=\"" + getFieldWidth() + "\">\n";
+            }
+
+            // Variable editing
+            if (fld == "variables" || fld == "extra_vars" || fld == 'inventory_variables') {
+              html += "<div class=\"parse-selection\">Parse as: " +
+                  "<input type=\"radio\" ng-model=\"";
+              html += (this.form.parseTypeName) ? this.form.parseTypeName : 'parseType'; 
+              html += "\" value=\"yaml\"> <span class=\"parse-label\">YAML</span>\n";
+              html += "<input type=\"radio\" ng-model=\"";
+              html += (this.form.parseTypeName) ? this.form.parseTypeName : 'parseType';
+              html += "\" value=\"json\"> <span class=\"parse-label\">JSON</span>\n</div>\n";
+            }
+
+            html += "<textarea ";
+            html += (field.rows) ? this.attr(field, 'rows') : "";
+            html += "ng-model=\"" + fld + '" ';
+            html += 'name="' + fld + '" ';
+            html += "class=\"form-control";
+            html += (field['class']) ? " " + field['class'] : "";
+            html += "\" ";
+            html += (field.ngChange) ? this.attr(field,'ngChange') : "";
+            html += (field.id) ? this.attr(field,'id') : "";
+            html += (field.placeholder) ? this.attr(field,'placeholder') : "";
+            html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
+            html += (options.mode == 'add' && field.addRequired) ? "required " : "";
+            html += (field.readonly || field.showonly) ? "readonly " : "";
+            html += "></textarea>\n";
+            // Add error messages
+            if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
+              html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
+              this.form.name + '_form.' + fld + ".$error.required\">A value is required!</div>\n";
+            }
+            html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+            if (field.label !== false) {
+              html += "</div>\n";
+            }
+         }
+
+         //select field
+         if (field.type == 'select') { 
+            html += "<label class=\"control-label " + getLabelWidth() + "\" for=\"" + fld + '">';
+            html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
+            html += field.label + '</label>' + "\n";
+            html += "<div ";
+            html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
+            html += "class=\"" + getFieldWidth() + "\">\n";
+            html += "<select ";
+            html += "ng-model=\"" + fld + '" ';
+            html += 'name="' + fld + '" ';
+            html += "class=\"form-control";
+            html += (field['class']) ? " " + field['class'] : "";
+            html += "\" ";
+            html += this.attr(field, 'ngOptions');
+            html += (field.ngChange) ? this.attr(field,'ngChange') : "";
+            html += (field.id) ? this.attr(field,'id') : "";
+            html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
+            html += (options.mode == 'add' && field.addRequired) ? "required " : "";
+            html += (field.readonly) ? "readonly " : "";
+            html += ">\n";  
+            html += "<option value=\"\">Choose " + field.label + "</option>\n";
+            html += "</select>\n";
+            // Add error messages
+            if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
+              html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
+              this.form.name + '_form.' + fld + ".$error.required\">A value is required!</div>\n";
+            }
+            html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+            html += "</div>\n";
+         }
+
+         //number field
+         if (field.type == 'number') { 
+            html += "<label class=\"control-label " + getLabelWidth() + "\" for=\"" + fld + '">';
+            html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
+            html += field.label + '</label>' + "\n";
+            html += "<div ";
+            html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
+            html += "class=\"" + getFieldWidth() + "\">\n";
+            // Use 'text' rather than 'number' so that our integer directive works correctly
+            html += (field.slider) ? "<div class=\"slider\" id=\"" + fld + "-slider\"></div>\n" : "";
+            html += "<input type=\""; 
+            html += (field.spinner) ? "spinner" : "text";
+            html += "\" value=\"" + field['default'] + "\" ";
+            html += "class=\"form-control";
+            html += (field['class']) ? " " + field['class'] : "";
+            html += "\" ";
+            html += (field.slider) ? "ng-slider=\"" + fld + "\" " : ""; 
+            html += (field.spinner) ? "ng-spinner=\"" + fld + "\" " : ""; 
+            html += "ng-model=\"" + fld + '" ';
+            html += 'name="' + fld + '" ';
+            html += (field.min || field.min == 0) ? this.attr(field, 'min') : "";
+            html += (field.max) ? this.attr(field, 'max') : "";
+            html += (field.ngChange) ? this.attr(field,'ngChange') : "";
+            html += (field.slider) ? "id=\"" + fld + "-number\"" : (field.id) ? this.attr(field,'id') : "";
+            html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
+            html += (options.mode == 'add' && field.addRequired) ? "required " : "";
+            html += (field.readonly) ? "readonly " : "";
+            html += (field.integer) ? "integer " : "";
+            html += (field.disabled) ? "data-disabled=\"true\" " : "";
+            html += " >\n";
+            // Add error messages
+            if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
+              html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
+              this.form.name + '_form.' + fld + ".$error.required\">A value is required!</div>\n";
+            }
+            if (field.integer) {
+              html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">Must be an integer value</div>\n";
+            }
+            if (field.min || field.max) { 
+              html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.min || " + 
+                  this.form.name + '_form.' + fld + ".$error.max\">Must be in range " + field.min + " to " + 
+                  field.max + "</div>\n";
+            }
+            html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+            html += "</div>\n";
+         } 
+
+         //checkbox
+         if (field.type == 'checkbox') {
+            html += "<label class=\"control-label " + getLabelWidth() + "\" > </label>\n";
+            html += "<div ";
+            html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
+            html += "class=\"" + getFieldWidth() + "\">\n"; 
+            html += "<label class=\"checkbox-inline\">";
+            html += "<input type=\"checkbox\" "; 
+            html += this.attr(field,'type');
+            html += "ng-model=\"" + fld + '" ';
+            html += "name=\"" + fld + '" ';
+            html += (field.ngChange) ? this.attr(field,'ngChange') : "";
+            html += (field.id) ? this.attr(field,'id') : "";
+            html += this.attr(field,'trueValue');
+            html += this.attr(field,'falseValue');
+            html += (field.checked) ? "checked " : "";
+            html += (field.readonly) ? "disabled " : "";
+            html += " > " + field.label + "\n";
+            html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
+            html += "</label>\n";
+            html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+            html += "</div>\n";
+         }
+
+         //radio
+         if (field.type == 'radio') {
+            html += "<label class=\"control-label " + getLabelWidth() + "\" for=\"" + fld + '">';
+            html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
+            html += field.label + '</label>' + "\n";
+            html += "<div ";
+            html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
+            html += "class=\"" + getFieldWidth() + "\">\n"; 
+            for (var i=0; i < field.options.length; i++) {
+               html += "<label class=\"radio-inline\" ";
+               html += (field.options[i].ngShow) ? this.attr(field.options[i],'ngShow') : "";
+               html += ">";
+               html += "<input type=\"radio\" "; 
+               html += "name=\"" + fld + "\" ";
+               html += "value=\"" + field.options[i].value + "\" ";
+               html += "ng-model=\"" + fld + "\" ";
+               html += (field.ngChange) ? this.attr(field,'ngChange') : "";
+               html += (field.readonly) ? "disabled " : "";
+               html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
+               html += (options.mode == 'add' && field.addRequired) ? "required " : "";
+               html += " > " + field.options[i].label + "\n";
+               html += "</label>\n";
+            }
+            if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
+              html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
+              this.form.name + '_form.' + fld + ".$error.required\">A value is required!</div>\n";
+            }
+            html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+            html += "</div>\n";
+         }
+
+         //lookup type fields
+         if (field.type == 'lookup' && (field.excludeMode == undefined || field.excludeMode != options.mode)) {
+            html += "<label class=\"control-label " + getLabelWidth() + "\" for=\"" + fld + '">';
+            html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
+            html +=  field.label + '</label>' + "\n";
+            html += "<div ";
+            html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
+            html += "class=\"" + getFieldWidth() + "\">\n";
+            html += "<div class=\"input-group\">\n";
+            html += "<span class=\"input-group-btn\">\n";
+            html += "<button type=\"button\" class=\"lookup-btn btn\" " + this.attr(field,'ngClick') + "><i class=\"icon-search\"></i></button>\n";
+            html += "</span>\n";
+            html += "<input type=\"text\" class=\"form-control input-medium\" ";
+            html += "ng-model=\"" + field.sourceModel + '_' + field.sourceField +  "\" ";
+            html += "name=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
+            html += "class=\"form-control\" ";
+            html += (field.ngChange) ? this.attr(field,'ngChange') : "";
+            html += (field.id) ? this.attr(field,'id') : "";
+            html += (field.placeholder) ? this.attr(field,'placeholder') : "";
+            html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
+            html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
+                field.awRequiredWhen.variable + "\" " : "";
+            html += " awlookup >\n";
+            html += "</div>\n";
+            // Add error messages
+            if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ||
+                 field.awRequiredWhen ) {
+               html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + 
+                   field.sourceModel + '_' + field.sourceField  + ".$dirty && " + 
+                   this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField + 
+                   ".$error.required\">A value is required!</div>\n";
+            }
+            html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + 
+                field.sourceModel + '_' + field.sourceField  + ".$dirty && " + 
+                this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField  + 
+                ".$error.awlookup\">Value not found</div>\n";
+            html += "<div class=\"error api-error\" ng-bind=\"" + field.sourceModel + '_' + field.sourceField + 
+                "_api_error\"></div>\n";
+            html += "</div>\n";
+         }
+
+         //custom fields
+         if (field.type == 'custom') {
+            html += "<label class=\"control-label " + getLabelWidth();
+            html += (field.labelClass) ? " " + field.labelClass : "";
+            html += "\" for=\"" + fld + '">';
+            html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
+            html += (field.icon) ? this.icon(field.icon) : "";
+            html += (field.label) ? field.label : '';
+            html += '</label>' + "\n";
+            html += "<div ";
+            html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
+            html += "class=\"" + getFieldWidth() + "\">\n"; 
+            html += field.control;
+            html += "</div>\n";
+         }
+
+         html += "</div>\n";
+
        }
-
-       //select field
-       if (field.type == 'select') { 
-          if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {
-             html += "<div class=\"control-group\""
-             html += (field.ngShow) ? this.attr(field,'ngShow') : "";
-             html += ">\n";
-             html += "<label class=\"control-label\" for=\"" + fld + '">';
-             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-             html += field.label + '</label>' + "\n";
-             html += "<div class=\"controls\">\n"; 
-             html += "<select ";
-             html += "ng-model=\"" + fld + '" ';
-             html += 'name="' + fld + '" ';
-             //html += "ng-options=\"item.label for item in " + fld + "_options\" "; 
-             html += this.attr(field, 'ngOptions');
-             html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-             html += (field.id) ? this.attr(field,'id') : "";
-             html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
-             html += (options.mode == 'add' && field.addRequired) ? "required " : "";
-             html += (field.readonly) ? "readonly " : "";
-             html += ">\n";  
-             html += "<option value=\"\">Choose " + field.label + "</option>\n";
-             html += "</select><br />\n";
-             // Add error messages
-             if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
-                html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
-                this.form.name + '_form.' + fld + ".$error.required\">A value is required!</span>\n";
-             }
-             html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
-             html += "</div>\n";
-             html += "</div>\n";
-          }
-       }
-
-       //number field
-       if (field.type == 'number') { 
-          if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {
-             html += "<div class=\"control-group\""
-             html += (field.ngShow) ? this.attr(field,'ngShow') : "";
-             html += ">\n";
-             html += "<label class=\"control-label\" for=\"" + fld + '">';
-             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-             html += field.label + '</label>' + "\n";
-             html += "<div class=\"controls\">\n"; 
-             // Use 'text' rather than 'number' so that our integer directive works correctly
-             html += (field.slider) ? "<div class=\"slider\" id=\"" + fld + "-slider\"></div>\n" : "";
-             html += "<input type=\""; 
-             html += (field.spinner) ? "spinner" : "text";
-             html += "\" value=\"" + field['default'] + "\" ";
-             html += (field['class']) ? this.attr(field, 'class') : "";
-             html += (field.slider) ? "ng-slider=\"" + fld + "\" " : ""; 
-             html += (field.spinner) ? "ng-spinner=\"" + fld + "\" " : ""; 
-             html += "ng-model=\"" + fld + '" ';
-             html += 'name="' + fld + '" ';
-             html += (field.min || field.min == 0) ? this.attr(field, 'min') : "";
-             html += (field.max) ? this.attr(field, 'max') : "";
-             html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-             html += (field.slider) ? "id=\"" + fld + "-number\"" : (field.id) ? this.attr(field,'id') : "";
-             html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
-             html += (options.mode == 'add' && field.addRequired) ? "required " : "";
-             html += (field.readonly) ? "readonly " : "";
-             html += (field.integer) ? "integer " : "";
-             html += (field.disabled) ? "data-disabled=\"true\" " : "";
-             html += "/>\n";
-             html += "<br />\n";
-             // Add error messages
-             if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
-                html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
-                this.form.name + '_form.' + fld + ".$error.required\">A value is required!</span>\n";
-             }
-             if (field.integer) {
-                html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">Must be an integer value</span>\n";
-             }
-             if (field.min || field.max) { 
-                html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.min || " + 
-                    this.form.name + '_form.' + fld + ".$error.max\">Must be in range " + field.min + " to " + 
-                    field.max + "</span>\n";
-             }
-             html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
-             html += "</div>\n";
-             html += "</div>\n";
-          }
-       } 
-
-       //checkbox
-       if (field.type == 'checkbox') {
-          if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {
-             html += "<div class=\"control-group\" "
-             html += (field.ngShow) ? this.attr(field,'ngShow') : "";
-             html += ">\n";
-             html += "<div class=\"controls\">\n";
-             html += "<label class=\"checkbox inline\">";
-             html += "<input "; 
-             html += this.attr(field,'type');
-             html += "ng-model=\"" + fld + '" ';
-             html += "name=\"" + fld + '" ';
-             html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-             html += (field.id) ? this.attr(field,'id') : "";
-             html += this.attr(field,'trueValue');
-             html += this.attr(field,'falseValue');
-             html += (field.checked) ? "checked " : "";
-             html += (field.readonly) ? "disabled " : "";
-             html += " /> " + field.label + "\n";
-             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-             html += "</label>\n";
-             html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
-             html += "</div>\n";
-             html += "</div>\n";
-          }
-       }
-
-       //radio
-       if (field.type == 'radio') {
-          if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {
-             html += "<div class=\"control-group\" "
-             html += (field.ngShow) ? this.attr(field,'ngShow') : "";
-             html += ">\n";
-             html += "<label class=\"control-label\" for=\"" + fld + '">';
-             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-             html += field.label + '</label>' + "\n";
-             html += "<div class=\"controls\">\n";
-             for (var i=0; i < field.options.length; i++) {
-                 html += "<label class=\"radio inline\" ";
-                 html += (field.options[i].ngShow) ? this.attr(field.options[i],'ngShow') : "";
-                 html += ">";
-                 html += "<input type=\"radio\" "; 
-                 html += "name=\"" + fld + "\" ";
-                 html += "value=\"" + field.options[i].value + "\" ";
-                 html += "ng-model=\"" + fld + "\" ";
-                 html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-                 html += (field.readonly) ? "disabled " : "";
-                 html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
-                 html += (options.mode == 'add' && field.addRequired) ? "required " : "";
-                 html += " /> " + field.options[i].label + "\n";
-                 html += "</label>\n";
-             }
-             if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
-                html += "<p><span class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
-                this.form.name + '_form.' + fld + ".$error.required\">A value is required!</span></p>\n";
-             }
-             html += "<p><span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span></p>\n";
-             html += "</div>\n";
-             html += "</div>\n";  
-          }
-       }
-
-       if (field.type == 'hidden') {
-          if ( (options.mode == 'edit' && field.includeOnEdit) ||
-               (options.mode == 'add' && field.includeOnAdd) ) {
-             html += "<input type=\"hidden\" ng-model=\"" + fld + "\" name=\"" + fld + "\" />";
-          }
-       }
-
-       //lookup type fields
-       if (field.type == 'lookup' && (field.excludeMode == undefined || field.excludeMode != options.mode)) {
-          html += "<div class=\"control-group\""
-          html += (field.ngShow) ? this.attr(field,'ngShow') : "";
-          html += ">\n";
-          html += "<label class=\"control-label\" for=\"" + fld + '">';
-          html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-          html +=  field.label + '</label>' + "\n";
-          html += "<div class=\"controls\">\n";
-          html += "<div class=\"input-prepend\">\n";
-          html += "<button class=\"lookup-btn btn\" " + this.attr(field,'ngClick') + "><i class=\"icon-search\"></i></button>\n";
-          html += "<input class=\"input-medium\" type=\"text\" ";
-          html += "ng-model=\"" + field.sourceModel + '_' + field.sourceField +  "\" ";
-          html += "name=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
-          html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-          html += (field.id) ? this.attr(field,'id') : "";
-          html += (field.placeholder) ? this.attr(field,'placeholder') : "";
-          html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
-          html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
-              field.awRequiredWhen.variable + "\" " : "";
-          html += " awlookup />\n";
-          html += "</div><br />\n";
-          // Add error messages
-          if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ||
-               field.awRequiredWhen ) {
-             html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + 
-                 field.sourceModel + '_' + field.sourceField  + ".$dirty && " + 
-                 this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField + 
-                 ".$error.required\">A value is required!</span>\n";
-          }
-          html += "<span class=\"error\" ng-show=\"" + this.form.name + '_form.' + 
-              field.sourceModel + '_' + field.sourceField  + ".$dirty && " + 
-              this.form.name + '_form.' + field.sourceModel + '_' + field.sourceField  + 
-              ".$error.awlookup\">Value not found</span>\n";
-          html += "<span class=\"error api-error\" ng-bind=\"" + field.sourceModel + '_' + field.sourceField + 
-              "_api_error\"></span>\n";
-          html += "</div>\n";
-          html += "</div>\n";
-       }
-
-       //text fields
-       if (field.type == 'custom') {
-          if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {
-             html += "<div class=\"control-group\""
-             html += (field.ngShow) ? this.attr(field,'ngShow') : "";
-             html += ">\n";
-             html += "<label class=\"control-label"; 
-             html += (field.labelClass) ? " " + field.labelClass : "";
-             html += "\" for=\"" + fld + '">';
-             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-             html += (field.icon) ? this.icon(field.icon) : "";
-             html += (field.label) ? field.label : '';
-             html += '</label>' + "\n";
-             html += "<div class=\"controls\">\n"; 
-             html += field.control;
-             html += "</div>\n";
-             html += "</div>\n";
-           }
-        }
-
        return html;
        },
 
@@ -588,8 +612,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           //Breadcrumbs
           html += "<div class=\"nav-path\">\n";
           html += "<ul class=\"breadcrumb\">\n";
-          html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title | capitalize }}</a> " +
-                  "<span class=\"divider\">/</span></li>\n";
+          html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title | capitalize }}</a></li>\n";
           html += "<li class=\"active\">";
           if (options.mode == 'edit') {
              html += this.form.editTitle;
@@ -608,7 +631,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              var act;
              for (action in this.form.statusActions) {
                  act = this.form.statusActions[action];
-                 html += "<button " + this.attr(act, 'ngClick') + "class=\"btn btn-small";
+                 html += "<button type=\"button\" " + this.attr(act, 'ngClick') + "class=\"btn btn-small";
                  html += (act['class']) ? " " + act['class'] : "";
                  html += "\" ";
                  html += (act.awToolTip) ? this.attr(act,'awToolTip') : "";
@@ -623,7 +646,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "<div class=\"form-horizontal status-fields\">\n";
           for (var fld in this.form.statusFields) {
               field = this.form.statusFields[fld];
-              html += this.buildField(fld, field, options);
+              html += this.buildField(fld, field, options, this.form);
           }
           html += "</div><!-- status fields -->\n";
           html += "</div><!-- well -->\n";
@@ -672,24 +695,24 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
           var field;
           if (this.form.twoColumns) { 
-             html += "<div class=\"row-fluid\">\n";
-             html += "<div class=\"span6\">\n";
+             html += "<div class=\"row\">\n";
+             html += "<div class=\"col-lg-6\">\n";
              for (var fld in this.form.fields) {
                  field = this.form.fields[fld];
                  if (field.column == 1) {
-                    html += this.buildField(fld, field, options);
+                    html += this.buildField(fld, field, options, this.form);
                  }
              }
              html += "</div><!-- column 1 -->\n";
-             html += "<div class=\"span6\">\n";
+             html += "<div class=\"col-lg-6\">\n";
              for (var fld in this.form.fields) {
                  field = this.form.fields[fld];
                  if (field.column == 2) {
-                    html += this.buildField(fld, field, options);
+                    html += this.buildField(fld, field, options, this.form);
                  }
              }
              html += "</div><!-- column 2 -->\n";
-             html += "</div><!-- inner row -->\n";
+             html += "</div>\n";
           }
           else {
              // original, single-column form
@@ -697,7 +720,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              var group = '';     
              for (var fld in this.form.fields) {
                  var field = this.form.fields[fld];
-                 
+                
                  if (field.group && field.group != group) {
                     if (group !== '') {
                        html += "</div>\n";
@@ -720,8 +743,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                     html += "<div" + sectionShow + ">\n";
                     section = field.section;
                  }
-
-                 html += this.buildField(fld, field, options);
+                 html += this.buildField(fld, field, options, this.form);
              }
              if (section !== '') {
                 html += "</div>\n</div>\n";
@@ -734,47 +756,52 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           //buttons
           if (!this.modal) {
              if (this.has('buttons')) {
-                html += (this.form.twoColumns) ? "<hr />" : "";
-                html += "<div class=\"control-group\">\n";
-                html += "<div class=\"controls buttons\">\n";
-             }
-             for (var btn in this.form.buttons) {
-                 var button = this.form.buttons[btn];
-                 //button
-                 html += "<button ";
-                 html += "class=\"btn btn-small";
-                 html += (button['class']) ? " " + button['class'] : "";
-                 html += "\" ";
-                 if (button.ngClick) {
-                    html += this.attr(button,'ngClick');
-                 }
-                 
-                 if (button.ngDisabled) {
-                    if (btn !== 'reset') {
-                       html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
-                       html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : ""; 
-                       html += "\" ";
+                if (this.form.twoColumns) {
+                  html += "<div class=\"row\">\n";
+                  html += "<div class=\"col-lg-12\">\n";
+                  html += "<hr />\n";
+                }
+                html += "<div class=\"form-group buttons\">\n";
+                html += "<label class=\"col-lg-2 control-label\"> </label>\n";
+                html += "<div class=\"controls col-lg-6\">\n";
+                for (var btn in this.form.buttons) {
+                    var button = this.form.buttons[btn];
+                    //button
+                    html += "<button type=\"button\" ";
+                    html += "class=\"btn btn-small";
+                    html += (button['class']) ? " " + button['class'] : "";
+                    html += "\" ";
+                    if (button.ngClick) {
+                       html += this.attr(button,'ngClick');
                     }
-                    else {
-                       html += "ng-disabled=\"" + this.form.name + "_form.$pristine";
-                       html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : ""; 
-                       html += "\" ";   
+                    if (button.ngDisabled) {
+                       if (btn !== 'reset') {
+                          html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
+                          html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : ""; 
+                          html += "\" ";
+                       }
+                       else {
+                          html += "ng-disabled=\"" + this.form.name + "_form.$pristine";
+                          html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : ""; 
+                          html += "\" ";   
+                       }
                     }
-                 }
-              
-                 html += ">";
-                 if (button.icon) {
-                    html += this.icon(button.icon);
-                 }
-                 html += button.label + "</button>\n";
-             } 
-             if (this.has('buttons')) {
+                    html += ">";
+                    if (button.icon) {
+                       html += this.icon(button.icon);
+                    }
+                    html += button.label + "</button>\n";
+                } 
                 html += "</div>\n";
                 html += "</div>\n";
+                if (this.form.twoColumns) {
+                   html += "</div>\n";
+                   html += "</div>\n";
+                }
              }
-             html += "</form>\n";
           }
-
+          html += "</form>\n";
+          
           if ( this.has('well') ) {
              html += "</div>\n";
           }
@@ -812,7 +839,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += "<form class=\"form-horizontal\" name=\"" + this.form.name + '_items_form" id="' + this.form.name + '_items_form" novalidate>' + "\n";
               for (var fld in this.form.items[itm].fields) {
                   var field = this.form.items[itm].fields[fld];
-                  html += this.buildField(fld, field, options);
+                  html += this.buildField(fld, field, options, this.form);
               }
               html += "</form>\n";
               html += "<ul class=\"pager\">\n";
@@ -855,22 +882,22 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        */
        html = "<div id=\"" + this.form.name + "-collapse-2\" data-open=\"true\" class=\"jqui-accordion\">\n";
        html += "<h3>Inventory Content<h3>\n"; 
-       html += "<div>\n";
+       html += "<div class=\"row\">\n";
        
        for (var itm in form.related) {
            if (form.related[itm].type == 'tree') {
-              html += "<div class=\"span5\">";
+              html += "<div class=\"col-lg-5\">";
               html += "<div class=\"inventory-buttons\">";
-              html += "<button ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-pad btn-mini\" " +
+              html += "<button ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-mini\" " +
                   "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\">" +
-                  "<i class=\"icon-edit\"></i> Edit Group</button>";
+                  "<i class=\"icon-edit\"></i> Edit</button>";
               html += "<button ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" id=\"inv-group-add\" " + 
                   "class=\"btn btn-mini btn-success\" aw-tool-tip=\"Add a new group\" " +
-                  "data-placement=\"bottom\"><i class=\"icon-plus\"></i> Add Group</button>";
+                  "data-placement=\"bottom\"><i class=\"icon-plus\"></i> Add</button>";
               html += "<button ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" id=\"inv-group-delete\" " +
                   "aw-tool-tip=\"Delete the selected group\" data-placement=\"bottom\" " +
                   "class=\"btn btn-mini btn-danger\">" +
-                  "<i class=\"icon-trash\"></i> Delete Group</button>";
+                  "<i class=\"icon-trash\"></i> Delete</button>";
               html += "</div>\n";  
               html += "<div id=\"tree-view\"></div>\n";
               html += "<div class=\" inventory-filter\">";
@@ -880,15 +907,15 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += "</div>\n";
            }
            else {
-              html += "<div id=\"group-view\" class=\"span7\">\n";
+              html += "<div id=\"group-view\" class=\"col-lg-7\">\n";
               html += "<div id=\"hosts-well\" class=\"well\">\n";
               html += "<div id=\"hosts-title\" ng-bind-html-unsafe=\"" + form.related[itm].title + "\"></div>\n";
-              html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true });
+              html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true, size: 'col-lg-6'});
 
               // Add actions(s)
               html += "<div class=\"list-actions\">\n";
               for (var action in form.related[itm].actions) {
-                  html += "<button class=\"btn btn-mini ";
+                  html += "<button type=\"button\" class=\"btn btn-mini ";
                   html += (form.related[itm].actions[action]['class']) ? form.related[itm].actions[action]['class'] : "btn-success";
                   html += "\" ";
                   html += (form.related[itm]['actions'][action].id) ? this.attr(form.related[itm]['actions'][action],'id') : "";
@@ -1041,7 +1068,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += "<div class=\"list-actions\">\n";
               for (var act in form.related[itm].actions) {
                  var action = form.related[itm].actions[act];
-                 html += "<button class=\"btn btn-small ";
+                 html += "<button type=\"button\" class=\"btn btn-mini ";
                  html += (form.related[itm].actions[act]['class']) ? form.related[itm].actions[act]['class'] : "btn-success";
                  html += "\" ";
                  html += this.attr(action,'ngClick');
@@ -1102,7 +1129,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += "<td class=\"actions\">";
               for (act in form.related[itm].fieldActions) {
                  var action = form.related[itm].fieldActions[act];
-                 html += "<button class=\"btn btn-small"; 
+                 html += "<button type=\"button\" class=\"btn btn-mini"; 
                  html += (action['class']) ? " " + action['class'] : "";
                  html += "\" " + this.attr(action,'ngClick');
                  html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";

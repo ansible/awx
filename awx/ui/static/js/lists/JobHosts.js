@@ -60,7 +60,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Refresh',
                 icon: 'icon-refresh',
                 ngClick: "refresh()",
-                "class": 'btn-success btn-small',
+                "class": 'btn-success btn-mini',
                 awToolTip: 'Refresh the page',
                 mode: 'all'
                 },
@@ -68,7 +68,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Details',
                 icon: 'icon-edit',
                 ngClick: "jobDetails()",
-                "class": 'btn btn-small',
+                "class": 'btn btn-mini',
                 awToolTip: 'Edit job details',
                 mode: 'all'
                 },
@@ -76,7 +76,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Events',
                 icon: 'icon-list-ul',
                 ngClick: "jobEvents()",
-                "class": 'btn btn-small',
+                "class": 'btn btn-mini',
                 awToolTip: 'View job events',
                 mode: 'all'            
                 },

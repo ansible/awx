@@ -253,16 +253,18 @@ angular.module('JobFormDefinition', [])
                 label: 'Standard Out', 
                 type: 'textarea',
                 readonly: true,
+                xtraWide: true,
                 rows: "\{\{ stdout_rows \}\}",
-                "class": 'span12 nowrap',
+                "class": 'nowrap',
                 ngShow: "result_stdout != ''"
                 },
             result_traceback: {
                 label: 'Traceback',
-                type: 'textarea', 
+                type: 'textarea',
+                xtraWide: true,
                 readonly: true,
                 rows: "\{\{ traceback_rows \}\}",
-                "class": 'span12 nowrap',
+                "class": 'nowrap',
                 ngShow: "result_traceback != ''"
                 }
             },
@@ -292,10 +294,6 @@ angular.module('JobFormDefinition', [])
                 awToolTip: 'Edit job events',
                 mode: 'all'        
                 }
-            },
-
-        related: { //related colletions (and maybe items?)
-           
             }
             
     }); //Form

@@ -57,7 +57,7 @@ angular.module('JobsListDefinition', [])
         actions: {
             refresh: {
                 label: 'Refresh',
-                "class": 'btn-success btn-small',
+                "class": 'btn-success btn-mini',
                 ngClick: "refreshJob(\{\{ job.id \}\})",
                 icon: 'icon-refresh',
                 awToolTip: 'Refresh the page',
@@ -70,7 +70,7 @@ angular.module('JobsListDefinition', [])
                 label: 'Hosts',
                 icon: 'icon-th-large',
                 ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.name \}\}')",
-                "class": 'btn btn-small',
+                "class": 'btn btn-mini',
                 awToolTip: 'View host summary',
                 ngDisabled: "job.status == 'new'"
                 },
@@ -79,7 +79,7 @@ angular.module('JobsListDefinition', [])
                 icon: 'icon-list-ul',
                 mode: 'all',             
                 ngClick: "viewEvents(\{{ job.id \}\}, '\{\{ job.name \}\}')",
-                "class": 'btn btn-small',
+                "class": 'btn btn-mini',
                 awToolTip: 'View events',
                 ngDisabled: "job.status == 'new'"
                 },
@@ -87,21 +87,21 @@ angular.module('JobsListDefinition', [])
                 label: 'Details',
                 icon: 'icon-zoom-in',
                 ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.name \}\}')",
-                "class": 'btn btn-small',
+                "class": 'btn btn-mini',
                 awToolTip: 'View job details'
                 },
             rerun: {
                 icon: 'icon-retweet',
                 mode: 'all',             
                 ngClick: "submitJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}' )",
-                "class": 'btn-success btn-small',
+                "class": 'btn-success btn-mini',
                 awToolTip: 'Re-run this job'
                 },
             cancel: {
                 icon: 'icon-minus-sign',
                 mode: 'all',
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
-                "class": 'btn-danger btn-small',
+                "class": 'btn-danger btn-mini',
                 awToolTip: 'Cancel job',
                 ngShow: "job.status == 'pending' || job.status == 'running'"
                 },
@@ -109,7 +109,7 @@ angular.module('JobsListDefinition', [])
                 icon: 'icon-trash',
                 mode: 'all',
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
-                "class": 'btn-danger btn-small',
+                "class": 'btn-danger btn-mini',
                 awToolTip: 'Delete this job',
                 ngShow: "job.status != 'pending' && job.status != 'running'"
                 }
