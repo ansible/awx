@@ -12,8 +12,16 @@
 
 function Authenticate($window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert)
 {
+   var setLoginFocus = function() {
+      $('#login-username').focus();
+      };
+
    // Display the login dialog
    $('#login-modal').modal({ show: true, keyboard: false, backdrop: 'static' });
+   // Set focus to username field
+   $('#login-modal').on('shown.bs.modal', function() {
+       setLoginFocus();
+       });
 
    var scope = angular.element(document.getElementById('login-modal')).scope();
    
@@ -58,7 +66,7 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
        var token;
        if (username == null || username == undefined || username == '' || 
            password == null || password == undefined || password == '' ) {
-           Alert('Error!', 'Please provide a username and password before attempting to login.');
+           Alert('Error!', 'Please provide a username and password before attempting to login.', 'alert-danger', setLoginFocus);
        }
        else {
            Authorization.retrieveToken(username, password)
@@ -86,11 +94,11 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
                                  $location.path('/organizations');
                                  })
                              .error(function(data, status, headers, config) {
-                                 Alert('Error', 'Failed to access user information. GET returned status: ' + status);
+                                 Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
                                  });
                          })
                      .error( function(data, status, headers, config) {
-                         Alert('Error', 'Failed to access license information. GET returned status: ' + status);
+                         Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
                          });
                  })
              .error( function(data, status, headers, config) {
@@ -111,7 +119,7 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
                        msg = 'The login attempt failed with a status of: ' + status;
                     }
                     scope.reset();
-                    Alert(hdr, msg);
+                    Alert(hdr, msg, 'alert-danger', setLoginFocus);
                  }
                  });
            }

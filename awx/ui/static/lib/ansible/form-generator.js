@@ -72,15 +72,31 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        if (options.modal) {
           this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;  //Default title for default modal
           this.scope.formModalInfo = false  //Disable info button for default modal
-          $('.popover').popover('hide');  //remove any lingering pop-overs
+          $('.popover').each(function(index) {
+              // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+              $(this).remove();
+              });
           if (options.modal_selector) {
-             $(options.modal_selector).removeClass('skinny-modal'); //Used in job_events to remove white space
-             $(options.modal_selector).modal({ show: true, backdrop: 'static', keyboard: false });
+             $(options.modal_selector).modal({ show: true, backdrop: 'static', keyboard: true });
+             $(options.modal_selector).on('shown.bs.modal', function() {
+                 $(options.modal_select + ' input:first').focus();
+                 });
           }
           else {
-             //$('#form-modal').removeClass('skinny-modal'); //Used in job_events to remove white space
-             $('#form-modal').modal({ show: true, backdrop: 'static', keyboard: false });
+             $('#form-modal').modal({ show: true, backdrop: 'static', keyboard: true });
+             $('#form-modal').on('shown.bs.modal', function() {
+                 $('#form-modal input:first').focus();
+                 });
           }
+          $(document).bind('keydown', function(e) {
+              if (e.keyCode === 27) {
+                 if (options.modal_selector) {
+                    $(options.modal_selector).modal('hide');
+                 }
+                 $('#prompt-modal').modal('hide');
+                 $('#form-modal').modal('hide');
+              }
+              });
        }
        return this.scope;
        },

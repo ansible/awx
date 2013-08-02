@@ -44,12 +44,30 @@ angular.module('Utilities',[])
                 action();
                 });
          }
+         $(document).bind('keydown', function(e) {
+            if (e.keyCode === 27) {
+               $('#alert-modal2').modal('hide');
+               if (action) {
+                  action();
+               }
+            }
+            });
       }
       else {
          $rootScope.alertHeader = hdr;
          $rootScope.alertBody = msg;
          $rootScope.alertClass = (cls) ? cls : 'alert-danger';  //default alert class is alert-danger
          $('#alert-modal').modal({ show: true, keyboard: true , backdrop: 'static' });
+         
+         $(document).bind('keydown', function(e) {
+            if (e.keyCode === 27) {
+               $('#alert-modal').modal('hide');
+               if (action) {
+                  action();
+               }
+            }
+            });
+
          $rootScope.disableButtons = (disableButtons) ? true : false;
          if (action) {
             $('#alert-modal').on('hidden', function() {

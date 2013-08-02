@@ -88,8 +88,16 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        if (options.mode == 'lookup') {
           // options should include {hdr: <dialog header>, action: <function...> }
           this.scope.lookupHeader = options.hdr;
-          $('.popover').popover('hide');  //remove any lingering pop-overs
-          $('#lookup-modal').modal({ backdrop: 'static', keyboard: false });
+          $('.popover').each(function(index) {
+              // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+              $(this).remove();
+              });
+          $('#lookup-modal').modal({ backdrop: 'static', keyboard: true });
+          $(document).bind('keydown', function(e) {
+              if (e.keyCode === 27) {
+                 $('#lookup-modal').modal('hide');
+              }
+              });
        }
        
        return this.scope;
