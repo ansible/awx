@@ -6,7 +6,8 @@ import sys
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
 
-__all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore']
+__all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
+           'get_awx_version']
 
 def get_object_or_400(klass, *args, **kwargs):
     '''
@@ -51,3 +52,14 @@ class RequireDebugTrueOrTest(logging.Filter):
     def filter(self, record):
         from django.conf import settings
         return settings.DEBUG or 'test' in sys.argv
+
+def get_awx_version():
+    '''
+    Return AWX version as reported by setuptools.
+    '''
+    from awx import __version__
+    try:
+        import pkg_resources
+        return pkg_resources.require('awx')[0].version
+    except:
+        return __version__

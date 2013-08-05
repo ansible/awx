@@ -11,8 +11,11 @@ import yaml
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.datastructures import SortedDict
+from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
+from rest_framework.compat import get_concrete_model
 from rest_framework import serializers
 
 # AWX
@@ -34,7 +37,7 @@ SUMMARIZABLE_FIELDS = (
 class BaseSerializer(serializers.ModelSerializer):
 
     # add the URL and related resources
-    url            = serializers.SerializerMethodField('get_absolute_url')
+    url            = serializers.SerializerMethodField('get_url')
     related        = serializers.SerializerMethodField('get_related')
     summary_fields = serializers.SerializerMethodField('get_summary_fields')
 
@@ -42,14 +45,34 @@ class BaseSerializer(serializers.ModelSerializer):
     created       = serializers.SerializerMethodField('get_created')
     active        = serializers.SerializerMethodField('get_active')
 
-    def get_absolute_url(self, obj):
+    def get_fields(self):
+        opts = get_concrete_model(self.opts.model)._meta
+        ret = super(BaseSerializer, self).get_fields()
+        for key, field in ret.items():
+            if key == 'id' and not getattr(field, 'help_text', None):
+                field.help_text = 'Database ID for this %s.' % unicode(opts.verbose_name)
+            elif key == 'url':
+                field.help_text = 'URL for this %s.' % unicode(opts.verbose_name)
+                field.type_label = 'string'
+            elif key == 'related':
+                field.help_text = 'Data structure with URLs of related resources.'
+                field.type_label = 'object'
+            elif key == 'summary_fields':
+                field.help_text = 'Data structure with name/description for related resources.'
+                field.type_label = 'object'
+            elif key == 'created':
+                field.help_text = 'Timestamp when this %s was created.' % unicode(opts.verbose_name)
+                field.type_label = 'datetime'
+        return ret
+
+    def get_url(self, obj):
         if isinstance(obj, User):
             return reverse('main:user_detail', args=(obj.pk,))
         else:
             return obj.get_absolute_url()
 
     def get_related(self, obj):
-        res = dict()
+        res = SortedDict()
         if getattr(obj, 'created_by', None):
             res['created_by'] = reverse('main:user_detail', args=(obj.created_by.pk,))
         return res
@@ -57,12 +80,12 @@ class BaseSerializer(serializers.ModelSerializer):
     def get_summary_fields(self, obj):
         # return the names (at least) for various fields, so we don't have to write this
         # method for each object.
-        summary_fields = {}
+        summary_fields = SortedDict()
         for fk in SUMMARIZABLE_FKS:
             try:
                 fkval = getattr(obj, fk, None)
                 if fkval is not None:
-                    summary_fields[fk] = {}
+                    summary_fields[fk] = SortedDict()
                     for field in SUMMARIZABLE_FIELDS:
                         fval = getattr(fkval, field, None)
                         if fval is not None:
@@ -86,13 +109,13 @@ class BaseSerializer(serializers.ModelSerializer):
 
 class UserSerializer(BaseSerializer):
 
-    password = serializers.WritableField(required=False, default='')
+    password = serializers.WritableField(required=False, default='',
+        help_text='Write-only field used to change the password.')
 
     class Meta:
         model = User
         fields = ('id', 'url', 'related', 'created', 'username', 'first_name',
-                  'last_name', 'email', 'is_active', 'is_superuser',
-                  'password')
+                  'last_name', 'email', 'is_superuser', 'password')
 
     def to_native(self, obj):
         ret = super(UserSerializer, self).to_native(obj)
@@ -152,7 +175,7 @@ class OrganizationSerializer(BaseSerializer):
 
 class ProjectSerializer(BaseSerializer):
 
-    playbooks = serializers.Field(source='playbooks')
+    playbooks = serializers.Field(source='playbooks', help_text='Array ')
 
     class Meta:
         model = Project
@@ -163,7 +186,7 @@ class ProjectSerializer(BaseSerializer):
         res.update(dict(
             organizations = reverse('main:project_organizations_list', args=(obj.pk,)),
             teams = reverse('main:project_teams_list', args=(obj.pk,)),
-            playbooks = reverse('main:project_detail_playbooks', args=(obj.pk,)),
+            playbooks = reverse('main:project_playbooks', args=(obj.pk,)),
         ))
         return res
 
@@ -190,7 +213,7 @@ class BaseSerializerWithVariables(BaseSerializer):
 
     def validate_variables(self, attrs, source):
         try:
-            json.loads(attrs[source].strip() or '{}')
+            json.loads(attrs.get(source, '').strip() or '{}')
         except ValueError:
             try:
                 yaml.safe_load(attrs[source])
@@ -211,8 +234,9 @@ class InventorySerializer(BaseSerializerWithVariables):
             hosts         = reverse('main:inventory_hosts_list',        args=(obj.pk,)),
             groups        = reverse('main:inventory_groups_list',       args=(obj.pk,)),
             root_groups   = reverse('main:inventory_root_groups_list',  args=(obj.pk,)),
-            variable_data = reverse('main:inventory_variable_detail',   args=(obj.pk,)),
-            organization  = reverse('main:organization_detail',        args=(obj.organization.pk,)),
+            variable_data = reverse('main:inventory_variable_data',     args=(obj.pk,)),
+            script        = reverse('main:inventory_script_view',       args=(obj.pk,)),
+            organization  = reverse('main:organization_detail',         args=(obj.organization.pk,)),
         ))
         return res
 
@@ -225,7 +249,7 @@ class HostSerializer(BaseSerializerWithVariables):
     def get_related(self, obj):
         res = super(HostSerializer, self).get_related(obj)
         res.update(dict(
-            variable_data = reverse('main:host_variable_detail', args=(obj.pk,)),
+            variable_data = reverse('main:host_variable_data',   args=(obj.pk,)),
             inventory     = reverse('main:inventory_detail',     args=(obj.inventory.pk,)),
             groups        = reverse('main:host_groups_list',     args=(obj.pk,)),
             all_groups    = reverse('main:host_all_groups_list', args=(obj.pk,)),
@@ -247,7 +271,7 @@ class GroupSerializer(BaseSerializerWithVariables):
     def get_related(self, obj):
         res = super(GroupSerializer, self).get_related(obj)
         res.update(dict(
-            variable_data = reverse('main:group_variable_detail', args=(obj.pk,)),
+            variable_data = reverse('main:group_variable_data',   args=(obj.pk,)),
             hosts         = reverse('main:group_hosts_list',      args=(obj.pk,)),
             children      = reverse('main:group_children_list',   args=(obj.pk,)),
             all_hosts     = reverse('main:group_all_hosts_list',  args=(obj.pk,)),

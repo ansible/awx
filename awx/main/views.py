@@ -13,17 +13,17 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
+from django.utils.datastructures import SortedDict
 
 # Django REST Framework
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.exceptions import PermissionDenied
-from rest_framework import generics
 from rest_framework.parsers import YAMLParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.renderers import YAMLRenderer
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
-from rest_framework.views import APIView
+from rest_framework import status
 
 # AWX
 from awx.main.authentication import JobTaskAuthentication
@@ -54,10 +54,6 @@ def handle_500(request):
     return handle_error(request, 500)
 
 class ApiRootView(APIView):
-    '''
-    This resource is the root of the AWX REST API and provides
-    information about the available API versions.
-    '''
 
     permission_classes = (AllowAny,)
     view_name = 'REST API'
@@ -76,11 +72,6 @@ class ApiRootView(APIView):
         return Response(data)
 
 class ApiV1RootView(APIView):
-    '''
-    Version 1 of the REST API.
-
-    Subject to change until the final 1.2 release.
-    '''
 
     permission_classes = (AllowAny,)
     view_name = 'Version 1'
@@ -106,17 +97,6 @@ class ApiV1RootView(APIView):
         return Response(data)
 
 class ApiV1ConfigView(APIView):
-    '''
-    Various sitewide configuration settings (some may only be visible to
-    superusers or organization admins):
-
-    * `project_base_dir`: Path on the server where projects and playbooks are \
-      stored.
-    * `project_local_paths`: List of directories beneath `project_base_dir` to
-      use when creating/editing a project.
-    * `time_zone`: The configured time zone for the server.
-    * `license_info`: Information about the current license.
-    '''
 
     permission_classes = (IsAuthenticated,)
     view_name = 'Configuration'
@@ -130,6 +110,7 @@ class ApiV1ConfigView(APIView):
         data = dict(
             time_zone=settings.TIME_ZONE,
             license_info=license_data,
+            version=get_awx_version(),
         )
         if request.user.is_superuser or request.user.admin_of_organizations.filter(active=True).count():
             data.update(dict(
@@ -139,29 +120,7 @@ class ApiV1ConfigView(APIView):
 
         return Response(data)
 
-class AuthTokenView(ObtainAuthToken):
-    '''
-    POST username and password to this resource to obtain an authentication
-    token for subsequent requests.
-    
-    Example JSON to post (application/json):
-
-        {"username": "user", "password": "my pass"}
-
-    Example form data to post (application/x-www-form-urlencoded):
-
-        username=user&password=my%20pass
-
-    If the username and password are valid, the response should be:
-
-        {"token": "8f17825cf08a7efea124f2638f3896f6637f8745"}
-
-    Otherwise, the response will indicate the error that occurred.
-
-    For subsequent requests, pass the token via the HTTP request headers:
-
-        Authenticate: Token 8f17825cf08a7efea124f2638f3896f6637f8745
-    '''
+class AuthTokenView(ObtainAuthToken, APIView):
 
     permission_classes = (AllowAny,)
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
@@ -273,7 +232,7 @@ class ProjectDetail(RetrieveUpdateDestroyAPIView):
     model = Project
     serializer_class = ProjectSerializer
 
-class ProjectDetailPlaybooks(RetrieveAPIView):
+class ProjectPlaybooks(RetrieveAPIView):
 
     model = Project
     serializer_class = ProjectPlaybooksSerializer
@@ -301,8 +260,7 @@ class UserMeList(ListAPIView):
 
     model = User
     serializer_class = UserSerializer
-
-    view_name = 'Me!'
+    view_name = 'Me'
 
     def get_queryset(self):
         return self.model.objects.filter(pk=self.request.user.pk)
@@ -522,37 +480,28 @@ class InventoryRootGroupsList(SubListCreateAPIView):
         sublist_qs = parent.groups.exclude(parents__pk__in=all_pks).distinct()
         return qs & sublist_qs
 
-class BaseVariableDetail(RetrieveUpdateDestroyAPIView):
+class BaseVariableData(RetrieveUpdateAPIView):
 
     parser_classes = api_settings.DEFAULT_PARSER_CLASSES + [YAMLParser]
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES + [YAMLRenderer]
     is_variable_data = True # Special flag for permissions check.
     
-class InventoryVariableDetail(BaseVariableDetail):
+class InventoryVariableData(BaseVariableData):
 
     model = Inventory
     serializer_class = InventoryVariableDataSerializer
 
-class HostVariableDetail(BaseVariableDetail):
+class HostVariableData(BaseVariableData):
 
     model = Host
     serializer_class = HostVariableDataSerializer
 
-class GroupVariableDetail(BaseVariableDetail):
+class GroupVariableData(BaseVariableData):
 
     model = Group
     serializer_class = GroupVariableDataSerializer
 
 class InventoryScriptView(RetrieveAPIView):
-    '''
-    Return inventory group and host data as needed for an inventory script.
-    
-    Without query parameters, return groups with hosts, children and vars
-    (equivalent to the --list parameter to an inventory script).
-    
-    With ?host=HOSTNAME, return host vars for the given host (equivalent to the
-    --host HOSTNAME parameter to an inventory script).
-    '''
 
     model = Inventory
     authentication_classes = [JobTaskAuthentication] + \
@@ -568,48 +517,30 @@ class InventoryScriptView(RetrieveAPIView):
                                      name=hostname)
             data = host.variables_dict
         else:
-            data = {}
+            data = SortedDict()
+            if self.object.variables_dict:
+                data['all'] = SortedDict()
+                data['all']['vars'] = self.object.variables_dict
+
             for group in self.object.groups.filter(active=True):
                 hosts = group.hosts.filter(active=True)
                 children = group.children.filter(active=True)
-                group_info = {
-                    'hosts': list(hosts.values_list('name', flat=True)),
-                    'children': list(children.values_list('name', flat=True)),
-                    'vars': group.variables_dict,
-                }
+                group_info = SortedDict()
+                group_info['hosts'] = list(hosts.values_list('name', flat=True))
+                group_info['children'] = list(children.values_list('name', flat=True))
+                group_info['vars'] = group.variables_dict
+                data[group.name] = group_info
 
-                # this confuses the inventory script if the group
-                # has children set and no variables or hosts.
-                # no other reason to do this right?
-                #
-                # group_info = dict(filter(lambda x: bool(x[1]),
-                #                          group_info.items()))
-
-                if group_info.keys() in ([], ['hosts']):
-                    data[group.name] = group_info.get('hosts', [])
-                else:
-                    data[group.name] = group_info
-
-            if self.object.variables_dict:
-                data['all'] = {
-                    'vars': self.object.variables_dict,
-                }
-
-            
-            # workaround for Ansible inventory bug (github #3687), localhost must
-            # be explicitly listed in the all group for dynamic inventory
-            # scripts to pick it up
-
-            localhost  = Host.objects.filter(inventory=self.object, name='localhost').count()
-            localhost2 = Host.objects.filter(inventory=self.object, name='127.0.0.1').count()
-            if localhost or localhost2:
-                if not 'all' in data:
-                    data['all'] = {}
-                data['all']['hosts'] = []
-                if localhost:
-                    data['all']['hosts'].append('localhost')
-                if localhost2:
-                    data['all']['hosts'].append('127.0.0.1')
+            # workaround for Ansible inventory bug (github #3687), localhost
+            # must be explicitly listed in the all group for dynamic inventory
+            # scripts to pick it up.
+            localhost_names = ('localhost', '127.0.0.1', '::1')
+            localhosts_qs = self.object.hosts.filter(active=True,
+                                                     name__in=localhost_names)
+            localhosts = list(localhosts_qs.values_list('name', flat=True))
+            if localhosts:
+                data.setdefault('all', SortedDict())
+                data['all']['hosts'] = localhosts
 
         return Response(data)
 
@@ -618,51 +549,12 @@ class JobTemplateList(ListCreateAPIView):
     model = JobTemplate
     serializer_class = JobTemplateSerializer
 
-    def _get_queryset(self):
-        return self.request.user.get_queryset(self.model)
-
 class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
 
-class JobTemplateCallback(generics.GenericAPIView):
-    '''
-    The job template callback allows for empheral hosts to launch a new job.
-    
-    Configure a host to POST to this resource, passing the `host_config_key`
-    parameter, to start a new job limited to only the requesting host.  In the
-    examples below, replace the `N` parameter with the `id` of the job template
-    and the `HOST_CONFIG_KEY` with the `host_config_key` associated with the
-    job template.
-
-    For example, using curl:
-
-        curl --data-urlencode host_config_key=HOST_CONFIG_KEY http://server/api/v1/job_templates/N/callback/
-
-    Or using wget:
-
-        wget -O /dev/null --post-data="host_config_key=HOST_CONFIG_KEY" http://server/api/v1/job_templates/N/callback/
-        
-    The response will return status 202 if the request is valid, 403 for an
-    invalid host config key, or 400 if the host cannot be determined from the
-    address making the request.
-    
-    A GET request may be used to verify that the correct host will be selected.
-    This request must authenticate as a valid user with permission to edit the
-    job template.  For example:
-    
-        curl http://user:password@server/api/v1/job_templates/N/callback/
-    
-    The response will include the host config key as well as the host name(s)
-    that would match the request:
-    
-        {
-            "host_config_key": "HOST_CONFIG_KEY",
-            "matching_hosts": ["hostname"]
-        }
-
-    '''
+class JobTemplateCallback(GenericAPIView):
 
     model = JobTemplate
     permission_classes = (JobTemplateCallbackPermission,)
@@ -782,9 +674,6 @@ class JobList(ListCreateAPIView):
     model = Job
     serializer_class = JobSerializer
 
-    def _get_queryset(self):
-        return self.model.objects.all() # FIXME
-
 class JobDetail(RetrieveUpdateDestroyAPIView):
 
     model = Job
@@ -797,7 +686,7 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
             return self.http_method_not_allowed(request, *args, **kwargs)
         return super(JobDetail, self).update(request, *args, **kwargs)
 
-class JobStart(generics.GenericAPIView):
+class JobStart(GenericAPIView):
 
     model = Job
     is_job_start = True
@@ -823,7 +712,7 @@ class JobStart(generics.GenericAPIView):
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
-class JobCancel(generics.GenericAPIView):
+class JobCancel(GenericAPIView):
 
     model = Job
     is_job_cancel = True
@@ -849,8 +738,7 @@ class BaseJobHostSummariesList(SubListAPIView):
     serializer_class = JobHostSummarySerializer
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_host_summaries'
-
-    view_name = 'Job Host Summary List'
+    view_name = 'Job Host Summaries List'
 
 class HostJobHostSummariesList(BaseJobHostSummariesList):
 
@@ -885,7 +773,6 @@ class JobEventChildrenList(SubListAPIView):
     serializer_class = JobEventSerializer
     parent_model = JobEvent
     relationship = 'children'
-
     view_name = 'Job Event Children List'
 
 class JobEventHostsList(SubListAPIView):
@@ -894,7 +781,6 @@ class JobEventHostsList(SubListAPIView):
     serializer_class = HostSerializer
     parent_model = JobEvent
     relationship = 'hosts'
-
     view_name = 'Job Event Hosts List'
 
 class BaseJobEventsList(SubListAPIView):
@@ -903,6 +789,7 @@ class BaseJobEventsList(SubListAPIView):
     serializer_class = JobEventSerializer
     parent_model = None # Subclasses must define this attribute.
     relationship = 'job_events'
+    view_name = 'Job Events List'
 
 class HostJobEventsList(BaseJobEventsList):
 

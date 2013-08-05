@@ -235,7 +235,7 @@ class ProjectsTest(BaseTest):
         self.get(project, expect=404, auth=self.get_normal_credentials())
 
         # can list playbooks for projects
-        proj_playbooks = reverse('main:project_detail_playbooks', args=(self.projects[2].pk,))
+        proj_playbooks = reverse('main:project_playbooks', args=(self.projects[2].pk,))
         got = self.get(proj_playbooks, expect=200, auth=self.get_super_credentials())
         self.assertEqual(got, self.projects[2].playbooks)
 

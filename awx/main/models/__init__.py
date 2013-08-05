@@ -147,14 +147,23 @@ class Inventory(CommonModel):
         verbose_name_plural = _('inventories')
         unique_together = (("name", "organization"),)
 
-    organization = models.ForeignKey(Organization, null=False, related_name='inventories')
+    organization = models.ForeignKey(
+        Organization,
+        null=False,
+        related_name='inventories',
+        help_text=_('Organization containing this inventory.'),
+    )
     variables = models.TextField(
         blank=True,
         default='',
         null=True,
         help_text=_('Variables in JSON or YAML format.'),
     )
-    has_active_failures = models.BooleanField(default=False, editable=False)
+    has_active_failures = models.BooleanField(
+        default=False,
+        editable=False,
+        help_text=_('Flag indicating whether any hosts in this inventory have failed.'),
+    )
 
     def get_absolute_url(self):
         return reverse('main:inventory_detail', args=(self.pk,))

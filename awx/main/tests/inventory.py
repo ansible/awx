@@ -342,7 +342,7 @@ class InventoryTest(BaseTest):
         vars_c = dict(asdf=5555, dog='mouse', cat='mogwai', unstructured=dict(a=[3,0,3],b=dict(z=2600)))
 
         # attempting to get a variable object creates it, even though it does not already exist
-        vdata_url = reverse('main:host_variable_detail', args=(added_by_collection_a['id'],))
+        vdata_url = reverse('main:host_variable_data', args=(added_by_collection_a['id'],))
         
         got = self.get(vdata_url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(got, {})
@@ -373,8 +373,8 @@ class InventoryTest(BaseTest):
         vars_c = dict(asdf=9999, dog='pluto',    cat='five',      unstructured=dict(a=[3,3,3],b=dict(z=5)))
         groups = Group.objects.all()
 
-        vdata1_url = reverse('main:group_variable_detail', args=(groups[0].pk,))
-        vdata2_url = reverse('main:group_variable_detail', args=(groups[1].pk,))
+        vdata1_url = reverse('main:group_variable_data', args=(groups[0].pk,))
+        vdata2_url = reverse('main:group_variable_data', args=(groups[1].pk,))
 
         # a super user can associate variable objects with groups
         got = self.get(vdata1_url, expect=200, auth=self.get_super_credentials())
@@ -399,7 +399,7 @@ class InventoryTest(BaseTest):
         vars_b = dict(asdf=2736, dog='benji',   cat='garfield',   unstructured=dict(a=[2,2,2],b=dict(x=3,y=4)))
         vars_c = dict(asdf=7692, dog='buck',    cat='sylvester',  unstructured=dict(a=[3,3,3],b=dict(z=5)))
          
-        vdata_url = reverse('main:inventory_variable_detail', args=(self.inventory_a.pk,))
+        vdata_url = reverse('main:inventory_variable_data', args=(self.inventory_a.pk,))
 
         # a super user can associate variable objects with inventory
         got = self.get(vdata_url, expect=200, auth=self.get_super_credentials())

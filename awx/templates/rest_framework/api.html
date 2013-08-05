@@ -12,18 +12,18 @@ html body {
 }
 html body .navbar .navbar-inner {
   border-top: none;
-  height: 20px;
+  height: 54px;
 }
 html body .navbar-inverse .navbar-inner {
-    background-color: #36454F;
-    background-image: -moz-linear-gradient(top, #36454F, #36454F);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#36454F), to(#36454F));
-    background-image: -webkit-linear-gradient(top, #36454F, #36454F);
-    background-image: -o-linear-gradient(top, #36454F, #36454F);
-    background-image: linear-gradient(to bottom, #36454F, #36454F);
+    background-color: #171717;
+    background-image: -moz-linear-gradient(top, #171717, #171717);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#171717), to(#171717));
+    background-image: -webkit-linear-gradient(top, #171717, #171717);
+    background-image: -o-linear-gradient(top, #171717, #171717);
+    background-image: linear-gradient(to bottom, #171717, #171717);
     background-repeat: repeat-x;
-    border-color: #36454F;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#36454F', endColorstr='#36454F', GradientType=0);
+    border-color: #171717;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#171717', endColorstr='#171717', GradientType=0);
 }
 html body .navbar-inverse .nav > li > a {
     color: #A9A9A9;
@@ -33,7 +33,7 @@ html body .navbar-inverse .nav > li > a:focus {
    color: #2078be;
 }
 html body .navbar .brand img {
-    width: 130px;
+    width: 200px;
     margin-top: -6px;
     margin-right: 0.5em;
 }
@@ -45,6 +45,15 @@ html body .navbar-inverse .nav li.dropdown.open.active > .dropdown-toggle {
 html body .navbar-inverse .brand {
   font-size: 1.2em;
   color: #fff;
+  padding-top: 6px;
+  padding-left: 4px;
+}
+html body .navbar-inverse .nav.pull-right {
+  margin-top: 8px;
+  margin-right: -8px;
+}
+html body ul.breadcrumb {
+  margin-top: 72px;
 }
 span.powered-by .version {
   color: #ddd;
@@ -88,20 +97,35 @@ html body .description {
   padding-bottom: 0;
   display: none;
 }
-.footer {
-  margin-top: 0.5em;
+#footer {
   font-size: 0.8em;
   text-align: center;
+  padding-bottom: 1em;
 }
-.footer a,
-.footer a:hover {
+#footer a,
+#footer a:hover {
   color: #333;
+}
+img.awxlogo {
+  width: 125px;
+  margin-bottom: 0.5em;
+}
+html body .wrapper {
+  min-height: 1%;
+  height: auto !important;
+  margin: 0 auto 0;
+}
+html body #footer {
+  height: auto !important;
+}
+html body #push {
+	height: 0;
 }
 </style>
 {% endblock %}
 
 {% block branding %}
-  <a class="brand" href="/api/"><img class="logo" src="{{ STATIC_URL }}img/ansibleworks-logo.png">{% trans 'REST API' %}</a>
+  <a class="brand" href="/api/"><img class="logo" src="{{ STATIC_URL }}img/logo.png">{% trans 'REST API' %}</a>
 {% endblock %}
 
 {% block userlinks %}
@@ -113,7 +137,9 @@ html body .description {
 {% endblock %}
 
 {% block footer %}
-<div class="footer">Copyright &copy; 2013 <a href="http://www.ansibleworks.com/">AnsibleWorks, Inc.</a> All rights reserved.<br />
+<div id="footer">
+  <img class="awxlogo" src="{{ STATIC_URL }}img/AWX_logo.png" /><br/>
+  Copyright &copy; 2013 <a href="http://www.ansibleworks.com/">AnsibleWorks, Inc.</a> All rights reserved.<br />
   1482 East Valley Road, Suite 888 &middot; Montecito, California 9308 &middot; <a href="tel:18008250212">+1-800-825-0212<a/></div>
 {% endblock %}
 
@@ -121,13 +147,51 @@ html body .description {
 {{ block.super }}
 <script type="text/javascript">
 $(function() {
-  // Make linkes from relative URLs to resources.
+  // Make links from relative URLs to resources.
   $('span.str').each(function() {
+    // Remove REST API links within data.
+    if ($(this).parent('a').size()) {
+      $(this).unwrap();
+    }
     var s = $(this).html();
     if (s.match(/^\"\/.+\/\"$/) || s.match(/^\"\/.+\/\?.*\"$/)) {
       $(this).html('"<a href=' + s + '>' + s.replace(/\"/g, '') + '</a>"');
     }
   });
+  // Make links for all inventory script hosts.
+  $('.request-info .pln:contains("script")').each(function() {
+    $('.response-info span.str:contains("hosts")').each(function() {
+      if ($(this).text() != '"hosts"') {
+        return;
+      }
+      var hosts_state = 0;
+      $(this).find('~ span').each(function() {
+          if (hosts_state == 0) {
+            if ($(this).is('span.pun') && $(this).text() == '[') {
+              hosts_state = 1;
+            }
+          }
+          else if (hosts_state == 1) {
+            if ($(this).is('span.pun') && ($(this).text() == ']' || $(this).text() == '],')) {
+              hosts_state = 2;
+            }
+            else if ($(this).is('span.str')) {
+              if ($(this).text() == '"') {
+              }
+              else if ($(this).text().match(/^\".+\"$/)) {
+                var s = $(this).text().replace(/\"/g, '');
+                $(this).html('"<a href="' + '?host=' + s + '">' + s + '</a>"');
+              }
+              else {
+                var s = $(this).text();
+                $(this).html('<a href="' + '?host=' + s + '">' + s + '</a>');
+              }
+            }
+          }
+      });
+    });
+  });
+  // Add classes/icons for dynamically showing/hiding help.
   if ($('.description').html()) {
     $('.description').addClass('well').addClass('well-small').addClass('prettyprint');
     $('.description').prepend('<a class="hide-description pull-right" href="#" title="Hide Description"><i class="icon-remove"></i></a>');
@@ -140,6 +204,9 @@ $(function() {
       $('.description').slideToggle('fast');
       return false;
     });
+    if (window.location.hash == '#showhelp') {
+      $('.description').slideDown('fast');
+    }
   }
   $('.btn-primary').removeClass('btn-primary').addClass('btn-success');
 });
