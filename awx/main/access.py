@@ -898,8 +898,10 @@ class JobEventAccess(BaseAccess):
             return qs
         job_qs = self.user.get_queryset(Job)
         host_qs = self.user.get_queryset(Host)
-        return qs.filter(Q(host__isnull=True) | Q(host__in=host_qs),
-                         job__in=job_qs)
+        qs = qs.filter(Q(host__isnull=True) | Q(host__in=host_qs),
+                       job__in=job_qs)
+        # FIXME: Filter certain extra events from async polling?
+        return qs
 
     def can_add(self, data):
         return False

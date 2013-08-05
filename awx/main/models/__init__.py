@@ -1139,6 +1139,24 @@ class JobEvent(models.Model):
         elif self.event == 'playbook_on_task_start':
             if self.task is not None:
                 msg = "%s (%s)" % (msg, self.task)
+
+        # Change display for runner events trigged by async polling.
+        if self.event in ('runner_on_ok', 'runner_on_failed'):
+            res = self.event_data.get('res', {})
+            try:
+                module_name = res['invocation']['module_name']
+                job_id = res['ansible_job_id']
+            except (TypeError, KeyError, AttributeError):
+                module_name = None
+                job_id = None
+            if module_name and job_id:
+                if module_name == 'async_status':
+                    msg = 'Host Async Checking'
+                else:
+                    msg = 'Host Async Started'
+            #msg = '%s %s %s' % (msg, module_name, job_id)
+        #msg = '%s [%s]' % (msg, self.event)
+
         return msg
 
     def _find_parent(self):
