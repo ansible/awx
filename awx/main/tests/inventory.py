@@ -478,11 +478,15 @@ class InventoryTest(BaseTest):
 
         # just some more groups for kicks
         inva  = Inventory.objects.get(pk=self.inventory_a.pk)
-        Group.objects.create(name='group-X1', inventory=inva)
-        Group.objects.create(name='group-X2', inventory=inva)
-        Group.objects.create(name='group-X3', inventory=inva)
-        Group.objects.create(name='group-X4', inventory=inva)
-        Group.objects.create(name='group-X5', inventory=inva)
+        gx1 = Group.objects.create(name='group-X1', inventory=inva)
+        gx2 = Group.objects.create(name='group-X2', inventory=inva)
+        gx2.parents.add(gx1)
+        gx3 = Group.objects.create(name='group-X3', inventory=inva)
+        gx3.parents.add(gx2)
+        gx4 = Group.objects.create(name='group-X4', inventory=inva)
+        gx4.parents.add(gx3)
+        gx5 = Group.objects.create(name='group-X5', inventory=inva)
+        gx5.parents.add(gx4)
 
         Permission.objects.create(
             inventory       = inva,
@@ -576,6 +580,21 @@ class InventoryTest(BaseTest):
             self.post(parent_children_url, data, expect=204, auth=self.get_super_credentials())
         removed_group = Group.objects.get(pk=result['id'])
         self.assertFalse(removed_group.active)
+
+        # Removing a group from a hierarchy should migrate its children to the
+        # parent.  The group itself will be deleted (marked inactive), and all
+        # relationships removed.
+        url = reverse('main:group_children_list', args=(gx2.pk,))
+        data = {
+            'id': gx3.pk,
+            'disassociate': 1,
+        }
+        with self.current_user(self.super_django_user):
+            response = self.post(url, data, expect=204)
+        gx3 = Group.objects.get(pk=gx3.pk)
+        self.assertFalse(gx3.active)
+        self.assertFalse(gx3 in gx2.children.all())
+        self.assertTrue(gx4 in gx2.children.all())
 
         #########################################################
         # FIXME: TAGS
