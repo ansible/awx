@@ -168,6 +168,16 @@ class Inventory(CommonModel):
     def get_absolute_url(self):
         return reverse('main:inventory_detail', args=(self.pk,))
 
+    def mark_inactive(self, save=True):
+        '''
+        When marking inventory inactive, also mark hosts and groups inactive.
+        '''
+        super(Inventory, self).mark_inactive(save=save)
+        for host in self.hosts.filter(active=True):
+            host.mark_inactive()
+        for group in self.groups.filter(active=True):
+            group.mark_inactive()
+
     @property
     def variables_dict(self):
         try:

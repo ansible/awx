@@ -166,7 +166,54 @@ class InventoryTest(BaseTest):
             self.put(url_a, data, expect=403)
 
     def test_delete_inventory_detail(self):
-        pass # FIXME
+        url_a = reverse('main:inventory_detail', args=(self.inventory_a.pk,))
+        url_b = reverse('main:inventory_detail', args=(self.inventory_b.pk,))
+        
+        # Create test hosts and groups within each inventory.
+        self.inventory_a.hosts.create(name='host-a')
+        self.inventory_a.groups.create(name='group-a')
+        self.inventory_b.hosts.create(name='host-b')
+        self.inventory_b.groups.create(name='group-b')
+        
+        # Check put to detail view with invalid authentication.
+        self.check_invalid_auth(url_a, methods=('delete',))
+        self.check_invalid_auth(url_b, methods=('delete',))
+
+        # a regular user cannot delete any inventory records
+        with self.current_user(self.nobody_django_user):
+            self.delete(url_a, expect=403)
+            self.delete(url_b, expect=403)
+
+        # a user who is on a team who has read permissions on an inventory can
+        # see inventory records, but not delete.
+        with self.current_user(self.other_django_user):
+            data = self.get(url_b, expect=200)
+            self.delete(url_b, expect=403)
+
+        # an org admin can delete inventory records for his orgs only.
+        with self.current_user(self.normal_django_user):
+            data = self.get(url_a, expect=200)
+            self.delete(url_a, expect=204)
+            self.delete(url_b, expect=403)
+
+        # Verify that the inventory is marked inactive, along with all its
+        # hosts and groups.
+        self.inventory_a = Inventory.objects.get(pk=self.inventory_a.pk)
+        self.assertFalse(self.inventory_a.active)
+        self.assertFalse(self.inventory_a.hosts.filter(active=True).count())
+        self.assertFalse(self.inventory_a.groups.filter(active=True).count())
+
+        # a super user can delete inventory records
+        with self.current_user(self.super_django_user):
+            self.delete(url_a, expect=404)
+            self.delete(url_b, expect=204)
+
+        # Verify that the inventory is marked inactive, along with all its
+        # hosts and groups.
+        self.inventory_b = Inventory.objects.get(pk=self.inventory_b.pk)
+        self.assertFalse(self.inventory_b.active)
+        self.assertFalse(self.inventory_b.hosts.filter(active=True).count())
+        self.assertFalse(self.inventory_b.groups.filter(active=True).count())
 
     def test_main_line(self):
        
