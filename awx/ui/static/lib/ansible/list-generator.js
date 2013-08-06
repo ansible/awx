@@ -152,7 +152,6 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        if (options.mode != 'lookup') {
           //actions
           var base = $location.path().replace(/^\//,'').split('/')[0];
-          //html += "<div class=\"list-actions\">\n";
           html += "<div class=\""; 
           html += (options.id != undefined) ? "col-lg-5" : "col-lg-7";
           html += "\">\n";
@@ -164,6 +163,20 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  }
               }
           }
+          //select instructions
+          if (options.mode == 'select' && list.selectInstructions) {
+             var btn = {
+                 awPopOver: list.selectInstructions,
+                 dataPlacement: 'left',
+                 dataContainer: 'body',
+                 icon: "icon-question-sign",
+                 'class': 'btn-mini btn-help btn-info',
+                 awToolTip: 'Click for help',
+                 dataTitle: 'Help',
+                 iconSize: 'large'
+                 };
+             html += this.button(btn);
+          }
        }
        else {
           html += "<div class=\"col-lg-7\"></div>\n";
@@ -172,20 +185,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += "</div>\n";
        html += "</div><!-- row -->\n";
          
-          //select instructions
-          //if (options.mode == 'select' && list.selectInstructions) {
-          //   var btn = {
-          //       awPopOver: list.selectInstructions,
-          //       dataPlacement: 'left',
-          //       dataContainer: '.container',
-          //       icon: "icon-question-sign",
-          //       'class': 'btn-small btn-info',
-          //       awToolTip: 'Click for help',
-          //       dataTitle: 'Help',
-          //       iconSize: 'large'
-          //       };
-          //   html += this.button(btn);
-          // }
+          
           
           //html += "</div>\n";
 
