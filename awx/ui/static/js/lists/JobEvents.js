@@ -70,7 +70,7 @@ angular.module('JobEventsListDefinition', [])
                 label: 'Details',
                 ngClick: "jobDetails()",
                 icon: 'icon-zoom-in',
-                "class": 'btn btn-mini',
+                "class": 'btn btn-default btn-mini',
                 awToolTip: 'Edit job details',
                 mode: 'all'
                 },
@@ -78,7 +78,7 @@ angular.module('JobEventsListDefinition', [])
                 label: 'Hosts',
                 icon: 'icon-th-large',
                 ngClick: "jobSummary()",
-                "class": 'btn btn-mini',
+                "class": 'btn btn-default btn-mini',
                 awToolTip: 'View host summary',
                 mode: 'all'
                 }
@@ -89,7 +89,7 @@ angular.module('JobEventsListDefinition', [])
                 label: 'View',
                 ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
                 icon: 'icon-zoom-in',
-                "class": 'btn-mini',
+                "class": 'btn-default btn-mini',
                 awToolTip: 'View event details'
                 }
             }

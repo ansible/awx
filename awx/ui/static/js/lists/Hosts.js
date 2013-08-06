@@ -32,10 +32,10 @@ angular.module('HostListDefinition', [])
             help: {
                 awPopOver: "Select hosts by clicking on each host you wish to add. Add the selected hosts to the group by clicking the <em>Select</em> button.",
                 dataPlacement: 'left',
-                dataContainer: "#form-modal",
+                dataContainer: '#form-modal .modal-content',
                 icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-mini btn-info',
+                'class': 'btn-mini btn-info btn-help',
                 awToolTip: 'Click for help',
                 dataTitle: 'Selecting Hosts',
                 iconSize: 'large',
@@ -48,7 +48,7 @@ angular.module('HostListDefinition', [])
                 label: 'Edit',
                 ngClick: "editHost(\{\{ host.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-mini',
+                "class": 'btn-mini btn-default',
                 awToolTip: 'View/Edit host'
                 },
 

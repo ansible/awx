@@ -98,6 +98,7 @@ angular.module('UserFormDefinition', [])
                 ngClick: 'formReset()',
                 label: 'Reset',
                 icon: 'icon-trash',
+                'class': 'btn btn-default',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },
@@ -134,7 +135,8 @@ angular.module('UserFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
                         icon: 'icon-edit',
-                        awToolTip: 'Edit the credential'
+                        awToolTip: 'Edit the credential',
+                        'class': 'btn btn-default'
                         },
                     "delete": {
                         label: 'Delete',
@@ -191,7 +193,8 @@ angular.module('UserFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}')",
                         icon: 'icon-edit',
-                        awToolTip: 'Edit the permission'
+                        awToolTip: 'Edit the permission',
+                        'class': 'btn btn-default'
                         },
                     
                     "delete": {

@@ -76,6 +76,7 @@ angular.module('InventoryFormDefinition', [])
                     '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
                 dataTitle: 'Inventory Variables',
                 dataPlacement: 'bottom',
+                dataContainer: "body",
                 column: 2
                 }
             },
@@ -92,6 +93,7 @@ angular.module('InventoryFormDefinition', [])
                 ngClick: 'formReset()',
                 label: 'Reset',
                 icon: 'icon-trash',
+                'class': 'btn btn-default',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },
@@ -116,7 +118,7 @@ angular.module('InventoryFormDefinition', [])
                         label: 'Add Existing',
                         awToolTip: 'Select existing host',
                         ngHide: 'createButtonShow == false',
-                        "class": 'btn btn-pad'
+                        "class": 'btn btn-default'
                         }, 
                     create: {
                         ngClick: "createHost()",
@@ -154,7 +156,7 @@ angular.module('InventoryFormDefinition', [])
                         icon: 'icon-edit',
                         label: 'Edit',
                         awToolTip: 'Edit host',
-                        'class': 'btn-inventory-edit'
+                        'class': 'btn-default'
                         },
                     "remove": {
                         ngClick: "removeHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",

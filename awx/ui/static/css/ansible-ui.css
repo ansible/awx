@@ -16,6 +16,10 @@
     padding-top: 100px;
  }
 
+ .tooltip {
+   z-index: 1050;
+ }
+ 
  .text-center {
    text-align: center !important;
  }
@@ -33,51 +37,20 @@
  }
 
  .btn .caret {
-    border-top-color: #787878;
+    border-top-color: #696969;
  }
 
-/* Attempt to make button heights consistent. For some reason success, info, etc. are
-   taller than plain .btn */
- 
- /*
- .btn-success, .btn-danger, .btn-info, .btn-primary, .btn-warning {
-    padding-top: 1px;
-    padding-bottom: 2px;
+ .dropdown-toggle, .btn-default {
+    background-color: #ccc;
+    border-color: #ccc;
+    color: #333;
  }
 
- .btn {
-    padding-left: 5px;
-    padding-right: 5px;
-    min-width: 28px;
+ .dropdown-toggle:hover , .btn-default:hover {
+    background-color: #bbb;
+    border-color: #bbb;
+    color: #333;
  }
-
- .btn-pad {
-    padding-top: 3px;
-    padding-bottom: 1px;
- }
- */
-
- /*
- .btn-inventory-edit {
-    padding-top: 2px;
-    padding-bottom: 1px;
- }
-
- .modal-footer .btn-success, 
- .modal-footer .btn-danger, 
- .modal-footer .btn-info, 
- .modal-footer .btn-primary {
-    padding-top: 3px;
-    padding-bottom: 4px;
- }
-
- .modal-footer .btn {
-    padding-left: 10px;
-    padding-right: 10px;
- }
- */
- 
-/* End btn heights */
 
 /* Use code-breakable in pop-over text to indent and wrap code segments */
  .code-breakable {
@@ -133,7 +106,7 @@
  .navbar-brand img {
     max-width: 260px;
  }
-ß
+
  a:hover {
     text-decoration: none;
  }
@@ -281,13 +254,6 @@
     margin-right: 5px;
  }
 
- .search-widget .spin {
-    display: inline-block;
-    font-size: 18px;
-    margin-left: 15px;
-    min-width: 30px;
- }
-
  .status-actions {
     display: inline-block;
     height: 25px;
@@ -299,6 +265,10 @@
     vertical-align: middle;
     margin-left: 15px;
     font-size: 22px;
+ }
+
+ .search-widget {
+    margin-bottom: 20px;
  }
 
  .search-widget label {
@@ -353,7 +323,7 @@
     margin-left: 10px;
  }
 
- #tree-view {
+ .tree-container {
     padding: 0;
     margin: 5px 0 15px 0;
  }
@@ -364,12 +334,6 @@
  }
  
  /* Display list actions next to search widget */
- .search-widget {
-    display: inline-block;
-    vertical-align: bottom;
-    margin-bottom: 15px;
-    padding-left: 0;
- }
 
  .list-actions {
     display: inline-block;
@@ -382,9 +346,8 @@
     margin-right: 3px;
  }
 
- .list-actions .btn-help {
-    margin-left: 20px;
-    margin-top: 2px;
+ .btn-help {
+    margin-left: 15px;
  }
 
  /* End Display list actions */
@@ -563,23 +526,23 @@
     margin-right: 10px;
  }
 
- #hosts-well {
+ .hosts-well {
     padding-top: 5px;
  }
 
- #hosts-title p {
+ .hosts-title p {
    font-size: 12px;
  }
 
- #hosts-title h4 {
+ .hosts-title h4 {
    margin: 5px 0;
  }
 
- #hosts-well .search-widget {
+ .hosts-well .search-widget {
    margin-top: 10px;
  }
 
- #hosts-well .list-actions {
+ .hosts-well .list-actions {
    padding-top: 10px;
  }
 

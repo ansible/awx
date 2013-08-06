@@ -43,6 +43,7 @@ angular.module('JobFormDefinition', [])
                     " syntax, test environment setup and report problems.</p>",
                 dataTitle: 'Job Type',
                 dataPlacement: 'right',
+                dataContainer: 'body',
                 column: 1
                 },
             inventory: {
@@ -100,6 +101,7 @@ angular.module('JobFormDefinition', [])
                 disabled: true,
                 awPopOver: "<p>The number of parallel or simultaneous processes to use while executing the playbook. Provide a value between 0 and 100. " +
                     "A value of zero will use the ansible default setting of 5 parallel processes.</p>",
+                dataContainer: 'body',
                 dataTitle: 'Forks',
                 dataPlacement: 'right'
                 },
@@ -113,6 +115,7 @@ angular.module('JobFormDefinition', [])
                     "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see the " +
                     "<a href=\"http://ansible.cc/docs/patterns.html#selecting-targets\" target=\"_blank\">Selecting Targets section</a> under Inventory and Patterns " + 
                     " in the Ansible documentation.</p>",
+                dataContainer: 'body',
                 dataTitle: 'Limit',
                 dataPlacement: 'right'
                 },
@@ -126,7 +129,8 @@ angular.module('JobFormDefinition', [])
                 column: 1,
                 awPopOver: "<p>Control the level of output ansible will produce as the playbook executes.</p>",
                 dataTitle: 'Verbosity',
-                dataPlacement: 'right'
+                dataPlacement: 'right',
+                dataContainer: 'body'
                 },
             variables: {
                 label: 'Extra Variables',
@@ -143,6 +147,7 @@ angular.module('JobFormDefinition', [])
                     "YAML:<br />\n" +
                     "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
                 dataTitle: 'Extra Variables',
+                dataContainer: 'body',
                 dataPlacement: 'left'
                 },
             job_tags: {
@@ -161,6 +166,7 @@ angular.module('JobFormDefinition', [])
                     "in the Job Tags field:<\p>\n" +
                     "<blockquote>configuration,packages</blockquote>\n",
                 dataTitle: "Job Tags",
+                dataContainer: 'body',
                 dataPlacement: "left"
                 },
             allow_callbacks: {
@@ -183,7 +189,7 @@ angular.module('JobFormDefinition', [])
                     "in one of your defined inventories, the request will be denied.</p>" +
                     "<p>Successful requests will result in an entry on the Jobs tab, where the results and history can be viewed.</p>",
                 detailPlacement: 'left',
-                dataContainer: '#jobs',
+                dataContainer: 'body',
                 dataTitle: 'Callback URL'
                 },
             callback_url: {
@@ -203,7 +209,7 @@ angular.module('JobFormDefinition', [])
                     "in one of your defined inventories, the request will be denied.</p>" +
                     "<p>Successful requests will result in an entry on the Jobs tab, where the results and history can be viewed.</p>",
                 detailPlacement: 'left',
-                dataContainer: '#jobs',
+                dataContainer: 'body',
                 dataTitle: 'Callback URL'
                 },
             host_config_key: {
@@ -217,7 +223,7 @@ angular.module('JobFormDefinition', [])
                     "<p class=\"code-breakable\">curl --data \"host_config_key=5a8ec154832b780b9bdef1061764ae5a\" " + 
                     "http://your.server.com:999/api/v1/job_templates/1/callback/</p>\n",
                 detailPlacement: 'left',
-                dataContainer: '#jobs'
+                dataContainer: 'body'
                 }
             },
 
@@ -233,6 +239,7 @@ angular.module('JobFormDefinition', [])
                 ngClick: 'formReset()',
                 label: 'Reset',
                 icon: 'icon-remove',
+                'class': 'btn btn-default',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },
@@ -282,7 +289,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Hosts',
                 icon: 'icon-th-large',
                 ngClick: "jobSummary()",
-                "class": 'btn btn-small',
+                "class": 'btn btn-default btn-small',
                 awToolTip: 'View host summary',
                 mode: 'all'
                 },
@@ -290,7 +297,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Events',
                 icon: 'icon-list-ul',
                 ngClick: "jobEvents()",
-                "class": 'btn btn-small',
+                "class": 'btn btn-default btn-small',
                 awToolTip: 'Edit job events',
                 mode: 'all'        
                 }

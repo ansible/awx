@@ -193,7 +193,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var label = (params.label) ? params.label : null;
         var html= '';
    
-        html += "<div class=\"search-widget ";
+        html += "<div class=\"row search-widget\">\n";
+        html += "<div class=\""; 
         html += (params.size) ? params.size : "col-lg-4";
         html += "\">\n";
         html += (label) ? "<label>" + label +"</label>" : "";
@@ -215,7 +216,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
           }
         }
         html += "</ul>\n";
-        html += "</div>\n";
+        html += "</div><!-- input-group-btn -->\n";
         
         html += "<select ng-show=\"" + iterator + "SelectShow\" ng-model=\""+ iterator + "SearchSelectValue\" ng-change=\"search('" + iterator + "')\" ";
         html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts\" class=\"search-select";
@@ -234,15 +235,15 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "<span ng-bind=\"" + iterator + "SearchTypeLabel\"></span>\n";
         html += "<span class=\"caret\"></span>\n";
         html += "</button>\n";
-        html += "<ul class=\"dropdown-menu\">\n";
+        html += "<ul class=\"dropdown-menu pull-right\">\n";
         html += "<li><a href=\"\" ng-click=\"setSearchType('" + iterator + "','iexact','Exact Match')\">Exact Match</a></li>\n";
         html += "<li><a href=\"\" ng-click=\"setSearchType('" + iterator + "','icontains','Contains')\">Contains</a></li>\n";
         html += "</ul>\n";
-        html += "</div>\n";
-        html += "</div>\n";
-        html += "<div class=\"spin\"><i class=\"icon-spinner icon-spin\" ng-show=\"" + iterator + "SearchSpin == true\"></i></div>\n";
-        html += "</div>\n";
-
+        html += "</div><!-- input-group-btn -->\n";
+        html += "</div><!-- input-group -->\n";
+        html += "</div><!-- col-lg-x -->\n";
+        html += "<div class=\"col-lg-1\"><i class=\"icon-spinner icon-spin icon-large\" ng-show=\"" + iterator + 
+                 "SearchSpin == true\"></i></div>\n";
         return html;
         
         }

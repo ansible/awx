@@ -72,7 +72,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             });
 
         scope.createGroup = function() {
-            $('#form-modal').modal('hide');
+            $('#form-modal').modal('hide');   
             GroupsAdd({ inventory_id: inventory_id, group_id: group_id });
             }
 
@@ -101,6 +101,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.formModalCancelShow = true;
         scope.parseType = 'yaml';
         ParseTypeChange(scope);
+
+         $('#form-modal').on('hidden.bs.modal', function() {
+             var me = $(this);
+             $('.modal-backdrop').each(function(index) {
+                 $(this).remove();
+                 });
+             me.unbind('hidden.bs.modal');
+             });
         
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
 

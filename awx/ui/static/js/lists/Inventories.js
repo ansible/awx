@@ -64,7 +64,7 @@ angular.module('InventoriesListDefinition', [])
                 label: 'Edit',
                 ngClick: "editInventory(\{\{ inventory.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-mini',
+                "class": 'btn-mini btn-default',
                 awToolTip: 'View/Edit inventory'
                 },
 

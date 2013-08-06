@@ -31,7 +31,7 @@ angular.module('HostFormDefinition', [])
                      "</blockquote>", 
                 dataTitle: 'Host Name',
                 dataPlacement: 'right',
-                dataContainer: '#form-modal'
+                dataContainer: '#form-modal .modal-content'
                 },
             description: { 
                 label: 'Description',
@@ -61,7 +61,7 @@ angular.module('HostFormDefinition', [])
                     '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
                 dataTitle: 'Host Variables',
                 dataPlacement: 'right',
-                dataContainer: '#form-modal'
+                dataContainer: '#form-modal .modal-content'
                 }
             },
 
@@ -77,6 +77,7 @@ angular.module('HostFormDefinition', [])
                 ngClick: 'formReset()',
                 label: 'Reset',
                 icon: 'icon-trash',
+                'class': 'btn btn-default',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },

@@ -69,6 +69,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           this.applyDefaults();
        }
 
+       // Remove any lingering tooltip <div> elements
+       $('.tooltip').each( function(index) {
+           $(this).remove();
+           });
+
        if (options.modal) {
           this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;  //Default title for default modal
           this.scope.formModalInfo = false  //Disable info button for default modal
@@ -338,7 +343,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              }
              
              if (field.clear) {
-                html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn\" ng-click=\"clear('" + fld + "','" + field.associated + "')\" " + 
+                html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"clear('" + fld + "','" + field.associated + "')\" " + 
                    "aw-tool-tip=\"Clear " + field.label + "\" id=\"" + fld + "-clear-btn\"><i class=\"icon-undo\"></i></button>\n";
                 if (field.ask) {
                    html += "<label class=\"checkbox-inline ask-checkbox\"><input type=\"checkbox\" ng-model=\"" + 
@@ -348,7 +353,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              }
              
              if (field.genMD5) {
-                html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn\" ng-click=\"genMD5('" + fld + "')\" " + 
+                html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"genMD5('" + fld + "')\" " + 
                    "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + fld + "-gen-btn\"><i class=\"icon-repeat\">" + 
                    "</i></button></span>\n</div>\n";
              }
@@ -564,7 +569,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += "class=\"" + getFieldWidth() + "\">\n";
             html += "<div class=\"input-group\">\n";
             html += "<span class=\"input-group-btn\">\n";
-            html += "<button type=\"button\" class=\"lookup-btn btn\" " + this.attr(field,'ngClick') + "><i class=\"icon-search\"></i></button>\n";
+            html += "<button type=\"button\" class=\"lookup-btn btn btn-default\" " + this.attr(field,'ngClick') + "><i class=\"icon-search\"></i></button>\n";
             html += "</span>\n";
             html += "<input type=\"text\" class=\"form-control input-medium\" ";
             html += "ng-model=\"" + field.sourceModel + '_' + field.sourceField +  "\" ";
@@ -904,7 +909,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            if (form.related[itm].type == 'tree') {
               html += "<div class=\"col-lg-5\">";
               html += "<div class=\"inventory-buttons\">";
-              html += "<button ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-mini\" " +
+              html += "<button ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" id=\"inv-group-edit\" class=\"btn btn-default btn-mini\" " +
                   "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\">" +
                   "<i class=\"icon-edit\"></i> Edit</button>";
               html += "<button ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" id=\"inv-group-add\" " + 
@@ -915,7 +920,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                   "class=\"btn btn-mini btn-danger\">" +
                   "<i class=\"icon-trash\"></i> Delete</button>";
               html += "</div>\n";  
-              html += "<div id=\"tree-view\"></div>\n";
+              html += "<div id=\"tree-view\" class=\"tree-container\"></div>\n";
               html += "<div class=\" inventory-filter\">";
               html += "<span ng-show=\"has_active_failures == true\"><label class=\"checkbox inline\">";
               html += "<input ng-model=\"inventoryFailureFilter\" ng-change=\"filterInventory()\" type=\"checkbox\"" +
@@ -924,12 +929,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            }
            else {
               html += "<div id=\"group-view\" class=\"col-lg-7\">\n";
-              html += "<div id=\"hosts-well\" class=\"well\">\n";
-              html += "<div id=\"hosts-title\" ng-bind-html-unsafe=\"" + form.related[itm].title + "\"></div>\n";
+              html += "<div class=\"hosts-well well\">\n";
+              html += "<div class=\"hosts-title\" ng-bind-html-unsafe=\"" + form.related[itm].title + "\"></div>\n";
               html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true, size: 'col-lg-6'});
 
               // Add actions(s)
-              html += "<div class=\"list-actions\">\n";
+              //html += "<div class=\"list-actions\">\n";
+              html += "<div class=\"col-lg-5\">\n";
               for (var action in form.related[itm].actions) {
                   html += "<button type=\"button\" class=\"btn btn-mini ";
                   html += (form.related[itm].actions[action]['class']) ? form.related[itm].actions[action]['class'] : "btn-success";
@@ -944,6 +950,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                   html += "</button>\n";
               }
               html += "</div>\n";
+              html += "</div><!-- row -->\n";
              
               // Start the list
               html += "<div class=\"list\">\n";
@@ -1081,7 +1088,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true });
 
               // Add actions(s)
-              html += "<div class=\"list-actions\">\n";
+              //html += "<div class=\"list-actions\">\n";
+               
+              html += "<div class=\"col-lg-7\">\n";
               for (var act in form.related[itm].actions) {
                  var action = form.related[itm].actions[act];
                  html += "<button type=\"button\" class=\"btn btn-mini ";
@@ -1096,6 +1105,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  html += "</button>\n";
               }
               html += "</div>\n";
+              html += "</div><!-- row -->\n"
+              //html += "</div>\n";
 
               // Start the list
               html += "<div class=\"list\">\n";

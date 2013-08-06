@@ -43,6 +43,7 @@ angular.module('OrganizationFormDefinition', [])
                 ngClick: 'formReset()',
                 label: 'Reset',
                 icon: 'icon-trash',
+                'class': 'btn btn-default',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },
@@ -82,6 +83,7 @@ angular.module('OrganizationFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('users', \{\{ user.id \}\}, '\{\{ user.username \}\}')",
                         icon: 'icon-edit',
+                        'class': 'btn btn-default',
                         awToolTip: 'Edit user'
                         },
                     "delete": {
@@ -125,7 +127,8 @@ angular.module('OrganizationFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('users', \{\{ admin.id \}\}, '\{\{ admin.username \}\}')",
                         icon: 'icon-edit',
-                        awToolTip: 'Edit administrator'
+                        awToolTip: 'Edit administrator',
+                        'class': 'btn btn-default'
                         },
                     "delete": {
                         label: 'Delete',

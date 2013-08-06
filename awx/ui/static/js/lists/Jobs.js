@@ -70,7 +70,7 @@ angular.module('JobsListDefinition', [])
                 label: 'Hosts',
                 icon: 'icon-th-large',
                 ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.name \}\}')",
-                "class": 'btn btn-mini',
+                "class": 'btn btn-default btn-mini',
                 awToolTip: 'View host summary',
                 ngDisabled: "job.status == 'new'"
                 },
@@ -79,7 +79,7 @@ angular.module('JobsListDefinition', [])
                 icon: 'icon-list-ul',
                 mode: 'all',             
                 ngClick: "viewEvents(\{{ job.id \}\}, '\{\{ job.name \}\}')",
-                "class": 'btn btn-mini',
+                "class": 'btn btn-default btn-mini',
                 awToolTip: 'View events',
                 ngDisabled: "job.status == 'new'"
                 },
@@ -87,7 +87,7 @@ angular.module('JobsListDefinition', [])
                 label: 'Details',
                 icon: 'icon-zoom-in',
                 ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.name \}\}')",
-                "class": 'btn btn-mini',
+                "class": 'btn btn-default btn-mini',
                 awToolTip: 'View job details'
                 },
             rerun: {

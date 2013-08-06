@@ -68,7 +68,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Details',
                 icon: 'icon-edit',
                 ngClick: "jobDetails()",
-                "class": 'btn btn-mini',
+                "class": 'btn btn-default btn-mini',
                 awToolTip: 'Edit job details',
                 mode: 'all'
                 },
@@ -76,7 +76,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Events',
                 icon: 'icon-list-ul',
                 ngClick: "jobEvents()",
-                "class": 'btn btn-mini',
+                "class": 'btn btn-default btn-mini',
                 awToolTip: 'View job events',
                 mode: 'all'            
                 },
@@ -94,8 +94,8 @@ angular.module('JobHostDefinition', [])
                 'class': 'btn-info btn-mini btn-help',
                 awToolTip: 'Click for help',
                 dataTitle: 'Job Host Summary',
-                iconSize: 'large',
-                id: 'jobhost-help-button'
+                id: 'jobhost-help-button',
+                iconSize: 'large'
                 }
             },
 

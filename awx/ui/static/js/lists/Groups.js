@@ -41,10 +41,10 @@ angular.module('GroupListDefinition', [])
                     "or to the selected parent group by clicking the <em>Select</em> button. You can also create a new group by clicking the " +
                     "<em>Create New Group</em> button.",
                 dataPlacement: 'left',
-                dataContainer: "#form-modal",
+                dataContainer: '#form-modal .modal-content',
                 icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-mini btn-info',
+                'class': 'btn-mini btn-info btn-help',
                 awToolTip: 'Click for help',
                 dataTitle: 'Adding Groups',
                 id: 'group-help-button',
@@ -57,7 +57,7 @@ angular.module('GroupListDefinition', [])
                 label: 'Edit',
                 ngClick: "editGroup(\{\{ group.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-mini',
+                "class": 'btn-mini btn-default',
                 awToolTip: 'View/Edit group'
                 },
 

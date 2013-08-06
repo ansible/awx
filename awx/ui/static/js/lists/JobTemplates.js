@@ -46,7 +46,7 @@ angular.module('JobTemplatesListDefinition', [])
                 ngClick: "editJobTemplate(\{\{ job_template.id \}\})",
                 icon: 'icon-edit',
                 awToolTip: 'Edit template',
-                "class": 'btn-mini'
+                "class": 'btn-default btn-mini'
                 },
             submit: {
                 label: 'Launch',

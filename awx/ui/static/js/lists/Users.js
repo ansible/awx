@@ -50,7 +50,7 @@ angular.module('UserListDefinition', [])
                 label: 'Edit',
                 ngClick: "editUser(\{\{ user.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-mini',
+                "class": 'btn-mini btn-default',
                 awToolTip: 'View/Edit user'
                 },
 

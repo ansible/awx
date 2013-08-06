@@ -57,6 +57,7 @@ angular.module('TeamFormDefinition', [])
                 ngClick: 'formReset()',
                 label: 'Reset',
                 icon: 'icon-trash',
+                'class': 'btn btn-default',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },
@@ -93,7 +94,8 @@ angular.module('TeamFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
                         icon: 'icon-edit',
-                        awToolTip: 'Modify the credential'
+                        awToolTip: 'Modify the credential',
+                        'class': 'btn btn-default'
                         },
                     "delete": {
                         label: 'Delete',
@@ -148,7 +150,8 @@ angular.module('TeamFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}')",
                         icon: 'icon-edit',
-                        awToolTip: 'Edit the permission'
+                        awToolTip: 'Edit the permission',
+                        'class': 'btn btn-default'
                         },
                     
                     "delete": {
@@ -191,7 +194,8 @@ angular.module('TeamFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('projects', \{\{ project.id \}\}, '\{\{ project.name \}\}')",
                         icon: 'icon-edit',
-                        awToolTip: 'Modify the project'
+                        awToolTip: 'Modify the project',
+                        'class': 'btn btn-default'
                         },
                     "delete": {
                         label: 'Delete',
@@ -236,7 +240,8 @@ angular.module('TeamFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('users', \{\{ user.id \}\}, '\{\{ user.username \}\}')",
                         icon: 'icon-edit',
-                        awToolTip: 'Edit user'
+                        awToolTip: 'Edit user',
+                        'class': 'btn btn-default'
                         },
                     "delete": {
                         label: 'Delete',
