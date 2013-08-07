@@ -894,13 +894,18 @@ class JobEventAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.distinct()
+
+        # Filter certain "internal" events generating by async polling.
+        qs = qs.exclude(event__in=('runner_on_ok', 'runner_on_failed'),
+                        event_data__icontains='"ansible_job_id": "',
+                        event_data__contains='"module_name": "async_status"')
+
         if self.user.is_superuser:
             return qs
         job_qs = self.user.get_queryset(Job)
         host_qs = self.user.get_queryset(Host)
         qs = qs.filter(Q(host__isnull=True) | Q(host__in=host_qs),
                        job__in=job_qs)
-        # FIXME: Filter certain extra events from async polling?
         return qs
 
     def can_add(self, data):

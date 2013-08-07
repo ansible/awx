@@ -1032,8 +1032,8 @@ class JobEvent(models.Model):
         (3, 'runner_on_unreachable', _('Host Unreachable'), True),
         (3, 'runner_on_no_hosts', _('No Hosts Remaining'), False),
         (3, 'runner_on_async_poll', _('Host Polling'), False),
-        (3, 'runner_on_async_ok', _('Host OK'), False),
-        (3, 'runner_on_async_failed', _('Host Failure'), True),
+        (3, 'runner_on_async_ok', _('Host Async OK'), False),
+        (3, 'runner_on_async_failed', _('Host Async Failure'), True),
         # AWX does not yet support --diff mode
         (3, 'runner_on_file_diff', _('File Difference'), False),
         (0, 'playbook_on_start', _('Playbook Started'), False),
@@ -1140,9 +1140,20 @@ class JobEvent(models.Model):
             if self.task is not None:
                 msg = "%s (%s)" % (msg, self.task)
 
-        # Change display for runner events trigged by async polling.
+        # Change display for runner events trigged by async polling.  Some of
+        # these events may not show in most cases, due to filterting them out
+        # of the job event queryset returned to the user.
+        res = self.event_data.get('res', {})
+        # Fix for existing records before we had added the workaround on save
+        # to change async_ok to async_failed.
+        if self.event == 'runner_on_async_ok':
+            try:
+                if res.get('failed', False) or res.get('rc', 0) != 0:
+                    msg = 'Host Async Failed'
+            except (AttributeError, TypeError):
+                pass
+        # Runner events with ansible_job_id are part of async starting/polling.
         if self.event in ('runner_on_ok', 'runner_on_failed'):
-            res = self.event_data.get('res', {})
             try:
                 module_name = res['invocation']['module_name']
                 job_id = res['ansible_job_id']
@@ -1154,9 +1165,14 @@ class JobEvent(models.Model):
                     msg = 'Host Async Checking'
                 else:
                     msg = 'Host Async Started'
-            #msg = '%s %s %s' % (msg, module_name, job_id)
-        #msg = '%s [%s]' % (msg, self.event)
-
+        # Handle both 1.2 on_failed and 1.3+ on_async_failed events when an
+        # async task times out.
+        if self.event in ('runner_on_failed', 'runner_on_async_failed'):
+            try:
+                if res['msg'] == 'timed out':
+                    msg = 'Host Async Timeout'
+            except (TypeError, KeyError, AttributeError):
+                pass
         return msg
 
     def _find_parent(self):
@@ -1187,9 +1203,18 @@ class JobEvent(models.Model):
         return None
 
     def save(self, *args, **kwargs):
+        res = self.event_data.get('res', None)
+        # Workaround for Ansible 1.2, where the runner_on_async_ok event is
+        # created even when the async task failed. Change the event to be
+        # correct.
+        if self.event == 'runner_on_async_ok':
+            try:
+                if res.get('failed', False) or res.get('rc', 0) != 0:
+                    self.event = 'runner_on_async_failed'
+            except (AttributeError, TypeError):
+                pass
         if self.event in self.FAILED_EVENTS:
             self.failed = True
-        res = self.event_data.get('res', None)
         if isinstance(res, dict) and res.get('changed', False):
             self.changed = True
         if self.event == 'playbook_on_stats':
