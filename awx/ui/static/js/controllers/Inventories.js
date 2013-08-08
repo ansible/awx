@@ -193,12 +193,13 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    var generator = GenerateForm;
    var form = InventoryForm;
    var defaultUrl=GetBasePath('inventory');
-   var scope = generator.inject(form, {mode: 'edit', related: true});
-   generator.reset();
+   var scope = generator.inject(form, {mode: 'edit', related: true, buildTree: true});
    var base = $location.path().replace(/^\//,'').split('/')[0];
    var id = $routeParams.id;
    
    ParseTypeChange(scope,'inventory_variables', 'inventoryParseType');
+   
+   $('#inventory-tabs a:first').tab('show');  //activate the groups tab
 
    scope.inventoryParseType = 'yaml';
    scope['inventory_id'] = id;
@@ -433,10 +434,13 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       var type = node.attr('type');
       var url;
       scope['selectedNode'] = node;
+      scope['selectedNodeName'] = node.attr('name');
+      
       $('#tree-view').jstree('open_node',node);
+
       if (type == 'group') {
          url = node.attr('all');
-         scope.groupAddHide = false; 
+         scope.groupAddHide = false;
          scope.groupEditHide =false;
          scope.groupDeleteHide = false;
          scope.createButtonShow = true;
@@ -455,10 +459,13 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.groupTitle = '<h4>All Hosts</h4>';
          scope.group_id = null;
       }
+
       if (!scope.$$phase) {
          scope.$digest();
       }
+
       HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
+      
       });
 
   scope.addGroup = function() {

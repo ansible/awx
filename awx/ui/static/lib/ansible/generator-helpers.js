@@ -266,20 +266,20 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (useMini) ? " related-footer" : "";
         html += "\">\n";
         html += "<form class=\"form-inline\">\n";
-        html += "<button class=\"previous btn";
+        html += "<button class=\"previous btn btn-light";
         html += (useMini) ? " btn-mini\" " : "\" ";
         html += "ng-click=\"prevSet('" + set + "','" + iterator + "')\" " +
-                "ng-disabled=\"" + iterator + "PrevUrl == null || " + iterator + "PrevUrl == undefined\"><i class=\"icon-chevron-left\"></i> Prev</button>\n";
-        html += "<button class=\"next btn btn";
+                "ng-disabled=\"" + iterator + "PrevUrl == null || " + iterator + "PrevUrl == undefined\"><i class=\"icon-caret-left\"></i> Prev</button>\n";
+        html += "<button class=\"next btn btn-light";
         html += (useMini) ? " btn-mini\" " : "\" ";
         html += " ng-click=\"nextSet('" + set + "','" + iterator + "')\"" + 
-                "ng-disabled=\"" + iterator + "NextUrl == null || " + iterator + "NextUrl == undefined\">Next <i class=\"icon-chevron-right\"></i></button>\n";
+                "ng-disabled=\"" + iterator + "NextUrl == null || " + iterator + "NextUrl == undefined\">Next <i class=\"icon-caret-right\"></i></button>\n";
         
         if (mode != 'lookup') {
-           html += "<label class=\"page-size-label\">Rows per page:</label>\n";
+           html += "<label class=\"page-size-label\">Rows per page: </label>\n";
            html += "<select ng-model=\"" + iterator + "PageSize\" ng-change=\"changePageSize('" + 
                     set + "'," + "'" + iterator + "')\" class=\"input-mini";
-           html += (useMini) ? " field-mini-height" : "";
+           //html += (useMini) ? " field-mini-height" : "";
            html += " page-size\">\n";
            html += "<option value=\"10\" selected>10</option>\n";
            html += "<option value=\"20\" selected>20</option>\n";
@@ -289,7 +289,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            html += "</select>\n";
         }
 
-        html += "<div class=\"page-number-small\" ng-show=\"" + iterator + "PageCount > 0\" ";
+        html += "<div class=\"page-number-small pull-right\" ng-show=\"" + iterator + "PageCount > 0\" ";
         html += ">Page: {{ " + iterator + "Page + 1 }} of {{ " + iterator + "PageCount }}</div>\n";
         html += "</form>\n";
         html += "</div>\n";

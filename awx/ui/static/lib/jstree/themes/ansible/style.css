@@ -6,13 +6,13 @@
 
 #tree-view {
   margin: 0;
-  padding: 0;
+  padding: 15px;
 }
 
 .jstree-ansible {
    background-color: #f5f5f5;
-   border-left: 1px solid #e3e3e3;
-   border-right: 1px solid #e3e3e3;
+   border: 1px solid #e3e3e3;
+   border-radius: 6px;
 }
 
 .jstree-ansible li, 
