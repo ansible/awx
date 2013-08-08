@@ -7,13 +7,20 @@
  *
  */
 
+@black:      #171717;
+@warning:    #FF9900;
+@red:        #FF0000;
+@blue:       #1778c3;   /* logo blue */
+@blue-link:  #0088cc; 
+
+
 html {
-  background-color: #171717;
+  background-color: @black;
 }
 
 body {
   padding-top: 100px;
-  color: #171717;
+  color: @black;
 }
 
 .tooltip {
@@ -81,7 +88,7 @@ hr {
   margin-bottom: 25px;
   font-size: 14px;
   font-weight: normal;
-  color: #0088cc;
+  color: @blue-link;
   text-align: center;
 }
 
@@ -94,7 +101,7 @@ hr {
 }
 
 .main-menu {
-  background-color: #171717;
+  background-color: @black;
 }
 
 .main-menu .nav {
@@ -135,7 +142,7 @@ a:hover {
 }
 
 .help-link:hover {
-  color: #1778c3;
+  color: @blue;
   text-decoration: none;
 }
 
@@ -146,7 +153,7 @@ a:hover {
   margin-top: 60px;
   color: #A9A9A9;
   text-align: center;
-  background-color: #171717;
+  background-color: @black;
 }
 
 .copyright {
@@ -209,7 +216,7 @@ a:hover {
   margin-top: 5px;
   font-size: 12px;
   line-height: normal;
-  color: #FF0000;
+  color: @red;
 }
 
 .xsmall {
@@ -269,7 +276,7 @@ legend {
 
 .accordion-heading {
   font-weight: bold;
-  color: #0088CC;
+  color: @blue-link;
 }
 
 .accordion-heading i {
@@ -323,7 +330,7 @@ legend {
 }
 
 .breadcrumb .active {
-  color: #171717;
+  color: @black;
 }
 
 .nav-tabs > li > a {
@@ -404,7 +411,7 @@ input[type="text"].job-error {
 }
 
 .active-failures-true a:hover {
-  color: #FF0000;
+  color: @red;
 }
 
 .job-failures-true {
@@ -444,17 +451,17 @@ input[type="text"].job-successful {
 }
 
 .field-failure {
-  color: #FF0000;
+  color: @red;
 }
 
 .field-failure input {
-  border-color: #FF0000;
+  border-color: @red;
 }
 
 .job-changed,
 .license-warning,
 .license-demo {
-  color: #FF9900;
+  color: @warning;
 }
 
 .job-detail-status {
@@ -475,7 +482,7 @@ input[type="text"].job-successful {
 }
 
 .child-event a {
-  color: #171717;
+  color: @black;
   cursor: default;
 }
 
@@ -523,7 +530,7 @@ input[type="text"].job-successful {
 .inventory-title {
   margin-top: 15px;
   font-weight: bold;
-  color: #0088cc;
+  color: @blue-link;
 }
 
 .inventory-buttons {
@@ -625,7 +632,7 @@ input[type="text"].job-successful {
 
 .list-header .icon-sort-down,
 .list-header .icon-sort-up {
-  color: #171717;
+  color: @black;
 }
 
 /* job_events syles */
@@ -686,7 +693,7 @@ tr td button i {
 }
 
 .modal {
-  border: 1px solid #171717;
+  border: 1px solid @black;
 }
 
 .close {
