@@ -185,7 +185,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                           OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
                           GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshGroupName, ParseTypeChange,
-                          HostsReload) 
+                          HostsReload, EditInventory) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -242,8 +242,8 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
               scope.inventory_variables = "---";
           }
        });
-  
-   LoadInventory({ scope: scope });
+
+   LoadInventory({ scope: scope, doPostSteps: true });
 
    scope.filterInventory = function() {
       RefreshTree({ scope: scope });
@@ -347,6 +347,10 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       $location.path('/' + base + '/' + $routeParams.id + '/' + set + '/' + id);
       };
 
+   scope.editInventory = function() {
+      EditInventory({ scope: scope, 'inventory_id': scope['inventory_id'] });
+      };
+
    // Related set: Delete button
    scope['delete'] = function(set, itm_id, name, title) {
       $rootScope.flashMessage = null;
@@ -384,7 +388,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                       if (!scope.$$phase) {
                          scope.$digest();
                       }
-                      InventoryEdit({ "inventory_id": id, group_id: null });
+                      EditInventory({ scope: scope, "inventory_id": id });
                       }
                   },
               addGroup: {
@@ -542,6 +546,6 @@ InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$l
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
                             'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete', 'RefreshGroupName',
-                            'ParseTypeChange', 'HostsReload'
+                            'ParseTypeChange', 'HostsReload', 'EditInventory'
                             ]; 
   

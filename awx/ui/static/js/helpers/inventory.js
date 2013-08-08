@@ -11,7 +11,7 @@
 angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationListDefinition',
                                     'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService',
                                     'InventoryHelper', 'RelatedSearchHelper', 'RelatedPaginateHelper',
-                                    'InventoryFormDefinition'
+                                    'InventoryFormDefinition', 'ParseHelper'
                                     ]) 
 
     .factory('LoadTreeData', ['Alert', 'Rest', 'Authorization', '$http',
@@ -227,12 +227,15 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                   }
                 }
 
-                // Load the tree view
                 scope.TreeParams = { scope: scope, inventory: data };
                 scope.variable_url = data.related.variable_data;
                 scope.relatedSets['hosts'] = { url: data.related.hosts, iterator: 'host' };
-                RelatedSearchInit({ scope: scope, form: form, relatedSets: scope.relatedSets });
-                RelatedPaginateInit({ scope: scope, relatedSets: scope.relatedSets });
+                
+                // Load the tree view
+                if (params.doPostSteps) {
+                   RelatedSearchInit({ scope: scope, form: form, relatedSets: scope.relatedSets });
+                   RelatedPaginateInit({ scope: scope, relatedSets: scope.relatedSets });
+                }
                 scope.$emit('inventoryLoaded');
                 })
             .error( function(data, status, headers, config) {
@@ -305,5 +308,76 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         LoadInventory({ scope: scope });
         
         }
-        }]);
+        }])
+
+
+    .factory('EditInventory', ['InventoryForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
+        'GetBasePath', 'ParseTypeChange', 'LoadInventory',
+    function(InventoryForm, GenerateForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange,
+        LoadInventory) {
+    return function(params) {
+
+        var generator = GenerateForm;
+        var form = InventoryForm;
+        var defaultUrl=GetBasePath('inventory');
+        var scope = params.scope
+
+        generator.inject(form, {mode: 'edit', modal: true, related: false});
+        
+        ParseTypeChange(scope,'inventory_variables', 'inventoryParseType');
+
+        scope.inventoryParseType = 'yaml';
+        scope['inventory_id'] = params['inventory_id'];
+        scope.formModalActionLabel = 'Save';
+        scope.formModalCancelShow = true;
+        scope.formModalInfo = false;
+        $('#form-modal .btn-success').removeClass('btn-none').addClass('btn-success');
+        scope.formModalHeader = 'Inventory Properties'; 
+        
+        // Retrieve each related set and any lookups
+        if (scope.inventoryLoadedRemove) {
+           scope.inventoryLoadedRemove();
+        }
+        scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
+           
+           LookUpInit({
+               scope: scope,
+               form: form,
+               current_item: (scope.organization !== undefined) ? scope.organization : null,
+               list: OrganizationList, 
+               field: 'organization' 
+               });
+
+           if (scope.variable_url) {
+              Rest.setUrl(scope.variable_url);
+              Rest.get()
+                  .success( function(data, status, headers, config) {
+                      if ($.isEmptyObject(data)) {
+                         scope.inventory_variables = "---";
+                      }
+                      else {
+                         scope.inventory_variables = jsyaml.safeDump(data);
+                      }
+                      })
+                  .error( function(data, status, headers, config) {
+                      scope.inventory_variables = null;
+                      ProcessErrors(scope, data, status, form,
+                          { hdr: 'Error!', msg: 'Failed to retrieve inventory variables. GET returned status: ' + status });
+                      });
+           }
+           else {
+              scope.inventory_variables = "---";
+           }
+           if (!scope.$$phase) {
+              scope.$digest();
+           } 
+           });
+
+        LoadInventory({ scope: scope, doPostSteps: false });
+        
+        if (!scope.$$phase) {
+           scope.$digest();
+        }
+    }
+    }]);
 

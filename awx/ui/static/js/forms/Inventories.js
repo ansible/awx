@@ -13,12 +13,10 @@ angular.module('InventoryFormDefinition', [])
         addTitle: 'Create Inventory',
         editTitle: '{{ inventory_name }}',
         name: 'inventory',
-        well: true,
-        collapse: true,
-        collapseTitle: 'Edit Inventory',
-        collapseMode: 'edit',
-        twoColumns: true,
         parseTypeName: 'inventoryParseType',
+        well: false,
+        formLabelSize: 'col-lg-3',
+        formFieldSize: 'col-lg-9',
 
         fields: {
             has_active_failures: {
@@ -27,8 +25,7 @@ angular.module('InventoryFormDefinition', [])
                     '<i class="icon-exclamation-sign"></i> Failed jobs</div>',
                 type: 'custom',
                 ngShow: 'has_active_failures',
-                readonly: true,
-                column: 1
+                readonly: true
                 },
             inventory_name: {
                 realName: 'name',
@@ -36,8 +33,7 @@ angular.module('InventoryFormDefinition', [])
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                capitalize: false,
-                column: 1
+                capitalize: false
                 },
             inventory_description: { 
                 realName: 'description',
@@ -45,7 +41,6 @@ angular.module('InventoryFormDefinition', [])
                 type: 'text',
                 addRequired: false,
                 editRequired: false,
-                column: 1
                 },
             organization: {
                 label: 'Organization',
@@ -55,8 +50,7 @@ angular.module('InventoryFormDefinition', [])
                 addRequired: true,
                 editRequired: true,
                 ngClick: 'lookUpOrganization()',
-                awRequiredWhen: {variable: "organizationrequired", init: "true" },
-                column: 1
+                awRequiredWhen: {variable: "organizationrequired", init: "true" }
                 },
             inventory_variables: {
                 realName: 'variables',
@@ -76,8 +70,7 @@ angular.module('InventoryFormDefinition', [])
                     '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
                 dataTitle: 'Inventory Variables',
                 dataPlacement: 'bottom',
-                dataContainer: "body",
-                column: 2
+                dataContainer: '#form-modal .modal-content'
                 }
             },
 
