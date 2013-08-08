@@ -112,7 +112,7 @@ class BaseTestMixin(object):
         data_ids = [x['id'] for x in data['results']]
         qs_ids = queryset.values_list('pk', flat=True)
         if check_order:
-            self.assertEqual(data_ids, qs_ids)
+            self.assertEqual(tuple(data_ids), tuple(qs_ids))
         else:
             self.assertEqual(set(data_ids), set(qs_ids))
 
@@ -261,19 +261,23 @@ class BaseTestMixin(object):
                     else:
                         f(url, expect=401)
 
-    def check_get_list(self, url, user, qs, fields=None, expect=200):
+    def check_get_list(self, url, user, qs, fields=None, expect=200,
+                       check_order=False):
         '''
         Check that the given list view URL returns results for the given user
         that match the given queryset.
         '''
         with self.current_user(user):
-            self.options(url, expect=expect)
+            if expect == 400:
+                self.options(url, expect=200)
+            else:
+                self.options(url, expect=expect)
             self.head(url, expect=expect)
             response = self.get(url, expect=expect)
         if expect != 200:
             return
         self.check_pagination_and_size(response, qs.count())
-        self.check_list_ids(response, qs)
+        self.check_list_ids(response, qs, check_order)
         if fields:
             for obj in response['results']:
                 self.assertTrue(set(obj.keys()) <= set(fields))

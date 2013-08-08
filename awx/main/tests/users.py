@@ -1,13 +1,18 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Python
+import datetime
 import json
+import urllib
 
+# Django
 from django.contrib.auth.models import User
 import django.test
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 
+# AWX
 from awx.main.models import *
 from awx.main.tests.base import BaseTest
 
@@ -247,4 +252,300 @@ class UsersTest(BaseTest):
         # FIXME: add test that shows posting a user w/o id to /organizations/2/admins/ can create a new one & associate
         # FIXME: add test that shows posting a projects w/o id to /organizations/2/projects/ can create a new one & associate
 
+    def test_user_list_ordering(self):
+        base_url = reverse('main:user_list')
+        base_qs = User.objects.distinct()
 
+        # Check list view with ordering by name.
+        url = '%s?order_by=username' % base_url
+        qs = base_qs.order_by('username')
+        self.check_get_list(url, self.super_django_user, qs, check_order=True)
+
+        # Check list view with ordering by username in reverse.
+        url = '%s?order=-username' % base_url
+        qs = base_qs.order_by('-username')
+        self.check_get_list(url, self.super_django_user, qs, check_order=True)
+
+        # Check list view with multiple ordering fields.
+        url = '%s?order_by=-pk,username' % base_url
+        qs = base_qs.order_by('-pk', 'username')
+        self.check_get_list(url, self.super_django_user, qs, check_order=True)
+
+        # Check list view with invalid field name.
+        url = '%s?order_by=invalidfieldname' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+        # Check list view with no field name.
+        url = '%s?order_by=' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+    def test_user_list_filtering(self):
+        # Also serves as general-purpose testing for custom API filters.
+        base_url = reverse('main:user_list')
+        base_qs = User.objects.distinct()
+
+        # Filter by username.
+        url = '%s?username=normal' % base_url
+        qs = base_qs.filter(username='normal')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by username with __exact suffix.
+        url = '%s?username__exact=normal' % base_url
+        qs = base_qs.filter(username__exact='normal')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+        
+        # Filter by username with __iexact suffix.
+        url = '%s?username__iexact=NORMAL' % base_url
+        qs = base_qs.filter(username__iexact='NORMAL')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by username with __contains suffix.
+        url = '%s?username__contains=dmi' % base_url
+        qs = base_qs.filter(username__contains='dmi')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by username with __icontains suffix.
+        url = '%s?username__icontains=DMI' % base_url
+        qs = base_qs.filter(username__icontains='DMI')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by username with __startswith suffix.
+        url = '%s?username__startswith=no' % base_url
+        qs = base_qs.filter(username__startswith='no')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by username with __istartswith suffix.
+        url = '%s?username__istartswith=NO' % base_url
+        qs = base_qs.filter(username__istartswith='NO')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by username with __endswith suffix.
+        url = '%s?username__endswith=al' % base_url
+        qs = base_qs.filter(username__endswith='al')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by username with __iendswith suffix.
+        url = '%s?username__iendswith=AL' % base_url
+        qs = base_qs.filter(username__iendswith='AL')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by username with __regex suffix.
+        url = '%s?username__regex=%s' % (base_url, urllib.quote_plus(r'^admin|no.+$'))
+        qs = base_qs.filter(username__regex=r'^admin|no.+$')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by username with __iregex suffix.
+        url = '%s?username__iregex=%s' % (base_url, urllib.quote_plus(r'^ADMIN|NO.+$'))
+        qs = base_qs.filter(username__iregex=r'^ADMIN|NO.+$')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by invalid regex value.
+        url = '%s?username__regex=%s' % (base_url, urllib.quote_plus('['))
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+        # Exclude by username.
+        url = '%s?not__username=normal' % base_url
+        qs = base_qs.exclude(username='normal')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Exclude by username with suffix.
+        url = '%s?not__username__startswith=no' % base_url
+        qs = base_qs.exclude(username__startswith='no')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by multiple username specs.
+        url = '%s?username__startswith=no&username__endswith=al' % base_url
+        qs = base_qs.filter(username__startswith='no', username__endswith='al')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by is_superuser (when True).
+        url = '%s?is_superuser=True' % base_url
+        qs = base_qs.filter(is_superuser=True)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by is_superuser (when False).
+        url = '%s?is_superuser=False' % base_url
+        qs = base_qs.filter(is_superuser=False)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by is_superuser (when 1).
+        url = '%s?is_superuser=1' % base_url
+        qs = base_qs.filter(is_superuser=True)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by is_superuser (when 0).
+        url = '%s?is_superuser=0' % base_url
+        qs = base_qs.filter(is_superuser=False)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by is_superuser (when TRUE).
+        url = '%s?is_superuser=TRUE' % base_url
+        qs = base_qs.filter(is_superuser=True)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by invalid value for boolean field.
+        url = '%s?is_superuser=notatbool' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+        # Filter by is_staff (field not exposed via API).  FIXME: Should 
+        # eventually not be allowed!
+        url = '%s?is_staff=true' % base_url
+        qs = base_qs.filter(is_staff=True)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by pk/id
+        url = '%s?pk=%d' % (base_url, self.normal_django_user.pk)
+        qs = base_qs.filter(pk=self.normal_django_user.pk)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+        url = '%s?id=%d' % (base_url, self.normal_django_user.pk)
+        qs = base_qs.filter(id=self.normal_django_user.pk)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by pk gt/gte/lt/lte.
+        url = '%s?pk__gt=0' % base_url
+        qs = base_qs.filter(pk__gt=0)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+        url = '%s?pk__gte=0' % base_url
+        qs = base_qs.filter(pk__gt=0)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+        url = '%s?pk__lt=999' % base_url
+        qs = base_qs.filter(pk__lt=999)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+        url = '%s?pk__lte=999' % base_url
+        qs = base_qs.filter(pk__lte=999)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by invalid value for integer field.
+        url = '%s?pk=notanint' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+        # Filter by int using custom __int suffix.
+        url = '%s?pk__int=%d' % (base_url, self.super_django_user.pk)
+        qs = base_qs.filter(pk=self.super_django_user.pk)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by related organization not present.
+        url = '%s?organizations=None' % base_url
+        qs = base_qs.filter(organizations=None)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+        url = '%s?organizations__isnull=true' % base_url
+        qs = base_qs.filter(organizations__isnull=True)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by related organization present.
+        url = '%s?organizations__isnull=0' % base_url
+        qs = base_qs.filter(organizations__isnull=False)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by related organizations name.
+        url = '%s?organizations__name__startswith=org' % base_url
+        qs = base_qs.filter(organizations__name__startswith='org')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by related organizations admins username.
+        url = '%s?organizations__admins__username__startswith=norm' % base_url
+        qs = base_qs.filter(organizations__admins__username__startswith='norm')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+        
+        # Filter by username with __in list.
+        url = '%s?username__in=normal,admin' % base_url
+        qs = base_qs.filter(username__in=('normal', 'admin'))
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by organizations with __in list.
+        url = '%s?organizations__in=%d,0' % (base_url, self.organizations[0].pk)
+        qs = base_qs.filter(organizations__in=(self.organizations[0].pk, 0))
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Exclude by organizations with __in list.
+        url = '%s?not__organizations__in=%d,0' % (base_url, self.organizations[0].pk)
+        qs = base_qs.exclude(organizations__in=(self.organizations[0].pk, 0))
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by organizations created timestamp (passing only a date).
+        url = '%s?organizations__created__gt=2013-01-01' % base_url
+        qs = base_qs.filter(organizations__created__gt=datetime.date(2013, 1, 1))
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by organizations created timestamp (passing datetime).
+        url = '%s?organizations__created__lt=%s' % (base_url, urllib.quote_plus('2037-03-07 12:34:56'))
+        qs = base_qs.filter(organizations__created__lt=datetime.datetime(2037, 3, 7, 12, 34, 56))
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by organizations created timestamp (invalid datetime value).
+        url = '%s?organizations__created__gt=yesterday' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+        # Filter by organizations created year (valid django lookup, but not
+        # allowed via API).
+        url = '%s?organizations__created__year=2013' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+        # Filter by invalid field.
+        url = '%s?email_address=nobody@example.com' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+        # Filter by invalid field across lookups.
+        url = '%s?organizations__users__teams__laser=green' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+        # Filter by invalid relation within lookups.
+        url = '%s?organizations__users__llamas__name=freddie' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+        # Filter by invalid query string field names.
+        url = '%s?__' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+        url = '%s?not__' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+        url = '%s?__foo' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+        url = '%s?username__' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+        url = '%s?username+=normal' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+        # Filter with some unicode characters included in field name and value.
+        url = u'%s?username=arrr\u2620' % base_url
+        qs = base_qs.filter(username=u'arrr\u2620')
+        self.assertFalse(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+        url = u'%s?user\u2605name=normal' % base_url
+        self.check_get_list(url, self.super_django_user, base_qs, expect=400)

@@ -31,6 +31,11 @@ Prefix the field name with a dash `-` to sort in reverse:
 
     ?order_by=-{{ order_field }}
 
+Multiple sorting fields may be specified by separating the field names with a
+comma `,`:
+
+    ?order_by={{ order_field }},some_other_field
+
 ## Pagination
 
 Use the `page_size` query string parameter to change the number of results
@@ -45,13 +50,54 @@ string parameters automatically.
 ## Filtering
 
 Any additional query string parameters may be used to filter the list of
-results returned to those matching a given value.  Only fields that exist in
-the database can be used for filtering.
+results returned to those matching a given value.  Only fields and relations
+that exist in the database may be used for filtering.  Any special characters
+in the specified value should be url-encoded. For example:
 
-    ?{{ order_field }}=value
+    ?field=value%20xyz
 
-Field lookups may also be used for slightly more advanced queries, for example:
+Fields may also span relations, only for fields and relationships defined in
+the database: 
 
-    ?{{ order_field }}__startswith=A
-    ?{{ order_field }}__endsswith=C
-    ?{{ order_field }}__contains=ABC
+    ?other__field=value
+
+To exclude results matching certain criteria, prefix the field parameter with
+`not__`:
+
+    ?not__field=value
+
+Field lookups may also be used for more advanced queries, by appending the
+lookup to the field name:
+
+    ?field__lookup=value
+
+The following field lookups are supported:
+
+* `exact`: Exact match (default lookup if not specified).
+* `iexact`: Case-insensitive version of `exact`.
+* `contains`: Field contains value.
+* `icontains`: Case-insensitive version of `contains`.
+* `startswith`: Field starts with value.
+* `istartswith`: Case-insensitive version of `startswith`.
+* `endswith`: Field ends with value.
+* `iendswith`: Case-insensitive version of `endswith`.
+* `regex`: Field matches the given regular expression.
+* `iregex`: Case-insensitive version of `regex`.
+* `gt`: Greater than comparison.
+* `gte`: Greater than or equal to comparison.
+* `lt`: Less than comparison.
+* `lte`: Less than or equal to comparison.
+* `isnull`: Check whether the given field or related object is null; expects a
+  boolean value.
+* `in`: Check whether the given field's value is present in the list provided;
+  expects a list of items.
+
+Boolean values may be specified as `True` or `1` for true, `False` or `0` for
+false (both case-insensitive).
+
+Null values may be specified as `None` or `Null` (both case-insensitive),
+though it is preferred to use the `isnull` lookup to explicitly check for null
+values.
+
+Lists (for the `in` lookup) may be specified as a comma-separated list of
+values.

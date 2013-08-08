@@ -151,7 +151,9 @@ REST_FRAMEWORK = {
         'awx.main.permissions.ModelAccessPermission',
     ),
     'DEFAULT_FILTER_BACKENDS': (
-        'awx.main.filters.DefaultFilterBackend',
+        'awx.main.filters.ActiveOnlyBackend',
+        'awx.main.filters.FieldLookupBackend',
+        'awx.main.filters.OrderByBackend',
     ),
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
