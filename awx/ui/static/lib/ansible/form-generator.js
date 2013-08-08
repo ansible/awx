@@ -916,12 +916,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        html += "<div class=\"navbar groups-menu\">\n"; 
        html += "<a class=\"navbar-brand\" ng-bind=\"selectedNodeName\" href=\"\"></a>\n"; 
        html += "<ul class=\"nav navbar-nav\">\n";
+       html += "<li><a href=\"\" ng-click=\"editInventory()\" ng-hide=\"inventoryEditHide\" " +
+           "aw-tool-tip=\"Edit inventory properties\"  data-placement=\"bottom\"><i class=\"icon-edit\"></i> Inventory Properties</a></li>\n";
        html += "<li><a href=\"\" ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" " +
-           "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> Edit</a></li>\n";
+           "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> Edit Group</a></li>\n";
        html += "<li><a href=\"\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
-           "aw-tool-tip=\"Add a new group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Add</a></li>\n";
+           "aw-tool-tip=\"Add a new group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> \{\{ addGroupTitle \}\}</a></li>\n";
        html += "<li><a href=\"\" ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" " +
-           "aw-tool-tip=\"Delete the group\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete</a></li>\n";
+           "aw-tool-tip=\"Delete the group\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Group</a></li>\n";
        html += "</ul>\n";
        html += "</div><!-- navbar -->\n";  
        html += "<div id=\"tree-view\" class=\"tree-container\"></div>\n";

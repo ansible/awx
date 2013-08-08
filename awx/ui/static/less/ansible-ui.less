@@ -522,9 +522,15 @@ input[type="text"].job-successful {
   background-color: #f5f5f5;
   border: 1px solid #e3e3e3;
   border-radius: 6px;
-}
-.groups-menu .navbar-brand {
-  color: ;
+
+  /* the brand won't really be a link */
+  .navbar-brand {
+     color: @black;
+  }
+  .navbar-brand:hover {
+     color: @black; 
+     cursor: default;
+  }
 }
 
 .inventory-title {

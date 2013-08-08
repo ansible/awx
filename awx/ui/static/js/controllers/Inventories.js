@@ -377,8 +377,18 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       var nodeType = $($node).attr('type');
       if (nodeType == 'inventory') {
           return {
+              editInventory: {
+                  label: 'Inventory Properties',
+                  action: function(obj) {
+                      scope.group_id = null;
+                      if (!scope.$$phase) {
+                         scope.$digest();
+                      }
+                      InventoryEdit({ "inventory_id": id, group_id: null });
+                      }
+                  },
               addGroup: {
-                  label: 'Add Group',
+                  label: 'Create Group',
                   action: function(obj) {
                       scope.group_id = null;
                       if (!scope.$$phase) {
@@ -442,8 +452,10 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          url = node.attr('all');
          scope.groupAddHide = false;
          scope.groupEditHide =false;
+         scope.inventoryEditHide=true;
          scope.groupDeleteHide = false;
          scope.createButtonShow = true;
+         scope.addGroupTitle = 'Add Group';
          scope.group_id = node.attr('group_id');
          scope.groupName = n.data;
          scope.groupTitle = '<h4>' + n.data + '</h4>';
@@ -453,7 +465,9 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          url = node.attr('hosts');
          scope.groupAddHide = false; 
          scope.groupEditHide =true;
+         scope.inventoryEditHide=false;
          scope.groupDeleteHide = true;
+         scope.addGroupTitle = 'Create Group';
          scope.createButtonShow = false;
          scope.groupName = 'All Hosts';
          scope.groupTitle = '<h4>All Hosts</h4>';
