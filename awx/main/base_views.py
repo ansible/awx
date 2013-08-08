@@ -52,7 +52,10 @@ class GenericAPIView(generics.GenericAPIView, APIView):
     #   serializer_class = SerializerClass
 
     def get_queryset(self):
-        return self.request.user.get_queryset(self.model)
+        #if hasattr(self.request.user, 'get_queryset'):
+        #    return self.request.user.get_queryset(self.model)
+        #else:
+        return super(GenericAPIView, self).get_queryset()
 
     def get_description_context(self):
         # Set instance attributes needed to get serializer metadata.
@@ -70,6 +73,9 @@ class GenericAPIView(generics.GenericAPIView, APIView):
 
 class ListAPIView(generics.ListAPIView, GenericAPIView):
     # Base class for a read-only list view.
+
+    def get_queryset(self):
+        return self.request.user.get_queryset(self.model)
 
     def get_description_context(self):
         opts = self.model._meta
