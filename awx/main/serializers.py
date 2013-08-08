@@ -27,7 +27,7 @@ BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created', 'name',
 # objects that if found we should add summary info for them
 SUMMARIZABLE_FKS = ( 
    'organization', 'host', 'group', 'inventory', 'project', 'team', 'job',
-   'job_template', 'credential', 'permission', 'user',
+   'job_template', 'credential', 'permission', 'user', 'last_job',
 )
 # fields that should be summarized regardless of object type
 SUMMARIZABLE_FIELDS = (
@@ -244,7 +244,8 @@ class HostSerializer(BaseSerializerWithVariables):
 
     class Meta:
         model = Host
-        fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures')
+        fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures',
+                                'last_job', 'last_job_host_summary')
 
     def get_related(self, obj):
         res = super(HostSerializer, self).get_related(obj)
@@ -261,6 +262,12 @@ class HostSerializer(BaseSerializerWithVariables):
         if obj.last_job_host_summary:
             res['last_job_host_summary'] = reverse('main:job_host_summary_detail', args=(obj.last_job_host_summary.pk,))
         return res
+
+    def get_summary_fields(self, obj):
+        d = super(HostSerializer, self).get_summary_fields(obj)
+        d['all_groups'] = [{'id': g.id, 'name': g.name} for g in obj.all_groups.all()]
+        d['groups'] = [{'id': g.id, 'name': g.name} for g in obj.groups.all()]
+        return d
 
 class GroupSerializer(BaseSerializerWithVariables):
 

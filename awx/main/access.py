@@ -217,6 +217,7 @@ class OrganizationAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.distinct()
+        qs = qs.select_related('created_by')
         if self.user.is_superuser:
             return qs
         return qs.filter(Q(admins__in=[self.user]) | Q(users__in=[self.user]))
@@ -249,6 +250,7 @@ class InventoryAccess(BaseAccess):
     def get_queryset(self, allowed=None):
         allowed = allowed or PERMISSION_TYPES_ALLOWING_INVENTORY_READ
         qs = Inventory.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by', 'organization')
         if self.user.is_superuser:
             return qs
         admin_of = qs.filter(organization__admins__in=[self.user]).distinct()
@@ -318,6 +320,9 @@ class HostAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by', 'inventory', 'last_job',
+                               'last_job_host_summary')
+        qs = qs.prefetch_related('groups')
         inventories_qs = self.user.get_queryset(Inventory)
         return qs.filter(inventory__in=inventories_qs)
 
@@ -378,6 +383,8 @@ class GroupAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by', 'inventory')
+        qs = qs.prefetch_related('parents', 'children')
         inventories_qs = self.user.get_queryset(Inventory)
         return qs.filter(inventory__in=inventories_qs)
 
@@ -440,6 +447,7 @@ class CredentialAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by', 'user', 'team')
         if self.user.is_superuser:
             return qs
         orgs_as_admin = self.user.admin_of_organizations.all()
@@ -509,6 +517,7 @@ class TeamAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by', 'organization')
         if self.user.is_superuser:
             return qs
         return qs.filter(
@@ -560,6 +569,7 @@ class ProjectAccess(BaseAccess):
 
     def get_queryset(self):
         qs = Project.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by')
         if self.user.is_superuser:
             return qs
         allowed = [PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
@@ -609,6 +619,8 @@ class PermissionAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by', 'user', 'team', 'inventory',
+                               'project')
         if self.user.is_superuser:
             return qs
         orgs_as_admin = self.user.admin_of_organizations.all()
@@ -699,6 +711,8 @@ class JobTemplateAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by', 'inventory', 'project',
+                               'credential')
         if self.user.is_superuser:
             return qs
         credential_qs = self.user.get_queryset(Credential)
@@ -801,6 +815,8 @@ class JobAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by', 'job_template', 'inventory',
+                               'project', 'credential')
         if self.user.is_superuser:
             return qs
         credential_qs = self.user.get_queryset(Credential)
@@ -870,6 +886,7 @@ class JobHostSummaryAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.distinct()
+        qs = qs.select_related('created_by', 'job', 'host')
         if self.user.is_superuser:
             return qs
         job_qs = self.user.get_queryset(Job)
@@ -894,6 +911,8 @@ class JobEventAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.distinct()
+        qs = qs.select_related('created_by', 'job', 'host', 'parent')
+        qs = qs.prefetch_related('hosts', 'children')
 
         # Filter certain "internal" events generating by async polling.
         qs = qs.exclude(event__in=('runner_on_ok', 'runner_on_failed'),

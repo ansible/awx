@@ -51,6 +51,9 @@ class GenericAPIView(generics.GenericAPIView, APIView):
     #   model = ModelClass
     #   serializer_class = SerializerClass
 
+    def get_queryset(self):
+        return self.request.user.get_queryset(self.model)
+
     def get_description_context(self):
         # Set instance attributes needed to get serializer metadata.
         if not hasattr(self, 'request'):
@@ -79,9 +82,6 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
             'order_field': order_field,
         })
         return d
-
-    def get_queryset(self):
-        return self.request.user.get_queryset(self.model)
 
 class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):
     # Base class for a list view that allows creating new objects.
