@@ -213,34 +213,6 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        scope.createButtonShow = false;
        scope.search(scope.relatedSets['hosts'].iterator);
        TreeInit(scope.TreeParams);
-       LookUpInit({
-           scope: scope,
-           form: form,
-           current_item: (scope.organization !== undefined) ? scope.organization : null,
-           list: OrganizationList, 
-           field: 'organization' 
-           });
-
-       if (scope.variable_url) {
-          Rest.setUrl(scope.variable_url);
-          Rest.get()
-              .success( function(data, status, headers, config) {
-                  if ($.isEmptyObject(data)) {
-                     scope.inventory_variables = "---";
-                  }
-                  else {
-                     scope.inventory_variables = jsyaml.safeDump(data);
-                  }
-                  })
-              .error( function(data, status, headers, config) {
-                  scope.inventory_variables = null;
-                  ProcessErrors(scope, data, status, form,
-                      { hdr: 'Error!', msg: 'Failed to retrieve inventory variables. GET returned status: ' + status });
-                  });
-          }
-          else {
-              scope.inventory_variables = "---";
-          }
        });
 
    LoadInventory({ scope: scope, doPostSteps: true });
@@ -405,18 +377,8 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       }
       else {
          return {
-             addGroup: { 
-                label: 'Add Group',
-                action: function(obj) {
-                    scope.group_id = $(obj).attr('group_id');
-                    if (!scope.$$phase) {
-                       scope.$digest();
-                    }
-                    GroupsList({ "inventory_id": id, group_id: $(obj).attr('group_id') });
-                    }    
-                },
              edit: { 
-                 label: 'Edit Group',
+                 label: 'Group Properties',
                  action: function(obj) {
                      scope.group_id = $(obj).attr('group_id');
                      if (!scope.$$phase) {
@@ -426,6 +388,29 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                      },
                  separator_before: true
                  },
+
+             addGroup: { 
+                 label: 'Add Existing',
+                 action: function(obj) {
+                     scope.group_id = $(obj).attr('group_id');
+                     if (!scope.$$phase) {
+                        scope.$digest();
+                     }
+                     GroupsList({ "inventory_id": id, group_id: $(obj).attr('group_id') });
+                     }    
+                 },
+
+             createGroup: { 
+                 label: 'Create New',
+                 action: function(obj) {
+                     scope.group_id = $(obj).attr('group_id');
+                     if (!scope.$$phase) {
+                        scope.$digest();
+                     }
+                     GroupsAdd({ "inventory_id": id, group_id: $(obj).attr('group_id') });
+                     }    
+                 },
+
              "delete": {
                  label: 'Delete Group',
                  action: function(obj) {
@@ -447,19 +432,20 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       var node = $('li[id="' + n.attr.id + '"]');
       var type = node.attr('type');
       var url;
+      
       scope['selectedNode'] = node;
       scope['selectedNodeName'] = node.attr('name');
       
       $('#tree-view').jstree('open_node',node);
-
+      
       if (type == 'group') {
          url = node.attr('all');
          scope.groupAddHide = false;
+         scope.groupCreateHide = false;
          scope.groupEditHide =false;
          scope.inventoryEditHide=true;
          scope.groupDeleteHide = false;
          scope.createButtonShow = true;
-         scope.addGroupTitle = 'Add Group';
          scope.group_id = node.attr('group_id');
          scope.groupName = n.data;
          scope.groupTitle = '<h4>' + n.data + '</h4>';
@@ -467,11 +453,11 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       }
       else if (type == 'inventory') {
          url = node.attr('hosts');
-         scope.groupAddHide = false; 
+         scope.groupAddHide = true;
+         scope.groupCreateHide = false; 
          scope.groupEditHide =true;
          scope.inventoryEditHide=false;
          scope.groupDeleteHide = true;
-         scope.addGroupTitle = 'Create Group';
          scope.createButtonShow = false;
          scope.groupName = 'All Hosts';
          scope.groupTitle = '<h4>All Hosts</h4>';
@@ -487,12 +473,11 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       });
 
   scope.addGroup = function() {
-      if (scope.group_id == null) {
-         GroupsAdd({ "inventory_id": id, group_id: null });
-      }
-      else {
          GroupsList({ "inventory_id": id, group_id: scope.group_id });
       }
+
+  scope.createGroup = function() {
+      GroupsAdd({ "inventory_id": id, group_id: scope.group_id });
       }
 
   scope.editGroup = function() {

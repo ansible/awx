@@ -919,11 +919,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        html += "<li><a href=\"\" ng-click=\"editInventory()\" ng-hide=\"inventoryEditHide\" " +
            "aw-tool-tip=\"Edit inventory properties\"  data-placement=\"bottom\"><i class=\"icon-edit\"></i> Inventory Properties</a></li>\n";
        html += "<li><a href=\"\" ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" " +
-           "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> Edit Group</a></li>\n";
+           "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> Group Properties</a></li>\n";
        html += "<li><a href=\"\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
-           "aw-tool-tip=\"Add a new group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> \{\{ addGroupTitle \}\}</a></li>\n";
+           "aw-tool-tip=\"Add an existing group\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Add Existing</a></li>\n";
+       html += "<li><a href=\"\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
+           "aw-tool-tip=\"Create a new group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New</a></li>\n";
        html += "<li><a href=\"\" ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" " +
-           "aw-tool-tip=\"Delete the group\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Group</a></li>\n";
+           "aw-tool-tip=\"Delete the selected group\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Group</a></li>\n";
        html += "</ul>\n";
        html += "</div><!-- navbar -->\n";  
        html += "<div id=\"tree-view\" class=\"tree-container\"></div>\n";

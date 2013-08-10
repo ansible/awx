@@ -28,18 +28,9 @@ angular.module('GroupListDefinition', [])
             },
         
         actions: {
-            add: {
-                label: 'Create New Group',
-                icon: 'icon-plus',
-                mode: 'all',             // One of: edit, select, all
-                ngClick: 'createGroup()',
-                "class": 'btn-success btn-mini',
-                awToolTip: 'Create a new group'
-                },
              help: {
                 awPopOver: "Select groups by clicking on each group you wish to add. Add the selected groups to your inventory " +
-                    "or to the selected parent group by clicking the <em>Select</em> button. You can also create a new group by clicking the " +
-                    "<em>Create New Group</em> button.",
+                    "or to the selected parent group by clicking the <em>Select</em> button.",
                 dataPlacement: 'left',
                 dataContainer: '#form-modal .modal-content',
                 icon: "icon-question-sign",

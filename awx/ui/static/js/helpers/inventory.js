@@ -121,14 +121,17 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         scope.buildTreeRemove = scope.$on('buildTree', function(e, treeData, index) {
             var idx = index;
             $(tree_id).jstree({
-                "core": { "initially_open":['inventory-node'] },
-                "plugins": ['themes', 'json_data', 'ui', 'contextmenu'],
+                "core": { "initially_open":['inventory_node'] },
+                "plugins": ['themes', 'json_data', 'ui', 'contextmenu', 'dnd', 'crrm'],
                 "themes": {
                     "theme": "ansible",
                     "dots": false,
                     "icons": true
                     },
-                "ui": { "initially_select": [ 'inventory-node' ]},
+                "ui": { 
+                    "initially_select": [ 'inventory-node' ],
+                    "select_limit": 1 
+                    },
                 "json_data": {
                     data: treeData,
                     ajax: {
@@ -166,6 +169,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                             }
                         }
                     },
+                "dnd": { },
+                "crrm": { },
                 "contextmenu": {
                     items: scope.treeController
                     }
@@ -174,12 +179,21 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             $(tree_id).bind("loaded.jstree", function () {
                 scope.$emit('treeLoaded');
                 });
+
+            $(tree_id).bind('move_node.jstree', function(e, data) {
+                if (data.rslt.o[0].id !== 'inventory_id') {
+                  console.log('group_id: ' + $('#tree-view li[id="' + data.rslt.o[0].id+ '"]').attr('group_id'));
+                }
+                else {
+                  console.log('id: ' + data.rslt.o[0].id);
+                }
+                });
             
             // When user clicks on a group, display the related hosts in the list view
             $(tree_id).bind("select_node.jstree", function(e, data){
                 //selected node object: data.inst.get_json()[0];
                 //selected node text: data.inst.get_json()[0].data
-                scope.$emit('NodeSelect',data.inst.get_json()[0]);
+                scope.$emit('NodeSelect', data.inst.get_json()[0]);
                 });
             });
    
@@ -272,6 +286,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             // Opens the list in reverse so that nodes open in parent then child order,
             // drilling down to the last selected node.
             var id, node;
+            
             if (openId.length > 0) {
                id = openId.pop();
                node = $('#tree-view li[id="' + id + '"]');
@@ -280,11 +295,13 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             else {
                if (selectedId !== null && selectedId !== undefined) {
                   // Click on the previously selected node
-                  $('#tree-view li[id="' + selectedId + '"] a').first().click();
-               }
+                  node = $('#tree-view li[id="' + selectedId + '"]');
+                  $('#tree-view').jstree('select_node', node);
+                  //$('#tree-view li[id="' + selectedId + '"] a').first().click();
+               }   
             }
             });
-
+      
         if (scope.inventoryLoadedRemove) {
            scope.inventoryLoadedRemove();
         }
@@ -302,10 +319,9 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             selectedId = scope.selectedNode.attr('id');
             findOpenNodes(scope.selectedNode);
             $('#tree-view').jstree('destroy');
-            TreeInit(scope.TreeParams);        
+            TreeInit(scope.TreeParams);  
             });
-
-        LoadInventory({ scope: scope });
+        LoadInventory({ scope: scope, doPostSteps: true });
         
         }
         }])
