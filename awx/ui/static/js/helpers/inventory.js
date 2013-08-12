@@ -177,6 +177,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 });
   
             $(tree_id).bind("loaded.jstree", function () {
+                scope['treeLoading'] = false;
                 scope.$emit('treeLoaded');
                 });
 
@@ -196,7 +197,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 scope.$emit('NodeSelect', data.inst.get_json()[0]);
                 });
             });
-   
+        
+        scope['treeLoading'] = true;
         LoadTreeData(params);
         
         }

@@ -926,6 +926,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            "aw-tool-tip=\"Create a new group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New</a></li>\n";
        html += "<li><a href=\"\" ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" " +
            "aw-tool-tip=\"Delete the selected group\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Group</a></li>\n";
+       html += "<li><a class=\"status\" ng-show=\"treeLoading\" href=\"\"><i class=\"icon-spinner icon-spin icon-large\"></i> Loading...</a></li>\n";
        html += "</ul>\n";
        html += "</div><!-- navbar -->\n";  
        html += "<div id=\"tree-view\" class=\"tree-container\"></div>\n";

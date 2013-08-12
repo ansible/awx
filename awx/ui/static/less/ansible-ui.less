@@ -11,7 +11,8 @@
 @warning:    #FF9900;
 @red:        #FF0000;
 @blue:       #1778c3;   /* logo blue */
-@blue-link:  #0088cc; 
+@blue-link:  #0088cc;
+@grey:       #A9A9A9;
 
 
 html {
@@ -109,7 +110,7 @@ hr {
 }
 
 .main-menu .nav > li > a {
-  color: #A9A9A9;
+  color: @grey;
 }
 
 .main-menu .nav > li > a:hover,
@@ -151,7 +152,7 @@ a:hover {
   padding-top: 20px;
   padding-bottom: 40px;
   margin-top: 60px;
-  color: #A9A9A9;
+  color: @grey;
   text-align: center;
   background-color: @black;
 }
@@ -169,7 +170,7 @@ a:hover {
 .site-footer a:visited {
   margin-right: 15px;
   font-size: 18px;
-  color: #A9A9A9;
+  color: @grey;
 }
 
 .site-footer .social {
@@ -522,18 +523,28 @@ input[type="text"].job-successful {
   background-color: #f5f5f5;
   border: 1px solid #e3e3e3;
   border-radius: 6px;
-
-  /* the brand won't really be a link */
-  .navbar-brand {
-     color: @black;
-  }
-  .navbar-brand:hover {
-     color: @black; 
-     cursor: default;
-  }
+  
   .nav a {
      color: @blue-link;
   }
+
+  /* the brand is't really a link */
+  .navbar-brand {
+     color: @grey;
+  }
+  .navbar-brand:hover {
+     color: @grey; 
+     cursor: default;
+  }
+  /* neither is the status spinner */
+  .nav .status {
+     color: @black;
+  }
+  .nav .status:hover {
+     color: @black; 
+     cursor: default;
+  }
+
 }
 
 .inventory-title {
@@ -706,7 +717,7 @@ tr td button i {
 }
 
 .close {
-  color: #A9A9A9;
+  color: @grey;
   opacity: .7;
   filter: alpha(opacity=70);
 }

@@ -40,7 +40,7 @@ angular.module('InventoryFormDefinition', [])
                 label: 'Description',
                 type: 'text',
                 addRequired: false,
-                editRequired: false,
+                editRequired: false
                 },
             organization: {
                 label: 'Organization',
