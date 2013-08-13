@@ -526,16 +526,43 @@ input[type="text"].job-successful {
   
   .nav a {
      color: @blue-link;
+     font-size: 12px;
+     i {
+       font-size: 14px;
+     }
+  }
+
+  .navbar-form {
+     display: inline-block;
+     float: right;
+     margin-top: 13px;
+     margin-left: 20px;
+     margin-right: 10px;
+
+     label {
+        font-size: 12px;
+        line-height: normal;
+     }
+     input[type="checkbox"] {
+        margin-top: 0;
+     }
   }
 
   /* the brand is't really a link */
   .navbar-brand {
-     color: @grey;
+     color: @black;
+     text-align: left;
+     font-size: 14px;
+     max-width: 100%;
+     i {
+       color: @red;
+     }
   }
   .navbar-brand:hover {
-     color: @grey; 
+     color: @black; 
      cursor: default;
   }
+  
   /* neither is the status spinner */
   .nav .status {
      color: @black;
@@ -545,6 +572,11 @@ input[type="text"].job-successful {
      cursor: default;
   }
 
+}
+
+.tree-badge {
+  color: @red;
+  font-size: 12px;
 }
 
 .inventory-title {

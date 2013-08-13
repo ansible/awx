@@ -205,24 +205,6 @@
        </div><!-- modal-dialog -->
     </div><!-- modal -->
 
-    <!-- Lookup dialog. Use for attribute selection -->
-    <div id="lookup-modal" class="modal fade">
-       <div class="modal-dialog">
-          <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-target="#lookup-modal" 
-                                data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h3 ng-bind="lookupHeader"></h3>
-              </div>
-              <div class="modal-body" id="lookup-modal-body"></div>
-              <div class="modal-footer">
-                <a href="#" data-target="#lookup-modal" data-dismiss="modal" class="btn btn-default">Cancel</a>
-                <a href="" ng-click="selectAction()" class="btn btn-primary">Select</a>
-              </div>
-          </div><!-- modal-content -->
-       </div><!-- modal-dialog -->
-    </div><!-- modal -->
-
     <!-- Generic Form dialog -->
     <div id="form-modal" class="modal fade">
        <div class="modal-dialog">
@@ -257,6 +239,24 @@
                     class="btn btn-small pull-left"><i class="icon-zoom-in"></i> <span ng-bind="formModal2Info"></span></a>
                 <a href="#" ng-show="formModal2CancelShow" data-target="#form-modal2" data-dismiss="modal" class="btn btn-default">Cancel</a>
                 <a href="" ng-bind="formModal2ActionLabel" ng-click="formModal2Action()" class="btn btn-primary"></a>
+              </div>
+          </div><!-- modal-content -->
+       </div><!-- modal-dialog -->
+    </div><!-- modal -->
+
+    <!-- Lookup dialog. Use for attribute selection -->
+    <div id="lookup-modal" class="modal fade">
+       <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-target="#lookup-modal" 
+                                data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 ng-bind="lookupHeader"></h3>
+              </div>
+              <div class="modal-body" id="lookup-modal-body"></div>
+              <div class="modal-footer">
+                <a href="#" data-target="#lookup-modal" data-dismiss="modal" class="btn btn-default">Cancel</a>
+                <a href="" ng-click="selectAction()" class="btn btn-primary">Select</a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->

@@ -20,9 +20,9 @@ angular.module('InventoryFormDefinition', [])
 
         fields: {
             has_active_failures: {
-                label: 'Host Status',
+                label: 'Status',
                 control: '<div class="job-failures-\{\{ has_active_failures \}\}">' +
-                    '<i class="icon-exclamation-sign"></i> Failed jobs</div>',
+                    '<i class="icon-exclamation-sign"></i> Contains hosts with failed jobs</div>',
                 type: 'custom',
                 ngShow: 'has_active_failures',
                 readonly: true

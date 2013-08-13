@@ -914,20 +914,24 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        
        // build the groups tab
        html += "<div class=\"navbar groups-menu\">\n"; 
-       html += "<a class=\"navbar-brand\" ng-bind=\"selectedNodeName\" href=\"\"></a>\n"; 
+       html += "<a class=\"navbar-brand\" ng-bind-html-unsafe=\"selectedNodeName\" href=\"\"></a>\n"; 
        html += "<ul class=\"nav navbar-nav\">\n";
        html += "<li><a href=\"\" ng-click=\"editInventory()\" ng-hide=\"inventoryEditHide\" " +
            "aw-tool-tip=\"Edit inventory properties\"  data-placement=\"bottom\"><i class=\"icon-edit\"></i> Inventory Properties</a></li>\n";
        html += "<li><a href=\"\" ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" " +
            "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> Group Properties</a></li>\n";
        html += "<li><a href=\"\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
-           "aw-tool-tip=\"Add an existing group\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Add Existing</a></li>\n";
+           "aw-tool-tip=\"Add an existing group\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Add Existing Group</a></li>\n";
        html += "<li><a href=\"\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
-           "aw-tool-tip=\"Create a new group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New</a></li>\n";
+           "aw-tool-tip=\"Create a new group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New Group</a></li>\n";
        html += "<li><a href=\"\" ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" " +
            "aw-tool-tip=\"Delete the selected group\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Group</a></li>\n";
        html += "<li><a class=\"status\" ng-show=\"treeLoading\" href=\"\"><i class=\"icon-spinner icon-spin icon-large\"></i> Loading...</a></li>\n";
        html += "</ul>\n";
+       html += "<form class=\"navbar-form\">\n";
+       html += "<label class=\"checkbox-inline\"><input type=\"checkbox\" ng-model=\"inventoryFailureFilter\" ng-change=\"filterInventory()\" > Only show groups with failed hosts" +
+           "</label>\n";
+       html += "</form>\n"; 
        html += "</div><!-- navbar -->\n";  
        html += "<div id=\"tree-view\" class=\"tree-container\"></div>\n";
        //html += "<span ng-show=\"has_active_failures == true\"><label class=\"checkbox inline\">";

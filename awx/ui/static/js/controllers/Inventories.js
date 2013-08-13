@@ -185,7 +185,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                           OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
                           GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshGroupName, ParseTypeChange,
-                          HostsReload, EditInventory) 
+                          HostsReload, EditInventory, RefreshTree) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -224,80 +224,6 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    scope.filterHosts = function() {
       HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
    }
-
-   function PostSave() {
-       // Make sure the inventory name in the tree is correct
-       RefreshGroupName($('#inventory-node'), scope['inventory_name'], scope['inventory_description']);
-      
-       // Reset the form to disable the form action buttons
-       scope[form.name + '_form'].$setPristine();
-
-       // Show the flash message for 5 seconds, letting the user know the save worked
-       scope['flashMessage'] = 'Your changes were successfully saved!';
-       setTimeout(function() {
-           scope['flashMessage'] = null;
-           if (!scope.$$phase) {
-              scope.$digest();
-           } 
-           }, 5000);
-       }
-
-   // Save
-   scope.formSave = function() {
-       try { 
-           // Make sure we have valid variable data
-           if (scope.inventoryParseType == 'json') {
-              var json_data = JSON.parse(scope.inventory_variables);  //make sure JSON parses
-           }
-           else {
-              var json_data = jsyaml.load(scope.inventory_variables);  //parse yaml
-           }
-
-           // Make sure our JSON is actually an object
-           if (typeof json_data !== 'object') {
-              throw "failed to return an object!";
-           }
-
-           var data = {}
-           for (var fld in form.fields) {
-               if (fld != 'inventory_variables') {
-                  if (form.fields[fld].realName) {
-                     data[form.fields[fld].realName] = scope[fld];
-                  }
-                  else {
-                     data[fld] = scope[fld];  
-                  }
-               }
-           }
-
-           Rest.setUrl(defaultUrl + id + '/');
-           Rest.put(data)
-               .success( function(data, status, headers, config) {
-                   if (scope.inventory_variables) {
-                      Rest.setUrl(data.related.variable_data);
-                      Rest.put(json_data)
-                          .success( function(data, status, headers, config) {
-                              PostSave();
-                              })
-                          .error( function(data, status, headers, config) {
-                              ProcessErrors(scope, data, status, form,
-                                 { hdr: 'Error!', msg: 'Failed to update inventory varaibles. PUT returned status: ' + status });
-                          });
-                   }
-                   else {
-                      PostSave();
-                   }
-                   })
-               .error( function(data, status, headers, config) {
-                   ProcessErrors(scope, data, status, form,
-                       { hdr: 'Error!', msg: 'Failed to update new inventory. Post returned status: ' + status });
-                   });
-       }
-       catch(err) {
-           Alert("Error", "Error parsing inventory variables. Parser returned: " + err);  
-           }      
-       
-       };
 
    // Cancel
    scope.formReset = function() {
@@ -350,6 +276,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       };
 
    scope.treeController = function($node) {
+
       var nodeType = $($node).attr('type');
       if (nodeType == 'inventory') {
           return {
@@ -361,10 +288,11 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                          scope.$digest();
                       }
                       EditInventory({ scope: scope, "inventory_id": id });
-                      }
+                      },
+                  separator_after: true
                   },
               addGroup: {
-                  label: 'Create Group',
+                  label: 'Create New Group',
                   action: function(obj) {
                       scope.group_id = null;
                       if (!scope.$$phase) {
@@ -386,11 +314,11 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                      }
                      GroupsEdit({ "inventory_id": id, group_id: $(obj).attr('group_id') }); 
                      },
-                 separator_before: true
+                 separator_after: true
                  },
 
              addGroup: { 
-                 label: 'Add Existing',
+                 label: 'Add Existing Group',
                  action: function(obj) {
                      scope.group_id = $(obj).attr('group_id');
                      if (!scope.$$phase) {
@@ -401,7 +329,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                  },
 
              createGroup: { 
-                 label: 'Create New',
+                 label: 'Create New Group',
                  action: function(obj) {
                      scope.group_id = $(obj).attr('group_id');
                      if (!scope.$$phase) {
@@ -435,15 +363,18 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       
       scope['selectedNode'] = node;
       scope['selectedNodeName'] = node.attr('name');
-      
+      scope['selectedNodeName'] += (node.attr('data-failures') == 'true') ? 
+         ' <span class="nav-badge">' +
+         '<i class="icon-exclamation-sign" title="Contains hosts with active failures"></i></span>' : '';
+
       $('#tree-view').jstree('open_node',node);
       
       if (type == 'group') {
          url = node.attr('all');
          scope.groupAddHide = false;
          scope.groupCreateHide = false;
-         scope.groupEditHide =false;
-         scope.inventoryEditHide=true;
+         scope.groupEditHide = false;
+         scope.inventoryEditHide = true;
          scope.groupDeleteHide = false;
          scope.createButtonShow = true;
          scope.group_id = node.attr('group_id');
@@ -473,7 +404,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       });
 
   scope.addGroup = function() {
-         GroupsList({ "inventory_id": id, group_id: scope.group_id });
+      GroupsList({ "inventory_id": id, group_id: scope.group_id });
       }
 
   scope.createGroup = function() {
@@ -531,6 +462,6 @@ InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$l
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
                             'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete', 'RefreshGroupName',
-                            'ParseTypeChange', 'HostsReload', 'EditInventory'
+                            'ParseTypeChange', 'HostsReload', 'EditInventory', 'RefreshTree'
                             ]; 
   

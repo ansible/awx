@@ -18,6 +18,14 @@ angular.module('GroupFormDefinition', [])
         formFieldSize: 'col-lg-9',
         
         fields: {
+            has_active_failures: {
+                label: 'Status',
+                control: '<div class="job-failures-\{\{ has_active_failures \}\}">' +
+                    '<i class="icon-exclamation-sign"></i> Contains hosts with failed jobs</div>',
+                type: 'custom',
+                ngShow: 'has_active_failures',
+                readonly: true
+                },
             name: {
                 label: 'Name',
                 type: 'text',

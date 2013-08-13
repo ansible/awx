@@ -31,19 +31,23 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var treeData = [];
 
         // Ater inventory top-level hosts, load top-level groups
-        if (scope.HostLoadedRemove) {
-            scope.HostLoadedRemove();
+        if (scope.inventoryLoadedRemove) {
+            scope.inventoryLoadedRemove();
         }
-        scope.HostLoadedRemove = scope.$on('hostsLoaded', function() {
-            var filter = (scope.inventoryFailureFilter) ? "has_active_failures__int=1&" : ""; 
+        scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
+            var filter = (scope.inventoryFailureFilter) ? "has_active_failures=true&" : ""; 
             var url = groups + '?' + filter + 'order_by=name';
+            var title;
             Rest.setUrl(url);
             Rest.get()
                 .success( function(data, status, headers, config) {    
                     for (var i=0; i < data.results.length; i++) {
+                        title = data.results[i].name; 
+                        title += (data.results[i].has_active_failures) ? ' <span class="tree-badge" title="Contains hosts with failed jobs">' +
+                            '<i class="icon-exclamation-sign"></i></span>' : ''; 
                         treeData[0].children.push({
                            data: {
-                               title: data.results[i].name
+                               title: title
                                },
                            attr: {
                                id: idx,
@@ -69,39 +73,35 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     });
             });
 
-        // Setup tree_data
-        Rest.setUrl(hosts + '?order_by=name'); 
-        Rest.get()
-            .success ( function(data, status, headers, config) {
-                treeData =
-                    [{ 
-                    data: {
-                        title: inventory_name
-                        }, 
-                    attr: {
-                        type: 'inventory',
-                        id: 'inventory-node',
-                        url: inventory_url,
-                        'inventory_id': inventory_id,
-                        hosts: hosts,
-                        name: inventory_name,
-                        description: inventory_descr,
-                        "data-failures": inventory.has_active_failures
-                        },
-                    state: 'open',
-                    children:[] 
-                    }];
-                scope.$emit('hostsLoaded');
-            })
-            .error ( function(data, status, headers, config) {
-                Alert('Error', 'Failed to laod tree data. Url: ' + hosts + ' GET status: ' + status);
-            });
+          var title = inventory_name;
+          title += (has_active_failures) ? ' <span class="tree-badge" title="Contains hosts with failed jobs">' +
+              '<i class="icon-exclamation-sign"></i></span>' : ''; 
+          treeData =
+              [{ 
+              data: {
+                  title: title
+                  }, 
+              attr: {
+                  type: 'inventory',
+                  id: 'inventory-node',
+                  url: inventory_url,
+                  'inventory_id': inventory_id,
+                  hosts: hosts,
+                  name: inventory_name,
+                  description: inventory_descr,
+                  "data-failures": inventory.has_active_failures
+                  },
+              state: 'open',
+              children:[] 
+              }];
+          scope.$emit('inventoryLoaded');
+           
         }
         }])
 
 
-    .factory('TreeInit', ['Alert', 'Rest', 'Authorization', '$http', 'LoadTreeData',
-    function(Alert, Rest, Authorization, $http, LoadTreeData) {
+    .factory('TreeInit', ['Alert', 'Rest', 'Authorization', '$http', 'LoadTreeData', 'GetBasePath', 'ProcessErrors',
+    function(Alert, Rest, Authorization, $http, LoadTreeData, GetBasePath, ProcessErrors) {
     return function(params) {
 
         var scope = params.scope;
@@ -121,7 +121,9 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         scope.buildTreeRemove = scope.$on('buildTree', function(e, treeData, index) {
             var idx = index;
             $(tree_id).jstree({
-                "core": { "initially_open":['inventory_node'] },
+                "core": { "initially_open":['inventory_node'], 
+                    "html_titles": true,
+                    },
                 "plugins": ['themes', 'json_data', 'ui', 'contextmenu', 'dnd', 'crrm'],
                 "themes": {
                     "theme": "ansible",
@@ -142,11 +144,15 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                         headers: { 'Authorization': 'Token ' + Authorization.getToken() },
                         success: function(data) {
                             var response = [];
-                            var filter = (scope.inventoryFailureFilter) ? "has_active_failures__int=1&" : ""; 
+                            var title;
+                            var filter = (scope.inventoryFailureFilter) ? "has_active_failures=true&" : ""; 
                             for (var i=0; i < data.results.length; i++) {
+                                title = data.results[i].name; 
+                                title += (data.results[i].has_active_failures) ? ' <span class="tree-badge" title="Contains hosts with failed jobs">' +
+                                    '<i class="icon-exclamation-sign"></i></span>' : ''; 
                                 response.push({
                                     data: {
-                                       title: data.results[i].name
+                                       title: title
                                        },
                                     attr: {
                                        id: idx,
@@ -170,7 +176,18 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                         }
                     },
                 "dnd": { },
-                "crrm": { },
+                "crrm": { 
+                    "move": {
+                        "check_move": function(m) {
+                            if (m.op.attr('id') == m.np.attr('id')) {
+                               // old parent and new parent cannot be the same
+                               return false;
+                            }
+                            return true;
+                            }
+                        }
+                    },
+                "crrm" : { },
                 "contextmenu": {
                     items: scope.treeController
                     }
@@ -182,20 +199,121 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 });
 
             $(tree_id).bind('move_node.jstree', function(e, data) {
-                if (data.rslt.o[0].id !== 'inventory_id') {
-                  console.log('group_id: ' + $('#tree-view li[id="' + data.rslt.o[0].id+ '"]').attr('group_id'));
+                // When user drags-n-drops a node, update the API
+                var node, target, url, parent, inv_id, variables;
+                node = $('#tree-view li[id="' + data.rslt.o[0].id + '"]');  // node being moved
+                parent = $('#tree-view li[id="' + data.args[0].op[0].id + '"]');  //node moving from
+                target = $('#tree-view li[id="' + data.rslt.np[0].id + '"]');  // node moving to
+                inv_id = inventory_id;
+
+                if (scope.removeCopyVariables) {
+                   scope.removeCopyVariables();
                 }
-                else {
-                  console.log('id: ' + data.rslt.o[0].id);
+                scope.removeCopyVariables = scope.$on('copyVariables', function(e, id, url) {
+                    
+                    function showSuccessMsg() {
+                        var parent_descr = (parent.attr('type') == 'inventory') ? 'the inventory root' : parent.attr('name');
+                        var target_descr = (target.attr('type') == 'inventory') ? 'the inventory root' : target.attr('name');
+                        Alert('Group Moved', 'Group ' + node.attr('name') + ' was successfully moved from ' + parent_descr + 
+                            ' to ' + target_descr + '.', 'alert-success');
+                        scope['treeLoading'] = false;
+                        if (!scope.$$phase) {
+                           scope.$digest();
+                        } 
+                    }
+
+                    if (variables) {
+                       Rest.setUrl(url); 
+                       Rest.put(variables)
+                           .success(function(data, status, headers, config) {
+                               showSuccessMsg();
+                               })
+                           .error(function(data, status, headers, config) {
+                               ProcessErrors(scope, data, status, null,
+                                   { hdr: 'Error!', msg: 'Failed to update variables. PUT returned status: ' + status });
+                               });
+                    }
+                    else {
+                       showSuccessMsg();
+                    }
+                    }); 
+                
+                if (scope['addToTargetRemove']) {
+                   scope.addToTargetRemove();
                 }
+                scope.addToTargetRemove = scope.$on('addToTarget', function() {
+                   // add the new group to the target parent
+                   var url = (target.attr('type') == 'group') ? GetBasePath('base') + 'groups/' + target.attr('group_id') + '/children/' :
+                       GetBasePath('inventory') + inv_id + '/groups/';
+                   var group = { 
+                       name: node.attr('name'),
+                       description: node.attr('description'),
+                       inventory: node.attr('inventory')
+                       }
+                   Rest.setUrl(url);
+                   Rest.post(group)
+                       .success( function(data, status, headers, config) {
+                           //Update the node with new attributes
+                           var filter = (scope.inventoryFailureFilter) ? "has_active_failures=true&" : ""; 
+                           node.attr('group_id', data.id);
+                           node.attr('variable', data.related.variable_data);
+                           node.attr('all', data.related.all_hosts); 
+                           node.attr('children', data.related.children + '?' + filter + 'order_by=name');
+                           node.attr('hosts', data.related.hosts);
+                           node.attr('data-failures', data.has_active_failures);
+                           scope.$emit('copyVariables', data.id, data.related.variable_data);
+                           })
+                       .error( function(data, status, headers, config) {
+                           ProcessErrors(scope, data, status, null,
+                              { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
+                              target.attr('name') + '. POST returned status: ' + status });
+                           });
+                   });
+
+                // disassociate the group from the original parent
+                if (scope.removeGroupRemove) {
+                   scope.removeGroupRemove(); 
+                }
+                scope.removeGroupRemove = scope.$on('removeGroup', function() {
+                    var url = (parent.attr('type') == 'group') ? GetBasePath('base') + 'groups/' + parent.attr('group_id') + '/children/' : 
+                        GetBasePath('inventory') + inv_id + '/groups/';
+                    Rest.setUrl(url);
+                    Rest.post({ id: node.attr('group_id'), disassociate: 1 })
+                        .success( function(data, status, headers, config) {
+                            scope.$emit('addToTarget');
+                            })
+                        .error( function(data, status, headers, config) {
+                            ProcessErrors(scope, data, status, null,
+                                { hdr: 'Error!', msg: 'Failed to remove ' + node.attr('name') + ' from ' + 
+                                  parent.attr('name') + '. POST returned status: ' + status });
+                            });
+                    });
+                
+                // Lookup the inventory. We already have what we need except for variables.
+                Rest.setUrl(GetBasePath('base') + 'groups/' + node.attr('group_id') + '/');
+                Rest.get()
+                    .success( function(data, status, headers, config) {
+                        variables = (data.variables) ? JSON.parse(data.variables) : "";
+                        scope.$emit('removeGroup');
+                        })
+                    .error( function(data, status, headers, config) {
+                        ProcessErrors(scope, data, status, null,
+                            { hdr: 'Error!', msg: 'Failed to lookup group ' + node.attr('name') + 
+                            '. GET returned status: ' + status });
+                        });
+                
+                scope['treeLoading'] = true;
+
+                if (!scope.$$phase) {
+                   scope.$digest();
+                } 
                 });
             
             // When user clicks on a group, display the related hosts in the list view
             $(tree_id).bind("select_node.jstree", function(e, data){
-                //selected node object: data.inst.get_json()[0];
-                //selected node text: data.inst.get_json()[0].data
                 scope.$emit('NodeSelect', data.inst.get_json()[0]);
                 });
+            
             });
         
         scope['treeLoading'] = true;
@@ -267,6 +385,10 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         // Call after GroupsEdit controller saves changes
         $('#tree-view').jstree('rename_node', node, name);
         node.attr('description', description);
+        scope = angular.element(getElementById('htmlTemplate')).scope();
+        scope['selectedNodeName'] = name;
+        scope['selectedNodeName'] += (node.attr('data-failures') == 'true') ? 
+           ' <span class="nav-badge"><i class="icon-exclamation-sign" title="Contains hosts with failed jobs"></i></span>' : '';
         }
         }])
 
@@ -323,6 +445,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             $('#tree-view').jstree('destroy');
             TreeInit(scope.TreeParams);  
             });
+
+        scope.treeLoading = true;
         LoadInventory({ scope: scope, doPostSteps: true });
         
         }
@@ -330,9 +454,9 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
 
 
     .factory('EditInventory', ['InventoryForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
-        'GetBasePath', 'ParseTypeChange', 'LoadInventory',
+        'GetBasePath', 'ParseTypeChange', 'LoadInventory', 'RefreshGroupName',
     function(InventoryForm, GenerateForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange,
-        LoadInventory) {
+        LoadInventory, RefreshGroupName) {
     return function(params) {
 
         var generator = GenerateForm;
@@ -396,6 +520,82 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         if (!scope.$$phase) {
            scope.$digest();
         }
+
+        function PostSave() {
+           $('#form-modal').modal('hide');
+
+           // Make sure the inventory name appears correctly in the tree and the navbar
+           RefreshGroupName($('#inventory-node'), scope['inventory_name'], scope['inventory_description']);
+          
+           // Reset the form to disable the form action buttons
+           //scope[form.name + '_form'].$setPristine();
+
+           // Show the flash message for 5 seconds, letting the user know the save worked
+           //scope['flashMessage'] = 'Your changes were successfully saved!';
+           //setTimeout(function() {
+           //    scope['flashMessage'] = null;
+           //    if (!scope.$$phase) {
+           //       scope.$digest();
+           //    } 
+           //    }, 5000);
+           }
+
+        // Save
+        scope.formModalAction = function() {
+           try { 
+               // Make sure we have valid variable data
+               if (scope.inventoryParseType == 'json') {
+                  var json_data = JSON.parse(scope.inventory_variables);  //make sure JSON parses
+               }
+               else {
+                  var json_data = jsyaml.load(scope.inventory_variables);  //parse yaml
+               }
+
+               // Make sure our JSON is actually an object
+               if (typeof json_data !== 'object') {
+                  throw "failed to return an object!";
+               }
+
+               var data = {}
+               for (var fld in form.fields) {
+                   if (fld != 'inventory_variables') {
+                      if (form.fields[fld].realName) {
+                         data[form.fields[fld].realName] = scope[fld];
+                      }
+                      else {
+                         data[fld] = scope[fld];  
+                      }
+                   }
+               }
+
+               Rest.setUrl(defaultUrl + scope['inventory_id'] + '/');
+               Rest.put(data)
+                   .success( function(data, status, headers, config) {
+                       if (scope.inventory_variables) {
+                          Rest.setUrl(data.related.variable_data);
+                          Rest.put(json_data)
+                              .success( function(data, status, headers, config) {
+                                  PostSave();
+                                  })
+                              .error( function(data, status, headers, config) {
+                                  ProcessErrors(scope, data, status, form,
+                                     { hdr: 'Error!', msg: 'Failed to update inventory varaibles. PUT returned status: ' + status });
+                              });
+                       }
+                       else {
+                          PostSave();
+                       }
+                       })
+                   .error( function(data, status, headers, config) {
+                       ProcessErrors(scope, data, status, form,
+                           { hdr: 'Error!', msg: 'Failed to update inventory. POST returned status: ' + status });
+                       });
+           }
+           catch(err) {
+               Alert("Error", "Error parsing inventory variables. Parser returned: " + err);  
+               }      
+           
+           };
     }
     }]);
 
