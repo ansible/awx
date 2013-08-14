@@ -406,6 +406,12 @@ class UsersTest(BaseTest):
         url = '%s?is_superuser=notatbool' % base_url
         self.check_get_list(url, self.super_django_user, base_qs, expect=400)
 
+        # Filter by custom __int suffix on boolean field.
+        url = '%s?is_superuser__int=1' % base_url
+        qs = base_qs.filter(is_superuser=True)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
         # Filter by is_staff (field not exposed via API).  FIXME: Should 
         # eventually not be allowed!
         url = '%s?is_staff=true' % base_url

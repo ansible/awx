@@ -61,6 +61,7 @@ class FieldLookupBackend(BaseFilterBackend):
         return field
 
     def to_python_boolean(self, value, allow_none=False):
+        value = unicode(value)
         if value.lower() in ('true', '1'):
             return True
         elif value.lower() in ('false', '0'):
@@ -71,6 +72,7 @@ class FieldLookupBackend(BaseFilterBackend):
             raise ValueError(u'Unable to convert "%s" to boolean' % unicode(value))
 
     def to_python_related(self, value):
+        value = unicode(value)
         if value.lower() in ('none', 'null'):
             return None
         else:
