@@ -122,7 +122,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             var idx = index;
             $(tree_id).jstree({
                 "core": { "initially_open":['inventory_node'], 
-                    "html_titles": true,
+                    "html_titles": true
                     },
                 "plugins": ['themes', 'json_data', 'ui', 'contextmenu', 'dnd', 'crrm'],
                 "themes": {
