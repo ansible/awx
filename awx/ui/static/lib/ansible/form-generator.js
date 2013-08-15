@@ -942,6 +942,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        // build the hosts tab
        itm = "hosts";
        html += "<div class=\"tab-pane\" id=\"inventory-hosts\">\n";
+       html += "<div class=\"row\">\n";
+       html += "<div class=\"col-lg-3\" id=\"search-tree-target\">\n";
+       html += "<div aw-tree=\"searchTree\"></div>\n";
+       html += "</div>\n";
+       html += "<div class=\"col-lg-9\">\n";
        html += "<div class=\"hosts-well well\">\n";             
        html += "<div class=\"hosts-title\" ng-bind-html-unsafe=\"" + form.related[itm].title + "\"></div>\n";
        html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true, size: 'col-lg-6'});
@@ -1047,6 +1052,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
       html += "</div>\n";    // close well
 
       html += PaginateWidget({ set: itm, iterator: form.related[itm].iterator, mini: true }); 
+      
+      html += "</div>\n";
+      html += "</div>\n";
 
       html += "</div><!-- inventory-hosts -->\n";
       html += "</div><!-- tab-content -->\n";

@@ -413,7 +413,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope = params.scope;
         scope['hosts'] = null;
         
-        var url = (scope.group_id !== null) ? GetBasePath('groups') + scope.group_id + '/all_hosts/' :
+        var url = (scope.group_id !== null && scope.group_id !== undefined) ? GetBasePath('groups') + scope.group_id + '/all_hosts/' :
                   GetBasePath('inventory') + params.inventory_id + '/hosts/';
 
         var relatedSets = { hosts: { url: url, iterator: 'host' } };
@@ -433,12 +433,45 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            }
         }
         
-        params.scope.search('host');
+        scope.search('host');
+        
         if (!params.scope.$$phase) {
            params.scope.$digest();
         }
         }
+        }])
+
+    .factory('LoadSearchTree', ['Rest', 'GetBasePath', 'ProcessErrors', '$compile', 
+    function(Rest, GetBasePath, ProcessErrors, $compile) {
+    return function(params) {
+         
+        var scope = params.scope; 
+        var inventory_id = params.inventory_id;
+        var newTree = [];
+        scope.searchTree = [];
+            
+        // Load the root node
+        Rest.setUrl (GetBasePath('inventory') + inventory_id + '/');
+        Rest.get()
+             .success( function(data, status, headers, config) {
+                 scope.searchTree.push({
+                     name: data.name, 
+                     description: data.description, 
+                     hosts: data.related.hosts,
+                     failures: data.has_active_failures,
+                     groups: data.related.root_groups,
+                     children: []
+                     });
+                 scope.$emit('hostTabInit');
+                 })
+             .error( function(data, status, headers, config) {
+                 ProcessErrors(scope, data, status, null,
+                     { hdr: 'Error!', msg: 'Failed to get inventory: ' + inventory_id + '. GET returned: ' + status });
+                 });
+        }
         }]);
+     
+
 
 
 

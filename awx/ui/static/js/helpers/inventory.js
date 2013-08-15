@@ -57,7 +57,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                description: data.results[i].description,
                                inventory: data.results[i].inventory,
                                all: data.results[i].related.all_hosts,
-                               children: data.results[i].related.children,
+                               children: data.results[i].related.children + '?' + filter + 'order_by=name',
                                hosts: data.results[i].related.hosts,
                                variable: data.results[i].related.variable_data,
                                "data-failures": data.results[i].has_active_failures

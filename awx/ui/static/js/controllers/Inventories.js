@@ -185,7 +185,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                           OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
                           GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshGroupName, ParseTypeChange,
-                          HostsReload, EditInventory, RefreshTree) 
+                          HostsReload, EditInventory, RefreshTree, LoadSearchTree) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -201,21 +201,26 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    
    $('#inventory-tabs a:first').tab('show');  //activate the groups tab
 
-   scope.inventoryParseType = 'yaml';
+   scope['inventoryParseType'] = 'yaml';
    scope['inventory_id'] = id;
-   
+   scope['inventoryFailureFilter'] = false;
+
    // Retrieve each related set and any lookups
    if (scope.inventoryLoadedRemove) {
       scope.inventoryLoadedRemove();
    }
    scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
-       scope.groupTitle = '<h4>All Hosts</h4>';
-       scope.createButtonShow = false;
-       scope.search(scope.relatedSets['hosts'].iterator);
        TreeInit(scope.TreeParams);
        });
 
    LoadInventory({ scope: scope, doPostSteps: true });
+   $('#inventory-tabs a[href="#inventory-hosts"]').on('show.bs.tab', function() { 
+       LoadSearchTree({ scope: scope, inventory_id: scope['inventory_id'] });
+       HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
+       if (!scope.$$phase) {
+          scope.$digest();
+       }
+       });
 
    scope.filterInventory = function() {
       RefreshTree({ scope: scope });
@@ -365,7 +370,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       scope['selectedNodeName'] = node.attr('name');
       scope['selectedNodeName'] += (node.attr('data-failures') == 'true') ? 
          ' <span class="nav-badge">' +
-         '<i class="icon-exclamation-sign" title="Contains hosts with active failures"></i></span>' : '';
+         '<i class="icon-exclamation-sign" title="Contains hosts with failed jobs"></i></span>' : '';
 
       $('#tree-view').jstree('open_node',node);
       
@@ -399,7 +404,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.$digest();
       }
 
-      HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
+      //HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
       
       });
 
@@ -455,6 +460,12 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
               });
       }
 
+  scope.showHosts = function(e) {
+      console.log('here');
+      var elm = angular.elment(e.srcElement);
+      console.log('Need to show hosts: ' + elm.attr('data-hosts'));
+      }
+
 }
 
 InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 
@@ -462,6 +473,6 @@ InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$l
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
                             'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete', 'RefreshGroupName',
-                            'ParseTypeChange', 'HostsReload', 'EditInventory', 'RefreshTree'
+                            'ParseTypeChange', 'HostsReload', 'EditInventory', 'RefreshTree', 'LoadSearchTree'
                             ]; 
   
