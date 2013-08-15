@@ -338,7 +338,7 @@ class GenericLoader(object):
             for f in glob.glob("%s/*" % src):
                 if f.endswith(".ini"):
                     # config files for inventory scripts should be ignored
-                    pass
+                    continue 
                 if not os.path.isdir(f):
                     if os.access(f, os.X_OK):
                         ExecutableJsonLoader().load(f, memGroup)
