@@ -253,7 +253,7 @@ class ExecutableJsonLoader(BaseLoader):
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (stdout, stderr) = proc.communicate()
         if proc.returncode != 0:
-            raise ImportException("%s list failed %s with output: %s" % (src, stderr, proc.returncode))
+            raise ImportException("%s list failed %s with output: %s" % (cmd, stderr, proc.returncode))
         data = {}
         try:
             data = json.loads(stdout)
