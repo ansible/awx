@@ -199,7 +199,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    
    ParseTypeChange(scope,'inventory_variables', 'inventoryParseType');
    
-   $('#inventory-tabs a:first').tab('show');  //activate the groups tab
+   $('#inventory-tabs a:first').tab('show');  //activate the hosts tab
 
    scope['inventoryParseType'] = 'yaml';
    scope['inventory_id'] = id;
@@ -210,11 +210,16 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       scope.inventoryLoadedRemove();
    }
    scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
+       LoadSearchTree({ scope: scope, inventory_id: scope['inventory_id'] });
        TreeInit(scope.TreeParams);
+       if (!scope.$$phase) {
+          scope.$digest();
+       }
        });
 
    LoadInventory({ scope: scope, doPostSteps: true });
    $('#inventory-tabs a[href="#inventory-hosts"]').on('show.bs.tab', function() { 
+       scope['hosts'] = null;
        LoadSearchTree({ scope: scope, inventory_id: scope['inventory_id'] });
        if (!scope.$$phase) {
           scope.$digest();
@@ -402,9 +407,6 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       if (!scope.$$phase) {
          scope.$digest();
       }
-
-      //HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
-      
       });
 
   scope.addGroup = function() {
@@ -423,7 +425,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       GroupsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id });
       }
   
-  scope.selectHost = function() {
+  scope.addHost = function() {
       HostsList({ scope: scope, "inventory_id": id, group_id: scope.group_id });
       }
 
@@ -440,10 +442,10 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
           request: 'delete' });
       }
 
-  scope.removeHost = function(host_id, host_name) {
+ /* scope.removeHost = function(host_id, host_name) {
       HostsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id, host_id: host_id, host_name: host_name,
           request: 'remove' });
-      }
+      } */
 
   scope.showEvents = function(host_name, last_job) {
       // When click on !Failed Events link, redirect to latest job/job_events for the host
@@ -463,6 +465,16 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
   scope.$on('refreshHost', function(e, group, title) {
       scope.groupTitle = title;
       scope.group_id = group;
+      if (scope.group_id == null) {
+         scope.hostAddHide = true;
+         scope.hostCreateHide = true; 
+         scope.hostDeleteHide = true;
+      }
+      else {
+         scope.hostAddHide = false;
+         scope.hostCreateHide = false; 
+         scope.hostDeleteHide = false;
+      }
       HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: group });
       });
 

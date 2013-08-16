@@ -317,8 +317,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
         }
         }])
 
-    .directive('awTree', ['Rest', 'ProcessErrors', 'Authorization', '$compile', '$rootScope',
-        function(Rest, ProcessErrors, Authorization, $compile, $rootScope) {
+    .directive('awTree', ['Rest', 'ProcessErrors', 'Authorization', '$compile', '$rootScope', 'Wait',
+        function(Rest, ProcessErrors, Authorization, $compile, $rootScope, Wait) {
         return {
         //require: 'ngModel',
         
@@ -354,12 +354,12 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                 var group, title;
                 if (parent.attr('data-group-id')) {
                    group = parent.attr('data-group-id');
-                   title = '<h4>' + parent.attr('data-name') + '</h4>';
-                   title += (parent.attr('data-description') !== "") ? '<p>' + parent.attr('data-description') + '</p>' : ''; 
+                   title = parent.attr('data-name');
+                   //title += (parent.attr('data-description') !== "") ? '<p>' + parent.attr('data-description') + '</p>' : ''; 
                 }
                 else {
                    group = null;
-                   title = '<h4>All Hosts</h4>'
+                   title = 'All Hosts'
                 } 
                 scope.$emit('refreshHost', group, title);
                 }
@@ -502,6 +502,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                         scope.$emit('childrenLoaded');
                         },
                     error: function(data, status) {
+                        Wait('stop');
                         ProcessErrors(scope, data, status, null,
                         { hdr: 'Error!', msg: 'Failed to get child groups for ' + elm.attr('name') + 
                            '. GET returned: ' + status });
@@ -521,6 +522,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                $rootScope.hostTabInitRemove();
             }
             $rootScope.hostTabInitRemove = $rootScope.$on('hostTabInit', function(e) {
+               Wait('start');
                var container = angular.element(document.getElementById('search-tree-container'));
                container.empty();
                var html = "<ul>\n" +
@@ -540,7 +542,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                setTimeout(function() {
                    $('#search-node-1000 .expand').click();
                    $('#search-node-1000 .activate').click();
-                   }, 500);  
+                   Wait('stop');
+                   }, 1000);  
                });
 
             }

@@ -226,7 +226,7 @@ angular.module('Utilities',[])
           $('.overlay').css({
               width: $('html').width(),
               height: $(document).height() + 200
-              }).fadeIn(500);
+              }).fadeIn();
           $('.spinny').css({
               top: y, 
               left: x,

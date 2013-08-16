@@ -199,41 +199,41 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 });
 
             $(tree_id).bind('move_node.jstree', function(e, data) {
-                // When user drags-n-drops a node, update the API
+                // When user drags-n-drops a node, update the API 
+                
                 Wait('start');
+
                 var node, target, url, parent, inv_id, variables;
                 node = $('#tree-view li[id="' + data.rslt.o[0].id + '"]');  // node being moved
                 parent = $('#tree-view li[id="' + data.args[0].op[0].id + '"]');  //node moving from
                 target = $('#tree-view li[id="' + data.rslt.np[0].id + '"]');  // node moving to
                 inv_id = inventory_id;
+                
+                function cleanUp() {
+                    Wait('stop');
+                    if (!scope.$$phase) {
+                       scope.$digest();
+                    } 
+                }
 
                 if (scope.removeCopyVariables) {
                    scope.removeCopyVariables();
                 }
                 scope.removeCopyVariables = scope.$on('copyVariables', function(e, id, url) {
-                    
-                    function showSuccessMsg() {
-                        var parent_descr = (parent.attr('type') == 'inventory') ? 'the inventory root' : parent.attr('name');
-                        var target_descr = (target.attr('type') == 'inventory') ? 'the inventory root' : target.attr('name');
-                        Wait('stop');
-                        if (!scope.$$phase) {
-                           scope.$digest();
-                        } 
-                    }
-
                     if (variables) {
                        Rest.setUrl(url); 
                        Rest.put(variables)
                            .success(function(data, status, headers, config) {
-                               showSuccessMsg();
+                               cleanUp();
                                })
                            .error(function(data, status, headers, config) {
+                               cleanUp();
                                ProcessErrors(scope, data, status, null,
                                    { hdr: 'Error!', msg: 'Failed to update variables. PUT returned status: ' + status });
                                });
                     }
                     else {
-                       showSuccessMsg();
+                       cleanUp();
                     }
                     }); 
                 
@@ -263,6 +263,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                            scope.$emit('copyVariables', data.id, data.related.variable_data);
                            })
                        .error( function(data, status, headers, config) {
+                           cleanUp();
                            ProcessErrors(scope, data, status, null,
                               { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
                               target.attr('name') + '. POST returned status: ' + status });
@@ -282,6 +283,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                             scope.$emit('addToTarget');
                             })
                         .error( function(data, status, headers, config) {
+                            cleanUp();
                             ProcessErrors(scope, data, status, null,
                                 { hdr: 'Error!', msg: 'Failed to remove ' + node.attr('name') + ' from ' + 
                                   parent.attr('name') + '. POST returned status: ' + status });
@@ -296,6 +298,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                         scope.$emit('removeGroup');
                         })
                     .error( function(data, status, headers, config) {
+                        cleanUp();
                         ProcessErrors(scope, data, status, null,
                             { hdr: 'Error!', msg: 'Failed to lookup group ' + node.attr('name') + 
                             '. GET returned status: ' + status });

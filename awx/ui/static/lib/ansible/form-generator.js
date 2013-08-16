@@ -905,8 +905,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        html += "<div class=\"inventory-content\">\n";
 
        html += "<ul class=\"nav nav-tabs\" id=\"inventory-tabs\">\n";
-       html += "<li><a href=\"#inventory-groups\" data-toggle=\"tab\">Groups</a></li>\n";
        html += "<li><a href=\"#inventory-hosts\" data-toggle=\"tab\">Hosts</a></li>\n";
+       html += "<li><a href=\"#inventory-groups\" data-toggle=\"tab\">Groups</a></li>\n"; 
        html += "</ul>\n";
 
        html += "<div class=\"tab-content\">\n";
@@ -928,10 +928,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            "aw-tool-tip=\"Delete the selected group\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Group</a></li>\n";
        html += "<li><a class=\"status\" ng-show=\"treeLoading\" href=\"\"><i class=\"icon-spinner icon-spin icon-large\"></i> Loading...</a></li>\n";
        html += "</ul>\n";
-       html += "<form class=\"navbar-form\">\n";
+       /*html += "<form class=\"navbar-form\">\n";
        html += "<label class=\"checkbox-inline\"><input type=\"checkbox\" ng-model=\"inventoryFailureFilter\" ng-change=\"filterInventory()\" > Only show groups with failed hosts" +
            "</label>\n";
-       html += "</form>\n"; 
+       html += "</form>\n"; */
        html += "</div><!-- navbar -->\n";  
        html += "<div id=\"tree-view\" class=\"tree-container\"></div>\n";
        //html += "<span ng-show=\"has_active_failures == true\"><label class=\"checkbox inline\">";
@@ -947,8 +947,24 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        html += "<div aw-tree=\"searchTree\"></div>\n";
        html += "</div>\n";
        html += "<div class=\"col-lg-9\">\n";
+       html += "<div class=\"navbar hosts-menu\">\n"; 
+       html += "<a class=\"navbar-brand\" ng-bind-html-unsafe=\"" + form.related[itm].title + "\" href=\"\"></a>\n"; 
+       html += "<ul class=\"nav navbar-nav\">\n";
+       html += "<li><a href=\"\" ng-click=\"addHost()\" ng-hide=\"hostAddHide\" " +
+           "aw-tool-tip=\"Add an existing host\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Add Existing Host</a></li>\n";
+       html += "<li><a href=\"\" ng-click=\"createHost()\" ng-hide=\"hostCreateHide\" " +
+           "aw-tool-tip=\"Create a new host\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New Host</a></li>\n";
+       html += "<li><a href=\"\" ng-click=\"deleteHost()\" ng-hide=\"hostDeleteHide\" " +
+           "aw-tool-tip=\"Delete selected hosts\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Hosts</a></li>\n";
+       html += "<li><a class=\"status\" ng-show=\"treeLoading\" href=\"\"><i class=\"icon-spinner icon-spin icon-large\"></i> Loading...</a></li>\n";
+       html += "</ul>\n";
+       html += "<form class=\"navbar-form\">\n";
+       html += "<label class=\"checkbox-inline\"><input type=\"checkbox\" ng-model=\"hostFailureFilter\" ng-change=\"filterInventory()\" > Only show hosts with failed jobs" +
+           "</label>\n";
+       html += "</form>\n"; 
+       html += "</div><!-- navbar -->\n";  
+       
        html += "<div class=\"hosts-well well\">\n";             
-       html += "<div class=\"hosts-title\" ng-bind-html-unsafe=\"" + form.related[itm].title + "\"></div>\n";
        html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true, size: 'col-lg-6'});
 
        // Add actions(s)
@@ -973,6 +989,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        html += "<thead>\n";
        html += "<tr>\n";
        html += "<th>#</th>\n";
+       html += "<th><input type=\"checkbox\" ng-click=\"toggle_all()\" aw-tool-tip=\"Select all hosts\" data-placement=\"top\"></th>\n";
+       
        for (var fld in form.related[itm].fields) {
            html += "<th class=\"list-header\" id=\"" + form.related[itm].iterator + '-' + fld + "-header\" " +
                "ng-click=\"sort('" + form.related[itm].iterator + "', '" + fld + "')\">" +
@@ -991,14 +1009,23 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            }
            html += "\"></i></a></th>\n";
       }
+
       html += "<th></th>\n";
       html += "</tr>\n";
       html += "</thead>";
       html += "<tbody>\n";
             
       html += "<tr ng-repeat=\"" + form.related[itm].iterator + " in " + itm + "\" >\n";
+      
+      // Row counter
       html += "<td>{{ $index + (" + form.related[itm].iterator + "Page * " + 
        form.related[itm].iterator + "PageSize) + 1 }}.</td>\n";
+      
+      // Select checkbox
+      html += "<td><input type=\"checkbox\" ng-model=\"" + form.related[itm].iterator + ".checked\" name=\"check_{{" + 
+              form.related[itm].iterator + ".id }}\" ng-click=\"toggle_" + form.related[itm].iterator +"({{ " + form.related[itm].iterator + ".id }}, true)\" ng-true-value=\"1\" " +
+              "ng-false-value=\"0\" id=\"check_{{" + form.related[itm].iterator + ".id}}\" /></td>";
+      
       var cnt = 1;
       var rfield;
       var base = (form.related[itm].base) ? form.related[itm].base : itm;

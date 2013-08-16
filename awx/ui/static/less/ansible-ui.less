@@ -546,7 +546,7 @@ input[type="text"].job-successful {
     border-radius: 6px;
   }
 
-  .groups-menu {
+  .groups-menu, .hosts-menu {
     min-height: 30px;
     background-color: #f5f5f5;
     border: 1px solid #e3e3e3;
@@ -634,27 +634,28 @@ input[type="text"].job-successful {
       list-style-type: none;
       padding-left: 13px;
     }
+    
     ul:first-child {
       padding-left: 0;
     }
-  }
+    
+    .activate:hover {
+      background-color: #ddd; 
+    }
 
-  .search-tree .active {
-    /*background-color: #ddd;
-    padding: 1px 1px 1px 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;*/
-    font-weight: bold;
-    color: #000;
-  }
+    .active {
+      font-weight: bold;
+      color: #000;
+    }
 
-  .search-tree .expand {
-    padding: 3px;
-  }
+    .expand {
+      padding: 3px;
+    }
 
-  .search-tree .expand:hover {
-    background-color: #ddd;
-    border: 1px solid #ddd;
+    .expand:hover {
+      background-color: #ddd;
+      border: 1px solid #ddd;
+    }
   }
 
 .parse-selection {
