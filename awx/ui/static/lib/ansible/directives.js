@@ -317,8 +317,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
         }
         }])
 
-    .directive('awTree', ['Rest', 'ProcessErrors', 'Authorization', '$compile', '$rootScope', 'HostsReload', 
-        function(Rest, ProcessErrors, Authorization, $compile, $rootScope, HostsReload) {
+    .directive('awTree', ['Rest', 'ProcessErrors', 'Authorization', '$compile', '$rootScope',
+        function(Rest, ProcessErrors, Authorization, $compile, $rootScope) {
         return {
         //require: 'ngModel',
         
@@ -335,104 +335,143 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
         template:
             "<div class=\"search-tree well\" id=\"search-tree-container\">\n" +
             "<ul>\n" +
-            "<li><a href=\"\" id=\"search-node-1000\" class=\"active\" data-state=\"closed\" data-hosts=\"{{ treeData[0].hosts}}\" " +
+            "<li id=\"search-node-1000\" data-state=\"closed\" data-hosts=\"{{ treeData[0].hosts}}\" " +
             "data-hosts=\"{{ treeData[0].hosts }}\" " +
             "data-description=\"{{ treeData[0].description }}\" " + 
             "data-failures=\"{{ treeData[0].failures }}\" " +
             "data-groups=\"{{ treeData[0].groups }}\" " + 
-            "data-name=\"{{ treeData[0].name }}\" " +
-            "><i class=\"icon-caret-right\"></i> {{ treeData[0].name}}</a></li>\n" +
+            "data-name=\"{{ treeData[0].name }}\">" + 
+            "<a href=\"\" class=\"expand\"><i class=\"icon-caret-right\"></i></a> <a href=\"\" class=\"activate active\">{{ treeData[0].name }}</a></li>\n" +
+            "</li>\n"+
             "</ul>\n" +
             "</div>\n",
 
         link: function(scope, elm , attrs) {
 
             var idx=1000;
-            
-            function toggle(e) {
-                var id = (e.target.tagName == 'I') ? e.target.parentNode.attributes.id.value : e.target.attributes.id.value;
-                var elm = angular.element(document.getElementById(id));
 
-                function activate() {
-                     /* Set the clicked node as active */
-                    $('.search-tree .active').removeClass('active');
-                    elm.addClass('active');
-                    var group = (elm.attr('data-group-id')) ? elm.attr('data-group-id') : null;
-                    var parentScope = angular.element(document.getElementById('htmlTemplate')).scope();
-                    console.log('calling for group: ' + group);
-                    HostsReload({ scope: parentScope, inventory_id: parentScope['inventory_id'], group_id: group });
+            function refresh(parent) {
+                var group, title;
+                if (parent.attr('data-group-id')) {
+                   group = parent.attr('data-group-id');
+                   title = '<h4>' + parent.attr('data-name') + '</h4>';
+                   title += (parent.attr('data-description') !== "") ? '<p>' + parent.attr('data-description') + '</p>' : ''; 
                 }
-              
+                else {
+                   group = null;
+                   title = '<h4>All Hosts</h4>'
+                } 
+                scope.$emit('refreshHost', group, title);
+                }
+            
+            function activate(e) {
+                /* Set the clicked node as active */
+                var elm = angular.element(e.target);  //<a>
+                var parent = angular.element(e.target.parentNode); //<li>
+                $('.search-tree .active').removeClass('active');
+                elm.addClass('active');
+                refresh(parent);
+                }
+
+            function toggle(e) {
+                
+                var id, parent, elm, icon;
+                
+                if (e.target.tagName == 'I') {
+                   id = e.target.parentNode.parentNode.attributes.id.value;
+                   parent = angular.element(e.target.parentNode.parentNode);  //<li>
+                   elm = angular.element(e.target.parentNode);  // <a>
+                }
+                else {
+                   id = e.target.parentNode.attributes.id.value;
+                   parent = angular.element(e.target.parentNode);
+                   elm = angular.element(e.target);
+                }
+                
+                var sibling = angular.element(parent.children()[1]); // <a>
+                var state = parent.attr('data-state');
+                var icon = angular.element(elm.children()[0]);
+
                 /* Open/close the node and expand */
                 if (scope.childrenLoadedRemove) {
                    scope.childrenLoadedRemove();
                 }
                 scope.childrenLoadedRemove = scope.$on('childrenLoaded', function() {
-                    childlists = elm.parent().find('ul');  //look for children
+                    childlists = parent.find('ul');  //look for children
                     if (childlists && childlists.length > 0) {
                        // bind toggle() to click event of each link in the group we clicked on
-                       var parent = angular.element(elm.parent()[0]);
                        var links = parent.find('a');
                        for (var i=0; i < links.length; i++) {
                            var link = angular.element(links[i]);
-                           link.unbind('click', toggle);
-                           link.bind('click', toggle);
+                           if (link.hasClass('expand')) {
+                              link.unbind('click', toggle);
+                              link.bind('click', toggle);
+                           }
+                           if (link.hasClass('activate')) {
+                              link.unbind('click', activate);
+                              link.bind('click', activate);
+                           }
                        }
                        toggle(e);
                     }
                     else {
-                       var icon = angular.element(elm.children()[0]);
-                       icon.removeClass('icon-caret-down').removeClass('icon-caret-right').addClass('icon-ellipsis-horizontal');
+                       icon.removeClass('icon-caret-right').addClass('icon-caret-down');
+                       //activate(e);
                     }
                     });
-
-                if (elm.attr('data-state') == 'closed') {
+ 
+                
+                if (state == 'closed') {
                    // expand the elment
-                   var childlists = elm.parent().find('ul');
+                   var childlists = parent.find('ul');
                    if (childlists && childlists.length > 0) {
                      // already has childen
                      for (var i=0; i < childlists.length; i++) {
                          var listChild = angular.element(childlists[i]);
-                         var listParent = angular.element(listChild.parent().find('a')[0]);
-                         if (listParent.attr('id') == elm.attr('id')) {
+                         var listParent = angular.element(listChild.parent());
+                         if (listParent.attr('id') == id) {
                             angular.element(childlists[i]).removeClass('hidden');
                          }
                          // all the children should be in a closed state
-                         var aList = listChild.find('a');
-                         for (var j=0; j < aList.length; j++) {
-                             var thisList  = angular.element(aList[j]);
+                         var liList = listChild.find('li');
+                         for (var j=0; j < liList.length; j++) {
+                             var thisList  = angular.element(liList[j]);
+                             var anchor = angular.element(thisList.find('a')[0]);
+                             var thisIcon = angular.element(anchor.children()[0]);
+                             thisIcon.removeClass('icon-caret-down').addClass('icon-caret-right');
                              thisList.attr('data-state', 'closed'); 
-                             var icon = angular.element(thisList.children()[0]);
-                             icon.removeClass('icon-caret-down').removeClass('icon-ellipsis-horizontal').addClass('icon-caret-right');
                          }
                      }
-                     elm.attr('data-state','open'); 
-                     var icon = angular.element(elm.children()[0]);
-                     icon.removeClass('icon-caret-right').removeClass('icon-ellipsis-horizontal').addClass('icon-caret-down');
-                     activate();
+                     parent.attr('data-state','open'); 
+                     icon.removeClass('icon-caret-right').addClass('icon-caret-down');
                    }
                    else {
-                     getChildren(elm);   
+                     getChildren(elm, parent, sibling);   
                    }
                 }
                 else {
                    // close the element
-                   elm.attr('data-state','closed'); 
+                   parent.attr('data-state','closed'); 
                    var icon = angular.element(elm.children()[0]);
-                   icon.removeClass('icon-caret-down').removeClass('icon-ellipsis-horizontal').addClass('icon-caret-right');
-                   var childlists = elm.parent().find('ul');
+                   icon.removeClass('icon-caret-down').addClass('icon-caret-right');
+                   var childlists = parent.find('ul');
                    if (childlists && childlists.length > 0) {
                        // has childen
                        for (var i=0; i < childlists.length; i++) {
                            angular.element(childlists[i]).addClass('hidden');
                       }
                    }
-                   activate();
+                   /* When the active node's parent is closed, activate the parent*/
+                   if ($(parent).find('.active').length > 0) {
+                      $(parent).find('.active').removeClass('active');
+                      sibling.addClass('active');
+                      refresh(parent);
+                   }
                 }
-            }
+                }
 
-            function getChildren(elm) {
-                var url = elm.attr('data-groups');
+            function getChildren(elm, parent, sibling) {
+                var url = parent.attr('data-groups');
                 var html = '';
                 var token = Authorization.getToken();
                 /* For reasons unknown calling Rest fails. It just dies with no errors
@@ -445,23 +484,21 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                         // build html and append to parent of clicked link
                         for (var i=0; i < data.results.length; i++) {
                             idx++;
-                            html += "<li>\n";
-                            html += "<a href=\"\" data-state=\"closed\" ";
+                            html += "<li ";
                             html += "id=\"search-tree-" + idx +"\" ";
+                            html += "date-state=\"closed\" ";
                             html += "data-hosts=\"" + data.results[i].related.all_hosts + "\" ";
                             html += "data-description=\"" + data.results[i].description + "\" ";
                             html += "data-failures=\"" +data.results[i].has_active_failures + "\" ";
                             html += "data-groups=\"" + data.results[i].related.children + "\" ";
                             html += "data-name=\"" + data.results[i].name + "\" ";
-                            html += "data-group-id=\"" + data.results[i].id + "\" ";
-                            html += "><i class=\"icon-caret-right\"></i> " + data.results[i].name;
-                            html += "</a></li>\n";
+                            html += "data-group-id=\"" + data.results[i].id + "\">";
+                            html += "<a href=\"\" class=\"expand\"><i class=\"icon-caret-right\"></i></a> ";
+                            html += "<a href=\"\" class=\"activate\">" + data.results[i].name + "</a></li>\n";
                         }
                         html = (html !== '') ? "<ul>" + html + "</ul>\n" : "";
-                        var parent = angular.element(elm.parent()[0]);
                         var compiled = $compile(html)(scope);
                         parent.append(compiled);  //append the new list to the parent <li>
-                        console.log('childrenLoaded');
                         scope.$emit('childrenLoaded');
                         },
                     error: function(data, status) {
@@ -474,7 +511,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
 
             function initialize() {
                 var root = angular.element(document.getElementById('search-node-1000'));
-                root.bind('click', toggle);
+                var toggleElm = angular.element(root.find('a')[0]);
+                var activateElm = angular.element(root.find('a')[1])
+                toggleElm.bind('click', toggle);
+                activateElm.bind('click', activate);
                 }
             
             if ($rootScope.hostTabInitRemove) {
@@ -484,18 +524,23 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                var container = angular.element(document.getElementById('search-tree-container'));
                container.empty();
                var html = "<ul>\n" +
-                   "<li><a href=\"\" id=\"search-node-1000\" class=\"active\" data-state=\"closed\" data-hosts=\"{{ treeData[0].hosts}}\" " +
+                   "<li id=\"search-node-1000\" data-state=\"closed\" data-hosts=\"{{ treeData[0].hosts}}\" " +
                    "data-hosts=\"{{ treeData[0].hosts }}\" " +
                    "data-description=\"{{ treeData[0].description }}\" " + 
                    "data-failures=\"{{ treeData[0].failures }}\" " +
                    "data-groups=\"{{ treeData[0].groups }}\" " + 
                    "data-name=\"{{ treeData[0].name }}\" " +
-                   "><i class=\"icon-caret-right\"></i> {{ treeData[0].name }}</a></li>\n" +
+                   "><a href=\"\" class=\"expand\"><i class=\"icon-caret-right\"></i></a> <a href=\"\" class=\"activate active\">{{ treeData[0].name }}</a>" +
+                   "</li>\n" +
                    "</ul>\n";
                var compiled = $compile(html)(scope);
                container.append(compiled);
                initialize();
-               //setTimeout(function() { $('.search-tree .active').click(); }, 1000);  //click the root node, forcing level 1 nodes to appear
+               // Expand the root node and show All Hosts
+               setTimeout(function() {
+                   $('#search-node-1000 .expand').click();
+                   $('#search-node-1000 .activate').click();
+                   }, 500);  
                });
 
             }

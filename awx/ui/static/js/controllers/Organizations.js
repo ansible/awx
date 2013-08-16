@@ -12,7 +12,7 @@
 
 function OrganizationsList ($routeParams, $scope, $rootScope, $location, $log, Rest, Alert, LoadBreadCrumbs, Prompt,
                             GenerateList, OrganizationList, SearchInit, PaginateInit, ClearScope, ProcessErrors,
-                            GetBasePath, SelectionInit)
+                            GetBasePath, SelectionInit, Wait)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -70,7 +70,7 @@ function OrganizationsList ($routeParams, $scope, $rootScope, $location, $log, R
 
 OrganizationsList.$inject=[ '$routeParams', '$scope', '$rootScope', '$location', '$log', 'Rest', 'Alert', 'LoadBreadCrumbs', 'Prompt',
                             'GenerateList', 'OrganizationList', 'SearchInit', 'PaginateInit', 'ClearScope', 'ProcessErrors',
-                            'GetBasePath', 'SelectionInit' ];
+                            'GetBasePath', 'SelectionInit', 'Wait' ];
 
 
 function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm, 

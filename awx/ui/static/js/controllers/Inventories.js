@@ -216,7 +216,6 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    LoadInventory({ scope: scope, doPostSteps: true });
    $('#inventory-tabs a[href="#inventory-hosts"]').on('show.bs.tab', function() { 
        LoadSearchTree({ scope: scope, inventory_id: scope['inventory_id'] });
-       HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
        if (!scope.$$phase) {
           scope.$digest();
        }
@@ -382,10 +381,10 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.inventoryEditHide = true;
          scope.groupDeleteHide = false;
          scope.createButtonShow = true;
-         scope.group_id = node.attr('group_id');
-         scope.groupName = n.data;
-         scope.groupTitle = '<h4>' + n.data + '</h4>';
-         scope.groupTitle += (node.attr('description')) ? '<p>' + node.attr('description') + '</p>' : '';
+         //scope.group_id = node.attr('group_id');
+         //scope.groupName = n.data;
+         //scope.groupTitle = '<h4>' + n.data + '</h4>';
+         //scope.groupTitle += (node.attr('description')) ? '<p>' + node.attr('description') + '</p>' : '';
       }
       else if (type == 'inventory') {
          url = node.attr('hosts');
@@ -395,9 +394,9 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.inventoryEditHide=false;
          scope.groupDeleteHide = true;
          scope.createButtonShow = false;
-         scope.groupName = 'All Hosts';
-         scope.groupTitle = '<h4>All Hosts</h4>';
-         scope.group_id = null;
+         //scope.groupName = 'All Hosts';
+         //scope.groupTitle = '<h4>All Hosts</h4>';
+         //scope.group_id = null;
       }
 
       if (!scope.$$phase) {
@@ -460,11 +459,12 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
               });
       }
 
-  scope.showHosts = function(e) {
-      console.log('here');
-      var elm = angular.elment(e.srcElement);
-      console.log('Need to show hosts: ' + elm.attr('data-hosts'));
-      }
+  // Respond to the scope.$emit from awTree directive
+  scope.$on('refreshHost', function(e, group, title) {
+      scope.groupTitle = title;
+      scope.group_id = group;
+      HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: group });
+      });
 
 }
 

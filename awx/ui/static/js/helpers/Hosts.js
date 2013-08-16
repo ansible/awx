@@ -410,10 +410,12 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
     function(RelatedSearchInit, RelatedPaginateInit, InventoryForm, GetBasePath) {
     return function(params) {
         // Rerfresh the Hosts view on right side of page
-        scope = params.scope;
+        
+        var group_id = params.group_id;
+        var scope = params.scope;
         scope['hosts'] = null;
         
-        var url = (scope.group_id !== null && scope.group_id !== undefined) ? GetBasePath('groups') + scope.group_id + '/all_hosts/' :
+        var url = (group_id !== null && group_id !== undefined) ? GetBasePath('groups') + group_id + '/all_hosts/' :
                   GetBasePath('inventory') + params.inventory_id + '/hosts/';
 
         var relatedSets = { hosts: { url: url, iterator: 'host' } };

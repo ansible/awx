@@ -24,6 +24,35 @@ body {
   color: @black;
 }
 
+.spinny {
+  display: none;
+  position: absolute;
+  z-index: 2000;
+  width: 75px;
+  height: 75px;
+  text-align:center; 
+  color: #eee;
+  background-color: @black; 
+  border: 1px solid @grey;
+  border-radius: 6px;
+  padding-top: 10px;
+
+  p {
+    padding-top: 10px;
+    font-size: 11px;
+  }
+}
+
+.overlay {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1999; 
+  background-color: @black;
+  opacity: .4;  
+}
+
 .tooltip {
   z-index: 1050;
 }
@@ -603,7 +632,7 @@ input[type="text"].job-successful {
   .search-tree { 
     ul {
       list-style-type: none;
-      padding-left: 10px;
+      padding-left: 13px;
     }
     ul:first-child {
       padding-left: 0;
@@ -611,10 +640,21 @@ input[type="text"].job-successful {
   }
 
   .search-tree .active {
-    background-color: #ddd;
+    /*background-color: #ddd;
     padding: 1px 1px 1px 0;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 4px;*/
+    font-weight: bold;
+    color: #000;
+  }
+
+  .search-tree .expand {
+    padding: 3px;
+  }
+
+  .search-tree .expand:hover {
+    background-color: #ddd;
+    border: 1px solid #ddd;
   }
 
 .parse-selection {

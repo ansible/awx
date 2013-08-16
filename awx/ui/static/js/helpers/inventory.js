@@ -100,8 +100,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         }])
 
 
-    .factory('TreeInit', ['Alert', 'Rest', 'Authorization', '$http', 'LoadTreeData', 'GetBasePath', 'ProcessErrors',
-    function(Alert, Rest, Authorization, $http, LoadTreeData, GetBasePath, ProcessErrors) {
+    .factory('TreeInit', ['Alert', 'Rest', 'Authorization', '$http', 'LoadTreeData', 'GetBasePath', 'ProcessErrors', 'Wait',
+    function(Alert, Rest, Authorization, $http, LoadTreeData, GetBasePath, ProcessErrors, Wait) {
     return function(params) {
 
         var scope = params.scope;
@@ -200,6 +200,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
 
             $(tree_id).bind('move_node.jstree', function(e, data) {
                 // When user drags-n-drops a node, update the API
+                Wait('start');
                 var node, target, url, parent, inv_id, variables;
                 node = $('#tree-view li[id="' + data.rslt.o[0].id + '"]');  // node being moved
                 parent = $('#tree-view li[id="' + data.args[0].op[0].id + '"]');  //node moving from
@@ -214,9 +215,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     function showSuccessMsg() {
                         var parent_descr = (parent.attr('type') == 'inventory') ? 'the inventory root' : parent.attr('name');
                         var target_descr = (target.attr('type') == 'inventory') ? 'the inventory root' : target.attr('name');
-                        Alert('Group Moved', 'Group ' + node.attr('name') + ' was successfully moved from ' + parent_descr + 
-                            ' to ' + target_descr + '.', 'alert-success');
-                        scope['treeLoading'] = false;
+                        Wait('stop');
                         if (!scope.$$phase) {
                            scope.$digest();
                         } 
@@ -302,7 +301,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                             '. GET returned status: ' + status });
                         });
                 
-                scope['treeLoading'] = true;
+                //scope['treeLoading'] = true;
 
                 if (!scope.$$phase) {
                    scope.$digest();
