@@ -105,28 +105,16 @@ angular.module('InventoryFormDefinition', [])
                 title: "groupTitle",
                 iterator: 'host',
                 actions: {
-                    select: {
-                        ngClick: "selectHost()",
-                        icon: 'icon-check',
-                        label: 'Add Existing',
-                        awToolTip: 'Select existing host',
-                        ngHide: 'createButtonShow == false',
-                        "class": 'btn btn-default'
-                        }, 
-                    create: {
-                        ngClick: "createHost()",
-                        icon: 'icon-plus',
-                        label: 'Create New',
-                        awToolTip: 'Create a new host',
-                        ngHide: 'createButtonShow == false',
-                        "class": 'btn-success'
-                        }
                     },
                 
                 fields: {
                     name: {
                         key: true,
                         label: 'Host Name',
+                        ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
+                        },
+                    description: {
+                        label: 'Description',
                         ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
                         },
                     has_active_failures: {

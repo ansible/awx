@@ -33,6 +33,7 @@ angular.module('RefreshRelatedHelper', ['RestServices', 'Utilities'])
                 scope[iterator + 'PageCount'] = Math.ceil((data.count / scope[iterator + 'PageSize']));
                 scope[iterator + 'SearchSpin'] = false;
                 scope[iterator + 'Loading'] = false;
+                scope.$emit('related' + set);
                 if (!params.scope.$$phase) {
                    params.scope.$digest();
                 }

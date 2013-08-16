@@ -98,6 +98,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            scope.removeHostsReload();
         }
         scope.removeHostsReload = scope.$on('hostsReload', function() {
+            console.log('here!');
             HostsReload(params);
         });
 
@@ -345,7 +346,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
     function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload) {
     return function(params) {
         
-        // Remove the selected host from the current group by dissaciating
+        // Remove the selected host from the current group by disassociating
 
         var scope = params.scope;
         var group_id = scope.group_id; 
@@ -356,39 +357,64 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         var url = (scope.group_id == null || req == 'delete') ? GetBasePath('inventory') + inventory_id + '/hosts/' : 
             GetBasePath('groups') + scope.group_id + '/hosts/';
+        
+        if (scope.removeHostsReload) {
+           scope.removeHostsReload();
+        }
+        scope.removeHostsReload = scope.$on('hostsReload', function() {
+            HostsReload(params);
+            });
 
         var action_to_take = function() {
-            if (scope.removeHostsReload) {
-               scope.removeHostsReload();
+            var errors = false;
+            var maxI;
+            
+            // Find index pointing to the last selected host
+            for (var i=0; i < scope.hosts.length; i++) {
+                if (scope.hosts[i].selected) {
+                   maxI = i;
+                }
             }
-            scope.removeHostsReload = scope.$on('hostsReload', function() {
-                $('#prompt-modal').modal('hide');
-                HostsReload(params);
-                });
+            
+            function emit(i) {
+               // After we process the last selected host or after we hit a problem, refresh the host list
+               if (i >= maxI || errors) {
+                  $('#prompt-modal').modal('hide');
+                  scope.$emit('hostsReload'); 
+               }
+            }
+            
             Rest.setUrl(url);
-            Rest.post({ id: host_id, disassociate: 1 })
-                .success( function(data, status, headers, config) {
-                    scope.$emit('hostsReload');
-                    })
-                .error( function(data, status, headers, config) {
-                    scope.$emit('hostsReload');
-                    ProcessErrors(scope, data, status, null,
-                       { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
-                    });      
+            for (var i=0; i < scope.hosts.length && !errors; i++) {
+                if (scope.hosts[i].selected) {
+                   Rest.post({ id: scope.hosts[i].id, disassociate: 1 })
+                       .success( function(data, status, headers, config) {
+                           // if this is the last selected host, clean up and exit
+                           emit(i);
+                           })
+                       .error( function(data, status, headers, config) {
+                           errors = true;
+                           emit(i);
+                           ProcessErrors(scope, data, status, null,
+                               { hdr: 'Error!', msg: 'Attempt to delete ' + scope.hosts[i].name + ' failed. POST returned status: ' + status });
+                           });    
+                }
+            }
             }
 
-        //Force binds to work. Not working usual way.
+        //Force binds to work (not working usual way), and launch the confirmation prompt
         if (scope.group_id == null || req == 'delete') {
            scope['promptHeader'] = 'Delete Host';
-           scope['promptBody'] = 'Are you sure you want to permanently delete ' + host_name + ' from the inventory?';
+           scope['promptBody'] = 'Are you sure you want to permanently delete the selected hosts?';
            scope['promptActionBtnClass'] = 'btn-danger';
         }
-        else {
+        
+        /*else {
            scope['promptHeader'] = 'Remove Host from Group';
            scope['promptBody'] = 'Are you sure you want to remove ' + host_name + ' from the group? ' + 
                host_name + ' will continue to be part of the inventory under All Hosts.';
            scope['promptActionBtnClass'] = 'btn-success';  
-        }
+        }*/
         
         scope.promptAction = action_to_take;
 
@@ -414,6 +440,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var group_id = params.group_id;
         var scope = params.scope;
         scope['hosts'] = null;
+        scope['toggleAllFlag'] = false;
+        scope['hostDeleteHide'] = true;
         
         var url = (group_id !== null && group_id !== undefined) ? GetBasePath('groups') + group_id + '/all_hosts/' :
                   GetBasePath('inventory') + params.inventory_id + '/hosts/';

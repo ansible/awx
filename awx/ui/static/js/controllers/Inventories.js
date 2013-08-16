@@ -205,7 +205,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    scope['inventory_id'] = id;
    scope['inventoryFailureFilter'] = false;
 
-   // Retrieve each related set and any lookups
+   // Retrieve each related sets and any lookups
    if (scope.inventoryLoadedRemove) {
       scope.inventoryLoadedRemove();
    }
@@ -214,6 +214,17 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        TreeInit(scope.TreeParams);
        if (!scope.$$phase) {
           scope.$digest();
+       }
+       });
+
+   // Add the selected flag to the hosts set.
+   if (scope.relatedHostsRemove) {
+      scope.relatedHostsRemove(); 
+   }
+   scope.relatedHostsRemove = scope.$on('relatedhosts', function() {
+       scope.toggleAllFlag = false;
+       for (var i=0; i < scope.hosts.length; i++) {
+           scope.hosts[i].selected = 0;
        }
        });
 
@@ -459,6 +470,24 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
               ProcessErrors(scope, data, status, form,
                   { hdr: 'Error!', msg: 'Failed to lookup last job: ' + last_job + '. GET status: ' + status });
               });
+      }
+  
+  scope.toggleAllHosts = function() {
+      scope.hostDeleteHide = (scope.toggleAllFlag) ? false : true;
+      for (var i=0; i < scope.hosts.length; i++) {
+          scope.hosts[i].selected = scope.toggleAllFlag;
+      }
+      }
+
+  scope.toggleOneHost = function() {
+      var result = true;
+      for (var i=0; i < scope.hosts.length; i++) {
+          if (scope.hosts[i].selected) {
+             result = false;
+             break;   
+          }
+      }
+      scope.hostDeleteHide = result;
       }
 
   // Respond to the scope.$emit from awTree directive

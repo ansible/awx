@@ -989,7 +989,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        html += "<thead>\n";
        html += "<tr>\n";
        html += "<th>#</th>\n";
-       html += "<th><input type=\"checkbox\" ng-click=\"toggle_all()\" aw-tool-tip=\"Select all hosts\" data-placement=\"top\"></th>\n";
+       html += "<th><input type=\"checkbox\" ng-model=\"toggleAllFlag\" ng-change=\"toggleAllHosts()\" aw-tool-tip=\"Select all hosts\" data-placement=\"top\"></th>\n";
        
        for (var fld in form.related[itm].fields) {
            html += "<th class=\"list-header\" id=\"" + form.related[itm].iterator + '-' + fld + "-header\" " +
@@ -1022,9 +1022,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        form.related[itm].iterator + "PageSize) + 1 }}.</td>\n";
       
       // Select checkbox
-      html += "<td><input type=\"checkbox\" ng-model=\"" + form.related[itm].iterator + ".checked\" name=\"check_{{" + 
-              form.related[itm].iterator + ".id }}\" ng-click=\"toggle_" + form.related[itm].iterator +"({{ " + form.related[itm].iterator + ".id }}, true)\" ng-true-value=\"1\" " +
-              "ng-false-value=\"0\" id=\"check_{{" + form.related[itm].iterator + ".id}}\" /></td>";
+      html += "<td><input type=\"checkbox\" ng-model=\"" + form.related[itm].iterator + ".selected\" ng-change=\"toggleOneHost()\" ></td>";
       
       var cnt = 1;
       var rfield;
