@@ -229,7 +229,7 @@ angular.module('Utilities',[])
               }).fadeIn();
           $('.spinny').css({
               top: y, 
-              left: x,
+              left: x
               }).fadeIn(500);
        }
        else {
