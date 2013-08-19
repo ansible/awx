@@ -35,17 +35,14 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             scope.inventoryLoadedRemove();
         }
         scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
-            var filter = (scope.inventoryFailureFilter) ? "has_active_failures=true&" : ""; 
-            var url = groups + '?' + filter + 'order_by=name';
-            var title;
+            var url = groups + '?order_by=name';
             Rest.setUrl(url);
             Rest.get()
                 .success( function(data, status, headers, config) {    
                     for (var i=0; i < data.results.length; i++) {
-                        title = data.results[i].name;
                         treeData[0].children.push({
                            data: {
-                               title: title
+                               title: data.results[i].name
                                },
                            attr: {
                                id: idx,
@@ -55,7 +52,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                description: data.results[i].description,
                                inventory: data.results[i].inventory,
                                all: data.results[i].related.all_hosts,
-                               children: data.results[i].related.children + '?' + filter + 'order_by=name',
+                               children: data.results[i].related.children + '?order_by=name',
                                hosts: data.results[i].related.hosts,
                                variable: data.results[i].related.variable_data,
                                "data-failures": data.results[i].has_active_failures
@@ -71,13 +68,10 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     });
             });
 
-          var title = inventory_name;
-          title += (has_active_failures) ? ' <span class="tree-badge" title="Contains hosts with failed jobs">' +
-              '<i class="icon-exclamation-sign"></i></span>' : ''; 
           treeData =
               [{ 
               data: {
-                  title: title
+                  title: inventory_name
                   }, 
               attr: {
                   type: 'inventory',
@@ -142,13 +136,10 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                         headers: { 'Authorization': 'Token ' + Authorization.getToken() },
                         success: function(data) {
                             var response = [];
-                            var title;
-                            var filter = (scope.inventoryFailureFilter) ? "has_active_failures=true&" : ""; 
                             for (var i=0; i < data.results.length; i++) {
-                                title = data.results[i].name;
                                 response.push({
                                     data: {
-                                       title: title
+                                       title: data.results[i].name
                                        },
                                     attr: {
                                        id: idx,
@@ -158,7 +149,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                        description: data.results[i].description,
                                        inventory: data.results[i].inventory,
                                        all: data.results[i].related.all_hosts,
-                                       children: data.results[i].related.children + '?' + filter + 'order_by=name',
+                                       children: data.results[i].related.children + '?order_by=name',
                                        hosts: data.results[i].related.hosts,
                                        variable: data.results[i].related.variable_data,
                                        "data-failures": data.results[i].has_active_failures
@@ -385,8 +376,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         node.attr('description', description);
         scope = angular.element(getElementById('htmlTemplate')).scope();
         scope['selectedNodeName'] = name;
-        scope['selectedNodeName'] += (node.attr('data-failures') == 'true') ? 
-           ' <span class="nav-badge"><i class="icon-exclamation-sign" title="Contains hosts with failed jobs"></i></span>' : '';
         }
         }])
 

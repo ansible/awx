@@ -83,15 +83,6 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
               scope[iterator + 'HideSearchType'] = true;   
            }
 
-           if (iterator == 'host') {
-              if (fld == 'has_active_failures') {
-                 scope['hostFailureFilter'] = true;
-              }
-              else {
-                 scope['hostFailureFilter'] = false;
-              }
-           }
-
            scope.search(iterator);
 
            }
@@ -143,13 +134,13 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
                 (scope[iterator + 'SelectShow'] && scope[iterator + 'SearchSelectValue']) || (f.searchType && f.searchType == 'gtzero') ) {
               if (f.sourceModel) {
                  // handle fields whose source is a related model e.g. inventories.organization
-                 scope[iterator + 'SearchParams'] = '?' + f.sourceModel + '__' + f.sourceField + '__';
+                 scope[iterator + 'SearchParams'] = f.sourceModel + '__' + f.sourceField + '__';
               }
               else if (f.searchField) {
-                 scope[iterator + 'SearchParams'] = '?' + f.searchField + '__'; 
+                 scope[iterator + 'SearchParams'] = f.searchField + '__'; 
               }
               else {
-                 scope[iterator + 'SearchParams'] = '?' + scope[iterator + 'SearchField'] + '__'; 
+                 scope[iterator + 'SearchParams'] = scope[iterator + 'SearchField'] + '__'; 
               }
               
               if ( f.searchType && (f.searchType == 'int' || f.searchType == 'boolean' ) ) {
@@ -171,11 +162,10 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
               scope[iterator + 'SearchParams'] += (sort_order) ? '&order_by=' + escape(sort_order) : '';
            }
            else {
-              scope[iterator + 'SearchParams'] = ''; 
-              scope[iterator + 'SearchParams'] += (sort_order) ? '?order_by=' + escape(sort_order) : '';
+              scope[iterator + 'SearchParams'] = (sort_order) ? 'order_by=' + escape(sort_order) : '';
            }
-
            scope[iterator + 'Page'] = 0;
+           url += (url.match(/\/$/)) ? '?' : '&';
            url += scope[iterator + 'SearchParams'];
            url += (scope[iterator + 'PageSize']) ? '&page_size=' + scope[iterator + 'PageSize'] : "";
            RefreshRelated({ scope: scope, set: set, iterator: iterator, url: url });

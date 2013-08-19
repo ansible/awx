@@ -238,7 +238,9 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        });
 
    scope.filterInventory = function() {
-      HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
+      $rootScope.hostFailureFilter = scope.hostFailureFilter;
+      LoadSearchTree({ scope: scope, inventory_id: scope['inventory_id'] });
+      //HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
    }
 
    scope.filterHosts = function() {
@@ -383,10 +385,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       
       scope['selectedNode'] = node;
       scope['selectedNodeName'] = node.attr('name');
-      scope['selectedNodeName'] += (node.attr('data-failures') == 'true') ? 
-         ' <span class="nav-badge">' +
-         '<i class="icon-exclamation-sign" title="Contains hosts with failed jobs"></i></span>' : '';
-
+      
       $('#tree-view').jstree('open_node',node);
       
       if (type == 'group') {

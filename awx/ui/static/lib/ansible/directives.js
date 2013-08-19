@@ -474,10 +474,13 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                 var url = parent.attr('data-groups');
                 var html = '';
                 var token = Authorization.getToken();
+                
+                url += ($rootScope.hostFailureFilter) ? '?has_active_failures=true&order_by=name' : '?order_by=name';
+                
                 /* For reasons unknown calling Rest fails. It just dies with no errors
                    or any info */
                 $.ajax({
-                    url: url + '?order_by=name', 
+                    url: url, 
                     headers: { 'Authorization': 'Token ' + token },
                     dataType: 'json',
                     success: function(data) {
