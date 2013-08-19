@@ -118,9 +118,16 @@ angular.module('InventoryFormDefinition', [])
                         badgeToolTip: 'Most recent job failed',
                         badgePlacement: 'bottom'
                         },
-                    description: {
+                    /*description: {
                         label: 'Description',
                         ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
+                        },*/
+                    groups: {
+                        label: 'Groups',
+                        searchable: false,
+                        sourceModel: 'groups',
+                        sourceField: 'name',
+                        nosort: true
                         }
                     },
                 fieldActions: {

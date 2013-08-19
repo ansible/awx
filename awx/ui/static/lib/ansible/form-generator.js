@@ -989,120 +989,93 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        html += "<thead>\n";
        html += "<tr>\n";
        //html += "<th>#</th>\n";
-       html += "<th><input type=\"checkbox\" ng-model=\"toggleAllFlag\" ng-change=\"toggleAllHosts()\" aw-tool-tip=\"Select all hosts\" data-placement=\"top\"></th>\n";
+       html += "<th><input type=\"checkbox\" ng-model=\"toggleAllFlag\" ng-change=\"toggleAllHosts()\" aw-tool-tip=\"Select all hosts\" " +
+           "data-placement=\"top\"></th>\n";
        for (var fld in form.related[itm].fields) {
-           html += "<th class=\"list-header\" id=\"" + form.related[itm].iterator + '-' + fld + "-header\" " +
-               "ng-click=\"sort('" + form.related[itm].iterator + "', '" + fld + "')\">" +
-               form.related[itm]['fields'][fld].label;
-           html += " <i class=\"";
-           if (form.related[itm].fields[fld].key) {
-              if (form.related[itm].fields[fld].desc) {
-                 html += "icon-sort-down";
+           html += "<th class=\"list-header\" id=\"" + form.related[itm].iterator + '-' + fld + "-header\" ";
+           html += (!form.related[itm].fields[fld].nosort) ? "ng-click=\"sort('" + form.related[itm].iterator + "', '" + fld + "')\"" : "";
+           html += ">" + form.related[itm]['fields'][fld].label;
+           if (form.related[itm].fields[fld].nosort == undefined || form.related[itm].fields[fld].nosort == false) {
+              html += " <i class=\"";
+              if (form.related[itm].fields[fld].key) {
+                 if (form.related[itm].fields[fld].desc) {
+                    html += "icon-sort-down";
+                 }
+                 else {
+                    html += "icon-sort-up";
+                 }
               }
               else {
-                 html += "icon-sort-up";
+                 html += "icon-sort";
               }
+              html += "\"></i>";
            }
-           else {
-              html += "icon-sort";
-           }
-           html += "\"></i></a></th>\n";
-      }
+           html += "</a></th>\n";
+       }
 
-      html += "<th></th>\n";
-      html += "</tr>\n";
-      html += "</thead>";
-      html += "<tbody>\n";
+       html += "<th></th>\n";
+       html += "</tr>\n";
+       html += "</thead>";
+       html += "<tbody>\n";
             
-      html += "<tr ng-repeat=\"" + form.related[itm].iterator + " in " + itm + "\" >\n";
-      
-      // Row counter
-      //html += "<td>{{ $index + (" + form.related[itm].iterator + "Page * " + 
-      // form.related[itm].iterator + "PageSize) + 1 }}.</td>\n";
-      
-      // Select checkbox
-      html += "<td><input type=\"checkbox\" ng-model=\"" + form.related[itm].iterator + ".selected\" ng-change=\"toggleOneHost()\" ></td>";
+       html += "<tr ng-repeat=\"" + form.related[itm].iterator + " in " + itm + "\" >\n";
 
-      var cnt = 1;
-      var rfield;
-      var base = (form.related[itm].base) ? form.related[itm].base : itm;
-      base = base.replace(/^\//,'');
-      for (var fld in form.related[itm].fields) {
-          cnt++;
-          rfield = form.related[itm].fields[fld];
-          html += Column({ list: form.related[itm], fld: fld, options: options, base: base })
-      }
+       // Select checkbox
+       html += "<td><input type=\"checkbox\" ng-model=\"" + form.related[itm].iterator + ".selected\" ng-change=\"toggleOneHost()\" ></td>";
 
-      // Row level actions
-     
-      /*
-      html += "<td class=\"actions\">";
-      for (action in form.related[itm].fieldActions) {
-          html += "<button class=\"btn btn-mini"; 
-          html += (form.related[itm]['fieldActions'][action]['class']) ?
-              " " + form.related[itm]['fieldActions'][action]['class'] : "";
-          html += "\" ";
-          html += (form.related[itm]['fieldActions'][action].awToolTip) ? this.attr(form.related[itm]['fieldActions'][action],'awToolTip') : "";
-          html += (form.related[itm]['fieldActions'][action].ngHide) ? this.attr(form.related[itm]['fieldActions'][action],'ngHide') : "";
-          html += this.attr(form.related[itm]['fieldActions'][action],'ngClick') +
-              ">" + this.icon(form.related[itm]['fieldActions'][action].icon);
-          html += (form.related[itm].fieldActions[action].label) ?  " " + form.related[itm].fieldActions[action].label : ""; 
-          html += "</button> ";
-      }
-      html += "</td>";
-      */
+       var cnt = 1;
+       var rfield;
+       var base = (form.related[itm].base) ? form.related[itm].base : itm;
+       base = base.replace(/^\//,'');
+       for (var fld in form.related[itm].fields) {
+           cnt++;
+           rfield = form.related[itm].fields[fld];
+           html += Column({ list: form.related[itm], fld: fld, options: options, base: base })
+       }
 
-      html += "<td>";
-      html += "<div class=\"btn-group\">\n";
-      html += "<button type=\"button\" class=\"btn btn-default btn-mini dropdown-toggle\" data-toggle=\"dropdown\">";
-      html += "View <span class=\"caret\"></span></button>\n";
-      html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"dropdownMenu1\">\n";
-      html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Action</a></li>\n";
-      html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Another action</a></li>\n";
-      html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Something else here</a></li>\n";
-      html += "<li role=\"presentation\" class=\"divider\"></li>\n";
-      html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Separated link</a></li>\n";
-      html += "</ul>\n";
-      html += "</div>\n";
-      html += "</td>\n";
+       html += "<td>";
+       html += "<div class=\"btn-group\">\n";
+       html += "<button type=\"button\" class=\"btn btn-default btn-mini dropdown-toggle\" data-toggle=\"dropdown\">";
+       html += "View <span class=\"caret\"></span></button>\n";
+       html += "<ul class=\"dropdown-menu pull-right\" role=\"menu\" aria-labelledby=\"dropdownMenu1\">\n";
+       html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Action</a></li>\n";
+       html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Another action</a></li>\n";
+       html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Something else here</a></li>\n";
+       html += "<li role=\"presentation\" class=\"divider\"></li>\n";
+       html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Separated link</a></li>\n";
+       html += "</ul>\n";
+       html += "</div>\n";
+       html += "</td>\n";
 
-      html += "</tr>\n";
+       html += "</tr>\n";
 
-      // Message for when a related collection is empty
-      html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == false && (" + itm + " == null || " + itm + ".length == 0)\">\n";
-      html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
-      html += "</tr>\n";
+       // Message for when a related collection is empty
+       html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == false && (" + itm + " == null || " + itm + ".length == 0)\">\n";
+       html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
+       html += "</tr>\n"; 
 
-      // Message for loading
-      html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == true\">\n";
-      html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">Loading...</div></td>\n";
-      html += "</tr>\n";
+       // Message for loading
+       html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == true\">\n";
+       html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">Loading...</div></td>\n";
+       html += "</tr>\n";
 
-      // End List
-      html += "</tbody>\n";
-      html += "</table>\n";
+       // End List
+       html += "</tbody>\n";
+       html += "</table>\n";
 
-      // Failure filter checkbox
-      //html += "<div class=\"host-filter\">\n";
-      //html += "<span ng-show=\"has_active_failures == true\">";
-      //html += "<label class=\"checkbox inline\">";
-      //html += "<input ng-model=\"hostFailureFilter\" ng-change=\"filterHosts()\" type=\"checkbox\"" +
-      //  ">Show only hosts with failures</label></span>\n"
-      //html += "</div>\n";
+       html += "</div>\n";    // close list
+       html += "</div>\n";    // close well
 
-      html += "</div>\n";    // close list
-      html += "</div>\n";    // close well
+       html += PaginateWidget({ set: itm, iterator: form.related[itm].iterator, mini: true }); 
 
-      html += PaginateWidget({ set: itm, iterator: form.related[itm].iterator, mini: true }); 
-      
-      html += "</div>\n";
-      html += "</div>\n";
+       html += "</div>\n";
+       html += "</div>\n";
 
-      html += "</div><!-- inventory-hosts -->\n";
-      html += "</div><!-- tab-content -->\n";
-      html += "</div><!-- inventory-content -->\n";
-      
-      return html; 
+       html += "</div><!-- inventory-hosts -->\n";
+       html += "</div><!-- tab-content -->\n";
+       html += "</div><!-- inventory-content -->\n"; 
+
+       return html; 
       
       },
 

@@ -238,7 +238,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        });
 
    scope.filterInventory = function() {
-      RefreshTree({ scope: scope });
+      HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
    }
 
    scope.filterHosts = function() {

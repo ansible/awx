@@ -446,6 +446,33 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var url = (group_id !== null && group_id !== undefined) ? GetBasePath('groups') + group_id + '/all_hosts/' :
                   GetBasePath('inventory') + params.inventory_id + '/hosts/';
 
+        if (scope.hostFailureFilter) {
+           url += '?has_active_failures=true';
+        }
+
+        if (scope.removeRelatedHosts) {
+           scope.removeRelatedHosts();
+        }
+        scope.removeRelatedHosts = scope.$on('relatedhosts', function() {
+            var groups, descr='';
+            for (var i=0; i < scope.hosts.length; i++) {
+              groups = scope.hosts[i].summary_fields.groups;
+              for (var j=0; j < groups.length; j++) {
+                  if (groups[j].name.match(/^_deleted/)) {
+                     descr += groups[j].name.substr(1,18) + ', ';
+                  }
+                  else {
+                     descr += groups[j].name + ', ';
+                  }  
+              }
+              descr = descr.replace(/, $/,'');
+              if (descr.length > 50) {
+                 descr = descr.substr(0,49) + '...';
+              }
+              scope.hosts[i].groups = descr;
+            }
+            });
+
         var relatedSets = { hosts: { url: url, iterator: 'host' } };
         RelatedSearchInit({ scope: params.scope, form: InventoryForm, relatedSets: relatedSets });
         RelatedPaginateInit({ scope: params.scope, relatedSets: relatedSets, pageSize: 40 });
