@@ -477,7 +477,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                 /* For reasons unknown calling Rest fails. It just dies with no errors
                    or any info */
                 $.ajax({
-                    url: url, 
+                    url: url + '?order_by=name', 
                     headers: { 'Authorization': 'Token ' + token },
                     dataType: 'json',
                     success: function(data) {
@@ -494,11 +494,17 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                             html += "data-name=\"" + data.results[i].name + "\" ";
                             html += "data-group-id=\"" + data.results[i].id + "\">";
                             html += "<a href=\"\" class=\"expand\"><i class=\"icon-caret-right\"></i></a> ";
-                            html += "<a href=\"\" class=\"activate\">" + data.results[i].name + "</a></li>\n";
+                            html += "<a href=\"\" class=\"activate\">" + data.results[i].name + "</a> ";
+                            html += "<a href=\"\" aw-tool-tip=\"Contains hosts with failed jobs\" ng-show=\"" +
+                                data.results[i].has_active_failures + "\" data-placement=\"bottom\">" +
+                                "<i class=\"host-badge icon-exclamation-sign\"></i></a></li>\n";
                         }
                         html = (html !== '') ? "<ul>" + html + "</ul>\n" : "";
                         var compiled = $compile(html)(scope);
                         parent.append(compiled);  //append the new list to the parent <li>
+                        if (!scope.$$phase) {
+                           scope.$digest();
+                        }
                         scope.$emit('childrenLoaded');
                         },
                     error: function(data, status) {
@@ -532,7 +538,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                    "data-failures=\"{{ treeData[0].failures }}\" " +
                    "data-groups=\"{{ treeData[0].groups }}\" " + 
                    "data-name=\"{{ treeData[0].name }}\" " +
-                   "><a href=\"\" class=\"expand\"><i class=\"icon-caret-right\"></i></a> <a href=\"\" class=\"activate active\">{{ treeData[0].name }}</a>" +
+                   "><a href=\"\" class=\"expand\"><i class=\"icon-caret-right\"></i></a> " +
+                   "<a href=\"\" class=\"activate active\">{{ treeData[0].name }}</a> " +
+                   "<a href=\"\" aw-tool-tip=\"Contains hosts with failed jobs\" ng-show=\"\{\{ treeData[0].failures \}\}\" data-placement=\"bottom\">" +
+                   "<i class=\"host-badge icon-exclamation-sign\"></i></a>" +
                    "</li>\n" +
                    "</ul>\n";
                var compiled = $compile(html)(scope);

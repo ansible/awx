@@ -85,18 +85,18 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        this.scope[list.name] = null;
        this.scope[list.iterator] = null;
 
-       // Remove any lingering tooltip <div> elements
+       // Remove any lingering tooltip and popover <div> elements
        $('.tooltip').each( function(index) {
            $(this).remove();
            });
+       $('.popover').each(function(index) {
+              // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+              $(this).remove();
+              });
 
        if (options.mode == 'lookup') {
           // options should include {hdr: <dialog header>, action: <function...> }
           this.scope.lookupHeader = options.hdr;
-          $('.popover').each(function(index) {
-              // remove lingering popover <div>. Seems to be a bug in TB3 RC1
-              $(this).remove();
-              });
           $('#lookup-modal').modal({ backdrop: 'static', keyboard: true });
           $(document).bind('keydown', function(e) {
               if (e.keyCode === 27) {

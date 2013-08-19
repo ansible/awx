@@ -176,6 +176,8 @@ a:hover {
   text-decoration: none;
 }
 
+
+
 .site-footer {
   width: 100%;
   padding-top: 20px;
@@ -184,6 +186,33 @@ a:hover {
   color: @grey;
   text-align: center;
   background-color: @black;
+
+  .inner-container {
+      max-width: 1170px;
+      margin: 0 auto;
+      padding: 0 10px;
+  }
+  
+  a,
+  a:active,
+  a:hover,
+  a:visited {
+    margin-right: 15px;
+    font-size: 18px;
+    color: @grey;
+  }
+
+  .social {
+    display: inline-block;
+  }
+
+  .logo {
+    display: inline-block;
+  }
+
+  .logo img {
+    max-width: 125px; 
+  }
 }
 
 .copyright {
@@ -193,28 +222,9 @@ a:hover {
   text-align: center;
 }
 
-.site-footer a,
-.site-footer a:active,
-.site-footer a:hover,
-.site-footer a:visited {
-  margin-right: 15px;
-  font-size: 18px;
-  color: @grey;
-}
 
-.site-footer .social {
-  display: inline-block;
-  margin-left: 50px;
-}
 
-.site-footer .logo {
-  display: inline-block;
-  margin-right: 35px;
-}
 
-.site-footer .logo img {
-  max-width: 125px;
-}
 
 .login-header {
   text-align: center;
@@ -602,7 +612,7 @@ input[type="text"].job-successful {
 
   }
 
-  .tree-badge {
+  .host-badge {
     color: @red;
     font-size: 12px;
   }

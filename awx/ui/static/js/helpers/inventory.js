@@ -42,9 +42,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             Rest.get()
                 .success( function(data, status, headers, config) {    
                     for (var i=0; i < data.results.length; i++) {
-                        title = data.results[i].name; 
-                        title += (data.results[i].has_active_failures) ? ' <span class="tree-badge" title="Contains hosts with failed jobs">' +
-                            '<i class="icon-exclamation-sign"></i></span>' : ''; 
+                        title = data.results[i].name;
                         treeData[0].children.push({
                            data: {
                                title: title
@@ -147,9 +145,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                             var title;
                             var filter = (scope.inventoryFailureFilter) ? "has_active_failures=true&" : ""; 
                             for (var i=0; i < data.results.length; i++) {
-                                title = data.results[i].name; 
-                                title += (data.results[i].has_active_failures) ? ' <span class="tree-badge" title="Contains hosts with failed jobs">' +
-                                    '<i class="icon-exclamation-sign"></i></span>' : ''; 
+                                title = data.results[i].name;
                                 response.push({
                                     data: {
                                        title: title

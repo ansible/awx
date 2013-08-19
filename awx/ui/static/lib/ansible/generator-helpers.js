@@ -101,7 +101,6 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var field = list['fields'][fld];
         var html = '';
         
-        //html += "<td ";
         html += "<td class=\"" + fld + "-column";
         html += (field['class']) ? " " + field['class'] : "";
         html += (field['columnClass']) ? " " + field['columnClass'] : "";
@@ -176,6 +175,20 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             "ng-bind-html-unsafe=\"" + field.appendHTML + "\" " +
             "class=\"level-\{\{ " + list.iterator + ".event_level \}\}-detail\" " +
             "></div>\n" : "";
+        
+        // Badge
+        if (field.badgeIcon) {
+           if (field.badgeToolTip) {
+              html += "<a href=\"\" aw-tool-tip=\"Most recent job failed\"";
+              html += (field.badgePlacement) ? " data-placement=\"" + field.badgePlacement + "\"" : "";
+              html += " ng-show=\"" + field.badgeShow + "\">";
+              html += " <i class=\"host-badge " + field.badgeIcon + "\"></i></a>\n";
+           }
+           else {
+              html += " <i class=\"host-badge " + field.badgeIcon + "\" ";
+              html += "ng-show=\"" + field.badgeShow + "\"></i>\n";
+          }
+        }
 
         return html += "</td>\n";
     

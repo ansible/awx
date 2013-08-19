@@ -448,7 +448,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         var relatedSets = { hosts: { url: url, iterator: 'host' } };
         RelatedSearchInit({ scope: params.scope, form: InventoryForm, relatedSets: relatedSets });
-        RelatedPaginateInit({ scope: params.scope, relatedSets: relatedSets });
+        RelatedPaginateInit({ scope: params.scope, relatedSets: relatedSets, pageSize: 40 });
         
         if (scope['hostFailureFilter']) {
            // If the user checked 'show only hosts with failures', filter for hosts with failed jobs

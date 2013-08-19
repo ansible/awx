@@ -76,18 +76,18 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           }
        }
 
-       // Remove any lingering tooltip <div> elements
+       // Remove any lingering tooltip and popover <div> elements
        $('.tooltip').each( function(index) {
            $(this).remove();
            });
+       $('.popover').each(function(index) {
+              // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+              $(this).remove();
+              });
 
        if (options.modal) {
           this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;  //Default title for default modal
           this.scope.formModalInfo = false  //Disable info button for default modal
-          $('.popover').each(function(index) {
-              // remove lingering popover <div>. Seems to be a bug in TB3 RC1
-              $(this).remove();
-              });
           if (options.modal_selector) {
              $(options.modal_selector).modal({ show: true, backdrop: 'static', keyboard: true });
              $(options.modal_selector).on('shown.bs.modal', function() {
@@ -988,9 +988,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        html += "<table class=\"" + form.related[itm].iterator + " table table-condensed table-hover\">\n";
        html += "<thead>\n";
        html += "<tr>\n";
-       html += "<th>#</th>\n";
+       //html += "<th>#</th>\n";
        html += "<th><input type=\"checkbox\" ng-model=\"toggleAllFlag\" ng-change=\"toggleAllHosts()\" aw-tool-tip=\"Select all hosts\" data-placement=\"top\"></th>\n";
-       
        for (var fld in form.related[itm].fields) {
            html += "<th class=\"list-header\" id=\"" + form.related[itm].iterator + '-' + fld + "-header\" " +
                "ng-click=\"sort('" + form.related[itm].iterator + "', '" + fld + "')\">" +
@@ -1018,12 +1017,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
       html += "<tr ng-repeat=\"" + form.related[itm].iterator + " in " + itm + "\" >\n";
       
       // Row counter
-      html += "<td>{{ $index + (" + form.related[itm].iterator + "Page * " + 
-       form.related[itm].iterator + "PageSize) + 1 }}.</td>\n";
+      //html += "<td>{{ $index + (" + form.related[itm].iterator + "Page * " + 
+      // form.related[itm].iterator + "PageSize) + 1 }}.</td>\n";
       
       // Select checkbox
       html += "<td><input type=\"checkbox\" ng-model=\"" + form.related[itm].iterator + ".selected\" ng-change=\"toggleOneHost()\" ></td>";
-      
+
       var cnt = 1;
       var rfield;
       var base = (form.related[itm].base) ? form.related[itm].base : itm;
@@ -1035,6 +1034,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
       }
 
       // Row level actions
+     
+      /*
       html += "<td class=\"actions\">";
       for (action in form.related[itm].fieldActions) {
           html += "<button class=\"btn btn-mini"; 
@@ -1049,6 +1050,22 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "</button> ";
       }
       html += "</td>";
+      */
+
+      html += "<td>";
+      html += "<div class=\"btn-group\">\n";
+      html += "<button type=\"button\" class=\"btn btn-default btn-mini dropdown-toggle\" data-toggle=\"dropdown\">";
+      html += "View <span class=\"caret\"></span></button>\n";
+      html += "<ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"dropdownMenu1\">\n";
+      html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Action</a></li>\n";
+      html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Another action</a></li>\n";
+      html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Something else here</a></li>\n";
+      html += "<li role=\"presentation\" class=\"divider\"></li>\n";
+      html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Separated link</a></li>\n";
+      html += "</ul>\n";
+      html += "</div>\n";
+      html += "</td>\n";
+
       html += "</tr>\n";
 
       // Message for when a related collection is empty

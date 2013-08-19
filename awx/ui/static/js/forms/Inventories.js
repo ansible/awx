@@ -104,6 +104,7 @@ angular.module('InventoryFormDefinition', [])
                 type: 'treeview',
                 title: "groupTitle",
                 iterator: 'host',
+                
                 actions: {
                     },
                 
@@ -111,50 +112,19 @@ angular.module('InventoryFormDefinition', [])
                     name: {
                         key: true,
                         label: 'Host Name',
-                        ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
+                        ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
+                        badgeShow: "\{\{ host.has_active_failures \}\}",
+                        badgeIcon: 'icon-exclamation-sign',
+                        badgeToolTip: 'Most recent job failed',
+                        badgePlacement: 'bottom'
                         },
                     description: {
                         label: 'Description',
                         ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
-                        },
-                    has_active_failures: {
-                        label: 'Failed jobs?',
-                        showValue: false,
-                        ngClick: "showEvents('\{\{ host.name \}\}', '\{\{ host.related.last_job \}\}')",
-                        ngShow: "\{\{ host.has_active_failures \}\}",
-                        icon: 'icon-exclamation-sign',
-                        "class": 'active-failures-\{\{ host.has_active_failures \}\}',
-                        text: 'View failures',
-                        searchField: 'has_active_failures',
-                        searchType: 'boolean',
-                        searchOptions: [{ name: "No", value: 0 }, { name: "Yes", value: 1 }]
                         }
                     },
-                
                 fieldActions: {
-                    edit: {
-                        ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
-                        icon: 'icon-edit',
-                        label: 'Edit',
-                        awToolTip: 'Edit host',
-                        'class': 'btn-default'
-                        },
-                    "remove": {
-                        ngClick: "removeHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
-                        icon: 'icon-minus-sign',
-                        label: 'Remove',
-                        "class": 'btn-success',
-                        ngHide: "group_id === null || group_id === undefined",
-                        awToolTip: 'Remove this host from the group, but leave it as part of the inventory under All Hosts'
-                        },
-                    "delete": {
-                        ngClick: "deleteHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
-                        icon: 'icon-trash',
-                        label: 'Delete',
-                        "class": 'btn-danger',
-                        awToolTip: 'Permanently remove this host from the inventory'
-                        }
-                    }    
+                    }
                 }
             }
 

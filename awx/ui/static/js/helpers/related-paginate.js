@@ -20,6 +20,7 @@ angular.module('RelatedPaginateHelper', ['RefreshRelatedHelper', 'ngCookies'])
         
         var scope = params.scope;
         var relatedSets = params.relatedSets; 
+        var pageSize = (params.pageSize) ? params.pageSize : 10;
 
         for (var key in relatedSets){ 
             cookieSize = $cookieStore.get(relatedSets[key].iterator + 'PageSize');
@@ -29,7 +30,7 @@ angular.module('RelatedPaginateHelper', ['RefreshRelatedHelper', 'ngCookies'])
             }
             else {
               scope[relatedSets[key].iterator + 'Page'] = 0;
-              scope[relatedSets[key].iterator + 'PageSize'] = 10;
+              scope[relatedSets[key].iterator + 'PageSize'] = pageSize;
             }
         }
 
