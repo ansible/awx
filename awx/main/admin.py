@@ -173,17 +173,30 @@ class TeamAdmin(BaseModelAdmin):
     list_display = ('name', 'description', 'active')
     filter_horizontal = ('projects', 'users')
 
+class ProjectUpdateInline(admin.StackedInline):
+
+    model = ProjectUpdate
+    extra = 0
+    can_delete = True
+    fields = ('created', 'status', 'result_stdout')
+    readonly_fields = ('created', 'status', 'result_stdout')
+
+    def has_add_permission(self, request):
+        return False
+
 class ProjectAdmin(BaseModelAdmin):
 
     list_display = ('name', 'description', 'active')
     fieldsets = (
         (None, {'fields': (('name', 'active'), 'description', 'local_path',
                             'get_playbooks_display')}),
+        (_('SCM'), {'fields': ('scm_type', 'scm_url', 'scm_branch')}),
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
     readonly_fields = ('created', 'created_by', 'get_playbooks_display')
     form = ProjectAdminForm
+    inlines = [ProjectUpdateInline]
 
     def get_playbooks_display(self, obj):
         return '<br/>'.join([format_html('{0}', x) for x in

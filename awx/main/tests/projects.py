@@ -1,19 +1,24 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Python
 import datetime
 import json
 import os
 import tempfile
+import urlparse
 
+# Django
 from django.conf import settings
 from django.contrib.auth.models import User
 import django.test
 from django.test.client import Client
 from django.core.urlresolvers import reverse
+from django.test.utils import override_settings
 
+# AWX
 from awx.main.models import *
-from awx.main.tests.base import BaseTest
+from awx.main.tests.base import BaseTest, BaseTransactionTest
 
 TEST_PLAYBOOK = '''- hosts: mygroup
   gather_facts: false
@@ -607,3 +612,170 @@ class ProjectsTest(BaseTest):
         self.delete(url2, expect=403, auth=self.get_other_credentials())
         self.delete(url2, expect=204, auth=self.get_super_credentials())
         self.delete(url2, expect=404, auth=self.get_other_credentials())
+
+@override_settings(CELERY_ALWAYS_EAGER=True,
+                   CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                   ANSIBLE_TRANSPORT='local')
+class ProjectUpdatesTest(BaseTransactionTest):
+
+    def setUp(self):
+        super(ProjectUpdatesTest, self).setUp()
+        self.setup_users()
+        self.skipTest('blah')
+
+    def create_project(self, **kwargs):
+        project = Project.objects.create(**kwargs)
+        project_path = project.get_project_path(check_if_exists=False)
+        self._temp_project_dirs.append(project_path)
+        return project
+
+    def update_url_auth(self, url, username=None, password=None):
+        parts = urlparse.urlsplit(url)
+        
+
+    def check_project_update(self, project, should_fail=False):
+        print project.local_path
+        pu = project.update()
+        self.assertTrue(pu)
+        pu = ProjectUpdate.objects.get(pk=pu.pk)
+        print pu.status
+        if should_fail:
+            self.assertEqual(pu.status, 'failed', pu.result_stdout)
+        else:
+            self.assertEqual(pu.status, 'successful', pu.result_stdout)
+        #print pu.result_traceback
+        #print pu.result_stdout
+        #print
+
+    def change_file_in_project(self, project):
+        project_path = project.get_project_path()
+        self.assertTrue(project_path)
+        for root, dirs, files in os.walk(project_path):
+            for f in files:
+                if f.startswith('.'):
+                    continue
+                path = os.path.join(root, f)
+                file(path, 'wb').write('CHANGED FILE')
+                return
+        self.fail('no file found to change!')
+    
+    def check_project_scm(self, project):
+        # Initial checkout.
+        self.check_project_update(project)
+        # Update to existing checkout.
+        self.check_project_update(project)
+        # Change file then update (with scm_clean=False).
+        self.assertFalse(project.scm_clean)
+        self.change_file_in_project(project)
+        self.check_project_update(project, should_fail=True)
+        # Set scm_clean=True then try to update again.
+        project.scm_clean = True
+        project.save()
+        self.check_project_update(project)
+
+    def test_public_git_project_over_https(self):
+        scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
+                          'https://github.com/ansible/ansible.github.com.git')
+        if not all([scm_url]):
+            self.skipTest('no public git repo defined for https!')
+        project = self.create_project(
+            name='my public git project over https',
+            scm_type='git',
+            scm_url=scm_url,
+        )
+        self.check_project_scm(project)
+
+    def test_private_git_project_over_https(self):
+        scm_url = getattr(settings, 'TEST_GIT_PRIVATE_HTTPS', '')
+        scm_username = getattr(settings, 'TEST_GIT_USERNAME', '')
+        scm_password = getattr(settings, 'TEST_GIT_PASSWORD', '')
+        if not all([scm_url, scm_username, scm_password]):
+            self.skipTest('no private git repo defined for https!')
+        project = self.create_project(
+            name='my private git project over https',
+            scm_type='git',
+            scm_url=scm_url,
+            scm_username=scm_username,
+            scm_password=scm_password,
+        )
+        self.check_project_scm(project)
+    
+    def test_private_git_project_over_ssh(self):
+        scm_url = getattr(settings, 'TEST_GIT_PRIVATE_SSH', '')
+        scm_key_data = getattr(settings, 'TEST_GIT_KEY_DATA', '')
+        if not all([scm_url, scm_key_data]):
+            self.skipTest('no private git repo defined for ssh!')
+        project = self.create_project(
+            name='my private git project over ssh',
+            scm_type='git',
+            scm_url=scm_url,
+            scm_key_data=scm_key_data,
+        )
+        self.check_project_scm(project)
+
+    def test_public_hg_project_over_https(self):
+        scm_url = getattr(settings, 'TEST_HG_PUBLIC_HTTPS',
+                          'https://bitbucket.org/cchurch/django-hotrunner')
+        if not all([scm_url]):
+            self.skipTest('no public hg repo defined for https!')
+        project = self.create_project(
+            name='my public hg project over https',
+            scm_type='hg',
+            scm_url=scm_url,
+        )
+        self.check_project_scm(project)
+
+    def test_private_hg_project_over_https(self):
+        scm_url = getattr(settings, 'TEST_HG_PRIVATE_HTTPS', '')
+        scm_username = getattr(settings, 'TEST_HG_USERNAME', '')
+        scm_password = getattr(settings, 'TEST_HG_PASSWORD', '')
+        if not all([scm_url, scm_username, scm_password]):
+            self.skipTest('no private hg repo defined for https!')
+        project = self.create_project(
+            name='my private hg project over https',
+            scm_type='hg',
+            scm_url=scm_url,
+            scm_username=scm_username,
+            scm_password=scm_password,
+        )
+        self.check_project_scm(project)
+
+    def test_private_hg_project_over_ssh(self):
+        scm_url = getattr(settings, 'TEST_HG_PRIVATE_SSH', '')
+        scm_key_data = getattr(settings, 'TEST_HG_KEY_DATA', '')
+        if not all([scm_url, scm_key_data]):
+            self.skipTest('no private hg repo defined for ssh!')
+        project = self.create_project(
+            name='my private hg project over ssh',
+            scm_type='hg',
+            scm_url=scm_url,
+            scm_key_data=scm_key_data,
+        )
+        self.check_project_scm(project)
+
+    def test_public_svn_project_over_https(self):
+        scm_url = getattr(settings, 'TEST_SVN_PUBLIC_HTTPS',
+                          'https://projects.ninemoreminutes.com/svn/django-site-utils/')
+        if not all([scm_url]):
+            self.skipTest('no public svn repo defined for https!')
+        project = self.create_project(
+            name='my public svn project over https',
+            scm_type='svn',
+            scm_url=scm_url,
+        )
+        self.check_project_scm(project)
+
+    def test_private_svn_project_over_https(self):
+        scm_url = getattr(settings, 'TEST_SVN_PRIVATE_HTTPS', '')
+        scm_username = getattr(settings, 'TEST_SVN_USERNAME', '')
+        scm_password = getattr(settings, 'TEST_SVN_PASSWORD', '')
+        if not all([scm_url, scm_username, scm_password]):
+            self.skipTest('no private svn repo defined for https!')
+        project = self.create_project(
+            name='my private svn project over https',
+            scm_type='svn',
+            scm_url=scm_url,
+            scm_username=scm_username,
+            scm_password=scm_password,
+        )
+        self.check_project_scm(project)

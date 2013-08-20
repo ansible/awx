@@ -195,7 +195,7 @@ class ProjectSerializer(BaseSerializer):
         valid_local_paths = Project.get_local_path_choices()
         if self.object:
             valid_local_paths.append(self.object.local_path)
-        if attrs[source] not in valid_local_paths:
+        if source in attrs and attrs[source] not in valid_local_paths:
             raise serializers.ValidationError('Invalid path choice')
         return attrs
 

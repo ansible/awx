@@ -19,6 +19,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.utils.timezone import now
+from django.utils.text import slugify
 
 # Django-JSONField
 from jsonfield import JSONField
@@ -29,11 +30,12 @@ from taggit.managers import TaggableManager
 # Django-Celery
 from djcelery.models import TaskMeta
 
-__all__ = ['PrimordialModel', 'Organization', 'Team', 'Project', 'Credential',
-           'Inventory', 'Host', 'Group', 'Permission', 'JobTemplate', 'Job',
-           'JobHostSummary', 'JobEvent', 'PERM_INVENTORY_ADMIN',
-           'PERM_INVENTORY_READ', 'PERM_INVENTORY_WRITE',
-           'PERM_INVENTORY_DEPLOY', 'PERM_INVENTORY_CHECK']
+__all__ = ['PrimordialModel', 'Organization', 'Team', 'Project',
+           'ProjectUpdate', 'Credential', 'Inventory', 'Host', 'Group',
+           'Permission', 'JobTemplate', 'Job', 'JobHostSummary', 'JobEvent',
+           'PERM_INVENTORY_ADMIN', 'PERM_INVENTORY_READ',
+           'PERM_INVENTORY_WRITE', 'PERM_INVENTORY_DEPLOY',
+           'PERM_INVENTORY_CHECK', 'JOB_STATUS_CHOICES']
 
 logger = logging.getLogger('awx.main.models')
 
@@ -57,6 +59,16 @@ PERMISSION_TYPE_CHOICES = [
     (PERM_INVENTORY_ADMIN, _('Administrate Inventory')),
     (PERM_INVENTORY_DEPLOY, _('Deploy To Inventory')),
     (PERM_INVENTORY_CHECK, _('Deploy To Inventory (Dry Run)')),
+]
+
+JOB_STATUS_CHOICES = [
+    ('new', _('New')),                  # Job has been created, but not started.
+    ('pending', _('Pending')),          # Job has been queued, but is not yet running.
+    ('running', _('Running')),          # Job is currently running.
+    ('successful', _('Successful')),    # Job completed successfully.
+    ('failed', _('Failed')),            # Job completed, but with failures.
+    ('error', _('Error')),              # The job was unable to run.
+    ('canceled', _('Canceled')),        # The job was canceled before completion.
 ]
 
 class PrimordialModel(models.Model):
@@ -470,6 +482,13 @@ class Project(CommonModel):
     A project represents a playbook git repo that can access a set of inventories
     '''
 
+    SCM_TYPE_CHOICES = [
+        ('', _('Manual')),
+        ('git', _('Git')),
+        ('hg', _('Mercurial')),
+        ('svn', _('Subversion')),
+    ]
+    
     # this is not part of the project, but managed with perms
     # inventories      = models.ManyToManyField('Inventory', blank=True, related_name='projects')
 
@@ -483,7 +502,7 @@ class Project(CommonModel):
         if os.path.exists(settings.PROJECTS_ROOT):
             paths = [x for x in os.listdir(settings.PROJECTS_ROOT)
                      if os.path.isdir(os.path.join(settings.PROJECTS_ROOT, x))
-                     and not x.startswith('.')]
+                     and not x.startswith('.') and not x.startswith('_')]
             qs = Project.objects.filter(active=True)
             used_paths = qs.values_list('local_path', flat=True)
             return [x for x in paths if x not in used_paths]
@@ -495,20 +514,97 @@ class Project(CommonModel):
         # Not unique for now, otherwise "deletes" won't allow reusing the
         # same path for another active project.
         #unique=True,
+        blank=True,
         help_text=_('Local path (relative to PROJECTS_ROOT) containing '
                     'playbooks and related files for this project.')
     )
-    #scm_type         = models.CharField(max_length=64)
-    #default_playbook = models.CharField(max_length=1024)
+    scm_type = models.CharField(
+        max_length=8,
+        choices=SCM_TYPE_CHOICES,
+        blank=True,
+        null=True,
+        default='',
+        verbose_name=_('SCM Type'),
+    )
+    scm_url = models.URLField(
+        max_length=1024,
+        blank=True,
+        null=True,
+        default='',
+        verbose_name=_('SCM URL'),
+    )
+    scm_branch = models.CharField(
+        max_length=256,
+        blank=True,
+        null=True,
+        default='',
+        verbose_name=_('SCM Branch'),
+        help_text=_('Specific branch, tag or commit to checkout.'),
+    )
+    scm_clean = models.BooleanField(
+        default=False,
+    )
+    scm_username = models.CharField(
+        blank=True,
+        null=True,
+        default='',
+        max_length=256,
+        verbose_name=_('Username'),
+        help_text=_('SCM username for this project.'),
+    )
+    scm_password = models.CharField(
+        blank=True,
+        null=True,
+        default='',
+        max_length=1024,
+        verbose_name=_('Password'),
+        help_text=_('SCM password (or "ASK" to prompt the user).'),
+    )
+    scm_key_data = models.TextField(
+        blank=True,
+        null=True,
+        default='',
+        verbose_name=_('SSH private key'),
+        help_text=_('RSA or DSA private key to be used instead of password.'),
+    )
+    scm_key_unlock = models.CharField(
+        max_length=1024,
+        null=True,
+        blank=True,
+        default='',
+        verbose_name=_('SSH key unlock'),
+        help_text=_('Passphrase to unlock SSH private key if encrypted (or '
+                    '"ASK" to prompt the user).'),
+    )
+
+    def save(self, *args, **kwargs):
+        super(Project, self).save(*args, **kwargs)
+        if self.scm_type and not self.local_path.startswith('_'):
+            slug_name = slugify(unicode(self.name)).replace(u'-', u'_')
+            self.local_path = u'_%d__%s' % (self.pk, slug_name)
+            self.save(update_fields=['local_path'])
+
+    def update(self):
+        if self.scm_type:
+            project_update = self.project_updates.create()
+            project_update.start()
+            return project_update
+
+    @property
+    def last_update(self):
+        try:
+            return self.project_updates.order_by('-modified')[0]
+        except IndexError:
+            pass
 
     def get_absolute_url(self):
         return reverse('main:project_detail', args=(self.pk,))
 
-    def get_project_path(self):
+    def get_project_path(self, check_if_exists=True):
         local_path = os.path.basename(self.local_path)
         if local_path and not local_path.startswith('.'):
             proj_path = os.path.join(settings.PROJECTS_ROOT, local_path)
-            if os.path.exists(proj_path):
+            if not check_if_exists or os.path.exists(proj_path):
                 return proj_path
 
     @property
@@ -542,6 +638,118 @@ class Project(CommonModel):
                         continue
                     results.append(playbook)
         return results
+
+class ProjectUpdate(models.Model):
+    '''
+    Job for tracking internal project updates.
+    '''
+
+    class Meta:
+        app_label = 'main'
+
+    created = models.DateTimeField(
+        auto_now_add=True,
+    )
+    modified = models.DateTimeField(
+        auto_now=True,
+    )
+    project = models.ForeignKey(
+        'Project',
+        related_name='project_updates',
+        on_delete=models.CASCADE,
+        editable=False,
+    )
+    cancel_flag = models.BooleanField(
+        blank=True,
+        default=False,
+        editable=False,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=JOB_STATUS_CHOICES,
+        default='new',
+        editable=False,
+    )
+    failed = models.BooleanField(
+        default=False,
+        editable=False,
+    )
+    job_args = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+    )
+    job_cwd = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+    )
+    job_env = JSONField(
+        blank=True,
+        default={},
+        editable=False,
+    )
+    result_stdout = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
+    result_traceback = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
+    celery_task_id = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        editable=False,
+    )
+
+    def save(self, *args, **kwargs):
+        self.failed = bool(self.status in ('failed', 'error', 'canceled'))
+        super(ProjectUpdate, self).save(*args, **kwargs)
+
+    @property
+    def celery_task(self):
+        try:
+            if self.celery_task_id:
+                return TaskMeta.objects.get(task_id=self.celery_task_id)
+        except TaskMeta.DoesNotExist:
+            pass
+
+    @property
+    def can_start(self):
+        return bool(self.status == 'new')
+
+    def start(self, **kwargs):
+        from awx.main.tasks import RunProjectUpdate
+        if not self.can_start:
+            return False
+        self.status = 'pending'
+        self.save(update_fields=['status'])
+        task_result = RunProjectUpdate().delay(self.pk, **kwargs)
+        # Reload project update from database so we don't clobber results
+        # from RunProjectUpdate (mainly from tests when using Django 1.4.x).
+        project_update = ProjectUpdate.objects.get(pk=self.pk)
+        # The TaskMeta instance in the database isn't created until the worker
+        # starts processing the task, so we can only store the task ID here.
+        project_update.celery_task_id = task_result.task_id
+        project_update.save(update_fields=['celery_task_id'])
+        return True
+
+    @property
+    def can_cancel(self):
+        return bool(self.status in ('pending', 'running'))
+
+    def cancel(self):
+        if self.can_cancel:
+            if not self.cancel_flag:
+                self.cancel_flag = True
+                self.save(update_fields=['cancel_flag'])
+        return self.cancel_flag
 
 class Permission(CommonModelNameNotUnique):
     '''
@@ -702,16 +910,6 @@ class Job(CommonModelNameNotUnique):
         ('scheduled', _('Scheduled')),
     ]
 
-    STATUS_CHOICES = [
-        ('new', _('New')),                  # Job has been created, but not started.
-        ('pending', _('Pending')),          # Job has been queued, but is not yet running.
-        ('running', _('Running')),          # Job is currently running.
-        ('successful', _('Successful')),    # Job completed successfully.
-        ('failed', _('Failed')),            # Job completed, but with failures.
-        ('error', _('Error')),              # The job was unable to run.
-        ('canceled', _('Canceled')),        # The job was canceled before completion.
-    ]
-
     class Meta:
         app_label = 'main'
 
@@ -783,7 +981,7 @@ class Job(CommonModelNameNotUnique):
     )
     status = models.CharField(
         max_length=20,
-        choices=STATUS_CHOICES,
+        choices=JOB_STATUS_CHOICES,
         default='new',
         editable=False,
     )

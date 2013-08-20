@@ -8,6 +8,7 @@ import logging
 import os
 import subprocess
 import tempfile
+import time
 import traceback
 
 # Pexpect
@@ -20,33 +21,31 @@ from celery import Task
 from django.conf import settings
 
 # AWX
-from awx.main.models import Job
+from awx.main.models import Job, ProjectUpdate
 
-__all__ = ['RunJob']
+__all__ = ['RunJob', 'RunProjectUpdate']
 
 logger = logging.getLogger('awx.main.tasks')
 
-class RunJob(Task):
-    '''
-    Celery task to run a job using ansible-playbook.
-    '''
+class BaseTask(Task):
+    
+    name = None
+    model = None
 
-    name = 'run_job'
-
-    def update_job(self, job_pk, **job_updates):
+    def update_model(self, pk, **updates):
         '''
-        Reload Job from database and update the given fields.
+        Reload model from database and update the given fields.
         '''
-        job = Job.objects.get(pk=job_pk)
-        if job_updates:
+        instance = self.model.objects.get(pk=pk)
+        if updates:
             update_fields = []
-            for field, value in job_updates.items():
-                setattr(job, field, value)
+            for field, value in updates.items():
+                setattr(instance, field, value)
                 update_fields.append(field)
                 if field == 'status':
                     update_fields.append('failed')
-            job.save(update_fields=update_fields)
-        return job
+            instance.save(update_fields=update_fields)
+        return instance
 
     def get_path_to(self, *args):
         '''
@@ -54,20 +53,140 @@ class RunJob(Task):
         '''
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
-    def build_ssh_key_path(self, job, **kwargs):
+    def build_ssh_key_path(self, instance, **kwargs):
         '''
         Create a temporary file containing the SSH private key.
         '''
-        creds = job.credential
-        if creds and creds.ssh_key_data:
+        ssh_key_data = getattr(instance, 'ssh_key_data', '')
+        if not ssh_key_data:
+            credential = getattr(instance, 'credential', None)
+            ssh_key_data = getattr(credential, 'ssh_key_data', '')
+        if ssh_key_data:
             # FIXME: File permissions?
             handle, path = tempfile.mkstemp()
             f = os.fdopen(handle, 'w')
-            f.write(creds.ssh_key_data)
+            f.write(ssh_key_data)
             f.close()
             return path
         else:
             return ''
+
+    def build_passwords(self, instance, **kwargs):
+        '''
+        Build a dictionary of passwords responding to prompts.
+        '''
+        return {}
+
+    def build_env(self, instance, **kwargs):
+        '''
+        Build environment dictionary for ansible-playbook.
+        '''
+        env = dict(os.environ.items())
+        # Add ANSIBLE_* settings to the subprocess environment.
+        for attr in dir(settings):
+            if attr == attr.upper() and attr.startswith('ANSIBLE_'):
+                env[attr] = str(getattr(settings, attr))
+        # Also set environment variables configured in AWX_TASK_ENV setting.
+        for key, value in settings.AWX_TASK_ENV.items():
+            env[key] = str(value)
+        # Set environment variables needed for inventory and job event
+        # callbacks to work.
+        env['ANSIBLE_NOCOLOR'] = '1' # Prevent output of escape sequences.
+        return env
+
+    def build_args(self, instance, **kwargs):
+        raise NotImplementedError
+
+    def build_cwd(self, instance, **kwargs):
+        raise NotImplementedError
+
+    def get_password_prompts(self):
+        '''
+        Return a dictionary of prompt regular expressions and password lookup
+        keys.
+        '''
+        return {
+            r'Enter passphrase for .*:': 'ssh_key_unlock',
+            r'Bad passphrase, try again for .*:': '',
+        }
+
+    def run_pexpect(self, pk, args, cwd, env, passwords):
+        '''
+        Run the given command using pexpect to capture output and provide
+        passwords when requested.
+        '''
+        status, stdout = 'error', ''
+        logfile = cStringIO.StringIO()
+        logfile_pos = logfile.tell()
+        child = pexpect.spawn(args[0], args[1:], cwd=cwd, env=env)
+        child.logfile_read = logfile
+        canceled = False
+        last_stdout_update = time.time()
+        expect_list = []
+        expect_passwords = {}
+        for n, item in enumerate(self.get_password_prompts().items()):
+            expect_list.append(item[0])
+            expect_passwords[n] = passwords.get(item[1], '')
+        expect_list.extend([pexpect.TIMEOUT, pexpect.EOF])
+        while child.isalive():
+            result_id = child.expect(expect_list, timeout=2)
+            if result_id in expect_passwords:
+                child.sendline(expect_passwords[result_id])
+            updates = {}
+            if logfile_pos != logfile.tell():
+                updates['result_stdout'] = logfile.getvalue()
+                last_stdout_update = time.time()
+            instance = self.update_model(pk, **updates)
+            if instance.cancel_flag:
+                child.close(True)
+                canceled = True
+            #elif (time.time() - last_stdout_update) > 30: # FIXME: Configurable idle timeout?
+            #    print 'canceling...'
+            #    child.close(True)
+            #    canceled = True
+        if canceled:
+            status = 'canceled'
+        elif child.exitstatus == 0:
+            status = 'successful'
+        else:
+            status = 'failed'
+        stdout = logfile.getvalue()
+        return status, stdout
+
+    def run(self, pk, **kwargs):
+        '''
+        Run the job/task using ansible-playbook and capture its output.
+        '''
+        instance = self.update_model(pk, status='running')
+        status, stdout, tb = 'error', '', ''
+        try:
+            kwargs['ssh_key_path'] = self.build_ssh_key_path(instance, **kwargs)
+            kwargs['passwords'] = self.build_passwords(instance, **kwargs)
+            args = self.build_args(instance, **kwargs)
+            cwd = self.build_cwd(instance, **kwargs)
+            env = self.build_env(instance, **kwargs)
+            instance = self.update_model(pk, job_args=json.dumps(args),
+                                         job_cwd=cwd, job_env=env)
+            status, stdout = self.run_pexpect(pk, args, cwd, env,
+                                              kwargs['passwords'])
+        except Exception:
+            tb = traceback.format_exc()
+        finally:
+            if kwargs.get('ssh_key_path', ''):
+                try:
+                    os.remove(kwargs['ssh_key_path'])
+                except IOError:
+                    pass
+        self.update_model(pk, status=status, result_stdout=stdout,
+                          result_traceback=tb)
+
+class RunJob(BaseTask):
+    '''
+    Celery task to run a job using ansible-playbook.
+    '''
+
+    name = 'run_job'
+    model = Job
 
     def build_passwords(self, job, **kwargs):
         '''
@@ -87,22 +206,12 @@ class RunJob(Task):
         Build environment dictionary for ansible-playbook.
         '''
         plugin_dir = self.get_path_to('..', 'plugins', 'callback')
-        env = dict(os.environ.items())
-        # question: when running over CLI, generate a random ID or grab next, etc?
-        # answer: TBD
-        # Add ANSIBLE_* settings to the subprocess environment.
-        for attr in dir(settings):
-            if attr == attr.upper() and attr.startswith('ANSIBLE_'):
-                env[attr] = str(getattr(settings, attr))
-        # Also set environment variables configured in AWX_TASK_ENV setting.
-        for key, value in settings.AWX_TASK_ENV.items():
-            env[key] = str(value)
+        env = super(RunJob, self).build_env(job, **kwargs)
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['JOB_ID'] = str(job.pk)
         env['INVENTORY_ID'] = str(job.inventory.pk)
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
-        env['ANSIBLE_NOCOLOR'] = '1' # Prevent output of escape sequences.
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
         return env
@@ -154,79 +263,88 @@ class RunJob(Task):
             args = ['ssh-agent', 'sh', '-c', cmd]
         return args
 
-    def run_pexpect(self, job_pk, args, cwd, env, passwords):
-        '''
-        Run the job using pexpect to capture output and provide passwords when
-        requested.
-        '''
-        status, stdout = 'error', ''
-        logfile = cStringIO.StringIO()
-        logfile_pos = logfile.tell()
-        child = pexpect.spawn(args[0], args[1:], cwd=cwd, env=env)
-        child.logfile_read = logfile
-        job_canceled = False
-        while child.isalive():
-            expect_list = [
-                r'Enter passphrase for .*:',
-                r'Bad passphrase, try again for .*:',
-                r'sudo password.*:',
-                r'SSH password:',
-                r'Password:',
-                pexpect.TIMEOUT,
-                pexpect.EOF,
-            ]
-            result_id = child.expect(expect_list, timeout=2)
-            if result_id == 0:
-                child.sendline(passwords.get('ssh_key_unlock', ''))
-            elif result_id == 1:
-                child.sendline('')
-            elif result_id == 2:
-                child.sendline(passwords.get('sudo_password', ''))
-            elif result_id in (3, 4):
-                child.sendline(passwords.get('ssh_password', ''))
-            job_updates = {}
-            if logfile_pos != logfile.tell():
-                job_updates['result_stdout'] = logfile.getvalue()
-            job = self.update_job(job_pk, **job_updates)
-            if job.cancel_flag:
-                child.close(True)
-                job_canceled = True
-        if job_canceled:
-            status = 'canceled'
-        elif child.exitstatus == 0:
-            status = 'successful'
-        else:
-            status = 'failed'
-        stdout = logfile.getvalue()
-        return status, stdout
-
-    def run(self, job_pk, **kwargs):
-        '''
-        Run the job using ansible-playbook and capture its output.
-        '''
-        job = self.update_job(job_pk, status='running')
-        status, stdout, tb = 'error', '', ''
-        try:
-            kwargs['ssh_key_path'] = self.build_ssh_key_path(job, **kwargs)
-            kwargs['passwords'] = self.build_passwords(job, **kwargs)
-            args = self.build_args(job, **kwargs)
-            cwd = job.project.get_project_path()
+    def build_cwd(self, job, **kwargs):
+        cwd = job.project.get_project_path()
+        if not cwd:
             root = settings.PROJECTS_ROOT
-            if not cwd:
-                raise RuntimeError('project local_path %s cannot be found in %s' %
-                                   (job.project.local_path, root))
-            env = self.build_env(job, **kwargs)
-            job = self.update_job(job_pk, job_args=json.dumps(args),
-                                  job_cwd=cwd, job_env=env)
-            status, stdout = self.run_pexpect(job_pk, args, cwd, env,
-                                              kwargs['passwords'])
-        except Exception:
-            tb = traceback.format_exc()
-        finally:
-            if kwargs.get('ssh_key_path', ''):
-                try:
-                    os.remove(kwargs['ssh_key_path'])
-                except IOError:
-                    pass
-        self.update_job(job_pk, status=status, result_stdout=stdout,
-                        result_traceback=tb)
+            raise RuntimeError('project local_path %s cannot be found in %s' %
+                               (job.project.local_path, root))
+        return cwd
+
+    def get_password_prompts(self):
+        d = super(RunJob, self).get_password_prompts()
+        d.update({
+            r'sudo password.*:': 'sudo_password',
+            r'SSH password:': 'ssh_password',
+            r'Password:': 'ssh_password',
+        })
+        return d
+
+class RunProjectUpdate(BaseTask):
+    
+    name = 'run_project_update'
+    model = ProjectUpdate
+
+    def build_passwords(self, project_update, **kwargs):
+        '''
+        Build a dictionary of passwords for SSH private key.
+        '''
+        passwords = {}
+        project = project_update.project
+        value = project.scm_key_unlock
+        if value not in ('', 'ASK'):
+            passwords['ssh_key_unlock'] = value
+        passwords['scm_username'] = project.scm_username
+        passwords['scm_password'] = project.scm_password
+        return passwords
+
+    def build_env(self, project_update, **kwargs):
+        '''
+        Build environment dictionary for ansible-playbook.
+        '''
+        env = super(RunProjectUpdate, self).build_env(project_update, **kwargs)
+        return env
+
+    def build_args(self, project_update, **kwargs):
+        '''
+        Build command line argument list for running ansible-playbook,
+        optionally using ssh-agent for public/private key authentication.
+        '''
+        args = ['ansible-playbook', '-i', 'localhost,']
+        args.append('-%s' % ('v' * 3))
+        # FIXME
+        project = project_update.project
+        extra_vars = {
+            'project_path': project.get_project_path(check_if_exists=False),
+            'scm_type': project.scm_type,
+            'scm_url': project.scm_url,
+            'scm_branch': project.scm_branch or 'HEAD',
+            'scm_clean': project.scm_clean,
+            'scm_username': project.scm_username,
+            'scm_password': project.scm_password,
+        }
+        args.extend(['-e', json.dumps(extra_vars)])
+        args.append('project_update.yml')
+
+        ssh_key_path = kwargs.get('ssh_key_path', '')
+        subcmds = [
+            ('ssh-add', '-D'),
+            args,
+        ]
+        if ssh_key_path:
+            subcmds.insert(1, ('ssh-add', ssh_key_path))
+        cmd = ' && '.join([subprocess.list2cmdline(x) for x in subcmds])
+        args = ['ssh-agent', 'sh', '-c', cmd]
+        return args
+
+    def build_cwd(self, project_update, **kwargs):
+        return self.get_path_to('..', 'playbooks')
+
+    def get_password_prompts(self):
+        d = super(RunProjectUpdate, self).get_password_prompts()
+        d.update({
+            r'Username for.*:': 'scm_username',
+            r'Password for.*:': 'scm_password',
+            r'Are you sure you want to continue connecting (yes/no)\?': 'yes',
+        })
+        return d
