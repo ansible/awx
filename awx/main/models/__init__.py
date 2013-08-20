@@ -19,7 +19,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.utils.timezone import now
-from django.utils.text import slugify
 
 # Django-JSONField
 from jsonfield import JSONField
@@ -29,6 +28,9 @@ from taggit.managers import TaggableManager
 
 # Django-Celery
 from djcelery.models import TaskMeta
+
+# AWX
+from awx.main.compat import slugify
 
 __all__ = ['PrimordialModel', 'Organization', 'Team', 'Project',
            'ProjectUpdate', 'Credential', 'Inventory', 'Host', 'Group',

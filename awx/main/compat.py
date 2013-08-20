@@ -24,3 +24,8 @@ except ImportError:
     class RequireDebugTrue(logging.Filter):
         def filter(self, record):
             return settings.DEBUG
+
+try:
+    from django.utils.text import slugify
+except ImportError:
+    from django.template.defaultfilters import slugify
