@@ -33,7 +33,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        // pass in button object, get back html
        var html = '';
        html += "<button type=\"button\" " + this.attr(btn, 'ngClick') + "class=\"btn";
-       html += (btn['class']) ?  " " + btn['class'] : " btn-small";
+       html += (btn['class']) ?  " " + btn['class'] : " btn-sm";
        html += (btn['awPopOver']) ? " help-link-white" : "";
        html += "\" ";
        html += (btn.id) ? "id=\"" + btn.id + "\" " : "";
@@ -96,6 +96,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
 
        if (options.mode == 'lookup') {
           // options should include {hdr: <dialog header>, action: <function...> }
+          this.scope.formModalActionDisabled = false;
           this.scope.lookupHeader = options.hdr;
           $('#lookup-modal').modal({ backdrop: 'static', keyboard: true });
           $(document).bind('keydown', function(e) {
@@ -143,17 +144,17 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        }
     
        if (options.mode == 'lookup' || options.id != undefined) {
-          html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-6' });
+          html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-8' });
        }
        else {
-          html += SearchWidget({ iterator: list.iterator, template: list, mini: false });
+          html += SearchWidget({ iterator: list.iterator, template: list, mini: true });
        }
 
        if (options.mode != 'lookup') {
           //actions
           var base = $location.path().replace(/^\//,'').split('/')[0];
           html += "<div class=\""; 
-          html += (options.id != undefined) ? "col-lg-5" : "col-lg-7";
+          html += (options.id != undefined) ? "col-lg-3" : "col-lg-7";
           html += "\">\n";
           for (action in list.actions) {
               if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
@@ -170,7 +171,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  dataPlacement: 'left',
                  dataContainer: 'body',
                  icon: "icon-question-sign",
-                 'class': 'btn-mini btn-help btn-info',
+                 'class': 'btn-sm btn-help btn-info',
                  awToolTip: 'Click for help',
                  dataTitle: 'Help',
                  iconSize: 'large'

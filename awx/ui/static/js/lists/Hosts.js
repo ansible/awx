@@ -35,7 +35,7 @@ angular.module('HostListDefinition', [])
                 dataContainer: '#form-modal .modal-content',
                 icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-mini btn-info btn-help',
+                'class': 'btn-xs btn-info btn-help',
                 awToolTip: 'Click for help',
                 dataTitle: 'Selecting Hosts',
                 iconSize: 'large',
@@ -48,7 +48,7 @@ angular.module('HostListDefinition', [])
                 label: 'Edit',
                 ngClick: "editHost(\{\{ host.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-mini btn-default',
+                "class": 'btn-xs btn-default',
                 awToolTip: 'View/Edit host'
                 },
 
@@ -56,7 +56,7 @@ angular.module('HostListDefinition', [])
                 label: 'Delete',
                 ngClick: "deleteHost(\{\{ host.id \}\},'\{\{ host.name \}\}')",
                 icon: 'icon-trash',
-                "class": 'btn-mini btn-danger',
+                "class": 'btn-xs btn-danger',
                 awToolTip: 'Delete host'
                 }
             }

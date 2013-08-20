@@ -60,7 +60,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Refresh',
                 icon: 'icon-refresh',
                 ngClick: "refresh()",
-                "class": 'btn-success btn-mini',
+                "class": 'btn-success btn-sm',
                 awToolTip: 'Refresh the page',
                 mode: 'all'
                 },
@@ -68,7 +68,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Details',
                 icon: 'icon-edit',
                 ngClick: "jobDetails()",
-                "class": 'btn btn-default btn-mini',
+                "class": 'btn btn-default btn-sm',
                 awToolTip: 'Edit job details',
                 mode: 'all'
                 },
@@ -76,7 +76,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Events',
                 icon: 'icon-list-ul',
                 ngClick: "jobEvents()",
-                "class": 'btn btn-default btn-mini',
+                "class": 'btn btn-default btn-sm',
                 awToolTip: 'View job events',
                 mode: 'all'            
                 },
@@ -87,11 +87,11 @@ angular.module('JobHostDefinition', [])
                     "<dt>Unreachable</dt><dd>Times the ansible server could not reach the host.</dd>\n" +
                     "<dt>Skipped</dt><dd>Tasks bypassed and not performed on the host due to prior task failure or the host being unreachable.</dd>\n" +
                     "</dl>\n",
-                dataPlacement: 'right',
-                dataContainer: ".container",
+                dataPlacement: 'left',
+                dataContainer: "body",
                 icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-info btn-mini btn-help',
+                'class': 'btn-info btn-xs btn-help pull-right',
                 awToolTip: 'Click for help',
                 dataTitle: 'Job Host Summary',
                 id: 'jobhost-help-button',

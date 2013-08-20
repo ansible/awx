@@ -62,6 +62,7 @@
   <script src="{{ STATIC_URL }}js/forms/Permissions.js"></script>
   <script src="{{ STATIC_URL }}js/forms/JobEventData.js"></script>
   <script src="{{ STATIC_URL }}js/forms/License.js"></script>
+  <script src="{{ STATIC_URL }}js/forms/HostGroups.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Users.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Admins.js"></script>
@@ -220,7 +221,7 @@
                 <button ng-show="formModalInfo !== undefined && formModalInfo != ''" ng-click="formModalInfoAction()" 
                     class="btn btn-mini pull-left"><i class="icon-zoom-in"></i> <span ng-bind="formModalInfo"></span></button>
                 <a href="#" ng-show="formModalCancelShow" data-target="#form-modal" data-dismiss="modal" class="btn btn-default">Cancel</a>
-                <a href="" ng-bind="formModalActionLabel" ng-click="formModalAction()" class="btn btn-primary"></a>
+                <a href="" ng-bind="formModalActionLabel" ng-click="formModalAction()" ng-disabled="formModalActionDisabled" class="btn btn-primary"></a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->

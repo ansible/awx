@@ -307,6 +307,7 @@ legend {
 }
 
 .page-size {
+  height: 25px;
   font-size: 10.5px;
   line-height: normal;
 }
@@ -573,6 +574,10 @@ input[type="text"].job-successful {
        }
     }
 
+    a.disabled {
+       color: @grey;
+    }
+
     .navbar-form {
        display: inline-block;
        float: right;
@@ -642,6 +647,25 @@ input[type="text"].job-successful {
     margin: 5px 0;
   }
 
+  .host-groups {
+    margin-top: 15px;
+
+    select {
+      height: 150px;
+    }
+  }
+
+  .host-group-buttons {
+    margin-top: 20px;
+    text-align: center;
+
+    p {
+      padding-top: 10px;
+      font-size: 12px;
+      font-weight: normal;
+    }
+  }
+
   .search-tree { 
     ul {
       list-style-type: none;
@@ -670,6 +694,10 @@ input[type="text"].job-successful {
       border: 1px solid #ddd;
     }
   }
+
+.disabled {
+  color: @grey; 
+}
 
 .parse-selection {
   display: inline-block;

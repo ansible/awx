@@ -52,15 +52,18 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        if (options.buildTree) {
           element.html(this.buildTree(options));
        }
+       else if (options.html) {
+          element.html(options.html);
+       }
        else {
-           element.html(this.build(options));
+          element.html(this.build(options));
        }
 
        this.scope = element.scope();       // Set scope specific to the element we're compiling, avoids circular reference
                                            // From here use 'scope' to manipulate the form, as the form is not in '$scope'
        $compile(element)(this.scope);
  
-       if (options.buildTree == undefined || options.buildTree == false) {
+       if (!options.buildTree == false && !options.html) {
           // Reset the scope to prevent displaying old data from our last visit to this form
           for (var fld in form.fields) {
               this.scope[fld] = null;
@@ -86,7 +89,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               });
 
        if (options.modal) {
-          this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;  //Default title for default modal
+          this.scope.formModalActionDisabled = false;
+          if (form) {
+             this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;  //Default title for default modal
+          }
           this.scope.formModalInfo = false  //Disable info button for default modal
           if (options.modal_selector) {
              $(options.modal_selector).modal({ show: true, backdrop: 'static', keyboard: true });
@@ -954,7 +960,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            "aw-tool-tip=\"Add an existing host\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Add Existing Host</a></li>\n";
        html += "<li><a href=\"\" ng-click=\"createHost()\" ng-hide=\"hostCreateHide\" " +
            "aw-tool-tip=\"Create a new host\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New Host</a></li>\n";
-       html += "<li><a href=\"\" ng-click=\"deleteHost()\" ng-hide=\"hostDeleteHide\" " +
+       html += "<li><a href=\"\" ng-click=\"deleteHost()\" ng-class=\"hostDeleteDisabledClass\" ng-disabled=\"hostDeleteDisabled\" " +
            "aw-tool-tip=\"Delete selected hosts\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Hosts</a></li>\n";
        html += "<li><a class=\"status\" ng-show=\"treeLoading\" href=\"\"><i class=\"icon-spinner icon-spin icon-large\"></i> Loading...</a></li>\n";
        html += "</ul>\n";
@@ -988,7 +994,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        html += "<table class=\"" + form.related[itm].iterator + " table table-condensed table-hover\">\n";
        html += "<thead>\n";
        html += "<tr>\n";
-       //html += "<th>#</th>\n";
        html += "<th><input type=\"checkbox\" ng-model=\"toggleAllFlag\" ng-change=\"toggleAllHosts()\" aw-tool-tip=\"Select all hosts\" " +
            "data-placement=\"top\"></th>\n";
        for (var fld in form.related[itm].fields) {
@@ -1030,11 +1035,25 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        for (var fld in form.related[itm].fields) {
            cnt++;
            rfield = form.related[itm].fields[fld];
-           html += Column({ list: form.related[itm], fld: fld, options: options, base: base })
+           if (fld == 'groups' ) {
+              // generate group form control/button widget
+              html += "<td>";
+              html += "<div class=\"input-group input-group-sm\">\n";
+              html += "<span class=\"input-group-btn\">\n";
+              html += "<button class=\"btn btn-default\" type=\"button\" ng-click=\"editHostGroups({{ host.id }})\"><i class=\"icon-list\"></i></button>\n";
+              html += "</span>\n";
+              html += "<input type=\"text\" ng-model=\"host.groups\" class=\"form-control\" disabled=\"disabled\" >\n";
+              html += "</div>\n";
+              //html += "<a href=\"\"><i class=\"icon-list\"></i></button> \{\{ host.groups \}\}</a>";
+              html += "</td>\n";
+           }
+           else {
+              html += Column({ list: form.related[itm], fld: fld, options: options, base: base });
+           }
        }
 
        html += "<td>";
-       html += "<div class=\"btn-group\">\n";
+       html += "<div class=\"btn-group btn-group-sm\">\n";
        html += "<button type=\"button\" class=\"btn btn-default btn-mini dropdown-toggle\" data-toggle=\"dropdown\">";
        html += "View <span class=\"caret\"></span></button>\n";
        html += "<ul class=\"dropdown-menu pull-right\" role=\"menu\" aria-labelledby=\"dropdownMenu1\">\n";

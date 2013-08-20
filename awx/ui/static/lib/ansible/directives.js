@@ -279,6 +279,35 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
         }
         }])
 
+    .directive('awMultiSelect', [ function() {
+        return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            $(elm).multiselect  ({
+                buttonClass: 'btn-default, btn-mini',
+                buttonWidth: 'auto',
+                buttonContainer: '<div class="btn-group" />',
+                maxHeight: false,
+                buttonText: function(options) {
+                   if (options.length == 0) {
+                       return 'None selected <b class="caret"></b>';
+                   }
+                   else if (options.length > 3) {
+                       return options.length + ' selected  <b class="caret"></b>';
+                   }
+                   else {
+                       var selected = '';
+                       options.each(function() {
+                           selected += $(this).text() + ', ';
+                           });
+                       return selected.substr(0, selected.length -2) + ' <b class="caret"></b>';
+                   }
+                }
+                });
+            }
+        }
+        }])
+
     //
     // Enable jqueryui spinner widget on a numeric input field
     //
@@ -317,6 +346,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
         }
         }])
 
+    /* This has become more than a simple directive. All the logic for building the group selector tree
+       on the Hosts tab is here. Probably needs to move into the Hosts helper and/or Inventory helper.
+     */
     .directive('awTree', ['Rest', 'ProcessErrors', 'Authorization', '$compile', '$rootScope', 'Wait',
         function(Rest, ProcessErrors, Authorization, $compile, $rootScope, Wait) {
         return {
@@ -360,7 +392,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                 else {
                    group = null;
                    title = 'All Hosts'
-                } 
+                }
+                // The following will trigger the host list to load. See Inventory.js controller.
                 scope.$emit('refreshHost', group, title);
                 }
             
@@ -527,6 +560,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                 activateElm.bind('click', activate);
                 }
             
+            // Responds to hostTabInit event, thrown from Hosts.js helper. Once the initial 
+            // inventory node is loaded, force the root level groups to load and populate the
+            // host list with All Hosts.
             if ($rootScope.hostTabInitRemove) {
                $rootScope.hostTabInitRemove();
             }

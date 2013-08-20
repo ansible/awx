@@ -185,7 +185,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                           OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
                           GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshGroupName, ParseTypeChange,
-                          HostsReload, EditInventory, RefreshTree, LoadSearchTree) 
+                          HostsReload, EditInventory, RefreshTree, LoadSearchTree, EditHostGroups) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -204,6 +204,8 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    scope['inventoryParseType'] = 'yaml';
    scope['inventory_id'] = id;
    scope['inventoryFailureFilter'] = false;
+   scope['hostDeleteDisabled'] = true; 
+   scope['hostDeleteDisabledClass'] = 'disabled';
 
    // Retrieve each related sets and any lookups
    if (scope.inventoryLoadedRemove) {
@@ -447,6 +449,10 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       HostsEdit({ scope: scope, "inventory_id": id, group_id: scope.group_id, host_id: host_id, host_name: host_name });
       }
 
+  scope.editHostGroups = function(host_id) {
+      EditHostGroups({ inventory_id: id, host_id: host_id });
+      }
+
   scope.deleteHost = function(host_id, host_name) {
       HostsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id, host_id: host_id, host_name: host_name,
           request: 'delete' });
@@ -472,7 +478,8 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       }
   
   scope.toggleAllHosts = function() {
-      scope.hostDeleteHide = (scope.toggleAllFlag) ? false : true;
+      scope.hostDeleteDisabled = (scope.toggleAllFlag) ? false : true;
+      scope.hostDeleteDisabledClass = (scope.hostDeleteDisabled) ? "disabled" : "";
       for (var i=0; i < scope.hosts.length; i++) {
           scope.hosts[i].selected = scope.toggleAllFlag;
       }
@@ -486,8 +493,10 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
              break;   
           }
       }
-      scope.hostDeleteHide = result;
+      scope.hostDeleteDisabled = result;
+      scope.hostDeleteDisabledClass = (scope.hostDeleteDisabled) ? "disabled" : "";
       }
+
 
   // Respond to the scope.$emit from awTree directive
   scope.$on('refreshHost', function(e, group, title) {
@@ -503,6 +512,8 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.hostCreateHide = false; 
          scope.hostDeleteHide = false;
       }
+      scope['hostDeleteDisabled'] = true; 
+      scope['hostDeleteDisabledClass'] = 'disabled';
       HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: group });
       });
 
@@ -513,6 +524,6 @@ InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$l
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
                             'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete', 'RefreshGroupName',
-                            'ParseTypeChange', 'HostsReload', 'EditInventory', 'RefreshTree', 'LoadSearchTree'
+                            'ParseTypeChange', 'HostsReload', 'EditInventory', 'RefreshTree', 'LoadSearchTree', 'EditHostGroups'
                             ]; 
   

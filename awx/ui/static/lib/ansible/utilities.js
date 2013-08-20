@@ -222,7 +222,6 @@ angular.module('Utilities',[])
           var spinnyh = $('.spinny').height();
           var x = (docw - spinnyw) / 2; 
           var y = (doch - spinnyh) / 2;
-          console.log($(document));
           $('.overlay').css({
               width: $('html').width(),
               height: $(document).height() + 200
@@ -230,10 +229,10 @@ angular.module('Utilities',[])
           $('.spinny').css({
               top: y, 
               left: x
-              }).fadeIn(500);
+              }).fadeIn(400);
        }
        else {
-          $('.spinny, .overlay').fadeOut(2000);
+          $('.spinny, .overlay').fadeOut(1000);
        }
        }
    }]);

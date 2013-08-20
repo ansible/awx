@@ -211,10 +211,12 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (params.size) ? params.size : "col-lg-4";
         html += "\">\n";
         html += (label) ? "<label>" + label +"</label>" : "";
-        html += "<div class=\"input-group\">\n";
+        html += "<div class=\"input-group";
+        html += (useMini) ? " input-group-sm" : " input-group-sm";
+        html += "\">\n";
         html += "<div class=\"input-group-btn\">\n";
         html += "<button type=\"button\" class=\"btn "; 
-        html += (useMini) ? "btn-mini " : "btn-small ";
+        // html += (useMini) ? "btn-mini " : "btn-small ";
         html += "dropdown-toggle\" data-toggle=\"dropdown\">\n";
         html += "<span ng-bind=\"" + iterator + "SearchFieldLabel\"></span>\n";
         html += "<span class=\"caret\"></span>\n";
@@ -232,18 +234,18 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "</div><!-- input-group-btn -->\n";
         
         html += "<select ng-show=\"" + iterator + "SelectShow\" ng-model=\""+ iterator + "SearchSelectValue\" ng-change=\"search('" + iterator + "')\" ";
-        html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts\" class=\"search-select";
-        html += (useMini) ? " input-mini" : " input-small";
+        html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts\" class=\"form-control search-select";
+        //html += (useMini) ? " input-sm" : "";
         html += "\"></select>\n";
 
         html += "<input type=\"text\" ng-hide=\"" + iterator + "SelectShow || " + iterator + "InputHide\" class=\"form-control ";
-        html += (useMini) ? " input-mini" : " input-small";
+        //html += (useMini) ? " input-sm" : " input-sm";
         html += "\" ng-model=\"" + iterator + "SearchValue\" ng-change=\"search('" + iterator + 
                 "')\" placeholder=\"Search\" type=\"text\" >\n";
         
         html += "<div class=\"input-group-btn\">\n";
         html += "<button type=\"button\" ng-hide=\"" + iterator + "SelectShow || " + iterator + "HideSearchType || " + iterator + "InputHide\" class=\"btn ";
-        html += (useMini) ? "btn-mini " : "btn-small ";
+        //html += (useMini) ? "btn-x " : "btn-small ";
         html += "dropdown-toggle\" data-toggle=\"dropdown\">\n";
         html += "<span ng-bind=\"" + iterator + "SearchTypeLabel\"></span>\n";
         html += "<span class=\"caret\"></span>\n";
@@ -279,21 +281,20 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (useMini) ? " related-footer" : "";
         html += "\">\n";
         html += "<form class=\"form-inline\">\n";
-        html += "<button class=\"previous btn btn-light";
-        html += (useMini) ? " btn-mini\" " : "\" ";
+        html += "<button type=\"button\" class=\"previous btn btn-light";
+        html += (useMini) ? " btn-xs\" " : "\" ";
         html += "ng-click=\"prevSet('" + set + "','" + iterator + "')\" " +
                 "ng-disabled=\"" + iterator + "PrevUrl == null || " + iterator + "PrevUrl == undefined\"><i class=\"icon-caret-left\"></i> Prev</button>\n";
-        html += "<button class=\"next btn btn-light";
-        html += (useMini) ? " btn-mini\" " : "\" ";
+        html += "<button type=\"button\" class=\"next btn btn-light";
+        html += (useMini) ? " btn-xs\" " : "\" ";
         html += " ng-click=\"nextSet('" + set + "','" + iterator + "')\"" + 
                 "ng-disabled=\"" + iterator + "NextUrl == null || " + iterator + "NextUrl == undefined\">Next <i class=\"icon-caret-right\"></i></button>\n";
         
         if (mode != 'lookup') {
            html += "<label class=\"page-size-label\">Rows per page: </label>\n";
            html += "<select ng-model=\"" + iterator + "PageSize\" ng-change=\"changePageSize('" + 
-                    set + "'," + "'" + iterator + "')\" class=\"input-mini";
-           //html += (useMini) ? " field-mini-height" : "";
-           html += " page-size\">\n";
+                    set + "'," + "'" + iterator + "')\" ";
+           html += "class=\"page-size\">\n";
            html += "<option value=\"10\" selected>10</option>\n";
            html += "<option value=\"20\" selected>20</option>\n";
            html += "<option value=\"40\">40</option>\n";

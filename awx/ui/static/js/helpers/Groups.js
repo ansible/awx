@@ -96,14 +96,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.parseType = 'yaml';
         ParseTypeChange(scope);
 
-        //$('#form-modal').on('hidden.bs.modal', function() {
-        //     var me = $(this);
-        //     $('.modal-backdrop').each(function(index) {
-        //         $(this).remove();
-        //         });
-        //     me.unbind('hidden.bs.modal');
-        //     });
-        
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
 
         generator.reset();
@@ -116,6 +108,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         // Save
         scope.formModalAction  = function() {
            try { 
+               
+               scope.formModalActionDisabled = true;
 
                // Make sure we have valid variable data
                if (scope.parseType == 'json') {
@@ -162,11 +156,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        }
                        })
                    .error( function(data, status, headers, config) {
+                       scope.formModalActionDisabled = false;
                        ProcessErrors(scope, data, status, form,
                            { hdr: 'Error!', msg: 'Failed to add new group. POST returned status: ' + status });
                        });
            }
            catch(err) {
+               scope.formModalActionDisabled = false;
                Alert("Error", "Error parsing group variables. Parser returned: " + err);     
            }
            }

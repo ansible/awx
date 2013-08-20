@@ -22,6 +22,7 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
         var returnToCaller = params.returnToCaller;
         
         scope.selected = [];   //array of selected row IDs
+        scope.formModalActionDisabled = true;
 
         // toggle row selection
         scope['toggle_' + list.iterator] = function(id, ischeckbox) {
@@ -59,62 +60,71 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
                    }
                 }
             }
+            if (scope.selected.length > 0) {
+               scope.formModalActionDisabled = false; 
+            }
+            else {
+               scope.formModalActionDisabled = true;
+            }
             }
 
-        scope.finishSelection = function() {
-           Rest.setUrl(target_url);
-           scope.queue = [];
-           
-           function finished() {
-               scope.selected = [];
-               if (returnToCaller !== undefined) {
-                  ReturnToCaller(returnToCaller);
+        if (target_url) {
+           scope.finishSelection = function() {
+               Rest.setUrl(target_url);
+               scope.queue = [];
+               scope.formModalActionDisabled = true;
+               
+               function finished() {
+                   scope.selected = [];
+                   if (returnToCaller !== undefined) {
+                      ReturnToCaller(returnToCaller);
+                   }
+                   else {
+                      $('#form-modal').modal('hide');
+                      scope.$emit('modalClosed');
+                   }
+                   }
+               
+               if (scope.callFinishedRemove) {
+                  scope.callFinishedRemove();
+               }
+               scope.callFinishedRemove = scope.$on('callFinished', function() {
+                  // We call the API for each selected item. We need to hang out until all the api
+                  // calls are finished.
+                  if (scope.queue.length == scope.selected.length) {
+                     var errors = 0;   
+                     for (var i=0; i < scope.queue.length; i++) {
+                         if (scope.queue[i].result == 'error') {
+                            ProcessErrors(scope, scope.queue[i].data, scope.queue[i].status, null,
+                                { hdr: 'POST Failure', msg: 'Failed to add ' + list.iterator + 
+                                '. POST returned status: ' + scope.queue[i].status });
+                            errors++;
+                         }
+                     }
+                     if (errors == 0) {
+                        finished();
+                     }
+                  }
+                  });
+
+               if (scope.selected.length > 0 ) {
+                  for (var j=0; j < scope.selected.length; j++) {
+                      Rest.post(scope.selected[j])
+                          .success( function(data, status, headers, config) {
+                              scope.queue.push({ result: 'success', data: data, status: status });
+                              scope.$emit('callFinished');
+                              })
+                          .error( function(data, status, headers, config) {
+                              scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
+                              scope.$emit('callFinished');
+                              });
+                  }
                }
                else {
-                  $('#form-modal').modal('hide');
-                  scope.$emit('modalClosed');
+                  finished();
+               }  
                }
-               }
-           
-           if (scope.callFinishedRemove) {
-              scope.callFinishedRemove();
-           }
-           scope.callFinishedRemove = scope.$on('callFinished', function() {
-              // We call the API for each selected item. We need to hang out until all the api
-              // calls are finished.
-              if (scope.queue.length == scope.selected.length) {
-                 var errors = 0;   
-                 for (var i=0; i < scope.queue.length; i++) {
-                     if (scope.queue[i].result == 'error') {
-                        ProcessErrors(scope, scope.queue[i].data, scope.queue[i].status, null,
-                            { hdr: 'POST Failure', msg: 'Failed to add ' + list.iterator + 
-                            '. POST returned status: ' + scope.queue[i].status });
-                        errors++;
-                     }
-                 }
-                 if (errors == 0) {
-                    finished();
-                 }
-              }
-              });
-
-           if (scope.selected.length > 0 ) {
-              for (var j=0; j < scope.selected.length; j++) {
-                  Rest.post(scope.selected[j])
-                      .success( function(data, status, headers, config) {
-                          scope.queue.push({ result: 'success', data: data, status: status });
-                          scope.$emit('callFinished');
-                          })
-                      .error( function(data, status, headers, config) {
-                          scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
-                          scope.$emit('callFinished');
-                          });
-              }
-           }
-           else {
-              finished();
-           }  
-           }
+        }
 
         scope.formModalAction = scope.finishSelection;
 

@@ -59,7 +59,7 @@ angular.module('RelatedPaginateHelper', ['RefreshRelatedHelper', 'ngCookies'])
            $cookieStore.put(iterator + 'PageSize', scope[iterator + 'PageSize']);
            
            url = url.replace(/\/\?.*$/,'/');
-           url += (scope[iterator + 'SearchParams']) ? scope[iterator + 'SearchParams'] + '&page_size=' + scope[iterator + 'PageSize' ] :
+           url += (scope[iterator + 'SearchParams']) ? '?' + scope[iterator + 'SearchParams'] + '&page_size=' + scope[iterator + 'PageSize' ] :
                '?page_size=' + scope[iterator + 'PageSize' ];
            RefreshRelated({ scope: scope, set: set, iterator: iterator, url: url });  
            }

@@ -40,7 +40,7 @@ angular.module('UserListDefinition', [])
                 mode: 'all',                      // One of: edit, select, all
                 ngClick: 'addUser()',
                 basePaths: ['organizations','users'],        // base path must be in list, or action not available
-                "class": 'btn-success btn-mini',
+                "class": 'btn-success btn-sm',
                 awToolTip: 'Create a new user'
                 }
             },
@@ -50,7 +50,7 @@ angular.module('UserListDefinition', [])
                 label: 'Edit',
                 ngClick: "editUser(\{\{ user.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-mini btn-default',
+                "class": 'btn-xs btn-default',
                 awToolTip: 'View/Edit user'
                 },
 
@@ -58,7 +58,7 @@ angular.module('UserListDefinition', [])
                 label: 'Delete',
                 ngClick: "deleteUser(\{\{ user.id \}\},'\{\{ user.username \}\}')",
                 icon: 'icon-trash',
-                "class": 'btn-mini btn-danger',
+                "class": 'btn-xs btn-danger',
                 awToolTip: 'Delete user'
                 }
             }

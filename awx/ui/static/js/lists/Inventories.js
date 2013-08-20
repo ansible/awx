@@ -54,7 +54,7 @@ angular.module('InventoriesListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addInventory()',
-                "class": 'btn-mini btn-success',
+                "class": 'btn-sm btn-success',
                 awToolTip: 'Create a new inventory'
                 }
             },
@@ -64,7 +64,7 @@ angular.module('InventoriesListDefinition', [])
                 label: 'Edit',
                 ngClick: "editInventory(\{\{ inventory.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-mini btn-default',
+                "class": 'btn-xs btn-default',
                 awToolTip: 'View/Edit inventory'
                 },
 
@@ -72,7 +72,7 @@ angular.module('InventoriesListDefinition', [])
                 label: 'Delete',
                 ngClick: "deleteInventory(\{\{ inventory.id \}\},'\{\{ inventory.name \}\}')",
                 icon: 'icon-trash',
-                "class": 'btn-mini btn-danger',
+                "class": 'btn-xs btn-danger',
                 awToolTip: 'Delete inventory'
                 }
             }
