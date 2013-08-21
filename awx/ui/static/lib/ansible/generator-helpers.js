@@ -91,7 +91,38 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         }
         })
 
-    .factory('Column', ['Attr', 'Icon', function(Attr, Icon) {
+
+    .factory('DropDown', ['Attr', 'Icon', function(Attr, Icon) {
+    return function(params) {
+        
+        var list = params['list'];
+        var fld = params['fld'];
+        var options = params['options'];
+        var base = params['base'];
+        var field = list['fields'][fld];
+        
+        html = "<td>\n";
+        html += "<div class=\"btn-group btn-group-sm\">\n";
+        html += "<button type=\"button\" class=\"btn btn-default btn-mini dropdown-toggle\" data-toggle=\"dropdown\">";
+        html += field.label;
+        html += " <span class=\"caret\"></span></button>\n";
+        html += "<ul class=\"dropdown-menu pull-right\" role=\"menu\" aria-labelledby=\"dropdownMenu1\">\n";
+        for (var i=0; i < field.options.length; i++) {
+            html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" "; 
+            html += "ng-click=\"" + field.options[i].ngClick + "\" ";
+            html += "href=\"\">" + field.options[i].label + "</a></li>\n";
+        }
+        html += "</ul>\n";
+        html += "</div>\n";
+        html += "</td>\n";
+        
+        return html;
+        
+        }  
+        }])
+
+
+    .factory('Column', ['Attr', 'Icon', 'DropDown', function(Attr, Icon, DropDown) {
     return function(params) {
         var list = params['list'];
         var fld = params['fld'];
@@ -101,99 +132,106 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var field = list['fields'][fld];
         var html = '';
         
-        html += "<td class=\"" + fld + "-column";
-        html += (field['class']) ? " " + field['class'] : "";
-        html += (field['columnClass']) ? " " + field['columnClass'] : "";
-        html +=  "\" ";  
-        html += (field.ngClass) ? Attr(field, 'ngClass') : "";
-        html += (options.mode == 'lookup' || options.mode == 'select') ? " ng-click=\"toggle_" + list.iterator +"({{ " + list.iterator + ".id }})\"" : "";
-        html += ">\n";
-
-        // Add ngShow
-        html += (field.ngShow) ? "<span " + Attr(field,'ngShow') + ">" : "";
-        
-        // Add collapse/expand icon  --used on job_events page
-        if (list['hasChildren'] && field.hasChildren) {
-           html += "<span class=\"level-\{\{ " + list.iterator + ".event_level \}\}\"><a href=\"\" ng-click=\"\{\{ " + list.iterator + ".ngclick \}\}\"> " +
-               "<i class=\"\{\{ " + list.iterator + ".ngicon \}\}\" ng-show=\"'\{\{ " + 
-               list.iterator + ".related.children \}\}' !== ''\" ></i></a> ";
-        }
-
-        // Start the Link
-        if ((field.key || field.link || field.linkTo || field.ngClick ) && options['mode'] != 'lookup' && options['mode'] != 'select') {
-          if (field.linkTo) {
-             html += "<a href=\"#" + field.linkTo + "\">";
-          }
-          else if (field.ngClick) {
-             html += "<a href=\"\"" + Attr(field, 'ngClick') + "\">";
-          }
-          else if (field.link == undefined || field.link) {
-             html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
-          }
-        }
-
-        // Add icon:
-        if (field.ngShowIcon) {
-          html += "<i ng-show=\"" + field.ngShowIcon + "\" class=\"" + field.icon + "\"></i> ";
+        if (field.type !== undefined && field.type == 'DropDown') {
+           html = DropDown(params);
         }
         else {
-          if (field.icon) {
-             html += Icon(field.icon) + " ";
-          }
-        }
+           html += "<td class=\"" + fld + "-column";
+           html += (field['class']) ? " " + field['class'] : "";
+           html += (field['columnClass']) ? " " + field['columnClass'] : "";
+           html +=  "\" ";  
+           html += (field.ngClass) ? Attr(field, 'ngClass') : "";
+           html += (options.mode == 'lookup' || options.mode == 'select') ? " ng-click=\"toggle_" + list.iterator +"({{ " + list.iterator + ".id }})\"" : "";
+           html += ">\n";
 
-        // Add data binds 
-        if (field.showValue == undefined || field.showValue == true) {
-          if (field.ngBind) {       
-             html += "{{ " + field.ngBind + " }}";
-          }
-          else {
-             html += "{{" + list.iterator + "." + fld + "}}";   
-          }
-        }
-        
-        // Add additional text:
-        if (field.text) {
-          html += field.text;
-        }
+           // Add ngShow
+           html += (field.ngShow) ? "<span " + Attr(field,'ngShow') + ">" : "";
+            
+           // Add collapse/expand icon  --used on job_events page
+           if (list['hasChildren'] && field.hasChildren) {
+              html += "<span class=\"level-\{\{ " + list.iterator + ".event_level \}\}\"><a href=\"\" ng-click=\"\{\{ " + list.iterator + ".ngclick \}\}\"> " +
+                  "<i class=\"\{\{ " + list.iterator + ".ngicon \}\}\" ng-show=\"'\{\{ " + 
+                  list.iterator + ".related.children \}\}' !== ''\" ></i></a> ";
+           }
 
-        if (list['hasChildren'] && field.hasChildren) {
-           html += "</span>";
-        }
-        
-        // close the link
-        if ((field.key || field.link || field.linkTo || field.ngClick )
-            && options.mode != 'lookup' && options.mode != 'select') {
-            html += "</a>";
-        }
+           // Start the Link
+           if ((field.key || field.link || field.linkTo || field.ngClick ) && options['mode'] != 'lookup' && options['mode'] != 'select') {
+              if (field.linkTo) {
+                 html += "<a href=\"#" + field.linkTo + "\">";
+              }
+              else if (field.ngClick) {
+                 html += "<a href=\"\"" + Attr(field, 'ngClick') + "\">";
+              }
+              else if (field.link == undefined || field.link) {
+                 html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
+              }
+           }
 
-        // close ngShow
-        html += (field.ngShow) ? "</span>" : "";
- 
-        // Specific to Job Events page -showing event detail/results
-        html += (field.appendHTML) ? "<div ng-show=\"" +  field.appendHTML + " !== null\" " + 
-            "ng-bind-html-unsafe=\"" + field.appendHTML + "\" " +
-            "class=\"level-\{\{ " + list.iterator + ".event_level \}\}-detail\" " +
-            "></div>\n" : "";
-        
-        // Badge
-        if (field.badgeIcon) {
-           if (field.badgeToolTip) {
-              html += "<a href=\"\" aw-tool-tip=\"Most recent job failed\"";
-              html += (field.badgePlacement) ? " data-placement=\"" + field.badgePlacement + "\"" : "";
-              html += " ng-show=\"" + field.badgeShow + "\">";
-              html += " <i class=\"host-badge " + field.badgeIcon + "\"></i></a>\n";
+           // Add icon:
+           if (field.ngShowIcon) {
+              html += "<i ng-show=\"" + field.ngShowIcon + "\" class=\"" + field.icon + "\"></i> ";
            }
            else {
-              html += " <i class=\"host-badge " + field.badgeIcon + "\" ";
-              html += "ng-show=\"" + field.badgeShow + "\"></i>\n";
-          }
+              if (field.icon) {
+                 html += Icon(field.icon) + " ";
+              }
+           }
+
+           // Add data binds 
+           if (field.showValue == undefined || field.showValue == true) {
+              if (field.ngBind) {       
+                 html += "{{ " + field.ngBind + " }}";
+              }
+              else {
+                 html += "{{" + list.iterator + "." + fld + "}}";   
+              }
+           }
+            
+           // Add additional text:
+           if (field.text) {
+              html += field.text;
+           }
+
+           if (list['hasChildren'] && field.hasChildren) {
+              html += "</span>";
+           }
+            
+           // close the link
+           if ((field.key || field.link || field.linkTo || field.ngClick )
+               && options.mode != 'lookup' && options.mode != 'select') {
+               html += "</a>";
+           }
+
+           // close ngShow
+           html += (field.ngShow) ? "</span>" : "";
+     
+           // Specific to Job Events page -showing event detail/results
+           html += (field.appendHTML) ? "<div ng-show=\"" +  field.appendHTML + " !== null\" " + 
+               "ng-bind-html-unsafe=\"" + field.appendHTML + "\" " +
+               "class=\"level-\{\{ " + list.iterator + ".event_level \}\}-detail\" " +
+               "></div>\n" : "";
+            
+           // Badge
+           if (field.badgeIcon) {
+              if (field.badgeToolTip) {
+                 html += "<a href=\"\" aw-tool-tip=\"" + field.badgeToolTip + "\"";
+                 html += (field.badgePlacement) ? " data-placement=\"" + field.badgePlacement + "\"" : "";
+                 html += (field.badgeShow) ? " ng-show=\"" + field.badgeShow + "\"" : "" 
+                 html += ">";
+                 html += " <i class=\"field-badge " + field.badgeIcon + "\"></i></a>\n";
+              }
+              else {
+                 html += " <i class=\"field-badge " + field.badgeIcon + "\" ";
+                 html += "ng-show=\"" + field.badgeShow + "\"></i>\n";
+              }
+           }
         }
 
         return html += "</td>\n";
     
         }
         }])
+
 
     .factory('SearchWidget', function() {
     return function(params) {

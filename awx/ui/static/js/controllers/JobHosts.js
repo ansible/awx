@@ -35,6 +35,14 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
   
     SearchInit({ scope: scope, set: 'jobhosts', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
+
+    // Called from Inventories tab, host failed events link:
+    if ($routeParams.host) {
+       scope[list.iterator + 'SearchField'] = 'host'; 
+       scope[list.iterator + 'SearchValue'] = $routeParams.host;
+       scope[list.iterator + 'SearchFieldLabel'] = list.fields['host'].label;
+    }
+    
     scope.search(list.iterator);
 
     LoadBreadCrumbs();

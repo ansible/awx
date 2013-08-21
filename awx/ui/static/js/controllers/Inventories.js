@@ -94,6 +94,11 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    var defaultUrl = GetBasePath('inventory');
    var form = InventoryForm;
    var generator = GenerateForm;
+
+   form.well = true,
+   form.formLabelSize = null;
+   form.formFieldSize = null;
+
    var scope = generator.inject(form, {mode: 'add', related: false});
    scope.inventoryParseType = 'yaml';
    
@@ -398,7 +403,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.inventoryEditHide = true;
          scope.groupDeleteHide = false;
          scope.createButtonShow = true;
-         //scope.group_id = node.attr('group_id');
+         scope.group_id = node.attr('group_id');
          //scope.groupName = n.data;
          //scope.groupTitle = '<h4>' + n.data + '</h4>';
          //scope.groupTitle += (node.attr('description')) ? '<p>' + node.attr('description') + '</p>' : '';
@@ -413,7 +418,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.createButtonShow = false;
          //scope.groupName = 'All Hosts';
          //scope.groupTitle = '<h4>All Hosts</h4>';
-         //scope.group_id = null;
+         scope.group_id = null;
       }
 
       if (!scope.$$phase) {
@@ -463,20 +468,18 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
           request: 'remove' });
       } */
 
-  scope.showEvents = function(host_name, last_job) {
-      // When click on !Failed Events link, redirect to latest job/job_events for the host
-      Rest.setUrl(last_job);
-      Rest.get()
-          .success( function(data, status, headers, config) {
-              LoadBreadCrumbs({ path: '/jobs/' + data.id, title: data.name });
-              $location.url('/jobs/' + data.id + '/job_events/?host=' + escape(host_name));
-              })
-          .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, form,
-                  { hdr: 'Error!', msg: 'Failed to lookup last job: ' + last_job + '. GET status: ' + status });
-              });
+  scope.viewLastEvents = function(host_id, last_job, host_name, last_job_name) {
+      // Choose View-> Latest job events
+      LoadBreadCrumbs({ path: '/jobs/' + last_job, title: last_job_name });
+      $location.url('/jobs/' + last_job + '/job_events/?host=' + escape(host_name));
       }
   
+  scope.viewLastSummary = function(host_id, last_job, host_name, last_job_name) {
+      // Choose View-> Latest job events
+      LoadBreadCrumbs({ path: '/jobs/' + last_job, title: last_job_name });
+      $location.url('/jobs/' + last_job + '/job_host_summaries/?host=' + escape(host_name));
+      }
+
   scope.toggleAllHosts = function() {
       scope.hostDeleteDisabled = (scope.toggleAllFlag) ? false : true;
       scope.hostDeleteDisabledClass = (scope.hostDeleteDisabled) ? "disabled" : "";

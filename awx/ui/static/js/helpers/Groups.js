@@ -341,14 +341,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('GroupsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree', 'Wait',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, RefreshTree) {
+        GetBasePath, RefreshTree, Wait) {
     return function(params) {
         // Delete the selected group node. Disassociates it from its parent.
         var scope = params.scope;
         var group_id = params.group_id; 
-        var inventory_id = params.inventory_id; 
+        var inventory_id = params.inventory_id;
         var obj = $('#tree-view li[group_id="' + group_id + '"]');
         var parent = (obj.parent().last().prop('tagName') == 'LI') ? obj.parent().last() : obj.parent().parent().last();
         var url; 
@@ -360,16 +360,19 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            url = GetBasePath('inventory') + inventory_id + '/groups/';
         }
         var action_to_take = function() {
+            $('#prompt-modal').modal('hide');
+            Wait('start');
             Rest.setUrl(url);
             Rest.post({ id: group_id, disassociate: 1 })
                .success( function(data, status, headers, config) {
-                   $('#prompt-modal').modal('hide');
                    scope.selectedNode = scope.selectedNode.parent().parent();
                    RefreshTree({ scope: scope });
+                   Wait('stop');
                    })
                .error( function(data, status, headers, config) {
-                   $('#prompt-modal').modal('hide');
+                   //$('#prompt-modal').modal('hide');
                    RefreshTree({ scope: scope });
+                   Wait('stop');
                    ProcessErrors(scope, data, status, null,
                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                    });      

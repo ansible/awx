@@ -63,7 +63,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                                            // From here use 'scope' to manipulate the form, as the form is not in '$scope'
        $compile(element)(this.scope);
  
-       if (!options.buildTree == false && !options.html) {
+       if (!options.buildTree && !options.html) {
           // Reset the scope to prevent displaying old data from our last visit to this form
           for (var fld in form.fields) {
               this.scope[fld] = null;
@@ -72,6 +72,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               this.scope[set] = null;
           }
           if ( ((!options.modal) && options.related) || this.form.forceListeners ) {
+             console.log('adding listeners');
              this.addListeners();
           }
           if (options.mode == 'add') {
@@ -1051,20 +1052,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += Column({ list: form.related[itm], fld: fld, options: options, base: base });
            }
        }
-
-       html += "<td>";
-       html += "<div class=\"btn-group btn-group-sm\">\n";
-       html += "<button type=\"button\" class=\"btn btn-default btn-mini dropdown-toggle\" data-toggle=\"dropdown\">";
-       html += "View <span class=\"caret\"></span></button>\n";
-       html += "<ul class=\"dropdown-menu pull-right\" role=\"menu\" aria-labelledby=\"dropdownMenu1\">\n";
-       html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Action</a></li>\n";
-       html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Another action</a></li>\n";
-       html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Something else here</a></li>\n";
-       html += "<li role=\"presentation\" class=\"divider\"></li>\n";
-       html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"#\">Separated link</a></li>\n";
-       html += "</ul>\n";
-       html += "</div>\n";
-       html += "</td>\n";
 
        html += "</tr>\n";
 

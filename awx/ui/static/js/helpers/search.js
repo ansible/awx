@@ -112,6 +112,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            scope[iterator + 'Loading'] = true;
            scope[iterator + 'SearchParms'] = '';
            var url = defaultUrl;
+           
            if ( (scope[iterator + 'SelectShow'] == false && scope[iterator + 'SearchValue'] != '' && scope[iterator + 'SearchValue'] != undefined) ||
                 (scope[iterator + 'SelectShow'] && scope[iterator + 'SearchSelectValue']) || 
                 (list.fields[scope[iterator + 'SearchField']].searchType && list.fields[scope[iterator + 'SearchField']].searchType == 'gtzero') ) {
@@ -156,6 +157,11 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            else {
               scope[iterator + 'SearchParams'] = (sort_order) ? 'order_by=' + escape(sort_order) : "";
            }
+
+           if (iterator == 'inventory' && scope.inventoryFailureFilter) {
+              scope[iterator + 'SearchParams'] += '&has_active_failures=true';
+           }
+           
            scope[iterator + 'Page'] = (page) ? parseInt(page) - 1 : 0;
            if (/\/$/.test(url)) {
               url += '?' + scope[iterator + 'SearchParams'];

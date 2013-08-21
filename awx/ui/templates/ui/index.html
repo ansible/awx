@@ -104,26 +104,25 @@
  </head>
 <body>
 
-    <div class="navbar navbar-inverse navbar-fixed-top main-menu">
+    <div class="navbar navbar-inverse navbar-fixed-top main-menu" role="navigation">
        <div class="container">
-
-         <a class="navbar-brand" href="#organizations"><img class="logo" src="{{ STATIC_URL }}img/logo.png" /></a>
-         
-         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-
-         <div class="nav-collapse collapse navbar-responsive-collapse">
+         <div class="navbar-header">
+           <a class="navbar-brand" href="#organizations"><img class="logo" src="{{ STATIC_URL }}img/logo.png" /></a>
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+         </div>
+         <div class="nav-collapse navbar-responsive-collapse">
            <ul class="nav navbar-nav pull-right">
              <li ng-show="current_user.username != null && current_user.username != undefined">
-              <a href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
-             <li ng-show="userLoggedIn == true"><a href="" ng-click="viewLicense()">View License</a></li>
+                 <a href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
+             <li ng-show="userLoggedIn == true"><a href="" ng-click="viewLicense()">View License</a></li> 
              <li ng-show="userLoggedIn == true"><a href="#/logout">Logout</a></li>
            </ul>
          </div><!-- nav-collapse -->
-       </div><!-- container -->
+       </div>
     </div><!-- navbar -->
     
     <div class="container main-container">
@@ -219,7 +218,7 @@
               <div class="modal-body" id="form-modal-body"></div>
               <div class="modal-footer">
                 <button ng-show="formModalInfo !== undefined && formModalInfo != ''" ng-click="formModalInfoAction()" 
-                    class="btn btn-mini pull-left"><i class="icon-zoom-in"></i> <span ng-bind="formModalInfo"></span></button>
+                    class="btn btn-sm pull-left"><i class="icon-zoom-in"></i> <span ng-bind="formModalInfo"></span></button>
                 <a href="#" ng-show="formModalCancelShow" data-target="#form-modal" data-dismiss="modal" class="btn btn-default">Cancel</a>
                 <a href="" ng-bind="formModalActionLabel" ng-click="formModalAction()" ng-disabled="formModalActionDisabled" class="btn btn-primary"></a>
               </div>
@@ -238,7 +237,7 @@
               <div class="modal-body" id="form-modal2-body"></div>
               <div class="modal-footer">
                 <a href="" ng-bind="formModal2Info" ng-show="formModal2Info !== undefined && formModal2Info != ''" ng-click="formModal2InfoAction()" 
-                    class="btn btn-small pull-left"><i class="icon-zoom-in"></i> <span ng-bind="formModal2Info"></span></a>
+                    class="btn btn-sm pull-left"><i class="icon-zoom-in"></i> <span ng-bind="formModal2Info"></span></a>
                 <a href="#" ng-show="formModal2CancelShow" data-target="#form-modal2" data-dismiss="modal" class="btn btn-default">Cancel</a>
                 <a href="" ng-bind="formModal2ActionLabel" ng-click="formModal2Action()" class="btn btn-primary"></a>
               </div>

@@ -142,6 +142,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        if (options.mode != 'lookup' && (list.well == undefined || list.well == 'true')) {
           html += "<div class=\"well\">\n";
        }
+
     
        if (options.mode == 'lookup' || options.id != undefined) {
           html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-8' });
@@ -164,6 +165,12 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  }
               }
           }
+          
+          if (list.name == 'inventories' && options.mode !== 'select') {
+              html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"inventoryFailureFilter\" " +
+                  "ng-change=\"search('inventory')\" > Show only inventories with failed jobs</label>\n";
+          }
+
           //select instructions
           if (options.mode == 'select' && list.selectInstructions) {
              var btn = {

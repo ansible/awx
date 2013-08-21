@@ -14,19 +14,12 @@ angular.module('InventoryFormDefinition', [])
         editTitle: '{{ inventory_name }}',
         name: 'inventory',
         parseTypeName: 'inventoryParseType',
-        well: false,
+        well: true,
+        /*,
         formLabelSize: 'col-lg-3',
-        formFieldSize: 'col-lg-9',
+        formFieldSize: 'col-lg-9',*/
 
         fields: {
-            has_active_failures: {
-                label: 'Status',
-                control: '<div class="job-failures-\{\{ has_active_failures \}\}">' +
-                    '<i class="icon-exclamation-sign"></i> Contains hosts with failed jobs</div>',
-                type: 'custom',
-                ngShow: 'has_active_failures',
-                readonly: true
-                },
             inventory_name: {
                 realName: 'name',
                 label: 'Name',
@@ -116,18 +109,26 @@ angular.module('InventoryFormDefinition', [])
                         badgeShow: "\{\{ host.has_active_failures \}\}",
                         badgeIcon: 'icon-exclamation-sign',
                         badgeToolTip: 'Most recent job failed',
-                        badgePlacement: 'bottom'
+                        badgePlacement: 'bottom',
+                        columnClass: 'col-lg-3'
                         },
-                    /*description: {
-                        label: 'Description',
-                        ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
-                        },*/
                     groups: {
                         label: 'Groups',
                         searchable: false,
                         sourceModel: 'groups',
                         sourceField: 'name',
                         nosort: true
+                        },
+                    dropdown: {
+                        type: 'DropDown',
+                        label: 'View',
+                        options: [
+                            { ngClick: 'viewJobs(\{\{ host.id \}\})', label: 'Jobs' },
+                            { ngClick: "viewLastEvents(\{\{ host.id \}\}, '\{\{ host.last_job \}\}', '\{\{ host.name \}\}', " +
+                                "'\{\{ host.summary_fields.last_job.name \}\}')", label: 'Latest job events' },
+                            { ngClick: "viewLastSummary(\{\{ host.id \}\}, '\{\{ host.last_job \}\}', '\{\{ host.name \}\}', " +
+                                "'\{\{ host.summary_fields.last_job.name \}\}')", label: 'Latest host summary' }
+                            ]
                         }
                     },
                 fieldActions: {

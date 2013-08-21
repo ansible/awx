@@ -179,7 +179,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     items: scope.treeController
                     }
                 });
-  
+
             $(tree_id).bind("loaded.jstree", function () {
                 scope['treeLoading'] = false;
                 scope.$emit('treeLoaded');
@@ -374,7 +374,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         // Call after GroupsEdit controller saves changes
         $('#tree-view').jstree('rename_node', node, name);
         node.attr('description', description);
-        scope = angular.element(getElementById('htmlTemplate')).scope();
+        scope = angular.element(document.getElementById('htmlTemplate')).scope();
         scope['selectedNodeName'] = name;
         }
         }])
@@ -450,7 +450,11 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var form = InventoryForm;
         var defaultUrl=GetBasePath('inventory');
         var scope = params.scope
-
+        
+        form.well = false,
+        form.formLabelSize = 'col-lg-3';
+        form.formFieldSize = 'col-lg-9';
+        
         generator.inject(form, {mode: 'edit', modal: true, related: false});
         
         ParseTypeChange(scope,'inventory_variables', 'inventoryParseType');
