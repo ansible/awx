@@ -1,6 +1,7 @@
 recursive-include awx *.py
 recursive-include awx/static *.ico
 recursive-include awx/templates *.html
+recursive-include awx/main/templates *.md
 recursive-include awx/ui *.html
 recursive-include awx/ui/static *.css *.ico *.png *.gif *.jpg
 recursive-include awx/ui/static *.eot *.svg *.ttf *.woff *.otf
