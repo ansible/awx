@@ -138,6 +138,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                Rest.setUrl(defaultUrl);
                Rest.post(data)
                    .success( function(data, status, headers, config) {
+                       scope.showGroupHelp = false;  // get rid of the Hint
                        if (scope.variables) {
                           Rest.setUrl(data.related.variable_data);
                           Rest.put(json_data)

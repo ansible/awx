@@ -103,13 +103,17 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         
         html = "<td>\n";
         html += "<div class=\"btn-group btn-group-sm\">\n";
-        html += "<button type=\"button\" class=\"btn btn-default btn-mini dropdown-toggle\" data-toggle=\"dropdown\">";
+        html += "<button type=\"button\" ";
+        html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
+        html += "class=\"btn btn-default btn-mini dropdown-toggle\" data-toggle=\"dropdown\">";
         html += field.label;
         html += " <span class=\"caret\"></span></button>\n";
         html += "<ul class=\"dropdown-menu pull-right\" role=\"menu\" aria-labelledby=\"dropdownMenu1\">\n";
         for (var i=0; i < field.options.length; i++) {
             html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" "; 
             html += "ng-click=\"" + field.options[i].ngClick + "\" ";
+            html += (field.options[i].ngShow) ? "ng-show=\"" + field.options[i].ngShow + "\" " : "";
+            html += (field.options[i].ngHide) ? "ng-hide=\"" + field.options[i].ngHide + "\" " : "";
             html += "href=\"\">" + field.options[i].label + "</a></li>\n";
         }
         html += "</ul>\n";

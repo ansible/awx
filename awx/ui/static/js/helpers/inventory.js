@@ -349,7 +349,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                           scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
                   }
                 }
-
+                
+                scope.inventoryGroupsUrl = data.related.groups; 
                 scope.TreeParams = { scope: scope, inventory: data };
                 scope.variable_url = data.related.variable_data;
                 scope.relatedSets['hosts'] = { url: data.related.hosts, iterator: 'host' };

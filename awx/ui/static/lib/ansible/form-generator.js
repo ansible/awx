@@ -481,8 +481,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += "class=\"" + getFieldWidth() + "\">\n";
             // Use 'text' rather than 'number' so that our integer directive works correctly
             html += (field.slider) ? "<div class=\"slider\" id=\"" + fld + "-slider\"></div>\n" : "";
-            html += "<input type=\""; 
-            html += (field.spinner) ? "spinner" : "text";
+            html += "<input "; 
+            html += (field.spinner) ? "" : "type=\"text\" ";
             html += "\" value=\"" + field['default'] + "\" ";
             html += "class=\"form-control";
             html += (field['class']) ? " " + field['class'] : "";
@@ -808,7 +808,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                     var button = this.form.buttons[btn];
                     //button
                     html += "<button type=\"button\" ";
-                    html += "class=\"btn btn-small";
+                    html += "class=\"btn btn-sm";
                     html += (button['class']) ? " " + button['class'] : "";
                     html += "\" ";
                     if (button.ngClick) {
@@ -919,6 +919,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        html += "<div class=\"tab-content\">\n";
        html += "<div class=\"tab-pane active\" id=\"inventory-groups\">\n";
        
+       html += "<div ng-show=\"showGroupHelp\" class=\"alert alert-dismissable alert-info\">\n";
+       html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
+       html += "<p><strong>Hint:</strong> Get started building your inventory by adding a group. After creating a group, " +
+           "use the Hosts tab to add hosts to the group."
+       html += "</div>\n";
+
        // build the groups tab
        html += "<div class=\"navbar groups-menu\">\n"; 
        html += "<a class=\"navbar-brand\" ng-bind-html-unsafe=\"selectedNodeName\" href=\"\"></a>\n"; 
@@ -935,15 +941,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            "aw-tool-tip=\"Delete the selected group\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Group</a></li>\n";
        html += "<li><a class=\"status\" ng-show=\"treeLoading\" href=\"\"><i class=\"icon-spinner icon-spin icon-large\"></i> Loading...</a></li>\n";
        html += "</ul>\n";
-       /*html += "<form class=\"navbar-form\">\n";
-       html += "<label class=\"checkbox-inline\"><input type=\"checkbox\" ng-model=\"inventoryFailureFilter\" ng-change=\"filterInventory()\" > Only show groups with failed hosts" +
-           "</label>\n";
-       html += "</form>\n"; */
+       
        html += "</div><!-- navbar -->\n";  
        html += "<div id=\"tree-view\" class=\"tree-container\"></div>\n";
-       //html += "<span ng-show=\"has_active_failures == true\"><label class=\"checkbox inline\">";
-       //html += "<input ng-model=\"inventoryFailureFilter\" ng-change=\"filterInventory()\" type=\"checkbox\"" +
-       //    ">Show only groups with failures</label></span></div>\n";
+       
        html += "</div><!-- inventory-groups -->\n";
 
        // build the hosts tab
@@ -976,7 +977,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
        // Add actions(s)
        for (var action in form.related[itm].actions) {
-           html += "<button type=\"button\" class=\"btn btn-mini ";
+           html += "<button type=\"button\" class=\"btn btn-sm ";
            html += (form.related[itm].actions[action]['class']) ? form.related[itm].actions[action]['class'] : "btn-success";
            html += "\" ";
            html += (form.related[itm]['actions'][action].id) ? this.attr(form.related[itm]['actions'][action],'id') : "";
@@ -1130,7 +1131,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += "<div class=\"col-lg-7\">\n";
               for (var act in form.related[itm].actions) {
                  var action = form.related[itm].actions[act];
-                 html += "<button type=\"button\" class=\"btn btn-mini ";
+                 html += "<button type=\"button\" class=\"btn btn-sm ";
                  html += (form.related[itm].actions[act]['class']) ? form.related[itm].actions[act]['class'] : "btn-success";
                  html += "\" ";
                  html += this.attr(action,'ngClick');
@@ -1193,7 +1194,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += "<td class=\"actions\">";
               for (act in form.related[itm].fieldActions) {
                  var action = form.related[itm].fieldActions[act];
-                 html += "<button type=\"button\" class=\"btn btn-mini"; 
+                 html += "<button type=\"button\" class=\"btn btn-xs"; 
                  html += (action['class']) ? " " + action['class'] : "";
                  html += "\" " + this.attr(action,'ngClick');
                  html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";

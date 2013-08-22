@@ -12,7 +12,7 @@
 
 function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, InventoryList,
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                          ClearScope, ProcessErrors, GetBasePath)
+                          ClearScope, ProcessErrors, GetBasePath, Wait)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -43,14 +43,16 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
        
        var action = function() {
            var url = defaultUrl + id + '/';
+           $('#prompt-modal').modal('hide');
+           Wait('start');
            Rest.setUrl(url);
            Rest.destroy()
                .success( function(data, status, headers, config) {
-                   $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
+                   Wait('stop');
                    })
                .error( function(data, status, headers, config) {
-                   $('#prompt-modal').modal('hide');
+                   Wait('stop');
                    ProcessErrors(scope, data, status, null,
                             { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                    });      
@@ -79,7 +81,7 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
 
 InventoriesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'InventoryList', 'GenerateList', 
                             'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                            'GetBasePath' ];
+                            'GetBasePath', 'Wait' ];
 
 
 function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 
@@ -219,6 +221,23 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
        LoadSearchTree({ scope: scope, inventory_id: scope['inventory_id'] });
        TreeInit(scope.TreeParams);
+       Rest.setUrl(scope.inventoryGroupsUrl);
+       Rest.get()
+           .success(function(data, status, headers, config) {
+               if (data.results.length == 0) {
+                  // No groups exist yet, activate the groups tab 
+                  scope.showGroupHelp = true;
+                  $('#inventory-tabs a[href="#inventory-groups"]').tab('show')
+               }
+               else {
+                  scope.showGroupHelp =  false;
+                  $('#inventory-tabs a[href="#inventory-hosts"]').tab('show')
+               }
+               })
+           .error(function(data, status, headers, config) {
+               ProcessErrors(scope, data, status, null,
+                   { hdr: 'Error!', msg: 'Failed to get inventory groups. GET returned status: ' + status });
+               });
        if (!scope.$$phase) {
           scope.$digest();
        }
@@ -236,13 +255,14 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        });
 
    LoadInventory({ scope: scope, doPostSteps: true });
+
    $('#inventory-tabs a[href="#inventory-hosts"]').on('show.bs.tab', function() { 
        scope['hosts'] = null;
        LoadSearchTree({ scope: scope, inventory_id: scope['inventory_id'] });
        if (!scope.$$phase) {
           scope.$digest();
        }
-       });
+       });    
 
    scope.filterInventory = function() {
       $rootScope.hostFailureFilter = scope.hostFailureFilter;
