@@ -50,6 +50,11 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
        scope[list.iterator + 'SearchValue'] = $routeParams['inventory__int'];
        scope[list.iterator + 'SearchFieldLabel'] = 'Inventory ID';
     }
+    if ($routeParams['id__int']) {
+       scope[list.iterator + 'SearchField'] = 'id'; 
+       scope[list.iterator + 'SearchValue'] = $routeParams['id__int'];
+       scope[list.iterator + 'SearchFieldLabel'] = 'Job ID';
+    }
     scope.search(list.iterator);
 
     // Called from Inventories page, failed jobs link. Now sort by status so faild jobs appear at top of list

@@ -9,8 +9,8 @@
 
 angular.module('ListGenerator', ['GeneratorHelpers'])
     .factory('GenerateList', [ '$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
-        'Column', 
-    function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column) {
+        'Column', 'DropDown',  
+    function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown) {
     return {
     
     setList: function(list) {
@@ -279,7 +279,20 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           // Row level actions
           html += "<td class=\"actions\">";
           for (action in list.fieldActions) {
-              html += this.button(list.fieldActions[action]);
+              if (list.fieldActions[action].type && list.fieldActions[action].type == 'DropDown') {
+                 html += DropDown({ 
+                     list: list,
+                     fld: action, 
+                     options: options, 
+                     base: base, 
+                     type: 'fieldActions',
+                     td: false
+                     });
+              }
+              else {
+                 console.log('here');
+                 html += this.button(list.fieldActions[action]);
+              }
           }
           html += "</td>";
        }

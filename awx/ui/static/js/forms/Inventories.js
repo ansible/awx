@@ -122,9 +122,10 @@ angular.module('InventoryFormDefinition', [])
                     dropdown: {
                         type: 'DropDown',
                         label: 'View',
+                        "class": "btn-sm",
                         ngDisabled: 'host.last_job == null',
                         options: [
-                            { ngClick: 'viewJobs(\{\{ host.id \}\})', label: 'Jobs' },
+                            { ngClick: 'viewJobs(\{\{ host.last_job \}\})', label: 'Latest job' },
                             { ngClick: "viewLastEvents(\{\{ host.id \}\}, '\{\{ host.last_job \}\}', '\{\{ host.name \}\}', " +
                                 "'\{\{ host.summary_fields.last_job.name \}\}')", label: 'Latest job events' },
                             { ngClick: "viewLastSummary(\{\{ host.id \}\}, '\{\{ host.last_job \}\}', '\{\{ host.name \}\}', " +

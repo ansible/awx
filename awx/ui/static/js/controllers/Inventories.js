@@ -77,6 +77,10 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
     scope.viewJobs = function(id) {
        $location.url('/jobs/?inventory__int=' + id + '&order_by=status');
        }
+
+    scope.viewFailedJobs = function(id) {
+       $location.url('/jobs/?inventory__int=' + id + '&status=failed&order_by=status');
+       }
 }
 
 InventoriesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'InventoryList', 'GenerateList', 
@@ -482,11 +486,10 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       HostsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id, host_id: host_id, host_name: host_name,
           request: 'delete' });
       }
-
- /* scope.removeHost = function(host_id, host_name) {
-      HostsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id, host_id: host_id, host_name: host_name,
-          request: 'remove' });
-      } */
+  
+  scope.viewJobs = function(last_job) {
+      $location.url('/jobs/?id__int=' + last_job );
+      }
 
   scope.viewLastEvents = function(host_id, last_job, host_name, last_job_name) {
       // Choose View-> Latest job events

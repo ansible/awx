@@ -98,14 +98,22 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var list = params['list'];
         var fld = params['fld'];
         var options = params['options'];
-        var base = params['base'];
-        var field = list['fields'][fld];
+        var field;
         
-        html = "<td>\n";
-        html += "<div class=\"btn-group btn-group-sm\">\n";
+        if (params.type) {
+           field = list[params.type][fld];
+        }
+        else { 
+           field = list['fields'][fld];
+        }
+        
+        html = (params.td == undefined || params.td !== false) ? "<td>\n" : "";
+        html += "<div class=\"btn-group\">\n";
         html += "<button type=\"button\" ";
         html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
-        html += "class=\"btn btn-default btn-mini dropdown-toggle\" data-toggle=\"dropdown\">";
+        html += "class=\"btn btn-default";
+        html += (field['class']) ? " " + field['class'] : " btn-xs"; 
+        html += " dropdown-toggle\" data-toggle=\"dropdown\">";
         html += field.label;
         html += " <span class=\"caret\"></span></button>\n";
         html += "<ul class=\"dropdown-menu pull-right\" role=\"menu\" aria-labelledby=\"dropdownMenu1\">\n";
@@ -118,7 +126,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         }
         html += "</ul>\n";
         html += "</div>\n";
-        html += "</td>\n";
+
+        html += (params.td == undefined || params.td !== false) ? "</td>\n" : "";
         
         return html;
         
