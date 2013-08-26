@@ -36,4 +36,4 @@ remove the {{ model_verbose_name }} from this {{ parent_model_verbose_name }}
 without deleting the {{ model_verbose_name }}.
 {% endif %}
 
-{% if new_in_13 %}> _New in AWX 1.3_{% endif %}
+{% include "main/_new_in_awx.md" %}

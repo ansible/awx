@@ -5,4 +5,4 @@ Make a GET request to this resource to retrieve the list of
 
 {% include "main/_list_common.md" %}
 
-{% if new_in_13 %}> _New in AWX 1.3_{% endif %}
+{% include "main/_new_in_awx.md" %}

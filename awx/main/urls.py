@@ -62,6 +62,7 @@ inventory_urls = patterns('awx.main.views',
     url(r'^(?P<pk>[0-9]+)/root_groups/$',               'inventory_root_groups_list'),
     url(r'^(?P<pk>[0-9]+)/variable_data/$',             'inventory_variable_data'),
     url(r'^(?P<pk>[0-9]+)/script/$',                    'inventory_script_view'),
+    url(r'^(?P<pk>[0-9]+)/tree/$',                      'inventory_tree_view'),
 )
 
 host_urls = patterns('awx.main.views',

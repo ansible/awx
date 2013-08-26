@@ -263,6 +263,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             root_groups   = reverse('main:inventory_root_groups_list',  args=(obj.pk,)),
             variable_data = reverse('main:inventory_variable_data',     args=(obj.pk,)),
             script        = reverse('main:inventory_script_view',       args=(obj.pk,)),
+            tree          = reverse('main:inventory_tree_view',         args=(obj.pk,)),
             organization  = reverse('main:organization_detail',         args=(obj.organization.pk,)),
         ))
         return res
@@ -314,6 +315,19 @@ class GroupSerializer(BaseSerializerWithVariables):
             job_host_summaries = reverse('main:group_job_host_summaries_list', args=(obj.pk,)),
         ))
         return res
+
+class GroupTreeSerializer(GroupSerializer):
+    
+    children = serializers.SerializerMethodField('get_children')
+
+    class Meta:
+        model = Group
+        fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures',
+                                'children')
+
+    def get_children(self, obj):
+        children_qs = obj.children.filter(active=True)
+        return GroupTreeSerializer(children_qs, many=True).data
 
 class BaseVariableDataSerializer(BaseSerializer):
 

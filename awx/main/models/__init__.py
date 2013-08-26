@@ -216,6 +216,11 @@ class Inventory(CommonModel):
             self.has_active_failures = has_active_failures
             self.save()
 
+    @property
+    def root_groups(self):
+        group_pks = self.groups.values_list('pk', flat=True)
+        return self.groups.exclude(parents__pk__in=group_pks).distinct()
+
 class Host(CommonModelNameNotUnique):
     '''
     A managed node

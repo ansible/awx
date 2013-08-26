@@ -17,4 +17,4 @@ For a PATCH request, include only the fields that are being modified.
 
 Make a DELETE request to this resource to delete this {{ model_verbose_name }}.
 
-{% if new_in_13 %}> _New in AWX 1.3_{% endif %}
+{% include "main/_new_in_awx.md" %}

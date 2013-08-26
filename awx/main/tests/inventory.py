@@ -663,6 +663,31 @@ class InventoryTest(BaseTest):
         #  on a group resource, I can see related resources for variables, inventories, and children
         #  and these work
 
+    def test_get_inventory_tree(self):
+        # Group A is parent of B, B is parent of C, C is parent of D.
+        g_a = self.inventory_a.groups.create(name='A')
+        g_b = self.inventory_a.groups.create(name='B')
+        g_b.parents.add(g_a)
+        g_c = self.inventory_a.groups.create(name='C')
+        g_c.parents.add(g_b)
+        g_d = self.inventory_a.groups.create(name='D')
+        g_d.parents.add(g_c)
+        
+        url = reverse('main:inventory_tree_view', args=(self.inventory_a.pk,))
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        
+        self.assertTrue(isinstance(response, list))
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0]['id'], g_a.pk)
+        self.assertEqual(len(response[0]['children']), 1)
+        self.assertEqual(response[0]['children'][0]['id'], g_b.pk)
+        self.assertEqual(len(response[0]['children'][0]['children']), 1)
+        self.assertEqual(response[0]['children'][0]['children'][0]['id'], g_c.pk)
+        self.assertEqual(len(response[0]['children'][0]['children'][0]['children']), 1)
+        self.assertEqual(response[0]['children'][0]['children'][0]['children'][0]['id'], g_d.pk)
+        self.assertEqual(len(response[0]['children'][0]['children'][0]['children'][0]['children']), 0)
+
     def test_migrate_children_when_group_removed(self):
         # Group A is parent of B, B is parent of C, C is parent of D.
         g_a = self.inventory_a.groups.create(name='A')

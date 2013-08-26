@@ -9,4 +9,4 @@ fields to create a new {{ model_verbose_name }}:
 {% include "main/_result_fields_common.md" %}
 {% endwith %}
 
-{% if new_in_13 %}> _New in AWX 1.3_{% endif %}
+{% include "main/_new_in_awx.md" %}

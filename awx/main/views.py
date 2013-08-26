@@ -550,9 +550,7 @@ class InventoryRootGroupsList(SubListCreateAPIView):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
-        all_pks = parent.groups.values_list('pk', flat=True)
-        sublist_qs = parent.groups.exclude(parents__pk__in=all_pks).distinct()
-        return qs & sublist_qs
+        return qs & parent.root_groups
 
 class BaseVariableData(RetrieveUpdateAPIView):
 
@@ -617,6 +615,25 @@ class InventoryScriptView(RetrieveAPIView):
                 data['all']['hosts'] = localhosts
 
         return Response(data)
+
+class InventoryTreeView(RetrieveAPIView):
+
+    model = Inventory
+    filter_backends = ()
+    new_in_13 = True
+
+    def retrieve(self, request, *args, **kwargs):
+        inventory = self.get_object()
+        groups_qs = inventory.root_groups.filter(active=True)
+        data = GroupTreeSerializer(groups_qs, many=True).data
+        return Response(data)
+
+    def get_description_context(self):
+        d = super(InventoryTreeView, self).get_description_context()
+        d.update({
+            'serializer_fields': GroupTreeSerializer().metadata(),
+        })
+        return d
 
 class JobTemplateList(ListCreateAPIView):
 
