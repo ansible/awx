@@ -15,7 +15,7 @@
 
     - name: delete project directory before update
       file: path={{project_path}} state=absent
-      when: scm_delete_on_update
+      when: scm_delete_on_update|default('')
 
     - name: update project using git
       git: dest={{project_path}} repo={{scm_url}} version={{scm_branch}} force={{scm_clean}}

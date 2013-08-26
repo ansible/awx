@@ -603,6 +603,15 @@ class Project(CommonModel):
         default=False,
         editable=False,
     )
+    
+    # FIXME: Still need to implement:
+    # - some scm_url validation
+    # - scm_update_on_launch
+    # - prompt for passwords for project update
+    # - prompt for passwords when running job when scm_update_on_launch set
+    # - prevent simultaneous updates of project and running jobs using project
+    # - prevent manually setting local path when scm_type is set
+    # - masking passwords in project update args/stdout
 
     def save(self, *args, **kwargs):
         # Check if scm_type or scm_url changes.

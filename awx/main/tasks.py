@@ -371,14 +371,10 @@ class RunProjectUpdate(BaseTask):
         args.append('project_update.yml')
 
         ssh_key_path = kwargs.get('ssh_key_path', '')
-        subcmds = [
-            ('ssh-add', '-D'),
-            args,
-        ]
         if ssh_key_path:
-            subcmds.insert(1, ('ssh-add', ssh_key_path))
-        cmd = ' && '.join([subprocess.list2cmdline(x) for x in subcmds])
-        args = ['ssh-agent', 'sh', '-c', cmd]
+            subcmds = [('ssh-add', ssh_key_path), args]
+            cmd = ' && '.join([subprocess.list2cmdline(x) for x in subcmds])
+            args = ['ssh-agent', 'sh', '-c', cmd]
         return args
 
     def build_cwd(self, project_update, **kwargs):
