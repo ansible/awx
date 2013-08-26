@@ -34,6 +34,7 @@ class APIView(views.APIView):
     def get_description_context(self):
         return {
             'docstring': type(self).__doc__ or '',
+            'new_in_13': getattr(self, 'new_in_13', False),
         }
 
     def get_description(self, html=False):

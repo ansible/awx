@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import time
 import traceback
+import urlparse
 
 # Pexpect
 import pexpect
@@ -110,7 +111,7 @@ class BaseTask(Task):
             r'Bad passphrase, try again for .*:': '',
         }
 
-    def run_pexpect(self, pk, args, cwd, env, passwords):
+    def run_pexpect(self, instance, args, cwd, env, passwords):
         '''
         Run the given command using pexpect to capture output and provide
         passwords when requested.
@@ -134,13 +135,15 @@ class BaseTask(Task):
                 child.sendline(expect_passwords[result_id])
             updates = {}
             if logfile_pos != logfile.tell():
+                logfile_pos = logfile.tell()
                 updates['result_stdout'] = logfile.getvalue()
                 last_stdout_update = time.time()
-            instance = self.update_model(pk, **updates)
+            instance = self.update_model(instance.pk, **updates)
             if instance.cancel_flag:
                 child.close(True)
                 canceled = True
-            #elif (time.time() - last_stdout_update) > 30: # FIXME: Configurable idle timeout?
+            elif (time.time() - last_stdout_update) > 30: # FIXME: Configurable idle timeout?
+                print 'no updates...'
             #    print 'canceling...'
             #    child.close(True)
             #    canceled = True
@@ -153,10 +156,21 @@ class BaseTask(Task):
         stdout = logfile.getvalue()
         return status, stdout
 
+    def pre_run_check(self, instance, **kwargs):
+        '''
+        Hook for checking job/task before running.
+        '''
+        if instance.status != 'pending':
+            return False
+        return True
+
     def run(self, pk, **kwargs):
         '''
         Run the job/task using ansible-playbook and capture its output.
         '''
+        instance = self.update_model(pk)
+        if not self.pre_run_check(instance, **kwargs):
+            return
         instance = self.update_model(pk, status='running')
         status, stdout, tb = 'error', '', ''
         try:
@@ -167,7 +181,7 @@ class BaseTask(Task):
             env = self.build_env(instance, **kwargs)
             instance = self.update_model(pk, job_args=json.dumps(args),
                                          job_cwd=cwd, job_env=env)
-            status, stdout = self.run_pexpect(pk, args, cwd, env,
+            status, stdout = self.run_pexpect(instance, args, cwd, env,
                                               kwargs['passwords'])
         except Exception:
             tb = traceback.format_exc()
@@ -280,6 +294,15 @@ class RunJob(BaseTask):
         })
         return d
 
+    def pre_run_check(self, job, **kwargs):
+        '''
+        Hook for checking job before running.
+        '''
+        if not super(RunJob, self).pre_run_check(job, **kwargs):
+            return False
+        # FIXME: Check if job is waiting on any projects that are being updated.
+        return True
+
 class RunProjectUpdate(BaseTask):
     
     name = 'run_project_update'
@@ -305,6 +328,19 @@ class RunProjectUpdate(BaseTask):
         env = super(RunProjectUpdate, self).build_env(project_update, **kwargs)
         return env
 
+    def update_url_auth(self, url, username=None, password=None):
+        parts = urlparse.urlsplit(url)
+        netloc_username = username or parts.username or ''
+        netloc_password = password or parts.password or ''
+        if netloc_username:
+            netloc = u':'.join(filter(None, [netloc_username, netloc_password]))
+        else:
+            netlock = u''
+        netloc = u'@'.join(filter(None, [netloc, parts.hostname]))
+        netloc = u':'.join(filter(None, [netloc, parts.port]))
+        return urlparse.urlunsplit([parts.scheme, netloc, parts.path,
+                                    parts.query, parts.fragment])
+
     def build_args(self, project_update, **kwargs):
         '''
         Build command line argument list for running ansible-playbook,
@@ -312,16 +348,24 @@ class RunProjectUpdate(BaseTask):
         '''
         args = ['ansible-playbook', '-i', 'localhost,']
         args.append('-%s' % ('v' * 3))
-        # FIXME
         project = project_update.project
+        scm_url = project.scm_url
+        if project.scm_username and project.scm_password:
+            scm_url = self.update_url_auth(scm_url, project.scm_username, project.scm_password)
+        elif project.scm_username:
+            scm_url = self.update_url_auth(scm_url, project.scm_username)
+        # FIXME: Need to hide password in saved job_args and result_stdout!
+        scm_branch = project.scm_branch or {'hg': 'tip'}.get(project.scm_type, 'HEAD')
+        scm_delete_on_update = project.scm_delete_on_update or project.scm_delete_on_next_update
         extra_vars = {
             'project_path': project.get_project_path(check_if_exists=False),
             'scm_type': project.scm_type,
-            'scm_url': project.scm_url,
-            'scm_branch': project.scm_branch or 'HEAD',
+            'scm_url': scm_url,
+            'scm_branch': scm_branch,
             'scm_clean': project.scm_clean,
-            'scm_username': project.scm_username,
-            'scm_password': project.scm_password,
+            #'scm_username': project.scm_username,
+            #'scm_password': project.scm_password,
+            'scm_delete_on_update': scm_delete_on_update,
         }
         args.extend(['-e', json.dumps(extra_vars)])
         args.append('project_update.yml')
@@ -348,3 +392,12 @@ class RunProjectUpdate(BaseTask):
             r'Are you sure you want to continue connecting (yes/no)\?': 'yes',
         })
         return d
+
+    def pre_run_check(self, project_update, **kwargs):
+        '''
+        Hook for checking project update before running.
+        '''
+        if not super(RunProjectUpdate, self).pre_run_check(project_update, **kwargs):
+            return False
+        # FIXME: Check if project update is blocked by any jobs that are being run.
+        return True

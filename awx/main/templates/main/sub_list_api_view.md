@@ -5,3 +5,5 @@ Make a GET request to this resource to retrieve a list of
 {{ parent_model_verbose_name }}.
 
 {% include "main/_list_common.md" %}
+
+{% if new_in_13 %}> _New in AWX 1.3_{% endif %}

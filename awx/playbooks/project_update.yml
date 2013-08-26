@@ -6,32 +6,31 @@
 # scm_url: https://server/repo
 # scm_branch: HEAD
 # scm_clean: true/false
+# scm_delete_on_update: true/false
 
 - hosts: all
   connection: local
   gather_facts: false
   tasks:
 
-    # Git Tasks
+    - name: delete project directory before update
+      file: path={{project_path}} state=absent
+      when: scm_delete_on_update
+
     - name: update project using git
       git: dest={{project_path}} repo={{scm_url}} version={{scm_branch}} force={{scm_clean}}
       when: scm_type == 'git'
       async: 0
       poll: 5
-      tags: git
 
-    # Mercurial Tasks
     - name: update project using hg
-      hg: dest={{project_path}} repo={{scm_url}} version={{scm_branch}} force={{scm_clean}}
+      hg: dest={{project_path}} repo={{scm_url}} revision={{scm_branch}} force={{scm_clean}}
       when: scm_type == 'hg'
       async: 0
       poll: 5
-      tags: hg
 
-    # Subversion Tasks
     - name: update project using svn
       subversion: dest={{project_path}} repo={{scm_url}} revision={{scm_branch}} force={{scm_clean}}
       when: scm_type == 'svn'
       async: 0
       poll: 5
-      tags: svn

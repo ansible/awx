@@ -251,6 +251,67 @@ class ProjectTeamsList(SubListCreateAPIView):
     parent_model = Project
     relationship = 'teams'
 
+class ProjectUpdatesList(SubListAPIView):
+
+    model = ProjectUpdate
+    serializer_class = ProjectUpdateSerializer
+    parent_model = Project
+    relationship = 'project_updates'
+    new_in_13 = True
+
+class ProjectUpdateView(GenericAPIView):
+    
+    model = Project
+    new_in_13 = True
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        data = dict(
+            can_update=bool(obj.scm_type),
+        )
+        #if obj.scm_type:
+        #    data['passwords_needed_to_update'] = obj.get_passwords_needed_to_start()
+        return Response(data)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if bool(obj.scm_type):
+            project_update = obj.update()
+            if not project_update:
+                data = dict(msg='Unable to update project!')
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return self.http_method_not_allowed(request, *args, **kwargs)
+
+class ProjectUpdateDetail(RetrieveAPIView):
+
+    model = ProjectUpdate
+    serializer_class = ProjectUpdateSerializer
+    new_in_13 = True
+
+class ProjectUpdateCancel(GenericAPIView):
+
+    model = ProjectUpdate
+    is_job_cancel = True
+    new_in_13 = True
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        data = dict(
+            can_cancel=obj.can_cancel,
+        )
+        return Response(data)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.can_cancel:
+            result = obj.cancel()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return self.http_method_not_allowed(request, *args, **kwargs)
+
 class UserList(ListCreateAPIView):
 
     model = User

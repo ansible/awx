@@ -601,6 +601,33 @@ class ProjectAccess(BaseAccess):
     def can_delete(self, obj):
         return self.can_change(obj, None)
 
+class ProjectUpdateAccess(BaseAccess):
+    '''
+    I can see project updates when I can see the project.
+    I can change/delete when:
+     - I am a superuser.
+     - I am an admin in an organization associated with the project.
+     - I created it (for now?).
+    '''
+
+    model = ProjectUpdate
+
+    def get_queryset(self):
+        qs = ProjectUpdate.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by', 'project')
+        #if self.user.is_superuser:
+        return qs
+        #allowed = [PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
+        #return qs.filter(
+        #    Q(created_by=self.user) |
+        #    Q(organizations__admins__in=[self.user]) |
+        #    Q(organizations__users__in=[self.user]) |
+        #    Q(teams__users__in=[self.user]) |
+        #    Q(permissions__user=self.user, permissions__permission_type__in=allowed) |
+        #    Q(permissions__team__users__in=[self.user], permissions__permission_type__in=allowed)
+        #)
+
+
 class PermissionAccess(BaseAccess):
     '''
     I can see a permission when:
@@ -944,6 +971,7 @@ register_access(Group, GroupAccess)
 register_access(Credential, CredentialAccess)
 register_access(Team, TeamAccess)
 register_access(Project, ProjectAccess)
+register_access(ProjectUpdate, ProjectUpdateAccess)
 register_access(Permission, PermissionAccess)
 register_access(JobTemplate, JobTemplateAccess)
 register_access(Job, JobAccess)

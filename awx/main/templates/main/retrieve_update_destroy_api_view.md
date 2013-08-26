@@ -16,3 +16,5 @@ For a PATCH request, include only the fields that are being modified.
 # Delete {{ model_verbose_name|title }}:
 
 Make a DELETE request to this resource to delete this {{ model_verbose_name }}.
+
+{% if new_in_13 %}> _New in AWX 1.3_{% endif %}

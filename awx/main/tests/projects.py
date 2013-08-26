@@ -621,7 +621,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
     def setUp(self):
         super(ProjectUpdatesTest, self).setUp()
         self.setup_users()
-        self.skipTest('blah')
+        #self.skipTest('blah')
 
     def create_project(self, **kwargs):
         project = Project.objects.create(**kwargs)
@@ -634,44 +634,103 @@ class ProjectUpdatesTest(BaseTransactionTest):
         
 
     def check_project_update(self, project, should_fail=False):
-        print project.local_path
+        #print project.local_path
         pu = project.update()
         self.assertTrue(pu)
         pu = ProjectUpdate.objects.get(pk=pu.pk)
-        print pu.status
+        #print pu.status
+        #print pu.result_traceback
         if should_fail:
             self.assertEqual(pu.status, 'failed', pu.result_stdout)
         else:
             self.assertEqual(pu.status, 'successful', pu.result_stdout)
+        project = Project.objects.get(pk=project.pk)
+        self.assertEqual(project.last_update, pu)
+        self.assertEqual(project.last_update_failed, pu.failed)
         #print pu.result_traceback
         #print pu.result_stdout
         #print
+        return pu
 
     def change_file_in_project(self, project):
         project_path = project.get_project_path()
         self.assertTrue(project_path)
         for root, dirs, files in os.walk(project_path):
             for f in files:
-                if f.startswith('.'):
+                if f.startswith('.') or f == 'yadayada.txt':
+                    continue
+                path_parts = os.path.relpath(root, project_path).split(os.sep)
+                if any([x.startswith('.') and x != '.' for x in path_parts]):
                     continue
                 path = os.path.join(root, f)
+                before = file(path, 'rb').read()
+                #print 'changed', path
                 file(path, 'wb').write('CHANGED FILE')
-                return
+                after = file(path, 'rb').read()
+                return path, before, after
         self.fail('no file found to change!')
     
     def check_project_scm(self, project):
+        project_path = project.get_project_path(check_if_exists=False)
         # Initial checkout.
+        self.assertFalse(os.path.exists(project_path))
         self.check_project_update(project)
-        # Update to existing checkout.
+        self.assertTrue(os.path.exists(project_path))
+        # Stick a new untracked file in the project.
+        untracked_path = os.path.join(project_path, 'yadayada.txt')
+        self.assertFalse(os.path.exists(untracked_path))
+        file(untracked_path, 'wb').write('yabba dabba doo')
+        self.assertTrue(os.path.exists(untracked_path))
+        # Update to existing checkout (should leave untracked file alone).
         self.check_project_update(project)
-        # Change file then update (with scm_clean=False).
+        self.assertTrue(os.path.exists(untracked_path))
+        # Change file then update (with scm_clean=False). Modified file should
+        # not be changed.
         self.assertFalse(project.scm_clean)
-        self.change_file_in_project(project)
-        self.check_project_update(project, should_fail=True)
-        # Set scm_clean=True then try to update again.
+        modified_path, before, after = self.change_file_in_project(project)
+        # Mercurial still returns successful if a modified file is present.
+        should_fail = bool(project.scm_type != 'hg')
+        self.check_project_update(project, should_fail=should_fail)
+        content = file(modified_path, 'rb').read()
+        self.assertEqual(content, after)
+        self.assertTrue(os.path.exists(untracked_path))
+        # Set scm_clean=True then try to update again.  Modified file should
+        # have been replaced with the original.  Untracked file should still be
+        # present.
         project.scm_clean = True
         project.save()
         self.check_project_update(project)
+        content = file(modified_path, 'rb').read()
+        self.assertEqual(content, before)
+        self.assertTrue(os.path.exists(untracked_path))
+        # If scm_type or scm_url changes, scm_delete_on_next_update should be
+        # set, causing project directory (including untracked file) to be
+        # completely blown away, but only for the next update..
+        self.assertFalse(project.scm_delete_on_update)
+        self.assertFalse(project.scm_delete_on_next_update)
+        scm_type = project.scm_type
+        project.scm_type = ''
+        project.save()
+        self.assertTrue(project.scm_delete_on_next_update)
+        project.scm_type = scm_type
+        project.save()
+        self.check_project_update(project)
+        self.assertFalse(os.path.exists(untracked_path))
+        # Check that the flag is cleared after the update, and that an
+        # untracked file isn't blown away.
+        project = Project.objects.get(pk=project.pk)
+        self.assertFalse(project.scm_delete_on_next_update)
+        file(untracked_path, 'wb').write('yabba dabba doo')
+        self.assertTrue(os.path.exists(untracked_path))
+        self.check_project_update(project)
+        self.assertTrue(os.path.exists(untracked_path))
+        # Set scm_delete_on_update=True then update again.  Project directory
+        # (including untracked file) should be completely blown away.
+        self.assertFalse(project.scm_delete_on_update)
+        project.scm_delete_on_update = True
+        project.save()
+        self.check_project_update(project)
+        self.assertFalse(os.path.exists(untracked_path))
 
     def test_public_git_project_over_https(self):
         scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',

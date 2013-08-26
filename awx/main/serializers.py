@@ -175,11 +175,17 @@ class OrganizationSerializer(BaseSerializer):
 
 class ProjectSerializer(BaseSerializer):
 
-    playbooks = serializers.Field(source='playbooks', help_text='Array ')
+    playbooks = serializers.Field(source='playbooks', help_text='Array of playbooks available within this project.')
+    scm_delete_on_next_update = serializers.Field(source='scm_delete_on_next_update')
 
     class Meta:
         model = Project
-        fields = BASE_FIELDS + ('local_path',)
+        fields = BASE_FIELDS + ('local_path', 'scm_type', 'scm_url',
+                                'scm_branch', 'scm_clean',
+                                'scm_delete_on_update', 'scm_delete_on_next_update',
+                                'scm_update_on_launch',
+                                'scm_username', 'scm_password', 'scm_key_data',
+                                'scm_key_unlock', 'last_update_failed')
 
     def get_related(self, obj):
         res = super(ProjectSerializer, self).get_related(obj)
@@ -187,7 +193,12 @@ class ProjectSerializer(BaseSerializer):
             organizations = reverse('main:project_organizations_list', args=(obj.pk,)),
             teams = reverse('main:project_teams_list', args=(obj.pk,)),
             playbooks = reverse('main:project_playbooks', args=(obj.pk,)),
+            update = reverse('main:project_update_view', args=(obj.pk,)),
+            project_updates = reverse('main:project_updates_list', args=(obj.pk,)),
         ))
+        if obj.last_update:
+            res['last_update'] = reverse('main:project_update_detail',
+                                         args=(obj.last_update.pk,))
         return res
 
     def validate_local_path(self, attrs, source):
@@ -208,6 +219,22 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
     def to_native(self, obj):
         ret = super(ProjectPlaybooksSerializer, self).to_native(obj)
         return ret.get('playbooks', [])
+
+class ProjectUpdateSerializer(BaseSerializer):
+
+    class Meta:
+        model = ProjectUpdate
+        fields = ('id', 'url', 'related', 'summary_fields', 'created',
+                  'project', 'status', 'failed', 'result_stdout',
+                  'result_traceback', 'job_args', 'job_cwd', 'job_env')
+
+    def get_related(self, obj):
+        res = super(ProjectUpdateSerializer, self).get_related(obj)
+        res.update(dict(
+            project = reverse('main:project_detail', args=(obj.project.pk,)),
+            cancel = reverse('main:project_update_cancel', args=(obj.pk,)),
+        ))
+        return res
 
 class BaseSerializerWithVariables(BaseSerializer):
 

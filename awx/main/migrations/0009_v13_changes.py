@@ -11,8 +11,10 @@ class Migration(SchemaMigration):
         # Adding model 'ProjectUpdate'
         db.create_table(u'main_projectupdate', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
+            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(related_name="{'class': 'projectupdate', 'app_label': 'main'}(class)s_created", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
+            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='project_updates', to=orm['main.Project'])),
             ('cancel_flag', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('status', self.gf('django.db.models.fields.CharField')(default='new', max_length=20)),
@@ -46,6 +48,21 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.BooleanField')(default=False),
                       keep_default=False)
 
+        # Adding field 'Project.scm_delete_on_update'
+        db.add_column(u'main_project', 'scm_delete_on_update',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
+
+        # Adding field 'Project.scm_delete_on_next_update'
+        db.add_column(u'main_project', 'scm_delete_on_next_update',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
+
+        # Adding field 'Project.scm_update_on_launch'
+        db.add_column(u'main_project', 'scm_update_on_launch',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
+
         # Adding field 'Project.scm_username'
         db.add_column(u'main_project', 'scm_username',
                       self.gf('django.db.models.fields.CharField')(default='', max_length=256, null=True, blank=True),
@@ -66,6 +83,16 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.CharField')(default='', max_length=1024, null=True, blank=True),
                       keep_default=False)
 
+        # Adding field 'Project.last_update'
+        db.add_column(u'main_project', 'last_update',
+                      self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='project_as_last_update+', null=True, to=orm['main.ProjectUpdate']),
+                      keep_default=False)
+
+        # Adding field 'Project.last_update_failed'
+        db.add_column(u'main_project', 'last_update_failed',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
+
 
     def backwards(self, orm):
         # Deleting model 'ProjectUpdate'
@@ -83,6 +110,15 @@ class Migration(SchemaMigration):
         # Deleting field 'Project.scm_clean'
         db.delete_column(u'main_project', 'scm_clean')
 
+        # Deleting field 'Project.scm_delete_on_update'
+        db.delete_column(u'main_project', 'scm_delete_on_update')
+
+        # Deleting field 'Project.scm_delete_on_next_update'
+        db.delete_column(u'main_project', 'scm_delete_on_next_update')
+
+        # Deleting field 'Project.scm_update_on_launch'
+        db.delete_column(u'main_project', 'scm_update_on_launch')
+
         # Deleting field 'Project.scm_username'
         db.delete_column(u'main_project', 'scm_username')
 
@@ -94,6 +130,12 @@ class Migration(SchemaMigration):
 
         # Deleting field 'Project.scm_key_unlock'
         db.delete_column(u'main_project', 'scm_key_unlock')
+
+        # Deleting field 'Project.last_update'
+        db.delete_column(u'main_project', 'last_update_id')
+
+        # Deleting field 'Project.last_update_failed'
+        db.delete_column(u'main_project', 'last_update_failed')
 
 
     models = {
@@ -302,28 +344,35 @@ class Migration(SchemaMigration):
             'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'project\', \'app_label\': u\'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'last_update': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'project_as_last_update+'", 'null': 'True', 'to': "orm['main.ProjectUpdate']"}),
+            'last_update_failed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'local_path': ('django.db.models.fields.CharField', [], {'max_length': '1024', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '512'}),
             'scm_branch': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '256', 'null': 'True', 'blank': 'True'}),
             'scm_clean': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'scm_delete_on_next_update': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'scm_delete_on_update': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'scm_key_data': ('django.db.models.fields.TextField', [], {'default': "''", 'null': 'True', 'blank': 'True'}),
             'scm_key_unlock': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'null': 'True', 'blank': 'True'}),
             'scm_password': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'null': 'True', 'blank': 'True'}),
             'scm_type': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '8', 'null': 'True', 'blank': 'True'}),
+            'scm_update_on_launch': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'scm_url': ('django.db.models.fields.URLField', [], {'default': "''", 'max_length': '1024', 'null': 'True', 'blank': 'True'}),
             'scm_username': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '256', 'null': 'True', 'blank': 'True'})
         },
         'main.projectupdate': {
             'Meta': {'object_name': 'ProjectUpdate'},
+            'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'cancel_flag': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'celery_task_id': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': '"{\'class\': \'projectupdate\', \'app_label\': \'main\'}(class)s_created"', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"}),
+            'description': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'failed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'job_args': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'job_cwd': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'job_env': ('jsonfield.fields.JSONField', [], {'default': '{}', 'blank': 'True'}),
-            'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'project_updates'", 'to': u"orm['main.Project']"}),
             'result_stdout': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'result_traceback': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),

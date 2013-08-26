@@ -94,7 +94,10 @@ class PrimordialModel(models.Model):
     tags = TaggableManager(blank=True)
 
     def __unicode__(self):
-        return unicode("%s-%s"% (self.name, self.id))
+        if hasattr(self, 'name'):
+            return unicode("%s-%s"% (self.name, self.id))
+        else:
+            return u'%s-%s' % (self._meta.verbose_name, self.id)
 
     def save(self, *args, **kwargs):
         # For compatibility with Django 1.4.x, attempt to handle any calls to
@@ -520,6 +523,7 @@ class Project(CommonModel):
         help_text=_('Local path (relative to PROJECTS_ROOT) containing '
                     'playbooks and related files for this project.')
     )
+
     scm_type = models.CharField(
         max_length=8,
         choices=SCM_TYPE_CHOICES,
@@ -544,6 +548,16 @@ class Project(CommonModel):
         help_text=_('Specific branch, tag or commit to checkout.'),
     )
     scm_clean = models.BooleanField(
+        default=False,
+    )
+    scm_delete_on_update = models.BooleanField(
+        default=False,
+    )
+    scm_delete_on_next_update = models.BooleanField(
+        default=False,
+        editable=True,
+    )
+    scm_update_on_launch = models.BooleanField(
         default=False,
     )
     scm_username = models.CharField(
@@ -578,13 +592,46 @@ class Project(CommonModel):
         help_text=_('Passphrase to unlock SSH private key if encrypted (or '
                     '"ASK" to prompt the user).'),
     )
+    last_update = models.ForeignKey(
+        'ProjectUpdate',
+        null=True,
+        default=None,
+        editable=False,
+        related_name='project_as_last_update+',
+    )
+    last_update_failed = models.BooleanField(
+        default=False,
+        editable=False,
+    )
 
     def save(self, *args, **kwargs):
+        # Check if scm_type or scm_url changes.
+        if self.pk:
+            project_before = Project.objects.get(pk=self.pk)
+            if project_before.scm_type != self.scm_type or project_before.scm_url != self.scm_url:
+                self.scm_delete_on_next_update = True
         super(Project, self).save(*args, **kwargs)
         if self.scm_type and not self.local_path.startswith('_'):
             slug_name = slugify(unicode(self.name)).replace(u'-', u'_')
             self.local_path = u'_%d__%s' % (self.pk, slug_name)
             self.save(update_fields=['local_path'])
+
+    @property
+    def needs_scm_password(self):
+        return not self.scm_key_data and self.ssh_password == 'ASK'
+
+    @property
+    def needs_scm_key_unlock(self):
+        return 'ENCRYPTED' in self.scm_key_data and \
+            (not self.scm_key_unlock or self.scm_key_unlock == 'ASK')
+
+    @property
+    def scm_passwords_needed(self):
+        needed = []
+        for field in ('scm_password', 'scm_key_unlock'):
+            if getattr(self, 'needs_%s' % field):
+                needed.append(field)
+        return needed
 
     def update(self):
         if self.scm_type:
@@ -593,11 +640,8 @@ class Project(CommonModel):
             return project_update
 
     @property
-    def last_update(self):
-        try:
-            return self.project_updates.order_by('-modified')[0]
-        except IndexError:
-            pass
+    def active_updates(self):
+        return self.project_updates.filter(active=True, status__in=('new', 'pending', 'running'))
 
     def get_absolute_url(self):
         return reverse('main:project_detail', args=(self.pk,))
@@ -641,20 +685,14 @@ class Project(CommonModel):
                     results.append(playbook)
         return results
 
-class ProjectUpdate(models.Model):
+class ProjectUpdate(PrimordialModel):
     '''
-    Job for tracking internal project updates.
+    Internal job for tracking project updates from SCM.
     '''
 
     class Meta:
         app_label = 'main'
 
-    created = models.DateTimeField(
-        auto_now_add=True,
-    )
-    modified = models.DateTimeField(
-        auto_now=True,
-    )
     project = models.ForeignKey(
         'Project',
         related_name='project_updates',
@@ -711,8 +749,26 @@ class ProjectUpdate(models.Model):
     )
 
     def save(self, *args, **kwargs):
+        # Get status before save...
+        status_before = self.status or 'new'
+        if self.pk:
+            project_update_before = ProjectUpdate.objects.get(pk=self.pk)
+            if project_update_before.status != self.status:
+                status_before = project_update_before.status
         self.failed = bool(self.status in ('failed', 'error', 'canceled'))
         super(ProjectUpdate, self).save(*args, **kwargs)
+        # If status changed, and update has completed, update project.
+        if self.status != status_before:
+            if self.status in ('successful', 'failed', 'error', 'canceled'):
+                project = self.project
+                project.last_update = self
+                project.last_update_failed = self.failed
+                if not self.failed and project.scm_delete_on_next_update:
+                    project.scm_delete_on_next_update = False
+                project.save()
+
+    def get_absolute_url(self):
+        return reverse('main:project_update_detail', args=(self.pk,))
 
     @property
     def celery_task(self):
