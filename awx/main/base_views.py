@@ -257,6 +257,9 @@ class SubListCreateAPIView(SubListAPIView, ListCreateAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def post(self, request, *args, **kwargs):
+        if not isinstance(request.DATA, dict):
+            return Response('invalid type for post data',
+                            status=status.HTTP_400_BAD_REQUEST)
         if 'disassociate' in request.DATA:
             return self.unattach(request, *args, **kwargs)
         else:

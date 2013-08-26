@@ -394,4 +394,21 @@ class OrganizationsTest(BaseTest):
         # also check that DELETE on the collection doesn't work
         self.delete(self.collection(), expect=405, auth=self.get_super_credentials())
 
+    def test_invalid_post_data(self):
+        url = reverse('main:organization_list')
+        # API should gracefully handle data of an invalid type.
+        self.post(url, expect=400, data=None, auth=self.get_super_credentials())
+        self.post(url, expect=400, data=99, auth=self.get_super_credentials())
+        self.post(url, expect=400, data='abcd', auth=self.get_super_credentials())
+        self.post(url, expect=400, data=3.14, auth=self.get_super_credentials())
+        self.post(url, expect=400, data=True, auth=self.get_super_credentials())
+        self.post(url, expect=400, data=[1,2,3], auth=self.get_super_credentials())
+        url = reverse('main:organization_users_list', args=(self.organizations[0].pk,))
+        self.post(url, expect=400, data=None, auth=self.get_super_credentials())
+        self.post(url, expect=400, data=99, auth=self.get_super_credentials())
+        self.post(url, expect=400, data='abcd', auth=self.get_super_credentials())
+        self.post(url, expect=400, data=3.14, auth=self.get_super_credentials())
+        self.post(url, expect=400, data=True, auth=self.get_super_credentials())
+        self.post(url, expect=400, data=[1,2,3], auth=self.get_super_credentials())
+
 # TODO: tests for tag disassociation

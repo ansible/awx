@@ -154,8 +154,8 @@ class BaseTestMixin(object):
                       data_type=None, accept=None, remote_addr=None):
         assert method is not None
         method_name = method.lower()
-        if method_name not in ('options', 'head', 'get', 'delete'):
-            assert data is not None
+        #if method_name not in ('options', 'head', 'get', 'delete'):
+        #    assert data is not None
         client_kwargs = {}
         if accept:
             client_kwargs['HTTP_ACCEPT'] = accept
