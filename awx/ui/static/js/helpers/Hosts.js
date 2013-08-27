@@ -6,7 +6,7 @@
  *  Routines that handle host add/edit/delete on the Inventory detail page.
  *  
  */
- 
+
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'HostListDefinition',
                                 'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'HostsHelper',
                                 'InventoryHelper', 'RelatedSearchHelper','RelatedPaginateHelper', 
@@ -460,49 +460,194 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }])
 
 
-    .factory('LoadSearchTree', ['Rest', 'GetBasePath', 'ProcessErrors', '$compile', 
-    function(Rest, GetBasePath, ProcessErrors, $compile) {
+    .factory('LoadSearchTree', ['Rest', 'GetBasePath', 'ProcessErrors', '$compile', '$rootScope', 'Wait',
+    function(Rest, GetBasePath, ProcessErrors, $compile, $rootScope, Wait) {
     return function(params) {
 
         var scope = params.scope; 
         var inventory_id = params.inventory_id;
-        var newTree = [];
-        scope.searchTree = [];
+        var html = '';
 
-        // After the inventory is loaded, build an array of all unique groups found therein.
-        // The lis is used in the group drop-down selector widget for each host.
+        function buildHTML(tree_data) {
+            html += (tree_data.length > 0) ? "<ul>\n" : "";
+            for(var i=0; i < tree_data.length; i++) {
+               html += "<li id=\"search-node-1000\" data-state=\"opened\" data-hosts=\"" + tree_data[i].related.hosts + "\" " +
+                   "data-description=\"" + tree_data[i].description + "\" " + 
+                   "data-failures=\"" + tree_data[i].has_active_failures + "\" " +
+                   "data-groups=\"" + tree_data[i].related.groups + "\" " + 
+                   "data-name=\"" + tree_data[i].name + "\" " +
+                   "data-group-id=\"" + tree_data[i].id + "\" " + 
+                   "><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a> " +
+                   "<i class=\"field-badge icon-failures-" + tree_data[i].has_active_failures + "\"></i> " +
+                   "<a href=\"\" class=\"activate\">" + tree_data[i].name + "</a> ";
+               if (tree_data[i].children.length > 0) {
+                  buildHTML(tree_data[i].children);
+               }
+               else {
+                  html += "</li>\n";
+               }
+            }
+            html += "</ul>\n";  
+        }
+
+        function refresh(parent) {
+            var group, title;
+            if (parent.attr('data-group-id')) {
+               group = parent.attr('data-group-id');
+               title = parent.attr('data-name');
+               //title += (parent.attr('data-description') !== "") ? '<p>' + parent.attr('data-description') + '</p>' : ''; 
+            }
+            else {
+               group = null;
+               title = 'All Hosts'
+            }
+            // The following will trigger the host list to load. See Inventory.js controller.
+            scope.$emit('refreshHost', group, title);
+            }
+            
+        function activate(e) {
+            /* Set the clicked node as active */
+            var elm = angular.element(e.target);  //<a>
+            var parent = angular.element(e.target.parentNode); //<li>
+            $('.search-tree .active').removeClass('active');
+            elm.addClass('active');
+            refresh(parent);
+            }
+
+        function toggle(e) {      
+            var id, parent, elm, icon;
+
+            if (e.target.tagName == 'I') {
+               id = e.target.parentNode.parentNode.attributes.id.value;
+               parent = angular.element(e.target.parentNode.parentNode);  //<li>
+               elm = angular.element(e.target.parentNode);  // <a>
+            }
+            else {
+               id = e.target.parentNode.attributes.id.value;
+               parent = angular.element(e.target.parentNode);
+               elm = angular.element(e.target);
+            }
+
+            var sibling = angular.element(parent.children()[2]); // <a>
+            var state = parent.attr('data-state');
+            var icon = angular.element(elm.children()[0]);
+
+            if (state == 'closed') {
+               // expand the elment
+               var childlists = parent.find('ul');
+               if (childlists && childlists.length > 0) {
+                  // has childen
+                  for (var i=0; i < childlists.length; i++) {
+                      var listChild = angular.element(childlists[i]);
+                      var listParent = angular.element(listChild.parent());
+                      if (listParent.attr('id') == id) {
+                         angular.element(childlists[i]).removeClass('hidden');
+                      }
+                  }
+               }
+               parent.attr('data-state','open'); 
+               icon.removeClass('icon-caret-right').addClass('icon-caret-down');
+            }
+            else {
+               // close the element
+               parent.attr('data-state','closed'); 
+               icon.removeClass('icon-caret-down').addClass('icon-caret-right');
+               var childlists = parent.find('ul');
+               if (childlists && childlists.length > 0) {
+                  // has childen
+                  for (var i=0; i < childlists.length; i++) {
+                      angular.element(childlists[i]).addClass('hidden');
+                  }
+               }
+               /* When the active node's parent is closed, activate the parent*/
+               if ($(parent).find('.active').length > 0) {
+                  $(parent).find('.active').removeClass('active');
+                  sibling.addClass('active');
+                  refresh(parent);
+               }
+            }
+            }
+
+        // Responds to searchTreeReady, thrown from Hosts.js helper when the inventory tree
+        // is ready
+        if (scope.searchTreeReadyRemove) {
+           scope.searchTreeReadyRemove();
+        }
+        scope.searchTreeReadyRemove = scope.$on('searchTreeReady', function(e, html) {
+            var container = angular.element(document.getElementById('search-tree-container'));
+            container.empty();
+            var compiled = $compile(html)(scope);
+            container.append(compiled);
+            var links = container.find('a');
+            for (var i=0; i < links.length; i++) {
+                var link = angular.element(links[i]);
+                if (link.hasClass('expand')) {
+                   link.unbind('click', toggle);
+                   link.bind('click', toggle);
+                }
+                if (link.hasClass('activate')) {
+                   link.unbind('click', activate);
+                   link.bind('click', activate);
+                }
+            }
+            Wait('stop');
+            });
+
         if (scope.buildAllGroupsRemove) {
            scope.buildAllGroupsRemove();
         }
-        scope.buildAllGroupsRemove = scope.$on('buildAllGroups', function(e, inventory_name) {
-            scope.inventory_groups = [];
-            Rest.setUrl(GetBasePath('inventory') + inventory_id + '/groups/?order_by=name');
+        scope.buildAllGroupsRemove = scope.$on('buildAllGroups', function(e, inventory_name, inventory_tree) {
+            Rest.setUrl(inventory_tree);
             Rest.get()
                 .success( function(data, status, headers, config) {
-                    for (var i=0; i < data.results.length; i++) {
-                        scope.inventory_groups.push({ name: data.results[i].name, id: data.results[i].id });
-                    }
-                    scope.$emit('hostTabInit', inventory_name);
+                    buildHTML(data);
+                    scope.$emit('searchTreeReady', html + "</li>\n</ul>\n");
                     })
                 .error( function(data, status, headers, config) {
                     ProcessErrors(scope, data, status, null,
-                        { hdr: 'Error!', msg: 'Failed to get groups for inventory: ' + inventory_id + '. GET returned: ' + status });
+                        { hdr: 'Error!', msg: 'Failed to get inventory tree for: ' + inventory_id + '. GET returned: ' + status });
                     });
             });
-            
+
+        if (scope.buildGroupListRemove) {
+           scope.buildGroupListRemove();
+        }
+        scope.buildGroupListRemove = scope.$on('buildAllGroups', function(e, inventory_name, inventory_tree, groups_url) {
+            scope.inventory_groups = [];
+            Rest.setUrl(groups_url);
+            Rest.get()
+                .success( function(data, status, headers, config) { 
+                    for (var i=0; i < data.results.length; i++) {
+                        scope.inventory_groups.push({
+                            id: data.results[i].id,
+                            description: data.results[i].description, 
+                            name: data.results[i].name }); 
+                    }
+                })
+                .error( function(data, status, headers, config) { 
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Failed to get groups for inventory: ' + inventory_id + '. GET returned: ' + status });
+                });
+            });
+        
+        Wait('start');
+
         // Load the inventory root node
         Rest.setUrl (GetBasePath('inventory') + inventory_id + '/');
         Rest.get()
              .success( function(data, status, headers, config) {
-                 scope.searchTree.push({
-                     name: data.name, 
-                     description: data.description, 
-                     hosts: data.related.hosts,
-                     failures: data.has_active_failures,
-                     groups: data.related.root_groups,
-                     children: []
-                     });
-                 scope.$emit('buildAllGroups', data.name);
+                 html += "<div class=\"title\">Group Selector:</div>\n" +
+                   "<ul class=\"tree-root\">\n" +
+                   "<li id=\"search-node-1000\" data-state=\"opened\" data-hosts=\"" + data.related.hosts + "\" " +
+                   "data-description=\"" + data.description + "\" " + 
+                   "data-failures=\"" + data.has_active_failures + "\" " +
+                   "data-groups=\"" + data.related.groups + "\" " + 
+                   "data-name=\"" + data.name + "\" " +
+                   "><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a> " +
+                   "<i class=\"field-badge icon-failures-" + data.has_active_failures + "\"></i> " +
+                   "<a href=\"\" class=\"activate active\">" + data.name + "</a>";
+                 scope.$emit('buildAllGroups', data.name, data.related.tree, data.related.groups);
+                 scope.$emit('refreshHost', null, 'All Hosts');
                  })
              .error( function(data, status, headers, config) {
                  ProcessErrors(scope, data, status, null,

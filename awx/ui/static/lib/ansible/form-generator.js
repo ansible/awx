@@ -941,7 +941,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           // build the hosts page
           html += "<div class=\"row\">\n";
           html += "<div class=\"col-lg-3\" id=\"search-tree-target\">\n";
-          html += "<div aw-tree=\"searchTree\"></div>\n";
+          //html += "<div aw-tree=\"searchTree\"></div>\n";
+          html += "<div class=\"search-tree well\" id=\"search-tree-container\">\n</div>\n";
           html += "</div>\n";
           html += "<div class=\"col-lg-9\">\n"; 
           html += "<div class=\"hosts-well well\">\n";
@@ -978,8 +979,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           //    "data-placement=\"top\"></th>\n";
           
           for (var fld in form.fields) {
-              html += "<th class=\"list-header\" id=\"" + form.iterator + '-' + fld + "-header\" ";
-              html += (!form.fields[fld].nosort) ? "ng-click=\"sort('" + form.iterator + "', '" + fld + "')\"" : "";
+              html += "<th class=\"list-header\" id=\"" + fld + "-header\" ";
+              html += (!form.fields[fld].nosort) ? "ng-click=\"sort('"+ fld + "')\"" : "";
               html += ">";
               html += (form['fields'][fld].label && form['fields'][fld].type !== 'DropDown') ? form['fields'][fld].label : '';
               if (form.fields[fld].nosort == undefined || form.fields[fld].nosort == false) {

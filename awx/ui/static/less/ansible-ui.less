@@ -687,6 +687,8 @@ select.field-mini-height {
   }
 
   .search-tree { 
+    
+    padding: 10px 3px 10px 3px;
 
     .title {
       color: @black;
@@ -697,20 +699,24 @@ select.field-mini-height {
 
     ul {
       list-style-type: none;
-      padding-left: 13px;
+      padding-left: 16px;
     }
-    
-    ul:first-child {
+
+    .tree-root {
       padding-left: 0;
     }
-    
+
+    .activate {
+      word-break: break-all;
+    }
+
     .activate:hover {
       background-color: #ddd; 
     }
 
     .active {
       font-weight: bold;
-      padding: 5px;
+      padding: 5px 0 5px 0;
     }
 
     .expand {
@@ -730,10 +736,10 @@ select.field-mini-height {
     }
 
   }
-
-.host-failure-filter {
-  padding: 10px;   
-}
+    
+  .host-failure-filter {
+    padding: 10px;   
+  }
 
 .disabled {
   color: @grey; 

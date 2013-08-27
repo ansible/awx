@@ -33,10 +33,11 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
    if (scope.loadBreadCrumbsRemove) {
       scope.loadBreadCrumbsRemove();
    }
-   scope.loadBreadCrumbsRemove = scope.$on('hostTabInit', function(e, inventory_name) {
+   scope.loadBreadCrumbsRemove = scope.$on('buildAllGroups', function(e, inventory_name) {
        LoadBreadCrumbs({ path: '/inventories/' + id, title: inventory_name });
        });
 
+   // Sets up the search tree and loads All Hosts for the inventory
    LoadSearchTree({ scope: scope, inventory_id: scope['inventory_id'] });
    
    // Add the selected flag to the hosts set.
