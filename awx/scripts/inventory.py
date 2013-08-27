@@ -78,6 +78,8 @@ class InventoryScript(object):
         url_path = '/api/v1/inventories/%d/script/' % self.inventory_id
         if self.hostname:
             url_path += '?%s' % urllib.urlencode({'host': self.hostname})
+        elif self.hostvars:
+            url_path += '?%s' % urllib.urlencode({'hostvars': 1})
         url = urlparse.urljoin(url, url_path)
         response = requests.get(url, auth=auth)
         response.raise_for_status()
@@ -107,6 +109,8 @@ class InventoryScript(object):
                 raise ValueError('No inventory ID specified')
             self.hostname = self.options.get('hostname', '')
             self.list_ = self.options.get('list', False)
+            self.hostvars = bool(self.options.get('hostvars', False) or
+                                 os.getenv('INVENTORY_HOSTVARS', ''))
             self.indent = self.options.get('indent', None)
             if self.list_ and self.hostname:
                 raise RuntimeError('Only --list or --host may be specified')
@@ -147,6 +151,10 @@ def main():
                       'using INVENTORY_ID environment variable)')
     parser.add_option('--list', action='store_true', dest='list',
                       default=False, help='Return JSON hash of host groups.')
+    parser.add_option('--hostvars', action='store_true', dest='hostvars',
+                      default=False, help='Return hostvars inline with --list,'
+                      ' under ["_meta"]["hostvars"]. Can also be specified '
+                      'using INVENTORY_HOSTVARS environment variable.')
     parser.add_option('--host', dest='hostname', default='',
                       help='Return JSON hash of host vars.')
     parser.add_option('--indent', dest='indent', type='int', default=None,

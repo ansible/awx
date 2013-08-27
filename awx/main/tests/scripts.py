@@ -208,6 +208,55 @@ class InventoryScriptTest(BaseScriptTest):
             else:
                 self.assertTrue(len(v['children']) == 0)
 
+    def test_list_with_hostvars_inline(self):
+        inventory = self.inventories[1]
+        self.assertTrue(inventory.active)
+        rc, stdout, stderr = self.run_inventory_script(list=True,
+                                                       inventory=inventory.pk,
+                                                       hostvars=True)
+        self.assertEqual(rc, 0, stderr)
+        data = json.loads(stdout)
+        groups = inventory.groups.filter(active=True)
+        groupnames = list(groups.values_list('name', flat=True))
+        groupnames.extend(['all', '_meta'])
+        self.assertEqual(set(data.keys()), set(groupnames))
+        all_hostnames = set()
+        # Groups for this inventory should have hosts, variable data, and one
+        # parent/child relationship.
+        for k,v in data.items():
+            self.assertTrue(isinstance(v, dict))
+            if k == 'all':
+                self.assertEqual(v.get('vars', {}), inventory.variables_dict)
+                continue
+            if k == '_meta':
+                continue
+            group = inventory.groups.get(active=True, name=k)
+            hosts = group.hosts.filter(active=True)
+            hostnames = hosts.values_list('name', flat=True)
+            all_hostnames.update(hostnames)
+            self.assertEqual(set(v.get('hosts', [])), set(hostnames))
+            if group.variables:
+                self.assertEqual(v.get('vars', {}), group.variables_dict)
+            if k == 'group-3':
+                children = group.children.filter(active=True)
+                childnames = children.values_list('name', flat=True)
+                self.assertEqual(set(v.get('children', [])), set(childnames))
+            else:
+                self.assertTrue(len(v['children']) == 0)
+        # Check hostvars in ['_meta']['hostvars'] dict.
+        for hostname in all_hostnames:
+            self.assertTrue(hostname in data['_meta']['hostvars'])
+            host = inventory.hosts.get(name=hostname)
+            self.assertEqual(data['_meta']['hostvars'][hostname],
+                             host.variables_dict)
+        # Hostvars can also be requested via environment variable.
+        os.environ['INVENTORY_HOSTVARS'] = str(True)
+        rc, stdout, stderr = self.run_inventory_script(list=True,
+                                                       inventory=inventory.pk)
+        self.assertEqual(rc, 0, stderr)
+        data = json.loads(stdout)
+        self.assertTrue('_meta' in data)
+
     def test_valid_host(self):
         # Host without variable data.
         inventory = self.inventories[0]
@@ -280,11 +329,10 @@ class InventoryScriptTest(BaseScriptTest):
         self.assertNotEqual(rc, 0, stderr)
         self.assertEqual(json.loads(stdout), {})
 
-    def _test_with_both_list_and_host_arguments(self):
+    def test_with_both_list_and_host_arguments(self):
         inventory = self.inventories[0]
         self.assertTrue(inventory.active)
         os.environ['INVENTORY_ID'] = str(inventory.pk)
         rc, stdout, stderr = self.run_inventory_script(list=True, host='blah')
         self.assertNotEqual(rc, 0, stderr)
         self.assertEqual(json.loads(stdout), {})
-        

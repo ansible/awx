@@ -3,6 +3,7 @@
 
 # Python
 import cStringIO
+import distutils.version
 import json
 import logging
 import os
@@ -23,6 +24,7 @@ from django.conf import settings
 
 # AWX
 from awx.main.models import Job, ProjectUpdate
+from awx.main.utils import get_ansible_version
 
 __all__ = ['RunJob', 'RunProjectUpdate']
 
@@ -228,6 +230,16 @@ class RunJob(BaseTask):
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
+
+        # When using Ansible >= 1.3, allow the inventory script to include host
+        # variables inline via ['_meta']['hostvars'].
+        try:
+            Version = distutils.version.StrictVersion
+            if Version( get_ansible_version()) >= Version('1.3'):
+                env['INVENTORY_HOSTVARS'] = str(True)
+        except ValueError:
+            pass
+
         return env
 
     def build_args(self, job, **kwargs):

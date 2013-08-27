@@ -111,6 +111,7 @@ class ApiV1ConfigView(APIView):
             time_zone=settings.TIME_ZONE,
             license_info=license_data,
             version=get_awx_version(),
+            ansible_version=get_ansible_version(),
         )
         if request.user.is_superuser or request.user.admin_of_organizations.filter(active=True).count():
             data.update(dict(
@@ -584,6 +585,7 @@ class InventoryScriptView(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         self.object = self.get_object()
         hostname = request.QUERY_PARAMS.get('host', '')
+        hostvars = bool(request.QUERY_PARAMS.get('hostvars', ''))
         if hostname:
             host = get_object_or_404(self.object.hosts, active=True,
                                      name=hostname)
@@ -602,6 +604,12 @@ class InventoryScriptView(RetrieveAPIView):
                 group_info['children'] = list(children.values_list('name', flat=True))
                 group_info['vars'] = group.variables_dict
                 data[group.name] = group_info
+
+            if hostvars:
+                data.setdefault('_meta', SortedDict())
+                data['_meta'].setdefault('hostvars', SortedDict())
+                for host in self.object.hosts.filter(active=True):
+                    data['_meta']['hostvars'][host.name] = host.variables_dict
 
             # workaround for Ansible inventory bug (github #3687), localhost
             # must be explicitly listed in the all group for dynamic inventory

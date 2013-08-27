@@ -1,13 +1,17 @@
+# Copyright (c) 2013 AnsibleWorks, Inc.
+# All Rights Reserved.
+
 # Python
 import logging
 import re
+import subprocess
 import sys
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
-           'get_awx_version']
+           'get_ansible_version', 'get_awx_version']
 
 def get_object_or_400(klass, *args, **kwargs):
     '''
@@ -52,6 +56,18 @@ class RequireDebugTrueOrTest(logging.Filter):
     def filter(self, record):
         from django.conf import settings
         return settings.DEBUG or 'test' in sys.argv
+
+def get_ansible_version():
+    '''
+    Return Ansible version installed.
+    '''
+    try:
+        proc = subprocess.Popen(['ansible', '--version'],
+                                stdout=subprocess.PIPE)
+        result = proc.communicate()[0]
+        return result.lower().replace('ansible', '').strip()
+    except:
+        return 'unknown'
 
 def get_awx_version():
     '''

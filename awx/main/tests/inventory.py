@@ -663,7 +663,60 @@ class InventoryTest(BaseTest):
         #  on a group resource, I can see related resources for variables, inventories, and children
         #  and these work
 
-    def test_get_inventory_tree(self):
+    def test_get_inventory_script_view(self):
+        i_a = self.inventory_a
+        i_a.variables = json.dumps({'i-vars': 123})
+        i_a.save()
+        # Group A is parent of B, B is parent of C, C is parent of D.
+        g_a = i_a.groups.create(name='A', variables=json.dumps({'A-vars': 'AAA'}))
+        g_b = i_a.groups.create(name='B', variables=json.dumps({'B-vars': 'BBB'}))
+        g_b.parents.add(g_a)
+        g_c = i_a.groups.create(name='C', variables=json.dumps({'C-vars': 'CCC'}))
+        g_c.parents.add(g_b)
+        g_d = i_a.groups.create(name='D', variables=json.dumps({'D-vars': 'DDD'}))
+        g_d.parents.add(g_c)
+        # Each group "X" contains one host "x".
+        h_a = i_a.hosts.create(name='a', variables=json.dumps({'a-vars': 'aaa'}))
+        h_a.groups.add(g_a)
+        h_b = i_a.hosts.create(name='b', variables=json.dumps({'b-vars': 'bbb'}))
+        h_b.groups.add(g_b)
+        h_c = i_a.hosts.create(name='c', variables=json.dumps({'c-vars': 'ccc'}))
+        h_c.groups.add(g_c)
+        h_d = i_a.hosts.create(name='d', variables=json.dumps({'d-vars': 'ddd'}))
+        h_d.groups.add(g_d)
+        
+        # Old, slow 1.2 way.
+        url = reverse('main:inventory_script_view', args=(i_a.pk,))
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        self.assertTrue('all' in response)
+        self.assertEqual(response['all']['vars'], i_a.variables_dict)
+        for g in i_a.groups.all():
+            self.assertTrue(g.name in response)
+            self.assertEqual(response[g.name]['vars'], g.variables_dict)
+            self.assertEqual(set(response[g.name]['children']),
+                             set(g.children.values_list('name', flat=True)))
+            self.assertEqual(set(response[g.name]['hosts']),
+                             set(g.hosts.values_list('name', flat=True)))
+        self.assertFalse('_meta' in response)
+        for h in i_a.hosts.all():
+            h_url = '%s?host=%s' % (url, h.name)
+            with self.current_user(self.super_django_user):
+                response = self.get(h_url, expect=200)
+            self.assertEqual(response, h.variables_dict)
+
+        # New 1.3 way.
+        url = reverse('main:inventory_script_view', args=(i_a.pk,))
+        url = '%s?hostvars=1' % url
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        self.assertTrue('_meta' in response)
+        self.assertTrue('hostvars' in response['_meta'])
+        for h in i_a.hosts.all():
+            self.assertEqual(response['_meta']['hostvars'][h.name],
+                             h.variables_dict)
+
+    def test_get_inventory_tree_view(self):
         # Group A is parent of B, B is parent of C, C is parent of D.
         g_a = self.inventory_a.groups.create(name='A')
         g_b = self.inventory_a.groups.create(name='B')
