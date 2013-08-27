@@ -325,7 +325,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         scope.relatedSets = [];
         scope.master = {};
 
-        Rest.setUrl(GetBasePath('inventory') + $routeParams.id + '/');
+        Rest.setUrl(GetBasePath('inventory') + scope['inventory_id'] + '/');
         Rest.get()
             .success( function(data, status, headers, config) {
                 LoadBreadCrumbs({ path: '/inventories/' + $routeParams.id, title: data.name });
@@ -440,11 +440,119 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         }
         }])
 
+   
+    .factory('SaveInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
+        'GetBasePath', 'ParseTypeChange', 'LoadInventory', 'RefreshGroupName',
+    function(InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange,
+        LoadInventory, RefreshGroupName) {
+    return function(params) {
+        
+        // Save inventory property modifications
+
+        var scope = params.scope;
+        var form = InventoryForm;
+        var defaultUrl=GetBasePath('inventory');
+     
+        try { 
+            // Make sure we have valid variable data
+            if (scope.inventoryParseType == 'json') {
+              var json_data = JSON.parse(scope.inventory_variables);  //make sure JSON parses
+            }
+            else {
+              var json_data = jsyaml.load(scope.inventory_variables);  //parse yaml
+            }
+
+            // Make sure our JSON is actually an object
+            if (typeof json_data !== 'object') {
+              throw "failed to return an object!";
+            }
+
+            var data = {}
+            for (var fld in form.fields) {
+               if (fld != 'inventory_variables') {
+                  if (form.fields[fld].realName) {
+                     data[form.fields[fld].realName] = scope[fld];
+                  }
+                  else {
+                     data[fld] = scope[fld];  
+                  }
+               }
+            }
+
+            Rest.setUrl(defaultUrl + scope['inventory_id'] + '/');
+            Rest.put(data)
+                .success( function(data, status, headers, config) {
+                    if (scope.inventory_variables) {
+                       Rest.setUrl(data.related.variable_data);
+                       Rest.put(json_data)
+                           .success( function(data, status, headers, config) {
+                               scope.$emit('inventorySaved');
+                               })
+                           .error( function(data, status, headers, config) {
+                               ProcessErrors(scope, data, status, form,
+                                  { hdr: 'Error!', msg: 'Failed to update inventory varaibles. PUT returned status: ' + status });
+                           });
+                    }
+                    else {
+                        scope.$emit('inventorySaved');
+                    }
+                    })
+                .error( function(data, status, headers, config) {
+                    ProcessErrors(scope, data, status, form,
+                        { hdr: 'Error!', msg: 'Failed to update inventory. POST returned status: ' + status });
+                    });
+        }
+        catch(err) {
+            Alert("Error", "Error parsing inventory variables. Parser returned: " + err);  
+            }
+    }
+    }])
+
+    .factory('PostLoadInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 'GetBasePath',
+    function(InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath) {
+    return function(params) {
+        
+        var scope = params.scope;
+        
+        LookUpInit({
+            scope: scope,
+            form: InventoryForm,
+            current_item: (scope.organization !== undefined) ? scope.organization : null,
+            list: OrganizationList, 
+            field: 'organization' 
+            });
+
+        if (scope.variable_url) {
+           Rest.setUrl(scope.variable_url);
+           Rest.get()
+               .success( function(data, status, headers, config) {
+                   if ($.isEmptyObject(data)) {
+                      scope.inventory_variables = "---";
+                   }
+                   else {
+                      scope.inventory_variables = jsyaml.safeDump(data);
+                   }
+                   scope.master.inventory_variables = scope.inventory_variables;
+                   })
+               .error( function(data, status, headers, config) {
+                   scope.inventory_variables = null;
+                   ProcessErrors(scope, data, status, form,
+                       { hdr: 'Error!', msg: 'Failed to retrieve inventory variables. GET returned status: ' + status });
+                   });
+        }
+        else {
+          scope.inventory_variables = "---";
+        }
+        if (!scope.$$phase) {
+          scope.$digest();
+        } 
+    }
+    }])
 
     .factory('EditInventory', ['InventoryForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
-        'GetBasePath', 'ParseTypeChange', 'LoadInventory', 'RefreshGroupName',
+        'GetBasePath', 'ParseTypeChange', 'LoadInventory', 'RefreshGroupName', 'SaveInventory', 'PostLoadInventory',
     function(InventoryForm, GenerateForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange,
-        LoadInventory, RefreshGroupName) {
+        LoadInventory, RefreshGroupName, SaveInventory, PostLoadInventory) {
     return function(params) {
 
         var generator = GenerateForm;
@@ -473,38 +581,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
            scope.inventoryLoadedRemove();
         }
         scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
-           
-           LookUpInit({
-               scope: scope,
-               form: form,
-               current_item: (scope.organization !== undefined) ? scope.organization : null,
-               list: OrganizationList, 
-               field: 'organization' 
-               });
-
-           if (scope.variable_url) {
-              Rest.setUrl(scope.variable_url);
-              Rest.get()
-                  .success( function(data, status, headers, config) {
-                      if ($.isEmptyObject(data)) {
-                         scope.inventory_variables = "---";
-                      }
-                      else {
-                         scope.inventory_variables = jsyaml.safeDump(data);
-                      }
-                      })
-                  .error( function(data, status, headers, config) {
-                      scope.inventory_variables = null;
-                      ProcessErrors(scope, data, status, form,
-                          { hdr: 'Error!', msg: 'Failed to retrieve inventory variables. GET returned status: ' + status });
-                      });
-           }
-           else {
-              scope.inventory_variables = "---";
-           }
-           if (!scope.$$phase) {
-              scope.$digest();
-           } 
+           PostLoadInventory({ scope: scope });
            });
 
         LoadInventory({ scope: scope, doPostSteps: false });
@@ -513,81 +590,19 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
            scope.$digest();
         }
 
-        function PostSave() {
-           $('#form-modal').modal('hide');
+        if (scope.removeInventorySaved) {
+           scope.removeInventorySaved();
+        }
+        scope.removeInventorySaved = scope.$on('inventorySaved', function() {
+            $('#form-modal').modal('hide');           
+            // Make sure the inventory name appears correctly in the tree and the navbar
+            RefreshGroupName($('#inventory-node'), scope['inventory_name'], scope['inventory_description']);
+           });
 
-           // Make sure the inventory name appears correctly in the tree and the navbar
-           RefreshGroupName($('#inventory-node'), scope['inventory_name'], scope['inventory_description']);
-          
-           // Reset the form to disable the form action buttons
-           //scope[form.name + '_form'].$setPristine();
-
-           // Show the flash message for 5 seconds, letting the user know the save worked
-           //scope['flashMessage'] = 'Your changes were successfully saved!';
-           //setTimeout(function() {
-           //    scope['flashMessage'] = null;
-           //    if (!scope.$$phase) {
-           //       scope.$digest();
-           //    } 
-           //    }, 5000);
-           }
-
-        // Save
         scope.formModalAction = function() {
-           try { 
-               // Make sure we have valid variable data
-               if (scope.inventoryParseType == 'json') {
-                  var json_data = JSON.parse(scope.inventory_variables);  //make sure JSON parses
-               }
-               else {
-                  var json_data = jsyaml.load(scope.inventory_variables);  //parse yaml
-               }
-
-               // Make sure our JSON is actually an object
-               if (typeof json_data !== 'object') {
-                  throw "failed to return an object!";
-               }
-
-               var data = {}
-               for (var fld in form.fields) {
-                   if (fld != 'inventory_variables') {
-                      if (form.fields[fld].realName) {
-                         data[form.fields[fld].realName] = scope[fld];
-                      }
-                      else {
-                         data[fld] = scope[fld];  
-                      }
-                   }
-               }
-
-               Rest.setUrl(defaultUrl + scope['inventory_id'] + '/');
-               Rest.put(data)
-                   .success( function(data, status, headers, config) {
-                       if (scope.inventory_variables) {
-                          Rest.setUrl(data.related.variable_data);
-                          Rest.put(json_data)
-                              .success( function(data, status, headers, config) {
-                                  PostSave();
-                                  })
-                              .error( function(data, status, headers, config) {
-                                  ProcessErrors(scope, data, status, form,
-                                     { hdr: 'Error!', msg: 'Failed to update inventory varaibles. PUT returned status: ' + status });
-                              });
-                       }
-                       else {
-                          PostSave();
-                       }
-                       })
-                   .error( function(data, status, headers, config) {
-                       ProcessErrors(scope, data, status, form,
-                           { hdr: 'Error!', msg: 'Failed to update inventory. POST returned status: ' + status });
-                       });
-           }
-           catch(err) {
-               Alert("Error", "Error parsing inventory variables. Parser returned: " + err);  
-               }      
-           
-           };
+            SaveInventory({ scope: scope });
+        }
+        
     }
     }]);
 

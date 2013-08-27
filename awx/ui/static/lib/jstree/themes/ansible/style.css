@@ -9,12 +9,6 @@
   padding: 15px;
 }
 
-.jstree-ansible {
-   background-color: #f5f5f5;
-   border: 1px solid #e3e3e3;
-   border-radius: 6px;
-}
-
 .jstree-ansible li, 
 .jstree-ansible ins { background-image:url("d.png"); background-repeat:no-repeat; background-color:transparent; }
 .jstree-ansible li { background-position:-90px 0; background-repeat:repeat-y;  }

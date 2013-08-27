@@ -158,7 +158,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
               scope[iterator + 'SearchParams'] = (sort_order) ? 'order_by=' + escape(sort_order) : "";
            }
 
-           if (iterator == 'inventory' && scope.inventoryFailureFilter) {
+           if ( (iterator == 'inventory' && scope.inventoryFailureFilter) ||
+                (iterator == 'host' && scope.hostFailureFilter) ) {
               scope[iterator + 'SearchParams'] += '&has_active_failures=true';
            }
            

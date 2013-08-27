@@ -10,7 +10,8 @@
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'HostListDefinition',
                                 'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'HostsHelper',
                                 'InventoryHelper', 'RelatedSearchHelper','RelatedPaginateHelper', 
-                                'InventoryFormDefinition', 'SelectionHelper', 'HostGroupsFormDefinition'
+                                'InventoryFormDefinition', 'SelectionHelper', 'HostGroupsFormDefinition', 
+                                'InventoryHostsFormDefinition'
                                 ])
 
     .factory('HostsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostList', 'GenerateList', 
@@ -28,7 +29,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         list.iterator = 'subhost';  //Override the iterator and name so the scope of the modal dialog
         list.name = 'subhosts';     //will not conflict with the parent scope
 
-        var defaultUrl = GetBasePath('inventory') + inventory_id + '/hosts/';
         var view = GenerateList;
 
         var scope = view.inject(list, {
@@ -38,8 +38,10 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             selectButton: false
             });
         
+        var defaultUrl = GetBasePath('inventory') + inventory_id + '/hosts/?not__groups__id=' + scope.group_id;
+        
         scope.formModalActionLabel = 'Select';
-        scope.formModalHeader = 'Select Hosts';
+        scope.formModalHeader = 'Add Existing Hosts';
         scope.formModalCancelShow = true;
     
         SelectionInit({ scope: scope, list: list, url: GetBasePath('groups') + group_id + '/hosts/' });
@@ -89,7 +91,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var scope = generator.inject(form, {mode: 'add', modal: true, related: false});
         
         scope.formModalActionLabel = 'Save';
-        scope.formModalHeader = 'Create Host';
+        scope.formModalHeader = 'Create New Host';
         scope.formModalCancelShow = true;
         scope.parseType = 'yaml';
         ParseTypeChange(scope);
@@ -349,16 +351,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         'HostsReload',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload) {
     return function(params) {
-        
         // Remove the selected host from the current group by disassociating
        
         var scope = params.scope;
-
-        if (scope.hostDeleteDisabled) {
-           // simulate a disabled link
-           return;
-        }
-        
         var group_id = scope.group_id; 
         var inventory_id = params.inventory_id;
         var host_id = params.host_id;
@@ -376,40 +371,18 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             });
 
         var action_to_take = function() {
-            var errors = false;
-            var maxI;
-            
-            // Find index pointing to the last selected host
-            for (var i=0; i < scope.hosts.length; i++) {
-                if (scope.hosts[i].selected) {
-                   maxI = i;
-                }
-            }
-            
-            function emit(i) {
-               // After we process the last selected host or after we hit a problem, refresh the host list
-               if (i >= maxI || errors) {
-                  $('#prompt-modal').modal('hide');
-                  scope.$emit('hostsReload'); 
-               }
-            }
-            
             Rest.setUrl(url);
-            for (var i=0; i < scope.hosts.length && !errors; i++) {
-                if (scope.hosts[i].selected) {
-                   Rest.post({ id: scope.hosts[i].id, disassociate: 1 })
-                       .success( function(data, status, headers, config) {
-                           // if this is the last selected host, clean up and exit
-                           emit(i);
-                           })
-                       .error( function(data, status, headers, config) {
-                           errors = true;
-                           emit(i);
-                           ProcessErrors(scope, data, status, null,
-                               { hdr: 'Error!', msg: 'Attempt to delete ' + scope.hosts[i].name + ' failed. POST returned status: ' + status });
-                           });    
-                }
-            }
+            Rest.post({ id: host_id, disassociate: 1 })
+                .success( function(data, status, headers, config) {
+                    $('#prompt-modal').modal('hide');
+                    scope.$emit('hostsReload'); 
+                    })
+                .error( function(data, status, headers, config) {
+                    $('#prompt-modal').modal('hide');
+                    scope.$emit('hostsReload'); 
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Attempt to delete ' + host_name + ' failed. POST returned status: ' + status });
+                    });    
             }
 
         //Force binds to work (not working usual way), and launch the confirmation prompt
@@ -418,13 +391,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            scope['promptBody'] = 'Are you sure you want to permanently delete the selected hosts?';
            scope['promptActionBtnClass'] = 'btn-danger';
         }
-        
-        /*else {
-           scope['promptHeader'] = 'Remove Host from Group';
-           scope['promptBody'] = 'Are you sure you want to remove ' + host_name + ' from the group? ' + 
-               host_name + ' will continue to be part of the inventory under All Hosts.';
-           scope['promptActionBtnClass'] = 'btn-success';  
-        }*/
         
         scope.promptAction = action_to_take;
 
@@ -442,13 +408,13 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }])
 
 
-    .factory('HostsReload', ['RelatedSearchInit', 'RelatedPaginateInit', 'InventoryForm', 'GetBasePath', 'Wait',
-    function(RelatedSearchInit, RelatedPaginateInit, InventoryForm, GetBasePath, Wait) {
+    .factory('HostsReload', ['SearchInit', 'PaginateInit', 'InventoryHostsForm', 'GetBasePath', 'Wait',
+    function(SearchInit, PaginateInit, InventoryHostsForm, GetBasePath, Wait) {
     return function(params) {
         // Rerfresh the Hosts view on right side of page
         
-        var group_id = params.group_id;
         var scope = params.scope;
+        var group_id = scope.group_id;
         var postAction = params.action; 
 
         scope['hosts'] = null;
@@ -463,10 +429,10 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }
 
         // Set the groups value in each element of hosts array
-        if (scope.removeRelatedHosts) {
-           scope.removeRelatedHosts();
+        if (scope.removePostRefresh) {
+           scope.removePostRefresh();
         }
-        scope.removeRelatedHosts = scope.$on('relatedhosts', function() {
+        scope.removePostRefresh = scope.$on('PostRefresh', function() {
             var groups, descr, found, list;
             for (var i=0; i < scope.hosts.length; i++) {
                 groups = scope.hosts[i].summary_fields.groups;
@@ -483,10 +449,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             }
             });
 
-        var relatedSets = { hosts: { url: url, iterator: 'host' } };
-        RelatedSearchInit({ scope: params.scope, form: InventoryForm, relatedSets: relatedSets });
-        RelatedPaginateInit({ scope: params.scope, relatedSets: relatedSets, pageSize: 40 });
-        
+        SearchInit({ scope: scope, set: 'hosts', list: InventoryHostsForm, url: url });
+        PaginateInit({ scope: scope, list: InventoryHostsForm, url: url });
         scope.search('host');
         
         if (!params.scope.$$phase) {
@@ -510,7 +474,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         if (scope.buildAllGroupsRemove) {
            scope.buildAllGroupsRemove();
         }
-        scope.buildAllGroupsRemove = scope.$on('buildAllGroups', function() {
+        scope.buildAllGroupsRemove = scope.$on('buildAllGroups', function(e, inventory_name) {
             scope.inventory_groups = [];
             Rest.setUrl(GetBasePath('inventory') + inventory_id + '/groups/?order_by=name');
             Rest.get()
@@ -518,7 +482,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     for (var i=0; i < data.results.length; i++) {
                         scope.inventory_groups.push({ name: data.results[i].name, id: data.results[i].id });
                     }
-                    scope.$emit('hostTabInit');
+                    scope.$emit('hostTabInit', inventory_name);
                     })
                 .error( function(data, status, headers, config) {
                     ProcessErrors(scope, data, status, null,
@@ -538,7 +502,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                      groups: data.related.root_groups,
                      children: []
                      });
-                 scope.$emit('buildAllGroups');
+                 scope.$emit('buildAllGroups', data.name);
                  })
              .error( function(data, status, headers, config) {
                  ProcessErrors(scope, data, status, null,

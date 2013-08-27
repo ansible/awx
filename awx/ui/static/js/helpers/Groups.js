@@ -33,7 +33,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             });
 
         scope.formModalActionLabel = 'Select';
-        scope.formModalHeader = 'Add Groups';
+        scope.formModalHeader = 'Add Existing Groups';
         scope.formModalCancelShow = true;
         scope.formModalActionClass = 'btn btn-success';
         
@@ -91,7 +91,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var scope = generator.inject(form, {mode: 'add', modal: true, related: false});
         
         scope.formModalActionLabel = 'Save';
-        scope.formModalHeader = 'Create Group';
+        scope.formModalHeader = 'Create New Group';
         scope.formModalCancelShow = true;
         scope.parseType = 'yaml';
         ParseTypeChange(scope);
@@ -185,7 +185,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     return function(params) {
         
         var group_id = params.group_id;
-        var inventory_id = $routeParams.id;
+        var inventory_id = params.inventory_id;
         var generator = GenerateForm;
         var form = GroupForm;
         var defaultUrl =  GetBasePath('groups') + group_id + '/';

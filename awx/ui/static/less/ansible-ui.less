@@ -14,7 +14,6 @@
 @blue-link:  #0088cc;
 @grey:       #A9A9A9;
 
-
 html {
   background-color: @black;
 }
@@ -105,6 +104,7 @@ hr {
   background-color: #ccc;
   border-color: #ccc;
 }
+
 
 /* Use code-breakable in pop-over text to indent and wrap code segments */
 
@@ -390,8 +390,20 @@ select.field-mini-height {
 }
 
 .tree-container {
-  padding: 0;
-  margin: 5px 0 15px 0;
+  background-color: #f5f5f5;
+  border: 1px solid #e3e3e3;
+  border-radius: 6px;
+}
+
+.tree-controls {
+  padding: 10px;
+  border-bottom: 1px solid #e3e3e3;
+
+  .title {
+    display: inline-block;
+    font-weight: bold; 
+    margin-right: 10px;
+  }
 }
 
 .no-padding {
@@ -436,116 +448,135 @@ select.field-mini-height {
 
 /* Jobs pages */
 
-.job-error,
-.job-failed,
-.license-expired,
-.license-invalid,
-.active-failures-true,
-.active-failures-true a,
-.active-failures-true a:active,
-input[type="text"].job-failed,
-input[type="text"].job-error {
-  color: #da4f49;
-}
+  .job-error,
+  .job-failed,
+  .license-expired,
+  .license-invalid,
+  .icon-failures-true,
+  .active-failures-true a,
+  .active-failures-true a:active,
+  input[type="text"].job-failed,
+  input[type="text"].job-error {
+    color: #da4f49;
+  }
 
-.active-failures-true a:hover {
-  color: @red;
-}
+  .icon-failures-true a:hover {
+    color: @red;
+  }
 
-.job-failures-true {
-  padding-top: 5px;
-  color: #da4f49;
-}
+  .job-failures-true {
+    padding-top: 5px;
+    color: #da4f49;
+  }
 
-.job-event-status,
-.license-status {
-  padding-top: 5px;
-}
+  .job-event-status,
+  .license-status {
+    padding-top: 5px;
+  }
 
-.job-new,
-input[type="text"].job-new,
-.job-canceled,
-input[type="text"].job-canceled {
-  color: #778899;
-}
+  .job-new,
+  input[type="text"].job-new,
+  .job-canceled,
+  input[type="text"].job-canceled {
+    color: #778899;
+  }
 
-.job-pending,
-.job-running,
-.job-success,
-.job-successful,
-.active-failures-false,
-.license-valid,
-input[type="text"].job-success,
-input[type="text"].job-successful {
-  color: #5bb75b;
-}
+  .job-pending,
+  .job-running,
+  .job-success,
+  .job-successful,
+  .icon-failures-false,
+  .license-valid,
+  input[type="text"].job-success,
+  input[type="text"].job-successful {
+    color: #5bb75b;
+  }
 
-.field-success {
-  color: #5bb75b;
-}
+  .icon-failures-true:before {
+    content: "\f06a";
+  }
 
-.field-success input {
-  border-color: #5bb75b;
-}
+  .icon-failures-false:before {
+    content: "\f111";
+  }
 
-.field-failure {
-  color: @red;
-}
+  .field-success {
+    color: #5bb75b;
+  }
 
-.field-failure input {
-  border-color: @red;
-}
+  .field-success input {
+    border-color: #5bb75b;
+  }
 
-.job-changed,
-.license-warning,
-.license-demo {
-  color: @warning;
-}
+  .field-failure {
+    color: @red;
+  }
 
-.job-detail-status {
-  display: inline-block;
-  margin-top: 5px;
-  font-size: 15px;
-  font-weight: bold;
-}
+  .field-failure input {
+    border-color: @red;
+  }
 
-.form-items .search-widget {
-  margin-top: 15px;
-}
+  .field-badge {
+    font-size: 12px;
+  }
 
-.form-items .item-count {
-  display: inline-block;
-  margin-top: 25px;
-  font-size: small;
-}
+  .job-changed,
+  .license-warning,
+  .license-demo {
+    color: @warning;
+  }
 
-.child-event a {
-  color: @black;
-  cursor: default;
-}
+  .job-detail-status {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 15px;
+    font-weight: bold;
+  }
 
-.level-1 {
-  padding-left: 24px;
-}
+  .form-items .search-widget {
+    margin-top: 15px;
+  }
 
-.level-2 {
-  padding-left: 48px;
-}
+  .form-items .item-count {
+    display: inline-block;
+    margin-top: 25px;
+    font-size: small;
+  }
 
-.level-3 {
-  padding-left: 72px;
-}
+  .child-event a {
+    color: @black;
+    cursor: default;
+  }
 
-.level-3-detail {
-  padding-left: 72px;
-}
+  .level-1 {
+    padding-left: 24px;
+  }
 
-#job_events .control-group {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
+  .level-2 {
+    padding-left: 48px;
+  }
+
+  .level-3 {
+    padding-left: 72px;
+  }
+
+  .level-3-detail {
+    padding-left: 72px;
+  }
+
+  #job_events .control-group {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
 
 /* End Jobs Page */
+
+
+/* License Accordion */
+  #license-collapse .ui-accordion-content {
+     overflow: hidden;
+  }
+
 
 /* Inventory Detail Groups tab */
   .inventory-content {
@@ -614,11 +645,6 @@ input[type="text"].job-successful {
 
   }
 
-  .field-badge {
-    color: @red;
-    font-size: 12px;
-  }
-
 /* Inventory Detail Hosts tab */
 
   .hosts-well {
@@ -661,6 +687,14 @@ input[type="text"].job-successful {
   }
 
   .search-tree { 
+
+    .title {
+      color: @black;
+      font-weight: bold;
+      margin-bottom: 10px;
+      margin-top: 0;
+    }
+
     ul {
       list-style-type: none;
       padding-left: 13px;
@@ -676,18 +710,30 @@ input[type="text"].job-successful {
 
     .active {
       font-weight: bold;
-      color: #000;
+      padding: 5px;
     }
 
     .expand {
       padding: 3px;
+      border: 1px solid rgb(245, 245, 245);
     }
 
     .expand:hover {
       background-color: #ddd;
       border: 1px solid #ddd;
     }
+
+    .field-badge {
+      font-size: 10px;
+      line-height: normal;
+      vertical-align: middle;
+    }
+
   }
+
+.host-failure-filter {
+  padding: 10px;   
+}
 
 .disabled {
   color: @grey; 
@@ -744,7 +790,7 @@ tr td i {
   float: none;
   padding-top: 3px;
   padding-left: 0;
-  margin-right: 10px;
+  margin-right: 5px;
   margin-left: 0;
 }
 

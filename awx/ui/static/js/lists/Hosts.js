@@ -12,7 +12,7 @@ angular.module('HostListDefinition', [])
         
         name: 'hosts',
         iterator: 'host',
-        selectTitle: 'Select Host',
+        selectTitle: 'Add Existing Hosts',
         editTitle: 'Hosts',
         index: true,
         well: true,

@@ -56,7 +56,7 @@ angular.module('AuthService', ['ngCookies'])
               return ($rootScope.token) ? $rootScope.token : $cookieStore.get('token'); 
            }
            else {
-              return null;
+              $location.path('/login');
            }
        },
 

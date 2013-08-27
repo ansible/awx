@@ -72,7 +72,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               this.scope[set] = null;
           }
           if ( ((!options.modal) && options.related) || this.form.forceListeners ) {
-             console.log('adding listeners');
              this.addListeners();
           }
           if (options.mode == 'add') {
@@ -906,184 +905,183 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        //
        var form = this.form;
        var itm = "groups";
-       
-       html = this.breadCrumbs(options);
-       
-       html += "<div class=\"inventory-content\">\n";
 
-       html += "<ul class=\"nav nav-tabs\" id=\"inventory-tabs\">\n";
-       html += "<li><a href=\"#inventory-hosts\" data-toggle=\"tab\">Hosts</a></li>\n";
-       html += "<li><a href=\"#inventory-groups\" data-toggle=\"tab\">Groups</a></li>\n"; 
-       html += "</ul>\n";
-
-       html += "<div class=\"tab-content\">\n";
-       html += "<div class=\"tab-pane active\" id=\"inventory-groups\">\n";
        
        html += "<div ng-show=\"showGroupHelp\" class=\"alert alert-dismissable alert-info\">\n";
        html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
        html += "<p><strong>Hint:</strong> Get started building your inventory by adding a group. After creating a group, " +
-           "use the Hosts tab to add hosts to the group."
+           "use the Hosts tab to add hosts to the group.</p>";
        html += "</div>\n";
-
-       // build the groups tab
-       html += "<div class=\"navbar groups-menu\">\n"; 
-       html += "<a class=\"navbar-brand\" ng-bind-html-unsafe=\"selectedNodeName\" href=\"\"></a>\n"; 
-       html += "<ul class=\"nav navbar-nav\">\n";
-       html += "<li><a href=\"\" ng-click=\"editInventory()\" ng-hide=\"inventoryEditHide\" " +
-           "aw-tool-tip=\"Edit inventory properties\"  data-placement=\"bottom\"><i class=\"icon-edit\"></i> Inventory Properties</a></li>\n";
-       html += "<li><a href=\"\" ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" " +
-           "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> Group Properties</a></li>\n";
-       html += "<li><a href=\"\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
-           "aw-tool-tip=\"Add an existing group\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Add Existing Group</a></li>\n";
-       html += "<li><a href=\"\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
-           "aw-tool-tip=\"Create a new group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New Group</a></li>\n";
-       html += "<li><a href=\"\" ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" " +
-           "aw-tool-tip=\"Delete the selected group\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Group</a></li>\n";
-       html += "<li><a class=\"status\" ng-show=\"treeLoading\" href=\"\"><i class=\"icon-spinner icon-spin icon-large\"></i> Loading...</a></li>\n";
-       html += "</ul>\n";
        
-       html += "</div><!-- navbar -->\n";  
-       html += "<div id=\"tree-view\" class=\"tree-container\"></div>\n";
-       
-       html += "</div><!-- inventory-groups -->\n";
+       var html = '';
+       html += this.breadCrumbs(options);
 
-       // build the hosts tab
-       itm = "hosts";
-       html += "<div class=\"tab-pane\" id=\"inventory-hosts\">\n";
-       html += "<div class=\"row\">\n";
-       html += "<div class=\"col-lg-3\" id=\"search-tree-target\">\n";
-       html += "<div aw-tree=\"searchTree\"></div>\n";
-       html += "</div>\n";
-       html += "<div class=\"col-lg-9\">\n";
-       html += "<div class=\"navbar hosts-menu\">\n"; 
-       html += "<a class=\"navbar-brand\" ng-bind-html-unsafe=\"" + form.related[itm].title + "\" href=\"\"></a>\n"; 
-       html += "<ul class=\"nav navbar-nav\">\n";
-       html += "<li><a href=\"\" ng-click=\"addHost()\" ng-hide=\"hostAddHide\" " +
-           "aw-tool-tip=\"Add an existing host\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Add Existing Host</a></li>\n";
-       html += "<li><a href=\"\" ng-click=\"createHost()\" ng-hide=\"hostCreateHide\" " +
-           "aw-tool-tip=\"Create a new host\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New Host</a></li>\n";
-       html += "<li><a href=\"\" ng-click=\"deleteHost()\" ng-class=\"hostDeleteDisabledClass\" ng-disabled=\"hostDeleteDisabled\" " +
-           "aw-tool-tip=\"Delete selected hosts\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Hosts</a></li>\n";
-       html += "<li><a class=\"status\" ng-show=\"treeLoading\" href=\"\"><i class=\"icon-spinner icon-spin icon-large\"></i> Loading...</a></li>\n";
-       html += "</ul>\n";
-       html += "<form class=\"navbar-form\">\n";
-       html += "<label class=\"checkbox-inline\"><input type=\"checkbox\" ng-model=\"hostFailureFilter\" ng-change=\"filterInventory()\" > Only show hosts with failed jobs" +
-           "</label>\n";
-       html += "</form>\n"; 
-       html += "</div><!-- navbar -->\n";  
-       
-       html += "<div class=\"hosts-well well\">\n";             
-       html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true, size: 'col-lg-6'});
-
-       // Add actions(s)
-       for (var action in form.related[itm].actions) {
-           html += "<button type=\"button\" class=\"btn btn-sm ";
-           html += (form.related[itm].actions[action]['class']) ? form.related[itm].actions[action]['class'] : "btn-success";
-           html += "\" ";
-           html += (form.related[itm]['actions'][action].id) ? this.attr(form.related[itm]['actions'][action],'id') : "";
-           html += this.attr(form.related[itm]['actions'][action],'ngClick');
-           html += (form.related[itm]['actions'][action].awToolTip) ? this.attr(form.related[itm]['actions'][action],'awToolTip') : "";
-           html += (form.related[itm]['actions'][action].awToolTip) ? "data-placement=\"top\" " : "";
-           html += (form.related[itm]['actions'][action].ngHide) ? this.attr(form.related[itm]['actions'][action],'ngHide') : "";
-           html += "><i class=\"" + form.related[itm]['actions'][action].icon + "\"></i>";
-           html += (form.related[itm]['actions'][action].label) ?  " " + form.related[itm]['actions'][action].label : ""; 
-           html += "</button>\n";
+       if (form.type == 'groupsview') {
+          // build the groups page
+          html += "<div class=\"tree-container\">\n";
+          html += "<div class=\"tree-controls\">\n";
+          //html += "<div class=\"title\" ng-bind=\"selectedNodeName\"></div>\n";
+          html += "<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"editInventory()\" ng-hide=\"inventoryEditHide\" " +
+              "aw-tool-tip=\"Edit inventory properties\"  data-placement=\"bottom\"><i class=\"icon-edit\"></i> " +
+              "\{\{ selectedNodeName \}\} Properties</button>\n";
+          html += "<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" " +
+              "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> " +
+              "\{\{ selectedNodeName \}\} Properties</button>\n";
+          html += "<button type=\"button\" class=\"btn btn-success btn-xs\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
+              "aw-tool-tip=\"Add an existing group\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Add Existing Group</button>\n";
+          html += "<button type=\"button\" class=\"btn btn-success btn-xs\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
+              "aw-tool-tip=\"Create a new group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New Group</button>\n";
+          html += "<button type=\"button\" class=\"btn btn-danger btn-xs\" ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" " +
+              "aw-tool-tip=\"Delete the selected group\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Group</button>\n";
+          html += "</div><!-- tree controls -->\n";
+          html += "<div id=\"tree-view\"></div>\n";
+          html += "</div><!-- tree-container -->\n";
        }
-       html += "</div><!-- row -->\n";
-      
-       // Start the list
-       html += "<div class=\"list\">\n";
-       html += "<table class=\"" + form.related[itm].iterator + " table table-condensed table-hover\">\n";
-       html += "<thead>\n";
-       html += "<tr>\n";
-       html += "<th><input type=\"checkbox\" ng-model=\"toggleAllFlag\" ng-change=\"toggleAllHosts()\" aw-tool-tip=\"Select all hosts\" " +
-           "data-placement=\"top\"></th>\n";
-       for (var fld in form.related[itm].fields) {
-           html += "<th class=\"list-header\" id=\"" + form.related[itm].iterator + '-' + fld + "-header\" ";
-           html += (!form.related[itm].fields[fld].nosort) ? "ng-click=\"sort('" + form.related[itm].iterator + "', '" + fld + "')\"" : "";
-           html += ">" + form.related[itm]['fields'][fld].label;
-           if (form.related[itm].fields[fld].nosort == undefined || form.related[itm].fields[fld].nosort == false) {
-              html += " <i class=\"";
-              if (form.related[itm].fields[fld].key) {
-                 if (form.related[itm].fields[fld].desc) {
-                    html += "icon-sort-down";
+       else {
+          // build the hosts page
+          html += "<div class=\"row\">\n";
+          html += "<div class=\"col-lg-3\" id=\"search-tree-target\">\n";
+          html += "<div aw-tree=\"searchTree\"></div>\n";
+          html += "</div>\n";
+          html += "<div class=\"col-lg-9\">\n"; 
+          html += "<div class=\"hosts-well well\">\n";
+          
+          html += SearchWidget({ iterator: form.iterator, template: form, mini: true, size: 'col-md-6 col-lg-6'});
+          html += "<div class=\"col-md-6 col-lg-6\">\n"
+          html += "<div class=\"pull-right\">\n";
+          // Add actions(s)
+          for (var action in form.actions) {
+              html += "<button type=\"button\" class=\"btn ";
+              html += (form.actions[action]['class']) ? form.actions[action]['class'] : "btn-success";
+              html += "\" ";
+              html += (form['actions'][action].id) ? this.attr(form['actions'][action],'id') : "";
+              html += this.attr(form['actions'][action],'ngClick');
+              html += (form['actions'][action].awToolTip) ? this.attr(form['actions'][action],'awToolTip') : "";
+              html += (form['actions'][action].awToolTip && form['actions'][action].dataPlacement) ? 
+                  this.attr(form['actions'][action], 'dataPlacement') : "data-placement=\"top\" ";
+              html += (form['actions'][action].ngHide) ? this.attr(form['actions'][action],'ngHide') : "";
+              html += "><i class=\"" + form['actions'][action].icon + "\"></i>";
+              html += (form['actions'][action].label) ?  " " + form['actions'][action].label : ""; 
+              html += "</button>\n";
+          }
+          html += "</div>\n";
+          html += "</div>\n";
+          html += "</div><!-- row -->\n";
+          
+          // Start the list
+          html += "<div class=\"list\">\n";
+          html += "<table class=\"" + form.iterator + " table table-condensed table-hover\">\n";
+          html += "<thead>\n";
+          html += "<tr>\n";
+          
+          //html += "<th><input type=\"checkbox\" ng-model=\"toggleAllFlag\" ng-change=\"toggleAllHosts()\" aw-tool-tip=\"Select all hosts\" " +
+          //    "data-placement=\"top\"></th>\n";
+          
+          for (var fld in form.fields) {
+              html += "<th class=\"list-header\" id=\"" + form.iterator + '-' + fld + "-header\" ";
+              html += (!form.fields[fld].nosort) ? "ng-click=\"sort('" + form.iterator + "', '" + fld + "')\"" : "";
+              html += ">";
+              html += (form['fields'][fld].label && form['fields'][fld].type !== 'DropDown') ? form['fields'][fld].label : '';
+              if (form.fields[fld].nosort == undefined || form.fields[fld].nosort == false) {
+                 html += " <i class=\"";
+                 if (form.fields[fld].key) {
+                    if (form.fields[fld].desc) {
+                       html += "icon-sort-down";
+                    }
+                    else {
+                       html += "icon-sort-up";
+                    }
                  }
                  else {
-                    html += "icon-sort-up";
+                    html += "icon-sort";
                  }
+                 html += "\"></i>";
+              }
+              html += "</th>\n";
+          }
+
+          html += "<th></th>\n";
+          html += "</tr>\n";
+          html += "</thead>";
+          html += "<tbody>\n";
+                
+          html += "<tr ng-repeat=\"" + form.iterator + " in hosts\" >\n";
+
+          // Select checkbox
+          //html += "<td><input type=\"checkbox\" ng-model=\"" + form.iterator + ".selected\" ng-change=\"toggleOneHost()\" ></td>";
+          
+          var cnt = 0;
+          var rfield; 
+
+          for (var fld in form.fields) {
+              cnt++;
+              rfield = form.fields[fld];
+              if (fld == 'groups' ) {
+                 // generate group form control/button widget
+                 html += "<td>";
+                 html += "<div class=\"input-group input-group-sm\">\n";
+                 html += "<span class=\"input-group-btn\">\n";
+                 html += "<button class=\"btn btn-default\" type=\"button\" ng-click=\"editHostGroups({{ host.id }})\"><i class=\"icon-list\"></i></button>\n";
+                 html += "</span>\n";
+                 html += "<input type=\"text\" ng-model=\"host.groups\" class=\"form-control\" disabled=\"disabled\" >\n";
+                 html += "</div>\n";
+                 html += "</td>\n";
               }
               else {
-                 html += "icon-sort";
+                 html += Column({ list: form, fld: fld, options: options, base: null });
               }
-              html += "\"></i>";
-           }
-           html += "</a></th>\n";
-       }
+          }
+          
+          // Row level actions
+          html += "<td class=\"actions\">";
+          for (act in form.fieldActions) {
+             var action = form.fieldActions[act];
+             html += "<button type=\"button\" class=\"btn"; 
+             html += (action['class']) ? " " + action['class'] : "";
+             html += "\" " + this.attr(action,'ngClick');
+             html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
+             html += (action.awToolTip) ? "data-placement=\"top\" " : "";
+             html += ">" + this.icon(action.icon);
+             html += (action.label) ?  " " + action.label : ""; 
+             html += "</button> ";
+          }
+          html += "</td>";
+          html += "</tr>\n";
+          cnt++;
+        
+          // Message for when a related collection is empty
+          html += "<tr class=\"info\" ng-show=\"" + form.iterator + "Loading == false && (hosts == null || hosts.length == 0)\">\n";
+          html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
+          html += "</tr>\n"; 
 
-       html += "<th></th>\n";
-       html += "</tr>\n";
-       html += "</thead>";
-       html += "<tbody>\n";
-            
-       html += "<tr ng-repeat=\"" + form.related[itm].iterator + " in " + itm + "\" >\n";
+          // Message for loading
+          html += "<tr class=\"info\" ng-show=\"HostsLoading == true\">\n";
+          html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">Loading...</div></td>\n";
+          html += "</tr>\n";
 
-       // Select checkbox
-       html += "<td><input type=\"checkbox\" ng-model=\"" + form.related[itm].iterator + ".selected\" ng-change=\"toggleOneHost()\" ></td>";
+          // End List
+          html += "</tbody>\n";
+          html += "</table>\n";
+          html += "</div>\n";    // close list
 
-       var cnt = 1;
-       var rfield;
-       var base = (form.related[itm].base) ? form.related[itm].base : itm;
-       base = base.replace(/^\//,'');
-       for (var fld in form.related[itm].fields) {
-           cnt++;
-           rfield = form.related[itm].fields[fld];
-           if (fld == 'groups' ) {
-              // generate group form control/button widget
-              html += "<td>";
-              html += "<div class=\"input-group input-group-sm\">\n";
-              html += "<span class=\"input-group-btn\">\n";
-              html += "<button class=\"btn btn-default\" type=\"button\" ng-click=\"editHostGroups({{ host.id }})\"><i class=\"icon-list\"></i></button>\n";
-              html += "</span>\n";
-              html += "<input type=\"text\" ng-model=\"host.groups\" class=\"form-control\" disabled=\"disabled\" >\n";
-              html += "</div>\n";
-              //html += "<a href=\"\"><i class=\"icon-list\"></i></button> \{\{ host.groups \}\}</a>";
-              html += "</td>\n";
-           }
-           else {
-              html += Column({ list: form.related[itm], fld: fld, options: options, base: base });
-           }
-       }
+          html += "<div class=\"row host-failure-filter\">\n";
+          html += "<div class=\"col-lg-12\">\n";
+          html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"hostFailureFilter\" ng-change=\"filterHosts()\" > Only show hosts with failed jobs" +
+              "</label>\n";
+          html += "</div>\n";
+          html += "</div>\n";
 
-       html += "</tr>\n";
+          html += "</div>\n";    // close well
 
-       // Message for when a related collection is empty
-       html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == false && (" + itm + " == null || " + itm + ".length == 0)\">\n";
-       html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
-       html += "</tr>\n"; 
+          html += PaginateWidget({ set: 'hosts', iterator: form.iterator, mini: true }); 
 
-       // Message for loading
-       html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == true\">\n";
-       html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">Loading...</div></td>\n";
-       html += "</tr>\n";
+          html += "</div>\n";
+          html += "</div>\n";
 
-       // End List
-       html += "</tbody>\n";
-       html += "</table>\n";
-
-       html += "</div>\n";    // close list
-       html += "</div>\n";    // close well
-
-       html += PaginateWidget({ set: itm, iterator: form.related[itm].iterator, mini: true }); 
-
-       html += "</div>\n";
-       html += "</div>\n";
-
-       html += "</div><!-- inventory-hosts -->\n";
-       html += "</div><!-- tab-content -->\n";
-       html += "</div><!-- inventory-content -->\n"; 
-
-       return html; 
-      
+          //html += "</div><!-- inventory-hosts -->\n";
+        
+        }
+        return html; 
       },
 
     buildCollections: function(options) {

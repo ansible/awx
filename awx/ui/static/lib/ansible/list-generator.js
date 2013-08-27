@@ -193,10 +193,6 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += "</div>\n";
        html += "</div><!-- row -->\n";
          
-          
-          
-          //html += "</div>\n";
-
        // table header row
        html += "<table class=\"table table-condensed"
        html += (list['class']) ? " " + list['class'] : "";
@@ -290,7 +286,6 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                      });
               }
               else {
-                 console.log('here');
                  html += this.button(list.fieldActions[action]);
               }
           }

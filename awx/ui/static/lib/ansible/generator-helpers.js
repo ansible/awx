@@ -134,8 +134,36 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         }  
         }])
 
+    .factory('Badge', [ function() {
+    return function(field) {
+        
+        var html = '';
 
-    .factory('Column', ['Attr', 'Icon', 'DropDown', function(Attr, Icon, DropDown) {
+        if (field.badgeToolTip) {
+           html += "<a href=\"\" aw-tool-tip=\"" + field.badgeToolTip + "\"";
+           html += (field.badgeTipPlacement) ? " data-placement=\"" + field.badgeTipPlacement + "\"" : "";
+           html += (field.badgeShow) ? " ng-show=\"" + field.badgeShow + "\"" : "";
+           html += ">";
+        } 
+        
+        html += "<i ";
+        html += (field.badgeShow) ? "ng-show=\"" + field.badgeShow + "\" " : "";
+        html += " class=\"field-badge " + field.badgeIcon;
+        html += (field.badgeClass) ? " " + field.badgeClass : "";
+        html += "\"></i>";
+
+        if (field.badgeToolTip) {
+           html += "</a>";
+        }
+        
+        html += "\n";
+
+        return html;
+
+        }  
+        }])
+
+    .factory('Column', ['Attr', 'Icon', 'DropDown', 'Badge', function(Attr, Icon, DropDown, Badge) {
     return function(params) {
         var list = params['list'];
         var fld = params['fld'];
@@ -159,6 +187,11 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
 
            // Add ngShow
            html += (field.ngShow) ? "<span " + Attr(field,'ngShow') + ">" : "";
+
+           // Badge
+           if (field.badgeIcon && field.badgePlacement && field.badgePlacement == 'left') {
+              html += Badge(field);
+           }
             
            // Add collapse/expand icon  --used on job_events page
            if (list['hasChildren'] && field.hasChildren) {
@@ -173,7 +206,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                  html += "<a href=\"#" + field.linkTo + "\">";
               }
               else if (field.ngClick) {
-                 html += "<a href=\"\"" + Attr(field, 'ngClick') + "\">";
+                 html += "<a href=\"\"" + Attr(field, 'ngClick') + ">";
               }
               else if (field.link == undefined || field.link) {
                  html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
@@ -225,18 +258,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                "></div>\n" : "";
             
            // Badge
-           if (field.badgeIcon) {
-              if (field.badgeToolTip) {
-                 html += "<a href=\"\" aw-tool-tip=\"" + field.badgeToolTip + "\"";
-                 html += (field.badgePlacement) ? " data-placement=\"" + field.badgePlacement + "\"" : "";
-                 html += (field.badgeShow) ? " ng-show=\"" + field.badgeShow + "\"" : "" 
-                 html += ">";
-                 html += " <i class=\"field-badge " + field.badgeIcon + "\"></i></a>\n";
-              }
-              else {
-                 html += " <i class=\"field-badge " + field.badgeIcon + "\" ";
-                 html += "ng-show=\"" + field.badgeShow + "\"></i>\n";
-              }
+           if (field.badgeIcon && field.badgePlacement && field.badgePlacement !== 'left') {
+              html += Badge(field);
            }
         }
 

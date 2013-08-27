@@ -421,7 +421,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                    elm = angular.element(e.target);
                 }
                 
-                var sibling = angular.element(parent.children()[1]); // <a>
+                var sibling = angular.element(parent.children()[2]); // <a>
                 var state = parent.attr('data-state');
                 var icon = angular.element(elm.children()[0]);
 
@@ -449,6 +449,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                     }
                     else {
                        icon.removeClass('icon-caret-right').addClass('icon-caret-down');
+                       parent.attr('data-state','open'); 
                        //activate(e);
                     }
                     });
@@ -485,7 +486,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                 else {
                    // close the element
                    parent.attr('data-state','closed'); 
-                   var icon = angular.element(elm.children()[0]);
                    icon.removeClass('icon-caret-down').addClass('icon-caret-right');
                    var childlists = parent.find('ul');
                    if (childlists && childlists.length > 0) {
@@ -525,15 +525,14 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                             html += "date-state=\"closed\" ";
                             html += "data-hosts=\"" + data.results[i].related.all_hosts + "\" ";
                             html += "data-description=\"" + data.results[i].description + "\" ";
-                            html += "data-failures=\"" +data.results[i].has_active_failures + "\" ";
+                            html += "data-failures=\"" + data.results[i].has_active_failures + "\" ";
                             html += "data-groups=\"" + data.results[i].related.children + "\" ";
                             html += "data-name=\"" + data.results[i].name + "\" ";
                             html += "data-group-id=\"" + data.results[i].id + "\">";
                             html += "<a href=\"\" class=\"expand\"><i class=\"icon-caret-right\"></i></a> ";
-                            html += "<a href=\"\" class=\"activate\">" + data.results[i].name + "</a> ";
-                            html += "<a href=\"\" aw-tool-tip=\"Contains hosts with failed jobs\" ng-show=\"" +
-                                data.results[i].has_active_failures + "\" data-placement=\"bottom\">" +
-                                "<i class=\"field-badge icon-exclamation-sign\"></i></a></li>\n";
+                            html += "<i class=\"field-badge icon-failures-" +  data.results[i].has_active_failures + "\"></i>";
+                            html += " <a href=\"\" class=\"activate\">" + data.results[i].name + "</a> ";
+                            html += "</li>\n";
                         }
                         html = (html !== '') ? "<ul>" + html + "</ul>\n" : "";
                         var compiled = $compile(html)(scope);
@@ -570,7 +569,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                Wait('start');
                var container = angular.element(document.getElementById('search-tree-container'));
                container.empty();
-               var html = "<ul>\n" +
+               var html = "<div class=\"title\">Group Selector:</div>\n" +
+                   "<ul>\n" +
                    "<li id=\"search-node-1000\" data-state=\"closed\" data-hosts=\"{{ treeData[0].hosts}}\" " +
                    "data-hosts=\"{{ treeData[0].hosts }}\" " +
                    "data-description=\"{{ treeData[0].description }}\" " + 
@@ -578,9 +578,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                    "data-groups=\"{{ treeData[0].groups }}\" " + 
                    "data-name=\"{{ treeData[0].name }}\" " +
                    "><a href=\"\" class=\"expand\"><i class=\"icon-caret-right\"></i></a> " +
+                   "<i class=\"field-badge \{\{ 'icon-failures-' + treeData[0].failures \}\}\"></i> " +
                    "<a href=\"\" class=\"activate active\">{{ treeData[0].name }}</a> " +
-                   "<a href=\"\" aw-tool-tip=\"Contains hosts with failed jobs\" ng-show=\"\{\{ treeData[0].failures \}\}\" data-placement=\"bottom\">" +
-                   "<i class=\"field-badge icon-exclamation-sign\"></i></a>" +
                    "</li>\n" +
                    "</ul>\n";
                var compiled = $compile(html)(scope);
@@ -591,7 +590,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                    $('#search-node-1000 .expand').click();
                    $('#search-node-1000 .activate').click();
                    Wait('stop');
-                   }, 1000);  
+                   }, 500);  
                });
 
             }

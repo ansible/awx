@@ -15,9 +15,6 @@ angular.module('InventoryFormDefinition', [])
         name: 'inventory',
         parseTypeName: 'inventoryParseType',
         well: true,
-        /*,
-        formLabelSize: 'col-lg-3',
-        formFieldSize: 'col-lg-9',*/
 
         fields: {
             inventory_name: {
@@ -63,7 +60,7 @@ angular.module('InventoryFormDefinition', [])
                     '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
                 dataTitle: 'Inventory Variables',
                 dataPlacement: 'bottom',
-                dataContainer: '#form-modal .modal-content'
+                dataContainer: '#inventory'
                 }
             },
 
@@ -86,56 +83,6 @@ angular.module('InventoryFormDefinition', [])
 
         related: {
 
-            groups: {
-                type: 'tree',
-                open: true,
-                actions: { 
-                    }
-                },
-
-            hosts: {
-                type: 'treeview',
-                title: "groupTitle",
-                iterator: 'host',
-                
-                actions: {
-                    },
-                
-                fields: {
-                    name: {
-                        key: true,
-                        label: 'Host Name',
-                        ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
-                        badgeShow: "\{\{ host.has_active_failures \}\}",
-                        badgeIcon: 'icon-exclamation-sign',
-                        badgeToolTip: 'Most recent job failed',
-                        badgePlacement: 'bottom',
-                        columnClass: 'col-lg-3'
-                        },
-                    groups: {
-                        label: 'Groups',
-                        searchable: false,
-                        sourceModel: 'groups',
-                        sourceField: 'name',
-                        nosort: true
-                        },
-                    dropdown: {
-                        type: 'DropDown',
-                        label: 'View',
-                        "class": "btn-sm",
-                        ngDisabled: 'host.last_job == null',
-                        options: [
-                            { ngClick: 'viewJobs(\{\{ host.last_job \}\})', label: 'Latest job' },
-                            { ngClick: "viewLastEvents(\{\{ host.id \}\}, '\{\{ host.last_job \}\}', '\{\{ host.name \}\}', " +
-                                "'\{\{ host.summary_fields.last_job.name \}\}')", label: 'Latest job events' },
-                            { ngClick: "viewLastSummary(\{\{ host.id \}\}, '\{\{ host.last_job \}\}', '\{\{ host.name \}\}', " +
-                                "'\{\{ host.summary_fields.last_job.name \}\}')", label: 'Latest host summary' }
-                            ]
-                        }
-                    },
-                fieldActions: {
-                    }
-                }
             }
 
     }); //InventoryForm

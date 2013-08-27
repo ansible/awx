@@ -29,6 +29,8 @@ angular.module('ansible', [
     'InventoriesListDefinition',
     'InventoryFormDefinition',
     'InventoryHelper',
+    'InventoryHostsFormDefinition',
+    'InventoryGroupsFormDefinition',
     'AWFilters',
     'HostFormDefinition',
     'HostListDefinition',
@@ -114,6 +116,12 @@ angular.module('ansible', [
 
             when('/inventories/:id', 
                 { templateUrl: urlPrefix + 'partials/inventories.html', controller: InventoriesEdit }).
+
+            when('/inventories/:inventory_id/hosts', 
+                { templateUrl: urlPrefix + 'partials/inventories.html', controller: InventoryHosts }).
+
+            when('/inventories/:inventory_id/groups', 
+                { templateUrl: urlPrefix + 'partials/inventories.html', controller: InventoryGroups }).
 
             when('/organizations', { templateUrl: urlPrefix + 'partials/organizations.html',
                                      controller: OrganizationsList }).

@@ -22,10 +22,8 @@ angular.module('InventoriesListDefinition', [])
             name: {
                 key: true,
                 label: 'Name',
-                badgeShow: "\{\{ inventory.has_active_failures \}\}",
-                badgeIcon: 'icon-exclamation-sign',
-                badgeToolTip: 'Contains hosts with active job failures',
-                badgePlacement: 'bottom'
+                badgeIcon: "\{\{ 'icon-failures-' + inventory.has_active_failures \}\}",
+                badgePlacement: 'left'
                 },
             description: {
                 label: 'Description'
@@ -54,7 +52,7 @@ angular.module('InventoriesListDefinition', [])
             
             dropdown: {
                 type: 'DropDown',
-                label: 'View',
+                label: 'View Jobs',
                 'class': 'btn-xs',
                 options: [
                     { ngClick: 'viewJobs(\{\{ inventory.id \}\})', label: 'Jobs' },
@@ -62,16 +60,30 @@ angular.module('InventoriesListDefinition', [])
                     ]
                 },
 
+            hosts: {
+                label: 'Hosts',
+                ngClick: "editHosts(\{\{ inventory.id \}\})",
+                icon: 'icon-th-large',
+                "class": 'btn-xs btn-default',
+                awToolTip: 'Edit Hosts'
+                },
+
+            groups: {
+                label: 'Groups',
+                ngClick: "editGroups(\{\{ inventory.id \}\})",
+                icon: 'icon-group',
+                "class": 'btn-xs btn-default',
+                awToolTip: 'Edit Groups'
+                },
+
             edit: {
-                label: 'Edit',
                 ngClick: "editInventory(\{\{ inventory.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
-                awToolTip: 'View/Edit inventory'
+                awToolTip: 'Edit Inventory Properties'
                 },
 
             "delete": {
-                label: 'Delete',
                 ngClick: "deleteInventory(\{\{ inventory.id \}\},'\{\{ inventory.name \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',
