@@ -6,6 +6,7 @@ import hmac
 import json
 import logging
 import os
+import re
 import shlex
 
 # PyYAML
@@ -669,6 +670,7 @@ class Project(CommonModel):
 
     @property
     def playbooks(self):
+        valid_re = re.compile(r'^\s*?-?\s*?(?:hosts|include):\s*?.*?$')
         results = []
         project_path = self.get_project_path()
         if project_path:
@@ -677,17 +679,17 @@ class Project(CommonModel):
                     if os.path.splitext(filename)[-1] != '.yml':
                         continue
                     playbook = os.path.join(dirpath, filename)
-                    # Filter any invalid YAML files.
-                    try:
-                        data = yaml.safe_load(file(playbook).read())
-                    except (IOError, yaml.YAMLError):
-                        continue
                     # Filter files that do not have either hosts or top-level
-                    # includes.
+                    # includes. Use regex to allow files with invalid YAML to
+                    # show up.
+                    matched = False
                     try:
-                        if 'hosts' not in data[0] and 'include' not in data[0]:
-                            continue
-                    except (TypeError, IndexError, KeyError):
+                        for line in file(playbook):
+                            if valid_re.match(line):
+                                matched = True
+                    except IOError:
+                        continue
+                    if not matched:
                         continue
                     playbook = os.path.relpath(playbook, project_path)
                     # Filter files in a roles subdirectory.

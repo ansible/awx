@@ -118,11 +118,11 @@ class ProjectsTest(BaseTest):
         self.assertEqual(len(project.playbooks), 1)
         write_test_file(project, 'blah.yml', '')
         self.assertEqual(len(project.playbooks), 1)
-        # Invalid YAML
+        # Invalid YAML (now allowed to show)
         project = self.projects[4]
         self.assertEqual(len(project.playbooks), 1)
         write_test_file(project, 'blah.yml', TEST_PLAYBOOK + '----')
-        self.assertEqual(len(project.playbooks), 1)
+        self.assertEqual(len(project.playbooks), 2)
         # No hosts or includes
         project = self.projects[5]
         self.assertEqual(len(project.playbooks), 1)
