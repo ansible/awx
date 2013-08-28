@@ -26,6 +26,14 @@ TEST_PLAYBOOK2 = '''- hosts: test-group
     command: test 1 = 0
 '''
 
+TEST_IGNORE_ERRORS_PLAYBOOK = '''- hosts: test-group
+  gather_facts: False
+  tasks:
+  - name: should fail
+    command: test 1 = 0
+    ignore_errors: true
+'''
+
 TEST_ASYNC_OK_PLAYBOOK = '''
 - hosts: test-group
   gather_facts: false
@@ -256,7 +264,8 @@ class RunJobTest(BaseCeleryTest):
                              job.result_traceback)
 
     def check_job_events(self, job, runner_status='ok', plays=1, tasks=1,
-                         async=False, async_timeout=False, async_nowait=False):
+                         async=False, async_timeout=False, async_nowait=False,
+                         check_ignore_errors=False):
         job_events = job.job_events.all()
         if False and async:
             print
@@ -307,7 +316,10 @@ class RunJobTest(BaseCeleryTest):
                 self.assertEqual(evt.changed, should_be_changed)
             self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
                              host_pks)
-        qs = job_events.filter(event=('runner_on_%s' % runner_status))
+        if check_ignore_errors:
+            qs = job_events.filter(event='runner_on_failed')
+        else:
+            qs = job_events.filter(event=('runner_on_%s' % runner_status))
         if async and async_timeout:
             pass
         elif async:
@@ -347,7 +359,10 @@ class RunJobTest(BaseCeleryTest):
                 self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
                                  host_pks)
         qs = job_events.filter(event__startswith='runner_')
-        qs = qs.exclude(event=('runner_on_%s' % runner_status))
+        if check_ignore_errors:
+            qs = qs.exclude(event='runner_on_failed')
+        else:
+            qs = qs.exclude(event=('runner_on_%s' % runner_status))
         if async:
             if runner_status == 'failed':
                 qs = qs.exclude(event='runner_on_ok')
@@ -437,6 +452,33 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.skipped_hosts.count(), 0)
         self.assertEqual(job.processed_hosts.count(), 1)
         return job
+
+    def test_run_job_with_ignore_errors(self):
+        self.create_test_project(TEST_IGNORE_ERRORS_PLAYBOOK)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.get_passwords_needed_to_start())
+        self.assertTrue(job.start())
+        self.assertEqual(job.status, 'pending')
+        job = Job.objects.get(pk=job.pk)
+        self.check_job_result(job, 'successful')
+        self.check_job_events(job, 'ok', 1, 1, check_ignore_errors=True)
+        for job_host_summary in job.job_host_summaries.all():
+            self.assertFalse(job_host_summary.failed)
+            self.assertEqual(job_host_summary.host.last_job_host_summary, job_host_summary)
+        self.host = Host.objects.get(pk=self.host.pk)
+        self.assertEqual(self.host.last_job, job)
+        self.assertFalse(self.host.has_active_failures)
+        for group in self.host.all_groups:
+            self.assertFalse(group.has_active_failures)
+        self.assertFalse(self.host.inventory.has_active_failures)
+        self.assertEqual(job.successful_hosts.count(), 1)
+        self.assertEqual(job.failed_hosts.count(), 0)
+        self.assertEqual(job.changed_hosts.count(), 1)
+        self.assertEqual(job.unreachable_hosts.count(), 0)
+        self.assertEqual(job.skipped_hosts.count(), 0)
+        self.assertEqual(job.processed_hosts.count(), 1)
 
     def test_update_has_active_failures_when_inventory_changes(self):
         job = self.test_run_job_that_fails()

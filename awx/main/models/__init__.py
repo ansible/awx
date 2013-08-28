@@ -1486,7 +1486,8 @@ class JobEvent(models.Model):
             except (AttributeError, TypeError):
                 pass
         if self.event in self.FAILED_EVENTS:
-            self.failed = True
+            if not self.event_data.get('ignore_errors', False):
+                self.failed = True
         if isinstance(res, dict) and res.get('changed', False):
             self.changed = True
         if self.event == 'playbook_on_stats':
