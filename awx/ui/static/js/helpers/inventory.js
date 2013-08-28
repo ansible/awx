@@ -31,6 +31,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var treeData = [];
 
         // Ater inventory top-level hosts, load top-level groups
+        /*
         if (scope.inventoryLoadedRemove) {
             scope.inventoryLoadedRemove();
         }
@@ -67,6 +68,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     Alert('Error', 'Failed to laod tree data. Url: ' + groups + ' GET status: ' + status);
                     });
             });
+          */
 
           treeData =
               [{ 
@@ -78,7 +80,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                   id: 'inventory-node',
                   url: inventory_url,
                   'inventory_id': inventory_id,
-                  hosts: hosts,
                   name: inventory_name,
                   description: inventory_descr,
                   "data-failures": inventory.has_active_failures
@@ -86,8 +87,44 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
               state: 'open',
               children:[] 
               }];
-          scope.$emit('inventoryLoaded');
-           
+          
+          function addNodes(tree, data) {
+              for (var i=0; i < data.length; i++) {
+                  tree.children.push({
+                      data: {
+                          title: data[i].name
+                          },
+                      attr: {
+                          id: idx,
+                          group_id: data[i].id,
+                          type: 'group',
+                          name: data[i].name, 
+                          description: data[i].description,
+                          "data-failures": data[i].has_active_failures,
+                          inventory: data[i].inventory
+                          },
+                      state: 'open',
+                      children:[]
+                      });
+                  idx++;
+                  if (data[i].children.length > 0) {
+                     var node = tree.children.length - 1;
+                     addNodes(tree.children[node], data[i].children);
+                  }
+              }
+          }
+
+          Rest.setUrl(scope.treeData); 
+          Rest.get()
+              .success( function(data, status, headers, config) { 
+                  addNodes(treeData[0], data);
+                  scope.$emit('buildTree', treeData, idx);  
+              })
+              .error( function(data, status, headers, config) {
+                  ProcessErrors(scope, data, status, form,
+                      { hdr: 'Error!', msg: 'Failed to retrieve inventory tree data. GET returned status: ' + status });
+              });
+
         }
         }])
 
@@ -127,7 +164,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     "select_limit": 1 
                     },
                 "json_data": {
-                    data: treeData,
+                    data: treeData
+                    /*,
                     ajax: {
                         url: function(node){
                             scope.selected_node = node;
@@ -161,6 +199,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                             return response;
                             }
                         }
+                        */
                     },
                 "dnd": { },
                 "crrm": { 
@@ -354,7 +393,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 scope.TreeParams = { scope: scope, inventory: data };
                 scope.variable_url = data.related.variable_data;
                 scope.relatedSets['hosts'] = { url: data.related.hosts, iterator: 'host' };
-                
+                scope.treeData = data.related.tree;
+
                 // Load the tree view
                 if (params.doPostSteps) {
                    RelatedSearchInit({ scope: scope, form: form, relatedSets: scope.relatedSets });

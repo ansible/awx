@@ -1022,7 +1022,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  html += "<td>";
                  html += "<div class=\"input-group input-group-sm\">\n";
                  html += "<span class=\"input-group-btn\">\n";
-                 html += "<button class=\"btn btn-default\" type=\"button\" ng-click=\"editHostGroups({{ host.id }})\"><i class=\"icon-list\"></i></button>\n";
+                 html += "<button class=\"btn btn-default\" type=\"button\" ng-click=\"editHostGroups({{ host.id }})\"><i class=\"icon-sitemap\"></i></button>\n";
                  html += "</span>\n";
                  html += "<input type=\"text\" ng-model=\"host.groups\" class=\"form-control\" disabled=\"disabled\" >\n";
                  html += "</div>\n";

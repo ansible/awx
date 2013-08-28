@@ -8,11 +8,9 @@
  */
 
 function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryGroupsForm,
-                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
-                          RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
-                          OrganizationList, TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
-                          GroupsDelete, HostsList, HostsAdd, HostsEdit, HostsDelete, RefreshGroupName, ParseTypeChange,
-                          HostsReload, EditInventory, RefreshTree, LoadSearchTree, EditHostGroups) 
+                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt,
+                          TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
+                          GroupsDelete, RefreshGroupName, EditInventory) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -38,7 +36,7 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
        }
        });
 
-   LoadInventory({ scope: scope, doPostSteps: true });
+   LoadInventory({ scope: scope, doPostSteps: false });
 
    scope.treeController = function($node) {
 
@@ -184,11 +182,9 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
 
 }
 
-InventoryGroups.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryGroupsForm', 
-                            'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
-                            'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
-                            'OrganizationList', 'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
-                            'GroupsDelete', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete', 'RefreshGroupName',
-                            'ParseTypeChange', 'HostsReload', 'EditInventory', 'RefreshTree', 'LoadSearchTree', 'EditHostGroups'
+InventoryGroups.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryGroupsForm',
+                            'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt',
+                            'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
+                            'GroupsDelete', 'RefreshGroupName', 'EditInventory'
                             ]; 
   

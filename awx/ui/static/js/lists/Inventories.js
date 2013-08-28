@@ -63,7 +63,7 @@ angular.module('InventoriesListDefinition', [])
             hosts: {
                 label: 'Hosts',
                 ngClick: "editHosts(\{\{ inventory.id \}\})",
-                icon: 'icon-th-large',
+                icon: 'icon-laptop',
                 "class": 'btn-xs btn-default',
                 awToolTip: 'Edit Hosts'
                 },
@@ -71,7 +71,7 @@ angular.module('InventoriesListDefinition', [])
             groups: {
                 label: 'Groups',
                 ngClick: "editGroups(\{\{ inventory.id \}\})",
-                icon: 'icon-group',
+                icon: 'icon-sitemap',
                 "class": 'btn-xs btn-default',
                 awToolTip: 'Edit Groups'
                 },
