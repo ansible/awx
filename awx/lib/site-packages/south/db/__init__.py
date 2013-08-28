@@ -12,7 +12,8 @@ engine_modules = {
     'django.db.backends.mysql': 'mysql',
     'mysql_oursql.standard': 'mysql',
     'django.db.backends.oracle': 'oracle',
-    'sql_server.pyodbc': 'sql_server.pyodbc', #django-pyodbc
+    'sql_server.pyodbc': 'sql_server.pyodbc', #django-pyodbc-azure
+    'django_pyodbc': 'sql_server.pyodbc', #django-pyodbc
     'sqlserver_ado': 'sql_server.pyodbc', #django-mssql
     'firebird': 'firebird', #django-firebird
     'django.contrib.gis.db.backends.postgis': 'postgresql_psycopg2',

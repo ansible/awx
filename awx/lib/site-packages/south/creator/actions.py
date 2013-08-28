@@ -137,12 +137,14 @@ class _NullIssuesField(object):
     A field that might need to ask a question about rogue NULL values.
     """
 
-    allow_third_null_option = False
+    issue_with_backward_migration = False
     irreversible = False
 
     IRREVERSIBLE_TEMPLATE = '''
         # User chose to not deal with backwards NULL issues for '%(model_name)s.%(field_name)s'
-        raise RuntimeError("Cannot reverse this migration. '%(model_name)s.%(field_name)s' and its values cannot be restored.")'''
+        raise RuntimeError("Cannot reverse this migration. '%(model_name)s.%(field_name)s' and its values cannot be restored.")
+        
+        # The following code is provided here to aid in writing a correct migration'''
 
     def deal_with_not_null_no_default(self, field, field_def):
         # If it's a CharField or TextField that's blank, skip this step.
@@ -156,17 +158,17 @@ class _NullIssuesField(object):
         ))
         print(" ? Since you are %s, you MUST specify a default" % self.null_reason)
         print(" ? value to use for existing rows. Would you like to:")
-        print(" ?  1. Quit now, and add a default to the field in models.py")
+        print(" ?  1. Quit now"+("." if self.issue_with_backward_migration else ", and add a default to the field in models.py" ))
         print(" ?  2. Specify a one-off value to use for existing columns now")
-        if self.allow_third_null_option:
-            print(" ?  3. Disable the backwards migration by raising an exception.")
+        if self.issue_with_backward_migration:
+            print(" ?  3. Disable the backwards migration by raising an exception; you can edit the migration to fix it later")
         while True:
             choice = raw_input(" ? Please select a choice: ")
             if choice == "1":
                 sys.exit(1)
             elif choice == "2":
                 break
-            elif choice == "3" and self.allow_third_null_option:
+            elif choice == "3" and self.issue_with_backward_migration:
                 break
             else:
                 print(" ! Invalid choice.")
@@ -266,7 +268,7 @@ class DeleteField(AddField):
     """
 
     null_reason = "removing this field"
-    allow_third_null_option = True
+    issue_with_backward_migration = True
 
     def console_line(self):
         "Returns the string to print on the console, e.g. ' + Added field foo'"
@@ -283,7 +285,7 @@ class DeleteField(AddField):
         if not self.irreversible:
             return AddField.forwards_code(self)
         else:
-            return self.irreversable_code(self.field)
+            return self.irreversable_code(self.field) + AddField.forwards_code(self)
 
 
 class ChangeField(Action, _NullIssuesField):
@@ -315,7 +317,7 @@ class ChangeField(Action, _NullIssuesField):
             self.deal_with_not_null_no_default(self.new_field, self.new_def)
         if not self.old_field.null and self.new_field.null and not old_default:
             self.null_reason = "making this field nullable"
-            self.allow_third_null_option = True
+            self.issue_with_backward_migration = True
             self.deal_with_not_null_no_default(self.old_field, self.old_def)
     
     def console_line(self):
@@ -353,10 +355,11 @@ class ChangeField(Action, _NullIssuesField):
         return self._code(self.old_field, self.new_field, self.new_def)
 
     def backwards_code(self):
+        change_code = self._code(self.new_field, self.old_field, self.old_def)
         if not self.irreversible:
-            return self._code(self.new_field, self.old_field, self.old_def)
+            return change_code
         else:
-            return self.irreversable_code(self.old_field)
+            return self.irreversable_code(self.old_field) + change_code
 
 
 class AddUnique(Action):

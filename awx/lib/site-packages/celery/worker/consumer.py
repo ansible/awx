@@ -80,6 +80,8 @@ import threading
 from time import sleep
 from Queue import Empty
 
+from billiard.common import restart_state
+from billiard.exceptions import RestartFreqExceeded
 from kombu.syn import _detect_environment
 from kombu.utils.encoding import safe_repr, safe_str, bytes_t
 from kombu.utils.eventio import READ, WRITE, ERR
@@ -99,6 +101,13 @@ from . import state
 from .bootsteps import StartStopComponent
 from .control import Panel
 from .heartbeat import Heart
+
+try:
+    buffer_t = buffer
+except NameError:  # pragma: no cover
+
+    class buffer_t(object):  # noqa
+        pass
 
 RUN = 0x1
 CLOSE = 0x2
@@ -171,7 +180,7 @@ def debug(msg, *args, **kwargs):
 
 
 def dump_body(m, body):
-    if isinstance(body, buffer):
+    if isinstance(body, buffer_t):
         body = bytes_t(body)
     return "%s (%sb)" % (text.truncate(safe_repr(body), 1024), len(m.body))
 
@@ -348,6 +357,7 @@ class Consumer(object):
         conninfo = self.app.connection()
         self.connection_errors = conninfo.connection_errors
         self.channel_errors = conninfo.channel_errors
+        self._restart_state = restart_state(maxR=5, maxT=1)
 
         self._does_info = logger.isEnabledFor(logging.INFO)
         self.strategies = {}
@@ -390,6 +400,11 @@ class Consumer(object):
         while self._state != CLOSE:
             self.restart_count += 1
             self.maybe_shutdown()
+            try:
+                self._restart_state.step()
+            except RestartFreqExceeded as exc:
+                crit('Frequent restarts detected: %r', exc, exc_info=1)
+                sleep(1)
             try:
                 self.reset_connection()
                 self.consume_messages()
@@ -736,6 +751,7 @@ class Consumer(object):
         # to the current channel.
         self.ready_queue.clear()
         self.timer.clear()
+        state.reserved_requests.clear()
 
         # Re-establish the broker connection and setup the task consumer.
         self.connection = self._open_connection()

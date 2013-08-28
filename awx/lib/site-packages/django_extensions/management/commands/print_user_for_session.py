@@ -1,5 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.contrib.auth.models import User
+try:
+    from django.contrib.auth import get_user_model  # Django 1.5
+except ImportError:
+    from django_extensions.future_1_5 import get_user_model
 from django.contrib.sessions.models import Session
 import re
 
@@ -38,6 +41,7 @@ class Command(BaseCommand):
             print('No user associated with session')
             return
         print("User id: %s" % uid)
+        User = get_user_model()
         try:
             user = User.objects.get(pk=uid)
         except User.DoesNotExist:

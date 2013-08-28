@@ -1,3 +1,4 @@
+import six
 import django
 from django import forms
 from django.conf import settings
@@ -67,7 +68,7 @@ class ForeignKeySearchInput(ForeignKeyRawIdWidget):
         if value:
             label = self.label_for_value(value)
         else:
-            label = u''
+            label = six.u('')
 
         try:
             admin_media_prefix = settings.ADMIN_MEDIA_PREFIX
@@ -92,4 +93,4 @@ class ForeignKeySearchInput(ForeignKeyRawIdWidget):
             'django_extensions/widgets/foreignkey_searchinput.html',
         ), context))
         output.reverse()
-        return mark_safe(u''.join(output))
+        return mark_safe(six.u(''.join(output)))

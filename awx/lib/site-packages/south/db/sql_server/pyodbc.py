@@ -242,19 +242,15 @@ class DatabaseOperations(generic.DatabaseOperations):
     
     def _alter_set_defaults(self, field, name, params, sqls): 
         "Subcommand of alter_column that sets default values (overrideable)"
-        # First drop the current default if one exists
+        # Historically, we used to set defaults here.
+        # But since South 0.8, we don't ever set defaults on alter-column -- we only
+        # use database-level defaults as scaffolding when adding columns.
+        # However, we still sometimes need to remove defaults in alter-column.
         table_name = self.quote_name(params['table_name'])
         drop_default = self.drop_column_default_sql(table_name, name)
         if drop_default:
             sqls.append((drop_default, []))
             
-        # Next, set any default
-        
-        if field.has_default():
-            default = field.get_default()
-            literal = self._value_to_unquoted_literal(field, default)
-            sqls.append(('ADD DEFAULT %s for %s' % (self._quote_string(literal), self.quote_name(name),), []))
-
     def _value_to_unquoted_literal(self, field, value):
         # Start with the field's own translation
         conn = self._get_connection()
@@ -432,6 +428,7 @@ class DatabaseOperations(generic.DatabaseOperations):
             INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
             INNER JOIN sys.indexes i ON i.object_id = t.object_id
             INNER JOIN sys.index_columns ic ON ic.object_id = t.object_id
+                                            AND ic.index_id = i.index_id
             INNER JOIN sys.columns c ON c.object_id = t.object_id 
                                      AND ic.column_id = c.column_id
             WHERE i.is_unique=0 AND i.is_primary_key=0 AND i.is_unique_constraint=0

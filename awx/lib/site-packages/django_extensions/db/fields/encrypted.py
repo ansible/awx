@@ -21,8 +21,11 @@ class BaseEncryptedField(models.Field):
 
     def __init__(self, *args, **kwargs):
         if not hasattr(settings, 'ENCRYPTED_FIELD_KEYS_DIR'):
-            raise ImproperlyConfigured('You must set the ENCRYPTED_FIELD_KEYS_DIR setting to your Keyczar keys directory.')
-        self.crypt = keyczar.Crypter.Read(settings.ENCRYPTED_FIELD_KEYS_DIR)
+            raise ImproperlyConfigured('You must set the ENCRYPTED_FIELD_KEYS_DIR '
+                                       'setting to your Keyczar keys directory.')
+
+        crypt_class = self.get_crypt_class()
+        self.crypt = crypt_class.Read(settings.ENCRYPTED_FIELD_KEYS_DIR)
 
         # Encrypted size is larger than unencrypted
         self.unencrypted_length = max_length = kwargs.get('max_length', None)
@@ -33,6 +36,32 @@ class BaseEncryptedField(models.Field):
             kwargs['max_length'] = max_length
 
         super(BaseEncryptedField, self).__init__(*args, **kwargs)
+
+    def get_crypt_class(self):
+        """
+        Get the Keyczar class to use.
+
+        The class can be customized with the ENCRYPTED_FIELD_MODE setting. By default,
+        this setting is DECRYPT_AND_ENCRYPT. Set this to ENCRYPT to disable decryption.
+        This is necessary if you are only providing public keys to Keyczar.
+
+        Returns:
+            keyczar.Encrypter if ENCRYPTED_FIELD_MODE is ENCRYPT.
+            keyczar.Crypter if ENCRYPTED_FIELD_MODE is DECRYPT_AND_ENCRYPT.
+
+        Override this method to customize the type of Keyczar class returned.
+        """
+
+        crypt_type = getattr(settings, 'ENCRYPTED_FIELD_MODE', 'DECRYPT_AND_ENCRYPT')
+        if crypt_type == 'ENCRYPT':
+            crypt_class_name = 'Encrypter'
+        elif crypt_type == 'DECRYPT_AND_ENCRYPT':
+            crypt_class_name = 'Crypter'
+        else:
+            raise ImproperlyConfigured(
+                'ENCRYPTED_FIELD_MODE must be either DECRYPT_AND_ENCRYPT '
+                'or ENCRYPT, not %s.' % crypt_type)
+        return getattr(keyczar, crypt_class_name)
 
     def to_python(self, value):
         if isinstance(self.crypt.primary_key, keyczar.keys.RsaPublicKey):
@@ -64,9 +93,8 @@ class BaseEncryptedField(models.Field):
         return value
 
 
-class EncryptedTextField(BaseEncryptedField):
-    __metaclass__ = models.SubfieldBase
-
+class EncryptedTextField(six.with_metaclass(models.SubfieldBase,
+                                            BaseEncryptedField)):
     def get_internal_type(self):
         return 'TextField'
 
@@ -85,9 +113,8 @@ class EncryptedTextField(BaseEncryptedField):
         return (field_class, args, kwargs)
 
 
-class EncryptedCharField(BaseEncryptedField):
-    __metaclass__ = models.SubfieldBase
-
+class EncryptedCharField(six.with_metaclass(models.SubfieldBase,
+                                            BaseEncryptedField)):
     def __init__(self, *args, **kwargs):
         super(EncryptedCharField, self).__init__(*args, **kwargs)
 
@@ -107,4 +134,3 @@ class EncryptedCharField(BaseEncryptedField):
         args, kwargs = introspector(self)
         # That's our definition!
         return (field_class, args, kwargs)
-

@@ -5,13 +5,13 @@ Generally helpful utility functions.
 
 def _ask_for_it_by_name(name):
     "Returns an object referenced by absolute path."
-    bits = name.split(".")
+    bits = str(name).split(".")
 
     ## what if there is no absolute reference?
-    if len(bits)>1:
+    if len(bits) > 1:
         modulename = ".".join(bits[:-1])
     else:
-        modulename=bits[0]
+        modulename = bits[0]
 
     module = __import__(modulename, {}, {}, bits[-1])
 

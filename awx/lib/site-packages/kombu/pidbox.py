@@ -20,6 +20,7 @@ from time import time
 from . import Exchange, Queue, Consumer, Producer
 from .clocks import LamportClock
 from .common import maybe_declare, oid_from
+from .exceptions import InconsistencyError
 from .utils import cached_property, kwdict, uuid
 
 REPLY_QUEUE_EXPIRES = 10
@@ -215,9 +216,15 @@ class Mailbox(object):
                             delivery_mode='transient',
                             durable=False)
         producer = Producer(chan, auto_declare=False)
-        producer.publish(reply, exchange=exchange, routing_key=routing_key,
-                         declare=[exchange], headers={
-                             'ticket': ticket, 'clock': self.clock.forward()})
+        try:
+            producer.publish(
+                reply, exchange=exchange, routing_key=routing_key,
+                declare=[exchange], headers={
+                    'ticket': ticket, 'clock': self.clock.forward(),
+                },
+            )
+        except InconsistencyError:
+            pass   # queue probably deleted and no one is expecting a reply.
 
     def _publish(self, type, arguments, destination=None,
                  reply_ticket=None, channel=None, timeout=None):

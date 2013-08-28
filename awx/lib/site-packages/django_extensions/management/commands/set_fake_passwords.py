@@ -28,7 +28,11 @@ class Command(NoArgsCommand):
         if not settings.DEBUG:
             raise CommandError('Only available in debug mode')
 
-        from django.contrib.auth.models import User
+        try:
+            from django.contrib.auth import get_user_model  # Django 1.5
+        except ImportError:
+            from django_extensions.future_1_5 import get_user_model
+
         if options.get('prompt_passwd', False):
             from getpass import getpass
             passwd = getpass('Password: ')
@@ -37,6 +41,7 @@ class Command(NoArgsCommand):
         else:
             passwd = options.get('default_passwd', DEFAULT_FAKE_PASSWORD)
 
+        User = get_user_model()
         user = User()
         user.set_password(passwd)
         count = User.objects.all().update(password=user.password)

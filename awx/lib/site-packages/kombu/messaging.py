@@ -276,8 +276,12 @@ class Consumer(object):
     #: consume from.
     queues = None
 
-    #: Flag for message acknowledgment disabled/enabled.
-    #: Enabled by default.
+    #: Flag for automatic message acknowledgment.
+    #: If enabled the messages are automatically acknowledged by the
+    #: broker.  This can increase performance but means that you
+    #: have no control of when the message is removed.
+    #:
+    #: Disabled by default.
     no_ack = None
 
     #: By default all entities will be declared at instantiation, if you
@@ -399,6 +403,12 @@ class Consumer(object):
             pass
 
     def add_queue(self, queue):
+        """Add a queue to the list of queues to consume from.
+
+        This will not start consuming from the queue,
+        for that you will have to call :meth:`consume` after.
+
+        """
         queue = queue(self.channel)
         if self.auto_declare:
             queue.declare()
@@ -406,9 +416,26 @@ class Consumer(object):
         return queue
 
     def add_queue_from_dict(self, queue, **options):
+        """This method is deprecated.
+
+        Instead please use::
+
+            consumer.add_queue(Queue.from_dict(d))
+
+        """
         return self.add_queue(Queue.from_dict(queue, **options))
 
     def consume(self, no_ack=None):
+        """Start consuming messages.
+
+        Can be called multiple times, but note that while it
+        will consume from new queues added since the last call,
+        it will not cancel consuming from removed queues (
+        use :meth:`cancel_by_queue`).
+
+        :param no_ack: See :attr:`no_ack`.
+
+        """
         if self.queues:
             no_ack = self.no_ack if no_ack is None else no_ack
 
@@ -441,10 +468,12 @@ class Consumer(object):
             self.channel.basic_cancel(tag)
 
     def consuming_from(self, queue):
+        """Returns :const:`True` if the consumer is currently
+        consuming from queue'."""
         name = queue
         if isinstance(queue, Queue):
             name = queue.name
-        return any(q.name == name for q in self.queues)
+        return name in self._active_tags
 
     def purge(self):
         """Purge messages from all queues.

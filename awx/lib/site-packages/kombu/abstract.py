@@ -1,6 +1,6 @@
 """
-kombu.compression
-=================
+kombu.abstract
+==============
 
 Object utilities.
 

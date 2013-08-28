@@ -210,9 +210,9 @@ def generate_dot(app_labels, **kwargs):
                 if skip_field(field):
                     continue
                 if isinstance(field, OneToOneField):
-                    add_relation(field, '[arrowhead=none, arrowtail=none]')
+                    add_relation(field, '[arrowhead=none, arrowtail=none, dir=both]')
                 elif isinstance(field, ForeignKey):
-                    add_relation(field, '[arrowhead=none, arrowtail=dot]')
+                    add_relation(field, '[arrowhead=none, arrowtail=dot, dir=both]')
 
             for field in appmodel._meta.local_many_to_many:
                 if skip_field(field):
@@ -240,7 +240,7 @@ def generate_dot(app_labels, **kwargs):
                             'type': "inheritance",
                             'name': "inheritance",
                             'label': l,
-                            'arrows': '[arrowhead=empty, arrowtail=none]',
+                            'arrows': '[arrowhead=empty, arrowtail=none, dir=both]',
                             'needs_node': True
                         }
                         # TODO: seems as if abstract models aren't part of models.getModels, which is why they are printed by this without any attributes.

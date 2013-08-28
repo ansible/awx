@@ -69,7 +69,7 @@ class AutoSlugField(SlugField):
             raise ValueError("missing 'populate_from' argument")
         else:
             self._populate_from = populate_from
-        self.separator = kwargs.pop('separator', u'-')
+        self.separator = kwargs.pop('separator', six.u('-'))
         self.overwrite = kwargs.pop('overwrite', False)
         super(AutoSlugField, self).__init__(*args, **kwargs)
 

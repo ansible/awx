@@ -17,6 +17,7 @@ import sys
 import gzip
 from xml.dom.minidom import *  # NOQA
 import re
+import six
 
 #Type dictionary translation types SQL -> Django
 tsd = {
@@ -75,7 +76,7 @@ def dia2django(archivo):
     datos = ppal.getElementsByTagName("dia:diagram")[0].getElementsByTagName("dia:layer")[0].getElementsByTagName("dia:object")
     clases = {}
     herit = []
-    imports = u""
+    imports = six.u("")
     for i in datos:
         #Look for the classes
         if i.getAttribute("type") == "UML - Class":
@@ -165,7 +166,7 @@ def dia2django(archivo):
             a = i.getElementsByTagName("dia:string")
             for j in a:
                 if len(j.childNodes[0].data[1:-1]):
-                    imports += u"from %s.models import *" % j.childNodes[0].data[1:-1]
+                    imports += six.u("from %s.models import *" % j.childNodes[0].data[1:-1])
 
     addparentstofks(herit, clases)
     #Ordering the appearance of classes

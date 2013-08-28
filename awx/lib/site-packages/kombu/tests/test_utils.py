@@ -215,7 +215,7 @@ class test_retry_over_time(TestCase):
             self.myfun, self.Predicate,
             max_retries=1, errback=self.errback, interval_max=14,
         )
-        self.assertEqual(self.index, 2)
+        self.assertEqual(self.index, 1)
         # no errback
         self.assertRaises(
             self.Predicate, utils.retry_over_time,
@@ -230,7 +230,7 @@ class test_retry_over_time(TestCase):
             self.myfun, self.Predicate,
             max_retries=0, errback=self.errback, interval_max=14,
         )
-        self.assertEqual(self.index, 1)
+        self.assertEqual(self.index, 0)
 
 
 class test_cached_property(TestCase):

@@ -11,10 +11,17 @@ if PY3:
     text_type = str
     raw_input = input
 
+    import io
+    StringIO = io.StringIO
+
 else:
     string_types = basestring,
     text_type = unicode
     raw_input = raw_input
+
+    import cStringIO
+    StringIO = cStringIO.StringIO
+
 
 def with_metaclass(meta, base=object):
     """Create a base class with a metaclass."""

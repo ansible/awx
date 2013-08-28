@@ -18,29 +18,26 @@ from celery.utils.compat import THREAD_TIMEOUT_MAX
 
 USE_FAST_LOCALS = os.environ.get('USE_FAST_LOCALS')
 PY3 = sys.version_info[0] == 3
+NEW_EVENT = (sys.version_info[0] == 3) and (sys.version_info[1] >= 3)
 
 _Thread = threading.Thread
-_Event = threading.Event if PY3 else threading._Event
+_Event = threading.Event if NEW_EVENT else threading._Event
 active_count = (getattr(threading, 'active_count', None) or
                 threading.activeCount)
 
 
-class Event(_Event):
+if sys.version_info < (2, 6):
 
-    if not hasattr(_Event, 'is_set'):     # pragma: no cover
+    class Event(_Event):                  # pragma: no cover
         is_set = _Event.isSet
 
-
-class Thread(_Thread):
-
-    if not hasattr(_Thread, 'is_alive'):  # pragma: no cover
+    class Thread(_Thread):                # pragma: no cover
         is_alive = _Thread.isAlive
-
-    if not hasattr(_Thread, 'daemon'):    # pragma: no cover
         daemon = property(_Thread.isDaemon, _Thread.setDaemon)
-
-    if not hasattr(_Thread, 'name'):      # pragma: no cover
         name = property(_Thread.getName, _Thread.setName)
+else:
+    Event = _Event
+    Thread = _Thread
 
 
 class bgThread(Thread):

@@ -258,9 +258,13 @@ class test_Consumer(TestCase):
 
     def test_consuming_from(self):
         consumer = self.connection.Consumer()
-        consumer.queues[:] = [Queue('a'), Queue('b')]
+        consumer.queues[:] = [Queue('a'), Queue('b'), Queue('d')]
+        consumer._active_tags = {'a': 1, 'b': 2}
+
         self.assertFalse(consumer.consuming_from(Queue('c')))
         self.assertFalse(consumer.consuming_from('c'))
+        self.assertFalse(consumer.consuming_from(Queue('d')))
+        self.assertFalse(consumer.consuming_from('d'))
         self.assertTrue(consumer.consuming_from(Queue('a')))
         self.assertTrue(consumer.consuming_from(Queue('b')))
         self.assertTrue(consumer.consuming_from('b'))

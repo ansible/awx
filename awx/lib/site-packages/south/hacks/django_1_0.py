@@ -2,6 +2,7 @@
 Hacks for the Django 1.0/1.0.2 releases.
 """
 
+import django
 from django.conf import settings
 from django.db.backends.creation import BaseDatabaseCreation
 from django.db.models.loading import cache
@@ -51,7 +52,7 @@ class Hacks:
         Used to repopulate AppCache after fiddling with INSTALLED_APPS.
         """
         cache.loaded = False
-        cache.handled = {}
+        cache.handled = set() if django.VERSION >= (1, 6) else {}
         cache.postponed = []
         cache.app_store = SortedDict()
         cache.app_models = SortedDict()

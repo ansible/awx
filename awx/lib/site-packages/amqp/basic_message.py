@@ -44,7 +44,7 @@ class Message(GenericContent):
         ('cluster_id', 'shortstr')
     ]
 
-    def __init__(self, body='', children=None, **properties):
+    def __init__(self, body='', children=None, channel=None, **properties):
         """Expected arg types
 
             body: string
@@ -107,6 +107,7 @@ class Message(GenericContent):
         """
         super(Message, self).__init__(**properties)
         self.body = body
+        self.channel = channel
 
     def __eq__(self, other):
         """Check if the properties and bodies of this Message and another

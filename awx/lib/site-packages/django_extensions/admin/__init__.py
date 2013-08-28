@@ -9,6 +9,7 @@
 # (Michal Salaban)
 #
 
+import six
 import operator
 from six.moves import reduce
 from django.http import HttpResponse, HttpResponseNotFound
@@ -108,8 +109,7 @@ class ForeignKeyAutocompleteAdmin(ModelAdmin):
                     other_qs.dup_select_related(queryset)
                     other_qs = other_qs.filter(reduce(operator.or_, or_queries))
                     queryset = queryset & other_qs
-                data = ''.join([u'%s|%s\n' % (
-                    to_string_function(f), f.pk) for f in queryset])
+                data = ''.join([six.u('%s|%s\n' % (to_string_function(f), f.pk)) for f in queryset])
             elif object_pk:
                 try:
                     obj = queryset.get(pk=object_pk)
@@ -139,7 +139,7 @@ class ForeignKeyAutocompleteAdmin(ModelAdmin):
             model_name = db_field.rel.to._meta.object_name
             help_text = self.get_help_text(db_field.name, model_name)
             if kwargs.get('help_text'):
-                help_text = u'%s %s' % (kwargs['help_text'], help_text)
+                help_text = six.u('%s %s' % (kwargs['help_text'], help_text))
             kwargs['widget'] = ForeignKeySearchInput(db_field.rel, self.related_search_fields[db_field.name])
             kwargs['help_text'] = help_text
         return super(ForeignKeyAutocompleteAdmin, self).formfield_for_dbfield(db_field, **kwargs)

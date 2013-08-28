@@ -1,5 +1,8 @@
-from django.utils.encoding import force_unicode
+from __future__ import unicode_literals
+
+from django.utils.encoding import force_text
 from django.utils.functional import wraps
+from django.utils import six
 
 
 def parse_tags(tagstring):
@@ -16,13 +19,13 @@ def parse_tags(tagstring):
     if not tagstring:
         return []
 
-    tagstring = force_unicode(tagstring)
+    tagstring = force_text(tagstring)
 
     # Special case - if there are no commas or double quotes in the
     # input, we don't *do* a recall... I mean, we know we only need to
     # split on spaces.
-    if u',' not in tagstring and u'"' not in tagstring:
-        words = list(set(split_strip(tagstring, u' ')))
+    if ',' not in tagstring and '"' not in tagstring:
+        words = list(set(split_strip(tagstring, ' ')))
         words.sort()
         return words
 
@@ -36,39 +39,39 @@ def parse_tags(tagstring):
     i = iter(tagstring)
     try:
         while True:
-            c = i.next()
-            if c == u'"':
+            c = six.next(i)
+            if c == '"':
                 if buffer:
-                    to_be_split.append(u''.join(buffer))
+                    to_be_split.append(''.join(buffer))
                     buffer = []
                 # Find the matching quote
                 open_quote = True
-                c = i.next()
-                while c != u'"':
+                c = six.next(i)
+                while c != '"':
                     buffer.append(c)
-                    c = i.next()
+                    c = six.next(i)
                 if buffer:
-                    word = u''.join(buffer).strip()
+                    word = ''.join(buffer).strip()
                     if word:
                         words.append(word)
                     buffer = []
                 open_quote = False
             else:
-                if not saw_loose_comma and c == u',':
+                if not saw_loose_comma and c == ',':
                     saw_loose_comma = True
                 buffer.append(c)
     except StopIteration:
         # If we were parsing an open quote which was never closed treat
         # the buffer as unquoted.
         if buffer:
-            if open_quote and u',' in buffer:
+            if open_quote and ',' in buffer:
                 saw_loose_comma = True
-            to_be_split.append(u''.join(buffer))
+            to_be_split.append(''.join(buffer))
     if to_be_split:
         if saw_loose_comma:
-            delimiter = u','
+            delimiter = ','
         else:
-            delimiter = u' '
+            delimiter = ' '
         for chunk in to_be_split:
             words.extend(split_strip(chunk, delimiter))
     words = list(set(words))
@@ -76,7 +79,7 @@ def parse_tags(tagstring):
     return words
 
 
-def split_strip(string, delimiter=u','):
+def split_strip(string, delimiter=','):
     """
     Splits ``string`` on ``delimiter``, stripping each resulting string
     and returning a list of non-empty strings.
@@ -110,11 +113,11 @@ def edit_string_for_tags(tags):
     names = []
     for tag in tags:
         name = tag.name
-        if u',' in name or u' ' in name:
+        if ',' in name or ' ' in name:
             names.append('"%s"' % name)
         else:
             names.append(name)
-    return u', '.join(sorted(names))
+    return ', '.join(sorted(names))
 
 
 def require_instance_manager(func):

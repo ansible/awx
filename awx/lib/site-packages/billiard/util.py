@@ -244,7 +244,9 @@ class Finalize(object):
         return x + '>'
 
 
-def _run_finalizers(minpriority=None):
+def _run_finalizers(minpriority=None,
+                    _finalizer_registry=_finalizer_registry,
+                    sub_debug=sub_debug, error=error):
     '''
     Run all finalizers whose exit priority is not None and at least minpriority
 
@@ -280,7 +282,9 @@ def is_exiting():
     return _exiting or _exiting is None
 
 
-def _exit_function():
+def _exit_function(info=info, debug=debug,
+                   active_children=active_children,
+                   _run_finalizers=_run_finalizers):
     '''
     Clean up on exit
     '''

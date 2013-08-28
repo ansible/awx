@@ -5,10 +5,6 @@ import datetime
 import inspect
 import sys
 import traceback
-try:
-    from cStringIO import StringIO # python 2
-except ImportError:
-    from io import StringIO # python 3
 
 from django.core.management import call_command
 from django.core.management.commands import loaddata
@@ -19,6 +15,7 @@ from south import exceptions
 from south.db import DEFAULT_DB_ALIAS
 from south.models import MigrationHistory
 from south.signals import ran_migration
+from south.utils.py3 import StringIO
 
 
 class Migrator(object):

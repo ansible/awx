@@ -54,7 +54,8 @@ try:
     def make_aware(value):
         if getattr(settings, 'USE_TZ', False):
             # naive datetimes are assumed to be in UTC.
-            value = timezone.make_aware(value, timezone.utc)
+            if timezone.is_naive(value):
+                value = timezone.make_aware(value, timezone.utc)
             # then convert to the Django configured timezone.
             default_tz = timezone.get_default_timezone()
             value = timezone.localtime(value, default_tz)

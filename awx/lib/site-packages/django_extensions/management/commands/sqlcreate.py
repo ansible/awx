@@ -1,5 +1,6 @@
 from optparse import make_option
 import sys
+import socket
 
 import django
 from django.core.management.base import CommandError, BaseCommand
@@ -57,6 +58,7 @@ The envisioned use case is something like this:
         dbuser = settings.DATABASE_USER
         dbpass = settings.DATABASE_PASSWORD
         dbhost = settings.DATABASE_HOST
+        dbclient = socket.gethostname()
 
         # django settings file tells you that localhost should be specified by leaving
         # the DATABASE_HOST blank
@@ -69,7 +71,7 @@ The envisioned use case is something like this:
 """)
             print("CREATE DATABASE %s CHARACTER SET utf8 COLLATE utf8_bin;" % dbname)
             print("GRANT ALL PRIVILEGES ON %s.* to '%s'@'%s' identified by '%s';" % (
-                dbname, dbuser, dbhost, dbpass
+                dbname, dbuser, dbclient, dbpass
             ))
         elif engine == 'postgresql_psycopg2':
             if options.get('drop'):

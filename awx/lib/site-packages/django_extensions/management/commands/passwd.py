@@ -1,5 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.contrib.auth.models import User
+try:
+    from django.contrib.auth import get_user_model  # Django 1.5
+except ImportError:
+    from django_extensions.future_1_5 import get_user_model
 import getpass
 
 
@@ -17,6 +20,7 @@ class Command(BaseCommand):
         else:
             username = getpass.getuser()
 
+        User = get_user_model()
         try:
             u = User.objects.get(username=username)
         except User.DoesNotExist:

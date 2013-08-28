@@ -68,12 +68,12 @@ class ModelEntry(ScheduleEntry):
     def _default_now(self):
         return self.app.now()
 
-    def next(self):
+    def __next__(self):
         self.model.last_run_at = self.app.now()
         self.model.total_run_count += 1
         self.model.no_changes = True
         return self.__class__(self.model)
-    __next__ = next  # for 2to3
+    next = __next__  # for 2to3
 
     def save(self):
         # Object may not be synchronized, so only

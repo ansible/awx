@@ -614,7 +614,7 @@ class control(_RemoteControl):
     def call(self, method, *args, **options):
         # XXX Python 2.5 doesn't support X(*args, reply=True, **kwargs)
         return getattr(self.app.control, method)(
-            *args, **dict(options, retry=True))
+            *args, **dict(options, reply=True))
 
     def pool_grow(self, method, n=1, **kwargs):
         """[N=1]"""
@@ -866,7 +866,7 @@ class CeleryCommand(BaseCommand):
         cls = self.commands.get(command) or self.commands['help']
         try:
             return cls(app=self.app).run_from_argv(self.prog_name, argv)
-        except (TypeError, Error):
+        except Error:
             return self.execute('help', argv)
 
     def remove_options_at_beginning(self, argv, index=0):

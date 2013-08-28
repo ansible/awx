@@ -71,11 +71,11 @@ class DatabaseOperations(generic.DatabaseOperations):
 
     def _alter_set_defaults(self, field, name, params, sqls):
         "Subcommand of alter_column that sets default values (overrideable)"
-        # Next, set any default
-        if not field.null and field.has_default():
-            default = field.get_default()
-            sqls.append(('ALTER COLUMN %s SET DEFAULT %%s ' % (self.quote_name(name),), [default]))
-        elif self._column_has_default(params):
+        # Historically, we used to set defaults here.
+        # But since South 0.8, we don't ever set defaults on alter-column -- we only
+        # use database-level defaults as scaffolding when adding columns.
+        # However, we still sometimes need to remove defaults in alter-column.
+        if self._column_has_default(params):
             sqls.append(('ALTER COLUMN %s DROP DEFAULT' % (self.quote_name(name),), []))
 
 

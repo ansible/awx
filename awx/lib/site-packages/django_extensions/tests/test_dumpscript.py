@@ -52,7 +52,7 @@ class DumpScriptTests(TestCase):
         tmp_out = StringIO()
         call_command('dumpscript', 'tests', stdout=tmp_out)
         self.assertTrue('Mike' in tmp_out.getvalue())  # script should go to tmp_out
-        self.assertEquals(0, len(sys.stdout.getvalue()))  # there should not be any output to sys.stdout
+        self.assertEqual(0, len(sys.stdout.getvalue()))  # there should not be any output to sys.stdout
         tmp_out.close()
 
     #----------------------------------------------------------------------
@@ -65,7 +65,7 @@ class DumpScriptTests(TestCase):
         call_command('dumpscript', 'tests', stderr=tmp_err)
         self.assertTrue('Fred' in sys.stdout.getvalue())  # script should still go to stdout
         self.assertTrue('Name' in tmp_err.getvalue())  # error output should go to tmp_err
-        self.assertEquals(0, len(sys.stderr.getvalue()))  # there should not be any output to sys.stderr
+        self.assertEqual(0, len(sys.stderr.getvalue()))  # there should not be any output to sys.stderr
         tmp_err.close()
 
     #----------------------------------------------------------------------

@@ -116,6 +116,8 @@ class Command(BaseCommand):
                     help='Specifies the directory from which to serve admin media.'),
         make_option('--prof-path', dest='prof_path', default='/tmp',
                     help='Specifies the directory which to save profile information in.'),
+        make_option('--prof-file', dest='prof_file', default='{path}.{duration:06d}ms.{time}',
+                    help='Set filename format, default if "{path}.{duration:06d}ms.{time}".'),
         make_option('--nomedia', action='store_true', dest='no_media', default=False,
                     help='Do not profile MEDIA_URL and ADMIN_MEDIA_URL'),
         make_option('--use-cprofile', action='store_true', dest='use_cprofile', default=False,
@@ -186,6 +188,11 @@ class Command(BaseCommand):
                 raise SystemExit("Kcachegrind compatible output format required cProfile from Python 2.5")
             prof_path = options.get('prof_path', '/tmp')
 
+            prof_file = options.get('prof_file', '{path}.{duration:06d}ms.{time}')
+            if not prof_file.format(path='1', duration=2, time=3):
+                prof_file = '{path}.{duration:06d}ms.{time}'
+                print("Filename format is wrong. Default format used: '{path}.{duration:06d}ms.{time}'.")
+
             def get_exclude_paths():
                 exclude_paths = []
                 media_url = getattr(settings, 'MEDIA_URL', None)
@@ -225,8 +232,8 @@ class Command(BaseCommand):
                             kg.output(open(profname, 'w'))
                         elif USE_CPROFILE:
                             prof.dump_stats(profname)
-                        profname2 = "%s.%06dms.%d.prof" % (path_name, elapms, time.time())
-                        profname2 = os.path.join(prof_path, profname2)
+                        profname2 = prof_file.format(path=path_name, duration=int(elapms), time=int(time.time()))
+                        profname2 = os.path.join(prof_path, "%s.prof" % profname2)
                         if not USE_CPROFILE:
                             prof.close()
                         os.rename(profname, profname2)
@@ -278,4 +285,3 @@ class Command(BaseCommand):
             autoreload.main(inner_run)
         else:
             inner_run()
-

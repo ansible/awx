@@ -309,21 +309,21 @@ class AutoChanges(BaseChanges):
                         old_together = [old_together]
                     if new_together and isinstance(new_together[0], string_types):
                         new_together = [new_together]
-                    old_together = list(map(set, old_together))
-                    new_together = list(map(set, new_together))
+                    old_together = frozenset(tuple(o) for o in old_together)
+                    new_together = frozenset(tuple(n) for n in new_together)
                     # See if any appeared or disappeared
-                    for item in old_together:
-                        if item not in new_together:
-                            yield (del_operation, {
-                                "model": self.old_orm[key],
-                                "fields": [self.old_orm[key + ":" + x] for x in item],
-                            })
-                    for item in new_together:
-                        if item not in old_together:
-                            yield (add_operation, {
-                                "model": self.current_model_from_key(key),
-                                "fields": [self.current_field_from_key(key, x) for x in item],
-                            })
+                    disappeared = old_together.difference(new_together)
+                    appeared = new_together.difference(old_together)
+                    for item in disappeared:
+                        yield (del_operation, {
+                            "model": self.old_orm[key],
+                            "fields": [self.old_orm[key + ":" + x] for x in item],
+                        })
+                    for item in appeared:
+                        yield (add_operation, {
+                            "model": self.current_model_from_key(key),
+                            "fields": [self.current_field_from_key(key, x) for x in item],
+                        })
 
     @classmethod
     def is_triple(cls, triple):

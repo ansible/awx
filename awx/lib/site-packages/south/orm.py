@@ -181,12 +181,16 @@ class _FakeORM(object):
         "Evaluates the given code in the context of the migration file."
         
         # Drag in the migration module's locals (hopefully including models.py)
-        fake_locals = dict(inspect.getmodule(self.cls).__dict__)
-        
-        # Remove all models from that (i.e. from modern models.py), to stop pollution
-        for key, value in fake_locals.items():
-            if isinstance(value, type) and issubclass(value, models.Model) and hasattr(value, "_meta"):
-                del fake_locals[key]
+        # excluding all models from that (i.e. from modern models.py), to stop pollution
+        fake_locals = dict(
+            (key, value)
+            for key, value in inspect.getmodule(self.cls).__dict__.items()
+            if not (
+                isinstance(value, type)
+                and issubclass(value, models.Model)
+                and hasattr(value, "_meta")
+            )
+        )
         
         # We add our models into the locals for the eval
         fake_locals.update(dict([

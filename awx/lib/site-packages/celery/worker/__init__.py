@@ -19,6 +19,7 @@ import time
 import traceback
 
 from functools import partial
+from weakref import WeakValueDictionary
 
 from billiard.exceptions import WorkerLostError
 from billiard.util import Finalize
@@ -26,6 +27,7 @@ from kombu.syn import detect_environment
 
 from celery import concurrency as _concurrency
 from celery import platforms
+from celery import signals
 from celery.app import app_or_default
 from celery.app.abstract import configurated, from_config
 from celery.exceptions import SystemTerminate, TaskRevokedError
@@ -105,6 +107,7 @@ class Pool(bootsteps.StartStopComponent):
         add_reader = hub.add_reader
         remove = hub.remove
         now = time.time
+        cache = pool._pool._cache
 
         # did_start_ok will verify that pool processes were able to start,
         # but this will only work the first time we start, as
@@ -120,25 +123,58 @@ class Pool(bootsteps.StartStopComponent):
         for handler, interval in pool.timers.iteritems():
             hub.timer.apply_interval(interval * 1000.0, handler)
 
-        def on_timeout_set(R, soft, hard):
+        trefs = pool._tref_for_id = WeakValueDictionary()
 
-            def _on_soft_timeout():
-                if hard:
-                    R._tref = apply_at(now() + (hard - soft),
-                                       on_hard_timeout, (R, ))
-                on_soft_timeout(R)
-            if soft:
-                R._tref = apply_after(soft * 1000.0, _on_soft_timeout)
-            elif hard:
-                R._tref = apply_after(hard * 1000.0,
-                                      on_hard_timeout, (R, ))
-
-        def on_timeout_cancel(result):
+        def _discard_tref(job):
             try:
-                result._tref.cancel()
-                delattr(result, '_tref')
-            except AttributeError:
-                pass
+                tref = trefs.pop(job)
+                tref.cancel()
+                del(tref)
+            except (KeyError, AttributeError):
+                pass  # out of scope
+
+        def _on_hard_timeout(job):
+            try:
+                result = cache[job]
+            except KeyError:
+                pass  # job ready
+            else:
+                on_hard_timeout(result)
+            finally:
+                # remove tref
+                _discard_tref(job)
+
+        def _on_soft_timeout(job, soft, hard, hub):
+            if hard:
+                trefs[job] = apply_at(
+                    now() + (hard - soft),
+                    _on_hard_timeout, (job, ),
+                )
+            try:
+                result = cache[job]
+            except KeyError:
+                pass  # job ready
+            else:
+                on_soft_timeout(result)
+            finally:
+                if not hard:
+                    # remove tref
+                    _discard_tref(job)
+
+        def on_timeout_set(R, soft, hard):
+            if soft:
+                trefs[R._job] = apply_after(
+                    soft * 1000.0,
+                    _on_soft_timeout, (R._job, soft, hard, hub),
+                )
+            elif hard:
+                trefs[R._job] = apply_after(
+                    hard * 1000.0,
+                    _on_hard_timeout, (R._job, )
+                )
+
+        def on_timeout_cancel(R):
+            _discard_tref(R._job)
 
         pool.init_callbacks(
             on_process_up=lambda w: add_reader(w.sentinel, maintain_pool),
@@ -208,19 +244,18 @@ class Queues(bootsteps.Component):
 
     def create(self, w):
         BucketType = TaskBucket
-        w.start_mediator = not w.disable_rate_limits
+        w.start_mediator = w.pool_cls.requires_mediator
         if not w.pool_cls.rlimit_safe:
-            w.start_mediator = False
             BucketType = AsyncTaskBucket
         process_task = w.process_task
         if w.use_eventloop:
-            w.start_mediator = False
             BucketType = AsyncTaskBucket
             if w.pool_putlocks and w.pool_cls.uses_semaphore:
                 process_task = w.process_task_sem
-        if w.disable_rate_limits:
+        if w.disable_rate_limits or not w.start_mediator:
             w.ready_queue = FastQueue()
-            w.ready_queue.put = process_task
+            if not w.start_mediator:
+                w.ready_queue.put = process_task
         else:
             w.ready_queue = BucketType(
                 task_registry=w.app.tasks, callback=process_task, worker=w,
@@ -327,7 +362,10 @@ class WorkController(configurated):
         self.loglevel = loglevel or self.loglevel
         self.hostname = hostname or socket.gethostname()
         self.ready_callback = ready_callback
-        self._finalize = Finalize(self, self.stop, exitpriority=1)
+        self._finalize = [
+            Finalize(self, self.stop, exitpriority=1),
+            Finalize(self, self._send_worker_shutdown, exitpriority=10),
+        ]
         self.pidfile = pidfile
         self.pidlock = None
         # this connection is not established, only used for params
@@ -349,6 +387,9 @@ class WorkController(configurated):
         self.pool_cls = _concurrency.get_implementation(self.pool_cls)
         self.components = []
         self.namespace = Namespace(app=self.app).apply(self, **kwargs)
+
+    def _send_worker_shutdown(self):
+        signals.worker_shutdown.send(sender=self)
 
     def start(self):
         """Starts the workers main loop."""

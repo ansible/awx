@@ -1,0 +1,64 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-08-01 16:52+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#: forms.py:24
+msgid "Please provide a comma-separated list of tags."
+msgstr "Vložte čárkami oddělený seznam tagů"
+
+#: managers.py:59 models.py:59
+msgid "Tags"
+msgstr "Tagy"
+
+#: managers.py:60
+msgid "A comma-separated list of tags."
+msgstr "Čárkami oddělený seznam tagů"
+
+#: models.py:15
+msgid "Name"
+msgstr "Jméno"
+
+#: models.py:16
+msgid "Slug"
+msgstr "Slug"
+
+#: models.py:58
+msgid "Tag"
+msgstr "Tag"
+
+#: models.py:65
+#, python-format
+msgid "%(object)s tagged with %(tag)s"
+msgstr "%(object)s označen tagem %(tag)s"
+
+#: models.py:112
+msgid "Object id"
+msgstr "ID objektu"
+
+#: models.py:115
+msgid "Content type"
+msgstr "Typ obsahu"
+
+#: models.py:158
+msgid "Tagged Item"
+msgstr "Tagem označená položka"
+
+#: models.py:159
+msgid "Tagged Items"
+msgstr "Tagy označené položky"
