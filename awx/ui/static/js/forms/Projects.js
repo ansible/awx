@@ -49,7 +49,7 @@ angular.module('ProjectFormDefinition', [])
             base_dir: {
                 label: 'Project Base Path',
                 type: 'textarea',
-                "class": 'span6',
+                "class": 'col-lg-6',
                 showonly: true,
                 awPopOver: '<p>Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
                   'Together the base path and selected playbook directory provide the full path used to locate playbooks.</p>' + 
@@ -58,27 +58,30 @@ angular.module('ProjectFormDefinition', [])
                 dataContainer: 'body',
                 dataPlacement: 'right'
                 },
-            local_path: { 
+            scm_type: {
+                label: 'SCM Type',
+                type: 'select',
+                ngOptions: 'type.label for type in scm_type_options',
+                ngChange: 'scmChange()',
+                "default": '',
+                addRequired: false, 
+                editRequired: false
+                },
+            local_path: {
                 label: 'Playbook Directory',
                 type: 'select',
                 id: 'local-path-select',
                 ngOptions: 'path for path in project_local_paths',
-                addRequired: true,
-                editRequired: true,
+                addRequired: false,
+                editRequired: false,
+                awRequiredWhen: { variable: "pathRequired", init: "true" },
+                ngShow: "scm_type == '' || scm_type == null",
                 awPopOver: '<p>Select from the list of directories found in the base path.' +
                   'Together the base path and the playbook directory provide the full path used to locate playbooks.</p>' + 
                   '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
                 dataTitle: 'Project Path',
                 dataContainer: 'body',
                 dataPlacement: 'right'
-                },
-            scm_type: {
-                label: 'SCM Type',
-                type: 'select',
-                ngOptions: 'type.label for type in scm_type_options',
-                "default": '',
-                addRequired: false, 
-                editRequired: false
                 },
             scm_url: {
                 label: 'SCM URL',

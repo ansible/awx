@@ -137,8 +137,16 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        // value, you have clear the model.
        this.scope[this.form.name + '_form'].$setPristine();
        for (var fld in this.form.fields) {
-           this.scope[fld] = '';        
-           this.scope[fld + '_api_error'] = '';
+           if (this.form.fields[fld].type == 'checkbox_group') {
+              for (var i=0; i < this.form.fields[fld].fields.length; i++) {
+                  this.scope[this.form.fields[fld].fields[i].name] = '';
+                  this.scope[this.form.fields[fld].fields[i].name + '_api_error'] = '';
+              }
+           }
+           else {
+              this.scope[fld] = '';      
+              this.scope[fld + '_api_error'] = '';  
+           }
            if (this.form.fields[fld].sourceModel) {
               this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField] = '';
               this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '_api_error'] = '';
@@ -480,6 +488,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
             html += (options.mode == 'add' && field.addRequired) ? "required " : "";
             html += (field.readonly) ? "readonly " : "";
+            html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
+                  field.awRequiredWhen.variable + "\" " : "";
             html += ">\n";  
             html += "<option value=\"\">Choose " + field.label + "</option>\n";
             html += "</select>\n";

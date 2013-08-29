@@ -104,6 +104,8 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    LoadBreadCrumbs();
    GetProjectPath({ scope: scope, master: master });
 
+   scope.scm_type = null;
+   master.scm_type = null;
    scope.scm_type_options = [
        { label: 'GitHub', value: 'git' },
        { label: 'SVN', value: 'svn' }];
@@ -118,45 +120,58 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
 
    // Save
    scope.formSave = function() {
-      var data = {};
-      for (var fld in form.fields) {
-          data[fld] = scope[fld];
-      }
-      if (scope.scm_type) {
-         data.scm_type = scope.scm_type.value;
-      }
-      var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
-      Rest.setUrl(url);
-      Rest.post(data)
-          .success( function(data, status, headers, config) {
-              var id = data.id;
-              var url = GetBasePath('projects') + id + '/organizations/';
-              var org = { id: scope.organization };
-              Rest.setUrl(url);
-              Rest.post(org)
-                  .success( function(data, status, headers, config) {
-                      $rootScope.flashMessage = "New project successfully created!";
-                      (base == 'projects') ? ReturnToCaller() : ReturnToCaller(1);
-                      })
-                  .error( function(data, status, headers, config) {
-                      ProcessErrors(scope, data, status, ProjectsForm,
-                          { hdr: 'Error!', msg: 'Failed to add organization to project. POST returned status: ' + status });
-                      });
-              })
+       var data = {};
+       for (var fld in form.fields) {
+           if (form.fields[fld].type == 'checkbox_group') {
+              for (var i=0; i < form.fields[fld].fields.length; i++) {
+                  data[form.fields[fld].fields[i].name] = scope[form.fields[fld].fields[i].name];
+              }
+           }
+           else {
+              data[fld] = scope[fld];
+           }
+        }
+       if (scope.scm_type) {
+          data.scm_type = scope.scm_type.value;
+          delete data.local_path;
+       }
+       var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
+       Rest.setUrl(url);
+       Rest.post(data)
+           .success( function(data, status, headers, config) {
+               var id = data.id;
+               var url = GetBasePath('projects') + id + '/organizations/';
+               var org = { id: scope.organization };
+               Rest.setUrl(url);
+               Rest.post(org)
+                   .success( function(data, status, headers, config) {
+                       $rootScope.flashMessage = "New project successfully created!";
+                       (base == 'projects') ? ReturnToCaller() : ReturnToCaller(1);
+                       })
+                   .error( function(data, status, headers, config) {
+                       ProcessErrors(scope, data, status, ProjectsForm,
+                           { hdr: 'Error!', msg: 'Failed to add organization to project. POST returned status: ' + status });
+                       });
+               })
           .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, ProjectsForm,
-                  { hdr: 'Error!', msg: 'Failed to create new project. POST returned status: ' + status });
-              });
-      };
+               ProcessErrors(scope, data, status, ProjectsForm,
+                   { hdr: 'Error!', msg: 'Failed to create new project. POST returned status: ' + status });
+               });
+       };
+
+   scope.scmChange = function() {
+       // When an scm_type is set, path is not required
+       scope.pathRequired = (scope.scm_type) ? false : true;
+       }
 
    // Cancel
    scope.formReset = function() {
-      $rootScope.flashMessage = null;
-      generator.reset();
-      for (var fld in master) {
-          scope[fld] = master[fld];
-      }
-      }; 
+       $rootScope.flashMessage = null;
+       generator.reset();
+       for (var fld in master) {
+           scope[fld] = master[fld];
+       }
+       }; 
 }
 
 ProjectsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
@@ -231,9 +246,17 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
        .success( function(data, status, headers, config) {
            LoadBreadCrumbs({ path: '/projects/' + id, title: data.name });
            for (var fld in form.fields) {
-              if (data[fld]) {
-                 scope[fld] = data[fld];
-                 master[fld] = data[fld];
+              if (form.fields[fld].type == 'checkbox_group') {
+                 for (var i=0; i < form.fields[fld].fields.length; i++) {
+                     scope[form.fields[fld].fields[i].name] = data[form.fields[fld].fields[i].name];
+                     master[form.fields[fld].fields[i].name] = data[form.fields[fld].fields[i].name];
+                 }
+              }
+              else {
+                 if (data[fld]) {
+                    scope[fld] = data[fld];
+                    master[fld] = data[fld];
+                 }
               }
            }
            var related = data.related;
@@ -250,7 +273,12 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
                      break;
                   }
               }
+              scope.pathRequired = false;
            }
+           else {
+              scope.pathRequired = true;
+           }
+
            master['scm_type'] = scope['scm_type'];
            setAskCheckboxes();
        
@@ -267,62 +295,70 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    
    // Save changes to the parent
    scope.formSave = function() {
-      $rootScope.flashMessage = null;
-      var params = {};
-      for (var fld in form.fields) {
-          params[fld] = scope[fld];
-      }
-      if (scope.scm_type) {
-         params.scm_type = scope.scm_type.value;
-      }
-      Rest.setUrl(defaultUrl);
-      Rest.put(params)
-          .success( function(data, status, headers, config) {
-              ReturnToCaller();
-              })
-          .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, form,
-                { hdr: 'Error!', msg: 'Failed to update project: ' + id + '. PUT status: ' + status });
-              });
-      };
+       $rootScope.flashMessage = null;
+       var params = {};
+       for (var fld in form.fields) {
+           if (form.fields[fld].type == 'checkbox_group') {
+              for (var i=0; i < form.fields[fld].fields.length; i++) {
+                  params[form.fields[fld].fields[i].name] = scope[form.fields[fld].fields[i].name];
+              }
+           }
+           else {
+              params[fld] = scope[fld];
+           }
+       }
+       if (scope.scm_type) {
+          params.scm_type = scope.scm_type.value;
+          delete params.local_path;
+       }
+       Rest.setUrl(defaultUrl);
+       Rest.put(params)
+           .success( function(data, status, headers, config) {
+                ReturnToCaller();
+               })
+           .error( function(data, status, headers, config) {
+               ProcessErrors(scope, data, status, form,
+                 { hdr: 'Error!', msg: 'Failed to update project: ' + id + '. PUT status: ' + status });
+               });
+       };
 
    // Reset the form
    scope.formReset = function() {
-      $rootScope.flashMessage = null;
-      generator.reset();
-      for (var fld in master) {
-          scope[fld] = master[fld];
-      }
-      };
+       $rootScope.flashMessage = null;
+       generator.reset();
+       for (var fld in master) {
+           scope[fld] = master[fld];
+       }
+       };
 
    // Related set: Add button
    scope.add = function(set) {
-      $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.id + '/' + set);
-      };
+       $rootScope.flashMessage = null;
+       $location.path('/' + base + '/' + $routeParams.id + '/' + set);
+       };
 
    // Related set: Edit button
    scope.edit = function(set, id, name) {
-      $rootScope.flashMessage = null;
-      $location.path('/' + set + '/' + id);
-      };
+       $rootScope.flashMessage = null;
+       $location.path('/' + set + '/' + id);
+       };
 
    // Related set: Delete button
    scope['delete'] = function(set, itm_id, name, title) {
-      var action = function() {
-      var url = GetBasePath('projects') + id + '/' + set + '/';
-      $rootScope.flashMessage = null;
-      Rest.setUrl(url);
-      Rest.post({ id: itm_id, disassociate: 1 })
-          .success( function(data, status, headers, config) {
-              $('#prompt-modal').modal('hide');
-              scope.search(form.related[set].iterator);
-              })
-          .error( function(data, status, headers, config) {
-              $('#prompt-modal').modal('hide');
-              ProcessErrors(scope, data, status, null,
-                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
-              });      
+       var action = function() {
+       var url = GetBasePath('projects') + id + '/' + set + '/';
+       $rootScope.flashMessage = null;
+       Rest.setUrl(url);
+       Rest.post({ id: itm_id, disassociate: 1 })
+           .success( function(data, status, headers, config) {
+               $('#prompt-modal').modal('hide');
+               scope.search(form.related[set].iterator);
+               })
+           .error( function(data, status, headers, config) {
+               $('#prompt-modal').modal('hide');
+               ProcessErrors(scope, data, status, null,
+                   { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+               });      
       };
 
       Prompt({ hdr: 'Delete',
@@ -333,32 +369,37 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
 
    // Password change
    scope.clearPWConfirm = function(fld) {
-      // If password value changes, make sure password_confirm must be re-entered
-      scope[fld] = '';
-      scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
-      }
-   
+       // If password value changes, make sure password_confirm must be re-entered
+       scope[fld] = '';
+       scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
+       }
+    
    // Respond to 'Ask at runtime?' checkbox
    scope.ask = function(fld, associated) {
-      if (scope[fld + '_ask']) {
-         $("#" + fld + "-clear-btn").attr("disabled","disabled");
-         scope[fld] = 'ASK';
-         scope[associated] = '';
-         scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
-      }
-      else {
-         $("#" + fld + "-clear-btn").removeAttr("disabled");
-         scope[fld] = '';
-         scope[associated] = '';
-         scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
-      }
-      }
+       if (scope[fld + '_ask']) {
+          $("#" + fld + "-clear-btn").attr("disabled","disabled");
+          scope[fld] = 'ASK';
+          scope[associated] = '';
+          scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+       }
+       else {
+          $("#" + fld + "-clear-btn").removeAttr("disabled");
+          scope[fld] = '';
+          scope[associated] = '';
+          scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+       }
+       }
 
    scope.clear = function(fld, associated) {
-      scope[fld] = '';
-      scope[associated] = '';
-      scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
-      }
+       scope[fld] = '';
+       scope[associated] = '';
+       scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+       }
+
+   scope.scmChange = function() {
+       // When an scm_type is set, path is not required
+       scope.pathRequired = (scope.scm_type) ? false : true;
+       }
 }
 
 ProjectsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
