@@ -107,6 +107,11 @@ class BaseSerializer(serializers.ModelSerializer):
         else:
             return obj.active
 
+    def validate_description(self, attrs, source):
+        # Description should always be empty string, never null.
+        attrs[source] = attrs.get(source, None) or ''
+        return attrs
+
 class UserSerializer(BaseSerializer):
 
     password = serializers.WritableField(required=False, default='',

@@ -165,6 +165,24 @@ class InventoryTest(BaseTest):
             data['organization'] = self.organizations[1].pk
             self.put(url_a, data, expect=403)
 
+        # Via AC-376:
+        # Create an inventory. Leave the description empty. 
+        # Edit the new inventory, change the Name, click Save.
+        list_url = reverse('main:inventory_list')
+        new_data = dict(name='inventory-c', description='',
+                        organization=self.organizations[0].pk)
+        new_id = max(Inventory.objects.values_list('pk', flat=True)) + 1
+        with self.current_user(self.super_django_user):
+            data = self.post(list_url, data=new_data, expect=201)
+            self.assertEqual(data['id'], new_id)
+            self.assertEqual(data['description'], '')
+            url_c = reverse('main:inventory_detail', args=(new_id,))
+            data = self.get(url_c, expect=200)
+            self.assertEqual(data['description'], '')
+            data['description'] = None
+            #data['name'] = 'inventory-a-update2'
+            self.put(url_c, data, expect=200)
+
     def test_delete_inventory_detail(self):
         url_a = reverse('main:inventory_detail', args=(self.inventory_a.pk,))
         url_b = reverse('main:inventory_detail', args=(self.inventory_b.pk,))
