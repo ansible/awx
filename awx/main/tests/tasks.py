@@ -1,11 +1,17 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Python
 import os
 import shutil
 import tempfile
+
+# Django
 from django.conf import settings
 from django.test.utils import override_settings
+from django.utils.timezone import now
+
+# AWX
 from awx.main.models import *
 from awx.main.tests.base import BaseLiveServerTest
 from awx.main.tasks import RunJob
@@ -203,7 +209,7 @@ class RunJobTest(BaseCeleryTest):
 
     def create_test_job_template(self, **kwargs):
         opts = {
-            'name': 'test-job-template',
+            'name': 'test-job-template %s' % str(now()),
             'inventory': self.inventory,
             'project': self.project,
             'credential': self.credential,
@@ -223,7 +229,7 @@ class RunJobTest(BaseCeleryTest):
             self.job = job_template.create_job(**kwargs)
         else:
             opts = {
-                'name': 'test-job',
+                'name': 'test-job %s' % str(now()),
                 'inventory': self.inventory,
                 'project': self.project,
                 'credential': self.credential,
@@ -397,6 +403,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.unreachable_hosts.count(), 0)
         self.assertEqual(job.skipped_hosts.count(), 0)
         self.assertEqual(job.processed_hosts.count(), 1)
+        return job
 
     def test_check_job(self):
         self.create_test_project(TEST_PLAYBOOK)
@@ -424,6 +431,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertEqual(job.unreachable_hosts.count(), 0)
         self.assertEqual(job.skipped_hosts.count(), 1)
         self.assertEqual(job.processed_hosts.count(), 1)
+        return job
 
     def test_run_job_that_fails(self):
         self.create_test_project(TEST_PLAYBOOK2)
@@ -539,6 +547,11 @@ class RunJobTest(BaseCeleryTest):
         job.name = '_'.join(job.name.split('_')[3:]) or 'undeleted job'
         job.active = True
         job.save()
+        # Need to manually update last_job on host...
+        host = Host.objects.get(pk=self.host.pk)
+        host.last_job = job
+        host.last_job_host_summary = JobHostSummary.objects.get(job=job, host=host)
+        host.save()
         job.inventory.update_has_active_failures()
         self.host = Host.objects.get(pk=self.host.pk)
         self.assertTrue(self.host.has_active_failures)
@@ -554,6 +567,23 @@ class RunJobTest(BaseCeleryTest):
         self.assertFalse(self.group.has_active_failures)
         self.inventory = Inventory.objects.get(pk=self.inventory.pk)
         self.assertFalse(self.inventory.has_active_failures)
+
+    def test_update_host_last_job_when_job_removed(self):
+        job1 = self.test_run_job()
+        job2 = self.test_run_job()
+        self.host = Host.objects.get(pk=self.host.pk)
+        self.assertEqual(self.host.last_job, job2)
+        self.assertEqual(self.host.last_job_host_summary.job, job2)
+        # Delete job2 (should update host to point to job1).
+        job2.delete()
+        self.host = Host.objects.get(pk=self.host.pk)
+        self.assertEqual(self.host.last_job, job1)
+        self.assertEqual(self.host.last_job_host_summary.job, job1)
+        # Mark job1 inactive (should update host.last_job to None).
+        job1.mark_inactive()
+        self.host = Host.objects.get(pk=self.host.pk)
+        self.assertEqual(self.host.last_job, None)
+        self.assertEqual(self.host.last_job_host_summary, None)
 
     def test_check_job_where_task_would_fail(self):
         self.create_test_project(TEST_PLAYBOOK2)

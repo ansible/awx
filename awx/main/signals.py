@@ -134,3 +134,43 @@ def migrate_children_from_inactive_group_to_parent_groups(sender, **kwargs):
                          child_group, parent_group, instance)
             parent_group.children.add(child_group)
         parent_group.children.remove(instance)
+
+# Update host pointers to last_job and last_job_host_summary when a job is
+# marked inactive or deleted.
+
+def _update_host_last_jhs(host):
+    jhs_qs = JobHostSummary.objects.filter(job__active=True, host__pk=host.pk)
+    try:
+        jhs = jhs_qs.order_by('-job__pk')[0]
+    except IndexError:
+        jhs = None
+    update_fields = []
+    last_job = jhs.job if jhs else None
+    if host.last_job != last_job:
+        host.last_job = last_job
+        update_fields.append('last_job')
+    if host.last_job_host_summary != jhs:
+        host.last_job_host_summary = jhs
+        update_fields.append('last_job_host_summary')
+    if update_fields:
+        host.save(update_fields=update_fields)
+
+@receiver(post_save, sender=Job)
+def update_host_last_job_when_job_marked_inactive(sender, **kwargs):
+    instance = kwargs['instance']
+    hosts_qs = Host.objects.filter(active=True, last_job__pk=instance.pk)
+    for host in hosts_qs:
+        _update_host_last_jhs(host)
+
+@receiver(pre_delete, sender=Job)
+def save_host_pks_before_job_delete(sender, **kwargs):
+    instance = kwargs['instance']
+    hosts_qs = Host.objects.filter(active=True, last_job__pk=instance.pk)
+    instance._saved_hosts_pks = set(hosts_qs.values_list('pk', flat=True))
+
+@receiver(post_delete, sender=Job)
+def update_host_last_job_after_job_deleted(sender, **kwargs):
+    instance = kwargs['instance']
+    hosts_pks = getattr(instance, '_saved_hosts_pks', [])
+    for host in Host.objects.filter(pk__in=hosts_pks):
+        _update_host_last_jhs(host)
