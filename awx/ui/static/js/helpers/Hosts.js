@@ -636,7 +636,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         Rest.setUrl (GetBasePath('inventory') + inventory_id + '/');
         Rest.get()
              .success( function(data, status, headers, config) {
-                 html += "<div class=\"title\">Group Selector:</div>\n" +
+                 html += "<div class=\"title\"><i class=\"icon-sitemap\"></i> Group Selector:</div>\n" +
                    "<ul class=\"tree-root\">\n" +
                    "<li id=\"search-node-1000\" data-state=\"opened\" data-hosts=\"" + data.related.hosts + "\" " +
                    "data-description=\"" + data.description + "\" " + 

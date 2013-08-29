@@ -122,6 +122,9 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
       for (var fld in form.fields) {
           data[fld] = scope[fld];
       }
+      if (scope.scm_type) {
+         data.scm_type = scope.scm_type.value;
+      }
       var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
       Rest.setUrl(url);
       Rest.post(data)

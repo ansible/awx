@@ -165,7 +165,7 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
                       Rest.setUrl(data.related.variable_data);
                       Rest.put(json_data)
                           .success( function(data, status, headers, config) {
-                              $location.path('/inventories/' + inventory_id);           
+                              $location.path('/inventories/' + inventory_id + '/groups');           
                               })
                           .error( function(data, status, headers, config) {
                               ProcessErrors(scope, data, status, form,
@@ -173,7 +173,7 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
                           });
                    }
                    else {
-                      $location.path('/inventories/' + inventory_id);
+                      $location.path('/inventories/' + inventory_id + '/groups');
                    }
                    })
                .error( function(data, status, headers, config) {

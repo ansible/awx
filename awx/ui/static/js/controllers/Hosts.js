@@ -13,7 +13,7 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                          RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                          GetBasePath, HostsList, HostsAdd, HostsEdit, HostsDelete,
-                         HostsReload, LoadSearchTree, EditHostGroups) 
+                         HostsReload, LoadSearchTree, EditHostGroups, SetShowGroupHelp) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -35,6 +35,7 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
    }
    scope.loadBreadCrumbsRemove = scope.$on('buildAllGroups', function(e, inventory_name) {
        LoadBreadCrumbs({ path: '/inventories/' + id, title: inventory_name });
+       SetShowGroupHelp({ scope: scope });
        });
 
    // Sets up the search tree and loads All Hosts for the inventory
@@ -65,6 +66,10 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
 
   scope.editHost = function(host_id, host_name) {
       HostsEdit({ scope: scope, "inventory_id": id, group_id: scope.group_id, host_id: host_id, host_name: host_name });
+      }
+  
+  scope.editGroups = function() {
+      $location.path('/inventories/' + scope.inventory_id + '/groups');
       }
 
   scope.editHostGroups = function(host_id) {
@@ -120,6 +125,6 @@ InventoryHosts.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'GetBasePath', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete',
-                            'HostsReload', 'LoadSearchTree', 'EditHostGroups'
+                            'HostsReload', 'LoadSearchTree', 'EditHostGroups', 'SetShowGroupHelp'
                             ]; 
   

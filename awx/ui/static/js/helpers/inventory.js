@@ -14,8 +14,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                     'InventoryFormDefinition', 'ParseHelper'
                                     ]) 
 
-    .factory('LoadTreeData', ['Alert', 'Rest', 'Authorization', '$http',
-    function(Alert, Rest, Authorization, $http) {
+    .factory('LoadTreeData', ['Alert', 'Rest', 'Authorization', '$http', 'Wait',
+    function(Alert, Rest, Authorization, $http, Wait) {
     return function(params) {
 
         var scope = params.scope;
@@ -28,65 +28,23 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var has_active_failures = inventory.has_active_failures;
         var inventory_descr = inventory.description;
         var idx=0;
-        var treeData = [];
-
-        // Ater inventory top-level hosts, load top-level groups
-        /*
-        if (scope.inventoryLoadedRemove) {
-            scope.inventoryLoadedRemove();
-        }
-        scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
-            var url = groups + '?order_by=name';
-            Rest.setUrl(url);
-            Rest.get()
-                .success( function(data, status, headers, config) {    
-                    for (var i=0; i < data.results.length; i++) {
-                        treeData[0].children.push({
-                           data: {
-                               title: data.results[i].name
-                               },
-                           attr: {
-                               id: idx,
-                               group_id: data.results[i].id,
-                               type: 'group',
-                               name: data.results[i].name, 
-                               description: data.results[i].description,
-                               inventory: data.results[i].inventory,
-                               all: data.results[i].related.all_hosts,
-                               children: data.results[i].related.children + '?order_by=name',
-                               hosts: data.results[i].related.hosts,
-                               variable: data.results[i].related.variable_data,
-                               "data-failures": data.results[i].has_active_failures
-                               },
-                           state: 'closed'
-                           });
-                        idx++;
-                    }
-                    scope.$emit('buildTree', treeData, idx);
-                    })
-                .error( function(data, status, headers, config) {
-                    Alert('Error', 'Failed to laod tree data. Url: ' + groups + ' GET status: ' + status);
-                    });
-            });
-          */
-
-          treeData =
-              [{ 
-              data: {
-                  title: inventory_name
-                  }, 
-              attr: {
-                  type: 'inventory',
-                  id: 'inventory-node',
-                  url: inventory_url,
-                  'inventory_id': inventory_id,
-                  name: inventory_name,
-                  description: inventory_descr,
-                  "data-failures": inventory.has_active_failures
-                  },
-              state: 'open',
-              children:[] 
-              }];
+        var treeData =
+            [{ 
+                data: {
+                    title: inventory_name
+                    }, 
+                attr: {
+                    type: 'inventory',
+                    id: 'inventory-node',
+                    url: inventory_url,
+                    'inventory_id': inventory_id,
+                    name: inventory_name,
+                    description: inventory_descr,
+                    "data-failures": inventory.has_active_failures
+                    },
+                state: 'open',
+                children:[] 
+                }];
           
           function addNodes(tree, data) {
               for (var i=0; i < data.length; i++) {
@@ -329,8 +287,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                             { hdr: 'Error!', msg: 'Failed to lookup group ' + node.attr('name') + 
                             '. GET returned status: ' + status });
                         });
-                
-                //scope['treeLoading'] = true;
 
                 if (!scope.$$phase) {
                    scope.$digest();
@@ -342,9 +298,10 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 scope.$emit('NodeSelect', data.inst.get_json()[0]);
                 });
             
+            Wait('stop');
             });
         
-        scope['treeLoading'] = true;
+        Wait('start');
         LoadTreeData(params);
         
         }
@@ -600,12 +557,17 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var defaultUrl=GetBasePath('inventory');
         var scope = params.scope
         
-        form.well = false,
+        form.well = false;
         form.formLabelSize = 'col-lg-3';
         form.formFieldSize = 'col-lg-9';
         
         generator.inject(form, {mode: 'edit', modal: true, related: false});
         
+        /* Reset form properties. Otherwise it screws up future requests of the Inventories detail page */
+        form.well = true;
+        delete form.formLabelSize;
+        delete form.formFieldSize;
+
         ParseTypeChange(scope,'inventory_variables', 'inventoryParseType');
 
         scope.inventoryParseType = 'yaml';
@@ -643,6 +605,29 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             SaveInventory({ scope: scope });
         }
         
+    }
+    }])
+
+    .factory('SetShowGroupHelp', ['Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
+    return function(params) {
+        // Check if inventory has groups. If not, turn on hints to let user know groups are required
+        // before we can 
+        var scope = params.scope;
+        var url = GetBasePath('inventory') + scope.inventory_id + '/groups/';
+        Rest.setUrl(url);
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                if (data.results.length > 0) {
+                   scope.showGroupHelp = false;
+                }
+                else {
+                   scope.showGroupHelp = true;
+                }
+                })
+            .error( function(data, status, headers, config) {
+                ProcessErrors(scope, data, status, form,
+                    { hdr: 'Error!', msg: 'Failed to retrieve inventory groups. GET returned status: ' + status });
+                });
     }
     }]);
 

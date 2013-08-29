@@ -380,8 +380,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             };
         //Force binds to work. Not working usual way.
         $('#prompt-header').text('Delete Group');
-        $('#prompt-body').text('Are you sure you want to remove group ' + $(obj).attr('name') + 
-           ' from ' + $(parent).attr('name') + '?');
+        $('#prompt-body').html('<p>Are you sure you want to permanently delete group <em>' + $(obj).attr('name') + '</em>?</p>');
         $('#prompt-action-btn').addClass('btn-danger');
         scope.promptAction = action_to_take;  // for some reason this binds?
         $('#prompt-modal').modal({

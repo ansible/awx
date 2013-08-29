@@ -35,7 +35,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 type: 'DropDown',
                 searchable: false,
                 nosort: true,
-                label: 'View Jobs',
+                label: 'View',
                 "class": "btn-sm",
                 //ngDisabled: 'host.last_job == null',
                 options: [

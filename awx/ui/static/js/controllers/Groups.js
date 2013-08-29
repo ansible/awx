@@ -10,7 +10,7 @@
 function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryGroupsForm,
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt,
                           TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
-                          GroupsDelete, RefreshGroupName, EditInventory) 
+                          GroupsDelete, RefreshGroupName, EditInventory, SetShowGroupHelp) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -18,6 +18,7 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
    var generator = GenerateForm;
    var form = InventoryGroupsForm;
    var defaultUrl=GetBasePath('inventory');
+   $('#tree-view').empty();
    var scope = generator.inject(form, { mode: 'edit', related: true, buildTree: true });
    var base = $location.path().replace(/^\//,'').split('/')[0];
    var id = $routeParams.inventory_id;
@@ -31,6 +32,7 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
    scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
        LoadBreadCrumbs({ path: '/inventories/' + id, title: scope.inventory_name });
        TreeInit(scope.TreeParams);
+       SetShowGroupHelp({ scope: scope });
        if (!scope.$$phase) {
           scope.$digest();
        }
@@ -179,12 +181,15 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
   scope.deleteGroup = function() {
       GroupsDelete({ scope: scope, "inventory_id": id, group_id: scope.group_id });
       }
-
+  
+  scope.editHosts = function() {
+      $location.path('/inventories/' + scope.inventory_id + '/hosts');
+      }
 }
 
 InventoryGroups.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryGroupsForm',
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt',
                             'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
-                            'GroupsDelete', 'RefreshGroupName', 'EditInventory'
+                            'GroupsDelete', 'RefreshGroupName', 'EditInventory', 'SetShowGroupHelp'
                             ]; 
   
