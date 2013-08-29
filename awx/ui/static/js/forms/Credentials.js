@@ -60,8 +60,9 @@ angular.module('CredentialFormDefinition', [])
                 type: 'textarea',
                 addRequired: false,
                 editRequired: false,
+                'class': 'ssh-key-field',
                 rows: 10,
-                "class": 'span10'
+                xtraWide: true
                 },
             "ssh_key_unlock": {
                 label: 'Key Password',

@@ -200,7 +200,6 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
               scope[fld + '_ask'] = false;
               $("#" + fld + "-clear-btn").removeAttr("disabled");
            }
-
        }
        } 
 
@@ -240,9 +239,18 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
                   relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
                }
            }
-           
-           setAskCheckboxes();
 
+           if (data.scm_type !== "") {
+              for (var i=0; i < scope.scm_type_options.length; i++) {
+                  if (scope.scm_type_options[i].value == data.scm_type) {
+                     scope.scm_type = scope.scm_type_options[i];
+                     break;
+                  }
+              }
+           }
+           master['scm_type'] = scope['scm_type'];
+           setAskCheckboxes();
+       
            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
            RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
            RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });

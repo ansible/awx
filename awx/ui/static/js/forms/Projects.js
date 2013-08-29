@@ -128,8 +128,10 @@ angular.module('ProjectFormDefinition', [])
                 label: 'SCM Private Key',
                 type: 'textarea',
                 ngShow: "scm_type !== '' && scm_type !== null",
+                xtraWide: true,
                 addRequired: false,
                 editRequired: false,
+                'class': 'ssh-key-field',
                 rows: 10
                 },
             "scm_key_unlock": {
