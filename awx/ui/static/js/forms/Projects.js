@@ -11,10 +11,10 @@ angular.module('ProjectFormDefinition', [])
     .value(
     'ProjectsForm', {
         
-        addTitle: 'Create Project',                             //Title in add mode
-        editTitle: '{{ name }}',                                //Title in edit mode
-        name: 'project',                                        //entity or model name in singular form
-        well: true,                                             //Wrap the form with TB well/           
+        addTitle: 'Create Project',                             // Title in add mode
+        editTitle: '{{ name }}',                                // Title in edit mode
+        name: 'project',                                        // entity or model name in singular form
+        well: true,                                             // Wrap the form with TB well
 
         fields: {
             name: {
@@ -30,7 +30,7 @@ angular.module('ProjectFormDefinition', [])
                 addRequired: false,
                 editRequired: false
                 },
-             organization: {
+            organization: {
                 label: 'Organization',
                 type: 'lookup',
                 sourceModel: 'organization',
@@ -43,6 +43,7 @@ angular.module('ProjectFormDefinition', [])
                 awPopOver: '<p>A project must have at least one organization. Pick one organization now to create the project, and then after ' +
                   'the project is created you can add additional organizations.' ,
                 dataTitle: 'Organization',
+                dataContainer: 'body',
                 dataPlacement: 'right'
                 },
             base_dir: {
@@ -54,6 +55,7 @@ angular.module('ProjectFormDefinition', [])
                   'Together the base path and selected playbook directory provide the full path used to locate playbooks.</p>' + 
                   '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
                 dataTitle: 'Project Base Path',
+                dataContainer: 'body',
                 dataPlacement: 'right'
                 },
             local_path: { 
@@ -67,7 +69,136 @@ angular.module('ProjectFormDefinition', [])
                   'Together the base path and the playbook directory provide the full path used to locate playbooks.</p>' + 
                   '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
                 dataTitle: 'Project Path',
+                dataContainer: 'body',
                 dataPlacement: 'right'
+                },
+            scm_type: {
+                label: 'SCM Type',
+                type: 'select',
+                ngOptions: 'type.label for type in scm_type_options',
+                "default": '',
+                addRequired: false, 
+                editRequired: false
+                },
+            scm_url: {
+                label: 'SCM URL',
+                type: 'text',
+                ngShow: "scm_type !== '' && scm_type !== null",
+                addRequired: false, 
+                editRequired: false,
+                awRequiredWhen: {variable: "scm_type", init: "true" }
+                },
+            scm_branch: {
+                label: 'SCM Branch',
+                type: 'text',
+                ngShow: "scm_type !== '' && scm_type !== null",
+                addRequired: false,
+                editRequired: false
+                },
+            scm_username: {
+                label: 'SCM Username',
+                type: 'text', 
+                ngShow: "scm_type !== '' && scm_type !== null",
+                addRequired: false, 
+                editRequired: false
+                },
+            "scm_password": {
+                label: 'SCM Password',
+                type: 'password',
+                ngShow: "scm_type !== '' && scm_type !== null",
+                addRequired: false,
+                editRequired: false,
+                ngChange: "clearPWConfirm('scm_password_confirm')",
+                ask: true,
+                clear: true,
+                associated: 'scm_password_confirm',
+                autocomplete: false
+                },
+            "scm_password_confirm": {
+                label: 'Confirm Password',
+                type: 'password',
+                ngShow: "scm_type !== '' && scm_type !== null",
+                addRequired: false,
+                editRequired: false,
+                awPassMatch: true,
+                associated: 'scm_password',
+                autocomplete: false
+                },
+            "scm_key_data": {
+                label: 'SCM Private Key',
+                type: 'textarea',
+                ngShow: "scm_type !== '' && scm_type !== null",
+                addRequired: false,
+                editRequired: false,
+                rows: 10
+                },
+            "scm_key_unlock": {
+                label: 'SCM Key Password',
+                type: 'password',
+                ngShow: "scm_type !== '' && scm_type !== null && scm_key_data",
+                addRequired: false,
+                editRequired: false,
+                ngChange: "clearPWConfirm('scm_key_unlock_confirm')",
+                associated: 'scm_key_unlock_confirm',
+                ask: true,
+                clear: true
+                },
+            "scm_key_unlock_confirm": {
+                label: 'Confirm Key Password',
+                type: 'password',
+                ngShow: "scm_type !== '' && scm_type !== null && scm_key_data",
+                addRequired: false,
+                editRequired: false,
+                awPassMatch: true,
+                associated: 'scm_key_unlock'
+                },
+            checkbox_group: {
+                label: 'SCM Options',
+                type: 'checkbox_group',
+                ngShow: "scm_type !== '' && scm_type !== null",
+
+                fields: [
+                    {
+                        name: 'scm_clean',
+                        label: 'Clean',
+                        type: 'checkbox',
+                        ngShow: "scm_type !== '' && scm_type !== null",
+                        addRequired: false,
+                        editRequired: false,
+                        awPopOver: '<p>Remove any local modifications prior to performing an update.</p>',
+                        dataTitle: 'SCM Clean',
+                        dataContainer: 'body',
+                        dataPlacement: 'right',
+                        labelClass: 'checkbox-options'
+                        },
+                    {
+                        name: 'scm_delete_on_update',
+                        label: 'Delete on Update',
+                        type: 'checkbox',
+                        ngShow: "scm_type !== '' && scm_type !== null",
+                        addRequired: false,
+                        editRequired: false,
+                        awPopOver: '<p>Delete the local repository in its entirety prior to performing an update.</p><p>Depending on the size of the ' +
+                           'repository this may significantly increase the amount of time required to complete an update.</p>',
+                        dataTitle: 'SCM Delete',
+                        dataContainer: 'body',
+                        dataPlacement: 'right',
+                        labelClass: 'checkbox-options'
+                        },
+                    {
+                        name: 'scm_update_on_launch',
+                        label: 'Update on Launch',
+                        type: 'checkbox',
+                        ngShow: "scm_type !== '' && scm_type !== null",
+                        addRequired: false,
+                        editRequired: false,
+                        awPopOver: '<p>Each time a job runs using this project, perform an update to the local repository prior to starting the job.</p>',
+                        dataTitle: 'SCM Update',
+                        dataContainer: 'body',
+                        dataPlacement: 'right',
+                        labelClass: 'checkbox-options'
+                        }
+                    ]
                 }
             },
 

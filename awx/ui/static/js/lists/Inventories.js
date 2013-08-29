@@ -52,7 +52,7 @@ angular.module('InventoriesListDefinition', [])
             
             dropdown: {
                 type: 'DropDown',
-                label: 'View Jobs',
+                label: 'View',
                 'class': 'btn-xs',
                 options: [
                     { ngClick: 'viewJobs(\{\{ inventory.id \}\})', label: 'Jobs' },

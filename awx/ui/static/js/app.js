@@ -65,7 +65,8 @@ angular.module('ansible', [
     'SelectionHelper',
     'LicenseFormDefinition',
     'License',
-    'HostGroupsFormDefinition'
+    'HostGroupsFormDefinition',
+    'SCMUpdateHelper'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.

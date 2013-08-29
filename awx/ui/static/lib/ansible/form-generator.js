@@ -265,41 +265,63 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
     buildField: function(fld, field, options, form) {
 
        function getFieldWidth() {
-          var x;
-          if (form.formFieldSize) {
-             x = form.formFieldSize;
-          }
-          else if (field.xtraWide) {
-             x = "col-lg-10";
-          }
-          else if (field.column) {
-             x = "col-lg-8";
-          }
-          else if (!form.formFieldSize && options.modal) {
-             x = "col-lg-10";
-          }
-          else {
-             x = "col-lg-6";
-          }
-          return x;
+           var x;
+           if (form.formFieldSize) {
+              x = form.formFieldSize;
+           }
+           else if (field.xtraWide) {
+              x = "col-lg-10";
+           }
+           else if (field.column) {
+              x = "col-lg-8";
+           }
+           else if (!form.formFieldSize && options.modal) {
+              x = "col-lg-10";
+           }
+           else {
+              x = "col-lg-6";
+           }
+           return x;
        }
 
        function getLabelWidth() {
-          var x;
-          if (form.formLabelSize) {
-             x = form.formLabelSize;
-          }
-          else if (field.column) {
-             x = "col-lg-4";
-          }
-          else if (!form.formLabelSize && options.modal) {
-             x = "col-lg-2";
-          }
-          else {
-             x = "col-lg-2";
-          }
-          return x;
+           var x;
+           if (form.formLabelSize) {
+              x = form.formLabelSize;
+           }
+           else if (field.column) {
+              x = "col-lg-4";
+           }
+           else if (!form.formLabelSize && options.modal) {
+              x = "col-lg-2";
+           }
+           else {
+              x = "col-lg-2";
+           }
+           return x;
        }
+
+       function buildCheckbox(field, fld) {
+           var html='';
+           html += "<label class=\"checkbox-inline"
+           html += (field.labelClass) ? " " + field.labelClass : "";
+           html += "\">";
+           html += "<input type=\"checkbox\" "; 
+           html += Attr(field,'type');
+           html += "ng-model=\"" + fld + '" ';
+           html += "name=\"" + fld + '" ';
+           html += (field.ngChange) ? Attr(field,'ngChange') : "";
+           html += (field.id) ? Attr(field,'id') : "";
+           html += (field['class']) ? Attr(field,'class') : "";
+           html += Attr(field,'trueValue');
+           html += Attr(field,'falseValue');
+           html += (field.checked) ? "checked " : "";
+           html += (field.readonly) ? "disabled " : "";
+           html += " > " + field.label + "\n";
+           html += (field.awPopOver) ? Attr(field, 'awPopOver', fld) : "";
+           html += "</label>\n";
+           return html;
+      }
        
        var html = '';
 
@@ -516,6 +538,29 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
             html += "</div>\n";
          } 
+         
+         //checkbox group
+         if (field.type == 'checkbox_group') {
+            html += "<label class=\"control-label " + getLabelWidth() + "\">" + 
+                field.label + "</label>\n";
+            for (var i=0; i < field.fields.length; i++) {
+                html += buildCheckbox(field.fields[i], field.fields[i].name);
+            }
+            // Add error messages
+            if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
+              html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
+              this.form.name + '_form.' + fld + ".$error.required\">A value is required!</div>\n";
+            }
+            if (field.integer) {
+              html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">Must be an integer value</div>\n";
+            }
+            if (field.min || field.max) { 
+              html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.min || " + 
+                  this.form.name + '_form.' + fld + ".$error.max\">Must be in range " + field.min + " to " + 
+                  field.max + "</div>\n";
+            }
+            html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+         }
 
          //checkbox
          if (field.type == 'checkbox') {
@@ -523,22 +568,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += "<div ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
             html += "class=\"" + getFieldWidth() + "\">\n"; 
-            html += "<label class=\"checkbox-inline\">";
-            html += "<input type=\"checkbox\" "; 
-            html += this.attr(field,'type');
-            html += "ng-model=\"" + fld + '" ';
-            html += "name=\"" + fld + '" ';
-            html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-            html += (field.id) ? this.attr(field,'id') : "";
-            html += this.attr(field,'trueValue');
-            html += this.attr(field,'falseValue');
-            html += (field.checked) ? "checked " : "";
-            html += (field.readonly) ? "disabled " : "";
-            html += " > " + field.label + "\n";
-            html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-            html += "</label>\n";
+            html += buildCheckbox(field, fld);
             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
-            html += "</div>\n";
+            html += "</div>\n"
          }
 
          //radio
@@ -782,6 +814,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                     html += "<div" + sectionShow + ">\n";
                     section = field.section;
                  }
+
                  html += this.buildField(fld, field, options, this.form);
              }
              if (section !== '') {

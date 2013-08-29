@@ -12,7 +12,7 @@
 
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                       ClearScope, ProcessErrors, GetBasePath, SelectionInit)
+                       ClearScope, ProcessErrors, GetBasePath, SelectionInit, SCMUpdate)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -63,11 +63,25 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                 action: action
                 });
        }
+
+    scope.scmUpdate = function(project_id) {
+       for (var i=0; i < scope.projects.length; i++) {
+           if (scope.projects[i].id == project_id) {
+              if (scope.projects[i].scm_type == "") {
+                 Alert('Missing SCM Setup', 'Before running an SCM update, edit the project and provide the SCM access information.', 'alert-info');
+              }
+              else {
+                 SCMUpdate({ scope: scope, project: scope.projects[i]});
+              }
+              break;
+           }
+       }
+       }
 }
 
 ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList', 
                          'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                         'GetBasePath', 'SelectionInit'];
+                         'GetBasePath', 'SelectionInit', 'SCMUpdate'];
 
 
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
@@ -89,6 +103,10 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    generator.reset();
    LoadBreadCrumbs();
    GetProjectPath({ scope: scope, master: master });
+
+   scope.scm_type_options = [
+       { label: 'GitHub', value: 'git' },
+       { label: 'SVN', value: 'svn' }];
 
    LookUpInit({
        scope: scope,
@@ -163,9 +181,28 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    var master = {};
    var id = $routeParams.id;
    var relatedSets = {}; 
+
+   scope.scm_type_options = [
+       { label: 'GitHub', value: 'git' },
+       { label: 'SVN', value: 'svn' }];
    
    scope.project_local_paths = [];
    scope.base_dir = ''; 
+
+   function setAskCheckboxes() {
+       for (var fld in form.fields) {
+           if (form.fields[fld].type == 'password' && form.fields[fld].ask && scope[fld] == 'ASK') {
+              // turn on 'ask' checkbox for password fields with value of 'ASK'
+              $("#" + fld + "-clear-btn").attr("disabled","disabled");
+              scope[fld + '_ask'] = true;
+           }
+           else {
+              scope[fld + '_ask'] = false;
+              $("#" + fld + "-clear-btn").removeAttr("disabled");
+           }
+
+       }
+       } 
 
    // After the project is loaded, retrieve each related set
    if (scope.projectLoadedRemove) {
@@ -203,6 +240,9 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
                   relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
                }
            }
+           
+           setAskCheckboxes();
+
            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
            RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
            RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
@@ -220,6 +260,9 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
       var params = {};
       for (var fld in form.fields) {
           params[fld] = scope[fld];
+      }
+      if (scope.scm_type) {
+         params.scm_type = scope.scm_type.value;
       }
       Rest.setUrl(defaultUrl);
       Rest.put(params)
@@ -275,6 +318,35 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
           body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
           action: action
           }); 
+      }
+
+   // Password change
+   scope.clearPWConfirm = function(fld) {
+      // If password value changes, make sure password_confirm must be re-entered
+      scope[fld] = '';
+      scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
+      }
+   
+   // Respond to 'Ask at runtime?' checkbox
+   scope.ask = function(fld, associated) {
+      if (scope[fld + '_ask']) {
+         $("#" + fld + "-clear-btn").attr("disabled","disabled");
+         scope[fld] = 'ASK';
+         scope[associated] = '';
+         scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+      }
+      else {
+         $("#" + fld + "-clear-btn").removeAttr("disabled");
+         scope[fld] = '';
+         scope[associated] = '';
+         scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+      }
+      }
+
+   scope.clear = function(fld, associated) {
+      scope[fld] = '';
+      scope[associated] = '';
+      scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
       }
 }
 

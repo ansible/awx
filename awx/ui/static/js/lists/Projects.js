@@ -41,12 +41,21 @@ angular.module('ProjectsListDefinition', [])
             },
 
         fieldActions: {
+
             edit: {
                 label: 'Edit',
                 ngClick: "editProject(\{\{ project.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
                 awToolTip: 'View/edit project'
+                },
+            
+            scm_update: {
+                label: 'Update',
+                icon: 'icon-cloud-download',
+                "class": 'btn-xs btn-success',
+                ngClick: 'scmUpdate(\{\{ project.id \}\})',
+                awToolTip: 'Perform an SCM update on this project'     
                 },
 
             "delete": {
