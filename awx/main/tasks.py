@@ -129,7 +129,7 @@ class BaseTask(Task):
         expect_passwords = {}
         for n, item in enumerate(self.get_password_prompts().items()):
             expect_list.append(item[0])
-            expect_passwords[n] = passwords.get(item[1], '')
+            expect_passwords[n] = passwords.get(item[1], '') or ''
         expect_list.extend([pexpect.TIMEOUT, pexpect.EOF])
         while child.isalive():
             result_id = child.expect(expect_list, timeout=2)

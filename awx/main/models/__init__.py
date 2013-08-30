@@ -633,11 +633,13 @@ class Project(CommonModel):
 
     @property
     def needs_scm_password(self):
-        return not self.scm_key_data and self.ssh_password == 'ASK'
+        return self.scm_type and not self.scm_key_data and \
+            self.scm_password == 'ASK'
 
     @property
     def needs_scm_key_unlock(self):
-        return 'ENCRYPTED' in self.scm_key_data and \
+        return self.scm_type and self.scm_key_data and \
+            'ENCRYPTED' in self.scm_key_data and \
             (not self.scm_key_unlock or self.scm_key_unlock == 'ASK')
 
     @property
@@ -648,10 +650,14 @@ class Project(CommonModel):
                 needed.append(field)
         return needed
 
-    def update(self):
+    def update(self, **kwargs):
         if self.scm_type:
+            needed = self.scm_passwords_needed
+            opts = dict([(field, kwargs.get(field, '')) for field in needed])
+            if not all(opts.values()):
+                return
             project_update = self.project_updates.create()
-            project_update.start()
+            project_update.start(**opts)
             return project_update
 
     @property
@@ -794,6 +800,10 @@ class ProjectUpdate(PrimordialModel):
         except TaskMeta.DoesNotExist:
             pass
 
+    def get_passwords_needed_to_start(self):
+        '''Return list of password field names needed to start the job.'''
+        return (self.credential and self.credential.passwords_needed) or []
+
     @property
     def can_start(self):
         return bool(self.status == 'new')
@@ -802,9 +812,13 @@ class ProjectUpdate(PrimordialModel):
         from awx.main.tasks import RunProjectUpdate
         if not self.can_start:
             return False
+        needed = self.project.scm_passwords_needed
+        opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        if not all(opts.values()):
+            return False
         self.status = 'pending'
         self.save(update_fields=['status'])
-        task_result = RunProjectUpdate().delay(self.pk, **kwargs)
+        task_result = RunProjectUpdate().delay(self.pk, **opts)
         # Reload project update from database so we don't clobber results
         # from RunProjectUpdate (mainly from tests when using Django 1.4.x).
         project_update = ProjectUpdate.objects.get(pk=self.pk)

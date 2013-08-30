@@ -19,6 +19,7 @@ from django.test.utils import override_settings
 # AWX
 from awx.main.models import *
 from awx.main.tests.base import BaseTest, BaseTransactionTest
+from awx.main.tests.tasks import TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
 
 TEST_PLAYBOOK = '''- hosts: mygroup
   gather_facts: false
@@ -621,7 +622,6 @@ class ProjectUpdatesTest(BaseTransactionTest):
     def setUp(self):
         super(ProjectUpdatesTest, self).setUp()
         self.setup_users()
-        #self.skipTest('blah')
 
     def create_project(self, **kwargs):
         project = Project.objects.create(**kwargs)
@@ -629,17 +629,10 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self._temp_project_dirs.append(project_path)
         return project
 
-    def update_url_auth(self, url, username=None, password=None):
-        parts = urlparse.urlsplit(url)
-        
-
-    def check_project_update(self, project, should_fail=False):
-        #print project.local_path
-        pu = project.update()
+    def check_project_update(self, project, should_fail=False, **kwargs):
+        pu = project.update(**kwargs)
         self.assertTrue(pu)
         pu = ProjectUpdate.objects.get(pk=pu.pk)
-        #print pu.status
-        #print pu.result_traceback
         if should_fail:
             self.assertEqual(pu.status, 'failed', pu.result_stdout)
         else:
@@ -647,9 +640,6 @@ class ProjectUpdatesTest(BaseTransactionTest):
         project = Project.objects.get(pk=project.pk)
         self.assertEqual(project.last_update, pu)
         self.assertEqual(project.last_update_failed, pu.failed)
-        #print pu.result_traceback
-        #print pu.result_stdout
-        #print
         return pu
 
     def change_file_in_project(self, project):
@@ -838,3 +828,46 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_password=scm_password,
         )
         self.check_project_scm(project)
+
+    def test_prompt_for_scm_password_on_update(self):
+        scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
+                          'https://github.com/ansible/ansible.github.com.git')
+        if not all([scm_url]):
+            self.skipTest('no public git repo defined for https!')
+        project = self.create_project(
+            name='my public git project over https',
+            scm_type='git',
+            scm_url=scm_url,
+            scm_username='nobody',
+            scm_password='ASK',
+        )
+        url = reverse('main:project_update_view', args=(project.pk,))
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        self.assertTrue(response['can_update'])
+        self.assertTrue('scm_password' in response['passwords_needed_to_update'])
+        with self.current_user(self.super_django_user):
+            response = self.post(url, {}, expect=400)
+        self.assertTrue('scm_password' in response['passwords_needed_to_update'])
+        with self.current_user(self.super_django_user):
+            response = self.post(url, {'scm_password': 'blah'}, expect=202)
+
+    def test_prompt_for_scm_key_unlock_on_update(self):
+        scm_url = 'git@github.com:ansible/ansible.github.com.git'
+        project = self.create_project(
+            name='my public git project over https',
+            scm_type='git',
+            scm_url=scm_url,
+            scm_key_data=TEST_SSH_KEY_DATA_LOCKED,
+            scm_key_unlock='ASK',
+        )
+        url = reverse('main:project_update_view', args=(project.pk,))
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        self.assertTrue(response['can_update'])
+        self.assertTrue('scm_key_unlock' in response['passwords_needed_to_update'])
+        with self.current_user(self.super_django_user):
+            response = self.post(url, {}, expect=400)
+        self.assertTrue('scm_key_unlock' in response['passwords_needed_to_update'])
+        with self.current_user(self.super_django_user):
+            response = self.post(url, {'scm_key_unlock': TEST_SSH_KEY_DATA_UNLOCK}, expect=202)

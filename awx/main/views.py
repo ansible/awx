@@ -270,16 +270,16 @@ class ProjectUpdateView(GenericAPIView):
         data = dict(
             can_update=bool(obj.scm_type),
         )
-        #if obj.scm_type:
-        #    data['passwords_needed_to_update'] = obj.get_passwords_needed_to_start()
+        if obj.scm_type:
+            data['passwords_needed_to_update'] = obj.scm_passwords_needed
         return Response(data)
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if bool(obj.scm_type):
-            project_update = obj.update()
+            project_update = obj.update(**request.DATA)
             if not project_update:
-                data = dict(msg='Unable to update project!')
+                data = dict(passwords_needed_to_update=obj.scm_passwords_needed)
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response(status=status.HTTP_202_ACCEPTED)
