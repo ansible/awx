@@ -23,10 +23,6 @@ from awx.main.licenses import LicenseReader
 
 LOGGER = None
 
-# maps host and group names to hosts to prevent redudant additions
-group_names = {}
-host_names = {}
-
 class ImportException(BaseException):
 
     def __init__(self, msg):
@@ -47,6 +43,10 @@ class MemGroup(object):
         self.hosts = []
         self.variables = {}
         self.parents = []
+        # Used on the "all" group in place of previous global variables.
+        # maps host and group names to hosts to prevent redudant additions
+        self.host_names = {}
+        self.group_names = {}
 
         group_vars = os.path.join(inventory_base, 'group_vars', name)
         if os.path.exists(group_vars):
@@ -133,43 +133,49 @@ class MemHost(object):
 
 class BaseLoader(object):
 
+    def __init__(self, inventory_base=None, all_group=None):
+        self.inventory_base = inventory_base
+        self.all_group = all_group
+
     def get_host(self, name):
         if ":" in name:
             tokens = name.split(":")
             name = tokens[0]
-        global host_names
         host = None
-        if not name in host_names:
+        if not name in self.all_group.host_names:
             host = MemHost(name, self.inventory_base)
-            host_names[name] = host
-        return host_names[name]
+            self.all_group.host_names[name] = host
+        return self.all_group.host_names[name]
 
-    def get_group(self, name, all_group, child=False):
-        global group_names
+    def get_group(self, name, all_group=None, child=False):
+        all_group = all_group or self.all_group
         if name == 'all':
             return all_group
-        if not name in group_names:
+        if not name in self.all_group.group_names:
             group = MemGroup(name, self.inventory_base) 
             if not child:
                 all_group.add_child_group(group)
-            group_names[name] = group
-        return group_names[name]
+            self.all_group.group_names[name] = group
+        return self.all_group.group_names[name]
+
+    def load(self, src):
+        raise NotImplementedError
 
 class IniLoader(BaseLoader):
     
-    def __init__(self, inventory_base=None):
+    def __init__(self, inventory_base=None, all_group=None):
+        super(IniLoader, self).__init__(inventory_base, all_group)
         LOGGER.debug("processing ini")
-        self.inventory_base = inventory_base
 
-    def load(self, src, all_group):
-        LOGGER.debug("loading: %s on %s" % (src, all_group))
+    def load(self, src):
+        LOGGER.debug("loading: %s on %s" % (src, self.all_group))
 
         if self.inventory_base is None:
             self.inventory_base = os.path.dirname(src)  
 
         data = open(src).read()
         lines = data.split("\n")
-        group = all_group
+        group = self.all_group
         input_mode = 'host'
 
         for line in lines:
@@ -183,14 +189,14 @@ class IniLoader(BaseLoader):
                  if line.find(":vars") != -1:
                      input_mode = 'vars'
                      line = line.replace(":vars","")
-                     group = self.get_group(line, all_group)
+                     group = self.get_group(line)
                  elif line.find(":children") != -1:
                      input_mode = 'children' 
                      line = line.replace(":children","")
-                     group = self.get_group(line, all_group)
+                     group = self.get_group(line)
                  else:
                      input_mode = 'host'
-                     group = self.get_group(line, all_group)
+                     group = self.get_group(line)
             else:
                  # add a host or variable to the existing group/host
                  line = line.lstrip().rstrip()
@@ -243,10 +249,9 @@ class IniLoader(BaseLoader):
 
 class ExecutableJsonLoader(BaseLoader):
 
-    def __init__(self, inventory_base=None):
-
+    def __init__(self, inventory_base=None, all_group=None):
+        super(ExecutableJsonLoader, self).__init__(inventory_base, all_group)
         LOGGER.debug("processing executable JSON source")
-        self.inventory_base = inventory_base
         self.child_group_names = {}
 
     def command_to_json(self, cmd):
@@ -263,9 +268,9 @@ class ExecutableJsonLoader(BaseLoader):
         assert type(data) == dict
         return data
 
-    def load(self, src, all_group):
+    def load(self, src):
 
-        LOGGER.debug("loading %s onto %s" % (src, all_group))
+        LOGGER.debug("loading %s onto %s" % (src, self.all_group))
 
         if self.inventory_base is None:
             self.inventory_base = os.path.dirname(src)
@@ -273,10 +278,11 @@ class ExecutableJsonLoader(BaseLoader):
         data = self.command_to_json([src, "--list"])
 
         group = None
+        _meta = data.pop('_meta', {})
 
         for (k,v) in data.iteritems():
  
-            group = self.get_group(k, all_group)
+            group = self.get_group(k)
 
             if type(v) == dict:
 
@@ -311,51 +317,49 @@ class ExecutableJsonLoader(BaseLoader):
                    host = self.get_host(x)
                    group.add_host(host)
 
-            all_group.add_child_group(group)
+            if k != 'all':
+                self.all_group.add_child_group(group)
            
 
         # then we invoke the executable once for each host name we've built up
         # to set their variables
-        global host_names
-        for (k,v) in host_names.iteritems():
-            data = self.command_to_json([src, "--host", k])
+        for (k,v) in self.all_group.host_names.iteritems():
+            if 'hostvars' not in _meta:
+                data = self.command_to_json([src, "--host", k])
+            else:
+                data = _meta['hostvars'].get(k, {})
             v.variables.update(data)
 
 
-class GenericLoader(object):
-
-    def __init__(self, src):
-
-        LOGGER.debug("preparing loaders")
+def load_generic(src):
+    LOGGER.debug("preparing loaders")
 
 
-        LOGGER.debug("analyzing type of source")
-        if not os.path.exists(src):
-            LOGGER.debug("source missing")
-            raise CommandError("source does not exist")
-        if os.path.isdir(src):
-            self.memGroup = memGroup = MemGroup('all', src)
-            for f in glob.glob("%s/*" % src):
-                if f.endswith(".ini"):
-                    # config files for inventory scripts should be ignored
-                    continue 
-                if not os.path.isdir(f):
-                    if os.access(f, os.X_OK):
-                        ExecutableJsonLoader().load(f, memGroup)
-                    else:
-                        IniLoader().load(f, memGroup)
-        elif os.access(src, os.X_OK):
-            self.memGroup = memGroup = MemGroup('all', os.path.dirname(src))
-            ExecutableJsonLoader().load(src, memGroup)
-        else:
-            self.memGroup = memGroup = MemGroup('all', os.path.dirname(src))
-            IniLoader().load(src, memGroup)
+    LOGGER.debug("analyzing type of source")
+    if not os.path.exists(src):
+        LOGGER.debug("source missing")
+        raise CommandError("source does not exist")
+    if os.path.isdir(src):
+        all_group = MemGroup('all', src)
+        for f in glob.glob("%s/*" % src):
+            if f.endswith(".ini"):
+                # config files for inventory scripts should be ignored
+                continue 
+            if not os.path.isdir(f):
+                if os.access(f, os.X_OK):
+                    ExecutableJsonLoader(None, all_group).load(f)
+                else:
+                    IniLoader(None, all_group).load(f)
+    elif os.access(src, os.X_OK):
+        all_group = MemGroup('all', os.path.dirname(src))
+        ExecutableJsonLoader(None, all_group).load(src)
+    else:
+        all_group = MemGroup('all', os.path.dirname(src))
+        IniLoader(None, all_group).load(src)
 
-        LOGGER.debug("loading process complete")
+    LOGGER.debug("loading process complete")
+    return all_group
 
-
-    def result(self):
-        return self.memGroup
 
 class Command(NoArgsCommand):
     '''
@@ -416,11 +420,10 @@ class Command(NoArgsCommand):
 
         LOGGER.debug("preparing loader")
 
-        loader = GenericLoader(source)
-        memGroup = loader.result()
+        all_group = load_generic(source)
 
         LOGGER.debug("debugging loaded result")
-        memGroup.debug_tree()
+        all_group.debug_tree()
 
         # now that memGroup is correct and supports JSON executables, INI, and trees
         # now merge and/or overwrite with the database itself!
@@ -439,15 +442,15 @@ class Command(NoArgsCommand):
         # if overwrite is set, for each host in the database but NOT in the local
         # list, delete it. Delete individually so signal handlers will run.
         if overwrite:
-            LOGGER.info("deleting any hosts not in the remote source: %s" % host_names.keys())
-            for host in Host.objects.exclude(name__in = host_names.keys()).filter(inventory=inventory):
+            LOGGER.info("deleting any hosts not in the remote source: %s" % all_group.host_names.keys())
+            for host in Host.objects.exclude(name__in = all_group.host_names.keys()).filter(inventory=inventory):
                 host.delete()
 
         # if overwrite is set, for each group in the database but NOT in the local
         # list, delete it. Delete individually so signal handlers will run.
         if overwrite:
             LOGGER.info("deleting any groups not in the remote source")
-            for group in Group.objects.exclude(name__in = group_names.keys()).filter(inventory=inventory):
+            for group in Group.objects.exclude(name__in = all_group.group_names.keys()).filter(inventory=inventory):
                 group.delete()
 
         # if overwrite is set, throw away all invalid child relationships for groups
@@ -457,7 +460,7 @@ class Command(NoArgsCommand):
 
             for db_group in db_groups:
                  db_kids = db_group.children.all()
-                 mem_kids = group_names[db_group.name].child_groups
+                 mem_kids = all_group.group_names[db_group.name].child_groups
                  mem_kid_names = [ k.name for k in mem_kids ]
                  removed = False
                  for db_kid in db_kids:
@@ -468,6 +471,17 @@ class Command(NoArgsCommand):
                  if removed:
                      db_group.save()
 
+        # Update/overwrite inventory variables from "all" group.
+        db_variables = inventory.variables_dict
+        mem_variables = all_group.variables
+        if overwrite_vars or overwrite:
+            LOGGER.info('replacing inventory variables from "all" group')
+            db_variables = mem_variables
+        else:
+            LOGGER.info('updating inventory variables from "all" group')
+            db_variables.update(mem_variables)
+        inventory.variables = json.dumps(db_variables)
+        inventory.save()
 
         # this will be slightly inaccurate, but attribute to first superuser.
         user = User.objects.filter(is_superuser=True)[0]
@@ -478,7 +492,7 @@ class Command(NoArgsCommand):
         db_host_names  = [ h.name for h in db_hosts  ] 
 
         # for each group not in the database but in the local list, create it
-        for (k,v) in group_names.iteritems():
+        for (k,v) in all_group.group_names.iteritems():
             if k not in db_group_names:
                 variables = json.dumps(v.variables)
                 LOGGER.info("inserting new group %s" % k)
@@ -487,7 +501,7 @@ class Command(NoArgsCommand):
                 host.save()
 
         # for each host not in the database but in the local list, create it
-        for (k,v) in host_names.iteritems():
+        for (k,v) in all_group.host_names.iteritems():
             if k not in db_host_names:
                 variables = json.dumps(v.variables)
                 LOGGER.info("inserting new host %s" % k)
@@ -502,7 +516,7 @@ class Command(NoArgsCommand):
 
             for db_group in db_groups:
                  db_hosts = db_group.hosts.all()
-                 mem_hosts = group_names[db_group.name].hosts
+                 mem_hosts = all_group.group_names[db_group.name].hosts
                  mem_host_names = [ h.name for h in mem_hosts ]
                  removed = False
                  for db_host in db_hosts:
@@ -516,7 +530,7 @@ class Command(NoArgsCommand):
 
         # for each host in a mem group, add it to the parents to which it belongs
         # FIXME: confirm Django is ok with calling add twice and not making two rows
-        for (k,v) in group_names.iteritems():
+        for (k,v) in all_group.group_names.iteritems():
             LOGGER.info("adding parent arrangements for %s" % k)
             db_group = Group.objects.get(name=k, inventory__pk=inventory.pk)
             mem_hosts = v.hosts
@@ -524,7 +538,7 @@ class Command(NoArgsCommand):
                 db_host = Host.objects.get(name=h.name, inventory__pk=inventory.pk)
                 db_group.hosts.add(db_host)
                 LOGGER.debug("*** ADDING %s to %s ***" % (db_host, db_group))
-            db_group.save()
+            #db_group.save()
 
         def variable_mangler(model, mem_hash, overwrite, overwrite_vars):
             db_collection = model.objects.filter(inventory=inventory)
@@ -541,17 +555,17 @@ class Command(NoArgsCommand):
                    obj.variables = db_variables
                    obj.save()
 
-        variable_mangler(Group, group_names, overwrite, overwrite_vars)
-        variable_mangler(Host,  host_names,  overwrite, overwrite_vars)
+        variable_mangler(Group, all_group.group_names, overwrite, overwrite_vars)
+        variable_mangler(Host,  all_group.host_names,  overwrite, overwrite_vars)
   
         # for each group, draw in child group arrangements
         # FIXME: confirm django add behavior as above
-        for (k,v) in group_names.iteritems():
+        for (k,v) in all_group.group_names.iteritems():
             db_group = Group.objects.get(inventory=inventory, name=k)
             for mem_child_group in v.child_groups:
                 db_child = Group.objects.get(inventory=inventory, name=mem_child_group.name)
                 db_group.children.add(db_child)
-            db_group.save()
+            #db_group.save()
 
         reader = LicenseReader()
         license_info = reader.from_file()

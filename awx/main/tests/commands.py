@@ -19,13 +19,13 @@ from django.utils.timezone import now
 # AWX
 from awx.main.licenses import LicenseWriter
 from awx.main.models import *
-from awx.main.tests.base import BaseTest
+from awx.main.tests.base import BaseTest, BaseLiveServerTest
 
 __all__ = ['CleanupDeletedTest', 'InventoryImportTest']
 
 TEST_INVENTORY_INI = '''\
 [webservers]
-web1.example.com
+web1.example.com ansible_ssh_host=w1.example.net
 web2.example.com
 web3.example.com
 
@@ -50,19 +50,19 @@ varb=B
 vara=A
 '''
 
-class BaseCommandTest(BaseTest):
+class BaseCommandMixin(object):
     '''
     Base class for tests that run management commands.
     '''
 
     def setUp(self):
-        super(BaseCommandTest, self).setUp()
+        super(BaseCommandMixin, self).setUp()
         self._sys_path = [x for x in sys.path]
         self._environ = dict(os.environ.items())
         self._temp_files = []
 
     def tearDown(self):
-        super(BaseCommandTest, self).tearDown()
+        super(BaseCommandMixin, self).tearDown()
         sys.path = self._sys_path
         for k,v in self._environ.items():
             if os.environ.get(k, None) != v:
@@ -152,7 +152,7 @@ class BaseCommandTest(BaseTest):
             result = CommandError(captured_stderr)
         return result, captured_stdout, captured_stderr
 
-class CleanupDeletedTest(BaseCommandTest):
+class CleanupDeletedTest(BaseCommandMixin, BaseTest):
     '''
     Test cases for cleanup_deleted management command.
     '''
@@ -244,7 +244,7 @@ class CleanupDeletedTest(BaseCommandTest):
         self.assertNotEqual(counts_before, counts_after)
         self.assertFalse(counts_after[1])
 
-class InventoryImportTest(BaseCommandTest):
+class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
     '''
     Test cases for inventory_import management command.
     '''
@@ -343,8 +343,82 @@ class InventoryImportTest(BaseCommandTest):
                                                   inventory_id=new_inv.pk,
                                                   source=self.ini_path)
         self.assertEqual(result, None)
-        # FIXME
+        # Check that inventory is populated as expected.
+        new_inv = Inventory.objects.get(pk=new_inv.pk)
+        expected_group_names = set(['servers', 'dbservers', 'webservers'])
+        group_names = set(new_inv.groups.values_list('name', flat=True))
+        self.assertEqual(expected_group_names, group_names)
+        expected_host_names = set(['web1.example.com', 'web2.example.com',
+                                   'web3.example.com', 'db1.example.com',
+                                   'db2.example.com'])
+        host_names = set(new_inv.hosts.values_list('name', flat=True))
+        self.assertEqual(expected_host_names, host_names)
+        self.assertEqual(new_inv.variables_dict, {'vara': 'A'})
+        for host in new_inv.hosts.all():
+            if host.name == 'web1.example.com':
+                self.assertEqual(host.variables_dict,
+                                {'ansible_ssh_host': 'w1.example.net'})
+            else:
+                self.assertEqual(host.variables_dict, {})
+        for group in new_inv.groups.all():
+            if group.name == 'servers':
+                self.assertEqual(group.variables_dict, {'varb': 'B'})
+                children = set(group.children.values_list('name', flat=True))
+                self.assertEqual(children, set(['dbservers', 'webservers']))
+                self.assertEqual(group.hosts.count(), 0)
+            elif group.name == 'dbservers':
+                self.assertEqual(group.variables_dict, {'dbvar': 'ugh'})
+                self.assertEqual(group.children.count(), 0)
+                hosts = set(group.hosts.values_list('name', flat=True))
+                host_names = set(['db1.example.com','db2.example.com'])
+                self.assertEqual(hosts, host_names)                
+            elif group.name == 'webservers':
+                self.assertEqual(group.variables_dict, {'webvar': 'blah'})
+                self.assertEqual(group.children.count(), 0)
+                hosts = set(group.hosts.values_list('name', flat=True))
+                host_names = set(['web1.example.com','web2.example.com',
+                                  'web3.example.com'])
+                self.assertEqual(hosts, host_names)
 
     def test_executable_file(self):
-        pass
-        # FIXME
+        # New empty inventory.
+        old_inv = self.inventories[1]
+        new_inv = self.organizations[0].inventories.create(name='newb')
+        self.assertEqual(new_inv.hosts.count(), 0)
+        self.assertEqual(new_inv.groups.count(), 0)
+        # Use our own inventory script as executable file.
+        os.environ.setdefault('REST_API_URL', self.live_server_url)
+        os.environ.setdefault('REST_API_TOKEN',
+                              self.super_django_user.auth_token.key)
+        os.environ['INVENTORY_ID'] = str(old_inv.pk)        
+        source = os.path.join(os.path.dirname(__file__), '..', '..', 'scripts',
+                              'inventory.py')
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=source)
+        self.assertEqual(result, None)
+        # Check that inventory is populated as expected.
+        new_inv = Inventory.objects.get(pk=new_inv.pk)
+        self.assertEqual(old_inv.variables_dict, new_inv.variables_dict)
+        old_groups = set(old_inv.groups.values_list('name', flat=True))
+        new_groups = set(new_inv.groups.values_list('name', flat=True))
+        self.assertEqual(old_groups, new_groups)
+        old_hosts = set(old_inv.hosts.values_list('name', flat=True))
+        new_hosts = set(new_inv.hosts.values_list('name', flat=True))
+        self.assertEqual(old_hosts, new_hosts)
+        for new_host in new_inv.hosts.all():
+            old_host = old_inv.hosts.get(name=new_host.name)
+            self.assertEqual(old_host.variables_dict, new_host.variables_dict)
+        for new_group in new_inv.groups.all():
+            old_group = old_inv.groups.get(name=new_group.name)
+            self.assertEqual(old_group.variables_dict, new_group.variables_dict)
+            old_children = set(old_group.children.values_list('name', flat=True))
+            new_children = set(new_group.children.values_list('name', flat=True))
+            self.assertEqual(old_children, new_children)
+            old_hosts = set(old_group.hosts.values_list('name', flat=True))
+            new_hosts = set(new_group.hosts.values_list('name', flat=True))
+            self.assertEqual(old_hosts, new_hosts)
+
+    def test_executable_file_with_meta_hostvars(self):
+        os.environ['INVENTORY_HOSTVARS'] = '1'
+        self.test_executable_file()
