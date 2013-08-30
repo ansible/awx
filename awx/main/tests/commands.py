@@ -4,6 +4,7 @@
 # Python
 import json
 import os
+import shutil
 import StringIO
 import sys
 import tempfile
@@ -15,13 +16,23 @@ from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.utils.timezone import now
+from django.test.utils import override_settings
 
 # AWX
 from awx.main.licenses import LicenseWriter
 from awx.main.models import *
 from awx.main.tests.base import BaseTest, BaseLiveServerTest
 
-__all__ = ['CleanupDeletedTest', 'InventoryImportTest']
+__all__ = ['CleanupDeletedTest', 'CleanupJobsTest', 'InventoryImportTest']
+
+TEST_PLAYBOOK = '''- hosts: test-group
+  gather_facts: False
+  tasks:
+  - name: should pass
+    command: test 1 = 1
+  - name: should also pass
+    command: test 2 = 2
+'''
 
 TEST_INVENTORY_INI = '''\
 [webservers]
@@ -115,7 +126,6 @@ class BaseCommandMixin(object):
                 if n > 0 and x == 4:
                     group.parents.add(groups[3])
             self.groups.extend(groups)
-
 
     def run_command(self, name, *args, **options):
         '''
@@ -243,6 +253,133 @@ class CleanupDeletedTest(BaseCommandMixin, BaseTest):
         counts_after = self.get_user_counts()
         self.assertNotEqual(counts_before, counts_after)
         self.assertFalse(counts_after[1])
+
+@override_settings(CELERY_ALWAYS_EAGER=True,
+                   CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                   ANSIBLE_TRANSPORT='local')
+class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
+    '''
+    Test cases for cleanup_jobs management command.
+    '''
+
+    def setUp(self):
+        super(CleanupJobsTest, self).setUp()
+        self.test_project_path = None
+        self.setup_users()
+        self.organization = self.make_organizations(self.super_django_user, 1)[0]
+        self.inventory = Inventory.objects.create(name='test-inventory',
+                                                  description='description for test-inventory',
+                                                  organization=self.organization)
+        self.host = self.inventory.hosts.create(name='host.example.com',
+                                                inventory=self.inventory)
+        self.group = self.inventory.groups.create(name='test-group',
+                                                  inventory=self.inventory)
+        self.group.hosts.add(self.host)
+        self.project = None
+        self.credential = None
+        settings.INTERNAL_API_URL = self.live_server_url
+
+    def tearDown(self):
+        super(CleanupJobsTest, self).tearDown()
+        if self.test_project_path:
+            shutil.rmtree(self.test_project_path, True)
+
+    def create_test_credential(self, **kwargs):
+        opts = {
+            'name': 'test-creds',
+            'user': self.super_django_user,
+            'ssh_username': '',
+            'ssh_key_data': '',
+            'ssh_key_unlock': '',
+            'ssh_password': '',
+            'sudo_username': '',
+            'sudo_password': '',
+        }
+        opts.update(kwargs)
+        self.credential = Credential.objects.create(**opts)
+        return self.credential
+
+    def create_test_project(self, playbook_content):
+        self.project = self.make_projects(self.normal_django_user, 1, playbook_content)[0]
+        self.organization.projects.add(self.project)
+
+    def create_test_job_template(self, **kwargs):
+        opts = {
+            'name': 'test-job-template %s' % str(now()),
+            'inventory': self.inventory,
+            'project': self.project,
+            'credential': self.credential,
+            'job_type': 'run',
+        }
+        try:
+            opts['playbook'] = self.project.playbooks[0]
+        except (AttributeError, IndexError):
+            pass
+        opts.update(kwargs)
+        self.job_template = JobTemplate.objects.create(**opts)
+        return self.job_template
+
+    def create_test_job(self, **kwargs):
+        job_template = kwargs.pop('job_template', None)
+        if job_template:
+            self.job = job_template.create_job(**kwargs)
+        else:
+            opts = {
+                'name': 'test-job %s' % str(now()),
+                'inventory': self.inventory,
+                'project': self.project,
+                'credential': self.credential,
+                'job_type': 'run',
+            }
+            try:
+                opts['playbook'] = self.project.playbooks[0]
+            except (AttributeError, IndexError):
+                pass
+            opts.update(kwargs)
+            self.job = Job.objects.create(**opts)
+        return self.job
+
+    def test_cleanup_jobs(self):
+        # Test with no jobs to be cleaned up.
+        jobs_before = Job.objects.all().count()
+        self.assertFalse(jobs_before)
+        result, stdout, stderr = self.run_command('cleanup_jobs')
+        self.assertEqual(result, None)
+        jobs_after = Job.objects.all().count()
+        self.assertEqual(jobs_before, jobs_after)        
+        # Create and run job.
+        self.create_test_project(TEST_PLAYBOOK)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.get_passwords_needed_to_start())
+        self.assertTrue(job.start())
+        self.assertEqual(job.status, 'pending')
+        job = Job.objects.get(pk=job.pk)
+        self.assertEqual(job.status, 'successful')
+        # With days=1, no jobs will be deleted.
+        jobs_before = Job.objects.all().count()
+        self.assertTrue(jobs_before)
+        result, stdout, stderr = self.run_command('cleanup_jobs', days=1)
+        self.assertEqual(result, None)
+        jobs_after = Job.objects.all().count()
+        self.assertEqual(jobs_before, jobs_after)
+        # With days=0 and dry_run=True, no jobs will be deleted.
+        jobs_before = Job.objects.all().count()
+        self.assertTrue(jobs_before)
+        result, stdout, stderr = self.run_command('cleanup_jobs', days=0,
+                                                  dry_run=True)
+        self.assertEqual(result, None)
+        jobs_after = Job.objects.all().count()
+        self.assertEqual(jobs_before, jobs_after)
+        # With days=0, our job will be deleted.
+        jobs_before = Job.objects.all().count()
+        self.assertTrue(jobs_before)
+        result, stdout, stderr = self.run_command('cleanup_jobs', days=0)
+        self.assertEqual(result, None)
+        jobs_after = Job.objects.all().count()
+        self.assertNotEqual(jobs_before, jobs_after)
+        self.assertFalse(jobs_after)
 
 class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
     '''
