@@ -321,8 +321,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            html += (field.ngChange) ? Attr(field,'ngChange') : "";
            html += (field.id) ? Attr(field,'id') : "";
            html += (field['class']) ? Attr(field,'class') : "";
-           html += Attr(field,'trueValue');
-           html += Attr(field,'falseValue');
+           html += (field.trueValue !== undefined) ? Attr(field,'trueValue') : "";
+           html += (field.falseValue !== undefined) ? Attr(field,'falseValue') : "";
            html += (field.checked) ? "checked " : "";
            html += (field.readonly) ? "disabled " : "";
            html += " > " + field.label + "\n";

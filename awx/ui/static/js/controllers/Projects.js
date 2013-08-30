@@ -64,14 +64,14 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                 });
        }
 
-    scope.scmUpdate = function(project_id) {
+    scope.SCMUpdate = function(project_id) {
        for (var i=0; i < scope.projects.length; i++) {
            if (scope.projects[i].id == project_id) {
               if (scope.projects[i].scm_type == "") {
                  Alert('Missing SCM Setup', 'Before running an SCM update, edit the project and provide the SCM access information.', 'alert-info');
               }
               else {
-                 SCMUpdate({ scope: scope, project: scope.projects[i]});
+                 SCMUpdate({ scope: scope, project_id: project_id });
               }
               break;
            }
@@ -281,7 +281,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
 
            master['scm_type'] = scope['scm_type'];
            setAskCheckboxes();
-       
+           
            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
            RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
            RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });

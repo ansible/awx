@@ -44,7 +44,7 @@ angular.module('ansible', [
     'LookUpHelper',
     'JobTemplatesListDefinition',
     'JobTemplateFormDefinition',
-    'JobTemplateHelper',
+    'JobSubmissionHelper',
     'ProjectsListDefinition',
     'ProjectFormDefinition',
     'PermissionFormDefinition',
@@ -65,8 +65,7 @@ angular.module('ansible', [
     'SelectionHelper',
     'LicenseFormDefinition',
     'License',
-    'HostGroupsFormDefinition',
-    'SCMUpdateHelper'
+    'HostGroupsFormDefinition'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.

@@ -22,7 +22,9 @@ angular.module('ProjectsListDefinition', [])
         fields: {
             name: {
                 key: true,
-                label: 'Name'
+                label: 'Name',
+                badgeIcon: "\{\{ 'icon-failures-' + project.last_update_failed \}\}",
+                badgePlacement: 'left'
                 },
             description: {
                 label: 'Description'
@@ -54,7 +56,7 @@ angular.module('ProjectsListDefinition', [])
                 label: 'Update',
                 icon: 'icon-cloud-download',
                 "class": 'btn-xs btn-success',
-                ngClick: 'scmUpdate(\{\{ project.id \}\})',
+                ngClick: 'SCMUpdate(\{\{ project.id \}\})',
                 awToolTip: 'Perform an SCM update on this project'     
                 },
 

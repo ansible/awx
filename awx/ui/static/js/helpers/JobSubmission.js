@@ -1,20 +1,20 @@
 /*********************************************
  *  Copyright (c) 2013 AnsibleWorks, Inc.
  *
- *  JobTemplateHelper
+ *  JobSubmission.js
  * 
  */
-angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
-    'LookUpHelper', 'JobTemplateFormDefinition' ])
+angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
+    'LookUpHelper', 'JobTemplateFormDefinition', 'ProjectFormDefinition' ])
 
-    .factory('PromptPasswords',['CredentialForm', '$compile', 'Rest', '$location', 'ProcessErrors', 'GetBasePath',
-    function(JobTemplateForm, $compile, Rest, $location, ProcessErrors, GetBasePath) {
+    .factory('PromptPasswords',['CredentialForm', '$compile', 'Rest', '$location', 'ProcessErrors', 'GetBasePath', 'Alert',
+    function(JobTemplateForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert) {
     return function(params) {
         
         var scope = params.scope; 
         var passwords = params.passwords;
         var start_url = params.start_url;
-        var form = JobTemplateForm;
+        var form = params.form;
         var html = '';
         var field, element, dialogScope, fld;
         var base = $location.path().replace(/^\//,'').split('/')[0];
@@ -40,7 +40,9 @@ angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFo
             Rest.setUrl(url);
             Rest.destroy()
                 .success ( function(data, status, headers, config) {
-                    navigate(true);
+                    if (form.name == 'credential') {
+                       navigate(true);
+                    }
                     })
                 .error( function(data, status, headers, config) {
                     ProcessErrors(scope, data, status, null,
@@ -51,7 +53,9 @@ angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFo
         scope.cancelJob = function() {
             // User clicked cancel button
             $('#password-modal').modal('hide');
-            cancelJob();
+            if (form.name == 'credential') {
+               cancelJob();
+            }
             }
         
         scope.startJob = function() {
@@ -64,84 +68,95 @@ angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFo
                    value_supplied = true;
                 }
                 });
-            if (value_supplied) {
+            if (passwords.length == 0 || value_supplied) {
                Rest.setUrl(start_url);
                Rest.post(pswd)
                    .success( function(data, status, headers, config) {
-                       navigate(false);
+                       if (form.name == 'credential') {
+                          navigate(false);
+                       }
                        })
                    .error( function(data, status, headers, config) { 
                        ProcessErrors(scope, data, status, null,
-                           { hdr: 'Error!', msg: 'Failed to start job. POST returned status: ' + status });
+                           { hdr: 'Error!', msg: 'POST to ' + start_url + ' failed with status: ' + status });
                        });
             }
             else {
-               // No passwords provided, so we can't start the job. Rather than leave the job in a 'new'
-               // state, let's delete it. 
-               scope.cancelJob();   
+               Alert('No Passwords', 'Required password(s) not provided. The request was not submitted.', 'alert-info');
+               if (form.name == 'credential') {
+                  // No passwords provided, so we can't start the job. Rather than leave the job in a 'new'
+                  // state, let's delete it. 
+                  scope.cancelJob();
+               }   
             }
             }
         
-
-        html += html += "<form class=\"form-horizontal\" name=\"password_form\" novalidate>\n";    
-        for (var i=0; i < passwords.length; i++) {
-            // Add the password field
-            field = form.fields[passwords[i]];
-            fld = passwords[i];
-            scope[fld] = '';
-            html += "<div class=\"control-group\">\n";
-            html += "<label class=\"control-label\" for=\"" + fld + '">' + field.label + '</label>' + "\n";
-            html += "<div class=\"controls\">\n"; 
-            html += "<input type=\"password\" ";
-            html += "ng-model=\"" + fld + '" ';
-            html += 'name="' + fld + '" ';
-            html += "class=\"password-field\" ";
-            html += "required ";
-            html += "/>";
-            html += "<br />\n";
-            // Add error messages
-            html += "<span class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " + 
-                "password_form." + fld + ".$error.required\">A value is required!</span>\n";
-            html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
-            html += "</div>\n";
-            html += "</div>\n";
-         
-            // Add the related confirm field
-            fld = field.associated;
-            field = form.fields[field.associated];
-            scope[fld] = '';
-            html += "<div class=\"control-group\">\n";
-            html += "<label class=\"control-label\" for=\"" + fld + '">' + field.label + '</label>' + "\n";
-            html += "<div class=\"controls\">\n"; 
-            html += "<input type=\"password\" ";
-            html += "ng-model=\"" + fld + '" ';
-            html += 'name="' + fld + '" ';
-            html += "required ";
-            html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
-            html += "/>";
-            html += "<br />\n";
-            // Add error messages
-            html += "<span class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " + 
-                "password_form." + fld + ".$error.required\">A value is required!</span>\n";     
-            if (field.awPassMatch) {
-               html += "<span class=\"error\" ng-show=\"password_form." + fld + 
-                   ".$error.awpassmatch\">Must match Password value</span>\n";
+        if (passwords.length > 0) {
+           // We need to prompt for passwords
+           html += html += "<form class=\"form-horizontal\" name=\"password_form\" novalidate>\n";    
+           for (var i=0; i < passwords.length; i++) {
+               // Add the password field
+               field = form.fields[passwords[i]];
+               fld = passwords[i];
+               scope[fld] = '';
+               html += "<div class=\"form-group\">\n";
+               html += "<label class=\"control-label col-lg-3\" for=\"" + fld + '">' + field.label + '</label>' + "\n";
+               html += "<div class=\"col-lg-9\">\n"; 
+               html += "<input type=\"password\" ";
+               html += "ng-model=\"" + fld + '" ';
+               html += 'name="' + fld + '" ';
+               html += "class=\"password-field form-control\" ";
+               html += "required ";
+               html += "/>";
+               html += "<br />\n";
+               // Add error messages
+               html += "<span class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " + 
+                   "password_form." + fld + ".$error.required\">A value is required!</span>\n";
+               html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
+               html += "</div>\n";
+               html += "</div>\n";
+             
+               // Add the related confirm field
+               fld = field.associated;
+               field = form.fields[field.associated];
+               scope[fld] = '';
+               html += "<div class=\"form-group\">\n";
+               html += "<label class=\"control-label col-lg-3\" for=\"" + fld + '">' + field.label + '</label>' + "\n";
+               html += "<div class=\"col-lg-9\">\n"; 
+               html += "<input type=\"password\" ";
+               html += "ng-model=\"" + fld + '" ';
+               html += 'name="' + fld + '" ';
+               html += "class=\"form-control\" ";
+               html += "required ";
+               html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
+               html += "/>";
+               html += "<br />\n";
+               // Add error messages
+               html += "<span class=\"error\" ng-show=\"password_form." + fld + ".$dirty && " + 
+                   "password_form." + fld + ".$error.required\">A value is required!</span>\n";     
+               if (field.awPassMatch) {
+                  html += "<span class=\"error\" ng-show=\"password_form." + fld + 
+                      ".$error.awpassmatch\">Must match Password value</span>\n";
+               }
+               html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
+               html += "</div>\n";
+               html += "</div>\n";
             }
-            html += "<span class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></span>\n";
-            html += "</div>\n";
-            html += "</div>\n";
+            html += "</form>\n";
+            element = angular.element(document.getElementById('password-body'));
+            element.html(html);
+            $compile(element.contents())(scope);
+            $('#password-modal').modal({ });
         }
-        html += "</form>\n";
-        element = angular.element(document.getElementById('password-body'));
-        element.html(html);
-        $compile(element.contents())(scope);
-        $('#password-modal').modal({ });
+        else {
+            scope.startJob();
         }
-    }])
+        }
+        }])
     
     .factory('SubmitJob',['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'CredentialList',
-    'LookUpInit', 'JobTemplateForm', 'ProcessErrors',
-    function(PromptPasswords, $compile, Rest, $location, GetBasePath, CredentialList, LookUpInit, JobTemplateForm,
+    'LookUpInit', 'CredentialForm', 'ProcessErrors',
+    function(PromptPasswords, $compile, Rest, $location, GetBasePath, CredentialList, LookUpInit, CredentialForm,
         ProcessErrors) {
     return function(params) {
         var scope = params.scope; 
@@ -179,7 +194,8 @@ angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFo
                        PromptPasswords({
                            scope: scope,
                            passwords: data.passwords_needed_to_start,
-                           start_url: data.related.start
+                           start_url: data.related.start,
+                           form: CredentialForm
                            });
                     }
                     else {
@@ -242,6 +258,38 @@ angular.module('JobTemplateHelper', [ 'RestServices', 'Utilities', 'CredentialFo
                    // We have what we need, submit the job
                    postJob(data);
                 }
+            })
+            .error( function(data, status, headers, config) {
+                ProcessErrors(scope, data, status, null,
+                    { hdr: 'Error!', msg: 'Failed to get job template details. GET returned status: ' + status });
+            });
+            };
+    }])
+    
+    // Sumbit SCM Update request
+    .factory('SCMUpdate',['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert',
+        'ProjectsForm',
+    function(PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, ProjectsForm) { 
+    return function(params) {
+        var scope = params.scope; 
+        var project_id = params.project_id;
+        var url = GetBasePath('projects') + project_id + '/update/';
+        // Check to see if we have permission to perform the update and if any passwords are needed
+        Rest.setUrl(url);
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                if (data.can_update) {
+                   PromptPasswords({
+                       scope: scope,
+                       passwords: data.passwords_needed_to_update,
+                       start_url: url, 
+                       form: ProjectsForm
+                       });
+                } 
+                else {
+                   Alert('Permission Denied', 'You do not have access to update this project. Please contact your system administrator.', 
+                       'alert-danger');
+                }   
             })
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, null,
