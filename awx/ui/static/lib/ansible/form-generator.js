@@ -490,8 +490,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += (field.readonly) ? "readonly " : "";
             html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
                   field.awRequiredWhen.variable + "\" " : "";
-            html += ">\n";  
-            html += "<option value=\"\">Choose " + field.label + "</option>\n";
+            html += ">\n";
+            html += "<option value=\"\">";
+            html += (field.defaultOption) ? field.defaultOption : "Choose " + field.label;
+            html += "</option>\n";
             html += "</select>\n";
             // Add error messages
             if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {

@@ -103,12 +103,14 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    generator.reset();
    LoadBreadCrumbs();
    GetProjectPath({ scope: scope, master: master });
-
+   //console.log(scope.)
+   
    scope.scm_type = null;
    master.scm_type = null;
    scope.scm_type_options = [
-       { label: 'GitHub', value: 'git' },
-       { label: 'SVN', value: 'svn' }];
+       { label: 'Git', value: 'git' },
+       { label: 'SVN', value: 'svn' },
+       { label: 'Mercurial', value: 'hg'}];
 
    LookUpInit({
        scope: scope,
@@ -201,8 +203,9 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    var relatedSets = {}; 
 
    scope.scm_type_options = [
-       { label: 'GitHub', value: 'git' },
-       { label: 'SVN', value: 'svn' }];
+       { label: 'Git', value: 'git' },
+       { label: 'SVN', value: 'svn' },
+       { label: 'Mercurial', value: 'hg'}];
    
    scope.project_local_paths = [];
    scope.base_dir = ''; 

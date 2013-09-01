@@ -231,10 +231,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                 });
             $(document).bind('keydown', function(e) {
                 if (e.keyCode === 27) {
-                   $(element).popover('destroy');
-                   $('.popover').each(function(index) {
+                   $(element).popover('hide');
+                      $('.popover').each(function(index) {
                       // remove lingering popover <div>. Seems to be a bug in TB3 RC1
-                      $(this).remove();
+                         $(this).remove();
                       });
                 }
                 });

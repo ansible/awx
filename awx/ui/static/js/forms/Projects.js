@@ -46,26 +46,27 @@ angular.module('ProjectFormDefinition', [])
                 dataContainer: 'body',
                 dataPlacement: 'right'
                 },
+            scm_type: {
+                label: 'SCM Type',
+                type: 'select',
+                ngOptions: 'type.label for type in scm_type_options',
+                ngChange: 'scmChange()',
+                defaultOption: 'Manual',
+                addRequired: false, 
+                editRequired: false
+                },
             base_dir: {
                 label: 'Project Base Path',
                 type: 'textarea',
                 "class": 'col-lg-6',
                 showonly: true,
+                ngShow: "scm_type == '' || scm_type == null",
                 awPopOver: '<p>Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
                   'Together the base path and selected playbook directory provide the full path used to locate playbooks.</p>' + 
                   '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
                 dataTitle: 'Project Base Path',
                 dataContainer: 'body',
                 dataPlacement: 'right'
-                },
-            scm_type: {
-                label: 'SCM Type',
-                type: 'select',
-                ngOptions: 'type.label for type in scm_type_options',
-                ngChange: 'scmChange()',
-                "default": '',
-                addRequired: false, 
-                editRequired: false
                 },
             local_path: {
                 label: 'Playbook Directory',

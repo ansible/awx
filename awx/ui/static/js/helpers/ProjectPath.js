@@ -31,6 +31,7 @@ angular.module('ProjectPathHelper', ['RestServices', 'Utilities'])
                 scope.base_dir = data.project_base_dir;
                 master.base_dir = scope.base_dir;  // Keep in master object so that it doesn't get
                                                    // wiped out on form reset.
+                console.log('base_dir: ' + scope.base_dir);
                 if (opts.length == 0) {
                    Alert('Missing Playbooks',
                        '<p>There are no unassigned playbook directories in the base project path (' + scope.base_dir + '). ' + 
