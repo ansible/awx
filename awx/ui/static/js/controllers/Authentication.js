@@ -83,7 +83,7 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
                  $rootScope.token = token;
                  $rootScope.userLoggedIn = true;
                  $rootScope.token_expire = today.getTime();
-
+                 
                  // Get all the profile/access info regarding the logged in user
                  Authorization.getUser()
                      .success(function(data, status, headers, config) {

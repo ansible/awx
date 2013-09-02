@@ -138,13 +138,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                Rest.setUrl(defaultUrl);
                Rest.post(data)
                    .success( function(data, status, headers, config) {
+                       var id = data.id;
                        scope.showGroupHelp = false;  // get rid of the Hint
                        if (scope.variables) {
                           Rest.setUrl(data.related.variable_data);
                           Rest.put(json_data)
                               .success( function(data, status, headers, config) {
                                   $('#form-modal').modal('hide');
-                                  RefreshTree({ scope: scope });
+                                  RefreshTree({ scope: scope, group_id: id });
                               })
                               .error( function(data, status, headers, config) {
                                   ProcessErrors(scope, data, status, form,
@@ -153,7 +154,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        }
                        else {
                           $('#form-modal').modal('hide');
-                          RefreshTree({ scope: scope });
+                          RefreshTree({ scope: scope, group_id: id });
                        }
                        })
                    .error( function(data, status, headers, config) {

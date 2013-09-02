@@ -20,6 +20,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
 
         var scope = params.scope;
         var inventory = params.inventory;
+        var group_id = params.group_id; 
+        var group_idx;
         var groups = inventory.related.root_groups;
         var hosts = inventory.related.hosts; 
         var inventory_name = inventory.name; 
@@ -45,38 +47,61 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 state: 'open',
                 children:[] 
                 }];
-          
-          function addNodes(tree, data) {
-              for (var i=0; i < data.length; i++) {
-                  tree.children.push({
-                      data: {
-                          title: data[i].name
-                          },
-                      attr: {
-                          id: idx,
-                          group_id: data[i].id,
-                          type: 'group',
-                          name: data[i].name, 
-                          description: data[i].description,
-                          "data-failures": data[i].has_active_failures,
-                          inventory: data[i].inventory
-                          },
-                      state: 'open',
-                      children:[]
-                      });
-                  idx++;
-                  if (data[i].children.length > 0) {
-                     var node = tree.children.length - 1;
-                     addNodes(tree.children[node], data[i].children);
-                  }
-              }
-          }
+
+        function sortNodes(data) {
+            //Sort nodes by name
+            var names = [];
+            var newData = [];
+            for (var i=0; i < data.length; i++) {
+                names.push(data[i].name);
+            }
+            names.sort();
+            for (var j=0; j < names.length; j++) {
+                for (i=0; i < data.length; i++) {
+                    if (data[i].name == names[j]) {
+                       newData.push(data[i]);
+                    }
+                }
+            }
+            return newData;
+            }
+
+        function addNodes(tree, data) {
+            var sorted = sortNodes(data);
+            for (var i=0; i < sorted.length; i++) {
+                tree.children.push({
+                    data: {
+                        title: sorted[i].name
+                        },
+                    attr: {
+                        id: idx,
+                        group_id: sorted[i].id,
+                        type: 'group',
+                        name: sorted[i].name, 
+                        description: sorted[i].description,
+                        "data-failures": sorted[i].has_active_failures,
+                        inventory: sorted[i].inventory
+                        },
+                    state: 'open',
+                    children:[]
+                    });
+                if (sorted[i].id == group_id) {
+                   group_idx = idx;  
+                }
+                idx++;
+                if (sorted[i].children.length > 0) {
+                   var node = tree.children.length - 1;
+                   addNodes(tree.children[node], sorted[i].children);
+                }
+            }
+            }
 
           Rest.setUrl(scope.treeData); 
           Rest.get()
-              .success( function(data, status, headers, config) { 
-                  addNodes(treeData[0], data);
-                  scope.$emit('buildTree', treeData, idx);  
+              .success( function(data, status, headers, config) {
+                  var sorted = sortNodes(data);
+                  addNodes(treeData[0], sorted);
+                  scope.$emit('buildTree', treeData, idx, group_idx);  
               })
               .error( function(data, status, headers, config) {
                   ProcessErrors(scope, data, status, form,
@@ -93,6 +118,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
 
         var scope = params.scope;
         var inventory = params.inventory;
+        var group_id = params.group_id;
+
         var groups = inventory.related.root_groups;
         var hosts = inventory.related.hosts; 
         var inventory_name = inventory.name; 
@@ -105,10 +132,12 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         if (scope.buildTreeRemove) {
            scope.buildTreeRemove();
         }
-        scope.buildTreeRemove = scope.$on('buildTree', function(e, treeData, index) {
+        scope.buildTreeRemove = scope.$on('buildTree', function(e, treeData, index, group_idx) {
             var idx = index;
+            var selected = (group_idx !== undefined && group_idx !== null) ? group_idx : 'inventory-node';
+            
             $(tree_id).jstree({
-                "core": { "initially_open":['inventory_node'], 
+                "core": { //"initially_open":['inventory-node'],
                     "html_titles": true
                     },
                 "plugins": ['themes', 'json_data', 'ui', 'contextmenu', 'dnd', 'crrm'],
@@ -118,8 +147,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     "icons": true
                     },
                 "ui": { 
-                    "initially_select": [ 'inventory-node' ],
-                    "select_limit": 1 
+                    "initially_select": [ selected ],
+                    "select_limit": 1
                     },
                 "json_data": {
                     data: treeData
@@ -179,6 +208,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
 
             $(tree_id).bind("loaded.jstree", function () {
                 scope['treeLoading'] = false;
+                Wait('stop');
                 scope.$emit('treeLoaded');
                 });
 
@@ -297,8 +327,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             $(tree_id).bind("select_node.jstree", function(e, data){
                 scope.$emit('NodeSelect', data.inst.get_json()[0]);
                 });
-            
-            Wait('stop');
             });
         
         Wait('start');
@@ -324,26 +352,28 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         Rest.setUrl(GetBasePath('inventory') + scope['inventory_id'] + '/');
         Rest.get()
             .success( function(data, status, headers, config) {
+                
                 LoadBreadCrumbs({ path: '/inventories/' + $routeParams.id, title: data.name });
+                
                 for (var fld in form.fields) {
-                  if (form.fields[fld].realName) {
-                     if (data[form.fields[fld].realName]) {
-                        scope[fld] = data[form.fields[fld].realName];
-                        scope.master[fld] = scope[fld];
-                     }
-                  }
-                  else {
-                     if (data[fld]) {
-                        scope[fld] = data[fld];
-                        scope.master[fld] = scope[fld];
-                     }
-                  }
-                  if (form.fields[fld].type == 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
-                      scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
-                          data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                      scope.master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                          scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
-                  }
+                    if (form.fields[fld].realName) {
+                       if (data[form.fields[fld].realName]) {
+                          scope[fld] = data[form.fields[fld].realName];
+                          scope.master[fld] = scope[fld];
+                       }
+                    }
+                    else {
+                       if (data[fld]) {
+                          scope[fld] = data[fld];
+                          scope.master[fld] = scope[fld];
+                       }
+                    }
+                    if (form.fields[fld].type == 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
+                        scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
+                            data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                        scope.master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                            scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
+                    }
                 }
                 
                 scope.inventoryGroupsUrl = data.related.groups; 
@@ -382,8 +412,11 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
     return function(params) {
 
         // Call after an Edit or Add to refresh tree data
-      
+        
         var scope = params.scope;
+        var group_id = params.group_id;
+        
+        /*
         var openId = [];
         var selectedId;
 
@@ -410,13 +443,15 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                }   
             }
             });
-      
+        */
+        
         if (scope.inventoryLoadedRemove) {
            scope.inventoryLoadedRemove();
         }
         scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
             // Get the list of open tree nodes starting with the current group and going up 
             // the tree until we hit the inventory or root node.
+            /*
             function findOpenNodes(node) {
                 if (node.attr('id') != 'inventory-node') {
                    if (node.prop('tagName') == 'LI' && (node.hasClass('jstree-open') || node.find('.jstree-clicked'))) {
@@ -427,7 +462,9 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             }
             selectedId = scope.selectedNode.attr('id');
             findOpenNodes(scope.selectedNode);
+            */
             $('#tree-view').jstree('destroy');
+            scope.TreeParams.group_id = group_id;
             TreeInit(scope.TreeParams);  
             });
 
