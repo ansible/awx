@@ -68,7 +68,7 @@ angular.module('JobsListDefinition', [])
         fieldActions: {
             summary: {
                 label: 'Hosts',
-                icon: 'icon-th-large',
+                icon: 'icon-laptop',
                 ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.name \}\}')",
                 "class": 'btn btn-default btn-xs',
                 awToolTip: 'View host summary',

@@ -76,7 +76,7 @@ angular.module('JobEventsListDefinition', [])
                 },
             summary: {
                 label: 'Hosts',
-                icon: 'icon-th-large',
+                icon: 'icon-laptop',
                 ngClick: "jobSummary()",
                 "class": 'btn btn-default btn-sm',
                 awToolTip: 'View host summary',

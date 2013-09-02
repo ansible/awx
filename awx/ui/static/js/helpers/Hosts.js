@@ -468,20 +468,39 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var inventory_id = params.inventory_id;
         var html = '';
 
+        function sortNodes(data) {
+            //Sort nodes by name
+            var names = [];
+            var newData = [];
+            for (var i=0; i < data.length; i++) {
+                names.push(data[i].name);
+            }
+            names.sort();
+            for (var j=0; j < names.length; j++) {
+                for (i=0; i < data.length; i++) {
+                    if (data[i].name == names[j]) {
+                       newData.push(data[i]);
+                    }
+                }
+            }
+            return newData;
+            }
+
         function buildHTML(tree_data) {
-            html += (tree_data.length > 0) ? "<ul>\n" : "";
-            for(var i=0; i < tree_data.length; i++) {
-               html += "<li id=\"search-node-1000\" data-state=\"opened\" data-hosts=\"" + tree_data[i].related.hosts + "\" " +
-                   "data-description=\"" + tree_data[i].description + "\" " + 
-                   "data-failures=\"" + tree_data[i].has_active_failures + "\" " +
-                   "data-groups=\"" + tree_data[i].related.groups + "\" " + 
-                   "data-name=\"" + tree_data[i].name + "\" " +
-                   "data-group-id=\"" + tree_data[i].id + "\" " + 
+            var sorted = sortNodes(tree_data);
+            html += (sorted.length > 0) ? "<ul>\n" : "";
+            for(var i=0; i < sorted.length; i++) {
+               html += "<li id=\"search-node-1000\" data-state=\"opened\" data-hosts=\"" + sorted[i].related.hosts + "\" " +
+                   "data-description=\"" + sorted[i].description + "\" " + 
+                   "data-failures=\"" + sorted[i].has_active_failures + "\" " +
+                   "data-groups=\"" + sorted[i].related.groups + "\" " + 
+                   "data-name=\"" + sorted[i].name + "\" " +
+                   "data-group-id=\"" + sorted[i].id + "\" " + 
                    "><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a> " +
-                   "<i class=\"field-badge icon-failures-" + tree_data[i].has_active_failures + "\"></i> " +
-                   "<a href=\"\" class=\"activate\">" + tree_data[i].name + "</a> ";
-               if (tree_data[i].children.length > 0) {
-                  buildHTML(tree_data[i].children);
+                   "<i class=\"field-badge icon-failures-" + sorted[i].has_active_failures + "\"></i> " +
+                   "<a href=\"\" class=\"activate\">" + sorted[i].name + "</a> ";
+               if (sorted[i].children.length > 0) {
+                  buildHTML(sorted[i].children);
                }
                else {
                   html += "</li>\n";
@@ -608,7 +627,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                         { hdr: 'Error!', msg: 'Failed to get inventory tree for: ' + inventory_id + '. GET returned: ' + status });
                     });
             });
-
+        
+        /*
         if (scope.buildGroupListRemove) {
            scope.buildGroupListRemove();
         }
@@ -616,20 +636,23 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             scope.inventory_groups = [];
             Rest.setUrl(groups_url);
             Rest.get()
-                .success( function(data, status, headers, config) { 
+                .success( function(data, status, headers, config) {
+                    var groups = [];
                     for (var i=0; i < data.results.length; i++) {
-                        scope.inventory_groups.push({
+                        groups.push({
                             id: data.results[i].id,
                             description: data.results[i].description, 
                             name: data.results[i].name }); 
                     }
+                    scope.inventory_groups = sortNodes(groups);
                 })
                 .error( function(data, status, headers, config) { 
                     ProcessErrors(scope, data, status, null,
                         { hdr: 'Error!', msg: 'Failed to get groups for inventory: ' + inventory_id + '. GET returned: ' + status });
                 });
             });
-        
+        */
+
         Wait('start');
 
         // Load the inventory root node

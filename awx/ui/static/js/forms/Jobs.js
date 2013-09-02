@@ -281,15 +281,15 @@ angular.module('JobFormDefinition', [])
                 label: 'Refresh',
                 icon: 'icon-refresh',
                 ngClick: "refresh()",
-                "class": 'btn-small btn-success',
+                "class": 'btn-sm btn-success',
                 awToolTip: 'Refresh job status &amp; output',
                 mode: 'all'
                 },
             summary: {
                 label: 'Hosts',
-                icon: 'icon-th-large',
+                icon: 'icon-laptop',
                 ngClick: "jobSummary()",
-                "class": 'btn btn-default btn-small',
+                "class": 'btn btn-default btn-sm',
                 awToolTip: 'View host summary',
                 mode: 'all'
                 },
@@ -297,7 +297,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Events',
                 icon: 'icon-list-ul',
                 ngClick: "jobEvents()",
-                "class": 'btn btn-default btn-small',
+                "class": 'btn btn-default btn-sm',
                 awToolTip: 'Edit job events',
                 mode: 'all'        
                 }
