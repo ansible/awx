@@ -27,6 +27,20 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
     SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
     
+    if (scope.postRefreshRemove) {
+       scope.postRefereshRemove();
+    }
+    scope.postRefreshRemove = scope.$on('PostRefresh', function() {
+        for (var i=0; i < scope.projects.length; i++) {
+            if (scope.projects[i].scm_type == null) {
+               // override the last_update_failed on manual projects- it should be false so we get a 
+               // green badge.  if projet scm_type changed from something to manual, last_update_failed
+               // will contain status of last update, which is not what we want.
+               scope.projects[i].last_update_failed = false;  
+            }
+        }
+        });
+
     SearchInit({ scope: scope, set: 'projects', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
@@ -164,6 +178,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    scope.scmChange = function() {
        // When an scm_type is set, path is not required
        scope.pathRequired = (scope.scm_type) ? false : true;
+       scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch'; 
        }
 
    // Cancel

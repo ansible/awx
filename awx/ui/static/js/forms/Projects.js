@@ -93,7 +93,7 @@ angular.module('ProjectFormDefinition', [])
                 awRequiredWhen: {variable: "scm_type", init: "true" }
                 },
             scm_branch: {
-                label: 'SCM Branch',
+                labelBind: "scmBranchLabel",
                 type: 'text',
                 ngShow: "scm_type !== '' && scm_type !== null",
                 addRequired: false,

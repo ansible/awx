@@ -369,12 +369,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                .success( function(data, status, headers, config) {
                    scope.selectedNode = scope.selectedNode.parent().parent();
                    RefreshTree({ scope: scope });
-                   Wait('stop');
                    })
                .error( function(data, status, headers, config) {
                    //$('#prompt-modal').modal('hide');
                    RefreshTree({ scope: scope });
-                   Wait('stop');
                    ProcessErrors(scope, data, status, null,
                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                    });      

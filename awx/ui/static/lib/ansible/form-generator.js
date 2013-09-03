@@ -352,12 +352,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
              html += "class=\"control-label " + getLabelWidth();
              html += (field.labelClass) ? " " + field.labelClass : "";
-             html += "\" for=\"" + fld + '">';
+             html += "\" ";
+             html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
+             html += "for=\"" + fld + '">';
              html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
              html += (field.icon) ? this.icon(field.icon) : "";
              html += field.label + '</label>' + "\n";
              html += "<div ";
-             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
+             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : "";
              html += "class=\"" + getFieldWidth() + "\">\n";
              html += (field.clear || field.genMD5) ? "<div class=\"input-group\">\n" : "";
              

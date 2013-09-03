@@ -210,12 +210,13 @@ angular.module('Utilities',[])
        }
    }])
 
-   .factory('Wait', [ function() {
+   .factory('Wait', [ '$rootScope', function($rootScope) {
    return function(directive) {
        // Display a spinning icon in the center of the screen to freeze the 
        // UI while waiting on async things to complete (i.e. API calls).    
        //   Wait('start' | 'stop');
-       if (directive == 'start') {
+       if (directive == 'start' && !$rootScope.waiting) {
+          $rootScope.waiting = true;
           var docw = $(document).width(); 
           var doch = $(document).height();
           var spinnyw = $('.spinny').width();
@@ -232,6 +233,7 @@ angular.module('Utilities',[])
               }).fadeIn(400);
        }
        else {
+          $rootScope.waiting = false;
           $('.spinny, .overlay').fadeOut(1000);
        }
        }
