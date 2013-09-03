@@ -16,9 +16,9 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
 {
     ClearScope('htmlTemplate');
     var list = JobHostList;
-    var defaultUrl = GetBasePath('jobs') + $routeParams.id + '/job_host_summaries/';
-    var view = GenerateList;
     var base = $location.path().replace(/^\//,'').split('/')[0];
+    var defaultUrl = GetBasePath(base) + $routeParams.id + '/job_host_summaries/';
+    var view = GenerateList;
     var scope = view.inject(list, { mode: 'edit' });
     scope.selected = [];
     

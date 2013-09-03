@@ -47,6 +47,8 @@ angular.module('ansible', [
     'JobSubmissionHelper',
     'ProjectsListDefinition',
     'ProjectFormDefinition',
+    'ProjectStatusDefinition',
+    'ProjectsHelper',
     'PermissionFormDefinition',
     'PermissionListDefinition',
     'JobsListDefinition',
@@ -107,6 +109,9 @@ angular.module('ansible', [
 
             when('/projects/:project_id/organizations/add',
                 { templateUrl: urlPrefix + 'partials/projects.html', controller: OrganizationsAdd }).
+
+            when('/hosts/:id/job_host_summaries', 
+                { templateUrl: urlPrefix + 'partials/jobs.html', controller: JobHostSummaryList  }).
 
             when('/inventories', 
                 { templateUrl: urlPrefix + 'partials/inventories.html', controller: InventoriesList }).

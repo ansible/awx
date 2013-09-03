@@ -85,6 +85,15 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
       $location.url('/jobs/?id__int=' + last_job );
       }
 
+  scope.allJobs = function(id) {
+      $location.url('/jobs/?job_host_summaries__host=' + id);
+      }
+
+  scope.allHostSummaries = function(id, name) {
+      LoadBreadCrumbs({ path: '/inventories/' + scope.inventory_id + '/hosts', title: name });
+      $location.url('/hosts/' + id + '/job_host_summaries');
+      }
+
   scope.viewLastEvents = function(host_id, last_job, host_name, last_job_name) {
       // Choose View-> Latest job events
       LoadBreadCrumbs({ path: '/jobs/' + last_job, title: last_job_name });

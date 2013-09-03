@@ -51,7 +51,13 @@ angular.module('ProjectsListDefinition', [])
                 "class": 'btn-xs btn-default',
                 awToolTip: 'View/edit project'
                 },
-            
+            scm_status: {
+                label: 'Status',
+                icon: 'icon-th-list',
+                ngClick: 'showSCMStatus(\{\{ project.id \}\})',
+                "class": 'btn-xs btn-default',
+                awToolTip: 'View SCM status'
+                },
             scm_update: {
                 label: 'Update',
                 icon: 'icon-cloud-download',

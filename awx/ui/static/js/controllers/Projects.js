@@ -12,7 +12,7 @@
 
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                       ClearScope, ProcessErrors, GetBasePath, SelectionInit, SCMUpdate)
+                       ClearScope, ProcessErrors, GetBasePath, SelectionInit, SCMUpdate, ProjectStatus)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -54,6 +54,23 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     scope.editProject = function(id) {
        $location.path($location.path() + '/' + id);
        }
+
+    scope.showSCMStatus = function(id) {
+       var project;
+       for (var i=0; i < scope.projects.length; i++) {
+           if (scope.projects[i].id == id) {
+              project = scope.projects[i];
+              break;
+           }
+       }
+       if (project.scm_type !== null) {
+          ProjectStatus({ project_id: id });
+       }
+       else {
+          Alert('Missing SCM Configuration', 'The selected project is not configured for SCM. You must first edit the project, provide SCM settings, ' + 
+              'and then start an update.', 'alert-info');
+       }
+       } 
  
     scope.deleteProject = function(id, name) {
        
@@ -95,7 +112,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
 ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList', 
                          'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                         'GetBasePath', 'SelectionInit', 'SCMUpdate'];
+                         'GetBasePath', 'SelectionInit', 'SCMUpdate', 'ProjectStatus'];
 
 
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 

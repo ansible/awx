@@ -41,6 +41,14 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         }
         });
     
+
+    if ($routeParams['job_host_summaries__host']) {
+       defaultUrl += '?job_host_summaries__host=' + $routeParams['job_host_summaries__host'];
+    }
+    if ($routeParams['inventory__int'] && $routeParams['status']) {
+       defaultUrl += '?inventory__int=' + $routeParams['inventory__int'] + '&status=' + 
+           $routeParams['status'];
+    }
     SearchInit({ scope: scope, set: 'jobs', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
 

@@ -39,8 +39,8 @@ angular.module('InventoryHostsFormDefinition', [])
                 "class": "btn-sm",
                 //ngDisabled: 'host.last_job == null',
                 options: [
-                    { ngClick: 'allJobs()', label: 'All jobs', ngShow: 'host.last_job' },
-                    { ngClick: 'allSummaries()', label: 'All host summaries', ngShow: 'host.last_job' },
+                    { ngClick: "allJobs(\{\{ host.id \}\})", label: 'All jobs', ngShow: 'host.last_job' },
+                    { ngClick: "allHostSummaries(\{\{ host.id \}\},'\{\{ host.name \}\}')", label: 'All host summaries', ngShow: 'host.last_job' },
                     { ngClick: 'viewJobs(\{\{ host.last_job \}\})', label: 'Latest job', ngShow: 'host.last_job' },
                     { ngClick: "viewLastEvents(\{\{ host.id \}\}, '\{\{ host.last_job \}\}', '\{\{ host.name \}\}', " +
                         "'\{\{ host.summary_fields.last_job.name \}\}')", label: 'Latest job events', ngShow: 'host.last_job' },

@@ -91,7 +91,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        if (options.modal) {
           this.scope.formModalActionDisabled = false;
           if (form) {
-             this.scope.formHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;  //Default title for default modal
+             this.scope.formModalHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;  //Default title for default modal
+             console.log('header: ' + this.scope.formHeader);
           }
           this.scope.formModalInfo = false  //Disable info button for default modal
           if (options.modal_selector) {
