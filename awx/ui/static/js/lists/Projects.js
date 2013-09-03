@@ -24,7 +24,7 @@ angular.module('ProjectsListDefinition', [])
                 key: true,
                 label: 'Name',
                 badgeIcon: "\{\{ 'icon-failures-' + project.last_update_failed \}\}",
-                badgePlacement: 'left',
+                badgePlacement: 'left'
                 },
             description: {
                 label: 'Description'

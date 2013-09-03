@@ -27,10 +27,10 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
     SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
     
-    if (scope.postRefreshRemove) {
-       scope.postRefereshRemove();
+    if (scope.projectsPostRefresh) {
+       scope.projectsPostRefresh();
     }
-    scope.postRefreshRemove = scope.$on('PostRefresh', function() {
+    scope.projectsPostRefresh = scope.$on('PostRefresh', function() {
         for (var i=0; i < scope.projects.length; i++) {
             if (scope.projects[i].scm_type == null) {
                // override the last_update_failed on manual projects- it should be false so we get a 
