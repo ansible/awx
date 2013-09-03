@@ -91,7 +91,6 @@ angular.module('JobFormDefinition', [])
                 type: 'number', 
                 integer: true,
                 min: 0,
-                max: null,
                 spinner: true, 
                 "class": 'input-small',
                 "default": '0',
@@ -99,8 +98,7 @@ angular.module('JobFormDefinition', [])
                 editRequired: false,
                 column: 1,
                 disabled: true,
-                awPopOver: "<p>The number of parallel or simultaneous processes to use while executing the playbook. Provide a value between 0 and 100. " +
-                    "A value of zero will use the ansible default setting of 5 parallel processes.</p>",
+                awPopOver: "<p>The number of parallel or simultaneous processes to use while executing the playbook.</p>",
                 dataContainer: 'body',
                 dataTitle: 'Forks',
                 dataPlacement: 'right'

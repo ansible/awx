@@ -92,7 +92,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           this.scope.formModalActionDisabled = false;
           if (form) {
              this.scope.formModalHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;  //Default title for default modal
-             console.log('header: ' + this.scope.formHeader);
           }
           this.scope.formModalInfo = false  //Disable info button for default modal
           if (options.modal_selector) {
@@ -545,10 +544,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             if (field.integer) {
               html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.integer\">Must be an integer value</div>\n";
             }
-            if (field.min || field.max) { 
+            if (field.min !== undefined || field.max !== undefined) { 
               html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$error.min || " + 
-                  this.form.name + '_form.' + fld + ".$error.max\">Must be in range " + field.min + " to " + 
-                  field.max + "</div>\n";
+                  this.form.name + '_form.' + fld + ".$error.max\">Must be an integer between " + field.min + " and ";
+              html += (field.max !== undefined) ? field.max : 'unlimited';
+              html += "</div>\n";
             }
             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
             html += "</div>\n";
