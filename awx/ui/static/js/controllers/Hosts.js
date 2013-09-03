@@ -89,9 +89,10 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
       $location.url('/jobs/?job_host_summaries__host=' + id);
       }
 
-  scope.allHostSummaries = function(id, name) {
-      LoadBreadCrumbs({ path: '/inventories/' + scope.inventory_id + '/hosts', title: name });
-      $location.url('/hosts/' + id + '/job_host_summaries');
+  scope.allHostSummaries = function(id, name, inventory_id) {
+      LoadBreadCrumbs({ path: '/hosts/' + id, title: name, altPath: '/inventories/' + inventory_id + '/hosts', 
+          inventory_id: inventory_id });
+      $location.url('/hosts/' + id + '/job_host_summaries/?inventory=' + inventory_id);
       }
 
   scope.viewLastEvents = function(host_id, last_job, host_name, last_job_name) {

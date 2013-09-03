@@ -133,7 +133,7 @@ angular.module('Utilities',[])
    }])
 
    .factory('LoadBreadCrumbs', ['$rootScope', '$routeParams', '$location', function($rootScope, $routeParams, $location, Rest) {
-   return function(crumb) {  
+   return function(crumb) {
        //Keep a list of path/title mappings. When we see /organizations/XX in the path, for example, 
        //we'll know the actual organization name it maps to.
        if (crumb !== null && crumb !== undefined) {
@@ -171,10 +171,21 @@ angular.module('Utilities',[])
                        break;
                     }
                 }
-                $rootScope.breadcrumbs.push({ title: child, path: ppath + '/' + paths[i] });
+                if ($rootScope.crumbCache[j].altPath) {
+                   $rootScope.breadcrumbs.push({ title: child, path: $rootScope.crumbCache[j].altPath });
+                }
+                else { 
+                   $rootScope.breadcrumbs.push({ title: child, path: ppath + '/' + paths[i] });
+                }
              }
              else {
-                $rootScope.breadcrumbs.push({ title: paths[i], path: ppath + '/' + paths[i] });
+                if (paths[i] == 'hosts') {
+                   $rootScope.breadcrumbs.push({ title: paths[i], path: '/inventories/' + $routeParams.inventory +
+                       '/hosts' });
+                }
+                else {
+                   $rootScope.breadcrumbs.push({ title: paths[i], path: ppath + '/' + paths[i] });
+                }
              }
              ppath += '/' + paths[i];
           }

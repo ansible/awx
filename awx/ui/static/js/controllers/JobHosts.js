@@ -21,6 +21,16 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
     var view = GenerateList;
     var scope = view.inject(list, { mode: 'edit' });
     scope.selected = [];
+
+    // control enable/disable/show of job specific view elements
+    if (base == 'hosts') {
+       scope.job_id = null;
+       scope.host_id = $routeParams.id;
+    }
+    else {
+       scope.job_id = $routeParams.id;
+       scope.host_id = null;
+    }
     
     // After a refresh, populate any needed summary field values on each row
     if (scope.PostRefreshRemove) {
@@ -48,30 +58,34 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
     LoadBreadCrumbs();
     
     scope.showEvents = function(host_name, last_job) {
-      // When click on !Failed Events link, redirect to latest job/job_events for the host
-      Rest.setUrl(last_job);
-      Rest.get()
-          .success( function(data, status, headers, config) {
-              LoadBreadCrumbs({ path: '/jobs/' + data.id, title: data.name });
-              $location.url('/jobs/' + data.id + '/job_events/?host=' + escape(host_name));
-              })
-          .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, form,
-                  { hdr: 'Error!', msg: 'Failed to lookup last job: ' + last_job + '. GET status: ' + status });
-              });
-      }
+        // When click on !Failed Events link, redirect to latest job/job_events for the host
+        Rest.setUrl(last_job);
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                LoadBreadCrumbs({ path: '/jobs/' + data.id, title: data.name });
+                $location.url('/jobs/' + data.id + '/job_events/?host=' + escape(host_name));
+                })
+            .error( function(data, status, headers, config) {
+                ProcessErrors(scope, data, status, form,
+                    { hdr: 'Error!', msg: 'Failed to lookup last job: ' + last_job + '. GET status: ' + status });
+        });
+        }
+
+    scope.showJob = function(id) {
+        $location.path('/jobs/' + id); 
+        }
 
     scope.refresh = function() {
-       scope.search(list.iterator);
-       }
+        scope.search(list.iterator);
+        }
 
     scope.jobDetails = function() {
-       $location.path('/jobs/' + $routeParams.id);
-       };
+        $location.path('/jobs/' + $routeParams.id);
+        };
 
     scope.jobEvents = function() {
-       $location.path('/jobs/' + $routeParams.id + '/job_events');
-       };
+        $location.path('/jobs/' + $routeParams.id + '/job_events');
+        };
   
 }
 

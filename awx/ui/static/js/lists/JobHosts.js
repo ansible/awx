@@ -17,6 +17,13 @@ angular.module('JobHostDefinition', [])
         hover: true,
         
         fields: {
+            job: {
+                label: 'Job ID',
+                ngClick: "showJob(\{\{ jobhost.job \}\})",
+                columnShow: 'host_id !== null',
+                key: true,
+                desc: true
+                },
             host: {
                 label: 'Host',
                 key: true,
@@ -68,6 +75,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Details',
                 icon: 'icon-edit',
                 ngClick: "jobDetails()",
+                ngShow: 'job_id !== null',
                 "class": 'btn btn-default btn-sm',
                 awToolTip: 'Edit job details',
                 mode: 'all'
@@ -76,6 +84,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Events',
                 icon: 'icon-list-ul',
                 ngClick: "jobEvents()",
+                ngShow: 'job_id !== null',
                 "class": 'btn btn-default btn-sm',
                 awToolTip: 'View job events',
                 mode: 'all'            

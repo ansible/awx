@@ -213,6 +213,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               html += "\" id=\""; 
               html += (list.fields[fld].id) ? list.fields[fld].id : fld + "-header";
               html += "\"";
+              html += (list.fields[fld].columnShow) ? " ng-show=\"" + list.fields[fld].columnShow + "\" " : "";
               html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? "ng-click=\"sort('" + fld + "')\"" : "";
               html += ">";
               html += list.fields[fld].label; 
