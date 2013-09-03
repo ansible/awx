@@ -14,8 +14,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                     'InventoryFormDefinition', 'ParseHelper'
                                     ]) 
 
-    .factory('LoadTreeData', ['Alert', 'Rest', 'Authorization', '$http', 'Wait',
-    function(Alert, Rest, Authorization, $http, Wait) {
+    .factory('LoadTreeData', ['Alert', 'Rest', 'Authorization', '$http', 'Wait', 'SortNodes',
+    function(Alert, Rest, Authorization, $http, Wait, SortNodes) {
     return function(params) {
 
         var scope = params.scope;
@@ -48,26 +48,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 children:[] 
                 }];
 
-        function sortNodes(data) {
-            //Sort nodes by name
-            var names = [];
-            var newData = [];
-            for (var i=0; i < data.length; i++) {
-                names.push(data[i].name);
-            }
-            names.sort();
-            for (var j=0; j < names.length; j++) {
-                for (i=0; i < data.length; i++) {
-                    if (data[i].name == names[j]) {
-                       newData.push(data[i]);
-                    }
-                }
-            }
-            return newData;
-            }
-
         function addNodes(tree, data) {
-            var sorted = sortNodes(data);
+            var sorted = SortNodes(data);
             for (var i=0; i < sorted.length; i++) {
                 tree.children.push({
                     data: {
@@ -96,17 +78,17 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             }
             }
 
-          Rest.setUrl(scope.treeData); 
-          Rest.get()
-              .success( function(data, status, headers, config) {
-                  var sorted = sortNodes(data);
-                  addNodes(treeData[0], sorted);
-                  scope.$emit('buildTree', treeData, idx, group_idx);  
-              })
-              .error( function(data, status, headers, config) {
-                  ProcessErrors(scope, data, status, form,
-                      { hdr: 'Error!', msg: 'Failed to retrieve inventory tree data. GET returned status: ' + status });
-              });
+        Rest.setUrl(scope.treeData); 
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                var sorted = SortNodes(data);
+                addNodes(treeData[0], sorted);
+                scope.$emit('buildTree', treeData, idx, group_idx);  
+            })
+            .error( function(data, status, headers, config) {
+                ProcessErrors(scope, data, status, form,
+                    { hdr: 'Error!', msg: 'Failed to retrieve inventory tree data. GET returned status: ' + status });
+            });
 
         }
         }])
@@ -665,6 +647,26 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 ProcessErrors(scope, data, status, form,
                     { hdr: 'Error!', msg: 'Failed to retrieve inventory groups. GET returned status: ' + status });
                 });
+    }
+    }])
+
+    .factory('SortNodes', [ function() {
+    return function(data) {
+        //Sort nodes by name
+        var names = [];
+        var newData = [];
+        for (var i=0; i < data.length; i++) {
+            names.push(data[i].name);
+        }
+        names.sort();
+        for (var j=0; j < names.length; j++) {
+            for (i=0; i < data.length; i++) {
+                if (data[i].name == names[j]) {
+                   newData.push(data[i]);
+                }
+            }
+        }
+        return newData;
     }
     }]);
 

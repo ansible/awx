@@ -460,34 +460,16 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }])
 
 
-    .factory('LoadSearchTree', ['Rest', 'GetBasePath', 'ProcessErrors', '$compile', '$rootScope', 'Wait',
-    function(Rest, GetBasePath, ProcessErrors, $compile, $rootScope, Wait) {
+    .factory('LoadSearchTree', ['Rest', 'GetBasePath', 'ProcessErrors', '$compile', '$rootScope', 'Wait', 'SortNodes',
+    function(Rest, GetBasePath, ProcessErrors, $compile, $rootScope, Wait, SortNodes) {
     return function(params) {
 
         var scope = params.scope; 
         var inventory_id = params.inventory_id;
         var html = '';
 
-        function sortNodes(data) {
-            //Sort nodes by name
-            var names = [];
-            var newData = [];
-            for (var i=0; i < data.length; i++) {
-                names.push(data[i].name);
-            }
-            names.sort();
-            for (var j=0; j < names.length; j++) {
-                for (i=0; i < data.length; i++) {
-                    if (data[i].name == names[j]) {
-                       newData.push(data[i]);
-                    }
-                }
-            }
-            return newData;
-            }
-
         function buildHTML(tree_data) {
-            var sorted = sortNodes(tree_data);
+            var sorted = SortNodes(tree_data);
             html += (sorted.length > 0) ? "<ul>\n" : "";
             for(var i=0; i < sorted.length; i++) {
                html += "<li id=\"search-node-1000\" data-state=\"opened\" data-hosts=\"" + sorted[i].related.hosts + "\" " +
