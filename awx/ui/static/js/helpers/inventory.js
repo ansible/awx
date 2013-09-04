@@ -630,7 +630,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
     .factory('SetShowGroupHelp', ['Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
     return function(params) {
         // Check if inventory has groups. If not, turn on hints to let user know groups are required
-        // before we can 
+        // before hosts can be added
         var scope = params.scope;
         var url = GetBasePath('inventory') + scope.inventory_id + '/groups/';
         Rest.setUrl(url);

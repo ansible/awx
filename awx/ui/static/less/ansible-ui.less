@@ -407,23 +407,6 @@ select.field-mini-height {
   margin-left: 10px;
 }
 
-.tree-container {
-  background-color: #f5f5f5;
-  border: 1px solid #e3e3e3;
-  border-radius: 6px;
-}
-
-.tree-controls {
-  padding: 10px;
-  border-bottom: 1px solid #e3e3e3;
-
-  .title {
-    display: inline-block;
-    font-weight: bold; 
-    margin-right: 25px;
-  }
-}
-
 .no-padding {
   padding: 0;
   margin: 0;
@@ -600,75 +583,48 @@ select.field-mini-height {
      overflow: hidden;
   }
 
+/* Inventory nav links */ 
+  .navigation-links {
+    
+    padding: 0;
+    margin-top: -10px;
 
-/* Inventory Detail Groups tab */
+    a { 
+      margin-right: 15px;
+    }
+
+    a:last-child {
+      margin-right: 20px;
+    }
+  }
+
+/* Inventory-> Groups */
+  
   .inventory-content {
     padding: 15px;
     border: 1px solid #ddd;
     border-radius: 6px;
   }
 
-  .groups-menu, .hosts-menu {
-    min-height: 30px;
+  .tree-container {
     background-color: #f5f5f5;
     border: 1px solid #e3e3e3;
     border-radius: 6px;
-    
-    .nav a {
-       color: @blue-link;
-       font-size: 12px;
-       i {
-         font-size: 14px;
-       }
-    }
-
-    a.disabled {
-       color: @grey;
-    }
-
-    .navbar-form {
-       display: inline-block;
-       float: right;
-       margin-top: 13px;
-       margin-left: 20px;
-       margin-right: 10px;
-
-       label {
-          font-size: 12px;
-          line-height: normal;
-       }
-       input[type="checkbox"] {
-          margin-top: 0;
-       }
-    }
-
-    /* the brand is't really a link */
-    .navbar-brand {
-       color: @black;
-       text-align: left;
-       font-size: 14px;
-       max-width: 100%;
-       i {
-         color: @red;
-       }
-    }
-    .navbar-brand:hover {
-       color: @black; 
-       cursor: default;
-    }
-    
-    /* neither is the status spinner */
-    .nav .status {
-       color: @black;
-    }
-    .nav .status:hover {
-       color: @black; 
-       cursor: default;
-    }
-
   }
 
-/* Inventory Detail Hosts tab */
+  .tree-controls {
+    padding: 10px;
+    border-bottom: 1px solid #e3e3e3;
+
+    .title {
+      display: inline-block;
+      color: #555;
+      font-size: 14px;
+      font-weight: normal; 
+    }
+  }
+
+/* Inventory-> Hosts */
 
   .hosts-well {
     padding-top: 5px;
@@ -710,7 +666,8 @@ select.field-mini-height {
   }
 
   .search-tree { 
-    
+
+    margin-top: 10px;
     padding: 10px 3px 10px 3px;
 
     .title {

@@ -171,7 +171,8 @@ angular.module('Utilities',[])
                        break;
                     }
                 }
-                if (paths[i] == 'hosts' && $rootScope.crumbCache[j].altPath) {
+                if ($rootScope.crumbCache[j] && $rootScope.crumbCache[j]['altPath'] !== undefined) {
+                   // Use altPath to override default path construction
                    $rootScope.breadcrumbs.push({ title: child, path: $rootScope.crumbCache[j].altPath });
                 }
                 else { 

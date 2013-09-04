@@ -15,6 +15,19 @@ angular.module('InventoryFormDefinition', [])
         name: 'inventory',
         parseTypeName: 'inventoryParseType',
         well: true,
+        
+        navigationLinks: {
+            hosts: {
+                href: "/#/inventories/{{ inventory_id }}/hosts",
+                label: 'Hosts',  
+                icon: 'icon-laptop'
+                },
+            Groups: {
+                href: "/#/inventories/{{ inventory_id }}/groups",
+                label: 'Groups',  
+                icon: 'icon-sitemap'
+                }
+            },
 
         fields: {
             inventory_name: {

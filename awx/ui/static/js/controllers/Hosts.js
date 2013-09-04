@@ -29,6 +29,7 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
    scope['hostAddHide'] = true;
    scope['hostCreateHide'] = true;
    scope['hosts'] = null;
+   scope['helpCount'] = 0;
 
    if (scope.loadBreadCrumbsRemove) {
       scope.loadBreadCrumbsRemove();
@@ -114,6 +115,7 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
   scope.refreshHostRemove = scope.$on('refreshHost', function(e, group, title) {
       scope.groupTitle = title;
       scope.group_id = group;
+      scope.helpCount++;
       if (scope.group_id == null) {
          scope.hostAddHide = true;
          scope.hostCreateHide = true; 

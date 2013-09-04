@@ -270,6 +270,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        return html;
     },
 
+    navigationLink: function(link) {
+       return "<a href=\"" + link.href + "\">" + this.attr(link, 'icon') + ' ' + link.label + "</a>\n";  
+    },
+
     buildField: function(fld, field, options, form) {
 
        function getFieldWidth() {
@@ -768,6 +772,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              }
              html += "</div>\n";
           }
+
+          if (this.form.navigationLinks) {
+             html += "<div class=\"navigation-links text-right\">\n"; 
+             for (var link in this.form.navigationLinks) {
+                 html += this.navigationLink(this.form.navigationLinks[link]);
+             }
+             html += "</div>\n";
+          }
           
           // Start the well
           if ( this.has('well') ) {
@@ -951,6 +963,22 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        //
        // Used to create the inventory detail view
        //
+
+       
+       function navigationLinks(page) {
+           // Returns html for navigation links
+           var html = "<div class=\"navigation-links text-right\">\n";
+           html += "<a href=\"/#/inventories/{{ inventory_id }}\"><i class=\"icon-edit\"></i> Inventory Properties</a>\n";
+           if (page == 'group') {
+              html += "<a href=\"/#/inventories/{{ inventory_id }}/hosts\"><i class=\"icon-laptop\"></i> Hosts</a>\n";
+           }
+           else {
+              html += "<a href=\"/#/inventories/{{ inventory_id }}/groups\"><i class=\"icon-sitemap\"></i> Groups</a>\n";    
+           }
+           html += "</div>\n";
+           return html;
+           }
+
        var form = this.form;
        var itm = "groups";
 
@@ -966,17 +994,20 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               "use the <a href=\"/#/inventories/\{\{ inventory_id \}\}/hosts\"><em>Inventories->Hosts</em></a> page to " +
               "add hosts to the group.</p>";
           html += "</div>\n";
-          html += "<div class=\"tree-container\">\n";
+
+          html += navigationLinks('group');
+
+          html += "<div class=\"tree-container\">\n";      
           html += "<div class=\"tree-controls\">\n";
-          html += "<div class=\"title\" ng-bind=\"selectedNodeName\"></div>\n";
-          html += "<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"editInventory()\" ng-hide=\"inventoryEditHide\" " +
-              "aw-tool-tip=\"Edit inventory properties\"  data-placement=\"bottom\"><i class=\"icon-edit\"></i> " +
-              "Inventory Properties</button>\n";
+          html += "<div class=\"title col-lg-2\" ng-bind=\"selectedNodeName\"></div>\n";
+          //html += "<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"editInventory()\" ng-hide=\"inventoryEditHide\" " +
+          //    "aw-tool-tip=\"Edit inventory properties\"  data-placement=\"bottom\"><i class=\"icon-edit\"></i> " +
+          //    "Inventory Properties</button>\n";
           html += "<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" " +
               "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> " +
-              "Group Properties</button>\n";
-          html += "<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"editHosts()\" ng-hide=\"showGroupHelp\" " +
-              "aw-tool-tip=\"Modify and create inventory hosts\" data-placement=\"bottom\"><i class=\"icon-laptop\"></i> Hosts</button>\n";
+              "Properties</button>\n";
+          //html += "<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"editHosts()\" ng-hide=\"showGroupHelp\" " +
+          //    "aw-tool-tip=\"Modify and create inventory hosts\" data-placement=\"bottom\"><i class=\"icon-laptop\"></i> Hosts</button>\n";
           html += "<button type=\"button\" class=\"btn btn-success btn-xs\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
               "aw-tool-tip=\"Add an existing group\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Add Existing Group</button>\n";
           html += "<button type=\"button\" class=\"btn btn-success btn-xs\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
@@ -989,24 +1020,35 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        }
        else {
           // build the hosts page      
+          
+          // Hint text
           html += "<div ng-show=\"showGroupHelp\" class=\"alert alert-dismissable alert-info\">\n";
           html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
           html += "<p><strong>Hint:</strong> Get started building your inventory by adding a group on the " + 
               "<a href=\"/#/inventories/\{\{ inventory_id \}\}/groups\"><em>Inventories->Groups</em></a> page. After creating a group, " +
               "return here and add hosts to the group.</p>";
           html += "</div>\n";
+
+          html += "<div ng-show=\"group_id == null && !showGroupHelp && helpCount < 2\" class=\"alert alert-dismissable alert-info\">\n";
+          html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
+          html += "<p><strong>Hint:</strong> To add hosts to the inventory, select a group using the Group Selector.</p>";
+          html += "</div>\n";
+
           html += "<div class=\"row\">\n";
           html += "<div class=\"col-lg-3\" id=\"search-tree-target\">\n";
           html += "<div class=\"search-tree well\">\n";
           html += "<div id=\"search-tree-container\">\n</div><!-- search-tree-container -->\n";
-          html += "<div class=\"text-right pad-right-sm\"><button type=\"button\" class=\"btn btn-default btn-xs\" " +
-              "ng-click=\"editGroups()\" aw-tool-tip=\"Modify and create inventory groups\" data-placement=\"left\"> " +
-              "<i class=\"icon-sitemap\"></i> Groups</button></div>\n";
+          //html += "<div class=\"text-right pad-right-sm\"><button type=\"button\" class=\"btn btn-default btn-xs\" " +
+          //    "ng-click=\"editGroups()\" aw-tool-tip=\"Modify and create inventory groups\" data-placement=\"left\"> " +
+          //    "<i class=\"icon-sitemap\"></i> Groups</button></div>\n";
           html += "</div><!-- search-tree well -->\n";
           html += "</div><!-- col-lg-3 -->\n";
           html += "<div class=\"col-lg-9\">\n"; 
-          html += "<div class=\"hosts-well well\">\n";
+
+          html += navigationLinks('host');
           
+          html += "<div class=\"hosts-well well\">\n";
+
           html += SearchWidget({ iterator: form.iterator, template: form, mini: true, size: 'col-md-6 col-lg-6'});
           html += "<div class=\"col-md-6 col-lg-6\">\n"
           html += "<div class=\"pull-right\">\n";
