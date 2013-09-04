@@ -171,7 +171,7 @@ angular.module('Utilities',[])
                        break;
                     }
                 }
-                if ($rootScope.crumbCache[j].altPath) {
+                if (paths[i] == 'hosts' && $rootScope.crumbCache[j].altPath) {
                    $rootScope.breadcrumbs.push({ title: child, path: $rootScope.crumbCache[j].altPath });
                 }
                 else { 
