@@ -11,9 +11,9 @@
 
 angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDefinition'])
 .factory('ProjectStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm', 
-         'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'ProjectStatusForm', 'FormatDate',
+         'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'ProjectStatusForm',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
-          FormatDate, ProjectStatusForm, FormatDate) {
+          FormatDate, ProjectStatusForm) {
     return function(params) {
 
         var project_id = params.project_id;
