@@ -337,6 +337,15 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        
        var html = '';
 
+       if (field.type == 'alertblock') {
+          html += "<div class=\"alert alert-dismissable " + field['class'] + "\" "; 
+          html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
+          html += ">\n";
+          html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
+          html += field.alertTxt;
+          html += "</div>\n";
+       }
+
        if (field.type == 'hidden') {
           if ( (options.mode == 'edit' && field.includeOnEdit) ||
                (options.mode == 'add' && field.includeOnAdd) ) {

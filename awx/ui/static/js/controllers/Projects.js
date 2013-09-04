@@ -161,7 +161,9 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
               }
            }
            else {
-              data[fld] = scope[fld];
+              if (form.fields[fld].type !== 'alertblock') {
+                 data[fld] = scope[fld];
+              }
            }
         }
        if (scope.scm_type) {
@@ -339,7 +341,9 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
               }
            }
            else {
-              params[fld] = scope[fld];
+              if (form.fields[fld].type !== 'alertblock') {
+                 params[fld] = scope[fld];
+              }
            }
        }
        if (scope.scm_type) {

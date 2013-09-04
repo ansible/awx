@@ -16,6 +16,8 @@ angular.module('ProjectPathHelper', ['RestServices', 'Utilities'])
         
         var scope = params.scope;
         var master = params.master; 
+        
+        scope.showMissingPlaybooksAlert = false; 
 
         Rest.setUrl( GetBasePath('config') );
         Rest.get()
@@ -31,14 +33,9 @@ angular.module('ProjectPathHelper', ['RestServices', 'Utilities'])
                 scope.base_dir = data.project_base_dir;
                 master.base_dir = scope.base_dir;  // Keep in master object so that it doesn't get
                                                    // wiped out on form reset.
-                console.log('base_dir: ' + scope.base_dir);
                 if (opts.length == 0) {
-                   Alert('Missing Playbooks',
-                       '<p>There are no unassigned playbook directories in the base project path (' + scope.base_dir + '). ' + 
-                       'Either the project directory is empty, or all of the contents are already assigned to other AWX projects.</p>' +
-                       '<p>To fix this, log into the AWX server and check out another playbook project from your SCM repository into ' + 
-                       scope.base_dir + '. After checking out the project, run &quot;chown -R awx&quot; on the content directory to ' +
-                       'ensure awx can read the playbooks.</p>', 'alert-info');
+                   // trigger display of alert block when scm_type == manual
+                   scope.showMissingPlaybooksAlert = true; 
                 }
                 })
             .error( function(data, status, headers, config) {
