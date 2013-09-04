@@ -227,7 +227,11 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
        $('#forks-slider').slider("option", "value", scope.forks);
        $('#forks-slider').slider("disable");
-      
+       $('input[type="checkbox"]').attr('disabled','disabled');
+       $('input[type="radio"]').attr('disabled','disabled');
+       $('#host_config_key-gen-btn').attr('disabled','disabled');
+       $('textarea').attr('readonly','readonly');
+
        // Get job template and display/hide host callback fields
        Rest.setUrl(scope.template_url);
        Rest.get()
@@ -241,14 +245,11 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                    default_val: dft
                    });
                scope['callback_url'] = data.related['callback'];
-               $('input[type="checkbox"]').attr('disabled','disabled');
-               $('input[type="radio"]').attr('disabled','disabled');
-               $('#host_config_key-gen-btn').attr('disabled','disabled');
-               $('textarea').attr('readonly','readonly');
                })
            .error( function(data, status, headers, config) {
-               ProcessErrors(scope, data, status, form,
-                   { hdr: 'Error!', msg: 'Failed to retrieve job: ' + $routeParams.id + '. GET status: ' + status });
+               //ProcessErrors(scope, data, status, form,
+               //    { hdr: 'Error!', msg: 'Failed to retrieve job: ' + $routeParams.id + '. GET status: ' + status });
+               scope['callback_url'] = '<< Job template not found >>';
                });
        
        });
