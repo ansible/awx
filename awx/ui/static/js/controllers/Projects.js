@@ -64,7 +64,13 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
            }
        }
        if (project.scm_type !== null) {
-          ProjectStatus({ project_id: id });
+          if (project.related.last_update !== undefined) {
+             ProjectStatus({ project_id: id, last_update: project.related.last_update });
+          }
+          else {
+             Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
+                 ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
+          }
        }
        else {
           Alert('Missing SCM Configuration', 'The selected project is not configured for SCM. You must first edit the project, provide SCM settings, ' + 
@@ -438,6 +444,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    scope.scmChange = function() {
        // When an scm_type is set, path is not required
        scope.pathRequired = (scope.scm_type) ? false : true;
+       scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch'; 
        }
 }
 

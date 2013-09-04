@@ -382,6 +382,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 html += "ng-model=\"" + fld + '" ';
                 html += 'name="' + fld + '" ';
                 html += (field.ngChange) ? this.attr(field,'ngChange') : "";
+                //html += (field.pwMeter) ? "ng-change=\"chkPass()\" " : "";
                 html += (field.id) ? this.attr(field,'id') : "";
                 html += "class=\"form-control";
                 html += (field['class']) ? " " + this.attr(field, 'class') : "";
@@ -429,6 +430,26 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              if (field.awPassMatch) {
                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + 
                     ".$error.awpassmatch\">Must match Password value</div>\n";
+             }
+
+             if (field.pwMeter) {
+                html += "<div class=\"pw-progress\">\n";
+                html += "<div class=\"progress progress-striped\">\n";
+                html += "<div id=\"progbar\" class=\"progress-bar\" role=\"progress\"></div>\n";
+                html += "</div>\n";
+                html += "<p>Password strength requirements:</p>";
+                html += "<ul class=\"pwddetails\">\n";
+                html += "<li>Minimum 8 characters in length</li>\n";
+                html += "<li>Contains 3/4 of the following items:\n";
+                html += "<ul>\n";
+                html += "<li>UPPERCASE letters</li>\n";
+                html += "<li>lowercase letters</li>\n";
+                html += "<li>Numbers</li>\n";
+                html += "<li>Symbols !@#$%^&*()</li>\n";
+                html += "</ul>\n";
+                html += "</li>\n";
+                html += "</ul>\n"; 
+                html += "</div>\n";
              }
              
              html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";

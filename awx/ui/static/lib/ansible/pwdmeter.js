@@ -65,6 +65,7 @@ var nScore = 0;
 function chkPass(pwd) {
    // Simultaneous variable declaration and value assignment aren't supported in IE apparently
    // so I'm forced to assign the same value individually per var to support a crappy browser *sigh* 
+   console.log('here!');
    var nLength=0, nAlphaUC=0, nAlphaLC=0, nNumber=0, nSymbol=0, nMidChar=0, nRequirements=0, 
        nAlphasOnly=0, nNumbersOnly=0, nUnqChar=0, nRepChar=0, nRepInc=0, nConsecAlphaUC=0, nConsecAlphaLC=0, 
        nConsecNumber=0, nConsecSymbol=0, nConsecCharType=0, nSeqAlpha=0, nSeqNumber=0, nSeqSymbol=0, 
@@ -229,22 +230,23 @@ function chkPass(pwd) {
 
       if (nScore >= 0 && nScore <= 33) {
          sComplexity = 'Weak';
-         progbar.addClass('bar-danger')
-         progbar.removeClass('bar-success bar-warning')
+         progbar.addClass('progress-bar-danger')
+         progbar.removeClass('progress-bar-success progress-bar-warning')
       } else if (nScore > 33 && nScore <= 67) {
          sComplexity = 'Good';
-         progbar.addClass('bar-warning')
-         progbar.removeClass('bar-success bar-danger')
+         progbar.addClass('progress-bar-warning')
+         progbar.removeClass('progress-bar-success progress-bar-danger')
       } else if (nScore > 67) {
          sComplexity = "Strong";
-         progbar.addClass('bar-success')
-         progbar.removeClass('bar-warning bar-danger')
+         progbar.addClass('progress-bar-success')
+         progbar.removeClass('progress-bar-warning progress-bar-danger')
       }
    }
    else {
       /* no password, so reset the displays */
       var progbar  = $("#progbar");
       progbar.css("width", '0%');
-      progbar.removeClass('bar-success bar-warning bar-danger')
+      progbar.removeClass('progress-bar-success progress-bar-warning progress-bar-danger')
    }
+   return nScore;
 }

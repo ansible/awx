@@ -65,7 +65,8 @@ angular.module('UserFormDefinition', [])
                 addRequired: true,
                 editRequired: false,
                 ngChange: "clearPWConfirm('password_confirm')",
-                autocomplete: false
+                autocomplete: false,
+                pwMeter: true
                 },
             password_confirm: {
                 label: 'Confirm Password',
@@ -74,8 +75,7 @@ angular.module('UserFormDefinition', [])
                 editRequired: false,
                 awPassMatch: true,
                 associated: 'password',
-                autocomplete: false,
-                pwMeter: true
+                autocomplete: false
                 },
             is_superuser: {
                 label: 'Superuser?',

@@ -17,51 +17,45 @@ angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDef
     return function(params) {
 
         var project_id = params.project_id;
+        var last_update = params.last_update;
         var generator = GenerateForm;
         var form = ProjectStatusForm;
         var scope;
-        var defaultUrl = GetBasePath('projects') + project_id + '/project_updates/';
         
         // Retrieve detail record and prepopulate the form
-        Rest.setUrl(defaultUrl);
+        Rest.setUrl(last_update);
         Rest.get()
             .success( function(data, status, headers, config) {
                 // load up the form
-                if (data.results.length > 0) {
-                    scope = generator.inject(form, { mode: 'edit', modal: true, related: false});
-                    generator.reset();
-                    var results = data.results[data.results.length - 1];  //get the latest
-                    for (var fld in form.fields) {
-                        if (results[fld]) {
-                           if (fld == 'created') {
-                              scope[fld] = FormatDate(new Date(results[fld]));
-                           }
-                           else {
-                              scope[fld] = results[fld];
-                           }
-                        }
-                        else {
-                           if (results.summary_fields.project[fld]) {
-                              scope[fld] = results.summary_fields.project[fld]
-                           }
-                        }
+                scope = generator.inject(form, { mode: 'edit', modal: true, related: false});
+                generator.reset();
+                var results = data;
+                for (var fld in form.fields) {
+                    if (results[fld]) {
+                       if (fld == 'created') {
+                          scope[fld] = FormatDate(new Date(results[fld]));
+                       }
+                       else {
+                          scope[fld] = results[fld];
+                       }
                     }
-                    scope.formModalAction = function() {
-                        $('#form-modal').modal("hide");
-                        }
-                    scope.formModalActionLabel = 'OK';
-                    scope.formModalCancelShow = false;
-                    scope.formModalInfo = false;
-                    scope.formModalHeader = results.summary_fields.project.name + '<span class="subtitle"> - SCM Status</span>';
-                    $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
-                    $('#form-modal').addClass('skinny-modal');
-                    if (!scope.$$phase) {
-                        scope.$digest();
+                    else {
+                       if (results.summary_fields.project[fld]) {
+                          scope[fld] = results.summary_fields.project[fld]
+                       }
                     }
                 }
-                else {
-                    Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
-                        ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
+                scope.formModalAction = function() {
+                    $('#form-modal').modal("hide");
+                    }
+                scope.formModalActionLabel = 'OK';
+                scope.formModalCancelShow = false;
+                scope.formModalInfo = false;
+                scope.formModalHeader = results.summary_fields.project.name + '<span class="subtitle"> - SCM Status</span>';
+                $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
+                $('#form-modal').addClass('skinny-modal');
+                if (!scope.$$phase) {
+                   scope.$digest();
                 }
                 })
             .error( function(data, status, headers, config) {
