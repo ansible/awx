@@ -11,13 +11,13 @@ angular.module('ProjectStatusDefinition', [])
     'ProjectStatusForm', {
     
         name: 'project_update',
-        editTitle: 'Latest SCM Update', 
+        editTitle: 'SCM Status', 
         well: false,
         'class': 'horizontal-narrow',
 
         fields: {
-            name: {
-                label: 'Name', 
+            created: {
+                label: 'Created', 
                 type: 'text',
                 readonly: true
             },

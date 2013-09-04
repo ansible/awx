@@ -11,9 +11,9 @@
 
 angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDefinition'])
 .factory('ProjectStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm', 
-         'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'ProjectStatusForm',
+         'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'ProjectStatusForm', 'FormatDate',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
-          FormatDate, ProjectStatusForm) {
+          FormatDate, ProjectStatusForm, FormatDate) {
     return function(params) {
 
         var project_id = params.project_id;
@@ -33,7 +33,12 @@ angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDef
                     var results = data.results[data.results.length - 1];  //get the latest
                     for (var fld in form.fields) {
                         if (results[fld]) {
-                           scope[fld] = results[fld];
+                           if (fld == 'created') {
+                              scope[fld] = FormatDate(new Date(results[fld]));
+                           }
+                           else {
+                              scope[fld] = results[fld];
+                           }
                         }
                         else {
                            if (results.summary_fields.project[fld]) {
@@ -47,6 +52,7 @@ angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDef
                     scope.formModalActionLabel = 'OK';
                     scope.formModalCancelShow = false;
                     scope.formModalInfo = false;
+                    scope.formModalHeader = results.summary_fields.project.name + '<span class="subtitle"> - SCM Status</span>';
                     $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
                     $('#form-modal').addClass('skinny-modal');
                     if (!scope.$$phase) {
