@@ -74,7 +74,8 @@ angular.module('UserFormDefinition', [])
                 editRequired: false,
                 awPassMatch: true,
                 associated: 'password',
-                autocomplete: false
+                autocomplete: false,
+                pwMeter: true
                 },
             is_superuser: {
                 label: 'Superuser?',

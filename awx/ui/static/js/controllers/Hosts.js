@@ -117,6 +117,7 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
       scope.group_id = group;
       scope.helpCount++;
       if (scope.group_id == null) {
+         scope.groupTitle = 'All Hosts';
          scope.hostAddHide = true;
          scope.hostCreateHide = true; 
          scope.hostDeleteHide = true;

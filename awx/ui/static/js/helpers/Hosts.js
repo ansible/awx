@@ -610,7 +610,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     });
             });
         
-        /*
+        
         if (scope.buildGroupListRemove) {
            scope.buildGroupListRemove();
         }
@@ -626,14 +626,14 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                             description: data.results[i].description, 
                             name: data.results[i].name }); 
                     }
-                    scope.inventory_groups = sortNodes(groups);
+                    scope.inventory_groups = SortNodes(groups);
                 })
                 .error( function(data, status, headers, config) { 
                     ProcessErrors(scope, data, status, null,
                         { hdr: 'Error!', msg: 'Failed to get groups for inventory: ' + inventory_id + '. GET returned: ' + status });
                 });
             });
-        */
+        
 
         Wait('start');
 

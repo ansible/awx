@@ -972,7 +972,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        //
        // Used to create the inventory detail view
        //
-
        
        function navigationLinks(page) {
            // Returns html for navigation links
@@ -1079,6 +1078,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "</div>\n";
           html += "</div>\n";
           html += "</div><!-- row -->\n";
+          
+          html += "<div class=\"title\" ng-bind=\"groupTitle\"></div>\n";
           
           // Start the list
           html += "<div class=\"list\">\n";
