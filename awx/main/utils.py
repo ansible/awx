@@ -2,6 +2,8 @@
 # All Rights Reserved.
 
 # Python
+import base64
+import hashlib
 import logging
 import re
 import subprocess
@@ -9,6 +11,9 @@ import sys
 
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
+
+# PyCrypto
+from Crypto.Cipher import AES
 
 __all__ = ['get_object_or_400', 'get_object_or_403', 'camelcase_to_underscore',
            'get_ansible_version', 'get_awx_version']
@@ -79,3 +84,45 @@ def get_awx_version():
         return pkg_resources.require('awx')[0].version
     except:
         return __version__
+
+def get_encryption_key(instance, field_name):
+    '''
+    Generate key for encrypted password based on instance pk and field name.
+    '''
+    from django.conf import settings
+    h = hashlib.sha1()
+    h.update(settings.SECRET_KEY)
+    h.update(str(instance.pk))
+    h.update(field_name)
+    return h.digest()[:16]
+
+def encrypt_field(instance, field_name, ask=False):
+    '''
+    Return content of the given instance and field name encrypted.
+    '''
+    value = getattr(instance, field_name)
+    if not value or value.startswith('$encrypted$') or (ask and value == 'ASK'):
+        return value
+    key = get_encryption_key(instance, field_name)
+    cipher = AES.new(key, AES.MODE_ECB)
+    while len(value) % cipher.block_size != 0:
+        value += '\x00'
+    encrypted = cipher.encrypt(value)
+    b64data = base64.b64encode(encrypted)
+    return '$encrypted$%s$%s' % ('AES', b64data)
+
+def decrypt_field(instance, field_name):
+    '''
+    Return content of the given instance and field name decrypted.
+    '''
+    value = getattr(instance, field_name)
+    if not value or not value.startswith('$encrypted$'):
+        return value
+    algo, b64data = value[len('$encrypted$'):].split('$', 1)
+    if algo != 'AES':
+        raise ValueError('unsupported algorithm: %s' % algo)
+    encrypted = base64.b64decode(b64data)
+    key = get_encryption_key(instance, field_name)
+    cipher = AES.new(key, AES.MODE_ECB)
+    value = cipher.decrypt(encrypted)
+    return value.rstrip('\x00')

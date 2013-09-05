@@ -193,6 +193,10 @@ class OrganizationSerializer(BaseSerializer):
 
 class ProjectSerializer(BaseSerializer):
 
+    scm_password = serializers.WritableField(required=False, default='')
+    scm_key_data = serializers.WritableField(required=False, default='')
+    scm_key_unlock = serializers.WritableField(required=False, default='')
+
     playbooks = serializers.Field(source='playbooks', help_text='Array of playbooks available within this project.')
     scm_delete_on_next_update = serializers.Field(source='scm_delete_on_next_update')
     status = serializers.Field(source='status')
@@ -206,6 +210,22 @@ class ProjectSerializer(BaseSerializer):
                                 'scm_update_on_launch',
                                 'scm_username', 'scm_password', 'scm_key_data',
                                 'scm_key_unlock', 'last_update_failed', 'status', 'last_updated')
+
+    def to_native(self, obj):
+        ret = super(ProjectSerializer, self).to_native(obj)
+        # Replace the actual encrypted value with the string $encrypted$.
+        for field in Project.PASSWORD_FIELDS:
+            if field in ret and unicode(ret[field]).startswith('$encrypted$'):
+                ret[field] = '$encrypted$'
+        return ret
+
+    def restore_object(self, attrs, instance=None):
+        # If the value sent to the API startswith $encrypted$, ignore it.
+        for field in Project.PASSWORD_FIELDS:
+            if unicode(attrs.get(field, '')).startswith('$encrypted$'):
+                attrs.pop(field, None)
+        instance = super(ProjectSerializer, self).restore_object(attrs, instance)
+        return instance
 
     def get_related(self, obj):
         res = super(ProjectSerializer, self).get_related(obj)
@@ -487,11 +507,32 @@ class CredentialSerializer(BaseSerializer):
 
     # FIXME: may want to make some of these filtered based on user accessing
 
+    ssh_password = serializers.WritableField(required=False, default='')
+    ssh_key_data = serializers.WritableField(required=False, default='')
+    ssh_key_unlock = serializers.WritableField(required=False, default='')
+    sudo_password = serializers.WritableField(required=False, default='')
+
     class Meta:
         model = Credential
         fields = BASE_FIELDS + ('ssh_username', 'ssh_password', 'ssh_key_data',
                                 'ssh_key_unlock', 'sudo_username',
                                 'sudo_password', 'user', 'team',)
+
+    def to_native(self, obj):
+        ret = super(CredentialSerializer, self).to_native(obj)
+        # Replace the actual encrypted value with the string $encrypted$.
+        for field in Credential.PASSWORD_FIELDS:
+            if field in ret and unicode(ret[field]).startswith('$encrypted$'):
+                ret[field] = '$encrypted$'
+        return ret
+
+    def restore_object(self, attrs, instance=None):
+        # If the value sent to the API startswith $encrypted$, ignore it.
+        for field in Credential.PASSWORD_FIELDS:
+            if unicode(attrs.get(field, '')).startswith('$encrypted$'):
+                attrs.pop(field, None)
+        instance = super(CredentialSerializer, self).restore_object(attrs, instance)
+        return instance
 
     def get_related(self, obj):
         res = super(CredentialSerializer, self).get_related(obj)
@@ -505,9 +546,9 @@ class CredentialSerializer(BaseSerializer):
         ''' some fields cannot be changed once written '''
         if self.object is not None:
             # this is an update
-            if self.object.user != attrs['user']:
+            if 'user' in attrs and self.object.user != attrs['user']:
                 raise serializers.ValidationError("user cannot be changed")
-            if self.object.team != attrs['team']:
+            if 'team' in attrs and self.object.team != attrs['team']:
                 raise serializers.ValidationError("team cannot be changed")
         return attrs
 

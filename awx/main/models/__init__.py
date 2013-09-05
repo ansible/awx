@@ -33,6 +33,7 @@ from djcelery.models import TaskMeta
 
 # AWX
 from awx.main.compat import slugify
+from awx.main.utils import encrypt_field, decrypt_field
 
 __all__ = ['PrimordialModel', 'Organization', 'Team', 'Project',
            'ProjectUpdate', 'Credential', 'Inventory', 'Host', 'Group',
@@ -409,6 +410,8 @@ class Credential(CommonModelNameNotUnique):
     If used with sudo, a sudo password should be set if required.
     '''
 
+    PASSWORD_FIELDS = ('ssh_password', 'ssh_key_data', 'ssh_key_unlock', 'sudo_password')
+
     class Meta:
         app_label = 'main'
 
@@ -462,7 +465,7 @@ class Credential(CommonModelNameNotUnique):
 
     @property
     def needs_ssh_key_unlock(self):
-        return 'ENCRYPTED' in self.ssh_key_data and \
+        return 'ENCRYPTED' in decrypt_field(self, 'ssh_key_data') and \
             (not self.ssh_key_unlock or self.ssh_key_unlock == 'ASK')
 
     @property
@@ -479,6 +482,36 @@ class Credential(CommonModelNameNotUnique):
 
     def get_absolute_url(self):
         return reverse('main:credential_detail', args=(self.pk,))
+
+    def save(self, *args, **kwargs):
+        new_instance = not bool(self.pk)
+        # When first saving to the database, don't store any password field
+        # values, but instead save them until after the instance is created.
+        if new_instance:
+            for field in self.PASSWORD_FIELDS:
+                value = getattr(self, field, '')
+                setattr(self, '_saved_%s' % field, value)
+                setattr(self, field, '')
+        # Otherwise, store encrypted values to the database.
+        else:
+            # If update_fields has been specified, add our field names to it,
+            # if hit hasn't been specified, then we're just doing a normal save.
+            update_fields = kwargs.get('update_fields', [])
+            for field in self.PASSWORD_FIELDS:
+                encrypted = encrypt_field(self, field, bool(field != 'ssh_key_data'))
+                setattr(self, field, encrypted)
+                if field not in update_fields:
+                    update_fields.append(field)
+        super(Credential, self).save(*args, **kwargs)
+        # After saving a new instance for the first time, set the password
+        # fields and save again.
+        if new_instance:
+            update_fields=[]
+            for field in self.PASSWORD_FIELDS:
+                saved_value = getattr(self, '_saved_%s' % field, '')
+                setattr(self, field, saved_value)
+                update_fields.append(field)
+            self.save(update_fields=update_fields)
 
 class Team(CommonModel):
     '''
@@ -499,6 +532,8 @@ class Project(CommonModel):
     '''
     A project represents a playbook git repo that can access a set of inventories
     '''
+
+    PASSWORD_FIELDS = ('scm_password', 'scm_key_data', 'scm_key_unlock')
 
     SCM_TYPE_CHOICES = [
         ('', _('Manual')),
@@ -627,12 +662,40 @@ class Project(CommonModel):
     # - masking passwords in project update args/stdout
 
     def save(self, *args, **kwargs):
+        new_instance = not bool(self.pk)
+        # When first saving to the database, don't store any password field
+        # values, but instead save them until after the instance is created.
+        if new_instance:
+            for field in self.PASSWORD_FIELDS:
+                value = getattr(self, field, '')
+                setattr(self, '_saved_%s' % field, value)
+                setattr(self, field, '')
+        # Otherwise, store encrypted values to the database.
+        else:
+            # If update_fields has been specified, add our field names to it,
+            # if hit hasn't been specified, then we're just doing a normal save.
+            update_fields = kwargs.get('update_fields', [])
+            for field in self.PASSWORD_FIELDS:
+                encrypted = encrypt_field(self, field, bool(field != 'scm_key_data'))
+                setattr(self, field, encrypted)
+                if field not in update_fields:
+                    update_fields.append(field)
         # Check if scm_type or scm_url changes.
         if self.pk:
             project_before = Project.objects.get(pk=self.pk)
             if project_before.scm_type != self.scm_type or project_before.scm_url != self.scm_url:
                 self.scm_delete_on_next_update = True
         super(Project, self).save(*args, **kwargs)
+        # After saving a new instance for the first time, set the password
+        # fields and save again.
+        if new_instance:
+            update_fields=[]
+            for field in self.PASSWORD_FIELDS:
+                saved_value = getattr(self, '_saved_%s' % field, '')
+                setattr(self, field, saved_value)
+                update_fields.append(field)
+            self.save(update_fields=update_fields)
+        # Create auto-generated local path if project uses SCM.
         if self.scm_type and not self.local_path.startswith('_'):
             slug_name = slugify(unicode(self.name)).replace(u'-', u'_')
             self.local_path = u'_%d__%s' % (self.pk, slug_name)
@@ -646,7 +709,7 @@ class Project(CommonModel):
     @property
     def needs_scm_key_unlock(self):
         return self.scm_type and self.scm_key_data and \
-            'ENCRYPTED' in self.scm_key_data and \
+            'ENCRYPTED' in decrypt_field(self, 'scm_key_data') and \
             (not self.scm_key_unlock or self.scm_key_unlock == 'ASK')
 
     @property

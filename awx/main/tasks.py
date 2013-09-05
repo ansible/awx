@@ -24,7 +24,7 @@ from django.conf import settings
 
 # AWX
 from awx.main.models import Job, ProjectUpdate
-from awx.main.utils import get_ansible_version
+from awx.main.utils import get_ansible_version, decrypt_field
 
 __all__ = ['RunJob', 'RunProjectUpdate']
 
@@ -63,10 +63,13 @@ class BaseTask(Task):
         '''
         Create a temporary file containing the SSH private key.
         '''
-        ssh_key_data = getattr(instance, 'ssh_key_data', '')
-        if not ssh_key_data:
-            credential = getattr(instance, 'credential', None)
-            ssh_key_data = getattr(credential, 'ssh_key_data', '')
+        ssh_key_data = ''
+        if hasattr(instance, 'scm_key_data'):
+            ssh_key_data = decrypt_field(instance, 'scm_key_data')
+        elif hasattr(instance, 'credential'):
+            credential = instance.credential
+            if hasattr(credential, 'ssh_key_data'):
+                ssh_key_data = decrypt_field(credential, 'ssh_key_data')
         if ssh_key_data:
             # FIXME: File permissions?
             handle, path = tempfile.mkstemp()
@@ -223,7 +226,7 @@ class RunJob(BaseTask):
         creds = job.credential
         if creds:
             for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password'):
-                value = kwargs.get(field, getattr(creds, field))
+                value = kwargs.get(field, decrypt_field(creds, field))
                 if value not in ('', 'ASK'):
                     passwords[field] = value
         return passwords
@@ -344,11 +347,11 @@ class RunProjectUpdate(BaseTask):
         '''
         passwords = {}
         project = project_update.project
-        value = project.scm_key_unlock
+        value = decrypt_field(project, 'scm_key_unlock')
         if value not in ('', 'ASK'):
             passwords['ssh_key_unlock'] = value
         passwords['scm_username'] = project.scm_username
-        passwords['scm_password'] = project.scm_password
+        passwords['scm_password'] = decrypt_field(project, 'scm_password')
         return passwords
 
     def build_env(self, project_update, **kwargs):
@@ -383,8 +386,9 @@ class RunProjectUpdate(BaseTask):
         args.append('-%s' % ('v' * 3))
         project = project_update.project
         scm_url = project.scm_url
-        if project.scm_username and project.scm_password:
-            scm_url = self.update_url_auth(scm_url, project.scm_username, project.scm_password)
+        if project.scm_username and project.scm_password not in ('ASK', ''):
+            scm_url = self.update_url_auth(scm_url, project.scm_username,
+                                           decrypt_field(project, 'scm_password'))
         elif project.scm_username:
             scm_url = self.update_url_auth(scm_url, project.scm_username)
         # FIXME: Need to hide password in saved job_args and result_stdout!
@@ -416,7 +420,7 @@ class RunProjectUpdate(BaseTask):
         d.update({
             r'Username for.*:': 'scm_username',
             r'Password for.*:': 'scm_password',
-            r'Are you sure you want to continue connecting (yes/no)\?': 'yes',
+            r'Are you sure you want to continue connecting (yes/no)\?': 'yes', # FIXME: Should we really do this?
         })
         return d
 
