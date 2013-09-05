@@ -3,6 +3,8 @@
 
 # Python
 import json
+import re
+import socket
 import urlparse
 
 # PyYAML
@@ -337,6 +339,31 @@ class HostSerializer(BaseSerializerWithVariables):
         d['groups'] = [{'id': g.id, 'name': g.name} for g in obj.groups.all()]
         return d
 
+    def validate_name(self, attrs, source):
+        name = unicode(attrs.get(source, ''))
+        # Allow hostname (except IPv6 for now) to specify the port # inline.
+        if name.count(':') == 1:
+            name, port = name.split(':')
+            try:
+                port = int(port)
+                if port < 1 or port > 65535:
+                    raise ValueError
+            except ValueError:
+                raise serializers.ValidationError('Invalid port specification')
+        for family in (socket.AF_INET, socket.AF_INET6):
+            try:
+                socket.inet_pton(family, name)
+                return attrs
+            except socket.error:
+                pass
+        # Hostname should match the following regular expression and have at
+        # last one letter in the name (to catch invalid IPv4 addresses from
+        # above).
+        valid_host_re = r'^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
+        if re.match(valid_host_re, name) and re.match(r'^.*?[a-zA-Z].*?$', name):
+            return attrs
+        raise serializers.ValidationError('Invalid host name or IP')
+
 class GroupSerializer(BaseSerializerWithVariables):
 
     class Meta:
@@ -355,6 +382,12 @@ class GroupSerializer(BaseSerializerWithVariables):
             job_host_summaries = reverse('main:group_job_host_summaries_list', args=(obj.pk,)),
         ))
         return res
+
+    def validate_name(self, attrs, source):
+        name = attrs.get(source, '')
+        if name in ('all', '_meta'):
+            raise serializers.ValidationError('Invalid group name')
+        return attrs
 
 class GroupTreeSerializer(GroupSerializer):
     

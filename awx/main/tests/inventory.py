@@ -249,9 +249,9 @@ class InventoryTest(BaseTest):
             organization = self.organizations[0]
         )
         invalid      = dict(name='asdf0.example.com')
-        new_host_a   = dict(name='asdf0.example.com', inventory=inv.pk)
+        new_host_a   = dict(name='asdf0.example.com:1022', inventory=inv.pk)
         new_host_b   = dict(name='asdf1.example.com', inventory=inv.pk)
-        new_host_c   = dict(name='asdf2.example.com', inventory=inv.pk)
+        new_host_c   = dict(name='127.1.2.3:2022', inventory=inv.pk)
         new_host_d   = dict(name='asdf3.example.com', inventory=inv.pk)
         new_host_e   = dict(name='asdf4.example.com', inventory=inv.pk)
         host_data0 = self.post(hosts, data=invalid, expect=400, auth=self.get_super_credentials())
@@ -296,6 +296,23 @@ class InventoryTest(BaseTest):
         self.assertEqual(Host.objects.get(id=host_data3['id']).variables, host_data3['variables'])
         self.assertEqual(Host.objects.get(id=host_data3['id']).variables_dict, {'angry': 'penguin'})
 
+        # Try with invalid hostnames and invalid IPs.
+        data = dict(name='', inventory=inv.pk)
+        with self.current_user(self.super_django_user):
+            response = self.post(hosts, data=data, expect=400)
+        data = dict(name='not a valid host name', inventory=inv.pk)
+        with self.current_user(self.super_django_user):
+            response = self.post(hosts, data=data, expect=400)
+        data = dict(name='validhost:99999', inventory=inv.pk)
+        with self.current_user(self.super_django_user):
+            response = self.post(hosts, data=data, expect=400)
+        data = dict(name='123.234.345.456', inventory=inv.pk)
+        with self.current_user(self.super_django_user):
+            response = self.post(hosts, data=data, expect=400)
+        data = dict(name='2001::1::3F', inventory=inv.pk)
+        with self.current_user(self.super_django_user):
+            response = self.post(hosts, data=data, expect=400)
+
         ###########################################
         # GROUPS
 
@@ -327,6 +344,15 @@ class InventoryTest(BaseTest):
  
         # hostnames must be unique inside an organization
         group_data4 = self.post(groups, data=new_group_c, expect=400, auth=self.get_other_credentials())
+
+        # Check that we don't allow creating reserved group names.
+        data = dict(name='all', inventory=inv.pk)
+        with self.current_user(self.super_django_user):
+            response = self.post(groups, data=data, expect=400)
+        data = dict(name='_meta', inventory=inv.pk)
+        with self.current_user(self.super_django_user):
+            response = self.post(groups, data=data, expect=400)
+
 
         #################################################
         # HOSTS->inventories POST via subcollection
