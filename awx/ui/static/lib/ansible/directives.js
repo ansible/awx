@@ -344,173 +344,32 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
             $(elm).spinner(opts);
             }
         }
+        }])
+
+    //
+    // chkPass
+    //
+    // Enables use of lib/ansible/pwdmeter.js to check strengh of passwords.
+    // See controllers/Users.js for example.
+    //
+    .directive('chkPass', [ function() {
+        return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {    
+            $(elm).keyup(function() {
+                var validity = true;
+                var score = chkPass(elm.val());
+                if (elm.val()) {
+                   validity = (score > 67) ? true : false;
+                }
+                ctrl.$setValidity('complexity', validity);
+                if (!scope.$$phase) {
+                   scope.$digest();
+                }
+                });
+            }
+        }
         }]);
-
-    /* This has become more than a simple directive. All the logic for building the group selector tree
-       on the Hosts tab is here. Probably needs to move into the Hosts helper and/or Inventory helper.
-     */
-    // .directive('awTree', ['Rest', 'ProcessErrors', 'Authorization', '$compile', '$rootScope', 'Wait',
-    //     function(Rest, ProcessErrors, Authorization, $compile, $rootScope, Wait) {
-    //     return {
-    //     //require: 'ngModel',
-        
-    //     replace: true,
-        
-    //     transclude: true,
-        
-    //     scope: {
-    //         treeData: '=awTree'
-    //         },
-        
-    //     replace: true,
-        
-    //     template:
-    //         "<div class=\"search-tree well\" id=\"search-tree-container\">\n" +
-    //         "<ul>\n" +
-    //         "<li id=\"search-node-1000\" data-state=\"closed\" data-hosts=\"{{ treeData[0].hosts}}\" " +
-    //         "data-hosts=\"{{ treeData[0].hosts }}\" " +
-    //         "data-description=\"{{ treeData[0].description }}\" " + 
-    //         "data-failures=\"{{ treeData[0].failures }}\" " +
-    //         "data-groups=\"{{ treeData[0].groups }}\" " + 
-    //         "data-name=\"{{ treeData[0].name }}\">" + 
-    //         "<a href=\"\" class=\"expand\"><i class=\"icon-caret-right\"></i></a> <a href=\"\" class=\"activate active\">{{ treeData[0].name }}</a></li>\n" +
-    //         "</li>\n"+
-    //         "</ul>\n" +
-    //         "</div>\n",
-
-    //     link: function(scope, elm , attrs) {
-
-    //         var idx=1000;
-
-    //         function refresh(parent) {
-    //             var group, title;
-    //             if (parent.attr('data-group-id')) {
-    //                group = parent.attr('data-group-id');
-    //                title = parent.attr('data-name');
-    //                //title += (parent.attr('data-description') !== "") ? '<p>' + parent.attr('data-description') + '</p>' : ''; 
-    //             }
-    //             else {
-    //                group = null;
-    //                title = 'All Hosts'
-    //             }
-    //             // The following will trigger the host list to load. See Inventory.js controller.
-    //             scope.$emit('refreshHost', group, title);
-    //             }
-            
-    //         function activate(e) {
-    //             /* Set the clicked node as active */
-    //             var elm = angular.element(e.target);  //<a>
-    //             var parent = angular.element(e.target.parentNode); //<li>
-    //             $('.search-tree .active').removeClass('active');
-    //             elm.addClass('active');
-    //             refresh(parent);
-    //             }
-
-    //         function toggle(e) {
-                
-    //             var id, parent, elm, icon;
-                
-    //             if (e.target.tagName == 'I') {
-    //                id = e.target.parentNode.parentNode.attributes.id.value;
-    //                parent = angular.element(e.target.parentNode.parentNode);  //<li>
-    //                elm = angular.element(e.target.parentNode);  // <a>
-    //             }
-    //             else {
-    //                id = e.target.parentNode.attributes.id.value;
-    //                parent = angular.element(e.target.parentNode);
-    //                elm = angular.element(e.target);
-    //             }
-                
-    //             var sibling = angular.element(parent.children()[2]); // <a>
-    //             var state = parent.attr('data-state');
-    //             var icon = angular.element(elm.children()[0]);
-                
-    //             if (state == 'closed') {
-    //                // expand the elment
-    //                var childlists = parent.find('ul');
-    //                if (childlists && childlists.length > 0) {
-    //                   // has childen
-    //                   for (var i=0; i < childlists.length; i++) {
-    //                       var listChild = angular.element(childlists[i]);
-    //                       var listParent = angular.element(listChild.parent());
-    //                       if (listParent.attr('id') == id) {
-    //                          angular.element(childlists[i]).removeClass('hidden');
-    //                       }
-    //                   }
-    //                }
-    //                parent.attr('data-state','open'); 
-    //                icon.removeClass('icon-caret-right').addClass('icon-caret-down');
-    //             }
-    //             else {
-    //                // close the element
-    //                parent.attr('data-state','closed'); 
-    //                icon.removeClass('icon-caret-down').addClass('icon-caret-right');
-    //                var childlists = parent.find('ul');
-    //                if (childlists && childlists.length > 0) {
-    //                   // has childen
-    //                   for (var i=0; i < childlists.length; i++) {
-    //                       angular.element(childlists[i]).addClass('hidden');
-    //                   }
-    //                }
-    //                /* When the active node's parent is closed, activate the parent*/
-    //                if ($(parent).find('.active').length > 0) {
-    //                   $(parent).find('.active').removeClass('active');
-    //                   sibling.addClass('active');
-    //                   refresh(parent);
-    //                }
-    //             }
-    //             }
-
-    //         function initialize() {
-    //             var root = angular.element(document.getElementById('search-node-1000'));
-    //             var toggleElm = angular.element(root.find('a')[0]);
-    //             var activateElm = angular.element(root.find('a')[1])
-    //             toggleElm.bind('click', toggle);
-    //             activateElm.bind('click', activate);
-    //             }
-            
-    //         // Responds to searchTreeReady, thrown from Hosts.js helper when the inventory tree
-    //         // is ready
-    //         if ($rootScope.hostTabInitRemove) {
-    //            $rootScope.hostTabInitRemove();
-    //         }
-    //         $rootScope.hostTabInitRemove = $rootScope.$on('searchTreeReady', function(e, html) {
-    //            Wait('start');
-    //            var container = angular.element(document.getElementById('search-tree-container'));
-    //            container.empty();
-    //            var compiled = $compile(html)(scope);
-    //            container.append(compiled);
-               
-    //            var links = container.find('a');
-    //            for (var i=0; i < links.length; i++) {
-    //                var link = angular.element(links[i]);
-    //                if (link.hasClass('expand')) {
-    //                   link.unbind('click', toggle);
-    //                   link.bind('click', toggle);
-    //                }
-    //                if (link.hasClass('activate')) {
-    //                   link.unbind('click', activate);
-    //                   link.bind('click', activate);
-    //                }
-    //            }
-               
-
-    //            Wait('stop');
-
-    //            //initialize();
-    //            // Expand the root node and show All Hosts
-    //            //setTimeout(function() {
-    //            //    $('#search-node-1000 .expand').click();
-    //            //    $('#search-node-1000 .activate').click();
-    //            //    Wait('stop');
-    //            //    }, 500);  
-    //            });
-
-    //         }
-    //     }
-    //     }]);
-
-
 
 
 

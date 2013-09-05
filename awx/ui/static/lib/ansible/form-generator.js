@@ -382,7 +382,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 html += "ng-model=\"" + fld + '" ';
                 html += 'name="' + fld + '" ';
                 html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-                //html += (field.pwMeter) ? "ng-change=\"chkPass()\" " : "";
+                html += (field.chkPass) ? "chk-pass " : "";
                 html += (field.id) ? this.attr(field,'id') : "";
                 html += "class=\"form-control";
                 html += (field['class']) ? " " + this.attr(field, 'class') : "";
@@ -432,7 +432,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                     ".$error.awpassmatch\">Must match Password value</div>\n";
              }
 
-             if (field.pwMeter) {
+             if (field.chkPass) {
+                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + 
+                    ".$error.complexity\">Password must meet minimum complexity</div>\n";
                 html += "<div class=\"pw-progress\">\n";
                 html += "<div class=\"progress progress-striped\">\n";
                 html += "<div id=\"progbar\" class=\"progress-bar\" role=\"progress\"></div>\n";

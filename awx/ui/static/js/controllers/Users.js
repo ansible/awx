@@ -157,10 +157,6 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
       // If password value changes, make sure password_confirm must be re-entered
       scope[fld] = '';
       scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
-      var score = chkPass(scope.password);
-      //if (score < 67) {
-      //  good stuff happens...  maybe this could be handled by a directive?
-      //}
       }
 }
 

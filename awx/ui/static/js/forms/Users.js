@@ -66,7 +66,7 @@ angular.module('UserFormDefinition', [])
                 editRequired: false,
                 ngChange: "clearPWConfirm('password_confirm')",
                 autocomplete: false,
-                pwMeter: true
+                chkPass: true
                 },
             password_confirm: {
                 label: 'Confirm Password',
