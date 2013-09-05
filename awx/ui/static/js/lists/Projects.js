@@ -28,6 +28,13 @@ angular.module('ProjectsListDefinition', [])
                 },
             description: {
                 label: 'Description'
+                },
+            last_updated: {
+                label: 'Last Updated',
+                type: 'date'
+                },
+            status: {
+                label: 'Status'
                 }
             },
         
@@ -39,6 +46,32 @@ angular.module('ProjectsListDefinition', [])
                 ngClick: 'addProject()',
                 "class": 'btn-success btn-sm',
                 awToolTip: 'Create a new project'
+                },
+            refresh: {
+                label: 'Refresh',
+                "class": 'btn-primary btn-sm',
+                ngClick: "refresh(\{\{ job.id \}\})",
+                icon: 'icon-refresh',
+                awToolTip: 'Refresh the page',
+                mode: 'all'
+                },
+            help: {
+                awPopOver: "<dl>\n<dt>Updating</dt><dd>An SCM update is in progress.</dd>\n" +
+                    "<dt>Never Updated</dt><dd>No SCM update has ever run for the project.</dd>\n" +
+                    "<dt>Failed</dt><dd>An error occurred during the most recent SCM update.</dd>\n" +
+                    "<dt>Successful</dt><dd>The latest SCM update ran to completion without incident.</dd>\n" +
+                    "<dt>Missing</dt><dd>The local project directory is missing.</dd>\n" +
+                    "<dt>OK</dt><dd>The project does not use SCM, and the directory is present.</dd>\n" +
+                    "</dl>\n",
+                dataPlacement: 'left',
+                dataContainer: 'body',
+                icon: "icon-question-sign",
+                mode: 'all',
+                'class': 'btn-xs btn-info btn-help',
+                awToolTip: 'Click for help',
+                dataTitle: 'Project Status',
+                iconSize: 'large',
+                id: 'project-help-button'
                 }
             },
 

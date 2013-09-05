@@ -67,7 +67,7 @@ angular.module('JobHostDefinition', [])
                 label: 'Refresh',
                 icon: 'icon-refresh',
                 ngClick: "refresh()",
-                "class": 'btn-success btn-sm',
+                "class": 'btn-primary btn-sm',
                 awToolTip: 'Refresh the page',
                 mode: 'all'
                 },

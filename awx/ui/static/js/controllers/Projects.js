@@ -12,7 +12,8 @@
 
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                       ClearScope, ProcessErrors, GetBasePath, SelectionInit, SCMUpdate, ProjectStatus)
+                       ClearScope, ProcessErrors, GetBasePath, SelectionInit, SCMUpdate, ProjectStatus,
+                       FormatDate)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -38,6 +39,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                // will contain status of last update, which is not what we want.
                scope.projects[i].last_update_failed = false;  
             }
+            scope.projects[i].last_updated = FormatDate(new Date(scope.projects[i].last_updated));
         }
         });
 
@@ -100,12 +102,25 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                 action: action
                 });
        }
-
+    
+    scope.refresh = function() {
+        scope.search(list.iterator); 
+        }
+    
+    if (scope.removeUpdateSubmitted) {
+       scope.removeUpdateSubmitted();
+    }
+    scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function() {
+        scope.search(list.iterator); 
+        });
     scope.SCMUpdate = function(project_id) {
        for (var i=0; i < scope.projects.length; i++) {
            if (scope.projects[i].id == project_id) {
               if (scope.projects[i].scm_type == "") {
                  Alert('Missing SCM Setup', 'Before running an SCM update, edit the project and provide the SCM access information.', 'alert-info');
+              }
+              else if (scope.projects[i].status == 'updating') {
+                 Alert('Update in Progress', 'The SCM update process is running. Use the Refresh button to monitor the status.', 'alert-info'); 
               }
               else {
                  SCMUpdate({ scope: scope, project_id: project_id });
@@ -118,7 +133,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
 ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList', 
                          'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                         'GetBasePath', 'SelectionInit', 'SCMUpdate', 'ProjectStatus'];
+                         'GetBasePath', 'SelectionInit', 'SCMUpdate', 'ProjectStatus', 'FormatDate'];
 
 
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 

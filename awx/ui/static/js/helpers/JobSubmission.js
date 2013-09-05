@@ -72,6 +72,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                Rest.setUrl(start_url);
                Rest.post(pswd)
                    .success( function(data, status, headers, config) {
+                       scope.$emit('UpdateSubmitted');
                        if (form.name == 'credential') {
                           navigate(false);
                        }

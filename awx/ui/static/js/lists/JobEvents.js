@@ -63,7 +63,7 @@ angular.module('JobEventsListDefinition', [])
                 icon: 'icon-refresh',
                 label: 'Refresh',
                 awToolTip: 'Refresh the page',
-                "class": 'btn-sm btn-success',
+                "class": 'btn-sm btn-primary',
                 mode: 'all'
                 },
             edit: {
