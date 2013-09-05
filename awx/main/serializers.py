@@ -227,7 +227,6 @@ class ProjectSerializer(BaseSerializer):
     def validate_local_path(self, attrs, source):
         # Don't allow assigning a local_path used by another project.
         # Don't allow assigning a local_path when scm_type is set.
-        print attrs, source, self.object
         valid_local_paths = Project.get_local_path_choices()
         if self.object:
             scm_type = attrs.get('scm_type', self.object.scm_type)
@@ -542,7 +541,7 @@ class JobTemplateSerializer(BaseSerializer):
 
 class JobSerializer(BaseSerializer):
 
-    passwords_needed_to_start = serializers.Field(source='get_passwords_needed_to_start')
+    passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
 
     class Meta:
         model = Job

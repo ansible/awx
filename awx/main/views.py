@@ -797,7 +797,7 @@ class JobStart(GenericAPIView):
             can_start=obj.can_start,
         )
         if obj.can_start:
-            data['passwords_needed_to_start'] = obj.asswords_needed_to_start
+            data['passwords_needed_to_start'] = obj.passwords_needed_to_start
         return Response(data)
 
     def post(self, request, *args, **kwargs):

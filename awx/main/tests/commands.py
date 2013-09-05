@@ -352,7 +352,7 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
-        self.assertFalse(job.get_passwords_needed_to_start())
+        self.assertFalse(job.passwords_needed_to_start)
         self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)

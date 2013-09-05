@@ -430,10 +430,10 @@ class BaseJobTestMixin(BaseTestMixin):
 class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
     JOB_TEMPLATE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created',
-                           'name', 'description', 'job_type', 'inventory',
-                           'project', 'playbook', 'credential', 'forks',
-                           'limit', 'verbosity', 'extra_vars', 'job_tags',
-                           'host_config_key',)
+                           'modified', 'name', 'description', 'job_type',
+                           'inventory', 'project', 'playbook', 'credential',
+                           'forks', 'limit', 'verbosity', 'extra_vars',
+                           'job_tags', 'host_config_key',)
 
     def test_get_job_template_list(self):
         url = reverse('main:job_template_list')

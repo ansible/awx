@@ -692,7 +692,8 @@ class Project(CommonModel):
 
     @property
     def can_update(self):
-        return bool(self.scm_type and not self.current_update)
+        # FIXME: Prevent update when another one is active!
+        return bool(self.scm_type)# and not self.current_update)
 
     def update(self, **kwargs):
         if self.can_update:

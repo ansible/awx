@@ -324,8 +324,6 @@ class RunJob(BaseTask):
         if not super(RunJob, self).pre_run_check(job, **kwargs):
             return False
         # FIXME: Check if job is waiting on any projects that are being updated.
-        if job.project.has_active_updates:
-            pass
         return True
 
     def post_run_hook(self, job):
