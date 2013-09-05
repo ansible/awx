@@ -483,9 +483,11 @@ class CredentialAccess(BaseAccess):
             raise PermissionDenied('Unable to change team on a credential')
         if self.user.is_superuser:
             return True
-        if self.user == obj.user:
+        if self.user == obj.created_by:
             return True
         if obj.user:
+            if self.user == obj.user:
+                return True
             if obj.user.organizations.filter(admins__in=[self.user]).count():
                 return True
             if obj.user.admin_of_organizations.filter(admins__in=[self.user]).count():
