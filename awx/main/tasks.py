@@ -358,6 +358,7 @@ class RunProjectUpdate(BaseTask):
         Build environment dictionary for ansible-playbook.
         '''
         env = super(RunProjectUpdate, self).build_env(project_update, **kwargs)
+        env['ANSIBLE_ASK_SUDO_PASS'] = str(False)
         return env
 
     def update_url_auth(self, url, username=None, password=None):
