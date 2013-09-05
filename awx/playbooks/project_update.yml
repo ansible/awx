@@ -20,17 +20,11 @@
     - name: update project using git
       git: dest={{project_path}} repo={{scm_url}} version={{scm_branch}} force={{scm_clean}}
       when: scm_type == 'git'
-      async: 0
-      poll: 5
 
     - name: update project using hg
       hg: dest={{project_path}} repo={{scm_url}} revision={{scm_branch}} force={{scm_clean}}
       when: scm_type == 'hg'
-      async: 0
-      poll: 5
 
     - name: update project using svn
       subversion: dest={{project_path}} repo={{scm_url}} revision={{scm_branch}} force={{scm_clean}}
       when: scm_type == 'svn'
-      async: 0
-      poll: 5

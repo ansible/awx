@@ -569,7 +569,7 @@ class ProjectAccess(BaseAccess):
 
     def get_queryset(self):
         qs = Project.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by')
+        qs = qs.select_related('created_by', 'current_update', 'last_update')
         if self.user.is_superuser:
             return qs
         allowed = [PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]

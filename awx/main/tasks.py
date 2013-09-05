@@ -30,10 +30,13 @@ __all__ = ['RunJob', 'RunProjectUpdate']
 
 logger = logging.getLogger('awx.main.tasks')
 
+# FIXME: Cleanly cancel task when celery worker is stopped.
+
 class BaseTask(Task):
     
     name = None
     model = None
+    idle_timeout = None
 
     def update_model(self, pk, **updates):
         '''
@@ -132,10 +135,10 @@ class BaseTask(Task):
             expect_passwords[n] = passwords.get(item[1], '') or ''
         expect_list.extend([pexpect.TIMEOUT, pexpect.EOF])
         while child.isalive():
-            result_id = child.expect(expect_list, timeout=2)
+            result_id = child.expect(expect_list, timeout=5)
             if result_id in expect_passwords:
                 child.sendline(expect_passwords[result_id])
-            updates = {}
+            updates = {'status': 'running'}
             if logfile_pos != logfile.tell():
                 logfile_pos = logfile.tell()
                 updates['result_stdout'] = logfile.getvalue()
@@ -144,11 +147,11 @@ class BaseTask(Task):
             if instance.cancel_flag:
                 child.close(True)
                 canceled = True
-            elif (time.time() - last_stdout_update) > 30: # FIXME: Configurable idle timeout?
-                print 'no updates...'
-            #    print 'canceling...'
-            #    child.close(True)
-            #    canceled = True
+            # FIXME: Configurable idle timeout? Find a way to determine if task
+            # is hung waiting at a prompt.
+            if self.idle_timeout and (time.time() - last_stdout_update) > self.idle_timeout:
+                child.close(True)
+                canceled = True
         if canceled:
             status = 'canceled'
         elif child.exitstatus == 0:
@@ -166,10 +169,17 @@ class BaseTask(Task):
             return False
         return True
 
+    def post_run_hook(self, instance):
+        '''
+        Hook for actions after job/task has completed.
+        '''
+
     def run(self, pk, **kwargs):
         '''
         Run the job/task using ansible-playbook and capture its output.
         '''
+        self.pk = pk
+        self.kwargs = dict(kwargs.items())
         instance = self.update_model(pk)
         if not self.pre_run_check(instance, **kwargs):
             return
@@ -193,8 +203,9 @@ class BaseTask(Task):
                     os.remove(kwargs['ssh_key_path'])
                 except IOError:
                     pass
-        self.update_model(pk, status=status, result_stdout=stdout,
-                          result_traceback=tb)
+        instance = self.update_model(pk, status=status, result_stdout=stdout,
+                                     result_traceback=tb)
+        self.post_run_hook(instance)
 
 class RunJob(BaseTask):
     '''
@@ -313,12 +324,21 @@ class RunJob(BaseTask):
         if not super(RunJob, self).pre_run_check(job, **kwargs):
             return False
         # FIXME: Check if job is waiting on any projects that are being updated.
+        if job.project.has_active_updates:
+            pass
         return True
+
+    def post_run_hook(self, job):
+        '''
+        Hook for actions after job has completed.
+        '''
+        # Start any project updates that were blocked waiting for the job.
 
 class RunProjectUpdate(BaseTask):
     
     name = 'run_project_update'
     model = ProjectUpdate
+    idle_timeout = 30
 
     def build_passwords(self, project_update, **kwargs):
         '''
@@ -359,6 +379,8 @@ class RunProjectUpdate(BaseTask):
         optionally using ssh-agent for public/private key authentication.
         '''
         args = ['ansible-playbook', '-i', 'localhost,']
+        # Since we specify -vvv and tasks use async polling, we should get some
+        # output regularly...
         args.append('-%s' % ('v' * 3))
         project = project_update.project
         scm_url = project.scm_url
@@ -375,8 +397,6 @@ class RunProjectUpdate(BaseTask):
             'scm_url': scm_url,
             'scm_branch': scm_branch,
             'scm_clean': project.scm_clean,
-            #'scm_username': project.scm_username,
-            #'scm_password': project.scm_password,
             'scm_delete_on_update': scm_delete_on_update,
         }
         args.extend(['-e', json.dumps(extra_vars)])
@@ -408,4 +428,13 @@ class RunProjectUpdate(BaseTask):
         if not super(RunProjectUpdate, self).pre_run_check(project_update, **kwargs):
             return False
         # FIXME: Check if project update is blocked by any jobs that are being run.
+        project = project_update.project
+        if project.jobs.filter(status__in=('pending', 'waiting', 'running')):
+            pass
         return True
+
+    def post_run_hook(self, project_update):
+        '''
+        Hook for actions after project_update has completed.
+        '''
+        # Start any jobs waiting on this update to finish.

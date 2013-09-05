@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import datetime
 import hmac
 import json
 import logging
@@ -19,7 +20,7 @@ from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from django.utils.timezone import now
+from django.utils.timezone import now, make_aware, get_default_timezone
 
 # Django-JSONField
 from jsonfield import JSONField
@@ -67,6 +68,7 @@ PERMISSION_TYPE_CHOICES = [
 JOB_STATUS_CHOICES = [
     ('new', _('New')),                  # Job has been created, but not started.
     ('pending', _('Pending')),          # Job has been queued, but is not yet running.
+    ('waiting', _('Waiting')),          # Job is waiting on an update/dependency.
     ('running', _('Running')),          # Job is currently running.
     ('successful', _('Successful')),    # Job completed successfully.
     ('failed', _('Failed')),            # Job completed, but with failures.
@@ -85,11 +87,16 @@ class PrimordialModel(models.Model):
         abstract = True
 
     description   = models.TextField(blank=True, default='')
-    created_by    = models.ForeignKey('auth.User', 
-                        on_delete=SET_NULL, null=True, 
-                        related_name='%s(class)s_created', 
-                        editable=False) # not blank=False on purpose for admin!
     created       = models.DateTimeField(auto_now_add=True)
+    modified      = models.DateTimeField(auto_now=True, default=now)
+    created_by    = models.ForeignKey('auth.User',
+                                      related_name='%s(class)s_created+',
+                                      default=None, null=True, editable=False,
+                                      on_delete=models.SET_NULL)
+    modified_by   = models.ForeignKey('auth.User',
+                                      related_name='%s(class)s_modified+',
+                                      default=None, null=True, editable=False,
+                                      on_delete=models.SET_NULL)
     active        = models.BooleanField(default=True)
 
     tags = TaggableManager(blank=True)
@@ -522,9 +529,6 @@ class Project(CommonModel):
 
     local_path = models.CharField(
         max_length=1024,
-        # Not unique for now, otherwise "deletes" won't allow reusing the
-        # same path for another active project.
-        #unique=True,
         blank=True,
         help_text=_('Local path (relative to PROJECTS_ROOT) containing '
                     'playbooks and related files for this project.')
@@ -538,7 +542,7 @@ class Project(CommonModel):
         default='',
         verbose_name=_('SCM Type'),
     )
-    scm_url = models.URLField(
+    scm_url = models.CharField(
         max_length=1024,
         blank=True,
         null=True,
@@ -598,6 +602,13 @@ class Project(CommonModel):
         help_text=_('Passphrase to unlock SSH private key if encrypted (or '
                     '"ASK" to prompt the user).'),
     )
+    current_update = models.ForeignKey(
+        'ProjectUpdate',
+        null=True,
+        default=None,
+        editable=False,
+        related_name='project_as_current_update+',
+    )
     last_update = models.ForeignKey(
         'ProjectUpdate',
         null=True,
@@ -611,12 +622,8 @@ class Project(CommonModel):
     )
     
     # FIXME: Still need to implement:
-    # - some scm_url validation
     # - scm_update_on_launch
-    # - prompt for passwords for project update
-    # - prompt for passwords when running job when scm_update_on_launch set
     # - prevent simultaneous updates of project and running jobs using project
-    # - prevent manually setting local path when scm_type is set
     # - masking passwords in project update args/stdout
 
     def save(self, *args, **kwargs):
@@ -650,8 +657,45 @@ class Project(CommonModel):
                 needed.append(field)
         return needed
 
-    def update(self, **kwargs):
+    @property
+    def status(self):
+        # FIXME: Update status values!
         if self.scm_type:
+            if self.current_update:
+                return 'updating'
+            elif not self.last_update:
+                return 'never updated'
+            elif self.last_update_failed:
+                return 'failed'
+            elif not self.get_project_path():
+                return 'missing'
+            else:
+                return 'successsful'
+        elif not self.get_project_path():
+            return 'missing'
+        else:
+            return 'ok'
+    
+    @property
+    def last_updated(self):
+        if self.scm_type and self.last_update:
+            return self.last_update.modified
+        else:
+            project_path = self.get_project_path()
+            if project_path:
+                try:
+                    mtime = os.path.getmtime(project_path)
+                    dt = datetime.datetime.fromtimestamp(mtime)
+                    return make_aware(dt, get_default_timezone())
+                except os.error:
+                    pass
+
+    @property
+    def can_update(self):
+        return bool(self.scm_type and not self.current_update)
+
+    def update(self, **kwargs):
+        if self.can_update:
             needed = self.scm_passwords_needed
             opts = dict([(field, kwargs.get(field, '')) for field in needed])
             if not all(opts.values()):
@@ -659,10 +703,6 @@ class Project(CommonModel):
             project_update = self.project_updates.create()
             project_update.start(**opts)
             return project_update
-
-    @property
-    def active_updates(self):
-        return self.project_updates.filter(active=True, status__in=('new', 'pending', 'running'))
 
     def get_absolute_url(self):
         return reverse('main:project_detail', args=(self.pk,))
@@ -779,15 +819,24 @@ class ProjectUpdate(PrimordialModel):
                 status_before = project_update_before.status
         self.failed = bool(self.status in ('failed', 'error', 'canceled'))
         super(ProjectUpdate, self).save(*args, **kwargs)
-        # If status changed, and update has completed, update project.
+        # If status changed, update project.
         if self.status != status_before:
-            if self.status in ('successful', 'failed', 'error', 'canceled'):
+            if self.status in ('pending', 'waiting', 'running'):
                 project = self.project
+                if project.current_update != self:
+                    project.current_update = self
+                    project.save(update_fields=['current_update'])
+            elif self.status in ('successful', 'failed', 'error', 'canceled'):
+                project = self.project
+                if project.current_update == self:
+                    project.current_update = None
                 project.last_update = self
                 project.last_update_failed = self.failed
                 if not self.failed and project.scm_delete_on_next_update:
                     project.scm_delete_on_next_update = False
-                project.save()
+                project.save(update_fields=['current_update', 'last_update',
+                                            'last_update_failed',
+                                            'scm_delete_on_next_update'])
 
     def get_absolute_url(self):
         return reverse('main:project_update_detail', args=(self.pk,))
@@ -799,10 +848,6 @@ class ProjectUpdate(PrimordialModel):
                 return TaskMeta.objects.get(task_id=self.celery_task_id)
         except TaskMeta.DoesNotExist:
             pass
-
-    def get_passwords_needed_to_start(self):
-        '''Return list of password field names needed to start the job.'''
-        return (self.credential and self.credential.passwords_needed) or []
 
     @property
     def can_start(self):
@@ -830,7 +875,7 @@ class ProjectUpdate(PrimordialModel):
 
     @property
     def can_cancel(self):
-        return bool(self.status in ('pending', 'running'))
+        return bool(self.status in ('pending', 'waiting', 'running'))
 
     def cancel(self):
         if self.can_cancel:
@@ -1151,9 +1196,15 @@ class Job(CommonModelNameNotUnique):
             h = hmac.new(settings.SECRET_KEY, self.created.isoformat())
             return '%d-%s' % (self.pk, h.hexdigest())
 
-    def get_passwords_needed_to_start(self):
+    @property
+    def passwords_needed_to_start(self):
         '''Return list of password field names needed to start the job.'''
-        return (self.credential and self.credential.passwords_needed) or []
+        needed = []
+        if self.credential:
+            needed.extend(self.credential.passwords_needed)
+        if self.project.scm_update_on_launch:
+            needed.extend(self.project.scm_passwords_needed)
+        return needed
 
     @property
     def can_start(self):
@@ -1163,7 +1214,7 @@ class Job(CommonModelNameNotUnique):
         from awx.main.tasks import RunJob
         if not self.can_start:
             return False
-        needed = self.get_passwords_needed_to_start()
+        needed = self.passwords_needed_to_start
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
@@ -1181,7 +1232,7 @@ class Job(CommonModelNameNotUnique):
 
     @property
     def can_cancel(self):
-        return bool(self.status in ('pending', 'running'))
+        return bool(self.status in ('pending', 'waiting', 'running'))
 
     def cancel(self):
         if self.can_cancel:
@@ -1244,6 +1295,14 @@ class JobHostSummary(models.Model):
         related_name='job_host_summaries',
         on_delete=models.CASCADE,
         editable=False,
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+        default=now,
+    )
+    modified = models.DateTimeField(
+        auto_now=True,
+        default=now,
     )
 
     changed = models.PositiveIntegerField(default=0, editable=False)
@@ -1353,6 +1412,11 @@ class JobEvent(models.Model):
     )
     created = models.DateTimeField(
         auto_now_add=True,
+        default=now,
+    )
+    modified = models.DateTimeField(
+        auto_now=True,
+        default=now,
     )
     event = models.CharField(
         max_length=100,

@@ -3,6 +3,7 @@
 
 # Python
 import json
+import urlparse
 
 # PyYAML
 import yaml
@@ -21,8 +22,8 @@ from rest_framework import serializers
 # AWX
 from awx.main.models import *
 
-BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created', 'name',
-               'description')
+BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created', 'modified',
+               'name', 'description')
 
 # objects that if found we should add summary info for them
 SUMMARIZABLE_FKS = ( 
@@ -43,6 +44,7 @@ class BaseSerializer(serializers.ModelSerializer):
 
     # make certain fields read only
     created       = serializers.SerializerMethodField('get_created')
+    modified      = serializers.SerializerMethodField('get_modified')
     active        = serializers.SerializerMethodField('get_active')
 
     def get_fields(self):
@@ -62,6 +64,9 @@ class BaseSerializer(serializers.ModelSerializer):
                 field.type_label = 'object'
             elif key == 'created':
                 field.help_text = 'Timestamp when this %s was created.' % unicode(opts.verbose_name)
+                field.type_label = 'datetime'
+            elif key == 'modified':
+                field.help_text = 'Timestamp when this %s was last modified.' % unicode(opts.verbose_name)
                 field.type_label = 'datetime'
         return ret
 
@@ -100,6 +105,12 @@ class BaseSerializer(serializers.ModelSerializer):
             return obj.date_joined
         else:
             return obj.created
+
+    def get_modified(self, obj):
+        if isinstance(obj, User):
+            return obj.last_login # Not actually exposed for User.
+        else:
+            return obj.modified
 
     def get_active(self, obj):
         if isinstance(obj, User):
@@ -182,6 +193,8 @@ class ProjectSerializer(BaseSerializer):
 
     playbooks = serializers.Field(source='playbooks', help_text='Array of playbooks available within this project.')
     scm_delete_on_next_update = serializers.Field(source='scm_delete_on_next_update')
+    status = serializers.Field(source='status')
+    last_updated = serializers.Field(source='last_updated')
 
     class Meta:
         model = Project
@@ -190,7 +203,7 @@ class ProjectSerializer(BaseSerializer):
                                 'scm_delete_on_update', 'scm_delete_on_next_update',
                                 'scm_update_on_launch',
                                 'scm_username', 'scm_password', 'scm_key_data',
-                                'scm_key_unlock', 'last_update_failed')
+                                'scm_key_unlock', 'last_update_failed', 'status', 'last_updated')
 
     def get_related(self, obj):
         res = super(ProjectSerializer, self).get_related(obj)
@@ -201,6 +214,9 @@ class ProjectSerializer(BaseSerializer):
             update = reverse('main:project_update_view', args=(obj.pk,)),
             project_updates = reverse('main:project_updates_list', args=(obj.pk,)),
         ))
+        if obj.current_update:
+            res['current_update'] = reverse('main:project_update_detail',
+                                            args=(obj.current_update.pk,))
         if obj.last_update:
             res['last_update'] = reverse('main:project_update_detail',
                                          args=(obj.last_update.pk,))
@@ -208,11 +224,30 @@ class ProjectSerializer(BaseSerializer):
 
     def validate_local_path(self, attrs, source):
         # Don't allow assigning a local_path used by another project.
+        # Don't allow assigning a local_path when scm_type is set.
+        print attrs, source, self.object
         valid_local_paths = Project.get_local_path_choices()
         if self.object:
-            valid_local_paths.append(self.object.local_path)
+            scm_type = attrs.get('scm_type', self.object.scm_type)
+            if not scm_type:
+                valid_local_paths.append(self.object.local_path)
+        else:
+            scm_type = attrs.get('scm_type', '')
+        if scm_type:
+            attrs.pop(source, None)
         if source in attrs and attrs[source] not in valid_local_paths:
             raise serializers.ValidationError('Invalid path choice')
+        return attrs
+
+    def validate_scm_url(self, attrs, source):
+        if self.object:
+            scm_type = attrs.get('scm_type', self.object.scm_type)
+        else:
+            scm_type = attrs.get('scm_type', '')
+        scm_url = unicode(attrs.get(source, None) or '')
+        scm_url_parts = urlparse.urlsplit(scm_url)
+        if scm_type and not any(scm_url_parts):
+            raise serializers.ValidationError('SCM URL must be provided')
         return attrs
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
@@ -230,7 +265,7 @@ class ProjectUpdateSerializer(BaseSerializer):
     class Meta:
         model = ProjectUpdate
         fields = ('id', 'url', 'related', 'summary_fields', 'created',
-                  'project', 'status', 'failed', 'result_stdout',
+                  'modified', 'project', 'status', 'failed', 'result_stdout',
                   'result_traceback', 'job_args', 'job_cwd', 'job_env')
 
     def get_related(self, obj):
@@ -530,9 +565,9 @@ class JobHostSummarySerializer(BaseSerializer):
 
     class Meta:
         model = JobHostSummary
-        fields = ('id', 'url', 'job', 'host', 'summary_fields', 'related',
-                  'changed', 'dark', 'failures', 'ok', 'processed', 'skipped',
-                  'failed')
+        fields = ('id', 'url', 'job', 'host', 'created', 'modified',
+                  'summary_fields', 'related', 'changed', 'dark', 'failures',
+                  'ok', 'processed', 'skipped', 'failed')
 
     def get_related(self, obj):
         res = super(JobHostSummarySerializer, self).get_related(obj)
@@ -549,9 +584,10 @@ class JobEventSerializer(BaseSerializer):
 
     class Meta:
         model = JobEvent
-        fields = ('id', 'url', 'created', 'job', 'event', 'event_display',
-                  'event_data', 'event_level', 'failed', 'changed', 'host',
-                  'related', 'summary_fields', 'parent', 'play', 'task')
+        fields = ('id', 'url', 'created', 'modified', 'job', 'event',
+                  'event_display', 'event_data', 'event_level', 'failed',
+                  'changed', 'host', 'related', 'summary_fields', 'parent',
+                  'play', 'task')
 
     def get_related(self, obj):
         res = super(JobEventSerializer, self).get_related(obj)

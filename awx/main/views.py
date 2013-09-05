@@ -268,7 +268,7 @@ class ProjectUpdateView(GenericAPIView):
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         data = dict(
-            can_update=bool(obj.scm_type),
+            can_update=obj.can_update,
         )
         if obj.scm_type:
             data['passwords_needed_to_update'] = obj.scm_passwords_needed
@@ -276,13 +276,14 @@ class ProjectUpdateView(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        if bool(obj.scm_type):
+        if obj.can_update:
             project_update = obj.update(**request.DATA)
             if not project_update:
                 data = dict(passwords_needed_to_update=obj.scm_passwords_needed)
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response(status=status.HTTP_202_ACCEPTED)
+                headers = {'Location': project_update.get_absolute_url()}
+                return Response(status=status.HTTP_202_ACCEPTED, headers=headers)
         else:
             return self.http_method_not_allowed(request, *args, **kwargs)
 
@@ -796,7 +797,7 @@ class JobStart(GenericAPIView):
             can_start=obj.can_start,
         )
         if obj.can_start:
-            data['passwords_needed_to_start'] = obj.get_passwords_needed_to_start()
+            data['passwords_needed_to_start'] = obj.asswords_needed_to_start
         return Response(data)
 
     def post(self, request, *args, **kwargs):
@@ -804,7 +805,7 @@ class JobStart(GenericAPIView):
         if obj.can_start:
             result = obj.start(**request.DATA)
             if not result:
-                data = dict(passwords_needed_to_start=obj.get_passwords_needed_to_start())
+                data = dict(passwords_needed_to_start=obj.passwords_needed_to_start)
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response(status=status.HTTP_202_ACCEPTED)
