@@ -18,6 +18,15 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
     var list = JobHostList;
     var base = $location.path().replace(/^\//,'').split('/')[0];
     var defaultUrl = GetBasePath(base) + $routeParams.id + '/job_host_summaries/';
+    
+    // When viewing all summaries for a particular host, show job ID, otherwise row ID.
+    if (base == 'hosts') {
+       list.index = false;
+    }
+    else {
+       list.index = true;
+    }
+
     var view = GenerateList;
     var scope = view.inject(list, { mode: 'edit' });
     scope.selected = [];

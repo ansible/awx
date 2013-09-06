@@ -59,6 +59,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             case 'dataTitle':
                result = "data-title=\"" + value + "\" ";
                break;
+            case 'columnShow':
+               result = "ng-show=\"" + value + "\" ";
+               break;
             case 'dataPlacement':
                result = "data-placement=\"" + value + "\" ";
                break;
@@ -183,6 +186,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            html +=  "\" ";  
            html += (field.ngClass) ? Attr(field, 'ngClass') : "";
            html += (options.mode == 'lookup' || options.mode == 'select') ? " ng-click=\"toggle_" + list.iterator +"({{ " + list.iterator + ".id }})\"" : "";
+           html += (field.columnShow) ? Attr(field, 'columnShow') : "";
            html += ">\n";
 
            // Add ngShow

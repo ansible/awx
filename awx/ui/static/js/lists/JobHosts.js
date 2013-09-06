@@ -13,7 +13,7 @@ angular.module('JobHostDefinition', [])
         name: 'jobhosts',
         iterator: 'jobhost',
         editTitle: 'Job Host Summary',
-        indexShow: 'host_id == null',
+        index: true,
         hover: true,
         
         fields: {
