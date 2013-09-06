@@ -17,6 +17,7 @@ Django-1.5.2.tar.gz
   #celery-3.0.22.tar.gz
   #pytz-2013b.tar.gz
   # Remaining dev/prod packages:
+  #django-auth-ldap-1.1.4.tar.gz
   #django-celery-3.0.21.tar.gz
   #django-extensions-1.2.0.tar.gz
   #django-jsonfield-0.9.10.tar.gz
@@ -31,3 +32,4 @@ Django-1.5.2.tar.gz
 # package manager, or pip if you're running inside a virtualenv.
 # - ansible (via yum, pip or source checkout)
 # - psycopg2 (via "yum install python-psycopg2")
+# - python-ldap (via "yum install python-ldap")

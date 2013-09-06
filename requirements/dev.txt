@@ -7,6 +7,7 @@
 Django>=1.4
 
 # The following packages are now bundled with AWX (awx/lib/site-packages):
+  #django-auth-ldap
   #django-celery
   #django-extensions
   #django-jsonfield
@@ -27,6 +28,7 @@ ipython
 # package manager, or pip if you're running inside a virtualenv.
 # - ansible (via yum, pip or source checkout)
 # - psycopg2 (via "yum install python-psycopg2")
+# - python-ldap (via "yum install python-ldap")
 # - coverage (if you want to check test coverage, via "pip install coverage";
 #   the default python-coverage package is old.)
 # - readline (for using the ipython interactive shell)
