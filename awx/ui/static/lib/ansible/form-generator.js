@@ -408,7 +408,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              
              if (field.clear) {
                 html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"clear('" + fld + "','" + field.associated + "')\" " + 
-                   "aw-tool-tip=\"Clear " + field.label + "\" id=\"" + fld + "-clear-btn\"><i class=\"icon-undo\"></i></button>\n";
+                   "aw-tool-tip=\"Clear " + field.label + "\" id=\"" + fld + "-clear-btn\" ";
+                html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
+                html += " ><i class=\"icon-undo\"></i></button>\n";
                 if (field.ask) {
                    html += "<label class=\"checkbox-inline ask-checkbox\"><input type=\"checkbox\" ng-model=\"" + 
                        fld + "_ask\" ng-change=\"ask('" + fld + "','" + field.associated + "')\" > Ask at runtime?</label>";
