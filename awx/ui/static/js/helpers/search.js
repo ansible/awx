@@ -24,8 +24,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         var defaultUrl = params.url;
         var list = params.list; 
         var iterator = (params.iterator) ? params.iterator : list.iterator;
-        var sort_order;
-        
+        var sort_order; 
+
         // Set default values
         for (fld in list.fields) {
             if (list.fields[fld].key) {

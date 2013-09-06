@@ -1,8 +1,8 @@
 /*
 **    Created by: Jeff Todnem (http://www.todnem.com/)
 **    Created on: 2007-08-14
-**    Last modified: 2013-07-31 by James Cammarata
-**
+**    Modified: 2013-07-31 by James Cammarata
+**   
 **    License Information:
 **    -------------------------------------------------------------------------
 **    Copyright (C) 2007 Jeff Todnem
@@ -20,35 +20,9 @@
 **    You should have received a copy of the GNU General Public License along
 **    with this program; if not, write to the Free Software Foundation, Inc.,
 **    59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-**    
-*/
-
-/*
-function addLoadEvent(func) {
-   var oldonload = window.onload;
-   if (typeof window.onload != "function") {
-      window.onload = func;
-   }
-   else {
-      window.onload = function() {
-         if (oldonload) {
-            oldonload();
-         }
-         func();
-      };
-   }
-}
-
-function $() {
-   var arrElms = [];
-   for (var i=0; i < arguments.length; i++) {
-      var elm = arguments[i];
-      if (typeof(elm == "string")) { elm = document.getElementById(elm); }
-      if (arguments.length == 1) { return elm; }
-      arrElms.push(elm);
-   }
-   return arrElms;
-}
+**   
+**
+**    CLH 9/5/13 - Set required strength in config.js 
 */
 
 String.prototype.strReverse = function() {
@@ -57,8 +31,6 @@ String.prototype.strReverse = function() {
       newstring = this.charAt(s) + newstring;
    }
    return newstring;
-   //strOrig = ' texttotrim ';
-   //strReversed = strOrig.revstring();
 };
 
 var nScore = 0;
@@ -80,7 +52,7 @@ function chkPass(pwd) {
        sConsecNumber="0", sSeqAlpha="0", sSeqNumber="0", sSeqSymbol="0";
    var sAlphas = "abcdefghijklmnopqrstuvwxyz";
    var sNumerics = "01234567890";
-   var sSymbols = ")!@#$%^&*()";
+   var sSymbols = ")_!@#$%^&*()";
    var sComplexity = "Too Short";
    var sStandards = "Below";
    var nMinPwdLen = 8;
@@ -225,17 +197,20 @@ function chkPass(pwd) {
       if (nScore > 100) { nScore = 100; } else if (nScore < 0) { nScore = 0; }
 
       var progbar  = $("#progbar");
+      var required_strength = $AnsibleConfig.password_strength; 
+      var warning_level = ($AnsibleConfig.password_strength - 15 < 0) ? 0 : $AnsibleConfig.password_strength - 15; 
+
       progbar.css("width", nScore + '%');
 
-      if (nScore >= 0 && nScore <= 33) {
+      if (nScore >= 0 && nScore <= warning_level) {
          sComplexity = 'Weak';
          progbar.addClass('progress-bar-danger')
          progbar.removeClass('progress-bar-success progress-bar-warning')
-      } else if (nScore > 33 && nScore <= 67) {
+      } else if (nScore > warning_level && nScore <= required_strength) {
          sComplexity = 'Good';
          progbar.addClass('progress-bar-warning')
          progbar.removeClass('progress-bar-success progress-bar-danger')
-      } else if (nScore > 67) {
+      } else if (nScore > required_strength) {
          sComplexity = "Strong";
          progbar.addClass('progress-bar-success')
          progbar.removeClass('progress-bar-warning progress-bar-danger')
@@ -245,7 +220,7 @@ function chkPass(pwd) {
       /* no password, so reset the displays */
       var progbar  = $("#progbar");
       progbar.css("width", '0%');
-      progbar.removeClass('progress-bar-success progress-bar-warning progress-bar-danger')
+      progbar.removeClass('progress-bar-success progress-bar-warning')
    }
    return nScore;
 }

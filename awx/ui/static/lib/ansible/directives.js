@@ -360,7 +360,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                 var validity = true;
                 var score = chkPass(elm.val());
                 if (elm.val()) {
-                   validity = (score > 67) ? true : false;
+                   validity = (score > $AnsibleConfig.password_strength) ? true : false;
                 }
                 ctrl.$setValidity('complexity', validity);
                 if (!scope.$$phase) {

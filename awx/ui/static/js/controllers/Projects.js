@@ -58,26 +58,38 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
        }
 
     scope.showSCMStatus = function(id) {
-       var project;
-       for (var i=0; i < scope.projects.length; i++) {
-           if (scope.projects[i].id == id) {
-              project = scope.projects[i];
-              break;
+       // Refresh the project list
+       var statusCheckRemove = scope.$on('PostRefresh', function() {
+           var project;
+           for (var i=0; i < scope.projects.length; i++) {
+               if (scope.projects[i].id == id) {
+                  project = scope.projects[i];
+                  break;
+               }
            }
-       }
-       if (project.scm_type !== null) {
-          if (project.related.last_update !== undefined) {
-             ProjectStatus({ project_id: id, last_update: project.related.last_update });
-          }
-          else {
-             Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
-                 ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
-          }
-       }
-       else {
-          Alert('Missing SCM Configuration', 'The selected project is not configured for SCM. You must first edit the project, provide SCM settings, ' + 
-              'and then start an update.', 'alert-info');
-       }
+           if (project.scm_type !== null) {
+              if (project.related.last_update !== undefined && project.status !== 'updating') {
+                 ProjectStatus({ project_id: id, last_update: project.related.last_update });
+              }
+              else if (project.status == 'updating') {
+                 Alert('Pending Status', 'An update is currently running. Status details cannot be viewed until the update process ' + 
+                     ' completes. Use the refresh button to monitor progress of the update proess.', 'alert-info');
+              }
+              else {
+                 Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
+                     ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
+              }
+           }
+           else {
+              Alert('Missing SCM Configuration', 'The selected project is not configured for SCM. You must first edit the project, provide SCM settings, ' + 
+                  'and then run an update.', 'alert-info');
+           }
+           statusCheckRemove();
+           });
+     
+       // Refresh the project list so we're  looking at the latest data
+       scope.search(list.iterator);
+
        } 
  
     scope.deleteProject = function(id, name) {

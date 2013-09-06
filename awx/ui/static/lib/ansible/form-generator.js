@@ -90,10 +90,15 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
        if (options.modal) {
           this.scope.formModalActionDisabled = false;
-          if (form) {
-             this.scope.formModalHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;  //Default title for default modal
-          }
           this.scope.formModalInfo = false  //Disable info button for default modal
+          if (form) {
+             if (options.modal_title_id) {
+                this.scope[options.modal_title_id] = (options.mode == 'add') ? form.addTitle : form.editTitle;
+             }
+             else {
+                this.scope.formModalHeader = (options.mode == 'add') ? form.addTitle : form.editTitle;  //Default title for default modal       
+             }
+          }
           if (options.modal_selector) {
              $(options.modal_selector).modal({ show: true, backdrop: 'static', keyboard: true });
              $(options.modal_selector).on('shown.bs.modal', function() {
@@ -434,23 +439,29 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
              if (field.chkPass) {
                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + 
-                    ".$error.complexity\">Password must meet minimum complexity</div>\n";
+                    ".$error.complexity\">Password must be stronger</div>\n";
                 html += "<div class=\"pw-progress\">\n";
                 html += "<div class=\"progress progress-striped\">\n";
                 html += "<div id=\"progbar\" class=\"progress-bar\" role=\"progress\"></div>\n";
                 html += "</div>\n";
-                html += "<p>Password strength requirements:</p>";
+                html += "<div class=\"panel panel-default\">\n";
+                html += "<div class=\"panel-heading\"><h5>Password Strength</h5></div>\n";
+                html += "<div class=\"panel-body\">\n";
+                html += "<p>A password with reasonable strength is required. As you type the password " + 
+                  "a progress bar will measure the strength. Sufficient strength is reached when the bar turns green.</p>" +
+                  "<p>Password strength is judged using the following:</p>";
                 html += "<ul class=\"pwddetails\">\n";
                 html += "<li>Minimum 8 characters in length</li>\n";
-                html += "<li>Contains 3/4 of the following items:\n";
+                html += "<li>Contains a sufficient combination of the following items:\n";
                 html += "<ul>\n";
                 html += "<li>UPPERCASE letters</li>\n";
-                html += "<li>lowercase letters</li>\n";
                 html += "<li>Numbers</li>\n";
-                html += "<li>Symbols !@#$%^&*()</li>\n";
+                html += "<li>Symbols _!@#$%^&*()</li>\n";
                 html += "</ul>\n";
                 html += "</li>\n";
-                html += "</ul>\n"; 
+                html += "</ul>\n";
+                html += "</div>\n"; 
+                html += "</div>\n";
                 html += "</div>\n";
              }
              

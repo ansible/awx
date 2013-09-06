@@ -273,19 +273,18 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                 scope.formModalInfoAction = function() {
                     var generator = GenerateForm;
                     var scope = generator.inject(JobEventDataForm, { mode: 'edit', modal: true, related: false, 
-                        modal_selector: '#form-modal2', modal_body_id: 'form-modal2-body' });
+                        modal_selector: '#form-modal2', modal_body_id: 'form-modal2-body', modal_title_id: 'formModal2Header' });
                     generator.reset();
+                    scope.formModal2Header = data['event_display'].replace(/^\u00a0*/g,'');
+                    scope.event_data = JSON.stringify(data['event_data'], null, '\t');
+                    scope.formModal2ActionLabel = 'OK';
+                    scope.formModal2CancelShow = false;
+                    scope.formModal2Info = false;
                     scope.formModalInfo = 'View JSON';
                     scope.formModal2Action = function() {
                         $('#form-modal2').modal("hide");
                         }
-                    scope.formModal2ActionLabel = 'OK';
-                    scope.formModal2CancelShow = false;
-                    scope.formModal2Info = false;
                     $('#form-modal2 .btn-success').removeClass('btn-success').addClass('btn-none');
-                    //$('#form-modal2').addClass('skinny-modal');
-                    scope.formModal2Header = data['event_display'].replace(/^\u00a0*/g,'');
-                    scope.event_data = JSON.stringify(data['event_data'], null, '\t');
                     }
 
                 if (typeof data['event_data']['res'] == 'string') {

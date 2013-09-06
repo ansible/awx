@@ -23,7 +23,9 @@ angular.module('InventoriesListDefinition', [])
                 key: true,
                 label: 'Name',
                 badgeIcon: "\{\{ 'icon-failures-' + inventory.has_active_failures \}\}",
-                badgePlacement: 'left'
+                badgePlacement: 'left',
+                badgeToolTip: 'Inventory contains hosts with active failures',
+                badgeTipPlacement: 'bottom'
                 },
             description: {
                 label: 'Description'
@@ -52,10 +54,10 @@ angular.module('InventoriesListDefinition', [])
             
             dropdown: {
                 type: 'DropDown',
-                label: 'View',
+                label: 'Jobs',
                 'class': 'btn-xs',
                 options: [
-                    { ngClick: 'viewJobs(\{\{ inventory.id \}\})', label: 'Jobs' },
+                    { ngClick: 'viewJobs(\{\{ inventory.id \}\})', label: 'All Jobs' },
                     { ngClick: "viewFailedJobs(\{\{ inventory.id \}\})", label: 'Failed jobs' }
                     ]
                 },

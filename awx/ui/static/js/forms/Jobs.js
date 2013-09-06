@@ -279,7 +279,7 @@ angular.module('JobFormDefinition', [])
                 label: 'Refresh',
                 icon: 'icon-refresh',
                 ngClick: "refresh()",
-                "class": 'btn-sm btn-success',
+                "class": 'btn-sm btn-primary',
                 awToolTip: 'Refresh job status &amp; output',
                 mode: 'all'
                 },

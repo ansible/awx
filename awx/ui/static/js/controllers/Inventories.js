@@ -75,11 +75,11 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
 
     // Failed jobs link. Go to the jobs tabs, find all jobs for the inventory and sort by status
     scope.viewJobs = function(id) {
-       $location.url('/jobs/?inventory__int=' + id + '&order_by=status');
+       $location.url('/jobs/?inventory__int=' + id);
        }
 
     scope.viewFailedJobs = function(id) {
-       $location.url('/jobs/?inventory__int=' + id + '&status=failed&order_by=status');
+       $location.url('/jobs/?inventory__int=' + id + '&status=failed');
        }
 
     scope.editHosts = function(id) {

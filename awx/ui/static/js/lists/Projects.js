@@ -67,7 +67,7 @@ angular.module('ProjectsListDefinition', [])
                 dataContainer: 'body',
                 icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-xs btn-info btn-help',
+                'class': 'btn-xs btn-info btn-help pull-right',
                 awToolTip: 'Click for help',
                 dataTitle: 'Project Status',
                 iconSize: 'large',
@@ -76,7 +76,6 @@ angular.module('ProjectsListDefinition', [])
             },
 
         fieldActions: {
-
             edit: {
                 label: 'Edit',
                 ngClick: "editProject(\{\{ project.id \}\})",
@@ -98,7 +97,6 @@ angular.module('ProjectsListDefinition', [])
                 ngClick: 'SCMUpdate(\{\{ project.id \}\})',
                 awToolTip: 'Perform an SCM update on this project'     
                 },
-
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteProject(\{\{ project.id \}\},'\{\{ project.name \}\}')",
