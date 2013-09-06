@@ -13,11 +13,11 @@ angular.module('JobHostDefinition', [])
         name: 'jobhosts',
         iterator: 'jobhost',
         editTitle: 'Job Host Summary',
-        index: true,
+        indexShow: 'host_id == null',
         hover: true,
         
         fields: {
-            job: {
+            id: {
                 label: 'Job ID',
                 ngClick: "showJob(\{\{ jobhost.job \}\})",
                 columnShow: 'host_id !== null',

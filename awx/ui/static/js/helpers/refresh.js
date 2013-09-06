@@ -15,7 +15,7 @@
  */
  
 angular.module('RefreshHelper', ['RestServices', 'Utilities'])  
-    .factory('Refresh', ['Alert', 'Rest', function(Alert, Rest) {
+    .factory('Refresh', ['ProcessErrors', 'Rest', function(ProcessErrors, Rest) {
     return function(params) {
         
         var scope = params.scope; 
@@ -37,7 +37,8 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities'])
                 })
             .error ( function(data, status, headers, config) {
                 scope[iterator + 'SearchSpin'] = false;
-                Alert('Error!', 'Failed to retrieve ' + set + '. GET returned status: ' + status);
+                ProcessErrors(scope, data, status, null,
+                    { hdr: 'Error!', msg: 'Failed to retrieve ' + set + '. GET returned status: ' + status });
                 });
         }
         }]);

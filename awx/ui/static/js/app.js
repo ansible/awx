@@ -230,8 +230,8 @@ angular.module('ansible', [
             
             otherwise({redirectTo: '/'});
     }])
-    .run(['$rootScope', 'CheckLicense', '$location', 'Authorization','LoadBasePaths', 'ViewLicense',
-         function($rootScope, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense) {
+    .run(['$cookieStore', '$rootScope', 'CheckLicense', '$location', 'Authorization','LoadBasePaths', 'ViewLicense',
+         function($cookieStore, $rootScope, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense) {
         
         LoadBasePaths(); 
 
@@ -239,8 +239,8 @@ angular.module('ansible', [
         $rootScope.crumbCache = new Array();
 
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
-            // Evaluate the token on each navigation request. Redirect to login page when not valid
-            if (Authorization.isTokenValid() == false) {
+            // On each navigation request, check that the user is logged in
+            if (Authorization.isUserLoggedIn() == false) {
                if ( next.templateUrl != (urlPrefix + 'partials/login.html') ) {
                   $location.path('/login');
                }
@@ -262,8 +262,10 @@ angular.module('ansible', [
             }
             });
 
-        if (! Authorization.isTokenValid() ) {
+        if (!Authorization.getToken()) {
            // When the app first loads, redirect to login page
+           $rootScope.sessionExpired = false;
+           $cookieStore.put('sessionExpired', false);
            $location.path('/login');
         }
         

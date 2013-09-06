@@ -78,8 +78,14 @@ angular.module('Utilities',[])
        }
    }])
 
-   .factory('ProcessErrors', ['$log', 'Alert', function($log, Alert) {
+   .factory('ProcessErrors', ['$cookieStore', '$log', '$location', '$rootScope', 'Alert',
+   function($cookieStore, $log, $location, $rootScope, Alert) {
    return function(scope, data, status, form, defaultMsg) {
+       if ($AnsibleConfig.debug_mode && console) {
+          console.log('Debug status: ' + status);
+          console.log('Debug data: ');
+          console.log(data);
+       }
        if (status == 403) {
           var msg = 'The API responded with a 403 Access Denied error. ';
           if (data['detail']) {
@@ -89,6 +95,11 @@ angular.module('Utilities',[])
              msg += 'Please contact your system administrator.';
           }
           Alert(defaultMsg.hdr, msg);
+       }
+       else if (status == 401 && data.detail && data.detail == 'Token is expired') {
+          $rootScope.sessionExpired = true;
+          $cookieStore.put('sessionExpired', true);
+          $location.path('/login');
        }
        else if (data.non_field_errors) {
           Alert('Error!', data.non_field_errors);
@@ -250,4 +261,3 @@ angular.module('Utilities',[])
        }
        }
    }]);
-   

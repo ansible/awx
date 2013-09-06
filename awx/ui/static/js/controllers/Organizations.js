@@ -176,7 +176,7 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
            })
        .error( function(data, status, headers, config) {
            ProcessErrors(scope, data, status, form,
-                         { hdr: 'Error!', msg: 'Failed to retrieve organization: ' + $routeParams.id + '. GET status: ' + status });
+               { hdr: 'Error!', msg: 'Failed to retrieve organization: ' + $routeParams.id + '. GET status: ' + status });
            });
    
    
@@ -194,7 +194,7 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
               })
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, OrganizationForm,
-                            { hdr: 'Error!', msg: 'Failed to update organization: ' + id + '. PUT status: ' + status });
+                  { hdr: 'Error!', msg: 'Failed to update organization: ' + id + '. PUT status: ' + status });
               });
       };
 

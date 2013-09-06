@@ -1,67 +1,45 @@
 /*********************************************
  *  Copyright (c) 2013 AnsibleWorks, Inc.
  *
- * User authentication functions
+ *  AuthService.js
  *
+ *  User authentication functions
  */
 
-angular.module('AuthService', ['ngCookies'])
-   .factory('Authorization', ['$http', '$rootScope', '$location', '$cookieStore', function($http, $rootScope, $location, $cookieStore) {
+angular.module('AuthService', ['ngCookies', 'Utilities'])
+   .factory('Authorization', ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath',
+   function($http, $rootScope, $location, $cookieStore, GetBasePath) {
    return {
-       setToken: function(token) {
+       setToken: function(token, expires) {
            // set the session cookie
-           var today = new Date();
-           today.setTime(today.getTime() + ($AnsibleConfig.session_timeout * 1000));
            $cookieStore.remove('token');
-           $cookieStore.remove('token_expire');
+           $cookieStore.remove('token_expires');
+           $cookieStore.remove('userLoggedIn');
            $cookieStore.put('token', token);
-           $cookieStore.put('token_expire', today.getTime());
+           $cookieStore.put('token_expires', expires);
+           $cookieStore.put('userLoggedIn', true);
+           $cookieStore.put('sessionExpired', false);
            $rootScope.token = token;
            $rootScope.userLoggedIn = true;
-           $rootScope.token_expire = today.getTime();
+           $rootScope.token_expires = expires;
+           $rootScope.sessionExpired = false;
            },
 
-       isTokenValid: function() {
-           // check if token exists and is not expired
-           var response = false;
-           var token = ($rootScope.token) ? $rootScope.token : $cookieStore.get('token'); 
-           var token_expire = ($rootScope.token_expire) ? $rootScope.token_expire : $cookieStore.get('token_expire');
-           if (token && token_expire) {
-              var exp = new Date(token_expire);
-              var today = new Date();
-              if (today < exp) {
-                 this.setToken(token);  //push expiration into the future while user is active
-                 response = true;
-              }
+       isUserLoggedIn: function() {
+           if ($rootScope.userLoggedIn == undefined) {
+              // Browser refresh may have occurred
+              $rootScope.userLoggedIn = $cookieStore.get('userLoggedIn');
+              $rootScope.sessionExpired = $cookieStore.get('sessionExpired');
            }
-           return response;
+           return $rootScope.userLoggedIn;
            },
 
-       didSessionExpire: function() {
-           // use only to test why user was sent to login page. 
-           var response = false;
-           var token_expire = ($rootScope.token_expire) ? $rootScope.token_expire : $cookieStore.get('token_expire');
-           if (token_expire) {
-              var exp = new Date(token_expire);
-              var today = new Date();
-              if (exp < today) {
-                 response = true;
-              }
-           }
-           return response;
-       },
-       
        getToken: function() {
-           if ( this.isTokenValid() ) {
-              return ($rootScope.token) ? $rootScope.token : $cookieStore.get('token'); 
-           }
-           else {
-              $location.path('/login');
-           }
-       },
+           return ($rootScope.token) ? $rootScope.token : $cookieStore.get('token');
+           },
 
        retrieveToken: function(username, password) {
-           return $http({ method: 'POST', url: '/api/v1/authtoken/', 
+           return $http({ method: 'POST', url: GetBasePath('authtoken'), 
                           data: {"username": username, "password": password} });
            },
        
@@ -70,15 +48,17 @@ angular.module('AuthService', ['ngCookies'])
            // should prevent content flash from the prior user.
            var scope = angular.element(document.getElementById('main-view')).scope();
            scope.$destroy();
-           $rootScope.$destroy();
-           
+           $rootScope.$destroy();     
            $cookieStore.remove('accordions');
            $cookieStore.remove('token'); 
            $cookieStore.remove('token_expire');
            $cookieStore.remove('current_user');
+           $cookieStore.put('userLoggedIn', false);
+           $cookieStore.put('sessionExpired', false);
            $rootScope.current_user = {};
            $rootScope.license_tested = undefined;
            $rootScope.userLoggedIn = false;
+           $rootScope.sessionExpired = false;
            $rootScope.token = null;
            $rootScope.token_expire = new Date(1970, 0, 1, 0, 0, 0, 0);
            },
@@ -86,7 +66,7 @@ angular.module('AuthService', ['ngCookies'])
        getLicense: function() {
            return $http({
                method: 'GET',
-               url: '/api/v1/config/',
+               url: GetBasePath('config'),
                headers: { 'Authorization': 'Token ' + this.getToken() }
                });
            },

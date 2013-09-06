@@ -15,7 +15,7 @@
  */
 
 angular.module('RefreshRelatedHelper', ['RestServices', 'Utilities'])  
-    .factory('RefreshRelated', ['Alert', 'Rest', function(Alert, Rest) {
+    .factory('RefreshRelated', ['ProcessErrors', 'Rest', function(ProcessErrors, Rest) {
     return function(params) {
         
         var scope = params.scope; 
@@ -40,7 +40,8 @@ angular.module('RefreshRelatedHelper', ['RestServices', 'Utilities'])
                 })
             .error ( function(data, status, headers, config) {
                 scope[iterator + 'SearchSpin'] = true;
-                Alert('Error!', 'Failed to retrieve related set: ' + set + '. GET returned status: ' + status);
+                ProcessErrors(scope, data, status, null,
+                    { hdr: 'Error!', msg: 'Failed to retrieve ' + set + '. GET returned status: ' + status });
                 });
         }
         }]);

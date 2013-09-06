@@ -54,6 +54,7 @@ angular.module('JobTemplateFormDefinition', [])
                 addRequired: true,
                 editRequired: true,
                 ngClick: 'lookUpInventory()',
+                awRequiredWhen: {variable: "inventoryrequired", init: "true" },
                 column: 1
                 },
             project: {
@@ -64,6 +65,7 @@ angular.module('JobTemplateFormDefinition', [])
                 addRequired: true,
                 editRequired: true,
                 ngClick: 'lookUpProject()',
+                awRequiredWhen: {variable: "projectrequired", init: "true" },
                 column: 1
                 },
             playbook: {
@@ -73,6 +75,7 @@ angular.module('JobTemplateFormDefinition', [])
                 id: 'playbook-select',
                 addRequired: true, 
                 editRequired: true,
+                awRequiredWhen: {variable: "playbookrequired", init: "true" },
                 column: 1
                 },
             credential: {

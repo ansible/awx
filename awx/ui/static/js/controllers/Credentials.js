@@ -29,6 +29,9 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
 
     SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
     
+    if (scope.PostRefreshRemove) {
+       scope.PostRefreshRemove();
+    }
     scope.PostRefershRemove = scope.$on('PostRefresh', function() {
          // After a refresh, populate the organization name on each row
         for(var i=0; i < scope.credentials.length; i++) {

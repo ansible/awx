@@ -10,7 +10,7 @@
 
 'use strict';
 
-function Authenticate($window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert)
+function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert)
 {
    var setLoginFocus = function() {
       $('#login-username').focus();
@@ -18,6 +18,7 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
 
    // Display the login dialog
    $('#login-modal').modal({ show: true, keyboard: false, backdrop: 'static' });
+   
    // Set focus to username field
    $('#login-modal').on('shown.bs.modal', function() {
        setLoginFocus();
@@ -36,18 +37,8 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
       Authorization.logout();
    }
   
-   scope.sessionTimeout = ($AnsibleConfig.session_timeout / 60).toFixed(2);
-   
-   if ($rootScope.userLoggedIn) { 
-      // If we're logged in, check for session timeout
-      scope.sessionExpired = Authorization.didSessionExpire();
-   }
-   else {
-      scope.sessionExpired = false;
-   }
-
-   $rootScope.userLoggedIn = false;  //hide the logout link. if you got here, you're logged out.
-                                     //gets set back to true by Authorization.setToken().
+   $rootScope.userLoggedIn = false;             //hide the logout link. if you got here, you're logged out.
+   $cookieStore.put('userLoggedIn', false);     //gets set back to true by Authorization.setToken().
 
    $('#login-password').bind('keypress', function(e) {
        var code = (e.keyCode ? e.keyCode : e.which);
@@ -73,16 +64,7 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
              .success( function(data, status, headers, config) {
                  $('#login-modal').modal('hide');
                  token = data.token;
-                 Authorization.setToken(data.token);
-                 scope.reset();
-
-                 // Force request to /organizations to query with the correct token -in the event a new user
-                 // has logged in.
-                 var today = new Date();
-                 today.setTime(today.getTime() + ($AnsibleConfig.session_timeout * 1000));
-                 $rootScope.token = token;
-                 $rootScope.userLoggedIn = true;
-                 $rootScope.token_expire = today.getTime();
+                 Authorization.setToken(data.token, data.expires);
                  
                  // Get all the profile/access info regarding the logged in user
                  Authorization.getUser()
@@ -126,5 +108,5 @@ function Authenticate($window, $scope, $rootScope, $location, Authorization, Tog
        }
 }
 
-Authenticate.$inject = ['$window', '$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert'];
+Authenticate.$inject = ['$cookieStore', '$window', '$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert'];
 

@@ -9,10 +9,7 @@
  */
 
 var $AnsibleConfig = 
-{ 
-   session_timeout: 3600,             // cookie expiration in seconds. session will expire after this many
-                                      // seconds of inactivity. 
-                                      
+{                                     
    tooltip_delay: {show: 500, hide: 100},   // Default number of milliseconds to delay displaying/hiding tooltips    
 
    debug_mode: true,                        // Enable console logging messages
