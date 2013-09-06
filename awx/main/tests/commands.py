@@ -9,6 +9,7 @@ import StringIO
 import sys
 import tempfile
 import time
+import urlparse
 
 # Django
 from django.conf import settings
@@ -524,9 +525,15 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertEqual(new_inv.hosts.count(), 0)
         self.assertEqual(new_inv.groups.count(), 0)
         # Use our own inventory script as executable file.
-        os.environ.setdefault('REST_API_URL', self.live_server_url)
-        os.environ.setdefault('REST_API_TOKEN',
-                              self.super_django_user.auth_token.key)
+        rest_api_url = self.live_server_url
+        parts = urlparse.urlsplit(rest_api_url)
+        username, password = self.get_super_credentials()
+        netloc = '%s:%s@%s' % (username, password, parts.netloc)
+        rest_api_url = urlparse.urlunsplit([parts.scheme, netloc, parts.path,
+                                            parts.query, parts.fragment])
+        os.environ.setdefault('REST_API_URL', rest_api_url)
+        #os.environ.setdefault('REST_API_TOKEN',
+        #                      self.super_django_user.auth_token.key)
         os.environ['INVENTORY_ID'] = str(old_inv.pk)        
         source = os.path.join(os.path.dirname(__file__), '..', '..', 'scripts',
                               'inventory.py')

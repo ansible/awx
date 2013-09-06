@@ -57,7 +57,8 @@ class BaseTestMixin(object):
             user = User.objects.create_superuser(username, "%s@example.com", password)
         else:
             user = User.objects.create_user(username, "%s@example.com", password)
-        self.assertTrue(user.auth_token)
+        # New user should have no auth tokens by default.
+        self.assertFalse(user.auth_tokens.count())
         self._user_passwords[user.username] = password
         return user
 
@@ -151,7 +152,8 @@ class BaseTestMixin(object):
         return ('random', 'combination')
         
     def _generic_rest(self, url, data=None, expect=204, auth=None, method=None,
-                      data_type=None, accept=None, remote_addr=None):
+                      data_type=None, accept=None, remote_addr=None,
+                      return_response_object=False):
         assert method is not None
         method_name = method.lower()
         #if method_name not in ('options', 'head', 'get', 'delete'):
@@ -188,16 +190,27 @@ class BaseTestMixin(object):
             assert response.status_code == expect, "expected status %s, got %s for url=%s as auth=%s: %s" % (expect, response.status_code, url, auth, response.content)
         if method_name == 'head':
             self.assertFalse(response.content)
+        #if return_response_object:
+        #    return response
         if response.status_code not in [ 202, 204, 405 ] and method_name != 'head' and response.content:
             # no JSON responses in these at least for now, 409 should probably return some (FIXME)
             if response['Content-Type'].startswith('application/json'):
-                return json.loads(response.content)
+                obj = json.loads(response.content)
             elif response['Content-Type'].startswith('application/yaml'):
-                return yaml.safe_load(response.content)
+                obj = yaml.safe_load(response.content)
             else:
                 self.fail('Unsupport response content type %s' % response['Content-Type'])
         else:
-            return None
+            obj = {}
+
+        # Create a new subclass of object type and attach the response instance
+        # to it (to allow for checking response headers).
+        if isinstance(obj, dict):
+            return type('DICT', (dict,), {'response': response})(obj.items())
+        elif isinstance(obj, (tuple, list)):
+            return type('LIST', (list,), {'response': response})(iter(obj))
+        else:
+            return obj
 
     def options(self, url, expect=200, auth=None, accept=None,
                 remote_addr=None):

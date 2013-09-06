@@ -127,7 +127,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'south',
     'rest_framework',
-    'rest_framework.authtoken',
     'django_extensions',
     'djcelery',
     'kombu.transport.django',
@@ -144,7 +143,7 @@ REST_FRAMEWORK = {
     'PAGINATE_BY_PARAM': 'page_size',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
+        'awx.main.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
@@ -165,6 +164,9 @@ REST_FRAMEWORK = {
         'awx.main.renderers.BrowsableAPIRenderer',
     ),
 }
+
+# Seconds before auth tokens expire.
+AUTH_TOKEN_EXPIRATION = 1800
 
 # If set, serve only minified JS for UI.
 USE_MINIFIED_JS = False

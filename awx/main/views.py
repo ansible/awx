@@ -14,6 +14,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.utils.datastructures import SortedDict
+from django.utils.timezone import now
 
 # Django REST Framework
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -121,10 +122,26 @@ class ApiV1ConfigView(APIView):
 
         return Response(data)
 
-class AuthTokenView(ObtainAuthToken, APIView):
+class AuthTokenView(APIView):
 
     permission_classes = (AllowAny,)
-    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+    serializer_class = AuthTokenSerializer
+    model = AuthToken
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.DATA)
+        if serializer.is_valid():
+            request_hash = AuthToken.get_request_hash(self.request)
+            try:
+                token = AuthToken.objects.filter(user=serializer.object['user'],
+                                                 request_hash=request_hash,
+                                                 expires__gt=now())[0]
+                token.refresh()
+            except IndexError:
+                token = AuthToken.objects.create(user=serializer.object['user'],
+                                                 request_hash=request_hash)
+            return Response({'token': token.key, 'expires': token.expires})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class OrganizationList(ListCreateAPIView):
 

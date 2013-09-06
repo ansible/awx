@@ -8,6 +8,7 @@ import StringIO
 import subprocess
 import sys
 import tempfile
+import urlparse
 
 # Django
 from django.conf import settings
@@ -120,9 +121,15 @@ class InventoryScriptTest(BaseScriptTest):
             self.groups.extend(groups)
 
     def run_inventory_script(self, *args, **options):
-        os.environ.setdefault('REST_API_URL', self.live_server_url)
-        os.environ.setdefault('REST_API_TOKEN',
-                              self.super_django_user.auth_token.key)
+        rest_api_url = self.live_server_url
+        parts = urlparse.urlsplit(rest_api_url)
+        username, password = self.get_super_credentials()
+        netloc = '%s:%s@%s' % (username, password, parts.netloc)
+        rest_api_url = urlparse.urlunsplit([parts.scheme, netloc, parts.path,
+                                            parts.query, parts.fragment])
+        os.environ.setdefault('REST_API_URL', rest_api_url)
+        #os.environ.setdefault('REST_API_TOKEN',
+        #                      self.super_django_user.auth_token.key)
         name = os.path.join(os.path.dirname(__file__), '..', '..', 'scripts',
                             'inventory.py')
         return self.run_script(name, *args, **options)

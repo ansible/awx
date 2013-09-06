@@ -96,8 +96,8 @@ class InventoryScript(object):
                               os.getenv('REST_API_TOKEN', '')
             parts = urlparse.urlsplit(self.base_url)
             if not (parts.username and parts.password) and not self.auth_token:
-                raise ValueError('No REST API token or username/password '
-                                 'specified')
+                raise ValueError('No username/password specified in REST API '
+                                 'URL, and no REST API token provided')
             try:
                 # Command line argument takes precedence over environment
                 # variable.
@@ -140,7 +140,8 @@ def main():
     parser.add_option('--traceback', action='store_true',
                       help='Raise on exception on error')
     parser.add_option('-u', '--url', dest='base_url', default='',
-                      help='Base URL to access REST API (can also be specified'
+                      help='Base URL to access REST API, including username '
+                      'and password for authentication (can also be specified'
                       ' using REST_API_URL environment variable)')
     parser.add_option('--authtoken', dest='authtoken', default='',
                       help='Authentication token used to access REST API (can '

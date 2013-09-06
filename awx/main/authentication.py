@@ -6,7 +6,36 @@ from rest_framework import authentication
 from rest_framework import exceptions
 
 # AWX
-from awx.main.models import Job
+from awx.main.models import Job, AuthToken
+
+class TokenAuthentication(authentication.TokenAuthentication):
+    '''
+    Custom token authentication using tokens that expire and are associated
+    with parameters specific to the request.
+    '''
+
+    model = AuthToken
+
+    def authenticate(self, request):
+        self.request = request
+        return super(TokenAuthentication, self).authenticate(request)
+
+    def authenticate_credentials(self, key):
+        try:
+            request_hash = self.model.get_request_hash(self.request)
+            token = self.model.objects.get(key=key, request_hash=request_hash)
+        except self.model.DoesNotExist:
+            raise exceptions.AuthenticationFailed('Invalid token')
+
+        if token.expired:
+            raise exceptions.AuthenticationFailed('Token is expired')
+
+        if not token.user.is_active:
+            raise exceptions.AuthenticationFailed('User inactive or deleted')
+
+        token.refresh()
+
+        return (token.user, token)
 
 class JobTaskAuthentication(authentication.BaseAuthentication):
     '''

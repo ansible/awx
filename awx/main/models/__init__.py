@@ -3,12 +3,14 @@
 
 # Python
 import datetime
+import hashlib
 import hmac
 import json
 import logging
 import os
 import re
 import shlex
+import uuid
 
 # PyYAML
 import yaml
@@ -38,6 +40,7 @@ from awx.main.utils import encrypt_field, decrypt_field
 __all__ = ['PrimordialModel', 'Organization', 'Team', 'Project',
            'ProjectUpdate', 'Credential', 'Inventory', 'Host', 'Group',
            'Permission', 'JobTemplate', 'Job', 'JobHostSummary', 'JobEvent',
+           'AuthToken',
            'PERM_INVENTORY_ADMIN', 'PERM_INVENTORY_READ',
            'PERM_INVENTORY_WRITE', 'PERM_INVENTORY_DEPLOY',
            'PERM_INVENTORY_CHECK', 'JOB_STATUS_CHOICES']
@@ -1716,6 +1719,61 @@ class JobEvent(models.Model):
                     pass
             if host_summary_changed:
                 host_summary.save()
+
+class AuthToken(models.Model):
+    '''
+    Custom authentication tokens per user with expiration and request-specific
+    data.
+    '''
+    
+    key = models.CharField(max_length=40, primary_key=True)
+    user = models.ForeignKey('auth.User', related_name='auth_tokens',
+                             on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    expires = models.DateTimeField(default=now)
+    request_hash = models.CharField(max_length=40, blank=True, default='')
+
+    @classmethod
+    def get_request_hash(cls, request):
+        h = hashlib.sha1()
+        h.update(settings.SECRET_KEY)
+        for header in settings.REMOTE_HOST_HEADERS:
+            value = request.META.get(header, '').strip()
+            if value:
+                h.update(value)
+        h.update(request.META.get('HTTP_USER_AGENT', ''))
+        return h.hexdigest()
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.refresh(save=False)
+        if not self.key:
+            self.key = self.generate_key()
+        return super(AuthToken, self).save(*args, **kwargs)
+
+    def refresh(self, save=True):
+        if not self.pk or not self.expired:
+            self.expires = now() + datetime.timedelta(seconds=settings.AUTH_TOKEN_EXPIRATION)
+            if save:
+                self.save()
+
+    def invalidate(self, save=True):
+        if not self.expired:
+            self.expires = now() - datetime.timedelta(seconds=1)
+            if save:
+                self.save()
+
+    def generate_key(self):
+        unique = uuid.uuid4()
+        return hmac.new(unique.bytes, digestmod=hashlib.sha1).hexdigest()
+
+    @property
+    def expired(self):
+        return bool(self.expires < now())
+
+    def __unicode__(self):
+        return self.key
 
 # TODO: reporting (MPD)
 

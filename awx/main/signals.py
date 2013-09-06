@@ -6,13 +6,8 @@ import logging
 import threading
 
 # Django
-from django.contrib.auth.models import User
-from django.db import DatabaseError
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
-
-# Django-REST-Framework
-from rest_framework.authtoken.models import Token
 
 # AWX
 from awx.main.models import *
@@ -20,18 +15,6 @@ from awx.main.models import *
 __all__ = []
 
 logger = logging.getLogger('awx.main.signals')
-
-@receiver(post_save, sender=User)
-def create_auth_token_for_user(sender, **kwargs):
-    instance = kwargs.get('instance', None)
-    if instance:
-        try:
-            Token.objects.get_or_create(user=instance)
-        except DatabaseError:
-            pass    
-    # Only fails when creating a new superuser from syncdb on a
-    # new database (before migrate has been called).
-
 
 # Update has_active_failures for inventory/groups when a Host/Group is deleted
 # or marked inactive, when a Host-Group or Group-Group relationship is updated,

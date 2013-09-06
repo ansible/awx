@@ -13,6 +13,7 @@ from django.template.loader import render_to_string
 from django.utils.timezone import now
 
 # Django REST Framework
+from rest_framework.authentication import get_authorization_header
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import generics
 from rest_framework.response import Response
@@ -30,7 +31,24 @@ __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'ListCreateAPIView',
            'RetrieveUpdateAPIView', 'RetrieveUpdateDestroyAPIView']
 
 class APIView(views.APIView):
-    
+
+    def get_authenticate_header(self, request):
+        """
+        Determine the WWW-Authenticate header to use for 401 responses.  Try to
+        use the request header as an indication for which authentication method
+        was attempted.
+        """
+        for authenticator in self.get_authenticators():
+            resp_hdr = authenticator.authenticate_header(request)
+            if not resp_hdr:
+                continue
+            req_hdr = get_authorization_header(request)
+            if not req_hdr:
+                continue
+            if resp_hdr.split()[0] and resp_hdr.split()[0] == req_hdr.split()[0]:
+                return resp_hdr
+        return super(APIView, self).get_authenticate_header(request)
+
     def get_description_context(self):
         return {
             'docstring': type(self).__doc__ or '',

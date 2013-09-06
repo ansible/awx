@@ -11,6 +11,7 @@ import urlparse
 import yaml
 
 # Django
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
@@ -677,3 +678,24 @@ class JobEventSerializer(BaseSerializer):
         if obj.hosts.count():
             res['hosts'] = reverse('main:job_event_hosts_list', args=(obj.pk,))
         return res
+
+class AuthTokenSerializer(serializers.Serializer):
+
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        password = attrs.get('password')
+
+        if username and password:
+            user = authenticate(username=username, password=password)
+            if user:
+                if not user.is_active:
+                    raise serializers.ValidationError('User account is disabled.')
+                attrs['user'] = user
+                return attrs
+            else:
+                raise serializers.ValidationError('Unable to login with provided credentials.')
+        else:
+            raise serializers.ValidationError('Must include "username" and "password"')
