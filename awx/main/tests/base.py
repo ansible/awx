@@ -1,6 +1,7 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Python
 import contextlib
 import datetime
 import json
@@ -8,11 +9,19 @@ import os
 import shutil
 import tempfile
 
+# PyYAML
 import yaml
-from django.conf import settings
+
+# Django
+from django.conf import settings, UserSettingsHolder
 from django.contrib.auth.models import User
 import django.test
 from django.test.client import Client
+
+# Django-Auth-LDAP
+from django_auth_ldap.backend import LDAPSettings
+
+# AWX
 from awx.main.models import *
 
 class BaseTestMixin(object):
@@ -26,12 +35,23 @@ class BaseTestMixin(object):
         self._temp_project_dirs = []
         self._current_auth = None
         self._user_passwords = {}
+        # Wrap settings so we can redefine them within each test.
+        self._wrapped = settings._wrapped
+        settings._wrapped = UserSettingsHolder(settings._wrapped)
+        # Set all AUTH_LDAP_* settings to defaults to avoid using LDAP for
+        # tests unless expicitly configured.
+        for name, value in LDAPSettings.defaults.items():
+            if name == 'SERVER_URI':
+                value = ''
+            setattr(settings, 'AUTH_LDAP_%s' % name, value)
 
     def tearDown(self):
         super(BaseTestMixin, self).tearDown()
         for project_dir in self._temp_project_dirs:
             if os.path.exists(project_dir):
                 shutil.rmtree(project_dir, True)
+        # Restore previous settings after each test.
+        settings._wrapped = self._wrapped
 
     @contextlib.contextmanager
     def current_user(self, user_or_username, password=None):

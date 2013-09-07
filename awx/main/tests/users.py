@@ -7,14 +7,11 @@ import json
 import urllib
 
 # Django
-from django.conf import settings, UserSettingsHolder
+from django.conf import settings
 from django.contrib.auth.models import User
 import django.test
 from django.test.client import Client
 from django.core.urlresolvers import reverse
-
-# Django-Auth-LDAP
-from django_auth_ldap.backend import LDAPSettings
 
 # AWX
 from awx.main.models import *
@@ -645,19 +642,9 @@ class LdapTest(BaseTest):
         self.ldap_password = getattr(settings, 'TEST_AUTH_LDAP_PASSWORD', None)
         if not self.ldap_password:
             self.skipTest('no test LDAP password defined')
-        # Wrap settings so we can redfine them for each test.
-        self._wrapped = settings._wrapped
-        settings._wrapped = UserSettingsHolder(settings._wrapped)
-        # Reset all AUTH_LDAP_* settings to defaults.
-        for name, value in LDAPSettings.defaults.items():
-            setattr(settings, 'AUTH_LDAP_%s' % name, value)
         # Set test LDAP settings that are always needed.
         for name in ('SERVER_URI', 'BIND_DN', 'BIND_PASSWORD', 'USE_TLS'):
             self.use_test_setting(name)
-
-    def tearDown(self):
-        super(LdapTest, self).tearDown()
-        settings._wrapped = self._wrapped
 
     def check_login(self, username=None, password=None, should_fail=False):
         username = username or self.ldap_username
