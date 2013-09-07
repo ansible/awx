@@ -259,10 +259,6 @@ These nightly repositories can be used by the AWX setup playbook by running the
 
     ./setup.sh -e "aw_repo_url=http://50.116.42.103/awx_nightlies_RTYUIOPOIUYTYU"
 
-Alternatively you can also install from the tarball produced by "make release_ball" ...
-
-    ./setup.sh -e "tarball=<path_to_tarball>"
-
 > Note that if this is not a fresh installation, you should run the following:
 > "yum clean all --enablerepo=ansibleworks-awx" in order to clean out the yum cache.
 
