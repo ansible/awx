@@ -7,6 +7,8 @@
 # scm_branch: HEAD
 # scm_clean: true/false
 # scm_delete_on_update: true/false
+# scm_username: username (only for svn)
+# scm_password: password (only for svn)
 
 - hosts: all
   connection: local
@@ -27,4 +29,9 @@
 
     - name: update project using svn
       subversion: dest={{project_path}} repo={{scm_url}} revision={{scm_branch}} force={{scm_clean}}
-      when: scm_type == 'svn'
+      when: scm_type == 'svn' and not scm_username|default('')
+
+    - name: update project using svn with auth
+      subversion: dest={{project_path}} repo={{scm_url}} revision={{scm_branch}} force={{scm_clean}} username={{scm_username}} password={{scm_password}}
+      when: scm_type == 'svn' and scm_username|default('')
+

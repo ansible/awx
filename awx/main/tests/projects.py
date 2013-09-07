@@ -721,6 +721,36 @@ class ProjectUpdatesTest(BaseTransactionTest):
         project.save()
         self.check_project_update(project)
         self.assertFalse(os.path.exists(untracked_path))
+        # Change username/password for private projects and verify the update
+        # fails (but doesn't cause the task to hang).
+        if project.scm_username and project.scm_password not in ('', 'ASK'):
+            scm_username = project.scm_username
+            # Clear username only.
+            project = Project.objects.get(pk=project.pk)
+            project.scm_username = ''
+            project.save()
+            self.check_project_update(project, should_fail=True)
+            # Try invalid username.
+            project = Project.objects.get(pk=project.pk)
+            project.scm_username = 'notavalidusername'
+            project.save()
+            self.check_project_update(project, should_fail=True)
+            # Clear username and password.
+            project = Project.objects.get(pk=project.pk)
+            project.scm_username = ''
+            project.scm_password = ''
+            project.save()
+            self.check_project_update(project, should_fail=True)
+            # Set username, but no password.
+            project = Project.objects.get(pk=project.pk)
+            project.scm_username = scm_username
+            project.save()
+            self.check_project_update(project, should_fail=True)
+            # Set username, with invalid password.
+            project = Project.objects.get(pk=project.pk)
+            project.scm_password = 'notavalidpassword'
+            project.save()
+            self.check_project_update(project, should_fail=True)
 
     def test_public_git_project_over_https(self):
         scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
@@ -871,3 +901,4 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.assertTrue('scm_key_unlock' in response['passwords_needed_to_update'])
         with self.current_user(self.super_django_user):
             response = self.post(url, {'scm_key_unlock': TEST_SSH_KEY_DATA_UNLOCK}, expect=202)
+

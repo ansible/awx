@@ -7,6 +7,7 @@ import distutils.version
 import json
 import logging
 import os
+import re
 import subprocess
 import tempfile
 import time
@@ -64,8 +65,10 @@ class BaseTask(Task):
         Create a temporary file containing the SSH private key.
         '''
         ssh_key_data = ''
-        if hasattr(instance, 'scm_key_data'):
-            ssh_key_data = decrypt_field(instance, 'scm_key_data')
+        if hasattr(instance, 'project'):
+            project = instance.project
+            if hasattr(project, 'scm_key_data'):
+                ssh_key_data = decrypt_field(project, 'scm_key_data')
         elif hasattr(instance, 'credential'):
             credential = instance.credential
             if hasattr(credential, 'ssh_key_data'):
@@ -82,9 +85,13 @@ class BaseTask(Task):
 
     def build_passwords(self, instance, **kwargs):
         '''
-        Build a dictionary of passwords responding to prompts.
+        Build a dictionary of passwords for responding to prompts.
         '''
-        return {}
+        return {
+            'yes': 'yes',
+            'no': 'no',
+            '': '',
+        }
 
     def build_env(self, instance, **kwargs):
         '''
@@ -222,7 +229,7 @@ class RunJob(BaseTask):
         '''
         Build a dictionary of passwords for SSH private key, SSH user and sudo.
         '''
-        passwords = {}
+        passwords = super(RunJob, self).build_passwords(job, **kwargs)
         creds = job.credential
         if creds:
             for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password'):
@@ -339,13 +346,15 @@ class RunProjectUpdate(BaseTask):
     
     name = 'run_project_update'
     model = ProjectUpdate
-    idle_timeout = 30
+    #idle_timeout = 30
 
     def build_passwords(self, project_update, **kwargs):
         '''
-        Build a dictionary of passwords for SSH private key.
+        Build a dictionary of passwords for SSH private key unlock and SCM
+        username/password.
         '''
-        passwords = {}
+        passwords = super(RunProjectUpdate, self).build_passwords(project_update,
+                                                                  **kwargs)
         project = project_update.project
         value = decrypt_field(project, 'scm_key_unlock')
         if value not in ('', 'ASK'):
@@ -360,6 +369,7 @@ class RunProjectUpdate(BaseTask):
         '''
         env = super(RunProjectUpdate, self).build_env(project_update, **kwargs)
         env['ANSIBLE_ASK_SUDO_PASS'] = str(False)
+        env['DISPLAY'] = '' # Prevent stupid password popup when running tests.
         return env
 
     def update_url_auth(self, url, username=None, password=None):
@@ -384,24 +394,32 @@ class RunProjectUpdate(BaseTask):
         # Since we specify -vvv and tasks use async polling, we should get some
         # output regularly...
         args.append('-%s' % ('v' * 3))
+        extra_vars = {}
         project = project_update.project
         scm_url = project.scm_url
         if project.scm_username and project.scm_password not in ('ASK', ''):
-            scm_url = self.update_url_auth(scm_url, project.scm_username,
-                                           decrypt_field(project, 'scm_password'))
+            if project.scm_type == 'svn':
+                extra_vars['scm_username'] = project.scm_username
+                extra_vars['scm_password'] = decrypt_field(project, 'scm_password')
+            else:
+                scm_url = self.update_url_auth(scm_url, project.scm_username,
+                                               decrypt_field(project, 'scm_password'))
         elif project.scm_username:
-            scm_url = self.update_url_auth(scm_url, project.scm_username)
+            if project.scm_type == 'svn':
+                extra_vars['scm_username'] = project.scm_username
+            else:  
+                scm_url = self.update_url_auth(scm_url, project.scm_username)
         # FIXME: Need to hide password in saved job_args and result_stdout!
         scm_branch = project.scm_branch or {'hg': 'tip'}.get(project.scm_type, 'HEAD')
         scm_delete_on_update = project.scm_delete_on_update or project.scm_delete_on_next_update
-        extra_vars = {
+        extra_vars.update({
             'project_path': project.get_project_path(check_if_exists=False),
             'scm_type': project.scm_type,
             'scm_url': scm_url,
             'scm_branch': scm_branch,
             'scm_clean': project.scm_clean,
             'scm_delete_on_update': scm_delete_on_update,
-        }
+        })
         args.extend(['-e', json.dumps(extra_vars)])
         args.append('project_update.yml')
 
@@ -418,9 +436,8 @@ class RunProjectUpdate(BaseTask):
     def get_password_prompts(self):
         d = super(RunProjectUpdate, self).get_password_prompts()
         d.update({
-            r'Username for.*:': 'scm_username',
-            r'Password for.*:': 'scm_password',
-            r'Are you sure you want to continue connecting (yes/no)\?': 'yes', # FIXME: Should we really do this?
+            # FIXME: Configure whether we should auto accept host keys?
+            r'Are you sure you want to continue connecting \(yes/no\)\?': 'yes',
         })
         return d
 
@@ -441,3 +458,4 @@ class RunProjectUpdate(BaseTask):
         Hook for actions after project_update has completed.
         '''
         # Start any jobs waiting on this update to finish.
+
