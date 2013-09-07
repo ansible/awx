@@ -149,7 +149,7 @@ setup(
                                      "awx/static/favicon.ico",
                                     ]),
             ("%s" % etcpath,        [settingsconf,]),
-            ("%s" % webconfig,      ["config/awx.conf"]),
+            ("%s" % webconfig,      ["config/awx.conf","config/awx-plain.conf"]),
         ]
     ),
     options = {
