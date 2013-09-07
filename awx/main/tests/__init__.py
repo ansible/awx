@@ -2,7 +2,7 @@
 # All Rights Reserved.
 
 from awx.main.tests.organizations import OrganizationsTest
-from awx.main.tests.users import UsersTest
+from awx.main.tests.users import *
 from awx.main.tests.inventory import InventoryTest
 from awx.main.tests.projects import ProjectsTest, ProjectUpdatesTest
 from awx.main.tests.commands import *

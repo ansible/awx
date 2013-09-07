@@ -165,6 +165,14 @@ REST_FRAMEWORK = {
     ),
 }
 
+AUTHENTICATION_BACKENDS = (
+    'awx.main.backend.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+# LDAP server (default to None to skip using LDAP authentication).
+AUTH_LDAP_SERVER_URI = None
+
 # Seconds before auth tokens expire.
 AUTH_TOKEN_EXPIRATION = 1800
 
@@ -344,6 +352,9 @@ LOGGING = {
         'awx.main.signals': {
             'handlers': ['null'],
             'propagate': False,
+        },
+        'django_auth_ldap': {
+            'handlers': ['null'],
         },
     }
 }

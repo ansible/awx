@@ -7,14 +7,20 @@ import json
 import urllib
 
 # Django
+from django.conf import settings, UserSettingsHolder
 from django.contrib.auth.models import User
 import django.test
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 
+# Django-Auth-LDAP
+from django_auth_ldap.backend import LDAPSettings
+
 # AWX
 from awx.main.models import *
 from awx.main.tests.base import BaseTest
+
+__all__ = ['UsersTest', 'LdapTest']
 
 class UsersTest(BaseTest):
 
@@ -621,3 +627,68 @@ class UsersTest(BaseTest):
         self.check_get_list(url, self.super_django_user, qs)
         url = u'%s?user\u2605name=normal' % base_url
         self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+class LdapTest(BaseTest):
+
+    def use_test_setting(self, name, default=None):
+        setattr(settings, 'AUTH_LDAP_%s' % name,
+                getattr(settings, 'TEST_AUTH_LDAP_%s' % name, default))
+
+    def setUp(self):
+        super(LdapTest, self).setUp()
+        # Skip tests if basic LDAP test settings aren't defined.
+        if not getattr(settings, 'TEST_AUTH_LDAP_SERVER_URI', None):
+            self.skipTest('no test LDAP auth server defined')
+        self.ldap_username = getattr(settings, 'TEST_AUTH_LDAP_USERNAME', None)
+        if not self.ldap_username:
+            self.skipTest('no test LDAP username defined')
+        self.ldap_password = getattr(settings, 'TEST_AUTH_LDAP_PASSWORD', None)
+        if not self.ldap_password:
+            self.skipTest('no test LDAP password defined')
+        # Wrap settings so we can redfine them for each test.
+        self._wrapped = settings._wrapped
+        settings._wrapped = UserSettingsHolder(settings._wrapped)
+        # Reset all AUTH_LDAP_* settings to defaults.
+        for name, value in LDAPSettings.defaults.items():
+            setattr(settings, 'AUTH_LDAP_%s' % name, value)
+        # Set test LDAP settings that are always needed.
+        for name in ('SERVER_URI', 'BIND_DN', 'BIND_PASSWORD', 'USE_TLS'):
+            self.use_test_setting(name)
+
+    def tearDown(self):
+        super(LdapTest, self).tearDown()
+        settings._wrapped = self._wrapped
+
+    def check_login(self, username=None, password=None, should_fail=False):
+        username = username or self.ldap_username
+        password = password or self.ldap_password
+        result = self.client.login(username=username, password=password)
+        self.assertNotEqual(result, should_fail)
+        if not should_fail:
+            return User.objects.get(username=username)
+
+    def test_ldap_auth(self):
+        self.use_test_setting('USER_SEARCH')
+        self.assertEqual(User.objects.filter(username=self.ldap_username).count(), 0)
+        # Test logging in, user should be created with no flags or fields set.
+        user = self.check_login()
+        self.assertTrue(user.is_active)
+        self.assertFalse(user.has_usable_password())
+        self.assertFalse(user.is_superuser)
+        self.assertFalse(user.first_name)
+        self.assertFalse(user.last_name)
+        self.assertFalse(user.email)
+        # Test logging in with bad username or password.
+        self.check_login(username='not a valid user', should_fail=True)
+        self.check_login(password='not a valid pass', should_fail=True)
+        # Test using a flat DN instead of user search.
+        self.use_test_setting('USER_DN_TEMPLATE', None)
+        if settings.AUTH_LDAP_USER_DN_TEMPLATE:
+            user = self.check_login()
+            del settings.AUTH_LDAP_USER_DN_TEMPLATE
+        # Test user attributes assigned from LDAP.
+        self.use_test_setting('USER_ATTR_MAP', {})
+        if settings.AUTH_LDAP_USER_ATTR_MAP:
+            user = self.check_login()
+            for attr in settings.AUTH_LDAP_USER_ATTR_MAP.keys():
+                self.assertTrue(getattr(user, attr))

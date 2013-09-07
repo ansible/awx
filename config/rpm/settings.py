@@ -54,3 +54,31 @@ EMAIL_PORT = 25
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
+
+# LDAP connection and authentication settings.  Refer to django-auth-ldap docs:
+# http://pythonhosted.org/django-auth-ldap/authentication.html
+
+AUTH_LDAP_SERVER_URI = ''
+AUTH_LDAP_BIND_DN = ''
+AUTH_LDAP_BIND_PASSWORD = ''
+AUTH_LDAP_START_TLS = False
+
+#import ldap
+#from django_auth_ldap.config import LDAPSearch, LDAPSearchUnion
+
+# LDAP search query to find users.
+#AUTH_LDAP_USER_SEARCH = LDAPSearch(
+#    'OU=Users,DC=example,DC=com',
+#    ldap.SCOPE_SUBTREE,
+#    '(sAMAccountName=%(user)s)',
+#)
+
+# Alternative to user search.
+#AUTH_LDAP_USER_DN_TEMPLATE = 'sAMAccountName=%(user)s,OU=Users,DC=example,DC=com'
+
+# Mapping of LDAP attributes to user attributes.
+#AUTH_LDAP_USER_ATTR_MAP = {
+#    'first_name': 'givenName',
+#    'last_name': 'sn',
+#    'email': 'mail',
+#}
