@@ -12,7 +12,7 @@ angular.module('GroupListDefinition', [])
         
         name: 'groups',
         iterator: 'group',
-        selectTitle: 'Add Group',
+        selectTitle: 'Copy Groups',
         editTitle: 'Groups',
         index: true,
         well: false,
@@ -29,8 +29,8 @@ angular.module('GroupListDefinition', [])
         
         actions: {
              help: {
-                awPopOver: "Select groups by clicking on each group you wish to add. Add the selected groups to your inventory " +
-                    "or to the selected parent group by clicking the <em>Select</em> button.",
+                awPopOver: "Choose groups by clicking on each group you wish to add. Click the <em>Select</em> button to add the groups to " +
+                    "the selected inventory group.",
                 dataPlacement: 'left',
                 dataContainer: '#form-modal .modal-content',
                 icon: "icon-question-sign",

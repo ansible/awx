@@ -14,8 +14,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('GroupsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupList', 'GenerateList', 
         'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'RefreshTree', 'SelectionInit',
-    function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupList, GenerateList, LoadBreadCrumbs, SearchInit,
-        PaginateInit, ProcessErrors, GetBasePath, GroupsAdd, RefreshTree, SelectionInit) {
+    function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupList, GenerateList, Prompt, SearchInit, PaginateInit,
+        ProcessErrors, GetBasePath, GroupsAdd, RefreshTree, SelectionInit) {
     return function(params) {
         
         var inventory_id = params.inventory_id;
@@ -33,7 +33,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             });
 
         scope.formModalActionLabel = 'Select';
-        scope.formModalHeader = 'Add Existing Groups';
+        scope.formModalHeader = 'Copy Groups';
         scope.formModalCancelShow = true;
         scope.formModalActionClass = 'btn btn-success';
         
@@ -43,8 +43,46 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
         var url = (group_id) ? GetBasePath('groups') + group_id + '/children/' :
             GetBasePath('inventory') + inventory_id + '/groups/'; 
+        
         SelectionInit({ scope: scope, list: list, url: url });
+        var finish = scope.formModalAction; 
+        scope.formModalAction = function() {
+            var groups = [];
+            for (var j=0; j < scope.selected.length; j++) {
+                if (scope.inventoryRootGroups.indexOf(scope.selected[j].id) > -1) {
+                   groups.push(scope.selected[j].name);
+                }
+            }
 
+            if (groups.length > 0) {
+               var action = function() {
+                   $('#prompt-modal').modal('hide');
+                       finish();
+                       }
+               if (groups.length == 1) {
+                  Prompt({ hdr: 'Warning', body: 'Be aware that ' + groups[0] + 
+                      ' is a top level group. Adding it to ' + scope.selectedNodeName + ' will remove it from the top level. Do you ' + 
+                      ' want to continue with this action?', 
+                      action: action });
+               }
+               else {
+                  var list = '';
+                  for (var i=0; i < groups.length; i++) {
+                      if (i+1 == groups.length) {
+                         list += ' and ' + groups[i];
+                      }
+                      else {
+                         list += groups[i] + ', ';
+                      }
+                  }
+                  Prompt({ hdr: 'Warning', body: 'Be aware that ' + list + 
+                      ' are top level groups. Adding them to ' + scope.selectedNodeName + ' will remove them from the top level. Do you ' + 
+                      ' want to continue with this action?', 
+                      action: action });
+               }
+            }
+            }
+        
         if (scope.PostRefreshRemove) {
            scope.PostRefreshRemove();
         }

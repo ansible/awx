@@ -101,6 +101,12 @@ angular.module('Utilities',[])
           $cookieStore.put('sessionExpired', true);
           $location.path('/login');
        }
+       else if (status == 401 && data.detail && data.detail == 'Invalid token') {
+          // should this condition be treated as an expired session?? Yes, for now.
+          $rootScope.sessionExpired = true;
+          $cookieStore.put('sessionExpired', true);
+          $location.path('/login');
+       }
        else if (data.non_field_errors) {
           Alert('Error!', data.non_field_errors);
        }

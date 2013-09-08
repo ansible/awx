@@ -1048,16 +1048,17 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           //    "aw-tool-tip=\"Edit inventory properties\"  data-placement=\"bottom\"><i class=\"icon-edit\"></i> " +
           //    "Inventory Properties</button>\n";
           html += "<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" " +
-              "aw-tool-tip=\"Edit the selected group\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> " +
+              "aw-tool-tip=\"Edit the selected group's properties\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> " +
               "Properties</button>\n";
           //html += "<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"editHosts()\" ng-hide=\"showGroupHelp\" " +
           //    "aw-tool-tip=\"Modify and create inventory hosts\" data-placement=\"bottom\"><i class=\"icon-laptop\"></i> Hosts</button>\n";
           html += "<button type=\"button\" class=\"btn btn-success btn-xs\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
-              "aw-tool-tip=\"Add an existing group\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Add Existing Group</button>\n";
+              "aw-tool-tip=\"Copy existing groups to the selected group\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Copy</button>\n";
           html += "<button type=\"button\" class=\"btn btn-success btn-xs\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
-              "aw-tool-tip=\"Create a new group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New Group</button>\n";
+              "aw-tool-tip=\"Create a brand new group and add it to the selected group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New</button>\n";
           html += "<button type=\"button\" class=\"btn btn-danger btn-xs\" ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" " +
-              "aw-tool-tip=\"Delete the selected group\" data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete Group</button>\n";
+              "aw-tool-tip=\"Permanently delete the selected group. Any hosts in the group will still be available in All Hosts.\" " +
+              "data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete</button>\n";
           html += "</div><!-- tree controls -->\n";
           html += "<div id=\"tree-view\"></div>\n";
           html += "</div><!-- tree-container -->\n";

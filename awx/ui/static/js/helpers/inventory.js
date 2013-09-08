@@ -95,7 +95,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
 
 
     .factory('TreeInit', ['Alert', 'Rest', 'Authorization', '$http', 'LoadTreeData', 'GetBasePath', 'ProcessErrors', 'Wait',
-    function(Alert, Rest, Authorization, $http, LoadTreeData, GetBasePath, ProcessErrors, Wait) {
+        'LoadRootGroups',
+    function(Alert, Rest, Authorization, $http, LoadTreeData, GetBasePath, ProcessErrors, Wait, LoadRootGroups) {
     return function(params) {
 
         var scope = params.scope;
@@ -109,7 +110,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var inventory_id = inventory.id;
         var inventory_descr = inventory.description;
         var tree_id = '#tree-view';
-        
+        var json_tree_data; 
+
         // After loading the Inventory top-level data, initialize the tree
         if (scope.buildTreeRemove) {
            scope.buildTreeRemove();
@@ -117,12 +119,13 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         scope.buildTreeRemove = scope.$on('buildTree', function(e, treeData, index, group_idx) {
             var idx = index;
             var selected = (group_idx !== undefined && group_idx !== null) ? group_idx : 'inventory-node';
-            
+            json_tree_data = treeData;
+
             $(tree_id).jstree({
                 "core": { //"initially_open":['inventory-node'],
                     "html_titles": true
                     },
-                "plugins": ['themes', 'json_data', 'ui', 'contextmenu', 'dnd', 'crrm'],
+                "plugins": ['themes', 'json_data', 'ui', 'dnd', 'crrm', 'sort'],
                 "themes": {
                     "theme": "ansible",
                     "dots": false,
@@ -133,47 +136,15 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     "select_limit": 1
                     },
                 "json_data": {
-                    data: treeData
-                    /*,
-                    ajax: {
-                        url: function(node){
-                            scope.selected_node = node;
-                            return $(node).attr('children');
-                            },
-                        headers: { 'Authorization': 'Token ' + Authorization.getToken() },
-                        success: function(data) {
-                            var response = [];
-                            for (var i=0; i < data.results.length; i++) {
-                                response.push({
-                                    data: {
-                                       title: data.results[i].name
-                                       },
-                                    attr: {
-                                       id: idx,
-                                       group_id: data.results[i].id,
-                                       type: 'group',
-                                       name: data.results[i].name, 
-                                       description: data.results[i].description,
-                                       inventory: data.results[i].inventory,
-                                       all: data.results[i].related.all_hosts,
-                                       children: data.results[i].related.children + '?order_by=name',
-                                       hosts: data.results[i].related.hosts,
-                                       variable: data.results[i].related.variable_data,
-                                       "data-failures": data.results[i].has_active_failures
-                                       },
-                                    state: 'closed'
-                                    });
-                                idx++;
-                            }
-                            return response;
-                            }
-                        }
-                        */
+                    data: json_tree_data
                     },
                 "dnd": { },
                 "crrm": { 
                     "move": {
                         "check_move": function(m) {
+                            if (m.np.attr('id') == 'tree-view') {
+                               return false;
+                            }
                             if (m.op.attr('id') == m.np.attr('id')) {
                                // old parent and new parent cannot be the same
                                return false;
@@ -182,134 +153,130 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                             }
                         }
                     },
-                "crrm" : { },
-                "contextmenu": {
-                    items: scope.treeController
-                    }
+                "crrm" : { }
                 });
+            });
+            
+        $(tree_id).bind("loaded.jstree", function () {
+            scope['treeLoading'] = false;
+            Wait('stop');
+            scope.$emit('treeLoaded');
+            });
 
-            $(tree_id).bind("loaded.jstree", function () {
-                scope['treeLoading'] = false;
+        $(tree_id).bind('move_node.jstree', function(e, data) {
+            // When user drags-n-drops a node, update the API 
+            
+            Wait('start');
+
+            var node, target, url, parent, inv_id, variables;
+            node = $('#tree-view li[id="' + data.rslt.o[0].id + '"]');  // node being moved
+            parent = $('#tree-view li[id="' + data.args[0].op[0].id + '"]');  //node moving from
+            target = $('#tree-view li[id="' + data.rslt.np[0].id + '"]');  // node moving to
+            inv_id = inventory_id;
+            
+            function cleanUp() {
+                LoadRootGroups({ scope: scope });
                 Wait('stop');
-                scope.$emit('treeLoaded');
-                });
-
-            $(tree_id).bind('move_node.jstree', function(e, data) {
-                // When user drags-n-drops a node, update the API 
-                
-                Wait('start');
-
-                var node, target, url, parent, inv_id, variables;
-                node = $('#tree-view li[id="' + data.rslt.o[0].id + '"]');  // node being moved
-                parent = $('#tree-view li[id="' + data.args[0].op[0].id + '"]');  //node moving from
-                target = $('#tree-view li[id="' + data.rslt.np[0].id + '"]');  // node moving to
-                inv_id = inventory_id;
-                
-                function cleanUp() {
-                    Wait('stop');
-                    if (!scope.$$phase) {
-                       scope.$digest();
-                    } 
                 }
 
-                if (scope.removeCopyVariables) {
-                   scope.removeCopyVariables();
-                }
-                scope.removeCopyVariables = scope.$on('copyVariables', function(e, id, url) {
-                    if (variables) {
-                       Rest.setUrl(url); 
-                       Rest.put(variables)
-                           .success(function(data, status, headers, config) {
-                               cleanUp();
-                               })
-                           .error(function(data, status, headers, config) {
-                               cleanUp();
-                               ProcessErrors(scope, data, status, null,
-                                   { hdr: 'Error!', msg: 'Failed to update variables. PUT returned status: ' + status });
-                               });
-                    }
-                    else {
-                       cleanUp();
-                    }
-                    }); 
-                
-                if (scope['addToTargetRemove']) {
-                   scope.addToTargetRemove();
-                }
-                scope.addToTargetRemove = scope.$on('addToTarget', function() {
-                   // add the new group to the target parent
-                   var url = (target.attr('type') == 'group') ? GetBasePath('base') + 'groups/' + target.attr('group_id') + '/children/' :
-                       GetBasePath('inventory') + inv_id + '/groups/';
-                   var group = { 
-                       name: node.attr('name'),
-                       description: node.attr('description'),
-                       inventory: node.attr('inventory')
-                       }
-                   Rest.setUrl(url);
-                   Rest.post(group)
-                       .success( function(data, status, headers, config) {
-                           //Update the node with new attributes
-                           var filter = (scope.inventoryFailureFilter) ? "has_active_failures=true&" : ""; 
-                           node.attr('group_id', data.id);
-                           node.attr('variable', data.related.variable_data);
-                           node.attr('all', data.related.all_hosts); 
-                           node.attr('children', data.related.children + '?' + filter + 'order_by=name');
-                           node.attr('hosts', data.related.hosts);
-                           node.attr('data-failures', data.has_active_failures);
-                           scope.$emit('copyVariables', data.id, data.related.variable_data);
+            if (scope.removeCopyVariables) {
+               scope.removeCopyVariables();
+            }
+            scope.removeCopyVariables = scope.$on('copyVariables', function(e, id, url) {
+                if (variables) {
+                   Rest.setUrl(url); 
+                   Rest.put(variables)
+                       .success(function(data, status, headers, config) {
+                           cleanUp();
                            })
-                       .error( function(data, status, headers, config) {
+                       .error(function(data, status, headers, config) {
                            cleanUp();
                            ProcessErrors(scope, data, status, null,
-                              { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
-                              target.attr('name') + '. POST returned status: ' + status });
+                               { hdr: 'Error!', msg: 'Failed to update variables. PUT returned status: ' + status });
                            });
-                   });
-
-                // disassociate the group from the original parent
-                if (scope.removeGroupRemove) {
-                   scope.removeGroupRemove(); 
                 }
-                scope.removeGroupRemove = scope.$on('removeGroup', function() {
-                    var url = (parent.attr('type') == 'group') ? GetBasePath('base') + 'groups/' + parent.attr('group_id') + '/children/' : 
-                        GetBasePath('inventory') + inv_id + '/groups/';
-                    Rest.setUrl(url);
-                    Rest.post({ id: node.attr('group_id'), disassociate: 1 })
-                        .success( function(data, status, headers, config) {
-                            scope.$emit('addToTarget');
-                            })
-                        .error( function(data, status, headers, config) {
-                            cleanUp();
-                            ProcessErrors(scope, data, status, null,
-                                { hdr: 'Error!', msg: 'Failed to remove ' + node.attr('name') + ' from ' + 
-                                  parent.attr('name') + '. POST returned status: ' + status });
-                            });
-                    });
-                
-                // Lookup the inventory. We already have what we need except for variables.
-                Rest.setUrl(GetBasePath('base') + 'groups/' + node.attr('group_id') + '/');
-                Rest.get()
+                else {
+                   cleanUp();
+                }
+                }); 
+            
+            if (scope['addToTargetRemove']) {
+               scope.addToTargetRemove();
+            }
+            scope.addToTargetRemove = scope.$on('addToTarget', function() {
+               // add the new group to the target parent
+               var url = (target.attr('type') == 'group') ? GetBasePath('base') + 'groups/' + target.attr('group_id') + '/children/' :
+                   GetBasePath('inventory') + inv_id + '/groups/';
+               var group = { 
+                   name: node.attr('name'),
+                   description: node.attr('description'),
+                   inventory: node.attr('inventory')
+                   }
+               Rest.setUrl(url);
+               Rest.post(group)
+                   .success( function(data, status, headers, config) {
+                       //Update the node with new attributes
+                       var filter = (scope.inventoryFailureFilter) ? "has_active_failures=true&" : ""; 
+                       node.attr('group_id', data.id);
+                       node.attr('variable', data.related.variable_data);
+                       node.attr('all', data.related.all_hosts); 
+                       node.attr('children', data.related.children + '?' + filter + 'order_by=name');
+                       node.attr('hosts', data.related.hosts);
+                       node.attr('data-failures', data.has_active_failures);
+                       scope.$emit('copyVariables', data.id, data.related.variable_data);
+                       })
+                   .error( function(data, status, headers, config) {
+                       cleanUp();
+                       ProcessErrors(scope, data, status, null,
+                          { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
+                          target.attr('name') + '. POST returned status: ' + status });
+                       });
+               });
+
+            // disassociate the group from the original parent
+            if (scope.removeGroupRemove) {
+               scope.removeGroupRemove(); 
+            }
+            scope.removeGroupRemove = scope.$on('removeGroup', function() {
+                var url = (parent.attr('type') == 'group') ? GetBasePath('base') + 'groups/' + parent.attr('group_id') + '/children/' : 
+                    GetBasePath('inventory') + inv_id + '/groups/';
+                Rest.setUrl(url);
+                Rest.post({ id: node.attr('group_id'), disassociate: 1 })
                     .success( function(data, status, headers, config) {
-                        variables = (data.variables) ? JSON.parse(data.variables) : "";
-                        scope.$emit('removeGroup');
+                        scope.$emit('addToTarget');
                         })
                     .error( function(data, status, headers, config) {
                         cleanUp();
                         ProcessErrors(scope, data, status, null,
-                            { hdr: 'Error!', msg: 'Failed to lookup group ' + node.attr('name') + 
-                            '. GET returned status: ' + status });
+                            { hdr: 'Error!', msg: 'Failed to remove ' + node.attr('name') + ' from ' + 
+                              parent.attr('name') + '. POST returned status: ' + status });
                         });
-
-                if (!scope.$$phase) {
-                   scope.$digest();
-                } 
                 });
             
-            // When user clicks on a group, display the related hosts in the list view
+            // Lookup the inventory. We already have what we need except for variables.
+            Rest.setUrl(GetBasePath('base') + 'groups/' + node.attr('group_id') + '/');
+            Rest.get()
+                .success( function(data, status, headers, config) {
+                    variables = (data.variables) ? JSON.parse(data.variables) : "";
+                    scope.$emit('removeGroup');
+                    })
+                .error( function(data, status, headers, config) {
+                    cleanUp();
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Failed to lookup group ' + node.attr('name') + 
+                        '. GET returned status: ' + status });
+                    });
+
+            if (!scope.$$phase) {
+               scope.$digest();
+            } 
+            });
+            
+            // When user clicks on a group
             $(tree_id).bind("select_node.jstree", function(e, data){
                 scope.$emit('NodeSelect', data.inst.get_json()[0]);
                 });
-            });
+            
         
         Wait('start');
         LoadTreeData(params);
@@ -317,11 +284,32 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         }
         }])
 
+    .factory('LoadRootGroups', ['Rest', 'ProcessErrors', function(Rest, ProcessErrors) {
+    return function(params) {
+        
+        // Build an array of root group IDs. We'll need this when copying IDs.
+        
+        var scope = params.scope;
+        Rest.setUrl(scope.inventoryRootGroupsUrl);
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                scope.inventoryRootGroups = [];
+                for (var i=0; i < data.results.length; i++){
+                    scope.inventoryRootGroups.push(data.results[i].id);
+                } 
+                })
+            .error( function(data, status, headers, config) {
+                ProcessErrors(scope, data, status, null,
+                    { hdr: 'Error!', msg: 'Failed to retrieve root groups for inventory: ' + 
+                    scope.inventory_id + '. GET status: ' + status });
+                });
+        }  
+        }])
 
     .factory('LoadInventory', ['$routeParams', 'Alert', 'Rest', 'Authorization', '$http', 'ProcessErrors',
-        'RelatedSearchInit', 'RelatedPaginateInit', 'GetBasePath', 'LoadBreadCrumbs', 'InventoryForm',
+        'RelatedSearchInit', 'RelatedPaginateInit', 'GetBasePath', 'LoadBreadCrumbs', 'InventoryForm', 'LoadRootGroups',
     function($routeParams, Alert, Rest, Authorization, $http, ProcessErrors, RelatedSearchInit, RelatedPaginateInit,
-        GetBasePath, LoadBreadCrumbs, InventoryForm) {
+        GetBasePath, LoadBreadCrumbs, InventoryForm, LoadRootGroups) {
     return function(params) {
         
         // Load inventory detail record
@@ -330,6 +318,13 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var form = InventoryForm;
         scope.relatedSets = [];
         scope.master = {};
+        
+        if (scope.removeLevelOneGroups) {
+           scope.removeLevelOneGroups();
+        }
+        scope.removeLevelOneGroups = scope.$on('inventoryLoaded', function() {
+            LoadRootGroups({ scope: scope });
+            });
 
         Rest.setUrl(GetBasePath('inventory') + scope['inventory_id'] + '/');
         Rest.get()
@@ -358,7 +353,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     }
                 }
                 
-                scope.inventoryGroupsUrl = data.related.groups; 
+                scope.inventoryGroupsUrl = data.related.groups;
+                scope.inventoryRootGroupsUrl = data.related.root_groups;
                 scope.TreeParams = { scope: scope, inventory: data };
                 scope.variable_url = data.related.variable_data;
                 scope.relatedSets['hosts'] = { url: data.related.hosts, iterator: 'host' };
@@ -372,12 +368,13 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 scope.$emit('inventoryLoaded');
                 })
             .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, form,
+                ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to retrieve inventory: ' + $routeParams.id + '. GET status: ' + status });
                 });
 
         }
         }])
+
 
     .factory('RefreshGroupName', [ function() {
     return function(node, name, description) {
@@ -388,6 +385,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         scope['selectedNodeName'] = name;
         }
         }])
+
 
     .factory('RefreshTree', ['Alert', 'Rest', 'Authorization', '$http', 'TreeInit', 'LoadInventory',
     function(Alert, Rest, Authorization, $http, TreeInit, LoadInventory) {
