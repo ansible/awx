@@ -65,14 +65,14 @@ class BaseTask(Task):
         Create a temporary file containing the SSH private key.
         '''
         ssh_key_data = ''
-        if hasattr(instance, 'project'):
-            project = instance.project
-            if hasattr(project, 'scm_key_data'):
-                ssh_key_data = decrypt_field(project, 'scm_key_data')
-        elif hasattr(instance, 'credential'):
+        if hasattr(instance, 'credential'):
             credential = instance.credential
             if hasattr(credential, 'ssh_key_data'):
                 ssh_key_data = decrypt_field(credential, 'ssh_key_data')
+        elif hasattr(instance, 'project'):
+            project = instance.project
+            if hasattr(project, 'scm_key_data'):
+                ssh_key_data = decrypt_field(project, 'scm_key_data')
         if ssh_key_data:
             # FIXME: File permissions?
             handle, path = tempfile.mkstemp()
