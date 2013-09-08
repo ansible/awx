@@ -202,7 +202,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
               scope[fld + '_ask'] = false;
               $("#" + fld + "-clear-btn").removeAttr("disabled");
            }
-
+           master[fld + '_ask'] = scope[fld + '_ask'];
        }
        } 
 

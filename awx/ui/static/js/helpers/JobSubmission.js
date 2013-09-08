@@ -5,16 +5,17 @@
  * 
  */
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
-    'LookUpHelper', 'JobTemplateFormDefinition', 'ProjectFormDefinition' ])
+    'LookUpHelper', 'ProjectFormDefinition' ])
 
-    .factory('PromptPasswords',['CredentialForm', '$compile', 'Rest', '$location', 'ProcessErrors', 'GetBasePath', 'Alert',
-    function(JobTemplateForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert) {
+    .factory('PromptPasswords', ['CredentialForm', 'JobTemplateForm', 'ProjectsForm', '$compile', 'Rest', '$location', 'ProcessErrors', 'GetBasePath',
+        'Alert',
+    function(CredentialForm, JobTemplateForm, ProjectsForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert) {
     return function(params) {
         
         var scope = params.scope; 
         var passwords = params.passwords;
         var start_url = params.start_url;
-        var form = params.form;
+        var form = CredentialForm;
         var html = '';
         var field, element, dialogScope, fld;
         var base = $location.path().replace(/^\//,'').split('/')[0];
@@ -97,7 +98,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
            html += html += "<form class=\"form-horizontal\" name=\"password_form\" novalidate>\n";    
            for (var i=0; i < passwords.length; i++) {
                // Add the password field
-               field = form.fields[passwords[i]];
+               field = (form.fields[passwords[i]]) ? form.fields[passwords[i]] : ProjectsForm.fields[passwords[i]];
                fld = passwords[i];
                scope[fld] = '';
                html += "<div class=\"form-group\">\n";
@@ -119,7 +120,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
              
                // Add the related confirm field
                fld = field.associated;
-               field = form.fields[field.associated];
+               field = (form.fields[field.associated]) ? form.fields[field.associated] : ProjectsForm.fields[field.associated];
                scope[fld] = '';
                html += "<div class=\"form-group\">\n";
                html += "<label class=\"control-label col-lg-3\" for=\"" + fld + '">' + field.label + '</label>' + "\n";

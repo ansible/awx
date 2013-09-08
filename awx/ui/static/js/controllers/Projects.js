@@ -39,7 +39,8 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                // will contain status of last update, which is not what we want.
                scope.projects[i].last_update_failed = false;  
             }
-            scope.projects[i].last_updated = FormatDate(new Date(scope.projects[i].last_updated));
+            scope.projects[i].last_updated = (scope.projects[i].last_updated !== null) ? 
+                FormatDate(new Date(scope.projects[i].last_updated)) : null;
         }
         });
 
@@ -233,6 +234,18 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
        scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch'; 
        }
 
+   scope.authChange = function() {
+       if (!scope.auth_required) {
+          scope.scm_username = null;
+          scope.scm_password = null;
+          scope.scm_password_confirm = null;
+          scope.scm_key_data = null;
+          scope.scm_key_unlock = null;
+          scope.scm_key_unlock_confirm = null;
+          scope.scm_password_ask = false;
+       }
+       }
+
    // Cancel
    scope.formReset = function() {
        $rootScope.flashMessage = null;
@@ -288,6 +301,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
               scope[fld + '_ask'] = false;
               $("#" + fld + "-clear-btn").removeAttr("disabled");
            }
+           master[fld + '_ask'] = scope[fld + '_ask'];
        }
        } 
 
@@ -308,6 +322,8 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
           scope.project_local_paths = opts;
           scope.base_dir = 'You do not have access to view this property';
        }
+       scope.auth_required = (scope.scm_type && (scope.scm_username || scope.scm_key_unlock)) ? true : false;
+       master.auth_required = scope.auth_required;
        });
 
    // Retrieve detail record and prepopulate the form
@@ -402,6 +418,18 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
            scope[fld] = master[fld];
        }
        };
+
+   scope.authChange = function() {
+       if (!scope.auth_required) {
+          scope.scm_username = null;
+          scope.scm_password = null;
+          scope.scm_password_confirm = null;
+          scope.scm_key_data = null;
+          scope.scm_key_unlock = null;
+          scope.scm_key_unlock_confirm = null;
+          scope.scm_password_ask = false;
+       }
+       }
 
    // Related set: Add button
    scope.add = function(set) {

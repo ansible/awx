@@ -109,17 +109,25 @@ angular.module('ProjectFormDefinition', [])
                 addRequired: false,
                 editRequired: false
                 },
+            auth_required: {
+                label: 'Authorization required?',
+                type: 'checkbox',
+                ngShow: "scm_type !== '' && scm_type !== null",
+                addRequired: false,
+                editRequired: false,
+                ngChange: 'authChange()'
+                },
             scm_username: {
                 label: 'SCM Username',
                 type: 'text', 
-                ngShow: "scm_type !== '' && scm_type !== null",
+                ngShow: "scm_type !== '' && scm_type !== null && auth_required",
                 addRequired: false, 
                 editRequired: false
                 },
             "scm_password": {
                 label: 'SCM Password',
                 type: 'password',
-                ngShow: "scm_type !== '' && scm_type !== null",
+                ngShow: "scm_type !== '' && scm_type !== null && auth_required",
                 addRequired: false,
                 editRequired: false,
                 ngChange: "clearPWConfirm('scm_password_confirm')",
@@ -129,9 +137,9 @@ angular.module('ProjectFormDefinition', [])
                 autocomplete: false
                 },
             "scm_password_confirm": {
-                label: 'Confirm Password',
+                label: 'Confirm SCM Password',
                 type: 'password',
-                ngShow: "scm_type !== '' && scm_type !== null",
+                ngShow: "scm_type !== '' && scm_type !== null && auth_required",
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,
@@ -141,7 +149,7 @@ angular.module('ProjectFormDefinition', [])
             "scm_key_data": {
                 label: 'SCM Private Key',
                 type: 'textarea',
-                ngShow: "scm_type !== '' && scm_type !== null",
+                ngShow: "scm_type !== '' && scm_type !== null && auth_required",
                 xtraWide: true,
                 addRequired: false,
                 editRequired: false,
@@ -151,7 +159,7 @@ angular.module('ProjectFormDefinition', [])
             "scm_key_unlock": {
                 label: 'SCM Key Password',
                 type: 'password',
-                ngShow: "scm_type !== '' && scm_type !== null && scm_key_data",
+                ngShow: "scm_type !== '' && scm_type !== null && scm_key_data && auth_required",
                 addRequired: false,
                 editRequired: false,
                 ngChange: "clearPWConfirm('scm_key_unlock_confirm')",
@@ -160,9 +168,9 @@ angular.module('ProjectFormDefinition', [])
                 clear: true
                 },
             "scm_key_unlock_confirm": {
-                label: 'Confirm Key Password',
+                label: 'Confirm SCM Key Password',
                 type: 'password',
-                ngShow: "scm_type !== '' && scm_type !== null && scm_key_data",
+                ngShow: "scm_type !== '' && scm_type !== null && scm_key_data && auth_required",
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,

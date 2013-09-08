@@ -33,11 +33,13 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
             scope[ngc] = "";
             });
 
-        // Convert created date to local time zone 
-        var cDate;
-        for (var i=0; i < scope[list.name].length; i++) {
-            cDate = new Date(scope[list.name][i].created);
-            scope[list.name][i].created = FormatDate(cDate);
+        if (scope[list.name]) {
+           // Convert created date to local time zone 
+           var cDate;
+           for (var i=0; i < scope[list.name].length; i++) {
+               cDate = new Date(scope[list.name][i].created);
+               scope[list.name][i].created = FormatDate(cDate);
+           }
         }
         });
     
