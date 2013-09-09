@@ -18,11 +18,9 @@ from django.contrib.auth.models import User
 import django.test
 from django.test.client import Client
 
-# Django-Auth-LDAP
-from django_auth_ldap.backend import LDAPSettings
-
 # AWX
 from awx.main.models import *
+from awx.main.backend import LDAPSettings
 
 class BaseTestMixin(object):
     '''

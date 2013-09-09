@@ -8,7 +8,7 @@ import urllib
 
 # Django
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 import django.test
 from django.test.client import Client
 from django.core.urlresolvers import reverse
@@ -627,9 +627,10 @@ class UsersTest(BaseTest):
 
 class LdapTest(BaseTest):
 
-    def use_test_setting(self, name, default=None):
+    def use_test_setting(self, name, default=None, from_name=None):
+        from_name = from_name or name
         setattr(settings, 'AUTH_LDAP_%s' % name,
-                getattr(settings, 'TEST_AUTH_LDAP_%s' % name, default))
+                getattr(settings, 'TEST_AUTH_LDAP_%s' % from_name, default))
 
     def setUp(self):
         super(LdapTest, self).setUp()
@@ -647,15 +648,18 @@ class LdapTest(BaseTest):
             self.use_test_setting(name)
 
     def check_login(self, username=None, password=None, should_fail=False):
+        self.assertEqual(Group.objects.count(), 0)
         username = username or self.ldap_username
         password = password or self.ldap_password
         result = self.client.login(username=username, password=password)
         self.assertNotEqual(result, should_fail)
+        self.assertEqual(Group.objects.count(), 0)
         if not should_fail:
             return User.objects.get(username=username)
 
     def test_ldap_auth(self):
         self.use_test_setting('USER_SEARCH')
+        self.use_test_setting('ALWAYS_UPDATE_USER')
         self.assertEqual(User.objects.filter(username=self.ldap_username).count(), 0)
         # Test logging in, user should be created with no flags or fields set.
         user = self.check_login()
@@ -679,3 +683,65 @@ class LdapTest(BaseTest):
             user = self.check_login()
             for attr in settings.AUTH_LDAP_USER_ATTR_MAP.keys():
                 self.assertTrue(getattr(user, attr))
+        # Turn on group search fields.
+        for name in ('GROUP_SEARCH', 'GROUP_TYPE'):
+            self.use_test_setting(name)
+        # Test that user must be in required group.
+        self.use_test_setting('REQUIRE_GROUP', from_name='REQUIRE_GROUP_FAIL')
+        if settings.AUTH_LDAP_REQUIRE_GROUP:
+            user = self.check_login(should_fail=True)
+        self.use_test_setting('REQUIRE_GROUP')
+        user = self.check_login()
+        # Test that user must not be in deny group.
+        self.use_test_setting('DENY_GROUP', from_name='DENY_GROUP_FAIL')
+        if settings.AUTH_LDAP_DENY_GROUP:
+            user = self.check_login(should_fail=True)
+        self.use_test_setting('DENY_GROUP')
+        user = self.check_login()
+        # Check that user flags are set from group membership.
+        self.use_test_setting('USER_FLAGS_BY_GROUP')
+        if settings.AUTH_LDAP_USER_FLAGS_BY_GROUP:
+            user = self.check_login()
+            for attr in settings.AUTH_LDAP_USER_FLAGS_BY_GROUP.keys():
+                self.assertTrue(getattr(user, attr))
+
+    def test_ldap_organization_mapping(self):
+        for name in ('USER_SEARCH', 'ALWAYS_UPDATE_USER', 'USER_ATTR_MAP',
+                     'GROUP_SEARCH', 'GROUP_TYPE', 'USER_FLAGS_BY_GROUP'):
+            self.use_test_setting(name)
+        self.assertEqual(User.objects.filter(username=self.ldap_username).count(), 0)
+        self.use_test_setting('ORGANIZATION_MAP', {})
+        self.use_test_setting('ORGANIZATION_MAP_RESULT', {})
+        for org_name in settings.AUTH_LDAP_ORGANIZATION_MAP.keys():
+            self.assertEqual(Organization.objects.filter(name=org_name).count(), 0)
+        user = self.check_login()
+        for org_name in settings.AUTH_LDAP_ORGANIZATION_MAP.keys():
+            self.assertEqual(Organization.objects.filter(name=org_name).count(), 1)
+        for org_name, org_result in settings.AUTH_LDAP_ORGANIZATION_MAP_RESULT.items():
+            org = Organization.objects.get(name=org_name)
+            if org_result.get('admins', False):
+                self.assertTrue(user in org.admins.all())
+            else:
+                self.assertFalse(user in org.admins.all())
+            if org_result.get('users', False):
+                self.assertTrue(user in org.users.all())
+            else:
+                self.assertFalse(user in org.users.all())
+        # Try again with different test mapping.
+        self.use_test_setting('ORGANIZATION_MAP', {},
+                              from_name='ORGANIZATION_MAP_2')
+        self.use_test_setting('ORGANIZATION_MAP_RESULT', {},
+                              from_name='ORGANIZATION_MAP_2_RESULT')
+        user = self.check_login()
+        for org_name in settings.AUTH_LDAP_ORGANIZATION_MAP.keys():
+            self.assertEqual(Organization.objects.filter(name=org_name).count(), 1)
+        for org_name, org_result in settings.AUTH_LDAP_ORGANIZATION_MAP_RESULT.items():
+            org = Organization.objects.get(name=org_name)
+            if org_result.get('admins', False):
+                self.assertTrue(user in org.admins.all())
+            else:
+                self.assertFalse(user in org.admins.all())
+            if org_result.get('users', False):
+                self.assertTrue(user in org.users.all())
+            else:
+                self.assertFalse(user in org.users.all())
