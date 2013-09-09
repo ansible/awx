@@ -890,7 +890,8 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         url = reverse('main:job_detail', args=(job.pk,))
         with self.current_user(self.user_sue):
             response = self.get(url)
-            self.assertEqual(response['status'], 'successful')
+            self.assertEqual(response['status'], 'successful',
+                             response['result_traceback'])
             self.assertTrue(response['result_stdout'])
 
         # Test job events for completed job.

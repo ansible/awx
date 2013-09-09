@@ -149,7 +149,7 @@ LOGGING['handlers']['syslog'] = {
 # Define these variables to enable more complete testing of project support for
 # SCM updates.
 try:
-    path = os.path.expanduser(os.path.expandvars('~/.ssh/id_rsa.pub'))
+    path = os.path.expanduser(os.path.expandvars('~/.ssh/id_rsa'))
     TEST_SSH_KEY_DATA = file(path, 'rb').read()
 except OSError:
     TEST_SSH_KEY_DATA = ''
@@ -170,8 +170,8 @@ TEST_HG_PRIVATE_SSH = ''
 
 TEST_SVN_USERNAME = ''
 TEST_SVN_PASSWORD = ''
-TEST_SVN_PUBLIC_HTTPS = 'https://projects.ninemoreminutes.com/svn/django-site-utils/trunk/'
-TEST_SVN_PRIVATE_HTTPS = ''
+TEST_SVN_PUBLIC_HTTPS = 'https://github.com/ansible/ansible-examples'
+TEST_SVN_PRIVATE_HTTPS = 'https://github.com/ansible/ansible-doc'
 
 # LDAP connection and authentication settings for unit tests only.  LDAP tests
 # will be skipped if not configured. Refer to django-auth-ldap docs:

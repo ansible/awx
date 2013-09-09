@@ -79,7 +79,7 @@ class BaseTask(Task):
             f = os.fdopen(handle, 'w')
             f.write(ssh_key_data)
             f.close()
-            os.chmod(stat.S_IRUSR|stat.S_IWUSR)
+            os.chmod(path, stat.S_IRUSR|stat.S_IWUSR)
             return path
         else:
             return ''
@@ -180,17 +180,10 @@ class BaseTask(Task):
             return False
         return True
 
-    def post_run_hook(self, instance):
-        '''
-        Hook for actions after job/task has completed.
-        '''
-
     def run(self, pk, **kwargs):
         '''
         Run the job/task using ansible-playbook and capture its output.
         '''
-        self.pk = pk
-        self.kwargs = dict(kwargs.items())
         instance = self.update_model(pk)
         if not self.pre_run_check(instance, **kwargs):
             return
@@ -216,7 +209,6 @@ class BaseTask(Task):
                     pass
         instance = self.update_model(pk, status=status, result_stdout=stdout,
                                      result_traceback=tb)
-        self.post_run_hook(instance)
 
 class RunJob(BaseTask):
     '''
@@ -355,7 +347,8 @@ class RunJob(BaseTask):
                     try:
                         project_update = pu_qs[0]
                     except IndexError:
-                        kw = dict(kwargs.items())
+                        kw = dict([(k,v) for k,v in kwargs.items()
+                                   if k.startswith('scm_')])
                         project_update = project.update(**kw)
                         if not project_update:
                             msg = 'Unable to update project before launch.'
@@ -384,12 +377,6 @@ class RunJob(BaseTask):
                 return False
             else:
                 return False
-
-    def post_run_hook(self, job):
-        '''
-        Hook for actions after job has completed.
-        '''
-        # Start any project updates that were blocked waiting for the job.
 
 class RunProjectUpdate(BaseTask):
     
@@ -445,20 +432,20 @@ class RunProjectUpdate(BaseTask):
         extra_vars = {}
         project = project_update.project
         scm_url = project.scm_url
-        if project.scm_username and project.scm_password not in ('ASK', ''):
-            scm_password = kwargs.get('scm_password',
-                                      decrypt_field(project, 'scm_password'))
+        scm_username = kwargs.get('passwords', {}).get('scm_username', '')
+        scm_password = kwargs.get('passwords', {}).get('scm_password', '')
+        if scm_username and scm_password not in ('ASK', ''):
             if project.scm_type == 'svn':
-                extra_vars['scm_username'] = project.scm_username
+                extra_vars['scm_username'] = scm_username
                 extra_vars['scm_password'] = scm_password
             else:
-                scm_url = self.update_url_auth(scm_url, project.scm_username,
+                scm_url = self.update_url_auth(scm_url, scm_username,
                                                scm_password)
-        elif project.scm_username:
+        elif scm_username:
             if project.scm_type == 'svn':
-                extra_vars['scm_username'] = project.scm_username
+                extra_vars['scm_username'] = scm_username
             else:  
-                scm_url = self.update_url_auth(scm_url, project.scm_username)
+                scm_url = self.update_url_auth(scm_url, scm_username)
         # FIXME: Need to hide password in saved job_args and result_stdout!
         scm_branch = project.scm_branch or {'hg': 'tip'}.get(project.scm_type, 'HEAD')
         scm_delete_on_update = project.scm_delete_on_update or project.scm_delete_on_next_update
@@ -519,9 +506,3 @@ class RunProjectUpdate(BaseTask):
                 return False
             else:
                 return False
-
-    def post_run_hook(self, project_update):
-        '''
-        Hook for actions after project_update has completed.
-        '''
-        # Start any jobs waiting on this update to finish.

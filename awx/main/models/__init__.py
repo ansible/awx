@@ -876,7 +876,7 @@ class ProjectUpdate(PrimordialModel):
     )
 
     def __unicode__(self):
-        return u'%s-%s-%s' % (self.name, self.id, self.status)
+        return u'%s-%s-%s' % (self.created, self.id, self.status)
 
     def save(self, *args, **kwargs):
         # Get status before save...
