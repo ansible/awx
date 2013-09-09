@@ -88,6 +88,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               $(this).remove();
               });
 
+       // Prepend an asterisk to required field label
+       $('.form-control[required]').each(function() {
+            var txt = $(this).parent().parent().find('label').prepend('* ');
+            });
+
        if (options.modal) {
           this.scope.formModalActionDisabled = false;
           this.scope.formModalInfo = false  //Disable info button for default modal
@@ -680,7 +685,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += "<span class=\"input-group-btn\">\n";
             html += "<button type=\"button\" class=\"lookup-btn btn btn-default\" " + this.attr(field,'ngClick') + "><i class=\"icon-search\"></i></button>\n";
             html += "</span>\n";
-            html += "<input type=\"text\" class=\"form-control input-medium\" ";
+            html += "<input type=\"text\" class=\"form-control input-medium lookup\" ";
             html += "ng-model=\"" + field.sourceModel + '_' + field.sourceField +  "\" ";
             html += "name=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
             html += "class=\"form-control\" ";
@@ -1047,16 +1052,16 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           //html += "<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"editInventory()\" ng-hide=\"inventoryEditHide\" " +
           //    "aw-tool-tip=\"Edit inventory properties\"  data-placement=\"bottom\"><i class=\"icon-edit\"></i> " +
           //    "Inventory Properties</button>\n";
-          html += "<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" " +
+          html += "<button type=\"button\" class=\"btn btn-default btn-sm\" ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" " +
               "aw-tool-tip=\"Edit the selected group's properties\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> " +
               "Properties</button>\n";
           //html += "<button type=\"button\" class=\"btn btn-default btn-xs\" ng-click=\"editHosts()\" ng-hide=\"showGroupHelp\" " +
           //    "aw-tool-tip=\"Modify and create inventory hosts\" data-placement=\"bottom\"><i class=\"icon-laptop\"></i> Hosts</button>\n";
-          html += "<button type=\"button\" class=\"btn btn-success btn-xs\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
+          html += "<button type=\"button\" class=\"btn btn-success btn-sm\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
               "aw-tool-tip=\"Copy existing groups to the selected group\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Copy</button>\n";
-          html += "<button type=\"button\" class=\"btn btn-success btn-xs\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
+          html += "<button type=\"button\" class=\"btn btn-success btn-sm\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
               "aw-tool-tip=\"Create a brand new group and add it to the selected group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New</button>\n";
-          html += "<button type=\"button\" class=\"btn btn-danger btn-xs\" ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" " +
+          html += "<button type=\"button\" class=\"btn btn-danger btn-sm\" ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" " +
               "aw-tool-tip=\"Permanently delete the selected group. Any hosts in the group will still be available in All Hosts.\" " +
               "data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete</button>\n";
           html += "</div><!-- tree controls -->\n";
@@ -1095,7 +1100,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "<div class=\"hosts-well well\">\n";
 
           html += SearchWidget({ iterator: form.iterator, template: form, mini: true, size: 'col-md-6 col-lg-6'});
-          html += "<div class=\"col-md-6 col-lg-6\">\n"
+          html += "<div class=\"col-md-5 col-lg-5\">\n"
           html += "<div class=\"pull-right\">\n";
           // Add actions(s)
           for (var action in form.actions) {

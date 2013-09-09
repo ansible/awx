@@ -110,9 +110,18 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                validity = true;
                if ( scope[attrs.awRequiredWhen] && (elm.attr('required') == null || elm.attr('required') == undefined) ) {
                   $(elm).attr('required','required');
+                  console.log('here');
+                  if ($(elm).hasClass('lookup')) {
+                     console.log('adding!');
+                     $(elm).parent().parent().parent().find('label').prepend('* ');
+                  }
                }
                else if (!scope[attrs.awRequiredWhen]) {
-                  elm.removeAttr('required'); 
+                  elm.removeAttr('required');
+                  if ($(elm).hasClass('lookup')) {
+                     var txt = $(elm).parent().parent().parent().find('label').text();
+                     $(elm).parent().parent().parent().find('label').text(txt.replace(/^*/,''));
+                  }
                }
                if (scope[attrs.awRequiredWhen] && (viewValue == undefined || viewValue == null || viewValue == '')) {
                   validity = false;

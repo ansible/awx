@@ -54,21 +54,21 @@ angular.module('InventoryHostsFormDefinition', [])
 
         actions: {
             add: {
-                label: 'Add Existing Host',
+                label: 'Copy',
                 ngClick: "addHost()",
                 ngHide: "hostAddHide",
-                awToolTip: "Select from a list of existing hosts",
+                awToolTip: "Copy an existing host to the selected group",
                 dataPlacement: 'bottom',
-                'class': 'btn-xs btn-primary',
+                'class': 'btn-sm btn-primary',
                 icon: 'icon-check'
                 },
             create: {
-                label: 'Create New Host',
+                label: 'Create New',
                 ngClick: 'createHost()',
                 ngHide: 'hostCreateHide',
-                awToolTip: 'Create a new host',
+                awToolTip: 'Create a new host and add it to the selected group',
                 dataPlacement: 'bottom',
-                'class': 'btn-xs btn-success',
+                'class': 'btn-sm btn-success',
                 icon: 'icon-plus'
                 }
             },
