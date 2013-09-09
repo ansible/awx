@@ -9,6 +9,7 @@ import logging
 import os
 import re
 import subprocess
+import stat
 import tempfile
 import time
 import traceback
@@ -74,11 +75,11 @@ class BaseTask(Task):
             if hasattr(project, 'scm_key_data'):
                 ssh_key_data = decrypt_field(project, 'scm_key_data')
         if ssh_key_data:
-            # FIXME: File permissions?
             handle, path = tempfile.mkstemp()
             f = os.fdopen(handle, 'w')
             f.write(ssh_key_data)
             f.close()
+            os.chmod(stat.S_IRUSR|stat.S_IWUSR)
             return path
         else:
             return ''
@@ -331,10 +332,58 @@ class RunJob(BaseTask):
         '''
         Hook for checking job before running.
         '''
-        if not super(RunJob, self).pre_run_check(job, **kwargs):
-            return False
-        # FIXME: Check if job is waiting on any projects that are being updated.
-        return True
+        project_update = None
+        while True:
+            pk = job.pk
+            if job.status in ('pending', 'waiting'):
+                project = job.project
+                pu_qs = project.project_updates.filter(status__in=('pending', 'running'))
+                # Refresh the current project_update instance (if set).
+                if project_update:
+                    try:
+                        project_update = project.project_updates.filter(pk=project_update.pk)[0]
+                    except IndexError:
+                        msg = 'Unable to check project update.'
+                        job = self.update_model(pk, status='error',
+                                                result_traceback=msg)
+                        return False
+
+                # If the job needs to update the project first (and there is no
+                # specific project update defined).
+                if not project_update and project.scm_update_on_launch:
+                    job = self.update_model(pk, status='waiting')
+                    try:
+                        project_update = pu_qs[0]
+                    except IndexError:
+                        kw = dict(kwargs.items())
+                        project_update = project.update(**kw)
+                        if not project_update:
+                            msg = 'Unable to update project before launch.'
+                            job = self.update_model(pk, status='error',
+                                                    result_traceback=msg)
+                            return False
+                    #print 'job %d waiting on project update %d' % (pk, project_update.pk)
+                    time.sleep(2.0)
+                # If project update has failed, abort the job.
+                elif project_update and project_update.failed:
+                    msg = 'Project update failed with status = %s.' % project_update.status
+                    job = self.update_model(pk, status='error',
+                                            result_traceback=msg)
+                    return False
+                # Check if blocked by any other active project updates.
+                elif pu_qs.count():
+                    #print 'job %d waiting on' % pk, pu_qs
+                    job = self.update_model(pk, status='waiting')
+                    time.sleep(4.0)
+                # Otherwise continue running the job.
+                else:
+                    job = self.update_model(pk, status='pending')
+                    return True
+            elif job.cancel_flag:
+                job = self.update_model(pk, status='canceled')
+                return False
+            else:
+                return False
 
     def post_run_hook(self, job):
         '''
@@ -356,11 +405,12 @@ class RunProjectUpdate(BaseTask):
         passwords = super(RunProjectUpdate, self).build_passwords(project_update,
                                                                   **kwargs)
         project = project_update.project
-        value = decrypt_field(project, 'scm_key_unlock')
+        value = kwargs.get('scm_key_unlock', decrypt_field(project, 'scm_key_unlock'))
         if value not in ('', 'ASK'):
             passwords['ssh_key_unlock'] = value
         passwords['scm_username'] = project.scm_username
-        passwords['scm_password'] = decrypt_field(project, 'scm_password')
+        passwords['scm_password'] = kwargs.get('scm_password',
+                                               decrypt_field(project, 'scm_password'))
         return passwords
 
     def build_env(self, project_update, **kwargs):
@@ -391,19 +441,19 @@ class RunProjectUpdate(BaseTask):
         optionally using ssh-agent for public/private key authentication.
         '''
         args = ['ansible-playbook', '-i', 'localhost,']
-        # Since we specify -vvv and tasks use async polling, we should get some
-        # output regularly...
         args.append('-%s' % ('v' * 3))
         extra_vars = {}
         project = project_update.project
         scm_url = project.scm_url
         if project.scm_username and project.scm_password not in ('ASK', ''):
+            scm_password = kwargs.get('scm_password',
+                                      decrypt_field(project, 'scm_password'))
             if project.scm_type == 'svn':
                 extra_vars['scm_username'] = project.scm_username
-                extra_vars['scm_password'] = decrypt_field(project, 'scm_password')
+                extra_vars['scm_password'] = scm_password
             else:
                 scm_url = self.update_url_auth(scm_url, project.scm_username,
-                                               decrypt_field(project, 'scm_password'))
+                                               scm_password)
         elif project.scm_username:
             if project.scm_type == 'svn':
                 extra_vars['scm_username'] = project.scm_username
@@ -436,6 +486,8 @@ class RunProjectUpdate(BaseTask):
     def get_password_prompts(self):
         d = super(RunProjectUpdate, self).get_password_prompts()
         d.update({
+            r'Username for.*:': 'scm_username',
+            r'Password for.*:': 'scm_password',
             # FIXME: Configure whether we should auto accept host keys?
             r'Are you sure you want to continue connecting \(yes/no\)\?': 'yes',
         })
@@ -445,17 +497,31 @@ class RunProjectUpdate(BaseTask):
         '''
         Hook for checking project update before running.
         '''
-        if not super(RunProjectUpdate, self).pre_run_check(project_update, **kwargs):
-            return False
-        # FIXME: Check if project update is blocked by any jobs that are being run.
-        project = project_update.project
-        if project.jobs.filter(status__in=('pending', 'waiting', 'running')):
-            pass
-        return True
+        while True:
+            pk = project_update.pk
+            if project_update.status in ('pending', 'waiting'):
+                # Check if project update is blocked by any jobs or other 
+                # updates that are active.  Exclude job that is waiting for
+                # this project update.
+                project = project_update.project
+                jobs_qs = project.jobs.filter(status__in=('pending', 'running'))
+                pu_qs = project.project_updates.filter(status__in=('pending', 'running'))
+                pu_qs = pu_qs.exclude(pk=project_update.pk)
+                if jobs_qs.count() or pu_qs.count():
+                    #print 'project update %d waiting on' % pk, jobs_qs, pu_qs
+                    project_update = self.update_model(pk, status='waiting')
+                    time.sleep(4.0)
+                else:
+                    project_update = self.update_model(pk, status='pending')
+                    return True
+            elif project_update.cancel_flag:
+                project_update = self.update_model(pk, status='canceled')
+                return False
+            else:
+                return False
 
     def post_run_hook(self, project_update):
         '''
         Hook for actions after project_update has completed.
         '''
         # Start any jobs waiting on this update to finish.
-

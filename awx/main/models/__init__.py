@@ -603,7 +603,7 @@ class Project(CommonModel):
     )
     scm_delete_on_next_update = models.BooleanField(
         default=False,
-        editable=True,
+        editable=False,
     )
     scm_update_on_launch = models.BooleanField(
         default=False,
@@ -660,8 +660,6 @@ class Project(CommonModel):
     )
     
     # FIXME: Still need to implement:
-    # - scm_update_on_launch
-    # - prevent simultaneous updates of project and running jobs using project
     # - masking passwords in project update args/stdout
 
     def save(self, *args, **kwargs):
@@ -877,6 +875,9 @@ class ProjectUpdate(PrimordialModel):
         editable=False,
     )
 
+    def __unicode__(self):
+        return u'%s-%s-%s' % (self.name, self.id, self.status)
+
     def save(self, *args, **kwargs):
         # Get status before save...
         status_before = self.status or 'new'
@@ -922,8 +923,6 @@ class ProjectUpdate(PrimordialModel):
 
     def start(self, **kwargs):
         from awx.main.tasks import RunProjectUpdate
-        if not self.can_start:
-            return False
         needed = self.project.scm_passwords_needed
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
@@ -1232,6 +1231,9 @@ class Job(CommonModelNameNotUnique):
 
     def get_absolute_url(self):
         return reverse('main:job_detail', args=(self.pk,))
+
+    def __unicode__(self):
+        return u'%s-%s-%s' % (self.name, self.id, self.status)
 
     def save(self, *args, **kwargs):
         self.failed = bool(self.status in ('failed', 'error', 'canceled'))

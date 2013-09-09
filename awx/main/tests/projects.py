@@ -15,6 +15,7 @@ import django.test
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
+from django.utils.timezone import now
 
 # AWX
 from awx.main.models import *
@@ -902,3 +903,121 @@ class ProjectUpdatesTest(BaseTransactionTest):
         with self.current_user(self.super_django_user):
             response = self.post(url, {'scm_key_unlock': TEST_SSH_KEY_DATA_UNLOCK}, expect=202)
 
+    def create_test_job_template(self, **kwargs):
+        opts = {
+            'name': 'test-job-template %s' % str(now()),
+            'inventory': self.inventory,
+            'project': self.project,
+            'credential': self.credential,
+            'job_type': 'run',
+        }
+        try:
+            opts['playbook'] = self.project.playbooks[0]
+        except (AttributeError, IndexError):
+            pass
+        opts.update(kwargs)
+        self.job_template = JobTemplate.objects.create(**opts)
+        return self.job_template
+
+    def create_test_job(self, **kwargs):
+        job_template = kwargs.pop('job_template', None)
+        if job_template:
+            self.job = job_template.create_job(**kwargs)
+        else:
+            opts = {
+                'name': 'test-job %s' % str(now()),
+                'inventory': self.inventory,
+                'project': self.project,
+                'credential': self.credential,
+                'job_type': 'run',
+            }
+            try:
+                opts['playbook'] = self.project.playbooks[0]
+            except (AttributeError, IndexError):
+                pass
+            opts.update(kwargs)
+            self.job = Job.objects.create(**opts)
+        return self.job
+
+    def test_update_on_launch(self):
+        scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
+                          'https://github.com/ansible/ansible.github.com.git')
+        if not all([scm_url]):
+            self.skipTest('no public git repo defined for https!')
+        self.organization = self.make_organizations(self.super_django_user, 1)[0]
+        self.inventory = Inventory.objects.create(name='test-inventory',
+                                                  description='description for test-inventory',
+                                                  organization=self.organization)
+        self.host = self.inventory.hosts.create(name='host.example.com',
+                                                inventory=self.inventory)
+        self.group = self.inventory.groups.create(name='test-group',
+                                                  inventory=self.inventory)
+        self.group.hosts.add(self.host)
+        self.credential = Credential.objects.create(name='test-creds',
+                                                    user=self.super_django_user)
+        self.project = self.create_project(
+            name='my public git project over https',
+            scm_type='git',
+            scm_url=scm_url,
+            scm_update_on_launch=True,
+        )
+        self.check_project_update(self.project)
+        self.assertEqual(self.project.project_updates.count(), 1)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.start())
+        self.assertEqual(job.status, 'pending')
+        job = Job.objects.get(pk=job.pk)
+        self.assertTrue(job.status in ('successful', 'failed'))
+        self.assertEqual(self.project.project_updates.count(), 2)
+
+    def test_update_on_launch_with_project_passwords(self):
+        scm_url = getattr(settings, 'TEST_GIT_PRIVATE_HTTPS', '')
+        scm_username = getattr(settings, 'TEST_GIT_USERNAME', '')
+        scm_password = getattr(settings, 'TEST_GIT_PASSWORD', '')
+        if not all([scm_url, scm_username, scm_password]):
+            self.skipTest('no private git repo defined for https!')
+        self.organization = self.make_organizations(self.super_django_user, 1)[0]
+        self.inventory = Inventory.objects.create(name='test-inventory',
+                                                  description='description for test-inventory',
+                                                  organization=self.organization)
+        self.host = self.inventory.hosts.create(name='host.example.com',
+                                                inventory=self.inventory)
+        self.group = self.inventory.groups.create(name='test-group',
+                                                  inventory=self.inventory)
+        self.group.hosts.add(self.host)
+        self.credential = Credential.objects.create(name='test-creds',
+                                                    user=self.super_django_user)
+        self.project = self.create_project(
+            name='my private git project over https',
+            scm_type='git',
+            scm_url=scm_url,
+            scm_username=scm_username,
+            scm_password='ASK',
+            scm_update_on_launch=True,
+        )
+        self.check_project_update(self.project, scm_password=scm_password)
+        self.assertEqual(self.project.project_updates.count(), 1)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertTrue(job.passwords_needed_to_start)
+        self.assertTrue('scm_password' in job.passwords_needed_to_start)
+        self.assertTrue(job.start(**{'scm_password': scm_password}))
+        self.assertEqual(job.status, 'pending')
+        job = Job.objects.get(pk=job.pk)
+        self.assertTrue(job.status in ('successful', 'failed'))
+        self.assertEqual(self.project.project_updates.count(), 2)
+        # Try again but with a bad password - the job should flag an error
+        # because the project update failed.
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertTrue(job.passwords_needed_to_start)
+        self.assertTrue('scm_password' in job.passwords_needed_to_start)
+        self.assertTrue(job.start(**{'scm_password': 'lasdkfjlsdkfj'}))
+        self.assertEqual(job.status, 'pending')
+        job = Job.objects.get(pk=job.pk)
+        self.assertEqual(job.status, 'error')
+        self.assertEqual(self.project.project_updates.count(), 3)
