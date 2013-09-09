@@ -701,6 +701,10 @@ class Project(CommonModel):
             slug_name = slugify(unicode(self.name)).replace(u'-', u'_')
             self.local_path = u'_%d__%s' % (self.pk, slug_name)
             self.save(update_fields=['local_path'])
+        # If we just created a new project with SCM and it doesn't require any
+        # passwords to update, start the initial update.
+        if new_instance and self.scm_type and not self.scm_passwords_needed:
+            self.update()
 
     @property
     def needs_scm_password(self):

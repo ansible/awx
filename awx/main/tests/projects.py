@@ -663,10 +663,14 @@ class ProjectUpdatesTest(BaseTransactionTest):
     
     def check_project_scm(self, project):
         project_path = project.get_project_path(check_if_exists=False)
-        # Initial checkout.
-        self.assertFalse(os.path.exists(project_path))
-        self.check_project_update(project)
-        self.assertTrue(os.path.exists(project_path))
+        # If project could be auto-updated on creation, the project dir should
+        # already exist, otherwise run an initial checkout.
+        if project.scm_type and not project.scm_passwords_needed:
+            self.assertTrue(os.path.exists(project_path))
+        else:
+            self.assertFalse(os.path.exists(project_path))
+            self.check_project_update(project)
+            self.assertTrue(os.path.exists(project_path))
         # Stick a new untracked file in the project.
         untracked_path = os.path.join(project_path, 'yadayada.txt')
         self.assertFalse(os.path.exists(untracked_path))
@@ -961,8 +965,10 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_url=scm_url,
             scm_update_on_launch=True,
         )
-        self.check_project_update(self.project)
+        # First update triggered by saving a new project with SCM.
         self.assertEqual(self.project.project_updates.count(), 1)
+        self.check_project_update(self.project)
+        self.assertEqual(self.project.project_updates.count(), 2)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
@@ -971,7 +977,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
         self.assertTrue(job.status in ('successful', 'failed'))
-        self.assertEqual(self.project.project_updates.count(), 2)
+        self.assertEqual(self.project.project_updates.count(), 3)
 
     def test_update_on_launch_with_project_passwords(self):
         scm_url = getattr(settings, 'TEST_GIT_PRIVATE_HTTPS', '')
