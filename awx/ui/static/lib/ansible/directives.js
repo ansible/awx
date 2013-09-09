@@ -120,7 +120,11 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                   elm.removeAttr('required');
                   if ($(elm).hasClass('lookup')) {
                      var txt = $(elm).parent().parent().parent().find('label').text();
-                     $(elm).parent().parent().parent().find('label').text(txt.replace(/^*/,''));
+                     var txt = txt.replace(/^\*/,'');
+                     var label = $(elm).parent().parent().parent().find('label');
+                     if (label) {
+                        label.text(txt);
+                     }
                   }
                }
                if (scope[attrs.awRequiredWhen] && (viewValue == undefined || viewValue == null || viewValue == '')) {
