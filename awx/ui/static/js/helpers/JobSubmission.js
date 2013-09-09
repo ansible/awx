@@ -5,7 +5,7 @@
  * 
  */
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
-    'LookUpHelper', 'ProjectFormDefinition' ])
+    'LookUpHelper', 'ProjectFormDefinition', 'JobSubmissionHelper'])
 
     .factory('PromptPasswords', ['CredentialForm', 'JobTemplateForm', 'ProjectsForm', '$compile', 'Rest', '$location', 'ProcessErrors', 'GetBasePath',
         'Alert',
@@ -15,7 +15,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         var scope = params.scope; 
         var passwords = params.passwords;
         var start_url = params.start_url;
-        var form = CredentialForm;
+        var form = params.form;
         var html = '';
         var field, element, dialogScope, fld;
         var base = $location.path().replace(/^\//,'').split('/')[0];
@@ -31,11 +31,12 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                }
             } 
             else {
+               console.log('navigating to: ' +  base);
                $location.path('/' + base);
             }
             }
 
-        function cancelJob() {
+        function cancel() {
             // Delete a job
             var url = GetBasePath('jobs') + scope.job_id +'/'
             Rest.setUrl(url);
@@ -55,7 +56,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             // User clicked cancel button
             $('#password-modal').modal('hide');
             if (form.name == 'credential') {
-               cancelJob();
+               cancel();
             }
             }
         
@@ -88,7 +89,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                if (form.name == 'credential') {
                   // No passwords provided, so we can't start the job. Rather than leave the job in a 'new'
                   // state, let's delete it. 
-                  scope.cancelJob();
+                  cancelJob();
                }   
             }
             }
@@ -145,10 +146,10 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                html += "</div>\n";
             }
             html += "</form>\n";
-            element = angular.element(document.getElementById('password-body'));
+            var element = angular.element(document.getElementById('password-body'));
             element.html(html);
             $compile(element.contents())(scope);
-            $('#password-modal').modal({ });
+            $('#password-modal').modal();
         }
         else {
             scope.startJob();
@@ -269,24 +270,40 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
     }])
     
     // Sumbit SCM Update request
-    .factory('SCMUpdate',['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert',
+    .factory('ProjectUpdate',['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert',
         'ProjectsForm',
     function(PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, ProjectsForm) { 
     return function(params) {
         var scope = params.scope; 
         var project_id = params.project_id;
         var url = GetBasePath('projects') + project_id + '/update/';
+        
+        if (scope.removeUpdateSubmitted) {
+           scope.removeUpdateSubmitted();
+        }
+        scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function() {
+            $location.path('/projects');
+            });
+        
+        if (scope.removeSCMSubmit) {
+           scope.removeSCMSubmit();
+        }
+        scope.removeSCMSubmit = scope.$on('SCMSubmit', function(e, passwords_needed_to_update) {
+            // After the call to update, kick off the job.
+            PromptPasswords({
+                       scope: scope,
+                       passwords: passwords_needed_to_update,
+                       start_url: url, 
+                       form: ProjectsForm
+                       });
+            });
+        
         // Check to see if we have permission to perform the update and if any passwords are needed
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
                 if (data.can_update) {
-                   PromptPasswords({
-                       scope: scope,
-                       passwords: data.passwords_needed_to_update,
-                       start_url: url, 
-                       form: ProjectsForm
-                       });
+                   scope.$emit('SCMSubmit', data.passwords_needed_to_update);
                 } 
                 else {
                    Alert('Permission Denied', 'You do not have access to update this project. Please contact your system administrator.', 
@@ -299,27 +316,4 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             });
             };
     }]);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

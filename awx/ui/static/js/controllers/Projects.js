@@ -12,11 +12,12 @@
 
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                       ClearScope, ProcessErrors, GetBasePath, SelectionInit, SCMUpdate, ProjectStatus,
+                       ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate, ProjectStatus,
                        FormatDate)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
+    
     var list = ProjectList;
     var defaultUrl = GetBasePath('projects');
     var view = GenerateList;
@@ -119,13 +120,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     scope.refresh = function() {
         scope.search(list.iterator); 
         }
-    
-    if (scope.removeUpdateSubmitted) {
-       scope.removeUpdateSubmitted();
-    }
-    scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function() {
-        scope.search(list.iterator); 
-        });
+
     scope.SCMUpdate = function(project_id) {
        for (var i=0; i < scope.projects.length; i++) {
            if (scope.projects[i].id == project_id) {
@@ -136,9 +131,8 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                  Alert('Update in Progress', 'The SCM update process is running. Use the Refresh button to monitor the status.', 'alert-info'); 
               }
               else {
-                 SCMUpdate({ scope: scope, project_id: project_id });
+                 ProjectUpdate({ scope: scope, project_id: project_id });
               }
-              break;
            }
        }
        }
@@ -146,7 +140,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
 ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList', 
                          'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                         'GetBasePath', 'SelectionInit', 'SCMUpdate', 'ProjectStatus', 'FormatDate'];
+                         'GetBasePath', 'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate'];
 
 
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 

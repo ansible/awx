@@ -237,7 +237,7 @@ angular.module('ansible', [
 
         $rootScope.breadcrumbs = new Array(); 
         $rootScope.crumbCache = new Array();
-
+        
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
             // On each navigation request, check that the user is logged in
             if (Authorization.isUserLoggedIn() == false) {
@@ -252,9 +252,9 @@ angular.module('ansible', [
                CheckLicense();
             }
             // Make the correct tab active
-            var base = ($location.path().replace(/^\//,'').split('/')[0]);
-            if  (base == '') {
-                $('.nav-tabs a[href="#' + 'organizations' + '"]').tab('show');
+            var base = $location.path().replace(/^\//,'').split('/')[0];
+            if (base == '') {
+               $('.nav-tabs a[href="#' + 'organizations' + '"]').tab('show');
             }
             else {
                 base.replace(/\_/g,' ');
