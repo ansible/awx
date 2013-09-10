@@ -26,7 +26,8 @@ angular.module('CredentialsListDefinition', [])
                 label: 'Name'
                 },
             description: {
-                label: 'Description'
+                label: 'Description',
+                excludeModal: true
                 },
             team: {
                 label: 'Team',

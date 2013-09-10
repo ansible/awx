@@ -29,14 +29,19 @@ angular.module('ProjectsListDefinition', [])
                 badgeTipPlacement: 'bottom'
                 },
             description: {
-                label: 'Description'
+                label: 'Description',
+                columnClass: 'hidden-sm hidden-xs',
+                excludeModal: true
                 },
             last_updated: {
                 label: 'Last Updated',
                 type: 'date'
                 },
             status: {
-                label: 'Status'
+                label: 'Update Status',
+                ngClick: 'showSCMStatus(\{\{ project.id \}\})',
+                awToolTip: 'View details of last SCM Update',
+                dataPlacement: 'bottom'
                 }
             },
         
@@ -63,7 +68,7 @@ angular.module('ProjectsListDefinition', [])
                     "<dt>Failed</dt><dd>An error occurred during the most recent SCM update.</dd>\n" +
                     "<dt>Successful</dt><dd>The latest SCM update ran to completion without incident.</dd>\n" +
                     "<dt>Missing</dt><dd>The local project directory is missing.</dd>\n" +
-                    "<dt>OK</dt><dd>The project does not use SCM, and the directory is present.</dd>\n" +
+                    "<dt>N/A</dt><dd>The project does not use SCM, so an update status is not available.</dd>\n" +
                     "</dl>\n",
                 dataPlacement: 'left',
                 dataContainer: 'body',
@@ -84,13 +89,6 @@ angular.module('ProjectsListDefinition', [])
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
                 awToolTip: 'View/edit project'
-                },
-            scm_status: {
-                label: 'Status',
-                icon: 'icon-th-list',
-                ngClick: 'showSCMStatus(\{\{ project.id \}\})',
-                "class": 'btn-xs btn-default',
-                awToolTip: 'View SCM status'
                 },
             scm_update: {
                 label: 'Update',

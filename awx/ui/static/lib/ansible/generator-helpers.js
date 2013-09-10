@@ -207,14 +207,21 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            // Start the Link
            if ((field.key || field.link || field.linkTo || field.ngClick ) && options['mode'] != 'lookup' && options['mode'] != 'select') {
               if (field.linkTo) {
-                 html += "<a href=\"#" + field.linkTo + "\">";
+                 html += "<a href=\"#" + field.linkTo + "\" ";
               }
               else if (field.ngClick) {
-                 html += "<a href=\"\"" + Attr(field, 'ngClick') + ">";
+                 html += "<a href=\"\"" + Attr(field, 'ngClick') + " ";
               }
               else if (field.link == undefined || field.link) {
-                 html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\">";
+                 html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\" ";
               }
+              if (field.awToolTip) {
+                 html += Attr(field, 'awToolTip');
+                 if (field.dataPlacement) {
+                    html += Attr(field,'dataPlacement');
+                 }
+              }
+              html += ">";
            }
 
            // Add icon:

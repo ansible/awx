@@ -35,10 +35,14 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     scope.projectsPostRefresh = scope.$on('PostRefresh', function() {
         if (scope.projects) {
            for (var i=0; i < scope.projects.length; i++) {
+               if (scope.projects[i].status == 'ok') {
+                  scope.projects[i].status = 'n/a';
+               }
                switch(scope.projects[i].status) {
                    case 'updating':
                    case 'successful':
                    case 'ok':
+                   case 'n/a':
                       scope.projects[i].badge = 'false';
                       break;
                    case 'never updated':
