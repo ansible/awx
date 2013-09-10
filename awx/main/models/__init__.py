@@ -709,7 +709,7 @@ class Project(CommonModel):
                 if 'scm_delete_on_next_update' not in update_fields:
                     update_fields.append('scm_delete_on_next_update')
         # Create auto-generated local path if project uses SCM.
-        if self.scm_type and not self.local_path.startswith('_'):
+        if self.pk and self.scm_type and not self.local_path.startswith('_'):
             slug_name = slugify(unicode(self.name)).replace(u'-', u'_')
             self.local_path = u'_%d__%s' % (self.pk, slug_name)
             if 'local_path' not in update_fields:
@@ -725,12 +725,16 @@ class Project(CommonModel):
         # key), set the password fields and save again.
         if new_instance:
             update_fields=[]
+            # Generate local_path for SCM after initial save (so we have a PK).
+            if self.scm_type and not self.local_path.startswith('_'):
+                update_fields.append('local_path')
             for field in self.PASSWORD_FIELDS:
                 saved_value = getattr(self, '_saved_%s' % field, '')
                 if getattr(self, field) != saved_value:
                     setattr(self, field, saved_value)
                     update_fields.append(field)
-            self.save(update_fields=update_fields)
+            if update_fields:
+                self.save(update_fields=update_fields)
         # If we just created a new project with SCM and it doesn't require any
         # passwords to update, start the initial update.
         if new_instance and self.scm_type and not self.scm_passwords_needed:
@@ -773,7 +777,7 @@ class Project(CommonModel):
         else:
             status = 'ok'
         # Determine current last_updated timestamp.
-        last_upated = None
+        last_updated = None
         if self.scm_type and self.last_update:
             last_updated = self.last_update.modified
         else:
