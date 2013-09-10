@@ -83,8 +83,22 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    // Inject dynamic view
    var defaultUrl = GetBasePath('organizations');
    var form = UserForm;
+
+   // Restore form to default condition. It may have been modified during edit of an LDAP user
+   form.fields['first_name'].readonly = false; 
+   form.fields['first_name'].editRequired = true;
+   form.fields['last_name'].readonly = false; 
+   form.fields['last_name'].editRequired = true; 
+   form.fields['email'].readonly = false; 
+   form.fields['email'].editRequired = true; 
+   form.fields['organization'].awRequiredWhen = { variable: "orgrequired", init: true};
+
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
+   
+   scope.not_ldap_user = true; 
+   scope.ldap_dn = null;
+
    generator.reset();
 
    LoadBreadCrumbs();
@@ -176,171 +190,205 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    var generator = GenerateForm;
    var form = UserForm;
    var base = $location.path().replace(/^\//,'').split('/')[0];
-   var scope = generator.inject(form, {mode: 'edit', related: true});
-   generator.reset();
-   var master = {};
-   var id = $routeParams.user_id;
-   var relatedSets = {}; 
-
-   scope.PermissionAddAllowed =  false; 
-
-   // After the Organization is loaded, retrieve each related set
-   scope.$on('userLoaded', function() {
-       for (var set in relatedSets) {
-           scope.search(relatedSets[set].iterator);
-       }
-       CheckAccess({ scope: scope });  //Does the user have access add Permissions?
-       });
-
-   // Retrieve detail record and prepopulate the form
-   Rest.setUrl(defaultUrl + ':id/'); 
-   Rest.get({ params: {id: id} })
-       .success( function(data, status, headers, config) {
-           LoadBreadCrumbs({ path: '/users/' + id, title: data.username });
-           for (var fld in form.fields) {
-              if (data[fld]) {
-                 if (fld == 'is_superuser') {
-                    scope[fld] = (data[fld] == 'true' || data[fld] == true) ? 'true' : 'false';
-                 }
-                 else {
-                    scope[fld] = data[fld];
-                 }  
-                 master[fld] = scope[fld];
-              }
-           }
-           var related = data.related;
-           for (var set in form.related) {
-               if (related[set]) {
-                  relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
-               }
-           }
-
-           // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
-           RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
-           RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
-           scope.$emit('userLoaded');
-           })
-       .error( function(data, status, headers, config) {
-           ProcessErrors(scope, data, status, form,
-                         { hdr: 'Error!', msg: 'Failed to retrieve user: ' + $routeParams.id + '. GET status: ' + status });
-           });
    
-   // Save changes to the parent
-   scope.formSave = function() {
-      $rootScope.flashMessage = null;
-      Rest.setUrl(defaultUrl + id + '/');
-      var data = {}
-      for (var fld in form.fields) {
-          data[fld] = scope[fld];   
-      } 
-      Rest.put(data)
-          .success( function(data, status, headers, config) {
-              var base = $location.path().replace(/^\//,'').split('/')[0];
-              (base == 'users') ? ReturnToCaller() : ReturnToCaller(1);
-              })
-          .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to update users: ' + $routeParams.id + '. PUT status: ' + status });
-              });
-      };
+   $scope.$on('formReady', function() { 
+       var scope = generator.inject(form, {mode: 'edit', related: true});
+       generator.reset();
+       var master = {};
+       var id = $routeParams.user_id;
+       var relatedSets = {}; 
 
-   // Cancel
-   scope.formReset = function() {
-      $rootScope.flashMessage = null;
-      generator.reset();
-      for (var fld in master) {
-          scope[fld] = master[fld];
-      }
-      };
+       scope.PermissionAddAllowed =  false; 
 
-   // Password change
-   scope.clearPWConfirm = function(fld) {
-      // If password value changes, make sure password_confirm must be re-entered
-      scope[fld] = '';
-      scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
-      $rootScope.flashMessage = null;
-      }
+       // After the Organization is loaded, retrieve each related set
+       scope.$on('userLoaded', function() {
+           for (var set in relatedSets) {
+               scope.search(relatedSets[set].iterator);
+           }
+           CheckAccess({ scope: scope });  //Does the user have access add Permissions?
+           });
+
+       // Retrieve detail record and prepopulate the form
+       Rest.setUrl(defaultUrl + ':id/'); 
+       Rest.get({ params: {id: id} })
+           .success( function(data, status, headers, config) {
+               LoadBreadCrumbs({ path: '/users/' + id, title: data.username });
+               for (var fld in form.fields) {
+                  if (data[fld]) {
+                     if (fld == 'is_superuser') {
+                        scope[fld] = (data[fld] == 'true' || data[fld] == true) ? 'true' : 'false';
+                     }
+                     else {
+                        scope[fld] = data[fld];
+                     }  
+                     master[fld] = scope[fld];
+                  }
+               }
+               var related = data.related;
+               for (var set in form.related) {
+                   if (related[set]) {
+                      relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
+                   }
+               }
+               
+               scope.not_ldap_user = (scope.ldap_dn) ? false : true;
+               
+               // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
+               RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
+               RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
+               scope.$emit('userLoaded');
+               })
+           .error( function(data, status, headers, config) {
+               ProcessErrors(scope, data, status, form,
+                  { hdr: 'Error!', msg: 'Failed to retrieve user: ' + $routeParams.id + '. GET status: ' + status });
+               });
+       
+       // Save changes to the parent
+       scope.formSave = function() {
+          $rootScope.flashMessage = null;
+          Rest.setUrl(defaultUrl + id + '/');
+          var data = {}
+          for (var fld in form.fields) {
+              data[fld] = scope[fld];   
+          } 
+          Rest.put(data)
+              .success( function(data, status, headers, config) {
+                  var base = $location.path().replace(/^\//,'').split('/')[0];
+                  (base == 'users') ? ReturnToCaller() : ReturnToCaller(1);
+                  })
+              .error( function(data, status, headers, config) {
+                  ProcessErrors(scope, data, status, form,
+                                { hdr: 'Error!', msg: 'Failed to update users: ' + $routeParams.id + '. PUT status: ' + status });
+                  });
+          };
+
+       // Cancel
+       scope.formReset = function() {
+          $rootScope.flashMessage = null;
+          generator.reset();
+          for (var fld in master) {
+              scope[fld] = master[fld];
+          }
+          };
+
+       // Password change
+       scope.clearPWConfirm = function(fld) {
+          // If password value changes, make sure password_confirm must be re-entered
+          scope[fld] = '';
+          scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
+          $rootScope.flashMessage = null;
+          }
 
 
-   // Related set: Add button
-   scope.add = function(set) {
-      $rootScope.flashMessage = null;
-      if (set == 'permissions') {
-         if (scope.PermissionAddAllowed) {
-            $location.path('/' + base + '/' + $routeParams.user_id + '/' + set + '/add');  
-         }
-         else {
-            Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
-         }
-      }
-      else {
-         $location.path('/' + base + '/' + $routeParams.user_id + '/' + set);
-      }
-      };
-
-   // Related set: Edit button
-   scope.edit = function(set, id, name) {
-      $rootScope.flashMessage = null;
-      if (set == 'permissions') {
-         if (scope.PermissionAddAllowed) {
-            $location.path('/users/' + $routeParams.user_id + '/permissions/' + id);
-         }
-         else {
-            Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
-         }
-      }
-      else {
-         $location.path('/' + set + '/' + id);
-      }
-      };
-
-   // Related set: Delete button
-   scope['delete'] = function(set, itm_id, name, title) {
-      $rootScope.flashMessage = null;
-      
-      var action = function() {
-          var url;
+       // Related set: Add button
+       scope.add = function(set) {
+          $rootScope.flashMessage = null;
           if (set == 'permissions') {
              if (scope.PermissionAddAllowed) {
-                url = GetBasePath('base') + 'permissions/' + itm_id + '/';
-                Rest.setUrl(url);
-                Rest.destroy()
-                    .success( function(data, status, headers, config) {
-                        $('#prompt-modal').modal('hide');
-                        scope.search(form.related[set].iterator);
-                        })
-                    .error( function(data, status, headers, config) {
-                        $('#prompt-modal').modal('hide');
-                        ProcessErrors(scope, data, status, null,
-                          { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                        });
-              }
-              else {
-                 Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.'); 
-              } 
+                $location.path('/' + base + '/' + $routeParams.user_id + '/' + set + '/add');  
+             }
+             else {
+                Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
+             }
           }
           else {
-              url = defaultUrl + $routeParams.user_id + '/' + set + '/';
-              Rest.setUrl(url);
-              Rest.post({ id: itm_id, disassociate: 1 })
-                  .success( function(data, status, headers, config) {
-                      $('#prompt-modal').modal('hide');
-                      scope.search(form.related[set].iterator);
-                      })
-                  .error( function(data, status, headers, config) {
-                      $('#prompt-modal').modal('hide');
-                      ProcessErrors(scope, data, status, null,
-                          { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
-                      });      
+             $location.path('/' + base + '/' + $routeParams.user_id + '/' + set);
           }
+          };
+
+       // Related set: Edit button
+       scope.edit = function(set, id, name) {
+          $rootScope.flashMessage = null;
+          if (set == 'permissions') {
+             if (scope.PermissionAddAllowed) {
+                $location.path('/users/' + $routeParams.user_id + '/permissions/' + id);
+             }
+             else {
+                Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
+             }
+          }
+          else {
+             $location.path('/' + set + '/' + id);
+          }
+          };
+
+       // Related set: Delete button
+       scope['delete'] = function(set, itm_id, name, title) {
+          $rootScope.flashMessage = null;
+          
+          var action = function() {
+              var url;
+              if (set == 'permissions') {
+                 if (scope.PermissionAddAllowed) {
+                    url = GetBasePath('base') + 'permissions/' + itm_id + '/';
+                    Rest.setUrl(url);
+                    Rest.destroy()
+                        .success( function(data, status, headers, config) {
+                            $('#prompt-modal').modal('hide');
+                            scope.search(form.related[set].iterator);
+                            })
+                        .error( function(data, status, headers, config) {
+                            $('#prompt-modal').modal('hide');
+                            ProcessErrors(scope, data, status, null,
+                              { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                            });
+                  }
+                  else {
+                     Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.'); 
+                  } 
+              }
+              else {
+                  url = defaultUrl + $routeParams.user_id + '/' + set + '/';
+                  Rest.setUrl(url);
+                  Rest.post({ id: itm_id, disassociate: 1 })
+                      .success( function(data, status, headers, config) {
+                          $('#prompt-modal').modal('hide');
+                          scope.search(form.related[set].iterator);
+                          })
+                      .error( function(data, status, headers, config) {
+                          $('#prompt-modal').modal('hide');
+                          ProcessErrors(scope, data, status, null,
+                              { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
+                          });      
+              }
+              }
+
+           Prompt({ hdr: 'Delete', 
+                    body: 'Are you sure you want to remove ' + name + ' from ' + scope.username + ' ' + title + '?',
+                    action: action
+                    });
           }
 
-       Prompt({ hdr: 'Delete', 
-                body: 'Are you sure you want to remove ' + name + ' from ' + scope.username + ' ' + title + '?',
-                action: action
-                });
-      }
-
+      }); // $scope.$on
+      
+   // Restore form to default condition
+   form.fields['first_name'].readonly = false; 
+   form.fields['first_name'].editRequired = true;
+   form.fields['last_name'].readonly = false; 
+   form.fields['last_name'].editRequired = true; 
+   form.fields['email'].readonly = false; 
+   form.fields['email'].editRequired = true; 
+   form.fields['organization'].awRequiredWhen = { variable: "orgrequired", init: true};
+  
+   // Modify form based on LDAP settings
+   Rest.setUrl(GetBasePath('config'));
+   Rest.get()
+       .success( function(data, status, headers, config) {
+           if (data['user_ldap_fields']) {
+              for (var fld in data['user_ldap_fields']) {
+                  form.fields[fld]['readonly'] = true;
+                  form.fields[fld]['editRequired'] = false;
+                  if (form.fields[fld].awRequiredWhen) {
+                     delete form.fields[fld].awRequiredWhen;
+                  }
+              }
+           }
+           $scope.$emit('formReady');
+           })
+       .error( function(data, status, headers, config) {
+           ProcessErrors(scope, data, status, null,
+               { hdr: 'Error!', msg: 'Failed to retrieve application config. GET status: ' + status });
+       });
 }
 
 UsersEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 

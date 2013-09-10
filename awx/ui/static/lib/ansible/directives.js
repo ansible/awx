@@ -131,8 +131,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                ctrl.$setValidity('required', validity);
                }
             
-            scope[attrs.awRequiredWhen] = attrs.awrequiredInit;
-            checkIt();
+            if (attrs.awrequiredInit !== undefined && attrs.awrequiredInit !== null) {
+               scope[attrs.awRequiredWhen] = attrs.awrequiredInit;
+               checkIt();
+            }
             
             scope.$watch(attrs.awRequiredWhen, function() {
                 // watch for the aw-required-when expression to change value

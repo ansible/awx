@@ -46,24 +46,26 @@ angular.module('UserFormDefinition', [])
                 type: 'lookup',
                 sourceModel: 'organization',
                 sourceField: 'name',
-                addRequired: true,
-                editRequired: true,
                 ngClick: 'lookUpOrganization()',
                 excludeMode: 'edit',
-                awRequiredWhen: {variable: "orgrequired", init: "true" }
+                awRequiredWhen: { variable: "orgrequired", init: true}
                 },
             username: {
                 label: 'Username',
                 type: 'text',
-                addRequired: true,
-                editRequired: true,
+                awRequiredWhen: { variable: "not_ldap_user", init: true },
                 autocomplete: false
+                },
+            ldap_dn: {
+                label: 'Created by LDAP?', 
+                type: 'checkbox',
+                readonly: true
                 },
             password: {
                 label: 'Password',
                 type: 'password',
-                addRequired: true,
-                editRequired: false,
+                ngShow: 'not_ldap_user == true',
+                awRequiredWhen: { variable: "not_ldap_user", init: true},
                 ngChange: "clearPWConfirm('password_confirm')",
                 autocomplete: false,
                 chkPass: true
@@ -71,6 +73,7 @@ angular.module('UserFormDefinition', [])
             password_confirm: {
                 label: 'Confirm Password',
                 type: 'password',
+                ngShow: 'not_ldap_user == true',
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,

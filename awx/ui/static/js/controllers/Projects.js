@@ -33,21 +33,23 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
        scope.projectsPostRefresh();
     }
     scope.projectsPostRefresh = scope.$on('PostRefresh', function() {
-        for (var i=0; i < scope.projects.length; i++) {
-            switch(scope.projects[i].status) {
-                case 'updating':
-                case 'successful':
-                case 'ok':
-                   scope.projects[i].badge = 'false';
-                   break;
-                case 'never updated':
-                case 'failed':
-                case 'missing':
-                   scope.projects[i].badge = 'true'; 
-                   break;
-            }
-            scope.projects[i].last_updated = (scope.projects[i].last_updated !== null) ? 
-                FormatDate(new Date(scope.projects[i].last_updated)) : null;
+        if (scope.projects) {
+           for (var i=0; i < scope.projects.length; i++) {
+               switch(scope.projects[i].status) {
+                   case 'updating':
+                   case 'successful':
+                   case 'ok':
+                      scope.projects[i].badge = 'false';
+                      break;
+                   case 'never updated':
+                   case 'failed':
+                   case 'missing':
+                      scope.projects[i].badge = 'true'; 
+                      break;
+               }
+               scope.projects[i].last_updated = (scope.projects[i].last_updated !== null) ? 
+                   FormatDate(new Date(scope.projects[i].last_updated)) : null;
+           }
         }
         });
 

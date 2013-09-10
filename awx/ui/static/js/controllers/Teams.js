@@ -32,8 +32,10 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
     }
     scope.PostRefershRemove = scope.$on('PostRefresh', function() {
          // After a refresh, populate the organization name on each row
-        for( var i=0; i < scope.teams.length; i++) {
-           scope.teams[i].organization_name = scope.teams[i].summary_fields.organization.name;  
+        if (scope.teams) {
+           for ( var i=0; i < scope.teams.length; i++) {
+               scope.teams[i].organization_name = scope.teams[i].summary_fields.organization.name;  
+           }
         }
         });
 
