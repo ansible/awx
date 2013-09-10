@@ -11,6 +11,7 @@ import urlparse
 import yaml
 
 # Django
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -130,11 +131,12 @@ class UserSerializer(BaseSerializer):
 
     password = serializers.WritableField(required=False, default='',
         help_text='Write-only field used to change the password.')
+    ldap_dn = serializers.Field(source='profile.ldap_dn')
 
     class Meta:
         model = User
         fields = ('id', 'url', 'related', 'created', 'username', 'first_name',
-                  'last_name', 'email', 'is_superuser', 'password')
+                  'last_name', 'email', 'is_superuser', 'password', 'ldap_dn')
 
     def to_native(self, obj):
         ret = super(UserSerializer, self).to_native(obj)
@@ -155,6 +157,13 @@ class UserSerializer(BaseSerializer):
 
     def save_object(self, obj, **kwargs):
         new_password = getattr(obj, '_new_password', None)
+        # For now we're not raising an error, just not saving password for
+        # users managed by LDAP who already have an unusable password set.
+        try:
+            if obj.pk and obj.profile.ldap_dn and not obj.has_usable_password():
+                new_password = None
+        except AttributeError:
+            pass
         if new_password:
             obj.set_password(new_password)
         if not obj.password:
@@ -172,6 +181,35 @@ class UserSerializer(BaseSerializer):
             permissions            = reverse('main:user_permissions_list',         args=(obj.pk,)),
         ))
         return res
+
+    def _validate_ldap_managed_field(self, attrs, source):
+        try:
+            is_ldap_user = bool(self.object.profile.ldap_dn)
+        except AttributeError:
+            is_ldap_user = False
+        if is_ldap_user:
+            ldap_managed_fields = ['username']
+            ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_ATTR_MAP', {}).keys())
+            ldap_managed_fields.extend(getattr(settings, 'AUTH_LDAP_USER_FLAGS_BY_GROUP', {}).keys())
+            if source in ldap_managed_fields and source in attrs:
+                if attrs[source] != getattr(self.object, source):
+                    raise serializers.ValidationError('Unable to change %s on user managed by LDAP' % source)
+        return attrs
+
+    def validate_username(self, attrs, source):
+        return self._validate_ldap_managed_field(attrs, source)
+
+    def validate_first_name(self, attrs, source):
+        return self._validate_ldap_managed_field(attrs, source)
+
+    def validate_last_name(self, attrs, source):
+        return self._validate_ldap_managed_field(attrs, source)
+
+    def validate_email(self, attrs, source):
+        return self._validate_ldap_managed_field(attrs, source)
+
+    def validate_is_superuser(self, attrs, source):
+        return self._validate_ldap_managed_field(attrs, source)
 
 class OrganizationSerializer(BaseSerializer):
 

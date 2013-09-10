@@ -35,6 +35,7 @@ from djcelery.models import TaskMeta
 
 # AWX
 from awx.main.compat import slugify
+from awx.main.fields import AutoOneToOneField
 from awx.main.utils import encrypt_field, decrypt_field
 
 __all__ = ['PrimordialModel', 'Organization', 'Team', 'Project',
@@ -1765,6 +1766,28 @@ class JobEvent(models.Model):
                     pass
             if host_summary_changed:
                 host_summary.save()
+
+class Profile(models.Model):
+    '''
+    Profile model related to User object. Currently stores LDAP DN for users
+    loaded from LDAP.
+    '''
+
+    created = models.DateTimeField(
+        auto_now_add=True,
+    )
+    modified = models.DateTimeField(
+        auto_now=True,
+    )
+    user = AutoOneToOneField(
+        'auth.User',
+        related_name='profile',
+        editable=False,
+    )
+    ldap_dn = models.CharField(
+        max_length=1024,
+        default='',
+    )
 
 class AuthToken(models.Model):
     '''

@@ -91,6 +91,7 @@ def on_populate_user(sender, **kwargs):
     ldap_user = kwargs['ldap_user']
     backend = ldap_user.backend
 
+    # Update organization membership based on group memberships.
     org_map = getattr(backend.settings, 'ORGANIZATION_MAP', {})
     for org_name, org_opts in org_map.items():
         org, created = Organization.objects.get_or_create(name=org_name)
@@ -103,3 +104,9 @@ def on_populate_user(sender, **kwargs):
         remove_users = bool(org_opts.get('remove_users', remove))
         _update_m2m_from_groups(user, ldap_user, org.users, users_opts,
                                 remove_users)
+
+    # Update user profile to store LDAP DN.
+    profile = user.profile
+    if profile.ldap_dn != ldap_user.dn:
+        profile.ldap_dn = ldap_user.dn
+        profile.save()

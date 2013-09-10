@@ -655,7 +655,10 @@ class LdapTest(BaseTest):
         self.assertNotEqual(result, should_fail)
         self.assertEqual(Group.objects.count(), 0)
         if not should_fail:
-            return User.objects.get(username=username)
+            user = User.objects.get(username=username)
+            self.assertTrue(user.profile)
+            self.assertTrue(user.profile.ldap_dn)
+            return user
 
     def test_ldap_auth(self):
         self.use_test_setting('USER_SEARCH')
@@ -745,3 +748,41 @@ class LdapTest(BaseTest):
                 self.assertTrue(user in org.users.all())
             else:
                 self.assertFalse(user in org.users.all())
+
+    def test_prevent_changing_ldap_user_fields(self):
+        for name in ('USER_SEARCH', 'ALWAYS_UPDATE_USER', 'USER_ATTR_MAP',
+                     'GROUP_SEARCH', 'GROUP_TYPE', 'USER_FLAGS_BY_GROUP'):
+            self.use_test_setting(name)
+        user = self.check_login()
+        self.setup_users()
+        url = reverse('main:api_v1_config_view')
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        user_ldap_fields = response.get('user_ldap_fields', [])
+        self.assertTrue(user_ldap_fields)
+        url = reverse('main:user_detail', args=(user.pk,))
+        for user_field in user_ldap_fields:
+            with self.current_user(self.super_django_user):
+                data = self.get(url, expect=200)
+            if user_field == 'password':
+                data[user_field] = 'my new password'
+                with self.current_user(self.super_django_user):
+                    self.put(url, data, expect=200)
+                user = User.objects.get(pk=user.pk)
+                self.assertFalse(user.has_usable_password())
+                #with self.current_user(self.super_django_user):
+                #    self.patch(url, {'password': 'try again'}, expect=200)
+                #user = User.objects.get(pk=user.pk)
+                #self.assertFalse(user.has_usable_password())
+            elif user_field in data:
+                value = data[user_field]
+                if isinstance(value, bool):
+                    value = not value
+                else:
+                    value = unicode(value).upper()
+                data[user_field] = value
+                with self.current_user(self.super_django_user):
+                    self.put(url, data, expect=400)
+                #patch_data = {user_field: data[user_field]}
+                #with self.current_user(self.super_django_user):
+                #    self.patch(url, patch_data, expect=400)
