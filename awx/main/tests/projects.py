@@ -21,6 +21,7 @@ from django.utils.timezone import now
 from awx.main.models import *
 from awx.main.tests.base import BaseTest, BaseTransactionTest
 from awx.main.tests.tasks import TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
+from awx.main.utils import decrypt_field
 
 TEST_PLAYBOOK = '''- hosts: mygroup
   gather_facts: false
@@ -631,13 +632,35 @@ class ProjectUpdatesTest(BaseTransactionTest):
         return project
 
     def check_project_update(self, project, should_fail=False, **kwargs):
-        pu = project.update(**kwargs)
-        self.assertTrue(pu)
+        pu = kwargs.pop('project_update', None)
+        if not pu:
+            pu = project.update(**kwargs)
+            self.assertTrue(pu)
         pu = ProjectUpdate.objects.get(pk=pu.pk)
         if should_fail:
             self.assertEqual(pu.status, 'failed', pu.result_stdout)
         else:
             self.assertEqual(pu.status, 'successful', pu.result_stdout)
+        scm_password = kwargs.get('scm_password',
+                                  decrypt_field(project, 'scm_password'))
+        if scm_password not in ('', 'ASK'):
+            self.assertFalse(scm_password in pu.job_args, pu.job_args)
+            self.assertFalse(scm_password in json.dumps(pu.job_env),
+                             json.dumps(pu.job_env))
+            self.assertFalse(scm_password in pu.result_stdout,
+                             pu.result_stdout)
+            self.assertFalse(scm_password in pu.result_traceback,
+                             pu.result_traceback)
+        scm_key_unlock = kwargs.get('scm_key_unlock',
+                                    decrypt_field(project, 'scm_key_unlock'))
+        if scm_key_unlock not in ('', 'ASK'):
+            self.assertFalse(scm_key_unlock in pu.job_args, pu.job_args)
+            self.assertFalse(scm_key_unlock in json.dumps(pu.job_env),
+                             json.dumps(pu.job_env))
+            self.assertFalse(scm_key_unlock in pu.result_stdout,
+                             pu.result_stdout)
+            self.assertFalse(scm_key_unlock in pu.result_traceback,
+                             pu.result_traceback)
         project = Project.objects.get(pk=project.pk)
         self.assertEqual(project.last_update, pu)
         self.assertEqual(project.last_update_failed, pu.failed)
@@ -737,7 +760,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             self.check_project_update(project, should_fail=True)
             # Try invalid username.
             project = Project.objects.get(pk=project.pk)
-            project.scm_username = 'notavalidusername'
+            project.scm_username = 'not a\\ valid\' user" name'
             project.save()
             self.check_project_update(project, should_fail=True)
             # Clear username and password.
@@ -753,7 +776,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             self.check_project_update(project, should_fail=True)
             # Set username, with invalid password.
             project = Project.objects.get(pk=project.pk)
-            project.scm_password = 'notavalidpassword'
+            project.scm_password = 'not a\\ valid\' "password'
             project.save()
             self.check_project_update(project, should_fail=True)
 
@@ -885,7 +908,11 @@ class ProjectUpdatesTest(BaseTransactionTest):
             response = self.post(url, {}, expect=400)
         self.assertTrue('scm_password' in response['passwords_needed_to_update'])
         with self.current_user(self.super_django_user):
-            response = self.post(url, {'scm_password': 'blah'}, expect=202)
+            response = self.post(url, {'scm_password': 'blah1234'}, expect=202)
+        project_update = project.project_updates.order_by('-pk')[0]
+        self.check_project_update(project, should_fail=False,
+                                  scm_password='blah1234',
+                                  project_update=project_update)
 
     def test_prompt_for_scm_key_unlock_on_update(self):
         scm_url = 'git@github.com:ansible/ansible.github.com.git'
@@ -906,6 +933,10 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.assertTrue('scm_key_unlock' in response['passwords_needed_to_update'])
         with self.current_user(self.super_django_user):
             response = self.post(url, {'scm_key_unlock': TEST_SSH_KEY_DATA_UNLOCK}, expect=202)
+        project_update = project.project_updates.order_by('-pk')[0]
+        self.check_project_update(project, should_fail=False,
+                                  scm_key_unlock=TEST_SSH_KEY_DATA_UNLOCK,
+                                  project_update=project_update)
 
     def create_test_job_template(self, **kwargs):
         opts = {

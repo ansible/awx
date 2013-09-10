@@ -44,10 +44,14 @@ class BaseTask(Task):
         '''
         Reload model from database and update the given fields.
         '''
+        output_replacements = updates.pop('output_replacements', None) or []
         instance = self.model.objects.get(pk=pk)
         if updates:
             update_fields = []
             for field, value in updates.items():
+                if field in ('result_stdout', 'result_traceback'):
+                    for srch, repl in output_replacements:
+                        value = value.replace(srch, repl)
                 setattr(instance, field, value)
                 update_fields.append(field)
                 if field == 'status':
@@ -114,8 +118,14 @@ class BaseTask(Task):
     def build_args(self, instance, **kwargs):
         raise NotImplementedError
 
+    def build_safe_args(self, instance, **kwargs):
+        return self.build_args(instance, **kwargs)
+
     def build_cwd(self, instance, **kwargs):
         raise NotImplementedError
+
+    def build_output_replacements(self, instance, **kwargs):
+        return []
 
     def get_password_prompts(self):
         '''
@@ -127,7 +137,8 @@ class BaseTask(Task):
             r'Bad passphrase, try again for .*:': '',
         }
 
-    def run_pexpect(self, instance, args, cwd, env, passwords):
+    def run_pexpect(self, instance, args, cwd, env, passwords,
+                    output_replacements=None):
         '''
         Run the given command using pexpect to capture output and provide
         passwords when requested.
@@ -149,7 +160,8 @@ class BaseTask(Task):
             result_id = child.expect(expect_list, timeout=5)
             if result_id in expect_passwords:
                 child.sendline(expect_passwords[result_id])
-            updates = {'status': 'running'}
+            updates = {'status': 'running',
+                       'output_replacements': output_replacements}
             if logfile_pos != logfile.tell():
                 logfile_pos = logfile.tell()
                 updates['result_stdout'] = logfile.getvalue()
@@ -193,9 +205,11 @@ class BaseTask(Task):
             kwargs['ssh_key_path'] = self.build_ssh_key_path(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
             args = self.build_args(instance, **kwargs)
+            safe_args = self.build_safe_args(instance, **kwargs)
+            output_replacements = self.build_output_replacements(instance, **kwargs)
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
-            instance = self.update_model(pk, job_args=json.dumps(args),
+            instance = self.update_model(pk, job_args=json.dumps(safe_args),
                                          job_cwd=cwd, job_env=env)
             status, stdout = self.run_pexpect(instance, args, cwd, env,
                                               kwargs['passwords'])
@@ -208,7 +222,8 @@ class BaseTask(Task):
                 except IOError:
                     pass
         instance = self.update_model(pk, status=status, result_stdout=stdout,
-                                     result_traceback=tb)
+                                     result_traceback=tb,
+                                     output_replacements=output_replacements)
 
 class RunJob(BaseTask):
     '''
@@ -422,13 +437,11 @@ class RunProjectUpdate(BaseTask):
         return urlparse.urlunsplit([parts.scheme, netloc, parts.path,
                                     parts.query, parts.fragment])
 
-    def build_args(self, project_update, **kwargs):
+    def _build_scm_url_extra_vars(self, project_update, **kwargs):
         '''
-        Build command line argument list for running ansible-playbook,
-        optionally using ssh-agent for public/private key authentication.
+        Helper method to build SCM url and extra vars with parameters needed
+        for authentication.
         '''
-        args = ['ansible-playbook', '-i', 'localhost,']
-        args.append('-%s' % ('v' * 3))
         extra_vars = {}
         project = project_update.project
         scm_url = project.scm_url
@@ -446,7 +459,18 @@ class RunProjectUpdate(BaseTask):
                 extra_vars['scm_username'] = scm_username
             else:  
                 scm_url = self.update_url_auth(scm_url, scm_username)
-        # FIXME: Need to hide password in saved job_args and result_stdout!
+        return scm_url, extra_vars
+
+    def build_args(self, project_update, **kwargs):
+        '''
+        Build command line argument list for running ansible-playbook,
+        optionally using ssh-agent for public/private key authentication.
+        '''
+        args = ['ansible-playbook', '-i', 'localhost,']
+        args.append('-%s' % ('v' * 3))
+        project = project_update.project
+        scm_url, extra_vars = self._build_scm_url_extra_vars(project_update,
+                                                             **kwargs)
         scm_branch = project.scm_branch or {'hg': 'tip'}.get(project.scm_type, 'HEAD')
         scm_delete_on_update = project.scm_delete_on_update or project.scm_delete_on_next_update
         extra_vars.update({
@@ -467,8 +491,52 @@ class RunProjectUpdate(BaseTask):
             args = ['ssh-agent', 'sh', '-c', cmd]
         return args
 
+    def build_safe_args(self, project_update, **kwargs):
+        pwdict = dict(kwargs.get('passwords', {}).items())
+        for pw_name, pw_val in pwdict.items():
+            if pw_name in ('', 'yes', 'no', 'scm_username'):
+                continue
+            pwdict[pw_name] = '*'*len(pw_val)
+        kwargs['passwords'] = pwdict
+        return self.build_args(project_update, **kwargs)
+
     def build_cwd(self, project_update, **kwargs):
         return self.get_path_to('..', 'playbooks')
+
+    def build_output_replacements(self, project_update, **kwargs):
+        '''
+        Return search/replace strings to prevent output URLs from showing
+        sensitive passwords.
+        '''
+        output_replacements = []
+        before_url = self._build_scm_url_extra_vars(project_update,
+                                                    **kwargs)[0]
+        scm_password = kwargs.get('passwords', {}).get('scm_password', '')
+        pwdict = dict(kwargs.get('passwords', {}).items())
+        for pw_name, pw_val in pwdict.items():
+            if pw_name in ('', 'yes', 'no', 'scm_username'):
+                continue
+            pwdict[pw_name] = '*'*len(pw_val)
+        kwargs['passwords'] = pwdict
+        after_url = self._build_scm_url_extra_vars(project_update,
+                                                   **kwargs)[0]
+        if after_url != before_url:
+            output_replacements.append((before_url, after_url))
+        project = project_update.project
+        if project.scm_type == 'svn' and project.scm_username and scm_password:
+            d_before = {
+                'username': project.scm_username,
+                'password': scm_password,
+            }
+            d_after = {
+                'username': project.scm_username,
+                'password': '*'*len(scm_password),
+            }
+            pattern1 = "username=\"%(username)s\" password=\"%(password)s\""
+            pattern2 = "--username '%(username)s' --password '%(password)s'"
+            output_replacements.append((pattern1 % d_before, pattern1 % d_after))
+            output_replacements.append((pattern2 % d_before, pattern2 % d_after))
+        return output_replacements
 
     def get_password_prompts(self):
         d = super(RunProjectUpdate, self).get_password_prompts()
