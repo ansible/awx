@@ -658,9 +658,6 @@ class Project(CommonModel):
         default=False,
         editable=False,
     )
-    
-    # FIXME: Still need to implement:
-    # - masking passwords in project update args/stdout
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
