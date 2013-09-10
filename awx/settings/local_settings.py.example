@@ -189,11 +189,11 @@ AUTH_LDAP_GROUP_TYPE = ActiveDirectoryGroupType()
 
 # Group DN required to login. If specified, user must be a member of this
 # group to login via LDAP.
-AUTH_LDAP_REQUIRE_GROUP = ''
+#AUTH_LDAP_REQUIRE_GROUP = ''
 
 # Group DN denied from login. If specified, user will not be allowed to login
 # if a member of this group.
-AUTH_LDAP_DENY_GROUP = ''
+#AUTH_LDAP_DENY_GROUP = ''
 
 # User profile flags updated from group membership (key is user attribute name,
 # value is group DN).
