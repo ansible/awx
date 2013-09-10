@@ -19,7 +19,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         var html = '';
         var field, element, dialogScope, fld;
         var base = $location.path().replace(/^\//,'').split('/')[0];
-        
+        var extra_html = params.extra_html;
+
         function navigate(canceled) {
             //Decide where to send the user once the modal dialog closes
             if (!canceled) {
@@ -31,7 +32,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                }
             } 
             else {
-               console.log('navigating to: ' +  base);
                $location.path('/' + base);
             }
             }
@@ -57,6 +57,9 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             $('#password-modal').modal('hide');
             if (form.name == 'credential') {
                cancel();
+            }
+            else {
+               scope.$emit('UpdateSubmitted');
             }
             }
         
@@ -96,14 +99,15 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         
         if (passwords.length > 0) {
            // We need to prompt for passwords
-           html += html += "<form class=\"form-horizontal\" name=\"password_form\" novalidate>\n";    
+           html += "<form class=\"form-horizontal\" name=\"password_form\" novalidate>\n";
+           html += (extra_html) ? extra_html : "";
            for (var i=0; i < passwords.length; i++) {
                // Add the password field
                field = (form.fields[passwords[i]]) ? form.fields[passwords[i]] : ProjectsForm.fields[passwords[i]];
                fld = passwords[i];
                scope[fld] = '';
                html += "<div class=\"form-group\">\n";
-               html += "<label class=\"control-label col-lg-3\" for=\"" + fld + '">' + field.label + '</label>' + "\n";
+               html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"" + fld + '">* ' + field.label + '</label>' + "\n";
                html += "<div class=\"col-lg-9\">\n"; 
                html += "<input type=\"password\" ";
                html += "ng-model=\"" + fld + '" ';
@@ -124,7 +128,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                field = (form.fields[field.associated]) ? form.fields[field.associated] : ProjectsForm.fields[field.associated];
                scope[fld] = '';
                html += "<div class=\"form-group\">\n";
-               html += "<label class=\"control-label col-lg-3\" for=\"" + fld + '">' + field.label + '</label>' + "\n";
+               html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"" + fld + '">* ' + field.label + '</label>' + "\n";
                html += "<div class=\"col-lg-9\">\n"; 
                html += "<input type=\"password\" ";
                html += "ng-model=\"" + fld + '" ';
@@ -150,6 +154,9 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             element.html(html);
             $compile(element.contents())(scope);
             $('#password-modal').modal();
+            $('#password-modal').on('shown.bs.modal', function() {
+                 $('#password-body').find('input[type="password"]:first').focus();
+                 });
         }
         else {
             scope.startJob();
@@ -282,19 +289,21 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
            scope.removeUpdateSubmitted();
         }
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function() {
-            $location.path('/projects');
+            // Refresh the project list after update request submitted
+            scope.refresh();
             });
         
         if (scope.removeSCMSubmit) {
            scope.removeSCMSubmit();
         }
-        scope.removeSCMSubmit = scope.$on('SCMSubmit', function(e, passwords_needed_to_update) {
+        scope.removeSCMSubmit = scope.$on('SCMSubmit', function(e, passwords_needed_to_update, extra_html) {
             // After the call to update, kick off the job.
             PromptPasswords({
                        scope: scope,
                        passwords: passwords_needed_to_update,
                        start_url: url, 
-                       form: ProjectsForm
+                       form: ProjectsForm,
+                       extra_html: extra_html
                        });
             });
         
@@ -303,7 +312,36 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         Rest.get()
             .success( function(data, status, headers, config) {
                 if (data.can_update) {
-                   scope.$emit('SCMSubmit', data.passwords_needed_to_update);
+                   var extra_html = '';
+                   for (var i=0; i < scope.projects.length; i++) {
+                       if (scope.projects[i].id == project_id) {
+                          extra_html += "<div class=\"form-group\">\n";
+                          extra_html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"scm_url\">SCM URL</label>\n";
+                          extra_html += "<div class=\"col-lg-9\">\n"; 
+                          extra_html += "<input type=\"text\" readonly";
+                          extra_html += ' name=\"scm_url\" ';
+                          extra_html += "class=\"form-control\" ";
+                          extra_html += "value=\"" + scope.projects[i].scm_url + "\" ";
+                          extra_html += "/>";
+                          extra_html += "</div>\n";
+                          extra_html += "</div>\n";
+                          if (scope.projects[i].scm_username) {
+                             extra_html += "<div class=\"form-group\">\n";
+                             extra_html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"scm_username\">SCM Username</label>\n";
+                             extra_html += "<div class=\"col-lg-9\">\n"; 
+                             extra_html += "<input type=\"text\" readonly";
+                             extra_html += ' name=\"scm_username\" ';
+                             extra_html += "class=\"form-control\" ";
+                             extra_html += "value=\"" + scope.projects[i].scm_username + "\" ";
+                             extra_html += "/>";
+                             extra_html += "</div>\n";
+                             extra_html += "</div>\n"; 
+                          }                        
+                          break;
+                       }
+                   }
+                   extra_html += "</p>";
+                   scope.$emit('SCMSubmit', data.passwords_needed_to_update, extra_html);
                 } 
                 else {
                    Alert('Permission Denied', 'You do not have access to update this project. Please contact your system administrator.', 

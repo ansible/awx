@@ -13,7 +13,7 @@
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                        ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate, ProjectStatus,
-                       FormatDate)
+                       FormatDate)                        
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -34,11 +34,17 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     }
     scope.projectsPostRefresh = scope.$on('PostRefresh', function() {
         for (var i=0; i < scope.projects.length; i++) {
-            if (scope.projects[i].scm_type == null) {
-               // override the last_update_failed on manual projects- it should be false so we get a 
-               // green badge.  if projet scm_type changed from something to manual, last_update_failed
-               // will contain status of last update, which is not what we want.
-               scope.projects[i].last_update_failed = false;  
+            switch(scope.projects[i].status) {
+                case 'updating':
+                case 'successful':
+                case 'ok':
+                   scope.projects[i].badge = 'false';
+                   break;
+                case 'never updated':
+                case 'failed':
+                case 'missing':
+                   scope.projects[i].badge = 'true'; 
+                   break;
             }
             scope.projects[i].last_updated = (scope.projects[i].last_updated !== null) ? 
                 FormatDate(new Date(scope.projects[i].last_updated)) : null;
@@ -89,7 +95,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
            statusCheckRemove();
            });
      
-       // Refresh the project list so we're  looking at the latest data
+       // Refresh the project list so we're looking at the latest data
        scope.search(list.iterator);
 
        } 
@@ -124,7 +130,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     scope.SCMUpdate = function(project_id) {
        for (var i=0; i < scope.projects.length; i++) {
            if (scope.projects[i].id == project_id) {
-              if (scope.projects[i].scm_type == "") {
+              if (scope.projects[i].scm_type == "" || scope.projects[i].scm_type == null ) {
                  Alert('Missing SCM Setup', 'Before running an SCM update, edit the project and provide the SCM access information.', 'alert-info');
               }
               else if (scope.projects[i].status == 'updating') {
@@ -140,7 +146,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
 ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList', 
                          'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                         'GetBasePath', 'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate'];
+                         'GetBasePath', 'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate' ];
 
 
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
@@ -162,7 +168,6 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    generator.reset();
    LoadBreadCrumbs();
    GetProjectPath({ scope: scope, master: master });
-   //console.log(scope.)
    
    scope.scm_type = null;
    master.scm_type = null;

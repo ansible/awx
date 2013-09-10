@@ -9,9 +9,10 @@
  *
  */
 
-angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDefinition'])
-.factory('ProjectStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm', 
-         'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'ProjectStatusForm',
+angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDefinition', 'ProjectFormDefinition'])
+
+    .factory('ProjectStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm', 
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'ProjectStatusForm',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
           FormatDate, ProjectStatusForm) {
     return function(params) {
@@ -65,3 +66,5 @@ angular.module('ProjectsHelper', ['RestServices', 'Utilities', 'ProjectStatusDef
                 });
     }
     }]);
+
+    

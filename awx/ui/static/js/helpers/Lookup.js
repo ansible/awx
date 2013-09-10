@@ -15,8 +15,8 @@
  */
  
 angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'PaginateHelper', 'ListGenerator', 'ApiLoader' ])  
-    .factory('LookUpInit', ['Alert', 'Rest', 'GenerateList', 'SearchInit', 'PaginateInit', 'GetBasePath',
-    function(Alert, Rest, GenerateList, SearchInit, PaginateInit, GetBasePath) {
+    .factory('LookUpInit', ['Alert', 'Rest', 'GenerateList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'FormatDate',
+    function(Alert, Rest, GenerateList, SearchInit, PaginateInit, GetBasePath, FormatDate) {
     return function(params) {
         
         var scope = params.scope;  // form scope
@@ -25,7 +25,6 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
         var list = params.list;    // list object
         var field = params.field;  // form field
         var postAction = params.postAction  //action to perform post user selection
-
         
         // Show pop-up 
         var name = list.iterator.charAt(0).toUpperCase() + list.iterator.substring(1);
@@ -92,6 +91,14 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
                 listScope.lookupPostRefreshRemove();
             }
             listScope.lookupPostRefreshRemove = scope.$on('PostRefresh', function() {
+                for (var fld in list.fields) {
+                   if (list.fields[fld].type && list.fields[fld].type == 'date') {
+                      //convert dates to our standard format
+                      for (var i=0; i < scope[list.name].length; i++) {
+                          scope[list.name][i][fld] = FormatDate(new Date(scope[list.name][i][fld]));
+                      }
+                   } 
+                }
                 listScope['toggle_' + list.iterator](scope[field]);
                 });
 

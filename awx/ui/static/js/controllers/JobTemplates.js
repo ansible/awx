@@ -144,12 +144,48 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
           }
        }
        };
+   
+   // Detect and alert user to potential SCM status issues
+   var checkSCMStatus = function(oldValue, newValue) {
+       if (oldValue !== newValue) {
+          Rest.setUrl(GetBasePath('projects') + scope.project + '/');
+          Rest.get()
+              .success( function(data, status, headers, config) {
+                  var msg;
+                  switch(data.status) {
+                      case 'failed':
+                          msg = "The selected project has a <em>failed</em> status. Review the project's SCM settings" +
+                           " and run an update before adding it to a template."; 
+                          break;
+                      case 'never updated':
+                          msg = 'The selected project has a <em>never updated</em> status. You will need to run a successful' +
+                              ' update in order to selected a playbook. Without a valid playbook you will not be able ' +
+                              ' to save this template.';
+                          break;
+                      case 'missing':
+                          msg = 'The selected project has a status of <em>missing</em>. Please check the server and make sure ' +
+                              ' the directory exists and file permissions are set correctly.';
+                          break;
+                      }
+                  if (msg) {
+                     Alert('Waning', msg, 'alert-info');
+                  }
+                  })
+              .error( function(data, status, headers, config) {
+                  ProcessErrors(scope, data, status, form,
+                      { hdr: 'Error!', msg: 'Failed to get project ' + scope.project +'. GET returned status: ' + status });
+                  });  
+       }
+       }
   
    // Register a watcher on project_name
    if (scope.selectPlaybookUnregister) {
       scope.selectPlaybookUnregister();
    }
-   scope.selectPlaybookUnregister = scope.$watch('project_name', selectPlaybook);
+   scope.selectPlaybookUnregister = scope.$watch('project_name', function(oldval, newval) {
+       selectPlaybook(oldval, newval);
+       checkSCMStatus(oldval, newval);
+       });
 
    LookUpInit({
        scope: scope,
@@ -272,6 +308,39 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                    });
        }
        }
+   
+   // Detect and alert user to potential SCM status issues
+   var checkSCMStatus = function() {
+       Rest.setUrl(GetBasePath('projects') + scope.project + '/');
+       Rest.get()
+           .success( function(data, status, headers, config) {
+               var msg;
+               switch(data.status) {
+                   case 'failed':
+                       msg = "The selected project has a <em>failed</em> status. Review the project's SCM settings" +
+                           " and run an update before adding it to a template.";
+                       break;
+                   case 'never updated':
+                       msg = 'The selected project has a <em>never updated</em> status. You will need to run a successful' +
+                           ' update in order to selected a playbook. Without a valid playbook you will not be able ' +
+                           ' to save this template.';
+                       break;
+                   case 'missing':
+                       msg = 'The selected project has a status of <em>missing</em>. Please check the server and make sure ' +
+                           ' the directory exists and file permissions are set correctly.';
+                       break;
+                   }
+
+               if (msg) {
+                  Alert('Waning', msg, 'alert-info');
+               }
+               })
+           .error( function(data, status, headers, config) {
+               ProcessErrors(scope, data, status, form,
+                   { hdr: 'Error!', msg: 'Failed to get project ' + scope.project +'. GET returned status: ' + status });
+               });
+       }
+
 
    // Register a watcher on project_name. Refresh the playbook list on change.
    if (scope.selectPlaybookUnregister) {
@@ -281,6 +350,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
        if (oldValue !== newValue && newValue !== '' && newValue !== null && newValue !== undefined) {
           scope.playbook = null;
           getPlaybooks(scope.project);
+          checkSCMStatus();
        }
        });
    

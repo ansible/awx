@@ -202,12 +202,11 @@
           <div class="modal-content">
               <div class="modal-header">
                 <button type="button" class="close" ng-click="cancelJob()" aria-hidden="true">&times;</button>
-                <h3>Password Required</h3>
+                <h3>Authentication Required</h3>
               </div>
-              <div class="modal-body" id="password-body">
-              </div>
+              <div class="modal-body" id="password-body"></div>
               <div class="modal-footer">
-                <a href="#" ng-click="cancelJob()" class="btn btn-default">Cancel</a>
+                <a href="" ng-click="cancelJob()" class="btn btn-default">Cancel</a>
                 <a href="" ng-click="startJob()" class="btn btn-primary" ng-disabled="password_form.$pristine || password_form.$invalid">Continue</a>
               </div>
           </div><!-- modal-content -->

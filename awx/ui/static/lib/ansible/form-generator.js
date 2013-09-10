@@ -126,6 +126,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               }
               });
        }
+       if (!this.scope.$$phase) {
+          this.scope.$digest();
+        } 
        return this.scope;
        },
 

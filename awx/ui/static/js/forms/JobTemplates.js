@@ -51,8 +51,6 @@ angular.module('JobTemplateFormDefinition', [])
                 type: 'lookup',
                 sourceModel: 'inventory',
                 sourceField: 'name',
-                addRequired: true,
-                editRequired: true,
                 ngClick: 'lookUpInventory()',
                 awRequiredWhen: {variable: "inventoryrequired", init: "true" },
                 column: 1
@@ -62,8 +60,6 @@ angular.module('JobTemplateFormDefinition', [])
                 type: 'lookup',
                 sourceModel: 'project',
                 sourceField: 'name',
-                addRequired: true,
-                editRequired: true,
                 ngClick: 'lookUpProject()',
                 awRequiredWhen: {variable: "projectrequired", init: "true" },
                 column: 1
@@ -73,8 +69,6 @@ angular.module('JobTemplateFormDefinition', [])
                 type:'select',
                 ngOptions: 'book for book in playbook_options',
                 id: 'playbook-select',
-                addRequired: true, 
-                editRequired: true,
                 awRequiredWhen: {variable: "playbookrequired", init: "true" },
                 column: 1
                 },

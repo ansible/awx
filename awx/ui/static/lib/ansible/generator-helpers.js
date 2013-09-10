@@ -193,7 +193,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            html += (field.ngShow) ? "<span " + Attr(field,'ngShow') + ">" : "";
 
            // Badge
-           if (field.badgeIcon && field.badgePlacement && field.badgePlacement == 'left') {
+           if (options.mode !== 'lookup' && field.badgeIcon && field.badgePlacement && field.badgePlacement == 'left') {
               html += Badge(field);
            }
             
@@ -262,7 +262,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                "></div>\n" : "";
             
            // Badge
-           if (field.badgeIcon && field.badgePlacement && field.badgePlacement !== 'left') {
+           if (options.mode !== 'lookup' &&  field.badgeIcon && field.badgePlacement && field.badgePlacement !== 'left') {
               html += Badge(field);
            }
         }
