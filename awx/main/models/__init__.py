@@ -1641,7 +1641,9 @@ class JobEvent(models.Model):
         if self.event == 'playbook_on_stats':
             try:
                 failures_dict = self.event_data.get('failures', {})
-                self.failed = bool(sum(failures_dict.values()))
+                dark_dict = self.event_data.get('dark', {})
+                self.failed = bool(sum(failures_dict.values()) + 
+                                   sum(dark_dict.values()))
                 changed_dict = self.event_data.get('changed', {})
                 self.changed = bool(sum(changed_dict.values()))
             except (AttributeError, TypeError):
