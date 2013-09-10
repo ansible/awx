@@ -83,7 +83,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
               }
               else if (project.status == 'updating') {
                  Alert('Pending Status', 'An update is currently running. Status details cannot be viewed until the update process ' + 
-                     ' completes. Use the refresh button to monitor progress of the update proess.', 'alert-info');
+                     ' completes. Use the refresh button to monitor progress of the update process.', 'alert-info');
               }
               else {
                  Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
