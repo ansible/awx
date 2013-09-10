@@ -735,7 +735,7 @@ class Project(CommonModel):
             elif not self.get_project_path():
                 return 'missing'
             else:
-                return 'successsful'
+                return 'successful'
         elif not self.get_project_path():
             return 'missing'
         else:
