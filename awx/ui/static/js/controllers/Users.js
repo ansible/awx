@@ -375,11 +375,14 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    Rest.get()
        .success( function(data, status, headers, config) {
            if (data['user_ldap_fields']) {
-              for (var fld in data['user_ldap_fields']) {
-                  form.fields[fld]['readonly'] = true;
-                  form.fields[fld]['editRequired'] = false;
-                  if (form.fields[fld].awRequiredWhen) {
-                     delete form.fields[fld].awRequiredWhen;
+              for (var i in data['user_ldap_fields']) {
+                  var fld = data['user_ldap_fields'][i];
+                  if (form.fields[fld]) {
+                      form.fields[fld]['readonly'] = true;
+                      form.fields[fld]['editRequired'] = false;
+                      if (form.fields[fld].awRequiredWhen) {
+                         delete form.fields[fld].awRequiredWhen;
+                      }
                   }
               }
            }
