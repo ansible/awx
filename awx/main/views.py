@@ -245,6 +245,15 @@ class ProjectList(ListCreateAPIView):
     model = Project
     serializer_class = ProjectSerializer
 
+    def get(self, request, *args, **kwargs):
+        # Not optimal, but make sure the project status and last_updated fields
+        # are up to date here...
+        projects_qs = Project.objects.filter(active=True)
+        projects_qs = projects_qs.select_related('current_update', 'last_updated')
+        for project in projects_qs:
+            project.set_status_and_last_updated()
+        return super(ProjectList, self).get(request, *args, **kwargs)
+
 class ProjectDetail(RetrieveUpdateDestroyAPIView):
 
     model = Project

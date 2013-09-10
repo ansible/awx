@@ -536,6 +536,15 @@ class Project(CommonModel):
     A project represents a playbook git repo that can access a set of inventories
     '''
 
+    PROJECT_STATUS_CHOICES = [
+        ('ok', 'OK'),
+        ('missing', 'Missing'),
+        ('never updated', 'Never Updated'),
+        ('updating', 'Updating'),
+        ('failed', 'Failed'),
+        ('successful', 'Successful'),
+    ]
+        
     PASSWORD_FIELDS = ('scm_password', 'scm_key_data', 'scm_key_unlock')
 
     SCM_TYPE_CHOICES = [
@@ -658,9 +667,24 @@ class Project(CommonModel):
         default=False,
         editable=False,
     )
+    last_updated = models.DateTimeField(
+        null=True,
+        default=None,
+        editable=False,
+    )
+    status = models.CharField(
+        max_length=32,
+        choices=PROJECT_STATUS_CHOICES,
+        default='ok',
+        editable=False,
+        null=True,
+    )
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
+        # If update_fields has been specified, add our field names to it,
+        # if it hasn't been specified, then we're just doing a normal save.
+        update_fields = kwargs.get('update_fields', [])
         # When first saving to the database, don't store any password field
         # values, but instead save them until after the instance is created.
         if new_instance:
@@ -670,34 +694,42 @@ class Project(CommonModel):
                 setattr(self, field, '')
         # Otherwise, store encrypted values to the database.
         else:
-            # If update_fields has been specified, add our field names to it,
-            # if hit hasn't been specified, then we're just doing a normal save.
-            update_fields = kwargs.get('update_fields', [])
             for field in self.PASSWORD_FIELDS:
                 encrypted = encrypt_field(self, field, bool(field != 'scm_key_data'))
-                setattr(self, field, encrypted)
-                if field not in update_fields:
-                    update_fields.append(field)
+                if getattr(self, field) != encrypted:
+                    setattr(self, field, encrypted)
+                    if field not in update_fields:
+                        update_fields.append(field)
         # Check if scm_type or scm_url changes.
         if self.pk:
             project_before = Project.objects.get(pk=self.pk)
             if project_before.scm_type != self.scm_type or project_before.scm_url != self.scm_url:
                 self.scm_delete_on_next_update = True
-        super(Project, self).save(*args, **kwargs)
-        # After saving a new instance for the first time, set the password
-        # fields and save again.
-        if new_instance:
-            update_fields=[]
-            for field in self.PASSWORD_FIELDS:
-                saved_value = getattr(self, '_saved_%s' % field, '')
-                setattr(self, field, saved_value)
-                update_fields.append(field)
-            self.save(update_fields=update_fields)
+                if 'scm_delete_on_next_update' not in update_fields:
+                    update_fields.append('scm_delete_on_next_update')
         # Create auto-generated local path if project uses SCM.
         if self.scm_type and not self.local_path.startswith('_'):
             slug_name = slugify(unicode(self.name)).replace(u'-', u'_')
             self.local_path = u'_%d__%s' % (self.pk, slug_name)
-            self.save(update_fields=['local_path'])
+            if 'local_path' not in update_fields:
+                update_fields.append('local_path')
+        # Update status and last_updated fields.
+        updated_fields = self.set_status_and_last_updated(save=False)
+        for field in updated_fields:
+            if field not in update_fields:
+                update_fields.append(field)
+        # Do the actual save.
+        super(Project, self).save(*args, **kwargs)
+        # After saving a new instance for the first time (to get a primary
+        # key), set the password fields and save again.
+        if new_instance:
+            update_fields=[]
+            for field in self.PASSWORD_FIELDS:
+                saved_value = getattr(self, '_saved_%s' % field, '')
+                if getattr(self, field) != saved_value:
+                    setattr(self, field, saved_value)
+                    update_fields.append(field)
+            self.save(update_fields=update_fields)
         # If we just created a new project with SCM and it doesn't require any
         # passwords to update, start the initial update.
         if new_instance and self.scm_type and not self.scm_passwords_needed:
@@ -722,38 +754,47 @@ class Project(CommonModel):
                 needed.append(field)
         return needed
 
-    @property
-    def status(self):
-        # FIXME: Update status values!
+    def set_status_and_last_updated(self, save=True):
+        # Determine current status.
         if self.scm_type:
             if self.current_update:
-                return 'updating'
+                status = 'updating'
             elif not self.last_update:
-                return 'never updated'
+                status = 'never updated'
             elif self.last_update_failed:
-                return 'failed'
+                status = 'failed'
             elif not self.get_project_path():
-                return 'missing'
+                status = 'missing'
             else:
-                return 'successful'
+                status = 'successful'
         elif not self.get_project_path():
-            return 'missing'
+            status = 'missing'
         else:
-            return 'ok'
-    
-    @property
-    def last_updated(self):
+            status = 'ok'
+        # Determine current last_updated timestamp.
+        last_upated = None
         if self.scm_type and self.last_update:
-            return self.last_update.modified
+            last_updated = self.last_update.modified
         else:
             project_path = self.get_project_path()
             if project_path:
                 try:
                     mtime = os.path.getmtime(project_path)
                     dt = datetime.datetime.fromtimestamp(mtime)
-                    return make_aware(dt, get_default_timezone())
+                    last_updated = make_aware(dt, get_default_timezone())
                 except os.error:
                     pass
+        # Update values if changed.
+        update_fields = []
+        if self.status != status:
+            self.status = status
+            update_fields.append('status')
+        if self.last_updated != last_updated:
+            self.last_updated = last_updated
+            update_fields.append('last_updated')
+        if save and update_fields:
+            self.save(update_fields=update_fields)
+        return update_fields
 
     @property
     def can_update(self):

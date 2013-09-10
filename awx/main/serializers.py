@@ -200,8 +200,6 @@ class ProjectSerializer(BaseSerializer):
 
     playbooks = serializers.Field(source='playbooks', help_text='Array of playbooks available within this project.')
     scm_delete_on_next_update = serializers.Field(source='scm_delete_on_next_update')
-    status = serializers.Field(source='status')
-    last_updated = serializers.Field(source='last_updated')
 
     class Meta:
         model = Project
