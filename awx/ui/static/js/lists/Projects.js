@@ -24,7 +24,9 @@ angular.module('ProjectsListDefinition', [])
                 key: true,
                 label: 'Name',
                 badgeIcon: "\{\{ 'icon-failures-' + project.badge \}\}",
-                badgePlacement: 'left'
+                badgePlacement: 'left',
+                badgeToolTip: "Indicates the project\'s health based on its status",
+                badgeTipPlacement: 'bottom'
                 },
             description: {
                 label: 'Description'

@@ -21,7 +21,9 @@ angular.module('InventoryHostsFormDefinition', [])
                 label: 'Host Name',
                 ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
                 badgeIcon: "\{\{ 'icon-failures-' + host.has_active_failures \}\}",
+                badgeToolTip: 'Indicates if host has active failures',
                 badgePlacement: 'left',
+                badgeTipPlacement: 'bottom',
                 columnClass: 'col-lg-3'
                 },
             groups: {
@@ -59,7 +61,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 ngHide: "hostAddHide",
                 awToolTip: "Copy an existing host to the selected group",
                 dataPlacement: 'bottom',
-                'class': 'btn-sm btn-primary',
+                'class': 'btn-sm btn-success',
                 icon: 'icon-check'
                 },
             create: {

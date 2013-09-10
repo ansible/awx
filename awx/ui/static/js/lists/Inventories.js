@@ -24,7 +24,7 @@ angular.module('InventoriesListDefinition', [])
                 label: 'Name',
                 badgeIcon: "\{\{ 'icon-failures-' + inventory.has_active_failures \}\}",
                 badgePlacement: 'left',
-                badgeToolTip: 'Inventory contains hosts with active failures',
+                badgeToolTip: 'Indicates if inventory contains hosts with active failures',
                 badgeTipPlacement: 'bottom'
                 },
             description: {

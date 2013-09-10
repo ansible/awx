@@ -479,7 +479,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                    "data-name=\"" + sorted[i].name + "\" " +
                    "data-group-id=\"" + sorted[i].id + "\" " + 
                    "><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a> " +
-                   "<i class=\"field-badge icon-failures-" + sorted[i].has_active_failures + "\"></i> " +
+                   "<i class=\"field-badge icon-failures-" + sorted[i].has_active_failures + "\" " +
+                   "aw-tool-tip=\"Indicates if group contains hosts with active failures\" data-placement=\"bottom\"></i> " +
                    "<a href=\"\" class=\"activate\">" + sorted[i].name + "</a> ";
                if (sorted[i].children.length > 0) {
                   buildHTML(sorted[i].children);
@@ -649,7 +650,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                    "data-groups=\"" + data.related.groups + "\" " + 
                    "data-name=\"" + data.name + "\" " +
                    "><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a> " +
-                   "<i class=\"field-badge icon-failures-" + data.has_active_failures + "\"></i> " +
+                   "<i class=\"field-badge icon-failures-" + data.has_active_failures + "\"" +
+                   "aw-tool-tip=\"Indicates if group contains hosts with active failures\" data-placement=\"bottom\"></i> " +
                    "<a href=\"\" class=\"activate active\">" + data.name + "</a>";
                  scope.$emit('buildAllGroups', data.name, data.related.tree, data.related.groups);
                  scope.$emit('refreshHost', null, 'All Hosts');
