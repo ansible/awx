@@ -10,7 +10,7 @@
 
 'use strict';
 
-function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert)
+function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert, Wait)
 {
    var setLoginFocus = function() {
       $('#login-username').focus();
@@ -60,12 +60,13 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
            Alert('Error!', 'Please provide a username and password before attempting to login.', 'alert-danger', setLoginFocus);
        }
        else {
+           Wait('start');
            Authorization.retrieveToken(username, password)
              .success( function(data, status, headers, config) {
+                 Wait('stop');
                  $('#login-modal').modal('hide');
                  token = data.token;
                  Authorization.setToken(data.token, data.expires);
-                 
                  // Get all the profile/access info regarding the logged in user
                  Authorization.getUser()
                      .success(function(data, status, headers, config) {
@@ -84,6 +85,7 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
                          });
                  })
              .error( function(data, status, headers, config) {
+                 Wait('stop');
                  if ( data.non_field_errors && data.non_field_errors.length == 0 ) {
                     // show field specific errors returned by the API
                     for (var key in data) {
@@ -108,5 +110,5 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
        }
 }
 
-Authenticate.$inject = ['$cookieStore', '$window', '$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert'];
+Authenticate.$inject = ['$cookieStore', '$window', '$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait'];
 
