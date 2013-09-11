@@ -371,6 +371,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
            }
 
            master['scm_type'] = scope['scm_type'];
+           scope.scmBranchLabel = (scope.scm_type && scope.scm_type.value && scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch';
            setAskCheckboxes();
            
            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.

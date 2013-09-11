@@ -414,6 +414,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
                 html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
                   field.awRequiredWhen.variable + "\" " : "";
+                html += (field.awValidUrl) ? "aw-valid-url " : ""; 
                 html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled=\"" + field.associated + "_ask\" " : "";
                 html += " >\n";
              }
@@ -449,6 +450,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              if (field.awPassMatch) {
                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + 
                     ".$error.awpassmatch\">Must match Password value</div>\n";
+             }
+             if (field.awValidUrl) {
+                html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + 
+                    ".$error.awvalidurl\">URL must begin with ssh, http or https and may not contain '@'</div>\n";
              }
 
              if (field.chkPass) {

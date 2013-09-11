@@ -195,6 +195,29 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
         }
         }])
     
+    //
+    // awValidUrl
+    //           
+    .directive('awValidUrl', [ function() {
+        return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            ctrl.$parsers.unshift( function(viewValue) {
+                var validity = true;
+                if (viewValue !== '') {
+                   ctrl.$setValidity('required', true);
+                   var rgx = /^(https|http|ssh)\:\/\//;
+                   var rgx2 = /\@/g;
+                   if (!rgx.test(viewValue) || rgx2.test(viewValue)) {
+                      validity = false;
+                   }
+                }
+                ctrl.$setValidity('awvalidurl', validity); 
+                })
+            }
+        }
+        }])
+
     /*  
      *  Enable TB tooltips. To add a tooltip to an element, include the following directive in
      *  the element's attributes:

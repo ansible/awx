@@ -33,7 +33,7 @@ angular.module('JobEventsListDefinition', [])
         
         fields: {
             created: {
-                label: 'Date',
+                label: 'Created On',
                 key: true,
                 nosort: true,
                 searchable: false,

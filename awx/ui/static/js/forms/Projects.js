@@ -96,8 +96,7 @@ angular.module('ProjectFormDefinition', [])
                 label: 'SCM URL',
                 type: 'text',
                 ngShow: "scm_type !== '' && scm_type !== null",
-                addRequired: false, 
-                editRequired: false,
+                awValidUrl: true,
                 awRequiredWhen: {variable: "scm_type", init: "true" }
                 },
             scm_branch: {
