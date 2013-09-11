@@ -83,8 +83,6 @@ angular.module('ProjectFormDefinition', [])
                 type: 'select',
                 id: 'local-path-select',
                 ngOptions: 'path for path in project_local_paths',
-                addRequired: false,
-                editRequired: false,
                 awRequiredWhen: { variable: "pathRequired", init: "true" },
                 ngShow: "scm_type == '' || scm_type == null",
                 awPopOver: '<p>Select from the list of directories found in the base path.' +

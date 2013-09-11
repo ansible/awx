@@ -107,22 +107,30 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
             
             function checkIt () {
                var viewValue = elm.val();
+               var txt, label;
                validity = true;
                if ( scope[attrs.awRequiredWhen] && (elm.attr('required') == null || elm.attr('required') == undefined) ) {
                   $(elm).attr('required','required');
                   if ($(elm).hasClass('lookup')) {
                      $(elm).parent().parent().parent().find('label').prepend('* ');
                   }
+                  else {
+                     $(elm).parent().parent().find('label').prepend('* ');
+                  }
                }
                else if (!scope[attrs.awRequiredWhen]) {
                   elm.removeAttr('required');
                   if ($(elm).hasClass('lookup')) {
-                     var txt = $(elm).parent().parent().parent().find('label').text();
-                     var txt = txt.replace(/^\*/,'');
-                     var label = $(elm).parent().parent().parent().find('label');
-                     if (label) {
-                        label.text(txt);
-                     }
+                     txt = $(elm).parent().parent().parent().find('label').text();
+                     label = $(elm).parent().parent().parent().find('label');
+                  }
+                  else {
+                     txt = $(elm).parent().parent().find('label').text();
+                     label = $(elm).parent().parent().find('label');
+                  }
+                  txt = txt.replace(/^\* /,'');
+                  if (label) {
+                     label.text(txt);
                   }
                }
                if (scope[attrs.awRequiredWhen] && (viewValue == undefined || viewValue == null || viewValue == '')) {
