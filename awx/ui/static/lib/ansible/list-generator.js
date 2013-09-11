@@ -202,7 +202,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += "</div><!-- row -->\n";
          
        // table header row
-       html += "<table class=\"table table-condensed"
+       html += "<table class=\"table"
        html += (list['class']) ? " " + list['class'] : "";
        html += (options.mode == 'lookup' || options.id) ? ' table-hover-inverse' : '';
        html += (list.hover) ? ' table-hover' : '';
@@ -247,7 +247,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "<th>Select</th>";
        }
        else if (options.mode == 'edit') {
-          html += "<th></th>\n";
+          html += "<th class=\"actions-column\"></th>\n";
        }
        html += "</tr>\n";
        html += "</thead>\n";
@@ -315,7 +315,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        // End List
        html += "</tbody>\n";
        html += "</table>\n";
-
+       
        if (options.mode == 'select' && (options.selectButton == undefined || options.selectButton == true)) {
           html += "<div class=\"navigation-buttons\">\n";
           html += " <button class=\"btn btn-small btn-primary pull-right\" aw-tool-tip=\"Complete your selection\" " +
