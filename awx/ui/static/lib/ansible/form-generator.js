@@ -92,10 +92,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        // Prepend an asterisk to required field label
        $('.form-control[required]').each(function() {
             var label = $(this).parent().parent().find('label');
-            var rgx = /^\*/;
-            if ( !rgx.test(label.text()) ) {
-               // required field does not have leading *
-               label.prepend('* ');
+            if (label && !label.hasClass('prepend-asterisk')) {
+               console.log('adding prepend');
+               label.addClass('prepend-asterisk');
             }
             });
 

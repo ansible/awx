@@ -112,26 +112,21 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                if ( scope[attrs.awRequiredWhen] && (elm.attr('required') == null || elm.attr('required') == undefined) ) {
                   $(elm).attr('required','required');
                   if ($(elm).hasClass('lookup')) {
-                     $(elm).parent().parent().parent().find('label').prepend('* ');
+                     $(elm).parent().parent().parent().find('label').addClass('prepend-asterisk');
                   }
                   else {
-                     $(elm).parent().parent().find('label').prepend('* ');
+                     $(elm).parent().parent().find('label').addClass('prepend-asterisk');
                   }
                }
                else if (!scope[attrs.awRequiredWhen]) {
                   elm.removeAttr('required');
                   if ($(elm).hasClass('lookup')) {
-                     txt = $(elm).parent().parent().parent().find('label').text();
                      label = $(elm).parent().parent().parent().find('label');
                   }
                   else {
-                     txt = $(elm).parent().parent().find('label').text();
                      label = $(elm).parent().parent().find('label');
                   }
-                  txt = txt.replace(/^\* /,'');
-                  if (label) {
-                     label.text(txt);
-                  }
+                  label.removeClass('prepend-asterisk');
                }
                if (scope[attrs.awRequiredWhen] && (viewValue == undefined || viewValue == null || viewValue == '')) {
                   validity = false;
