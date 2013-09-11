@@ -162,6 +162,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
       scope[fld] = '';
       scope[associated] = '';
       scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+      scope[form.name + '_form'].$setDirty();
       }
       
 }
@@ -345,6 +346,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       scope[fld] = '';
       scope[associated] = '';
       scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+      scope[form.name + '_form'].$setDirty();
       }
 
 }

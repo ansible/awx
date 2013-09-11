@@ -499,6 +499,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
        scope[fld] = '';
        scope[associated] = '';
        scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
+       scope[form.name + '_form'].$setDirty();
        }
 
    scope.scmChange = function() {
