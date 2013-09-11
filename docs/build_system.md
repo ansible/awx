@@ -267,11 +267,9 @@ These nightly repositories can be used by the AWX setup playbook by running the
 As noted above, `OFFICIAL` builds are copied out to the production server, and can be
 found at the following location:
 
-    http://ansibleworks.com/awx_releases_SDFOIFWOIEFJWEOFIWEF/
+    http://www.ansibleworks.com/releases/awx/
 
 The AWX setup playbook will use this repo location by default.
-
-NOTE: These release paths will need to change once the product is actually released.
 
 
 
