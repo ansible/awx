@@ -90,10 +90,23 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
 
     .factory('Icon', function() {
     return function(icon) {
-       return "<i class=\"" + icon + "\"></i> ";
+        return "<i class=\"" + icon + "\"></i> ";
         }
         })
-
+    
+    .factory('NavigationLink', ['Attr', 'Icon', function(Attr, Icon) {
+    return function(link) {
+        var html = "<a "; 
+        html += (link.href) ? Attr(link, 'href') : '';
+        html += (link.ngClick) ? Attr(link, 'ngClick') : '';
+        html += (link.ngShow) ? Attr(link, 'ngShow') : '';
+        html += '>';
+        html += (link.icon) ? Icon(link.icon) : '';
+        html += (link.label) ? link.label : '';
+        html += "</a>\n";
+        return html;
+        }
+        }])
 
     .factory('DropDown', ['Attr', 'Icon', function(Attr, Icon) {
     return function(params) {

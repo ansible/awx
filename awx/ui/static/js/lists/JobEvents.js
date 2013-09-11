@@ -17,6 +17,19 @@ angular.module('JobEventsListDefinition', [])
         hover: true,
         hasChildren: true,
         filterBy: '\{ show: true \}',
+
+        navigationLinks: {
+            details: {
+                href: "/#/jobs/{{ job_id }}",
+                label: 'Details',
+                icon: 'icon-zoom-in'
+                },
+            summary: {
+                href: "/#/jobs/{{ job_id }}/job_host_summaries",
+                label: 'Hosts',
+                icon: 'icon-laptop'
+                }
+            },
         
         fields: {
             created: {
@@ -64,22 +77,6 @@ angular.module('JobEventsListDefinition', [])
                 label: 'Refresh',
                 awToolTip: 'Refresh the page',
                 "class": 'btn-sm btn-primary',
-                mode: 'all'
-                },
-            edit: {
-                label: 'Details',
-                ngClick: "jobDetails()",
-                icon: 'icon-zoom-in',
-                "class": 'btn btn-default btn-sm',
-                awToolTip: 'Edit job details',
-                mode: 'all'
-                },
-            summary: {
-                label: 'Hosts',
-                icon: 'icon-laptop',
-                ngClick: "jobSummary()",
-                "class": 'btn btn-default btn-sm',
-                awToolTip: 'View host summary',
                 mode: 'all'
                 }
             },

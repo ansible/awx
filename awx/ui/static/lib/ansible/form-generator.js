@@ -9,8 +9,9 @@
  */
 
 angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
-    .factory('GenerateForm', [ '$location', '$cookieStore', '$compile', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column', 
-    function($location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column) {
+    .factory('GenerateForm', [ '$location', '$cookieStore', '$compile', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column',
+        'NavigationLink', 
+    function($location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink) {
     return {
     
     setForm: function(form) {
@@ -288,9 +289,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        return html;
     },
 
-    navigationLink: function(link) {
-       return "<a href=\"" + link.href + "\">" + this.attr(link, 'icon') + ' ' + link.label + "</a>\n";  
-    },
+    navigationLink: NavigationLink,
 
     buildField: function(fld, field, options, form) {
 
@@ -770,6 +769,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        if (!this.modal) {
           html += this.breadCrumbs(options);
        }
+       
+       if (!this.modal && this.form.navigationLinks) {
+          html += "<div class=\"navigation-links text-right\">\n"; 
+          for (var link in this.form.navigationLinks) {
+              html += this.navigationLink(this.form.navigationLinks[link]);
+          }
+          html += "</div>\n";
+       }
 
        if ((!this.modal && this.form.statusFields)) {
           // Add status fields section (used in Jobs form)
@@ -811,7 +818,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "</div>\n";
        }
        else { 
-          
+
           if ( this.form.collapse && this.form.collapseMode == options.mode) {
              html += "<div id=\"" + this.form.name + "-collapse-0\" ";
              html += (this.form.collapseOpen) ? "data-open=\"true\" " : "";
@@ -827,14 +834,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  if ( btn.position.indexOf('top-left') >= 0 || btn.position.indexOf('top-right') >= 0 ) {
                     html += this.button(btn, 'top');
                  }
-             }
-             html += "</div>\n";
-          }
-
-          if (this.form.navigationLinks) {
-             html += "<div class=\"navigation-links text-right\">\n"; 
-             for (var link in this.form.navigationLinks) {
-                 html += this.navigationLink(this.form.navigationLinks[link]);
              }
              html += "</div>\n";
           }

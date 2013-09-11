@@ -16,6 +16,21 @@ angular.module('JobHostDefinition', [])
         index: true,
         hover: true,
         
+        navigationLinks: {
+            details: {
+                href: "/#/jobs/{{ job_id }}",
+                label: 'Details',
+                icon: 'icon-zoom-in',
+                ngShow: "job_id !== null"
+                },
+            events: {
+                href: "/#/jobs/{{ job_id }}/job_events",
+                label: 'Events',
+                icon: 'icon-list-ul',
+                ngShow: "job_id !== null"
+                }
+            },
+
         fields: {
             id: {
                 label: 'Job ID',
@@ -70,24 +85,6 @@ angular.module('JobHostDefinition', [])
                 "class": 'btn-primary btn-sm',
                 awToolTip: 'Refresh the page',
                 mode: 'all'
-                },
-            edit: {
-                label: 'Details',
-                icon: 'icon-edit',
-                ngClick: "jobDetails()",
-                ngShow: 'job_id !== null',
-                "class": 'btn btn-default btn-sm',
-                awToolTip: 'Edit job details',
-                mode: 'all'
-                },
-            events: {
-                label: 'Events',
-                icon: 'icon-list-ul',
-                ngClick: "jobEvents()",
-                ngShow: 'job_id !== null',
-                "class": 'btn btn-default btn-sm',
-                awToolTip: 'View job events',
-                mode: 'all'            
                 },
             help: {
                 awPopOver: "<dl>\n<dt>Success</dt><dd>Tasks successfully executed on the host.</dd>\n" +

@@ -9,8 +9,8 @@
 
 angular.module('ListGenerator', ['GeneratorHelpers'])
     .factory('GenerateList', [ '$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
-        'Column', 'DropDown',  
-    function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown) {
+        'Column', 'DropDown', 'NavigationLink',
+    function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink) {
     return {
     
     setList: function(list) {
@@ -137,6 +137,14 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>\n";
           html += "<strong>Hint: </strong>" + list.editInstructions + "\n"; 
           html += "</div>\n";
+       }
+
+       if (options.mode != 'lookup' && list.navigationLinks) {
+             html += "<div class=\"navigation-links text-right\">\n"; 
+             for (var link in list.navigationLinks) {
+                 html += NavigationLink(list.navigationLinks[link]);
+             }
+             html += "</div>\n";
        }
 
        if (options.mode != 'lookup' && (list.well == undefined || list.well == 'true')) {

@@ -24,7 +24,8 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     var view = GenerateList;
     var base = $location.path().replace(/^\//,'').split('/')[0];
     var scope = view.inject(list, { mode: 'edit' });
-    
+
+    scope.job_id = $routeParams.id;
     $rootScope.flashMessage = null;
     scope.selected = [];
     scope.expand = true;    //on load, automatically expand all nodes
@@ -168,11 +169,6 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     LoadBreadCrumbs();
     
     scope.viewJobEvent = function(id) {
-       //var url = '/jobs/' + $routeParams.id + '/job_events/' + id;
-       //if (scope['jobeventPage']) {
-       //   url += '?&page=' + (scope['jobeventPage'] + 1);
-       //}
-       //$location.url(url);
        EventView({ event_id: id });
        }
 
@@ -180,15 +176,6 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
        scope.expand = true;
        scope.search(list.iterator);
        }
-
-    scope.jobDetails = function() {
-       $location.path('/jobs/' + $routeParams.id);
-       };
-
-    scope.jobSummary = function() {
-       $location.path('/jobs/' + $routeParams.id + '/job_host_summaries');
-       };
-
 }
 
 JobEventsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',

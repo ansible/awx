@@ -16,6 +16,21 @@ angular.module('JobFormDefinition', [])
         well: true,
         twoColumns: true,
         
+
+        navigationLinks: {
+            hosts: {
+                href: "/#/jobs/{{ job_id }}/job_host_summaries",
+                label: 'Hosts',
+                icon: 'icon-laptop'
+                },
+            events: {
+                href: "/#/jobs/{{ job_id }}/job_events",
+                label: 'Events',
+                icon: 'icon-list-ul'
+                }
+            },
+            
+
         fields: {
             name: {
                 label: 'Name',
@@ -282,22 +297,6 @@ angular.module('JobFormDefinition', [])
                 "class": 'btn-sm btn-primary',
                 awToolTip: 'Refresh job status &amp; output',
                 mode: 'all'
-                },
-            summary: {
-                label: 'Hosts',
-                icon: 'icon-laptop',
-                ngClick: "jobSummary()",
-                "class": 'btn btn-default btn-sm',
-                awToolTip: 'View host summary',
-                mode: 'all'
-                },
-            events: {
-                label: 'Events',
-                icon: 'icon-list-ul',
-                ngClick: "jobEvents()",
-                "class": 'btn btn-default btn-sm',
-                awToolTip: 'Edit job events',
-                mode: 'all'        
                 }
             }
             

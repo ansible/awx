@@ -175,7 +175,8 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    var master = {};
    var id = $routeParams.id;
    var relatedSets = {};
-
+   
+   scope.job_id = id;
    scope.parseType = 'yaml';
    scope.statusSearchSpin = false;
 
