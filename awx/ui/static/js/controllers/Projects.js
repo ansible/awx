@@ -236,7 +236,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    scope.scmChange = function() {
        // When an scm_type is set, path is not required
        scope.pathRequired = (scope.scm_type) ? false : true;
-       scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch'; 
+       scope.scmBranchLabel = (scope.scm_type && scope.scm_type.value && scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch'; 
        }
 
    scope.authChange = function() {
@@ -504,7 +504,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    scope.scmChange = function() {
        // When an scm_type is set, path is not required
        scope.pathRequired = (scope.scm_type) ? false : true;
-       scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch'; 
+       scope.scmBranchLabel = (scope.scm_type && scope.scm_type.value && scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch';  
        }
 }
 

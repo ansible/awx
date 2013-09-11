@@ -130,7 +130,11 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                  else {
                     data[fld] = scope[fld];
                  }   
-             } 
+             }
+             
+             data.is_superuser = (data.is_superuser == null || data.is_superuser == undefined || data.is_superuser == '') ? false : 
+                 data.is_superuser;
+
              Rest.post(data)
                  .success( function(data, status, headers, config) {
                      var base = $location.path().replace(/^\//,'').split('/')[0];
@@ -247,8 +251,17 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
           Rest.setUrl(defaultUrl + id + '/');
           var data = {}
           for (var fld in form.fields) {
-              data[fld] = scope[fld];   
-          } 
+              if (form.fields[fld].realName) {
+                 data[form.fields[fld].realName] = scope[fld];
+              }
+              else {
+                 data[fld] = scope[fld];
+              }   
+          }
+
+          data.is_superuser = (data.is_superuser == null || data.is_superuser == undefined || data.is_superuser == '') ? false : 
+              data.is_superuser;
+
           Rest.put(data)
               .success( function(data, status, headers, config) {
                   var base = $location.path().replace(/^\//,'').split('/')[0];

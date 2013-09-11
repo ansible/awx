@@ -48,7 +48,7 @@ angular.module('UserFormDefinition', [])
                 sourceField: 'name',
                 ngClick: 'lookUpOrganization()',
                 excludeMode: 'edit',
-                awRequiredWhen: { variable: "orgrequired", init: true}
+                awRequiredWhen: { variable: "orgrequired", init: true }
                 },
             username: {
                 label: 'Username',
@@ -65,7 +65,7 @@ angular.module('UserFormDefinition', [])
                 label: 'Password',
                 type: 'password',
                 ngShow: 'ldap_user == false',
-                awRequiredWhen: { variable: "not_ldap_user", init: true},
+                awRequiredWhen: { variable: "not_ldap_user", init: true },
                 ngChange: "clearPWConfirm('password_confirm')",
                 autocomplete: false,
                 chkPass: true
