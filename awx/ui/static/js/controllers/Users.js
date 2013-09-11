@@ -75,7 +75,7 @@ UsersList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams
 
 function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
                    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-                   GetBasePath, LookUpInit, OrganizationList) 
+                   GetBasePath, LookUpInit, OrganizationList, ResetForm) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -83,20 +83,12 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    // Inject dynamic view
    var defaultUrl = GetBasePath('organizations');
    var form = UserForm;
-
-   // Restore form to default condition. It may have been modified during edit of an LDAP user
-   form.fields['first_name'].readonly = false; 
-   form.fields['first_name'].editRequired = true;
-   form.fields['last_name'].readonly = false; 
-   form.fields['last_name'].editRequired = true; 
-   form.fields['email'].readonly = false; 
-   form.fields['email'].editRequired = true; 
-   form.fields['organization'].awRequiredWhen = { variable: "orgrequired", init: true};
-
+   ResetForm();
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
    
-   scope.not_ldap_user = true; 
+   scope.ldap_user = false;
+   scope.not_ldap_user = !scope.ldap_user;
    scope.ldap_dn = null;
 
    generator.reset();
@@ -164,6 +156,7 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    scope.formReset = function() {
       // Defaults
       generator.reset();
+      scope.ldap_user = false;
       }; 
 
    // Password change
@@ -176,12 +169,12 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
 UsersAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 'GenerateForm', 
                      'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 
-                     'LookUpInit', 'OrganizationList' ]; 
+                     'LookUpInit', 'OrganizationList', 'ResetForm' ]; 
 
 
 function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
                     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
-                    RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath, Prompt, CheckAccess) 
+                    RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath, Prompt, CheckAccess, ResetForm) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -190,14 +183,17 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    var generator = GenerateForm;
    var form = UserForm;
    var base = $location.path().replace(/^\//,'').split('/')[0];
-   
-   $scope.$on('formReady', function() { 
+   var master = {};
+   var id = $routeParams.user_id;
+   var relatedSets = {}; 
+
+   if ($scope.removeFormReady) {
+      $scope.removeFormReady();
+   }
+   $scope.removeFormReady = $scope.$on('formReady', function() { 
        var scope = generator.inject(form, {mode: 'edit', related: true});
        generator.reset();
-       var master = {};
-       var id = $routeParams.user_id;
-       var relatedSets = {}; 
-
+      
        scope.PermissionAddAllowed =  false; 
 
        // After the Organization is loaded, retrieve each related set
@@ -231,7 +227,9 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
                    }
                }
                
-               scope.not_ldap_user = (scope.ldap_dn) ? false : true;
+               scope.ldap_user = (data.ldap_dn !== null && data.ldap_dn !== undefined && data.ldap_dn !== '') ? true : false;
+               scope.not_ldap_user = !scope.ldap_user;
+               master.ldap_user = scope.ldap_user;
                
                // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
                RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
@@ -360,41 +358,59 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
           }
 
       }); // $scope.$on
-      
-   // Restore form to default condition
-   form.fields['first_name'].readonly = false; 
-   form.fields['first_name'].editRequired = true;
-   form.fields['last_name'].readonly = false; 
-   form.fields['last_name'].editRequired = true; 
-   form.fields['email'].readonly = false; 
-   form.fields['email'].editRequired = true; 
-   form.fields['organization'].awRequiredWhen = { variable: "orgrequired", init: true};
-  
-   // Modify form based on LDAP settings
-   Rest.setUrl(GetBasePath('config'));
-   Rest.get()
-       .success( function(data, status, headers, config) {
-           if (data['user_ldap_fields']) {
-              for (var i in data['user_ldap_fields']) {
-                  var fld = data['user_ldap_fields'][i];
-                  if (form.fields[fld]) {
-                      form.fields[fld]['readonly'] = true;
-                      form.fields[fld]['editRequired'] = false;
-                      if (form.fields[fld].awRequiredWhen) {
-                         delete form.fields[fld].awRequiredWhen;
+   
+   // Put form back to its original state   
+   ResetForm();
+
+   
+   if ($scope.removeModifyForm) {
+      $scope.removeModifyForm();
+   }
+   $scope.removeModifyForm = $scope.$on('modifyForm', function() {
+       // Modify form based on LDAP settings
+       Rest.setUrl(GetBasePath('config'));
+       Rest.get()
+           .success( function(data, status, headers, config) {
+               if (data['user_ldap_fields']) {
+                  var fld;
+                  for (var i=0; i < data['user_ldap_fields'].length; i++) {
+                      fld = data['user_ldap_fields'][i];
+                      if (form.fields[fld]) {
+                         form.fields[fld]['readonly'] = true;
+                         form.fields[fld]['editRequired'] = false;
+                         if (form.fields[fld].awRequiredWhen) {
+                            delete form.fields[fld].awRequiredWhen;
+                         }
                       }
                   }
-              }
-           }
-           $scope.$emit('formReady');
-           })
-       .error( function(data, status, headers, config) {
-           ProcessErrors(scope, data, status, null,
-               { hdr: 'Error!', msg: 'Failed to retrieve application config. GET status: ' + status });
+               }
+               $scope.$emit('formReady');
+               })
+           .error( function(data, status, headers, config) {
+               ProcessErrors($scope, data, status, null,
+                   { hdr: 'Error!', msg: 'Failed to retrieve application config. GET status: ' + status });
+               });
        });
+   
+   Rest.setUrl(defaultUrl + id + '/');
+   Rest.get()
+        .success( function(data, status, headers, config) {
+            if (data.ldap_dn !== null && data.ldap_dn !== undefined && data.ldap_dn !== '') {
+               //this is an LDAP user
+               $scope.$emit('modifyForm');
+            }
+            else {
+               $scope.$emit('formReady');
+            }
+            })
+        .error( function(data, status, headers, config) {
+            ProcessErrors($scope, data, status, null,
+               { hdr: 'Error!', msg: 'Failed to retrieve user: ' + id + '. GET status: ' + status });
+            });
 }
 
 UsersEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 
                       'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
-                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Prompt', 'CheckAccess']; 
+                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Prompt', 'CheckAccess',
+                      'ResetForm' ]; 
   

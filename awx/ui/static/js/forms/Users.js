@@ -56,7 +56,7 @@ angular.module('UserFormDefinition', [])
                 awRequiredWhen: { variable: "not_ldap_user", init: true },
                 autocomplete: false
                 },
-            ldap_dn: {
+            ldap_user: {
                 label: 'Created by LDAP?', 
                 type: 'checkbox',
                 readonly: true
@@ -64,7 +64,7 @@ angular.module('UserFormDefinition', [])
             password: {
                 label: 'Password',
                 type: 'password',
-                ngShow: 'not_ldap_user == true',
+                ngShow: 'ldap_user == false',
                 awRequiredWhen: { variable: "not_ldap_user", init: true},
                 ngChange: "clearPWConfirm('password_confirm')",
                 autocomplete: false,
@@ -73,7 +73,7 @@ angular.module('UserFormDefinition', [])
             password_confirm: {
                 label: 'Confirm Password',
                 type: 'password',
-                ngShow: 'not_ldap_user == true',
+                ngShow: 'ldap_user == false',
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,

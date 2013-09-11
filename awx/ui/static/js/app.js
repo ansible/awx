@@ -16,6 +16,7 @@ angular.module('ansible', [
     'FormGenerator',
     'OrganizationListDefinition',
     'UserListDefinition', 
+    'UserHelper',
     'ListGenerator', 
     'PromptDialog',
     'ApiLoader', 
