@@ -219,14 +219,18 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
 
            // Start the Link
            if ((field.key || field.link || field.linkTo || field.ngClick ) && options['mode'] != 'lookup' && options['mode'] != 'select') {
+              var cap=false;
               if (field.linkTo) {
                  html += "<a href=\"#" + field.linkTo + "\" ";
+                 cap = true;
               }
               else if (field.ngClick) {
                  html += "<a href=\"\"" + Attr(field, 'ngClick') + " ";
+                 cap = true;
               }
-              else if (field.link == undefined || field.link) {
+              else if (field.link || (field.key && (field.link === undefined || field.link))) {
                  html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\" ";
+                 cap = true;
               }
               if (field.awToolTip) {
                  html += Attr(field, 'awToolTip');
@@ -234,7 +238,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                     html += Attr(field,'dataPlacement');
                  }
               }
-              html += ">";
+              html += (cap) ? ">" : "";
            }
 
            // Add icon:
