@@ -675,8 +675,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var generator = GenerateForm;
         var actions = [];
         
-        var html="<div class=\"host-groups-title\"><h4>{{ host.name }}</h4></div>\n";
-        html += "<div class=\"row host-groups\">\n";
+        //var html="<div class=\"host-groups-title\"><h4>{{ host.name }}</h4></div>\n";
+        var html = "<div class=\"row host-groups\">\n";
         html += "<div class=\"col-lg-6\">\n";
         html += "<label>Available Groups:</label>\n";
         html += "<select multiple class=\"form-control\" name=\"available-groups\" ng-model=\"selectedGroups\" ng-change=\"leftChange()\" " +
@@ -713,7 +713,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.rightButtonDisabled = true; 
 
         scope.formModalActionLabel = 'Save';
-        scope.formModalHeader = 'Host Groups';
+        //scope.formModalHeader = 'Host Groups';
+        scope.formModalHeader = scope.host.name + ' - <span class=\"subtitle\">Groups</span>';
         scope.formModalCancelShow = true;
         scope.formModalActionDisabled = true;
 
