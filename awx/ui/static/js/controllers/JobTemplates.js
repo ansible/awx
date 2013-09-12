@@ -297,6 +297,9 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                    scope.playbook_options = [];
                    for (var i=0; i < data.length; i++) {
                        scope.playbook_options.push(data[i]);
+                       if (data[i] == scope.playbook) {
+                          scope['job_templates_form']['playbook'].$setValidity('required',true);
+                       }
                    }
                    if (!scope.$$phase) {
                       scope.$digest();
@@ -514,7 +517,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
           scope[fld] = master[fld];
       }
       scope.parseType = 'yaml';
-      //$('#forks-slider').slider("option", "value", scope.forks);
+      $('#forks-slider').slider("option", "value", scope.forks);
       };
 
    // Related set: Add button

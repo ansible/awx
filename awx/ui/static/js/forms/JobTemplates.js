@@ -85,10 +85,10 @@ angular.module('JobTemplateFormDefinition', [])
             forks: {
                 label: 'Forks',
                 id: 'forks-number',
-                type: 'text', 
-                /*integer: true,
+                type: 'number', 
+                integer: true,
                 min: 0,
-                spinner: true,*/ 
+                spinner: true, 
                 "default": '0',
                 addRequired: false, 
                 editRequired: false,

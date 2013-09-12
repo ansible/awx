@@ -266,4 +266,27 @@ angular.module('Utilities',[])
           $('.spinny, .overlay').fadeOut(1000);
        }
        }
-   }]);
+   }])
+   
+   /* DeugForm(form_name)
+    *
+    * Use to log the $pristine and $invalid properties of each form element. Helpful when form
+    * buttons fail to enable/disable properly. 
+    *
+    */
+   .factory('DebugForm', [ function() {
+   return function(form_name) {
+      $('form[name="' + form_name + '"]').find('select, input, button, textarea').each(function(index){
+          var name = $(this).attr('name');
+          if (name) {
+             if (scope['job_templates_form'][name]) {
+                console.log(name + ' pristine: ' + scope['job_templates_form'][name].$pristine);
+                console.log(name + ' invalid: ' + scope['job_templates_form'][name].$invalid);
+             }
+          }
+          });
+      }
+      }]);
+
+
+
