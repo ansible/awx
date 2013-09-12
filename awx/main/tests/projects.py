@@ -680,29 +680,29 @@ class ProjectUpdatesTest(BaseTransactionTest):
             ('git', 'ftps://user:pass@host.xz/path/to/repo.git/', None, 'ftps://testuser:pass@host.xz/path/to/repo.git/', 'ftps://testuser:testpass@host.xz/path/to/repo.git/'),
             ('git', 'ftps://user:pass@host.xz:8990/path/to/repo.git', None, 'ftps://testuser:pass@host.xz:8990/path/to/repo.git', 'ftps://testuser:testpass@host.xz:8990/path/to/repo.git'),
             # - rsync://host.xz/path/to/repo.git/
-            ('git', 'rsync://host.xz/path/to/repo.git/', None, 'rsync://testuser@host.xz/path/to/repo.git/', 'rsync://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'rsync://host.xz/path/to/repo.git/', ValueError, ValueError, ValueError),
             # - [user@]host.xz:path/to/repo.git/ (SCP style)
             ('git', 'host.xz:path/to/repo.git/', 'ssh://host.xz/path/to/repo.git/', 'ssh://testuser@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
             ('git', 'user@host.xz:path/to/repo.git/', 'ssh://user@host.xz/path/to/repo.git/', 'ssh://testuser@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
             ('git', 'user:pass@host.xz:path/to/repo.git/', 'ssh://user:pass@host.xz/path/to/repo.git/', 'ssh://testuser:pass@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
             # - /path/to/repo.git/ (local file)
-            ('git', '/path/to/repo.git', 'file:///path/to/repo.git', 'file:///path/to/repo.git', 'file:///path/to/repo.git'),
-            ('git', 'path/to/repo.git', 'file:///path/to/repo.git', 'file:///path/to/repo.git', 'file:///path/to/repo.git'),
+            ('git', '/path/to/repo.git', ValueError, ValueError, ValueError),
+            ('git', 'path/to/repo.git', ValueError,  ValueError, ValueError),
             # - file:///path/to/repo.git/
-            ('git', 'file:///path/to/repo.git', None, None, None),
-            ('git', 'file://localhost/path/to/repo.git', None, None, None),
+            ('git', 'file:///path/to/repo.git', ValueError, ValueError, ValueError),
+            ('git', 'file://localhost/path/to/repo.git', ValueError, ValueError, ValueError),
 
             # hg: http://www.selenic.com/mercurial/hg.1.html#url-paths
             # - local/filesystem/path[#revision]
-            ('hg', '/path/to/repo', 'file:///path/to/repo', 'file:///path/to/repo', 'file:///path/to/repo'),
-            ('hg', 'path/to/repo/', 'file:///path/to/repo/', 'file:///path/to/repo/', 'file:///path/to/repo/'),
-            ('hg', '/path/to/repo#rev', 'file:///path/to/repo#rev', 'file:///path/to/repo#rev', 'file:///path/to/repo#rev'),
-            ('hg', 'path/to/repo/#rev', 'file:///path/to/repo/#rev', 'file:///path/to/repo/#rev', 'file:///path/to/repo/#rev'),
+            ('hg', '/path/to/repo', ValueError, ValueError, ValueError),
+            ('hg', 'path/to/repo/', ValueError, ValueError, ValueError),
+            ('hg', '/path/to/repo#rev', ValueError, ValueError, ValueError),
+            ('hg', 'path/to/repo/#rev', ValueError, ValueError, ValueError),
             # - file://local/filesystem/path[#revision]
-            ('hg', 'file:///path/to/repo', None, None, None),
-            ('hg', 'file://localhost/path/to/repo/', None, None, None),
-            ('hg', 'file:///path/to/repo#rev', None, None, None),
-            ('hg', 'file://localhost/path/to/repo/#rev', None, None, None),
+            ('hg', 'file:///path/to/repo', ValueError, ValueError, ValueError),
+            ('hg', 'file://localhost/path/to/repo/', ValueError, ValueError, ValueError),
+            ('hg', 'file:///path/to/repo#rev', ValueError, ValueError, ValueError),
+            ('hg', 'file://localhost/path/to/repo/#rev', ValueError, ValueError, ValueError),
             # - http://[user[:pass]@]host[:port]/[path][#revision]
             ('hg', 'http://host.xz/path/to/repo/', None, 'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
             ('hg', 'http://host.xz:8080/path/to/repo', None, 'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
@@ -745,8 +745,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
 
             # svn: http://svnbook.red-bean.com/en/1.7/svn-book.html#svn.advanced.reposurls
             # - file:///    Direct repository access (on local disk)
-            ('svn', 'file:///path/to/repo', None, None, None),
-            ('svn', 'file://localhost/path/to/repo/', None, None, None),
+            ('svn', 'file:///path/to/repo', ValueError, ValueError, ValueError),
+            ('svn', 'file://localhost/path/to/repo/', ValueError, ValueError, ValueError),
             # - http://     Access via WebDAV protocol to Subversion-aware Apache server
             ('svn', 'http://host.xz/path/to/repo/', None, 'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
             ('svn', 'http://host.xz:8080/path/to/repo', None, 'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
@@ -778,24 +778,28 @@ class ProjectUpdatesTest(BaseTransactionTest):
 
             # FIXME: Add some invalid URLs.
         ]
+        def is_exception(e):
+            return bool(isinstance(new_url, Exception) or
+                        isinstance(new_url, type) and
+                        issubclass(new_url, Exception))
         for url_opts in urls_to_test:
             scm_type, url, new_url, new_url_u, new_url_up = url_opts
             new_url = new_url or url
             new_url_u = new_url_u or url
             new_url_up = new_url_up or url
-            if isinstance(new_url, Exception):
+            if is_exception(new_url):
                 self.assertRaises(new_url, update_scm_url, scm_type, url)
             else:
                 updated_url = update_scm_url(scm_type, url)
                 self.assertEqual(new_url, updated_url)
-            if isinstance(new_url_u, Exception):
+            if is_exception(new_url_u):
                 self.assertRaises(new_url_u, update_scm_url, scm_type,
                                   url, username='testuser')
             else:
                 updated_url = update_scm_url(scm_type, url,
                                                   username='testuser')
                 self.assertEqual(new_url_u, updated_url)
-            if isinstance(new_url_up, Exception):
+            if is_exception(new_url_up):
                 self.assertRaises(new_url_up, update_scm_url, scm_type,
                                   url, username='testuser', password='testpass')
             else:
@@ -1083,7 +1087,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return repo_dir
 
-    def test_git_project_from_local_path(self):
+    def _test_git_project_from_local_path(self):
         repo_dir = self.create_local_git_repo()
         project = self.create_project(
             name='my git project from local path',
@@ -1178,7 +1182,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return repo_dir
 
-    def test_hg_project_from_local_path(self):
+    def _test_hg_project_from_local_path(self):
         repo_dir = self.create_local_hg_repo()
         project = self.create_project(
             name='my hg project from local path',
@@ -1247,7 +1251,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
                               stderr=subprocess.PIPE)
         return repo_dir
 
-    def test_svn_project_from_local_path(self):
+    def _test_svn_project_from_local_path(self):
         repo_dir = self.create_local_svn_repo()
         scm_url = 'file://%s' % repo_dir
         project = self.create_project(
