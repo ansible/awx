@@ -500,7 +500,10 @@ class RunProjectUpdate(BaseTask):
         optionally using ssh-agent for public/private key authentication.
         '''
         args = ['ansible-playbook', '-i', 'localhost,']
-        args.append('-%s' % ('v' * 3))
+        if getattr(settings, 'PROJECT_UPDATE_VVV', False):
+            args.append('-vvv')
+        else:
+            args.append('-v')
         project = project_update.project
         scm_url, extra_vars = self._build_scm_url_extra_vars(project_update,
                                                              **kwargs)
