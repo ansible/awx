@@ -164,7 +164,7 @@ angular.module('UserFormDefinition', [])
                         icon: 'icon-plus',
                         label: 'Add',
                         awToolTip: 'Add a permission for this user',
-                        ngShow: 'PermissionAddAllowed == true'
+                        ngShow: 'PermissionAddAllowed'
                         }
                     },
 
@@ -206,7 +206,8 @@ angular.module('UserFormDefinition', [])
                         ngClick: "delete('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}', 'permissions')",
                         icon: 'icon-trash',
                         "class": 'btn-danger',
-                        awToolTip: 'Delete the permission'
+                        awToolTip: 'Delete the permission',
+                        ngShow: 'PermissionAddAllowed'
                         }
                     }
 

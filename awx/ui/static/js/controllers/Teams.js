@@ -274,12 +274,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    scope.edit = function(set, id, name) {
       $rootScope.flashMessage = null;
       if (set == 'permissions') {
-         if (scope.PermissionAddAllowed) {  
-            $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/' + id);   
-         }
-         else {
-            Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
-         }
+         $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/' + id);   
       }
       else {
          $location.path('/' + set + '/' + id);

@@ -20,3 +20,4 @@ coverage.xml
 pep8.txt
 .vagrant*
 .tox
+nohup.out

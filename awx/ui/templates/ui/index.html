@@ -167,7 +167,7 @@
                 <div class="login-alert" ng-show="(sessionExpired == true)">Your session timed out due to inactivity. Please sign in.</div>
                 <form id="login-form" name="loginForm" class="form-horizontal" autocomplete="off" novalidate >
                   <div class="form-group">
-                    <label class="control-label col-lg-3">* Username</label>
+                    <label class="control-label col-lg-3 prepend-asterisk">Username</label>
                     <div class="col-lg-8">
                       <input type="text" name="login_username" class="form-control" ng-model="login_username"
                           id="login-username" autocomplete="off" required>
@@ -178,7 +178,7 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="control-label col-lg-3">* Password</label>
+                    <label class="control-label col-lg-3 prepend-asterisk">Password</label>
                     <div class="col-lg-8">
                       <input type="password" name="login_password" id="login-password" class="form-control"
                           ng-model="login_password" required autocomplete="off">
@@ -303,7 +303,7 @@
                 <div class="alert" ng-class="alertClass" ng-bind-html-unsafe="alertBody"></div>
               </div>
               <div class="modal-footer">
-                <a href="#" ng-hide="disableButtons" data-target="#form-modal" data-dismiss="modal" class="btn btn-default">OK</a>
+                <a href="#" ng-hide="disableButtons" data-target="#form-modal" data-dismiss="modal" class="btn btn-primary">OK</a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->
@@ -321,7 +321,7 @@
                 <div class="alert" ng-class="alertClass2" ng-bind-html-unsafe="alertBody2"></div>
               </div>
               <div class="modal-footer">
-                <a href="#" ng-hide="disableButtons2" data-target="#form-modal2" data-dismiss="modal" class="btn btn-default">OK</a>
+                <a href="#" ng-hide="disableButtons2" data-target="#form-modal2" data-dismiss="modal" class="btn btn-primary">OK</a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->

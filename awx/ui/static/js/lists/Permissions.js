@@ -48,7 +48,8 @@ angular.module('PermissionListDefinition', [])
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addPermission()',
                 "class": 'btn-success btn-sm',
-                awToolTip: 'Add a new permission'
+                awToolTip: 'Add a new permission',
+                ngShow: 'PermissionAddAllowed'
                 }
             },
 
@@ -66,7 +67,8 @@ angular.module('PermissionListDefinition', [])
                 ngClick: "deletePermission(\{\{ permission.id \}\},'\{\{ permission.name \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',
-                awToolTip: 'Delete permission'
+                awToolTip: 'Delete permission',
+                ngShow: 'PermissionAddAllowed'
                 }
             }
         });

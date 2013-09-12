@@ -201,11 +201,14 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
        scope.PermissionAddAllowed =  false; 
 
        // After the Organization is loaded, retrieve each related set
-       scope.$on('userLoaded', function() {
+       if (scope.removeUserLoaded) {
+          scope.removeUserLoaded();
+       }
+       scope.removeUserLoaded = scope.$on('userLoaded', function() {
            for (var set in relatedSets) {
                scope.search(relatedSets[set].iterator);
            }
-           CheckAccess({ scope: scope });  //Does the user have access add Permissions?
+           CheckAccess({ scope: scope });  //Does the user have access to add/edit Permissions?
            });
 
        // Retrieve detail record and prepopulate the form
@@ -311,12 +314,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
        scope.edit = function(set, id, name) {
           $rootScope.flashMessage = null;
           if (set == 'permissions') {
-             if (scope.PermissionAddAllowed) {
-                $location.path('/users/' + $routeParams.user_id + '/permissions/' + id);
-             }
-             else {
-                Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
-             }
+             $location.path('/users/' + $routeParams.user_id + '/permissions/' + id);
           }
           else {
              $location.path('/' + set + '/' + id);

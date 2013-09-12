@@ -116,7 +116,8 @@ angular.module('TeamFormDefinition', [])
                         ngClick: "add('permissions')",
                         icon: 'icon-plus',
                         label: 'Add',
-                        awToolTip: 'Add a permission for this user'
+                        awToolTip: 'Add a permission for this user',
+                        ngShow: 'PermissionAddAllowed'
                         }
                     },
 
@@ -157,7 +158,8 @@ angular.module('TeamFormDefinition', [])
                         ngClick: "delete('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}', 'permissions')",
                         icon: 'icon-trash',
                         "class": 'btn-danger',
-                        awToolTip: 'Delete the permission'
+                        awToolTip: 'Delete the permission',
+                        ngShow: 'PermissionAddAllowed'
                         }
                     }
 

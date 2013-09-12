@@ -14,7 +14,9 @@ function PermissionsList ($scope, $rootScope, $location, $log, $routeParams, Res
     var view = GenerateList;
     var scope = view.inject(list, { mode: 'edit' });         // Inject our view
     scope.selected = [];
-   
+    
+    CheckAccess({ scope: scope });
+
     SearchInit({ scope: scope, set: 'permissions', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
@@ -22,15 +24,13 @@ function PermissionsList ($scope, $rootScope, $location, $log, $routeParams, Res
     LoadBreadCrumbs();
 
     scope.addPermission = function() {
-       if (CheckAccess()) {
+       if (scope.PermissionAddAllowed) {
           $location.path($location.path() + '/add');
        }
        }
 
     scope.editPermission = function(id) {
-       if (CheckAccess()) {
-          $location.path($location.path() + '/' + id);
-       }
+       $location.path($location.path() + '/' + id);
        }
  
     scope.deletePermission = function(id, name) {
@@ -45,11 +45,11 @@ function PermissionsList ($scope, $rootScope, $location, $log, $routeParams, Res
                .error( function(data, status, headers, config) {
                    $('#prompt-modal').modal('hide');
                    ProcessErrors(scope, data, status, null,
-                      { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                       { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                    });      
            };
        
-       if (checkAccess()) {
+       if (scope.PermissionAddAllowed) {
            Prompt({ hdr: 'Delete', 
                     body: 'Are you sure you want to delete ' + name + '?',
                     action: action
@@ -66,7 +66,7 @@ PermissionsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$route
 
 function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, PermissionsForm, 
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, 
-                         GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit) 
+                         GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -79,7 +79,8 @@ function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    var defaultUrl = GetBasePath(base) + id + '/permissions';
    var scope = generator.inject(form, {mode: 'add', related: false});
    var master = {};
-
+  
+   CheckAccess({ scope: scope })
    generator.reset();
    LoadBreadCrumbs();
    
@@ -108,20 +109,25 @@ function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
    // Save
    scope.formSave = function() {
-      var data = {};
-      for (var fld in form.fields) {
-          data[fld] = scope[fld];
+      if (scope.PermissionAddAllowed) {
+         var data = {};
+         for (var fld in form.fields) {
+             data[fld] = scope[fld];
+         }
+         var url = (base == 'teams') ? GetBasePath('teams') + id + '/permissions/' : GetBasePath('users') + id + '/permissions/';
+         Rest.setUrl(url);
+         Rest.post(data)
+             .success( function(data, status, headers, config) {
+                 ReturnToCaller(1);
+                 })
+             .error( function(data, status, headers, config) {
+                 ProcessErrors(scope, data, status, PermissionsForm,
+                     { hdr: 'Error!', msg: 'Failed to create new permission. Post returned status: ' + status });
+                 });
       }
-      var url = (base == 'teams') ? GetBasePath('teams') + id + '/permissions/' : GetBasePath('users') + id + '/permissions/';
-      Rest.setUrl(url);
-      Rest.post(data)
-          .success( function(data, status, headers, config) {
-              ReturnToCaller(1);
-              })
-          .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, PermissionsForm,
-                  { hdr: 'Error!', msg: 'Failed to create new permission. Post returned status: ' + status });
-              });
+      else {
+         Alert('Access Denied', 'You do not have access to create new permission objects. Please contact a system administrator.', 'alert-danger');
+      }
       };
 
    // Cancel
@@ -146,13 +152,13 @@ function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
 PermissionsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'PermissionsForm', 
                            'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
-                           'ReturnToCaller', 'InventoryList', 'ProjectList', 'LookUpInit'
+                           'ReturnToCaller', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess'
                            ];
 
 
 function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, PermissionsForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, 
-                          ClearScope, Prompt, GetBasePath, InventoryList, ProjectList, LookUpInit) 
+                          ClearScope, Prompt, GetBasePath, InventoryList, ProjectList, LookUpInit, CheckAccess) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -169,6 +175,7 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    var master = {};
    var relatedSets = {}; 
    
+   CheckAccess({ scope: scope })
 
    // Retrieve detail record and prepopulate the form
    Rest.setUrl(defaultUrl); 
@@ -215,6 +222,20 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
               list: ProjectList, 
               field: 'project' 
               });
+
+           if (!scope.PermissionAddAllowed) {
+              // If not a privileged user, disable access
+              $('form[name="permission_form"]').find('select, input, button').each(function(index){
+                  if ($(this).is('input') || $(this).is('select')) {
+                     $(this).attr('readonly','readonly');
+                  }
+                  if ( $(this).is('input[type="checkbox"]') ||
+                       $(this).is('input[type="radio"]') || 
+                       $(this).is('button') ) {
+                     $(this).attr('disabled','disabled');
+                  }
+                  });
+           }
            })
        .error( function(data, status, headers, config) {
            ProcessErrors(scope, data, status, form,
@@ -263,6 +284,6 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 
 PermissionsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'PermissionsForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
-                            'ClearScope', 'Prompt', 'GetBasePath', 'InventoryList', 'ProjectList', 'LookUpInit'
+                            'ClearScope', 'Prompt', 'GetBasePath', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess'
                             ]; 
   
