@@ -301,29 +301,63 @@ class ProjectSerializer(BaseSerializer):
     def validate_scm_url(self, attrs, source):
         if self.object:
             scm_type = attrs.get('scm_type', self.object.scm_type) or ''
-            scm_username = attrs.get('scm_username', self.object.scm_username) or ''
-            scm_password = attrs.get('scm_password', self.object.scm_password) or ''
         else:
             scm_type = attrs.get('scm_type', '') or ''
-            scm_username = attrs.get('scm_username', '') or ''
-            scm_password = attrs.get('scm_password', '') or ''
         scm_url = unicode(attrs.get(source, None) or '')
         if not scm_type:
             return attrs
         try:
-            if scm_username and scm_password:
-                scm_url = update_scm_url(scm_type, scm_url, scm_username,
-                                         '********')
-            elif scm_username:
-                scm_url = update_scm_url(scm_type, scm_url, scm_username)
-            else:
-                scm_url = update_scm_url(scm_type, scm_url)
+            scm_url = update_scm_url(scm_type, scm_url)
         except ValueError, e:
             raise serializers.ValidationError((e.args or ('Invalid SCM URL',))[0])
         scm_url_parts = urlparse.urlsplit(scm_url)
-        print scm_url_parts
+        #print scm_url_parts
         if scm_type and not any(scm_url_parts):
-            raise serializers.ValidationError('SCM URL must be provided')
+            raise serializers.ValidationError('SCM URL is required')
+        return attrs
+
+    def validate_scm_username(self, attrs, source):
+        if self.object:
+            scm_type = attrs.get('scm_type', self.object.scm_type) or ''
+            scm_url = unicode(attrs.get('scm_url', self.object.scm_url) or '')
+            scm_username = attrs.get('scm_username', self.object.scm_username) or ''
+        else:
+            scm_type = attrs.get('scm_type', '') or ''
+            scm_url = unicode(attrs.get('scm_url', '') or '')
+            scm_username = attrs.get('scm_username', '') or ''
+        if not scm_type:
+            return attrs
+        try:
+            if scm_url and scm_username:
+                update_scm_url(scm_type, scm_url, scm_username)
+        except ValueError, e:
+            raise serializers.ValidationError((e.args or ('Invalid SCM username',))[0])
+        return attrs
+
+    def validate_scm_password(self, attrs, source):
+        if self.object:
+            scm_type = attrs.get('scm_type', self.object.scm_type) or ''
+            scm_url = unicode(attrs.get('scm_url', self.object.scm_url) or '')
+            scm_username = attrs.get('scm_username', self.object.scm_username) or ''
+            scm_password = attrs.get('scm_password', self.object.scm_password) or ''
+        else:
+            scm_type = attrs.get('scm_type', '') or ''
+            scm_url = unicode(attrs.get('scm_url', '') or '')
+            scm_username = attrs.get('scm_username', '') or ''
+            scm_password = attrs.get('scm_password', '') or ''
+        if not scm_type:
+            return attrs
+        try:
+            try:
+                if scm_url and scm_username:
+                    update_scm_url(scm_type, scm_url, scm_username)
+            except ValueError:
+                pass
+            else:
+                if scm_url and scm_username and scm_password:
+                    update_scm_url(scm_type, scm_url, scm_username, '**')
+        except ValueError, e:
+            raise serializers.ValidationError((e.args or ('Invalid SCM password',))[0])
         return attrs
 
 class ProjectPlaybooksSerializer(ProjectSerializer):

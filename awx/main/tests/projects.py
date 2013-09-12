@@ -692,6 +692,17 @@ class ProjectUpdatesTest(BaseTransactionTest):
             # - file:///path/to/repo.git/
             ('git', 'file:///path/to/repo.git', ValueError, ValueError, ValueError),
             ('git', 'file://localhost/path/to/repo.git', ValueError, ValueError, ValueError),
+            # Invalid SSH URLs:
+            ('git', 'ssh:github.com:ansible/ansible-examples.git', ValueError, ValueError, ValueError),
+            ('git', 'ssh://github.com:ansible/ansible-examples.git', ValueError, ValueError, ValueError),
+            # Special case for github URLs:
+            ('git', 'git@github.com:ansible/ansible-examples.git', 'ssh://git@github.com/ansible/ansible-examples.git', ValueError, ValueError),
+            ('git', 'bob@github.com:ansible/ansible-examples.git', ValueError, ValueError, ValueError),
+            # Special case for bitbucket URLs:
+            ('git', 'ssh://git@bitbucket.org/foo/bar.git', None, ValueError, ValueError),
+            ('git', 'ssh://git@altssh.bitbucket.org:443/foo/bar.git', None, ValueError, ValueError),
+            ('git', 'ssh://hg@bitbucket.org/foo/bar.git', ValueError, ValueError, ValueError),
+            ('git', 'ssh://hg@altssh.bitbucket.org:443/foo/bar.git', ValueError, ValueError, ValueError),
 
             # hg: http://www.selenic.com/mercurial/hg.1.html#url-paths
             # - local/filesystem/path[#revision]
@@ -743,6 +754,11 @@ class ProjectUpdatesTest(BaseTransactionTest):
             ('hg', 'ssh://user@host.xz:1022/path/to/repo#rev', None, 'ssh://testuser@host.xz:1022/path/to/repo#rev', 'ssh://testuser:testpass@host.xz:1022/path/to/repo#rev'),
             ('hg', 'ssh://user:pass@host.xz/path/to/repo/#rev', None, 'ssh://testuser:pass@host.xz/path/to/repo/#rev', 'ssh://testuser:testpass@host.xz/path/to/repo/#rev'),
             ('hg', 'ssh://user:pass@host.xz:1022/path/to/repo#rev', None, 'ssh://testuser:pass@host.xz:1022/path/to/repo#rev', 'ssh://testuser:testpass@host.xz:1022/path/to/repo#rev'),
+            # Special case for bitbucket URLs:
+            ('hg', 'ssh://hg@bitbucket.org/foo/bar', None, ValueError, ValueError),
+            ('hg', 'ssh://hg@altssh.bitbucket.org:443/foo/bar', None, ValueError, ValueError),
+            ('hg', 'ssh://bob@bitbucket.org/foo/bar', ValueError, ValueError, ValueError),
+            ('hg', 'ssh://bob@altssh.bitbucket.org:443/foo/bar', ValueError, ValueError, ValueError),
 
             # svn: http://svnbook.red-bean.com/en/1.7/svn-book.html#svn.advanced.reposurls
             # - file:///    Direct repository access (on local disk)
@@ -780,11 +796,11 @@ class ProjectUpdatesTest(BaseTransactionTest):
             # FIXME: Add some invalid URLs.
         ]
         def is_exception(e):
-            return bool(isinstance(new_url, Exception) or
-                        isinstance(new_url, type) and
-                        issubclass(new_url, Exception))
+            return bool(isinstance(e, Exception) or
+                        (isinstance(e, type) and issubclass(e, Exception)))
         for url_opts in urls_to_test:
             scm_type, url, new_url, new_url_u, new_url_up = url_opts
+            #print url
             new_url = new_url or url
             new_url_u = new_url_u or url
             new_url_up = new_url_up or url
