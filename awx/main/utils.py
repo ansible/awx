@@ -141,6 +141,8 @@ def update_scm_url(scm_type, url, username=True, password=True):
     # svn: http://svnbook.red-bean.com/en/1.7/svn-book.html#svn.advanced.reposurls
     if scm_type not in ('git', 'hg', 'svn'):
         raise ValueError('unsupported SCM type "%s"' % str(scm_type))
+    if not url.strip():
+        return ''
     parts = urlparse.urlsplit(url)
     #print parts
     if '://' not in url:

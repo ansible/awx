@@ -25,6 +25,7 @@ from rest_framework import serializers
 
 # AWX
 from awx.main.models import *
+from awx.main.utils import update_scm_url
 
 BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created', 'modified',
                'name', 'description')
@@ -299,11 +300,26 @@ class ProjectSerializer(BaseSerializer):
 
     def validate_scm_url(self, attrs, source):
         if self.object:
-            scm_type = attrs.get('scm_type', self.object.scm_type)
+            scm_type = attrs.get('scm_type', self.object.scm_type) or ''
+            scm_username = attrs.get('scm_username', self.object.scm_username) or ''
+            scm_password = attrs.get('scm_password', self.object.scm_password) or ''
         else:
-            scm_type = attrs.get('scm_type', '')
+            scm_type = attrs.get('scm_type', '') or ''
+            scm_username = attrs.get('scm_username', '') or ''
+            scm_password = attrs.get('scm_password', '') or ''
         scm_url = unicode(attrs.get(source, None) or '')
+        try:
+            if scm_username and scm_password:
+                scm_url = update_scm_url(scm_type, scm_url, scm_username,
+                                         '********')
+            elif scm_username:
+                scm_url = update_scm_url(scm_type, scm_url, scm_username)
+            else:
+                scm_url = update_scm_url(scm_type, scm_url)
+        except ValueError, e:
+            raise serializers.ValidationError((e.args or ('Invalid SCM URL',))[0])
         scm_url_parts = urlparse.urlsplit(scm_url)
+        print scm_url_parts
         if scm_type and not any(scm_url_parts):
             raise serializers.ValidationError('SCM URL must be provided')
         return attrs

@@ -260,6 +260,11 @@ TEST_SVN_PASSWORD = ''
 TEST_SVN_PUBLIC_HTTPS = 'https://github.com/ansible/ansible-examples'
 TEST_SVN_PRIVATE_HTTPS = 'https://github.com/ansible/ansible-doc'
 
+# To test repo access via SSH login to localhost.
+import getpass
+TEST_SSH_LOOPBACK_USERNAME = getpass.getuser()
+TEST_SSH_LOOPBACK_PASSWORD = ''
+
 ###############################################################################
 # LDAP TEST SETTINGS
 ###############################################################################

@@ -40,7 +40,6 @@ class BaseTask(Task):
     
     name = None
     model = None
-    idle_timeout = None
 
     def update_model(self, pk, **updates):
         '''
@@ -129,6 +128,9 @@ class BaseTask(Task):
     def build_output_replacements(self, instance, **kwargs):
         return []
 
+    def get_idle_timeout(self):
+        return None
+
     def get_password_prompts(self):
         '''
         Return a dictionary of prompt regular expressions and password lookup
@@ -152,6 +154,7 @@ class BaseTask(Task):
         child.logfile_read = logfile
         canceled = False
         last_stdout_update = time.time()
+        idle_timeout = self.get_idle_timeout()
         expect_list = []
         expect_passwords = {}
         for n, item in enumerate(self.get_password_prompts().items()):
@@ -174,7 +177,7 @@ class BaseTask(Task):
                 canceled = True
             # FIXME: Configurable idle timeout? Find a way to determine if task
             # is hung waiting at a prompt.
-            if self.idle_timeout and (time.time() - last_stdout_update) > self.idle_timeout:
+            if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
                 child.close(True)
                 canceled = True
         if canceled:
@@ -430,7 +433,6 @@ class RunProjectUpdate(BaseTask):
     
     name = 'run_project_update'
     model = ProjectUpdate
-    #idle_timeout = 30
 
     def build_passwords(self, project_update, **kwargs):
         '''
@@ -463,27 +465,33 @@ class RunProjectUpdate(BaseTask):
         Helper method to build SCM url and extra vars with parameters needed
         for authentication.
         '''
-        # FIXME: May need to pull username/password out of URL in other cases.
         extra_vars = {}
         project = project_update.project
         scm_type = project.scm_type
-        scm_url = project.scm_url
+        scm_url = update_scm_url(scm_type, project.scm_url)
+        scm_url_parts = urlparse.urlsplit(scm_url)
         scm_username = kwargs.get('passwords', {}).get('scm_username', '')
+        scm_username = scm_username or scm_url_parts.username or ''
         scm_password = kwargs.get('passwords', {}).get('scm_password', '')
+        scm_password = scm_password or scm_url_parts.password or ''
         if scm_username and scm_password not in ('ASK', ''):
             if scm_type == 'svn':
+                # FIXME: Need to somehow escape single/double quotes in username/password
                 extra_vars['scm_username'] = scm_username
                 extra_vars['scm_password'] = scm_password
+                scm_url = update_scm_url(scm_type, scm_url, False, False)
+            elif scm_url_parts.scheme == 'ssh':
+                scm_url = update_scm_url(scm_type, scm_url, scm_username, False)
             else:
                 scm_url = update_scm_url(scm_type, scm_url, scm_username,
                                          scm_password)
         elif scm_username:
             if scm_type == 'svn':
                 extra_vars['scm_username'] = scm_username
+                extra_vars['scm_password'] = ''
+                scm_url = update_scm_url(scm_type, scm_url, False, False)
             else:  
-                scm_url = update_scm_url(scm_type, scm_url, scm_username)
-        else:
-            scm_url = update_scm_url(scm_type, scm_url)
+                scm_url = update_scm_url(scm_type, scm_url, scm_username, False)
         return scm_url, extra_vars
 
     def build_args(self, project_update, **kwargs):
@@ -506,6 +514,7 @@ class RunProjectUpdate(BaseTask):
             'scm_clean': project.scm_clean,
             'scm_delete_on_update': scm_delete_on_update,
         })
+        #print extra_vars
         args.extend(['-e', json.dumps(extra_vars)])
         args.append('project_update.yml')
 
@@ -568,10 +577,14 @@ class RunProjectUpdate(BaseTask):
         d.update({
             r'Username for.*:': 'scm_username',
             r'Password for.*:': 'scm_password',
+            r'^Password:\s*?$': 'scm_password',     # SSH prompt for git.
             # FIXME: Configure whether we should auto accept host keys?
             r'Are you sure you want to continue connecting \(yes/no\)\?': 'yes',
         })
         return d
+
+    def get_idle_timeout(self):
+        return getattr(settings, 'PROJECT_UPDATE_IDLE_TIMEOUT', None)
 
     def pre_run_check(self, project_update, **kwargs):
         '''
