@@ -575,11 +575,12 @@ class RunProjectUpdate(BaseTask):
     def get_password_prompts(self):
         d = super(RunProjectUpdate, self).get_password_prompts()
         d.update({
-            r'Username for.*:': 'scm_username',
-            r'Password for.*:': 'scm_password',
-            r'^Password:\s*?$': 'scm_password',     # SSH prompt for git.
+            re.compile(r'^Username for.*:\s*?$', re.M): 'scm_username',
+            re.compile(r'^Password for.*:\s*?$', re.M): 'scm_password',
+            re.compile(r'^Password:\s*?$', re.M): 'scm_password',
+            re.compile(r'^\S+?@\S+?\'s\s+?password:\s*?$', re.M): 'scm_password',
             # FIXME: Configure whether we should auto accept host keys?
-            r'Are you sure you want to continue connecting \(yes/no\)\?': 'yes',
+            re.compile(r'^Are you sure you want to continue connecting \(yes/no\)\?\s*?$', re.M): 'yes',
         })
         return d
 
