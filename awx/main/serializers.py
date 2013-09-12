@@ -308,6 +308,8 @@ class ProjectSerializer(BaseSerializer):
             scm_username = attrs.get('scm_username', '') or ''
             scm_password = attrs.get('scm_password', '') or ''
         scm_url = unicode(attrs.get(source, None) or '')
+        if not scm_type:
+            return attrs
         try:
             if scm_username and scm_password:
                 scm_url = update_scm_url(scm_type, scm_url, scm_username,
