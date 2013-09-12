@@ -96,16 +96,16 @@ angular.module('ProjectFormDefinition', [])
                 label: 'SCM URL',
                 type: 'text',
                 ngShow: "scm_type !== '' && scm_type !== null",
-                awValidUrl: true,
-                awRequiredWhen: { variable: "scm_type", init: "true" },
-                awPopOver: "<p>Provide the URL to your SCM server. The value should begin with the protocol https:\/\/, http:\/\/ or ssh:\/\/.</p>" +
+                //awValidUrl: true,
+                awRequiredWhen: { variable: "scm_type", init: "true" }
+                /*awPopOver: "<p>Provide the URL to your SCM server. The value should begin with the protocol https:\/\/, http:\/\/ or ssh:\/\/.</p>" +
                     "<p>Do not inlcude username or password values. Use the authentication settings instead.</p>" + 
                     "<p>Examples include:</p>" +
                     "<p>ssh:\/\/github.com:ansible/ansible-examples.git</p>" +
                     "<p>https:\/\/github.com/ansible/ansible-examples.git</p>",
                 dataTitle: 'SCM URL',
                 dataPlacement: 'right',
-                dataContainer: 'body'
+                dataContainer: 'body'*/
                 },
             scm_branch: {
                 labelBind: "scmBranchLabel",
