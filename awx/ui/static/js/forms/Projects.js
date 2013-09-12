@@ -22,7 +22,7 @@ angular.module('ProjectFormDefinition', [])
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                capitalize: true
+                capitalize: false
                 },
             description: { 
                 label: 'Description',
@@ -96,16 +96,29 @@ angular.module('ProjectFormDefinition', [])
                 label: 'SCM URL',
                 type: 'text',
                 ngShow: "scm_type !== '' && scm_type !== null",
-                //awValidUrl: true,
-                awRequiredWhen: { variable: "scm_type", init: "true" }
-                /*awPopOver: "<p>Provide the URL to your SCM server. The value should begin with the protocol https:\/\/, http:\/\/ or ssh:\/\/.</p>" +
-                    "<p>Do not inlcude username or password values. Use the authentication settings instead.</p>" + 
-                    "<p>Examples include:</p>" +
-                    "<p>ssh:\/\/github.com:ansible/ansible-examples.git</p>" +
-                    "<p>https:\/\/github.com/ansible/ansible-examples.git</p>",
-                dataTitle: 'SCM URL',
-                dataPlacement: 'right',
-                dataContainer: 'body'*/
+                awRequiredWhen: { variable: "scm_type", init: "true" },
+                helpCollapse: [
+                    { hdr: 'GIT URLs',
+                      content: '<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
+                               '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
+                               '<p><strong>Note:</strong> If using SSH protocol for github or bitbucket, enter in the SSH key only, ' +
+                               'do not enter a username (other than git) and password authentication is not supported.  GIT read only ' + 
+                               'protocol (git://) does not use username or password information.',
+                      show: "scm_type.value == 'git'" },
+                    { hdr: 'SVN URLs', 
+                      content: '<p>Example URLs for Subversion SCM include:</p>' +
+                               '<ul class=\"no-bullets\"><li>https://github.com/ansible/ansible</li><li>svn://servername.example.com/path</li>' +
+                               '<li>svn+ssh://servername.example.com/path</li></ul>',
+                      show: "scm_type.value == 'svn'" },
+                    { hdr: 'Mercurial URLs',
+                      content: '<p>Example URLs for Mercurial SCM include:</p>' +
+                          '<ul class=\"no-bullets\"><li>https://bitbucket.org/username/project</li><li>ssh://hg@bitbucket.org/username/project</li>' +
+                          '<li>ssh://server.example.com/path</li></ul>' +
+                          '<p><strong>Note:</strong> Mercurial does not support password authentication for SSH. ' +
+                          'If applicable, add the username, password and key below. Do not put the username and key in the URL. ' +
+                          'If using Bitbucket and SSH, do not supply your Bitbucket username.',
+                      show: "scm_type.value == 'hg'" }  
+                    ]
                 },
             scm_branch: {
                 labelBind: "scmBranchLabel",

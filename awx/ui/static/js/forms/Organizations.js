@@ -21,7 +21,7 @@ angular.module('OrganizationFormDefinition', [])
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                capitalize: true
+                capitalize: false
                 },
             description: { 
                 label: 'Description',

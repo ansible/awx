@@ -27,6 +27,7 @@ body {
 .pad-right-sm { padding-right: 10px; }
 .pad-left-lg { padding-left: 50px; }
 .normal-weight { font-weight: normal; }
+.no-bullets { list-style: none; }
 
 /* Working... spinner */
 .spinny {
@@ -88,6 +89,19 @@ hr {
 
 .nowrap {
   white-space: nowrap;
+}
+
+/* help collapse */
+h4.panel-title {
+  font-size: 14px;
+}
+
+.panel-heading:hover {
+  cursor: pointer;  
+}
+
+.panel-default>.panel-heading .collapse-help-icon {
+  color: @grey;
 }
 
 th.actions-column,

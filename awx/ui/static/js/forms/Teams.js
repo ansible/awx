@@ -25,7 +25,7 @@ angular.module('TeamFormDefinition', [])
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                capitalize: true
+                capitalize: false
                 },
             description: { 
                 label: 'Description',

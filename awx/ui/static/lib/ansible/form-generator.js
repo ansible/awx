@@ -10,8 +10,8 @@
 
 angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
     .factory('GenerateForm', [ '$location', '$cookieStore', '$compile', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column',
-        'NavigationLink', 
-    function($location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink) {
+        'NavigationLink', 'HelpCollapse',
+    function($location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse) {
     return {
     
     setForm: function(form) {
@@ -21,6 +21,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
     attr: Attr,
 
     icon: Icon,
+
+    accordion_count: 0,
 
     has: function(key) {
        return (this.form[key] && this.form[key] != null && this.form[key] != undefined) ? true : false;
@@ -197,6 +199,16 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 });
         }
         else {
+           this.scope.accordionToggle = function(selector) {
+               $(selector).collapse('toggle');
+               if ( $(selector + '-icon').hasClass('icon-minus') ) {
+                  $(selector + '-icon').removeClass('icon-minus').addClass('icon-plus');
+               }
+               else {
+                  $(selector + '-icon').removeClass('icon-plus').addClass('icon-minus')
+               }
+               }
+
            $('.jqui-accordion').each( function(index) {
               
                var active = false;
@@ -289,6 +301,21 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
     navigationLink: NavigationLink,
 
+    
+    buildHelpCollapse: function(collapse_array) {
+        var html = ''; 
+        var params = {};
+        for (var i=0; i < collapse_array.length; i++) {
+            params.hdr = collapse_array[i].hdr; 
+            params.content = collapse_array[i].content; 
+            params.idx = this.accordion_count++;
+            params.show = (collapse_array[i].show) ? collapse_array[i].show : null;   
+            html += HelpCollapse(params);       
+        }
+        return html;
+        },
+
+    
     buildField: function(fld, field, options, form) {
 
        function getFieldWidth() {
@@ -326,7 +353,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               x = "col-lg-2";
            }
            return x;
-       }
+           }
 
        function buildCheckbox(field, fld) {
            var html='';
@@ -348,7 +375,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            html += (field.awPopOver) ? Attr(field, 'awPopOver', fld) : "";
            html += "</label>\n";
            return html;
-      }
+           }
        
        var html = '';
 
@@ -456,36 +483,45 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + 
                     ".$error.awvalidurl\">URL must begin with ssh, http or https and may not contain '@'</div>\n";
              }
+             
+             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
 
              if (field.chkPass) {
+                // complexity error
                 html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + 
                     ".$error.complexity\">Password must be stronger</div>\n";
+                
+                // progress bar
                 html += "<div class=\"pw-progress\">\n";
                 html += "<div class=\"progress progress-striped\">\n";
                 html += "<div id=\"progbar\" class=\"progress-bar\" role=\"progress\"></div>\n";
                 html += "</div>\n";
-                html += "<div class=\"panel panel-default\">\n";
-                html += "<div class=\"panel-heading\"><h5>Password Strength</h5></div>\n";
-                html += "<div class=\"panel-body\">\n";
-                html += "<p>A password with reasonable strength is required. As you type the password " + 
-                  "a progress bar will measure the strength. Sufficient strength is reached when the bar turns green.</p>" +
-                  "<p>Password strength is judged using the following:</p>";
-                html += "<ul class=\"pwddetails\">\n";
-                html += "<li>Minimum 8 characters in length</li>\n";
-                html += "<li>Contains a sufficient combination of the following items:\n";
-                html += "<ul>\n";
-                html += "<li>UPPERCASE letters</li>\n";
-                html += "<li>Numbers</li>\n";
-                html += "<li>Symbols _!@#$%^&*()</li>\n";
-                html += "</ul>\n";
-                html += "</li>\n";
-                html += "</ul>\n";
-                html += "</div>\n"; 
-                html += "</div>\n";
-                html += "</div>\n";
+                
+                // help panel
+                html += HelpCollapse({
+                    hdr: 'Password Complexity',
+                    content: "<p>A password with reasonable strength is required. As you type the password " + 
+                    "a progress bar will measure the strength. Sufficient strength is reached when the bar turns green.</p>" +
+                    "<p>Password strength is judged using the following:</p>" +
+                    "<ul class=\"pwddetails\">" + 
+                    "<li>Minimum 8 characters in length</li>\n" +
+                    "<li>Contains a sufficient combination of the following items:\n" +
+                    "<ul>\n" +
+                    "<li>UPPERCASE letters</li>\n" +
+                    "<li>Numbers</li>\n" +
+                    "<li>Symbols _!@#$%^&*()</li>\n" +
+                    "</ul>\n" +
+                    "</li>\n" +
+                    "</ul>\n",
+                    idx: this.accordion_count++,
+                    show: null
+                    });
+                html += "</div><!-- pw-progress -->\n";
              }
-             
-             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+
+             // Add help panel(s)
+             html += (field.helpCollapse) ? this.buildHelpCollapse(field.helpCollapse) : '';
+
              html += "</div>\n";
          }
 
@@ -583,6 +619,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               this.form.name + '_form.' + fld + ".$error.required\">A value is required!</div>\n";
             }
             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+            
+            // Add help panel(s)
+            html += (field.helpCollapse) ? this.buildHelpCollapse(field.helpCollapse) : '';
+            
             html += "</div>\n";
          }
 

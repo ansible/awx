@@ -28,7 +28,7 @@ angular.module('PermissionFormDefinition', [])
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
-                capitalize: true
+                capitalize: false
                 },
             description: { 
                 label: 'Description',

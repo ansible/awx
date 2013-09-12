@@ -296,6 +296,33 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         }
         }])
 
+    .factory('HelpCollapse', function() {
+    return function(params) {
+        var hdr = params.hdr; 
+        var content = params.content;
+        var show = params.show;
+        var idx = params.idx;
+        var html = '';
+        html += "<div class=\"panel-group collapsible-help\" ";
+        html += (show) ? "ng-show=\"" + show + "\"" : "";
+        html += ">\n";
+        html += "<div class=\"panel panel-default\">\n";
+        html += "<div class=\"panel-heading\" ng-click=\"accordionToggle('#accordion" + idx + "')\">\n";
+        html += "<h4 class=\"panel-title\">\n";
+        html += "<i class=\"icon-question-sign help-collapse\"></i> " + hdr;
+        html += "<i class=\"icon-minus pull-right collapse-help-icon\" id=\"accordion" + idx + "-icon\"></i>";
+        html += "</h4>\n";
+        html += "</div>\n";
+        html += "<div id=\"accordion" + idx + "\" class=\"panel-collapse collapse in\">\n";
+        html += "<div class=\"panel-body\">\n";
+        html += content; 
+        html += "</div>\n";
+        html += "</div>\n";
+        html += "</div>\n";
+        html += "</div>\n";
+        return html;
+        }
+        })
 
     .factory('SearchWidget', function() {
     return function(params) {
