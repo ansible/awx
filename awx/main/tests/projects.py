@@ -5,6 +5,8 @@
 import datetime
 import json
 import os
+import re
+import subprocess
 import tempfile
 import urlparse
 
@@ -21,7 +23,7 @@ from django.utils.timezone import now
 from awx.main.models import *
 from awx.main.tests.base import BaseTest, BaseTransactionTest
 from awx.main.tests.tasks import TEST_SSH_KEY_DATA_LOCKED, TEST_SSH_KEY_DATA_UNLOCK
-from awx.main.utils import decrypt_field
+from awx.main.utils import decrypt_field, update_scm_url
 
 TEST_PLAYBOOK = '''- hosts: mygroup
   gather_facts: false
@@ -631,6 +633,175 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self._temp_project_dirs.append(project_path)
         return project
 
+    def test_update_scm_url(self):
+        # Handle all of the URL formats supported by the SCM systems:
+        urls_to_test = [
+            # (scm type, original url, new url, new url with username, new url with username and password)
+
+            # git: https://www.kernel.org/pub/software/scm/git/docs/git-clone.html#URLS
+            # - ssh://[user@]host.xz[:port]/path/to/repo.git/
+            ('git', 'ssh://host.xz/path/to/repo.git/', None, 'ssh://testuser@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'ssh://host.xz:1022/path/to/repo.git', None, 'ssh://testuser@host.xz:1022/path/to/repo.git', 'ssh://testuser:testpass@host.xz:1022/path/to/repo.git'),
+            ('git', 'ssh://user@host.xz/path/to/repo.git/', None, 'ssh://testuser@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'ssh://user@host.xz:1022/path/to/repo.git', None, 'ssh://testuser@host.xz:1022/path/to/repo.git', 'ssh://testuser:testpass@host.xz:1022/path/to/repo.git'),
+            ('git', 'ssh://user:pass@host.xz/path/to/repo.git/', None, 'ssh://testuser:pass@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'ssh://user:pass@host.xz:1022/path/to/repo.git', None, 'ssh://testuser:pass@host.xz:1022/path/to/repo.git', 'ssh://testuser:testpass@host.xz:1022/path/to/repo.git'),
+            # - git://host.xz[:port]/path/to/repo.git/ (doesn't really support authentication)
+            ('git', 'git://host.xz/path/to/repo.git/', None, 'git://testuser@host.xz/path/to/repo.git/', 'git://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'git://host.xz:9418/path/to/repo.git', None, 'git://testuser@host.xz:9418/path/to/repo.git', 'git://testuser:testpass@host.xz:9418/path/to/repo.git'),
+            ('git', 'git://user@host.xz/path/to/repo.git/', None, 'git://testuser@host.xz/path/to/repo.git/', 'git://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'git://user@host.xz:9418/path/to/repo.git', None, 'git://testuser@host.xz:9418/path/to/repo.git', 'git://testuser:testpass@host.xz:9418/path/to/repo.git'),
+            # - http[s]://host.xz[:port]/path/to/repo.git/
+            ('git', 'http://host.xz/path/to/repo.git/', None, 'http://testuser@host.xz/path/to/repo.git/', 'http://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'http://host.xz:8080/path/to/repo.git', None, 'http://testuser@host.xz:8080/path/to/repo.git', 'http://testuser:testpass@host.xz:8080/path/to/repo.git'),
+            ('git', 'http://user@host.xz/path/to/repo.git/', None, 'http://testuser@host.xz/path/to/repo.git/', 'http://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'http://user@host.xz:8080/path/to/repo.git', None, 'http://testuser@host.xz:8080/path/to/repo.git', 'http://testuser:testpass@host.xz:8080/path/to/repo.git'),
+            ('git', 'http://user:pass@host.xz/path/to/repo.git/', None, 'http://testuser:pass@host.xz/path/to/repo.git/', 'http://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'http://user:pass@host.xz:8080/path/to/repo.git', None, 'http://testuser:pass@host.xz:8080/path/to/repo.git', 'http://testuser:testpass@host.xz:8080/path/to/repo.git'),
+            ('git', 'https://host.xz/path/to/repo.git/', None, 'https://testuser@host.xz/path/to/repo.git/', 'https://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'https://host.xz:8443/path/to/repo.git', None, 'https://testuser@host.xz:8443/path/to/repo.git', 'https://testuser:testpass@host.xz:8443/path/to/repo.git'),
+            ('git', 'https://user@host.xz/path/to/repo.git/', None, 'https://testuser@host.xz/path/to/repo.git/', 'https://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'https://user@host.xz:8443/path/to/repo.git', None, 'https://testuser@host.xz:8443/path/to/repo.git', 'https://testuser:testpass@host.xz:8443/path/to/repo.git'),
+            ('git', 'https://user:pass@host.xz/path/to/repo.git/', None, 'https://testuser:pass@host.xz/path/to/repo.git/', 'https://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'https://user:pass@host.xz:8443/path/to/repo.git', None, 'https://testuser:pass@host.xz:8443/path/to/repo.git', 'https://testuser:testpass@host.xz:8443/path/to/repo.git'),
+            # - ftp[s]://host.xz[:port]/path/to/repo.git/
+            ('git', 'ftp://host.xz/path/to/repo.git/', None, 'ftp://testuser@host.xz/path/to/repo.git/', 'ftp://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'ftp://host.xz:8021/path/to/repo.git', None, 'ftp://testuser@host.xz:8021/path/to/repo.git', 'ftp://testuser:testpass@host.xz:8021/path/to/repo.git'),
+            ('git', 'ftp://user@host.xz/path/to/repo.git/', None, 'ftp://testuser@host.xz/path/to/repo.git/', 'ftp://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'ftp://user@host.xz:8021/path/to/repo.git', None, 'ftp://testuser@host.xz:8021/path/to/repo.git', 'ftp://testuser:testpass@host.xz:8021/path/to/repo.git'),
+            ('git', 'ftp://user:pass@host.xz/path/to/repo.git/', None, 'ftp://testuser:pass@host.xz/path/to/repo.git/', 'ftp://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'ftp://user:pass@host.xz:8021/path/to/repo.git', None, 'ftp://testuser:pass@host.xz:8021/path/to/repo.git', 'ftp://testuser:testpass@host.xz:8021/path/to/repo.git'),
+            ('git', 'ftps://host.xz/path/to/repo.git/', None, 'ftps://testuser@host.xz/path/to/repo.git/', 'ftps://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'ftps://host.xz:8990/path/to/repo.git', None, 'ftps://testuser@host.xz:8990/path/to/repo.git', 'ftps://testuser:testpass@host.xz:8990/path/to/repo.git'),
+            ('git', 'ftps://user@host.xz/path/to/repo.git/', None, 'ftps://testuser@host.xz/path/to/repo.git/', 'ftps://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'ftps://user@host.xz:8990/path/to/repo.git', None, 'ftps://testuser@host.xz:8990/path/to/repo.git', 'ftps://testuser:testpass@host.xz:8990/path/to/repo.git'),
+            ('git', 'ftps://user:pass@host.xz/path/to/repo.git/', None, 'ftps://testuser:pass@host.xz/path/to/repo.git/', 'ftps://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'ftps://user:pass@host.xz:8990/path/to/repo.git', None, 'ftps://testuser:pass@host.xz:8990/path/to/repo.git', 'ftps://testuser:testpass@host.xz:8990/path/to/repo.git'),
+            # - rsync://host.xz/path/to/repo.git/
+            ('git', 'rsync://host.xz/path/to/repo.git/', None, 'rsync://testuser@host.xz/path/to/repo.git/', 'rsync://testuser:testpass@host.xz/path/to/repo.git/'),
+            # - [user@]host.xz:path/to/repo.git/ (SCP style)
+            ('git', 'host.xz:path/to/repo.git/', 'ssh://host.xz/path/to/repo.git/', 'ssh://testuser@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'user@host.xz:path/to/repo.git/', 'ssh://user@host.xz/path/to/repo.git/', 'ssh://testuser@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            ('git', 'user:pass@host.xz:path/to/repo.git/', 'ssh://user:pass@host.xz/path/to/repo.git/', 'ssh://testuser:pass@host.xz/path/to/repo.git/', 'ssh://testuser:testpass@host.xz/path/to/repo.git/'),
+            # - /path/to/repo.git/ (local file)
+            ('git', '/path/to/repo.git', 'file:///path/to/repo.git', 'file:///path/to/repo.git', 'file:///path/to/repo.git'),
+            ('git', 'path/to/repo.git', 'file:///path/to/repo.git', 'file:///path/to/repo.git', 'file:///path/to/repo.git'),
+            # - file:///path/to/repo.git/
+            ('git', 'file:///path/to/repo.git', None, None, None),
+            ('git', 'file://localhost/path/to/repo.git', None, None, None),
+
+            # hg: http://www.selenic.com/mercurial/hg.1.html#url-paths
+            # - local/filesystem/path[#revision]
+            ('hg', '/path/to/repo', 'file:///path/to/repo', 'file:///path/to/repo', 'file:///path/to/repo'),
+            ('hg', 'path/to/repo/', 'file:///path/to/repo/', 'file:///path/to/repo/', 'file:///path/to/repo/'),
+            ('hg', '/path/to/repo#rev', 'file:///path/to/repo#rev', 'file:///path/to/repo#rev', 'file:///path/to/repo#rev'),
+            ('hg', 'path/to/repo/#rev', 'file:///path/to/repo/#rev', 'file:///path/to/repo/#rev', 'file:///path/to/repo/#rev'),
+            # - file://local/filesystem/path[#revision]
+            ('hg', 'file:///path/to/repo', None, None, None),
+            ('hg', 'file://localhost/path/to/repo/', None, None, None),
+            ('hg', 'file:///path/to/repo#rev', None, None, None),
+            ('hg', 'file://localhost/path/to/repo/#rev', None, None, None),
+            # - http://[user[:pass]@]host[:port]/[path][#revision]
+            ('hg', 'http://host.xz/path/to/repo/', None, 'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
+            ('hg', 'http://host.xz:8080/path/to/repo', None, 'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
+            ('hg', 'http://user@host.xz/path/to/repo/', None, 'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
+            ('hg', 'http://user@host.xz:8080/path/to/repo', None, 'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
+            ('hg', 'http://user:pass@host.xz/path/to/repo/', None, 'http://testuser:pass@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
+            ('hg', 'http://user:pass@host.xz:8080/path/to/repo', None, 'http://testuser:pass@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
+            ('hg', 'http://host.xz/path/to/repo/#rev', None, 'http://testuser@host.xz/path/to/repo/#rev', 'http://testuser:testpass@host.xz/path/to/repo/#rev'),
+            ('hg', 'http://host.xz:8080/path/to/repo#rev', None, 'http://testuser@host.xz:8080/path/to/repo#rev', 'http://testuser:testpass@host.xz:8080/path/to/repo#rev'),
+            ('hg', 'http://user@host.xz/path/to/repo/#rev', None, 'http://testuser@host.xz/path/to/repo/#rev', 'http://testuser:testpass@host.xz/path/to/repo/#rev'),
+            ('hg', 'http://user@host.xz:8080/path/to/repo#rev', None, 'http://testuser@host.xz:8080/path/to/repo#rev', 'http://testuser:testpass@host.xz:8080/path/to/repo#rev'),
+            ('hg', 'http://user:pass@host.xz/path/to/repo/#rev', None, 'http://testuser:pass@host.xz/path/to/repo/#rev', 'http://testuser:testpass@host.xz/path/to/repo/#rev'),
+            ('hg', 'http://user:pass@host.xz:8080/path/to/repo#rev', None, 'http://testuser:pass@host.xz:8080/path/to/repo#rev', 'http://testuser:testpass@host.xz:8080/path/to/repo#rev'),
+            # - https://[user[:pass]@]host[:port]/[path][#revision]
+            ('hg', 'https://host.xz/path/to/repo/', None, 'https://testuser@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
+            ('hg', 'https://host.xz:8443/path/to/repo', None, 'https://testuser@host.xz:8443/path/to/repo', 'https://testuser:testpass@host.xz:8443/path/to/repo'),
+            ('hg', 'https://user@host.xz/path/to/repo/', None, 'https://testuser@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
+            ('hg', 'https://user@host.xz:8443/path/to/repo', None, 'https://testuser@host.xz:8443/path/to/repo', 'https://testuser:testpass@host.xz:8443/path/to/repo'),
+            ('hg', 'https://user:pass@host.xz/path/to/repo/', None, 'https://testuser:pass@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
+            ('hg', 'https://user:pass@host.xz:8443/path/to/repo', None, 'https://testuser:pass@host.xz:8443/path/to/repo', 'https://testuser:testpass@host.xz:8443/path/to/repo'),
+            ('hg', 'https://host.xz/path/to/repo/#rev', None, 'https://testuser@host.xz/path/to/repo/#rev', 'https://testuser:testpass@host.xz/path/to/repo/#rev'),
+            ('hg', 'https://host.xz:8443/path/to/repo#rev', None, 'https://testuser@host.xz:8443/path/to/repo#rev', 'https://testuser:testpass@host.xz:8443/path/to/repo#rev'),
+            ('hg', 'https://user@host.xz/path/to/repo/#rev', None, 'https://testuser@host.xz/path/to/repo/#rev', 'https://testuser:testpass@host.xz/path/to/repo/#rev'),
+            ('hg', 'https://user@host.xz:8443/path/to/repo#rev', None, 'https://testuser@host.xz:8443/path/to/repo#rev', 'https://testuser:testpass@host.xz:8443/path/to/repo#rev'),
+            ('hg', 'https://user:pass@host.xz/path/to/repo/#rev', None, 'https://testuser:pass@host.xz/path/to/repo/#rev', 'https://testuser:testpass@host.xz/path/to/repo/#rev'),
+            ('hg', 'https://user:pass@host.xz:8443/path/to/repo#rev', None, 'https://testuser:pass@host.xz:8443/path/to/repo#rev', 'https://testuser:testpass@host.xz:8443/path/to/repo#rev'),
+            # - ssh://[user@]host[:port]/[path][#revision]
+            ('hg', 'ssh://host.xz/path/to/repo/', None, 'ssh://testuser@host.xz/path/to/repo/', 'ssh://testuser:testpass@host.xz/path/to/repo/'),
+            ('hg', 'ssh://host.xz:1022/path/to/repo', None, 'ssh://testuser@host.xz:1022/path/to/repo', 'ssh://testuser:testpass@host.xz:1022/path/to/repo'),
+            ('hg', 'ssh://user@host.xz/path/to/repo/', None, 'ssh://testuser@host.xz/path/to/repo/', 'ssh://testuser:testpass@host.xz/path/to/repo/'),
+            ('hg', 'ssh://user@host.xz:1022/path/to/repo', None, 'ssh://testuser@host.xz:1022/path/to/repo', 'ssh://testuser:testpass@host.xz:1022/path/to/repo'),
+            ('hg', 'ssh://user:pass@host.xz/path/to/repo/', None, 'ssh://testuser:pass@host.xz/path/to/repo/', 'ssh://testuser:testpass@host.xz/path/to/repo/'),
+            ('hg', 'ssh://user:pass@host.xz:1022/path/to/repo', None, 'ssh://testuser:pass@host.xz:1022/path/to/repo', 'ssh://testuser:testpass@host.xz:1022/path/to/repo'),
+            ('hg', 'ssh://host.xz/path/to/repo/#rev', None, 'ssh://testuser@host.xz/path/to/repo/#rev', 'ssh://testuser:testpass@host.xz/path/to/repo/#rev'),
+            ('hg', 'ssh://host.xz:1022/path/to/repo#rev', None, 'ssh://testuser@host.xz:1022/path/to/repo#rev', 'ssh://testuser:testpass@host.xz:1022/path/to/repo#rev'),
+            ('hg', 'ssh://user@host.xz/path/to/repo/#rev', None, 'ssh://testuser@host.xz/path/to/repo/#rev', 'ssh://testuser:testpass@host.xz/path/to/repo/#rev'),
+            ('hg', 'ssh://user@host.xz:1022/path/to/repo#rev', None, 'ssh://testuser@host.xz:1022/path/to/repo#rev', 'ssh://testuser:testpass@host.xz:1022/path/to/repo#rev'),
+            ('hg', 'ssh://user:pass@host.xz/path/to/repo/#rev', None, 'ssh://testuser:pass@host.xz/path/to/repo/#rev', 'ssh://testuser:testpass@host.xz/path/to/repo/#rev'),
+            ('hg', 'ssh://user:pass@host.xz:1022/path/to/repo#rev', None, 'ssh://testuser:pass@host.xz:1022/path/to/repo#rev', 'ssh://testuser:testpass@host.xz:1022/path/to/repo#rev'),
+
+            # svn: http://svnbook.red-bean.com/en/1.7/svn-book.html#svn.advanced.reposurls
+            # - file:///    Direct repository access (on local disk)
+            ('svn', 'file:///path/to/repo', None, None, None),
+            ('svn', 'file://localhost/path/to/repo/', None, None, None),
+            # - http://     Access via WebDAV protocol to Subversion-aware Apache server
+            ('svn', 'http://host.xz/path/to/repo/', None, 'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
+            ('svn', 'http://host.xz:8080/path/to/repo', None, 'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
+            ('svn', 'http://user@host.xz/path/to/repo/', None, 'http://testuser@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
+            ('svn', 'http://user@host.xz:8080/path/to/repo', None, 'http://testuser@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
+            ('svn', 'http://user:pass@host.xz/path/to/repo/', None, 'http://testuser:pass@host.xz/path/to/repo/', 'http://testuser:testpass@host.xz/path/to/repo/'),
+            ('svn', 'http://user:pass@host.xz:8080/path/to/repo', None, 'http://testuser:pass@host.xz:8080/path/to/repo', 'http://testuser:testpass@host.xz:8080/path/to/repo'),
+            # - https://    Same as http://, but with SSL encryption
+            ('svn', 'https://host.xz/path/to/repo/', None, 'https://testuser@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
+            ('svn', 'https://host.xz:8080/path/to/repo', None, 'https://testuser@host.xz:8080/path/to/repo', 'https://testuser:testpass@host.xz:8080/path/to/repo'),
+            ('svn', 'https://user@host.xz/path/to/repo/', None, 'https://testuser@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
+            ('svn', 'https://user@host.xz:8080/path/to/repo', None, 'https://testuser@host.xz:8080/path/to/repo', 'https://testuser:testpass@host.xz:8080/path/to/repo'),
+            ('svn', 'https://user:pass@host.xz/path/to/repo/', None, 'https://testuser:pass@host.xz/path/to/repo/', 'https://testuser:testpass@host.xz/path/to/repo/'),
+            ('svn', 'https://user:pass@host.xz:8080/path/to/repo', None, 'https://testuser:pass@host.xz:8080/path/to/repo', 'https://testuser:testpass@host.xz:8080/path/to/repo'),
+            # - svn://      Access via custom protocol to an svnserve server
+            ('svn', 'svn://host.xz/path/to/repo/', None, 'svn://testuser@host.xz/path/to/repo/', 'svn://testuser:testpass@host.xz/path/to/repo/'),
+            ('svn', 'svn://host.xz:3690/path/to/repo', None, 'svn://testuser@host.xz:3690/path/to/repo', 'svn://testuser:testpass@host.xz:3690/path/to/repo'),
+            ('svn', 'svn://user@host.xz/path/to/repo/', None, 'svn://testuser@host.xz/path/to/repo/', 'svn://testuser:testpass@host.xz/path/to/repo/'),
+            ('svn', 'svn://user@host.xz:3690/path/to/repo', None, 'svn://testuser@host.xz:3690/path/to/repo', 'svn://testuser:testpass@host.xz:3690/path/to/repo'),
+            ('svn', 'svn://user:pass@host.xz/path/to/repo/', None, 'svn://testuser:pass@host.xz/path/to/repo/', 'svn://testuser:testpass@host.xz/path/to/repo/'),
+            ('svn', 'svn://user:pass@host.xz:3690/path/to/repo', None, 'svn://testuser:pass@host.xz:3690/path/to/repo', 'svn://testuser:testpass@host.xz:3690/path/to/repo'),
+            # - svn+ssh://  Same as svn://, but through an SSH tunnel
+            ('svn', 'svn+ssh://host.xz/path/to/repo/', None, 'svn+ssh://testuser@host.xz/path/to/repo/', 'svn+ssh://testuser:testpass@host.xz/path/to/repo/'),
+            ('svn', 'svn+ssh://host.xz:1022/path/to/repo', None, 'svn+ssh://testuser@host.xz:1022/path/to/repo', 'svn+ssh://testuser:testpass@host.xz:1022/path/to/repo'),
+            ('svn', 'svn+ssh://user@host.xz/path/to/repo/', None, 'svn+ssh://testuser@host.xz/path/to/repo/', 'svn+ssh://testuser:testpass@host.xz/path/to/repo/'),
+            ('svn', 'svn+ssh://user@host.xz:1022/path/to/repo', None, 'svn+ssh://testuser@host.xz:1022/path/to/repo', 'svn+ssh://testuser:testpass@host.xz:1022/path/to/repo'),
+            ('svn', 'svn+ssh://user:pass@host.xz/path/to/repo/', None, 'svn+ssh://testuser:pass@host.xz/path/to/repo/', 'svn+ssh://testuser:testpass@host.xz/path/to/repo/'),
+            ('svn', 'svn+ssh://user:pass@host.xz:1022/path/to/repo', None, 'svn+ssh://testuser:pass@host.xz:1022/path/to/repo', 'svn+ssh://testuser:testpass@host.xz:1022/path/to/repo'),
+
+            # FIXME: Add some invalid URLs.
+        ]
+        for url_opts in urls_to_test:
+            scm_type, url, new_url, new_url_u, new_url_up = url_opts
+            new_url = new_url or url
+            new_url_u = new_url_u or url
+            new_url_up = new_url_up or url
+            if isinstance(new_url, Exception):
+                self.assertRaises(new_url, update_scm_url, scm_type, url)
+            else:
+                updated_url = update_scm_url(scm_type, url)
+                self.assertEqual(new_url, updated_url)
+            if isinstance(new_url_u, Exception):
+                self.assertRaises(new_url_u, update_scm_url, scm_type,
+                                  url, username='testuser')
+            else:
+                updated_url = update_scm_url(scm_type, url,
+                                                  username='testuser')
+                self.assertEqual(new_url_u, updated_url)
+            if isinstance(new_url_up, Exception):
+                self.assertRaises(new_url_up, update_scm_url, scm_type,
+                                  url, username='testuser', password='testpass')
+            else:
+                updated_url = update_scm_url(scm_type, url,
+                                                  username='testuser',
+                                                  password='testpass')
+                self.assertEqual(new_url_up, updated_url)
+
     def check_project_update(self, project, should_fail=False, **kwargs):
         pu = kwargs.pop('project_update', None)
         if not pu:
@@ -638,9 +809,18 @@ class ProjectUpdatesTest(BaseTransactionTest):
             self.assertTrue(pu)
         pu = ProjectUpdate.objects.get(pk=pu.pk)
         if should_fail:
-            self.assertEqual(pu.status, 'failed', pu.result_stdout)
+            self.assertEqual(pu.status, 'failed',
+                             pu.result_stdout + pu.result_traceback)
         else:
-            self.assertEqual(pu.status, 'successful', pu.result_stdout)
+            self.assertEqual(pu.status, 'successful',
+                             pu.result_stdout + pu.result_traceback)
+        # Get the SCM URL from the job args, if it starts with a '/' we aren't
+        # handling the URL correctly.
+        scm_url_in_args_re = re.compile(r'\\(?:\\\\)??"scm_url\\(?:\\\\)??": \\(?:\\\\)??"(.*?)\\(?:\\\\)??"')
+        match = scm_url_in_args_re.search(pu.job_args)
+        self.assertTrue(match, pu.job_args)
+        scm_url_in_args = match.groups()[0]
+        self.assertFalse(scm_url_in_args.startswith('/'), scm_url_in_args)
         scm_password = kwargs.get('scm_password',
                                   decrypt_field(project, 'scm_password'))
         if scm_password not in ('', 'ASK'):
@@ -791,6 +971,19 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_url=scm_url,
         )
         self.check_project_scm(project)
+        # Test passing username/password for public project. Though they're not
+        # needed, the update should still work.
+        scm_username = getattr(settings, 'TEST_GIT_USERNAME', '')
+        scm_password = getattr(settings, 'TEST_GIT_PASSWORD', '')
+        if scm_username or scm_password:
+            project2 = self.create_project(
+                name='my other public git project over https',
+                scm_type='git',
+                scm_url=scm_url,
+                scm_username=scm_username,
+                scm_password=scm_password,
+            )
+            self.check_project_update(project2)
 
     def test_private_git_project_over_https(self):
         scm_url = getattr(settings, 'TEST_GIT_PRIVATE_HTTPS', '')
@@ -810,13 +1003,48 @@ class ProjectUpdatesTest(BaseTransactionTest):
     def test_private_git_project_over_ssh(self):
         scm_url = getattr(settings, 'TEST_GIT_PRIVATE_SSH', '')
         scm_key_data = getattr(settings, 'TEST_GIT_KEY_DATA', '')
-        if not all([scm_url, scm_key_data]):
+        scm_username = getattr(settings, 'TEST_GIT_USERNAME', '')
+        scm_password = 'blahblahblah'#getattr(settings, 'TEST_GIT_PASSWORD', '')
+        if not all([scm_url, scm_key_data, scm_username, scm_password]):
             self.skipTest('no private git repo defined for ssh!')
         project = self.create_project(
             name='my private git project over ssh',
             scm_type='git',
             scm_url=scm_url,
             scm_key_data=scm_key_data,
+        )
+        self.check_project_scm(project)
+        # Test project using SSH username/password instead of key. Should fail
+        # because of bad password, but never hang.
+        project2 = self.create_project(
+            name='my other private git project over ssh',
+            scm_type='git',
+            scm_url=scm_url,
+            scm_username=scm_username,
+            scm_password=scm_password,
+        )
+        self.check_project_update(project2, should_fail=True)
+
+    def test_git_project_from_local_path(self):
+        # Create temp repository directory.
+        repo_dir = tempfile.mkdtemp()
+        self._temp_project_dirs.append(repo_dir)
+        handle, playbook_path = tempfile.mkstemp(suffix='.yml', dir=repo_dir)
+        test_playbook_file = os.fdopen(handle, 'w')
+        test_playbook_file.write(TEST_PLAYBOOK)
+        test_playbook_file.close()
+        subprocess.check_call(['git', 'init', '.'], cwd=repo_dir,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.check_call(['git', 'add', os.path.basename(playbook_path)],
+                              cwd=repo_dir, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        subprocess.check_call(['git', 'commit', '-m', 'blah'], cwd=repo_dir,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # Now test project using local repo.
+        project = self.create_project(
+            name='my git project from local path',
+            scm_type='git',
+            scm_url=repo_dir,
         )
         self.check_project_scm(project)
 
@@ -831,6 +1059,19 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_url=scm_url,
         )
         self.check_project_scm(project)
+        # Test passing username/password for public project. Though they're not
+        # needed, the update should still work.
+        scm_username = getattr(settings, 'TEST_HG_USERNAME', '')
+        scm_password = getattr(settings, 'TEST_HG_PASSWORD', '')
+        if scm_username or scm_password:
+            project2 = self.create_project(
+                name='my other public hg project over https',
+                scm_type='hg',
+                scm_url=scm_url,
+                scm_username=scm_username,
+                scm_password=scm_password,
+            )
+            self.check_project_update(project2)
 
     def test_private_hg_project_over_https(self):
         scm_url = getattr(settings, 'TEST_HG_PRIVATE_HTTPS', '')
@@ -850,13 +1091,48 @@ class ProjectUpdatesTest(BaseTransactionTest):
     def test_private_hg_project_over_ssh(self):
         scm_url = getattr(settings, 'TEST_HG_PRIVATE_SSH', '')
         scm_key_data = getattr(settings, 'TEST_HG_KEY_DATA', '')
-        if not all([scm_url, scm_key_data]):
+        scm_username = getattr(settings, 'TEST_HG_USERNAME', '')
+        scm_password = 'blahblahblah'
+        if not all([scm_url, scm_key_data, scm_username]):
             self.skipTest('no private hg repo defined for ssh!')
         project = self.create_project(
             name='my private hg project over ssh',
             scm_type='hg',
             scm_url=scm_url,
             scm_key_data=scm_key_data,
+        )
+        self.check_project_scm(project)
+        # Test project using SSH username/password instead of key. Should fail
+        # because of bad password, but never hang.
+        project2 = self.create_project(
+            name='my other private hg project over ssh',
+            scm_type='hg',
+            scm_url=scm_url,
+            scm_username=scm_username,
+            scm_password=scm_password,
+        )
+        self.check_project_update(project2, should_fail=True)
+
+    def test_hg_project_from_local_path(self):
+        # Create temp repository directory.
+        repo_dir = tempfile.mkdtemp()
+        self._temp_project_dirs.append(repo_dir)
+        handle, playbook_path = tempfile.mkstemp(suffix='.yml', dir=repo_dir)
+        test_playbook_file = os.fdopen(handle, 'w')
+        test_playbook_file.write(TEST_PLAYBOOK)
+        test_playbook_file.close()
+        subprocess.check_call(['hg', 'init', '.'], cwd=repo_dir,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.check_call(['hg', 'add', os.path.basename(playbook_path)],
+                              cwd=repo_dir, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        subprocess.check_call(['hg', 'commit', '-m', 'blah'], cwd=repo_dir,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # Now test project using local repo.
+        project = self.create_project(
+            name='my hg project from local path',
+            scm_type='hg',
+            scm_url=repo_dir,
         )
         self.check_project_scm(project)
 
@@ -884,6 +1160,30 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_url=scm_url,
             scm_username=scm_username,
             scm_password=scm_password,
+        )
+        self.check_project_scm(project)
+
+    def test_svn_project_from_local_path(self):
+        # Create temp repository directory.
+        repo_dir = tempfile.mkdtemp()
+        self._temp_project_dirs.append(repo_dir)
+        subprocess.check_call(['svnadmin', 'create', '.'], cwd=repo_dir,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        handle, playbook_path = tempfile.mkstemp(suffix='.yml', dir=repo_dir)
+        test_playbook_file = os.fdopen(handle, 'w')
+        test_playbook_file.write(TEST_PLAYBOOK)
+        test_playbook_file.close()
+        subprocess.check_call(['svn', 'import', '-m', 'blah',
+                               os.path.basename(playbook_path),
+                               'file://%s/%s' % (repo_dir, os.path.basename(playbook_path))],
+                              cwd=repo_dir, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+        scm_url = 'file://%s' % repo_dir
+        # Now test project using local repo.
+        project = self.create_project(
+            name='my svn project from local path',
+            scm_type='svn',
+            scm_url=scm_url,
         )
         self.check_project_scm(project)
 

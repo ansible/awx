@@ -28,7 +28,7 @@ from django.utils.timezone import now
 
 # AWX
 from awx.main.models import Job, ProjectUpdate
-from awx.main.utils import get_ansible_version, decrypt_field
+from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url
 
 __all__ = ['RunJob', 'RunProjectUpdate']
 
@@ -232,6 +232,7 @@ class BaseTask(Task):
             return
         instance = self.update_model(pk, status='running')
         status, stdout, tb = 'error', '', ''
+        output_replacements = []
         try:
             kwargs['ssh_key_path'] = self.build_ssh_key_path(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
@@ -452,45 +453,37 @@ class RunProjectUpdate(BaseTask):
         Build environment dictionary for ansible-playbook.
         '''
         env = super(RunProjectUpdate, self).build_env(project_update, **kwargs)
+        env['ANSIBLE_ASK_PASS'] = str(False)
         env['ANSIBLE_ASK_SUDO_PASS'] = str(False)
         env['DISPLAY'] = '' # Prevent stupid password popup when running tests.
         return env
-
-    def update_url_auth(self, url, username=None, password=None):
-        parts = urlparse.urlsplit(url)
-        netloc_username = username or parts.username or ''
-        netloc_password = password or parts.password or ''
-        if netloc_username:
-            netloc = u':'.join(filter(None, [netloc_username, netloc_password]))
-        else:
-            netlock = u''
-        netloc = u'@'.join(filter(None, [netloc, parts.hostname]))
-        netloc = u':'.join(filter(None, [netloc, parts.port]))
-        return urlparse.urlunsplit([parts.scheme, netloc, parts.path,
-                                    parts.query, parts.fragment])
 
     def _build_scm_url_extra_vars(self, project_update, **kwargs):
         '''
         Helper method to build SCM url and extra vars with parameters needed
         for authentication.
         '''
+        # FIXME: May need to pull username/password out of URL in other cases.
         extra_vars = {}
         project = project_update.project
+        scm_type = project.scm_type
         scm_url = project.scm_url
         scm_username = kwargs.get('passwords', {}).get('scm_username', '')
         scm_password = kwargs.get('passwords', {}).get('scm_password', '')
         if scm_username and scm_password not in ('ASK', ''):
-            if project.scm_type == 'svn':
+            if scm_type == 'svn':
                 extra_vars['scm_username'] = scm_username
                 extra_vars['scm_password'] = scm_password
             else:
-                scm_url = self.update_url_auth(scm_url, scm_username,
-                                               scm_password)
+                scm_url = update_scm_url(scm_type, scm_url, scm_username,
+                                         scm_password)
         elif scm_username:
-            if project.scm_type == 'svn':
+            if scm_type == 'svn':
                 extra_vars['scm_username'] = scm_username
             else:  
-                scm_url = self.update_url_auth(scm_url, scm_username)
+                scm_url = update_scm_url(scm_type, scm_url, scm_username)
+        else:
+            scm_url = update_scm_url(scm_type, scm_url)
         return scm_url, extra_vars
 
     def build_args(self, project_update, **kwargs):
