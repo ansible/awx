@@ -15,6 +15,7 @@ angular.module('ProjectFormDefinition', [])
         editTitle: '{{ name }}',                                // Title in edit mode
         name: 'project',                                        // entity or model name in singular form
         well: true,                                             // Wrap the form with TB well
+        forceListeners: true,
 
         fields: {
             name: {
