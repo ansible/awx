@@ -479,7 +479,10 @@ class RunProjectUpdate(BaseTask):
                 # FIXME: Need to somehow escape single/double quotes in username/password
                 extra_vars['scm_username'] = scm_username
                 extra_vars['scm_password'] = scm_password
-                scm_url = update_scm_url(scm_type, scm_url, False, False)
+                if scm_url_parts.scheme == 'svn+ssh':
+                    scm_url = update_scm_url(scm_type, scm_url, scm_username, False)
+                else:
+                    scm_url = update_scm_url(scm_type, scm_url, False, False)
             elif scm_url_parts.scheme == 'ssh':
                 scm_url = update_scm_url(scm_type, scm_url, scm_username, False)
             else:
@@ -489,7 +492,10 @@ class RunProjectUpdate(BaseTask):
             if scm_type == 'svn':
                 extra_vars['scm_username'] = scm_username
                 extra_vars['scm_password'] = ''
-                scm_url = update_scm_url(scm_type, scm_url, False, False)
+                if scm_url_parts.scheme == 'svn+ssh':
+                    scm_url = update_scm_url(scm_type, scm_url, scm_username, False)
+                else:
+                    scm_url = update_scm_url(scm_type, scm_url, False, False)
             else:  
                 scm_url = update_scm_url(scm_type, scm_url, scm_username, False)
         return scm_url, extra_vars
