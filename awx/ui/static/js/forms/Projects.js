@@ -101,9 +101,9 @@ angular.module('ProjectFormDefinition', [])
                     { hdr: 'GIT URLs',
                       content: '<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
                                '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
-                               '<p><strong>Note:</strong> If using SSH protocol for github or bitbucket, enter in the SSH key only, ' +
-                               'do not enter a username (other than git) and password authentication is not supported.  GIT read only ' + 
-                               'protocol (git://) does not use username or password information.',
+                               '<p><strong>Note:</strong> If using SSH protocol for GitHub or Bitbucket, enter in the SSH key only, ' +
+                               'do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using ' +
+                               'SSH protocol. GIT read only protocol (git://) does not use username or password information.',
                       show: "scm_type.value == 'git'" },
                     { hdr: 'SVN URLs', 
                       content: '<p>Example URLs for Subversion SCM include:</p>' +
