@@ -6,32 +6,50 @@
 
 {% block extrastyle %}
 {{ block.super }}
-<link href="{{ STATIC_URL }}favicon.ico" rel="shortcut icon" />
+<link href="{{ STATIC_URL }}img/favicon.ico" rel="shortcut icon" />
 <style type="text/css">
 /* Heading and button background colors. */
 #header
 {
-  background: #1778C3 !important;
+  background: #171717 !important;
 }
 .module h2,
 #content-related .module h2,
 .module caption,
 .inline-group h2,
-.button.default,
+.button.default
+{
+  background: #171717 !important;
+}
 input[type="submit"].default,
 .submit-row input.default
 {
-  background: #2773ae !important;
+  background: #51a351 !important;
 }
 body
 {
   background-color: #f5f5f5;
+}
+body h1, body h2, body h3 {
+  color: #333;
 }
 
 /* Heading and button foreground colors. */
 #branding h1
 {
   color: white !important;
+  margin: 0;
+  padding-top: 4px;
+  text-transform: uppercase;
+  font-weight: normal;
+}
+#branding h1 img {
+  height: 48px;
+  width: auto;
+  margin: -10px 8px -6px -2px;
+}
+#user-tools {
+  padding-top: 1em;
 }
 .module h2,
 .module h2 a,
@@ -60,16 +78,58 @@ a:hover
 }
 
 /* Button border color. */
-.button.default,
-input[type="submit"].default,
-.submit-row input.default,
 .selector h2
 {
-  border-color: #074979 !important;
+  border-color: #171717 !important;
+}
+body .button.default,
+body input[type="submit"].default,
+body .submit-row input.default
+{
+  border: 1px solid #51a351;
+  border-color: #7c7 #383 #383 #7c7;
 }
 #header {
   color: #ddd;
-  border-bottom: solid 2px #074979;
+  border-bottom: none;
+}
+#header a:hover {
+  color: #2078be;
+  text-decoration: none;
+}
+
+/* Object Tools */
+body .object-tools li {
+  background: #888;
+  border-radius: 8px;
+}
+body .object-tools li:hover {
+  background: #aaa;
+}
+body .object-tools a:link,
+body .object-tools a:visited,
+body .object-tools a:hover,
+body .object-tools li:hover a {
+  background: transparent;
+  text-decoration: none;
+}
+body .object-tools a.viewsitelink,
+body .object-tools a.golink,
+body .object-tools a.addlink {
+  background: transparent;
+  padding-right: 10px;
+}
+body .object-tools a.viewsitelink:hover,
+body .object-tools a.golink:hover,
+body .object-tools a.addlink:hover  {
+  background: transparent;
+}
+body .object-tools a.viewsitelink:after,
+body .object-tools a.golink:after {
+  content: " \27a1";
+}
+body .object-tools a.addlink:after {
+  content: " +";
 }
 
 a:hover,
@@ -172,7 +232,7 @@ if (django.jQuery) {
 {% endblock %}
 
 {% block branding %}
-<h1 id="site-name">{% trans 'AWX Admin' %}</h1>
+<h1 id="site-name"><img class="logo" src="{{ STATIC_URL }}img/logo.png">{% block branding_title %}{% trans 'AWX Admin' %}{% endblock %}</h1>
 {% endblock %}
 
 {% block userlinks %}
