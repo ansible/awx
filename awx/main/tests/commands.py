@@ -24,7 +24,8 @@ from awx.main.licenses import LicenseWriter
 from awx.main.models import *
 from awx.main.tests.base import BaseTest, BaseLiveServerTest
 
-__all__ = ['CleanupDeletedTest', 'CleanupJobsTest', 'InventoryImportTest']
+__all__ = ['DumpDataTest', 'CleanupDeletedTest', 'CleanupJobsTest',
+           'InventoryImportTest']
 
 TEST_PLAYBOOK = '''- hosts: test-group
   gather_facts: False
@@ -162,6 +163,20 @@ class BaseCommandMixin(object):
         if isinstance(result, SystemExit) and captured_stderr:
             result = CommandError(captured_stderr)
         return result, captured_stdout, captured_stderr
+
+class DumpDataTest(BaseCommandMixin, BaseTest):
+    '''
+    Test cases for dumpdata management command.
+    '''
+
+    def setUp(self):
+        super(DumpDataTest, self).setUp()
+        self.create_test_inventories()
+
+    def test_dumpdata(self):
+        result, stdout, stderr = self.run_command('dumpdata')
+        self.assertEqual(result, None)
+        data = json.loads(stdout)
 
 class CleanupDeletedTest(BaseCommandMixin, BaseTest):
     '''
