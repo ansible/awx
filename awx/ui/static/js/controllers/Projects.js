@@ -82,13 +82,16 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                }
            }
            if (project.scm_type !== null) {
-              if (project.related.last_update !== undefined && project.status !== 'updating') {
+              if (project.related.current_update) {
+                 ProjectStatus({ project_id: id, last_update: project.related.current_update });
+              }
+              else if (project.related.last_update) {
                  ProjectStatus({ project_id: id, last_update: project.related.last_update });
               }
-              else if (project.status == 'updating') {
-                 Alert('Pending Status', 'An update is currently running. Status details cannot be viewed until the update process ' + 
-                     ' completes. Use the refresh button to monitor progress of the update process.', 'alert-info');
-              }
+             // else if (project.status == 'updating') {
+             //    Alert('Pending Status', 'An update is currently running. Status details cannot be viewed until the update process ' + 
+             //        ' completes. Use the refresh button to monitor progress of the update process.', 'alert-info');
+             // }
               else {
                  Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
                      ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
