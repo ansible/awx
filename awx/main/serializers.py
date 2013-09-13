@@ -447,7 +447,7 @@ class HostSerializer(BaseSerializerWithVariables):
         d['groups'] = [{'id': g.id, 'name': g.name} for g in obj.groups.all()]
         return d
 
-    def validate_name(self, attrs, source):
+    def _validate_name(self, attrs, source):
         name = unicode(attrs.get(source, ''))
         # Allow hostname (except IPv6 for now) to specify the port # inline.
         if name.count(':') == 1:

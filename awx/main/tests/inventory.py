@@ -296,23 +296,6 @@ class InventoryTest(BaseTest):
         self.assertEqual(Host.objects.get(id=host_data3['id']).variables, host_data3['variables'])
         self.assertEqual(Host.objects.get(id=host_data3['id']).variables_dict, {'angry': 'penguin'})
 
-        # Try with invalid hostnames and invalid IPs.
-        data = dict(name='', inventory=inv.pk)
-        with self.current_user(self.super_django_user):
-            response = self.post(hosts, data=data, expect=400)
-        data = dict(name='not a valid host name', inventory=inv.pk)
-        with self.current_user(self.super_django_user):
-            response = self.post(hosts, data=data, expect=400)
-        data = dict(name='validhost:99999', inventory=inv.pk)
-        with self.current_user(self.super_django_user):
-            response = self.post(hosts, data=data, expect=400)
-        data = dict(name='123.234.345.456', inventory=inv.pk)
-        with self.current_user(self.super_django_user):
-            response = self.post(hosts, data=data, expect=400)
-        data = dict(name='2001::1::3F', inventory=inv.pk)
-        with self.current_user(self.super_django_user):
-            response = self.post(hosts, data=data, expect=400)
-
         ###########################################
         # GROUPS
 
@@ -352,7 +335,6 @@ class InventoryTest(BaseTest):
         data = dict(name='_meta', inventory=inv.pk)
         with self.current_user(self.super_django_user):
             response = self.post(groups, data=data, expect=400)
-
 
         #################################################
         # HOSTS->inventories POST via subcollection
@@ -686,6 +668,25 @@ class InventoryTest(BaseTest):
         self.assertFalse(gx3.active)
         self.assertFalse(gx3 in gx2.children.all())
         self.assertTrue(gx4 in gx2.children.all())
+
+        # Try with invalid hostnames and invalid IPs.
+        hosts         = reverse('main:host_list')
+        invalid_expect = 201 # hostname validation is disabled for now.
+        data = dict(name='', inventory=inv.pk)
+        with self.current_user(self.super_django_user):
+            response = self.post(hosts, data=data, expect=400)
+        data = dict(name='not a valid host name', inventory=inv.pk)
+        with self.current_user(self.super_django_user):
+            response = self.post(hosts, data=data, expect=invalid_expect)
+        data = dict(name='validhost:99999', inventory=inv.pk)
+        with self.current_user(self.super_django_user):
+            response = self.post(hosts, data=data, expect=invalid_expect)
+        data = dict(name='123.234.345.456', inventory=inv.pk)
+        with self.current_user(self.super_django_user):
+            response = self.post(hosts, data=data, expect=invalid_expect)
+        data = dict(name='2001::1::3F', inventory=inv.pk)
+        with self.current_user(self.super_django_user):
+            response = self.post(hosts, data=data, expect=invalid_expect)
 
         #########################################################
         # FIXME: TAGS
