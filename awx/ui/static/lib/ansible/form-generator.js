@@ -678,6 +678,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
          if (field.type == 'checkbox_group') {
             html += "<label class=\"control-label " + getLabelWidth() + "\">" + 
                 field.label + "</label>\n";
+            html += "<div class=\"checkbox-group\">\n";
             for (var i=0; i < field.fields.length; i++) {
                 html += buildCheckbox(field.fields[i], field.fields[i].name);
             }
@@ -695,6 +696,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                   field.max + "</div>\n";
             }
             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+            html += "</div>\n";
          }
 
          //checkbox
@@ -702,7 +704,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += "<label class=\"control-label " + getLabelWidth() + "\" > </label>\n";
             html += "<div ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-            html += "class=\"" + getFieldWidth() + "\">\n"; 
+            html += "class=\"" + getFieldWidth() + " bold-text\">\n"; 
             html += buildCheckbox(field, fld);
             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
             html += "</div>\n"
