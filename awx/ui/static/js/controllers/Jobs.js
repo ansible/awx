@@ -75,17 +75,17 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
        }
 
     scope.editJob = function(id, name) {
-       LoadBreadCrumbs({ path: '/jobs/' + id, title: name });
+       LoadBreadCrumbs({ path: '/jobs/' + id, title: id + ' - ' + name });
        $location.path($location.path() + '/' + id);
        }
 
     scope.viewEvents = function(id, name) {
-       LoadBreadCrumbs({ path: '/jobs/' + id, title: name });
+       LoadBreadCrumbs({ path: '/jobs/' + id, title: id + ' - ' + name });
        $location.path($location.path() + '/' + id + '/job_events');
        }
 
     scope.viewSummary = function(id, name) {
-       LoadBreadCrumbs({ path: '/jobs/' + id, title: name });
+       LoadBreadCrumbs({ path: '/jobs/' + id, title: id + ' - ' + name });
        $location.path($location.path() + '/' + id + '/job_host_summaries');
        }
 
@@ -267,7 +267,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    Rest.get({ params: {id: id} })
        .success( function(data, status, headers, config) {
            
-           LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.name });
+           LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.id + ' - ' + data.summary_fields.job_template.name });
            
            for (var fld in form.fields) {
               if (fld != 'variables' && data[fld] !== null && data[fld] !== undefined) {  
@@ -288,6 +288,10 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                  }
                  master[fld] = scope[fld];
               }
+              
+              scope.id = data.id;
+              scope.name = data.summary_fields.job_template.name;
+
               if (fld == 'variables') {
                  // Parse extra_vars, converting to YAML.  
                  if ($.isEmptyObject(data.extra_vars) || data.extra_vars == "\{\}" || data.extra_vars == "null") {

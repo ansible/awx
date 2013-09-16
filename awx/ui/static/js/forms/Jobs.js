@@ -11,7 +11,7 @@ angular.module('JobFormDefinition', [])
     'JobForm', {
         
         addTitle: 'Create Job',                          //Legend in add mode
-        editTitle: '{{ name }}',                         //Legend in edit mode
+        editTitle: '{{ id }} - {{ name }}',            //Legend in edit mode
         name: 'jobs',
         well: true,
         twoColumns: true,
@@ -33,10 +33,11 @@ angular.module('JobFormDefinition', [])
 
         fields: {
             name: {
-                label: 'Name',
+                label: 'Job Template',
                 type: 'text',
-                addRequired: true,
-                editRequired: true,
+                addRequired: false,
+                editRequired: false,
+                readonly: true,
                 column: 1
                 },
             description: { 
