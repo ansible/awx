@@ -23,25 +23,23 @@ angular.module('ProjectsListDefinition', [])
             name: {
                 key: true,
                 label: 'Name',
-                badgeIcon: "\{\{ 'icon-failures-' + project.badge \}\}",
-                badgePlacement: 'left',
-                badgeToolTip: "Indicates the project\'s health based on its status",
-                badgeTipPlacement: 'bottom'
                 },
             description: {
                 label: 'Description',
                 columnClass: 'hidden-sm hidden-xs',
                 excludeModal: true
                 },
-            last_updated: {
-                label: 'Last Updated',
-                type: 'date'
-                },
             status: {
                 label: 'Update Status',
                 ngClick: 'showSCMStatus(\{\{ project.id \}\})',
                 awToolTip: 'View details of last SCM Update',
-                dataPlacement: 'bottom'
+                dataPlacement: 'bottom',
+                badgeIcon: "\{\{ 'icon-failures-' + project.badge \}\}",
+                badgePlacement: 'left'
+                },
+            last_updated: {
+                label: 'Last Updated',
+                type: 'date'
                 }
             },
         
@@ -88,7 +86,7 @@ angular.module('ProjectsListDefinition', [])
                 ngClick: "editProject(\{\{ project.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
-                awToolTip: 'View/edit project'
+                awToolTip: 'View/edit project properties'
                 },
             scm_update: {
                 label: 'Update',
@@ -102,7 +100,7 @@ angular.module('ProjectsListDefinition', [])
                 ngClick: "deleteProject(\{\{ project.id \}\},'\{\{ project.name \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',
-                awToolTip: 'Delete project'
+                awToolTip: 'Permanently remove project from the database'
                 }
             }
         });

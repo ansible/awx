@@ -97,6 +97,7 @@ angular.module('JobsListDefinition', [])
             dropdown: {
                 type: 'DropDown',
                 label: 'View',
+                icon: 'icon-zoom-in',
                 'class': 'btn-xs',
                 options: [
                     { ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Host Summary', 

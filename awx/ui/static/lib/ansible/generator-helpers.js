@@ -119,7 +119,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         if (params.type) {
            field = list[params.type][fld];
         }
-        else { 
+        else {
            field = list['fields'][fld];
         }
         
@@ -130,6 +130,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "class=\"btn btn-default";
         html += (field['class']) ? " " + field['class'] : " btn-xs"; 
         html += " dropdown-toggle\" data-toggle=\"dropdown\">";
+        html += (field.icon) ? Icon(field.icon) : "";
         html += field.label;
         html += " <span class=\"caret\"></span></button>\n";
         html += "<ul class=\"dropdown-menu pull-right\" role=\"menu\" aria-labelledby=\"dropdownMenu1\">\n";

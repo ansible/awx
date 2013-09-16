@@ -55,6 +55,7 @@ angular.module('InventoriesListDefinition', [])
             dropdown: {
                 type: 'DropDown',
                 label: 'Jobs',
+                icon: 'icon-zoom-in',
                 'class': 'btn-xs',
                 options: [
                     { ngClick: 'viewJobs(\{\{ inventory.id \}\})', label: 'All Jobs' },
