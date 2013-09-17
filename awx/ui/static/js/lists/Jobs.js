@@ -47,7 +47,8 @@ angular.module('JobsListDefinition', [])
                 "class": 'job-\{\{ job.status \}\}',
                 searchType: 'select',
                 searchOptions: [
-                    { name: "new", value: "new" }, 
+                    { name: "new", value: "new" },
+                    { name: "waiting", value: "waiting" },
                     { name: "pending", value: "pending" },
                     { name: "running", value: "running" }, 
                     { name: "successful", value: "successful" },
@@ -117,18 +118,18 @@ angular.module('JobsListDefinition', [])
                 icon: 'icon-minus-sign',
                 mode: 'all',
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
-                "class": 'btn-danger btn-xs',
+                "class": 'btn-danger btn-xs delete-btn',
                 awToolTip: 'Cancel a running or pending job',
-                ngShow: "job.status == 'pending' || job.status == 'running'"
+                ngShow: "job.status == 'pending' || job.status == 'running' || job.status == 'waiting'"
                 },
             "delete": {
                 label: 'Delete',
                 icon: 'icon-trash',
                 mode: 'all',
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
-                "class": 'btn-danger btn-xs',
+                "class": 'btn-danger btn-xs delete-btn',
                 awToolTip: 'Remove the selected job from the database',
-                ngShow: "job.status != 'pending' && job.status != 'running'"
+                ngShow: "job.status != 'pending' && job.status != 'running' && job.status != 'waiting'"
                 }
             }
         });

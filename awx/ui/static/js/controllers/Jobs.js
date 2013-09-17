@@ -70,9 +70,11 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
     LoadBreadCrumbs();
 
-    scope.refreshJob = function() {
+    scope.refresh = function() {
        scope.search(list.iterator);
        }
+
+    scope.refreshJob = scope.refresh;
 
     scope.editJob = function(id, name) {
        LoadBreadCrumbs({ path: '/jobs/' + id, title: id + ' - ' + name });
@@ -94,7 +96,7 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
        Rest.get()
            .success( function(data, status, headers, config) { 
                var url, action_label, restcall, hdr; 
-               if (data.status == 'pending' || data.status == 'running') {
+               if (data.status == 'pending' || data.status == 'running' || data.status == 'waiting') {
                   url = data.related.cancel;
                   action_label = 'cancel';
                   hdr = 'Cancel Job';

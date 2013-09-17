@@ -71,9 +71,10 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               // remove lingering popover <div>. Seems to be a bug in TB3 RC1
               $(this).remove();
               });
-       // Remove leftover timer
-       //if (options.mode != 'lookup' && $rootScope.timer) {
-       //   clearInterval($rootScope.timer);
+       
+       // Remove leftover timer, if any
+       //if (options.mode != 'lookup' && this.scope.timer) {
+       //   clearInterval(this.scope.timer);
        //}
 
        if (options.mode == 'lookup') {

@@ -258,6 +258,10 @@ angular.module('ansible', [
                CheckLicense();
             }
 
+            if ($rootScope.timer) {
+               clearInterval($rootScope.timer);
+            }
+
             // Make the correct tab active
             var base = $location.path().replace(/^\//,'').split('/')[0];
             if (base == '') {

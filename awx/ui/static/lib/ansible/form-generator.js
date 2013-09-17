@@ -100,6 +100,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             }
             });
 
+       // Remove leftover timer, if any
+       //if ((!options.modal) && this.scope.timer) {
+       //   clearInterval(this.scope.timer);
+       //}
+
        if (options.modal) {
           this.scope.formModalActionDisabled = false;
           this.scope.formModalInfo = false  //Disable info button for default modal
