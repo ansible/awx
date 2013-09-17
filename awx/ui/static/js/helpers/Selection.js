@@ -133,22 +133,24 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
            scope.SelectPostRefreshRemove();
         }
         scope.SelectPostRefreshRemove = scope.$on('PostRefresh', function() {
-            for (var i=0; i < scope[list.name].length; i++) {
-                var found = false;
-                for (var j=0; j < scope.selected.length; j++) {
-                    if (scope.selected[j].id == scope[list.name][i].id) {
-                       found = true; 
-                       break;
-                    }
-                }
-                if (found) {
-                   scope[list.name][i]['checked'] = '1';
-                   scope[list.name][i]['success_class'] = 'success';   
-                }
-                else {
-                   scope[list.name][i]['checked'] = '0';
-                   scope[list.name][i]['success_class'] = '';
-                }
+            if (scope[list.name]) {
+               for (var i=0; i < scope[list.name].length; i++) {
+                   var found = false;
+                   for (var j=0; j < scope.selected.length; j++) {
+                       if (scope.selected[j].id == scope[list.name][i].id) {
+                          found = true; 
+                          break;
+                       }
+                   }
+                   if (found) {
+                      scope[list.name][i]['checked'] = '1';
+                      scope[list.name][i]['success_class'] = 'success';   
+                   }
+                   else {
+                      scope[list.name][i]['checked'] = '0';
+                      scope[list.name][i]['success_class'] = '';
+                   }
+               }
             }
             });
         }

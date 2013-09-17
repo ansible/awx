@@ -72,11 +72,8 @@ angular.module('JobEventsListDefinition', [])
         
         actions: {
             refresh: {
-                ngClick: "refresh()",
-                icon: 'icon-refresh',
-                label: 'Refresh',
-                awToolTip: 'Refresh the page',
-                "class": 'btn-sm btn-primary',
+                awRefresh: true,
+                ngShow: "job_status == 'pending' || job_status == 'waiting' || job_status == 'running'",
                 mode: 'all'
                 }
             },

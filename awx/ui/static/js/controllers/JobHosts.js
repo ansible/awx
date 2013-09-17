@@ -50,7 +50,24 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
         for( var i=0; i < scope.jobhosts.length; i++) {
            scope.jobhosts[i].host_name = scope.jobhosts[i].summary_fields.host.name;
            scope.jobhosts[i].status = (scope.jobhosts[i].failed) ? 'error' : 'success';  
-        }  
+        }
+        if (scope.host_id == null) {
+           // need job_status so we can show/hide refresh button
+           Rest.setUrl(GetBasePath('jobs') + scope.job_id);
+           Rest.get()
+               .success( function(data, status, headers, config) {
+                   scope.job_status = data.status;
+                   if (!(data.status == 'pending' || data.status == 'waiting' || data.status == 'running')) {
+                      if ($rootScope.timer) {
+                         clearInterval($rootScope.timer);
+                      }
+                   }
+                   })
+               .error(  function(data, status, headers, config) {
+                   ProcessErrors(scope, data, status, null,
+                     { hdr: 'Error!', msg: 'Failed to get job status for job: ' + scope.job_id + '. GET status: ' + status });
+                   });
+        }
         });
   
     SearchInit({ scope: scope, set: 'jobhosts', list: list, url: defaultUrl });

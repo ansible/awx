@@ -154,7 +154,6 @@ angular.module('Utilities',[])
        
        //Keep a list of path/title mappings. When we see /organizations/XX in the path, for example, 
        //we'll know the actual organization name it maps to.
-       console.log($rootScope.crumbCache);
        if (crumb !== null && crumb !== undefined) {
           var found = false; 
           for (var i=0; i < $rootScope.crumbCache.length; i++) {

@@ -59,11 +59,7 @@ angular.module('JobsListDefinition', [])
         
         actions: {
             refresh: {
-                label: 'Refresh',
-                "class": 'btn-primary btn-sm',
-                ngClick: "refreshJob(\{\{ job.id \}\})",
-                icon: 'icon-refresh',
-                awToolTip: 'Refresh the page',
+                awRefresh: true,
                 mode: 'all'
                 }
             },

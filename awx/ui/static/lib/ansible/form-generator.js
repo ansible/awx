@@ -10,8 +10,8 @@
 
 angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
     .factory('GenerateForm', [ '$location', '$cookieStore', '$compile', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column',
-        'NavigationLink', 'HelpCollapse',
-    function($location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse) {
+        'NavigationLink', 'HelpCollapse', 'Button',
+    function($location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse, Button) {
     return {
     
     setForm: function(form) {
@@ -86,6 +86,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        $('.tooltip').each( function(index) {
            $(this).remove();
            });
+       
        $('.popover').each(function(index) {
               // remove lingering popover <div>. Seems to be a bug in TB3 RC1
               $(this).remove();
@@ -277,7 +278,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        return html;
        },
 
-    button: function(btn, topOrBottom) {
+    /*button: function(btn, topOrBottom) {
        // pass in a button object and get back an html string containing
        // a <button> element.
        var html = '';
@@ -297,7 +298,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            }
        }
        return html;
-    },
+    },*/
+
+    button: Button,
 
     navigationLink: NavigationLink,
 
@@ -854,21 +857,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           // Add status fields section (used in Jobs form)
           html += "<div class=\"well\">\n";
           if (this.form.statusActions) {
-             html += "<div class=\"status-actions\">\n";
+             //html += "<div class=\"status-actions\">\n";
              var act;
              for (action in this.form.statusActions) {
                  act = this.form.statusActions[action];
-                 html += "<button type=\"button\" " + this.attr(act, 'ngClick') + "class=\"btn btn-small";
-                 html += (act['class']) ? " " + act['class'] : "";
-                 html += "\" ";
-                 html += (act.awToolTip) ? this.attr(act,'awToolTip') : "";
-                 html += (act.awToolTip) ? "data-placement=\"top\" " : "";
-                 html += " >" + this.icon(act.icon);
-                 html += (act.label) ? act.label : ""; 
-                 html += "</button> ";
-              }
-              html += "</div>\n";
-              html += "<div class=\"status-spin\"><i class=\"icon-spinner icon-spin\" ng-show=\"statusSearchSpin == true\"></i></div>\n";
+                 html += this.button(act);
+             }
+             //html += "</div>\n";
+             //html += "<div class=\"status-spin\"><i class=\"icon-spinner icon-spin\" ng-show=\"statusSearchSpin == true\"></i></div>\n";
           }
           html += "<div class=\"form-horizontal status-fields\">\n";
           for (var fld in this.form.statusFields) {
@@ -899,7 +895,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += "<div>\n";
           }
 
-          if (this.form.navigation) {
+         /* if (this.form.navigation) {
              html += "<div class=\"navigation-buttons navigation-buttons-top\">\n";
              for (btn in this.form.navigation) {
                  var btn = this.form.navigation[btn];
@@ -908,7 +904,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  }
              }
              html += "</div>\n";
-          }
+          } */
           
           // Start the well
           if ( this.has('well') ) {
@@ -1034,7 +1030,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += "</div>\n";
           }
 
-          if (this.form.navigation) {
+          /*if (this.form.navigation) {
              html += "<div class=\"navigation-buttons navigation-buttons-bottom\">\n";
              for (btn in this.form.navigation) {
                  var btn = this.form.navigation[btn];
@@ -1043,7 +1039,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  }
              }
              html += "</div>\n";
-          }
+          }*/
 
           if ( this.form.collapse && this.form.collapseMode == options.mode ) {
              html += "</div>\n";

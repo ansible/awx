@@ -22,7 +22,7 @@ angular.module('ProjectsListDefinition', [])
         fields: {
             name: {
                 key: true,
-                label: 'Name',
+                label: 'Name'
                 },
             description: {
                 label: 'Description',
@@ -53,11 +53,7 @@ angular.module('ProjectsListDefinition', [])
                 awToolTip: 'Create a new project'
                 },
             refresh: {
-                label: 'Refresh',
-                "class": 'btn-primary btn-sm',
-                ngClick: "refresh(\{\{ job.id \}\})",
-                icon: 'icon-refresh',
-                awToolTip: 'Refresh the page',
+                awRefresh: true,
                 mode: 'all'
                 },
             help: {

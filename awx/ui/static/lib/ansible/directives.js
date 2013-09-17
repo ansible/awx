@@ -408,6 +408,42 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                 });
             }
         }
+        }])
+    
+    //
+    // awRefresh
+    //
+    // Creates a timer to call scope.refresh(iterator) ever N seconds, where
+    // N is a setting in config.js
+    //
+    .directive('awRefresh', [ '$rootScope', function($rootScope) {
+        return {
+        link: function(scope, elm, attrs, ctrl) {
+            function msg() {
+                var num = '' + scope.refreshCnt;
+                while (num.length < 2) {
+                   num = '0' + num;
+                }
+                return 'Refresh in ' + num + ' sec.';
+            }
+            scope.refreshCnt = $AnsibleConfig.refresh_rate;
+            scope.refreshMsg = msg();
+            if ($rootScope.timer) {
+                clearInterval($rootScope.timer);
+            }
+            $rootScope.timer = setInterval( function() {
+                scope.refreshCnt--;
+                if (scope.refreshCnt <= 0) {
+                   scope.refresh();
+                   scope.refreshCnt = $AnsibleConfig.refresh_rate;
+                }
+                scope.refreshMsg = msg();
+                if (!scope.$$phase) {
+                   scope.$digest();
+                }
+                }, 1000);
+            }
+        }
         }]);
 
 

@@ -291,12 +291,9 @@ angular.module('JobFormDefinition', [])
             },
 
         statusActions: {
-            refresh: {
-                label: 'Refresh',
-                icon: 'icon-refresh',
-                ngClick: "refresh()",
-                "class": 'btn-sm btn-primary',
-                awToolTip: 'Refresh job status &amp; output',
+             refresh: {
+                awRefresh: true,
+                ngShow: "(status == 'pending' || status == 'waiting' || status == 'running')",
                 mode: 'all'
                 }
             }

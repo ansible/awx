@@ -262,6 +262,12 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    scope.playbook_options = null;
    scope.playbook = null; 
 
+   function calcRows (content) {
+       var n = content.match(/\n/g);
+       var rows = (n) ? n.length : 1;
+       return (rows > 15) ? 15 : rows;
+       }
+
    // Retrieve detail record and prepopulate the form
    Rest.setUrl(defaultUrl + ':id/'); 
    Rest.get({ params: {id: id} })
@@ -336,17 +342,20 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                   relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
                }
            }
-
+           
            // Calc row size of stdout and traceback textarea fields
-           var n = scope['result_stdout'].match(/\n/g);
-           var rows = (n) ? n.length : 1;
-           rows = (rows > 15) ? 15 : rows;
-           scope['stdout_rows'] = rows;
+           //var n = scope['result_stdout'].match(/\n/g);
+           //var rows = (n) ? n.length : 1;
+           //rows = (rows > 15) ? 15 : rows;
+           //rows;
 
-           n = scope['result_traceback'].match(/\n/g);
-           var rows = (n) ? n.length : 1;
-           rows = (rows > 15) ? 15 : rows;
-           scope['traceback_rows'] = rows;
+           scope['stdout_rows'] = calcRows(scope['result_stdout']);
+
+           //n = scope['result_traceback'].match(/\n/g);
+           //var rows = (n) ? n.length : 1;
+           //rows = (rows > 15) ? 15 : rows;
+
+           scope['traceback_rows'] = calcRows(scope['result_traceback']);
 
            LookUpInit({
                scope: scope,
@@ -461,6 +470,13 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
               scope.status = data.status; 
               scope.result_stdout = data.result_stdout;
               scope.result_traceback = data.result_traceback;
+              scope['stdout_rows'] = calcRows(scope['result_stdout']);
+              scope['traceback_rows'] = calcRows(scope['result_traceback']);
+              if (!(data.status == 'pending' || data.status == 'waiting' || data.status == 'running')) {
+                 if ($rootScope.timer) {
+                    clearInterval($rootScope.timer);
+                 }
+              }
               scope.statusSearchSpin = false;
               })
           .error( function(data, status, headers, config) {

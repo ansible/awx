@@ -27,8 +27,11 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     $rootScope.flashMessage = null;
     
     var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
-    SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
     
+    if (mode == 'select') {
+       SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
+    }
+
     if (scope.projectsPostRefresh) {
        scope.projectsPostRefresh();
     }

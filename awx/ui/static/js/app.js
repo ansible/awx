@@ -235,6 +235,11 @@ angular.module('ansible', [
          function($cookieStore, $rootScope, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense) {
         
         LoadBasePaths(); 
+        
+        if ( !(typeof $AnsibleConfig.refresh_rate == 'number' && $AnsibleConfig.refresh_rate >= 3
+               && $AnsibleConfig.refresh_rate <= 99) ) {
+           $AnsibleConfig.refresh_rate = 10;
+        }
 
         $rootScope.breadcrumbs = new Array(); 
         $rootScope.crumbCache = new Array();
@@ -252,6 +257,7 @@ angular.module('ansible', [
                }
                CheckLicense();
             }
+
             // Make the correct tab active
             var base = $location.path().replace(/^\//,'').split('/')[0];
             if (base == '') {

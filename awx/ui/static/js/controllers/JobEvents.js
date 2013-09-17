@@ -141,6 +141,22 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
             cDate = new Date(set[i].created);
             set[i].created = FormatDate(cDate);
         }
+
+        // need job_status so we can show/hide refresh button
+        Rest.setUrl(GetBasePath('jobs') + scope.job_id);
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                scope.job_status = data.status;
+                if (!(data.status == 'pending' || data.status == 'waiting' || data.status == 'running')) {
+                   if ($rootScope.timer) {
+                      clearInterval($rootScope.timer);
+                   }
+                }
+                })
+            .error(  function(data, status, headers, config) {
+                ProcessErrors(scope, data, status, null,
+                  { hdr: 'Error!', msg: 'Failed to get job status for job: ' + scope.job_id + '. GET status: ' + status });
+                });
         });
 
     SearchInit({ scope: scope, set: 'jobevents', list: list, url: defaultUrl });

@@ -79,11 +79,8 @@ angular.module('JobHostDefinition', [])
         
         actions: {
             refresh: {
-                label: 'Refresh',
-                icon: 'icon-refresh',
-                ngClick: "refresh()",
-                "class": 'btn-primary btn-sm',
-                awToolTip: 'Refresh the page',
+                awRefresh: true,
+                ngShow: "host_id == null && (job_status == 'pending' || job_status == 'waiting' || job_status == 'running')",
                 mode: 'all'
                 },
             help: {

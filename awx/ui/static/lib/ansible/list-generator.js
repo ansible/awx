@@ -9,8 +9,8 @@
 
 angular.module('ListGenerator', ['GeneratorHelpers'])
     .factory('GenerateList', [ '$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
-        'Column', 'DropDown', 'NavigationLink',
-    function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink) {
+        'Column', 'DropDown', 'NavigationLink', 'Button',
+    function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink, Button) {
     return {
     
     setList: function(list) {
@@ -29,29 +29,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        $('#lookup-modal').modal('hide');
        },
 
-    button: function(btn) {
-       // pass in button object, get back html
-       var html = '';
-       html += "<button type=\"button\" " + this.attr(btn, 'ngClick') + "class=\"btn";
-       html += (btn['class']) ?  " " + btn['class'] : " btn-sm";
-       html += (btn['awPopOver']) ? " help-link-white" : "";
-       html += "\" ";
-       html += (btn.id) ? "id=\"" + btn.id + "\" " : "";
-       html += (btn.ngHide) ? this.attr(btn,'ngHide') : "";
-       html += (btn.awToolTip) ? this.attr(btn,'awToolTip') : "";
-       html += (btn.awToolTip && btn.dataPlacement == undefined) ? "data-placement=\"top\" " : "";
-       html += (btn.awPopOver) ? "aw-pop-over=\"" + 
-           btn.awPopOver.replace(/[\'\"]/g, '&quot;') + "\" " : "";
-       html += (btn.dataPlacement) ? this.attr(btn, 'dataPlacement') : "";
-       html += (btn.dataContainer) ? this.attr(btn, 'dataContainer') : "";
-       html += (btn.dataTitle) ? this.attr(btn, 'dataTitle') : "";
-       html += (btn.ngShow) ? this.attr(btn, 'ngShow') : "";
-       html += (btn.ngHide) ? this.attr(btn, 'ngHide') : "";
-       html += " >" + this.attr(btn,'icon');
-       html += (btn.label) ? " " + btn.label : ""; 
-       html += "</button> ";
-       return html;
-       },
+    button: Button,
  
     inject: function(list, options) {
        // options.mode = one of edit, select or lookup
@@ -93,6 +71,10 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               // remove lingering popover <div>. Seems to be a bug in TB3 RC1
               $(this).remove();
               });
+       // Remove leftover timer
+       //if (options.mode != 'lookup' && $rootScope.timer) {
+       //   clearInterval($rootScope.timer);
+       //}
 
        if (options.mode == 'lookup') {
           // options should include {hdr: <dialog header>, action: <function...> }
@@ -169,7 +151,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
                  if ( (list.actions[action].basePaths == undefined) || 
                       (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
-                    html += this.button(list.actions[action]);
+                    html += this.button(list.actions[action], list.iterator);
                  }
               }
           }

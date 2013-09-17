@@ -93,6 +93,54 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         return "<i class=\"" + icon + "\"></i> ";
         }
         })
+
+    .factory('Button', ['Attr', function(Attr) {
+    return function(btn) {
+        // pass in button object, get back html
+        var html = '';
+        if (btn.awRefresh) {
+           html += "<div class=\"refresh-grp pull-right\" ";
+           html += (btn.ngShow) ? Attr(btn, 'ngShow') : ""; 
+           html += ">\n";
+        }
+        html += "<button type=\"button\" " + "class=\"btn";
+        if (btn.awRefresh && !btn['class']) {
+            html += ' btn-primary btn-xs refresh-btn';
+        }
+        else if (btn['class']) {
+            html += ' ' + btn['class']; 
+        }
+        else {
+            html += " btn-sm";
+        }
+        html += (btn['awPopOver']) ? " help-link-white" : "";
+        html += "\" ";
+        html += (btn.ngClick) ? Attr(btn, 'ngClick') : "";
+        html += (btn.awRefresh) ? " ng-click=\"refreshCnt = " + $AnsibleConfig.refresh_rate + "; refresh()\" " : "";
+        html += (btn.id) ? "id=\"" + btn.id + "\" " : "";
+        html += (btn.ngHide) ? Attr(btn,'ngHide') : "";
+        html += (btn.awToolTip) ? Attr(btn,'awToolTip') : "";
+        html += (btn.awToolTip && btn.dataPlacement == undefined) ? "data-placement=\"top\" " : "";
+        html += (btn.awRefresh && !btn.awTooltip) ? "aw-tool-tip=\"Refresh page\" " : "";
+        html += (btn.awPopOver) ? "aw-pop-over=\"" + 
+            btn.awPopOver.replace(/[\'\"]/g, '&quot;') + "\" " : "";
+        html += (btn.dataPlacement) ? Attr(btn, 'dataPlacement') : "";
+        html += (btn.dataContainer) ? Attr(btn, 'dataContainer') : "";
+        html += (btn.dataTitle) ? Attr(btn, 'dataTitle') : "";
+        html += (btn.ngShow) ? Attr(btn, 'ngShow') : "";
+        html += (btn.ngHide) ? Attr(btn, 'ngHide') : "";
+        html += " >";
+        html += (btn['icon']) ? Attr(btn,'icon') : "";
+        html += (btn['awRefresh'] && !btn['icon']) ? "<i class=\"icon-refresh\"></i> " : "";
+        html += (btn.label) ? " " + btn.label : "";
+        html += "</button> ";
+        if (btn['awRefresh']) {
+           html += '<span class=\"refresh-msg\" aw-refresh>{{ refreshMsg }}</span>\n';
+           html += "</div><!-- refresh-grp -->\n";
+        }
+        return html;
+        }
+        }])
     
     .factory('NavigationLink', ['Attr', 'Icon', function(Attr, Icon) {
     return function(link) {
