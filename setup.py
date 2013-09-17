@@ -19,10 +19,8 @@ etcpath = "/etc/awx"
 homedir = "/var/lib/awx"
 if os.path.exists("/etc/debian_version"):
     webconfig  = "/etc/apache2/conf.d"
-    settingsconf = "config/deb/settings.py"
 else:
     webconfig  = "/etc/httpd/conf.d"
-    settingsconf = "config/rpm/settings.py"
 
 #####################################################################
 # Helper Functions
@@ -148,7 +146,6 @@ setup(
             ("%s" % homedir,        ["config/wsgi.py",
                                      "awx/static/favicon.ico",
                                     ]),
-            ("%s" % etcpath,        [settingsconf,]),
             ("%s" % webconfig,      ["config/awx.conf","config/awx-plain.conf"]),
         ]
     ),
