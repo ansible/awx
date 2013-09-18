@@ -38,6 +38,7 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
         scope['lookUp' + name] = function() {
             var listGenerator = GenerateList;
             var listScope = listGenerator.inject(list, { mode: 'lookup', hdr: hdr });
+            listScope = scope;
             listScope.selectAction = function() {
                 var found = false;
                 var name;

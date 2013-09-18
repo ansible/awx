@@ -183,9 +183,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            if (this.scope[this.form.name + '_form'][fld]) {
               this.scope[this.form.name + '_form'][fld].$setPristine();
            }
-           if (this.form.fields[fld].awPassMatch) {
-              this.scope[this.form.name + '_form'][fld].$setValidity('awpassmatch', true); 
-           }
+           //if (this.scope.fields[fld].awPassMatch) {
+           //   this.scope[this.form.name + '_form'][fld].$setValidity('awpassmatch', true); 
+           //}
            if (this.form.fields[fld].ask) {
               this.scope[fld + '_ask'] = false;
            }
@@ -363,13 +363,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            return x;
            }
 
-       function buildId(field, fld) {
+       function buildId(field, fld, form) {
            var html = '';
            if (field.id) {
-              html += Attr(field,'id') : "";
+              html += Attr(field,'id');
            }
            else {
-              html += "id=\"" + this.form.name + "_" + fld + "\" ";
+              html += "id=\"" + form.name + "_" + fld + "\" ";
            }
            return html;
            }
@@ -448,7 +448,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 html += 'name="' + fld + '" ';
                 html += (field.ngChange) ? this.attr(field,'ngChange') : "";
                 html += (field.chkPass) ? "chk-pass " : "";
-                html += buildId(field, fld);
+                html += buildId(field, fld, this.form);
                 html += "class=\"form-control";
                 html += (field['class']) ? " " + this.attr(field, 'class') : "";
                 html += "\" ";
@@ -587,7 +587,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += (field['class']) ? " " + field['class'] : "";
             html += "\" ";
             html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-            html += buildId(field, fld);
+            html += buildId(field, fld, this.form);
             html += (field.placeholder) ? this.attr(field,'placeholder') : "";
             html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
             html += (options.mode == 'add' && field.addRequired) ? "required " : "";
@@ -626,7 +626,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += "\" ";
             html += this.attr(field, 'ngOptions');
             html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-            html += buildId(field, fld);
+            html += buildId(field, fld, this.form);
             html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
             html += (options.mode == 'add' && field.addRequired) ? "required " : "";
             html += (field.readonly) ? "readonly " : "";
@@ -671,7 +671,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += (field.spinner) ? "ng-spinner=\"" + fld + "\" " : ""; 
             html += "ng-model=\"" + fld + '" ';
             html += 'name="' + fld + '" ';
-            html += buildId(field, fld);
+            html += buildId(field, fld, this.form);
             html += (field.min || field.min == 0) ? this.attr(field, 'min') : "";
             html += (field.max) ? this.attr(field, 'max') : "";
             html += (field.ngChange) ? this.attr(field,'ngChange') : "";
@@ -776,7 +776,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += (field.labelClass) ? " " + field.labelClass : "";
             html += "\" ";
             html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
-            html += "id=\"" + this.field.name + "_" + fld + "_lookup\" ";
+            html += "id=\"" + this.form.name + "_" + fld + "_lookup\" ";
             html += ">\n";
             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
             html += "<label class=\"control-label\" for=\"" + fld + '">';
@@ -903,7 +903,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
        if (this.form.fieldsAsHeader) {
           html += "<div class=\"well\">\n";
-          html += "<form class=\"form-inline\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "\" novalidate >\n";
+          html += "<form class=\"form-inline\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "_form\" novalidate >\n";
           for (var fld in this.form.fields) {
               field = this.form.fields[fld];
               html += this.headerField(fld, field, options);
@@ -939,7 +939,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
           html += "<form class=\"form-horizontal";
           html += (this.form['class']) ? ' ' + this.form['class'] : '';
-          html += "\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "\" autocomplete=\"off\" novalidate>\n";
+          html += "\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "_form\" autocomplete=\"off\" novalidate>\n";
           html += "<div ng-show=\"flashMessage != null && flashMessage != undefined\" class=\"alert alert-info\">{{ flashMessage }}</div>\n";
 
           var field;
@@ -1011,7 +1011,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                   html += "<div class=\"col-lg-12\">\n";
                   html += "<hr />\n";
                 }
-                html += "<div class=\"form-group buttons\">\n";
+                html += "<div class=\"form-group buttons\" ";
+                html += "id=\"" + this.form.name + "_controls\" ";
+                html += ">\n";
                 html += "<label class=\"col-lg-2 control-label\"> </label>\n";
                 html += "<div class=\"controls col-lg-6\">\n";
                 for (var btn in this.form.buttons) {
@@ -1021,6 +1023,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                     html += "class=\"btn btn-sm";
                     html += (button['class']) ? " " + button['class'] : "";
                     html += "\" ";
+                    html += "id=\"" + this.form.name + "_" + btn + "_btn\" "; 
                     if (button.ngClick) {
                        html += this.attr(button,'ngClick');
                     }
