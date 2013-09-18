@@ -71,8 +71,7 @@ angular.module('ProjectsListDefinition', [])
                 'class': 'btn-xs btn-info btn-help pull-right',
                 awToolTip: 'Click for help',
                 dataTitle: 'Project Status',
-                iconSize: 'large',
-                id: 'project-help-button'
+                iconSize: 'large'
                 }
             },
 

@@ -38,7 +38,6 @@ angular.module('GroupListDefinition', [])
                 'class': 'btn-xs btn-info btn-help pull-right',
                 awToolTip: 'Click for help',
                 dataTitle: 'Adding Groups',
-                id: 'group-help-button',
                 iconSize: 'large'
                 }
             },

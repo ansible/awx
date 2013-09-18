@@ -125,10 +125,11 @@
          <div class="nav-collapse navbar-responsive-collapse">
            <ul class="nav navbar-nav pull-right">
              <li ng-show="current_user.username != null && current_user.username != undefined">
-                 <a href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
-             <li ng-show="userLoggedIn == true"><a href="" ng-click="viewLicense()">View License</a></li>
-             <li ng-show="userLoggedIn == true"><a href="mailto:support@ansibleworks.com?subject=AWX%20Help%20Request">Contact Support</a><li>
-             <li ng-show="userLoggedIn == true"><a href="#/logout">Logout</a></li>
+                 <a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
+             <li ng-show="userLoggedIn == true"><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
+             <li ng-show="userLoggedIn == true"><a id="main_contact_support" 
+                  href="mailto:support@ansibleworks.com?subject=AWX%20Help%20Request">Contact Support</a><li>
+             <li ng-show="userLoggedIn == true"><a id="main_logout" href="#/logout">Logout</a></li>
            </ul>
          </div><!-- nav-collapse -->
        </div>
@@ -138,15 +139,15 @@
 
     <div class="row">
       <div class="col-lg-12">
-        <ul class="nav nav-tabs">
-          <li class="active"><a href="#organizations" data-toggle="tab">Organizations</a></li>
-          <li><a href="#users" data-toggle="tab">Users</a></li>
-          <li><a href="#teams" data-toggle="tab">Teams</a></li>
-          <li><a href="#projects" data-toggle="tab">Projects</a></li>
-          <li><a href="#inventories" data-toggle="tab">Inventories</a></li>
-          <li><a href="#credentials" data-toggle="tab">Credentials</a></li>
-          <li><a href="#job_templates" data-toggle="tab">Job Templates</a></li>
-          <li><a href="#jobs" data-toggle="tab">Jobs</a></li>
+        <ul class="nav nav-tabs" id="main_tabs">
+          <li class="active"><a href="#organizations" id="main_organizations_tab" data-toggle="tab">Organizations</a></li>
+          <li><a href="#users" id="main_users_tab" data-toggle="tab">Users</a></li>
+          <li><a href="#teams" id="main_teams_tab" data-toggle="tab">Teams</a></li>
+          <li><a href="#projects" id="main_projects_tab" data-toggle="tab">Projects</a></li>
+          <li><a href="#inventories" id="main_inventories_tab" data-toggle="tab">Inventories</a></li>
+          <li><a href="#credentials" id="main_credentials_tab" data-toggle="tab">Credentials</a></li>
+          <li><a href="#job_templates" id="main_job_templates_tab" data-toggle="tab">Job Templates</a></li>
+          <li><a href="#jobs" id="main_jobs_tab" data-toggle="tab">Jobs</a></li>
         </ul>
      
         <div class="tab-content">
@@ -207,8 +208,8 @@
               </div>
               <div class="modal-body" id="password-body"></div>
               <div class="modal-footer">
-                <a href="" ng-click="cancelJob()" class="btn btn-default">Cancel</a>
-                <a href="" ng-click="startJob()" class="btn btn-primary" ng-disabled="password_form.$pristine || password_form.$invalid">Continue</a>
+                <a href="" ng-click="cancelJob()" class="btn btn-default" id="password_cancel_btn">Cancel</a>
+                <a href="" ng-click="startJob()" class="btn btn-primary" id="password_continue_btn" ng-disabled="password_form.$pristine || password_form.$invalid">Continue</a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->
@@ -227,8 +228,8 @@
               <div class="modal-footer">
                 <button ng-show="formModalInfo !== undefined && formModalInfo != ''" ng-click="formModalInfoAction()" 
                     class="btn btn-sm pull-left"><i class="icon-zoom-in"></i> <span ng-bind="formModalInfo"></span></button>
-                <a href="#" ng-show="formModalCancelShow" data-target="#form-modal" data-dismiss="modal" class="btn btn-default">Cancel</a>
-                <a href="" ng-bind="formModalActionLabel" ng-click="formModalAction()" ng-disabled="formModalActionDisabled" class="btn btn-primary"></a>
+                <a href="#" ng-show="formModalCancelShow" data-target="#form-modal" data-dismiss="modal" id="form_cancel_btn" class="btn btn-default">Cancel</a>
+                <a href="" ng-bind="formModalActionLabel" ng-click="formModalAction()" ng-disabled="formModalActionDisabled" id="form_ok_btn" class="btn btn-primary"></a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->
@@ -246,8 +247,9 @@
               <div class="modal-footer">
                 <a href="" ng-bind="formModal2Info" ng-show="formModal2Info !== undefined && formModal2Info != ''" ng-click="formModal2InfoAction()" 
                     class="btn btn-default btn-sm pull-left"><i class="icon-zoom-in"></i> <span ng-bind="formModal2Info"></span></a>
-                <a href="#" ng-show="formModal2CancelShow" data-target="#form-modal2" data-dismiss="modal" class="btn btn-default">Cancel</a>
-                <a href="" ng-bind="formModal2ActionLabel" ng-click="formModal2Action()" class="btn btn-primary"></a>
+                <a href="#" ng-show="formModal2CancelShow" data-target="#form-modal2" data-dismiss="modal" id="form2_cancel_btn"
+                    class="btn btn-default">Cancel</a>
+                <a href="" ng-bind="formModal2ActionLabel" ng-click="formModal2Action()" id="form2_ok_btn" class="btn btn-primary"></a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->
@@ -264,8 +266,8 @@
               </div>
               <div class="modal-body" id="lookup-modal-body"></div>
               <div class="modal-footer">
-                <a href="#" data-target="#lookup-modal" data-dismiss="modal" class="btn btn-default">Cancel</a>
-                <a href="" ng-click="selectAction()" class="btn btn-primary">Select</a>
+                <a href="#" data-target="#lookup-modal" data-dismiss="modal" id="lookup_cancel_btn" class="btn btn-default">Cancel</a>
+                <a href="" ng-click="selectAction()" id="lookup_select_btn" class="btn btn-primary">Select</a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->
@@ -283,8 +285,8 @@
               <div class="modal-body" ng-bind-html-unsafe="promptBody" id="prompt-body">
               </div>
               <div class="modal-footer">
-                <a href="#" data-target="#prompt-modal" data-dismiss="modal" class="btn btn-default">No</a>
-                <a href="" ng-class="promptActionBtnClass" ng-click="promptAction()" id="prompt-action-btn" class="btn btn-primary">Yes</a>
+                <a href="#" data-target="#prompt-modal" data-dismiss="modal" id="prompt_cancel_btn" class="btn btn-default">No</a>
+                <a href="" ng-class="promptActionBtnClass" ng-click="promptAction()" id="prompt_action_btn" class="btn btn-primary">Yes</a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->
@@ -303,7 +305,7 @@
                 <div class="alert" ng-class="alertClass" ng-bind-html-unsafe="alertBody"></div>
               </div>
               <div class="modal-footer">
-                <a href="#" ng-hide="disableButtons" data-target="#form-modal" data-dismiss="modal" class="btn btn-primary">OK</a>
+                <a href="#" ng-hide="disableButtons" data-target="#form-modal" data-dismiss="modal" id="alert_ok_btn" class="btn btn-primary">OK</a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->
@@ -321,7 +323,7 @@
                 <div class="alert" ng-class="alertClass2" ng-bind-html-unsafe="alertBody2"></div>
               </div>
               <div class="modal-footer">
-                <a href="#" ng-hide="disableButtons2" data-target="#form-modal2" data-dismiss="modal" class="btn btn-primary">OK</a>
+                <a href="#" ng-hide="disableButtons2" data-target="#form-modal2" data-dismiss="modal" id="alert2_ok_btn" class="btn btn-primary">OK</a>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->

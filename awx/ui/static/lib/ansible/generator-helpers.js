@@ -95,7 +95,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         })
 
     .factory('Button', ['Attr', function(Attr) {
-    return function(btn) {
+    return function(btn, action) {
         // pass in button object, get back html
         var html = '';
         if (btn.awRefresh) {
@@ -103,7 +103,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            html += (btn.ngShow) ? Attr(btn, 'ngShow') : ""; 
            html += ">\n";
         }
-        html += "<button type=\"button\" " + "class=\"btn";
+        html += "<button type=\"button\" ";
+        html += "class=\"btn";
         if (btn.awRefresh && !btn['class']) {
             html += ' btn-primary btn-xs refresh-btn';
         }
@@ -117,7 +118,14 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "\" ";
         html += (btn.ngClick) ? Attr(btn, 'ngClick') : "";
         html += (btn.awRefresh) ? " ng-click=\"refreshCnt = " + $AnsibleConfig.refresh_rate + "; refresh()\" " : "";
-        html += (btn.id) ? "id=\"" + btn.id + "\" " : "";
+        if (btn.id) {
+           html += "id=\"" + btn.id + "\" ";
+        }
+        else {
+           if (action) {
+              html += "id=\"" + action + "_btn\" "; 
+           }
+        }
         html += (btn.ngHide) ? Attr(btn,'ngHide') : "";
         html += (btn.awToolTip) ? Attr(btn,'awToolTip') : "";
         html += (btn.awToolTip && btn.dataPlacement == undefined) ? "data-placement=\"top\" " : "";
@@ -163,7 +171,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var fld = params['fld'];
         var options = params['options'];
         var field;
-        
+
         if (params.type) {
            field = list[params.type][fld];
         }
@@ -171,13 +179,17 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            field = list['fields'][fld];
         }
         
+        var name = field['label'].replace(/ /g,'_');
+
         html = (params.td == undefined || params.td !== false) ? "<td>\n" : "";
         html += "<div class=\"btn-group\">\n";
         html += "<button type=\"button\" ";
         html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
         html += "class=\"btn btn-default";
         html += (field['class']) ? " " + field['class'] : " btn-xs"; 
-        html += " dropdown-toggle\" data-toggle=\"dropdown\">";
+        html += " dropdown-toggle\" data-toggle=\"dropdown\" ";
+        html += "id=\"" + name + "_ddown\" ";  
+        html += ">";
         html += (field.icon) ? Icon(field.icon) : "";
         html += field.label;
         html += " <span class=\"caret\"></span></button>\n";
@@ -393,9 +405,11 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (useMini) ? " input-group-sm" : " input-group-sm";
         html += "\">\n";
         html += "<div class=\"input-group-btn\">\n";
-        html += "<button type=\"button\" class=\"btn "; 
-        // html += (useMini) ? "btn-mini " : "btn-small ";
-        html += "dropdown-toggle\" data-toggle=\"dropdown\">\n";
+        html += "<button type=\"button\" ";
+        html += "id=\"search_field_ddown\" ";
+        html += "class=\"btn "; 
+        html += "dropdown-toggle\" data-toggle=\"dropdown\" "
+        html += ">\n";
         html += "<span ng-bind=\"" + iterator + "SearchFieldLabel\"></span>\n";
         html += "<span class=\"caret\"></span>\n";
         html += "</button>\n";
@@ -411,19 +425,18 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "</ul>\n";
         html += "</div><!-- input-group-btn -->\n";
         
-        html += "<select ng-show=\"" + iterator + "SelectShow\" ng-model=\""+ iterator + "SearchSelectValue\" ng-change=\"search('" + iterator + "')\" ";
+        html += "<select id=\"search_value_select\" ng-show=\"" + iterator + "SelectShow\" ng-model=\""+ iterator + "SearchSelectValue\" ng-change=\"search('" + iterator + "')\" ";
         html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts\" class=\"form-control search-select";
-        //html += (useMini) ? " input-sm" : "";
         html += "\"></select>\n";
 
-        html += "<input type=\"text\" ng-hide=\"" + iterator + "SelectShow || " + iterator + "InputHide\" class=\"form-control ";
-        //html += (useMini) ? " input-sm" : " input-sm";
+        html += "<input id=\"search_value_input\" type=\"text\" ng-hide=\"" + iterator + "SelectShow || " + iterator + "InputHide\" class=\"form-control ";
         html += "\" ng-model=\"" + iterator + "SearchValue\" ng-change=\"search('" + iterator + 
                 "')\" placeholder=\"Search\" type=\"text\" >\n";
         
         html += "<div class=\"input-group-btn\">\n";
-        html += "<button type=\"button\" ng-hide=\"" + iterator + "SelectShow || " + iterator + "HideSearchType || " + iterator + "InputHide\" class=\"btn ";
-        //html += (useMini) ? "btn-x " : "btn-small ";
+        html += "<button type=\"button\" ";
+        html += "id=\"search_option_ddown\" ";
+        html += "ng-hide=\"" + iterator + "SelectShow || " + iterator + "HideSearchType || " + iterator + "InputHide\" class=\"btn ";
         html += "dropdown-toggle\" data-toggle=\"dropdown\">\n";
         html += "<span ng-bind=\"" + iterator + "SearchTypeLabel\"></span>\n";
         html += "<span class=\"caret\"></span>\n";
@@ -461,10 +474,12 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "<form class=\"form-inline\">\n";
         html += "<button type=\"button\" class=\"previous btn btn-light";
         html += (useMini) ? " btn-xs\" " : "\" ";
+        html += "id=\"previous_page_btn\" ";
         html += "ng-click=\"prevSet('" + set + "','" + iterator + "')\" " +
                 "ng-disabled=\"" + iterator + "PrevUrl == null || " + iterator + "PrevUrl == undefined\"><i class=\"icon-caret-left\"></i> Prev</button>\n";
         html += "<button type=\"button\" class=\"next btn btn-light";
         html += (useMini) ? " btn-xs\" " : "\" ";
+        html += "id=\"next_page_btn\" ";
         html += " ng-click=\"nextSet('" + set + "','" + iterator + "')\"" + 
                 "ng-disabled=\"" + iterator + "NextUrl == null || " + iterator + "NextUrl == undefined\">Next <i class=\"icon-caret-right\"></i></button>\n";
         
@@ -472,6 +487,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            html += "<label class=\"page-size-label\">Rows per page: </label>\n";
            html += "<select ng-model=\"" + iterator + "PageSize\" ng-change=\"changePageSize('" + 
                     set + "'," + "'" + iterator + "')\" ";
+           html += "id=\"page_size_select\" ";
            html += "class=\"page-size\">\n";
            html += "<option value=\"10\" selected>10</option>\n";
            html += "<option value=\"20\" selected>20</option>\n";

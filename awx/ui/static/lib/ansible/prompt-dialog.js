@@ -24,7 +24,7 @@ angular.module('PromptDialog', ['Utilities'])
         scope.promptHeader = params.hdr;
         scope.promptBody = params.body;
         var cls = (params['class'] == null || params['class'] == undefined) ? 'btn-danger' : params['class'];
-        $('#prompt-action-btn').addClass(cls); //Use jquery because django template engine conflicts with Angular's
+        $('#prompt_action_btn').addClass(cls); //Use jquery because django template engine conflicts with Angular's
                                                // use of {{...}}
         //scope.id = params.id; 
         //scope.url = params.url; 

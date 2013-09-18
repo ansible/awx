@@ -152,14 +152,14 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
                  if ( (list.actions[action].basePaths == undefined) || 
                       (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
-                    html += this.button(list.actions[action], list.iterator);
+                    html += this.button(list.actions[action], action);
                  }
               }
           }
           
           if (list.name == 'inventories' && options.mode !== 'select') {
               html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"inventoryFailureFilter\" " +
-                  "ng-change=\"search('inventory')\" > Show only inventories with failed jobs</label>\n";
+                  "ng-change=\"search('inventory')\" id=\"failed_jobs_chbox\"> Show only inventories with failed jobs</label>\n";
           }
 
           //select instructions
@@ -174,7 +174,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  dataTitle: 'Help',
                  iconSize: 'large'
                  };
-             html += this.button(btn);
+             html += this.button(btn, 'select');
           }
        }
        else {
@@ -185,12 +185,14 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += "</div><!-- row -->\n";
          
        // table header row
-       html += "<table class=\"table"
+       html += "<table id=\"" + list.name + "_table\" ";
+       html += "class=\"table"
        html += (list['class']) ? " " + list['class'] : "";
        html += (options.mode == 'lookup' || options.id) ? ' table-hover-inverse' : '';
        html += (list.hover) ? ' table-hover' : '';
        
-       html += "\">\n";
+       html += "\" ";
+       html += ">\n";
        html += "<thead>\n";
        html += "<tr>\n";
        if (list.index) {
