@@ -363,7 +363,18 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            return x;
            }
 
-       function buildCheckbox(field, fld) {
+       function buildId(field, fld) {
+           var html = '';
+           if (field.id) {
+              html += Attr(field,'id') : "";
+           }
+           else {
+              html += "id=\"" + this.form.name + "_" + fld + "\" ";
+           }
+           return html;
+           }
+
+       function buildCheckbox(field, fld, idx) {
            var html='';
            html += "<label class=\"checkbox-inline"
            html += (field.labelClass) ? " " + field.labelClass : "";
@@ -373,7 +384,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            html += "ng-model=\"" + fld + '" ';
            html += "name=\"" + fld + '" ';
            html += (field.ngChange) ? Attr(field,'ngChange') : "";
-           html += (field.id) ? Attr(field,'id') : "";
+           html += "id=\"" + this.form_name + "_" +  fld + "_chbox";
+           html += (idx !== undefined) ? "_" + idx : "";
            html += (field['class']) ? Attr(field,'class') : "";
            html += (field.trueValue !== undefined) ? Attr(field,'trueValue') : "";
            html += (field.falseValue !== undefined) ? Attr(field,'falseValue') : "";
@@ -436,7 +448,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 html += 'name="' + fld + '" ';
                 html += (field.ngChange) ? this.attr(field,'ngChange') : "";
                 html += (field.chkPass) ? "chk-pass " : "";
-                html += (field.id) ? this.attr(field,'id') : "";
+                html += buildId(field, fld);
                 html += "class=\"form-control";
                 html += (field['class']) ? " " + this.attr(field, 'class') : "";
                 html += "\" ";
@@ -456,21 +468,26 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              }
              
              if (field.clear) {
-                html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"clear('" + fld + "','" + field.associated + "')\" " + 
+                html += "<span class=\"input-group-btn\"><button type=\"button\" ";
+                html += "id=\"" + this.form.name + "_" + fld + "_clear_btn\" "; 
+                html += "class=\"btn btn-default\" ng-click=\"clear('" + fld + "','" + field.associated + "')\" " + 
                    "aw-tool-tip=\"Clear " + field.label + "\" id=\"" + fld + "-clear-btn\" ";
                 html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
                 html += " ><i class=\"icon-undo\"></i></button>\n";
                 if (field.ask) {
-                   html += "<label class=\"checkbox-inline ask-checkbox\"><input type=\"checkbox\" ng-model=\"" + 
-                       fld + "_ask\" ng-change=\"ask('" + fld + "','" + field.associated + "')\" > Ask at runtime?</label>";
+                   html += "<label class=\"checkbox-inline ask-checkbox\">";
+                   html += "<input type=\"checkbox\" ng-model=\"" + 
+                       fld + "_ask\" ng-change=\"ask('" + fld + "','" + field.associated + "')\" ";
+                   html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";
+                   html += "> Ask at runtime?</label>";
                 }
                 html += "</span>\n</div>\n";
              }
              
              if (field.genMD5) {
                 html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"genMD5('" + fld + "')\" " + 
-                   "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + fld + "-gen-btn\"><i class=\"icon-repeat\">" + 
-                   "</i></button></span>\n</div>\n";
+                   "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + this.form.name + "_" + fld + "_gen_btn\">" +
+                   "<i class=\"icon-repeat\"></i></button></span>\n</div>\n";
              }
              
              // Add error messages
@@ -553,7 +570,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
             // Variable editing
             if (fld == "variables" || fld == "extra_vars" || fld == 'inventory_variables') {
-              html += "<div class=\"parse-selection\">Parse as: " +
+              html += "<div class=\"parse-selection\" id=\"" + this.form.name + "_" + fld + "_parse_type\">Parse as: " +
                   "<input type=\"radio\" ng-model=\"";
               html += (this.form.parseTypeName) ? this.form.parseTypeName : 'parseType'; 
               html += "\" value=\"yaml\"> <span class=\"parse-label\">YAML</span>\n";
@@ -570,7 +587,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += (field['class']) ? " " + field['class'] : "";
             html += "\" ";
             html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-            html += (field.id) ? this.attr(field,'id') : "";
+            html += buildId(field, fld);
             html += (field.placeholder) ? this.attr(field,'placeholder') : "";
             html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
             html += (options.mode == 'add' && field.addRequired) ? "required " : "";
@@ -609,7 +626,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += "\" ";
             html += this.attr(field, 'ngOptions');
             html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-            html += (field.id) ? this.attr(field,'id') : "";
+            html += buildId(field, fld);
             html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
             html += (options.mode == 'add' && field.addRequired) ? "required " : "";
             html += (field.readonly) ? "readonly " : "";
@@ -654,6 +671,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += (field.spinner) ? "ng-spinner=\"" + fld + "\" " : ""; 
             html += "ng-model=\"" + fld + '" ';
             html += 'name="' + fld + '" ';
+            html += buildId(field, fld);
             html += (field.min || field.min == 0) ? this.attr(field, 'min') : "";
             html += (field.max) ? this.attr(field, 'max') : "";
             html += (field.ngChange) ? this.attr(field,'ngChange') : "";
@@ -686,9 +704,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
          if (field.type == 'checkbox_group') {
             html += "<label class=\"control-label " + getLabelWidth() + "\">" + 
                 field.label + "</label>\n";
-            html += "<div class=\"checkbox-group\">\n";
+            html += "<div class=\"checkbox-group\" ";
+            html += "id=\"" + this.form.name + "_" + fld + "_chbox_group\" "; 
+            html += ">\n";
             for (var i=0; i < field.fields.length; i++) {
-                html += buildCheckbox(field.fields[i], field.fields[i].name);
+                html += buildCheckbox(field.fields[i], field.fields[i].name, i);
             }
             // Add error messages
             if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
@@ -724,6 +744,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
             html += field.label + '</label>' + "\n";
             html += "<div ";
+            html += "id=\"" + this.form.name + "_" + fld + "_radio_grp\" ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
             html += "class=\"" + getFieldWidth() + "\">\n"; 
             for (var i=0; i < field.options.length; i++) {
@@ -755,6 +776,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += (field.labelClass) ? " " + field.labelClass : "";
             html += "\" ";
             html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
+            html += "id=\"" + this.field.name + "_" + fld + "_lookup\" ";
             html += ">\n";
             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
             html += "<label class=\"control-label\" for=\"" + fld + '">';
@@ -800,17 +822,16 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
          if (field.type == 'custom') {
             html += "<div class=\"text-right " + getLabelWidth();
             html += (field.labelClass) ? " " + field.labelClass : "";
-            html += "\" ";
             html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
             html += ">\n";
             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-             
             html += "<label class=\"control-label\" for=\"" + fld + '">';
             html += (field.icon) ? this.icon(field.icon) : "";
             html += (field.label) ? field.label : '';
             html += '</label>' + "\n";
             html += "</div>\n";
             html += "<div ";
+            html += "id=\"" + this.field.name + "_" + fld + "\" ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
             html += "class=\"" + getFieldWidth() + "\">\n"; 
             html += field.control;
