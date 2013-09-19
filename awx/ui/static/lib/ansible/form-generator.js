@@ -374,7 +374,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            return html;
            }
 
-       function buildCheckbox(field, fld, idx) {
+       function buildCheckbox(form, field, fld, idx) {
            var html='';
            html += "<label class=\"checkbox-inline"
            html += (field.labelClass) ? " " + field.labelClass : "";
@@ -384,7 +384,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            html += "ng-model=\"" + fld + '" ';
            html += "name=\"" + fld + '" ';
            html += (field.ngChange) ? Attr(field,'ngChange') : "";
-           html += "id=\"" + this.form_name + "_" +  fld + "_chbox";
+           html += "id=\"" + form.name + "_" +  fld + "_chbox\" ";
            html += (idx !== undefined) ? "_" + idx : "";
            html += (field['class']) ? Attr(field,'class') : "";
            html += (field.trueValue !== undefined) ? Attr(field,'trueValue') : "";
@@ -708,7 +708,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += "id=\"" + this.form.name + "_" + fld + "_chbox_group\" "; 
             html += ">\n";
             for (var i=0; i < field.fields.length; i++) {
-                html += buildCheckbox(field.fields[i], field.fields[i].name, i);
+                html += buildCheckbox(this.form, field.fields[i], field.fields[i].name, i);
             }
             // Add error messages
             if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
@@ -733,7 +733,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += "<div ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
             html += "class=\"" + getFieldWidth() + " bold-text\">\n"; 
-            html += buildCheckbox(field, fld);
+            html += buildCheckbox(this.form, field, fld);
             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
             html += "</div>\n"
          }
