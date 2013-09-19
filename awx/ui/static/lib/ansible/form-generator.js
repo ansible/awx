@@ -1352,23 +1352,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        html = "<div id=\"" + this.form.name + "-collapse-" + idx + "\" class=\"jqui-accordion\">\n";
        for (var itm in form.related) {
            if (form.related[itm].type == 'collection') {
-
-              // Start the accordion group
-             /* html += "<div class=\"accordion-group\">\n";
-              html += "<div class=\"accordion-heading\">\n";
-              html += "<a id=\"" + form.name + "-collapse-" + idx + "\" class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#collapse" + idx + "\">";
-              html += "<i class=\"icon-angle-down icon-white\"></i>" + form.related[itm].title + "</a>\n";
-              html += "</div>\n";
-              html += "<div id=\"collapse" + idx + "\" class=\"accordion-body collapse";
-              if (form.related[itm].open) {
-                 html += " in";   //open accordion on load
-              }
-              html += "\">\n";
-              html += "<div class=\"accordion-inner\">\n";
-              */
-             
-              
-              html += "<h3>" + form.related[itm].title + "<h3>\n"; 
+              html += "<h3 class=\"" + itm + "_collapse\">" + form.related[itm].title + "<h3>\n"; 
               html += "<div>\n";
 
               if (form.related[itm].instructions) {
@@ -1380,10 +1364,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
               html += "<div class=\"well\">\n";
               html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true });
-
-              // Add actions(s)
-              //html += "<div class=\"list-actions\">\n";
-               
+ 
               html += "<div class=\"col-lg-7\">\n";
               for (var act in form.related[itm].actions) {
                  var action = form.related[itm].actions[act];
@@ -1401,8 +1382,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               }
               html += "</div>\n";
               html += "</div><!-- row -->\n"
-              //html += "</div>\n";
-
+              
               // Start the list
               html += "<div class=\"list\">\n";
               html += "<table id=\"" + itm + "_table" + "\" class=\"" + form.related[itm].iterator + " table table-condensed table-hover\">\n";
