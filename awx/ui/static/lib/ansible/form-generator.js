@@ -858,12 +858,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "<div class=\"dropdown\">\n";
           for (var itm in navigation) {
               if (navigation[itm].active) {
-                 html += "<a href=\"\" class=\"toggle\">" + 
-                     navigation[itm].label + " <i class=\"icon-chevron-sign-down\"></i></a>";
+                 html += "<a href=\"\" class=\"toggle\" ";
+                 html += "data-toggle=\"dropdown\" ";
+                 html += ">" + navigation[itm].label + " <i class=\"icon-chevron-sign-down\"></i></a>";
                  break;
               }
           }
-          html += "<ul class=\"dropdown-menu\" role=\"menu\">\n";
+          html += "<ul class=\"dropdown-menu pull-right\" role=\"menu\">\n";
           for (var itm in navigation) {
               html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"" +
                   navigation[itm].href + "\" ";

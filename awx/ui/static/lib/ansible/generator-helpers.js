@@ -205,6 +205,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (field['class']) ? field['class'] : 'btn-default btn-xs';
         html += "\" ";
         html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
+        html += "data-toggle=\"dropdown\" ";
         html += ">";
         html += (field.icon) ? Icon(field.icon) : "";
         html += field.label;
@@ -420,15 +421,24 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "<div class=\"input-group";
         html += (useMini) ? " input-group-sm" : " input-group-sm";
         html += "\">\n";
-        html += "<div class=\"input-group-btn\">\n";
+        html += "<div class=\"input-group-btn dropdown\">\n";
+        
+        // Use standard button on mobile
         html += "<button type=\"button\" ";
         html += "id=\"search_field_ddown\" ";
         html += "class=\"btn "; 
-        html += "dropdown-toggle\" data-toggle=\"dropdown\" "
+        html += "dropdown-toggle\" data-toggle=\"dropdown\"";
         html += ">\n";
         html += "<span ng-bind=\"" + iterator + "SearchFieldLabel\"></span>\n";
         html += "<span class=\"caret\"></span>\n";
         html += "</button>\n";
+        
+        // Use link and hover activation on desktop
+        //html += "<a href=\"\" id=\"search_field_ddown\" class=\"btn btn-default visible-lg\">";
+        //html += "<span ng-bind=\"" + iterator + "SearchFieldLabel\"></span>\n";
+        //html += "<span class=\"caret\"></span>\n";
+        //html += "</a>\n";
+        
         html += "<ul class=\"dropdown-menu\" id=\"" + iterator + "SearchDropdown\">\n";
         
         for ( var fld in form.fields) {
@@ -449,7 +459,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "\" ng-model=\"" + iterator + "SearchValue\" ng-change=\"search('" + iterator + 
                 "')\" placeholder=\"Search\" type=\"text\" >\n";
         
-        html += "<div class=\"input-group-btn\">\n";
+        html += "<div class=\"input-group-btn dropdown\">\n";
         html += "<button type=\"button\" ";
         html += "id=\"search_option_ddown\" ";
         html += "ng-hide=\"" + iterator + "SelectShow || " + iterator + "HideSearchType || " + iterator + "InputHide\" class=\"btn ";
