@@ -17,12 +17,18 @@ angular.module('InventoryFormDefinition', [])
         well: true,
         
         navigationLinks: {
+            inventory: {
+                href: "/#/inventories/{{ inventory_id }}",
+                label: "Inventory Properties",
+                icon: "icon-edit",
+                active: true
+                },
             hosts: {
                 href: "/#/inventories/{{ inventory_id }}/hosts",
                 label: 'Hosts',  
                 icon: 'icon-laptop'
                 },
-            Groups: {
+            groups: {
                 href: "/#/inventories/{{ inventory_id }}/groups",
                 label: 'Groups',  
                 icon: 'icon-sitemap'

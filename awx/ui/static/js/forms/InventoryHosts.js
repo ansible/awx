@@ -32,25 +32,6 @@ angular.module('InventoryHostsFormDefinition', [])
                 sourceModel: 'groups',
                 sourceField: 'name',
                 nosort: true
-                },
-            dropdown: {
-                type: 'DropDown',
-                searchable: false,
-                nosort: true,
-                label: 'Jobs',
-                "class": "btn-sm",
-                //ngDisabled: 'host.last_job == null',
-                options: [
-                    { ngClick: "allJobs(\{\{ host.id \}\})", label: 'All jobs', ngShow: 'host.last_job' },
-                    { ngClick: "allHostSummaries(\{\{ host.id \}\},'\{\{ host.name \}\}', \{\{ inventory_id \}\})", label: 'All host summaries', 
-                        ngShow: 'host.last_job' },
-                    { ngClick: 'viewJobs(\{\{ host.last_job \}\})', label: 'Latest job', ngShow: 'host.last_job' },
-                    { ngClick: "viewLastEvents(\{\{ host.id \}\}, '\{\{ host.last_job \}\}', '\{\{ host.name \}\}', " +
-                        "'\{\{ host.summary_fields.last_job.name \}\}')", label: 'Latest job events', ngShow: 'host.last_job' },
-                    { ngClick: "viewLastSummary(\{\{ host.id \}\}, '\{\{ host.last_job \}\}', '\{\{ host.name \}\}', " +
-                        "'\{\{ host.summary_fields.last_job.name \}\}')", label: 'Latest host summary', ngShow: 'host.last_job' },
-                    { ngClick: "", label: 'No job data available', ngShow: 'host.last_job == null' }
-                    ]
                 }
             },
 
@@ -76,6 +57,25 @@ angular.module('InventoryHostsFormDefinition', [])
             },
         
         fieldActions: {
+            
+            ViewJobs: {
+                type: 'DropDown',
+                label: 'Jobs',
+                icon: 'icon-zoom-in',
+                "class": "btn-default btn-sm",
+                options: [
+                    { ngClick: "allJobs(\{\{ host.id \}\})", label: 'All jobs', ngShow: 'host.last_job' },
+                    { ngClick: "allHostSummaries(\{\{ host.id \}\},'\{\{ host.name \}\}', \{\{ inventory_id \}\})", label: 'All host summaries', 
+                        ngShow: 'host.last_job' },
+                    { ngClick: 'viewJobs(\{\{ host.last_job \}\})', label: 'Latest job', ngShow: 'host.last_job' },
+                    { ngClick: "viewLastEvents(\{\{ host.id \}\}, '\{\{ host.last_job \}\}', '\{\{ host.name \}\}', " +
+                        "'\{\{ host.summary_fields.last_job.name \}\}')", label: 'Latest job events', ngShow: 'host.last_job' },
+                    { ngClick: "viewLastSummary(\{\{ host.id \}\}, '\{\{ host.last_job \}\}', '\{\{ host.name \}\}', " +
+                        "'\{\{ host.summary_fields.last_job.name \}\}')", label: 'Latest host summary', ngShow: 'host.last_job' },
+                    { ngClick: "", label: 'No job data available', ngShow: 'host.last_job == null' }
+                    ]
+                },
+
             "delete": {
                 ngClick: "deleteHost(\{\{ host.id \}\},'\{\{ host.name \}\}')",
                 icon: 'icon-trash',

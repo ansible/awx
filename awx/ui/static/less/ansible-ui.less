@@ -423,6 +423,8 @@ legend {
   vertical-align: middle;
 }
 
+
+/* breadcrumbs */
 .nav-path {
   padding: 5px 0 10px 0;
   margin-right: 5px;
@@ -433,14 +435,56 @@ legend {
   border: 1px solid #d8d8d8;
   border-radius: 6px;
   box-shadow: 3px 3px 4px 0 #808080;
+
+  .breadcrumb {
+    display: inline-block;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-bottom: 0;
+    margin-left: 10px;
+  }
+
+  .dropdown {
+    display: inline-block;
+    margin-right: 0;
+    paddding-right: 0;
+
+    .toggle, .toggle:visited, .toggle:hover, .toggle:active {
+      color: @black;
+    }
+
+    li a.active {
+       color: @grey;
+    }
+
+  }
+
 }
 
-.nav-path ul {
-  padding-bottom: 0;
-  padding-left: 0;
-  margin-bottom: 0;
-  margin-left: 10px;
+.actions .dropdown {
+  display: inline-block;
 }
+
+/* Display drop-down menus on hover. Remove margin between toggle link
+   and menu, allowing smooth mouse movement between toggle and menu 
+   
+   http://stackoverflow.com/questions/8878033/how-to-make-twitter-bootstrap-menu-dropdown-on-hover-rather-than-click 
+ */
+  .dropdown-toggle:hover .dropdown-menu, .dropdown:hover .dropdown-menu {
+     display: block; 
+  }
+
+  .dropdown-menu li:hover {
+     visibility: visible;
+  } 
+
+  .dropdown-menu {
+     margin-top: 0;
+  }
+
+/* end */
+
 
 .greeting {
   padding-right: 22px;
@@ -996,7 +1040,7 @@ tr td button i {
     white-space: normal;
   }
 
-  td.actions button {
+  td.actions .btn {
      width: 75px;
      margin-bottom: 5px;
   } 

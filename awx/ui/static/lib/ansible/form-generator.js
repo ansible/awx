@@ -10,8 +10,9 @@
 
 angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
     .factory('GenerateForm', [ '$location', '$cookieStore', '$compile', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column',
-        'NavigationLink', 'HelpCollapse', 'Button',
-    function($location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse, Button) {
+        'NavigationLink', 'HelpCollapse', 'Button', 'DropDown',
+    function($location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse, Button,
+        DropDown) {
     return {
     
     setForm: function(form) {
@@ -844,19 +845,48 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        return html;
        },
 
-    breadCrumbs: function(options) {
+    breadCrumbs: function(options, navigation) {
        var html = '';
+       
        html += "<div class=\"nav-path\">\n";
        html += "<ul class=\"breadcrumb\">\n";
        html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title | capitalize }}</a></li>\n";
-       html += "<li class=\"active\">";
-       if (options.mode == 'edit') {
-          html += this.form.editTitle;
+       
+       if (navigation) {
+          html += "<li class=\"active\"> </li>\n";
+          html += "</ul>\n";
+          html += "<div class=\"dropdown\">\n";
+          for (var itm in navigation) {
+              if (navigation[itm].active) {
+                 html += "<a href=\"\" class=\"toggle\">" + 
+                     navigation[itm].label + " <i class=\"icon-chevron-sign-down\"></i></a>";
+                 break;
+              }
+          }
+          html += "<ul class=\"dropdown-menu\" role=\"menu\">\n";
+          for (var itm in navigation) {
+              html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"" +
+                  navigation[itm].href + "\" ";
+              html += (navigation[itm].active) ? "class=\"active\" " : "";
+              html += ">";
+              html += navigation[itm].label;
+              html += (navigation[itm].active) ? " <i class=\"icon-angle-left\"></i>" : "";
+              html += "</a></li>\n";
+          }
+          html += "</ul>\n";
+          html += "</div><!-- dropdown -->\n";
+          html += "</div><!-- nav-path -->\n";
        }
        else {
-          html += this.form.addTitle; 
+          html += "<li class=\"active\">";
+          if (options.mode == 'edit') {
+             html += this.form.editTitle;
+          }
+          else {
+             html += this.form.addTitle; 
+          }
+          html += "</li>\n</ul>\n</div><!-- nav-path -->\n";
        }
-       html += "</li>\n</ul>\n</div>\n";
        return html;
        },
 
@@ -868,17 +898,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        var html = '';
        
        if (!this.modal) {
-          html += this.breadCrumbs(options);
+          if (this.form.navigationLinks) {
+             html += this.breadCrumbs(options, this.form.navigationLinks);
+          }
+          else {
+             html += this.breadCrumbs(options);
+          }
        }
        
-       if (!this.modal && this.form.navigationLinks) {
-          html += "<div class=\"navigation-links text-right\">\n"; 
-          for (var link in this.form.navigationLinks) {
-              html += this.navigationLink(this.form.navigationLinks[link]);
-          }
-          html += "</div>\n";
-       }
-
        if ((!this.modal && this.form.statusFields)) {
           // Add status fields section (used in Jobs form)
           html += "<div class=\"well\">\n";
@@ -920,17 +947,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += "<h3>" + this.form.collapseTitle + "</h3>\n"; 
              html += "<div>\n";
           }
-
-         /* if (this.form.navigation) {
-             html += "<div class=\"navigation-buttons navigation-buttons-top\">\n";
-             for (btn in this.form.navigation) {
-                 var btn = this.form.navigation[btn];
-                 if ( btn.position.indexOf('top-left') >= 0 || btn.position.indexOf('top-right') >= 0 ) {
-                    html += this.button(btn, 'top');
-                 }
-             }
-             html += "</div>\n";
-          } */
           
           // Start the well
           if ( this.has('well') ) {
@@ -1059,17 +1075,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += "</div>\n";
           }
 
-          /*if (this.form.navigation) {
-             html += "<div class=\"navigation-buttons navigation-buttons-bottom\">\n";
-             for (btn in this.form.navigation) {
-                 var btn = this.form.navigation[btn];
-                 if ( btn.position.indexOf('bottom-left') >= 0 || btn.position.indexOf('bottom-right') >= 0 ) {
-                    html += this.button(btn, 'bottom');
-                 }
-             }
-             html += "</div>\n";
-          }*/
-
           if ( this.form.collapse && this.form.collapseMode == options.mode ) {
              html += "</div>\n";
              html += "</div>\n"; 
@@ -1117,29 +1122,37 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        //
        // Used to create the inventory detail view
        //
-       
-       function navigationLinks(page) {
-           // Returns html for navigation links
-           var html = "<div class=\"navigation-links text-right\">\n";
-           html += "<a href=\"/#/inventories/{{ inventory_id }}\"><i class=\"icon-edit\"></i> Inventory Properties</a>\n";
-           if (page == 'group') {
-              html += "<a href=\"/#/inventories/{{ inventory_id }}/hosts\"><i class=\"icon-laptop\"></i> Hosts</a>\n";
-           }
-           else {
-              html += "<a href=\"/#/inventories/{{ inventory_id }}/groups\"><i class=\"icon-sitemap\"></i> Groups</a>\n";    
-           }
-           html += "</div>\n";
-           return html;
-           }
 
        var form = this.form;
        var itm = "groups";
-
        var html = '';
+       var navigation = {
+            inventory: {
+                href: "/#/inventories/{{ inventory_id }}",
+                label: "Inventory Properties",
+                icon: "icon-edit"
+                },
+            hosts: {
+                href: "/#/inventories/{{ inventory_id }}/hosts",
+                label: 'Hosts',  
+                icon: 'icon-laptop'
+                },
+            groups: {
+                href: "/#/inventories/{{ inventory_id }}/groups",
+                label: 'Groups',  
+                icon: 'icon-sitemap'
+                }
+            };
     
-       html += this.breadCrumbs(options);
-
+       
        if (form.type == 'groupsview') {
+
+          navigation.inventory.active = false; 
+          navigation.hosts.active = false;
+          navigation.groups.active = true; 
+          
+          html += this.breadCrumbs(options, navigation);
+
           // build the groups page
           html += "<div ng-show=\"showGroupHelp\" class=\"alert alert-dismissable alert-info\">\n";
           html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
@@ -1147,15 +1160,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               "use the <a href=\"/#/inventories/\{\{ inventory_id \}\}/hosts\"><em>Inventories->Hosts</em></a> page to " +
               "add hosts to the group.</p>";
           html += "</div>\n";
-
-          html += navigationLinks('group');
-
           html += "<div class=\"tree-container\">\n";      
           html += "<div class=\"tree-controls\">\n";
           html += "<div class=\"title col-lg-2\" ng-bind=\"selectedNodeName\"></div>\n";
           html += "<button type=\"button\" id=\"edit_group_btn\" class=\"btn btn-default btn-sm\" ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" " +
               "aw-tool-tip=\"Edit the selected group's properties\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> " +
-              "Properties</button>\n";
+              "properties</button>\n";
           html += "<button type=\"button\" id=\"copy_group_btn\" class=\"btn btn-success btn-sm\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
               "aw-tool-tip=\"Copy existing groups to the selected group\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Copy</button>\n";
           html += "<button type=\"button\" id=\"create_group_btn\" class=\"btn btn-success btn-sm\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
@@ -1168,8 +1178,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "</div><!-- tree-container -->\n";
        }
        else {
-          // build the hosts page      
+          // build the hosts page
+
+          navigation.inventory.active = false; 
+          navigation.hosts.active = true;
+          navigation.groups.active = false; 
           
+          html += this.breadCrumbs(options, navigation);
+  
           // Hint text
           html += "<div ng-show=\"showGroupHelp\" class=\"alert alert-dismissable alert-info\">\n";
           html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
@@ -1191,8 +1207,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "</div><!-- col-lg-3 -->\n";
           html += "<div class=\"col-lg-9\">\n"; 
 
-          html += navigationLinks('host');
-          
           html += "<div class=\"hosts-well well\">\n";
 
           html += SearchWidget({ iterator: form.iterator, template: form, mini: true, size: 'col-md-6 col-lg-6'});
@@ -1292,16 +1306,21 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "<td class=\"actions\">";
           for (act in form.fieldActions) {
              var action = form.fieldActions[act];
-             html += "<button type=\"button\" ";
-             html += "id=\"row_" + act + "_btn\" ";
-             html += "class=\"btn"; 
-             html += (action['class']) ? " " + action['class'] : "";
-             html += "\" " + this.attr(action,'ngClick');
-             html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
-             html += (action.awToolTip) ? "data-placement=\"top\" " : "";
-             html += ">" + this.icon(action.icon);
-             html += (action.label) ?  " " + action.label : ""; 
-             html += "</button> ";
+             if (action.type && action.type == 'DropDown') {
+                html += DropDown({ field: action, td: false });
+             }
+             else {
+                html += "<button type=\"button\" ";
+                html += "id=\"row_" + act + "_btn\" ";
+                html += "class=\"btn"; 
+                html += (action['class']) ? " " + action['class'] : "";
+                html += "\" " + this.attr(action,'ngClick');
+                html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
+                html += (action.awToolTip) ? "data-placement=\"top\" " : "";
+                html += ">" + this.icon(action.icon);
+                html += (action.label) ?  " " + action.label : ""; 
+                html += "</button> ";
+             }
           }
           html += "</td>";
           html += "</tr>\n";

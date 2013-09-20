@@ -28,7 +28,8 @@ angular.module('InventoriesListDefinition', [])
                 badgeTipPlacement: 'bottom'
                 },
             description: {
-                label: 'Description'
+                label: 'Description',
+                link: true
                 },
             organization: {
                 label: 'Organization',
@@ -56,37 +57,25 @@ angular.module('InventoriesListDefinition', [])
                 type: 'DropDown',
                 label: 'Jobs',
                 icon: 'icon-zoom-in',
-                'class': 'btn-xs',
+                'class': 'btn-default btn-xs',
                 options: [
                     { ngClick: 'viewJobs(\{\{ inventory.id \}\})', label: 'All Jobs' },
                     { ngClick: "viewFailedJobs(\{\{ inventory.id \}\})", label: 'Failed jobs' }
                     ]
                 },
-
-            hosts: {
-                label: 'Hosts',
-                ngClick: "editHosts(\{\{ inventory.id \}\})",
-                icon: 'icon-laptop',
-                "class": 'btn-xs btn-default',
-                awToolTip: 'Edit Hosts'
-                },
-
-            groups: {
-                label: 'Groups',
-                ngClick: "editGroups(\{\{ inventory.id \}\})",
-                icon: 'icon-sitemap',
-                "class": 'btn-xs btn-default',
-                awToolTip: 'Edit Groups'
-                },
-
-            edit: {
-                ngClick: "editInventory(\{\{ inventory.id \}\})",
+            edit: { 
+                type: 'DropDown', 
+                label: 'Edit',
                 icon: 'icon-edit',
-                "class": 'btn-xs btn-default',
-                awToolTip: 'Edit Inventory Properties'
+                'class': 'btn-default btn-xs',
+                options: [
+                    { ngClick: "editInventory(\{\{ inventory.id \}\})", label: 'Inventory Properties' },
+                    { ngClick: "editHosts(\{\{ inventory.id \}\})", label: 'Hosts' }, 
+                    { ngClick: "editGroups(\{\{ inventory.id \}\})", label: 'Groups' }
+                    ]
                 },
-
             "delete": {
+                label: 'Delete',
                 ngClick: "deleteInventory(\{\{ inventory.id \}\},'\{\{ inventory.name \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',

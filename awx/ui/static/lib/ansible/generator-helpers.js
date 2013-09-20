@@ -171,17 +171,23 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var fld = params['fld'];
         var options = params['options'];
         var field;
-
-        if (params.type) {
-           field = list[params.type][fld];
+        
+        if (params.field) {
+           field = params.field; 
         }
         else {
-           field = list['fields'][fld];
+           if (params.type) {
+              field = list[params.type][fld];
+           }
+           else {
+              field = list['fields'][fld];
+           }
         }
-        
+
         var name = field['label'].replace(/ /g,'_');
 
         html = (params.td == undefined || params.td !== false) ? "<td>\n" : "";
+        /*
         html += "<div class=\"btn-group\">\n";
         html += "<button type=\"button\" ";
         html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
@@ -193,6 +199,16 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (field.icon) ? Icon(field.icon) : "";
         html += field.label;
         html += " <span class=\"caret\"></span></button>\n";
+        */
+        html += "<div class=\"dropdown\">\n";
+        html += "<a href=\"\" class=\"toggle btn "; 
+        html += (field['class']) ? field['class'] : 'btn-default btn-xs';
+        html += "\" ";
+        html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
+        html += ">";
+        html += (field.icon) ? Icon(field.icon) : "";
+        html += field.label;
+        html += " <span class=\"caret\"></span></a>\n";
         html += "<ul class=\"dropdown-menu pull-right\" role=\"menu\" aria-labelledby=\"dropdownMenu1\">\n";
         for (var i=0; i < field.options.length; i++) {
             html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" "; 
