@@ -19,7 +19,7 @@ angular.module('JobHostDefinition', [])
         navigationLinks: {
             details: {
                 href: "/#/jobs/{{ job_id }}",
-                label: 'Details',
+                label: 'Job Details',
                 icon: 'icon-zoom-in',
                 ngShow: "job_id !== null"
                 },

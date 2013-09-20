@@ -871,7 +871,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                   navigation[itm].href + "\" ";
               html += (navigation[itm].active) ? "class=\"active\" " : "";
               html += ">";
-              html += navigation[itm].label;
+              html += (navigation[itm].listLabel) ? navigation[itm].listLabel : navigation[itm].label;
               html += (navigation[itm].active) ? " <i class=\"icon-angle-left\"></i>" : "";
               html += "</a></li>\n";
           }

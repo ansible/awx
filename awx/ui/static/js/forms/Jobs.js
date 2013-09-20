@@ -19,7 +19,8 @@ angular.module('JobFormDefinition', [])
         navigationLinks: {
             details: {
                 href: "/#/jobs/{{ job_id }}",
-                label: 'Details',
+                label: "\{\{ job_id + '- ' + name \}\}",
+                listLabel: 'Job Details',
                 icon: 'icon-zoom-in',
                 active: true,
                 ngShow: "job_id !== null"
