@@ -15,9 +15,15 @@ angular.module('JobFormDefinition', [])
         name: 'jobs',
         well: true,
         twoColumns: true,
-        
 
         navigationLinks: {
+            details: {
+                href: "/#/jobs/{{ job_id }}",
+                label: 'Details',
+                icon: 'icon-zoom-in',
+                active: true,
+                ngShow: "job_id !== null"
+                },
             hosts: {
                 href: "/#/jobs/{{ job_id }}/job_host_summaries",
                 label: 'Hosts',
@@ -30,7 +36,6 @@ angular.module('JobFormDefinition', [])
                 }
             },
             
-
         fields: {
             name: {
                 label: 'Job Template',

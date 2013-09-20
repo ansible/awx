@@ -823,6 +823,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
          if (field.type == 'custom') {
             html += "<div class=\"text-right " + getLabelWidth();
             html += (field.labelClass) ? " " + field.labelClass : "";
+            html += "\" ";
             html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
             html += ">\n";
             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
@@ -832,7 +833,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += '</label>' + "\n";
             html += "</div>\n";
             html += "<div ";
-            html += "id=\"" + this.field.name + "_" + fld + "\" ";
+            html += "id=\"" + form.name + "_" + fld + "\" ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
             html += "class=\"" + getFieldWidth() + "\">\n"; 
             html += field.control;
@@ -864,7 +865,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  break;
               }
           }
-          html += "<ul class=\"dropdown-menu pull-right\" role=\"menu\">\n";
+          html += "<ul class=\"dropdown-menu\" role=\"menu\">\n";
           for (var itm in navigation) {
               html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"" +
                   navigation[itm].href + "\" ";

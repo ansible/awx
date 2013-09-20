@@ -275,7 +275,8 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    Rest.get({ params: {id: id} })
        .success( function(data, status, headers, config) {
            
-           LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.id + ' - ' + data.summary_fields.job_template.name });
+           //LoadBreadCrumbs({ path: '/jobs/' + id, title: data.id + ' - ' + data.summary_fields.job_template.name });
+           LoadBreadCrumbs();
            
            for (var fld in form.fields) {
               if (fld != 'variables' && data[fld] !== null && data[fld] !== undefined) {  

@@ -105,14 +105,44 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            html += "<div class=\"nav-path\">\n";
            html += "<ul class=\"breadcrumb\">\n";
            html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title | capitalize }}</a></li>\n";
-           html += "<li class=\"active\">";
-           if (options.mode == 'select') {
-              html += list.selectTitle; 
+           
+           if (list.navigationLinks) {
+              var navigation = list.navigationLinks;
+              html += "<li class=\"active\"> </li>\n";
+              html += "</ul>\n";
+              html += "<div class=\"dropdown\">\n";
+              for (var itm in navigation) {
+                  if (navigation[itm].active) {
+                     html += "<a href=\"\" class=\"toggle\" ";
+                     html += "data-toggle=\"dropdown\" ";
+                     html += ">" + navigation[itm].label + " <i class=\"icon-chevron-sign-down\"></i></a>";
+                     break;
+                  }
+              }
+              html += "<ul class=\"dropdown-menu\" role=\"menu\">\n";
+              for (var itm in navigation) {
+                  html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"" +
+                      navigation[itm].href + "\" ";
+                  html += (navigation[itm].active) ? "class=\"active\" " : "";
+                  html += ">";
+                  html += navigation[itm].label;
+                  html += (navigation[itm].active) ? " <i class=\"icon-angle-left\"></i>" : "";
+                  html += "</a></li>\n";
+              }
+              html += "</ul>\n";
+              html += "</div><!-- dropdown -->\n";
+              html += "</div><!-- nav-path -->\n";
            }
            else {
-              html += list.editTitle;
+              html += "<li class=\"active\">";
+              if (options.mode == 'select') {
+                 html += list.selectTitle; 
+              }
+              else {
+                 html += list.editTitle;
+              }
+              html += "</li>\n</ul>\n</div>\n";
            }
-           html += "</li>\n</ul>\n</div>\n";
        }
        
        if (options.mode == 'edit' && list.editInstructions) {
@@ -122,18 +152,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "</div>\n";
        }
 
-       if (options.mode != 'lookup' && list.navigationLinks) {
-             html += "<div class=\"navigation-links text-right\">\n"; 
-             for (var link in list.navigationLinks) {
-                 html += NavigationLink(list.navigationLinks[link]);
-             }
-             html += "</div>\n";
-       }
-
        if (options.mode != 'lookup' && (list.well == undefined || list.well == 'true')) {
           html += "<div class=\"well\">\n";
        }
-
     
        if (options.mode == 'lookup' || options.id != undefined) {
           html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-8' });

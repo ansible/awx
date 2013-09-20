@@ -22,12 +22,19 @@ angular.module('JobEventsListDefinition', [])
             details: {
                 href: "/#/jobs/{{ job_id }}",
                 label: 'Details',
-                icon: 'icon-zoom-in'
+                icon: 'icon-zoom-in',
+                ngShow: "job_id !== null"
                 },
-            summary: {
+            hosts: {
                 href: "/#/jobs/{{ job_id }}/job_host_summaries",
                 label: 'Hosts',
                 icon: 'icon-laptop'
+                },
+            events: {
+                href: "/#/jobs/{{ job_id }}/job_events",
+                label: 'Events',
+                active: true,
+                icon: 'icon-list-ul'
                 }
             },
         

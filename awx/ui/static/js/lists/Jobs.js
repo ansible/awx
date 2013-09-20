@@ -95,7 +95,7 @@ angular.module('JobsListDefinition', [])
                 type: 'DropDown',
                 label: 'View',
                 icon: 'icon-zoom-in',
-                'class': 'btn-xs',
+                'class': 'btn-default btn-xs',
                 options: [
                     { ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Host Summary', 
                         ngHide: "job.status == 'new'" },
