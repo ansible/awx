@@ -115,7 +115,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                   if (navigation[itm].active) {
                      html += "<a href=\"\" class=\"toggle\" ";
                      html += "data-toggle=\"dropdown\" ";
-                     html += ">" + navigation[itm].label + " <i class=\"icon-chevron-sign-down\"></i></a>";
+                     html += ">" + navigation[itm].label + " <i class=\"icon-chevron-sign-down crumb-icon\"></i></a>";
                      break;
                   }
               }
