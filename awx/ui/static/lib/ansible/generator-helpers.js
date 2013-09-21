@@ -415,7 +415,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
    
         html += "<div class=\"row search-widget\">\n";
         html += "<div class=\""; 
-        html += (params.size) ? params.size : "col-lg-4";
+        html += (params.size) ? params.size : "col-lg-4 col-md-6 col-sm-11 col-xs-11";
         html += "\">\n";
         html += (label) ? "<label>" + label +"</label>" : "";
         html += "<div class=\"input-group";
@@ -474,7 +474,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "</div><!-- input-group-btn -->\n";
         html += "</div><!-- input-group -->\n";
         html += "</div><!-- col-lg-x -->\n";
-        html += "<div class=\"col-lg-1\"><i class=\"icon-spinner icon-spin icon-large\" ng-show=\"" + iterator + 
+        html += "<div class=\"col-lg-1 col-md-1 col-sm-1 col-xs-1\"><i class=\"icon-spinner icon-spin icon-large\" ng-show=\"" + iterator + 
                  "SearchSpin == true\"></i></div>\n";
         return html;
         

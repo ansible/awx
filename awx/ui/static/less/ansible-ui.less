@@ -527,7 +527,7 @@ select.field-mini-height {
 
 
 /* Display list actions next to search widget */
-
+/*
 .list-actions {
   display: inline-block;
   padding-bottom: 22px;
@@ -538,6 +538,7 @@ select.field-mini-height {
 .list-actions .btn {
   margin-right: 3px;
 }
+*/
 
 .btn-help {
   margin-left: 15px;
@@ -1014,7 +1015,11 @@ tr td button i {
 /* Portrait tablet to landscape and desktop */
 
 @media (min-width: 768px) and (max-width: 979px) {
-  
+
+  .list-actions button, .list-actions .checkbox-inline {
+    margin-top: 10px;    
+  }
+ 
 }
 
 /* Landscape phone to portrait tablet */
@@ -1041,7 +1046,12 @@ tr td button i {
   }
 
   td.actions .btn {
-     width: 75px;
-     margin-bottom: 5px;
-  } 
+    width: 75px;
+    margin-bottom: 5px;
+  }
+
+  .list-actions button, .list-actions .checkbox-inline {
+    margin-top: 10px;    
+  }
+
 }

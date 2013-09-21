@@ -115,22 +115,22 @@
     <div class="navbar navbar-inverse navbar-fixed-top main-menu" role="navigation">
        <div class="container">
          <div class="navbar-header">
-           <a class="navbar-brand" href="#organizations"><img class="logo" src="{{ STATIC_URL }}img/logo.png" /></a>
+            <a class="navbar-brand" href="#organizations"><img class="logo" src="{{ STATIC_URL }}img/logo.png" /></a>
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
          </div>
-         <div class="nav-collapse navbar-responsive-collapse">
-           <ul class="nav navbar-nav pull-right">
-             <li ng-show="current_user.username != null && current_user.username != undefined">
+         <div class="collapse navbar-collapse navbar-responsive-collapse">
+            <ul class="nav navbar-nav pull-right">
+              <li ng-show="current_user.username != null && current_user.username != undefined">
                  <a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
-             <li ng-show="userLoggedIn == true"><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
-             <li ng-show="userLoggedIn == true"><a id="main_contact_support" 
+              <li ng-show="userLoggedIn == true"><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
+              <li ng-show="userLoggedIn == true"><a id="main_contact_support" 
                   href="mailto:support@ansibleworks.com?subject=AWX%20Help%20Request">Contact Support</a><li>
-             <li ng-show="userLoggedIn == true"><a id="main_logout" href="#/logout">Logout</a></li>
-           </ul>
+              <li ng-show="userLoggedIn == true"><a id="main_logout" href="#/logout">Logout</a></li>
+            </ul>
          </div><!-- nav-collapse -->
        </div>
     </div><!-- navbar -->
