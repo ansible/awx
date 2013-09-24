@@ -109,6 +109,7 @@ function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
    // Save
    scope.formSave = function() {
+      generator.clearApiErrors();
       if (scope.PermissionAddAllowed) {
          var data = {};
          for (var fld in form.fields) {
@@ -245,6 +246,7 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 
    // Save changes to the parent
    scope.formSave = function() {
+      generator.clearApiErrors();
       var data = {}
       for (var fld in form.fields) {
           data[fld] = scope[fld];   

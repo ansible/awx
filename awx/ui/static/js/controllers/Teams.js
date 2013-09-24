@@ -119,6 +119,7 @@ function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    
    // Save
    scope.formSave = function() {
+      generator.clearApiErrors();
       Rest.setUrl(defaultUrl);
       var data = {}
       for (var fld in form.fields) {
@@ -228,6 +229,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 
    // Save changes to the parent
    scope.formSave = function() {
+      generator.clearApiErrors();
       $rootScope.flashMessage = null;
       Rest.setUrl(defaultUrl + $routeParams.team_id +'/');
       var data = {}

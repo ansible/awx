@@ -397,6 +397,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
    // Save changes to the parent
    scope.formSave = function() {
+      generator.clearApiErrors();
       Rest.setUrl(defaultUrl + $routeParams.id + '/');
       var data = {}
       for (var fld in form.fields) {

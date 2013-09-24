@@ -107,6 +107,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    
    // Save
    scope.formSave = function() {
+      generator.clearApiErrors();
       Rest.setUrl(defaultUrl);
       var data = {}
       for (var fld in form.fields) {
@@ -252,6 +253,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 
    // Save changes to the parent
    scope.formSave = function() {
+      generator.clearApiErrors();
       Rest.setUrl(defaultUrl + id + '/');
       var data = {}
       for (var fld in form.fields) {

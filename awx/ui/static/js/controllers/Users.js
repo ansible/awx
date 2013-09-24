@@ -120,6 +120,7 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
    // Save
    scope.formSave = function() {
+      generator.clearApiErrors();
       if (scope.organization !== undefined && scope.organization !== null && scope.organization !== '') {
          Rest.setUrl(defaultUrl + scope.organization + '/users/');
              var data = {}
@@ -250,6 +251,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
        
        // Save changes to the parent
        scope.formSave = function() {
+          generator.clearApiErrors();
           $rootScope.flashMessage = null;
           Rest.setUrl(defaultUrl + id + '/');
           var data = {}

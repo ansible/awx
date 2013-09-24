@@ -91,6 +91,7 @@ function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $route
 
    // Save
    scope.formSave = function() {
+      form.clearApiErrors();s
       var url = GetBasePath(base);
       url += (base != 'organizations') ? $routeParams['project_id'] + '/organizations/' : '';
       Rest.setUrl(url);
@@ -182,6 +183,7 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
    
    // Save changes to the parent
    scope.formSave = function() {
+      generator.clearApiErrors();
       var params = {};
       for (var fld in form.fields) {
           params[fld] = scope[fld];

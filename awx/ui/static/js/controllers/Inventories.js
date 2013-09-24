@@ -130,7 +130,7 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    
    // Save
    scope.formSave = function() {
-
+       generator.clearApiErrors();
        try { 
            // Make sure we have valid variable data
            if (scope.inventoryParseType == 'json') {
@@ -257,6 +257,7 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        $location.path('/inventories');
        });
    scope.formSave = function() {
+      generator.clearApiErrors();
       SaveInventory({ scope: scope });
       }
 

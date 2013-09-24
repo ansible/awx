@@ -141,7 +141,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        }
        if (!this.scope.$$phase) {
           this.scope.$digest();
-        } 
+       } 
        return this.scope;
        },
 
@@ -160,7 +160,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
     reset: function() {
        // The form field values cannot be reset with jQuery. Each field is tied to a model, so to clear the field
-       // value, you have clear the model.
+       // value, you have to clear the model.
        this.scope[this.form.name + '_form'].$setPristine();
        for (var fld in this.form.fields) {
            if (this.form.fields[fld].type == 'checkbox_group') {
@@ -284,27 +284,19 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        return html;
        },
 
-    /*button: function(btn, topOrBottom) {
-       // pass in a button object and get back an html string containing
-       // a <button> element.
-       var html = '';
-       for (var i=0; i < btn.position.length; i++) {
-           if (btn.position[i].indexOf(topOrBottom) >= 0) {
-              html += "<button type=\"button\" "; 
-              html += "class=\"btn";
-              html += (btn['class']) ?  " " + btn['class'] : "";
-              if (btn.position[i] == 'top-right' || btn.position[i] == 'bottom-right') {
-                 html += " " + "pull-right";  
-              }
-              html += "\" ";
-              html += (btn.ngClick) ? this.attr(btn, 'ngClick') : "";
-              html += ">" + this.attr(btn, 'icon');
-              html += " " + btn.label;
-              html += "</button>\n";
+    clearApiErrors: function() {
+       for (fld in this.form.fields) {
+           if (this.form.fields[fld].sourceModel) {
+              this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '_api_error'] = '';
+           }
+           else {
+              this.scope[fld + '_api_error'] = '';  
            }
        }
-       return html;
-    },*/
+       if (!this.scope.$$phase) {
+          this.scope.$digest();
+       } 
+       },
 
     button: Button,
 

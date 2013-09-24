@@ -260,6 +260,7 @@ angular.module('ansible', [
 
             if ($rootScope.timer) {
                clearInterval($rootScope.timer);
+               $rootScope.timer = null;
             }
 
             // Make the correct tab active

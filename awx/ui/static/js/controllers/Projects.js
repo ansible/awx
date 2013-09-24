@@ -198,6 +198,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
 
    // Save
    scope.formSave = function() {
+       generator.clearApiErrors();
        var data = {};
        for (var fld in form.fields) {
            if (form.fields[fld].type == 'checkbox_group') {
@@ -333,7 +334,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
           scope.project_local_paths = opts;
           scope.base_dir = 'You do not have access to view this property';
        }
-       scope.auth_required = (scope.scm_type && (scope.scm_username || scope.scm_key_unlock)) ? true : false;
+       scope.auth_required = (scope.scm_type && (scope.scm_username || scope.scm_password || scope.scm_key_data)) ? true : false;
        master.auth_required = scope.auth_required;
        });
 
@@ -377,6 +378,8 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
            }
 
            master['scm_type'] = scope['scm_type'];
+           master['auth_required'] = scope['auth_required'];
+
            scope.scmBranchLabel = (scope.scm_type && scope.scm_type.value && scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch';
            setAskCheckboxes();
            
@@ -393,6 +396,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    
    // Save changes to the parent
    scope.formSave = function() {
+       generator.clearApiErrors();
        $rootScope.flashMessage = null;
        var params = {};
        for (var fld in form.fields) {

@@ -197,6 +197,7 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
 
    // Save
    scope.formSave = function() {
+       generator.clearApiErrors();
        var data = {}
        try {
            // Make sure we have valid variable data
@@ -467,6 +468,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
 
    // Save changes to the parent
    scope.formSave = function() {
+       generator.clearApiErrors();
        var data = {}
        try {
            // Make sure we have valid variable data
