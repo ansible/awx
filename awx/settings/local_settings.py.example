@@ -4,6 +4,10 @@
 # Local Django settings for AWX project.  Rename to "local_settings.py" and
 # edit as needed for your development environment.
 
+# All variables defined in awx/settings/development.py will already be loaded
+# into the global namespace before this file is loaded, to allow for reading
+# and updating the default settings as needed.
+
 ###############################################################################
 # MISC PROJECT SETTINGS
 ###############################################################################
@@ -18,15 +22,17 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'awx',
-        'USER': 'awx',
-        'PASSWORD': 'AWXsome!',
+        'NAME': 'awx-dev',
+        'USER': 'awx-dev',
+        'PASSWORD': 'AWXsome1',
         'HOST': '',
         'PORT': '',
     }
 }
 
-# Use SQLite for unit tests instead of PostgreSQL.
+# Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
+# commented out, Django will create the awx-dev_test database in PostgreSQL to
+# run unit tests.
 if len(sys.argv) >= 2 and sys.argv[1] == 'test':
     DATABASES = {
         'default': {
@@ -237,7 +243,9 @@ AUTH_LDAP_ORGANIZATION_MAP = {
 ###############################################################################
 
 # Define these variables to enable more complete testing of project support for
-# SCM updates.
+# SCM updates.  The test repositories listed do not have to contain any valid
+# playbooks.
+
 try:
     path = os.path.expanduser(os.path.expandvars('~/.ssh/id_rsa'))
     TEST_SSH_KEY_DATA = file(path, 'rb').read()

@@ -72,7 +72,7 @@ STATIC_URL = '/static/'
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'media') # FIXME: Is this where we want it?
+MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -103,10 +103,8 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 )
 
 MIDDLEWARE_CLASSES += (
-# masking 500 errors do not use for now?
-#    'awx.middleware.exceptions.ExceptionMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
-    # middleware loaded after this point will be subject to transactions
+    # Middleware loaded after this point will be subject to transactions.
 )
 
 TEMPLATE_DIRS = (
@@ -241,6 +239,14 @@ DEVSERVER_MODULES = (
     #'devserver.modules.profile.LineProfilerModule',
 )
 
+# Use Django-Jenkins if installed.  Only run tests for awx.main app.
+try:
+    import django_jenkins
+    INSTALLED_APPS += ('django_jenkins',)
+    PROJECT_APPS = ('awx.main',)
+except ImportError:
+    pass
+
 # Set default ports for live server tests.
 os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', 'localhost:9013-9199')
 
@@ -268,18 +274,20 @@ CELERYBEAT_MAX_LOOP_INTERVAL = 60
 ANSIBLE_HOST_KEY_CHECKING = False
 
 # RHEL has too old of an SSH so ansible will select paramiko and this is VERY
-# .slow
+# slow.
 ANSIBLE_PARAMIKO_RECORD_HOST_KEYS = False
 
 # Additional environment variables to be passed to the subprocess started by
 # the celery task.
 AWX_TASK_ENV = {}
 
+# Internal API URL for use by inventory scripts and callback plugin.
 if 'devserver' in INSTALLED_APPS:
     INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
 else:
     INTERNAL_API_URL = 'http://127.0.0.1:8000'
 
+# Logging configuration.
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

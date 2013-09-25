@@ -10,21 +10,23 @@ RELEASE=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.spl
 ifneq ($(OFFICIAL),yes)
 BUILD=dev$(DATE)
 SDIST_TAR_FILE=awx-$(VERSION)-$(BUILD).tar.gz
+SETUP_TAR_NAME=awx-setup-$(VERSION)-$(BUILD)
 RPM_PKG_RELEASE=$(BUILD)
 DEB_BUILD_DIR=deb-build/awx-$(VERSION)-$(BUILD)
 DEB_PKG_RELEASE=$(VERSION)-$(BUILD)
 else
 BUILD=
 SDIST_TAR_FILE=awx-$(VERSION).tar.gz
+SETUP_TAR_NAME=awx-setup-$(VERSION)
 RPM_PKG_RELEASE=$(RELEASE)
 DEB_BUILD_DIR=deb-build/awx-$(VERSION)
 DEB_PKG_RELEASE=$(VERSION)-$(RELEASE)
 endif
 
-.PHONY: clean rebase push setup requirements requirements_pypi develop refresh \
+.PHONY: clean rebase push requirements requirements_pypi develop refresh \
 	adduser syncdb migrate dbchange dbshell runserver celeryd test \
-	test_coverage coverage_html dev_build release_build release_ball \
-	release_clean sdist rpm
+	test_coverage coverage_html test_ui test_jenkins dev_build \
+	release_build release_clean sdist rpm
 
 # Remove temporary build files, compiled Python files.
 clean:
@@ -42,45 +44,51 @@ rebase:
 push:
 	git push origin master
 
-# Use Ansible to setup AWX development environment.
-setup:
-	ansible-playbook app_setup/setup.yml --verbose -i "127.0.0.1," -c local -e working_dir=`pwd`
-
 # Install third-party requirements needed for development environment (using
 # locally downloaded packages).
 requirements:
-	(cd requirements && pip install --no-index -r dev_local.txt)
+	@if [ "$(VIRTUAL_ENV)" ]; then \
+	    (cd requirements && pip install --no-index -r dev_local.txt); \
+	else \
+	    (cd requirements && sudo pip install --no-index -r dev_local.txt); \
+	fi
 
 # Install third-party requirements needed for development environment
 # (downloading from PyPI if necessary).
 requirements_pypi:
-	pip install -r requirements/dev.txt
+	@if [ "$(VIRTUAL_ENV)" ]; then \
+	    pip install -r requirements/dev.txt; \
+	else \
+	    sudo pip install -r requirements/dev.txt; \
+	fi
 
 # "Install" awx package in development mode.  Creates link to working
 # copy in site-packages and installs awx-manage command.
 develop:
-	python setup.py develop
+	@if [ "$(VIRTUAL_ENV)" ]; then \
+	    $(PYTHON) setup.py develop; \
+	else \
+	    sudo $(PYTHON) setup.py develop; \
+	fi
 
 # Refresh development environment after pulling new code.
 refresh: clean requirements develop migrate
 
 # Create Django superuser.
 adduser:
-	python manage.py createsuperuser
+	$(PYTHON) manage.py createsuperuser
 
 # Create initial database tables (excluding migrations).
 syncdb:
-	python manage.py syncdb --noinput
+	$(PYTHON) manage.py syncdb --noinput
 
 # Create database tables and apply any new migrations.
-# The first command fixes migrations following cleanup for the 1.2b1 release.
 migrate: syncdb
-	-(python manage.py migrate main 2>&1 | grep 0017_changes) && (python manage.py migrate main --delete-ghost-migrations --fake 0001_v12b1_initial || python manage.py migrate main --fake)
-	python manage.py migrate --noinput
+	$(PYTHON) manage.py migrate --noinput
 
 # Run after making changes to the models to create a new migration.
 dbchange:
-	python manage.py schemamigration main v12b2_changes --auto
+	$(PYTHON) manage.py schemamigration main v14_changes --auto
 
 # access database shell, asks for password
 dbshell:
@@ -88,49 +96,57 @@ dbshell:
 
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:
-	python manage.py runserver
+	$(PYTHON) manage.py runserver
 
 # Run to start the background celery worker for development.
 celeryd:
-	python manage.py celeryd -l DEBUG -B --autoreload
+	$(PYTHON) manage.py celeryd -l DEBUG -B --autoreload
 
-# Run all unit tests.
+# Run all API unit tests.
 test:
-	python manage.py test main
+	$(PYTHON) manage.py test -v2 main
 
-# Run all unit tests with coverage enabled.
+# Run all API unit tests with coverage enabled.
 test_coverage:
-	coverage run manage.py test main
+	coverage run manage.py test -v2 main
 
 # Output test coverage as HTML (into htmlcov directory).
 coverage_html:
 	coverage html
 
+# Run UI unit tests using Selenium.
+test_ui:
+	$(PYTHON) manage.py test -v2 ui
+
+# Run API unit tests across multiple Python/Django versions with Tox.
+test_tox:
+	tox -v
+
+# Run unit tests to produce output for Jenkins.
+test_jenkins:
+	$(PYTHON) manage.py jenkins -v2
+
+# Build minified JS/CSS.
+minjs:
+	(cd tools/ui/ && ./compile.sh)
+
 # Build a pip-installable package into dist/ with a timestamped version number.
-dev_build:
-	python setup.py dev_build
+dev_build: 
+	$(PYTHON) setup.py dev_build
 
 # Build a pip-installable package into dist/ with the release version number.
 release_build:
-	python setup.py release_build
+	$(PYTHON) setup.py release_build
 
-release_ball: clean sdist 
-	(cd ../ansible-doc; make)
-	-(rm -rf awx-$(VERSION)-$(RELEASE))
-	mkdir -p awx-$(VERSION)-$(RELEASE)/dist
-	cp -a dist/* awx-$(VERSION)-$(RELEASE)/dist
-	mkdir -p awx-$(VERSION)-$(RELEASE)/setup
-	cp -a setup/* awx-$(VERSION)-$(RELEASE)/setup
-	mkdir -p awx-$(VERSION)-$(RELEASE)/docs
-	cp -a ../ansible-doc/*.pdf awx-$(VERSION)-$(RELEASE)/docs
-	tar -cvf awx-$(VERSION)-$(RELEASE)-all.tar awx-$(VERSION)-$(RELEASE)
+# Build AWX setup tarball.
+setup_tarball:
+	@cp -a setup $(SETUP_TAR_NAME)
+	@tar czf $(SETUP_TAR_NAME).tar.gz $(SETUP_TAR_NAME)/
+	@rm -rf $(SETUP_TAR_NAME)
 
 release_clean:
 	-(rm *.tar)
 	-(rm -rf ($RELEASE))
-
-minjs: clean
-	(cd tools/ui/ && ./compile.sh)
 
 sdist: clean minjs
 	if [ "$(OFFICIAL)" = "yes" ] ; then \

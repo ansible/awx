@@ -31,6 +31,8 @@ class UITests(LiveServerTestCase):
         time.sleep(s)
 
     def setUp(self):
+        if not self.selenium:
+            self.skipTest('selenium is not installed')
         self.superuser = User.objects.create_superuser('admin', 'admin@example.com', 'password')
 
     def test_login(self, username='admin', password='password'):

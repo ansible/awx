@@ -2,7 +2,6 @@
 # All Rights Reserved.
 
 # Production settings for AWX project.
-
 from defaults import *
 
 DEBUG = False

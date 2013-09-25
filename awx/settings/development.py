@@ -2,12 +2,11 @@
 # All Rights Reserved.
 
 # Development settings for AWX project.
-
 from defaults import *
 
 # If a local_settings.py file is present in awx/settings/, use it to override
 # default settings for development.  If not present, we can still run using
-# the defaults.
+# only the defaults.
 try:
     local_settings_file = os.path.join(os.path.dirname(__file__),
                                        'local_settings.py')

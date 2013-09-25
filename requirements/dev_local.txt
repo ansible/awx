@@ -3,7 +3,7 @@
 
 distribute-0.6.45.tar.gz
 
-Django-1.5.2.tar.gz
+Django-1.5.4.tar.gz
 
 # The following packages are now bundled with AWX (awx/lib/site-packages):
   # Needed by python-dateutil, django-extensions:
@@ -33,13 +33,16 @@ Django-1.5.2.tar.gz
 # Remaining dev-only packages:
 django-debug-toolbar-0.9.4.tar.gz
 django-devserver-0.6.2.tar.gz
+astroid-1.0.0.tar.gz
+coverage-3.6.tar.gz
+logilab-common-0.60.0.tar.gz
+pylint-1.0.0.tar.gz
+django-jenkins-0.14.1.tar.gz
 ipython-1.0.0.tar.gz
+readline-6.2.4.1.tar.gz
 
 # You may also need to install the following extra packages using the OS
 # package manager, or pip if you're running inside a virtualenv.
 # - ansible (via yum, pip or source checkout)
 # - psycopg2 (via "yum install python-psycopg2")
 # - python-ldap (via "yum install python-ldap")
-# - coverage-3.6.tar.gz (if you want to check test coverage; the default
-#   python-coverage package is old.)
-# - readline-6.2.4.1.tar.gz (for using the ipython interactive shell)

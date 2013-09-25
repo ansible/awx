@@ -22,13 +22,12 @@ Django>=1.4
 # Development-only packages:
 django-debug-toolbar
 django-devserver
+django-jenkins
 ipython
+readline
 
 # You may also need to install the following extra packages using the OS
 # package manager, or pip if you're running inside a virtualenv.
 # - ansible (via yum, pip or source checkout)
 # - psycopg2 (via "yum install python-psycopg2")
 # - python-ldap (via "yum install python-ldap")
-# - coverage (if you want to check test coverage, via "pip install coverage";
-#   the default python-coverage package is old.)
-# - readline (for using the ipython interactive shell)

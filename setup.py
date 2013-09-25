@@ -11,7 +11,6 @@ from setuptools.command.sdist import sdist as _sdist
 
 from awx import __version__
 
-#build_timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M')
 build_timestamp = os.getenv("BUILD",datetime.datetime.now().strftime('-%Y%m%d%H%M'))
 
 # Paths we'll use later
@@ -117,13 +116,9 @@ setup(
     packages=['awx'],
     include_package_data=True,
     zip_safe=False,
-    #install_requires=[
-    #    'Django>=1.4',
-    #    'PyYAML',
-    #],
     setup_requires=[],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
