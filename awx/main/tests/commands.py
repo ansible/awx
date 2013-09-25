@@ -63,6 +63,11 @@ varb=B
 vara=A
 '''
 
+TEST_GROUP_VARS = '''\
+test_username: test
+test_email: test@example.com
+'''
+
 class BaseCommandMixin(object):
     '''
     Base class for tests that run management commands.
@@ -422,12 +427,20 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self._temp_files.append(license_path)
         os.environ['AWX_LICENSE_FILE'] = license_path
 
-    def create_test_ini(self):
-        handle, self.ini_path = tempfile.mkstemp(suffix='.txt')
+    def create_test_ini(self, inv_dir=None):
+        handle, self.ini_path = tempfile.mkstemp(suffix='.txt', dir=inv_dir)
         ini_file = os.fdopen(handle, 'w')
         ini_file.write(TEST_INVENTORY_INI)
         ini_file.close()
         self._temp_files.append(self.ini_path)
+
+    def create_test_dir(self):
+        self.inv_dir = tempfile.mkdtemp()
+        self._temp_project_dirs.append(self.inv_dir)
+        self.create_test_ini(self.inv_dir)
+        group_vars = os.path.join(self.inv_dir, 'group_vars')
+        os.makedirs(group_vars)
+        file(os.path.join(group_vars, 'all'), 'wb').write(TEST_GROUP_VARS)
 
     def test_invalid_options(self):
         inventory_id = self.inventories[0].pk
@@ -487,14 +500,15 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertTrue(isinstance(result, CommandError), result)
         self.assertTrue('matched' in str(result))
 
-    def test_ini_file(self):
+    def test_ini_file(self, source=None):
+        inv_src = source or self.ini_path
         # New empty inventory.
         new_inv = self.organizations[0].inventories.create(name='newb')
         self.assertEqual(new_inv.hosts.count(), 0)
         self.assertEqual(new_inv.groups.count(), 0)
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
-                                                  source=self.ini_path)
+                                                  source=inv_src)
         self.assertEqual(result, None)
         # Check that inventory is populated as expected.
         new_inv = Inventory.objects.get(pk=new_inv.pk)
@@ -506,7 +520,14 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                                    'db2.example.com'])
         host_names = set(new_inv.hosts.values_list('name', flat=True))
         self.assertEqual(expected_host_names, host_names)
-        self.assertEqual(new_inv.variables_dict, {'vara': 'A'})
+        if source:
+            self.assertEqual(new_inv.variables_dict, {
+                'vara': 'A',
+                'test_username': 'test',
+                'test_email': 'test@example.com',
+            })
+        else:
+            self.assertEqual(new_inv.variables_dict, {'vara': 'A'})
         for host in new_inv.hosts.all():
             if host.name == 'web1.example.com':
                 self.assertEqual(host.variables_dict,
@@ -532,6 +553,10 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                 host_names = set(['web1.example.com','web2.example.com',
                                   'web3.example.com'])
                 self.assertEqual(hosts, host_names)
+
+    def test_dir_with_ini_file(self):
+        self.create_test_dir()
+        self.test_ini_file(self.inv_dir)
 
     def test_executable_file(self):
         # New empty inventory.

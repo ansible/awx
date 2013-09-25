@@ -12,6 +12,9 @@ import subprocess
 import sys
 import traceback
 
+# PyYAML
+import yaml
+
 # Django
 from django.core.management.base import NoArgsCommand, CommandError
 from django.db import transaction
