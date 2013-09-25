@@ -664,6 +664,20 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue('-vv' in self.run_job_args)
         self.assertTrue('-e' in self.run_job_args)
 
+    def test_lots_of_extra_vars(self):
+        self.create_test_project(TEST_PLAYBOOK)
+        extra_vars = dict(('var_%d' % x, x) for x in xrange(200))
+        job_template = self.create_test_job_template(extra_vars=extra_vars)
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.start())
+        self.assertEqual(job.status, 'pending')
+        job = Job.objects.get(pk=job.pk)
+        self.assertTrue(len(job.job_args) > 1024)
+        self.check_job_result(job, 'successful')
+        self.assertTrue('-e' in self.run_job_args)
+
     def test_limit_option(self):
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template(limit='bad.example.com')

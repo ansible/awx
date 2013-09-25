@@ -31,7 +31,7 @@ DATABASES = {
 }
 
 # Use SQLite for unit tests instead of PostgreSQL.  If the lines below are
-# commented out, Django will create the awx-dev_test database in PostgreSQL to
+# commented out, Django will create the test_awx-dev database in PostgreSQL to
 # run unit tests.
 if len(sys.argv) >= 2 and sys.argv[1] == 'test':
     DATABASES = {

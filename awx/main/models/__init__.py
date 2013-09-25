@@ -888,8 +888,7 @@ class ProjectUpdate(PrimordialModel):
         default=False,
         editable=False,
     )
-    job_args = models.CharField(
-        max_length=1024,
+    job_args = models.TextField(
         blank=True,
         default='',
         editable=False,
@@ -1235,8 +1234,7 @@ class Job(CommonModelNameNotUnique):
         default=False,
         editable=False,
     )
-    job_args = models.CharField(
-        max_length=1024,
+    job_args = models.TextField(
         blank=True,
         default='',
         editable=False,
