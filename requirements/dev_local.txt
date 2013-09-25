@@ -33,9 +33,10 @@ Django-1.5.4.tar.gz
 # Remaining dev-only packages:
 django-debug-toolbar-0.9.4.tar.gz
 django-devserver-0.6.2.tar.gz
+unittest2-0.5.1.tar.gz
+logilab-common-0.60.0.tar.gz
 astroid-1.0.0.tar.gz
 coverage-3.6.tar.gz
-logilab-common-0.60.0.tar.gz
 pylint-1.0.0.tar.gz
 django-jenkins-0.14.1.tar.gz
 ipython-1.0.0.tar.gz
