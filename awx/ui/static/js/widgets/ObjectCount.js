@@ -83,6 +83,7 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
                //scope = element.scope();   // Set scope specific to the element we're compiling, avoids circular reference
                                           // From here use 'scope' to manipulate the form, as the form is not in '$scope'
                $compile(element)(scope);
+               $rootScope.$emit('WidgetLoaded');
             }
             });
 

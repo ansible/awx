@@ -12,18 +12,27 @@
 
 function Home ($routeParams, $scope, $rootScope, $location, Wait, ObjectCount, ClearScope)
 {
-    //ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
-                                 //scope.
-    if (!$routeParams['login']) {
-       Wait('start');
-    }
-    
-    ObjectCount({ target: 'container1' });
+    ClearScope('home');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
+                         //scope.
 
-    if (!$routeParams['login']) {
-       Wait('stop');
-    }
+    var waitCount = 1;
+    var loadedCount = 0;
     
+    if (!$routeParams['login']) {
+        // If we're not logging in, start the Wait widget. Otherwise, it's already running.
+        Wait('start');
+    }
+
+    ObjectCount({ target: 'container1' });
+     
+    $rootScope.$on('WidgetLoaded', function() {
+        // Once all the widget report back 'loaded', turn off Wait widget
+        console.log('got here!');
+        loadedCount++; 
+        if ( loadedCount == waitCount ) {
+           Wait('stop');
+        }
+        });
 }
 
 Home.$inject=[ '$routeParams', '$scope', '$rootScope', '$location', 'Wait', 'ObjectCount', 'ClearScope'];
