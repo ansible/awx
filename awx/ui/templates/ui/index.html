@@ -42,6 +42,7 @@
   <script src="{{ STATIC_URL }}js/controllers/Users.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Admins.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Inventories.js"></script>
+  <script src="{{ STATIC_URL }}js/controllers/Home.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Groups.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Teams.js"></script>
@@ -104,6 +105,7 @@
   <script src="{{ STATIC_URL }}js/helpers/Selection.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/Projects.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/Users.js"></script>
+  <script src="{{ STATIC_URL }}js/widgets/ObjectCount.js"></script>
   
   <script src="{{ STATIC_URL }}lib/less/less-1.4.1.min.js"></script>
 
@@ -140,7 +142,8 @@
     <div class="row">
       <div class="col-lg-12">
         <ul class="nav nav-tabs" id="main_tabs">
-          <li class="active"><a href="#organizations" id="main_organizations_tab" data-toggle="tab">Organizations</a></li>
+          <li class="active"><a href="#home" id="main_home_tab" data-toggle="tab">Home</a></li>
+          <li><a href="#organizations" id="main_organizations_tab" data-toggle="tab">Organizations</a></li>
           <li><a href="#users" id="main_users_tab" data-toggle="tab">Users</a></li>
           <li><a href="#teams" id="main_teams_tab" data-toggle="tab">Teams</a></li>
           <li><a href="#projects" id="main_projects_tab" data-toggle="tab">Projects</a></li>

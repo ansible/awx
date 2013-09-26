@@ -12,7 +12,7 @@
 
 function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                       ClearScope, ProcessErrors, GetBasePath, LookUpInit, SubmitJob, FormatDate)
+                       ClearScope, ProcessErrors, GetBasePath, LookUpInit, SubmitJob, FormatDate, Refresh)
 {
     ClearScope('htmlTemplate');
     var list = JobList;
@@ -71,7 +71,9 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     LoadBreadCrumbs();
 
     scope.refresh = function() {
-       scope.search(list.iterator);
+       scope['jobSearchSpin'] = true;
+       scope['jobLoading'] = true;
+       Refresh({ scope: scope, set: 'jobs', iterator: 'job', url: scope['current_url'] });
        }
 
     scope.refreshJob = scope.refresh;
@@ -155,7 +157,7 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
 JobsListCtrl.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobList',
                          'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                         'ProcessErrors','GetBasePath', 'LookUpInit', 'SubmitJob', 'FormatDate'
+                         'ProcessErrors','GetBasePath', 'LookUpInit', 'SubmitJob', 'FormatDate', 'Refresh'
                          ];
 
 

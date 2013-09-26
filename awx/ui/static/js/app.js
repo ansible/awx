@@ -68,7 +68,8 @@ angular.module('ansible', [
     'SelectionHelper',
     'LicenseFormDefinition',
     'License',
-    'HostGroupsFormDefinition'
+    'HostGroupsFormDefinition',
+    'ObjectCountWidget'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.
@@ -228,13 +229,15 @@ angular.module('ansible', [
             when('/login', { templateUrl: urlPrefix + 'partials/organizations.html', controller: Authenticate }). 
 
             when('/logout', { templateUrl: urlPrefix + 'partials/organizations.html', controller: Authenticate }).
+
+            when('/home', { templateUrl: urlPrefix + 'partials/home.html', controller: Home }).
             
-            otherwise({redirectTo: '/'});
+            otherwise({redirectTo: '/home'});
     }])
     .run(['$cookieStore', '$rootScope', 'CheckLicense', '$location', 'Authorization','LoadBasePaths', 'ViewLicense',
          function($cookieStore, $rootScope, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense) {
         
-        LoadBasePaths(); 
+        LoadBasePaths();
         
         if ( !(typeof $AnsibleConfig.refresh_rate == 'number' && $AnsibleConfig.refresh_rate >= 3
                && $AnsibleConfig.refresh_rate <= 99) ) {
@@ -266,12 +269,12 @@ angular.module('ansible', [
             // Make the correct tab active
             var base = $location.path().replace(/^\//,'').split('/')[0];
             if (base == '') {
-               $('.nav-tabs a[href="#' + 'organizations' + '"]').tab('show');
+               base = 'home';
             }
             else {
-                base.replace(/\_/g,' ');
-                $('.nav-tabs a[href="#' + base + '"]').tab('show');
+               base.replace(/\_/g,' ');
             }
+            $('.nav-tabs a[href="#' + base + '"]').tab('show');
             });
 
         if (!Authorization.getToken()) {
@@ -284,14 +287,13 @@ angular.module('ansible', [
         // If browser refresh, activate the correct tab
         var base = ($location.path().replace(/^\//,'').split('/')[0]);
         if  (base == '') {
-            base = 'organizations';
-            $location.path('/organizations');
-            $('.nav-tabs a[href="#' + base + '"]').tab('show');
+            base = 'home';
+            $location.path('/home');
         }
         else {
             base.replace(/\_/g,' ');
-            $('.nav-tabs a[href="#' + base + '"]').tab('show');
         }
+        $('.nav-tabs a[href="#' + base + '"]').tab('show');
 
         $rootScope.viewCurrentUser = function() {
             $location.path('/users/' + $rootScope.current_user.id);

@@ -23,6 +23,7 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities'])
         var iterator = params.iterator; 
         var url = params.url;
         
+        scope.current_url = url;
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {

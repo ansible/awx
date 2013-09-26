@@ -74,7 +74,7 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
                          Authorization.getLicense()
                              .success(function(data, status, headers, config) {
                                  Authorization.setLicense(data['license_info']);
-                                 $location.path('/organizations');
+                                 $location.url('/home?login=true');
                                  })
                              .error(function(data, status, headers, config) {
                                  Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
