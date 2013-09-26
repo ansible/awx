@@ -857,9 +857,11 @@ class ProjectUpdatesTest(BaseTransactionTest):
         if should_fail:
             self.assertEqual(pu.status, 'failed',
                              pu.result_stdout + pu.result_traceback)
-        else:
+        elif should_fail is False:
             self.assertEqual(pu.status, 'successful',
                              pu.result_stdout + pu.result_traceback)
+        else:
+            pass # If should_fail is None, we don't care.
         # Get the SCM URL from the job args, if it starts with a '/' we aren't
         # handling the URL correctly.
         scm_url_in_args_re = re.compile(r'\\(?:\\\\)??"scm_url\\(?:\\\\)??": \\(?:\\\\)??"(.*?)\\(?:\\\\)??"')
@@ -1324,7 +1326,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
     def test_prompt_for_scm_key_unlock_on_update(self):
         scm_url = 'git@github.com:ansible/ansible.github.com.git'
         project = self.create_project(
-            name='my public git project over https',
+            name='my public git project over ssh',
             scm_type='git',
             scm_url=scm_url,
             scm_key_data=TEST_SSH_KEY_DATA_LOCKED,
@@ -1341,7 +1343,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         with self.current_user(self.super_django_user):
             response = self.post(url, {'scm_key_unlock': TEST_SSH_KEY_DATA_UNLOCK}, expect=202)
         project_update = project.project_updates.order_by('-pk')[0]
-        self.check_project_update(project, should_fail=False,
+        self.check_project_update(project, should_fail=None,
                                   scm_key_unlock=TEST_SSH_KEY_DATA_UNLOCK,
                                   project_update=project_update)
 
