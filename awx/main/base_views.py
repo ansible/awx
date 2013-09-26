@@ -53,6 +53,7 @@ class APIView(views.APIView):
         return {
             'docstring': type(self).__doc__ or '',
             'new_in_13': getattr(self, 'new_in_13', False),
+            'new_in_14': getattr(self, 'new_in_14', False),
         }
 
     def get_description(self, html=False):

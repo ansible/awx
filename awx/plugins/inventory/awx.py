@@ -45,9 +45,10 @@ try:
 except ImportError:
     # If running from an AWX installation, use the local version of requests if
     # if cannot be found globally.
-    local_site_packages = os.path.join(os.path.dirname(__file__), '..', 'lib',
-                                       'site-packages')
-    sys.path.insert(0, local_site_packages)
+    local_site_packages = os.path.join(os.path.dirname(__file__), '..', '..',
+                                       'lib', 'site-packages')
+    if os.path.exists(local_site_packages):
+        sys.path.insert(0, local_site_packages)
     import requests
 
 class TokenAuth(requests.auth.AuthBase):
@@ -121,9 +122,6 @@ class InventoryScript(object):
         except Exception, e:
             # Always return an empty hash on stdout, even when an error occurs.
             sys.stdout.write(json.dumps({}))
-            #print >> file(os.path.join(os.path.dirname(__file__), 'foo.log'), 'a'), repr(e)
-            #if hasattr(e, 'response'):
-            #    print >> file(os.path.join(os.path.dirname(__file__), 'foo.log'), 'a'), e.response.content
             if self.options.get('traceback', False):
                 raise
             sys.stderr.write(str(e) + '\n')

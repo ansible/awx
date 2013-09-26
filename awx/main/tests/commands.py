@@ -575,8 +575,8 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         #os.environ.setdefault('REST_API_TOKEN',
         #                      self.super_django_user.auth_token.key)
         os.environ['INVENTORY_ID'] = str(old_inv.pk)        
-        source = os.path.join(os.path.dirname(__file__), '..', '..', 'scripts',
-                              'inventory.py')
+        source = os.path.join(os.path.dirname(__file__), '..', '..', 'plugins',
+                              'inventory', 'awx.py')
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=new_inv.pk,
                                                   source=source)

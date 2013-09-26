@@ -488,6 +488,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             inventory     = reverse('main:inventory_detail',       args=(obj.inventory.pk,)),
             job_events    = reverse('main:group_job_events_list',   args=(obj.pk,)),
             job_host_summaries = reverse('main:group_job_host_summaries_list', args=(obj.pk,)),
+            inventory_source = reverse('main:inventory_source_detail', args=(obj.inventory_source.pk,)),
         ))
         return res
 
@@ -540,6 +541,67 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
     class Meta:
         model = Group
         fields = ('variables',)
+
+class InventorySourceSerializer(BaseSerializer):
+    
+    source_password = serializers.WritableField(required=False, default='')
+
+    class Meta:
+        model = InventorySource
+        fields = ('id', 'url', 'related', 'summary_fields', 'created',
+                  'modified', 'group', 'source', 'source_path', 'source_env',
+                  'source_username', 'source_password', 'source_regions',
+                  'source_tags', 'overwrite_hosts', 'overwrite_vars',
+                  'keep_vars', 'update_on_launch', 'last_update_failed',
+                  'status', 'last_updated')
+
+    def to_native(self, obj):
+        ret = super(InventorySourceSerializer, self).to_native(obj)
+        # Replace the actual encrypted value with the string $encrypted$.
+        for field in InventorySource.PASSWORD_FIELDS:
+            if field in ret and unicode(ret[field]).startswith('$encrypted$'):
+                ret[field] = '$encrypted$'
+        return ret
+
+    def restore_object(self, attrs, instance=None):
+        # If the value sent to the API startswith $encrypted$, ignore it.
+        for field in InventorySource.PASSWORD_FIELDS:
+            if unicode(attrs.get(field, '')).startswith('$encrypted$'):
+                attrs.pop(field, None)
+        instance = super(InventorySourceSerializer, self).restore_object(attrs, instance)
+        return instance
+
+    def get_related(self, obj):
+        res = super(InventorySourceSerializer, self).get_related(obj)
+        res.update(dict(
+            group = reverse('main:group_detail', args=(obj.group.pk,)),
+            update = reverse('main:inventory_source_update_view', args=(obj.pk,)),
+            inventory_updates = reverse('main:inventory_source_updates_list', args=(obj.pk,)),
+        ))
+        if obj.current_update:
+            res['current_update'] = reverse('main:inventory_update_detail',
+                                            args=(obj.current_update.pk,))
+        if obj.last_update:
+            res['last_update'] = reverse('main:inventory_update_detail',
+                                         args=(obj.last_update.pk,))
+        return res
+
+class InventoryUpdateSerializer(BaseSerializer):
+
+    class Meta:
+        model = InventoryUpdate
+        fields = ('id', 'url', 'related', 'summary_fields', 'created',
+                  'modified', 'inventory_source', 'status', 'failed',
+                  'result_stdout', 'result_traceback', 'job_args', 'job_cwd',
+                  'job_env')
+
+    def get_related(self, obj):
+        res = super(InventoryUpdateSerializer, self).get_related(obj)
+        res.update(dict(
+            inventory_source = reverse('main:inventory_source_detail', args=(obj.inventory_source.pk,)),
+            cancel = reverse('main:inventory_update_cancel', args=(obj.pk,)),
+        ))
+        return res
 
 class TeamSerializer(BaseSerializer):
 

@@ -27,10 +27,10 @@ from django.conf import settings
 from django.utils.timezone import now
 
 # AWX
-from awx.main.models import Job, ProjectUpdate
+from awx.main.models import Job, ProjectUpdate, InventoryUpdate
 from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url
 
-__all__ = ['RunJob', 'RunProjectUpdate']
+__all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryImport']
 
 logger = logging.getLogger('awx.main.tasks')
 
@@ -231,12 +231,12 @@ class BaseTask(Task):
         Run the job/task using ansible-playbook and capture its output.
         '''
         instance = self.update_model(pk)
-        if not self.pre_run_check(instance, **kwargs):
-            return
-        instance = self.update_model(pk, status='running')
         status, stdout, tb = 'error', '', ''
         output_replacements = []
         try:
+            if not self.pre_run_check(instance, **kwargs):
+                return
+            instance = self.update_model(pk, status='running')
             kwargs['ssh_key_path'] = self.build_ssh_key_path(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
             args = self.build_args(instance, **kwargs)
@@ -322,7 +322,8 @@ class RunJob(BaseTask):
         # it doesn't make sense to rely on ansible-playbook's default of using
         # the current user.
         ssh_username = ssh_username or 'root'
-        inventory_script = self.get_path_to('..', 'scripts', 'inventory.py')
+        inventory_script = self.get_path_to('..', 'plugins', 'inventory',
+                                            'awx.py')
         args = ['ansible-playbook', '-i', inventory_script]
         if job.job_type == 'check':
             args.append('--check')
@@ -622,3 +623,26 @@ class RunProjectUpdate(BaseTask):
                 return False
             else:
                 return False
+
+class RunInventoryUpdate(BaseTask):
+
+    name = 'run_inventory_update'
+    model = InventoryUpdate
+
+    def build_env(self, inventory_update, **kwargs):
+        '''
+        Build environment dictionary for inventory import.
+        '''
+        env = super(RunInventoryUpdate, self).build_env(inventory_update, **kwargs)
+        # FIXME
+        return env
+
+    def build_args(self, inventory_update, **kwargs):
+        '''
+        Build command line argument list for running inventory import.
+        '''
+        # FIXME
+        return ['echo', 'FIXME']
+
+    def build_cwd(self, inventory_update, **kwargs):
+        return self.get_path_to('..', 'plugins', 'inventory')

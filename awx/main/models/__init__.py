@@ -40,8 +40,8 @@ from awx.main.utils import encrypt_field, decrypt_field
 
 __all__ = ['PrimordialModel', 'Organization', 'Team', 'Project',
            'ProjectUpdate', 'Credential', 'Inventory', 'Host', 'Group',
-           'Permission', 'JobTemplate', 'Job', 'JobHostSummary', 'JobEvent',
-           'AuthToken',
+           'InventorySource', 'InventoryUpdate', 'Permission', 'JobTemplate',
+           'Job', 'JobHostSummary', 'JobEvent', 'AuthToken',
            'PERM_INVENTORY_ADMIN', 'PERM_INVENTORY_READ',
            'PERM_INVENTORY_WRITE', 'PERM_INVENTORY_DEPLOY',
            'PERM_INVENTORY_CHECK', 'JOB_STATUS_CHOICES']
@@ -254,6 +254,14 @@ class Host(CommonModelNameNotUnique):
     last_job_host_summary   = models.ForeignKey('JobHostSummary', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job_summary+')
     has_active_failures     = models.BooleanField(default=False, editable=False)
 
+    # FIXME: Track which inventory source(s) created this host.
+    #inventory_sources = models.ManyToManyField(
+    #    'InventorySource',
+    #    related_name='synced_hosts',
+    #    blank=True,
+    #    editable=False,
+    #)
+
     def __unicode__(self):
         return self.name
 
@@ -316,6 +324,14 @@ class Group(CommonModelNameNotUnique):
     )
     hosts         = models.ManyToManyField('Host', related_name='groups', blank=True)
     has_active_failures = models.BooleanField(default=False, editable=False)
+
+    # FIXME: Track which inventory source(s) created this group.
+    #inventory_sources = models.ManyToManyField(
+    #    'InventorySource',
+    #    related_name='synced_groups',
+    #    blank=True,
+    #    editable=False,
+    #)
 
     def __unicode__(self):
         return self.name
@@ -406,6 +422,341 @@ class Group(CommonModelNameNotUnique):
     @property
     def job_events(self):
         return JobEvent.objects.filter(host__in=self.all_hosts)
+
+class InventorySource(PrimordialModel):
+
+    # FIXME: Track inventory source for import via management command?
+
+    SOURCE_CHOICES = [
+        ('file', _('Local File or Script')),
+        ('rackspace', _('Rackspace Cloud Servers')),
+        ('ec2', _('Amazon EC2')),
+    ]
+
+    PASSWORD_FIELDS = ('source_password',)
+
+    INVENTORY_SOURCE_STATUS_CHOICES = [
+        ('none', _('No External Source')),
+        ('never updated', _('Never Updated')),
+        ('updating', _('Updating')),
+        ('failed', _('Failed')),
+        ('successful', _('Successful')),
+    ]
+
+    group = AutoOneToOneField(
+        'Group',
+        related_name='inventory_source',
+        editable=False,
+    )
+    source = models.CharField(
+        max_length=32,
+        choices=SOURCE_CHOICES,
+        blank=True,
+        default='',
+    )
+    source_path = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
+    source_env = models.TextField(
+        blank=True,
+        default='',
+    )
+    source_username = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
+    source_password = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
+    source_regions = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
+    source_tags = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
+    overwrite_hosts = models.BooleanField(
+        default=False,
+    )
+    overwrite_vars = models.BooleanField(
+        default=False,
+    )
+    keep_vars = models.BooleanField(
+        default=False,
+    )
+    update_on_launch = models.BooleanField(
+        default=False,
+    )
+    current_update = models.ForeignKey(
+        'InventoryUpdate',
+        null=True,
+        default=None,
+        editable=False,
+        related_name='inventory_source_as_current_update+',
+    )
+    last_update = models.ForeignKey(
+        'InventoryUpdate',
+        null=True,
+        default=None,
+        editable=False,
+        related_name='inventory_source_as_last_update+',
+    )
+    last_update_failed = models.BooleanField(
+        default=False,
+        editable=False,
+    )
+    last_updated = models.DateTimeField(
+        null=True,
+        default=None,
+        editable=False,
+    )
+    status = models.CharField(
+        max_length=32,
+        choices=INVENTORY_SOURCE_STATUS_CHOICES,
+        default='none',
+        editable=False,
+        null=True,
+    )
+
+    def save(self, *args, **kwargs):
+        new_instance = not bool(self.pk)
+        # If update_fields has been specified, add our field names to it,
+        # if it hasn't been specified, then we're just doing a normal save.
+        update_fields = kwargs.get('update_fields', [])
+        # When first saving to the database, don't store any password field
+        # values, but instead save them until after the instance is created.
+        if new_instance:
+            for field in self.PASSWORD_FIELDS:
+                value = getattr(self, field, '')
+                setattr(self, '_saved_%s' % field, value)
+                setattr(self, field, '')
+        # Otherwise, store encrypted values to the database.
+        else:
+            for field in self.PASSWORD_FIELDS:
+                encrypted = encrypt_field(self, field, True)
+                if getattr(self, field) != encrypted:
+                    setattr(self, field, encrypted)
+                    if field not in update_fields:
+                        update_fields.append(field)
+        # Update status and last_updated fields.
+        updated_fields = self.set_status_and_last_updated(save=False)
+        for field in updated_fields:
+            if field not in update_fields:
+                update_fields.append(field)
+        # Do the actual save.
+        super(InventorySource, self).save(*args, **kwargs)
+        # After saving a new instance for the first time (to get a primary
+        # key), set the password fields and save again.
+        if new_instance:
+            update_fields=[]
+            for field in self.PASSWORD_FIELDS:
+                saved_value = getattr(self, '_saved_%s' % field, '')
+                if getattr(self, field) != saved_value:
+                    setattr(self, field, saved_value)
+                    update_fields.append(field)
+            if update_fields:
+                self.save(update_fields=update_fields)
+
+    @property
+    def needs_source_password(self):
+        return self.source and self.source_password == 'ASK'
+
+    @property
+    def source_passwords_needed(self):
+        needed = []
+        for field in ('source_password',):
+            if getattr(self, 'needs_%s' % field):
+                needed.append(field)
+        return needed
+
+    def set_status_and_last_updated(self, save=True):
+        # Determine current status.
+        if self.source:
+            if self.current_update:
+                status = 'updating'
+            elif not self.last_update:
+                status = 'never updated'
+            elif self.last_update_failed:
+                status = 'failed'
+            else:
+                status = 'successful'
+        else:
+            status = 'none'
+        # Determine current last_updated timestamp.
+        last_updated = None
+        if self.source and self.last_update:
+            last_updated = self.last_update.modified
+        # Update values if changed.
+        update_fields = []
+        if self.status != status:
+            self.status = status
+            update_fields.append('status')
+        if self.last_updated != last_updated:
+            self.last_updated = last_updated
+            update_fields.append('last_updated')
+        if save and update_fields:
+            self.save(update_fields=update_fields)
+        return update_fields
+
+    @property
+    def can_update(self):
+        # FIXME: Prevent update when another one is active!
+        return bool(self.source)
+
+    def update(self, **kwargs):
+        if self.can_update:
+            needed = self.source_passwords_needed
+            opts = dict([(field, kwargs.get(field, '')) for field in needed])
+            if not all(opts.values()):
+                return
+            inventory_update = self.inventory_updates.create()
+            inventory_update.start(**opts)
+            return inventory_update
+
+    def get_absolute_url(self):
+        return reverse('main:inventory_source_detail', args=(self.pk,))
+
+class InventoryUpdate(PrimordialModel):
+    '''
+    Internal job for tracking inventory updates from external sources.
+    '''
+
+    class Meta:
+        app_label = 'main'
+
+    inventory_source = models.ForeignKey(
+        'InventorySource',
+        related_name='inventory_updates',
+        on_delete=models.CASCADE,
+        editable=False,
+    )
+    cancel_flag = models.BooleanField(
+        blank=True,
+        default=False,
+        editable=False,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=JOB_STATUS_CHOICES,
+        default='new',
+        editable=False,
+    )
+    failed = models.BooleanField(
+        default=False,
+        editable=False,
+    )
+    job_args = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
+    job_cwd = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+    )
+    job_env = JSONField(
+        blank=True,
+        default={},
+        editable=False,
+    )
+    result_stdout = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
+    result_traceback = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
+    celery_task_id = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        editable=False,
+    )
+
+    def __unicode__(self):
+        return u'%s-%s-%s' % (self.created, self.id, self.status)
+
+    def save(self, *args, **kwargs):
+        # Get status before save...
+        status_before = self.status or 'new'
+        if self.pk:
+            inventory_update_before = InventoryUpdate.objects.get(pk=self.pk)
+            if inventory_update_before.status != self.status:
+                status_before = inventory_update_before.status
+        self.failed = bool(self.status in ('failed', 'error', 'canceled'))
+        super(InventoryUpdate, self).save(*args, **kwargs)
+        # If status changed, update inventory.
+        if self.status != status_before:
+            if self.status in ('pending', 'waiting', 'running'):
+                inventory_source = self.inventory_source
+                if inventory_source.current_update != self:
+                    inventory_source.current_update = self
+                    inventory_source.save(update_fields=['current_update'])
+            elif self.status in ('successful', 'failed', 'error', 'canceled'):
+                inventory_source = self.inventory_source
+                if inventory_source.current_update == self:
+                    inventory_source.current_update = None
+                inventory_source.last_update = self
+                inventory_source.last_update_failed = self.failed
+                inventory_source.save(update_fields=['current_update', 'last_update',
+                                            'last_update_failed'])
+
+    def get_absolute_url(self):
+        return reverse('main:inventory_update_detail', args=(self.pk,))
+
+    @property
+    def celery_task(self):
+        try:
+            if self.celery_task_id:
+                return TaskMeta.objects.get(task_id=self.celery_task_id)
+        except TaskMeta.DoesNotExist:
+            pass
+
+    @property
+    def can_start(self):
+        return bool(self.status == 'new')
+
+    def start(self, **kwargs):
+        from awx.main.tasks import RunInventoryUpdate
+        needed = self.inventory_source.source_passwords_needed
+        opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        if not all(opts.values()):
+            return False
+        self.status = 'pending'
+        self.save(update_fields=['status'])
+        task_result = RunInventoryUpdate().delay(self.pk, **opts)
+        # Reload inventory update from database so we don't clobber results
+        # from RunInventoryUpdate (mainly from tests when using Django 1.4.x).
+        inventory_update = InventoryUpdate.objects.get(pk=self.pk)
+        # The TaskMeta instance in the database isn't created until the worker
+        # starts processing the task, so we can only store the task ID here.
+        inventory_update.celery_task_id = task_result.task_id
+        inventory_update.save(update_fields=['celery_task_id'])
+        return True
+
+    @property
+    def can_cancel(self):
+        return bool(self.status in ('pending', 'waiting', 'running'))
+
+    def cancel(self):
+        if self.can_cancel:
+            if not self.cancel_flag:
+                self.cancel_flag = True
+                self.save(update_fields=['cancel_flag'])
+        return self.cancel_flag
 
 class Credential(CommonModelNameNotUnique):
     '''

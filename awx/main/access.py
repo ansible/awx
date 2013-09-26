@@ -427,6 +427,45 @@ class GroupAccess(BaseAccess):
                 return False
         return True
 
+class InventorySourceAccess(BaseAccess):
+    '''
+    I can see inventory sources whenever I can see their group.
+    I can change inventory sources whenever I can change their group.
+    '''
+
+    model = InventorySource
+
+    def get_queryset(self):
+        qs = self.model.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by', 'group')
+        groups_qs = self.user.get_queryset(Group)
+        return qs.filter(group__in=groups_qs)
+
+    def can_read(self, obj):
+        return obj and self.user.can_access(Group, 'read', obj.group)
+
+    def can_add(self, data):
+        # Automatically created from group.
+        return False
+
+    def can_change(self, obj, data):
+        # Checks for admin or change permission on group.
+        return obj and self.user.can_access(Group, 'change', obj.group, None)
+
+class InventoryUpdateAccess(BaseAccess):
+    '''
+    I can see inventory updates when I can see the inventory source.
+    I can change inventory updates whenever I can change their source.
+    '''
+
+    model = InventoryUpdate
+
+    def get_queryset(self):
+        qs = InventoryUpdate.objects.filter(active=True).distinct()
+        qs = qs.select_related('created_by', 'group')
+        inventory_sources_qs = self.user.get_queryset(InventorySource)
+        return qs.filter(inventory_source__in=inventory_sources_qs)
+
 class CredentialAccess(BaseAccess):
     '''
     I can see credentials when:
@@ -970,6 +1009,8 @@ register_access(Organization, OrganizationAccess)
 register_access(Inventory, InventoryAccess)
 register_access(Host, HostAccess)
 register_access(Group, GroupAccess)
+register_access(InventorySource, InventorySourceAccess)
+register_access(InventoryUpdate, InventoryUpdateAccess)
 register_access(Credential, CredentialAccess)
 register_access(Team, TeamAccess)
 register_access(Project, ProjectAccess)

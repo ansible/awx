@@ -680,6 +680,74 @@ class InventoryTreeView(RetrieveAPIView):
         })
         return d
 
+class InventorySourceDetail(RetrieveUpdateAPIView):
+
+    model = InventorySource
+    serializer_class = InventorySourceSerializer
+    new_in_14 = True
+
+class InventorySourceUpdatesList(SubListAPIView):
+
+    model = InventoryUpdate
+    serializer_class = InventoryUpdateSerializer
+    parent_model = InventorySource
+    relationship = 'inventory_updates'
+    new_in_14 = True
+
+class InventorySourceUpdateView(GenericAPIView):
+
+    model = InventorySource
+    new_in_14 = True
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        data = dict(
+            can_update=obj.can_update,
+        )
+        if obj.source:
+            data['passwords_needed_to_update'] = obj.source_passwords_needed
+        return Response(data)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.can_update:
+            inventory_update = obj.update(**request.DATA)
+            if not inventory_update:
+                data = dict(passwords_needed_to_update=obj.source_passwords_needed)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                headers = {'Location': inventory_update.get_absolute_url()}
+                return Response(status=status.HTTP_202_ACCEPTED, headers=headers)
+        else:
+            return self.http_method_not_allowed(request, *args, **kwargs)
+
+class InventoryUpdateDetail(RetrieveAPIView):
+
+    model = InventoryUpdate
+    serializer_class = InventoryUpdateSerializer
+    new_in_14 = True
+
+class InventoryUpdateCancel(GenericAPIView):
+
+    model = InventoryUpdate
+    is_job_cancel = True
+    new_in_14 = True
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        data = dict(
+            can_cancel=obj.can_cancel,
+        )
+        return Response(data)
+
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.can_cancel:
+            result = obj.cancel()
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return self.http_method_not_allowed(request, *args, **kwargs)
+
 class JobTemplateList(ListCreateAPIView):
 
     model = JobTemplate

@@ -86,6 +86,17 @@ group_urls = patterns('awx.main.views',
     url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'group_job_host_summaries_list'),
 )
 
+inventory_source_urls = patterns('awx.main.views',
+    url(r'^(?P<pk>[0-9]+)/$',                           'inventory_source_detail'),
+    url(r'^(?P<pk>[0-9]+)/update/$',                    'inventory_source_update_view'),
+    url(r'^(?P<pk>[0-9]+)/inventory_updates/$',         'inventory_source_updates_list'),
+)
+
+inventory_update_urls = patterns('awx.main.views',
+    url(r'^(?P<pk>[0-9]+)/$',                           'inventory_update_detail'),
+    url(r'^(?P<pk>[0-9]+)/cancel/$',                    'inventory_update_cancel'),
+)
+
 credential_urls = patterns('awx.main.views',
     url(r'^$',                                          'credential_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'credential_detail'),
@@ -136,6 +147,8 @@ v1_urls = patterns('awx.main.views',
     url(r'^inventories/',           include(inventory_urls)),
     url(r'^hosts/',                 include(host_urls)),
     url(r'^groups/',                include(group_urls)),
+    url(r'^inventory_sources/',     include(inventory_source_urls)),
+    url(r'^inventory_updates/',     include(inventory_update_urls)),
     url(r'^credentials/',           include(credential_urls)),
     url(r'^permissions/',           include(permission_urls)),
     url(r'^job_templates/',         include(job_template_urls)),
