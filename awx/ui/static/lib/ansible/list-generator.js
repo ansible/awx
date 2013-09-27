@@ -123,10 +123,12 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               for (var itm in navigation) {
                   html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"" +
                       navigation[itm].href + "\" ";
-                  html += (navigation[itm].active) ? "class=\"active\" " : "";
+                  // html += (navigation[itm].active) ? "class=\"active\" " : "";
                   html += ">";
+                  html += "<i class=\"icon-ok\" style=\"visibility: ";
+                  html += (navigation[itm].active) ? "visible" : "hidden";
+                  html += "\"></i> ";
                   html += navigation[itm].label;
-                  html += (navigation[itm].active) ? " <i class=\"icon-angle-left\"></i>" : "";
                   html += "</a></li>\n";
               }
               html += "</ul>\n";

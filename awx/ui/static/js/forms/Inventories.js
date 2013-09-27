@@ -19,7 +19,7 @@ angular.module('InventoryFormDefinition', [])
         navigationLinks: {
             inventory: {
                 href: "/#/inventories/{{ inventory_id }}",
-                label: "Inventory Properties",
+                label: "Properties",
                 icon: "icon-edit",
                 active: true
                 },

@@ -21,7 +21,7 @@ angular.module('JobEventsListDefinition', [])
         navigationLinks: {
             details: {
                 href: "/#/jobs/{{ job_id }}",
-                label: 'Job Details',
+                label: 'Status',
                 icon: 'icon-zoom-in',
                 ngShow: "job_id !== null"
                 },

@@ -10,17 +10,19 @@ angular.module('JobFormDefinition', [])
     .value(
     'JobForm', {
         
-        addTitle: 'Create Job',                          //Legend in add mode
-        editTitle: '{{ id }} - {{ name }}',            //Legend in edit mode
+        addTitle: 'Create Job',
+        editTitle: '{{ id }} - {{ name }}',
         name: 'jobs',
         well: true,
+        collapse: true,
+        collapseMode: 'edit',
+        collapseTitle: 'Job Template',
         twoColumns: true,
 
         navigationLinks: {
             details: {
                 href: "/#/jobs/{{ job_id }}",
-                label: "\{\{ job_id + '- ' + name \}\}",
-                listLabel: 'Job Details',
+                label: 'Status',
                 icon: 'icon-zoom-in',
                 active: true,
                 ngShow: "job_id !== null"

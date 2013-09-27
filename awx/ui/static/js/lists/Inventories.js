@@ -69,7 +69,7 @@ angular.module('InventoriesListDefinition', [])
                 icon: 'icon-edit',
                 'class': 'btn-default btn-xs',
                 options: [
-                    { ngClick: "editInventory(\{\{ inventory.id \}\})", label: 'Inventory Properties' },
+                    { ngClick: "editInventory(\{\{ inventory.id \}\})", label: 'Properties' },
                     { ngClick: "editHosts(\{\{ inventory.id \}\})", label: 'Hosts' }, 
                     { ngClick: "editGroups(\{\{ inventory.id \}\})", label: 'Groups' }
                     ]

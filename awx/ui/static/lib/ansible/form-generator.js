@@ -846,6 +846,20 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title | capitalize }}</a></li>\n";
        
        if (navigation) {
+          
+          var paths = $location.path().replace(/^\//,'').split('/');
+
+          if (paths.length == 2) {
+             html += "<li class=\"active\">";
+             if (options.mode == 'edit') {
+                html += this.form.editTitle;
+             }
+             else {
+                html += this.form.addTitle; 
+             }
+             html += "</li>\n";
+          }
+          
           html += "<li class=\"active\"> </li>\n";
           html += "</ul>\n";
           html += "<div class=\"dropdown\">\n";
@@ -857,14 +871,17 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  break;
               }
           }
+    
           html += "<ul class=\"dropdown-menu\" role=\"menu\">\n";
           for (var itm in navigation) {
               html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"" +
                   navigation[itm].href + "\" ";
-              html += (navigation[itm].active) ? "class=\"active\" " : "";
+              // html += (navigation[itm].active) ? "class=\"active\" " : "";
               html += ">";
+              html += "<i class=\"icon-ok\" style=\"visibility: ";
+              html += (navigation[itm].active) ? "visible" : "hidden";
+              html += "\"></i> ";
               html += (navigation[itm].listLabel) ? navigation[itm].listLabel : navigation[itm].label;
-              html += (navigation[itm].active) ? " <i class=\"icon-angle-left\"></i>" : "";
               html += "</a></li>\n";
           }
           html += "</ul>\n";
@@ -1123,7 +1140,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        var navigation = {
             inventory: {
                 href: "/#/inventories/{{ inventory_id }}",
-                label: "Inventory Properties",
+                label: "Properties",
                 icon: "icon-edit"
                 },
             hosts: {

@@ -97,11 +97,11 @@ angular.module('JobsListDefinition', [])
                 icon: 'icon-zoom-in',
                 'class': 'btn-default btn-xs',
                 options: [
-                    { ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Host Summary', 
+                    { ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Status' },
+                    { ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Hosts', 
                         ngHide: "job.status == 'new'" },
-                    { ngClick: "viewEvents(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Job Events',
-                        ngHide: "job.status == 'new'" },
-                    { ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Job Details' }
+                    { ngClick: "viewEvents(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Events',
+                        ngHide: "job.status == 'new'" }
                     ]
                 },
 
