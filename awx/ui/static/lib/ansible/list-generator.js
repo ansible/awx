@@ -108,11 +108,21 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            
            if (list.navigationLinks) {
               var navigation = list.navigationLinks;
-              html += "<li class=\"active\"> </li>\n";
-              html += "</ul>\n";
-              html += "<div class=\"dropdown\">\n";
+              if (navigation['ngHide']) {
+                  html += "<li class=\"active\" ng-show=\"" + navigation['ngHide'] + "\">";
+                  html += list.editTitle;
+                  html += "</li>\n";
+                  html += "<li class=\"active\" ng-hide=\"" + navigation['ngHide'] + "\"> </li>\n";
+              }
+              else {
+                  html += "<li class=\"active\"> </li>\n";
+                  html += "</ul>\n";
+              }
+              html += "<div class=\"dropdown\" ";
+              html += (navigation['ngHide']) ? Attr(navigation, 'ngHide') : '';
+              html += ">\n";
               for (var itm in navigation) {
-                  if (navigation[itm].active) {
+                  if (typeof navigation[itm] == 'object' && navigation[itm].active) {
                      html += "<a href=\"\" class=\"toggle\" ";
                      html += "data-toggle=\"dropdown\" ";
                      html += ">" + navigation[itm].label + " <i class=\"icon-chevron-sign-down crumb-icon\"></i></a>";
@@ -121,15 +131,17 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               }
               html += "<ul class=\"dropdown-menu\" role=\"menu\">\n";
               for (var itm in navigation) {
-                  html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"" +
-                      navigation[itm].href + "\" ";
-                  // html += (navigation[itm].active) ? "class=\"active\" " : "";
-                  html += ">";
-                  html += "<i class=\"icon-ok\" style=\"visibility: ";
-                  html += (navigation[itm].active) ? "visible" : "hidden";
-                  html += "\"></i> ";
-                  html += navigation[itm].label;
-                  html += "</a></li>\n";
+                  if (typeof navigation[itm] == 'object') {
+                     html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"" +
+                         navigation[itm].href + "\" ";
+                     // html += (navigation[itm].active) ? "class=\"active\" " : "";
+                     html += ">";
+                     html += "<i class=\"icon-ok\" style=\"visibility: ";
+                     html += (navigation[itm].active) ? "visible" : "hidden";
+                     html += "\"></i> ";
+                     html += navigation[itm].label;
+                     html += "</a></li>\n";
+                  }
               }
               html += "</ul>\n";
               html += "</div><!-- dropdown -->\n";

@@ -194,7 +194,15 @@ angular.module('Utilities',[])
                    $rootScope.breadcrumbs.push({ title: child, path: $rootScope.crumbCache[j].altPath });
                 }
                 else { 
-                   $rootScope.breadcrumbs.push({ title: child, path: ppath + '/' + paths[i] });
+                   if (paths[i - 1] == 'hosts') {
+                      // For hosts, there is no /hosts, so we need to link back to the inventory
+                      // We end up here when user has clicked refresh and the crumbcache is missing
+                      $rootScope.breadcrumbs.push({ title: child, 
+                          path: '/inventories/' + $routeParams.inventory + '/hosts' });
+                   }
+                   else { 
+                      $rootScope.breadcrumbs.push({ title: child, path: ppath + '/' + paths[i] });
+                   }
                 }
              }
              else {

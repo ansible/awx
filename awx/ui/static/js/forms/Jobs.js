@@ -29,7 +29,7 @@ angular.module('JobFormDefinition', [])
                 },
             hosts: {
                 href: "/#/jobs/{{ job_id }}/job_host_summaries",
-                label: 'Hosts',
+                label: 'Summary',
                 icon: 'icon-laptop'
                 },
             events: {

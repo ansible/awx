@@ -59,8 +59,8 @@ angular.module('InventoriesListDefinition', [])
                 icon: 'icon-zoom-in',
                 'class': 'btn-default btn-xs',
                 options: [
-                    { ngClick: 'viewJobs(\{\{ inventory.id \}\})', label: 'All Jobs' },
-                    { ngClick: "viewFailedJobs(\{\{ inventory.id \}\})", label: 'Failed jobs' }
+                    { ngClick: 'viewJobs(\{\{ inventory.id \}\})', label: 'All' },
+                    { ngClick: "viewFailedJobs(\{\{ inventory.id \}\})", label: 'Failed' }
                     ]
                 },
             edit: { 

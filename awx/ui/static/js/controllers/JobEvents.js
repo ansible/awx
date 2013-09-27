@@ -109,10 +109,10 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
         return html;
         }
 
-    if (scope.RemovePostRefresh) {
-       scope.RemovePostRefresh();
+    if (scope.PostRefreshRemove) {
+       scope.PostRefreshRemove();
     }
-    scope.RemovePostRefresh = scope.$on('PostRefresh', function() {
+    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
         // Initialize the parent levels
         var set = scope[list.name];
         var cDate;
@@ -189,8 +189,9 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
        }
 
     scope.refresh = function() {
-       scope.expand = true;
-       scope.search(list.iterator);
+       scope['jobSearchSpin'] = true;
+       scope['jobLoading'] = true;
+       Refresh({ scope: scope, set: 'jobevents', iterator: 'jobevent', url: scope['current_url'] });
        }
 }
 

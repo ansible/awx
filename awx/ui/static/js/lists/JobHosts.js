@@ -12,11 +12,12 @@ angular.module('JobHostDefinition', [])
         
         name: 'jobhosts',
         iterator: 'jobhost',
-        editTitle: 'Job Host Summary',
+        editTitle: 'All summaries',
         index: true,
         hover: true,
         
         navigationLinks: {
+            ngHide: 'host_id !== null',
             details: {
                 href: "/#/jobs/{{ job_id }}",
                 label: 'Status',
@@ -25,7 +26,7 @@ angular.module('JobHostDefinition', [])
                 },
             hosts: {
                 href: "/#/jobs/{{ job_id }}/job_host_summaries",
-                label: 'Hosts',
+                label: 'Summary',
                 active: true,
                 icon: 'icon-laptop'
                 },

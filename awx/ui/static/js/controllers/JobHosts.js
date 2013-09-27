@@ -12,7 +12,7 @@
 
 function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobHostList,
                              GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                             ClearScope, ProcessErrors, GetBasePath)
+                             ClearScope, ProcessErrors, GetBasePath, Refresh)
 {
     ClearScope('htmlTemplate');
     var list = JobHostList;
@@ -31,7 +31,7 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
     var scope = view.inject(list, { mode: 'edit' });
 
     scope.selected = [];
-
+     
     // control enable/disable/show of job specific view elements
     if (base == 'hosts') {
        scope.job_id = null;
@@ -41,7 +41,7 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
        scope.job_id = $routeParams.id;
        scope.host_id = null;
     }
-    
+   
     // After a refresh, populate any needed summary field values on each row
     if (scope.PostRefreshRemove) {
        scope.PostRefreshRemove();
@@ -51,7 +51,7 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
            scope.jobhosts[i].host_name = scope.jobhosts[i].summary_fields.host.name;
            scope.jobhosts[i].status = (scope.jobhosts[i].failed) ? 'error' : 'success';  
         }
-        if (scope.host_id == null) {
+        if (scope.job_id !== null && scope.job_id !== undefined && scope.job_id !== '') {
            // need job_status so we can show/hide refresh button
            Rest.setUrl(GetBasePath('jobs') + scope.job_id);
            Rest.get()
@@ -81,7 +81,6 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
     }
     
     scope.search(list.iterator);
-
     LoadBreadCrumbs();
     
     scope.showEvents = function(host_name, last_job) {
@@ -103,12 +102,16 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
         }
 
     scope.refresh = function() {
-        scope.search(list.iterator);
+        if (scope.host_id == null) {
+           scope['jobSearchSpin'] = true;
+           scope['jobLoading'] = true;
+           Refresh({ scope: scope, set: 'jobhosts', iterator: 'jobhost', url: scope['current_url'] });
+        }
         }
   
 }
 
 JobHostSummaryList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobHostList',
                                'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                               'ProcessErrors','GetBasePath'
+                               'ProcessErrors', 'GetBasePath', 'Refresh'
                                ];
