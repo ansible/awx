@@ -320,7 +320,8 @@ class HostAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'inventory', 'last_job',
+        qs = qs.select_related('created_by', 'inventory',
+                               'last_job__job_template',
                                'last_job_host_summary')
         qs = qs.prefetch_related('groups')
         inventories_qs = self.user.get_queryset(Inventory)
@@ -954,7 +955,8 @@ class JobHostSummaryAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.distinct()
-        qs = qs.select_related('created_by', 'job', 'host')
+        qs = qs.select_related('created_by', 'job', 'job__job_template',
+                               'host')
         if self.user.is_superuser:
             return qs
         job_qs = self.user.get_queryset(Job)
@@ -979,7 +981,8 @@ class JobEventAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.distinct()
-        qs = qs.select_related('created_by', 'job', 'host', 'parent')
+        qs = qs.select_related('created_by', 'job', 'job__job_template',
+                               'host', 'parent')
         qs = qs.prefetch_related('hosts', 'children')
 
         # Filter certain "internal" events generating by async polling.

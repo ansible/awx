@@ -30,15 +30,32 @@ from awx.main.utils import update_scm_url
 BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created', 'modified',
                'name', 'description')
 
-# objects that if found we should add summary info for them
-SUMMARIZABLE_FKS = ( 
-   'organization', 'host', 'group', 'inventory', 'project', 'team', 'job',
-   'job_template', 'credential', 'permission', 'user', 'last_job',
-)
-# fields that should be summarized regardless of object type
-SUMMARIZABLE_FIELDS = (
-   'name', 'username', 'first_name', 'last_name', 'description',
-)
+# Fields that should be summarized regardless of object type.
+DEFAULT_SUMMARY_FIELDS = ('name', 'description',)
+
+# Keys are fields (foreign keys) where, if found on an instance, summary info
+# should be added to the serialized data.  Values are a tuple of field names on
+# the related object to include in the summary data (if the field is present on
+# the related object).
+SUMMARIZABLE_FK_FIELDS = {
+    'organization': DEFAULT_SUMMARY_FIELDS,
+    'user': ('username', 'first_name', 'last_name'),
+    'team': DEFAULT_SUMMARY_FIELDS,
+    'inventory': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
+                                           'hosts_with_active_failures'),
+    'host': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',),
+    'group': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
+                                       'hosts_with_active_failures'),
+    'project': DEFAULT_SUMMARY_FIELDS + ('status',),
+    'credential': DEFAULT_SUMMARY_FIELDS,
+    'permission': DEFAULT_SUMMARY_FIELDS,
+    'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
+    'job_template': DEFAULT_SUMMARY_FIELDS,
+    'last_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
+    'last_job_host_summary': DEFAULT_SUMMARY_FIELDS + ('failed',),
+    'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
+    'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
+}
 
 class BaseSerializer(serializers.ModelSerializer):
 
@@ -88,15 +105,15 @@ class BaseSerializer(serializers.ModelSerializer):
         return res
 
     def get_summary_fields(self, obj):
-        # return the names (at least) for various fields, so we don't have to write this
-        # method for each object.
+        # Return values for certain fields on related objects, to simplify
+        # displaying lists of items without additional API requests.
         summary_fields = SortedDict()
-        for fk in SUMMARIZABLE_FKS:
+        for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items():
             try:
                 fkval = getattr(obj, fk, None)
                 if fkval is not None:
                     summary_fields[fk] = SortedDict()
-                    for field in SUMMARIZABLE_FIELDS:
+                    for field in related_fields:
                         fval = getattr(fkval, field, None)
                         if fval is not None:
                             summary_fields[fk][field] = fval
@@ -403,7 +420,8 @@ class InventorySerializer(BaseSerializerWithVariables):
     class Meta:
         model = Inventory
         fields = BASE_FIELDS + ('organization', 'variables',
-                                'has_active_failures')
+                                'has_active_failures',
+                                'hosts_with_active_failures')
 
     def get_related(self, obj):
         res = super(InventorySerializer, self).get_related(obj)
@@ -443,6 +461,11 @@ class HostSerializer(BaseSerializerWithVariables):
 
     def get_summary_fields(self, obj):
         d = super(HostSerializer, self).get_summary_fields(obj)
+        try:
+            d['last_job']['job_template_id'] = obj.last_job.job_template.id
+            d['last_job']['job_template_name'] = obj.last_job.job_template.name
+        except (KeyError, AttributeError):
+            pass
         d['all_groups'] = [{'id': g.id, 'name': g.name} for g in obj.all_groups.all()]
         d['groups'] = [{'id': g.id, 'name': g.name} for g in obj.groups.all()]
         return d
@@ -476,7 +499,8 @@ class GroupSerializer(BaseSerializerWithVariables):
 
     class Meta:
         model = Group
-        fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures')
+        fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures',
+                                'hosts_with_active_failures')
 
     def get_related(self, obj):
         res = super(GroupSerializer, self).get_related(obj)
@@ -585,6 +609,10 @@ class InventorySourceSerializer(BaseSerializer):
             res['last_update'] = reverse('main:inventory_update_detail',
                                          args=(obj.last_update.pk,))
         return res
+
+    def get_summary_fields(self, obj):
+        d = super(InventorySourceSerializer, self).get_summary_fields(obj)
+        return d
 
 class InventoryUpdateSerializer(BaseSerializer):
 
@@ -801,6 +829,15 @@ class JobHostSummarySerializer(BaseSerializer):
         ))
         return res
 
+    def get_summary_fields(self, obj):
+        d = super(JobHostSummarySerializer, self).get_summary_fields(obj)
+        try:
+            d['job']['job_template_id'] = obj.job.job_template.id
+            d['job']['job_template_name'] = obj.job.job_template.name
+        except (KeyError, AttributeError):
+            pass
+        return d
+
 class JobEventSerializer(BaseSerializer):
 
     event_display = serializers.Field(source='get_event_display2')
@@ -828,6 +865,15 @@ class JobEventSerializer(BaseSerializer):
         if obj.hosts.count():
             res['hosts'] = reverse('main:job_event_hosts_list', args=(obj.pk,))
         return res
+
+    def get_summary_fields(self, obj):
+        d = super(JobEventSerializer, self).get_summary_fields(obj)
+        try:
+            d['job']['job_template_id'] = obj.job.job_template.id
+            d['job']['job_template_name'] = obj.job.job_template.name
+        except (KeyError, AttributeError):
+            pass
+        return d
 
 class AuthTokenSerializer(serializers.Serializer):
 

@@ -194,6 +194,11 @@ class Inventory(CommonModel):
         editable=False,
         help_text=_('Flag indicating whether any hosts in this inventory have failed.'),
     )
+    hosts_with_active_failures = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        help_text=_('Number of hosts in this inventory with active failures.'),
+    )
 
     def get_absolute_url(self):
         return reverse('main:inventory_detail', args=(self.pk,))
@@ -224,10 +229,17 @@ class Inventory(CommonModel):
             for group in self.groups.filter(active=True):
                 group.update_has_active_failures()
         failed_hosts = self.hosts.filter(active=True, has_active_failures=True)
-        has_active_failures = bool(failed_hosts.count())
+        hosts_with_active_failures = failed_hosts.count()
+        has_active_failures = bool(hosts_with_active_failures)
+        update_fields = []
+        if self.hosts_with_active_failures != hosts_with_active_failures:
+            self.hosts_with_active_failures = hosts_with_active_failures
+            update_fields.append('hosts_with_active_failures')
         if self.has_active_failures != has_active_failures:
             self.has_active_failures = has_active_failures
-            self.save()
+            update_fields.append('has_active_failures')
+        if update_fields:
+            self.save(update_fields=update_fields)
 
     @property
     def root_groups(self):
@@ -324,6 +336,11 @@ class Group(CommonModelNameNotUnique):
     )
     hosts         = models.ManyToManyField('Host', related_name='groups', blank=True)
     has_active_failures = models.BooleanField(default=False, editable=False)
+    hosts_with_active_failures = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        help_text=_('Number of hosts in this group with active failures.'),
+    )
 
     # FIXME: Track which inventory source(s) created this group.
     #inventory_sources = models.ManyToManyField(
@@ -353,10 +370,17 @@ class Group(CommonModelNameNotUnique):
         failed_hosts = self.all_hosts.filter(active=True,
                                              last_job_host_summary__job__active=True,
                                              last_job_host_summary__failed=True)
-        has_active_failures = bool(failed_hosts.count())
+        hosts_with_active_failures = failed_hosts.count()
+        has_active_failures = bool(hosts_with_active_failures)
+        update_fields = []
+        if self.hosts_with_active_failures != hosts_with_active_failures:
+            self.hosts_with_active_failures = hosts_with_active_failures
+            update_fields.append('hosts_with_active_failures')
         if self.has_active_failures != has_active_failures:
             self.has_active_failures = has_active_failures
-            self.save()
+            update_fields.append('has_active_failures')
+        if update_fields:
+            self.save(update_fields=update_fields)
 
     @property
     def variables_dict(self):
