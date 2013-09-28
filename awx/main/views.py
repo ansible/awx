@@ -540,6 +540,22 @@ class GroupChildrenList(SubListCreateAPIView):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class GroupPotentialChildrenList(SubListAPIView):
+
+    model = Group
+    serializer_class = GroupSerializer
+    parent_model = Group
+    new_in_14 = True
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        except_pks = set([parent.pk])
+        except_pks.update(parent.all_parents.values_list('pk', flat=True))
+        except_pks.update(parent.all_children.values_list('pk', flat=True))
+        return qs.exclude(pk__in=except_pks)
+
 class GroupHostsList(SubListCreateAPIView):
     ''' the list of hosts directly below a group '''
 

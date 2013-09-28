@@ -84,6 +84,7 @@ group_urls = patterns('awx.main.views',
     url(r'^(?P<pk>[0-9]+)/variable_data/$',             'group_variable_data'),
     url(r'^(?P<pk>[0-9]+)/job_events/$',                'group_job_events_list'),
     url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'group_job_host_summaries_list'),
+    url(r'^(?P<pk>[0-9]+)/potential_children/$',        'group_potential_children_list'),
 )
 
 inventory_source_urls = patterns('awx.main.views',

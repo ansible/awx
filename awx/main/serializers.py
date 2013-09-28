@@ -507,6 +507,7 @@ class GroupSerializer(BaseSerializerWithVariables):
         res.update(dict(
             variable_data = reverse('main:group_variable_data',   args=(obj.pk,)),
             hosts         = reverse('main:group_hosts_list',      args=(obj.pk,)),
+            potential_children = reverse('main:group_potential_children_list',   args=(obj.pk,)),
             children      = reverse('main:group_children_list',   args=(obj.pk,)),
             all_hosts     = reverse('main:group_all_hosts_list',  args=(obj.pk,)),
             inventory     = reverse('main:inventory_detail',       args=(obj.inventory.pk,)),
