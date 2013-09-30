@@ -14,8 +14,8 @@ angular.module('GroupFormDefinition', [])
         editTitle: '{{ name }}',                             //Legend in edit mode
         name: 'group',                                       //Form name attribute
         well: false,                                         //Wrap the form with TB well
-        formLabelSize: 'col-lg-3',
-        formFieldSize: 'col-lg-9',
+        //formLabelSize: 'col-lg-3',
+        //formFieldSize: 'col-lg-9',
         
         fields: {
             /*has_active_failures: {
@@ -47,7 +47,7 @@ angular.module('GroupFormDefinition', [])
                 "class": 'modal-input-xlarge',
                 "default": "---",
                 dataTitle: 'Group Variables',
-                dataPlacement: 'right',
+                dataPlacement: 'left',
                 awPopOver: "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                     "JSON:<br />\n" +
                     "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
@@ -55,7 +55,7 @@ angular.module('GroupFormDefinition', [])
                     "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                     '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
                     '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
-                dataContainer: '#form-modal .modal-content'
+                dataContainer: 'body'
                 }
             },
 

@@ -228,19 +228,27 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var generator = GenerateForm;
         var form = GroupForm;
         var defaultUrl =  GetBasePath('groups') + group_id + '/';
+        
+        $('#tree-form').hide('slide',{ direction: 'right' }, 500);
+        $('#tree-form').empty();
+        var scope = generator.inject(form, { mode: 'edit', modal: false, related: false, id: 'tree-form', breadCrumbs: false });
+        //$('#tree-form').show('slide',{ direction: 'up' }, 500);
+        /*
         var scope = generator.inject(form, { mode: 'edit', modal: true, related: false});
+        */
         generator.reset();
         var master = {};
         var relatedSets = {};
 
-        scope.formModalActionLabel = 'Save';
-        scope.formModalHeader = 'Edit Group';
-        scope.formModalCancelShow = true;
+        //scope.formModalActionLabel = 'Save';
+        //scope.formModalHeader = 'Edit Group';
+        //scope.formModalCancelShow = true;
         scope.parseType = 'yaml';
         ParseTypeChange(scope);
 
-        $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
-
+        //$('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
+        
+        
         // After the group record is loaded, retrieve any group variables
         if (scope.groupLoadedRemove) {
            scope.groupLoadedRemove();

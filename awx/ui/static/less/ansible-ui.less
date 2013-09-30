@@ -738,16 +738,44 @@ select.field-mini-height {
     border-radius: 6px;
   }
 
+  .tree-view-container {
+    padding: 0;
+  }
+  
+  .tree-form-container {
+    min-height: 800px;
+    padding-left: 0;
+    padding-right: 25px;
+  }
+
+  #tree-view {
+    border: 1px solid #e3e3e3;
+    border-radius: 6px;
+    background-color: #e3e3e3;
+    padding-top: 10px;
+  }
+
+  #tree-form {
+    display: none;
+    margin-top: 15px;
+    border: 1px solid #e3e3e3;
+    background-color: #e3e3e3;
+    border-radius: 6px;
+    padding-top: 15px;
+  }
+
   .tree-controls {
     padding: 10px;
     border-bottom: 1px solid #e3e3e3;
 
     .title {
       display: inline-block;
+      width: 263px;
       padding-top: 7px;
-      color: #555;
+      color: @grey;
       font-size: 14px;
-      font-weight: normal; 
+      font-weight: bold;
+      padding-right: 5px;
     }
   }
 
@@ -769,7 +797,6 @@ select.field-mini-height {
       font-size: 14px;
       font-weight: bold;
       margin-bottom: 10px;
-      padding-left: 5px;
     }
   }
 
@@ -801,8 +828,6 @@ select.field-mini-height {
   }
 
   .search-tree { 
-
-    margin-top: 10px;
     padding: 10px 3px 10px 3px;
 
     .title {
@@ -1024,15 +1049,47 @@ tr td button i {
    .delete-btn {
      /* Used on job page to make cancel and delete buttons have an equal width */
      width: 60px;
-   } 
+   }
+
+   #tree-form:before {
+    content:" ";
+    border-color: transparent transparent #e3e3e3 transparent;
+    border-style: solid;
+    border-width: 15px;
+    width: 0;
+    height: 0;
+    position: relative; 
+    top: -46px;
+    left: 28px;
+  }
+
+  #tree-view {
+    margin-left: 10px;
+    margin-top: 16px;
+  }
+
 }
 
 /* Portrait tablet to landscape and desktop */
 
-@media (min-width: 768px) and (max-width: 979px) {
+@media (min-width: 768px) and (max-width: 1199px) {
 
   .list-actions button, .list-actions .checkbox-inline {
     margin-top: 10px;    
+  }
+
+  .tree-form-container {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  #tree-view {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+
+  #tree-form {
+    margin-top: 10px;
   }
  
 }
@@ -1067,6 +1124,11 @@ tr td button i {
 
   .list-actions button, .list-actions .checkbox-inline {
     margin-top: 10px;    
+  }
+
+  .tree-form-container {
+    padding-left: 15px;
+    padding-right: 15px;
   }
 
 }

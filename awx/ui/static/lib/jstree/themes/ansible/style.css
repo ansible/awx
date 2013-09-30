@@ -3,12 +3,7 @@
  * Supported features: dots/no-dots, icons/no-icons, focused, loading
  * Supported plugins: ui (hovered, clicked), checkbox, contextmenu, search
  */
-
-#tree-view {
-  margin: 0;
-  padding: 15px;
-}
-
+ 
 .jstree-ansible li, 
 .jstree-ansible ins { background-image:url("d.png"); background-repeat:no-repeat; background-color:transparent; }
 .jstree-ansible li { background-position:-90px 0; background-repeat:repeat-y;  }

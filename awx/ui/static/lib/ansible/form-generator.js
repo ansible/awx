@@ -45,7 +45,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           }
        }
        else {
-          element = angular.element(document.getElementById('htmlTemplate'));
+          if (options.id) {
+             element = angular.element(document.getElementById(options.id));
+          }
+          else {
+             element = angular.element(document.getElementById('htmlTemplate'));
+          }
        }
 
        this.mode = options.mode;
@@ -908,7 +913,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        //
        var html = '';
        
-       if (!this.modal) {
+       if (!this.modal && (options.breadCrumbs == undefined || options.breadCrumbs == true)) {
           if (this.form.navigationLinks) {
              html += this.breadCrumbs(options, this.form.navigationLinks);
           }
@@ -1171,22 +1176,31 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               "use the <a href=\"/#/inventories/\{\{ inventory_id \}\}/hosts\"><em>Inventories->Hosts</em></a> page to " +
               "add hosts to the group.</p>";
           html += "</div>\n";
-          html += "<div class=\"tree-container\">\n";      
+
+          html += "<div class=\"row\">\n";
+          html += "<div class=\"col-lg-12\">\n";
+          html += "<div class=\"tree-view-container well\">\n";
           html += "<div class=\"tree-controls\">\n";
-          html += "<div class=\"title col-lg-2\" ng-bind=\"selectedNodeName\"></div>\n";
+          html += "<div class=\"title\" ng-bind=\"selectedNodeName\"></div>\n";
           html += "<button type=\"button\" id=\"edit_group_btn\" class=\"btn btn-default btn-sm\" ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" " +
-              "aw-tool-tip=\"Edit the selected group's properties\" data-placement=\"bottom\"><i class=\"icon-edit\"></i> " +
+              "aw-tool-tip=\"Edit the selected group's properties\" data-placement=\"bottom\" ng-disabled=\"grpBtnDisable\"><i class=\"icon-edit\"></i> " +
               "properties</button>\n";
           html += "<button type=\"button\" id=\"copy_group_btn\" class=\"btn btn-success btn-sm\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
-              "aw-tool-tip=\"Copy existing groups to the selected group\" data-placement=\"bottom\"><i class=\"icon-check\"></i> Copy</button>\n";
+              "aw-tool-tip=\"Copy existing groups to the selected group\" data-placement=\"bottom\" ng-disabled=\"grpBtnDisable\"><i class=\"icon-check\"></i> Copy</button>\n";
           html += "<button type=\"button\" id=\"create_group_btn\" class=\"btn btn-success btn-sm\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
-              "aw-tool-tip=\"Create a brand new group and add it to the selected group\" data-placement=\"bottom\"><i class=\"icon-plus\"></i> Create New</button>\n";
+              "aw-tool-tip=\"Create a brand new group and add it to the selected group\" data-placement=\"bottom\" ng-disabled=\"grpBtnDisable\"><i class=\"icon-plus\"></i> Create New</button>\n";
           html += "<button type=\"button\" id=\"delete_group_btn\" class=\"btn btn-danger btn-sm\" ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" " +
               "aw-tool-tip=\"Permanently delete the selected group. Any hosts in the group will still be available in All Hosts.\" " +
-              "data-placement=\"bottom\"><i class=\"icon-trash\"></i> Delete</button>\n";
+              "data-placement=\"bottom\" ng-disabled=\"grpBtnDisable\"><i class=\"icon-trash\"></i> Delete</button>\n";
           html += "</div><!-- tree controls -->\n";
-          html += "<div id=\"tree-view\"></div>\n";
-          html += "</div><!-- tree-container -->\n";
+          html += "<div class=\"row\">\n";
+          html += "<div class=\"col-lg-3\"><div id=\"tree-view\"></div></div>\n";
+          html += "<div class=\"col-lg-9 tree-form-container\">\n<div id=\"tree-form\">\n</div>\n</div>\n";
+          html += "</div>\n";
+          html += "</div><!-- well -->\n";
+          html += "</div><!-- col-lg-12 -->\n";
+          html += "</div><!-- row -->\n";
+       
        }
        else {
           // build the hosts page

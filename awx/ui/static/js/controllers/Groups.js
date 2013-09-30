@@ -23,6 +23,7 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
    var base = $location.path().replace(/^\//,'').split('/')[0];
    var id = $routeParams.inventory_id;
    
+   scope.grpBtnDisable = false;
    scope['inventory_id'] = id;
    
    // Retrieve each related sets and any lookups
@@ -128,6 +129,7 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
       
       scope['selectedNode'] = node;
       scope['selectedNodeName'] = node.attr('name');
+      scope['grpBtnDisable'] = false;
       
       $('#tree-view').jstree('open_node',node);
       
@@ -140,6 +142,9 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.groupDeleteHide = false;
          scope.createButtonShow = true;
          scope.group_id = node.attr('group_id');
+         
+         // Load the form
+         GroupsEdit({ "inventory_id": id, group_id: scope.group_id });
          //scope.groupName = n.data;
          //scope.groupTitle = '<h4>' + n.data + '</h4>';
          //scope.groupTitle += (node.attr('description')) ? '<p>' + node.attr('description') + '</p>' : '';
@@ -171,7 +176,24 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
       }
 
   scope.editGroup = function() {
-      GroupsEdit({ "inventory_id": id, group_id: scope.group_id });
+      // Slide in the group properties form
+      $('#tree-form').show('slide', {direction: 'up'}, 500);
+      
+      // Set the focust to the first form field
+      $('input:first').focus();
+
+      // Disable all the group related buttons
+      scope.grpBtnDisable = true;
+      setTimeout(function() {
+          // Remove any tooltips that might be lingering
+          $('.tooltip').each( function(index) {
+              $(this).remove();
+              });
+          $('.popover').each(function(index) {
+              // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+              $(this).remove();
+              });
+          }, 1000);
       }
 
   scope.editInventory = function() {
