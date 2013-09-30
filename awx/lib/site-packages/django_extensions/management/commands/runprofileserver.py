@@ -142,11 +142,15 @@ class Command(BaseCommand):
         import django
         from django.core.servers.basehttp import run, WSGIServerException
         try:
+            from django.core.servers.basehttp import get_internal_wsgi_application as WSGIHandler
+        except ImportError:
+            from django.core.handlers.wsgi import WSGIHandler  # noqa
+
+        try:
             from django.core.servers.basehttp import AdminMediaHandler
             HAS_ADMINMEDIAHANDLER = True
         except ImportError:
             HAS_ADMINMEDIAHANDLER = False
-        from django.core.handlers.wsgi import WSGIHandler
 
         if args:
             raise CommandError('Usage is runserver %s' % self.args)

@@ -94,6 +94,7 @@ class IntervalSchedule(models.Model):
     class Meta:
         verbose_name = _(u'interval')
         verbose_name_plural = _(u'intervals')
+        ordering = ['period', 'every']
 
     @property
     def schedule(self):
@@ -137,6 +138,8 @@ class CrontabSchedule(models.Model):
     class Meta:
         verbose_name = _(u'crontab')
         verbose_name_plural = _(u'crontabs')
+        ordering = ['month_of_year', 'day_of_month',
+                    'day_of_week', 'hour', 'minute']
 
     def __unicode__(self):
         rfield = lambda f: f and str(f).replace(' ', '') or '*'

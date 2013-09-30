@@ -1,0 +1,61 @@
+from __future__ import absolute_import
+
+import sys
+
+
+class promise(object):
+    if not hasattr(sys, 'pypy_version_info'):
+        __slots__ = tuple(
+            'fun args kwargs value ready failed on_success on_error'.split()
+        )
+
+    def __init__(self, fun, args=(), kwargs=(),
+                 on_success=None, on_error=None):
+        self.fun = fun
+        self.args = args
+        self.kwargs = kwargs
+        self.ready = False
+        self.failed = False
+        self.on_success = on_success
+        self.on_error = on_error
+        self.value = None
+
+    def __repr__(self):
+        return '<$: {0.fun.__name__}(*{0.args!r}, **{0.kwargs!r})'.format(
+            self,
+        )
+
+    def __call__(self, *args, **kwargs):
+        try:
+            self.value = self.fun(
+                *self.args + args if self.args else args,
+                **dict(self.kwargs, **kwargs) if self.kwargs else kwargs
+            )
+        except Exception as exc:
+            self.set_error_state(exc)
+        else:
+            if self.on_success:
+                self.on_success(self.value)
+        finally:
+            self.ready = True
+
+    def then(self, callback=None, on_error=None):
+        self.on_success = callback
+        self.on_error = on_error
+        return callback
+
+    def set_error_state(self, exc):
+        self.failed = True
+        if self.on_error is None:
+            raise
+        self.on_error(exc)
+
+    def throw(self, exc):
+        try:
+            raise exc
+        except exc.__class__ as with_cause:
+            self.set_error_state(with_cause)
+
+
+def noop():
+    return promise(lambda *a, **k: None)

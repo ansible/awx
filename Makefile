@@ -49,6 +49,7 @@ push:
 requirements:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
 	    (cd requirements && pip install --no-index -r dev_local.txt); \
+	    $(PYTHON) fix_virtualenv_setuptools.py; \
 	else \
 	    (cd requirements && sudo pip install --no-index -r dev_local.txt); \
 	fi
@@ -58,6 +59,7 @@ requirements:
 requirements_pypi:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
 	    pip install -r requirements/dev.txt; \
+	    $(PYTHON) fix_virtualenv_setuptools.py; \
 	else \
 	    sudo pip install -r requirements/dev.txt; \
 	fi

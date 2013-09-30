@@ -93,4 +93,4 @@ class ForeignKeySearchInput(ForeignKeyRawIdWidget):
             'django_extensions/widgets/foreignkey_searchinput.html',
         ), context))
         output.reverse()
-        return mark_safe(six.u(''.join(output)))
+        return mark_safe(six.u('').join(output))

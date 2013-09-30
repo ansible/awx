@@ -40,7 +40,7 @@ class DjangoMemcacheWrapper(object):
 from django.core.cache.backends.base import InvalidCacheBackendError
 try:
     from django.core.cache.backends.memcached import CacheClass
-except InvalidCacheBackendError:
+except (ImportError, InvalidCacheBackendError):
     pass
 else:
     if django.VERSION[0:2] < (1, 2) and isinstance(cache, CacheClass):

@@ -42,15 +42,15 @@ is at <http://python-requests.org>.
 """
 
 __title__ = 'requests'
-__version__ = '1.2.3'
-__build__ = 0x010203
+__version__ = '2.0.0'
+__build__ = 0x020000
 __author__ = 'Kenneth Reitz'
 __license__ = 'Apache 2.0'
 __copyright__ = 'Copyright 2013 Kenneth Reitz'
 
 # Attempt to enable urllib3's SNI support, if possible
 try:
-    from requests.packages.urllib3.contrib import pyopenssl
+    from .packages.urllib3.contrib import pyopenssl
     pyopenssl.inject_into_urllib3()
 except ImportError:
     pass

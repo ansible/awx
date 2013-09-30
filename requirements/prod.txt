@@ -3,7 +3,9 @@
 
 Django>=1.4
 
-# The following packages are now bundled with AWX (awx/lib/site-packages):
+# The following packages and their dependencies are bundled with AWX
+# (in awx/lib/site-packages):
+  #boto
   #django-auth-ldap
   #django-celery
   #django-extensions
@@ -12,6 +14,7 @@ Django>=1.4
   #djangorestframework>=2.3.0,<2.4.0
   #Markdown
   #pexpect
+  #pyrax
   #python-dateutil
   #requests
   #South>=0.8,<2.0
