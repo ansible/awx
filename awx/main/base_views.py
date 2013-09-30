@@ -10,6 +10,7 @@ from django.http import HttpResponse, Http404
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
+from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 
 # Django REST Framework
@@ -29,6 +30,42 @@ from awx.main.utils import *
 __all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'ListCreateAPIView',
            'SubListAPIView', 'SubListCreateAPIView', 'RetrieveAPIView',
            'RetrieveUpdateAPIView', 'RetrieveUpdateDestroyAPIView']
+
+def get_view_name(cls, suffix=None):
+    '''
+    Wrapper around REST framework get_view_name() to support get_name() method
+    and view_name property on a view class.
+    '''
+    name = ''
+    if hasattr(cls, 'get_name') and callable(cls.get_name):
+        name = cls().get_name()
+    elif hasattr(cls, 'view_name'):
+        if callable(cls.view_name):
+            name = cls.view_name()
+        else:
+            name = cls.view_name
+    if name:
+        return ('%s %s' % (name, suffix)) if suffix else name
+    return views.get_view_name(cls, suffix=None)
+
+def get_view_description(cls, html=False):
+    '''
+    Wrapper around REST framework get_view_description() to support
+    get_description() method and view_description property on a view class.
+    '''
+    if hasattr(cls, 'get_description') and callable(cls.get_description):
+        desc = cls().get_description(html=html)
+        cls = type(cls.__name__, (object,), {'__doc__': desc})
+    elif hasattr(cls, 'view_description'):
+        if callable(cls.view_description):
+            view_desc = cls.view_description()
+        else:
+            view_desc = cls.view_description
+        cls = type(cls.__name__, (object,), {'__doc__': view_desc})
+    desc = views.get_view_description(cls, html=html)
+    if html:
+        desc = '<div class="description">%s</div>' % desc
+    return mark_safe(desc)
 
 class APIView(views.APIView):
 

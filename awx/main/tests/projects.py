@@ -850,11 +850,15 @@ class ProjectUpdatesTest(BaseTransactionTest):
 
     def check_project_update(self, project, should_fail=False, **kwargs):
         pu = kwargs.pop('project_update', None)
+        should_error = kwargs.pop('should_error', False)
         if not pu:
             pu = project.update(**kwargs)
             self.assertTrue(pu)
         pu = ProjectUpdate.objects.get(pk=pu.pk)
-        if should_fail:
+        if should_error:
+            self.assertEqual(pu.status, 'error',
+                             pu.result_stdout + pu.result_traceback)
+        elif should_fail:
             self.assertEqual(pu.status, 'failed',
                              pu.result_stdout + pu.result_traceback)
         elif should_fail is False:
@@ -864,11 +868,12 @@ class ProjectUpdatesTest(BaseTransactionTest):
             pass # If should_fail is None, we don't care.
         # Get the SCM URL from the job args, if it starts with a '/' we aren't
         # handling the URL correctly.
-        scm_url_in_args_re = re.compile(r'\\(?:\\\\)??"scm_url\\(?:\\\\)??": \\(?:\\\\)??"(.*?)\\(?:\\\\)??"')
-        match = scm_url_in_args_re.search(pu.job_args)
-        self.assertTrue(match, pu.job_args)
-        scm_url_in_args = match.groups()[0]
-        self.assertFalse(scm_url_in_args.startswith('/'), scm_url_in_args)
+        if not should_error:
+            scm_url_in_args_re = re.compile(r'\\(?:\\\\)??"scm_url\\(?:\\\\)??": \\(?:\\\\)??"(.*?)\\(?:\\\\)??"')
+            match = scm_url_in_args_re.search(pu.job_args)
+            self.assertTrue(match, pu.job_args)
+            scm_url_in_args = match.groups()[0]
+            self.assertFalse(scm_url_in_args.startswith('/'), scm_url_in_args)
         #return pu
         # Make sure scm_password doesn't show up anywhere in args or output
         # from project update.
@@ -1088,7 +1093,9 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_username=scm_username,
             scm_password=scm_password,
         )
-        self.check_project_update(project2, should_fail=True)
+        should_error = bool('github.com' in scm_url and scm_username != 'git')
+        self.check_project_update(project2, should_fail=True,
+                                  should_error=should_error)
 
     def create_local_git_repo(self):
         repo_dir = tempfile.mkdtemp()

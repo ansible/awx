@@ -161,6 +161,8 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'awx.main.renderers.BrowsableAPIRenderer',
     ),
+    'VIEW_NAME_FUNCTION': 'awx.main.base_views.get_view_name',
+    'VIEW_DESCRIPTION_FUNCTION': 'awx.main.base_views.get_view_description',
 }
 
 AUTHENTICATION_BACKENDS = (
