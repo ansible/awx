@@ -75,7 +75,7 @@ django-devserver-0.6.2.tar.gz
 unittest2-0.5.1.tar.gz
 # Needed by pylint (use tip of astroid instead of 1.0.0):
 logilab-common-0.60.0.tar.gz
--U astroid-5ed6266.tar.gz
+astroid-5ed6266.tar.gz
 # Needed by django-jenkins:
 coverage-3.6.tar.gz
 pylint-1.0.0.tar.gz
