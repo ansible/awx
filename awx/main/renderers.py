@@ -9,7 +9,7 @@ class BrowsableAPIRenderer(renderers.BrowsableAPIRenderer):
     Customizations to the default browsable API renderer.
     '''
 
-    def get_form(self, view, method, request):
+    def get_rendered_html_form(self, view, method, request):
         '''Never show auto-generated form (only raw form).'''
         obj = getattr(view, 'object', None)
         if not self.show_form_for_method(view, method, request, obj):

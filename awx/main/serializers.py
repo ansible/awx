@@ -93,7 +93,9 @@ class BaseSerializer(serializers.ModelSerializer):
         return ret
 
     def get_url(self, obj):
-        if isinstance(obj, User):
+        if obj is None:
+            return ''
+        elif isinstance(obj, User):
             return reverse('main:user_detail', args=(obj.pk,))
         else:
             return obj.get_absolute_url()
@@ -123,19 +125,25 @@ class BaseSerializer(serializers.ModelSerializer):
         return summary_fields 
 
     def get_created(self, obj):
-        if isinstance(obj, User):
+        if obj is None:
+            return None
+        elif isinstance(obj, User):
             return obj.date_joined
         else:
             return obj.created
 
     def get_modified(self, obj):
-        if isinstance(obj, User):
+        if obj is None:
+            return None
+        elif isinstance(obj, User):
             return obj.last_login # Not actually exposed for User.
         else:
             return obj.modified
 
     def get_active(self, obj):
-        if isinstance(obj, User):
+        if obj is None:
+            return False
+        elif isinstance(obj, User):
             return obj.is_active
         else:
             return obj.active
@@ -157,6 +165,7 @@ class UserSerializer(BaseSerializer):
                   'last_name', 'email', 'is_superuser', 'password', 'ldap_dn')
 
     def to_native(self, obj):
+        print obj
         ret = super(UserSerializer, self).to_native(obj)
         ret.pop('password', None)
         ret.fields.pop('password', None)
@@ -189,6 +198,8 @@ class UserSerializer(BaseSerializer):
         return super(UserSerializer, self).save_object(obj, **kwargs)
     
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(UserSerializer, self).get_related(obj)
         res.update(dict(
             teams                  = reverse('main:user_teams_list',               args=(obj.pk,)),
@@ -236,6 +247,8 @@ class OrganizationSerializer(BaseSerializer):
         fields = BASE_FIELDS
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(OrganizationSerializer, self).get_related(obj)
         res.update(dict(
             #audit_trail = reverse('main:organization_audit_trail_list',    args=(obj.pk,)),
@@ -283,6 +296,8 @@ class ProjectSerializer(BaseSerializer):
         return instance
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(ProjectSerializer, self).get_related(obj)
         res.update(dict(
             organizations = reverse('main:project_organizations_list', args=(obj.pk,)),
@@ -396,6 +411,8 @@ class ProjectUpdateSerializer(BaseSerializer):
                   'result_traceback', 'job_args', 'job_cwd', 'job_env')
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(ProjectUpdateSerializer, self).get_related(obj)
         res.update(dict(
             project = reverse('main:project_detail', args=(obj.project.pk,)),
@@ -424,6 +441,8 @@ class InventorySerializer(BaseSerializerWithVariables):
                                 'hosts_with_active_failures')
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(InventorySerializer, self).get_related(obj)
         res.update(dict(
             hosts         = reverse('main:inventory_hosts_list',        args=(obj.pk,)),
@@ -444,6 +463,8 @@ class HostSerializer(BaseSerializerWithVariables):
                                 'last_job', 'last_job_host_summary')
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(HostSerializer, self).get_related(obj)
         res.update(dict(
             variable_data = reverse('main:host_variable_data',   args=(obj.pk,)),
@@ -460,6 +481,8 @@ class HostSerializer(BaseSerializerWithVariables):
         return res
 
     def get_summary_fields(self, obj):
+        if obj is None:
+            return {}
         d = super(HostSerializer, self).get_summary_fields(obj)
         try:
             d['last_job']['job_template_id'] = obj.last_job.job_template.id
@@ -503,6 +526,8 @@ class GroupSerializer(BaseSerializerWithVariables):
                                 'hosts_with_active_failures')
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(GroupSerializer, self).get_related(obj)
         res.update(dict(
             variable_data = reverse('main:group_variable_data',   args=(obj.pk,)),
@@ -533,12 +558,16 @@ class GroupTreeSerializer(GroupSerializer):
                                 'children')
 
     def get_children(self, obj):
+        if obj is None:
+            return {}
         children_qs = obj.children.filter(active=True)
         return GroupTreeSerializer(children_qs, many=True).data
 
 class BaseVariableDataSerializer(BaseSerializer):
 
     def to_native(self, obj):
+        if obj is None:
+            return {}
         ret = super(BaseVariableDataSerializer, self).to_native(obj)
         try:
             return json.loads(ret.get('variables', '') or '{}')
@@ -597,6 +626,8 @@ class InventorySourceSerializer(BaseSerializer):
         return instance
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(InventorySourceSerializer, self).get_related(obj)
         res.update(dict(
             group = reverse('main:group_detail', args=(obj.group.pk,)),
@@ -612,6 +643,8 @@ class InventorySourceSerializer(BaseSerializer):
         return res
 
     def get_summary_fields(self, obj):
+        if obj is None:
+            return {}
         d = super(InventorySourceSerializer, self).get_summary_fields(obj)
         return d
 
@@ -625,6 +658,8 @@ class InventoryUpdateSerializer(BaseSerializer):
                   'job_env')
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(InventoryUpdateSerializer, self).get_related(obj)
         res.update(dict(
             inventory_source = reverse('main:inventory_source_detail', args=(obj.inventory_source.pk,)),
@@ -639,6 +674,8 @@ class TeamSerializer(BaseSerializer):
         fields = BASE_FIELDS + ('organization',)
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(TeamSerializer, self).get_related(obj)
         res.update(dict(
             projects     = reverse('main:team_projects_list',    args=(obj.pk,)),
@@ -657,6 +694,8 @@ class PermissionSerializer(BaseSerializer):
                                 'permission_type',)
          
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(PermissionSerializer, self).get_related(obj)
         if obj.user:
             res['user']        = reverse('main:user_detail', args=(obj.user.pk,))
@@ -715,6 +754,8 @@ class CredentialSerializer(BaseSerializer):
         return instance
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(CredentialSerializer, self).get_related(obj)
         if obj.user:
             res['user'] = reverse('main:user_detail', args=(obj.user.pk,))
@@ -741,6 +782,8 @@ class JobTemplateSerializer(BaseSerializer):
                                 'extra_vars', 'job_tags', 'host_config_key')
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(JobTemplateSerializer, self).get_related(obj)
         res.update(dict(
             inventory   = reverse('main:inventory_detail',   args=(obj.inventory.pk,)),
@@ -775,6 +818,8 @@ class JobSerializer(BaseSerializer):
                                 'job_cwd', 'job_env')
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(JobSerializer, self).get_related(obj)
         res.update(dict(
             inventory   = reverse('main:inventory_detail',   args=(obj.inventory.pk,)),
@@ -823,6 +868,8 @@ class JobHostSummarySerializer(BaseSerializer):
                   'ok', 'processed', 'skipped', 'failed')
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(JobHostSummarySerializer, self).get_related(obj)
         res.update(dict(
             job=reverse('main:job_detail', args=(obj.job.pk,)),
@@ -831,6 +878,8 @@ class JobHostSummarySerializer(BaseSerializer):
         return res
 
     def get_summary_fields(self, obj):
+        if obj is None:
+            return {}
         d = super(JobHostSummarySerializer, self).get_summary_fields(obj)
         try:
             d['job']['job_template_id'] = obj.job.job_template.id
@@ -852,6 +901,8 @@ class JobEventSerializer(BaseSerializer):
                   'play', 'task')
 
     def get_related(self, obj):
+        if obj is None:
+            return {}
         res = super(JobEventSerializer, self).get_related(obj)
         res.update(dict(
             job = reverse('main:job_detail', args=(obj.job.pk,)),
@@ -868,6 +919,8 @@ class JobEventSerializer(BaseSerializer):
         return res
 
     def get_summary_fields(self, obj):
+        if obj is None:
+            return {}
         d = super(JobEventSerializer, self).get_summary_fields(obj)
         try:
             d['job']['job_template_id'] = obj.job.job_template.id
