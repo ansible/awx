@@ -278,9 +278,7 @@ class RunJob(BaseTask):
         '''
         credential = getattr(job, 'credential', None)
         if credential:
-            return decrypt_field(credential, 'ssh_key_data')
-        else:
-            return ''
+            return decrypt_field(credential, 'ssh_key_data') or None
 
     def build_passwords(self, job, **kwargs):
         '''
@@ -453,7 +451,7 @@ class RunProjectUpdate(BaseTask):
         Return SSH private key data needed for this project update.
         '''
         project = project_update.project
-        return decrypt_field(project, 'scm_key_data')
+        return decrypt_field(project, 'scm_key_data') or None
 
     def build_passwords(self, project_update, **kwargs):
         '''
