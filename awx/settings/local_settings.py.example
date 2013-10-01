@@ -373,3 +373,18 @@ TEST_AUTH_LDAP_ORGANIZATION_MAP_2_RESULT = {
     'Test Org': {'admins': False, 'users': True},
     'Test Org 2': {'admins': True, 'users': False},
 }
+
+###############################################################################
+# INVENTORY IMPORT TEST SETTINGS
+###############################################################################
+
+# Define these variables to enable more complete testing of inventory import
+# from cloud providers.
+
+# EC2 credentials
+TEST_AWS_ACCESS_KEY_ID = ''
+TEST_AWS_SECRET_ACCESS_KEY = ''
+
+# Rackspace credentials
+TEST_RACKSPACE_USERNAME = ''
+TEST_RACKSPACE_API_KEY = ''

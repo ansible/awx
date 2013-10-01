@@ -64,8 +64,8 @@ options:
     default: DFW
 author: Jesse Keating
 notes:
-  - Two environment variables need to be set, RAX_CREDS and RAX_REGION.
-  - RAX_CREDS points to a credentials file appropriate for pyrax
+  - Two environment variables need to be set, RAX_CREDS_FILE and RAX_REGION.
+  - RAX_CREDS_FILE points to a credentials file appropriate for pyrax
   - RAX_REGION defines a Rackspace Public Cloud region (DFW, ORD, LON, ...)
 requirements: [ "pyrax" ]
 examples:

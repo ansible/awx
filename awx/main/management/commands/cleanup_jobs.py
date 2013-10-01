@@ -14,14 +14,14 @@ from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now, is_aware, make_aware
 
 # AWX
-from awx.main.models import ProjectUpdate, Job
+from awx.main.models import Job, ProjectUpdate, InventoryUpdate
 
 class Command(NoArgsCommand):
     '''
     Management command to cleanup old jobs and project updates.
     '''
 
-    help = 'Remove old jobs and project updates from the database.'
+    help = 'Remove old jobs, project and inventory updates from the database.'
 
     option_list = NoArgsCommand.option_list + (
         make_option('--days', dest='days', type='int', default=90, metavar='N',
@@ -31,10 +31,13 @@ class Command(NoArgsCommand):
                     'be removed)'),
         make_option('--jobs', dest='only_jobs', action='store_true',
                     default=False,
-                    help='Only remove jobs (leave project updates alone)'),
+                    help='Only remove jobs'),
         make_option('--project-updates', dest='only_project_updates',
                     action='store_true', default=False,
-                    help='Only remove project updates (leave jobs alone)'),
+                    help='Only remove project updates'),
+        make_option('--inventory-updates', dest='only_inventory_updates',
+                    action='store_true', default=False,
+                    help='Only remove inventory updates'),
     )
 
     def cleanup_jobs(self):
@@ -74,6 +77,24 @@ class Command(NoArgsCommand):
                 if not self.dry_run:
                     pu.delete()
 
+    def cleanup_inventory_updates(self):
+        for iu in InventoryUpdate.objects.all():
+            iu_display = '"%s" (started %s)' % (unicode(iu), unicode(iu.created))
+            if iu.status in ('pending', 'waiting', 'running'):
+                action_text = 'would skip' if self.dry_run else 'skipping'
+                self.logger.debug('%s %s inventory update %s', action_text, iu.status, iu_display)
+            if iu in (iu.inventory_source.current_update, iu.inventory_source.last_update) and iu.inventory_source.source:
+                action_text = 'would skip' if self.dry_run else 'skipping'
+                self.logger.debug('%s %s', action_text, iu_display)
+            elif iu.created >= self.cutoff:
+                action_text = 'would skip' if self.dry_run else 'skipping'
+                self.logger.debug('%s %s', action_text, iu_display)
+            else:
+                action_text = 'would delete' if self.dry_run else 'deleting'
+                self.logger.info('%s %s', action_text, iu_display)
+                if not self.dry_run:
+                    iu.delete()
+
     def init_logging(self):
         log_levels = dict(enumerate([logging.ERROR, logging.INFO,
                                      logging.DEBUG, 0]))
@@ -93,7 +114,10 @@ class Command(NoArgsCommand):
         self.cutoff = now() - datetime.timedelta(days=self.days)
         self.only_jobs = bool(options.get('only_jobs', False))
         self.only_project_updates = bool(options.get('only_project_updates', False))
-        if self.only_jobs or (not self.only_jobs and not self.only_project_updates):
+        self.only_inventory_updates = bool(options.get('only_inventory_updates', False))
+        if self.only_jobs or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates):
             self.cleanup_jobs()
-        if self.only_project_updates or (not self.only_jobs and not self.only_project_updates):
+        if self.only_project_updates or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates):
             self.cleanup_project_updates()
+        if self.only_inventory_updates or (not self.only_jobs and not self.only_project_updates and not self.only_inventory_updates):
+            self.cleanup_inventory_updates()

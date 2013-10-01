@@ -258,12 +258,13 @@ class ExecutableJsonLoader(BaseLoader):
         self.child_group_names = {}
 
     def command_to_json(self, cmd):
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (stdout, stderr) = proc.communicate()
-        if proc.returncode != 0:
-            raise ImportException("%s list failed %s with output: %s" % (cmd, stderr, proc.returncode))
         data = {}
+        stdout, stderr = '', ''
         try:
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = proc.communicate()
+            if proc.returncode != 0:
+                raise Exception("%s list failed %s with output: %s" % (cmd, stderr, proc.returncode))
             data = json.loads(stdout)
         except:
             traceback.print_exc()
@@ -335,9 +336,6 @@ class ExecutableJsonLoader(BaseLoader):
 
 
 def load_generic(src):
-    LOGGER.debug("preparing loaders")
-
-
     LOGGER.debug("analyzing type of source")
     if not os.path.exists(src):
         LOGGER.debug("source missing")

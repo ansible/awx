@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import ConfigParser
 import cStringIO
 import datetime
 import distutils.version
@@ -66,23 +67,21 @@ class BaseTask(Task):
         '''
         return os.path.abspath(os.path.join(os.path.dirname(__file__), *args))
 
-    def build_ssh_key_path(self, instance, **kwargs):
+    def build_private_data(self, instance, **kwargs):
         '''
-        Create a temporary file containing the SSH private key.
+        Return any private data that needs to be written to a temporary file
+        for this task.
         '''
-        ssh_key_data = ''
-        if hasattr(instance, 'credential'):
-            credential = instance.credential
-            if hasattr(credential, 'ssh_key_data'):
-                ssh_key_data = decrypt_field(credential, 'ssh_key_data')
-        elif hasattr(instance, 'project'):
-            project = instance.project
-            if hasattr(project, 'scm_key_data'):
-                ssh_key_data = decrypt_field(project, 'scm_key_data')
-        if ssh_key_data:
+
+    def build_private_data_file(self, instance, **kwargs):
+        '''
+        Create a temporary file containing the private data.
+        '''
+        private_data = self.build_private_data(instance, **kwargs)
+        if private_data is not None:
             handle, path = tempfile.mkstemp()
             f = os.fdopen(handle, 'w')
-            f.write(ssh_key_data)
+            f.write(private_data)
             f.close()
             os.chmod(path, stat.S_IRUSR|stat.S_IWUSR)
             return path
@@ -115,6 +114,9 @@ class BaseTask(Task):
         # callbacks to work.
         env['ANSIBLE_NOCOLOR'] = '1' # Prevent output of escape sequences.
         return env
+
+    def build_safe_env(self, instance, **kwargs):
+        return self.build_env(instance, **kwargs)
 
     def build_args(self, instance, **kwargs):
         raise NotImplementedError
@@ -237,23 +239,24 @@ class BaseTask(Task):
             if not self.pre_run_check(instance, **kwargs):
                 return
             instance = self.update_model(pk, status='running')
-            kwargs['ssh_key_path'] = self.build_ssh_key_path(instance, **kwargs)
+            kwargs['private_data_file'] = self.build_private_data_file(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
             args = self.build_args(instance, **kwargs)
             safe_args = self.build_safe_args(instance, **kwargs)
             output_replacements = self.build_output_replacements(instance, **kwargs)
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
+            safe_env = self.build_safe_env(instance, **kwargs)
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
-                                         job_cwd=cwd, job_env=env)
+                                         job_cwd=cwd, job_env=safe_env)
             status, stdout = self.run_pexpect(instance, args, cwd, env,
                                               kwargs['passwords'])
         except Exception:
             tb = traceback.format_exc()
         finally:
-            if kwargs.get('ssh_key_path', ''):
+            if kwargs.get('private_data_file', ''):
                 try:
-                    os.remove(kwargs['ssh_key_path'])
+                    os.remove(kwargs['private_data_file'])
                 except IOError:
                     pass
         instance = self.update_model(pk, status=status, result_stdout=stdout,
@@ -268,6 +271,16 @@ class RunJob(BaseTask):
 
     name = 'run_job'
     model = Job
+
+    def build_private_data(self, job, **kwargs):
+        '''
+        Return SSH private key data needed for this job.
+        '''
+        credential = getattr(job, 'credential', None)
+        if credential:
+            return decrypt_field(credential, 'ssh_key_data')
+        else:
+            return ''
 
     def build_passwords(self, job, **kwargs):
         '''
@@ -348,7 +361,7 @@ class RunJob(BaseTask):
         if job.job_tags:
             args.extend(['-t', job.job_tags])
         args.append(job.playbook) # relative path to project.local_path
-        ssh_key_path = kwargs.get('ssh_key_path', '')
+        ssh_key_path = kwargs.get('private_data_file', '')
         if ssh_key_path:
             cmd = ' '.join([subprocess.list2cmdline(['ssh-add', ssh_key_path]),
                             '&&', subprocess.list2cmdline(args)])
@@ -434,6 +447,13 @@ class RunProjectUpdate(BaseTask):
     
     name = 'run_project_update'
     model = ProjectUpdate
+
+    def build_private_data(self, project_update, **kwargs):
+        '''
+        Return SSH private key data needed for this project update.
+        '''
+        project = project_update.project
+        return decrypt_field(project, 'scm_key_data')
 
     def build_passwords(self, project_update, **kwargs):
         '''
@@ -528,7 +548,7 @@ class RunProjectUpdate(BaseTask):
         args.extend(['-e', json.dumps(extra_vars)])
         args.append('project_update.yml')
 
-        ssh_key_path = kwargs.get('ssh_key_path', '')
+        ssh_key_path = kwargs.get('private_data_file', '')
         if ssh_key_path:
             subcmds = [('ssh-add', ssh_key_path), args]
             cmd = ' && '.join([subprocess.list2cmdline(x) for x in subcmds])
@@ -629,12 +649,77 @@ class RunInventoryUpdate(BaseTask):
     name = 'run_inventory_update'
     model = InventoryUpdate
 
+    def build_private_data(self, inventory_update, **kwargs):
+        '''
+        Return private data needed for inventory update.
+        '''
+        inventory_source = inventory_update.inventory_source
+        cp = ConfigParser.ConfigParser()
+        # Build custom ec2.ini for ec2 inventory script to use.
+        if inventory_source.source == 'ec2':
+            section = 'ec2'
+            cp.add_section(section)
+            cp.set(section, 'regions', inventory_source.source_regions or 'all')
+            cp.set(section, 'regions_exclude', '')
+            # FIXME: Provide a way to override these defaults.. source_env?
+            cp.set(section, 'destination_variable', 'public_dns_name')
+            cp.set(section, 'vpc_destination_variable', 'ip_address')
+            cp.set(section, 'route53', 'False')
+            # FIXME: Separate temp path for each source so they don't clobber
+            # each other.
+            cp.set(section, 'cache_path', '/tmp')
+            cp.set(section, 'cache_max_age', '300')
+        # Build pyrax creds INI for rax inventory script.
+        elif inventory_source.source == 'rackspace':
+            section = 'rackspace_cloud'
+            cp.add_section(section)
+            cp.set(section, 'username', inventory_source.source_username)
+            cp.set(section, 'api_key', decrypt_field(inventory_source,
+                                                     'source_password'))
+        # Return INI content.
+        if cp.sections():
+            f = cStringIO.StringIO()
+            cp.write(f)
+            return f.getvalue()
+
+    def build_passwords(self, inventory_update, **kwargs):
+        '''
+        Build a dictionary of passwords inventory sources.
+        '''
+        passwords = super(RunInventoryUpdate, self).build_passwords(inventory_update,
+                                                                    **kwargs)
+        inventory_source = inventory_update.inventory_source
+        passwords['source_username'] = inventory_source.source_username
+        passwords['source_password'] = kwargs.get('source_password', \
+            decrypt_field(inventory_source, 'source_password'))
+        return passwords
+
     def build_env(self, inventory_update, **kwargs):
         '''
         Build environment dictionary for inventory import.
         '''
         env = super(RunInventoryUpdate, self).build_env(inventory_update, **kwargs)
-        # FIXME
+        # Update PYTHONPATH to use local site-packages for inventory scripts.
+        python_paths = env.get('PYTHONPATH', '').split(os.pathsep)
+        local_site_packages = self.get_path_to('..', 'lib', 'site-packages')
+        if local_site_packages not in python_paths:
+            python_paths.insert(0, local_site_packages)
+        env['PYTHONPATH'] = os.pathsep.join(python_paths)
+        # Pass inventory source ID to inventory script.
+        inventory_source = inventory_update.inventory_source
+        env['INVENTORY_SOURCE_ID'] = str(inventory_source.pk)
+        # Set environment variables specific to each source.
+        if inventory_source.source == 'ec2':
+            env['AWS_ACCESS_KEY_ID'] = kwargs.get('passwords', {}).get('source_username', '')
+            env['AWS_SECRET_ACCESS_KEY'] = kwargs.get('passwords', {}).get('source_password', '')
+            env['EC2_INI_PATH'] = kwargs.get('private_data_file', '')
+        elif inventory_source.source == 'rackspace':
+            env['RAX_CREDS_FILE'] = kwargs.get('private_data_file', '')
+            env['RAX_REGION'] = inventory_source.source_regions
+        elif inventory_source.source == 'file':
+            # FIXME: Parse source_env to dict, update env.
+            pass
+        #print env
         return env
 
     def build_args(self, inventory_update, **kwargs):
@@ -642,7 +727,29 @@ class RunInventoryUpdate(BaseTask):
         Build command line argument list for running inventory import.
         '''
         # FIXME
-        return ['echo', 'FIXME']
+        inventory_source = inventory_update.inventory_source
+        inventory = inventory_source.group.inventory
+        args = ['awx-manage', 'inventory_import']
+        args.extend(['--inventory-id', str(inventory.pk)])
+        if inventory_source.overwrite_hosts:
+            args.append('--overwrite')
+        if inventory_source.overwrite_vars:
+            args.append('--overwrite-vars')
+        if inventory_source.keep_vars:
+            args.append('--keep-vars')
+        args.append('--source')
+        if inventory_source.source == 'ec2':
+            ec2_path = self.get_path_to('..', 'plugins', 'inventory', 'ec2.py')
+            args.append(ec2_path)
+        elif inventory_source.source == 'rackspace':
+            rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax.py')
+            args.append(rax_path)
+        elif inventory_source.source == 'file':
+            args.append(inventory_source.source_path)
+        args.append('-v2')
+        if settings.DEBUG:
+            args.append('--traceback')
+        return args
 
     def build_cwd(self, inventory_update, **kwargs):
         return self.get_path_to('..', 'plugins', 'inventory')
