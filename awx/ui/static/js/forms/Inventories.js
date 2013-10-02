@@ -76,8 +76,8 @@ angular.module('InventoryFormDefinition', [])
                     '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
                     '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
                 dataTitle: 'Inventory Variables',
-                dataPlacement: 'bottom',
-                dataContainer: '#inventory'
+                dataPlacement: 'left',
+                dataContainer: 'body'
                 }
             },
 

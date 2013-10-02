@@ -318,6 +318,24 @@ a:hover {
   max-width: 100px;
 }
 
+.form-title { 
+  display: inline-block;
+  width: 100%;
+  vertical-align: middle;
+  font-weight: bold;
+  padding-left: 15px;
+  margin-bottom: 10px;
+}
+
+.form-cancel {
+   float: right;
+   margin-right: 10px;
+}
+
+.form-title-hr {
+   margin-bottom: 20px;
+}
+
 .form-horizontal .buttons {
   margin-top: 25px;  
 }
@@ -533,13 +551,9 @@ select.field-mini-height {
 }
 
 .checkbox-options {
-  padding-left: 40px;
+  font-weight: normal;
+  padding-right: 20px;
 }
-
-.checkbox-group .checkbox-options:first-child {
-  padding-left: 35px;
-}
-
 
 /* Display list actions next to search widget */
 /*
@@ -739,11 +753,15 @@ select.field-mini-height {
   }
 
   .tree-view-container {
-    padding: 0;
+    min-height: 650px;
+    padding: 0 0 10px 0;
+
+    .col-lg-4 {
+      padding-right: 10px;
+    }
   }
   
   .tree-form-container {
-    min-height: 800px;
     padding-left: 0;
     padding-right: 25px;
   }
@@ -753,30 +771,65 @@ select.field-mini-height {
     border-radius: 6px;
     background-color: #e3e3e3;
     padding-top: 10px;
+    margin-top: 10px;
+    min-height: 100px;
   }
-
+  
+  /*
+  #tree-form:before {
+    content: "";
+    border-color: transparent transparent #e3e3e3 transparent;
+    border-style: solid;
+    border-width: 15px;
+    width: 0;
+    height: 0;
+    position: relative; 
+    top: -34px;
+    left: 28px;
+  }
+  */
+  
   #tree-form {
     display: none;
-    margin-top: 15px;
+    padding: 15px 10px 0 10px;
+    margin-top: 10px;
     border: 1px solid #e3e3e3;
     background-color: #e3e3e3;
     border-radius: 6px;
-    padding-top: 15px;
+
+    .form-title {
+      color: #999;
+      padding-left: 10px;
+    }
+
+    hr {
+      background-color: #ccc;
+      height: 1px;
+      margin-top: 5px;
+      margin-bottom: 30px;
+    }
   }
 
   .tree-controls {
-    padding: 10px;
-    border-bottom: 1px solid #e3e3e3;
+    .btn-container{
+      padding-left: 0;
+    }
+
+    .btn-container-inner {
+      padding-top: 10px;
+    }
 
     .title {
-      display: inline-block;
-      width: 263px;
-      padding-top: 7px;
+      padding-top: 15px;
+      padding-left: 13px;
       color: @grey;
-      font-size: 14px;
       font-weight: bold;
-      padding-right: 5px;
     }
+  }
+
+  .tree-control-divider {
+    width: 98%;
+    margin: 10px auto;
   }
 
 /* Inventory-> Hosts */
@@ -899,10 +952,6 @@ select.field-mini-height {
 
 .parse-select .parse-label {
   margin-left: 3px;
-}
-
-#tree-view {
-  min-height: 100px;
 }
 
 .slider {
@@ -1046,26 +1095,18 @@ tr td button i {
 
 @media (min-width: 1200px) {
    
-   .delete-btn {
-     /* Used on job page to make cancel and delete buttons have an equal width */
-     width: 60px;
-   }
-
-   #tree-form:before {
-    content:" ";
-    border-color: transparent transparent #e3e3e3 transparent;
-    border-style: solid;
-    border-width: 15px;
-    width: 0;
-    height: 0;
-    position: relative; 
-    top: -46px;
-    left: 28px;
+  .delete-btn {
+    /* Used on job page to make cancel and delete buttons have an equal width */
+    width: 60px;
   }
 
   #tree-view {
     margin-left: 10px;
-    margin-top: 16px;
+    margin-top: 10px;
+  }
+
+  .label-text {
+    text-align: right;
   }
 
 }
@@ -1081,8 +1122,17 @@ tr td button i {
   .tree-form-container {
     padding-left: 15px;
     padding-right: 15px;
+    
   }
 
+  .tree-view-container .col-lg-4 {
+      padding-right: 15px;
+  }
+
+  .tree-controls .btn-container {
+    padding-left: 15px;
+  }
+    
   #tree-view {
     margin-left: 0;
     margin-top: 10px;
@@ -1090,6 +1140,10 @@ tr td button i {
 
   #tree-form {
     margin-top: 10px;
+  }
+
+  .label-text {
+    text-align: left;
   }
  
 }
@@ -1130,5 +1184,17 @@ tr td button i {
     padding-left: 15px;
     padding-right: 15px;
   }
+
+  .tree-view-container .col-lg-4 {
+      padding-right: 15px;
+  }
+
+  .tree-controls .btn-container {
+    padding-left: 15px;
+  }
+
+  .label-text {
+    text-align: left;
+  } 
 
 }

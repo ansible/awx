@@ -20,10 +20,10 @@ angular.module('ParseHelper', [])
         scope.blockParseTypeWatch = false; 
         scope.blockVariableDataWatch = false; 
 
-        if (scope.removeParseTypeWatch) {
-           scope.removeParseTypeWatch();
+        if (scope['remove' + fld + 'Watch']) {
+           scope['remove' + fld + 'Watch']();
         }
-        scope.removeParseTypeWatch = scope.$watch(pfld, function(newVal, oldVal) {
+        scope['remove' + fld + 'Watch'] = scope.$watch(pfld, function(newVal, oldVal) {
             if (newVal !== oldVal) {
                if (newVal == 'json') {
                   if ( scope[fld] && !/^---$/.test(scope[fld])) { 

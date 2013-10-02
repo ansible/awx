@@ -18,6 +18,7 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
    var generator = GenerateForm;
    var form = InventoryGroupsForm;
    var defaultUrl=GetBasePath('inventory');
+   
    $('#tree-view').empty();
    var scope = generator.inject(form, { mode: 'edit', related: true, buildTree: true });
    var base = $location.path().replace(/^\//,'').split('/')[0];
@@ -127,10 +128,13 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
       var type = node.attr('type');
       var url;
       
+      scope['nodeSelectValue'] = n;
       scope['selectedNode'] = node;
       scope['selectedNodeName'] = node.attr('name');
       scope['grpBtnDisable'] = false;
-      
+      scope['flashMessage'] = null;
+      scope['groupUpdateHide'] = true;
+
       $('#tree-view').jstree('open_node',node);
       
       if (type == 'group') {
@@ -145,11 +149,13 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
          
          // Load the form
          GroupsEdit({ "inventory_id": id, group_id: scope.group_id });
-         //scope.groupName = n.data;
-         //scope.groupTitle = '<h4>' + n.data + '</h4>';
-         //scope.groupTitle += (node.attr('description')) ? '<p>' + node.attr('description') + '</p>' : '';
+
+         // Slide in the group properties form
+         $('#tree-form').show();
+         $('input:first').focus();
       }
       else if (type == 'inventory') {
+         $('#tree-form').hide().empty();
          url = node.attr('hosts');
          scope.groupAddHide = true;
          scope.groupCreateHide = false; 
@@ -157,8 +163,6 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.inventoryEditHide=false;
          scope.groupDeleteHide = true;
          scope.createButtonShow = false;
-         //scope.groupName = 'All Hosts';
-         //scope.groupTitle = '<h4>All Hosts</h4>';
          scope.group_id = null;
       }
 
@@ -177,14 +181,7 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
 
   scope.editGroup = function() {
       // Slide in the group properties form
-      $('#tree-form').show('slide', {direction: 'up'}, 500);
-      
-      // Set the focust to the first form field
-      $('input:first').focus();
-
-      // Disable all the group related buttons
-      scope.grpBtnDisable = true;
-      setTimeout(function() {
+      $('#tree-form').show('slide', {direction: 'up'}, 500, function() {
           // Remove any tooltips that might be lingering
           $('.tooltip').each( function(index) {
               $(this).remove();
@@ -193,7 +190,19 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
               // remove lingering popover <div>. Seems to be a bug in TB3 RC1
               $(this).remove();
               });
-          }, 1000);
+          // Set the focust to the first form field
+          $('input:first').focus();
+          });   
+      
+      // Disable all the group related buttons
+      scope.grpBtnDisable = false;
+          
+      }
+
+  scope.closeForm = function() {
+      // Slide in the group properties form
+      $('#tree-form').hide('slide',{ direction: 'right' }, 500, function() { $('#tree-form').empty(); });
+      scope.grpBtnDisable = false;
       }
 
   scope.editInventory = function() {

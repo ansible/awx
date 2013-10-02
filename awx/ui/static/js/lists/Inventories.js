@@ -28,8 +28,7 @@ angular.module('InventoriesListDefinition', [])
                 badgeTipPlacement: 'bottom'
                 },
             description: {
-                label: 'Description',
-                link: true
+                label: 'Description'
                 },
             organization: {
                 label: 'Organization',

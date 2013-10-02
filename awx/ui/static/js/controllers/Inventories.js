@@ -238,54 +238,18 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       }
       };
 
-   // Related set: Add button
-   scope.add = function(set) {
-      $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.id + '/groups/' + scope.group_id + '/' + set + '/add');
-      };
-
-   // Related set: Edit button
-   scope.edit = function(set, id, name) {
-      $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.id + '/' + set + '/' + id);
-      };
-   
    if (scope.removeInventorySaved) {
       scope.removeInventorySaved();
    }
    scope.removeInventorySaved = scope.$on('inventorySaved', function() {
        $location.path('/inventories');
        });
+
    scope.formSave = function() {
       generator.clearApiErrors();
       SaveInventory({ scope: scope });
       }
 
-   // Related set: Delete button
-   scope['delete'] = function(set, itm_id, name, title) {
-      $rootScope.flashMessage = null;
-      
-      var action = function() {
-          var url = defaultUrl + id + '/' + set + '/';
-          Rest.setUrl(url);
-          Rest.post({ id: itm_id, disassociate: 1 })
-              .success( function(data, status, headers, config) {
-                  $('#prompt-modal').modal('hide');
-                  scope.search(form.related[set].iterator);
-                  })
-              .error( function(data, status, headers, config) {
-                  $('#prompt-modal').modal('hide');
-                  ProcessErrors(scope, data, status, null,
-                      { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
-                  });      
-          };
-
-       Prompt({ hdr: 'Delete', 
-                body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
-                action: action
-                });
-       
-      };
 }
 
 InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 
