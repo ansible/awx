@@ -11,7 +11,7 @@
 angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationListDefinition',
                                     'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService',
                                     'InventoryHelper', 'RelatedSearchHelper', 'RelatedPaginateHelper',
-                                    'InventoryFormDefinition', 'ParseHelper'
+                                    'InventoryFormDefinition', 'ParseHelper', 'InventorySummaryDefinition'
                                     ]) 
 
     .factory('LoadTreeData', ['Alert', 'Rest', 'Authorization', '$http', 'Wait', 'SortNodes',
@@ -160,6 +160,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         $(tree_id).bind("loaded.jstree", function () {
             scope['treeLoading'] = false;
             Wait('stop');
+            $(tree_id).prepend('<div class=\"title\"><i class=\"icon-sitemap\"></i> Group Selector</div>');
             scope.$emit('treeLoaded');
             });
 
@@ -666,5 +667,65 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         }
         return newData;
     }
+    }])
+
+    .factory('InventoryStatus', [ 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary', 'GenerateList',
+    function(Rest, Aler, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList) {
+    return function(params) {
+        //Build a summary of a given inventory
+    
+        $('#tree-form').hide().empty();
+        var view = GenerateList;
+        var scope = view.inject(InventorySummary, { mode: 'summary', id: 'tree-form', breadCrumbs: false });
+        scope['groups'] = [];
+        
+        function checkSource(url) {
+            Rest.setUrl(url);
+            Rest.get()
+                .success( function(data, status, headers, config) {
+                    //console.log(data);
+                    var last_update = (data.last_updated == null) ? 'n/a' : FormatDate(new Date(data.last_updated));    
+                    var source = 'Manual';
+                    switch(data.source) {
+                       case 'file':
+                           source = 'File';
+                           break;
+                       case 'ec2':
+                           source = 'Amazon EC2';
+                           break;
+                       case 'rackspace': 
+                           source = 'Rackspace';
+                           break;   
+                    }
+                    scope['groups'].push({
+                        name: data.summary_fields.group.name, 
+                        description: data.summary_fields.group.description, 
+                        failures: data.summary_fields.group.hosts_with_active_failures, 
+                        source: source,
+                        last_update: last_update,
+                        status: data.status
+                        });
+                    })
+                .error( function(data, status, headers, config) {
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST status: ' + status });
+                    });  
+            }
+
+        var url = GetBasePath('inventory') + scope['inventory_id'] + '/groups/';
+        Rest.setUrl(url);
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                for (var i=0; i < data.results.length; i++) {
+                    if (data.results[i].related.inventory_source) {
+                       checkSource(data.results[i].related.inventory_source);
+                    }
+                } 
+                })
+            .error( function(data, status, headers, config) {
+                ProcessErrors(scope, data, status, null,
+                    { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST status: ' + status });
+                });
+    } 
     }]);
 

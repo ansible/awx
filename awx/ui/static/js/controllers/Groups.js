@@ -10,7 +10,7 @@
 function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryGroupsForm,
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt,
                           TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
-                          GroupsDelete, RefreshGroupName, EditInventory, SetShowGroupHelp) 
+                          GroupsDelete, RefreshGroupName, EditInventory, SetShowGroupHelp, InventoryStatus) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -155,7 +155,6 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
          $('input:first').focus();
       }
       else if (type == 'inventory') {
-         $('#tree-form').hide().empty();
          url = node.attr('hosts');
          scope.groupAddHide = true;
          scope.groupCreateHide = false; 
@@ -164,6 +163,8 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.groupDeleteHide = true;
          scope.createButtonShow = false;
          scope.group_id = null;
+         InventoryStatus();
+         $('#tree-form').show();
       }
 
       if (!scope.$$phase) {
@@ -221,6 +222,6 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
 InventoryGroups.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryGroupsForm',
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt',
                             'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
-                            'GroupsDelete', 'RefreshGroupName', 'EditInventory', 'SetShowGroupHelp'
+                            'GroupsDelete', 'RefreshGroupName', 'EditInventory', 'SetShowGroupHelp', 'InventoryStatus'
                             ]; 
   

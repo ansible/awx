@@ -232,7 +232,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         }])
 
-
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshGroupName', 'ParseTypeChange', 'getSourceTypeOptions',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
@@ -488,6 +487,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                                        { hdr: 'Error!', msg: 'Failed to update group varaibles. PUT status: ' + status });
                                    });
                         }
+                        RefreshGroupName(scope['selectedNode'], data.name, data.description);
                         scope.$emit('formSaveSuccess', data.id);
                         })
                     .error( function(data, status, headers, config) {

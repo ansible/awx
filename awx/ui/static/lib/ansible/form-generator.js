@@ -1230,7 +1230,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "</div><!-- tree controls -->\n";
           html += "<hr class=\"tree-control-divider\">\n";
           html += "<div class=\"row\">\n";
-          html += "<div class=\"col-lg-4\"><div id=\"tree-view\"></div></div>\n";
+          html += "<div class=\"col-lg-4\">\n" +
+                  "<div id=\"tree-view\"></div>\n" + 
+                  "</div>\n";
           html += "<div class=\"col-lg-8 tree-form-container\">\n<div id=\"tree-form\">\n</div>\n</div>\n";
           html += "</div>\n";
           html += "</div><!-- well -->\n";

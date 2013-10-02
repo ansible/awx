@@ -32,6 +32,7 @@ angular.module('ansible', [
     'InventoryHelper',
     'InventoryHostsFormDefinition',
     'InventoryGroupsFormDefinition',
+    'InventorySummaryDefinition',
     'AWFilters',
     'HostFormDefinition',
     'HostListDefinition',

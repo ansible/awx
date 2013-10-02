@@ -169,56 +169,59 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        if (options.mode != 'lookup' && (list.well == undefined || list.well == 'true')) {
           html += "<div class=\"well\">\n";
        }
-    
-       if (options.mode == 'lookup' || options.id != undefined) {
-          html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-8' });
-       }
-       else {
-          html += SearchWidget({ iterator: list.iterator, template: list, mini: true });
-       }
 
-       if (options.mode != 'lookup') {
-          //actions
-          var base = $location.path().replace(/^\//,'').split('/')[0];
-          html += "<div class=\"list-actions "; 
-          html += (options.id != undefined) ? "col-lg-3" : "col-lg-7 col-md-5";
-          html += "\">\n";
-          for (action in list.actions) {
-              if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
-                 if ( (list.actions[action].basePaths == undefined) || 
-                      (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
-                    html += this.button(list.actions[action], action);
-                 }
-              }
-          }
+       if (options.mode !== 'summary') {
           
-          if (list.name == 'inventories' && options.mode !== 'select') {
-              html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"inventoryFailureFilter\" " +
-                  "ng-change=\"search('inventory')\" id=\"failed_jobs_chbox\"> Show only inventories with failed jobs</label>\n";
+          if ( options.mode == 'lookup' || options.id != undefined ) {
+             html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-8' });
           }
-
-          //select instructions
-          if (options.mode == 'select' && list.selectInstructions) {
-             var btn = {
-                 awPopOver: list.selectInstructions,
-                 dataPlacement: 'left',
-                 dataContainer: 'body',
-                 icon: "icon-question-sign",
-                 'class': 'btn-sm btn-help btn-info',
-                 awToolTip: 'Click for help',
-                 dataTitle: 'Help',
-                 iconSize: 'large'
-                 };
-             html += this.button(btn, 'select');
+          else {
+             html += SearchWidget({ iterator: list.iterator, template: list, mini: true });
           }
-       }
-       else {
-          html += "<div class=\"col-lg-7\"></div>\n";
-       }
        
-       html += "</div>\n";
-       html += "</div><!-- row -->\n";
-         
+          if (options.mode != 'lookup') {
+             //actions
+             var base = $location.path().replace(/^\//,'').split('/')[0];
+             html += "<div class=\"list-actions "; 
+             html += (options.id != undefined) ? "col-lg-3" : "col-lg-7 col-md-5";
+             html += "\">\n";
+             for (action in list.actions) {
+                 if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
+                    if ( (list.actions[action].basePaths == undefined) || 
+                         (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
+                         html += this.button(list.actions[action], action);
+                    }
+                 }
+             }
+          
+             if (list.name == 'inventories' && options.mode !== 'select') {
+                 html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"inventoryFailureFilter\" " +
+                     "ng-change=\"search('inventory')\" id=\"failed_jobs_chbox\"> Show only inventories with failed jobs</label>\n";
+             }   
+
+             //select instructions
+             if (options.mode == 'select' && list.selectInstructions) {
+                var btn = {
+                    awPopOver: list.selectInstructions,
+                    dataPlacement: 'left',
+                    dataContainer: 'body',
+                    icon: "icon-question-sign",
+                    'class': 'btn-sm btn-help btn-info',
+                    awToolTip: 'Click for help',
+                    dataTitle: 'Help',
+                    iconSize: 'large'
+                    };
+                html += this.button(btn, 'select');
+             }
+         }
+         else {
+            html += "<div class=\"col-lg-7\"></div>\n";
+         }
+
+         html += "</div>\n";
+         html += "</div><!-- row -->\n";
+       }
+
        // table header row
        html += "<table id=\"" + list.name + "_table\" ";
        html += "class=\"table"
