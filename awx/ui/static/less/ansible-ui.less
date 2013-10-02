@@ -10,6 +10,7 @@
 @black:      #171717;
 @warning:    #FF9900;
 @red:        #FF0000;
+@green:      #5bb75b;
 @blue:       #1778c3;   /* logo blue */
 @blue-link:  #0088cc;
 @grey:       #A9A9A9;
@@ -591,6 +592,19 @@ select.field-mini-height {
   background-color: #dff0d8;
 }
 
+.table-summary thead > tr > th,
+.table-summary tbody > tr > th,
+.table-summary tfoot > tr > th,
+.table-summary thead > tr > td,
+.table-summary tbody > tr > td,
+.table-summary tfoot > tr > td {
+  border-top: 1px solid #ccc;
+}
+
+.table-summary thead > tr > th {
+  border-bottom: 1px solid #ccc;
+}
+
 /* Jobs pages */
 
   .job-error,
@@ -645,6 +659,31 @@ select.field-mini-height {
   .icon-failures-false:before {
     content: "\f111";
   }
+
+
+/* Cloud inventory status. i.e. inventory_source.status values */
+  
+  .icon-cloud-na:before,
+  .icon-cloud-never:before,
+  .icon-cloud-updating:before,
+  .icon-cloud-failed:before,
+  .icon-cloud-success:before {
+    content: "\f0c2";
+  }
+  .icon-cloud-na {
+    color: #e3e3e3;
+  }
+  .icon-cloud-never {
+    color: #888;
+  }
+  .icon-cloud-updating,
+  .icon-cloud-success {
+    color: #5bb75b;
+  }
+  .icon-cloud-failed {
+    color: @red;
+  }
+  
 
   .field-success {
     color: #5bb75b;
@@ -813,7 +852,7 @@ select.field-mini-height {
       background-color: #ccc;
       height: 1px;
       margin-top: 5px;
-      margin-bottom: 30px;
+      margin-bottom: 15px;
     }
   }
 

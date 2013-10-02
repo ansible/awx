@@ -5,7 +5,7 @@
  * 
  */
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
-    'LookUpHelper', 'ProjectFormDefinition', 'JobSubmissionHelper'])
+    'LookUpHelper', 'ProjectFormDefinition', 'JobSubmissionHelper', 'GroupFormDefinition'])
 
     .factory('PromptPasswords', ['CredentialForm', 'JobTemplateForm', 'ProjectsForm', '$compile', 'Rest', '$location', 'ProcessErrors', 'GetBasePath',
         'Alert',
@@ -350,7 +350,89 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             })
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, null,
-                    { hdr: 'Error!', msg: 'Failed to get job template details. GET returned status: ' + status });
+                    { hdr: 'Error!', msg: 'Failed to get project update details: ' +  url + ' GET status: ' + status });
+            });
+            };
+    }])
+
+
+    // Sumbit Inventory Update request
+    .factory('InventoryUpdate',['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert', 'GroupForm',
+    function(PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, GroupForm) { 
+    return function(params) {
+        
+        var scope = params.scope; 
+        var inventory_id = params.inventory_id;
+        var url = params.url;
+        
+        if (scope.removeUpdateSubmitted) {
+           scope.removeUpdateSubmitted();
+        }
+        scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function() {
+            // Refresh the project list after update request submitted
+            scope.refresh();
+            });
+        
+        if (scope.removeInventorySubmit) {
+           scope.removeInventorySubmit();
+        }
+        scope.removeInventorySubmit = scope.$on('InventorySubmit', function(e, passwords_needed_to_update, extra_html) {
+            // After the call to update, kick off the job.
+            PromptPasswords({
+                       scope: scope,
+                       passwords: passwords_needed_to_update,
+                       start_url: url, 
+                       form: GroupForm,
+                       extra_html: extra_html
+                       });
+            });
+        
+        // Check to see if we have permission to perform the update and if any passwords are needed
+        Rest.setUrl(url);
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                if (data.can_update) {
+                   var extra_html = '';
+                   /*
+                   for (var i=0; i < scope.projects.length; i++) {
+                       if (scope.projects[i].id == project_id) {
+                          extra_html += "<div class=\"form-group\">\n";
+                          extra_html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"scm_url\">SCM URL</label>\n";
+                          extra_html += "<div class=\"col-lg-9\">\n"; 
+                          extra_html += "<input type=\"text\" readonly";
+                          extra_html += ' name=\"scm_url\" ';
+                          extra_html += "class=\"form-control\" ";
+                          extra_html += "value=\"" + scope.projects[i].scm_url + "\" ";
+                          extra_html += "/>";
+                          extra_html += "</div>\n";
+                          extra_html += "</div>\n";
+                          if (scope.projects[i].scm_username) {
+                             extra_html += "<div class=\"form-group\">\n";
+                             extra_html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"scm_username\">SCM Username</label>\n";
+                             extra_html += "<div class=\"col-lg-9\">\n"; 
+                             extra_html += "<input type=\"text\" readonly";
+                             extra_html += ' name=\"scm_username\" ';
+                             extra_html += "class=\"form-control\" ";
+                             extra_html += "value=\"" + scope.projects[i].scm_username + "\" ";
+                             extra_html += "/>";
+                             extra_html += "</div>\n";
+                             extra_html += "</div>\n"; 
+                          }                        
+                          break;
+                       }
+                   }
+                   extra_html += "</p>";
+                   */
+                   scope.$emit('InventorySubmit', data.passwords_needed_to_update, extra_html);
+                } 
+                else {
+                   Alert('Permission Denied', 'You do not have access to run the update. Please contact your system administrator.', 
+                       'alert-danger');
+                }   
+            })
+            .error( function(data, status, headers, config) {
+                ProcessErrors(scope, data, status, null,
+                    { hdr: 'Error!', msg: 'Failed to get inventory_source details. ' + url + 'GET status: ' + status });
             });
             };
     }]);

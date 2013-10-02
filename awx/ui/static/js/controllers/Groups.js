@@ -163,7 +163,8 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.groupDeleteHide = true;
          scope.createButtonShow = false;
          scope.group_id = null;
-         InventoryStatus();
+         scope.inventory_name = node.attr('name');
+         InventoryStatus({ scope: scope });
          $('#tree-form').show();
       }
 

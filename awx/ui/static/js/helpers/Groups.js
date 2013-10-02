@@ -9,7 +9,7 @@
  
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
                                  'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'GroupsHelper',
-                                 'InventoryHelper', 'SelectionHelper'
+                                 'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper'
                                  ])
 
     .factory('getSourceTypeOptions', [ function() {
@@ -233,9 +233,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }])
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshGroupName', 'ParseTypeChange', 'getSourceTypeOptions',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshGroupName', 'ParseTypeChange', 'getSourceTypeOptions', 'InventoryUpdate',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, RefreshGroupName, ParseTypeChange, getSourceTypeOptions) {
+        GetBasePath, RefreshGroupName, ParseTypeChange, getSourceTypeOptions, InventoryUpdate) {
     return function(params) {
         
         var group_id = params.group_id;
@@ -348,7 +348,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                               scope[fld] = data[fld];
                               master[fld] = scope[fld];
                            }
-                       }           
+                       }
+                       scope['group_update_url'] = data.related['update'];           
                        })
                    .error( function(data, status, headers, config) {
                        scope.source = null;
@@ -563,6 +564,21 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             scope[associated] = '';
             scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
             scope[form.name + '_form'].$setDirty();
+            }
+        
+        // Start the update process
+        scope.updateGroup = function() {
+            if (scope['source'] == null || scope['source'] == '') {
+               Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group, provide Source settings, ' + 
+                  'and then run an update.', 'alert-info');
+            }
+            else {
+               InventoryUpdate({
+                   scope: scope, 
+                   group_id: group_id,
+                   url: scope['group_update_url']
+                   });
+            }
             }
 
         // Cancel

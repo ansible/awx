@@ -232,25 +232,43 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
     return function(field) {
         
         var html = '';
-
-        if (field.badgeToolTip) {
-           html += "<a href=\"\" aw-tool-tip=\"" + field.badgeToolTip + "\"";
-           html += (field.badgeTipPlacement) ? " data-placement=\"" + field.badgeTipPlacement + "\"" : "";
-           html += (field.badgeShow) ? " ng-show=\"" + field.badgeShow + "\"" : "";
-           html += ">";
-        } 
         
-        html += "<i ";
-        html += (field.badgeShow) ? "ng-show=\"" + field.badgeShow + "\" " : "";
-        html += " class=\"field-badge " + field.badgeIcon;
-        html += (field.badgeClass) ? " " + field.badgeClass : "";
-        html += "\"></i>";
-
-        if (field.badgeToolTip) {
-           html += "</a>";
+        if (field.badges) {
+           for (var i=0; i < field.badges.length; i++) {
+               if (field.badges[i].toolTip) {
+                   html += "<a href=\"\" aw-tool-tip=\"" + field.badges[i].toolTip + "\"";
+                   html += (field.badges[i].toolTipPlacement) ? " data-placement=\"" + field.badges[i].toolTipPlacement + "\"" : "";
+                   html += (field.badges[i].badgeShow) ? " ng-show=\"" + field.badges[i].badgeShow + "\"" : "";
+                   html += ">";
+               }
+               html += "<i ";
+               html += (field.badges[i].badgeShow) ? "ng-show=\"" + field.badges[i].badgeShow + "\" " : "";
+               html += " class=\"field-badge " + field.badges[i].icon;
+               html += (field.badges[i].badgeClass) ? " " + field.badges[i].badgeClass : "";
+               html += "\"></i>";
+               if (field.badges[i].toolTip) {
+                  html += "</a>";
+               }      
+               html += "\n";
+           }
         }
-        
-        html += "\n";
+        else {
+           if (field.badgeToolTip) {
+              html += "<a href=\"\" aw-tool-tip=\"" + field.badgeToolTip + "\"";
+              html += (field.badgeTipPlacement) ? " data-placement=\"" + field.badgeTipPlacement + "\"" : "";
+              html += (field.badgeShow) ? " ng-show=\"" + field.badgeShow + "\"" : "";
+              html += ">";
+           } 
+           html += "<i ";
+           html += (field.badgeShow) ? "ng-show=\"" + field.badgeShow + "\" " : "";
+           html += " class=\"field-badge " + field.badgeIcon;
+           html += (field.badgeClass) ? " " + field.badgeClass : "";
+           html += "\"></i>";
+           if (field.badgeToolTip) {
+              html += "</a>";
+           }      
+           html += "\n";
+        }
 
         return html;
 
@@ -284,7 +302,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            html += (field.ngShow) ? "<span " + Attr(field,'ngShow') + ">" : "";
 
            // Badge
-           if (options.mode !== 'lookup' && field.badgeIcon && field.badgePlacement && field.badgePlacement == 'left') {
+           if ( options.mode !== 'lookup' && (field.badges || (field.badgeIcon && field.badgePlacement && field.badgePlacement == 'left')) ) {
               html += Badge(field);
            }
             
@@ -296,7 +314,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            }
 
            // Start the Link
-           if ((field.key || field.link || field.linkTo || field.ngClick ) && options['mode'] != 'lookup' && options['mode'] != 'select') {
+           if ( (field.key || field.link || field.linkTo || field.ngClick ) &&
+                options['mode'] != 'lookup' && options['mode'] != 'select' && !field.noLink ) {
               var cap=false;
               if (field.linkTo) {
                  html += "<a href=\"#" + field.linkTo + "\" ";
@@ -349,11 +368,10 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            }
             
            // close the link
-           if ((field.key || field.link || field.linkTo || field.ngClick )
-               && options.mode != 'lookup' && options.mode != 'select') {
-               html += "</a>";
+           if ( (field.key || field.link || field.linkTo || field.ngClick )
+                && options.mode != 'lookup' && options.mode != 'select' && !field.noLink ) {
+              html += "</a>";
            }
-
            // close ngShow
            html += (field.ngShow) ? "</span>" : "";
      

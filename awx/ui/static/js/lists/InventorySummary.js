@@ -12,26 +12,40 @@ angular.module('InventorySummaryDefinition', [])
 
         name: 'groups',
         iterator: 'group',
-        editTitle: 'Inventory Summary',
+        editTitle: 'Inventory Summary: {{ inventory_name }}',
+        showTitle: true,
+        well: false,
         index: false,
         hover: true,
         
         fields: {
             name: {
                 key: true,
-                label: 'Name'
+                label: 'Group',
+                noLink: true,
+                badges: [
+                    { //Active Failures
+                      icon: "\{\{ 'icon-failures-' + group.has_active_failures \}\}",
+                      toolTip: 'Indicates if inventory contains hosts with active failures',
+                      toolTipPlacement: 'bottom'
+                      },
+                    { //Cloud Status
+                      icon: "\{\{ 'icon-cloud-' + group.status \}\}",
+                      toolTip: 'Indicates if inventory contains hosts with active failures',
+                      toolTipPlacement: 'bottom'
+                      }]
                 },
             failures: {
-                label: 'Hosts Failures'
+                label: 'Active<br />Failures'
                 },
             source: {
                 label: 'Source'
                 },
             last_update: {
-                label: 'Last Update'
+                label: 'Last<br />Updated'
                 },
             status: {
-                label: 'Update Status'
+                label: 'Update<br />Status'
                 }
             },
 

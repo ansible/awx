@@ -1220,7 +1220,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "<button type=\"button\" id=\"create_group_btn\" class=\"btn btn-success btn-sm\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
               "aw-tool-tip=\"Create a brand new group and add it to the selected group\" data-placement=\"bottom\" ng-disabled=\"grpBtnDisable\"><i class=\"icon-plus\"></i> Create New</button>\n";
           html += "<button type=\"button\" id=\"update_group_btn\" class=\"btn btn-success btn-sm\" ng-click=\"updateGroup()\" ng-hide=\"groupUpdateHide\" " +
-              "aw-tool-tip=\"Start the inventory update process, refreshing the group.\" " +
+              "aw-tool-tip=\"Start the inventory update process to refresh the group.\" " +
               "data-placement=\"bottom\" ng-disabled=\"grpBtnDisable\"><i class=\"icon-cloud-download\"></i> Update</button>\n";
           html += "<button type=\"button\" id=\"delete_group_btn\" class=\"btn btn-danger btn-sm\" ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" " +
               "aw-tool-tip=\"Permanently delete the selected group. Any hosts in the group will still be available in All Hosts.\" " +

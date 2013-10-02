@@ -67,15 +67,11 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        $('.tooltip').each( function(index) {
            $(this).remove();
            });
+       
        $('.popover').each(function(index) {
               // remove lingering popover <div>. Seems to be a bug in TB3 RC1
               $(this).remove();
               });
-       
-       // Remove leftover timer, if any
-       //if (options.mode != 'lookup' && this.scope.timer) {
-       //   clearInterval(this.scope.timer);
-       //}
 
        if (options.mode == 'lookup') {
           // options should include {hdr: <dialog header>, action: <function...> }
@@ -169,6 +165,18 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        if (options.mode != 'lookup' && (list.well == undefined || list.well == 'true')) {
           html += "<div class=\"well\">\n";
        }
+       
+       // Add a title and optionally a close button (used on Inventory->Groups)
+       if (options.mode !== 'lookup' && list.showTitle) {
+          html += "<div class=\"form-title\">";
+          html += (options.mode == 'edit' || options.mode == 'summary') ? list.editTitle : list.addTitle;
+          if (list.cancelButton) {
+             html += "<button type=\"button\" ng-click=\"closeForm()\" class=\"close form-cancel\" aria-hidden=\"true\">" + 
+                 "&times;</button>\n";
+          }
+          html += "</div>\n";
+          html += "<hr class=\"form-title-hr\">\n";
+       }
 
        if (options.mode !== 'summary') {
           
@@ -226,9 +234,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += "<table id=\"" + list.name + "_table\" ";
        html += "class=\"table"
        html += (list['class']) ? " " + list['class'] : "";
-       html += (options.mode == 'lookup' || options.id) ? ' table-hover-inverse' : '';
+       html += (options.mode !== 'summary' && (options.mode == 'lookup' || options.id)) ? ' table-hover-inverse' : '';
        html += (list.hover) ? ' table-hover' : '';
-       
+       html += (options.mode == 'summary') ? ' table-summary' : '';
        html += "\" ";
        html += ">\n";
        html += "<thead>\n";
@@ -354,7 +362,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true, mode: 'lookup' });
        }
        else {
-          html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true });  
+          if (options.mode !== 'summary') {
+             html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true });
+          } 
        }
       
        return html;

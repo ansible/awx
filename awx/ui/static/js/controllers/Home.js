@@ -27,7 +27,6 @@ function Home ($routeParams, $scope, $rootScope, $location, Wait, ObjectCount, C
      
     $rootScope.$on('WidgetLoaded', function() {
         // Once all the widget report back 'loaded', turn off Wait widget
-        console.log('got here!');
         loadedCount++; 
         if ( loadedCount == waitCount ) {
            Wait('stop');
