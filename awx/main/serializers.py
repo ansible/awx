@@ -55,6 +55,7 @@ SUMMARIZABLE_FK_FIELDS = {
     'last_job_host_summary': DEFAULT_SUMMARY_FIELDS + ('failed',),
     'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
+    'inventory_source': ('source', 'last_updated', 'status'),
 }
 
 class BaseSerializer(serializers.ModelSerializer):
@@ -452,6 +453,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             script        = reverse('main:inventory_script_view',       args=(obj.pk,)),
             tree          = reverse('main:inventory_tree_view',         args=(obj.pk,)),
             organization  = reverse('main:organization_detail',         args=(obj.organization.pk,)),
+            inventory_sources = reverse('main:inventory_inventory_sources_list', args=(obj.pk,)),
         ))
         return res
 

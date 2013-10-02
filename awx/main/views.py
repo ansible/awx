@@ -696,6 +696,21 @@ class InventoryTreeView(RetrieveAPIView):
         })
         return d
 
+class InventoryInventorySourcesList(SubListAPIView):
+
+    model = InventorySource
+    serializer_class = InventorySourceSerializer
+    parent_model = Inventory
+    relationship = None # Not defined since using get_queryset().
+    view_name = 'Inventory Source List'
+    new_in_14 = True
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(group__inventory__pk=parent.pk)
+
 class InventorySourceDetail(RetrieveUpdateAPIView):
 
     model = InventorySource
