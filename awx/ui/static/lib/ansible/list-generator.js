@@ -177,58 +177,80 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "</div>\n";
           html += "<hr class=\"form-title-hr\">\n";
        }
-
-       if (options.mode !== 'summary') {
-          
-          if ( options.mode == 'lookup' || options.id != undefined ) {
-             html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-8' });
-          }
-          else {
-             html += SearchWidget({ iterator: list.iterator, template: list, mini: true });
-          }
        
-          if (options.mode != 'lookup') {
-             //actions
-             var base = $location.path().replace(/^\//,'').split('/')[0];
-             html += "<div class=\"list-actions "; 
-             html += (options.id != undefined) ? "col-lg-3" : "col-lg-7 col-md-5";
-             html += "\">\n";
-             for (action in list.actions) {
-                 if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
-                    if ( (list.actions[action].basePaths == undefined) || 
-                         (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
-                         html += this.button(list.actions[action], action);
-                    }
-                 }
-             }
-          
-             if (list.name == 'inventories' && options.mode !== 'select') {
-                 html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"inventoryFailureFilter\" " +
-                     "ng-change=\"search('inventory')\" id=\"failed_jobs_chbox\"> Show only inventories with failed jobs</label>\n";
-             }   
-
-             //select instructions
-             if (options.mode == 'select' && list.selectInstructions) {
-                var btn = {
-                    awPopOver: list.selectInstructions,
-                    dataPlacement: 'left',
-                    dataContainer: 'body',
-                    icon: "icon-question-sign",
-                    'class': 'btn-sm btn-help btn-info',
-                    awToolTip: 'Click for help',
-                    dataTitle: 'Help',
-                    iconSize: 'large'
-                    };
-                html += this.button(btn, 'select');
-             }
-         }
-         else {
-            html += "<div class=\"col-lg-7\"></div>\n";
-         }
-
-         html += "</div>\n";
-         html += "</div><!-- row -->\n";
+       /*
+       if (list.editTitle.match(/^Inventory Summary/)) {
+          html += "<div class=\"row groups-issue\">\n";
+          html += "<div class=\"col-lg-12\">\n";
+          html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"groupFailureFilter\" " +
+              "ng-change=\"search()\" id=\"groups-issue-chbox\"> Show only groups with errors</label>\n";
+          html += "</div>\n";
+          html += "</div>\n";
+       }   
+       */
+       
+       if (options.mode == 'summary') {
+          html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-6' });
        }
+       else if (options.mode == 'lookup' || options.id != undefined) {
+          html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-8' });
+       }
+       else {
+          html += SearchWidget({ iterator: list.iterator, template: list, mini: true });
+       }
+     
+       if (options.mode != 'lookup') {
+          //actions
+          var base = $location.path().replace(/^\//,'').split('/')[0];
+          
+          html += "<div class=\"list-actions "; 
+          if (options.mode == 'summary') {
+             html += 'col-lg-5';
+          }
+          else if (options.id != undefined) {
+             html += "col-lg-3"; 
+          }
+          else { 
+             html += "col-lg-7 col-md-5";
+          }
+
+          html += "\">\n";
+          for (action in list.actions) {
+              if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
+                 if ( (list.actions[action].basePaths == undefined) || 
+                      (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
+                      html += this.button(list.actions[action], action);
+                 }
+              }
+          }
+        
+          if (list.name == 'inventories' && options.mode !== 'select') {
+             html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"inventoryFailureFilter\" " +
+                 "ng-change=\"search('inventory')\" id=\"failed_jobs_chbox\"> Show only inventories with failed jobs</label>\n";
+          }
+
+          //select instructions
+          if (options.mode == 'select' && list.selectInstructions) {
+             var btn = {
+                 awPopOver: list.selectInstructions,
+                 dataPlacement: 'left',
+                 dataContainer: 'body',
+                 icon: "icon-question-sign",
+                 'class': 'btn-sm btn-help btn-info',
+                 awToolTip: 'Click for help',
+                 dataTitle: 'Help',
+                 iconSize: 'large'
+                 };
+             html += this.button(btn, 'select');
+          }
+       }
+       else {
+          html += "<div class=\"col-lg-7\"></div>\n";
+       }
+
+       html += "</div>\n";
+       html += "</div><!-- row -->\n";
+
 
        // table header row
        html += "<table id=\"" + list.name + "_table\" ";
@@ -311,7 +333,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator +"({{ " + list.iterator + ".id }}, true)\" ng-true-value=\"1\" " +
               "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
        }
-       else if (options.mode == 'edit') {
+       else if (options.mode == 'edit' || options.mode == 'summary') {
           // Row level actions
           html += "<td class=\"actions\">";
           for (action in list.fieldActions) {
@@ -362,9 +384,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true, mode: 'lookup' });
        }
        else {
-          if (options.mode !== 'summary') {
-             html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true });
-          } 
+          html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true });
        }
       
        return html;

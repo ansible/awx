@@ -5,7 +5,7 @@
  * 
  */
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
-    'LookUpHelper', 'ProjectFormDefinition', 'JobSubmissionHelper', 'GroupFormDefinition'])
+    'LookUpHelper', 'ProjectFormDefinition', 'JobSubmissionHelper', 'GroupFormDefinition', 'GroupsHelper' ])
 
     .factory('PromptPasswords', ['CredentialForm', 'JobTemplateForm', 'ProjectsForm', '$compile', 'Rest', '$location', 'ProcessErrors', 'GetBasePath',
         'Alert',
@@ -107,7 +107,9 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                fld = passwords[i];
                scope[fld] = '';
                html += "<div class=\"form-group\">\n";
-               html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"" + fld + '">* ' + field.label + '</label>' + "\n";
+               html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"" + fld + "\">* ";
+               html += (field.labelBind) ? scope[field.labelBind] : field.label;
+               html += "</label>\n";
                html += "<div class=\"col-lg-9\">\n"; 
                html += "<input type=\"password\" ";
                html += "ng-model=\"" + fld + '" ';
@@ -128,7 +130,9 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                field = (form.fields[field.associated]) ? form.fields[field.associated] : ProjectsForm.fields[field.associated];
                scope[fld] = '';
                html += "<div class=\"form-group\">\n";
-               html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"" + fld + '">* ' + field.label + '</label>' + "\n";
+               html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"" + fld + "\">* ";
+               html += (field.labelBind) ? scope[field.labelBind] : field.label;
+               html += "</label>\n";
                html += "<div class=\"col-lg-9\">\n"; 
                html += "<input type=\"password\" ";
                html += "ng-model=\"" + fld + '" ';
@@ -357,8 +361,9 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
 
 
     // Sumbit Inventory Update request
-    .factory('InventoryUpdate',['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert', 'GroupForm',
-    function(PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, GroupForm) { 
+    .factory('InventoryUpdate',['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert', 
+        'GroupForm', 'InventorySummary',
+    function(PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, GroupForm, InventorySummary) { 
     return function(params) {
         
         var scope = params.scope; 
@@ -370,7 +375,10 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         }
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function() {
             // Refresh the project list after update request submitted
-            scope.refresh();
+            //$location.path(GetBasePath('inventories') + inventory_id + '/groups'
+            InventorySummary({ scope: scope });
+            $('#tree-form').show();
+            //scope.refresh();
             });
         
         if (scope.removeInventorySubmit) {
@@ -392,37 +400,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         Rest.get()
             .success( function(data, status, headers, config) {
                 if (data.can_update) {
-                   var extra_html = '';
-                   /*
-                   for (var i=0; i < scope.projects.length; i++) {
-                       if (scope.projects[i].id == project_id) {
-                          extra_html += "<div class=\"form-group\">\n";
-                          extra_html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"scm_url\">SCM URL</label>\n";
-                          extra_html += "<div class=\"col-lg-9\">\n"; 
-                          extra_html += "<input type=\"text\" readonly";
-                          extra_html += ' name=\"scm_url\" ';
-                          extra_html += "class=\"form-control\" ";
-                          extra_html += "value=\"" + scope.projects[i].scm_url + "\" ";
-                          extra_html += "/>";
-                          extra_html += "</div>\n";
-                          extra_html += "</div>\n";
-                          if (scope.projects[i].scm_username) {
-                             extra_html += "<div class=\"form-group\">\n";
-                             extra_html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"scm_username\">SCM Username</label>\n";
-                             extra_html += "<div class=\"col-lg-9\">\n"; 
-                             extra_html += "<input type=\"text\" readonly";
-                             extra_html += ' name=\"scm_username\" ';
-                             extra_html += "class=\"form-control\" ";
-                             extra_html += "value=\"" + scope.projects[i].scm_username + "\" ";
-                             extra_html += "/>";
-                             extra_html += "</div>\n";
-                             extra_html += "</div>\n"; 
-                          }                        
-                          break;
-                       }
-                   }
-                   extra_html += "</p>";
-                   */
+                   var extra_html = "<div class=\"inventory-passwd-msg\">Starting inventory update for the <em>" + params.group_name + 
+                       "</em> group. Please provide the " + params.group_source + " credentials:</div>\n";
                    scope.$emit('InventorySubmit', data.passwords_needed_to_update, extra_html);
                 } 
                 else {

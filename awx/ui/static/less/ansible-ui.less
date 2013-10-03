@@ -667,7 +667,7 @@ select.field-mini-height {
   .icon-cloud-never:before,
   .icon-cloud-updating:before,
   .icon-cloud-failed:before,
-  .icon-cloud-success:before {
+  .icon-cloud-successful:before {
     content: "\f0c2";
   }
   .icon-cloud-na {
@@ -779,6 +779,16 @@ select.field-mini-height {
 
 /* Inventory-> Groups */
   
+  .inventory-passwd-msg {
+    font-size: 14px;
+    margin-bottom: 25px;
+    margin-left: 10px;
+  }
+
+  .groups-issue {
+    margin-bottom: 10px;
+  }
+
   .inventory-content {
     padding: 15px;
     border: 1px solid #ddd;
@@ -792,7 +802,6 @@ select.field-mini-height {
   }
 
   .tree-view-container {
-    min-height: 650px;
     padding: 0 0 10px 0;
 
     .col-lg-4 {
@@ -821,23 +830,9 @@ select.field-mini-height {
     }
   }
   
-  /*
-  #tree-form:before {
-    content: "";
-    border-color: transparent transparent #e3e3e3 transparent;
-    border-style: solid;
-    border-width: 15px;
-    width: 0;
-    height: 0;
-    position: relative; 
-    top: -34px;
-    left: 28px;
-  }
-  */
-  
   #tree-form {
     display: none;
-    padding: 15px 10px 0 10px;
+    padding: 15px 10px 10px 10px;
     margin-top: 5px;
     border: 1px solid #e3e3e3;
     background-color: #e3e3e3;
@@ -845,7 +840,7 @@ select.field-mini-height {
 
     .form-title {
       color: #888;
-      padding-left: 10px;
+      padding-left: 0;
     }
 
     hr {

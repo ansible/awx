@@ -125,6 +125,11 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                  scope[iterator + 'SearchParams'] = list.fields[scope[iterator + 'SearchField']].sourceModel + '__' + 
                  list.fields[scope[iterator + 'SearchField']].sourceField + '__';
               }
+              else if ( (list.fields[scope[iterator + 'SearchField']].searchType == 'select') && 
+                        (scope[iterator + 'SearchSelectValue'].value == '' || 
+                            scope[iterator + 'SearchSelectValue'].value == null) ) {
+                 scope[iterator + 'SearchParams'] = scope[iterator + 'SearchField'];
+              }
               else {
                  scope[iterator + 'SearchParams'] = scope[iterator + 'SearchField'] + '__'; 
               }
@@ -138,6 +143,11 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                         list.fields[scope[iterator + 'SearchField']].searchType == 'gtzero' ) {
                  scope[iterator + 'SearchParams'] += 'gt=0'; 
               }
+              else if ( (list.fields[scope[iterator + 'SearchField']].searchType == 'select') && 
+                        (scope[iterator + 'SearchSelectValue'].value == '' || 
+                            scope[iterator + 'SearchSelectValue'].value == null) ) {
+                 scope[iterator + 'SearchParams'] += '=';
+              }
               else {
                  scope[iterator + 'SearchParams'] += scope[iterator + 'SearchType'] + '='; 
               }             
@@ -145,7 +155,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
               if ( list.fields[scope[iterator + 'SearchField']].searchType && 
                    (list.fields[scope[iterator + 'SearchField']].searchType == 'boolean' 
                        || list.fields[scope[iterator + 'SearchField']].searchType == 'select') ) { 
-                   scope[iterator + 'SearchParams'] += scope[iterator + 'SearchSelectValue'].value;
+                 scope[iterator + 'SearchParams'] += scope[iterator + 'SearchSelectValue'].value;
               }
               else {
                 //if ( list.fields[scope[iterator + 'SearchField']].searchType == undefined || 

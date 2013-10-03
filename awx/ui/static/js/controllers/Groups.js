@@ -128,6 +128,12 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
       var type = node.attr('type');
       var url;
       
+      if ($rootScope.timer) {
+         // Kill any linger timers from the inventory summary page
+         clearInterval($rootScope.timer);
+         $rootScope.timer = null;
+      }
+
       scope['nodeSelectValue'] = n;
       scope['selectedNode'] = node;
       scope['selectedNodeName'] = node.attr('name');

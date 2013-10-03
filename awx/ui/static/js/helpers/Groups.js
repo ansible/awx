@@ -9,7 +9,7 @@
  
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
                                  'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'GroupsHelper',
-                                 'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper'
+                                 'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper', 'RefreshHelper'
                                  ])
 
     .factory('getSourceTypeOptions', [ function() {
@@ -56,7 +56,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             GetBasePath('inventory') + inventory_id + '/groups/'; 
         
         SelectionInit({ scope: scope, list: list, url: url });
-        var finish = scope.formModalAction; 
+        
         scope.formModalAction = function() {
             var groups = [];
             for (var j=0; j < scope.selected.length; j++) {
@@ -93,6 +93,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                }
             }
             }
+
+        var finish = scope.formModalAction; 
         
         if (scope.PostRefreshRemove) {
            scope.PostRefreshRemove();
@@ -121,6 +123,112 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             });
         }
         }])
+
+
+    .factory('InventoryStatus', [ '$rootScope', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
+        'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate',
+    function($rootScope, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, SearchInit, 
+        PaginateInit, Refresh, InventoryUpdate) {
+    return function(params) {
+        //Build a summary of a given inventory
+        
+        ClearScope('tree-form');
+        
+        $('#tree-form').hide().empty();
+        var view = GenerateList;
+        var list = InventorySummary;
+        var scope = view.inject(InventorySummary, { mode: 'summary', id: 'tree-form', breadCrumbs: false });
+        var defaultUrl = GetBasePath('inventory') + scope['inventory_id'] + '/inventory_sources/';
+        
+        if (scope.PostRefreshRemove) {
+           scope.PostRefreshRemove();
+        }
+        scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
+            for (var i=0; i < scope.groups.length; i++) {
+                var last_update = (scope.groups[i].last_updated == null) ? '' : FormatDate(new Date(scope.groups[i].last_updated));    
+                var source = 'Manual';
+                var stat;
+                var stat_class;
+
+                switch (scope.groups[i].status) {
+                    case 'never updated':
+                        stat = 'never';
+                        stat_class = 'never';
+                        break;
+                    case 'none':
+                        stat = 'n/a';
+                        stat_class = 'na';
+                        break;
+                    default: 
+                        stat = scope.groups[i].status;
+                        stat_class = stat;
+                    }
+
+                switch (scope.groups[i].source) {
+                    case 'file':
+                        source = 'File';
+                        break;
+                    case 'ec2':
+                        source = 'Amazon EC2';
+                        break;
+                    case 'rackspace': 
+                        source = 'Rackspace';
+                        break;   
+                    }
+                scope.groups[i].status = stat;
+                scope.groups[i].source = source;
+                scope.groups[i].last_updated = last_update;
+                scope.groups[i].status_class = stat_class;
+            }
+            });
+
+        SearchInit({ scope: scope, set: 'groups', list: list, url: defaultUrl });
+        PaginateInit({ scope: scope, list: list, url: defaultUrl });
+        scope.search(list.iterator);
+
+        scope.refresh = function() {
+            scope['groupSearchSpin'] = true;
+            scope['groupLoading'] = true;
+            Refresh({ scope: scope, set: 'groups', iterator: 'group', url: scope['current_url'] });
+            }
+
+        // Start the update process
+        scope.updateGroup = function(id) {
+            for (var i=0; i < scope.groups.length; i++) {
+                if (scope.groups[i].id == id) {
+                   if (scope.groups[i].source == "" || scope.groups[i].source == null) {
+                      Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group, provide Source settings, ' + 
+                          'and then run an update.', 'alert-info');
+                   }
+                   else if (scope.groups[i].status == 'updating') {
+                      Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
+                          scope.groups[i].summary_fields.group.name + '</em>. Use the Refresh button to monitor the status.', 'alert-info'); 
+                   }
+                   else {
+                      if (scope.groups[i].source == 'Amazon EC2') {
+                         scope.sourceUsernameLabel = 'Access Key ID';
+                         scope.sourcePasswordLabel = 'Secret Access Key';
+                         scope.sourcePasswordConfirmLabel = 'Confirm Secret Access Key';
+                      }
+                      else {
+                         scope.sourceUsernameLabel = 'Username';
+                         scope.sourcePasswordLabel = 'Password'; 
+                         scope.sourcePasswordConfirmLabel = 'Confirm Password';
+                      }
+                      InventoryUpdate({
+                          scope: scope, 
+                          group_id: id,
+                          url: scope.groups[i].related.update,
+                          group_name: scope.groups[i].summary_fields.group.name, 
+                          group_source: scope.groups[i].source
+                          });
+                   }
+                   break;
+                }
+            }
+            }
+    } 
+    }])
 
 
     .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
