@@ -43,7 +43,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 },
             groups: {
                 label: 'Groups',
-                searchable: false,
+                searchable: true,
                 sourceModel: 'groups',
                 sourceField: 'name',
                 nosort: true

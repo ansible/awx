@@ -32,6 +32,18 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 
     scope.parentNode = 'parent-event';  // used in ngClass to dynamicall set row level class and control
     scope.childNode = 'child-event';    // link color and cursor
+    
+    if (scope.removeSetHostLinks) {
+       scope.removeSetHostLinks();
+    }
+    scope.removeSetHostLinks = scope.$on('SetHostLinks', function(e, inventory_id) {
+        for (var i=0; i < scope.jobevents.length; i++) {
+            if (scope.jobevents[i].summary_fields.host) {
+               scope.jobevents[i].hostLink = "/#/inventories/" + inventory_id + "/hosts/?name=" +
+                   escape(scope.jobevents[i].summary_fields.host.name);
+            }
+        }
+        });
 
     function formatJSON(eventData) {
         //turn JSON event data into an html form
@@ -181,6 +193,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                       clearInterval($rootScope.timer);
                    }
                 }
+                scope.$emit('SetHostLinks', data.inventory);
                 })
             .error(  function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, null,

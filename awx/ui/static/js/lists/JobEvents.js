@@ -75,6 +75,7 @@ angular.module('JobEventsListDefinition', [])
             host: {
                 label: 'Host',
                 ngBind: 'jobevent.summary_fields.host.name',
+                ngHref: "\{\{ jobevent.hostLink \}\}",
                 searchField: 'hosts__name',
                 nosort: true,
                 searchOnly: false,

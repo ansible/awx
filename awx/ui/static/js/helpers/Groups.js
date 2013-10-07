@@ -126,9 +126,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('InventoryStatus', [ '$rootScope', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
-        'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate',
+        'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit',
     function($rootScope, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, SearchInit, 
-        PaginateInit, Refresh, InventoryUpdate) {
+        PaginateInit, Refresh, InventoryUpdate, GroupsEdit) {
     return function(params) {
         //Build a summary of a given inventory
         
@@ -205,6 +205,16 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         SearchInit({ scope: scope, set: 'groups', list: list, url: defaultUrl });
         PaginateInit({ scope: scope, list: list, url: defaultUrl });
         scope.search(list.iterator);
+        
+        scope.GroupsEdit = function(group_id) {
+            // On the tree, select the first occurrance of the requested group
+            var node = $('#tree-view').find("li[group_id='" + group_id + "']").first();
+            var selected = $('#tree-view').jstree('get_selected');
+            selected.each(function(idx) {
+                $('#tree-view').jstree('deselect_node', $(this));
+                });
+            $('#tree-view').jstree('select_node', node);
+            }
 
         scope.refresh = function() {
             scope['groupSearchSpin'] = true;

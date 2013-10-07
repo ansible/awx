@@ -22,10 +22,10 @@ angular.module('InventorySummaryDefinition', [])
             name: {
                 key: true,
                 label: 'Group',
-                noLink: true,
                 ngBind: "group.summary_fields.group.name",
                 sourceModel: 'group',
-                sourceField: 'name'
+                sourceField: 'name',
+                ngClick: "\{\{ 'GroupsEdit(' + group.group + ')' \}\}"
                 },
             hosts_with_active_failures: {
                 label: 'Hosts with<br>Job Failures?',
@@ -36,6 +36,22 @@ angular.module('InventorySummaryDefinition', [])
                 dataPlacement: 'bottom',
                 searchable: false,
                 nosort: true
+                },
+            has_active_failures: {
+                label: 'Hosts have job failures?',
+                searchSingleValue: true,
+                searchType: 'boolean',
+                searchValue: 'true',
+                searchOnly: true,
+                sourceModel: 'group',
+                sourceField: 'has_active_failures'
+                },
+            last_update_failed: {
+                label: 'Update failed?',
+                searchSingleValue: true,
+                searchType: 'boolean',
+                searchValue: 'true',
+                searchOnly: true
                 },
             status: {
                 label: 'Update<br>Status',
@@ -63,21 +79,12 @@ angular.module('InventorySummaryDefinition', [])
                     { name: "Local Script", value: "file" },
                     { name: "Manual", value: "" }, 
                     { name: "Rackspace", value: "rackspace" }]
-                },
-            has_active_failures: {
-                label: 'Hosts have job failures?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true,
-                sourceModel: 'group',
-                sourceField: 'has_active_failures'
                 }
             },
 
         actions: {
             refresh: {
-                awRefresh: false,
+                awRefresh: true,
                 mode: 'all'
                 },
             help: {
