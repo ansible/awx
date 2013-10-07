@@ -125,9 +125,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }])
 
 
-    .factory('InventoryStatus', [ '$rootScope', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
+    .factory('InventoryStatus', [ '$rootScope', '$routeParams', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
         'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit',
-    function($rootScope, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, SearchInit, 
+    function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, SearchInit, 
         PaginateInit, Refresh, InventoryUpdate, GroupsEdit) {
     return function(params) {
         //Build a summary of a given inventory
@@ -201,11 +201,26 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 scope.groups[i].status_badge_tooltip = status_tip;
             }
             });
-
+        
         SearchInit({ scope: scope, set: 'groups', list: list, url: defaultUrl });
         PaginateInit({ scope: scope, list: list, url: defaultUrl });
+        
+        if ($routeParams['status']) {
+           // with status param post update submit
+           scope[list.iterator + 'SearchField'] = 'status';
+           //scope[list.iterator + 'SearchType'] = 'icontains';
+           scope[list.iterator + 'SelectShow'] = true;
+           scope[list.iterator + 'SearchSelectOpts'] = list.fields['status'].searchOptions;
+           for (var opt in list.fields['status'].searchOptions) {
+               if (list.fields['status'].searchOptions[opt].value == $routeParams['status']) {
+                  scope[list.iterator + 'SearchSelectValue'] = list.fields['status'].searchOptions[opt];
+               }
+           }
+        }
+        
         scope.search(list.iterator);
         
+        // Click on group name
         scope.GroupsEdit = function(group_id) {
             // On the tree, select the first occurrance of the requested group
             var node = $('#tree-view').find("li[group_id='" + group_id + "']").first();
@@ -216,6 +231,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             $('#tree-view').jstree('select_node', node);
             }
 
+        // Respond to refresh button
         scope.refresh = function() {
             scope['groupSearchSpin'] = true;
             scope['groupLoading'] = true;
@@ -706,45 +722,33 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         
         // Start the update process
         scope.updateGroup = function() {
-            if (scope['source'] == null || scope['source'] == '') {
-               Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group, provide Source settings, ' + 
+            console.log('working on id: ' + scope.name);
+            console.log('source: ' + scope.source.value);
+            if (scope.source == "" || scope.source == null) {
+              Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group, provide Source settings, ' + 
                   'and then run an update.', 'alert-info');
             }
-            else {
-               InventoryUpdate({
-                   scope: scope, 
-                   group_id: group_id,
-                   url: scope['group_update_url']
-                   });
-            }
-            }
-        // Start the update process
-        scope.updateGroup = function() {
-            if (scope[source] == "" || scope.groups[i].source == null) {
-              Alert('Missing Configuration', 'The group is not configured for updates. You must provide Source settings before running the update ' +
-                    'process.');
-            }
-            else if (scope[status] == 'updating') {
-              Alert('Update in Progress', 'The inventory update process is currently running for this group <em>' +
-                  scope.groups[i].summary_fields.group.name + '</em>. Under the Groupmonitor the status.', 'alert-info'); 
+            else if (scope.status == 'updating') {
+              Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
+                  scope.summary_fields.group.name + '</em>. Use the Refresh button to monitor the status.', 'alert-info'); 
             }
             else {
-              if (scope['source'] == 'Amazon EC2') {
-                 scope['sourceUsernameLabel'] = 'Access Key ID';
-                 scope['sourcePasswordLabel'] = 'Secret Access Key';
-                 scope['sourcePasswordConfirmLabel'] = 'Confirm Secret Access Key';
+              if (scope.source == 'Amazon EC2') {
+                 scope.sourceUsernameLabel = 'Access Key ID';
+                 scope.sourcePasswordLabel = 'Secret Access Key';
+                 scope.sourcePasswordConfirmLabel = 'Confirm Secret Access Key';
               }
               else {
-                 scope['sourceUsernameLabel'] = 'Username';
-                 scope['sourcePasswordLabel'] = 'Password'; 
-                 scope['sourcePasswordConfirmLabel'] = 'Confirm Password';
+                 scope.sourceUsernameLabel = 'Username';
+                 scope.sourcePasswordLabel = 'Password'; 
+                 scope.sourcePasswordConfirmLabel = 'Confirm Password';
               }
               InventoryUpdate({
                   scope: scope, 
-                  group_id: id,
-                  url: scope.groups[i].related.update,
-                  group_name: scope.groups[i].summary_fields.group.name, 
-                  group_source: scope.groups[i].source
+                  group_id: group_id,
+                  url: scope.group_update_url,
+                  group_name: scope.name, 
+                  group_source: scope.source.value
                   });
             }
             }

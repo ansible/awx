@@ -376,9 +376,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function() {
             // Refresh the project list after update request submitted
             //$location.path(GetBasePath('inventories') + inventory_id + '/groups'
-            InventorySummary({ scope: scope });
-            $('#tree-form').show();
-            //scope.refresh();
+            //InventorySummary({ scope: scope });
+            $location.url('/inventories/' + scope['inventory_id'] + '/groups/?status=updating');
             });
         
         if (scope.removeInventorySubmit) {
