@@ -83,7 +83,7 @@ angular.module('OrganizationFormDefinition', [])
                         label: 'Edit',
                         ngClick: "edit('users', \{\{ user.id \}\}, '\{\{ user.username \}\}')",
                         icon: 'icon-edit',
-                        'class': 'btn btn-default',
+                        'class': 'btn-default',
                         awToolTip: 'Edit user'
                         },
                     "delete": {
@@ -128,7 +128,7 @@ angular.module('OrganizationFormDefinition', [])
                         ngClick: "edit('users', \{\{ admin.id \}\}, '\{\{ admin.username \}\}')",
                         icon: 'icon-edit',
                         awToolTip: 'Edit administrator',
-                        'class': 'btn btn-default'
+                        'class': 'btn-default'
                         },
                     "delete": {
                         label: 'Delete',

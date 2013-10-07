@@ -722,8 +722,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         
         // Start the update process
         scope.updateGroup = function() {
-            console.log('working on id: ' + scope.name);
-            console.log('source: ' + scope.source.value);
             if (scope.source == "" || scope.source == null) {
               Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group, provide Source settings, ' + 
                   'and then run an update.', 'alert-info');

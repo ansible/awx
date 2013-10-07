@@ -1522,9 +1522,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  html += "<button type=\"button\" class=\"btn btn-xs"; 
                  html += (action['class']) ? " " + action['class'] : "";
                  html += "\" "; 
-                 html += "id=\"row" + action + "_btn\" ";
+                 html += "id=\"row" + act + "_btn\" ";
                  html += this.attr(action,'ngClick');
-                 html += this.attr(action, 'ngShow');
+                 html += (action.ngShow) ? this.attr(action, 'ngShow') : "";
                  html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
                  html += (action.awToolTip) ? "data-placement=\"top\" " : "";
                  html += ">" + this.icon(action.icon);
