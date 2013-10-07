@@ -20,7 +20,6 @@ angular.module('InventoryHostsFormDefinition', [])
                 key: true,
                 label: 'Name',
                 ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
-                //columnClass: 'col-lg-3'
                 },
             active_failures: {
                 label: 'Current<br>Job Status?',
@@ -48,7 +47,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 sourceModel: 'groups',
                 sourceField: 'name',
                 nosort: true
-                },
+                }
             },
 
         actions: {
