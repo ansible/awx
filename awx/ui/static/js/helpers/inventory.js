@@ -33,7 +33,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var treeData =
             [{ 
                 data: {
-                    title: inventory_name + ' Inventory'
+                    title: inventory_name + ' Inventory Groups'
                     }, 
                 attr: {
                     type: 'inventory',
@@ -163,7 +163,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             // Force root node styling changes
             $('#inventory-node ins').first().remove();
             $('#inventory-node a ins').first().css('background-image', 'none').append('<i class="icon-sitemap"></i>').css('margin-right','10px');
-            $('#inventory-node a').first().css('margin-bottom', '10px');
             scope.$emit('treeLoaded');
             });
 

@@ -61,6 +61,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         scope[iterator + 'SearchValue'] = '';
         scope[iterator + 'SelectShow'] = false;   // show/hide the Select
         scope[iterator + 'HideSearchType'] = false;
+        scope[iterator + 'InputDisable'] = false; 
 
         var f = scope[iterator + 'SearchField']
         if (list.fields[f].searchType && ( list.fields[f].searchType == 'boolean' 
@@ -87,7 +88,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            scope[iterator + 'SearchType'] = 'icontains';
            
            if (list.fields[fld].searchType && list.fields[fld].searchType == 'gtzero') {
-              scope[iterator + "InputHide"] = true;
+              scope[iterator + "InputDisable"] = true;
            }
            else if (list.fields[fld].searchSingleValue){
               // Query a specific attribute for one specific value

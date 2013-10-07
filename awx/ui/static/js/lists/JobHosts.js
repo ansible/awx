@@ -67,6 +67,14 @@ angular.module('JobHostDefinition', [])
                 searchType: 'boolean',
                 searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }]
                 },
+            failed: {
+                label: 'Job failed?',
+                searchSingleValue: true,
+                searchType: 'boolean',
+                searchValue: 'true',
+                searchOnly: true,
+                nosort: true
+                },
             ok: {
                 label: 'Success',
                 searchable: false
@@ -77,11 +85,15 @@ angular.module('JobHostDefinition', [])
                 },
             failures: {
                 label: 'Failure',
+                searchable: true,
+                searchLabel: 'Contains failed events?',
                 searchType: 'gtzero'
                 },
             dark: {
                 label: 'Unreachable',
-                searchable: false
+                searchable: true,
+                searchType: 'gtzero',
+                searchLabel: 'Contains unreachable hosts?'
                 },
             skipped: {
                 label: 'Skipped',

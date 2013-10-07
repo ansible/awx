@@ -507,8 +507,15 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         for ( var fld in form.fields) {
           if (form.fields[fld].searchable == undefined || form.fields[fld].searchable == true) {
              html += "<li><a href=\"\" ng-click=\"setSearchField('" + iterator + "','";
-             html += fld + "','" + form.fields[fld].label.replace(/\<br\>/g,' ') + "')\">" 
-                 + form.fields[fld].label.replace(/\<br\>/g,' ') + "</a></li>\n";
+             html += fld + "','";
+             if (form.fields[fld].searchLabel) {
+                html += form.fields[fld].searchLabel + "')\">" +
+                    form.fields[fld].searchLabel + "</a></li>\n";
+             }
+             else {
+                html += form.fields[fld].label.replace(/\<br\>/g,' ') + "')\">" +
+                    form.fields[fld].label.replace(/\<br\>/g,' ') + "</a></li>\n";
+             }
           }
         }
         html += "</ul>\n";

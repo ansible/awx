@@ -87,6 +87,11 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
                      { hdr: 'Error!', msg: 'Failed to get job status for job: ' + scope.job_id + '. GET status: ' + status });
                    });
         }
+        else {
+           if ($routeParams['inventory']) {
+              scope.$emit('setHostLink', $routeParams['inventory']);
+           }
+        }
         if (base == 'hosts' && $routeParams['host_name']) {
            // Make the host name appear in breadcrumbs
            LoadBreadCrumbs({ path: '/hosts/' + scope['host_id'], title: $routeParams['host_name'] });
