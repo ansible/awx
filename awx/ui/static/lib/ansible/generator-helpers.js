@@ -186,7 +186,13 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
 
         var name = field['label'].replace(/ /g,'_');
 
-        html = (params.td == undefined || params.td !== false) ? "<td>\n" : "";
+        if (params.td == undefined || params.td !== false) {
+           html = "<td class=\"" + fld + "-column\">\n"; 
+        }
+        else {
+           html = '';
+        }
+
         /*
         html += "<div class=\"btn-group\">\n";
         html += "<button type=\"button\" ";
@@ -218,19 +224,49 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             html += (field.options[i].ngHide) ? "ng-hide=\"" + field.options[i].ngHide + "\" " : "";
             html += "href=\"\">" + field.options[i].label + "</a></li>\n";
         }
+        
         html += "</ul>\n";
         html += "</div>\n";
-
         html += (params.td == undefined || params.td !== false) ? "</td>\n" : "";
-        
+
         return html;
         
+        }  
+        }])
+
+    .factory('BadgeCount', [ function() {
+    return function(params) {
+        
+        // Adds a badge count with optional tooltip
+
+        var list = params['list'];
+        var fld = params['fld'];
+        var field = list.fields[fld];
+        var options = params['options'];
+        var base = params['base'];
+        var html = "<td class=\"" + fld + "-column"
+        html += (field.columnClass) ? " " + field.columnClass : "";
+        html += "\">\n";
+        html += "<a ng-href=\"" + field.ngHref + "\" aw-tool-tip=\"" + field.awToolTip + "\"";
+        html += (field.dataPlacement) ? " data-placement=\"" + field.dataPlacement + "\"" : "";
+        html += ">";
+        html += "<span class=\"badge";
+        html += (field['class']) ? " " + field['class'] : "";
+        html += "\">";
+        html += "\{\{ " + list.iterator + '.' + fld + " \}\}";
+        html += "</span>";
+        html += (field.badgeLabel) ? " " + field.badgeLabel : "";
+        html += "</a>\n";
+        html += "</td>\n";
+        return html;
         }  
         }])
 
     .factory('Badge', [ function() {
     return function(field) {
         
+        // Adds an icon(s) with optional tooltip
+
         var html = '';
         
         if (field.badges) {
@@ -254,7 +290,10 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         }
         else {
            if (field.badgeToolTip) {
-              html += "<a href=\"\" aw-tool-tip=\"" + field.badgeToolTip + "\"";
+              html += "<a ";
+              html += (field.badgeNgHref) ? "ng-href=\"" + field.badgeNgHref + "\" " : "href=\"\"";
+              html += (field.ngClick) ? "ng-click=\"" + field.ngClick + "\" " : "";
+              html += " aw-tool-tip=\"" + field.badgeToolTip + "\"";
               html += (field.badgeTipPlacement) ? " data-placement=\"" + field.badgeTipPlacement + "\"" : "";
               html += (field.badgeShow) ? " ng-show=\"" + field.badgeShow + "\"" : "";
               html += ">";
@@ -275,7 +314,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         }  
         }])
 
-    .factory('Column', ['Attr', 'Icon', 'DropDown', 'Badge', function(Attr, Icon, DropDown, Badge) {
+    .factory('Column', ['Attr', 'Icon', 'DropDown', 'Badge', 'BadgeCount', function(Attr, Icon, DropDown, Badge, BadgeCount) {
     return function(params) {
         var list = params['list'];
         var fld = params['fld'];
@@ -287,6 +326,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         
         if (field.type !== undefined && field.type == 'DropDown') {
            html = DropDown(params);
+        }
+        else if (field.type == 'badgeCount') {
+           html = BadgeCount(params);
         }
         else {
            html += "<td class=\"" + fld + "-column";
@@ -314,15 +356,19 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            }
 
            // Start the Link
-           if ( (field.key || field.link || field.linkTo || field.ngClick ) &&
+           if ( (field.key || field.link || field.linkTo || field.ngClick || field.ngHref) &&
                 options['mode'] != 'lookup' && options['mode'] != 'select' && !field.noLink ) {
               var cap=false;
               if (field.linkTo) {
-                 html += "<a href=\"#" + field.linkTo + "\" ";
+                 html += "<a href=\"" + field.linkTo + "\" ";
                  cap = true;
               }
               else if (field.ngClick) {
                  html += "<a href=\"\"" + Attr(field, 'ngClick') + " ";
+                 cap = true;
+              }
+              else if (field.ngHref) {
+                 html += "<a ng-href=\"" + field.ngHref + "\" ";
                  cap = true;
               }
               else if (field.link || (field.key && (field.link === undefined || field.link))) {
@@ -368,7 +414,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            }
             
            // close the link
-           if ( (field.key || field.link || field.linkTo || field.ngClick )
+           if ( (field.key || field.link || field.linkTo || field.ngClick || field.ngHref )
                 && options.mode != 'lookup' && options.mode != 'select' && !field.noLink ) {
               html += "</a>";
            }
@@ -458,7 +504,6 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         //html += "</a>\n";
         
         html += "<ul class=\"dropdown-menu\" id=\"" + iterator + "SearchDropdown\">\n";
-        
         for ( var fld in form.fields) {
           if (form.fields[fld].searchable == undefined || form.fields[fld].searchable == true) {
              html += "<li><a href=\"\" ng-click=\"setSearchField('" + iterator + "','";
@@ -475,8 +520,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
 
         html += "<input id=\"search_value_input\" type=\"text\" ng-hide=\"" + iterator + "SelectShow || " + iterator + "InputHide\" class=\"form-control ";
         html += "\" ng-model=\"" + iterator + "SearchValue\" ng-change=\"search('" + iterator + 
-                "')\" placeholder=\"Search\" type=\"text\" >\n";
+                "')\" placeholder=\"Search\" type=\"text\" ng-disabled=\"" + iterator + "InputDisable\">\n";
         
+        /*
         html += "<div class=\"input-group-btn dropdown\">\n";
         html += "<button type=\"button\" ";
         html += "id=\"search_option_ddown\" ";
@@ -490,7 +536,17 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "<li><a href=\"\" ng-click=\"setSearchType('" + iterator + "','icontains','Contains')\">Contains</a></li>\n";
         html += "</ul>\n";
         html += "</div><!-- input-group-btn -->\n";
+        */
+        
+        
+        // Reset button
+        html += "<div class=\"input-group-btn\">\n";
+        html += "<button type=\"button\" class=\"btn btn-default btn-small\" ng-click=\"resetSearch('" + iterator + "')\" " +
+            "aw-tool-tip=\"Reset filter\" data-placement=\"top\" " +
+            "><i class=\"icon-undo\"></i></button>\n";
+        html += "</div><!-- input-group-btn -->\n";
         html += "</div><!-- input-group -->\n";
+        
         html += "</div><!-- col-lg-x -->\n";
         html += "<div class=\"col-lg-1 col-md-1 col-sm-1 col-xs-1\"><i class=\"icon-spinner icon-spin icon-large\" ng-show=\"" + iterator + 
                  "SearchSpin == true\"></i></div>\n";

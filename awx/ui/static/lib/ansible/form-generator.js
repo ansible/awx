@@ -1272,7 +1272,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
           html += "<div class=\"hosts-well well\">\n";
 
-          html += SearchWidget({ iterator: form.iterator, template: form, mini: true, size: 'col-md-6 col-lg-6'});
+          html += SearchWidget({ iterator: form.iterator, template: form, mini: true, size: 'col-md-5 col-lg-5'});
           
           html += "<div class=\"col-md-5 col-lg-5\">\n"
           html += "<div class=\"pull-right\">\n";
@@ -1309,26 +1309,28 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "<tr>\n";
           
           for (var fld in form.fields) {
-              html += "<th class=\"list-header\" id=\"" + fld + "-header\" ";
-              html += (!form.fields[fld].nosort) ? "ng-click=\"sort('"+ fld + "')\"" : "";
-              html += ">";
-              html += (form['fields'][fld].label && form['fields'][fld].type !== 'DropDown') ? form['fields'][fld].label : '';
-              if (form.fields[fld].nosort == undefined || form.fields[fld].nosort == false) {
-                 html += " <i class=\"";
-                 if (form.fields[fld].key) {
-                    if (form.fields[fld].desc) {
-                       html += "icon-sort-down";
-                    }
-                    else {
-                       html += "icon-sort-up";
-                    }
-                 }
-                 else {
-                    html += "icon-sort";
-                 }
-                 html += "\"></i>";
+              if (form.fields[fld].searchOnly == undefined || form.fields[fld].searchOnly == false) {
+                  html += "<th class=\"list-header\" id=\"" + fld + "-header\" ";
+                  html += (!form.fields[fld].nosort) ? "ng-click=\"sort('"+ fld + "')\"" : "";
+                  html += ">";
+                  html += (form['fields'][fld].label && form['fields'][fld].type !== 'DropDown') ? form['fields'][fld].label : '';
+                  if (form.fields[fld].nosort == undefined || form.fields[fld].nosort == false) {
+                     html += " <i class=\"";
+                     if (form.fields[fld].key) {
+                        if (form.fields[fld].desc) {
+                           html += "icon-sort-down";
+                        }
+                        else {
+                           html += "icon-sort-up";
+                        }
+                     }
+                     else {
+                        html += "icon-sort";
+                     }
+                     html += "\"></i>";
+                  }
+                  html += "</th>\n";
               }
-              html += "</th>\n";
           }
 
           html += "<th></th>\n";
@@ -1349,11 +1351,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               rfield = form.fields[fld];
               if (fld == 'groups' ) {
                  // generate group form control/button widget
-                 html += "<td>";
+                 html += "<td class=\"col-lg-5 col-md-4 col-sm-3\">";
                  html += "<div class=\"input-group input-group-sm\">\n";
                  html += "<span class=\"input-group-btn\">\n";
                  html += "<button class=\"btn btn-default\" type=\"button\" id=\"edit_groups_btn\" ng-click=\"editHostGroups({{ host.id }})\" " +
-                     "aw-tool-tip=\"Change group associations for this host\" data-placement=\"top\" >" + 
+                     "aw-tool-tip=\"Edit group associations\" data-placement=\"top\" >" + 
                      "<i class=\"icon-sitemap\"></i></button>\n";
                  html += "</span>\n";
                  html += "<input type=\"text\" id=\"host_groups\" ng-model=\"host.groups\" class=\"form-control\" disabled=\"disabled\" >\n";
@@ -1361,7 +1363,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                  html += "</td>\n";
               }
               else {
-                 html += Column({ list: form, fld: fld, options: options, base: null });
+                if (form.fields[fld].searchOnly == undefined || form.fields[fld].searchOnly == false) {
+                   html += Column({ list: form, fld: fld, options: options, base: null });
+                }
               }
           }
           
@@ -1404,12 +1408,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "</table>\n";
           html += "</div>\n";    // close list
 
+          /*
           html += "<div class=\"row host-failure-filter\">\n";
           html += "<div class=\"col-lg-12\">\n";
           html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"hostFailureFilter\" ng-change=\"filterHosts()\" > Only show hosts with failed jobs" +
               "</label>\n";
           html += "</div>\n";
           html += "</div>\n";
+          */
 
           html += "</div>\n";    // close well
 

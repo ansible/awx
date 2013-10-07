@@ -270,7 +270,7 @@ angular.module('JobFormDefinition', [])
             status: {
                 label: 'Job Status',
                 type: 'custom',
-                control: '<div class="job-detail-status job-\{\{ status \}\}"><i class="icon-circle"></i> \{\{ status \}\}</div>',
+                control: '<div class=\"job-detail-status\"><i class=\"icon-job-\{\{ status \}\}\"></i> \{\{ status \}\}</div>',
                 readonly: true
                 },
             created: {

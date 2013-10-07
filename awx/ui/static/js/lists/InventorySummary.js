@@ -25,27 +25,35 @@ angular.module('InventorySummaryDefinition', [])
                 noLink: true,
                 ngBind: "group.summary_fields.group.name",
                 sourceModel: 'group',
-                sourceField: 'name',
-                badges: [
-                    { //Active Failures
-                      icon: "\{\{ 'icon-failures-' + group.summary_fields.group.has_active_failures \}\}",
-                      toolTip: 'Indicates if inventory contains hosts with active failures',
-                      toolTipPlacement: 'bottom'
-                      },
-                    { //Cloud Status
-                      icon: "\{\{ 'icon-cloud-' + group.status_class \}\}",
-                      toolTip: 'Indicates status of inventory update process',
-                      toolTipPlacement: 'bottom'
-                      }]
+                sourceField: 'name'
                 },
-            failures: {
-                label: 'Active<br>Failures',
-                ngBind: "group.summary_fields.group.hosts_with_active_failures",
-                sourceModel: 'group',
-                sourceField: 'hosts_with_active_failures',
-                searchField: 'group__has_active_failures',
-                searchType: 'boolean',
-                searchOptions: [{ name: "yes", value: 1 }, { name: "no", value: 0 }]
+            hosts_with_active_failures: {
+                label: 'Hosts with<br>Job Failures?',
+                ngHref: '/#/inventories/{{ inventory_id }}/hosts{{ group.active_failures_params }}', 
+                type: 'badgeCount',
+                "class": "{{ 'failures-' + group.has_active_failures }}",
+                awToolTip: '# of hosts with job failures. Click to view hosts.',
+                dataPlacement: 'bottom',
+                searchable: false,
+                nosort: true
+                },
+            status: {
+                label: 'Update<br>Status',
+                searchType: 'select',
+                badgeIcon: 'icon-cloud',
+                badgeToolTip: "\{\{ group.status_badge_tooltip \}\}", 
+                badgePlacement: 'left',
+                badgeClass: "\{\{ 'icon-cloud-' + group.status_badge_class \}\}",
+                searchOptions: [
+                    { name: "failed", value: "failed" },
+                    { name: "never", value: "never updated" },
+                    { name: "n/a", value: "none" },
+                    { name: "successful", value: "successful" },
+                    { name: "updating", value: "updating" }]
+                },
+            last_updated: {
+                label: 'Last<br>Updated',
+                searchable: false
                 },
             source: {
                 label: 'Source',
@@ -56,25 +64,20 @@ angular.module('InventorySummaryDefinition', [])
                     { name: "Manual", value: "" }, 
                     { name: "Rackspace", value: "rackspace" }]
                 },
-            last_updated: {
-                label: 'Last<br>Updated',
-                searchable: false
-                },
-            status: {
-                label: 'Update<br>Status',
-                searchType: 'select',
-                searchOptions: [
-                    { name: "failed", value: "failed" },
-                    { name: "never", value: "never updated" },
-                    { name: "n/a", value: "none" },
-                    { name: "successful", value: "successful" },
-                    { name: "updating", value: "updating" }]
+            has_active_failures: {
+                label: 'Hosts have job failures?',
+                searchSingleValue: true,
+                searchType: 'boolean',
+                searchValue: 'true',
+                searchOnly: true,
+                sourceModel: 'group',
+                sourceField: 'has_active_failures'
                 }
             },
 
         actions: {
             refresh: {
-                awRefresh: true,
+                awRefresh: false,
                 mode: 'all'
                 },
             help: {

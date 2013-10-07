@@ -147,26 +147,35 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             for (var i=0; i < scope.groups.length; i++) {
                 var last_update = (scope.groups[i].last_updated == null) ? '' : FormatDate(new Date(scope.groups[i].last_updated));    
                 var source = 'Manual';
-                var stat;
-                var stat_class;
+                var stat, stat_class, status_tip;
 
+                stat = scope.groups[i].status;
+                stat_class = stat;
                 switch (scope.groups[i].status) {
                     case 'never updated':
                         stat = 'never';
                         stat_class = 'never';
+                        status_tip = 'Inventory update has not been performed. Click Update button to start it now.';
                         break;
                     case 'none':
                         stat = 'n/a';
                         stat_class = 'na';
+                        status_tip = 'Not configured for inventory update.';
                         break;
-                    default: 
-                        stat = scope.groups[i].status;
-                        stat_class = stat;
+                    case 'failed':
+                        status_tip = 'Inventory update completed with errors. Click to view process output.';
+                        break;
+                    case 'successful':
+                        status_tip = 'Inventory update completed with no errors. Click to view process output.';
+                        break; 
+                    case 'updating':
+                        status_tip = 'Inventory update process running now.';
+                        break;
                     }
 
                 switch (scope.groups[i].source) {
                     case 'file':
-                        source = 'File';
+                        source = 'Local Script';
                         break;
                     case 'ec2':
                         source = 'Amazon EC2';
@@ -175,10 +184,21 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         source = 'Rackspace';
                         break;   
                     }
+     
+                if (scope.groups[i].summary_fields.group.hosts_with_active_failures > 0) {
+                   scope.groups[i].active_failures_params = "/?has_active_failures=true";
+                }
+                else {
+                   scope.groups[i].active_failures_params = '';
+                } 
+                
+                scope.groups[i].hosts_with_active_failures = scope.groups[i].summary_fields.group.hosts_with_active_failures;
+                scope.groups[i].has_active_failures = scope.groups[i].summary_fields.group.has_active_failures;
                 scope.groups[i].status = stat;
                 scope.groups[i].source = source;
                 scope.groups[i].last_updated = last_update;
-                scope.groups[i].status_class = stat_class;
+                scope.groups[i].status_badge_class = stat_class;
+                scope.groups[i].status_badge_tooltip = status_tip;
             }
             });
 
@@ -688,6 +708,36 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    });
             }
             }
+        // Start the update process
+        scope.updateGroup = function() {
+            if (scope[source] == "" || scope.groups[i].source == null) {
+              Alert('Missing Configuration', 'The group is not configured for updates. You must provide Source settings before running the update ' +
+                    'process.');
+            }
+            else if (scope[status] == 'updating') {
+              Alert('Update in Progress', 'The inventory update process is currently running for this group <em>' +
+                  scope.groups[i].summary_fields.group.name + '</em>. Under the Groupmonitor the status.', 'alert-info'); 
+            }
+            else {
+              if (scope['source'] == 'Amazon EC2') {
+                 scope['sourceUsernameLabel'] = 'Access Key ID';
+                 scope['sourcePasswordLabel'] = 'Secret Access Key';
+                 scope['sourcePasswordConfirmLabel'] = 'Confirm Secret Access Key';
+              }
+              else {
+                 scope['sourceUsernameLabel'] = 'Username';
+                 scope['sourcePasswordLabel'] = 'Password'; 
+                 scope['sourcePasswordConfirmLabel'] = 'Confirm Password';
+              }
+              InventoryUpdate({
+                  scope: scope, 
+                  group_id: id,
+                  url: scope.groups[i].related.update,
+                  group_name: scope.groups[i].summary_fields.group.name, 
+                  group_source: scope.groups[i].source
+                  });
+            }
+            }
 
         // Cancel
         scope.formReset = function() {
@@ -697,6 +747,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
             scope.parseType = 'yaml';
             }
+            
         }
         }])
 

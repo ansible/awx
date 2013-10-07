@@ -9,11 +9,12 @@
 
 @black:      #171717;
 @warning:    #FF9900;
-@red:        #FF0000;
+@red:        #da4f49;;
 @green:      #5bb75b;
 @blue:       #1778c3;   /* logo blue */
 @blue-link:  #0088cc;
 @grey:       #A9A9A9;
+@green:      #5bb75b;
 
 html {
   background-color: @black;
@@ -32,6 +33,7 @@ body {
 .no-bullets { list-style: none; }
 .capitalize { text-transform: capitalize; }
 .grey-txt { color: @grey; }
+.text-center { text-align: center !important; }
 
 .success-badge { 
   color: #ffffff;
@@ -90,10 +92,6 @@ body {
 
 .tooltip {
   z-index: 1050;
-}
-
-.text-center {
-  text-align: center !important;
 }
 
 hr {
@@ -607,8 +605,6 @@ select.field-mini-height {
 
 /* Jobs pages */
 
-  .job-error,
-  .job-failed,
   .license-expired,
   .license-invalid,
   .icon-failures-true,
@@ -633,33 +629,87 @@ select.field-mini-height {
     padding-top: 5px;
   }
 
-  .job-new,
+  
   input[type="text"].job-new,
-  .job-canceled,
   input[type="text"].job-canceled {
     color: #778899;
   }
 
-  .job-pending,
-  .job-running,
-  .job-success,
-  .job-successful,
-  .job-waiting,
   .icon-failures-false,
   .license-valid,
   input[type="text"].job-success,
   input[type="text"].job-successful {
-    color: #5bb75b;
+    color: @green;
+  }
+
+  .icon-job-pending:before,
+  .icon-job-running:before,
+  .icon-job-success:before,
+  .icon-job-successful:before,
+  .icon-job-waiting:before,
+  .icon-job-new:before,
+  .icon-job-canceled:before,
+  .icon-job-changed:before {
+    content: "\f111";
+  }
+
+  .icon-job-error:before,
+  .icon-job-failed:before {
+    content: "\f06a";
+  }
+
+  .icon-job-pending,
+  .icon-job-running,
+  .icon-job-success,
+  .icon-job-successful,
+  .icon-job-waiting,
+  .icon-job-new {
+    color: @green;
+  }
+  
+  .icon-job-canceled {
+    color: @grey;
+  }
+
+  .icon-job-changed {
+    color: @warning;
+  }
+
+  .icon-job-error,
+  .icon-job-failed {
+    color: @red;
+  }
+
+  .icon-failures-none {
+    color: @grey;
   }
 
   .icon-failures-true:before {
     content: "\f06a";
   }
 
+  .icon-failures-none:before,
   .icon-failures-false:before {
     content: "\f111";
   }
 
+  .badge {
+    padding: 3px 4px;
+    font-size: 11px;
+    font-weight: normal;
+    line-height: 1;
+  }
+
+  /* Inventory job status badge */
+  .failures-true {
+    background-color: @red;
+    color: #fff;
+  }
+
+  .failures-false {
+    background-color: @green;
+    color: #fff;
+  }
 
 /* Cloud inventory status. i.e. inventory_source.status values */
   
@@ -671,7 +721,7 @@ select.field-mini-height {
     content: "\f0c2";
   }
   .icon-cloud-na {
-    color: #e3e3e3;
+    color: #888;
   }
   .icon-cloud-never {
     color: #888;
@@ -684,7 +734,6 @@ select.field-mini-height {
     color: @red;
   }
   
-
   .field-success {
     color: #5bb75b;
   }
@@ -702,11 +751,10 @@ select.field-mini-height {
   }
 
   .field-badge {
-    font-size: 12px;
+    font-size: 14px;
   }
 
-  .job-changed,
-  .license-warning,
+  .license-warning
   .license-demo {
     color: @warning;
   }

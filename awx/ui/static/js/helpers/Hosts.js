@@ -408,8 +408,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }])
 
 
-    .factory('HostsReload', ['SearchInit', 'PaginateInit', 'InventoryHostsForm', 'GetBasePath', 'Wait',
-    function(SearchInit, PaginateInit, InventoryHostsForm, GetBasePath, Wait) {
+    .factory('HostsReload', ['$routeParams', 'SearchInit', 'PaginateInit', 'InventoryHostsForm', 'GetBasePath', 'Wait',
+    function($routeParams, SearchInit, PaginateInit, InventoryHostsForm, GetBasePath, Wait) {
     return function(params) {
         // Rerfresh the Hosts view on right side of page
         
@@ -424,15 +424,13 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var url = (group_id !== null && group_id !== undefined) ? GetBasePath('groups') + group_id + '/all_hosts/' :
                   GetBasePath('inventory') + params.inventory_id + '/hosts/';
 
-        if (scope.hostFailureFilter) {
-           url += '?has_active_failures=true';
-        }
-
         // Set the groups value in each element of hosts array
         if (scope.removePostRefresh) {
            scope.removePostRefresh();
         }
         scope.removePostRefresh = scope.$on('PostRefresh', function() {
+
+            // Add a list of groups to each host
             var groups, descr, found, list;
             for (var i=0; i < scope.hosts.length; i++) {
                 groups = scope.hosts[i].summary_fields.groups;
@@ -444,14 +442,54 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                 }
                 scope.hosts[i].groups = scope.hosts[i].groups.replace(/\, $/,'');
             }
+           
+            // Add the value displayed in Job Status column
+            for (var i=0; i < scope.hosts.length; i++) {
+                scope.hosts[i].activeFailuresLink = '/#/hosts/' + scope.hosts[i].id + '/job_host_summaries/?inventory=' + scope['inventory_id'] +
+                    '&host_name=' + escape(scope.hosts[i].name); 
+                if (scope.hosts[i].has_active_failures == true) {
+                   scope.hosts[i].badgeToolTip = 'Most recent job failed. Click to view jobs.';
+                   scope.hosts[i].active_failures = 'failed';
+                }
+                else if (scope.hosts[i].has_active_failures == false && scope.hosts[i].last_job == null) {
+                   scope.hosts[i].has_active_failures = 'none';
+                   scope.hosts[i].badgeToolTip = "No job data available.";
+                   scope.hosts[i].active_failures = 'n/a';
+                }
+                else if (scope.hosts[i].has_active_failures == false && scope.hosts[i].last_job !== null) {
+                   scope.hosts[i].badgeToolTip = "Most recent job successful. Click to view jobs.";
+                   scope.hosts[i].active_failures = 'success';
+                }        
+            }
+         
             if (postAction) {
                postAction();
             }
-            });
 
+            });
+        
         SearchInit({ scope: scope, set: 'hosts', list: InventoryHostsForm, url: url });
         PaginateInit({ scope: scope, list: InventoryHostsForm, url: url });
-        scope.search('host');
+        
+        if ($routeParams['has_active_failures']) {
+           //scope.resetSearch(InventoryHostsForm.iterator);
+           scope[InventoryHostsForm.iterator + 'InputDisable'] = true;
+           scope[InventoryHostsForm.iterator + 'SearchValue'] = $routeParams['has_active_failures'];
+           scope[InventoryHostsForm.iterator + 'SearchField'] = 'has_active_failures';
+           scope[InventoryHostsForm.iterator + 'SearchFieldLabel'] = InventoryHostsForm.fields['has_active_failures'].label;
+           scope[InventoryHostsForm.iterator + 'SearchSelectValue'] = ($routeParams['has_active_failures'] == 'true') ? { value: 1 } : { value: 0 };
+        }
+
+        if ($routeParams['name']) {
+           console.log('here!');
+           scope[InventoryHostsForm.iterator + 'InputDisable'] = false;
+           scope[InventoryHostsForm.iterator + 'SearchValue'] = $routeParams['name'];
+           scope[InventoryHostsForm.iterator + 'SearchField'] = 'name';
+           scope[InventoryHostsForm.iterator + 'SearchFieldLabel'] = InventoryHostsForm.fields['name'].label;
+           scope[InventoryHostsForm.iterator + 'SearchSelectValue'] = null;
+        }
+        
+        scope.search(InventoryHostsForm.iterator);
         
         if (!params.scope.$$phase) {
            params.scope.$digest();
@@ -467,6 +505,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var scope = params.scope; 
         var inventory_id = params.inventory_id;
         var html = '';
+        var toolTip = 'Hosts have failed jobs?';
 
         function buildHTML(tree_data) {
             var sorted = SortNodes(tree_data);
@@ -480,7 +519,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                    "data-group-id=\"" + sorted[i].id + "\" " + 
                    "><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a> " +
                    "<i class=\"field-badge icon-failures-" + sorted[i].has_active_failures + "\" " +
-                   "aw-tool-tip=\"Indicates if group contains hosts with active failures\" data-placement=\"bottom\"></i> " +
+                   "aw-tool-tip=\"" + toolTip + "\" data-placement=\"bottom\"></i> " +
                    "<a href=\"\" class=\"activate\">" + sorted[i].name + "</a> ";
                if (sorted[i].children.length > 0) {
                   buildHTML(sorted[i].children);
@@ -651,7 +690,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                    "data-name=\"" + data.name + "\" " +
                    "><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a> " +
                    "<i class=\"field-badge icon-failures-" + data.has_active_failures + "\"" +
-                   "aw-tool-tip=\"Indicates if group contains hosts with active failures\" data-placement=\"bottom\"></i> " +
+                   "aw-tool-tip=\"" + toolTip + "\" data-placement=\"bottom\"></i> " +
                    "<a href=\"\" class=\"activate active\">" + data.name + "</a>";
                  scope.$emit('buildAllGroups', data.name, data.related.tree, data.related.groups);
                  scope.$emit('refreshHost', null, 'All Hosts');

@@ -27,7 +27,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
             fields: {
                 status: {
                     labelClass: 'job-\{\{ status \}\}',
-                    icon: 'icon-circle',
+                    icon: 'icon-job-\{\{ status \}\}',
                     type: 'custom',
                     section: 'Event',
                     control: '<div class=\"job-event-status job-\{\{ status \}\}\">\{\{ status \}\}</div>'

@@ -30,65 +30,79 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
     scope.search(list.iterator);
 
     LoadBreadCrumbs();
-    
+
+    if (scope.projectsPostRefresh) {
+       scope.projectsPostRefresh();
+    }
+    scope.projectsPostRefresh = scope.$on('PostRefresh', function() {
+        for (var i=0; i < scope.inventories.length; i++) {
+            if (scope.inventories[i].hosts_with_active_failures > 0) {
+               scope.inventories[i].active_failures_params = "/?has_active_failures=true";
+            }  
+            //if (scope.inventories[i].hosts_with_active_failures < 99) {
+            //   scope.inventories[i].hosts_with_active_failures = ('00' + scope.inventories[i].hosts_with_active_failures).substr(-2);
+            //}
+        }
+        });
+
     scope.addInventory = function() {
-       $location.path($location.path() + '/add');
-       }
+        $location.path($location.path() + '/add');
+        }
 
     scope.editInventory = function(id) {
-       $location.path($location.path() + '/' + id);
-       }
+        $location.path($location.path() + '/' + id);
+        }
  
     scope.deleteInventory = function(id, name) {
        
-       var action = function() {
-           var url = defaultUrl + id + '/';
-           $('#prompt-modal').modal('hide');
-           Wait('start');
-           Rest.setUrl(url);
-           Rest.destroy()
-               .success( function(data, status, headers, config) {
-                   scope.search(list.iterator);
-                   Wait('stop');
-                   })
-               .error( function(data, status, headers, config) {
-                   Wait('stop');
-                   ProcessErrors(scope, data, status, null,
-                            { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                   });      
-           };
+        var action = function() {
+            var url = defaultUrl + id + '/';
+            $('#prompt-modal').modal('hide');
+            Wait('start');
+            Rest.setUrl(url);
+            Rest.destroy()
+                .success( function(data, status, headers, config) {
+                    scope.search(list.iterator);
+                    Wait('stop');
+                    })
+                .error( function(data, status, headers, config) {
+                    Wait('stop');
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                    });      
+            };
 
-       Prompt({ hdr: 'Delete', 
-                body: 'Are you sure you want to delete ' + name + '?',
-                action: action
-                });
-       }
+        Prompt({ hdr: 'Delete', 
+                 body: 'Are you sure you want to delete ' + name + '?',
+                 action: action
+                 });
+        }
     
-    scope.lookupOrganization = function(organization_id) {
-       Rest.setUrl(GetBasePath('organizations') + organization_id + '/');
-       Rest.get()
-           .success( function(data, status, headers, config) {
-               return data.name;
-               });
-       }
+     scope.lookupOrganization = function(organization_id) {
+        Rest.setUrl(GetBasePath('organizations') + organization_id + '/');
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                return data.name;
+                });
+        }
 
 
-    // Failed jobs link. Go to the jobs tabs, find all jobs for the inventory and sort by status
-    scope.viewJobs = function(id) {
-       $location.url('/jobs/?inventory__int=' + id);
-       }
+     // Failed jobs link. Go to the jobs tabs, find all jobs for the inventory and sort by status
+     scope.viewJobs = function(id) {
+        $location.url('/jobs/?inventory__int=' + id);
+        }
 
-    scope.viewFailedJobs = function(id) {
-       $location.url('/jobs/?inventory__int=' + id + '&status=failed');
-       }
+     scope.viewFailedJobs = function(id) {
+        $location.url('/jobs/?inventory__int=' + id + '&status=failed');
+        }
 
-    scope.editHosts = function(id) {
-       $location.url('/inventories/' + id + '/hosts');
-       }
+     scope.editHosts = function(id) {
+        $location.url('/inventories/' + id + '/hosts');
+        }
 
-    scope.editGroups = function(id) {
-       $location.url('/inventories/' + id + '/groups');
-       }
+     scope.editGroups = function(id) {
+        $location.url('/inventories/' + id + '/groups');
+        }
 }
 
 InventoriesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'InventoryList', 'GenerateList', 

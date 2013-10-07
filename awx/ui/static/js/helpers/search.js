@@ -83,19 +83,57 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            scope[iterator + 'SelectShow'] = false;
            scope[iterator + 'HideSearchType'] = false;
            scope[iterator + 'InputHide'] = false;
+           scope[iterator + 'InputDisable'] = false;
+           scope[iterator + 'SearchType'] = 'icontains';
            
            if (list.fields[fld].searchType && list.fields[fld].searchType == 'gtzero') {
               scope[iterator + "InputHide"] = true;
            }
-           if (list.fields[fld].searchType && (list.fields[fld].searchType == 'boolean' 
+           else if (list.fields[fld].searchSingleValue){
+              // Query a specific attribute for one specific value
+              // searchSingleValue: true
+              // searchType: 'boolean|int|etc.'
+              // searchValue: < value to match for boolean use 'true'|'false' >
+              scope[iterator + "SearchType"] = list.fields[fld].searchType;
+              scope[iterator + 'InputDisable'] = true;
+              scope[iterator + "SearchValue"] = list.fields[fld].searchValue;
+              // For boolean type, SearchValue must be an object
+              if (list.fields[fld].searchType == 'boolean' && list.fields[fld].searchValue == 'true') {
+                 scope[iterator + "SearchSelectValue"] = { value: 1 }; 
+              }
+              else if (list.fields[fld].searchType == 'boolean' && list.fields[fld].searchValue == 'false') {
+                 scope[iterator + "SearchSelectValue"] = { value: 0 };
+              }
+              else if (list.fields[fld].searchType == 'boolean') {
+                 scope[iterator + "SearchSelectValue"] = { value: list.fields[fld].searchValue };
+              }
+           }
+           else if (list.fields[fld].searchType && (list.fields[fld].searchType == 'boolean' 
                 || list.fields[fld].searchType == 'select')) {
               scope[iterator + 'SelectShow'] = true;
               scope[iterator + 'SearchSelectOpts'] = list.fields[fld].searchOptions;
            }
-           if (list.fields[fld].searchType && list.fields[fld].searchType == 'int') {
+           else if (list.fields[fld].searchType && list.fields[fld].searchType == 'int') {
               scope[iterator + 'HideSearchType'] = true;   
+           }    
+           scope.search(iterator);
            }
-           
+
+        scope.resetSearch = function(iterator) {
+           // Respdond to click of reset button
+           scope[iterator + "SearchValue"] = '';
+           scope[iterator + "SearchSelectValue"] = '';
+           scope[iterator + 'SelectShow'] = false;
+           scope[iterator + 'HideSearchType'] = false;
+           scope[iterator + 'InputHide'] = false;
+           scope[iterator + 'InputDisable'] = false;
+           for (fld in list.fields) {
+               if (list.fields[fld].searchable == undefined || list.fields[fld].searchable == true) {
+                  scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
+                  scope[iterator + 'SearchField'] = fld;
+                  break;
+               }
+           }
            scope.search(iterator);
            }
 

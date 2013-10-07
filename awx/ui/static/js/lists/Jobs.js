@@ -37,15 +37,15 @@ angular.module('JobsListDefinition', [])
             job_template: {
                 label: 'Job Template',
                 ngBind: 'job.summary_fields.job_template.name',
-                link: true,
+                ngHref: "\{\{ '/#/job_templates/?name=' + job.summary_fields.job_template.name \}\}",
                 sourceModel: 'job_template',
                 sourceField: 'name'
                 },
             status: {
                 label: 'Status',
-                icon: 'icon-circle',
                 "class": 'job-\{\{ job.status \}\}',
                 searchType: 'select',
+                linkTo: "\{\{ job.statusLinkTo \}\}",
                 searchOptions: [
                     { name: "new", value: "new" },
                     { name: "waiting", value: "waiting" },
@@ -54,7 +54,14 @@ angular.module('JobsListDefinition', [])
                     { name: "successful", value: "successful" },
                     { name: "error", value: "error" },
                     { name: "failed", value: "failed" },
-                    { name: "canceled", value: "canceled" } ]
+                    { name: "canceled", value: "canceled" } ],
+                badgeIcon: 'icon-job-\{\{ job.status \}\}',
+                badgePlacement: 'left',
+                badgeToolTip: "\{\{ job.statusBadgeToolTip \}\}",
+                badgeTipPlacement: 'top',
+                badgeNgHref: "\{\{ job.statusLinkTo \}\}",
+                awToolTip: "\{\{ job.statusBadgeToolTip \}\}",
+                dataPlacement: 'top'
                 }
             },
         

@@ -166,7 +166,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
 
         $(tree_id).bind('move_node.jstree', function(e, data) {
             // When user drags-n-drops a node, update the API 
-            
             Wait('start');
 
             var node, target, url, parent, inv_id, variables;
@@ -273,12 +272,11 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             } 
             });
             
-            // When user clicks on a group
-            $(tree_id).bind("select_node.jstree", function(e, data){
-                scope.$emit('NodeSelect', data.inst.get_json()[0]);
-                });
+        // When user clicks on a group
+        $(tree_id).bind("select_node.jstree", function(e, data){
+            scope.$emit('NodeSelect', data.inst.get_json()[0]);
+            });
             
-        
         Wait('start');
         LoadTreeData(params);
         

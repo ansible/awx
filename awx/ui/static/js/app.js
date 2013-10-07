@@ -70,7 +70,8 @@ angular.module('ansible', [
     'LicenseFormDefinition',
     'License',
     'HostGroupsFormDefinition',
-    'ObjectCountWidget'
+    'ObjectCountWidget',
+    'JobsHelper'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.

@@ -21,21 +21,37 @@ angular.module('InventoriesListDefinition', [])
         fields: {
             name: {
                 key: true,
-                label: 'Name',
-                badgeIcon: "\{\{ 'icon-failures-' + inventory.has_active_failures \}\}",
-                badgePlacement: 'left',
-                badgeToolTip: 'Indicates if inventory contains hosts with active failures',
-                badgeTipPlacement: 'bottom'
+                label: 'Name'
                 },
             description: {
-                label: 'Description'
+                label: 'Description', 
+                link: true
+                },
+            hosts_with_active_failures: {
+                label: 'Hosts with<br>Failed Job?',
+                ngHref: '/#/inventories/{{ inventory.id }}/hosts{{ inventory.active_failures_params }}', 
+                type: 'badgeCount',
+                "class": "{{ 'failures-' + inventory.has_active_failures }}",
+                //badgeIcon: "\{\{ 'icon-failures-' + inventory.has_active_failures \}\}",
+                //badgePlacement: 'left',
+                awToolTip: '# of hosts with failed jobs. Click to view hosts.',
+                dataPlacement: 'bottom',
+                searchable: false
                 },
             organization: {
                 label: 'Organization',
                 ngBind: 'inventory.summary_fields.organization.name',
+                linkTo: '/organizations/{{ inventory.organization }}',
                 sourceModel: 'organization',
                 sourceField: 'name',
                 excludeModal: true
+                },
+            has_active_failures: {
+                label: 'Hosts with failed jobs?',
+                searchSingleValue: true,
+                searchType: 'boolean',
+                searchValue: 'true',
+                searchOnly: true
                 }
             },
         

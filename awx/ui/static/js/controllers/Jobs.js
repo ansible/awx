@@ -12,7 +12,8 @@
 
 function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                       ClearScope, ProcessErrors, GetBasePath, LookUpInit, SubmitJob, FormatDate, Refresh)
+                       ClearScope, ProcessErrors, GetBasePath, LookUpInit, SubmitJob, FormatDate, Refresh,
+                       JobStatusToolTip)
 {
     ClearScope('htmlTemplate');
     var list = JobList;
@@ -41,6 +42,13 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                scope[list.name][i].created = FormatDate(cDate);
            }
         }
+        
+        for (var i=0; i < scope.jobs.length; i++) {
+           scope.jobs[i].statusBadgeToolTip = JobStatusToolTip(scope.jobs[i].status) + 
+               " Click to view status details.";
+           scope.jobs[i].statusLinkTo = '/#/jobs/' + scope.jobs[i].id;
+        }
+
         });
     
 
@@ -157,14 +165,14 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
 JobsListCtrl.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobList',
                          'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                         'ProcessErrors','GetBasePath', 'LookUpInit', 'SubmitJob', 'FormatDate', 'Refresh'
+                         'ProcessErrors','GetBasePath', 'LookUpInit', 'SubmitJob', 'FormatDate', 'Refresh', 'JobStatusToolTip'
                          ];
 
 
 function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, 
                   GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
                   RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList, CredentialList,
-                  ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, FormatDate) 
+                  ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, FormatDate, JobStatusToolTip) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -334,7 +342,9 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                   }
                }
            }
-            
+
+           scope.statusToolTip = JobStatusToolTip(data.status);
+         
            $('form[name="jobs_form"] input[type="text"], form[name="jobs_form"] jobs_form textarea').attr('readonly','readonly');
            $('form[name="jobs_form"] select').prop('disabled', 'disabled');
            $('form[name="jobs_form"] .lookup-btn').prop('disabled', 'disabled');
@@ -503,5 +513,6 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 JobsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobForm', 
                      'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList',
-                     'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup', 'FormatDate'
+                     'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup', 'FormatDate',
+                     'JobStatusToolTip'
                      ];

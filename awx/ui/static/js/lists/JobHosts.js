@@ -38,7 +38,7 @@ angular.module('JobHostDefinition', [])
             },
 
         fields: {
-            id: {
+            job: {
                 label: 'Job ID',
                 ngClick: "showJob(\{\{ jobhost.job \}\})",
                 columnShow: 'host_id !== null',
@@ -51,12 +51,18 @@ angular.module('JobHostDefinition', [])
                 sourceModel: 'host',
                 sourceField: 'name',
                 ngBind: 'jobhost.host_name',
-                ngClick:"showEvents('\{\{ jobhost.summary_fields.host.name \}\}','\{\{ jobhost.related.job \}\}')"
+                ngHref: "\{\{ jobhost.hostLinkTo \}\}"
                 },
             status: {
                 label: 'Status',
-                icon: 'icon-circle',
-                "class": 'job-\{\{ jobhost.status \}\}',
+                badgeNgHref: "\{\{ jobhost.statusLinkTo \}\}", 
+                badgeIcon: 'icon-job-\{\{ jobhost.status \}\}',
+                badgePlacement: 'left',
+                badgeToolTip: "\{\{ jobhost.statusBadgeToolTip \}\}",
+                badgeTipPlacement: 'top',
+                ngHref: "\{\{ jobhost.statusLinkTo \}\}",
+                awToolTip: "\{\{ jobhost.statusBadgeToolTip \}\}",
+                dataPlacement: 'top',
                 searchField: 'failed',
                 searchType: 'boolean',
                 searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }]

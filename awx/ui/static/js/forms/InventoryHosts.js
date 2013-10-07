@@ -18,13 +18,29 @@ angular.module('InventoryHostsFormDefinition', [])
         fields: {
             name: {
                 key: true,
-                label: 'Host Name',
-                ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
+                label: 'Name',
+                ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
+                //columnClass: 'col-lg-3'
+                },
+            active_failures: {
+                label: 'Current<br>Job Status?',
+                ngHref: "\{\{ host.activeFailuresLink \}\}", 
+                awToolTip: "\{\{ host.badgeToolTip \}\}",
+                dataPlacement: 'bottom',
+                badgeNgHref: '\{\{ host.activeFailuresLink \}\}', 
                 badgeIcon: "\{\{ 'icon-failures-' + host.has_active_failures \}\}",
-                badgeToolTip: 'Indicates if host has active failures',
                 badgePlacement: 'left',
+                badgeToolTip: "\{\{ host.badgeToolTip \}\}",
                 badgeTipPlacement: 'bottom',
-                columnClass: 'col-lg-3'
+                searchable: false,
+                nosort: true
+                },
+            has_active_failures: {
+                label: 'Current job failed?',
+                searchSingleValue: true,
+                searchType: 'boolean',
+                searchValue: 'true',
+                searchOnly: true
                 },
             groups: {
                 label: 'Groups',
@@ -32,7 +48,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 sourceModel: 'groups',
                 sourceField: 'name',
                 nosort: true
-                }
+                },
             },
 
         actions: {

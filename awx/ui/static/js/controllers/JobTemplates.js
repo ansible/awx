@@ -27,6 +27,14 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
     
     SearchInit({ scope: scope, set: 'job_templates', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
+
+    // Called from Inventories tab, host failed events link:
+    if ($routeParams['name']) {
+       scope[list.iterator + 'SearchField'] = 'name'; 
+       scope[list.iterator + 'SearchValue'] = $routeParams['name'];
+       scope[list.iterator + 'SearchFieldLabel'] = list.fields['name'].label;
+    }
+
     scope.search(list.iterator);
 
     LoadBreadCrumbs();

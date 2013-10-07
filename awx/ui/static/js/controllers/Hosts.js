@@ -43,15 +43,15 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
    LoadSearchTree({ scope: scope, inventory_id: scope['inventory_id'] });
    
    // Add the selected flag to the hosts set.
-   if (scope.relatedHostsRemove) {
-      scope.relatedHostsRemove(); 
-   }
-   scope.relatedHostsRemove = scope.$on('relatedhosts', function() {
-       scope.toggleAllFlag = false;
-       for (var i=0; i < scope.hosts.length; i++) {
-           scope.hosts[i].selected = 0;
-       }
-       });
+   //if (scope.relatedHostsRemove) {
+   //   scope.relatedHostsRemove(); 
+   //}
+   //scope.relatedHostsRemove = scope.$on('relatedhosts', function() {
+   //    scope.toggleAllFlag = false;
+   //    for (var i=0; i < scope.hosts.length; i++) {
+   //        scope.hosts[i].selected = 0;
+   //    }
+   //    });
 
   scope.filterHosts = function() {
       HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });

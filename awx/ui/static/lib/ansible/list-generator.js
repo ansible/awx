@@ -224,10 +224,10 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               }
           }
         
-          if (list.name == 'inventories' && options.mode !== 'select') {
+          /*if (list.name == 'inventories' && options.mode !== 'select') {
              html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"inventoryFailureFilter\" " +
                  "ng-change=\"search('inventory')\" id=\"failed_jobs_chbox\"> Show only inventories with failed jobs</label>\n";
-          }
+          }*/
 
           //select instructions
           if (options.mode == 'select' && list.selectInstructions) {

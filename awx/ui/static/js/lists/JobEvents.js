@@ -48,14 +48,20 @@ angular.module('JobEventsListDefinition', [])
                 },
             status: {
                 label: 'Status',
-                icon: 'icon-circle',
                 showValue: true,
-                "class": 'job-\{\{ jobevent.status \}\}',
                 searchField: 'failed',
                 searchType: 'boolean',
                 searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }],
                 nosort: true,
-                searchable: false
+                searchable: false,
+                ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
+                awToolTip: "\{\{ jobevent.statusBadgeToolTip \}\}",
+                dataPlacement: 'top',
+                badgeIcon: 'icon-job-\{\{ jobevent.status \}\}',
+                badgePlacement: 'left',
+                badgeToolTip: "\{\{ jobevent.statusBadgeToolTip \}\}",
+                badgeTipPlacement: 'top',
+                badgeNgClick: "viewJobEvent(\{\{ jobevent.id \}\})"
                 },
             event_display: {
                 label: 'Event',

@@ -131,12 +131,39 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
             set[i]['spaces'] = set[i].event_level * 24;
             if (scope.jobevents[i].failed) {
                scope.jobevents[i].status = 'error';
+               if (i == set.length - 1) {
+                  scope.jobevents[i].statusBadgeToolTip = "A failure occurred durring one or more playbook tasks.";
+               }
+               else if (set[i].event_level < 3) {
+                  scope.jobevents[i].statusBadgeToolTip = "A failure occurred within the children of this event.";
+               }
+               else {
+                  scope.jobevents[i].statusBadgeToolTip = "A failure occurred. Click to view details";
+               }
             }
             else if (scope.jobevents[i].changed) {
                scope.jobevents[i].status = 'changed';
+               if (i == set.length - 1) {
+                  scope.jobevents[i].statusBadgeToolTip = "A change was completed durring one or more playbook tasks.";
+               }
+               else if (set[i].event_level < 3) {
+                  scope.jobevents[i].statusBadgeToolTip = "A change was completed by one or more children of this event.";
+               }
+               else {
+                  scope.jobevents[i].statusBadgeToolTip = "A change was completed. Click to view details";
+               }
             }
             else {
                scope.jobevents[i].status = 'success';
+               if (i == set.length - 1) {
+                  scope.jobevents[i].statusBadgeToolTip = "All playbook tasks completed successfully.";
+               }
+               else if (set[i].event_level < 3) {
+                  scope.jobevents[i].statusBadgeToolTip = "All the children of this event completed successfully.";
+               }
+               else {
+                  scope.jobevents[i].statusBadgeToolTip = "No errors occurred. Click to view details";
+               }
             }
             cDate = new Date(set[i].created);
             set[i].created = FormatDate(cDate);
@@ -147,6 +174,8 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
         Rest.get()
             .success( function(data, status, headers, config) {
                 scope.job_status = data.status;
+                scope.job_name = data.summary_fields.job_template.name;
+                LoadBreadCrumbs({ path: '/jobs/' + scope.job_id, title: scope.job_name });
                 if (!(data.status == 'pending' || data.status == 'waiting' || data.status == 'running')) {
                    if ($rootScope.timer) {
                       clearInterval($rootScope.timer);
@@ -181,8 +210,6 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
             children: children
             });
         }
-
-    LoadBreadCrumbs();
     
     scope.viewJobEvent = function(id) {
        EventView({ event_id: id });
