@@ -41,6 +41,14 @@ angular.module('JobsListDefinition', [])
                 sourceModel: 'job_template',
                 sourceField: 'name'
                 },
+            failed: {
+                label: 'Job failed?',
+                searchSingleValue: true,
+                searchType: 'boolean',
+                searchValue: 'true',
+                searchOnly: true,
+                nosort: true
+                },
             status: {
                 label: 'Status',
                 "class": 'job-\{\{ job.status \}\}',
