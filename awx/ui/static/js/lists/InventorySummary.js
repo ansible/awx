@@ -73,7 +73,7 @@ angular.module('InventorySummaryDefinition', [])
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
-                searchOnly: true,
+                searchOnly: true
                 },
             last_update_failed: {
                 label: 'Update failed?',
