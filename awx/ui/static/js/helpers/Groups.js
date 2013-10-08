@@ -17,7 +17,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             return [
                 { label: 'Manual', value: null },
                 { label: 'Amazon EC2', value: 'ec2' },
-                { label: 'Rackspace', value: 'rackspace' },
+                { label: 'Rackspace', value: 'rackspace' }
                 ];
         }
         }])

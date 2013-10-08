@@ -39,9 +39,16 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
             if (scope.inventories[i].hosts_with_active_failures > 0) {
                scope.inventories[i].active_failures_params = "/?has_active_failures=true";
             }  
-            //if (scope.inventories[i].hosts_with_active_failures < 99) {
-            //   scope.inventories[i].hosts_with_active_failures = ('00' + scope.inventories[i].hosts_with_active_failures).substr(-2);
-            //}
+            if (scope.inventories[i].has_inventory_sources) {
+               //scope.inventories[i].inventory_source = 'external';
+               scope.inventories[i].has_inventory_tip = 'Has one or more external sources. Click to view details.';
+               scope.inventories[i].has_inventory_link = '/#/inventories/' + scope.inventories[i].id + '/groups';
+            }
+            else {
+               //scope.inventories[i].inventory_source = 'manual';
+               scope.inventories[i].has_inventory_tip = 'Has no external sources. Click to view details';
+               scope.inventories[i].has_inventory_link = '/#/inventories/' + scope.inventories[i].id + '/groups';
+            }
         }
         });
 

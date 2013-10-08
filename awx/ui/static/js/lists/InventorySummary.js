@@ -33,7 +33,7 @@ angular.module('InventorySummaryDefinition', [])
                 type: 'badgeCount',
                 "class": "{{ 'failures-' + group.has_active_failures }}",
                 awToolTip: '# of hosts with job failures. Click to view hosts.',
-                dataPlacement: 'bottom',
+                dataPlacement: 'top',
                 searchable: false,
                 nosort: true
                 },

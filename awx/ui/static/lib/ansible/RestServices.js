@@ -76,6 +76,18 @@ angular.module('RestServices',['ngCookies','AuthService'])
         else {
            return false;
         }
+        },
+    options: function() {
+        var token = Authorization.getToken();
+        if (token) {
+           return $http({method: 'OPTIONS',
+                         url: this.url,
+                         headers: { 'Authorization': 'Token ' + token }
+                         });
+        }
+        else {
+           return false;
+        }
         }
     }
 }]);

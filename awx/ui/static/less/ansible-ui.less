@@ -740,7 +740,22 @@ select.field-mini-height {
   .icon-cloud-failed {
     color: @red;
   }
-  
+
+/* Inventory cloud sourced? indicator */
+  .icon-cloud-true:before,
+  .icon-cloud-false:before {
+    content: "\f0c2"; 
+  }
+
+  .icon-cloud-true {
+    color: @blue-link;
+  }
+
+  .icon-cloud-false {
+    color: @grey;
+  }
+/* end */
+
   .field-success {
     color: #5bb75b;
   }
