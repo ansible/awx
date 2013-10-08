@@ -681,17 +681,19 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         Rest.setUrl (GetBasePath('inventory') + inventory_id + '/');
         Rest.get()
              .success( function(data, status, headers, config) {
-                 html += "<div class=\"title\"><i class=\"icon-sitemap\"></i> Group Selector:</div>\n" +
+                 html += "<div class=\"title\">Group Selector:</div>\n" +
                    "<ul class=\"tree-root\">\n" +
                    "<li id=\"search-node-1000\" data-state=\"opened\" data-hosts=\"" + data.related.hosts + "\" " +
                    "data-description=\"" + data.description + "\" " + 
                    "data-failures=\"" + data.has_active_failures + "\" " +
                    "data-groups=\"" + data.related.groups + "\" " + 
                    "data-name=\"" + data.name + "\" " +
-                   "><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a> " +
-                   "<i class=\"field-badge icon-failures-" + data.has_active_failures + "\"" +
-                   "aw-tool-tip=\"" + toolTip + "\" data-placement=\"bottom\"></i> " +
-                   "<a href=\"\" class=\"activate active\">" + data.name + "</a>";
+                   //"><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a> " +
+                   ">" +
+                   //"<i class=\"field-badge icon-failures-" + data.has_active_failures + "\"" +
+                   //"aw-tool-tip=\"" + toolTip + "\" data-placement=\"bottom\"></i> " +
+                   "<i class=\"icon-sitemap\"></i> " +
+                   "<a href=\"\" class=\"activate active\">" + data.name + " Inventory</a>";
                  scope.$emit('buildAllGroups', data.name, data.related.tree, data.related.groups);
                  scope.$emit('refreshHost', null, 'All Hosts');
                  })
