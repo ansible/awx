@@ -126,9 +126,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('InventoryStatus', [ '$rootScope', '$routeParams', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
-        'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit',
+        'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'ShowUpdateStatus',
     function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, SearchInit, 
-        PaginateInit, Refresh, InventoryUpdate, GroupsEdit) {
+        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus) {
     return function(params) {
         //Build a summary of a given inventory
         
@@ -214,11 +214,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            for (var opt in list.fields['status'].searchOptions) {
                if (list.fields['status'].searchOptions[opt].value == $routeParams['status']) {
                   scope[list.iterator + 'SearchSelectValue'] = list.fields['status'].searchOptions[opt];
+                  break;
                }
            }
         }
         
         scope.search(list.iterator);
+
+        scope.ShowUpdateStatus = ShowUpdateStatus; 
         
         // Click on group name
         scope.GroupsEdit = function(group_id) {
@@ -810,7 +813,76 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             show: true
             });
         }
-        }]);
+        }])
+
+
+    .factory('ShowUpdateStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm', 
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm',
+    function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
+          FormatDate, InventoryStatusForm) {
+    return function(params) {
+
+        var group_name = params.group_name;
+        var last_update = params.last_update;
+        var generator = GenerateForm;
+        var form = InventoryStatusForm;
+        var scope;
+   
+        if (last_update == undefined || last_update == null || last_update == ''){
+            Alert('Missing Configuration', 'The selected group is not configured for inventory updates. ' +
+                'You must first edit the group, provide Source settings, and then run an update.', 'alert-info');
+        }
+        else {
+            // Retrieve detail record and prepopulate the form
+            Rest.setUrl(last_update);
+            Rest.get()
+                .success( function(data, status, headers, config) {
+                    // load up the form
+                    scope = generator.inject(form, { mode: 'edit', modal: true, related: false});
+                    generator.reset();
+                    var results = data;
+                    for (var fld in form.fields) {
+                        if (results[fld]) {
+                           if (fld == 'created') {
+                              scope[fld] = FormatDate(new Date(results[fld]));
+                           }
+                           else {
+                              scope[fld] = results[fld];
+                           }
+                        }
+                        //else {
+                        //   if (results.summary_fields.project[fld]) {
+                        //      scope[fld] = results.summary_fields.project[fld]
+                        //   }
+                        //}
+                    }
+                    
+                    scope.formModalAction = function() {
+                        $('#form-modal').modal("hide");
+                        }
+                    
+                    scope.formModalActionLabel = 'OK';
+                    scope.formModalCancelShow = false;
+                    scope.formModalInfo = false;
+                    scope.formModalHeader = group_name + '<span class="subtitle"> - Inventory Update</span>';
+                    
+                    $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
+                    $('#form-modal').addClass('skinny-modal');
+                    
+                    if (!scope.$$phase) {
+                       scope.$digest();
+                    }
+                    })
+                .error( function(data, status, headers, config) {
+                    $('#form-modal').modal("hide");
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Failed to retrieve last update: ' + last_update + '. GET status: ' + status });
+                    });
+        }
+    }
+    }]);
+
+
 
 
 
