@@ -43,10 +43,13 @@ SUMMARIZABLE_FK_FIELDS = {
     'user': ('username', 'first_name', 'last_name'),
     'team': DEFAULT_SUMMARY_FIELDS,
     'inventory': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
-                                           'hosts_with_active_failures'),
-    'host': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',),
+                                           'hosts_with_active_failures',
+                                           'has_inventory_sources'),
+    'host': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
+                                      'has_inventory_sources'),
     'group': DEFAULT_SUMMARY_FIELDS + ('has_active_failures',
-                                       'hosts_with_active_failures'),
+                                       'hosts_with_active_failures',
+                                       'has_inventory_sources'),
     'project': DEFAULT_SUMMARY_FIELDS + ('status',),
     'credential': DEFAULT_SUMMARY_FIELDS,
     'permission': DEFAULT_SUMMARY_FIELDS,
@@ -539,7 +542,8 @@ class GroupSerializer(BaseSerializerWithVariables):
     class Meta:
         model = Group
         fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures',
-                                'hosts_with_active_failures')
+                                'hosts_with_active_failures',
+                                'has_inventory_sources')
 
     def get_related(self, obj):
         if obj is None:
@@ -621,7 +625,7 @@ class InventorySourceSerializer(BaseSerializer):
     class Meta:
         model = InventorySource
         fields = ('id', 'url', 'related', 'summary_fields', 'created',
-                  'modified', 'group', 'source', 'source_path',
+                  'modified', 'inventory', 'group', 'source', 'source_path',
                   'source_vars', 'source_username', 'source_password',
                   'source_regions', 'source_tags', 'overwrite',
                   'overwrite_vars', 'update_on_launch', 'update_interval',
@@ -655,12 +659,15 @@ class InventorySourceSerializer(BaseSerializer):
             return {}
         res = super(InventorySourceSerializer, self).get_related(obj)
         res.update(dict(
-            group = reverse('main:group_detail', args=(obj.group.pk,)),
             update = reverse('main:inventory_source_update_view', args=(obj.pk,)),
             inventory_updates = reverse('main:inventory_source_updates_list', args=(obj.pk,)),
             #hosts = reverse('main:inventory_source_hosts_list', args=(obj.pk,)),
             #groups = reverse('main:inventory_source_groups_list', args=(obj.pk,)),
         ))
+        if obj.inventory:
+            res['inventory'] = reverse('main:inventory_detail', args=(obj.inventory.pk,))
+        if obj.group:
+            res['group'] = reverse('main:group_detail', args=(obj.group.pk,))
         if obj.current_update:
             res['current_update'] = reverse('main:inventory_update_detail',
                                             args=(obj.current_update.pk,))

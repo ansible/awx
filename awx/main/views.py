@@ -11,6 +11,7 @@ import sys
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.utils.datastructures import SortedDict
@@ -713,7 +714,8 @@ class InventoryInventorySourcesList(SubListAPIView):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
-        return qs.filter(group__inventory__pk=parent.pk)
+        return qs.filter(Q(inventory__pk=parent.pk) |
+                         Q(group__inventory__pk=parent.pk))
 
 class InventorySourceDetail(RetrieveUpdateAPIView):
 

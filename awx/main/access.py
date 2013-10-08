@@ -430,7 +430,7 @@ class GroupAccess(BaseAccess):
 
 class InventorySourceAccess(BaseAccess):
     '''
-    I can see inventory sources whenever I can see their group.
+    I can see inventory sources whenever I can see their group or inventory.
     I can change inventory sources whenever I can change their group.
     '''
 
@@ -439,11 +439,17 @@ class InventorySourceAccess(BaseAccess):
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
         qs = qs.select_related('created_by', 'group')
-        groups_qs = self.user.get_queryset(Group)
-        return qs.filter(group__in=groups_qs)
+        inventories_qs = self.user.get_queryset(Inventory)
+        return qs.filter(Q(inventory__in=inventories_qs) |
+                         Q(group__inventory__in=inventories_qs))
 
     def can_read(self, obj):
-        return obj and self.user.can_access(Group, 'read', obj.group)
+        if obj and obj.group:
+            return self.user.can_access(Group, 'read', obj.group)
+        elif obj and obj.inventory:
+            return self.user.can_access(Inventory, 'read', obj.inventory)
+        else:
+            return False
 
     def can_add(self, data):
         # Automatically created from group or management command.

@@ -137,7 +137,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var view = GenerateList;
         var list = InventorySummary;
         var scope = view.inject(InventorySummary, { mode: 'summary', id: 'tree-form', breadCrumbs: false });
-        var defaultUrl = GetBasePath('inventory') + scope['inventory_id'] + '/inventory_sources/';
+        var defaultUrl = GetBasePath('inventory') + scope['inventory_id'] + '/inventory_sources/?group__isnull=false';
         
         if (scope.PostRefreshRemove) {
            scope.PostRefreshRemove();

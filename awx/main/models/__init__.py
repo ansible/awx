@@ -537,6 +537,7 @@ class InventorySource(PrimordialModel):
         related_name='inventory_sources',
         null=True,
         default=None,
+        editable=False,
     )
     group = AutoOneToOneField(
         'Group',
