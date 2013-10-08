@@ -12,12 +12,53 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                                  'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper', 'RefreshHelper'
                                  ])
 
-    .factory('getSourceTypeOptions', [ function() {
+    .factory('GetSourceTypeOptions', [ function() {
         return function() {
             return [
-                { label: 'Manual', value: null },
-                { label: 'Amazon EC2', value: 'ec2' },
-                { label: 'Rackspace', value: 'rackspace' }
+                { label: 'none', value: null },
+                { label: 'ec2', value: 'ec2' },
+                { label: 'rackspace', value: 'rackspace' }
+                ];
+        }
+        }])
+
+    .factory('GetUpdateIntervalOptions', [ function() {
+        return function() {
+            return [
+                { label: 'none', value: null },
+                { label: '5 minutes', value: 5 },
+                { label: '10 minutes', value: 10 },
+                { label: '15 minutes', value: 15 },
+                { label: '30 minutes', value: 30 },
+                { label: '45 minutes', value: 45 },
+                { label: '1 hour', value: 60 },
+                { label: '2 hours', value: 120 }, 
+                { label: '3 hours', value: 180 },
+                { label: '4 hours', value: 240 },
+                { label: '5 hours', value: 300 },
+                { label: '6 hours', value: 360 },
+                { label: '7 hours', value: 420 },
+                { label: '8 hours', value: 480 },
+                { label: '9 hours', value: 540 },
+                { label: '10 hours', value: 600 },
+                { label: '11 hours', value: 660 },
+                { label: '12 hours', value: 720 },
+                { label: '13 hours', value: 780 },
+                { label: '14 hours', value: 840 },
+                { label: '15 hours', value: 900 },
+                { label: '16 hours', value: 960 },
+                { label: '17 hours', value: 1020 },
+                { label: '18 hours', value: 1080 },
+                { label: '19 hours', value: 1140},
+                { label: '20 hours', value: 1200 },
+                { label: '21 hours', value: 1260 },
+                { label: '22 hours', value: 1320 },
+                { label: '23 hours', value: 1380 },
+                { label: '24 hours', value: 1440 },
+                { label: '48 hours', value: 1880 },
+                { label: '72 hours', value: 4320 },
+                { label: 'weekly (every 7 days)', value: 10080 },
+                { label: 'monthly (every 30 days)', value: 43200 }
                 ];
         }
         }])
@@ -425,9 +466,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }])
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshGroupName', 'ParseTypeChange', 'getSourceTypeOptions', 'InventoryUpdate',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshGroupName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
+        'GetUpdateIntervalOptions',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, RefreshGroupName, ParseTypeChange, getSourceTypeOptions, InventoryUpdate) {
+        GetBasePath, RefreshGroupName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions) {
     return function(params) {
         
         var group_id = params.group_id;
@@ -443,7 +485,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var master = {};
         var relatedSets = {};
 
-        scope.source_type_options = getSourceTypeOptions();
+        scope.source_type_options = GetSourceTypeOptions();
+        scope.update_interval_options = GetUpdateIntervalOptions();
         scope.parseType = 'yaml';
         scope[form.fields['source_vars'].parseTypeName] = 'yaml';
         scope.sourcePasswordRequired = false;
@@ -524,6 +567,16 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                               }
                               master['source'] = scope['source'];
                            }
+                           else if (fld == 'update_interval') {
+                              if (data['update_interval'] == '') { 
+                                 data['update_interval'] = null; 
+                              }
+                              for (var i=0; i < scope.update_interval_options.length; i++) {
+                                  if (scope.update_interval_options[i].value == data['update_interval']) {
+                                     scope['update_interval'] = scope.update_interval_options[i];
+                                  }  
+                              }
+                           }
                            else if (fld == 'source_vars') {
                               // Parse source_vars, converting to YAML.  
                               if ($.isEmptyObject(data.source_vars) || data.source_vars == "\{\}" || 
@@ -598,7 +651,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    source_tags: scope['source_tags'],
                    overwrite: scope['overwrite'],
                    overwrite_vars: scope['overwrite_vars'],
-                   update_on_launch: scope['update_on_launch']
+                   update_on_launch: scope['update_on_launch'],
+                   update_interval: scope['update_interval'].value
                    };
 
                if (scope['source'].value == 'ec2') {

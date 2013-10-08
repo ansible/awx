@@ -41,7 +41,8 @@ angular.module('GroupFormDefinition', [])
                 'default': '---',
                 dataTitle: 'Group Variables',
                 dataPlacement: 'left',
-                awPopOver: "<p>Variables defined here apply to all child groups and hosts. Enter variables using either JSON or YAML syntax. Use the " +
+                awPopOver: "<p>Variables defined here apply to all child groups and hosts.</p>" +
+                    "<p>Enter variables using either JSON or YAML syntax. Use the " +
                     "radio button to toggle between the two.</p>" +
                     "JSON:<br />\n" +
                     "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
@@ -104,7 +105,12 @@ angular.module('GroupFormDefinition', [])
                 type: 'text',
                 ngShow: "source.value == 'rackspace' || source.value == 'ec2'",
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                dataTitle: 'Source Regions',
+                dataPlacement: 'left',
+                awPopOver: "<p>Comma separated list of regions. Region names must match those defined at the inventory source (i.e. ec2 or rackspace). " +
+                    "Only hosts associated with the list of regions will be included in the update process.</p>",
+                dataContainer: 'body'
                 },
             source_tags: {
                 label: 'Tags',
@@ -112,7 +118,12 @@ angular.module('GroupFormDefinition', [])
                 type: 'text',
                 ngShow: "source.value == 'ec2'",
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                dataTitle: 'Source Regions',
+                dataPlacement: 'left',
+                awPopOver: "<p>Comma separated list of tags. Tag names must match those defined at the inventory source (i.e. ec2 or rackspace)." + 
+                           " Only hosts associated with the list of tags will be included in the update process.</p>",
+                dataContainer: 'body'
                 },
             source_vars: {
                 label: 'Source Variables',
@@ -126,8 +137,8 @@ angular.module('GroupFormDefinition', [])
                 parseTypeName: 'envParseType',
                 dataTitle: 'Source Variables',
                 dataPlacement: 'left',
-                awPopOver: "<p>Define additional variables here that will be referenced by the inventory script at runtime. " +
-                    "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                awPopOver: "<p>Define additional variables here that will be referenced by the inventory script at runtime.</p> " +
+                    "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                     "JSON:<br />\n" +
                     "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
                     "YAML:<br />\n" +
@@ -136,6 +147,21 @@ angular.module('GroupFormDefinition', [])
                     '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
                 dataContainer: 'body',
                 awPopOverRight: true
+                },
+            update_interval: {
+                label: 'Update Interval',
+                type: 'select',
+                ngOptions: 'interval.label for interval in update_interval_options',
+                ngShow: "source.value !== '' && source.value !== null",
+                editRequired: false,
+                addRequired: false,
+                default: { label: 'none', value: null },
+                dataTitle: 'Update Interval',
+                dataPlacement: 'left',
+                awPopOver: "<p>Instruct the AWX server to automatically run the inventory update process the selected number of minutes from " +
+                    "the last run.</p><p>With a value set, task manager will periodically compare the amount of elapsed time from the last run. If enough time " +
+                    "has elapsed, it will go ahead and start an inventory update process.</p>",
+                dataContainer: 'body',
                 },
             checkbox_group: {
                 label: 'Update Options',
@@ -154,8 +180,7 @@ angular.module('GroupFormDefinition', [])
                         dataTitle: 'Overwrite Hosts',
                         dataContainer: 'body',
                         dataPlacement: 'left',
-                        labelClass: 'checkbox-options',
-                        inline: false
+                        labelClass: 'checkbox-options'
                         },
                     {
                         name: 'overwrite_vars',
@@ -168,8 +193,7 @@ angular.module('GroupFormDefinition', [])
                         dataTitle: 'Overwrite Variables',
                         dataContainer: 'body',
                         dataPlacement: 'left',
-                        labelClass: 'checkbox-options',
-                        inline: false
+                        labelClass: 'checkbox-options'
                         },
                     {
                         name: 'update_on_launch',
@@ -182,8 +206,7 @@ angular.module('GroupFormDefinition', [])
                         dataTitle: 'Update on Launch',
                         dataContainer: 'body',
                         dataPlacement: 'left',
-                        labelClass: 'checkbox-options',
-                        inline: false
+                        labelClass: 'checkbox-options'
                         }
                     ]
                 } 
