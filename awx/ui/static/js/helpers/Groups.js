@@ -18,7 +18,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 { label: 'Manual', value: null },
                 { label: 'Amazon EC2', value: 'ec2' },
                 { label: 'Rackspace', value: 'rackspace' },
-                { label: 'Local script', value: 'file' }
                 ];
         }
         }])
@@ -174,9 +173,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     }
 
                 switch (scope.groups[i].source) {
-                    case 'file':
-                        source = 'Local Script';
-                        break;
                     case 'ec2':
                         source = 'Amazon EC2';
                         break;
@@ -410,7 +406,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
         scope.source_type_options = getSourceTypeOptions();
         scope.parseType = 'yaml';
-        scope[form.fields['source_env'].parseTypeName] = 'yaml';
+        scope[form.fields['source_vars'].parseTypeName] = 'yaml';
         scope.sourcePasswordRequired = false;
         scope.sourceUsernameRequired = false;
         scope.sourceUsernameLabel = 'Username';
@@ -419,7 +415,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.sourcePathRequired = false;
         
         ParseTypeChange(scope);
-        ParseTypeChange(scope, 'source_env', form.fields['source_env'].parseTypeName);
+        ParseTypeChange(scope, 'source_vars', form.fields['source_vars'].parseTypeName);
 
         //$('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         
@@ -489,17 +485,17 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                               }
                               master['source'] = scope['source'];
                            }
-                           else if (fld == 'source_env') {
-                              // Parse source_env, converting to YAML.  
-                              if ($.isEmptyObject(data.source_env) || data.source_env == "\{\}" || 
-                                  data.source_env == "null" || data.source_env == "") {
-                                 scope.source_env = "---";
+                           else if (fld == 'source_vars') {
+                              // Parse source_vars, converting to YAML.  
+                              if ($.isEmptyObject(data.source_vars) || data.source_vars == "\{\}" || 
+                                  data.source_vars == "null" || data.source_vars == "") {
+                                 scope.source_vars = "---";
                               }
                               else {
                                  var json_obj = JSON.parse(data.extra_vars);
-                                 scope.source_env = jsyaml.safeDump(json_obj);
+                                 scope.source_vars = jsyaml.safeDump(json_obj);
                               }
-                              master.source_env = scope.variables;
+                              master.source_vars = scope.variables;
                            }
                            else if (data[fld]) {
                               scope[fld] = data[fld];
@@ -561,27 +557,26 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    source_password: scope['source_password'],
                    source_regions: scope['source_regions'],
                    source_tags: scope['source_tags'],
-                   overwrite_hosts: scope['overwite_hosts'],
-                   overwrite_vars: scope['overwite_vars'],
-                   keep_vars: scope['keep_vars'],
+                   overwrite: scope['overwrite'],
+                   overwrite_vars: scope['overwrite_vars'],
                    update_on_launch: scope['update_on_launch']
                    };
 
-               if (scope['source'].value == 'file') {
+               if (scope['source'].value == 'ec2') {
                   try {
                        // Make sure we have valid variable data
                        if (scope.envParseType == 'json') {
-                          var json_data = JSON.parse(scope.source_env);  //make sure JSON parses
+                          var json_data = JSON.parse(scope.source_vars);  //make sure JSON parses
                        }
                        else {
-                          var json_data = jsyaml.load(scope.source_env);  //parse yaml
+                          var json_data = jsyaml.load(scope.source_vars);  //parse yaml
                        }
                       
                        // Make sure our JSON is actually an object
                        if (typeof json_data !== 'object') {
                           throw "failed to return an object!";
                        }
-                       data.source_env = JSON.stringify(json_data, undefined, '\t');
+                       data.source_vars = JSON.stringify(json_data, undefined, '\t');
                   }
                   catch(err) {
                        parseError = true;

@@ -68,29 +68,6 @@ angular.module('GroupFormDefinition', [])
                 type: 'text',
                 awRequiredWhen: {variable: "sourcePathRequired", init: "false" }
                 },
-            source_env: {
-                label: 'Script Environment Variables',
-                ngShow: "source.value == 'file'",
-                type: 'textarea',
-                addRequired: false,
-                editRequird: false, 
-                excludeModal: true,
-                rows: 10,
-                'default': '---',
-                parseTypeName: 'envParseType',
-                dataTitle: 'Script Environment Variables',
-                dataPlacement: 'left',
-                awPopOver: "<p>Define environment variables here that will be referenced by the inventory script at runtime. " +
-                    "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
-                    "JSON:<br />\n" +
-                    "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
-                    "YAML:<br />\n" +
-                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
-                    '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
-                    '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
-                dataContainer: 'body',
-                awPopOverRight: true
-                },
             source_username: {
                 labelBind: 'sourceUsernameLabel',
                 excludeModal: true,
@@ -133,9 +110,32 @@ angular.module('GroupFormDefinition', [])
                 label: 'Tags',
                 excludeModal: true,
                 type: 'text',
-                ngShow: "source.value == 'rackspace' || source.value == 'ec2'",
+                ngShow: "source.value == 'ec2'",
                 addRequired: false,
                 editRequired: false
+                },
+            source_vars: {
+                label: 'Source Variables',
+                ngShow: "source.value == 'file' || source.value == 'ec2'",
+                type: 'textarea',
+                addRequired: false,
+                editRequird: false, 
+                excludeModal: true,
+                rows: 10,
+                'default': '---',
+                parseTypeName: 'envParseType',
+                dataTitle: 'Source Variables',
+                dataPlacement: 'left',
+                awPopOver: "<p>Define additional variables here that will be referenced by the inventory script at runtime. " +
+                    "Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
+                    "JSON:<br />\n" +
+                    "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
+                    "YAML:<br />\n" +
+                    "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
+                    '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
+                    '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
+                dataContainer: 'body',
+                awPopOverRight: true
                 },
             checkbox_group: {
                 label: 'Update Options',
@@ -144,7 +144,7 @@ angular.module('GroupFormDefinition', [])
 
                 fields: [
                     {
-                        name: 'overwite_hosts',
+                        name: 'overwrite',
                         label: 'Overwrite Hosts',
                         type: 'checkbox',
                         ngShow: "source.value !== '' && source.value !== null",
@@ -158,7 +158,7 @@ angular.module('GroupFormDefinition', [])
                         inline: false
                         },
                     {
-                        name: 'overwite_vars',
+                        name: 'overwrite_vars',
                         label: 'Overwrite Variables',
                         type: 'checkbox',
                         ngShow: "source.value !== '' && source.value !== null",
@@ -166,20 +166,6 @@ angular.module('GroupFormDefinition', [])
                         editRequired: false,
                         awPopOver: '<p></p>',
                         dataTitle: 'Overwrite Variables',
-                        dataContainer: 'body',
-                        dataPlacement: 'left',
-                        labelClass: 'checkbox-options',
-                        inline: false
-                        },
-                    {
-                        name: 'keep_vars',
-                        label: 'Keep Variables',
-                        type: 'checkbox',
-                        ngShow: "source.value !== '' && source.value !== null",
-                        addRequired: false,
-                        editRequired: false,
-                        awPopOver: '<p></p>',
-                        dataTitle: 'Keep Variables',
                         dataContainer: 'body',
                         dataPlacement: 'left',
                         labelClass: 'checkbox-options',

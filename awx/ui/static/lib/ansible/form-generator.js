@@ -570,7 +570,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             }
 
             // Variable editing
-            if (fld == "variables" || fld == "extra_vars" || fld == 'inventory_variables' || fld == 'source_env') {
+            if (fld == "variables" || fld == "extra_vars" || fld == 'inventory_variables' || fld == 'source_vars') {
               html += "<div class=\"parse-selection\" id=\"" + this.form.name + "_" + fld + "_parse_type\">Parse as: " +
                   "<input type=\"radio\" ng-model=\"";
               html += (field.parseTypeName) ? field.parseTypeName : 'parseType'; 
