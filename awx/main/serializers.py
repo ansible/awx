@@ -638,11 +638,11 @@ class InventorySourceSerializer(BaseSerializer):
             if field in ret and unicode(ret[field]).startswith('$encrypted$'):
                 ret[field] = '$encrypted$'
         # Make regions/tags into a list of strings.
-        for field in ('source_regions', 'source_tags'):
-            if field in ret:
-                value = ret[field]
-                if isinstance(value, basestring):
-                    ret[field] = [x.strip() for x in value.split(',') if x.strip()]
+        #for field in ('source_regions', 'source_tags'):
+        #    if field in ret:
+        #        value = ret[field]
+        #        if isinstance(value, basestring):
+        #            ret[field] = [x.strip() for x in value.split(',') if x.strip()]
         return ret
 
     def restore_object(self, attrs, instance=None):
@@ -650,7 +650,10 @@ class InventorySourceSerializer(BaseSerializer):
         for field in InventorySource.PASSWORD_FIELDS:
             if unicode(attrs.get(field, '')).startswith('$encrypted$'):
                 attrs.pop(field, None)
-        # FIXME: Accept list of strings for regions/tags.
+        #for field in ('source_regions', 'source_tags'):
+        #    value = attrs.get(field, [])
+        #    if isinstance(value, (list,tuple)):
+        #        attrs[field] = ','.join([unicode(x).strip() for x in value])
         instance = super(InventorySourceSerializer, self).restore_object(attrs, instance)
         return instance
 
