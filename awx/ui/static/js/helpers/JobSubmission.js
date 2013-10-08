@@ -369,15 +369,24 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         var scope = params.scope; 
         var inventory_id = params.inventory_id;
         var url = params.url;
-        
+        var group_id = params.group_id; 
+        var group_name = params.group_name;
+        var group_source = params.group_source; 
+
         if (scope.removeUpdateSubmitted) {
            scope.removeUpdateSubmitted();
         }
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function() {
             // Refresh the project list after update request submitted
-            //$location.path(GetBasePath('inventories') + inventory_id + '/groups'
-            //InventorySummary({ scope: scope });
-            $location.url('/inventories/' + scope['inventory_id'] + '/groups/?status=updating');
+            Alert('Update Started', 'The request to start the inventory process was submitted. Monitor progress from the inventory summary screen. ' +
+                'The screen will refresh every 10 seconds, or refresh manually by clicking the <em>Refresh</em> button.', 'alert-info');
+            var node = $('#inventory-node')
+            var selected = $('#tree-view').jstree('get_selected');
+            scope['inventorySummaryGroup'] = group_name; 
+            selected.each(function(idx) {
+                $('#tree-view').jstree('deselect_node', $(this));
+                });
+            $('#tree-view').jstree('select_node', node);
             });
         
         if (scope.removeInventorySubmit) {
@@ -399,8 +408,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         Rest.get()
             .success( function(data, status, headers, config) {
                 if (data.can_update) {
-                   var extra_html = "<div class=\"inventory-passwd-msg\">Starting inventory update for the <em>" + params.group_name + 
-                       "</em> group. Please provide the " + params.group_source + " credentials:</div>\n";
+                   var extra_html = "<div class=\"inventory-passwd-msg\">Starting inventory update for the <em>" + group_name + 
+                       "</em> group. Please provide the " + group_source + " credentials:</div>\n";
                    scope.$emit('InventorySubmit', data.passwords_needed_to_update, extra_html);
                 } 
                 else {

@@ -95,7 +95,6 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
               // searchSingleValue: true
               // searchType: 'boolean|int|etc.'
               // searchValue: < value to match for boolean use 'true'|'false' >
-              scope[iterator + "SearchType"] = list.fields[fld].searchType;
               scope[iterator + 'InputDisable'] = true;
               scope[iterator + "SearchValue"] = list.fields[fld].searchValue;
               // For boolean type, SearchValue must be an object
@@ -105,7 +104,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
               else if (list.fields[fld].searchType == 'boolean' && list.fields[fld].searchValue == 'false') {
                  scope[iterator + "SearchSelectValue"] = { value: 0 };
               }
-              else if (list.fields[fld].searchType == 'boolean') {
+              else {
                  scope[iterator + "SearchSelectValue"] = { value: list.fields[fld].searchValue };
               }
            }
@@ -185,7 +184,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
               else if ( (list.fields[scope[iterator + 'SearchField']].searchType == 'select') && 
                         (scope[iterator + 'SearchSelectValue'].value == '' || 
                             scope[iterator + 'SearchSelectValue'].value == null) ) {
-                 scope[iterator + 'SearchParams'] += '=';
+                 scope[iterator + 'SearchParams'] += 'iexact=';
               }
               else {
                  scope[iterator + 'SearchParams'] += scope[iterator + 'SearchType'] + '='; 

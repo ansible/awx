@@ -22,10 +22,7 @@ angular.module('InventorySummaryDefinition', [])
             name: {
                 key: true,
                 label: 'Group',
-                ngBind: "group.summary_fields.group.name",
-                sourceModel: 'group',
-                sourceField: 'name',
-                ngClick: "\{\{ 'GroupsEdit(' + group.group + ')' \}\}"
+                ngClick: "\{\{ 'GroupsEdit(' + group.id + ')' \}\}"
                 },
             hosts_with_active_failures: {
                 label: 'Hosts with<br>Job Failures?',
@@ -37,52 +34,55 @@ angular.module('InventorySummaryDefinition', [])
                 searchable: false,
                 nosort: true
                 },
+            status: {
+                label: 'Update<br>Status',
+                ngClick: "viewUpdateStatus(\{\{ group.id \}\})",
+                searchType: 'select',
+                badgeIcon: "\{\{ 'icon-cloud-' + group.status_badge_class \}\}",
+                badgeToolTip: "\{\{ group.status_badge_tooltip \}\}",
+                awToolTip: "\{\{ group.status_badge_tooltip \}\}",
+                dataPlacement: 'top',
+                badgeTipPlacement: 'top',
+                badgePlacement: 'left',
+                searchOptions: [
+                    { name: "failed", value: "failed" },
+                    { name: "never", value: "never updated" },
+                    { name: "n/a", value: "none" },
+                    { name: "successful", value: "successful" },
+                    { name: "updating", value: "updating" }],
+                sourceModel: 'inventory_source',
+                sourceField: 'status'
+                },
+            last_updated: {
+                label: 'Last<br>Updated',
+                searchable: false,
+                nosort: true
+                },
+            source: {
+                label: 'Source',
+                searchType: 'select',
+                searchOptions: [
+                    { name: "ec2", value: "ec2" },
+                    { name: "none", value: "" },
+                    { name: "rackspace", value: "rackspace" }],
+                sourceModel: 'inventory_source',
+                sourceField: 'source'
+                },
             has_active_failures: {
                 label: 'Hosts have job failures?',
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
                 searchOnly: true,
-                sourceModel: 'group',
-                sourceField: 'has_active_failures'
                 },
             last_update_failed: {
                 label: 'Update failed?',
+                searchType: 'select',
                 searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true
-                },
-            status: {
-                label: 'Update<br>Status',
-                ngClick: "ShowUpdateStatus({ last_update: '{{ group.related.last_update }}', group_name: '{{ group.summary_fields.group.name }}' })",
-                searchType: 'select',
-                badgeIcon: 'icon-cloud',
-                badgeToolTip: "\{\{ group.status_badge_tooltip \}\}",
-                awToolTip: "\{\{ group.status_badge_tooltip \}\}",
-                dataPlacement: 'top',
-                badgeTipPlacement: 'top',
-                badgePlacement: 'left',
-                badgeClass: "\{\{ 'icon-cloud-' + group.status_badge_class \}\}",
-                searchOptions: [
-                    { name: "failed", value: "failed" },
-                    { name: "never", value: "never updated" },
-                    { name: "n/a", value: "none" },
-                    { name: "successful", value: "successful" },
-                    { name: "updating", value: "updating" }]
-                },
-            last_updated: {
-                label: 'Last<br>Updated',
-                searchable: false
-                },
-            source: {
-                label: 'Source',
-                searchType: 'select',
-                searchOptions: [
-                    { name: "Amazon EC2", value: "ec2" },
-                    { name: "Local Script", value: "file" },
-                    { name: "Manual", value: "" }, 
-                    { name: "Rackspace", value: "rackspace" }]
+                searchValue: 'failed',
+                searchOnly: true,
+                sourceModel: 'inventory_source',
+                sourceField: 'status'
                 }
             },
 
