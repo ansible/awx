@@ -658,8 +658,8 @@ class InventorySourceSerializer(BaseSerializer):
             group = reverse('main:group_detail', args=(obj.group.pk,)),
             update = reverse('main:inventory_source_update_view', args=(obj.pk,)),
             inventory_updates = reverse('main:inventory_source_updates_list', args=(obj.pk,)),
-            hosts = reverse('main:inventory_source_hosts_list', args=(obj.pk,)),
-            groups = reverse('main:inventory_source_groups_list', args=(obj.pk,)),
+            #hosts = reverse('main:inventory_source_hosts_list', args=(obj.pk,)),
+            #groups = reverse('main:inventory_source_groups_list', args=(obj.pk,)),
         ))
         if obj.current_update:
             res['current_update'] = reverse('main:inventory_update_detail',
