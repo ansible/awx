@@ -25,6 +25,7 @@ from celery import Task
 
 # Django
 from django.conf import settings
+from django.db import transaction
 from django.utils.timezone import now
 
 # AWX
@@ -116,7 +117,12 @@ class BaseTask(Task):
         return env
 
     def build_safe_env(self, instance, **kwargs):
-        return self.build_env(instance, **kwargs)
+        hidden_re = re.compile('API|TOKEN|KEY|SECRET|PASS')
+        env = self.build_env(instance, **kwargs)
+        for k,v in env.items():
+            if hidden_re.search(k):
+                env[k] = '*'*len(str(v))
+        return env
 
     def build_args(self, instance, **kwargs):
         raise NotImplementedError
@@ -174,6 +180,9 @@ class BaseTask(Task):
                 updates['result_stdout'] = logfile.getvalue()
                 last_stdout_update = time.time()
             instance = self.update_model(instance.pk, **updates)
+            # Commit transaction needed when running unit tests. FIXME: Is it
+            # needed or breaks anything for normal operation?
+            transaction.commit()
             if instance.cancel_flag:
                 child.close(True)
                 canceled = True
@@ -729,18 +738,16 @@ class RunInventoryUpdate(BaseTask):
         inventory = inventory_source.group.inventory
         args = ['awx-manage', 'inventory_import']
         args.extend(['--inventory-id', str(inventory.pk)])
-        if inventory_source.overwrite_hosts:
+        if inventory_source.overwrite:
             args.append('--overwrite')
         if inventory_source.overwrite_vars:
             args.append('--overwrite-vars')
-        if inventory_source.keep_vars:
-            args.append('--keep-vars')
         args.append('--source')
         if inventory_source.source == 'ec2':
             ec2_path = self.get_path_to('..', 'plugins', 'inventory', 'ec2.py')
             args.append(ec2_path)
         elif inventory_source.source == 'rackspace':
-            rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax.py')
+            rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax2.py')
             args.append(rax_path)
         elif inventory_source.source == 'file':
             args.append(inventory_source.source_path)

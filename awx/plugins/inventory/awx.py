@@ -77,10 +77,14 @@ class InventoryScript(object):
                                    '%s:%d' % (parts.hostname, port),
                                    parts.path, parts.query, parts.fragment])
         url_path = '/api/v1/inventories/%d/script/' % self.inventory_id
+        q = {}
+        if self.show_all:
+            q['all'] = 1
         if self.hostname:
-            url_path += '?%s' % urllib.urlencode({'host': self.hostname})
+            q['host'] = self.hostname
         elif self.hostvars:
-            url_path += '?%s' % urllib.urlencode({'hostvars': 1})
+            q['hostvars'] = 1
+        url_path += '?%s' % urllib.urlencode(q)
         url = urlparse.urljoin(url, url_path)
         response = requests.get(url, auth=auth)
         response.raise_for_status()
@@ -112,6 +116,8 @@ class InventoryScript(object):
             self.list_ = self.options.get('list', False)
             self.hostvars = bool(self.options.get('hostvars', False) or
                                  os.getenv('INVENTORY_HOSTVARS', ''))
+            self.show_all = bool(self.options.get('show_all', False) or
+                                 os.getenv('INVENTORY_ALL', ''))
             self.indent = self.options.get('indent', None)
             if self.list_ and self.hostname:
                 raise RuntimeError('Only --list or --host may be specified')
@@ -154,6 +160,10 @@ def main():
                       default=False, help='Return hostvars inline with --list,'
                       ' under ["_meta"]["hostvars"]. Can also be specified '
                       'using INVENTORY_HOSTVARS environment variable.')
+    parser.add_option('--all', action='store_true', dest='show_all',
+                      default=False, help='Return all hosts, including those '
+                      'marked as offline/disabled. Can also be specified '
+                      'using INVENTORY_ALL environment variable.')
     parser.add_option('--host', dest='hostname', default='',
                       help='Return JSON hash of host vars.')
     parser.add_option('--indent', dest='indent', type='int', default=None,

@@ -22,9 +22,9 @@ logger = logging.getLogger('awx.main.signals')
 
 _inventory_updating = threading.local()
 
-def update_inventory_has_active_failures(sender, **kwargs):
+def update_inventory_computed_fields(sender, **kwargs):
     '''
-    Signal handler and wrapper around inventory.update_has_active_failures to
+    Signal handler and wrapper around inventory.update_computed_fields to
     prevent unnecessary recursive calls.
     '''
     if not getattr(_inventory_updating, 'is_updating', False):
@@ -33,6 +33,10 @@ def update_inventory_has_active_failures(sender, **kwargs):
             sender_name = 'group.hosts'
         elif sender == Group.parents.through:
             sender_name = 'group.parents'
+        elif sender == Host.inventory_sources.through:
+            sender_name = 'host.inventory_sources'
+        elif sender == Group.inventory_sources.through:
+            sender_name = 'group.inventory_sources'
         else:
             sender_name = unicode(sender._meta.verbose_name)
         if kwargs['signal'] == post_save:
@@ -45,24 +49,28 @@ def update_inventory_has_active_failures(sender, **kwargs):
             sender_action = 'changed'
         else:
             return
-        logger.debug('%s %s, updating inventory has_active_failures: %r %r',
+        logger.debug('%s %s, updating inventory computed fields: %r %r',
                      sender_name, sender_action, sender, kwargs)
         try:
             _inventory_updating.is_updating = True
             inventory = instance.inventory
             update_hosts = issubclass(sender, Job)
-            inventory.update_has_active_failures(update_hosts=update_hosts)
+            inventory.update_computed_fields(update_hosts=update_hosts)
         finally:
             _inventory_updating.is_updating = False
 
-post_save.connect(update_inventory_has_active_failures, sender=Host)
-post_delete.connect(update_inventory_has_active_failures, sender=Host)
-post_save.connect(update_inventory_has_active_failures, sender=Group)
-post_delete.connect(update_inventory_has_active_failures, sender=Group)
-m2m_changed.connect(update_inventory_has_active_failures, sender=Group.hosts.through)
-m2m_changed.connect(update_inventory_has_active_failures, sender=Group.parents.through)
-post_save.connect(update_inventory_has_active_failures, sender=Job)
-post_delete.connect(update_inventory_has_active_failures, sender=Job)
+post_save.connect(update_inventory_computed_fields, sender=Host)
+post_delete.connect(update_inventory_computed_fields, sender=Host)
+post_save.connect(update_inventory_computed_fields, sender=Group)
+post_delete.connect(update_inventory_computed_fields, sender=Group)
+m2m_changed.connect(update_inventory_computed_fields, sender=Group.hosts.through)
+m2m_changed.connect(update_inventory_computed_fields, sender=Group.parents.through)
+m2m_changed.connect(update_inventory_computed_fields, sender=Host.inventory_sources.through)
+m2m_changed.connect(update_inventory_computed_fields, sender=Group.inventory_sources.through)
+post_save.connect(update_inventory_computed_fields, sender=Job)
+post_delete.connect(update_inventory_computed_fields, sender=Job)
+post_save.connect(update_inventory_computed_fields, sender=InventorySource)
+post_delete.connect(update_inventory_computed_fields, sender=InventorySource)
 
 # Migrate hosts, groups to parent group(s) whenever a group is deleted or
 # marked as inactive.
@@ -98,6 +106,7 @@ def save_related_pks_before_group_marked_inactive(sender, **kwargs):
     instance._saved_parents_pks = set(instance.parents.values_list('pk', flat=True))
     instance._saved_hosts_pks = set(instance.hosts.values_list('pk', flat=True))
     instance._saved_children_pks = set(instance.children.values_list('pk', flat=True))
+    instance._saved_inventory_source_pk = instance.inventory_source.pk
 
 @receiver(post_save, sender=Group)
 def migrate_children_from_inactive_group_to_parent_groups(sender, **kwargs):
@@ -117,6 +126,10 @@ def migrate_children_from_inactive_group_to_parent_groups(sender, **kwargs):
                          child_group, parent_group, instance)
             parent_group.children.add(child_group)
         parent_group.children.remove(instance)
+    inventory_source_pk = getattr(instance, '_saved_inventory_source_pk', None)
+    if inventory_source_pk:
+        inventory_source = InventorySource.objects.get(pk=inventory_source_pk)
+        inventory_source.mark_inactive()
 
 # Update host pointers to last_job and last_job_host_summary when a job is
 # marked inactive or deleted.

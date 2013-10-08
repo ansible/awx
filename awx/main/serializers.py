@@ -21,6 +21,7 @@ from django.utils.translation import ugettext_lazy as _
 
 # Django REST Framework
 from rest_framework.compat import get_concrete_model
+from rest_framework import fields
 from rest_framework import serializers
 
 # AWX
@@ -57,6 +58,18 @@ SUMMARIZABLE_FK_FIELDS = {
     'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'inventory_source': ('source', 'last_updated', 'status'),
 }
+
+class ChoiceField(fields.ChoiceField):
+
+    def metadata(self):
+        metadata = super(ChoiceField, self).metadata()
+        if self.choices:
+            metadata['choices'] = self.choices
+        return metadata
+
+# Monkeypatch REST framework to replace default ChoiceField used by
+# ModelSerializer.
+serializers.ChoiceField = ChoiceField
 
 class BaseSerializer(serializers.ModelSerializer):
 
@@ -166,7 +179,6 @@ class UserSerializer(BaseSerializer):
                   'last_name', 'email', 'is_superuser', 'password', 'ldap_dn')
 
     def to_native(self, obj):
-        print obj
         ret = super(UserSerializer, self).to_native(obj)
         ret.pop('password', None)
         ret.fields.pop('password', None)
@@ -344,7 +356,6 @@ class ProjectSerializer(BaseSerializer):
         except ValueError, e:
             raise serializers.ValidationError((e.args or ('Invalid SCM URL',))[0])
         scm_url_parts = urlparse.urlsplit(scm_url)
-        #print scm_url_parts
         if scm_type and not any(scm_url_parts):
             raise serializers.ValidationError('SCM URL is required')
         return attrs
@@ -439,7 +450,8 @@ class InventorySerializer(BaseSerializerWithVariables):
         model = Inventory
         fields = BASE_FIELDS + ('organization', 'variables',
                                 'has_active_failures',
-                                'hosts_with_active_failures')
+                                'hosts_with_active_failures',
+                                'has_inventory_sources')
 
     def get_related(self, obj):
         if obj is None:
@@ -461,7 +473,8 @@ class HostSerializer(BaseSerializerWithVariables):
 
     class Meta:
         model = Host
-        fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures',
+        fields = BASE_FIELDS + ('inventory', 'enabled', 'variables',
+                                'has_active_failures', 'has_inventory_sources',
                                 'last_job', 'last_job_host_summary')
 
     def get_related(self, obj):
@@ -475,6 +488,7 @@ class HostSerializer(BaseSerializerWithVariables):
             all_groups    = reverse('main:host_all_groups_list', args=(obj.pk,)),
             job_events    = reverse('main:host_job_events_list',  args=(obj.pk,)),
             job_host_summaries = reverse('main:host_job_host_summaries_list', args=(obj.pk,)),
+            #inventory_sources = reverse('main:host_inventory_sources_list', args=(obj.pk,)),
         ))
         if obj.last_job:
             res['last_job'] = reverse('main:job_detail', args=(obj.last_job.pk,))
@@ -541,6 +555,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             job_events    = reverse('main:group_job_events_list',   args=(obj.pk,)),
             job_host_summaries = reverse('main:group_job_host_summaries_list', args=(obj.pk,)),
             inventory_source = reverse('main:inventory_source_detail', args=(obj.inventory_source.pk,)),
+            #inventory_sources = reverse('main:group_inventory_sources_list', args=(obj.pk,)),
         ))
         return res
 
@@ -557,7 +572,8 @@ class GroupTreeSerializer(GroupSerializer):
     class Meta:
         model = Group
         fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures',
-                                'children')
+                                'hosts_with_active_failures',
+                                'has_inventory_sources', 'children')
 
     def get_children(self, obj):
         if obj is None:
@@ -605,11 +621,11 @@ class InventorySourceSerializer(BaseSerializer):
     class Meta:
         model = InventorySource
         fields = ('id', 'url', 'related', 'summary_fields', 'created',
-                  'modified', 'group', 'source', 'source_path', 'source_env',
-                  'source_username', 'source_password', 'source_regions',
-                  'source_tags', 'overwrite_hosts', 'overwrite_vars',
-                  'keep_vars', 'update_on_launch', 'last_update_failed',
-                  'status', 'last_updated')
+                  'modified', 'group', 'source', 'source_path',
+                  'source_vars', 'source_username', 'source_password',
+                  'source_regions', 'source_tags', 'overwrite',
+                  'overwrite_vars', 'update_on_launch', 'update_interval',
+                  'last_update_failed', 'status', 'last_updated')
 
     def to_native(self, obj):
         ret = super(InventorySourceSerializer, self).to_native(obj)
@@ -617,6 +633,12 @@ class InventorySourceSerializer(BaseSerializer):
         for field in InventorySource.PASSWORD_FIELDS:
             if field in ret and unicode(ret[field]).startswith('$encrypted$'):
                 ret[field] = '$encrypted$'
+        # Make regions/tags into a list of strings.
+        for field in ('source_regions', 'source_tags'):
+            if field in ret:
+                value = ret[field]
+                if isinstance(value, basestring):
+                    ret[field] = [x.strip() for x in value.split(',') if x.strip()]
         return ret
 
     def restore_object(self, attrs, instance=None):
@@ -624,6 +646,7 @@ class InventorySourceSerializer(BaseSerializer):
         for field in InventorySource.PASSWORD_FIELDS:
             if unicode(attrs.get(field, '')).startswith('$encrypted$'):
                 attrs.pop(field, None)
+        # FIXME: Accept list of strings for regions/tags.
         instance = super(InventorySourceSerializer, self).restore_object(attrs, instance)
         return instance
 
@@ -635,6 +658,8 @@ class InventorySourceSerializer(BaseSerializer):
             group = reverse('main:group_detail', args=(obj.group.pk,)),
             update = reverse('main:inventory_source_update_view', args=(obj.pk,)),
             inventory_updates = reverse('main:inventory_source_updates_list', args=(obj.pk,)),
+            hosts = reverse('main:inventory_source_hosts_list', args=(obj.pk,)),
+            groups = reverse('main:inventory_source_groups_list', args=(obj.pk,)),
         ))
         if obj.current_update:
             res['current_update'] = reverse('main:inventory_update_detail',
@@ -649,6 +674,43 @@ class InventorySourceSerializer(BaseSerializer):
             return {}
         d = super(InventorySourceSerializer, self).get_summary_fields(obj)
         return d
+
+    def validate_source(self, attrs, source):
+        src = attrs.get(source, '')
+        obj = self.object
+        # FIXME
+        return attrs
+
+    def validate_source_vars(self, attrs, source):
+        # source_env must be blank, a valid JSON or YAML dict, or ...
+        # FIXME: support key=value pairs.
+        try:
+            json.loads(attrs.get(source, '').strip() or '{}')
+            return attrs
+        except ValueError:
+            pass
+        try:
+            yaml.safe_load(attrs[source])
+            return attrs
+        except yaml.YAMLError:
+            pass
+        raise serializers.ValidationError('Must be valid JSON or YAML')
+
+    def validate_source_username(self, attrs, source):
+        # FIXME
+        return attrs
+
+    def validate_source_password(self, attrs, source):
+        # FIXME
+        return attrs
+
+    def validate_source_regions(self, attrs, source):
+        # FIXME
+        return attrs
+
+    def validate_source_tags(self, attrs, source):
+        # FIXME
+        return attrs
 
 class InventoryUpdateSerializer(BaseSerializer):
 

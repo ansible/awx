@@ -24,7 +24,7 @@ from django.contrib.auth.models import User
 from awx.main.models import *
 from awx.main.licenses import LicenseReader
 
-LOGGER = None
+logger = logging.getLogger('awx.main.commands.inventory_import')
 
 class ImportException(BaseException):
 
@@ -53,11 +53,11 @@ class MemGroup(object):
 
         group_vars = os.path.join(inventory_base, 'group_vars', name)
         if os.path.exists(group_vars):
-            LOGGER.debug("loading group_vars")
+            logger.debug("loading group_vars")
             self.variables = yaml.load(open(group_vars).read())
 
     def child_group_by_name(self, grp_name, loader):
-        LOGGER.debug("looking for child group: %s" % grp_name)
+        logger.debug("looking for child group: %s" % grp_name)
         if grp_name == 'all':
             return
         # slight hack here, passing in 'self' for all_group but child=True won't use it
@@ -66,14 +66,14 @@ class MemGroup(object):
         for x in self.child_groups:
             if x.name == grp_name:
                  return x
-        LOGGER.debug("adding child group %s to group %s" % (grp.name, self.name))
+        logger.debug("adding child group %s to group %s" % (grp.name, self.name))
         self.child_groups.append(grp)
         return grp
 
     def add_child_group(self, grp):
         assert grp.name is not 'all'
 
-        LOGGER.debug("adding child group %s to group %s" % (grp.name, self.name))
+        logger.debug("adding child group %s to group %s" % (grp.name, self.name))
  
         assert type(grp) == MemGroup
         if grp not in self.child_groups:
@@ -82,33 +82,29 @@ class MemGroup(object):
             grp.parents.append(self)
 
     def add_host(self, host):
-        LOGGER.debug("adding host %s to group %s" % (host.name, self.name))
+        logger.debug("adding host %s to group %s" % (host.name, self.name))
        
         assert type(host) == MemHost
         if host not in self.hosts:
             self.hosts.append(host)
 
-    def set_variables(self, values):
-        LOGGER.debug("setting variables %s on group %s" % (values, self.name))
-        self.variables = values
-
     def debug_tree(self):
-        LOGGER.debug("describing tree of group (%s)" % self.name)
+        logger.debug("describing tree of group (%s)" % self.name)
  
-        LOGGER.debug("group: %s, %s" % (self.name, self.variables))
+        logger.debug("group: %s, %s" % (self.name, self.variables))
         for x in self.child_groups:
-            LOGGER.debug("   child: %s" % (x.name))
+            logger.debug("   child: %s" % (x.name))
         for x in self.hosts:
-            LOGGER.debug("   host: %s, %s" % (x.name, x.variables))
+            logger.debug("   host: %s, %s" % (x.name, x.variables))
 
-        LOGGER.debug("---")
+        logger.debug("---")
         for x in self.child_groups:
             x.debug_tree()
 
 class MemHost(object):
 
     def __init__(self, name, inventory_base):
-        LOGGER.debug("adding host name: %s" % name)
+        logger.debug("adding host name: %s" % name)
         assert name is not None
         assert inventory_base is not None
 
@@ -117,23 +113,19 @@ class MemHost(object):
         self.variables = {}
         self.inventory_base = inventory_base
       
-        if name.find(":") != -1:
+        if ':' in name:
             tokens = name.split(":")
             self.name = tokens[0]
-            self.variables['ansible_ssh_port'] = tokens[1]
+            self.variables['ansible_ssh_port'] = int(tokens[1])
 
         if "[" in name:
             raise ImportException("block ranges like host[0:50].example.com are not yet supported by the importer")
 
         host_vars = os.path.join(inventory_base, 'host_vars', name)
         if os.path.exists(host_vars):
-            LOGGER.debug("loading host_vars")
-            self.variables = yaml.load(open(host_vars).read())
+            logger.debug("loading host_vars")
+            self.variables.update(yaml.load(open(host_vars).read()))
     
-    def set_variables(self, values):
-        LOGGER.debug("setting variables %s on host %s" % (values, self.name))
-        self.variables = values
-
 class BaseLoader(object):
 
     def __init__(self, inventory_base=None, all_group=None):
@@ -141,14 +133,12 @@ class BaseLoader(object):
         self.all_group = all_group
 
     def get_host(self, name):
-        if ":" in name:
-            tokens = name.split(":")
-            name = tokens[0]
+        host_name = name.split(':')[0]
         host = None
-        if not name in self.all_group.host_names:
+        if not host_name in self.all_group.host_names:
             host = MemHost(name, self.inventory_base)
-            self.all_group.host_names[name] = host
-        return self.all_group.host_names[name]
+            self.all_group.host_names[host_name] = host
+        return self.all_group.host_names[host_name]
 
     def get_group(self, name, all_group=None, child=False):
         all_group = all_group or self.all_group
@@ -168,10 +158,10 @@ class IniLoader(BaseLoader):
     
     def __init__(self, inventory_base=None, all_group=None):
         super(IniLoader, self).__init__(inventory_base, all_group)
-        LOGGER.debug("processing ini")
+        logger.debug("processing ini")
 
     def load(self, src):
-        LOGGER.debug("loading: %s on %s" % (src, self.all_group))
+        logger.debug("loading: %s on %s" % (src, self.all_group))
 
         if self.inventory_base is None:
             self.inventory_base = os.path.dirname(src)  
@@ -182,11 +172,10 @@ class IniLoader(BaseLoader):
         input_mode = 'host'
 
         for line in lines:
-            if line.find("#"):
-                 tokens = line.split("#")
-                 line = tokens[0]
-
-            if line.startswith("["):
+            line = line.split('#')[0].strip()
+            if not line:
+                continue
+            elif line.startswith("["):
                  # mode change, possible new group name
                  line = line.replace("[","").replace("]","").lstrip().rstrip()
                  if line.find(":vars") != -1:
@@ -202,9 +191,6 @@ class IniLoader(BaseLoader):
                      group = self.get_group(line)
             else:
                  # add a host or variable to the existing group/host
-                 line = line.lstrip().rstrip()
-                 if line == "":
-                     continue
                  tokens = shlex.split(line)
 
                  if input_mode == 'host':
@@ -254,7 +240,7 @@ class ExecutableJsonLoader(BaseLoader):
 
     def __init__(self, inventory_base=None, all_group=None):
         super(ExecutableJsonLoader, self).__init__(inventory_base, all_group)
-        LOGGER.debug("processing executable JSON source")
+        logger.debug("processing executable JSON source")
         self.child_group_names = {}
 
     def command_to_json(self, cmd):
@@ -274,7 +260,7 @@ class ExecutableJsonLoader(BaseLoader):
 
     def load(self, src):
 
-        LOGGER.debug("loading %s onto %s" % (src, self.all_group))
+        logger.debug("loading %s onto %s" % (src, self.all_group))
 
         if self.inventory_base is None:
             self.inventory_base = os.path.dirname(src)
@@ -336,9 +322,9 @@ class ExecutableJsonLoader(BaseLoader):
 
 
 def load_generic(src):
-    LOGGER.debug("analyzing type of source")
+    logger.debug("analyzing type of source")
     if not os.path.exists(src):
-        LOGGER.debug("source missing")
+        logger.debug("source missing")
         raise CommandError("source does not exist")
     if os.path.isdir(src):
         all_group = MemGroup('all', src)
@@ -358,216 +344,251 @@ def load_generic(src):
         all_group = MemGroup('all', os.path.dirname(src))
         IniLoader(None, all_group).load(src)
 
-    LOGGER.debug("loading process complete")
+    logger.debug("loading process complete")
     return all_group
 
 
 class Command(NoArgsCommand):
     '''
-    Management command to import directory, INI, or dynamic inventory
+    Management command to import inventory from a directory, ini file, or
+    dynamic inventory script.
     '''
 
     help = 'Import or sync external inventory sources'
 
     option_list = NoArgsCommand.option_list + (
-        make_option('--inventory-name', dest='inventory_name', type='str', default=None, metavar='n',
-                    help='name of inventory source to sync'),
-        make_option('--inventory-id', dest='inventory_id', type='int', default=None, metavar='i',
-                    help='inventory id to sync'),
-        make_option('--overwrite', dest='overwrite', action='store_true', metavar="o",
-                    default=False, help='overwrite the destination'),
-        make_option('--overwrite-vars', dest='overwrite_vars', action='store_true', metavar="V",
-                    default=False, help='overwrite (rather than merge) variables'),
-        make_option('--keep-vars', dest='keep_vars', action='store_true', metavar="k",
-                    default=False, help='use database variables if set'),
-        make_option('--source', dest='source', type='str', default=None, metavar='s',
-                    help='inventory directory, file, or script to load'),
+        make_option('--inventory-name', dest='inventory_name', type='str',
+                    default=None, metavar='n',
+                    help='name of inventory to sync'),
+        make_option('--inventory-id', dest='inventory_id', type='int',
+                    default=None, metavar='i', help='id of inventory to sync'),
+        make_option('--overwrite', dest='overwrite', action='store_true',
+                    metavar="o", default=False,
+                    help='overwrite the destination hosts and groups'),
+        make_option('--overwrite-vars', dest='overwrite_vars',
+                    action='store_true', metavar="V", default=False,
+                    help='overwrite (rather than merge) variables'),
+        make_option('--keep-vars', dest='keep_vars', action='store_true',
+                    metavar="k", default=False,
+                    help='use database variables if set'),
+        make_option('--source', dest='source', type='str', default=None,
+                    metavar='s', help='inventory directory, file, or script '
+                    'to load'),
     )
 
     def init_logging(self):
         log_levels = dict(enumerate([logging.ERROR, logging.INFO,
                                      logging.DEBUG, 0]))
-        global LOGGER
-        LOGGER = self.logger = logging.getLogger('awx.main.commands.inventory_import')
+        self.logger = logging.getLogger('awx.main.commands.inventory_import')
         self.logger.setLevel(log_levels.get(self.verbosity, 0))
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter('%(message)s'))
         self.logger.addHandler(handler)
         self.logger.propagate = False
 
-    @transaction.commit_on_success
-    def handle_noargs(self, **options):
-        self.verbosity = int(options.get('verbosity', 1))
-        self.init_logging()
-
-        name           = options.get('inventory_name', None)
-        id             = options.get('inventory_id', None)
-        overwrite      = options.get('overwrite', False)
-        overwrite_vars = options.get('overwrite_vars', False)
-        keep_vars      = options.get('keep_vars', False)
-        source         = options.get('source', None)
-
-        LOGGER.debug("name=%s" % name)
-        LOGGER.debug("id=%s" % id)
-
-        if name is not None and id is not None:
-            raise CommandError("--inventory-name and --inventory-id are mutually exclusive")
-        if name is None and id is None:
-            raise CommandError("--inventory-name or --inventory-id is required")
-        if (overwrite or overwrite_vars) and keep_vars:
-            raise CommandError("--overwrite/--overwrite-vars and --keep-vars are mutually exclusive")
-        if not source:
-            raise CommandError("--source is required")
-
-        LOGGER.debug("preparing loader")
-
-        all_group = load_generic(source)
-
-        LOGGER.debug("debugging loaded result")
-        all_group.debug_tree()
-
-        # now that memGroup is correct and supports JSON executables, INI, and trees
-        # now merge and/or overwrite with the database itself!
-
-        if id:
-            inventory = Inventory.objects.filter(pk=id)
+    def load_inventory_from_database(self):
+        '''
+        Load inventory and related objects from the database.
+        '''
+        # Load inventory object based on name or ID.
+        if self.inventory_id:
+            q = dict(id=self.inventory_id)
         else:
-            inventory = Inventory.objects.filter(name=name)
-        count = inventory.count()
-        if count != 1:
-            raise CommandError("%d inventory objects matched, expected 1" % count)        
-        inventory = inventory.all()[0]
+            q = dict(name=self.inventory_name)
+        try:
+            self.inventory = Inventory.objects.get(**q)
+        except Inventory.DoesNotExist:
+            raise CommandError('Inventory with %s = %s cannot be found' % q.items()[0])
+        except Inventory.MultipleObjectsReturned:
+            raise CommandError('Inventory with %s = %s returned multiple results' % q.items()[0])
+        self.logger.info('Updating inventory %d: %s' % (self.inventory.pk,
+                                                        self.inventory.name))
 
-        LOGGER.info("MODIFYING INVENTORY: %s" % inventory.name)
+        # Load inventory source if specified via environment variable (when
+        # inventory_import is called from an InventoryUpdate task).
+        inventory_source_id = os.getenv('INVENTORY_SOURCE_ID', None)
+        if inventory_source_id:
+            try:
+                self.inventory_source = InventorySource.objects.get(pk=inventory_source_id,
+                                                               inventory=self.inventory)
+            except InventorySource.DoesNotExist:
+                raise CommandError('Inventory source with id=%s not found' % \
+                                   inventory_source_id)
+            self.inventory_update = None
+        # Otherwise, create a new inventory source to capture this invocation
+        # via command line.
+        else:
+            self.inventory_source, created = InventorySource.objects.get_or_create(
+                inventory=self.inventory,
+                group=None,
+                source='file',
+                source_path=os.path.abspath(self.source),
+                overwrite=self.overwrite,
+                overwrite_vars=self.overwrite_vars,
+            )
+            self.inventory_update = self.inventory_source.inventory_updates.create(
+                job_args=json.dumps(sys.argv),
+                job_env=dict(os.environ.items()),
+                job_cwd=os.getcwd(),
+            )
 
-        # if overwrite is set, for each host in the database but NOT in the local
-        # list, delete it. Delete individually so signal handlers will run.
-        if overwrite:
-            LOGGER.info("deleting any hosts not in the remote source: %s" % all_group.host_names.keys())
-            for host in Host.objects.exclude(name__in = all_group.host_names.keys()).filter(inventory=inventory):
+        # FIXME: Wait or raise error if inventory is being updated by another
+        # source.
+
+    def load_into_database(self):
+        '''
+        Load inventory from in-memory groups to the database, overwriting or
+        merging as appropriate.
+        '''
+
+        # If overwrite is set, for each host in the database that is NOT in
+        # the local list, delete it. When importing from a cloud inventory
+        # source attached to a specific group, only delete hosts beneath that
+        # group.  Delete each host individually so signal handlers will run.
+        if self.overwrite:
+            self.logger.debug('deleting any hosts not in the remote source')
+            if self.inventory_source.group:
+                del_hosts = self.inventory_source.group.all_hosts
+                # FIXME: Also include hosts from inventory_source.managed_hosts?
+            else:
+                del_hosts = self.inventory.hosts.all()
+            del_hosts = del_hosts.exclude(name__in=self.all_group.host_names.keys())
+            for host in del_hosts:
                 host.delete()
 
-        # if overwrite is set, for each group in the database but NOT in the local
-        # list, delete it. Delete individually so signal handlers will run.
-        if overwrite:
-            LOGGER.info("deleting any groups not in the remote source")
-            for group in Group.objects.exclude(name__in = all_group.group_names.keys()).filter(inventory=inventory):
+        # If overwrite is set, for each group in the database that is NOT in
+        # the local list, delete it. When importing from a cloud inventory
+        # source attached to a specific group, only delete children of that
+        # group.  Delete each group individually so signal handlers will run.
+        if self.overwrite:
+            self.logger.debug('deleting any groups not in the remote source')
+            if self.inventory_source.group:
+                del_groups = self.inventory_source.group.all_children
+                # FIXME: Also include groups from inventory_source.managed_groups?
+            else:
+                del_groups = self.inventory.groups.all()
+            del_groups = del_groups.exclude(name__in=self.all_group.group_names.keys())
+            for group in del_groups:
                 group.delete()
 
-        # if overwrite is set, throw away all invalid child relationships for groups
-        if overwrite:
-            LOGGER.info("clearing any child relationships to rebuild from remote source")
-            db_groups = Group.objects.filter(inventory=inventory)
+        # If overwrite is set, clear all invalid child relationships for groups
+        # and all invalid host memberships.  When importing from a cloud
+        # inventory source attached to a specific group, only clear
+        # relationships for hosts and groups that are beneath the inventory
+        # source group.
+        if self.overwrite:
+            self.logger.info("clearing any child relationships to rebuild from remote source")
+            if self.inventory_source.group:
+                db_groups = self.inventory_source.group.all_children
+            else:
+                db_groups = self.inventory.groups.all()
 
             for db_group in db_groups:
-                 db_kids = db_group.children.all()
-                 mem_kids = all_group.group_names[db_group.name].child_groups
-                 mem_kid_names = [ k.name for k in mem_kids ]
-                 removed = False
-                 for db_kid in db_kids:
-                     if db_kid.name not in mem_kid_names:
-                         removed = True
-                         LOGGER.debug("removing non-DB kid: %s" % (db_kid.name))
-                         db_group.children.remove(db_kid)
-                 if removed:
-                     db_group.save()
+                db_kids = db_group.children.all()
+                mem_kids = self.all_group.group_names[db_group.name].child_groups
+                mem_kid_names = [ k.name for k in mem_kids ]
+                for db_kid in db_kids:
+                    if db_kid.name not in mem_kid_names:
+                        self.logger.debug("removing non-DB kid: %s" % (db_kid.name))
+                        db_group.children.remove(db_kid)
 
-        # Update/overwrite inventory variables from "all" group.
-        db_variables = inventory.variables_dict
-        mem_variables = all_group.variables
-        if overwrite_vars or overwrite:
-            LOGGER.info('replacing inventory variables from "all" group')
+                db_hosts = db_group.hosts.all()
+                mem_hosts = self.all_group.group_names[db_group.name].hosts
+                mem_host_names = [ h.name for h in mem_hosts ]
+                for db_host in db_hosts:
+                    if db_host.name not in mem_host_names:
+                        self.logger.debug("removing non-DB host: %s" % (db_host.name))
+                        db_group.hosts.remove(db_host)
+
+        # Update/overwrite variables from "all" group.  If importing from a
+        # cloud source attached to a specific group, variables will be set on
+        # the base group, otherwise they will be set on the inventory.
+        if self.inventory_source.group:
+            all_obj = self.inventory_source.group
+            all_obj.inventory_sources.add(self.inventory_source)
+        else:
+            all_obj = self.inventory
+        db_variables = all_obj.variables_dict
+        mem_variables = self.all_group.variables
+        if self.overwrite_vars or self.overwrite:
+            self.logger.info('replacing inventory variables from "all" group')
             db_variables = mem_variables
         else:
-            LOGGER.info('updating inventory variables from "all" group')
+            self.logger.info('updating inventory variables from "all" group')
             db_variables.update(mem_variables)
-        inventory.variables = json.dumps(db_variables)
-        inventory.save()
+        all_obj.variables = json.dumps(db_variables)
+        all_obj.save(update_fields=['variables'])
 
-        # this will be slightly inaccurate, but attribute to first superuser.
-        user = User.objects.filter(is_superuser=True)[0]
+        # FIXME: Attribute changes to superuser?
 
-        db_groups = Group.objects.filter(inventory=inventory)
-        db_hosts  = Host.objects.filter(inventory=inventory)
-        db_group_names = [ g.name for g in db_groups ]
-        db_host_names  = [ h.name for h in db_hosts  ] 
+        # For each group in the local list, create it if it doesn't exist in
+        # the database.  Otherwise, update/replace database variables from the
+        # imported data.  Associate with the inventory source group if
+        # importing from cloud inventory source.
+        for k,v in self.all_group.group_names.iteritems():
+            variables = json.dumps(v.variables)
+            defaults = dict(variables=variables, description='imported')
+            group, created = self.inventory.groups.get_or_create(name=k,
+                                                                 defaults=defaults)
+            if created:
+                self.logger.info('inserting new group %s' % k)
+            else:
+                self.logger.info('updating existing group %s' % k)
+                db_variables = group.variables_dict
+                mem_variables = v.variables
+                if self.overwrite_vars or self.overwrite:
+                    db_variables = mem_variables
+                else:
+                    db_variables.update(mem_variables)
+                group.variables = json.dumps(db_variables)
+                group.save(update_fields=['variables'])
+            if self.inventory_source.group:
+                self.inventory_source.group.children.add(group)
+            group.inventory_sources.add(self.inventory_source)
 
-        # for each group not in the database but in the local list, create it
-        for (k,v) in all_group.group_names.iteritems():
-            if k not in db_group_names:
-                variables = json.dumps(v.variables)
-                LOGGER.info("inserting new group %s" % k)
-                host = Group.objects.create(inventory=inventory, name=k, variables=variables, created_by=user,
-                   description="imported")                
-                host.save()
-
-        # for each host not in the database but in the local list, create it
-        for (k,v) in all_group.host_names.iteritems():
-            if k not in db_host_names:
-                variables = json.dumps(v.variables)
-                LOGGER.info("inserting new host %s" % k)
-                group = Host.objects.create(inventory=inventory, name=k, variables=variables, created_by=user,
-                    description="imported")
-                group.save()
-
-        # if overwrite is set, clear any host membership on all hosts that should not exist
-        if overwrite:
-            LOGGER.info("purging host group memberships")
-            db_groups = Group.objects.filter(inventory=inventory)
-
-            for db_group in db_groups:
-                 db_hosts = db_group.hosts.all()
-                 mem_hosts = all_group.group_names[db_group.name].hosts
-                 mem_host_names = [ h.name for h in mem_hosts ]
-                 removed = False
-                 for db_host in db_hosts:
-                     if db_host.name not in mem_host_names:
-                         removed = True
-                         LOGGER.debug("removing non-DB host: %s" % (db_host.name))
-                         db_group.hosts.remove(db_host)
-                 if removed:
-                     db_group.save()
-
+        # For each host in the local list, create it if it doesn't exist in
+        # the database.  Otherwise, update/replace database variables from the
+        # imported data.  Associate with the inventory source group if
+        # importing from cloud inventory source.
+        for k,v in self.all_group.host_names.iteritems():
+            variables = json.dumps(v.variables)
+            defaults = dict(variables=variables, description='imported')
+            host, created = self.inventory.hosts.get_or_create(name=k,
+                                                               defaults=defaults)
+            if created:
+                self.logger.info('inserting new host %s' % k)
+            else:
+                self.logger.info('updating existing host %s' % k)
+                db_variables = host.variables_dict
+                mem_variables = v.variables
+                if self.overwrite_vars or self.overwrite:
+                    db_variables = mem_variables
+                else:
+                    db_variables.update(mem_variables)
+                host.variables = json.dumps(db_variables)
+                host.save(update_fields=['variables'])
+            if self.inventory_source.group:
+                self.inventory_source.group.hosts.add(host)
+            host.inventory_sources.add(self.inventory_source)
 
         # for each host in a mem group, add it to the parents to which it belongs
-        # FIXME: confirm Django is ok with calling add twice and not making two rows
-        for (k,v) in all_group.group_names.iteritems():
-            LOGGER.info("adding parent arrangements for %s" % k)
-            db_group = Group.objects.get(name=k, inventory__pk=inventory.pk)
+        for (k,v) in self.all_group.group_names.iteritems():
+            self.logger.info("adding parent arrangements for %s" % k)
+            db_group = Group.objects.get(name=k, inventory__pk=self.inventory.pk)
             mem_hosts = v.hosts
             for h in mem_hosts:
-                db_host = Host.objects.get(name=h.name, inventory__pk=inventory.pk)
+                db_host = Host.objects.get(name=h.name, inventory__pk=self.inventory.pk)
                 db_group.hosts.add(db_host)
-                LOGGER.debug("*** ADDING %s to %s ***" % (db_host, db_group))
-            #db_group.save()
-
-        def variable_mangler(model, mem_hash, overwrite, overwrite_vars):
-            db_collection = model.objects.filter(inventory=inventory)
-            for obj in db_collection:
-               if obj.name in mem_hash:
-                   mem_group = mem_hash[obj.name]
-                   db_variables = json.loads(obj.variables)
-                   mem_variables = mem_group.variables
-                   if overwrite_vars or overwrite:
-                       db_variables = mem_variables
-                   else:
-                       db_variables.update(mem_variables)
-                   db_variables = json.dumps(db_variables)
-                   obj.variables = db_variables
-                   obj.save()
-
-        variable_mangler(Group, all_group.group_names, overwrite, overwrite_vars)
-        variable_mangler(Host,  all_group.host_names,  overwrite, overwrite_vars)
+                self.logger.debug("*** ADDING %s to %s ***" % (db_host, db_group))
   
         # for each group, draw in child group arrangements
-        # FIXME: confirm django add behavior as above
-        for (k,v) in all_group.group_names.iteritems():
-            db_group = Group.objects.get(inventory=inventory, name=k)
+        for (k,v) in self.all_group.group_names.iteritems():
+            db_group = Group.objects.get(inventory=self.inventory, name=k)
             for mem_child_group in v.child_groups:
-                db_child = Group.objects.get(inventory=inventory, name=mem_child_group.name)
+                db_child = Group.objects.get(inventory=self.inventory, name=mem_child_group.name)
                 db_group.children.add(db_child)
-            #db_group.save()
 
+    def check_license(self):
         reader = LicenseReader()
         license_info = reader.from_file()
         available_instances = license_info.get('available_instances', 0)
@@ -575,10 +596,71 @@ class Command(NoArgsCommand):
         new_count = Host.objects.filter(active=True).count()
         if free_instances < 0:
             if license_info.get('demo', False):
-                raise ImportError("demo mode free license count exceeded, would bring available instances to %s, demo mode allows %s, see http://ansibleworks.com/ansibleworks-awx for licensing information" % (new_count, available_instances))
+                raise CommandError("demo mode free license count exceeded, would bring available instances to %s, demo mode allows %s, see http://ansibleworks.com/ansibleworks-awx for licensing information" % (new_count, available_instances))
             else:
-                raise ImportError("number of licensed instances exceeded, would bring available instances to %s, system is licensed for %s, see http://ansibleworks.com/ansibleworks-awx for license extension information" % (new_count, available_instances))
+                raise CommandError("number of licensed instances exceeded, would bring available instances to %s, system is licensed for %s, see http://ansibleworks.com/ansibleworks-awx for license extension information" % (new_count, available_instances))
+
+    @transaction.commit_on_success
+    def handle_noargs(self, **options):
+        self.verbosity = int(options.get('verbosity', 1))
+        self.init_logging()
+        self.inventory_name = options.get('inventory_name', None)
+        self.inventory_id = options.get('inventory_id', None)
+        self.overwrite = bool(options.get('overwrite', False))
+        self.overwrite_vars = bool(options.get('overwrite_vars', False))
+        self.keep_vars = bool(options.get('keep_vars', False))
+        self.source = options.get('source', None)
+
+        # Load inventory and related objects from database.
+        if self.inventory_name and self.inventory_id:
+            raise CommandError('--inventory-name and --inventory-id are mutually exclusive')
+        elif not self.inventory_name and not self.inventory_id:
+            raise CommandError('--inventory-name or --inventory-id is required')
+        if (self.overwrite or self.overwrite_vars) and self.keep_vars:
+            raise CommandError('--overwrite/--overwrite-vars and --keep-vars are mutually exclusive')
+        if not self.source:
+            raise CommandError('--source is required')
+
+        self.load_inventory_from_database()
+
+        status, tb, exc = 'error', '', None
+        try:
+            # Update inventory update for this command line invocation.
+            if self.inventory_update:
+                self.inventory_update.status = 'running'
+                self.inventory_update.save()
+                transaction.commit()
+
+            self.logger.debug('preparing to load from %s' % self.source)
+            self.all_group = load_generic(self.source)
+            self.logger.debug('debugging loaded result:')
+            self.all_group.debug_tree()
+
+            # now that memGroup is correct and supports JSON executables, INI, and trees
+            # now merge and/or overwrite with the database itself!
+
+            self.load_into_database()
+            self.check_license()
  
-        LOGGER.info("inventory import complete, %s, id=%s" % (inventory.name, inventory.id))
+            self.logger.info("inventory import complete, %s, id=%s" % \
+                             (self.inventory.name, self.inventory.id))
+            status = 'successful'
+        except Exception, e:
+            if isinstance(e, KeyboardInterrupt):
+                status = 'canceled'
+                exc = e
+            else:
+                tb = traceback.format_exc()
+                exc = e
+            if self.inventory_update:
+                transaction.rollback()
 
-
+        if self.inventory_update:
+            self.inventory_update = InventoryUpdate.objects.get(pk=self.inventory_update.pk)
+            self.inventory_update.result_traceback = tb
+            self.inventory_update.status = status
+            self.inventory_update.save(update_fields=['status', 'result_traceback'])
+            transaction.commit()
+            
+        if exc:
+            raise exc

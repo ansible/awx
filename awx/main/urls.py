@@ -74,6 +74,7 @@ host_urls = patterns('awx.main.views',
     url(r'^(?P<pk>[0-9]+)/all_groups/$',                'host_all_groups_list'),
     url(r'^(?P<pk>[0-9]+)/job_events/',                 'host_job_events_list'),
     url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'host_job_host_summaries_list'),
+    #url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'host_inventory_sources_list'),
 )
 
 group_urls = patterns('awx.main.views',
@@ -86,12 +87,15 @@ group_urls = patterns('awx.main.views',
     url(r'^(?P<pk>[0-9]+)/job_events/$',                'group_job_events_list'),
     url(r'^(?P<pk>[0-9]+)/job_host_summaries/$',        'group_job_host_summaries_list'),
     url(r'^(?P<pk>[0-9]+)/potential_children/$',        'group_potential_children_list'),
+    #url(r'^(?P<pk>[0-9]+)/inventory_sources/$',         'group_inventory_sources_list'),
 )
 
 inventory_source_urls = patterns('awx.main.views',
     url(r'^(?P<pk>[0-9]+)/$',                           'inventory_source_detail'),
     url(r'^(?P<pk>[0-9]+)/update/$',                    'inventory_source_update_view'),
     url(r'^(?P<pk>[0-9]+)/inventory_updates/$',         'inventory_source_updates_list'),
+    #url(r'^(?P<pk>[0-9]+)/groups/$',                    'inventory_source_groups_list'),
+    #url(r'^(?P<pk>[0-9]+)/hosts/$',                     'inventory_source_hosts_list'),
 )
 
 inventory_update_urls = patterns('awx.main.views',

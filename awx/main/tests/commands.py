@@ -37,13 +37,15 @@ TEST_PLAYBOOK = '''- hosts: test-group
 '''
 
 TEST_INVENTORY_INI = '''\
+# Some comment about blah blah blah...
+
 [webservers]
 web1.example.com ansible_ssh_host=w1.example.net
 web2.example.com
-web3.example.com
+web3.example.com:1022
 
-[webservers:vars]
-webvar=blah
+[webservers:vars]   # Comment on a section
+webvar=blah         # Comment on an option
 
 [dbservers]
 db1.example.com
@@ -434,13 +436,42 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         ini_file.close()
         self._temp_files.append(self.ini_path)
 
-    def create_test_dir(self):
+    def create_test_dir(self, hostnames=None):
+        hostnames = hostnames or []
         self.inv_dir = tempfile.mkdtemp()
         self._temp_project_dirs.append(self.inv_dir)
         self.create_test_ini(self.inv_dir)
         group_vars = os.path.join(self.inv_dir, 'group_vars')
         os.makedirs(group_vars)
         file(os.path.join(group_vars, 'all'), 'wb').write(TEST_GROUP_VARS)
+        if hostnames:
+            host_vars = os.path.join(self.inv_dir, 'host_vars')
+            os.makedirs(host_vars)
+            for hostname in hostnames:
+                test_host_vars = '''test_hostname: %s''' % hostname
+                file(os.path.join(host_vars, hostname), 'wb').write(test_host_vars)
+
+    def check_adhoc_inventory_source(self, inventory, except_host_pks=None,
+                                     except_group_pks=None):
+        # Check that management command created a new inventory source and
+        # related inventory update.
+        inventory_sources = inventory.inventory_sources.filter(group=None)
+        self.assertEqual(inventory_sources.count(), 1)
+        inventory_source = inventory_sources[0]
+        self.assertEqual(inventory_source.source, 'file')
+        self.assertEqual(inventory_source.inventory_updates.count(), 1)
+        inventory_update = inventory_source.inventory_updates.all()[0]
+        self.assertEqual(inventory_update.status, 'successful')
+        for host in inventory.hosts.all():
+            if host.pk in (except_host_pks or []):
+                continue
+            source_pks = host.inventory_sources.values_list('pk', flat=True)
+            self.assertTrue(inventory_source.pk in source_pks)
+        for group in inventory.groups.all():
+            if group.pk in (except_group_pks or []):
+                continue
+            source_pks = group.inventory_sources.values_list('pk', flat=True)
+            self.assertTrue(inventory_source.pk in source_pks)
 
     def test_invalid_options(self):
         inventory_id = self.inventories[0].pk
@@ -491,14 +522,14 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                                                   inventory_id=invalid_id,
                                                   source=self.ini_path)
         self.assertTrue(isinstance(result, CommandError), result)
-        self.assertTrue('matched' in str(result))
+        self.assertTrue('found' in str(result))
         # Invalid inventory name.
         invalid_name = 'invalid inventory name'
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_name=invalid_name,
                                                   source=self.ini_path)
         self.assertTrue(isinstance(result, CommandError), result)
-        self.assertTrue('matched' in str(result))
+        self.assertTrue('found' in str(result))
 
     def test_ini_file(self, source=None):
         inv_src = source or self.ini_path
@@ -532,6 +563,10 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
             if host.name == 'web1.example.com':
                 self.assertEqual(host.variables_dict,
                                 {'ansible_ssh_host': 'w1.example.net'})
+            elif host.name in ('db1.example.com', 'db2.example.com') and source and os.path.isdir(source):
+                self.assertEqual(host.variables_dict, {'test_hostname': host.name})
+            elif host.name == 'web3.example.com':
+                self.assertEqual(host.variables_dict, {'ansible_ssh_port': 1022})
             else:
                 self.assertEqual(host.variables_dict, {})
         for group in new_inv.groups.all():
@@ -553,10 +588,105 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                 host_names = set(['web1.example.com','web2.example.com',
                                   'web3.example.com'])
                 self.assertEqual(hosts, host_names)
+        self.check_adhoc_inventory_source(new_inv)
 
     def test_dir_with_ini_file(self):
-        self.create_test_dir()
+        self.create_test_dir(hostnames=['db1.example.com', 'db2.example.com'])
         self.test_ini_file(self.inv_dir)
+
+    def test_merge_from_ini_file(self, overwrite=False, overwrite_vars=False):
+        new_inv_vars = json.dumps({'varc': 'C'})
+        new_inv = self.organizations[0].inventories.create(name='inv123',
+                                                           variables=new_inv_vars)
+        lb_host_vars = json.dumps({'lbvar': 'ni!'})
+        lb_host = new_inv.hosts.create(name='lb.example.com',
+                                       variables=lb_host_vars)
+        lb_group = new_inv.groups.create(name='lbservers')
+        servers_group_vars = json.dumps({'vard': 'D'})
+        servers_group = new_inv.groups.create(name='servers',
+                                              variables=servers_group_vars)
+        servers_group.children.add(lb_group)
+        lb_group.hosts.add(lb_host)
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=self.ini_path,
+                                                  overwrite=overwrite,
+                                                  overwrite_vars=overwrite_vars)
+        self.assertEqual(result, None)
+        # Check that inventory is populated as expected.
+        new_inv = Inventory.objects.get(pk=new_inv.pk)
+        expected_group_names = set(['servers', 'dbservers', 'webservers',
+                                    'lbservers'])
+        if overwrite:
+            expected_group_names.remove('lbservers')
+        group_names = set(new_inv.groups.values_list('name', flat=True))
+        self.assertEqual(expected_group_names, group_names)
+        expected_host_names = set(['web1.example.com', 'web2.example.com',
+                                   'web3.example.com', 'db1.example.com',
+                                   'db2.example.com', 'lb.example.com'])
+        if overwrite:
+            expected_host_names.remove('lb.example.com')
+        host_names = set(new_inv.hosts.values_list('name', flat=True))
+        self.assertEqual(expected_host_names, host_names)
+        expected_inv_vars = {'vara': 'A', 'varc': 'C'}
+        if overwrite or overwrite_vars:
+            expected_inv_vars.pop('varc')
+        self.assertEqual(new_inv.variables_dict, expected_inv_vars)
+        for host in new_inv.hosts.all():
+            if host.name == 'web1.example.com':
+                self.assertEqual(host.variables_dict,
+                                {'ansible_ssh_host': 'w1.example.net'})
+            elif host.name == 'web3.example.com':
+                self.assertEqual(host.variables_dict, {'ansible_ssh_port': 1022})
+            elif host.name == 'lb.example.com':
+                self.assertEqual(host.variables_dict, {'lbvar': 'ni!'})
+            else:
+                self.assertEqual(host.variables_dict, {})
+        for group in new_inv.groups.all():
+            if group.name == 'servers':
+                expected_vars = {'varb': 'B', 'vard': 'D'}
+                if overwrite or overwrite_vars:
+                    expected_vars.pop('vard')
+                self.assertEqual(group.variables_dict, expected_vars)
+                children = set(group.children.values_list('name', flat=True))
+                expected_children = set(['dbservers', 'webservers', 'lbservers'])
+                if overwrite:
+                    expected_children.remove('lbservers')
+                self.assertEqual(children, expected_children)
+                self.assertEqual(group.hosts.count(), 0)
+            elif group.name == 'dbservers':
+                self.assertEqual(group.variables_dict, {'dbvar': 'ugh'})
+                self.assertEqual(group.children.count(), 0)
+                hosts = set(group.hosts.values_list('name', flat=True))
+                host_names = set(['db1.example.com','db2.example.com'])
+                self.assertEqual(hosts, host_names)                
+            elif group.name == 'webservers':
+                self.assertEqual(group.variables_dict, {'webvar': 'blah'})
+                self.assertEqual(group.children.count(), 0)
+                hosts = set(group.hosts.values_list('name', flat=True))
+                host_names = set(['web1.example.com','web2.example.com',
+                                  'web3.example.com'])
+                self.assertEqual(hosts, host_names)
+            elif group.name == 'lbservers':
+                self.assertEqual(group.variables_dict, {})
+                self.assertEqual(group.children.count(), 0)
+                hosts = set(group.hosts.values_list('name', flat=True))
+                host_names = set(['lb.example.com'])
+                self.assertEqual(hosts, host_names)
+        if overwrite:
+            except_host_pks = set()
+            except_group_pks = set()
+        else:
+            except_host_pks = set([lb_host.pk])
+            except_group_pks = set([lb_group.pk])
+        self.check_adhoc_inventory_source(new_inv, except_host_pks,
+                                          except_group_pks)
+
+    def test_overwrite_vars_from_ini_file(self):
+        self.test_merge_from_ini_file(overwrite_vars=True)
+
+    def test_overwrite_from_ini_file(self):
+        self.test_merge_from_ini_file(overwrite=True)
 
     def test_executable_file(self):
         # New empty inventory.
@@ -572,8 +702,6 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         rest_api_url = urlparse.urlunsplit([parts.scheme, netloc, parts.path,
                                             parts.query, parts.fragment])
         os.environ.setdefault('REST_API_URL', rest_api_url)
-        #os.environ.setdefault('REST_API_TOKEN',
-        #                      self.super_django_user.auth_token.key)
         os.environ['INVENTORY_ID'] = str(old_inv.pk)        
         source = os.path.join(os.path.dirname(__file__), '..', '..', 'plugins',
                               'inventory', 'awx.py')
@@ -602,6 +730,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
             old_hosts = set(old_group.hosts.values_list('name', flat=True))
             new_hosts = set(new_group.hosts.values_list('name', flat=True))
             self.assertEqual(old_hosts, new_hosts)
+        self.check_adhoc_inventory_source(new_inv)
 
     def test_executable_file_with_meta_hostvars(self):
         os.environ['INVENTORY_HOSTVARS'] = '1'

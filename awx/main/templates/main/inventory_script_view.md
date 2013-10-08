@@ -18,6 +18,11 @@ separate API request for each host.  Refer to
 [Tuning the External Inventory Script](http://www.ansibleworks.com/docs/api.html#tuning-the-external-inventory-script)
 for more information on this feature.
 
+_(New in AWX 1.4)_ By default, the inventory script will only return hosts that
+are enabled in the inventory.  This feature allows disabled hosts to be skipped
+when running jobs without removing them from the inventory.  Specify a query
+string of `?all=1` to return all hosts, including disabled ones.
+
 ## Host Response
 
 Make a GET request to this resource with a query string similar to

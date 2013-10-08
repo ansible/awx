@@ -622,7 +622,7 @@ class ProjectsTest(BaseTest):
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                    ANSIBLE_TRANSPORT='local',
-                   PROJECT_UPDATE_IDLE_TIMEOUT=30,
+                   PROJECT_UPDATE_IDLE_TIMEOUT=60,
                    PROJECT_UPDATE_VVV=True)
 class ProjectUpdatesTest(BaseTransactionTest):
 

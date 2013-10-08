@@ -520,7 +520,7 @@ class RunJobTest(BaseCeleryTest):
         host.name = '_'.join(host.name.split('_')[3:]) or 'undeleted host'
         host.active = True
         host.save()
-        host.update_has_active_failures()
+        host.update_computed_fields()
         self.group = Group.objects.get(pk=self.group.pk)
         self.assertTrue(self.group.has_active_failures)
         self.inventory = Inventory.objects.get(pk=self.inventory.pk)
@@ -552,7 +552,7 @@ class RunJobTest(BaseCeleryTest):
         host.last_job = job
         host.last_job_host_summary = JobHostSummary.objects.get(job=job, host=host)
         host.save()
-        job.inventory.update_has_active_failures()
+        job.inventory.update_computed_fields()
         self.host = Host.objects.get(pk=self.host.pk)
         self.assertTrue(self.host.has_active_failures)
         self.group = Group.objects.get(pk=self.group.pk)

@@ -992,6 +992,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
                              inventory_update.result_traceback)
         else:
             pass # If should_fail is None, we don't care.
+        return inventory_update
 
     def check_inventory_source(self, inventory_source):
         inventory_source = InventorySource.objects.get(pk=inventory_source.pk)
@@ -999,26 +1000,35 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.assertTrue(inventory_source.can_update)
         self.assertEqual(inventory.groups.count(), 1)
         self.assertEqual(inventory.hosts.count(), 0)
-        self.check_inventory_update(inventory_source)
+        inventory_update = self.check_inventory_update(inventory_source)
+        inventory_source = InventorySource.objects.get(pk=inventory_source.pk)
         self.assertNotEqual(inventory.groups.count(), 1)
         self.assertNotEqual(inventory.hosts.count(), 0)
+        for host in inventory.hosts.all():
+            source_pks = host.inventory_sources.values_list('pk', flat=True)
+            self.assertTrue(inventory_source.pk in source_pks)
+        for group in inventory.groups.all():
+            source_pks = group.inventory_sources.values_list('pk', flat=True)
+            self.assertTrue(inventory_source.pk in source_pks)
 
     def test_update_from_ec2(self):
         source_username = getattr(settings, 'TEST_AWS_ACCESS_KEY_ID', '')
         source_password = getattr(settings, 'TEST_AWS_SECRET_ACCESS_KEY', '')
+        source_regions = getattr(settings, 'TEST_AWS_REGIONS', 'all')
         if not all([source_username, source_password]):
             self.skipTest('no test ec2 credentials defined!')
         inventory_source = self.update_inventory_source(self.group,
             source='ec2', source_username=source_username,
-            source_password=source_password)
+            source_password=source_password, source_regions=source_regions)
         self.check_inventory_source(inventory_source)
 
     def test_update_from_rackspace(self):
         source_username = getattr(settings, 'TEST_RACKSPACE_USERNAME', '')
         source_password = getattr(settings, 'TEST_RACKSPACE_API_KEY', '')
+        source_regions = getattr(settings, 'TEST_RACKSPACE_REGIONS', '')
         if not all([source_username, source_password]):
             self.skipTest('no test rackspace credentials defined!')
         inventory_source = self.update_inventory_source(self.group,
             source='rackspace', source_username=source_username,
-            source_password=source_password)
+            source_password=source_password, source_regions=source_regions)
         self.check_inventory_source(inventory_source)

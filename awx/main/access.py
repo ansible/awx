@@ -446,12 +446,17 @@ class InventorySourceAccess(BaseAccess):
         return obj and self.user.can_access(Group, 'read', obj.group)
 
     def can_add(self, data):
-        # Automatically created from group.
+        # Automatically created from group or management command.
         return False
 
     def can_change(self, obj, data):
         # Checks for admin or change permission on group.
-        return obj and self.user.can_access(Group, 'change', obj.group, None)
+        if obj and obj.group:
+            return self.user.can_access(Group, 'change', obj.group, None)
+        # Can't change inventory sources attached to only the inventory, since
+        # these are created automatically from the management command.
+        else:
+            return False
 
 class InventoryUpdateAccess(BaseAccess):
     '''

@@ -639,9 +639,13 @@ class InventoryScriptView(RetrieveAPIView):
         self.object = self.get_object()
         hostname = request.QUERY_PARAMS.get('host', '')
         hostvars = bool(request.QUERY_PARAMS.get('hostvars', ''))
+        show_all = bool(request.QUERY_PARAMS.get('all', ''))
+        if show_all:
+            hosts_q = dict(active=True)
+        else:
+            hosts_q = dict(active=True, enabled=True)
         if hostname:
-            host = get_object_or_404(self.object.hosts, active=True,
-                                     name=hostname)
+            host = get_object_or_404(self.object.hosts, name=hostname, **hosts_q)
             data = host.variables_dict
         else:
             data = SortedDict()
@@ -650,7 +654,7 @@ class InventoryScriptView(RetrieveAPIView):
                 data['all']['vars'] = self.object.variables_dict
 
             for group in self.object.groups.filter(active=True):
-                hosts = group.hosts.filter(active=True)
+                hosts = group.hosts.filter(**hosts_q)
                 children = group.children.filter(active=True)
                 group_info = SortedDict()
                 group_info['hosts'] = list(hosts.values_list('name', flat=True))
@@ -661,15 +665,15 @@ class InventoryScriptView(RetrieveAPIView):
             if hostvars:
                 data.setdefault('_meta', SortedDict())
                 data['_meta'].setdefault('hostvars', SortedDict())
-                for host in self.object.hosts.filter(active=True):
+                for host in self.object.hosts.filter(**hosts_q):
                     data['_meta']['hostvars'][host.name] = host.variables_dict
 
             # workaround for Ansible inventory bug (github #3687), localhost
             # must be explicitly listed in the all group for dynamic inventory
             # scripts to pick it up.
             localhost_names = ('localhost', '127.0.0.1', '::1')
-            localhosts_qs = self.object.hosts.filter(active=True,
-                                                     name__in=localhost_names)
+            localhosts_qs = self.object.hosts.filter(name__in=localhost_names,
+                                                     **hosts_q)
             localhosts = list(localhosts_qs.values_list('name', flat=True))
             if localhosts:
                 data.setdefault('all', SortedDict())
