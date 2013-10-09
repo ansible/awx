@@ -162,7 +162,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             $('#inventory-node ins').first().remove();
             $('#inventory-node a ins').first().css('background-image', 'none').append('<i class="icon-sitemap"></i>').css('margin-right','10px');
             
-            $('#tree-view').parent().css('opacity','100'); // all our changes are done. display the tree
+            $('#tree-view ul').first().css('opacity','100'); // all our changes are done. display the tree
             scope['treeLoading'] = false;
             Wait('stop');
             
@@ -409,7 +409,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             TreeInit(scope.TreeParams);
             });
         
-        $('#tree-view').parent().css('opacity','0');   //Hide the tree until all the changes are made
+        $('#tree-view ul').first().css('opacity','0');   //Hide the tree until all the changes are made
         scope.treeLoading = true;
         LoadInventory({ scope: scope, doPostSteps: true });
         
