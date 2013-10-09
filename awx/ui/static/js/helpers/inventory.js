@@ -14,8 +14,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                     'InventoryFormDefinition', 'ParseHelper', 'InventorySummaryDefinition'
                                     ]) 
 
-    .factory('LoadTreeData', ['Alert', 'Rest', 'Authorization', '$http', 'Wait', 'SortNodes',
-    function(Alert, Rest, Authorization, $http, Wait, SortNodes) {
+    .factory('LoadTreeData', ['Alert', 'Rest', 'Authorization', '$http', 'Wait', 'SortNodes', 'HideElement',
+    function(Alert, Rest, Authorization, $http, Wait, SortNodes, HideElement) {
     return function(params) {
 
         var scope = params.scope;
@@ -95,8 +95,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
 
 
     .factory('TreeInit', ['Alert', 'Rest', 'Authorization', '$http', 'LoadTreeData', 'GetBasePath', 'ProcessErrors', 'Wait',
-        'LoadRootGroups',
-    function(Alert, Rest, Authorization, $http, LoadTreeData, GetBasePath, ProcessErrors, Wait, LoadRootGroups) {
+        'LoadRootGroups', 'ShowElement',
+    function(Alert, Rest, Authorization, $http, LoadTreeData, GetBasePath, ProcessErrors, Wait, LoadRootGroups, ShowElement) {
     return function(params) {
 
         var scope = params.scope;
@@ -120,7 +120,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             var idx = index;
             var selected = (group_idx !== undefined && group_idx !== null) ? group_idx : 'inventory-node';
             json_tree_data = treeData;
-
             $(tree_id).jstree({
                 "core": { //"initially_open":['inventory-node'],
                     "html_titles": true
@@ -157,13 +156,16 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 });
             });
             
-        $(tree_id).bind("loaded.jstree", function () {
-            scope['treeLoading'] = false;
-            Wait('stop');
+        $(tree_id).bind("loaded.jstree", function () {   
             // Force root node styling changes
             $('#tree-view').prepend("<div class=\"title\">Group Selector:</div>");
             $('#inventory-node ins').first().remove();
             $('#inventory-node a ins').first().css('background-image', 'none').append('<i class="icon-sitemap"></i>').css('margin-right','10px');
+            
+            $('#tree-view').parent().css('opacity','100'); // all our changes are done. display the tree
+            scope['treeLoading'] = false;
+            Wait('stop');
+            
             scope.$emit('treeLoaded');
             });
 
@@ -389,8 +391,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         }])
 
 
-    .factory('RefreshTree', ['Alert', 'Rest', 'Authorization', '$http', 'TreeInit', 'LoadInventory',
-    function(Alert, Rest, Authorization, $http, TreeInit, LoadInventory) {
+    .factory('RefreshTree', ['Alert', 'Rest', 'Authorization', '$http', 'TreeInit', 'LoadInventory', 'HideElement',
+    function(Alert, Rest, Authorization, $http, TreeInit, LoadInventory, HideElement) {
     return function(params) {
 
         // Call after an Edit or Add to refresh tree data
@@ -398,58 +400,16 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var scope = params.scope;
         var group_id = params.group_id;
         
-        /*
-        var openId = [];
-        var selectedId;
-
-        if (scope.treeLoadedRemove) {
-           scope.treeLoadedRemove();
-        }
-        scope.treeLoadedRemove = scope.$on('treeLoaded', function() {
-            // Called recursively to pop the next openId node value and open it. 
-            // Opens the list in reverse so that nodes open in parent then child order,
-            // drilling down to the last selected node.
-            var id, node;
-            
-            if (openId.length > 0) {
-               id = openId.pop();
-               node = $('#tree-view li[id="' + id + '"]');
-               $.jstree._reference('#tree-view').open_node(node, function(){ scope.$emit('treeLoaded'); }, true);
-            }
-            else {
-               if (selectedId !== null && selectedId !== undefined) {
-                  // Click on the previously selected node
-                  node = $('#tree-view li[id="' + selectedId + '"]');
-                  $('#tree-view').jstree('select_node', node);
-                  //$('#tree-view li[id="' + selectedId + '"] a').first().click();
-               }   
-            }
-            });
-        */
-        
         if (scope.inventoryLoadedRemove) {
            scope.inventoryLoadedRemove();
         }
         scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
-            // Get the list of open tree nodes starting with the current group and going up 
-            // the tree until we hit the inventory or root node.
-            /*
-            function findOpenNodes(node) {
-                if (node.attr('id') != 'inventory-node') {
-                   if (node.prop('tagName') == 'LI' && (node.hasClass('jstree-open') || node.find('.jstree-clicked'))) {
-                      openId.push(node.attr('id'));
-                   }
-                   findOpenNodes(node.parent());
-                }
-            }
-            selectedId = scope.selectedNode.attr('id');
-            findOpenNodes(scope.selectedNode);
-            */
             $('#tree-view').jstree('destroy');
             scope.TreeParams.group_id = group_id;
-            TreeInit(scope.TreeParams);  
+            TreeInit(scope.TreeParams);
             });
-
+        
+        $('#tree-view').parent().css('opacity','0');   //Hide the tree until all the changes are made
         scope.treeLoading = true;
         LoadInventory({ scope: scope, doPostSteps: true });
         

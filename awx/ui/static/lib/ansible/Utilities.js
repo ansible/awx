@@ -13,7 +13,7 @@ angular.module('Utilities',[])
        var scope = angular.element(element).scope();
        scope.$destroy();
        }
-   })
+       })
 
    .factory('ToggleClass', function() {
    return function(selector, cssClass) {
@@ -25,7 +25,7 @@ angular.module('Utilities',[])
           $(selector).addClass(cssClass);
        }
        } 
-   })
+       })
 
    .factory('Alert', ['$rootScope', '$location', function($rootScope, $location) {
    return function(hdr, msg, cls, action, secondAlert, disableButtons) {
@@ -76,7 +76,7 @@ angular.module('Utilities',[])
           }
        }
        }
-   }])
+       }])
 
    .factory('ProcessErrors', ['$cookieStore', '$log', '$location', '$rootScope', 'Alert',
    function($cookieStore, $log, $location, $rootScope, Alert) {
@@ -147,7 +147,7 @@ angular.module('Utilities',[])
           Alert(defaultMsg.hdr, defaultMsg.msg); 
        }
        } 
-   }])
+       }])
 
    .factory('LoadBreadCrumbs', ['$rootScope', '$routeParams', '$location', function($rootScope, $routeParams, $location, Rest) {
    return function(crumb) {
@@ -218,7 +218,7 @@ angular.module('Utilities',[])
           }
        }
        }
-   }])
+       }])
 
    .factory('ReturnToCaller', ['$location', function($location) {
    return function(idx) {
@@ -233,7 +233,7 @@ angular.module('Utilities',[])
        }
        $location.path(newpath);
        }
-   }])
+       }])
 
    .factory('FormatDate', [ function() {
    return function(dt) {
@@ -246,7 +246,7 @@ angular.module('Utilities',[])
        //result += ('000' + dt.getMilliseconds()).slice(-3);
        return result;
        }
-   }])
+       }])
 
    .factory('Wait', [ '$rootScope', function($rootScope) {
    return function(directive) {
@@ -275,8 +275,45 @@ angular.module('Utilities',[])
           $('.spinny, .overlay').fadeOut(1000);
        }
        }
-   }])
+       }])
    
+   .factory('HideElement', [ function() {
+   return function(selector, action) {
+       // Fade-in a cloack or vail or a specific element
+       var target = $(selector);
+       var width = target.css('width');
+       var height = target.css('height');
+       var position = target.position();
+       var parent = target.parent();
+       var borderRadius = target.css('border-radius');
+       var backgroundColor = target.css('background-color');
+       var margin = target.css('margin');
+       var padding = target.css('padding');
+       parent.append("<div id=\"curtain-div\" style=\"" + 
+           "position: absolute;" +
+           "top: " + position.top + "px; " + 
+           "left: " + position.left + "px; " + 
+           "z-index: 1000; " +
+           "width: " + width + "; " + 
+           "height: " + height + "; " + 
+           "background-color: " + backgroundColor + "; " +
+           "margin: " + margin + "; " + 
+           "padding: " + padding + "; " +
+           "border-radius: " + borderRadius + "; " + 
+           "opacity: .75; " + 
+           "display: none; " +
+           "\"></div>");
+       $('#curtain-div').show(0, action);
+       }
+       }])
+
+   .factory('ShowElement', [ function() {
+   return function() {
+       // And Fade-out the cloack revealing the element
+       $('#curtain-div').fadeOut(500, function() { $(this).remove(); });
+       }
+       }])
+
    /* DeugForm(form_name)
     *
     * Use to log the $pristine and $invalid properties of each form element. Helpful when form
@@ -285,15 +322,15 @@ angular.module('Utilities',[])
     */
    .factory('DebugForm', [ function() {
    return function(form_name) {
-      $('form[name="' + form_name + '"]').find('select, input, button, textarea').each(function(index){
-          var name = $(this).attr('name');
-          if (name) {
-             if (scope['job_templates_form'][name]) {
-                console.log(name + ' pristine: ' + scope['job_templates_form'][name].$pristine);
-                console.log(name + ' invalid: ' + scope['job_templates_form'][name].$invalid);
-             }
-          }
-          });
+       $('form[name="' + form_name + '"]').find('select, input, button, textarea').each(function(index){
+           var name = $(this).attr('name');
+           if (name) {
+              if (scope['job_templates_form'][name]) {
+                  console.log(name + ' pristine: ' + scope['job_templates_form'][name].$pristine);
+                  console.log(name + ' invalid: ' + scope['job_templates_form'][name].$invalid);
+              }
+           }
+           });
       }
       }]);
 

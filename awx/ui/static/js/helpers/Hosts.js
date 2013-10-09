@@ -444,12 +444,12 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                
                 if (scope.hosts[i].has_inventory_sources) {
                    scope.hosts[i].inventory_sources = 'yes';
-                   scope.hosts[i].has_inv_source_link = '???';
-                   scope.hosts[i].has_inv_source_tip = 'Has an external source. Click to view details.';
+                   scope.hosts[i].has_inv_source_link = '/#/inventories/' + scope['inventory_id'] + '/groups/?has_external_source=true';
+                   scope.hosts[i].has_inv_source_tip = 'Has an external source. Click to view inventory source details.';
                 }
                 else {
                    scope.hosts[i].inventory_sources = 'no';
-                   scope.hosts[i].has_inv_source_link = '???';
+                   scope.hosts[i].has_inv_source_link = '/#/inventories/' + scope['inventory_id'] + '/groups';
                    scope.hosts[i].has_inv_source_tip = 'Has no external source.';
                 }
 
@@ -491,9 +491,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            scope[InventoryHostsForm.iterator + 'SearchFieldLabel'] = InventoryHostsForm.fields['has_active_failures'].label;
            scope[InventoryHostsForm.iterator + 'SearchSelectValue'] = ($routeParams['has_active_failures'] == 'true') ? { value: 1 } : { value: 0 };
         }
-
-        if ($routeParams['name']) {
-           console.log('here!');
+        else if ($routeParams['name']) {
            scope[InventoryHostsForm.iterator + 'InputDisable'] = false;
            scope[InventoryHostsForm.iterator + 'SearchValue'] = $routeParams['name'];
            scope[InventoryHostsForm.iterator + 'SearchField'] = 'name';
