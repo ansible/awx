@@ -742,18 +742,21 @@ select.field-mini-height {
   }
 
 /* Inventory cloud sourced? indicator */
-  .icon-cloud-true:before,
+  .icon-cloud-true:before {
+    content: "\f111";
+  }
+
   .icon-cloud-false:before {
-    content: "\f0c2"; 
+    content: "\f111"; 
   }
 
   .icon-cloud-true {
-    color: @blue-link;
+    color: @green;
   }
 
   .icon-cloud-false {
     color: @grey;
-  }
+  } 
 /* end */
 
   .field-success {

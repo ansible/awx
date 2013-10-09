@@ -25,13 +25,33 @@ angular.module('InventoryHostsFormDefinition', [])
                 label: 'Current<br>Job Status?',
                 ngHref: "\{\{ host.activeFailuresLink \}\}", 
                 awToolTip: "\{\{ host.badgeToolTip \}\}",
-                dataPlacement: 'bottom',
+                dataPlacement: 'top',
                 badgeNgHref: '\{\{ host.activeFailuresLink \}\}', 
                 badgeIcon: "\{\{ 'icon-failures-' + host.has_active_failures \}\}",
                 badgePlacement: 'left',
                 badgeToolTip: "\{\{ host.badgeToolTip \}\}",
-                badgeTipPlacement: 'bottom',
+                badgeTipPlacement: 'top',
                 searchable: false,
+                nosort: true
+                },
+            inventory_sources: {
+                label: 'External<br>Source?',
+                ngHref: "\{\{ host.has_inv_source_link \}\}",
+                badgeNgHref: "\{\{ host.has_inv_source_link \}\}",
+                badgeIcon: "\{\{ 'icon-cloud-' + host.has_inventory_sources \}\}",
+                badgePlacement: 'left',
+                badgeToolTip: "\{\{ host.has_inv_source_tip \}\}",
+                awToolTip: "\{\{ host.has_inv_source_tip \}\}",
+                dataPlacement: 'top',
+                badgeTipPlacement: 'top',
+                searchable: false,
+                nosort: true
+                },
+            groups: {
+                label: 'Groups',
+                searchable: true,
+                sourceModel: 'groups',
+                sourceField: 'name',
                 nosort: true
                 },
             has_active_failures: {
@@ -41,12 +61,12 @@ angular.module('InventoryHostsFormDefinition', [])
                 searchValue: 'true',
                 searchOnly: true
                 },
-            groups: {
-                label: 'Groups',
-                searchable: true,
-                sourceModel: 'groups',
-                sourceField: 'name',
-                nosort: true
+            has_inventory_sources: {
+                label: 'Has external source?',
+                searchSingleValue: true,
+                searchType: 'boolean',
+                searchValue: 'true',
+                searchOnly: true
                 }
             },
 

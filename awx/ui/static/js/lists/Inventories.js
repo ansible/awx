@@ -33,18 +33,18 @@ angular.module('InventoriesListDefinition', [])
                 type: 'badgeCount',
                 "class": "{{ 'failures-' + inventory.has_active_failures }}",
                 awToolTip: '# of hosts with failed jobs. Click to view hosts.',
-                dataPlacement: 'bottom',
+                dataPlacement: 'top',
                 searchable: false
                 },
-            inventory_source: {
-                label: 'Source?', 
-                //ngHref: "\{\{ inventory.has_inventory_link \}\}", 
-                //awToolTip: "\{\{ inventory.has_inventory_tip \}\}",
-                //dataPlacement: 'top',
-                badgeNgHref: '\{\{ inventory.has_inventory_link \}\}', 
+            inventory_sources: {
+                label: 'External<br>Sources?',
+                ngHref: '\{\{ inventory.has_inv_sources_link \}\}',
+                badgeNgHref: '\{\{ inventory.has_inv_sources_link \}\}', 
                 badgeIcon: "\{\{ 'icon-cloud-' + inventory.has_inventory_sources \}\}",
                 badgePlacement: 'left',
-                badgeToolTip: "\{\{ inventory.has_inventory_tip \}\}",
+                badgeToolTip: "\{\{ inventory.has_inv_sources_tip \}\}",
+                awToolTip: "\{\{ inventory.has_inv_sources_tip \}\}",
+                dataPlacement: "top",
                 badgeTipPlacement: 'top',
                 searchable: false,
                 nosort: true
@@ -52,7 +52,7 @@ angular.module('InventoriesListDefinition', [])
             organization: {
                 label: 'Organization',
                 ngBind: 'inventory.summary_fields.organization.name',
-                linkTo: '/organizations/{{ inventory.organization }}',
+                linkTo: '/#/organizations/{{ inventory.organization }}',
                 sourceModel: 'organization',
                 sourceField: 'name',
                 excludeModal: true

@@ -41,13 +41,17 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
             }  
             if (scope.inventories[i].has_inventory_sources) {
                //scope.inventories[i].inventory_source = 'external';
-               scope.inventories[i].has_inventory_tip = 'Has one or more external sources. Click to view details.';
-               scope.inventories[i].has_inventory_link = '/#/inventories/' + scope.inventories[i].id + '/groups';
+               scope.inventories[i].has_inv_sources_tip = 'Has one or more external sources. Click to view details.';
+               scope.inventories[i].has_inv_sources_link = '/#/inventories/' + scope.inventories[i].id + 
+                   '/groups?has_external_source=true';
+               scope.inventories[i].inventory_sources = 'yes';
             }
             else {
                //scope.inventories[i].inventory_source = 'manual';
-               scope.inventories[i].has_inventory_tip = 'Has no external sources. Click to view details';
-               scope.inventories[i].has_inventory_link = '/#/inventories/' + scope.inventories[i].id + '/groups';
+               scope.inventories[i].has_inv_sources_tip = 'Has no external sources.';
+               scope.inventories[i].has_inv_sources_link = '/#/inventories/' + scope.inventories[i].id + 
+                  '/groups';
+               scope.inventories[i].inventory_sources = 'no';
             }
         }
         });

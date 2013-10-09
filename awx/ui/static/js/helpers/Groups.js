@@ -239,12 +239,22 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            scope[list.iterator + 'SearchField'] = 'name';
            scope[list.iterator + 'SearchType'] = 'iexact';
            scope[list.iterator + 'SearchValue'] = scope['inventorySummaryGroup'];
+           scope[list.iterator + 'SearchFieldLabel'] = list.fields['name'].label;
+        }
+        else if ($routeParams['has_external_source']) {
+           scope[list.iterator + 'SearchField'] = 'has_external_source';
+           scope[list.iterator + 'SearchValue'] = list.fields['has_external_source'].searchValue; 
+           scope[list.iterator + 'InputDisable'] = true;
+           scope[list.iterator + 'SearchType'] = 'in';
+           scope[list.iterator + 'SearchFieldLabel'] = list.fields['has_external_source'].label;
+           //=ec2,rackspace,file)
         }
         else if ($routeParams['status']) {
            // with status param, called post update-submit
            scope[list.iterator + 'SearchField'] = 'status';
            scope[list.iterator + 'SelectShow'] = true;
            scope[list.iterator + 'SearchSelectOpts'] = list.fields['status'].searchOptions;
+           scope[list.iterator + 'SearchFieldLabel'] = list.fields['status'].label;
            for (var opt in list.fields['status'].searchOptions) {
                if (list.fields['status'].searchOptions[opt].value == $routeParams['status']) {
                   scope[list.iterator + 'SearchSelectValue'] = list.fields['status'].searchOptions[opt];

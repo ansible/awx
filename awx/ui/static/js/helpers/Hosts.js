@@ -441,6 +441,18 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     }
                 }
                 scope.hosts[i].groups = scope.hosts[i].groups.replace(/\, $/,'');
+               
+                if (scope.hosts[i].has_inventory_sources) {
+                   scope.hosts[i].inventory_sources = 'yes';
+                   scope.hosts[i].has_inv_source_link = '???';
+                   scope.hosts[i].has_inv_source_tip = 'Has an external source. Click to view details.';
+                }
+                else {
+                   scope.hosts[i].inventory_sources = 'no';
+                   scope.hosts[i].has_inv_source_link = '???';
+                   scope.hosts[i].has_inv_source_tip = 'Has no external source.';
+                }
+
             }
            
             // Add the value displayed in Job Status column
@@ -519,7 +531,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                    "data-group-id=\"" + sorted[i].id + "\" " + 
                    "><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a> " +
                    "<i class=\"field-badge icon-failures-" + sorted[i].has_active_failures + "\" " +
-                   "aw-tool-tip=\"" + toolTip + "\" data-placement=\"bottom\"></i> " +
+                   "aw-tool-tip=\"" + toolTip + "\" data-placement=\"top\"></i> " +
                    "<a href=\"\" class=\"activate\">" + sorted[i].name + "</a> ";
                if (sorted[i].children.length > 0) {
                   buildHTML(sorted[i].children);

@@ -68,6 +68,14 @@ angular.module('InventorySummaryDefinition', [])
                 sourceModel: 'inventory_source',
                 sourceField: 'source'
                 },
+            has_external_source: {
+                label: 'Has external source?', 
+                searchType: 'in', 
+                searchValue: 'ec2,rackspace',
+                searchOnly: true,
+                sourceModel: 'inventory_source',
+                sourceField: 'source'
+                },
             has_active_failures: {
                 label: 'Hosts have job failures?',
                 searchSingleValue: true,

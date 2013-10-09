@@ -108,6 +108,11 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                  scope[iterator + "SearchSelectValue"] = { value: list.fields[fld].searchValue };
               }
            }
+           else if (list.fields[fld].searchType == 'in') {
+              scope[iterator + "SearchType"] = 'in';
+              scope[iterator + "SearchValue"] = list.fields[fld].searchValue;
+              scope[iterator + "InputDisable"] = true;
+           }
            else if (list.fields[fld].searchType && (list.fields[fld].searchType == 'boolean' 
                 || list.fields[fld].searchType == 'select')) {
               scope[iterator + 'SelectShow'] = true;
