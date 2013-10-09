@@ -1599,7 +1599,16 @@ class JobTemplate(CommonModel):
         Return whether job template can be used to start a new job without
         requiring any user input.
         '''
-        return bool(self.credential and not self.credential.passwords_needed)
+        needed = []
+        if self.credential:
+            needed.extend(self.credential.passwords_needed)
+        if self.project.scm_update_on_launch:
+            needed.extend(self.project.scm_passwords_needed)
+        for inventory_source in self.inventory.inventory_sources.filter(active=True, update_on_launch=True):
+            for pw in inventory_source.source_passwords_needed:
+                if pw not in needed:
+                    needed.append(pw)
+        return bool(len(needed) == 0)
 
 class Job(CommonModelNameNotUnique):
     '''
@@ -1777,6 +1786,10 @@ class Job(CommonModelNameNotUnique):
             needed.extend(self.credential.passwords_needed)
         if self.project.scm_update_on_launch:
             needed.extend(self.project.scm_passwords_needed)
+        for inventory_source in self.inventory.inventory_sources.filter(active=True, update_on_launch=True):
+            for pw in inventory_source.source_passwords_needed:
+                if pw not in needed:
+                    needed.append(pw)
         return needed
 
     @property
