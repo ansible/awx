@@ -81,21 +81,21 @@ class ApiV1RootView(APIView):
     def get(self, request, format=None):
         ''' list top level resources '''
 
-        data = dict(
-            organizations = reverse('main:organization_list'),
-            users         = reverse('main:user_list'),
-            projects      = reverse('main:project_list'),
-            teams         = reverse('main:team_list'),
-            credentials   = reverse('main:credential_list'),
-            inventory     = reverse('main:inventory_list'),
-            groups        = reverse('main:group_list'),
-            hosts         = reverse('main:host_list'),
-            job_templates = reverse('main:job_template_list'),
-            jobs          = reverse('main:job_list'),
-            authtoken     = reverse('main:auth_token_view'),
-            me            = reverse('main:user_me_list'),
-            config        = reverse('main:api_v1_config_view'),
-        )
+        data = SortedDict()
+        data['authtoken'] = reverse('main:auth_token_view')
+        data['config'] = reverse('main:api_v1_config_view')
+        data['me'] = reverse('main:user_me_list')
+        data['organizations'] = reverse('main:organization_list')
+        data['users'] = reverse('main:user_list')
+        data['projects'] = reverse('main:project_list')
+        data['teams'] = reverse('main:team_list')
+        data['credentials'] = reverse('main:credential_list')
+        data['inventory'] = reverse('main:inventory_list')
+        data['inventory_sources'] = reverse('main:inventory_source_list')
+        data['groups'] = reverse('main:group_list')
+        data['hosts'] = reverse('main:host_list')
+        data['job_templates'] = reverse('main:job_template_list')
+        data['jobs'] = reverse('main:job_list')
         return Response(data)
 
 class ApiV1ConfigView(APIView):
@@ -716,6 +716,12 @@ class InventoryInventorySourcesList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         return qs.filter(Q(inventory__pk=parent.pk) |
                          Q(group__inventory__pk=parent.pk))
+
+class InventorySourceList(ListAPIView):
+
+     model = InventorySource
+     serializer_class = InventorySourceSerializer
+     new_in_14 = True
 
 class InventorySourceDetail(RetrieveUpdateAPIView):
 

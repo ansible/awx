@@ -18,6 +18,7 @@ from rest_framework.authentication import get_authorization_header
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.request import clone_request
 from rest_framework import status
 from rest_framework import views
 
@@ -127,6 +128,47 @@ class GenericAPIView(generics.GenericAPIView, APIView):
             'serializer_fields': self.get_serializer().metadata(),
         })
         return d
+
+    def metadata(self, request):
+        '''
+        Add field information for GET requests (so field names/labels are
+        available even when we can't POST/PUT).
+        '''
+        ret = super(GenericAPIView, self).metadata(request)
+        actions = ret.get('actions', {})
+        # Remove read only fields from PUT/POST data.
+        for method in ('POST', 'PUT'):
+            fields = actions.get(method, {})
+            for field, meta in fields.items():
+                if not isinstance(meta, dict):
+                    continue
+                if meta.get('read_only', False):
+                    fields.pop(field)
+        if 'GET' in self.allowed_methods:
+            cloned_request = clone_request(request, 'GET')
+            try:
+                # Test global permissions
+                self.check_permissions(cloned_request)
+                # Test object permissions
+                if hasattr(self, 'retrieve'):
+                    try:
+                        self.get_object()
+                    except Http404:
+                        # Http404 should be acceptable and the serializer
+                        # metadata should be populated. Except this so the
+                        # outer "else" clause of the try-except-else block
+                        # will be executed.
+                        pass
+            except (exceptions.APIException, PermissionDenied):
+                pass
+            else:
+                # If user has appropriate permissions for the view, include
+                # appropriate metadata about the fields that should be supplied.
+                serializer = self.get_serializer()
+                actions['GET'] = serializer.metadata()
+        if actions:
+            ret['actions'] = actions
+        return ret
 
 class ListAPIView(generics.ListAPIView, GenericAPIView):
     # Base class for a read-only list view.

@@ -91,6 +91,7 @@ group_urls = patterns('awx.main.views',
 )
 
 inventory_source_urls = patterns('awx.main.views',
+    url(r'^$',                                          'inventory_source_list'),
     url(r'^(?P<pk>[0-9]+)/$',                           'inventory_source_detail'),
     url(r'^(?P<pk>[0-9]+)/update/$',                    'inventory_source_update_view'),
     url(r'^(?P<pk>[0-9]+)/inventory_updates/$',         'inventory_source_updates_list'),
