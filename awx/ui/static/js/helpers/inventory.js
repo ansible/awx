@@ -184,60 +184,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 Wait('stop');
                 }
 
-            if (scope.removeCopyVariables) {
-               scope.removeCopyVariables();
-            }
-            scope.removeCopyVariables = scope.$on('copyVariables', function(e, id, url) {
-                if (variables) {
-                   Rest.setUrl(url); 
-                   Rest.put(variables)
-                       .success(function(data, status, headers, config) {
-                           cleanUp();
-                           })
-                       .error(function(data, status, headers, config) {
-                           cleanUp();
-                           ProcessErrors(scope, data, status, null,
-                               { hdr: 'Error!', msg: 'Failed to update variables. PUT returned status: ' + status });
-                           });
-                }
-                else {
-                   cleanUp();
-                }
-                }); 
-            
-            if (scope['addToTargetRemove']) {
-               scope.addToTargetRemove();
-            }
-            scope.addToTargetRemove = scope.$on('addToTarget', function() {
-               // add the new group to the target parent
-               var url = (target.attr('type') == 'group') ? GetBasePath('base') + 'groups/' + target.attr('group_id') + '/children/' :
-                   GetBasePath('inventory') + inv_id + '/groups/';
-               var group = { 
-                   name: node.attr('name'),
-                   description: node.attr('description'),
-                   inventory: node.attr('inventory')
-                   }
-               Rest.setUrl(url);
-               Rest.post(group)
-                   .success( function(data, status, headers, config) {
-                       //Update the node with new attributes
-                       var filter = (scope.inventoryFailureFilter) ? "has_active_failures=true&" : ""; 
-                       node.attr('group_id', data.id);
-                       node.attr('variable', data.related.variable_data);
-                       node.attr('all', data.related.all_hosts); 
-                       node.attr('children', data.related.children + '?' + filter + 'order_by=name');
-                       node.attr('hosts', data.related.hosts);
-                       node.attr('data-failures', data.has_active_failures);
-                       scope.$emit('copyVariables', data.id, data.related.variable_data);
-                       })
-                   .error( function(data, status, headers, config) {
-                       cleanUp();
-                       ProcessErrors(scope, data, status, null,
-                          { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
-                          target.attr('name') + '. POST returned status: ' + status });
-                       });
-               });
-
             // disassociate the group from the original parent
             if (scope.removeGroupRemove) {
                scope.removeGroupRemove(); 
@@ -248,7 +194,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                 Rest.setUrl(url);
                 Rest.post({ id: node.attr('group_id'), disassociate: 1 })
                     .success( function(data, status, headers, config) {
-                        scope.$emit('addToTarget');
+                        cleanUp();
                         })
                     .error( function(data, status, headers, config) {
                         cleanUp();
@@ -257,13 +203,40 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                               parent.attr('name') + '. POST returned status: ' + status });
                         });
                 });
+
+            if (scope['addToTargetRemove']) {
+               scope.addToTargetRemove();
+            }
+            scope.addToTargetRemove = scope.$on('addToTarget', function() {
+               // add the new group to the target parent
+               var url = (target.attr('type') == 'group') ? GetBasePath('base') + 'groups/' + target.attr('group_id') + '/children/' :
+                   GetBasePath('inventory') + inv_id + '/groups/';
+               var group = { 
+                   id: node.attr('group_id'),
+                   name: node.attr('name'),
+                   description: node.attr('description'),
+                   inventory: node.attr('inventory')
+                   }
+               Rest.setUrl(url);
+               Rest.post(group)
+                   .success( function(data, status, headers, config) {
+                       scope.$emit('removeGroup');
+                       })
+                   .error( function(data, status, headers, config) {
+                       cleanUp();
+                       ProcessErrors(scope, data, status, null,
+                          { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
+                          target.attr('name') + '. POST returned status: ' + status });
+                       });
+               });
+
             
             // Lookup the inventory. We already have what we need except for variables.
             Rest.setUrl(GetBasePath('base') + 'groups/' + node.attr('group_id') + '/');
             Rest.get()
                 .success( function(data, status, headers, config) {
                     variables = (data.variables) ? JSON.parse(data.variables) : "";
-                    scope.$emit('removeGroup');
+                    scope.$emit('addToTarget');
                     })
                 .error( function(data, status, headers, config) {
                     cleanUp();

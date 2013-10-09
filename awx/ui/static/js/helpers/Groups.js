@@ -97,6 +97,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         
         SelectionInit({ scope: scope, list: list, url: url });
         
+        //var finish = scope.finishSelection; 
+
         scope.formModalAction = function() {
             var groups = [];
             for (var j=0; j < scope.selected.length; j++) {
@@ -108,8 +110,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             if (groups.length > 0) {
                var action = function() {
                    $('#prompt-modal').modal('hide');
-                       finish();
-                       }
+                   scope.finishSelection();
+                   }
                if (groups.length == 1) {
                   Prompt({ hdr: 'Warning', body: 'Be aware that ' + groups[0] + 
                       ' is a top level group. Adding it to ' + scope.selectedNodeName + ' will remove it from the top level. Do you ' + 
@@ -132,9 +134,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                       action: action });
                }
             }
+            else {
+               scope.finishSelection();
             }
-
-        var finish = scope.formModalAction; 
+            }
         
         if (scope.PostRefreshRemove) {
            scope.PostRefreshRemove();
@@ -902,7 +905,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             };
         //Force binds to work. Not working usual way.
         $('#prompt-header').text('Delete Group');
-        $('#prompt-body').html('<p>Are you sure you want to permanently delete group <em>' + $(obj).attr('name') + '</em>?</p>');
+        $('#prompt-body').html('<p>Are you sure you want to remove group <em>' + $(obj).attr('name') + '</em> from group <em>' +
+            parent.attr('name') + '</em>?</p>');
         $('#prompt-action-btn').addClass('btn-danger');
         scope.promptAction = action_to_take;  // for some reason this binds?
         $('#prompt-modal').modal({
