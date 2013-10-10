@@ -102,11 +102,6 @@ angular.module('JobHostDefinition', [])
             },
         
         actions: {
-            refresh: {
-                awRefresh: true,
-                ngShow: "host_id == null && (job_status == 'pending' || job_status == 'waiting' || job_status == 'running')",
-                mode: 'all'
-                },
             help: {
                 awPopOver: "<dl>\n<dt>Success</dt><dd>Tasks successfully executed on the host.</dd>\n" +
                     "<dt>Changed</dt><dd>Actions taken on the host.</dd>\n" +
@@ -114,15 +109,20 @@ angular.module('JobHostDefinition', [])
                     "<dt>Unreachable</dt><dd>Times the ansible server could not reach the host.</dd>\n" +
                     "<dt>Skipped</dt><dd>Tasks bypassed and not performed on the host due to prior task failure or the host being unreachable.</dd>\n" +
                     "</dl>\n",
-                dataPlacement: 'left',
+                dataPlacement: 'top',
                 dataContainer: "body",
                 icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-info btn-xs btn-help pull-right',
+                'class': 'btn-info btn-xs btn-help',
                 awToolTip: 'Click for help',
                 dataTitle: 'Job Host Summary',
                 id: 'jobhost-help-button',
                 iconSize: 'large'
+                },
+            refresh: {
+                awRefresh: true,
+                ngShow: "host_id == null && (job_status == 'pending' || job_status == 'waiting' || job_status == 'running')",
+                mode: 'all'
                 }
             },
 

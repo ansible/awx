@@ -33,7 +33,7 @@ angular.module('OrganizationListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',                  // One of: edit, select, all
                 ngClick: 'addOrganization()',
-                "class": 'btn-success btn-sm',
+                "class": 'btn-success btn-xs',
                 awToolTip: 'Create a new organization'
                 }
             },

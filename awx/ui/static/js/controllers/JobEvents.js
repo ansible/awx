@@ -187,7 +187,8 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
             .success( function(data, status, headers, config) {
                 scope.job_status = data.status;
                 scope.job_name = data.summary_fields.job_template.name;
-                LoadBreadCrumbs({ path: '/jobs/' + scope.job_id, title: scope.job_name });
+                //LoadBreadCrumbs({ path: '/jobs/' + scope.job_id, title: scope.job_name });
+                LoadBreadCrumbs({ path: '/jobs/' + scope.job_id, title: scope.job_id + ' - ' + data.summary_fields.job_template.name });
                 if (!(data.status == 'pending' || data.status == 'waiting' || data.status == 'running')) {
                    if ($rootScope.timer) {
                       clearInterval($rootScope.timer);

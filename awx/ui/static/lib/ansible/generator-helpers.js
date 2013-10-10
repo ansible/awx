@@ -99,7 +99,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         // pass in button object, get back html
         var html = '';
         if (btn.awRefresh) {
-           html += "<div class=\"refresh-grp pull-right\" ";
+           html += "<div class=\"refresh-grp\" ";
            html += (btn.ngShow) ? Attr(btn, 'ngShow') : ""; 
            html += ">\n";
         }
@@ -129,7 +129,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (btn.ngHide) ? Attr(btn,'ngHide') : "";
         html += (btn.awToolTip) ? Attr(btn,'awToolTip') : "";
         html += (btn.awToolTip && btn.dataPlacement == undefined) ? "data-placement=\"top\" " : "";
-        html += (btn.awRefresh && !btn.awTooltip) ? "aw-tool-tip=\"Refresh page\" " : "";
+        html += (btn.awRefresh && !btn.awTooltip) ? "aw-tool-tip=\"Refresh page\" data-placement=\"top\" ": "";
         html += (btn.awPopOver) ? "aw-pop-over=\"" + 
             btn.awPopOver.replace(/[\'\"]/g, '&quot;') + "\" " : "";
         html += (btn.dataPlacement) ? Attr(btn, 'dataPlacement') : "";

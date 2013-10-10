@@ -978,9 +978,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           if ( (!options.modal) && this.form.showTitle ) {
              html += "<div class=\"form-title\">";
              html += (options.mode == 'edit') ? this.form.editTitle : this.form.addTitle;
-             if (this.form.cancelButton) {
-                html += "<button type=\"button\" ng-click=\"closeForm()\" class=\"close form-cancel\" aria-hidden=\"true\">" + 
-                    "&times;</button>\n";
+             if (this.has('titleActions')) {
+                html += "<div class=\"title-actions pull-right\">\n";
+                for (btn in this.form.titleActions) {
+                    html += this.button(this.form.titleActions[btn]);
+                }
+                html += "</div>\n";
              }
              html += "</div>\n";
              html += "<hr class=\"form-title-hr\">\n";
@@ -1202,6 +1205,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               "add hosts to the group.</p>";
           html += "</div>\n";
 
+          /*
           html += "<div class=\"row\">\n";
           html += "<div class=\"col-lg-12\">\n";
           html += "<div class=\"tree-view-container well\">\n";
@@ -1211,10 +1215,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "</div>\n";
           html += "<div class=\"col-lg-8 btn-container\">\n";
           html += "<div class=\"btn-container-inner\">\n";
-          /*html += "<button type=\"button\" id=\"edit_group_btn\" class=\"btn btn-default btn-sm\" ng-click=\"editGroup()\" ng-hide=\"groupEditHide\" " +
-              "aw-tool-tip=\"Edit the selected group's properties\" data-placement=\"bottom\" ng-disabled=\"grpBtnDisable\"><i class=\"icon-edit\"></i> " +
-              "properties</button>\n";
-          */
           html += "<button type=\"button\" id=\"copy_group_btn\" class=\"btn btn-success btn-sm\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
               "aw-tool-tip=\"Copy existing groups to the selected group\" data-placement=\"bottom\" ng-disabled=\"grpBtnDisable\"><i class=\"icon-check\"></i> Copy</button>\n";
           html += "<button type=\"button\" id=\"create_group_btn\" class=\"btn btn-success btn-sm\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
@@ -1229,14 +1229,16 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "</div>\n";
           html += "</div><!-- tree controls -->\n";
           html += "<hr class=\"tree-control-divider\">\n";
+          */
           html += "<div class=\"row\">\n";
-          html += "<div class=\"col-lg-4\">\n" +
+          html += "<div class=\"col-lg-3\">\n" +
                   "<div id=\"tree-view\"></div>\n" + 
                   "</div>\n";
-          html += "<div class=\"col-lg-8 tree-form-container\">\n<div id=\"tree-form\">\n</div>\n</div>\n";
+          html += "<div class=\"col-lg-9 tree-form-container\">\n";
+          html += "<div id=\"tree-form\">\n</div>\n";
           html += "</div>\n";
-          html += "</div><!-- well -->\n";
-          html += "</div><!-- col-lg-12 -->\n";
+          //html += "</div><!-- well -->\n";
+          //html += "</div><!-- col-lg-12 -->\n";
           html += "</div><!-- row -->\n";
        
        }
@@ -1454,20 +1456,22 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true });
  
               html += "<div class=\"col-lg-7\">\n";
+              html += "<div class=\"list-actions\">\n";
               for (var act in form.related[itm].actions) {
                  var action = form.related[itm].actions[act];
-                 html += "<button type=\"button\" class=\"btn btn-sm ";
+                 html += "<button type=\"button\" class=\"btn btn-xs ";
                  html += (form.related[itm].actions[act]['class']) ? form.related[itm].actions[act]['class'] : "btn-success";
                  html += "\" ";
                  html += "id=\"" + itm + "_" + act + "_btn\" ";
                  html += this.attr(action,'ngClick');
                  html += (action['ngShow']) ? this.attr(action,'ngShow') : "";
                  html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
-                 html += (action.awToolTip) ? "data-placement=\"right\" " : "";
+                 html += (action.awToolTip) ? "data-placement=\"top\" " : "";
                  html += "><i class=\"" + action.icon + "\"></i>";
                  html += (action.label) ? " " + action.label : "";
                  html += "</button>\n";
               }
+              html += "</div>\n";
               html += "</div>\n";
               html += "</div><!-- row -->\n"
               

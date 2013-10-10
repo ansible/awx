@@ -14,7 +14,7 @@ angular.module('InventorySummaryDefinition', [])
         iterator: 'group',
         editTitle: 'Inventory Summary: {{ inventory_name }}',
         showTitle: true,
-        well: false,
+        well: true,
         index: false,
         hover: true,
         
@@ -32,7 +32,7 @@ angular.module('InventorySummaryDefinition', [])
                 awToolTip: '# of hosts with job failures. Click to view hosts.',
                 dataPlacement: 'top',
                 searchable: false,
-                nosort: true
+                nosort: false
                 },
             status: {
                 label: 'Update<br>Status',
@@ -55,8 +55,10 @@ angular.module('InventorySummaryDefinition', [])
                 },
             last_updated: {
                 label: 'Last<br>Updated',
+                sourceModel: 'inventory_source',
+                sourceField: 'last_updated',
                 searchable: false,
-                nosort: true
+                nosort: false
                 },
             source: {
                 label: 'Source',
@@ -95,9 +97,16 @@ angular.module('InventorySummaryDefinition', [])
             },
 
         actions: {
-            refresh: {
-                awRefresh: true,
-                mode: 'all'
+            create: {
+                label: 'Create New',
+                mode: 'all',
+                icon: 'icon-plus',
+                'class': "btn-success btn-xs", 
+                ngClick: "createGroup()",
+                ngHide: "groupCreateHide", 
+                ngDisabled: 'grpBtnDisabled',
+                awToolTip: "Create a new top-level group", 
+                dataPlacement: 'top'
                 },
             help: {
                 awPopOver: 
@@ -108,14 +117,18 @@ angular.module('InventorySummaryDefinition', [])
                     "<dt>successful</dt><dd>The most recent inventory update ran to completion without incident.</dd>\n" +
                     "<dt>updating</dt><dd>The inventory update is currently running.</dd>\n" +
                     "</dl>\n",
-                dataPlacement: 'left',
+                dataPlacement: 'top',
                 dataContainer: 'body',
                 icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-xs btn-info btn-help pull-right',
+                'class': 'btn-xs btn-info btn-help',
                 awToolTip: 'Click for help',
                 dataTitle: 'Update Status',
                 iconSize: 'large'
+                },
+            refresh: {
+                awRefresh: true,
+                mode: 'all'
                 }
             },
 

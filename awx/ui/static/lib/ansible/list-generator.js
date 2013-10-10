@@ -162,20 +162,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "</div>\n";
        }
 
-       if (options.mode != 'lookup' && (list.well == undefined || list.well == 'true')) {
+       if (options.mode != 'lookup' && (list.well == undefined || list.well == true)) {
           html += "<div class=\"well\">\n";
-       }
-       
-       // Add a title and optionally a close button (used on Inventory->Groups)
-       if (options.mode !== 'lookup' && list.showTitle) {
-          html += "<div class=\"form-title\">";
-          html += (options.mode == 'edit' || options.mode == 'summary') ? list.editTitle : list.addTitle;
-          if (list.cancelButton) {
-             html += "<button type=\"button\" ng-click=\"closeForm()\" class=\"close form-cancel\" aria-hidden=\"true\">" + 
-                 "&times;</button>\n";
-          }
-          html += "</div>\n";
-          html += "<hr class=\"form-title-hr\">\n";
        }
        
        /*
@@ -203,7 +191,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           //actions
           var base = $location.path().replace(/^\//,'').split('/')[0];
           
-          html += "<div class=\"list-actions "; 
+          html += "<div class=\""; 
           if (options.mode == 'summary') {
              html += 'col-lg-5';
           }
@@ -213,22 +201,20 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           else { 
              html += "col-lg-7 col-md-5";
           }
-
           html += "\">\n";
+          
+          html += "<div class=\"list-actions\">\n";
+          // all but refresh button
           for (action in list.actions) {
               if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
                  if ( (list.actions[action].basePaths == undefined) || 
                       (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
-                      html += this.button(list.actions[action], action);
+                    html += this.button(list.actions[action], action);
                  }
               }
           }
-        
-          /*if (list.name == 'inventories' && options.mode !== 'select') {
-             html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"inventoryFailureFilter\" " +
-                 "ng-change=\"search('inventory')\" id=\"failed_jobs_chbox\"> Show only inventories with failed jobs</label>\n";
-          }*/
-
+          html += "</div><!-- list-acitons -->\n";
+          
           //select instructions
           if (options.mode == 'select' && list.selectInstructions) {
              var btn = {
@@ -243,14 +229,21 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  };
              html += this.button(btn, 'select');
           }
+          html += "</div><!-- col-lg-7 -->\n";
+       
        }
        else {
           html += "<div class=\"col-lg-7\"></div>\n";
        }
 
-       html += "</div>\n";
        html += "</div><!-- row -->\n";
-
+       
+       // Add a title and optionally a close button (used on Inventory->Groups)
+       if (options.mode !== 'lookup' && list.showTitle) {
+          html += "<div class=\"form-title\">";
+          html += (options.mode == 'edit' || options.mode == 'summary') ? list.editTitle : list.addTitle;
+          html += "</div>\n";
+       }
 
        // table header row
        html += "<table id=\"" + list.name + "_table\" ";
@@ -376,7 +369,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "</div>\n";
        }
        
-       if (options.mode != 'lookup' && (list.well == undefined || list.well == 'true')) {
+       if (options.mode != 'lookup' && (list.well == undefined || list.well == true)) {
           html += "</div>\n";    //well
        }
 
@@ -386,7 +379,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        else {
           html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true });
        }
-      
+       
        return html;
        
        }

@@ -47,7 +47,7 @@ angular.module('PermissionListDefinition', [])
                 label: 'Create New',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addPermission()',
-                "class": 'btn-success btn-sm',
+                "class": 'btn-success btn-xs',
                 awToolTip: 'Add a new permission',
                 ngShow: 'PermissionAddAllowed'
                 }

@@ -189,8 +189,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
             for (var i=0; i < scope.groups.length; i++) {
-                var last_update = null
-                  //(scope.groups[i].last_updated == null) ? '' : FormatDate(new Date(scope.groups[i].last_updated));    
+                var last_update = (scope.groups[i].summary_fields.inventory_source.last_updated == null) ? null : 
+                    FormatDate(new Date(scope.groups[i].summary_fields.inventory_source.last_updated));    
                 
                 var stat, stat_class, status_tip;
 
@@ -639,7 +639,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 })
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, form,
-                    { hdr: 'Error!', msg: 'Failed to retrieve group: ' + id + '. GET status: ' + status });
+                    { hdr: 'Error!', msg: 'Failed to retrieve group: ' + defaultUrl + '. GET status: ' + status });
                 });
        
         if (!scope.$$phase) {

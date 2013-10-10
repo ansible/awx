@@ -157,6 +157,7 @@ td.actions {
 
 .refresh-grp {
   display: inline-block;
+  text-align: right;
   margin-left: 10px;
   margin-top: 0;
   padding: 0;
@@ -555,18 +556,10 @@ select.field-mini-height {
 }
 
 /* Display list actions next to search widget */
-/*
 .list-actions {
-  display: inline-block;
-  padding-bottom: 22px;
-  margin-left: 10px;
-  vertical-align: top;
+  text-align: right;
 }
 
-.list-actions .btn {
-  margin-right: 3px;
-}
-*/
 
 .btn-help {
   margin-left: 15px;
@@ -868,12 +861,7 @@ select.field-mini-height {
     border-radius: 6px;
   }
 
-  .tree-container {
-    background-color: #f5f5f5;
-    border: 1px solid #e3e3e3;
-    border-radius: 6px;
-  }
-
+  /*
   .tree-view-container {
     padding: 0 0 10px 0;
 
@@ -881,16 +869,19 @@ select.field-mini-height {
       padding-right: 10px;
     }
   }
-  
-  .tree-form-container {
-    padding-left: 0;
-    padding-right: 25px;
-  }
+  */
 
   #tree-view {
+    background-color: #f5f5f5;
     border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+
+    /*border: 1px solid #e3e3e3;
     border-radius: 6px;
     background-color: #e3e3e3;
+    */
     padding-top: 10px;
     padding-left: 10px;
     padding-bottom: 10px;
@@ -905,11 +896,11 @@ select.field-mini-height {
   
   #tree-form {
     display: none;
-    padding: 15px 10px 10px 10px;
+    /*padding: 15px 10px 10px 10px;
     margin-top: 5px;
     border: 1px solid #e3e3e3;
     background-color: #e3e3e3;
-    border-radius: 6px;
+    border-radius: 6px;*/
 
     .form-title {
       color: #888;
@@ -922,28 +913,6 @@ select.field-mini-height {
       margin-top: 5px;
       margin-bottom: 15px;
     }
-  }
-
-  .tree-controls {
-    .btn-container{
-      padding-left: 0;
-    }
-
-    .btn-container-inner {
-      padding-top: 10px;
-    }
-
-    .title {
-      padding-top: 15px;
-      padding-left: 13px;
-      color: @grey;
-      font-weight: bold;
-    }
-  }
-
-  .tree-control-divider {
-    width: 98%;
-    margin: 10px auto;
   }
 
 /* Inventory-> Hosts */
@@ -1214,11 +1183,6 @@ tr td button i {
   .delete-btn {
     /* Used on job page to make cancel and delete buttons have an equal width */
     width: 60px;
-  }
-
-  #tree-view {
-    margin-left: 10px;
-    margin-top: 5px;
   }
 
   .label-text {

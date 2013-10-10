@@ -11,14 +11,57 @@ angular.module('GroupFormDefinition', [])
     'GroupForm', {
         
         addTitle: 'Create Group',                            //Legend in add mode
-        editTitle: 'Group Properties: {{ name }}',           //Legend in edit mode
+        editTitle: '{{ name }}',                             //Legend in edit mode
         showTitle: true,
         cancelButton: false,
         name: 'group',                                       //Form name attribute
-        well: false,                                         //Wrap the form with TB well
+        well: true,                                          //Wrap the form with TB well
         formLabelSize: 'col-lg-3',
         formFieldSize: 'col-lg-9',
         
+        titleActions: {
+            copy_action: {
+                'class': 'btn-success btn-xs',
+                ngClick: "addGroup()",
+                ngHide: "groupAddHide",
+                awToolTip: "\{\{ addGroupHelp \}\}",
+                dataPlacement: 'top',
+                ngDisabled: "grpBtnDisable",
+                icon: "icon-check",
+                label: 'Copy'
+                },
+            create_action: {
+                'class': 'btn-success btn-xs',
+                ngClick: "createGroup()",
+                ngHide: "groupCreateHide",
+                awToolTip: "\{\{ createGroupHelp \}\}",
+                dataPlacement: "top",
+                ngDisabled: "grpBtnDisable",
+                icon: "icon-plus",
+                label: "Create New"
+                },
+            update_action: {
+                'class': 'btn-success btn-xs',
+                ngClick: "updateGroup()",
+                ngHide: "groupUpdateHide",
+                awToolTip: "\{\{ updateGroupHelp \}\}",
+                dataPlacement: "top",
+                ngDisabled: "grpBtnDisable",
+                icon: "icon-cloud-download",
+                label: 'Update'
+                },
+            delete_action: {
+                'class': "btn-danger btn-xs",
+                ngClick: "deleteGroup()",
+                ngHide: "groupDeleteHide",
+                awToolTip: "\{\{ deleteGroupHelp \}\}",
+                dataPlacement: "top",
+                ngDisabled: "grpBtnDisable",
+                icon: "icon-trash",
+                label: "Delete"
+                }
+            },
+
         fields: {
             name: {
                 label: 'Name',

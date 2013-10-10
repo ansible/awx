@@ -34,7 +34,7 @@ angular.module('JobTemplatesListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',                // One of: edit, select, all
                 ngClick: 'addJobTemplate()',
-                "class": 'btn-success btn-sm',
+                "class": 'btn-success btn-xs',
                 basePaths: ['job_templates'], 
                 awToolTip: 'Create a new template'
                 }

@@ -31,7 +31,7 @@ angular.module('HostListDefinition', [])
         actions: {
             help: {
                 awPopOver: "Select hosts by clicking on each host you wish to add. Add the selected hosts to the group by clicking the <em>Select</em> button.",
-                dataPlacement: 'left',
+                dataPlacement: 'top',
                 dataContainer: '#form-modal .modal-content',
                 icon: "icon-question-sign",
                 mode: 'all',

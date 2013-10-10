@@ -49,12 +49,8 @@ angular.module('ProjectsListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addProject()',
-                "class": 'btn-success btn-sm',
+                "class": 'btn-success btn-xs',
                 awToolTip: 'Create a new project'
-                },
-            refresh: {
-                awRefresh: true,
-                mode: 'all'
                 },
             help: {
                 awPopOver: "<dl>\n<dt>Updating</dt><dd>An SCM update is in progress.</dd>\n" +
@@ -64,14 +60,18 @@ angular.module('ProjectsListDefinition', [])
                     "<dt>Missing</dt><dd>The local project directory is missing.</dd>\n" +
                     "<dt>N/A</dt><dd>The project does not use SCM, so an update status is not available.</dd>\n" +
                     "</dl>\n",
-                dataPlacement: 'left',
+                dataPlacement: 'top',
                 dataContainer: 'body',
                 icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-xs btn-info btn-help pull-right',
+                'class': 'btn-xs btn-info btn-help',
                 awToolTip: 'Click for help',
                 dataTitle: 'Project Status',
                 iconSize: 'large'
+                },
+             refresh: {
+                awRefresh: true,
+                mode: 'all'
                 }
             },
 

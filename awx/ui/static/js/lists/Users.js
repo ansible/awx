@@ -40,7 +40,7 @@ angular.module('UserListDefinition', [])
                 mode: 'all',                      // One of: edit, select, all
                 ngClick: 'addUser()',
                 basePaths: ['organizations','users'],        // base path must be in list, or action not available
-                "class": 'btn-success btn-sm',
+                "class": 'btn-success btn-xs',
                 awToolTip: 'Create a new user'
                 }
             },

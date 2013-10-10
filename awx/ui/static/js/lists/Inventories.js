@@ -79,7 +79,7 @@ angular.module('InventoriesListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addInventory()',
-                "class": 'btn-sm btn-success',
+                "class": 'btn-xs btn-success',
                 awToolTip: 'Create a new inventory'
                 }
             },

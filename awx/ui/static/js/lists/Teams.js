@@ -40,7 +40,7 @@ angular.module('TeamsListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addTeam()',
-                "class": 'btn-sm btn-success',
+                "class": 'btn-xs btn-success',
                 awToolTip: 'Create a new team'
                 }
             },

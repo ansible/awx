@@ -97,7 +97,8 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
            LoadBreadCrumbs({ path: '/hosts/' + scope['host_id'], title: $routeParams['host_name'] });
         }
         else {
-           LoadBreadCrumbs();
+           LoadBreadCrumbs({ path: '/jobs/' + scope.job_id, title: scope.job_id + ' - ' + 
+               scope.jobhosts[0].summary_fields.job.job_template_name });
         }
         });
   

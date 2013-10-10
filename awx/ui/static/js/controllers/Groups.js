@@ -125,6 +125,7 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
       // Respond to user clicking on a tree node
 
       var node = $('li[id="' + n.attr.id + '"]');
+      var parent = node.parent().parent();
       var type = node.attr('type');
       var url;
       
@@ -152,6 +153,18 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.groupDeleteHide = false;
          scope.createButtonShow = true;
          scope.group_id = node.attr('group_id');
+         
+         scope.addGroupHelp = "Copy an existing group into " + node.attr('name');
+         scope.createGroupHelp = "Create a new group, adding it to " + node.attr('name');
+         scope.updateGroupHelp = "Start the inventory update process, refreshing " + node.attr('name');
+         if (parent.attr('id') == 'inventory-node') {
+            scope.deleteGroupHelp = "Remove " + node.attr('name') + " from " + parent.attr('name') + 
+             " Inventory. Any hosts will still be available in All Hosts."; 
+         }
+         else {
+            scope.deleteGroupHelp = "Remove " + node.attr('name') + " from " + parent.attr('name') + 
+             ". Any hosts will still be available in " + parent.attr('name') + " and All Hosts."; 
+         }
          
          // Load the form
          GroupsEdit({ "inventory_id": id, group_id: scope.group_id });
