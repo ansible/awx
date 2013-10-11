@@ -74,31 +74,27 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
            Rest.setUrl(GetBasePath('jobs') + scope.job_id);
            Rest.get()
                .success( function(data, status, headers, config) {
+                   LoadBreadCrumbs({ path: '/jobs/' + data.id, title: data.id + ' - ' + 
+                       data.summary_fields.job_template.name });
                    scope.job_status = data.status;
-                   scope.$emit('setHostLink', data.inventory);
                    if (!(data.status == 'pending' || data.status == 'waiting' || data.status == 'running')) {
                       if ($rootScope.timer) {
                          clearInterval($rootScope.timer);
                       }
                    }
+                   scope.$emit('setHostLink', data.inventory);
                    })
                .error( function(data, status, headers, config) {
                    ProcessErrors(scope, data, status, null,
                      { hdr: 'Error!', msg: 'Failed to get job status for job: ' + scope.job_id + '. GET status: ' + status });
                    });
         }
-        else {
+        else { 
+           // Make the host name appear in breadcrumbs
+           LoadBreadCrumbs({ path: '/hosts/' + scope['host_id'], title: $routeParams['host_name'] });
            if ($routeParams['inventory']) {
               scope.$emit('setHostLink', $routeParams['inventory']);
            }
-        }
-        if (base == 'hosts' && $routeParams['host_name']) {
-           // Make the host name appear in breadcrumbs
-           LoadBreadCrumbs({ path: '/hosts/' + scope['host_id'], title: $routeParams['host_name'] });
-        }
-        else {
-           LoadBreadCrumbs({ path: '/jobs/' + scope.job_id, title: scope.job_id + ' - ' + 
-               scope.jobhosts[0].summary_fields.job.job_template_name });
         }
         });
   

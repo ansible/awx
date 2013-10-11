@@ -70,7 +70,7 @@ angular.module('ansible', [
     'LicenseFormDefinition',
     'License',
     'HostGroupsFormDefinition',
-    'ObjectCountWidget',
+    'JobStatusWidget',
     'JobsHelper',
     'InventoryStatusDefinition'
      ])

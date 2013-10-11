@@ -42,10 +42,12 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                   scope.projects[i].status = 'n/a';
                }
                switch(scope.projects[i].status) {
+                   case 'n/a':
+                      scope.projects[i].badge = 'none';
+                      break;
                    case 'updating':
                    case 'successful':
                    case 'ok':
-                   case 'n/a':
                       scope.projects[i].badge = 'false';
                       break;
                    case 'never updated':

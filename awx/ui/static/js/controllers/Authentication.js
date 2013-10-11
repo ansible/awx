@@ -16,6 +16,9 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
       $('#login-username').focus();
       };
 
+   // Just in case, make sure the wait widget is not active
+   Wait('stop');
+   
    // Display the login dialog
    $('#login-modal').modal({ show: true, keyboard: false, backdrop: 'static' });
    

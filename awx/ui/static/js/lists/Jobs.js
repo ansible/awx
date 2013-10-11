@@ -31,13 +31,14 @@ angular.module('JobsListDefinition', [])
                 },
             created: {
                 label: 'Date',
-                link: true,
+                link: false,
                 searchable: false
                 },
             job_template: {
                 label: 'Job Template',
                 ngBind: 'job.summary_fields.job_template.name',
-                ngHref: "\{\{ '/#/job_templates/?name=' + job.summary_fields.job_template.name \}\}",
+                //ngHref: "\{\{ '/#/job_templates/?name=' + job.summary_fields.job_template.name \}\}",
+                ngHref:"\{\{ '/#/job_templates/' + job.job_template \}\}",
                 sourceModel: 'job_template',
                 sourceField: 'name'
                 },

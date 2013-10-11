@@ -10,7 +10,7 @@
 
 'use strict';
 
-function Home ($routeParams, $scope, $rootScope, $location, Wait, ObjectCount, ClearScope)
+function Home ($routeParams, $scope, $rootScope, $location, Wait, JobStatus, ClearScope)
 {
     ClearScope('home');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                          //scope.
@@ -23,10 +23,10 @@ function Home ($routeParams, $scope, $rootScope, $location, Wait, ObjectCount, C
         Wait('start');
     }
 
-    ObjectCount({ target: 'container1' });
+    JobStatus({ target: 'container1' });
      
     $rootScope.$on('WidgetLoaded', function() {
-        // Once all the widget report back 'loaded', turn off Wait widget
+        // Once all the widgets report back 'loaded', turn off Wait widget
         loadedCount++; 
         if ( loadedCount == waitCount ) {
            Wait('stop');
@@ -34,4 +34,4 @@ function Home ($routeParams, $scope, $rootScope, $location, Wait, ObjectCount, C
         });
 }
 
-Home.$inject=[ '$routeParams', '$scope', '$rootScope', '$location', 'Wait', 'ObjectCount', 'ClearScope'];
+Home.$inject=[ '$routeParams', '$scope', '$rootScope', '$location', 'Wait', 'JobStatus', 'ClearScope'];

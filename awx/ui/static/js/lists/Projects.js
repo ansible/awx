@@ -33,7 +33,7 @@ angular.module('ProjectsListDefinition', [])
                 label: 'Update Status',
                 ngClick: 'showSCMStatus(\{\{ project.id \}\})',
                 awToolTip: 'View details of last SCM Update',
-                dataPlacement: 'bottom',
+                dataPlacement: 'top',
                 badgeIcon: "\{\{ 'icon-failures-' + project.badge \}\}",
                 badgePlacement: 'left'
                 },
