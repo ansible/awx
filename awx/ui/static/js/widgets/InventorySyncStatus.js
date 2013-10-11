@@ -8,16 +8,18 @@
  */
 
 angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
-    .factory('InventorySyncStatus', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
-    function($rootScope, $compile, Rest, GetBasePath, ProcessErrors, Wait) {
+    .factory('InventorySyncStatus', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'GetChoices',
+    function($rootScope, $compile, Rest, GetBasePath, ProcessErrors, Wait, GetChoices) {
     return function(params) {
         
         var scope = $rootScope.$new();
         var inventoryCount, inventoryFails, groupCount, groupFails, hostCount;
         var hostFails = 0; 
         var counts = 0;
-        var expectedCounts = 4;
-        var target = params.target;        
+        var expectedCounts = 5;
+        var target = params.target;
+        var results = [];
+        var expected;      
         
         if (scope.removeCountReceived) {
            scope.removeCountReceived();
@@ -67,6 +69,13 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                   rowcount++;
                }
 
+               for (var i=0; i < results.length; i++) {
+                   if (results[i].count > 0) {
+                      html += makeRow(results[i].label, results[i].count, results[i].fail);
+                      rowcount++;
+                   }
+               }
+
                if (rowcount == 0) {
                   html += "<tr><td colspan=\"3\">No inventories configured for external sync</td></tr>\n";
                }
@@ -97,7 +106,7 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
         
         inventoryFails = 0;
         
-        url = GetBasePath('groups') + '?has_inventory_sources=true&page=1';
+        url = GetBasePath('inventory_sources') + '?source__in=ec2,rackspace&page=1';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
@@ -109,7 +118,7 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
 
-        url = GetBasePath('groups') + '?has_inventory_sources=true&inventory_source__status=failed&page=1';
+        url = GetBasePath('inventory_sources') + '?status=failed&source__in=ec2,rackspace&page=1';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
@@ -132,6 +141,77 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
+
+        scope.removeTypesReady = scope.$on('TypesReady', function (e, label, count, fail) {
+            results.push({ label: label, count: count, fail: fail });  
+            if (results.length == expected) {
+               scope.$emit('CountReceived');
+            }
+            });
+
+        scope.removeCountProjects = scope.$on('CountTypes', function(e, choices) {
+            
+            scm_choices = choices; 
+
+            function getLabel(config) {
+                var url = config.url; 
+                var type = url.match(/source=.*\&/)[0].replace(/source=/,'').replace(/\&/,'');
+                var label;
+                for (var i=0; i < choices.length; i++) {
+                   if (choices[i][0] == type) {
+                      label = choices[i][1];
+                      break;
+                   }
+                }
+                return label;   
+                }
+            
+            // Remove ---- option from list of choices
+            for (var i=0; i < choices.length; i++) {
+                if (choices[i][1].match(/^---/)) {
+                   choices.splice(i,1);
+                   break;
+                }
+            }
+
+            for (var i=0; i < choices.length; i++) {
+                if (choices[i][1].match(/^Local/)) {
+                   choices.splice(i,1);
+                   break;
+                }
+            }
+            
+            expected = choices.length; 
+
+            for (var i=0; i < choices.length; i++) {
+                if (!choices[i][1].match(/^---/)) {
+                   var url = GetBasePath('inventory_sources') + '?source=' + choices[i][0] + '&page=1';
+                   Rest.setUrl(url);
+                   Rest.get()
+                       .success( function(data, status, headers, config) {
+                           // figure out the scm_type we're looking at and its label
+                           var label = getLabel(config);
+                           var count = data.count;
+                           var fail = 0;
+                           for (var i=0; i < data.results.length; i++) {
+                               if (data.results[i].status == 'failed') {
+                                  fail++;
+                               }
+                           }
+                           scope.$emit('TypesReady', label, count, fail);
+                           })
+                       .error( function(data, status, headers, config) {
+                           ProcessErrors(scope, data, status, null,
+                               { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
+                           });
+                }
+            }
+            });
+
+        GetChoices({ scope: scope,
+            url: GetBasePath('inventory_sources'),
+            field: 'source',
+            emit: 'CountTypes' });
 
         }
         }]);
