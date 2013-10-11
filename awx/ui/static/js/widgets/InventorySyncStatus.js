@@ -54,10 +54,6 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                html += "</thead>\n";
                html += "<tbody>\n";
                
-               console.log('inventory count:' + inventoryCount);
-               console.log('group count:' + groupCount);
-               console.log('host count:' + hostCount);
-
                if (inventoryCount > 0) {
                   html += makeRow('Inventories', inventoryCount, inventoryFails);
                   rowcount++;
