@@ -48,6 +48,9 @@ class BaseTask(Task):
         Reload model from database and update the given fields.
         '''
         output_replacements = updates.pop('output_replacements', None) or []
+        # Commit outstanding transaction so that we fetch the latest object
+        # from the database.
+        transaction.commit()
         instance = self.model.objects.get(pk=pk)
         if updates:
             update_fields = []
@@ -60,6 +63,7 @@ class BaseTask(Task):
                 if field == 'status':
                     update_fields.append('failed')
             instance.save(update_fields=update_fields)
+            transaction.commit()
         return instance
 
     def get_path_to(self, *args):
@@ -237,6 +241,7 @@ class BaseTask(Task):
             obj.result_traceback += '\nCanceled stuck %s.' % unicode(self.model._meta.verbose_name)
             obj.save(update_fields=['status', 'result_traceback'])
 
+    @transaction.commit_on_success
     def run(self, pk, **kwargs):
         '''
         Run the job/task using ansible-playbook and capture its output.
@@ -817,7 +822,7 @@ class RunInventoryUpdate(BaseTask):
                 iu_qs = InventoryUpdate.objects.filter(inventory_source__inventory=inventory, status__in=('pending', 'running'))
                 iu_qs = iu_qs.exclude(pk=inventory_update.pk)
                 if jobs_qs.count() or iu_qs.count():
-                    #print 'inventory update %d waiting on' % pk, jobs_qs, iu_qs
+                    print 'inventory update %d waiting on' % pk, jobs_qs, iu_qs
                     inventory_update = self.update_model(pk, status='waiting')
                     time.sleep(4.0)
                 else:
