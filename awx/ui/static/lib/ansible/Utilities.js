@@ -5,7 +5,7 @@
  *  Utility functions
  *
  */
-angular.module('Utilities',[])
+angular.module('Utilities',['RestServices'])
    
    .factory('ClearScope', function() {
    return function(id) {
@@ -311,6 +311,27 @@ angular.module('Utilities',[])
    return function() {
        // And Fade-out the cloack revealing the element
        $('#curtain-div').fadeOut(500, function() { $(this).remove(); });
+       }
+       }])
+
+   .factory('GetChoices', [ 'Rest', 'ProcessErrors', function(Rest, ProcessErrors) {
+   return function(params) {
+       // Get dropdown options
+
+       var scope = params.scope;
+       var url = params.url; 
+       var field = params.field;
+       var emit_callback = params.emit;
+
+       Rest.setUrl(url);
+       Rest.options()
+           .success( function(data, status, headers, config) {
+               scope.$emit(emit_callback, data.actions['GET'][field].choices);
+               })
+           .error(  function(data, status, headers, config) {
+               ProcessErrors(scope, data, status, null,
+                    { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status }); 
+               });
        }
        }])
 

@@ -1,38 +1,38 @@
 /*********************************************
  *  Copyright (c) 2013 AnsibleWorks, Inc.
  *
- * JobStatus.js 
+ * InventorySyncStatus.js 
  *
  * Dashboard widget showing object counts and license availability.
  *
  */
 
-angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
-    .factory('JobStatus', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
+angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
+    .factory('InventorySyncStatus', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
     function($rootScope, $compile, Rest, GetBasePath, ProcessErrors, Wait) {
     return function(params) {
         
         var scope = $rootScope.$new();
-        var jobCount, jobFails, inventoryCount, inventoryFails, groupCount, groupFails, hostCount, hostFails; 
+        var inventoryCount, inventoryFails, groupCount, groupFails, hostCount;
+        var hostFails = 0; 
         var counts = 0;
-        var expectedCounts = 8;
+        var expectedCounts = 4;
         var target = params.target;        
-
+        
         if (scope.removeCountReceived) {
            scope.removeCountReceived();
         }
         scope.removeCountReceived = scope.$on('CountReceived', function() {
 
             var rowcount = 0;
-
+            
             function makeRow(label, count, fail) {
-                var html = '';
-                html += "<tr>\n";
+                var html = "<tr>\n";
                 html += "<td><a href=\"/#/" + label.toLowerCase() + "\">"  + label + "</a></td>\n";
                 html += "<td class=\"failed-column text-right\">";
-                html += (fail > 0) ? "<a href=\"/blah/blah\">" + fail + "</a>" : ""; 
+                html += (fail > 0) ? "<a href=\"/blah/blah\">" + fail + "</a>" : "";
                 html += "</td>\n";
-                html += "<td class=\"text-right\">"
+                html += "<td class=\"text-right\">";
                 html += (count > 0) ? "<a href=\"/blah/blah\">" + count + "</a>" : "";
                 html += "</td></tr>\n";
                 return html; 
@@ -42,7 +42,7 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
             if (counts == expectedCounts) {
                // all the counts came back, now generate the HTML 
                var html = "<div class=\"panel panel-default\">\n";
-               html += "<div class=\"panel-heading\">Job Status</div>\n";
+               html += "<div class=\"panel-heading\">Inventory Sync Status</div>\n";
                html += "<div class=\"panel-body\">\n";
                html += "<table class=\"table table-condensed table-hover\">\n";
                html += "<thead>\n";
@@ -53,11 +53,11 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                html += "</tr>\n";
                html += "</thead>\n";
                html += "<tbody>\n";
+               
+               console.log('inventory count:' + inventoryCount);
+               console.log('group count:' + groupCount);
+               console.log('host count:' + hostCount);
 
-               if (jobCount > 0) {
-                  html += makeRow('Jobs', jobCount, jobFails);
-                  rowcount++;
-               }
                if (inventoryCount > 0) {
                   html += makeRow('Inventories', inventoryCount, inventoryFails);
                   rowcount++;
@@ -70,9 +70,9 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                   html += makeRow('Hosts', hostCount, hostFails);
                   rowcount++;
                }
-              
+
                if (rowcount == 0) {
-                  html += "<tr><td colspan=\"3\">No job data found</td></tr>\n";
+                  html += "<tr><td colspan=\"3\">No inventories configured for external sync</td></tr>\n";
                }
 
                html += "</tbody>\n";
@@ -80,7 +80,6 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                html += "</div>\n";
                html += "</div>\n";
                html += "</div>\n";
-
                var element = angular.element(document.getElementById(target));
                element.html(html);
                $compile(element)(scope);
@@ -88,31 +87,7 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
             }
             });
 
-        var url = GetBasePath('jobs') + '?page=1';
-        Rest.setUrl(url);
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                jobCount=data.count;
-                scope.$emit('CountReceived');
-                })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, null,
-                    { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
-                });
-
-        url = GetBasePath('jobs') + '?failed=true&page=1';
-        Rest.setUrl(url);
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                jobFails=data.count;
-                scope.$emit('CountReceived');
-                })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, null,
-                    { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
-                });
-
-        url = GetBasePath('inventory') + '?page=1';
+        var url = GetBasePath('inventory') + '?has_inventory_sources=true&page=1';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
@@ -123,12 +98,14 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
-
-        url = GetBasePath('inventory') + '?has_active_failures=true&page=1';
+        
+        inventoryFails = 0;
+        
+        url = GetBasePath('groups') + '?has_inventory_sources=true&page=1';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
-                inventoryFails=data.count;
+                groupCount=data.count;
                 scope.$emit('CountReceived');
                 })
             .error( function(data, status, headers, config) {
@@ -136,47 +113,23 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
 
-        url = GetBasePath('groups') + '?page=1';
+        url = GetBasePath('groups') + '?has_inventory_sources=true&inventory_source__status=failed&page=1';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
-                groupCount = data.count;
+                groupFails=data.count;
                 scope.$emit('CountReceived');
                 })
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
-
-        url = GetBasePath('groups') + '?has_active_failures=true&page=1';
+        
+        url = GetBasePath('hosts') + '?has_inventory_sources=true&page=1';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
-                groupFails = data.count;
-                scope.$emit('CountReceived');
-                })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, null,
-                    { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
-                });
-
-        url = GetBasePath('hosts') + '?page=1';
-        Rest.setUrl(url);
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                hostCount = data.count;
-                scope.$emit('CountReceived');
-                })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, null,
-                    { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
-                });
-
-        url = GetBasePath('hosts') + '?has_active_failures=true&page=1';
-        Rest.setUrl(url);
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                hostFails = data.count;
+                hostCount=data.count;
                 scope.$emit('CountReceived');
                 })
             .error( function(data, status, headers, config) {

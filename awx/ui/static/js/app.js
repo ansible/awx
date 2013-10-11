@@ -71,6 +71,8 @@ angular.module('ansible', [
     'License',
     'HostGroupsFormDefinition',
     'JobStatusWidget',
+    'InventorySyncStatusWidget',
+    'SCMSyncStatusWidget',
     'JobsHelper',
     'InventoryStatusDefinition'
      ])
