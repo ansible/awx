@@ -12,7 +12,7 @@ angular.module('InventorySummaryDefinition', [])
 
         name: 'groups',
         iterator: 'group',
-        editTitle: 'Inventory Summary: {{ inventory_name }}',
+        editTitle: '{{ inventory_name }}',
         showTitle: true,
         well: true,
         index: false,

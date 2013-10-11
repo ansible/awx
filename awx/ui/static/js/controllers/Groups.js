@@ -130,7 +130,7 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
       var url;
       
       if ($rootScope.timer) {
-         // Kill any linger timers from the inventory summary page
+         // Kill any lingering timers from the inventory summary page
          clearInterval($rootScope.timer);
          $rootScope.timer = null;
       }

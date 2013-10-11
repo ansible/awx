@@ -33,7 +33,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var treeData =
             [{ 
                 data: {
-                    title: inventory_name + ' Inventory'
+                    title: inventory_name
                     }, 
                 attr: {
                     type: 'inventory',
