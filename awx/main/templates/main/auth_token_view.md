@@ -21,10 +21,10 @@ the timestamp when the token will expire:
 Otherwise, the response will indicate the error that occurred and return a 4xx
 status code.
 
-For subsequent requests, pass the token via the HTTP `Authenticate` request
+For subsequent requests, pass the token via the HTTP `Authorization` request
 header:
 
-    Authenticate: Token 8f17825cf08a7efea124f2638f3896f6637f8745
+    Authorization: Token 8f17825cf08a7efea124f2638f3896f6637f8745
 
 Each request that uses the token for authentication will refresh its expiration
 timestamp and keep it from expiring.  A token only expires when it is not used
