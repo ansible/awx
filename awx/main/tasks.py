@@ -368,8 +368,8 @@ class RunJob(BaseTask):
             args.extend(['-l', job.limit])
         if job.verbosity:
             args.append('-%s' % ('v' * min(3, job.verbosity)))
-        if job.extra_vars:
-            args.extend(['-e', job.extra_vars])
+        if job.extra_vars_dict:
+            args.extend(['-e', json.dumps(job.extra_vars_dict)])
         if job.job_tags:
             args.extend(['-t', job.job_tags])
         args.append(job.playbook) # relative path to project.local_path

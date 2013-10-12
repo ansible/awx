@@ -649,20 +649,35 @@ class RunJobTest(BaseCeleryTest):
 
     def test_extra_job_options(self):
         self.create_test_project(TEST_PLAYBOOK)
+        # Test with extra_vars containing misc whitespace.
         job_template = self.create_test_job_template(forks=3, verbosity=2,
-                                                     extra_vars='foo=1')
+                                                     extra_vars=u'{\n\t"abc": 1234\n}')
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
         self.assertFalse(job.passwords_needed_to_start)
         self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
-        # Job may fail if current user doesn't have password-less sudo
-        # privileges, but we're mainly checking the command line arguments.
-        self.check_job_result(job, ('successful', 'failed'))
+        self.check_job_result(job, 'successful')
         self.assertTrue('--forks=3' in self.run_job_args)
         self.assertTrue('-vv' in self.run_job_args)
         self.assertTrue('-e' in self.run_job_args)
+        # Test with extra_vars as key=value (old format).
+        job_template2 = self.create_test_job_template(extra_vars='foo=1')
+        job2 = self.create_test_job(job_template=job_template2)
+        self.assertEqual(job2.status, 'new')
+        self.assertTrue(job2.start())
+        self.assertEqual(job2.status, 'pending')
+        job2 = Job.objects.get(pk=job2.pk)
+        self.check_job_result(job2, 'successful')
+        # Test with extra_vars as YAML (should be converted to JSON in args).
+        job_template3 = self.create_test_job_template(extra_vars='abc: 1234')
+        job3 = self.create_test_job(job_template=job_template3)
+        self.assertEqual(job3.status, 'new')
+        self.assertTrue(job3.start())
+        self.assertEqual(job3.status, 'pending')
+        job3 = Job.objects.get(pk=job3.pk)
+        self.check_job_result(job3, 'successful')
 
     def test_lots_of_extra_vars(self):
         self.create_test_project(TEST_PLAYBOOK)

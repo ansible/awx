@@ -1754,9 +1754,17 @@ class Job(CommonModelNameNotUnique):
 
     @property
     def extra_vars_dict(self):
-        '''Return extra_vars key=value pairs as a dictionary.'''
-        d = {}
+        '''Return extra_vars as a dictionary.'''
         extra_vars = self.extra_vars.encode('utf-8')
+        try:
+            return json.loads(extra_vars.strip() or '{}')
+        except ValueError:
+            pass
+        try:
+            return yaml.safe_load(extra_vars)
+        except yaml.YAMLError:
+            pass
+        d = {}
         for kv in [x.decode('utf-8') for x in shlex.split(extra_vars, posix=True)]:
             if '=' in kv:
                 k, v = kv.split('=', 1)
