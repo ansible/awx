@@ -1608,7 +1608,7 @@ class JobTemplate(CommonModel):
             for pw in inventory_source.source_passwords_needed:
                 if pw not in needed:
                     needed.append(pw)
-        return bool(len(needed) == 0)
+        return bool(self.credential and not len(needed))
 
 class Job(CommonModelNameNotUnique):
     '''
