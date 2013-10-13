@@ -231,10 +231,24 @@ dd {
   text-align: justify;
 }
 
+
+
+.navbar-collapse {
+  padding-right: 0;  
+}
+
+.nav >li >a:last-child {
+  padding-right: 0;
+  padding-left: 20px;
+}
+
+.navbar>.container .navbar-brand {
+  margin-left: -10px;
+}
+
 /* Using inline-block rather than block keeps 
     brand img from right aligning into the collapse button
     on mobile screens */
-
 .main-menu .navbar-brand {
   display: inline-block;
   padding: 0;
