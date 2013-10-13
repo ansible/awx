@@ -73,6 +73,7 @@ angular.module('ansible', [
     'JobStatusWidget',
     'InventorySyncStatusWidget',
     'SCMSyncStatusWidget',
+    'ObjectCountWidget',
     'JobsHelper',
     'InventoryStatusDefinition'
      ])

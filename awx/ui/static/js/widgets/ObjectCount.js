@@ -15,20 +15,25 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
         
         var current_version; 
         var scope = $rootScope.$new();
-        var counts = [];
+        var counts = {};
         var target = params.target;
-
-        scope.$on('countReady', function(e, obj, count) {
+        var expected;
+        
+        if (scope.removeCountReady) {
+           scope.removeCountReady();
+        }
+        scope.removeCountReady = scope.$on('countReady', function(e, obj, count) {
             var keys=[];
-            var hash = {};
-            if (counts.length == 10) {
+            var html, itm;
+            var cnt = 0;
+            for (itm in counts) {
+                cnt++;
+            }
+            if (cnt == expected) {
                // sort the list of objs
-               for (var i=0; i < counts.length; i++) {
-                   for (var key in counts[i]) {
-                       if (key !== 'hosts' && key !== 'groups') {
-                          keys.push(key);
-                       }
-                       hash[key] = counts[i][key];
+               for (var key in counts) {
+                   if (key !== 'hosts' && key !== 'groups') {
+                      keys.push(key);
                    }
                }
                // sort the keys, forcing groups and hosts to appear directlry after inventory
@@ -45,43 +50,43 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
                    }
                }
                keys = new_keys; 
-
-               var html = "<div class=\"panel panel-primary\">\n";
+               html = "<div class=\"panel panel-default\">\n";
                html += "<div class=\"panel-heading\">System Summary</div>\n";
                html += "<div class=\"panel-body\">\n";
-               html += "<ul class=\"list-group grey-txt\">\n";
+               html += "<table class=\"table table-condensed table-hover\">\n";
+               html += "<thead>\n";
+               html += "<tr>\n";
+               html += "<th class=\"col-md-5 col-lg-4\"></th>\n";
+               html += "<th class=\"col-md-1 col-lg-1 text-right\">Total</th>\n";
+               html += "</tr>\n";
+               html += "</thead>\n";
+               html += "<tbody>\n";
                for (var i=0; i < keys.length; i++) {
-                   html += "<li class=\"list-group-item";
-                   html += (keys[i] == 'hosts' || keys[i] == 'groups') ? ' pad-left-md' : ''; 
-                   html += "\">\n";
-                   html += "<span class=\"badge success-badge\">" + hash[keys[i]] + "</span>\n";
-                   
-                   if (keys[i] !== 'hosts' && keys[i] !== 'groups') {
-                      html += "<a href=\"/#/";
-                      html += (keys[i] == 'inventory') ? 'inventories' : keys[i];
-                      html += "\">";
-                   }
-                   
+                   html += "<tr><td ";
+                   html += (keys[i] == 'hosts' || keys[i] == 'groups') ? "class=\"pad-left-md\"" : ''; 
+                   html += ">\n";
+                   html += "<a href=\"/#/";
+                   html += (keys[i] == 'inventory') ? 'inventories' : keys[i];
+                   html += "\">";
                    if (keys[i] == 'inventory') {
                       html += 'Inventories';
                    }
-                   else if (keys[i] == 'job_templates') {
-                      html += 'Job Templates';
-                   }
                    else {
-                      html += keys[i].substring(0,1).toUpperCase() + keys[i].substring(1);
+                      var txt = keys[i].replace(/\_/g,' ');
+                      html += txt.substring(0,1).toUpperCase() + txt.substring(1);
                    }
-                   html += (keys[i] !== 'hosts' && keys[i] !== 'groups') ? "</a>" : "";
-                   html += "</li>\n";
+                   html += "</a></td>\n"
+                   html += "<td class=\"text-right\"><a href=\"/#/";
+                   html += (keys[i] == 'inventory') ? 'inventories' : keys[i];
+                   html += "\">";
+                   html += counts[keys[i]] + "</a></td></tr>\n";
                }
-               html += "</ul>\n";
+               html += "</tbody>\n";
+               html += "</table>\n";
                html += "</div>\n";
-               html += "</div>\n";
-               
+               html += "</div>\n"
                var element = angular.element(document.getElementById(target));
                element.html(html);
-               //scope = element.scope();   // Set scope specific to the element we're compiling, avoids circular reference
-                                          // From here use 'scope' to manipulate the form, as the form is not in '$scope'
                $compile(element)(scope);
                $rootScope.$emit('WidgetLoaded');
             }
@@ -93,9 +98,7 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
             Rest.setUrl(url);
             Rest.get()
                 .success( function(data, status, headers, config) {
-                    var count = {};
-                    count[obj] = data.count;
-                    counts.push(count);
+                    counts[obj] = data.count;
                     scope.$emit('countReady');
                     })
                 .error( function(data, status, headers, config) {
@@ -113,10 +116,17 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
                 Rest.setUrl(current_version);
                 Rest.get()
                     .success( function(data, status, headers, config) {
-                        for (obj in data) {
-                            if (obj !== 'me' && obj !== 'authtoken' && obj !== 'config') {
-                               getCount(obj);
+                        for (var obj in data) {
+                            if (obj == 'me' || obj == 'authtoken' || obj == 'config' || obj == 'inventory_sources') {
+                               delete data[obj]; 
                             }
+                        }
+                        expected = 0;
+                        for (var obj in data) {
+                            expected++;
+                        }
+                        for (obj in data) {
+                            getCount(obj);
                         }
                         })
                     .error( function(data, status, headers, config) {

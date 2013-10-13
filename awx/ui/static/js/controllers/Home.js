@@ -10,12 +10,13 @@
 
 'use strict';
 
-function Home ($routeParams, $scope, $rootScope, $location, Wait, JobStatus, InventorySyncStatus, SCMSyncStatus, ClearScope)
+function Home ($routeParams, $scope, $rootScope, $location, Wait, ObjectCount, JobStatus, InventorySyncStatus, SCMSyncStatus, 
+    ClearScope)
 {
     ClearScope('home');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                          //scope.
 
-    var waitCount = 3;
+    var waitCount = 4;
     var loadedCount = 0;
     
     if (!$routeParams['login']) {
@@ -25,7 +26,8 @@ function Home ($routeParams, $scope, $rootScope, $location, Wait, JobStatus, Inv
     
     JobStatus({ target: 'container1' });
     InventorySyncStatus({ target: 'container2' });
-    SCMSyncStatus({ target: 'container3' });
+    SCMSyncStatus({ target: 'container4' });
+    ObjectCount({ target: 'container3' });
      
     $rootScope.$on('WidgetLoaded', function() {
         // Once all the widgets report back 'loaded', turn off Wait widget
@@ -36,5 +38,5 @@ function Home ($routeParams, $scope, $rootScope, $location, Wait, JobStatus, Inv
         });
 }
 
-Home.$inject=[ '$routeParams', '$scope', '$rootScope', '$location', 'Wait', 'JobStatus', 'InventorySyncStatus',
+Home.$inject=[ '$routeParams', '$scope', '$rootScope', '$location', 'Wait', 'ObjectCount', 'JobStatus', 'InventorySyncStatus',
     'SCMSyncStatus', 'ClearScope'];
