@@ -23,7 +23,8 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
            scope.removeCountReady();
         }
         scope.removeCountReady = scope.$on('countReady', function(e, obj, count) {
-            var keys=[];
+            var keys=[ 'organizations', 'users', 'teams', 'projects', 'inventory', 'groups', 'hosts',
+                'credentials', 'job_templates', 'jobs' ];
             var html, itm;
             var cnt = 0;
             for (itm in counts) {
@@ -31,25 +32,25 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
             }
             if (cnt == expected) {
                // sort the list of objs
-               for (var key in counts) {
-                   if (key !== 'hosts' && key !== 'groups') {
-                      keys.push(key);
-                   }
-               }
+               //for (var key in counts) {
+               //    if (key !== 'hosts' && key !== 'groups') {
+               //      keys.push(key);
+               //    }
+               //}
                // sort the keys, forcing groups and hosts to appear directlry after inventory
-               keys.sort();
-               var new_keys = [];
-               for (var i=0; i < keys.length; i++) {
-                   if (keys[i] == 'inventory') {
-                      new_keys.push('inventory');
-                      new_keys.push('groups');
-                      new_keys.push('hosts');
-                   } 
-                   else {
-                      new_keys.push(keys[i]);
-                   }
-               }
-               keys = new_keys; 
+               //keys.sort();
+               //var new_keys = [];
+               //for (var i=0; i < keys.length; i++) {
+               //    if (keys[i] == 'inventory') {
+               //       new_keys.push('inventory');
+               //       new_keys.push('groups');
+               //       new_keys.push('hosts');
+               //    } 
+               //    else {
+               //       new_keys.push(keys[i]);
+               //    }
+               //}
+               //keys = new_keys; 
                html = "<div class=\"panel panel-default\">\n";
                html += "<div class=\"panel-heading\">System Summary</div>\n";
                html += "<div class=\"panel-body\">\n";
@@ -62,18 +63,18 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
                html += "</thead>\n";
                html += "<tbody>\n";
                for (var i=0; i < keys.length; i++) {
-                   html += "<tr><td ";
-                   html += (keys[i] == 'hosts' || keys[i] == 'groups') ? "class=\"pad-left-md\"" : ''; 
-                   html += ">\n";
+                   html += "<tr><td class=\"capitalize\">\n";
                    html += "<a href=\"/#/";
                    html += (keys[i] == 'inventory') ? 'inventories' : keys[i];
-                   html += "\">";
+                   html += "\"";
+                   html += (keys[i] == 'hosts' || keys[i] == 'groups') ? " class=\"pad-left-sm\" " : "";
+                   html += ">";
                    if (keys[i] == 'inventory') {
                       html += 'Inventories';
                    }
                    else {
-                      var txt = keys[i].replace(/\_/g,' ');
-                      html += txt.substring(0,1).toUpperCase() + txt.substring(1);
+                      html += keys[i].replace(/\_/g,' ');
+                      //html += txt.substring(0,1).toUpperCase() + txt.substring(1);
                    }
                    html += "</a></td>\n"
                    html += "<td class=\"text-right\"><a href=\"/#/";

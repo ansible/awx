@@ -99,7 +99,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         
         if (passwords.length > 0) {
            // Prompt for passwords
-           console.log(passwords);
            html += "<form class=\"form-horizontal\" name=\"password_form\" novalidate>\n";
            html += (extra_html) ? extra_html : "";
            var current_form;
