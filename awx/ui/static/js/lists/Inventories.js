@@ -23,9 +23,13 @@ angular.module('InventoriesListDefinition', [])
                 key: true,
                 label: 'Name'
                 },
-            description: {
-                label: 'Description', 
-                link: true
+            organization: {
+                label: 'Organization',
+                ngBind: 'inventory.summary_fields.organization.name',
+                linkTo: '/#/organizations/{{ inventory.organization }}',
+                sourceModel: 'organization',
+                sourceField: 'name',
+                excludeModal: true
                 },
             hosts_with_active_failures: {
                 label: 'Hosts with<br>Failed Job?',
@@ -48,14 +52,6 @@ angular.module('InventoriesListDefinition', [])
                 badgeTipPlacement: 'top',
                 searchable: false,
                 nosort: true
-                },
-            organization: {
-                label: 'Organization',
-                ngBind: 'inventory.summary_fields.organization.name',
-                linkTo: '/#/organizations/{{ inventory.organization }}',
-                sourceModel: 'organization',
-                sourceField: 'name',
-                excludeModal: true
                 },
             has_inventory_sources: {
                 label: 'Has external sources?',
