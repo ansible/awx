@@ -93,10 +93,6 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
               else if (project.related.last_update) {
                  ProjectStatus({ project_id: id, last_update: project.related.last_update });
               }
-             // else if (project.status == 'updating') {
-             //    Alert('Pending Status', 'An update is currently running. Status details cannot be viewed until the update process ' + 
-             //        ' completes. Use the refresh button to monitor progress of the update process.', 'alert-info');
-             // }
               else {
                  Alert('No Updates Available', 'There is no SCM update information available for this project. An update has not yet been ' +
                      ' completed.  If you have not already done so, start an update for this project.', 'alert-info');
@@ -114,29 +110,96 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
        } 
  
-    scope.deleteProject = function(id, name) {
-       
-       var action = function() {
-           var url = defaultUrl + id + '/';
-           Rest.setUrl(url);
-           Rest.destroy()
+    scope.deleteProject = function(id, name) {  
+        var action = function() {
+            var url = defaultUrl + id + '/';
+            Rest.setUrl(url);
+            Rest.destroy()
+                .success( function(data, status, headers, config) {
+                    $('#prompt-modal').modal('hide');
+                    scope.search(list.iterator);
+                    })
+                .error( function(data, status, headers, config) {
+                    $('#prompt-modal').modal('hide');
+                    ProcessErrors(scope, data, status, null,
+                             { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                    });      
+            };
+
+        Prompt({ hdr: 'Delete', 
+            body: 'Are you sure you want to delete ' + name + '?',
+            action: action
+            });
+        }
+
+    if (scope.removeCancelUpdate) {
+       scope.removeCancelUpdate();
+    }
+    scope.removeCancelUpdate = scope.$on('Cancel_Update', function(e, url) {
+        // Cancel the project update process
+        Rest.setUrl(url)
+        Rest.post()
+            .success( function(data, status, headers, config) {
+                Alert('SCM Update Cancel', 'Your request to cancel the update was submitted to the task maanger.', 'alert-info');
+                scope.refresh();
+                })
+            .error( function(data, status, headers, config) {
+                ProcessErrors(scope, data, status, null,
+                    { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST status: ' + status });
+                });  
+        });
+
+    if (scope.removeCheckCancel) {
+       scope.removeCheckCancel();
+    }
+    scope.removeCheckCancel = scope.$on('Check_Cancel', function(e, data) {
+        // Check that we 'can' cancel the update
+        var url = data.related.cancel;
+        Rest.setUrl(url);
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                if (data.can_cancel) {
+                   scope.$emit('Cancel_Update', url);
+                }
+                else {
+                   Alert('Cancel Not Allowed', 'Either you do not have access or the SCM update process completed. Use the Refresh button to' +
+                      ' view the latest status.', 'alert-info');
+                }
+                })
+            .error( function(data, status, headers, config) {
+                ProcessErrors(scope, data, status, null,
+                    { hdr: 'Error!', msg: 'Call to ' + url + ' failed. GET status: ' + status });
+                });
+        });
+
+    scope.cancelUpdate = function(id, name) {
+        // Start the update process
+        var project;
+        var found = false;
+        for (var i=0; i < projects.length; i++) {
+            if (projects[i].id == id) {
+               project = projects[i];
+               found = true;
+               break;
+            }
+        }
+        if (found && project.related.current_update) {
+           Rest.setUrl(project.related.current_update);
+           Rest.get()
                .success( function(data, status, headers, config) {
-                   $('#prompt-modal').modal('hide');
-                   scope.search(list.iterator);
+                   scope.$emit('Check_Cancel', data);
                    })
                .error( function(data, status, headers, config) {
-                   $('#prompt-modal').modal('hide');
                    ProcessErrors(scope, data, status, null,
-                            { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
-                   });      
-           };
+                       { hdr: 'Error!', msg: 'Call to ' + project.related.current_update + ' failed. GET status: ' + status });
+                   });
+        }
+        else {
+           Alert('Update Not Found', 'An SCM Update does not appear to be running for project ' + name + '. Click the Refresh ' +
+               'button to view the latet status.', 'alert-info');
+        }
+        }
 
-       Prompt({ hdr: 'Delete', 
-                body: 'Are you sure you want to delete ' + name + '?',
-                action: action
-                });
-       }
-    
     scope.refresh = function() {
         scope['projectSearchSpin'] = true;
         scope['projectLoading'] = true;

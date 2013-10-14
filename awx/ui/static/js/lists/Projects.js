@@ -90,12 +90,21 @@ angular.module('ProjectsListDefinition', [])
                 ngClick: 'SCMUpdate(\{\{ project.id \}\})',
                 awToolTip: 'Perform an SCM update on this project'     
                 },
+            cancel: {
+                label: 'Cancel',
+                icon: 'icon-minus-sign',
+                ngClick: "cancelUpdate(\{\{ project.id \}\}, '\{\{ project.name \}\}')",
+                "class": 'btn-danger btn-xs delete-btn',
+                awToolTip: 'Cancel a running SCM update process',
+                ngShow: "project.status == 'updating'"
+                },
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteProject(\{\{ project.id \}\},'\{\{ project.name \}\}')",
                 icon: 'icon-trash',
-                "class": 'btn-xs btn-danger',
-                awToolTip: 'Permanently remove project from the database'
+                "class": 'btn-danger btn-xs delete-btn',
+                awToolTip: 'Permanently remove project from the database',
+                ngShow: "project.status !== 'updating'"
                 }
             }
         });

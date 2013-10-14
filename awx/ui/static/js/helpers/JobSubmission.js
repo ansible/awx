@@ -7,9 +7,9 @@
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
     'LookUpHelper', 'ProjectFormDefinition', 'JobSubmissionHelper', 'GroupFormDefinition', 'GroupsHelper' ])
 
-    .factory('PromptPasswords', ['CredentialForm', 'JobTemplateForm', 'ProjectsForm', '$compile', 'Rest', '$location', 'ProcessErrors', 'GetBasePath',
-        'Alert',
-    function(CredentialForm, JobTemplateForm, ProjectsForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert) {
+    .factory('PromptPasswords', ['CredentialForm', 'JobTemplateForm', 'GroupForm', 'ProjectsForm', '$compile', 'Rest', '$location', 'ProcessErrors',
+        'GetBasePath', 'Alert',
+    function(CredentialForm, JobTemplateForm, ProjectsForm, GroupForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert) {
     return function(params) {
         
         var scope = params.scope; 
@@ -98,12 +98,34 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             }
         
         if (passwords.length > 0) {
-           // We need to prompt for passwords
+           // Prompt for passwords
+           console.log(passwords);
            html += "<form class=\"form-horizontal\" name=\"password_form\" novalidate>\n";
            html += (extra_html) ? extra_html : "";
+           var current_form;
            for (var i=0; i < passwords.length; i++) {
                // Add the password field
-               field = (form.fields[passwords[i]]) ? form.fields[passwords[i]] : ProjectsForm.fields[passwords[i]];
+               if (form.name == 'credential') {
+                  // this is a job. we could be prompting for inventory and/or SCM passwords
+                  if (form.fields[passwords[i]]) {
+                     current_form = form;
+                  }
+                  else if (ProjectsForm.fields[passwords[i]]) {
+                     current_form = ProjectsForm;
+                  }
+                  else if (GroupForm.fields[passwords[i]]) {
+                     current_form = GroupForm;
+                  }
+                  else {
+                     // No match found. Abandon ship!
+                     Alert('Form Not Found', 'Could not locate form for: ' + passwords[i], 'alert-danger');
+                     $location('/#/jobs');
+                  }
+               }
+               else {
+                  current_form = form;
+               }
+               field = current_form.fields[passwords[i]];
                fld = passwords[i];
                scope[fld] = '';
                html += "<div class=\"form-group\">\n";
@@ -127,7 +149,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
              
                // Add the related confirm field
                fld = field.associated;
-               field = (form.fields[field.associated]) ? form.fields[field.associated] : ProjectsForm.fields[field.associated];
+               field = current_form.fields[field.associated];
                scope[fld] = '';
                html += "<div class=\"form-group\">\n";
                html += "<label class=\"control-label col-lg-3 normal-weight\" for=\"" + fld + "\">* ";
@@ -219,10 +241,10 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                            .success( function(data, status, headers, config) {
                                var base = $location.path().replace(/^\//,'').split('/')[0];
                                if (base == 'jobs') {
-                                  scope.refreshJob();
+                                  scope.refresh();
                                } 
                                else {
-                                  $location.path('/jobs');
+                                  $location.url('/#/jobs');
                                }
                                })
                            .error( function(data, status, headers, config) { 
@@ -294,6 +316,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         }
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function(e, action) {
             // Refresh the project list after update request submitted
+            Alert('Update Started', 'The request to start the SCM update process was submitted. ' +
+                'The Projects page will refresh every 10 seconds, or refresh manually by clicking the <em>Refresh</em> button.', 'alert-info');
             scope.refresh();
             });
         
@@ -379,7 +403,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function(e, action) {
             if (action == 'started') {
                // Refresh the project list after update request submitted
-               Alert('Update Started', 'The request to start the inventory process was submitted. Monitor progress from the inventory summary screen. ' +
+               Alert('Update Started', 'The request to start the inventory update process was submitted. Monitor progress from the inventory summary screen. ' +
                    'The screen will refresh every 10 seconds, or refresh manually by clicking the <em>Refresh</em> button.', 'alert-info');
                var node = $('#inventory-node')
                var selected = $('#tree-view').jstree('get_selected');

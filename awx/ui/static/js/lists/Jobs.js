@@ -82,31 +82,6 @@ angular.module('JobsListDefinition', [])
             },
 
         fieldActions: {
-            /*summary: {
-                label: 'Hosts',
-                icon: 'icon-laptop',
-                ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')",
-                "class": 'btn btn-default btn-xs',
-                awToolTip: 'View host summary',
-                ngDisabled: "job.status == 'new'"
-                },
-            events: {
-                label: 'Events',
-                icon: 'icon-list-ul',
-                mode: 'all',             
-                ngClick: "viewEvents(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')",
-                "class": 'btn btn-default btn-xs',
-                awToolTip: 'View events',
-                ngDisabled: "job.status == 'new'"
-                },
-            edit: {
-                label: 'Details',
-                icon: 'icon-zoom-in',
-                ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')",
-                "class": 'btn btn-default btn-xs',
-                awToolTip: 'View job details'
-                },*/
-
             dropdown: {
                 type: 'DropDown',
                 label: 'View',
@@ -120,7 +95,6 @@ angular.module('JobsListDefinition', [])
                         ngHide: "job.status == 'new'" }
                     ]
                 },
-
             rerun: {
                 label: 'Launch',
                 icon: 'icon-rocket',
