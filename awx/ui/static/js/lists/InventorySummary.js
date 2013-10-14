@@ -139,6 +139,13 @@ angular.module('InventorySummaryDefinition', [])
                 "class": 'btn-xs btn-success',
                 ngClick: 'updateGroup(\{\{ group.id \}\})',
                 awToolTip: 'Perform an update on this group'     
+                },
+            cancel: {
+                label: 'Cancel',
+                icon: 'icon-minus-sign',
+                ngClick: "cancelUpdate(\{\{ group.id \}\}, '\{\{ group.name \}\}')",
+                "class": 'btn-danger btn-xs delete-btn',
+                awToolTip: 'Cancel a running update process'
                 }
             }
     });

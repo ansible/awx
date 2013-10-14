@@ -314,6 +314,74 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             $('#tree-view').jstree('select_node', node);
             }
 
+        if (scope.removeCancelUpdate) {
+           scope.removeCancelUpdate();
+        }
+        scope.removeCancelUpdate = scope.$on('Cancel_Update', function(e, url) {
+            // Cancel the project update process
+            Rest.setUrl(url)
+            Rest.post()
+                .success( function(data, status, headers, config) {
+                    Alert('SCM Update Cancel', 'Your request to cancel the update was submitted to the task maanger.', 'alert-info');
+                    scope.refresh();
+                    })
+                .error( function(data, status, headers, config) {
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST status: ' + status });
+                    });  
+            });
+
+        if (scope.removeCheckCancel) {
+           scope.removeCheckCancel();
+        }
+        scope.removeCheckCancel = scope.$on('Check_Cancel', function(e, data) {
+            // Check that we 'can' cancel the update
+            var url = data.related.cancel;
+            Rest.setUrl(url);
+            Rest.get()
+                .success( function(data, status, headers, config) {
+                    if (data.can_cancel) {
+                       scope.$emit('Cancel_Update', url);
+                    }
+                    else {
+                       Alert('Cancel Not Allowed', 'Either you do not have access or the Inventory update process completed. Click the <em>Refresh</em> button to' +
+                          ' view the latest status.', 'alert-info');
+                    }
+                    })
+                .error( function(data, status, headers, config) {
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. GET status: ' + status });
+                    });
+            });
+
+        scope.cancelUpdate = function(id, name) {
+            // Cancel the update process
+            var group;
+            var found = false;
+            for (var i=0; i < scope.groups.length; i++) {
+                if (scope.groups[i].id == id) {
+                   group = scope.groups[i];
+                   found = true;
+                   break;
+                }
+            }
+            if (found && group.related.current_update) {
+               Rest.setUrl(group.related.current_update);
+               Rest.get()
+                   .success( function(data, status, headers, config) {
+                       scope.$emit('Check_Cancel', data);
+                       })
+                   .error( function(data, status, headers, config) {
+                       ProcessErrors(scope, data, status, null,
+                           { hdr: 'Error!', msg: 'Call to ' + group.related.current_update + ' failed. GET status: ' + status });
+                       });
+            }
+            else {
+               Alert('Update Not Found', 'An Inventory update does not appear to be running for group: ' + name + '. Click the <em>Refresh</em> ' +
+                   'button to view the latet status.', 'alert-info');
+            }
+            }
+
         // Respond to refresh button
         scope.refresh = function() {
             scope['groupSearchSpin'] = true;

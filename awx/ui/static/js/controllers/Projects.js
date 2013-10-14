@@ -162,7 +162,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                    scope.$emit('Cancel_Update', url);
                 }
                 else {
-                   Alert('Cancel Not Allowed', 'Either you do not have access or the SCM update process completed. Use the Refresh button to' +
+                   Alert('Cancel Not Allowed', 'Either you do not have access or the SCM update process completed. Click the <em>Refresh</em> button to' +
                       ' view the latest status.', 'alert-info');
                 }
                 })
@@ -173,12 +173,12 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         });
 
     scope.cancelUpdate = function(id, name) {
-        // Start the update process
+        // Start the cancel process
         var project;
         var found = false;
-        for (var i=0; i < projects.length; i++) {
-            if (projects[i].id == id) {
-               project = projects[i];
+        for (var i=0; i < scope.projects.length; i++) {
+            if (scope.projects[i].id == id) {
+               project = scope.projects[i];
                found = true;
                break;
             }
@@ -195,7 +195,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                    });
         }
         else {
-           Alert('Update Not Found', 'An SCM Update does not appear to be running for project ' + name + '. Click the Refresh ' +
+           Alert('Update Not Found', 'An SCM update does not appear to be running for project: ' + name + '. Click the <em>Refresh</em> ' +
                'button to view the latet status.', 'alert-info');
         }
         }
