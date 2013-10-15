@@ -1254,6 +1254,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += this.breadCrumbs(options, navigation);
   
           // Hint text
+         /*
           html += "<div ng-show=\"showGroupHelp\" class=\"alert alert-dismissable alert-info\">\n";
           html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
           html += "<p><strong>Hint:</strong> Get started building your inventory by adding a group on the " + 
@@ -1265,6 +1266,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
           html += "<p><strong>Hint:</strong> To add hosts to the inventory, select a group using the Group Selector.</p>";
           html += "</div>\n";
+          */
 
           html += "<div class=\"row\">\n";
           html += "<div class=\"col-lg-3\" id=\"search-tree-target\">\n";
@@ -1279,10 +1281,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += SearchWidget({ iterator: form.iterator, template: form, mini: true, size: 'col-md-5 col-lg-5'});
           
           html += "<div class=\"col-md-5 col-lg-5\">\n"
-          html += "<div class=\"pull-right\">\n";
+          html += "<div class=\"list-actions\">\n";
           // Add actions(s)
           for (var action in form.actions) {
-              html += "<button type=\"button\" class=\"btn ";
+              /*html += "<button type=\"button\" class=\"btn ";
               html += (form.actions[action]['class']) ? form.actions[action]['class'] : "btn-success";
               html += "\" ";
               if (form['actions'][action].id) {
@@ -1298,9 +1300,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               html += (form['actions'][action].ngHide) ? this.attr(form['actions'][action],'ngHide') : "";
               html += "><i class=\"" + form['actions'][action].icon + "\"></i>";
               html += (form['actions'][action].label) ?  " " + form['actions'][action].label : ""; 
-              html += "</button>\n";
+              html += "</button>\n";*/
+              html += this.button(form.actions[action], action);
           }
-          html += "</div>\n";
+          html += "</div><!-- list-actions -->\n";
           html += "</div>\n";
           html += "</div><!-- row -->\n";
           

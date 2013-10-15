@@ -88,6 +88,17 @@ angular.module('InventoryHostsFormDefinition', [])
                 dataPlacement: 'bottom',
                 'class': 'btn-xs btn-success',
                 icon: 'icon-plus'
+                },
+            help: {
+                dataPlacement: 'left',
+                icon: "icon-question-sign",
+                mode: 'all',
+                'class': 'btn-xs btn-info btn-help',
+                awToolTip: "<div style=\"padding-top:10px; text-align: left;\"><p>Need help getting started?</p>" +
+                    "<p>Click here for help with this page</p></div>",
+                iconSize: 'large',
+                ngClick: "showHelp()",
+                id: "hosts-page-help"
                 }
             },
         

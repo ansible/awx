@@ -473,6 +473,12 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                    scope.hosts[i].active_failures = 'success';
                 }        
             }
+
+            if (group_id == null || group_id == undefined) {
+               if (!scope.hosts.length) {
+                  scope.$emit('ShowHelp');
+               }
+            }
          
             if (postAction) {
                postAction();

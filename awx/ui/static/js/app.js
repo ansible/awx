@@ -76,7 +76,8 @@ angular.module('ansible', [
     'ObjectCountWidget',
     'JobsHelper',
     'InventoryStatusDefinition',
-    'InventorySummaryHelpDefinition'
+    'InventorySummaryHelpDefinition',
+    'InventoryHostsHelpDefinition'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.
