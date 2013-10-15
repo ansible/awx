@@ -933,13 +933,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           // Add status fields section (used in Jobs form)
           html += "<div class=\"well\">\n";
           if (this.form.statusActions) {
-             //html += "<div class=\"status-actions\">\n";
+             html += "<div class=\"list-actions\">\n";
              var act;
              for (action in this.form.statusActions) {
                  act = this.form.statusActions[action];
                  html += this.button(act, action);
              }
-             //html += "</div>\n";
+             html += "</div>\n";
              //html += "<div class=\"status-spin\"><i class=\"icon-spinner icon-spin\" ng-show=\"statusSearchSpin == true\"></i></div>\n";
           }
           html += "<div class=\"form-horizontal status-fields\">\n";
