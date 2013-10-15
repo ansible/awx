@@ -234,7 +234,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                    $(this).remove();
                    });  
                });
-           $(element).tooltip({ placement: placement, delay: delay, title: attrs.awToolTip, container: 'body' });
+           $(element).tooltip({ placement: placement, delay: delay, html: true, title: attrs.awToolTip, container: 'body' });
        }
        })
      

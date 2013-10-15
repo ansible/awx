@@ -569,7 +569,10 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
-                scope.$emit('ShowHelp');
+                if (data.count == 0) {
+                   // no groups exist, show help
+                   scope.$emit('ShowHelp');
+                }
                 })
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, form,

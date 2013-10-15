@@ -274,11 +274,15 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            scope.removeShowHelp();
         }
         scope.removeShowHelp = scope.$on('ShowHelp', function() {
-            HelpDialog({ defn: InventorySummaryHelp });
+            // Force display fo help tooltip when no groups exist
+            $('#inventory-summary-help').focus();
             });
 
         scope.showHelp = function() {
-            scope.$emit('ShowHelp');
+            // Display help dialog
+            $('.btn').blur();  //remove focus from the help button and all buttons
+                               //this stops the tooltip from continually displaying
+            HelpDialog({ defn: InventorySummaryHelp });
             }
         
         scope.viewUpdateStatus = function(id) {

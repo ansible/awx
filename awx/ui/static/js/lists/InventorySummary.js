@@ -113,9 +113,11 @@ angular.module('InventorySummaryDefinition', [])
                 icon: "icon-question-sign",
                 mode: 'all',
                 'class': 'btn-xs btn-info btn-help',
-                awToolTip: 'Click for help',
+                awToolTip: "<div style=\"text-align: left;\"><p>Need help getting started creating your inventory?</p>" +
+                    "<p>Click here for help with this page</p></div>",
                 iconSize: 'large',
-                ngClick: "showHelp()"
+                ngClick: "showHelp()",
+                id: "inventory-summary-help"
                 },
             refresh: {
                 awRefresh: true,
