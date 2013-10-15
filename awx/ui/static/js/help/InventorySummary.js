@@ -10,7 +10,7 @@ angular.module('InventorySummaryHelpDefinition', [])
     .value(
     'InventorySummaryHelp', {
         story: {
-            hdr: 'Getting Started',
+            hdr: 'Building Your Inventory',
             steps: {
                 step1: {
                     intro: 'Start by creating a group:',
