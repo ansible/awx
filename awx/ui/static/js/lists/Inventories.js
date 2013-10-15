@@ -38,7 +38,8 @@ angular.module('InventoriesListDefinition', [])
                 "class": "{{ 'failures-' + inventory.has_active_failures }}",
                 awToolTip: '# of hosts with failed jobs. Click to view hosts.',
                 dataPlacement: 'top',
-                searchable: false
+                searchable: false,
+                excludeModal: true
                 },
             inventory_sources: {
                 label: 'External<br>Sources?',
@@ -51,6 +52,7 @@ angular.module('InventoriesListDefinition', [])
                 dataPlacement: "top",
                 badgeTipPlacement: 'top',
                 searchable: false,
+                excludeModal: true,
                 nosort: true
                 },
             has_inventory_sources: {

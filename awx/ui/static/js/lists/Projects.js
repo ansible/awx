@@ -35,11 +35,13 @@ angular.module('ProjectsListDefinition', [])
                 awToolTip: 'View details of last SCM Update',
                 dataPlacement: 'top',
                 badgeIcon: "\{\{ 'icon-failures-' + project.badge \}\}",
-                badgePlacement: 'left'
+                badgePlacement: 'left',
+                excludeModal: true
                 },
             last_updated: {
                 label: 'Last Updated',
-                type: 'date'
+                type: 'date',
+                excludeModal: true
                 }
             },
         
