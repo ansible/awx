@@ -238,7 +238,14 @@ angular.module('Utilities',['RestServices', 'Utilities'])
            function buildHtml(step) {
                var html = ''; 
                html += (step.intro) ? "<div class=\"help-intro\">" + step.intro + "</div>" : "";
-               html += (step.img) ? "<img src=\"" + $basePath + "img/help/" + step.img + "\" style=\"max-width:" + (width - 30) + "px\" >" : "";
+               if (step.img) {
+                  html += "<img src=\"" + $basePath + "img/help/" + step.img.src + "\" ";
+                  html += "style=\"";
+                  html += (step.img.maxWidth) ? "max-width:" + step.img.maxWidth + "px;" : "";
+                  html += (step.img.maxHeight) ? " max-height: " + step.img.maxHeight + "px;" : "";
+                  html += "\" ";
+                  html += ">";
+               }
                html += (step.box) ? "<div class=\"help-box\">" + step.box + "</div>" : "";
                return html;
                }
@@ -265,6 +272,12 @@ angular.module('Utilities',['RestServices', 'Utilities'])
                   showHelp({ defn: nxtStory });
                   }
               
+              try {
+                  $('#help-modal').dialog('hide');
+              }
+              catch(e) {
+                  // ignore
+              }
               $('#help-modal').html(buildHtml(defn.story.steps[nxt])).dialog({
                   position: { my: "center top", at: "center top+150", of: 'body' },
                   title: defn.story.hdr, 
@@ -272,12 +285,20 @@ angular.module('Utilities',['RestServices', 'Utilities'])
                   height: height,
                   buttons: [{ text: "Next", click: nxtStep }],
                   closeOnEscape: true,
+                  show: 500,
+                  hide: 500,
                   close: function() { $('#help-modal').empty(); }
                   });
               $('.ui-dialog-buttonset button').addClass('btn btn-primary').focus();
               $('.ui-dialog-titlebar-close').empty().removeClass('close').removeClass('ui-dialog-titlebar-close').addClass('close').append('x');
            }
            else {
+              try {
+                  $('#help-modal').dialog('hide');
+              }
+              catch(e) {
+                  // ignore
+              }
               $('#help-modal').html(buildHtml(defn.story.steps[nxt])).dialog({
                   position: { my: "center top", at: "center top+150", of: 'body' },
                   title: defn.story.hdr, 
@@ -285,6 +306,8 @@ angular.module('Utilities',['RestServices', 'Utilities'])
                   height: height,
                   buttons: [ { text: "OK", click: function() { $( this ).dialog( "close" ); } } ],
                   closeOnEscape: true,
+                  show: 500,
+                  hide: 500,
                   close: function() { $('#help-modal').empty(); }
                   });
               $('.ui-dialog-buttonset button').addClass('btn btn-primary').focus();
