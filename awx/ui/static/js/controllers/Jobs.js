@@ -43,10 +43,12 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
            }
         }
         
-        for (var i=0; i < scope.jobs.length; i++) {
-           scope.jobs[i].statusBadgeToolTip = JobStatusToolTip(scope.jobs[i].status) + 
-               " Click to view status details.";
-           scope.jobs[i].statusLinkTo = '/#/jobs/' + scope.jobs[i].id;
+        if (scope.jobs && scope.jobs.length) {
+           for (var i=0; i < scope.jobs.length; i++) {
+               scope.jobs[i].statusBadgeToolTip = JobStatusToolTip(scope.jobs[i].status) + 
+                   " Click to view status details.";
+               scope.jobs[i].statusLinkTo = '/#/jobs/' + scope.jobs[i].id;
+           }
         }
 
         });
