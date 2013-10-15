@@ -70,6 +70,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         ProcessErrors, GetBasePath, GroupsAdd, RefreshTree, SelectionInit) {
     return function(params) {
         
+        // build and present the list of groups we can add to an existing group
+
         var inventory_id = params.inventory_id;
         var group_id = (params.group_id !== undefined) ? params.group_id : null;
 
@@ -92,8 +94,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         $('.popover').popover('hide');  //remove any lingering pop-overs
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').modal({ backdrop: 'static', keyboard: false });
-
-        var url = (group_id) ? GetBasePath('groups') + group_id + '/children/' :
+        
+        var url = (group_id) ? GetBasePath('groups') + group_id + '/potential_children/' :
             GetBasePath('inventory') + inventory_id + '/groups/'; 
         
         SelectionInit({ scope: scope, list: list, url: url });
@@ -140,6 +142,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
             }
         
+        /* Now using /potential_children resource, so should not need to do this any longer.
         if (scope.PostRefreshRemove) {
            scope.PostRefreshRemove();
         }
@@ -150,9 +153,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 }
             }
             });
+        */
 
-        SearchInit({ scope: scope, set: 'groups', list: list, url: defaultUrl });
-        PaginateInit({ scope: scope, list: list, url: defaultUrl, mode: 'lookup' });
+        SearchInit({ scope: scope, set: 'groups', list: list, url: url });
+        PaginateInit({ scope: scope, list: list, url: url, mode: 'lookup' });
         scope.search(list.iterator);
 
         if (!scope.$$phase) {
