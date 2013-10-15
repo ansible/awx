@@ -24,6 +24,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         function navigate(canceled) {
             //Decide where to send the user once the modal dialog closes
             if (!canceled) {
+               console.log('here'); 
+               console.log('base: ' + base);
                if (base == 'jobs') {
                   scope.refreshJob();
                }
@@ -243,7 +245,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                                   scope.refresh();
                                } 
                                else {
-                                  $location.url('/#/jobs');
+                                  $location.path('/jobs');
                                }
                                })
                            .error( function(data, status, headers, config) { 

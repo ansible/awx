@@ -570,6 +570,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         Rest.get()
             .success( function(data, status, headers, config) {
                 if (data.count == 0) {
+                    console.log('emitted');
                    // no groups exist, show help
                    scope.$emit('ShowHelp');
                 }
