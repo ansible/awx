@@ -348,7 +348,7 @@ class RunJob(BaseTask):
         # the current user.
         ssh_username = ssh_username or 'root'
         inventory_script = self.get_path_to('..', 'plugins', 'inventory',
-                                            'awx.py')
+                                            'awxrest.py')
         args = ['ansible-playbook', '-i', inventory_script]
         if job.job_type == 'check':
             args.append('--check')

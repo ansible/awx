@@ -131,7 +131,7 @@ class InventoryScriptTest(BaseScriptTest):
         #os.environ.setdefault('REST_API_TOKEN',
         #                      self.super_django_user.auth_token.key)
         name = os.path.join(os.path.dirname(__file__), '..', '..', 'plugins',
-                            'inventory', 'awx.py')
+                            'inventory', 'awxrest.py')
         return self.run_script(name, *args, **options)
 
     def test_without_inventory_id(self):
