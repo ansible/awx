@@ -198,7 +198,7 @@ angular.module('GroupFormDefinition', [])
                 ngShow: "source.value !== '' && source.value !== null",
                 editRequired: false,
                 addRequired: false,
-                'default': { label: 'none', value: null },
+                'default': { label: 'none', value: 0 },
                 dataTitle: 'Update Interval',
                 dataPlacement: 'left',
                 awPopOver: "<p>Instruct the AWX server to automatically run the inventory update process the selected number of minutes from " +

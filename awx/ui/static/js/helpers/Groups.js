@@ -26,7 +26,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     .factory('GetUpdateIntervalOptions', [ function() {
         return function() {
             return [
-                { label: 'none', value: null },
+                { label: 'none', value: 0 },
                 { label: '5 minutes', value: 5 },
                 { label: '10 minutes', value: 10 },
                 { label: '15 minutes', value: 15 },
@@ -673,13 +673,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                               master['source'] = scope['source'];
                            }
                            else if (fld == 'update_interval') {
-                              if (data['update_interval'] == '') { 
-                                 data['update_interval'] = null; 
+                              if (data[fld] == '' || data[fld] == null || data[fld] == undefined) {
+                                 data[fld] = 0;
                               }
-                              for (var i=0; i < scope.update_interval_options.length; i++) {
-                                  if (scope.update_interval_options[i].value == data['update_interval']) {
-                                     scope['update_interval'] = scope.update_interval_options[i];
-                                  }  
+                              for (var i=0; i < scope.update_interval_options.length; i++) { 
+                                  if (scope.update_interval_options[i].value == 
+                                       data[fld]) {
+                                     scope[fld] = scope.update_interval_options[i];
+                                  }
                               }
                            }
                            else if (fld == 'source_vars') {
@@ -738,6 +739,18 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            scope.$digest();
         }
 
+        if (scope.removeSaveComplete) {
+           scope.removeSaveComplete();
+        }
+        scope.removeSaveComplete = scope.$on('SaveComplete', function(e, error) {
+           if (!error) {
+               // Reset the form, adjust buttons and let user know changese saved
+               scope[form.name + '_form'].$setPristine();
+               scope['groupUpdateHide'] = (scope['source'].value !== null && scope['source'].value !== '') ? false : true;
+               Alert("Changes Saved", "Your changes to inventory group " + scope['name'] + " were successfully saved.", 'alert-info'); 
+            }
+            });
+
         if (scope.removeFormSaveSuccess) {
            scope.removeFormSaveSuccess();
         }
@@ -759,7 +772,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    update_on_launch: scope['update_on_launch'],
                    update_interval: scope['update_interval'].value
                    };
-
+        
                if (scope['source'].value == 'ec2') {
                   try {
                        // Make sure we have valid variable data
@@ -778,6 +791,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                   }
                   catch(err) {
                        parseError = true;
+                       scope.$emit('SaveComplete', true);
                        Alert("Error", "Error parsing extra variables. Parser returned: " + err);     
                   }
                }
@@ -785,21 +799,16 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                if (!parseError) {           
                   Rest.setUrl(scope.source_url)
                   Rest.put(data)
+                      .success( function(data, status, headers, config) {
+                          scope.$emit('SaveComplete', false);
+                          })
                       .error( function(data, status, headers, config) {
-                          saveError = true;
+                          scope.$emit('SaveComplete', true);
                           ProcessErrors(scope, data, status, form,
                               { hdr: 'Error!', msg: 'Failed to update group inventory source. PUT status: ' + status });
                           });
                }
             }
-
-            if (!saveError && !parseError) {
-               // Reset the form, adjust buttons and let user know changese saved
-               scope[form.name + '_form'].$setPristine();
-               scope['groupUpdateHide'] = (scope['source'].value !== null && scope['source'].value !== '') ? false : true;
-               Alert("Changes Saved", "Your changes to inventory group " + scope['name'] + " were successfully saved.", 'alert-info'); 
-            }
-
             });
 
         // Save changes to the parent
@@ -835,7 +844,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                            Rest.put(json_data)
                                .error( function(data, status, headers, config) {
                                    ProcessErrors(scope, data, status, form,
-                                       { hdr: 'Error!', msg: 'Failed to update group varaibles. PUT status: ' + status });
+                                       { hdr: 'Error!', msg: 'Failed to update group variables. PUT status: ' + status });
                                    });
                         }
                         RefreshGroupName(scope['selectedNode'], data.name, data.description);

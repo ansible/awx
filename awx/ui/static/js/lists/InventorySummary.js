@@ -109,7 +109,7 @@ angular.module('InventorySummaryDefinition', [])
                 dataPlacement: 'top'
                 },
             help: {
-                dataPlacement: 'top',
+                dataPlacement: 'left',
                 icon: "icon-question-sign",
                 mode: 'all',
                 'class': 'btn-xs btn-info btn-help',
