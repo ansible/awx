@@ -31,26 +31,6 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
                 cnt++;
             }
             if (cnt == expected) {
-               // sort the list of objs
-               //for (var key in counts) {
-               //    if (key !== 'hosts' && key !== 'groups') {
-               //      keys.push(key);
-               //    }
-               //}
-               // sort the keys, forcing groups and hosts to appear directlry after inventory
-               //keys.sort();
-               //var new_keys = [];
-               //for (var i=0; i < keys.length; i++) {
-               //    if (keys[i] == 'inventory') {
-               //       new_keys.push('inventory');
-               //       new_keys.push('groups');
-               //       new_keys.push('hosts');
-               //    } 
-               //    else {
-               //       new_keys.push(keys[i]);
-               //    }
-               //}
-               //keys = new_keys; 
                html = "<div class=\"panel panel-default\">\n";
                html += "<div class=\"panel-heading\">System Summary</div>\n";
                html += "<div class=\"panel-body\">\n";

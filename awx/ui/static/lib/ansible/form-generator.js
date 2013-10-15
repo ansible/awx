@@ -105,11 +105,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                label.addClass('prepend-asterisk');
             }
             });
-
-       // Remove leftover timer, if any
-       //if ((!options.modal) && this.scope.timer) {
-       //   clearInterval(this.scope.timer);
-       //}
+       
+       try {
+           $('#help-modal').empty().dialog('destroy');
+       }
+       catch(e) {  
+           //ignore any errors should the dialog not be initialized 
+       }
 
        if (options.modal) {
           this.scope.formModalActionDisabled = false;
@@ -1198,12 +1200,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += this.breadCrumbs(options, navigation);
 
           // build the groups page
-          html += "<div ng-show=\"showGroupHelp\" class=\"alert alert-dismissable alert-info\">\n";
-          html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
-          html += "<p><strong>Hint:</strong> Get started building your inventory by adding a group. After creating a group, " +
-              "use the <a href=\"/#/inventories/\{\{ inventory_id \}\}/hosts\"><em>Inventories->Hosts</em></a> page to " +
-              "add hosts to the group.</p>";
-          html += "</div>\n";
+          //html += "<div ng-show=\"showGroupHelp\" class=\"alert alert-dismissable alert-info\">\n";
+          //html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
+          //html += "<p><strong>Hint:</strong> Get started building your inventory by adding a group. After creating a group " +
+          //    "go to the <a href=\"/#/inventories/\{\{ inventory_id \}\}/hosts\"><em>Hosts</em></a> page to " +
+          //    "add hosts to the group.</p>";
+          //html += "</div>\n";
 
           /*
           html += "<div class=\"row\">\n";

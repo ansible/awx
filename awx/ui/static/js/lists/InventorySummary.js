@@ -109,22 +109,13 @@ angular.module('InventorySummaryDefinition', [])
                 dataPlacement: 'top'
                 },
             help: {
-                awPopOver: 
-                    "<dl>\n" +
-                    "<dt>failed</dt><dd>Errors were encountered with the most recent inventory update.</dd>\n" +
-                    "<dt>n/a</dt><dd>The group is not configured for inventory update.</dd>\n" +
-                    "<dt>never</dt><dd>The inventory update has never run for the group.</dd>\n" +
-                    "<dt>successful</dt><dd>The most recent inventory update ran to completion without incident.</dd>\n" +
-                    "<dt>updating</dt><dd>The inventory update is currently running.</dd>\n" +
-                    "</dl>\n",
                 dataPlacement: 'top',
-                dataContainer: 'body',
                 icon: "icon-question-sign",
                 mode: 'all',
                 'class': 'btn-xs btn-info btn-help',
                 awToolTip: 'Click for help',
-                dataTitle: 'Update Status',
-                iconSize: 'large'
+                iconSize: 'large',
+                ngClick: "showHelp()"
                 },
             refresh: {
                 awRefresh: true,

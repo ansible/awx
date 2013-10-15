@@ -7,15 +7,18 @@
  *
  */
 
-@black:      #171717;
-@warning:    #FF9900;
-@red:        #da4f49;
-@red-hover:  #AE3F3A;
-@green:      #5bb75b;
-@blue:       #1778c3;   /* logo blue */
-@blue-link:  #0088cc;
-@grey:       #A9A9A9;
-@green:      #5bb75b;
+@black:       #171717;
+@warning:     #FF9900;
+@red:         #da4f49;
+@red-hover:   #AE3F3A;
+@green:       #5bb75b;
+@blue:        #1778c3;   /* logo blue */
+@blue-link:   #0088cc;
+@grey:        #A9A9A9;
+@green:       #5bb75b;
+@info:        #d9edf7;   /* alert info background color */
+@info-border: #bce8f1;   /* alert info border color */
+@info-color:  #3a87ad;
 
 html {
   background-color: @black;
@@ -1202,6 +1205,44 @@ tr td button i {
 
 #home #refresh-row {
   margin-bottom: 5px;
+}
+
+/* help dialog */
+
+#help-modal {
+  overflow: hidden;
+  padding: 10px;
+  text-align: center;
+}
+
+.help-box {
+  text-align: center;
+  border: 1px solid @info-border;
+  border-radius: 6px;
+  margin-top: 0;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: @info;
+  color: @info-color;
+}
+
+.help-intro {
+  width: 100;
+  text-align: left;
+  margin: 15px 0 30px 0;
+  font-weight: normal;
+  font-size: 16px;
+  color: #888;
+}
+
+.step-no {
+  font-weight: bold;
+}
+
+.ui-dialog-titlebar.ui-widget-header {
+  color: #0088cc;
+  background-color: #F0F0F0;
+  background-image: none;
 }
 
 

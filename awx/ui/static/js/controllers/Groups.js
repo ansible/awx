@@ -10,7 +10,7 @@
 function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryGroupsForm,
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt,
                           TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
-                          GroupsDelete, RefreshGroupName, EditInventory, SetShowGroupHelp, InventoryStatus) 
+                          GroupsDelete, RefreshGroupName, EditInventory, InventoryStatus) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -34,7 +34,6 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
    scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
        LoadBreadCrumbs({ path: '/inventories/' + id, title: scope.inventory_name });
        TreeInit(scope.TreeParams);
-       SetShowGroupHelp({ scope: scope });
        if (!scope.$$phase) {
           scope.$digest();
        }
@@ -242,6 +241,6 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
 InventoryGroups.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryGroupsForm',
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt',
                             'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
-                            'GroupsDelete', 'RefreshGroupName', 'EditInventory', 'SetShowGroupHelp', 'InventoryStatus'
+                            'GroupsDelete', 'RefreshGroupName', 'EditInventory', 'InventoryStatus'
                             ]; 
   

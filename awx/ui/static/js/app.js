@@ -75,7 +75,8 @@ angular.module('ansible', [
     'SCMSyncStatusWidget',
     'ObjectCountWidget',
     'JobsHelper',
-    'InventoryStatusDefinition'
+    'InventoryStatusDefinition',
+    'InventorySummaryHelpDefinition'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.

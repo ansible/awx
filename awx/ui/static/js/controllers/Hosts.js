@@ -13,7 +13,7 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                          RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                          GetBasePath, HostsList, HostsAdd, HostsEdit, HostsDelete,
-                         HostsReload, LoadSearchTree, EditHostGroups, SetShowGroupHelp) 
+                         HostsReload, LoadSearchTree, EditHostGroups) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -36,7 +36,6 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
    }
    scope.loadBreadCrumbsRemove = scope.$on('buildAllGroups', function(e, inventory_name) {
        LoadBreadCrumbs({ path: '/inventories/' + id, title: inventory_name });
-       SetShowGroupHelp({ scope: scope });
        });
 
    // Sets up the search tree and loads All Hosts for the inventory
@@ -138,6 +137,6 @@ InventoryHosts.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'GetBasePath', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete',
-                            'HostsReload', 'LoadSearchTree', 'EditHostGroups', 'SetShowGroupHelp'
+                            'HostsReload', 'LoadSearchTree', 'EditHostGroups'
                             ]; 
   

@@ -5,7 +5,7 @@
  *  Utility functions
  *
  */
-angular.module('Utilities',['RestServices'])
+angular.module('Utilities',['RestServices', 'Utilities'])
    
    .factory('ClearScope', function() {
    return function(id) {
@@ -217,6 +217,83 @@ angular.module('Utilities',['RestServices'])
              ppath += '/' + paths[i];
           }
        }
+       }
+       }])
+   
+   .factory('HelpDialog', ['$rootScope', '$location', function($rootScope, $location) {
+   return function(params) {
+       // Display a help dialog
+       //
+       // HelpDialog({ defn: <HelpDefinition> })
+       //
+       
+       function showHelp(params) {
+           // Using a function inside a function so we can recurse 
+           // over the steps in the help story
+
+           var defn = params.defn;
+           var nxtStory = { story: { steps: { } } };
+           var width, height;
+           
+           function buildHtml(step) {
+               var html = ''; 
+               html += (step.intro) ? "<div class=\"help-intro\">" + step.intro + "</div>" : "";
+               html += (step.img) ? "<img src=\"" + $basePath + "img/help/" + step.img + "\" style=\"max-width:" + (width - 30) + "px\" >" : "";
+               html += (step.box) ? "<div class=\"help-box\">" + step.box + "</div>" : "";
+               return html;
+               }
+           
+           var nxt;
+           for (var step in defn.story.steps) {
+               nxt = step;
+               break;
+           }
+           
+           width = (defn.story.steps[nxt].width !== undefined) ? defn.story.steps[nxt].width : 500; 
+           height = (defn.story.steps[nxt].height !== undefined) ? defn.story.steps[nxt].height : 600;
+           
+           if (Object.keys(defn.story.steps).length > 1) {
+              // We have multiple steps
+              for (var step in defn.story.steps) {
+                  if (step !== nxt) {
+                     nxtStory.story.steps[step] = defn.story.steps[step];
+                  }
+              }
+              nxtStory.story.hdr = defn.story.hdr; 
+
+              nxtStep = function() {
+                  showHelp({ defn: nxtStory });
+                  }
+              
+              $('#help-modal').html(buildHtml(defn.story.steps[nxt])).dialog({
+                  position: { my: "center top", at: "center top+150", of: 'body' },
+                  title: defn.story.hdr, 
+                  width: width,
+                  height: height,
+                  buttons: [{ text: "Next", click: nxtStep }],
+                  closeOnEscape: true,
+                  close: function() { $('#help-modal').empty(); }
+                  });
+              $('.ui-dialog-buttonset button').addClass('btn btn-primary').focus();
+              $('.ui-dialog-titlebar-close').empty().removeClass('close').removeClass('ui-dialog-titlebar-close').addClass('close').append('x');
+           }
+           else {
+              $('#help-modal').html(buildHtml(defn.story.steps[nxt])).dialog({
+                  position: { my: "center top", at: "center top+150", of: 'body' },
+                  title: defn.story.hdr, 
+                  width: width,
+                  height: height,
+                  buttons: [ { text: "OK", click: function() { $( this ).dialog( "close" ); } } ],
+                  closeOnEscape: true,
+                  close: function() { $('#help-modal').empty(); }
+                  });
+              $('.ui-dialog-buttonset button').addClass('btn btn-primary').focus();
+              $('.ui-dialog-titlebar button').empty().removeClass('close').removeClass('ui-dialog-titlebar-close').addClass('close').append('x');
+           }
+           }
+       
+       showHelp(params);
+
        }
        }])
 

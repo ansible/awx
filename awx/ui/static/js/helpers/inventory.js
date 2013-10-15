@@ -560,25 +560,20 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
     }
     }])
 
-    .factory('SetShowGroupHelp', ['Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
+    .factory('ShowGroupHelp', ['Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
     return function(params) {
         // Check if inventory has groups. If not, turn on hints to let user know groups are required
         // before hosts can be added
         var scope = params.scope;
-        var url = GetBasePath('inventory') + scope.inventory_id + '/groups/';
+        var url = GetBasePath('inventory') + scope.inventory_id + '/groups/?page=1';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
-                if (data.results.length > 0) {
-                   scope.showGroupHelp = false;
-                }
-                else {
-                   scope.showGroupHelp = true;
-                }
+                scope.$emit('ShowHelp');
                 })
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, form,
-                    { hdr: 'Error!', msg: 'Failed to retrieve inventory groups. GET returned status: ' + status });
+                    { hdr: 'Error!', msg: 'Failed to retrieve inventory group count. ' + url + ' GET status: ' + status });
                 });
     }
     }])

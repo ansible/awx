@@ -60,7 +60,7 @@ angular.module('ProjectsListDefinition', [])
                     "<dt>Missing</dt><dd>The local project directory is missing.</dd>\n" +
                     "<dt>N/A</dt><dd>The project does not use SCM, so an update status is not available.</dd>\n" +
                     "</dl>\n",
-                dataPlacement: 'top',
+                dataPlacement: 'left',
                 dataContainer: 'body',
                 icon: "icon-question-sign",
                 mode: 'all',

@@ -14,7 +14,9 @@
   {% endif %}
 
   <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" />
-
+  <script>
+      var $basePath = "{{ STATIC_URL }}";
+  </script>
   <script src="{{ STATIC_URL }}lib/jquery/jquery-1.10.2.min.js"></script>
   <script src="{{ STATIC_URL }}js/config.js"></script>
   <script src="{{ STATIC_URL }}lib/angular/angular.js"></script>
@@ -112,6 +114,7 @@
   <script src="{{ STATIC_URL }}js/widgets/InventorySyncStatus.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/SCMSyncStatus.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/ObjectCount.js"></script>
+  <script src="{{ STATIC_URL }}js/help/InventorySummary.js"></script>
   <script src="{{ STATIC_URL }}lib/less/less-1.4.1.min.js"></script>
 
   {% endif %}
@@ -336,7 +339,10 @@
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->
     </div><!-- modal -->
-  
+
+    <!-- Help dialog -->
+    <div id="help-modal"></div>
+     
   </div><!-- container -->
   
   <div class="overlay"></div>

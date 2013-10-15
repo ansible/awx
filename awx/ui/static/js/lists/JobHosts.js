@@ -109,7 +109,7 @@ angular.module('JobHostDefinition', [])
                     "<dt>Unreachable</dt><dd>Times the ansible server could not reach the host.</dd>\n" +
                     "<dt>Skipped</dt><dd>Tasks bypassed and not performed on the host due to prior task failure or the host being unreachable.</dd>\n" +
                     "</dl>\n",
-                dataPlacement: 'top',
+                dataPlacement: 'left',
                 dataContainer: "body",
                 icon: "icon-question-sign",
                 mode: 'all',

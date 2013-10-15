@@ -9,7 +9,8 @@
  
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
                                  'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'GroupsHelper',
-                                 'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper', 'RefreshHelper'
+                                 'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper', 'RefreshHelper',
+                                 'PromptDialog', 'InventorySummaryHelpDefinition'
                                  ])
 
     .factory('GetSourceTypeOptions', [ function() {
@@ -169,9 +170,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('InventoryStatus', [ '$rootScope', '$routeParams', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
-        'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'ShowUpdateStatus',
+        'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'ShowUpdateStatus', 'HelpDialog',
+        'ShowGroupHelp', 'InventorySummaryHelp', 
     function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, SearchInit, 
-        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus) {
+        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus, HelpDialog, ShowGroupHelp, InventorySummaryHelp) {
     return function(params) {
         //Build a summary of a given inventory
         
@@ -267,6 +269,17 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
 
         scope.search(list.iterator);
+ 
+        if (scope.removeShowHelp) {
+           scope.removeShowHelp();
+        }
+        scope.removeShowHelp = scope.$on('ShowHelp', function() {
+            HelpDialog({ defn: InventorySummaryHelp });
+            });
+
+        scope.showHelp = function() {
+            scope.$emit('ShowHelp');
+            }
         
         scope.viewUpdateStatus = function(id) {
             var found = false;
@@ -365,20 +378,29 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    break;
                 }
             }
-            if (found && group.related.current_update) {
-               Rest.setUrl(group.related.current_update);
-               Rest.get()
-                   .success( function(data, status, headers, config) {
-                       scope.$emit('Check_Cancel', data);
-                       })
-                   .error( function(data, status, headers, config) {
-                       ProcessErrors(scope, data, status, null,
-                           { hdr: 'Error!', msg: 'Call to ' + group.related.current_update + ' failed. GET status: ' + status });
-                       });
+            if (group.summary_fields.inventory_source.source !== '' &&
+                   group.summary_fields.inventory_source.source !== null) {
+               // the group has a source
+               if (group.related.current_update) {
+                  // there is an update currently running
+                  Rest.setUrl(group.related.current_update);
+                  Rest.get()
+                      .success( function(data, status, headers, config) {
+                          scope.$emit('Check_Cancel', data);
+                          })
+                      .error( function(data, status, headers, config) {
+                          ProcessErrors(scope, data, status, null,
+                              { hdr: 'Error!', msg: 'Call to ' + group.related.current_update + ' failed. GET status: ' + status });
+                          });
+               }
+               else {
+                  Alert('Update Not Found', 'An Inventory update does not appear to be running for group: ' + name + '. Click the <em>Refresh</em> ' +
+                      'button to view the latet status.', 'alert-info');
+               }
             }
             else {
-               Alert('Update Not Found', 'An Inventory update does not appear to be running for group: ' + name + '. Click the <em>Refresh</em> ' +
-                   'button to view the latet status.', 'alert-info');
+                Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group and provide external Source settings ' +
+                    'before attempting an update.', 'alert-info');
             }
             }
 
@@ -394,8 +416,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             for (var i=0; i < scope.groups.length; i++) {
                 if (scope.groups[i].id == id) {
                    if (scope.groups[i].summary_fields.inventory_source.source == "" || scope.groups[i].summary_fields.inventory_source.source == null) {
-                      Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group, provide Source settings, ' + 
-                          'and then run an update.', 'alert-info');
+                      Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group and provide ' +
+                          'external Source settings before attempting an update.', 'alert-info');
                    }
                    else if (scope.groups[i].summary_fields.inventory_source.status == 'updating') {
                       Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
@@ -433,6 +455,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 }
             }
             }
+
+        ShowGroupHelp({ scope: scope });
     } 
     }])
 
