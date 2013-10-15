@@ -312,8 +312,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                   Rest.setUrl(group.related.inventory_source);
                   Rest.get()
                       .success( function(data, status, headers, config) {
+                          var url = (data.related.current_update) ? data.related.current_update : data.related.last_update;
                           ShowUpdateStatus({ group_name: data.summary_fields.group.name,
-                              last_update: data.related.last_update });
+                              last_update: url });
                           })
                       .error( function(data, status, headers, config) {
                           ProcessErrors(scope, data, status, form,
@@ -355,9 +356,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         if (scope.removeCheckCancel) {
            scope.removeCheckCancel();
         }
-        scope.removeCheckCancel = scope.$on('Check_Cancel', function(e, data) {
+        scope.removeCheckCancel = scope.$on('Check_Cancel', function(e, last_update, current_update) {
             // Check that we 'can' cancel the update
-            var url = data.related.cancel;
+            var url = (current_update) ? current_update : last_update;
+            url += 'cancel/';
             Rest.setUrl(url);
             Rest.get()
                 .success( function(data, status, headers, config) {
@@ -389,20 +391,20 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             if (group.summary_fields.inventory_source.source !== '' &&
                    group.summary_fields.inventory_source.source !== null) {
                // the group has a source
-               if (group.related.current_update) {
+               if (group.summary_fields.inventory_source.status == 'updating') {
                   // there is an update currently running
-                  Rest.setUrl(group.related.current_update);
+                  Rest.setUrl(group.related.inventory_source);
                   Rest.get()
                       .success( function(data, status, headers, config) {
-                          scope.$emit('Check_Cancel', data);
+                          scope.$emit('Check_Cancel', data.related.last_update, data.related.current_update);
                           })
                       .error( function(data, status, headers, config) {
                           ProcessErrors(scope, data, status, null,
-                              { hdr: 'Error!', msg: 'Call to ' + group.related.current_update + ' failed. GET status: ' + status });
+                              { hdr: 'Error!', msg: 'Call to ' + group.related.inventory_source + ' failed. GET status: ' + status });
                           });
                }
                else {
-                  Alert('Update Not Found', 'An Inventory update does not appear to be running for group: ' + name + '. Click the <em>Refresh</em> ' +
+                  Alert('Update Not Found', 'An Inventory update does not appear to be running for group: <em>' + group.name + '</em>. Click the <em>Refresh</em> ' +
                       'button to view the latet status.', 'alert-info');
                }
             }
@@ -429,7 +431,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    }
                    else if (scope.groups[i].summary_fields.inventory_source.status == 'updating') {
                       Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
-                          scope.groups[i].summary_fields.group.name + '</em>. Use the Refresh button to monitor the status.', 'alert-info'); 
+                          scope.groups[i].name + '</em>. Use the Refresh button to monitor the status.', 'alert-info'); 
                    }
                    else {
                       if (scope.groups[i].summary_fields.inventory_source.source == 'ec2') {
