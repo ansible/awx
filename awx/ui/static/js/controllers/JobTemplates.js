@@ -231,7 +231,12 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
                   }
                }      
            }
+           
            data.extra_vars = JSON.stringify(json_data, undefined, '\t');
+           if (data.extra_vars == "null" || data.extra_vars == null) { 
+              data.extra_vars = "";
+           }
+
            Rest.setUrl(defaultUrl);
            Rest.post(data)
                .success( function(data, status, headers, config) {
@@ -413,7 +418,8 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
               }
               if (fld == 'variables') {
                  // Parse extra_vars, converting to YAML.  
-                 if ($.isEmptyObject(data.extra_vars) || data.extra_vars == "\{\}" || data.extra_vars == "null" || data.extra_vars = "") {
+                 if ($.isEmptyObject(data.extra_vars) || data.extra_vars == "\{\}" || data.extra_vars == "null"
+                     || data.extra_vars == "" || data.extra_vars == null) {
                     scope.variables = "---";
                  }
                  else {
@@ -502,7 +508,12 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                   }
                }      
            }
+           
            data.extra_vars = JSON.stringify(json_data, undefined, '\t');
+           if (data.extra_vars == "null" || data.extra_vars == null) { 
+              data.extra_vars = "";
+           }
+
            Rest.setUrl(defaultUrl + id + '/');
            Rest.put(data)
                .success( function(data, status, headers, config) {
