@@ -413,7 +413,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
               }
               if (fld == 'variables') {
                  // Parse extra_vars, converting to YAML.  
-                 if ($.isEmptyObject(data.extra_vars) || data.extra_vars == "\{\}" || data.extra_vars == "null") {
+                 if ($.isEmptyObject(data.extra_vars) || data.extra_vars == "\{\}" || data.extra_vars == "null" || data.extra_vars = "") {
                     scope.variables = "---";
                  }
                  else {
