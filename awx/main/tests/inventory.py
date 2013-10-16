@@ -1004,9 +1004,11 @@ class InventoryUpdatesTest(BaseTransactionTest):
         for host in inventory.hosts.all():
             source_pks = host.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
+            self.assertTrue(host.has_inventory_sources)
         for group in inventory.groups.all():
             source_pks = group.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
+            self.assertTrue(group.has_inventory_sources)
 
     def test_update_from_ec2(self):
         source_username = getattr(settings, 'TEST_AWS_ACCESS_KEY_ID', '')

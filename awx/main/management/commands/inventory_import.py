@@ -570,6 +570,7 @@ class Command(NoArgsCommand):
             if self.inventory_source.group:
                 self.inventory_source.group.hosts.add(host)
             host.inventory_sources.add(self.inventory_source)
+            host.update_computed_fields(False, False)
 
         # for each host in a mem group, add it to the parents to which it belongs
         for (k,v) in self.all_group.group_names.iteritems():
