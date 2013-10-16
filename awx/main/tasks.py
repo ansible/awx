@@ -772,6 +772,9 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_source.source == 'rackspace':
             env['RAX_CREDS_FILE'] = kwargs.get('private_data_file', '')
             env['RAX_REGION'] = inventory_source.source_regions
+            # Set this environment variable so the vendored package won't
+            # complain about not being able to determine its version number.
+            env['PBR_VERSION'] = '0.5.21'
         elif inventory_source.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
