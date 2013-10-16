@@ -58,11 +58,12 @@ def prepare_env():
         sys.modules['django.utils.six'] = sys.modules['six']
         django.utils.six = sys.modules['django.utils.six']
         from django.utils import six
-    # Use the AWX_TEST_DATABASE_NAME environment variable to specify the test
-    # database name to use when management command is run as an external
+    # Use the AWX_TEST_DATABASE_* environment variables to specify the test
+    # database settings to use when management command is run as an external
     # program via unit tests.
-    if os.environ.get('AWX_TEST_DATABASE_NAME', None):
-        settings.DATABASES['default']['NAME'] = os.environ['AWX_TEST_DATABASE_NAME']
+    for opt in ('ENGINE', 'NAME', 'USER', 'PASSWORD', 'HOST', 'PORT'):
+        if os.environ.get('AWX_TEST_DATABASE_%s' % opt, None):
+            settings.DATABASES['default'][opt] = os.environ['AWX_TEST_DATABASE_%s' % opt]
 
 def manage():
     # Prepare the AWX environment.

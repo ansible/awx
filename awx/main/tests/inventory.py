@@ -954,9 +954,6 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.organization.users.add(self.normal_django_user)
         self.inventory = self.organization.inventories.create(name='Cloud Inventory')
         self.group = self.inventory.groups.create(name='Cloud Group')
-        # Pass test database name in environment for use by the inventory_import
-        # management command.
-        os.environ['AWX_TEST_DATABASE_NAME'] = settings.DATABASES['default']['NAME']
 
     def update_inventory_source(self, group, **kwargs):
         inventory_source = group.inventory_source

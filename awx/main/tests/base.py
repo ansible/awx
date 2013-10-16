@@ -42,6 +42,10 @@ class BaseTestMixin(object):
             if name == 'SERVER_URI':
                 value = ''
             setattr(settings, 'AUTH_LDAP_%s' % name, value)
+        # Pass test database settings in environment for use by any management
+        # commands that run from tests.
+        for opt in ('ENGINE', 'NAME', 'USER', 'PASSWORD', 'HOST', 'PORT'):
+            os.environ['AWX_TEST_DATABASE_%s' % opt] = settings.DATABASES['default'][opt]
 
     def tearDown(self):
         super(BaseTestMixin, self).tearDown()
