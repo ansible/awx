@@ -22,7 +22,8 @@ angular.module('InventorySummaryDefinition', [])
             name: {
                 key: true,
                 label: 'Group',
-                ngClick: "\{\{ 'GroupsEdit(' + group.id + ')' \}\}"
+                ngClick: "\{\{ 'GroupsEdit(' + group.id + ')' \}\}",
+                columnClass: 'col-lg-3 col-md3 col-sm-2'
                 },
             hosts_with_active_failures: {
                 label: 'Hosts with<br>Job Failures?',

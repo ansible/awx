@@ -151,7 +151,7 @@ angular.module('GroupFormDefinition', [])
                 editRequired: false,
                 dataTitle: 'Source Regions',
                 dataPlacement: 'left',
-                awPopOver: "<p>Comma separated list of regions. Region names must match those defined at the inventory source (i.e. ec2 or rackspace). " +
+                awPopOver: "<p>Comma separated list of regions. Region names must match those defined at the inventory source. " +
                     "Only hosts associated with the list of regions will be included in the update process.</p>",
                 dataContainer: 'body'
                 },
@@ -164,7 +164,7 @@ angular.module('GroupFormDefinition', [])
                 editRequired: false,
                 dataTitle: 'Source Regions',
                 dataPlacement: 'left',
-                awPopOver: "<p>Comma separated list of tags. Tag names must match those defined at the inventory source (i.e. ec2 or rackspace)." + 
+                awPopOver: "<p>Comma separated list of tags. Tag names must match those defined at the inventory source." + 
                            " Only hosts associated with the list of tags will be included in the update process.</p>",
                 dataContainer: 'body'
                 },
@@ -180,7 +180,9 @@ angular.module('GroupFormDefinition', [])
                 parseTypeName: 'envParseType',
                 dataTitle: 'Source Variables',
                 dataPlacement: 'left',
-                awPopOver: "<p>Define additional variables here that will be referenced by the inventory script at runtime.</p> " +
+                awPopOver: "<p>Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables " +
+                    "<a href=\"https://github.com/ansible/ansible/blob/devel/plugins/inventory/ec2.ini\" target=\"_blank\">" +
+                    "view ec2.ini in the Ansible github repo.</a></p>" +
                     "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                     "JSON:<br />\n" +
                     "<blockquote>{<br />\"somevar\": \"somevalue\",<br />\"password\": \"magic\"<br /> }</blockquote>\n" +
@@ -214,13 +216,15 @@ angular.module('GroupFormDefinition', [])
                 fields: [
                     {
                         name: 'overwrite',
-                        label: 'Overwrite Hosts',
+                        label: 'Overwrite',
                         type: 'checkbox',
                         ngShow: "source.value !== '' && source.value !== null",
                         addRequired: false,
                         editRequired: false,
-                        awPopOver: '<p>Replace AWX inventory hosts with cloud inventory hosts.</p>',
-                        dataTitle: 'Overwrite Hosts',
+                        awPopOver: '<p>When checked all child groups and hosts not found on the remote source will be deleted from ' +
+                           'the local inventory.</p><p>Unchecked any local child hosts and groups not found on the external source will ' + 
+                           'remain untouched by the inventory update process.</p>',
+                        dataTitle: 'Overwrite',
                         dataContainer: 'body',
                         dataPlacement: 'left',
                         labelClass: 'checkbox-options'
@@ -232,7 +236,9 @@ angular.module('GroupFormDefinition', [])
                         ngShow: "source.value !== '' && source.value !== null",
                         addRequired: false,
                         editRequired: false,
-                        awPopOver: '<p></p>',
+                        awPopOver: '<p>If checked, all variables for child groups and hosts will be removed and replaced by those ' + 
+                          'found on the external source.</p><p>When not checked a merge will be performed, combinging local variables with ' +
+                          'those found on the external source.</p>',
                         dataTitle: 'Overwrite Variables',
                         dataContainer: 'body',
                         dataPlacement: 'left',
@@ -245,7 +251,8 @@ angular.module('GroupFormDefinition', [])
                         ngShow: "source.value !== '' && source.value !== null",
                         addRequired: false,
                         editRequired: false,
-                        awPopOver: '<p>Each time a job runs using this inventory, refresh the inventory from the selected source</p>',
+                        awPopOver: '<p>Each time a job runs using this inventory, refresh the inventory from the selected source before ' +
+                            'executing job tasks.</p>',
                         dataTitle: 'Update on Launch',
                         dataContainer: 'body',
                         dataPlacement: 'left',
