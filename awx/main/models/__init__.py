@@ -649,6 +649,7 @@ class InventorySource(PrimordialModel):
     source_vars = models.TextField(
         blank=True,
         default='',
+        help_text=_('Inventory source variables in YAML or JSON format.'),
     )
     source_username = models.CharField(
         max_length=1024,
@@ -759,6 +760,13 @@ class InventorySource(PrimordialModel):
                     update_fields.append(field)
             if update_fields:
                 self.save(update_fields=update_fields)
+
+    @property
+    def source_vars_dict(self):
+        try:
+            return json.loads(self.source_vars.strip() or '{}')
+        except ValueError:
+            return yaml.safe_load(self.source_vars)
 
     @property
     def needs_source_password(self):

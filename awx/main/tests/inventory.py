@@ -942,7 +942,8 @@ class InventoryTest(BaseTest):
                          set([g_e.pk]))
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
-                   CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+                   CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                   PEXPECT_TIMEOUT=60)
 class InventoryUpdatesTest(BaseTransactionTest):
 
     def setUp(self):

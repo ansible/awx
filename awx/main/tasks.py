@@ -169,12 +169,13 @@ class BaseTask(Task):
         idle_timeout = self.get_idle_timeout()
         expect_list = []
         expect_passwords = {}
+        pexpect_timeout = getattr(settings, 'PEXPECT_TIMEOUT', 5)
         for n, item in enumerate(self.get_password_prompts().items()):
             expect_list.append(item[0])
             expect_passwords[n] = passwords.get(item[1], '') or ''
         expect_list.extend([pexpect.TIMEOUT, pexpect.EOF])
         while child.isalive():
-            result_id = child.expect(expect_list, timeout=5)
+            result_id = child.expect(expect_list, timeout=pexpect_timeout)
             if result_id in expect_passwords:
                 child.sendline(expect_passwords[result_id])
             updates = {'status': 'running',
@@ -190,8 +191,7 @@ class BaseTask(Task):
             if instance.cancel_flag:
                 child.close(True)
                 canceled = True
-            # FIXME: Configurable idle timeout? Find a way to determine if task
-            # is hung waiting at a prompt.
+            # FIXME: Find a way to determine if task is hung waiting at a prompt.
             if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
                 child.close(True)
                 canceled = True
@@ -715,16 +715,18 @@ class RunInventoryUpdate(BaseTask):
         if inventory_source.source == 'ec2':
             section = 'ec2'
             cp.add_section(section)
-            cp.set(section, 'regions', inventory_source.source_regions or 'all')
-            cp.set(section, 'regions_exclude', '')
-            # FIXME: Provide a way to override these defaults.. source_env?
-            cp.set(section, 'destination_variable', 'public_dns_name')
-            cp.set(section, 'vpc_destination_variable', 'ip_address')
-            cp.set(section, 'route53', 'False')
-            # FIXME: Separate temp path for each source so they don't clobber
-            # each other.
-            cp.set(section, 'cache_path', '/tmp')
-            cp.set(section, 'cache_max_age', '300')
+            ec2_opts = dict(inventory_source.source_vars_dict.items())
+            regions = inventory_source.source_regions or 'all'
+            regions = ','.join([x.strip() for x in regions.split(',')])
+            ec2_opts['regions'] = regions
+            ec2_opts.setdefault('regions_exclude', 'us-gov-west-1')
+            ec2_opts.setdefault('destination_variable', 'public_dns_name')
+            ec2_opts.setdefault('vpc_destination_variable', 'ip_address')
+            ec2_opts.setdefault('route53', 'False')
+            ec2_opts['cache_path'] = tempfile.mkdtemp(prefix='awx_ec2_')
+            ec2_opts['cache_max_age'] = '300'
+            for k,v in ec2_opts.items():
+                cp.set(section, k, str(v))
         # Build pyrax creds INI for rax inventory script.
         elif inventory_source.source == 'rackspace':
             section = 'rackspace_cloud'
