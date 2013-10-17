@@ -190,22 +190,47 @@ class Inventory(CommonModel):
         blank=True,
         default='',
         null=True,
-        help_text=_('Variables in JSON or YAML format.'),
+        help_text=_('Inventory variables in JSON or YAML format.'),
     )
     has_active_failures = models.BooleanField(
         default=False,
         editable=False,
         help_text=_('Flag indicating whether any hosts in this inventory have failed.'),
     )
+    total_hosts = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        help_text=_('Total mumber of hosts in this inventory.'),
+    )
     hosts_with_active_failures = models.PositiveIntegerField(
         default=0,
         editable=False,
         help_text=_('Number of hosts in this inventory with active failures.'),
     )
+    total_groups = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        help_text=_('Total number of groups in this inventory.'),
+    )
+    groups_with_active_failures = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        help_text=_('Number of groups in this inventory with active failures.'),
+    )
     has_inventory_sources = models.BooleanField(
         default=False,
         editable=False,
         help_text=_('Flag indicating whether this inventory has any external inventory sources.'),
+    )
+    total_inventory_sources = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        help_text=_('Total number of external inventory sources configured within this inventory.'),
+    )
+    inventory_sources_with_failures = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        help_text=_('Number of external inventory sources in this inventory with failures.'),
     )
 
     def get_absolute_url(self):
@@ -232,40 +257,44 @@ class Inventory(CommonModel):
             return yaml.safe_load(self.variables)
 
     def update_computed_fields(self, update_groups=True, update_hosts=True):
+        '''
+        Update model fields that are computed from database relationships.
+        '''
         if update_hosts:
             for host in self.hosts.filter(active=True):
                 host.update_computed_fields(update_inventory=False,
-                                                update_groups=False)
+                                            update_groups=False)
         if update_groups:
             for group in self.groups.filter(active=True):
                 group.update_computed_fields()
-        failed_hosts = self.hosts.filter(active=True, has_active_failures=True)
-        hosts_with_active_failures = failed_hosts.count()
-        has_active_failures = bool(hosts_with_active_failures)
-        inv_src_qs = self.inventory_sources.filter(active=True,
-                                                   source__in=CLOUD_INVENTORY_SOURCES)
-        has_inventory_sources = bool(inv_src_qs.count())
-        update_fields = []
-        if self.hosts_with_active_failures != hosts_with_active_failures:
-            self.hosts_with_active_failures = hosts_with_active_failures
-            update_fields.append('hosts_with_active_failures')
-        if self.has_active_failures != has_active_failures:
-            self.has_active_failures = has_active_failures
-            update_fields.append('has_active_failures')
-        if self.has_inventory_sources != has_inventory_sources:
-            self.has_inventory_sources = has_inventory_sources
-            update_fields.append('has_inventory_sources')
-        if update_fields:
-            self.save(update_fields=update_fields)
+        active_hosts = self.hosts.filter(active=True)
+        failed_hosts = active_hosts.filter(has_active_failures=True)
+        active_groups = self.groups.filter(active=True)
+        failed_groups = active_groups.filter(has_active_failures=True)
+        active_inventory_sources = self.inventory_sources.filter(active=True, source__in=CLOUD_INVENTORY_SOURCES)
+        failed_inventory_sources = active_inventory_sources.filter(last_update_failed=True)
+        computed_fields = {
+            'has_active_failures': bool(failed_hosts.count()),
+            'total_hosts': active_hosts.count(),
+            'hosts_with_active_failures': failed_hosts.count(),
+            'total_groups': active_groups.count(),
+            'groups_with_active_failures': failed_groups.count(),
+            'has_inventory_sources': bool(active_inventory_sources.count()),
+            'total_inventory_sources': active_inventory_sources.count(),
+            'inventory_sources_with_failures': failed_inventory_sources.count(),
+        }
+        for field, value in computed_fields.items():
+            if getattr(self, field) != value:
+                setattr(self, field, value)
+            else:
+                computed_fields.pop(field)
+        if computed_fields:
+            self.save(update_fields=computed_fields.keys())
 
     @property
     def root_groups(self):
         group_pks = self.groups.values_list('pk', flat=True)
         return self.groups.exclude(parents__pk__in=group_pks).distinct()
-
-    @property
-    def inventory_sources(self):
-        return InventorySource.objects.filter(group__inventory=self)
 
 class Host(CommonModelNameNotUnique):
     '''
@@ -288,24 +317,42 @@ class Host(CommonModelNameNotUnique):
     variables = models.TextField(
         blank=True,
         default='',
-        help_text=_('Variables in JSON or YAML format.'),
+        help_text=_('Host variables in JSON or YAML format.'),
     )
-
-    last_job                = models.ForeignKey('Job', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job+')
-    last_job_host_summary   = models.ForeignKey('JobHostSummary', blank=True, null=True, default=None, on_delete=models.SET_NULL, related_name='hosts_as_last_job_summary+')
-    has_active_failures     = models.BooleanField(default=False, editable=False)
+    last_job = models.ForeignKey(
+        'Job',
+        related_name='hosts_as_last_job+',
+        blank=True,
+        null=True,
+        default=None,
+        editable=False,
+        on_delete=models.SET_NULL,
+    )
+    last_job_host_summary = models.ForeignKey(
+        'JobHostSummary',
+        related_name='hosts_as_last_job_summary+',
+        blank=True,
+        null=True,
+        default=None,
+        editable=False,
+        on_delete=models.SET_NULL,
+    )
+    has_active_failures  = models.BooleanField(
+        default=False,
+        editable=False,
+        help_text=_('Flag indicating whether the last job failed for this host.'),
+    )
     has_inventory_sources = models.BooleanField(
         default=False,
         editable=False,
         help_text=_('Flag indicating whether this host was created/updated from any external inventory sources.'),
     )
-
-    # Track which inventory source(s) created or modified this host.
     inventory_sources = models.ManyToManyField(
         'InventorySource',
         related_name='hosts',
         blank=True,
         editable=False,
+        help_text=_('Inventory source(s) that created or modified this host.'),
     )
 
     def __unicode__(self):
@@ -322,30 +369,34 @@ class Host(CommonModelNameNotUnique):
         super(Host, self).mark_inactive(save=save)
         self.inventory_sources.clear()
 
-    def update_computed_fields(self, update_inventory=True,
-                                   update_groups=True):
+    def update_computed_fields(self, update_inventory=True, update_groups=True):
+        '''
+        Update model fields that are computed from database relationships.
+        '''
         has_active_failures = bool(self.last_job_host_summary and
                                    self.last_job_host_summary.job.active and
                                    self.last_job_host_summary.failed)
-        inv_src_qs = self.inventory_sources.filter(active=True,
-                                                   source__in=CLOUD_INVENTORY_SOURCES)
-        has_inventory_sources = bool(inv_src_qs.count())
-        update_fields = []
-        if self.has_active_failures != has_active_failures:
-            self.has_active_failures = has_active_failures
-            update_fields.append('has_active_failures')
-        if self.has_inventory_sources != has_inventory_sources:
-            self.has_inventory_sources = has_inventory_sources
-            update_fields.append('has_inventory_sources')
-        if update_fields:
-            self.save(update_fields=update_fields)
-
-        if update_inventory:
-            self.inventory.update_computed_fields(update_groups=False,
-                                                  update_hosts=False)
+        active_inventory_sources = self.inventory_sources.filter(active=True,
+                                                                 source__in=CLOUD_INVENTORY_SOURCES)
+        computed_fields = {
+            'has_active_failures': has_active_failures,
+            'has_inventory_sources': bool(active_inventory_sources.count()),
+        }
+        for field, value in computed_fields.items():
+            if getattr(self, field) != value:
+                setattr(self, field, value)
+            else:
+                computed_fields.pop(field)
+        if computed_fields:
+            self.save(update_fields=computed_fields.keys())
+        # Groups and inventory may also need to be updated when host fields
+        # change.
         if update_groups:
             for group in self.all_groups.filter(active=True):
                 group.update_computed_fields()
+        if update_inventory:
+            self.inventory.update_computed_fields(update_groups=False,
+                                                  update_hosts=False)
 
     @property
     def variables_dict(self):
@@ -378,33 +429,65 @@ class Group(CommonModelNameNotUnique):
         app_label = 'main'
         unique_together = (("name", "inventory"),)
 
-    inventory     = models.ForeignKey('Inventory', null=False, related_name='groups')
+    inventory = models.ForeignKey(
+        'Inventory',
+        null=False,
+        related_name='groups',
+    )
     # Can also be thought of as: parents == member_of, children == members
-    parents       = models.ManyToManyField('self', symmetrical=False, related_name='children', blank=True)
+    parents = models.ManyToManyField(
+        'self',
+        symmetrical=False,
+        related_name='children',
+        blank=True,
+    )
     variables = models.TextField(
         blank=True,
         default='',
-        help_text=_('Variables in JSON or YAML format.'),
+        help_text=_('Group variables in JSON or YAML format.'),
     )
-    hosts         = models.ManyToManyField('Host', related_name='groups', blank=True)
-    has_active_failures = models.BooleanField(default=False, editable=False)
+    hosts = models.ManyToManyField(
+        'Host',
+        related_name='groups',
+        blank=True,
+        help_text=_('Hosts associated directly with this group.'),
+    )
+    total_hosts = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        help_text=_('Total number of hosts directly or indirectly in this group.'),
+    )
+    has_active_failures = models.BooleanField(
+        default=False,
+        editable=False,
+        help_text=_('Flag indicating whether this group has any hosts with active failures.'),
+    )
     hosts_with_active_failures = models.PositiveIntegerField(
         default=0,
         editable=False,
         help_text=_('Number of hosts in this group with active failures.'),
+    )
+    total_groups = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        help_text=_('Total number of child groups contained within this group.'),
+    )
+    groups_with_active_failures = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        help_text=_('Number of child groups within this group that have active failures.'),
     )
     has_inventory_sources = models.BooleanField(
         default=False,
         editable=False,
         help_text=_('Flag indicating whether this group was created/updated from any external inventory sources.'),
     )
-
-    # Track which inventory source(s) created or modified this group.
     inventory_sources = models.ManyToManyField(
         'InventorySource',
         related_name='groups',
         blank=True,
         editable=False,
+        help_text=_('Inventory source(s) that created or modified this group.'),
     )
 
     def __unicode__(self):
@@ -426,26 +509,32 @@ class Group(CommonModelNameNotUnique):
         self.hosts.clear()
 
     def update_computed_fields(self):
-        failed_hosts = self.all_hosts.filter(active=True,
-                                             last_job_host_summary__job__active=True,
-                                             last_job_host_summary__failed=True)
-        hosts_with_active_failures = failed_hosts.count()
-        has_active_failures = bool(hosts_with_active_failures)
-        inv_src_qs = self.inventory_sources.filter(active=True,
-                                                   source__in=CLOUD_INVENTORY_SOURCES)
-        has_inventory_sources = bool(inv_src_qs.count())
-        update_fields = []
-        if self.hosts_with_active_failures != hosts_with_active_failures:
-            self.hosts_with_active_failures = hosts_with_active_failures
-            update_fields.append('hosts_with_active_failures')
-        if self.has_active_failures != has_active_failures:
-            self.has_active_failures = has_active_failures
-            update_fields.append('has_active_failures')
-        if self.has_inventory_sources != has_inventory_sources:
-            self.has_inventory_sources = has_inventory_sources
-            update_fields.append('has_inventory_sources')
-        if update_fields:
-            self.save(update_fields=update_fields)
+        '''
+        Update model fields that are computed from database relationships.
+        '''
+        active_hosts = self.all_hosts.filter(active=True)
+        failed_hosts = active_hosts.filter(last_job_host_summary__job__active=True,
+                                           last_job_host_summary__failed=True)
+        active_groups = self.all_children.filter(active=True)
+        # FIXME: May not be accurate unless we always update groups depth-first.
+        failed_groups = active_groups.filter(has_active_failures=True)
+        active_inventory_sources = self.inventory_sources.filter(active=True,
+                                                                 source__in=CLOUD_INVENTORY_SOURCES)
+        computed_fields = {
+            'total_hosts': active_hosts.count(),
+            'has_active_failures': bool(failed_hosts.count()),
+            'hosts_with_active_failures': failed_hosts.count(),
+            'total_groups': active_groups.count(),
+            'groups_with_active_failures': failed_groups.count(),
+            'has_inventory_sources': bool(active_inventory_sources.count()),
+        }
+        for field, value in computed_fields.items():
+            if getattr(self, field) != value:
+                setattr(self, field, value)
+            else:
+                computed_fields.pop(field)
+        if computed_fields:
+            self.save(update_fields=computed_fields.keys())
 
     @property
     def variables_dict(self):
@@ -513,8 +602,6 @@ class Group(CommonModelNameNotUnique):
         return JobEvent.objects.filter(host__in=self.all_hosts)
 
 class InventorySource(PrimordialModel):
-
-    # FIXME: Track inventory source for import via management command?
 
     SOURCE_CHOICES = [
         ('file', _('Local File, Directory or Script')),

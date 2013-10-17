@@ -452,9 +452,12 @@ class InventorySerializer(BaseSerializerWithVariables):
     class Meta:
         model = Inventory
         fields = BASE_FIELDS + ('organization', 'variables',
-                                'has_active_failures',
-                                'hosts_with_active_failures',
-                                'has_inventory_sources')
+                                'has_active_failures', 'total_hosts',
+                                'hosts_with_active_failures', 'total_groups',
+                                'groups_with_active_failures',
+                                'has_inventory_sources',
+                                'total_inventory_sources',
+                                'inventory_sources_with_failures',)
 
     def get_related(self, obj):
         if obj is None:
@@ -542,7 +545,8 @@ class GroupSerializer(BaseSerializerWithVariables):
     class Meta:
         model = Group
         fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures',
-                                'hosts_with_active_failures',
+                                'total_hosts', 'hosts_with_active_failures',
+                                'total_groups', 'groups_with_active_failures',
                                 'has_inventory_sources')
 
     def get_related(self, obj):
