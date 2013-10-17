@@ -175,9 +175,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('InventoryStatus', [ '$rootScope', '$routeParams', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
         'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'ShowUpdateStatus', 'HelpDialog',
-        'ShowGroupHelp', 'InventorySummaryHelp', 
+        'ShowGroupHelp', 'InventorySummaryHelp', 'RefreshTree',
     function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, SearchInit, 
-        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus, HelpDialog, ShowGroupHelp, InventorySummaryHelp) {
+        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus, HelpDialog, ShowGroupHelp, InventorySummaryHelp, RefreshTree) {
     return function(params) {
         //Build a summary of a given inventory
         
@@ -305,7 +305,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            }
         }
 
-        scope.search(list.iterator);
+        scope.search(list.iterator, false, true);
  
         if (scope.removeShowHelp) {
            scope.removeShowHelp();
@@ -450,8 +450,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         // Respond to refresh button
         scope.refresh = function() {
             scope['groupSearchSpin'] = true;
-            scope['groupLoading'] = true;
-            Refresh({ scope: scope, set: 'groups', iterator: 'group', url: scope['current_url'] });
+            scope['groupLoading'] = false;
+            RefreshTree({ scope: scope });
+            //setTimeout( function () { Refresh({ scope: scope, set: 'groups', iterator: 'group', url: scope['current_url'] }); }, 500);
             }
 
         // Start the update process

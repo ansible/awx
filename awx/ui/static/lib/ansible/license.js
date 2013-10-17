@@ -8,9 +8,9 @@
 'use strict';
 
 angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'PromptDialog'])
-   .factory('ViewLicense', ['$location', 'GenerateForm', 'Rest', 'Alert', 'GetBasePath', 'ProcessErrors',
+   .factory('ViewLicense', ['$location', '$rootScope', 'GenerateForm', 'Rest', 'Alert', 'GetBasePath', 'ProcessErrors',
        'FormatDate', 'Prompt',
-   function($location, GenerateForm, Rest, Alert, GetBasePath, ProcessErrors, FormatDate, Prompt) {
+   function($location, $rootScope, GenerateForm, Rest, Alert, GetBasePath, ProcessErrors, FormatDate, Prompt) {
    return function() {
    
    var defaultUrl=GetBasePath('config');
@@ -201,7 +201,7 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
 
            })
        .error( function(data, status, headers, config) {
-           ProcessErrors(scope, data, status, form,
+           ProcessErrors($rootScope, data, status, form,
                { hdr: 'Error!', msg: 'Failed to retrieve license. GET status: ' + status });
            });
    }

@@ -70,7 +70,7 @@ angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
                    }
                }
                if (rowcount == 0) {
-                  html += "<tr><td colspan=\"3\">No projects conigured for SCM sync</td></tr>\n";
+                  html += "<tr><td colspan=\"3\">No projects configured for SCM sync</td></tr>\n";
                }
 
                html += "</tbody>\n";

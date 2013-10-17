@@ -148,11 +148,13 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            scope.search(iterator);
            }
 
-        scope.search = function(iterator, page) {
+        scope.search = function(iterator, page, load, spin) {
            // Page is optional. Added to accomodate back function on Job Events detail. 
+           // Spin optional -set to false if spin not desired.
+           // Load optional -set to false if loading message not desired
 
-           scope[iterator + 'SearchSpin'] = true;
-           scope[iterator + 'Loading'] = true;
+           scope[iterator + 'SearchSpin'] = (spin == undefined || spin == true) ? true : false;
+           scope[iterator + 'Loading'] = (load == undefined || load == true) ? true : false;
            scope[iterator + 'SearchParms'] = '';
            var url = defaultUrl;
            

@@ -408,7 +408,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                    'The screen will refresh every 10 seconds, or refresh manually by clicking the <em>Refresh</em> button.', 'alert-info');
                var node = $('#inventory-node')
                var selected = $('#tree-view').jstree('get_selected');
-               scope['inventorySummaryGroup'] = group_name; 
+               scope['inventorySummaryGroup'] = null; 
                selected.each(function(idx) {
                    $('#tree-view').jstree('deselect_node', $(this));
                    });
