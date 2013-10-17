@@ -84,6 +84,41 @@ JOB_STATUS_CHOICES = [
 
 CLOUD_INVENTORY_SOURCES = ['ec2', 'rackspace']
 
+class VarsDictProperty(object):
+    '''
+    Retrieve a string of variables in YAML or JSON as a dictionary.
+    '''
+
+    def __init__(self, field='variables', key_value=False):
+        self.field = field
+        self.key_value = key_value
+
+    def __get__(self, obj, type=None):
+        if obj is None:
+            return self
+        v = getattr(obj, self.field).encode('utf-8')
+        d = None
+        try:
+            d = json.loads(v.strip() or '{}')
+        except ValueError:
+            pass
+        if d is None:
+            try:
+                d = yaml.safe_load(v)
+            except yaml.YAMLError:
+                pass
+        if d is None and self.key_value:
+            d = {}
+            for kv in [x.decode('utf-8') for x in shlex.split(extra_vars, posix=True)]:
+                if '=' in kv:
+                    k, v = kv.split('=', 1)
+                    d[k] = v
+        return d if hasattr(d, 'items') else {}
+
+    def __set__(self, obj, value):
+        raise AttributeError('readonly property')
+
+
 class PrimordialModel(models.Model):
     '''
     common model for all object types that have these standard fields
@@ -249,12 +284,7 @@ class Inventory(CommonModel):
         for inventory_source in self.inventory_sources.filter(active=True):
             inventory_source.mark_inactive()
 
-    @property
-    def variables_dict(self):
-        try:
-            return json.loads(self.variables.strip() or '{}')
-        except ValueError:
-            return yaml.safe_load(self.variables)
+    variables_dict = VarsDictProperty('variables')
 
     def update_computed_fields(self, update_groups=True, update_hosts=True):
         '''
@@ -398,12 +428,7 @@ class Host(CommonModelNameNotUnique):
             self.inventory.update_computed_fields(update_groups=False,
                                                   update_hosts=False)
 
-    @property
-    def variables_dict(self):
-        try:
-            return json.loads(self.variables.strip() or '{}')
-        except ValueError:
-            return yaml.safe_load(self.variables)
+    variables_dict = VarsDictProperty('variables')
 
     @property
     def all_groups(self):
@@ -536,12 +561,7 @@ class Group(CommonModelNameNotUnique):
         if computed_fields:
             self.save(update_fields=computed_fields.keys())
 
-    @property
-    def variables_dict(self):
-        try:
-            return json.loads(self.variables.strip() or '{}')
-        except ValueError:
-            return yaml.safe_load(self.variables)
+    variables_dict = VarsDictProperty('variables')
 
     def get_all_parents(self, except_pks=None):
         '''
@@ -761,12 +781,7 @@ class InventorySource(PrimordialModel):
             if update_fields:
                 self.save(update_fields=update_fields)
 
-    @property
-    def source_vars_dict(self):
-        try:
-            return json.loads(self.source_vars.strip() or '{}')
-        except ValueError:
-            return yaml.safe_load(self.source_vars)
+    source_vars_dict = VarsDictProperty('source_vars')
 
     @property
     def needs_source_password(self):
@@ -1847,24 +1862,7 @@ class Job(CommonModelNameNotUnique):
         self.failed = bool(self.status in ('failed', 'error', 'canceled'))
         super(Job, self).save(*args, **kwargs)
 
-    @property
-    def extra_vars_dict(self):
-        '''Return extra_vars as a dictionary.'''
-        extra_vars = self.extra_vars.encode('utf-8')
-        try:
-            return json.loads(extra_vars.strip() or '{}')
-        except ValueError:
-            pass
-        try:
-            return yaml.safe_load(extra_vars)
-        except yaml.YAMLError:
-            pass
-        d = {}
-        for kv in [x.decode('utf-8') for x in shlex.split(extra_vars, posix=True)]:
-            if '=' in kv:
-                k, v = kv.split('=', 1)
-                d[k] = v
-        return d
+    extra_vars_dict = VarsDictProperty('extra_vars', True)
 
     @property
     def celery_task(self):

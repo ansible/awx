@@ -1019,7 +1019,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.skipTest('no test ec2 credentials defined!')
         inventory_source = self.update_inventory_source(self.group,
             source='ec2', source_username=source_username,
-            source_password=source_password, source_regions=source_regions)
+            source_password=source_password, source_regions=source_regions,
+            source_vars='---')
         self.check_inventory_source(inventory_source)
 
     def test_update_from_rackspace(self):
