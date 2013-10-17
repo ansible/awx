@@ -72,8 +72,12 @@ angular.module('ProjectsListDefinition', [])
                 iconSize: 'large'
                 },
              refresh: {
-                awRefresh: true,
-                mode: 'all'
+                dataPlacement: 'top',
+                icon: "icon-refresh",
+                mode: 'all',
+                'class': 'btn-xs btn-primary',
+                awToolTip: "Refresh the page",
+                ngClick: "refresh()"
                 }
             },
 

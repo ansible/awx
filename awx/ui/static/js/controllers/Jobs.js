@@ -82,7 +82,7 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
     scope.refresh = function() {
        scope['jobSearchSpin'] = true;
-       scope['jobLoading'] = true;
+       scope['jobLoading'] = false;
        Refresh({ scope: scope, set: 'jobs', iterator: 'job', url: scope['current_url'] });
        }
 

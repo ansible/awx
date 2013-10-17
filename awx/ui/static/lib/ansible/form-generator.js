@@ -632,6 +632,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += buildId(field, fld, this.form);
             html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
             html += (options.mode == 'add' && field.addRequired) ? "required " : "";
+            html += (field.multiSelect) ? "multiple " : "";
             html += (field.readonly) ? "readonly " : "";
             html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
                   field.awRequiredWhen.variable + "\" " : "";

@@ -120,9 +120,13 @@ angular.module('JobHostDefinition', [])
                 iconSize: 'large'
                 },
             refresh: {
-                awRefresh: true,
+                dataPlacement: 'top',
+                icon: "icon-refresh",
+                mode: 'all',
                 ngShow: "host_id == null && (job_status == 'pending' || job_status == 'waiting' || job_status == 'running')",
-                mode: 'all'
+                'class': 'btn-xs btn-primary',
+                awToolTip: "Refresh the page",
+                ngClick: "refresh()"
                 }
             },
 
