@@ -22,7 +22,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
                 },
             active_failures: {
-                label: 'Current<br>Job Status?',
+                label: 'Job Status?',
                 ngHref: "\{\{ host.activeFailuresLink \}\}", 
                 awToolTip: "\{\{ host.badgeToolTip \}\}",
                 dataPlacement: 'top',
@@ -34,7 +34,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 searchable: false,
                 nosort: true
                 },
-            inventory_sources: {
+            /*inventory_sources: {
                 label: 'External<br>Source?',
                 ngHref: "\{\{ host.has_inv_source_link \}\}",
                 badgeNgHref: "\{\{ host.has_inv_source_link \}\}",
@@ -46,7 +46,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 badgeTipPlacement: 'top',
                 searchable: false,
                 nosort: true
-                },
+                },*/
             groups: {
                 label: 'Groups',
                 searchable: true,
@@ -55,7 +55,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 nosort: true
                 },
             has_active_failures: {
-                label: 'Current job failed?',
+                label: 'Has failed job?',
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
@@ -90,7 +90,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 icon: 'icon-plus'
                 },
             help: {
-                dataPlacement: 'left',
+                dataPlacement: 'top',
                 icon: "icon-question-sign",
                 mode: 'all',
                 'class': 'btn-xs btn-info btn-help',

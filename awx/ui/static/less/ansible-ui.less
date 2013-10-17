@@ -689,7 +689,8 @@ select.field-mini-height {
     color: @red;
   }
 
-  .icon-failures-none {
+  .icon-failures-none,
+  .icon-failures-na {
     color: @grey;
   }
 
@@ -698,6 +699,7 @@ select.field-mini-height {
   }
 
   .icon-failures-none:before,
+  .icon-failures-na:before,
   .icon-failures-false:before {
     content: "\f111";
   }
@@ -733,17 +735,14 @@ select.field-mini-height {
     content: "\f06a";
   }
 
-  .icon-cloud-na {
-    color: #888;
-  }
-
+  .icon-cloud-na,
   .icon-cloud-never {
-    color: #888;
+    color: @grey;
   }
 
   .icon-cloud-updating,
   .icon-cloud-successful {
-    color: #5bb75b;
+    color: @green;
   }
 
   .icon-cloud-failed {
@@ -1041,7 +1040,7 @@ select.field-mini-height {
     .field-badge {
       font-size: 10px;
       line-height: normal;
-      vertical-align: middle;
+      vertical-align: baseline;
     }
 
   }

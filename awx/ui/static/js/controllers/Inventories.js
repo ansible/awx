@@ -36,23 +36,73 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
     }
     scope.projectsPostRefresh = scope.$on('PostRefresh', function() {
         for (var i=0; i < scope.inventories.length; i++) {
+            
+            // Set values for Failed Hosts column
+            scope.inventories[i].failed_hosts = scope.inventories[i].hosts_with_active_failures + ' / ' + scope.inventories[i].total_hosts;
             if (scope.inventories[i].hosts_with_active_failures > 0) {
-               scope.inventories[i].active_failures_params = "/?has_active_failures=true";
-            }  
-            if (scope.inventories[i].has_inventory_sources) {
-               //scope.inventories[i].inventory_source = 'external';
-               scope.inventories[i].has_inv_sources_tip = 'Has one or more external sources. Click to view details.';
-               scope.inventories[i].has_inv_sources_link = '/#/inventories/' + scope.inventories[i].id + 
-                   '/groups?has_external_source=true';
-               scope.inventories[i].inventory_sources = 'yes';
+               scope.inventories[i].failed_hosts_tip = "Contains " + scope.inventories[i].hosts_with_active_failures +
+                   [ (scope.inventories[i].hosts_with_active_failures == 1) ? ' host' : ' hosts' ] + ' where the latest job failed. Click to view the ' +
+                   [ (scope.inventories[i].hosts_with_active_failures == 1) ? ' offending host.' : ' hosts with failed jobs.' ];
+               scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/hosts?has_active_failures=true';
+               scope.inventories[i].failed_hosts_class = 'true';
             }
             else {
-               //scope.inventories[i].inventory_source = 'manual';
-               scope.inventories[i].has_inv_sources_tip = 'Has no external sources.';
-               scope.inventories[i].has_inv_sources_link = '/#/inventories/' + scope.inventories[i].id + 
-                  '/groups';
-               scope.inventories[i].inventory_sources = 'no';
+               if (scope.inventories[i].total_hosts == 0) {
+                  // no hosts
+                  scope.inventories[i].failed_hosts_tip = "There are no hosts in this inventory. It's a sad empty shell. Click to view the hosts page and add a host.";
+                  scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/hosts';
+                  scope.inventories[i].failed_hosts_class = 'na';
+               }
+               else if (scope.inventories[i].total_hosts == 1) {
+                  // on host with 0 failures
+                  scope.inventories[i].failed_hosts_tip = "The 1 host contained in this inventory does not have a current job failure. It's happy!" + 
+                      " Click to view the host.";
+                  scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/hosts';
+                  scope.inventories[i].failed_hosts_class = 'false';
+               }
+               else {
+                  // many hosts with 0 failures
+                  scope.inventories[i].failed_hosts_tip = "All " + scope.inventories[i].total_hosts + " hosts are happy! None of them have " + 
+                      " a recent job failure. Click to view the hosts.";
+                  scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/hosts';
+                  scope.inventories[i].failed_hosts_class = 'false';
+               }
             }
+
+            // Set values for Status column
+            scope.inventories[i].status = scope.inventories[i].inventory_sources_with_failures + ' / ' + scope.inventories[i].total_inventory_sources; 
+            if (scope.inventories[i].inventory_sources_with_failures > 0) {
+               scope.inventories[i].status_tip = "Contains " + scope.inventories[i].inventory_sources_with_failures +
+                   [ (scope.inventories[i].inventory_sources_with_failures == 1) ? ' group' : ' groups' ] + ' where the latest inventory update failed. ' + 
+                   'Click to view the ' +
+                   [ (scope.inventories[i].inventory_sources_with_failures == 1) ? ' offending group.' : ' groups with failures.' ];
+               scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/groups?status=failed';
+               scope.inventories[i].status_class = 'failed'; 
+            }
+            else {
+               if (scope.inventories[i].total_inventory_sources == 0) {
+                  // no groups are reporting a source
+                  scope.inventories[i].status_tip = "There are no groups configured for an external inventory source. Click to view groups and " +
+                      "and add an inventory source.";
+                  scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/groups';
+                  scope.inventories[i].status_class = 'na';
+               }
+               else if (scope.inventories[i].total_inventory_sources == 1) {
+                  // on host with 0 failures
+                  scope.inventories[i].status_tip = "The 1 group configured with an inventory source was updated successfully. It's happy!" + 
+                      " Click to view the group.";
+                  scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/groups?has_external_source=true';
+                  scope.inventories[i].status_class = 'successful';
+               }
+               else {
+                  // many hosts with 0 failures
+                  scope.inventories[i].status_tip = "The " + scope.inventories[i].total_inventory_sources + " groups with an inventory source are happy! " +
+                      " The most recent update of each group was successful. Click to view the groups.";
+                  scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/groups?has_external_source=true';
+                  scope.inventories[i].status_class = 'successful';
+               }  
+            }
+
         }
         });
 

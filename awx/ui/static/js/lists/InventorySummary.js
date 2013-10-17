@@ -25,18 +25,22 @@ angular.module('InventorySummaryDefinition', [])
                 ngClick: "\{\{ 'GroupsEdit(' + group.id + ')' \}\}",
                 columnClass: 'col-lg-3 col-md3 col-sm-2'
                 },
-            hosts_with_active_failures: {
-                label: 'Hosts with<br>Job Failures?',
-                ngHref: '/#/inventories/{{ inventory_id }}/hosts{{ group.active_failures_params }}', 
-                type: 'badgeCount',
-                "class": "{{ 'failures-' + group.has_active_failures }}",
-                awToolTip: '# of hosts with job failures. Click to view hosts.',
-                dataPlacement: 'top',
+            failed_hosts: {
+                label: 'Failed Hosts',
+                ngHref: "\{\{ group.failed_hosts_link \}\}",
+                badgeIcon: "\{\{ 'icon-failures-' + group.failed_hosts_class \}\}",
+                badgeNgHref: "\{\{ group.failed_hosts_link \}\}",
+                badgePlacement: 'left',
+                badgeToolTip: "\{\{ group.failed_hosts_tip \}\}",
+                badgeTipPlacement: 'top',
+                awToolTip: "\{\{ group.failed_hosts_tip \}\}",
+                dataPlacement: "top",
                 searchable: false,
-                nosort: false
+                excludeModal: true,
+                sortField: "hosts_with_active_failures"
                 },
             status: {
-                label: 'Update<br>Status',
+                label: 'Status',
                 ngClick: "viewUpdateStatus(\{\{ group.id \}\})",
                 searchType: 'select',
                 badgeIcon: "\{\{ 'icon-cloud-' + group.status_badge_class \}\}",
@@ -69,7 +73,8 @@ angular.module('InventorySummaryDefinition', [])
                     { name: "none", value: "" },
                     { name: "rackspace", value: "rackspace" }],
                 sourceModel: 'inventory_source',
-                sourceField: 'source'
+                sourceField: 'source',
+                searchOnly: true
                 },
             has_external_source: {
                 label: 'Has external source?', 
@@ -80,7 +85,7 @@ angular.module('InventorySummaryDefinition', [])
                 sourceField: 'source'
                 },
             has_active_failures: {
-                label: 'Hosts have job failures?',
+                label: 'Has failed hosts?',
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
@@ -110,7 +115,7 @@ angular.module('InventorySummaryDefinition', [])
                 dataPlacement: 'top'
                 },
             help: {
-                dataPlacement: 'left',
+                dataPlacement: 'top',
                 icon: "icon-question-sign",
                 mode: 'all',
                 'class': 'btn-xs btn-info btn-help',

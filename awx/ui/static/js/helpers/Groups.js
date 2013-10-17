@@ -232,6 +232,39 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 else {
                    scope.groups[i].active_failures_params = "/?has_active_failures=false";
                 } 
+
+
+                // Set values for Failed Hosts column
+                scope.groups[i].failed_hosts = scope.groups[i].hosts_with_active_failures + ' / ' + scope.groups[i].total_hosts;
+                if (scope.groups[i].hosts_with_active_failures > 0) {
+                   scope.groups[i].failed_hosts_tip = "Contains " + scope.groups[i].hosts_with_active_failures +
+                       [ (scope.groups[i].hosts_with_active_failures == 1) ? ' host' : ' hosts' ] + ' where the latest job failed. Click to view the ' +
+                       [ (scope.groups[i].hosts_with_active_failures == 1) ? ' offending host.' : ' hosts with failed jobs.' ];
+                   scope.groups[i].failed_hosts_link = '/#/inventories/' + scope.groups[i].inventory + '/hosts?has_active_failures=true';
+                   scope.groups[i].failed_hosts_class = 'true';
+                }
+                else {
+                   if (scope.groups[i].total_hosts == 0) {
+                      // no hosts
+                      scope.groups[i].failed_hosts_tip = "There are no hosts in this inventory. It's a sad empty shell. Click to view the hosts page and add a host.";
+                      scope.groups[i].failed_hosts_link = '/#/inventories/' + scope.groups[i].inventory + '/hosts';
+                      scope.groups[i].failed_hosts_class = 'na';
+                   }
+                   else if (scope.groups[i].total_hosts == 1) {
+                      // on host with 0 failures
+                      scope.groups[i].failed_hosts_tip = "The 1 host contained in this inventory does not have a current job failure. It's happy!" + 
+                          " Click to view the host.";
+                      scope.groups[i].failed_hosts_link = '/#/inventories/' + scope.groups[i].inventory + '/hosts';
+                      scope.groups[i].failed_hosts_class = 'false';
+                   }
+                   else {
+                      // many hosts with 0 failures
+                      scope.groups[i].failed_hosts_tip = "All " + scope.groups[i].total_hosts + " hosts are happy! None of them have " + 
+                          " a recent job failure. Click to view the hosts.";
+                      scope.groups[i].failed_hosts_link = '/#/inventories/' + scope.groups[i].inventory + '/hosts';
+                      scope.groups[i].failed_hosts_class = 'false';
+                   }
+                }
                 
                 scope.groups[i].status = stat;
                 scope.groups[i].source = scope.groups[i].summary_fields.inventory_source.source;
@@ -263,7 +296,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            scope[list.iterator + 'SearchField'] = 'status';
            scope[list.iterator + 'SelectShow'] = true;
            scope[list.iterator + 'SearchSelectOpts'] = list.fields['status'].searchOptions;
-           scope[list.iterator + 'SearchFieldLabel'] = list.fields['status'].label;
+           scope[list.iterator + 'SearchFieldLabel'] = list.fields['status'].label.replace(/\<br\>/g,' ');
            for (var opt in list.fields['status'].searchOptions) {
                if (list.fields['status'].searchOptions[opt].value == $routeParams['status']) {
                   scope[list.iterator + 'SearchSelectValue'] = list.fields['status'].searchOptions[opt];

@@ -1280,7 +1280,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
           html += SearchWidget({ iterator: form.iterator, template: form, mini: true, size: 'col-md-5 col-lg-5'});
           
-          html += "<div class=\"col-md-5 col-lg-5\">\n"
+          html += "<div class=\"col-md-6 col-lg-6\">\n"
           html += "<div class=\"list-actions\">\n";
           // Add actions(s)
           for (var action in form.actions) {

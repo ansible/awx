@@ -31,29 +31,33 @@ angular.module('InventoriesListDefinition', [])
                 sourceField: 'name',
                 excludeModal: true
                 },
-            hosts_with_active_failures: {
-                label: 'Hosts with<br>Failed Job?',
-                ngHref: '/#/inventories/{{ inventory.id }}/hosts{{ inventory.active_failures_params }}', 
-                type: 'badgeCount',
-                "class": "{{ 'failures-' + inventory.has_active_failures }}",
-                awToolTip: '# of hosts with failed jobs. Click to view hosts.',
-                dataPlacement: 'top',
-                searchable: false,
-                excludeModal: true
-                },
-            inventory_sources: {
-                label: 'External<br>Sources?',
-                ngHref: '\{\{ inventory.has_inv_sources_link \}\}',
-                badgeNgHref: '\{\{ inventory.has_inv_sources_link \}\}', 
-                badgeIcon: "\{\{ 'icon-cloud-' + inventory.has_inventory_sources \}\}",
+            failed_hosts: {
+                label: 'Failed Hosts',
+                ngHref: "\{\{ inventory.failed_hosts_link \}\}",
+                badgeIcon: "\{\{ 'icon-failures-' + inventory.failed_hosts_class \}\}",
+                badgeNgHref: "\{\{ inventory.failed_hosts_link \}\}",
                 badgePlacement: 'left',
-                badgeToolTip: "\{\{ inventory.has_inv_sources_tip \}\}",
-                awToolTip: "\{\{ inventory.has_inv_sources_tip \}\}",
-                dataPlacement: "top",
+                badgeToolTip: "\{\{ inventory.failed_hosts_tip \}\}",
                 badgeTipPlacement: 'top',
+                awToolTip: "\{\{ inventory.failed_hosts_tip \}\}",
+                dataPlacement: "top",
                 searchable: false,
                 excludeModal: true,
-                nosort: true
+                sortField: "hosts_with_active_failures"
+                },
+            status: { 
+                label: 'Status', 
+                ngHref: "\{\{ inventory.status_link \}\}",
+                badgeIcon: "\{\{ 'icon-cloud-' + inventory.status_class \}\}",
+                badgeNgHref: "\{\{ inventory.status_link \}\}",
+                badgePlacement: 'left',
+                badgeTipPlacement: 'top',
+                badgeToolTip: "\{\{ inventory.status_tip \}\}",
+                awToolTip: "\{\{ inventory.status_tip \}\}",
+                dataPlacement: "top",
+                searchable: false,
+                excludeModal: true,
+                sortField: "inventory_sources_with_failures"
                 },
             has_inventory_sources: {
                 label: 'Has external sources?',
@@ -63,7 +67,7 @@ angular.module('InventoriesListDefinition', [])
                 searchOnly: true
                 },   
             has_active_failures: {
-                label: 'Has hosts with failed jobs?',
+                label: 'Has failed hosts?',
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',

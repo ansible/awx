@@ -263,6 +263,9 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             if (list.fields[fld].searchField) {
                sort_order = direction + list.fields[fld].searchField;
             }
+            else if (list.fields[fld].sortField) {
+               sort_order = direction + list.fields[fld].sortField;
+            }
             else {
                if (list.fields[fld].sourceModel) {
                   sort_order = direction + list.fields[fld].sourceModel + '__' + list.fields[fld].sourceField;
