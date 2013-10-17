@@ -992,6 +992,11 @@ select.field-mini-height {
     ul {
       list-style-type: none;
       padding-left: 16px;
+      padding-top: 5px;
+    }
+
+    li { 
+      padding-bottom: 5px;
     }
 
     .tree-root {
@@ -1001,7 +1006,6 @@ select.field-mini-height {
     .activate {
       padding-left: 3px;
       padding-right: 3px;
-      word-break: break-all;
     }
 
     .activate:hover {
@@ -1010,18 +1014,28 @@ select.field-mini-height {
 
     .active {
       font-weight: bold;
-      padding-top: 5px;
-      padding-bottom: 5px;
     }
 
-    .expand {
+    div {
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    .expand-container {
+      width: 14px;
+      text-align: center;
+    }
+
+    .expand { 
       padding: 3px;
-      /*border: 1px solid rgb(245, 245, 245);*/
     }
 
-    .expand:hover {
+    .title-container {
+      word-break: break-all;
+    }
+
+    .expand-container:hover {
       background-color: #ddd;
-      border: 1px solid #ddd;
     }
 
     .field-badge {
@@ -1285,6 +1299,7 @@ tr td button i {
   #tree-view {
     margin-left: 0;
     margin-top: 10px;
+    overflow: hidden;
   }
 
   #tree-form {

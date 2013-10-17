@@ -272,12 +272,12 @@
 			v = (u.match( /.+?(?:rv|it|ra|ie)[\/: ]([\d.]+)/ ) || [0,'0'])[1],
 			css_string = '' + 
 				'.jstree ul, .jstree li { display:block; margin:0 0 0 0; padding:0 0 0 0; list-style-type:none; } ' + 
-				'.jstree li { display:block; min-height:18px; line-height:18px; white-space:nowrap; margin-left:18px; min-width:18px; } ' + 
+				'.jstree li { display:block; min-height:18px; line-height:18px; margin-left:18px; min-width:18px; } ' + 
 				'.jstree-rtl li { margin-left:0; margin-right:18px; } ' + 
 				'.jstree > ul > li { margin-left:0px; } ' + 
 				'.jstree-rtl > ul > li { margin-right:0px; } ' + 
 				'.jstree ins { display:inline-block; text-decoration:none; width:18px; height:18px; margin:0 0 0 0; padding:0; } ' + 
-				'.jstree a { display:inline-block; line-height:16px; height:16px; color:black; white-space:nowrap; text-decoration:none; padding:1px 2px; margin:0; } ' + 
+				'.jstree a { display:inline-block; line-height:16px; height:16px; color:black; text-wrap: unrestricted; text-decoration:none; padding:1px 2px; margin:0; } ' + 
 				'.jstree a:focus { outline: none; } ' + 
 				'.jstree a > ins { height:16px; width:16px; } ' + 
 				'.jstree a > .jstree-icon { margin-right:3px; } ' + 
@@ -1825,6 +1825,7 @@
 							if(m.icon.indexOf("/") === -1) { tmp.children("ins").addClass(m.icon); }
 							else { tmp.children("ins").css("background","url('" + m.icon + "') center center no-repeat"); }
 						}
+						var div = $("<div style=\"display:inline-block;\"></div>");
 						d.append(tmp);
 					});
 					d.prepend("<ins class='jstree-icon'>&#160;</ins>");

@@ -1234,7 +1234,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           */
           html += "<div class=\"row\">\n";
           html += "<div class=\"col-lg-3\">\n" +
-                  "<div id=\"tree-view\"></div>\n" + 
+                  "<div id=\"tree-view\" class=\"col-lg-12\"></div>\n" + 
                   "</div>\n";
           html += "<div class=\"col-lg-9 tree-form-container\">\n";
           html += "<div id=\"tree-form\">\n</div>\n";

@@ -527,16 +527,17 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             var sorted = SortNodes(tree_data);
             html += (sorted.length > 0) ? "<ul>\n" : "";
             for(var i=0; i < sorted.length; i++) {
-               html += "<li id=\"search-node-1000\" data-state=\"opened\" data-hosts=\"" + sorted[i].related.hosts + "\" " +
+               html += "<li id=\"search-node-10" + i + "\" data-state=\"opened\" data-hosts=\"" + sorted[i].related.hosts + "\" " +
                    "data-description=\"" + sorted[i].description + "\" " + 
                    "data-failures=\"" + sorted[i].has_active_failures + "\" " +
                    "data-groups=\"" + sorted[i].related.groups + "\" " + 
                    "data-name=\"" + sorted[i].name + "\" " +
                    "data-group-id=\"" + sorted[i].id + "\" " + 
-                   "><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a> " +
-                   "<i class=\"field-badge icon-failures-" + sorted[i].has_active_failures + "\" " +
-                   "aw-tool-tip=\"" + toolTip + "\" data-placement=\"top\"></i> " +
-                   "<a href=\"\" class=\"activate\">" + sorted[i].name + "</a> ";
+                   "><div class=\"expand-container\"><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a></div> " +
+                   "<div class=\"badge-container\"><i class=\"field-badge icon-failures-" + sorted[i].has_active_failures + "\" " +
+                   "aw-tool-tip=\"" + toolTip + "\" data-placement=\"top\"></i></div> " +
+                   "<div class=\"title-container\"><a href=\"\" class=\"activate\">" + sorted[i].name + "</a></div>";
+              
                if (sorted[i].children.length > 0) {
                   buildHTML(sorted[i].children);
                }
@@ -565,7 +566,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         function activate(e) {
             /* Set the clicked node as active */
             var elm = angular.element(e.target);  //<a>
-            var parent = angular.element(e.target.parentNode); //<li>
+            var parent = angular.element(e.target.parentNode.parentNode); //<li>
             $('.search-tree .active').removeClass('active');
             elm.addClass('active');
             refresh(parent);
@@ -575,13 +576,13 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             var id, parent, elm, icon;
 
             if (e.target.tagName == 'I') {
-               id = e.target.parentNode.parentNode.attributes.id.value;
-               parent = angular.element(e.target.parentNode.parentNode);  //<li>
+               id = e.target.parentNode.parentNode.parentNode.attributes.id.value;
+               parent = angular.element(e.target.parentNode.parentNode.parentNode);  //<li>
                elm = angular.element(e.target.parentNode);  // <a>
             }
             else {
-               id = e.target.parentNode.attributes.id.value;
-               parent = angular.element(e.target.parentNode);
+               id = e.target.parentNode.parentNode.attributes.id.value;
+               parent = angular.element(e.target.parentNode.parentNode);
                elm = angular.element(e.target);
             }
 
@@ -647,6 +648,16 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                    link.bind('click', activate);
                 }
             }
+             
+            // Attempt to stop the title from dropping to the next 
+            // line
+            $(container).find('.title-container').each(function(idx) {
+                var parent = $(this).parent();
+                if ($(this).width() >= parent.width()) {
+                   $(this).css('width','80%');
+                } 
+                });
+
             Wait('stop');
             });
 

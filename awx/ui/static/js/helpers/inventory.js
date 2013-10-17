@@ -160,7 +160,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
             // Force root node styling changes
             $('#tree-view').prepend("<div class=\"title\">Group Selector:</div>");
             $('#inventory-node ins').first().remove();
-            $('#inventory-node a ins').first().css('background-image', 'none').append('<i class="icon-sitemap"></i>').css('margin-right','10px');
+            //$('#inventory-node a ins').first().css('background-image', 'none').append('<i class="icon-sitemap"></i>').css('margin-right','10px');
             
             $('#tree-view ul').first().css('opacity','100'); // all our changes are done. display the tree
             scope['treeLoading'] = false;
