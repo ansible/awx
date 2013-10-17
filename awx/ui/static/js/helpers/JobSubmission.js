@@ -24,8 +24,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         function navigate(canceled) {
             //Decide where to send the user once the modal dialog closes
             if (!canceled) {
-               console.log('here'); 
-               console.log('base: ' + base);
                if (base == 'jobs') {
                   scope.refreshJob();
                }
