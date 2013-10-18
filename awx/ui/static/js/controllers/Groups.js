@@ -9,7 +9,7 @@
 
 function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryGroupsForm,
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt,
-                          TreeInit, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
+                          BuildTree, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
                           GroupsDelete, RefreshGroupName, EditInventory, InventoryStatus) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
@@ -33,7 +33,13 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
    }
    scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
        LoadBreadCrumbs({ path: '/inventories/' + id, title: scope.inventory_name });
-       TreeInit(scope.TreeParams);
+       //TreeInit(scope.TreeParams);
+       BuildTree({
+           scope: scope,
+           inventory_id: id,
+           emit_on_select: 'NodeSelect',
+           target_id: 'search-tree-container'
+           });
        if (!scope.$$phase) {
           scope.$digest();
        }
@@ -119,61 +125,59 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
       }
       }
   
-  scope.$on('NodeSelect', function(e, n) {
+  scope.$on('NodeSelect', function(e, id, group_id, name) {
       
       // Respond to user clicking on a tree node
 
-      var node = $('li[id="' + n.attr.id + '"]');
+      var node = $('#' + id);
       var parent = node.parent().parent();
-      var type = node.attr('type');
+      var type = (group_id == null) ? 'inventory' : 'group';
       var url;
       
-      if ($rootScope.timer) {
+      /*if ($rootScope.timer) {
          // Kill any lingering timers from the inventory summary page
          clearInterval($rootScope.timer);
          $rootScope.timer = null;
-      }
+      }*/
 
-      scope['nodeSelectValue'] = n;
       scope['selectedNode'] = node;
-      scope['selectedNodeName'] = node.attr('name');
+      scope['selectedNodeName'] = name
       scope['grpBtnDisable'] = false;
       scope['flashMessage'] = null;
       scope['groupUpdateHide'] = true;
 
-      $('#tree-view').jstree('open_node',node);
+      //$('#tree-view').jstree('open_node',node);
       
       if (type == 'group') {
-         url = node.attr('all');
+         //url = node.attr('all');
          scope.groupAddHide = false;
          scope.groupCreateHide = false;
          scope.groupEditHide = false;
          scope.inventoryEditHide = true;
          scope.groupDeleteHide = false;
          scope.createButtonShow = true;
-         scope.group_id = node.attr('group_id');
-         
-         scope.addGroupHelp = "Copy an existing group into " + node.attr('name');
-         scope.createGroupHelp = "Create a new group, adding it to " + node.attr('name');
-         scope.updateGroupHelp = "Start the inventory update process, refreshing " + node.attr('name');
-         if (parent.attr('id') == 'inventory-node') {
-            scope.deleteGroupHelp = "Remove " + node.attr('name') + " from " + parent.attr('name') + 
+         scope.group_id = group_id;
+         scope.addGroupHelp = "Copy an existing group into " + name;
+         scope.createGroupHelp = "Create a new group, adding it to " + name;
+         scope.updateGroupHelp = "Start the inventory update process, refreshing " + name;
+         if (parent.attr('id') == 'inventory-root-node') {
+            scope.deleteGroupHelp = "Remove " + name + " from " + parent.attr('data-name') + 
              " Inventory. Any hosts will still be available in All Hosts."; 
          }
          else {
-            scope.deleteGroupHelp = "Remove " + node.attr('name') + " from " + parent.attr('name') + 
+            scope.deleteGroupHelp = "Remove " + name + " from " + parent.attr('data-name') + 
              ". Any hosts will still be available in " + parent.attr('name') + " and All Hosts."; 
          }
          
          // Load the form
-         GroupsEdit({ "inventory_id": id, group_id: scope.group_id });
+         GroupsEdit({ "inventory_id": scope['inventory_id'], group_id: scope['group_id'] });
 
          // Slide in the group properties form
          $('#tree-form').show();
          $('input:first').focus();
       }
       else if (type == 'inventory') {
-         url = node.attr('hosts');
+         //url = node.attr('hosts');
          scope.groupAddHide = true;
          scope.groupCreateHide = false; 
          scope.groupEditHide =true;
@@ -181,7 +185,7 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
          scope.groupDeleteHide = true;
          scope.createButtonShow = false;
          scope.group_id = null;
-         scope.inventory_name = node.attr('name');
+         scope.inventory_name = name;
          InventoryStatus({ scope: scope });
          $('#tree-form').show();
       }
@@ -240,7 +244,7 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
 
 InventoryGroups.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryGroupsForm',
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt',
-                            'TreeInit', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
+                            'BuildTree', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
                             'GroupsDelete', 'RefreshGroupName', 'EditInventory', 'InventoryStatus'
                             ]; 
   

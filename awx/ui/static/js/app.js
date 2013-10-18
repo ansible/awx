@@ -77,7 +77,8 @@ angular.module('ansible', [
     'JobsHelper',
     'InventoryStatusDefinition',
     'InventorySummaryHelpDefinition',
-    'InventoryHostsHelpDefinition'
+    'InventoryHostsHelpDefinition',
+    'TreeSelector'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.
