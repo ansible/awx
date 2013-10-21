@@ -13,10 +13,10 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                          RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                          GetBasePath, HostsList, HostsAdd, HostsEdit, HostsDelete,
-                         HostsReload, LoadSearchTree, EditHostGroups, InventoryHostsHelp, HelpDialog)
+                         HostsReload, BuildTree, EditHostGroups, InventoryHostsHelp, HelpDialog)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
-                                //scope.
+                                 //scope.
 
     var generator = GenerateForm;
     var form = InventoryHostsForm;
@@ -31,16 +31,13 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
     scope['hosts'] = null;
     scope['helpCount'] = 0;
 
+    // buildAllGroups emits from TreeSelector.js after the inventory object is ready
     if (scope.loadBreadCrumbsRemove) {
       scope.loadBreadCrumbsRemove();
     }
     scope.loadBreadCrumbsRemove = scope.$on('buildAllGroups', function(e, inventory_name) {
        LoadBreadCrumbs({ path: '/inventories/' + id, title: inventory_name });
        });
-
-    // Sets up the search tree and loads All Hosts for the inventory
-    LoadSearchTree({ scope: scope, inventory_id: scope['inventory_id'] });
-
 
     scope.filterHosts = function() {
         HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
@@ -112,11 +109,11 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
         HelpDialog({ defn: InventoryHostsHelp });
         }
 
-    // Respond to the scope.$emit from awTree directive
+    // Refresh host is emitted each time a group on the selector tree is clicked
     if (scope.refreshHostRemove) {
        scope.refreshHostRemove();
     } 
-    scope.refreshHostRemove = scope.$on('refreshHost', function(e, group, title) {
+    scope.refreshHostRemove = scope.$on('refreshHost', function(e, id, group, title) {
         scope.groupTitle = title;
         scope.group_id = group;
         scope.helpCount++;
@@ -135,12 +132,21 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
         scope['hostDeleteDisabledClass'] = 'disabled';
         HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: group });
         });
+
+    // Load the tree. See TreeSelector.js
+    BuildTree({
+           scope: scope,
+           inventory_id: id,
+           emit_on_select: 'refreshHost',
+           target_id: 'search-tree-container'
+           });
+
 }
 
 InventoryHosts.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryHostsForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'GetBasePath', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete',
-                            'HostsReload', 'LoadSearchTree', 'EditHostGroups', 'InventoryHostsHelp', 'HelpDialog'
+                            'HostsReload', 'BuildTree', 'EditHostGroups', 'InventoryHostsHelp', 'HelpDialog'
                             ]; 
   

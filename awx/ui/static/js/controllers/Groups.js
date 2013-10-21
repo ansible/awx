@@ -33,7 +33,6 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
    }
    scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
        LoadBreadCrumbs({ path: '/inventories/' + id, title: scope.inventory_name });
-       //TreeInit(scope.TreeParams);
        BuildTree({
            scope: scope,
            inventory_id: id,

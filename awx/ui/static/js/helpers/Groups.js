@@ -10,7 +10,7 @@
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
                                  'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'GroupsHelper',
                                  'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper', 'RefreshHelper',
-                                 'PromptDialog', 'InventorySummaryHelpDefinition'
+                                 'PromptDialog', 'InventorySummaryHelpDefinition', 'TreeSelector'
                                  ])
 
     .factory('GetSourceTypeOptions', [ function() {
@@ -175,9 +175,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('InventoryStatus', [ '$rootScope', '$routeParams', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
         'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'ShowUpdateStatus', 'HelpDialog',
-        'ShowGroupHelp', 'InventorySummaryHelp', 'RefreshTree',
+        'ShowGroupHelp', 'InventorySummaryHelp', 'BuildTree',
     function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, SearchInit, 
-        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus, HelpDialog, ShowGroupHelp, InventorySummaryHelp, RefreshTree) {
+        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus, HelpDialog, ShowGroupHelp, InventorySummaryHelp, BuildTree) {
     return function(params) {
         //Build a summary of a given inventory
         
@@ -449,10 +449,18 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
         // Respond to refresh button
         scope.refresh = function() {
-            scope['groupSearchSpin'] = true;
-            scope['groupLoading'] = false;
-            RefreshTree({ scope: scope });
-            //setTimeout( function () { Refresh({ scope: scope, set: 'groups', iterator: 'group', url: scope['current_url'] }); }, 500);
+            
+            //scope['groupSearchSpin'] = true;
+            //scope['groupLoading'] = false;
+            scope.search(list.iterator, false, true);
+
+            BuildTree({
+                scope: scope,
+                inventory_id: scope['inventory_id'],
+                emit_on_select: 'NodeSelect',
+                target_id: 'search-tree-container',
+                refresh: true
+                });
             }
 
         // Start the update process
@@ -615,10 +623,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }])
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshGroupName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-        'GetUpdateIntervalOptions',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
+        'GetUpdateIntervalOptions', 'ClickNode',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, RefreshGroupName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions) {
+        GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions, ClickNode) {
     return function(params) {
         
         var group_id = params.group_id;
@@ -787,11 +795,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            scope.removeSaveComplete();
         }
         scope.removeSaveComplete = scope.$on('SaveComplete', function(e, error) {
-           if (!error) {
+            if (!error) {
                // Reset the form, adjust buttons and let user know changese saved
-               scope[form.name + '_form'].$setPristine();
-               scope['groupUpdateHide'] = (scope['source'].value !== null && scope['source'].value !== '') ? false : true;
-               Alert("Changes Saved", "Your changes to inventory group " + scope['name'] + " were successfully saved.", 'alert-info'); 
+               //scope[form.name + '_form'].$setPristine();
+               //scope['groupUpdateHide'] = (scope['source'].value !== null && scope['source'].value !== '') ? false : true;
+               //Alert("Changes Saved", "Your changes to inventory group " + scope['name'] + " were successfully saved.", 'alert-info');
+               scope['flashMessage'] = 'Your changes to ' + scope['name'] + ' were saved.';
+               ClickNode({ selector: '#inventory-root-node' });
             }
             });
 
@@ -802,6 +812,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             
             var parseError = false;
             var saveError = false;
+            
+            // Update the selector tree with new group name, descr
+            SetNodeName({ scope: scope['selectedNode'], group_id: group_id,
+                name: scope.name, description: scope.description });
 
             if (scope.source.value !== null && scope.source.value !== '') {
                var data = { group: group_id, 
@@ -853,6 +867,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                           });
                }
             }
+            else {
+               // No source value
+               scope.$emit('SaveComplete', false);
+            }
             });
 
         // Save changes to the parent
@@ -891,7 +909,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                                        { hdr: 'Error!', msg: 'Failed to update group variables. PUT status: ' + status });
                                    });
                         }
-                        RefreshGroupName(scope['selectedNode'], data.name, data.description);
                         scope.$emit('formSaveSuccess', data.id);
                         })
                     .error( function(data, status, headers, config) {

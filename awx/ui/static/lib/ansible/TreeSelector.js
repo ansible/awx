@@ -7,7 +7,7 @@
  *
  */
 
- angular.module('TreeSelector', ['Utilities', 'RestServices'])
+angular.module('TreeSelector', ['Utilities', 'RestServices'])
     .factory('BuildTree', ['Rest', 'GetBasePath', 'ProcessErrors', '$compile', '$rootScope', 'Wait', 'SortNodes',
         function(Rest, GetBasePath, ProcessErrors, $compile, $rootScope, Wait, SortNodes) {
         return function(params) {
@@ -16,6 +16,7 @@
             var inventory_id = params.inventory_id;
             var emit_on_select = params.emit_on_select;
             var target_id = params.target_id;
+            var refresh_tree = (params.refresh == undefined || params.refresh == false) ? false : true;
 
             var html = '';
             var toolTip = 'Hosts have failed jobs?';
@@ -207,7 +208,7 @@
             Rest.get()
                  .success( function(data, status, headers, config) {
                      html += "<div class=\"title\">Group Selector:</div>\n" +
-                       "<ul class=\"tree-root\">\n" +
+                       "<ul id=\"inventory-tree\" class=\"tree-root\">\n" +
                        "<li id=\"inventory-root-node\" data-state=\"opened\" data-hosts=\"" + data.related.hosts + "\" " +
                        "data-description=\"" + data.description + "\" " + 
                        "data-failures=\"" + data.has_active_failures + "\" " +
@@ -216,8 +217,14 @@
                        ">" +
                        "<i class=\"icon-sitemap\"></i> " +
                        "<a href=\"\" class=\"activate active\">" + data.name + "</a>";
+                     
                      scope.$emit('buildAllGroups', data.name, data.related.tree, data.related.groups);
-                     scope.$emit(emit_on_select, 'inventory-root-node', null, 'All Hosts');
+                     
+                     if (!refresh_tree) {
+                        // if caller requests refresh, let caller handle next steps / node selection
+                        scope.$emit(emit_on_select, 'inventory-root-node', null, 'All Hosts');
+                     }
+
                      })
                  .error( function(data, status, headers, config) {
                      ProcessErrors(scope, data, status, null,
@@ -225,3 +232,38 @@
                      });
             }
             }])
+
+    // Set node name and description after an update to Group properties.
+    .factory('SetNodeName', [ function() {
+        return function(params) {
+            var scope = params.scope;
+            var name = params.name; 
+            var descr = params.description; 
+            var group_id = (params.group_id !== undefined) ? params.group_id : null;
+            var inventory_id = (params.inventory_id != undefined) ? params.inventory_id : null; 
+
+            if (group_id !== null) {
+                $('#inventory-tree').find('li [data-group-id="' + group_id + '"]').each(function(idx) {
+                    $(this).attr('data-name',name);
+                    $(this).attr('data-description',descr);
+                    $(this).find('.activate').first().text(name); 
+                    });
+            }
+
+            if (inventory_id !== null) {
+                $('#inventory-root-node').attr('data-name', name).attr('data-description', descr).find('.activate').first().text(name);
+            }
+
+            }
+            }])
+
+    .factory('ClickNode', [ function() {
+        return function(params) {
+            var selector = params.selector;   //jquery selector string to find the correct <li>
+            $(selector + ' .activate').first().click();
+            }
+            }]);
+
+
+
+
