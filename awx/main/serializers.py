@@ -643,6 +643,7 @@ class InventorySourceSerializer(BaseSerializer):
                   'source_regions', 'source_tags', 'overwrite',
                   'overwrite_vars', 'update_on_launch', 'update_interval',
                   'last_update_failed', 'status', 'last_updated')
+        read_only_fields = ('inventory', 'group')
 
     def to_native(self, obj):
         ret = super(InventorySourceSerializer, self).to_native(obj)
