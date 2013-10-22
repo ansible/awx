@@ -588,7 +588,8 @@ class GroupTreeSerializer(GroupSerializer):
     class Meta:
         model = Group
         fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures',
-                                'hosts_with_active_failures',
+                                'total_hosts', 'hosts_with_active_failures',
+                                'total_groups', 'groups_with_active_failures',
                                 'has_inventory_sources', 'children')
 
     def get_children(self, obj):
