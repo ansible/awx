@@ -260,11 +260,17 @@ class InventoryTest(BaseTest):
         invalid      = dict(name='asdf0.example.com')
         new_host_a   = dict(name='asdf0.example.com:1022', inventory=inv.pk)
         new_host_b   = dict(name='asdf1.example.com', inventory=inv.pk)
-        new_host_c   = dict(name='127.1.2.3:2022', inventory=inv.pk)
+        new_host_c   = dict(name='127.1.2.3:2022', inventory=inv.pk,
+                            variables=json.dumps({'who': 'what?'}))
         new_host_d   = dict(name='asdf3.example.com', inventory=inv.pk)
         new_host_e   = dict(name='asdf4.example.com', inventory=inv.pk)
         host_data0 = self.post(hosts, data=invalid, expect=400, auth=self.get_super_credentials())
         host_data0 = self.post(hosts, data=new_host_a, expect=201, auth=self.get_super_credentials())
+    
+        # Port should be split out into host variables.
+        host_a = Host.objects.get(pk=host_data0['id'])
+        self.assertEqual(host_a.name, 'asdf0.example.com')
+        self.assertEqual(host_a.variables_dict, {'ansible_ssh_port': 1022})
  
         # an org admin can add hosts
         host_data1 = self.post(hosts, data=new_host_e, expect=201, auth=self.get_normal_credentials())
@@ -279,6 +285,11 @@ class InventoryTest(BaseTest):
              permission_type = PERM_INVENTORY_WRITE
         )
         host_data3 = self.post(hosts, data=new_host_c, expect=201, auth=self.get_other_credentials())
+
+        # Port should be split out into host variables, other variables kept intact.
+        host_c = Host.objects.get(pk=host_data3['id'])
+        self.assertEqual(host_c.name, '127.1.2.3')
+        self.assertEqual(host_c.variables_dict, {'ansible_ssh_port': 2022, 'who': 'what?'})
 
         # hostnames must be unique inside an organization
         host_data4 = self.post(hosts, data=new_host_c, expect=400, auth=self.get_other_credentials())
@@ -680,22 +691,22 @@ class InventoryTest(BaseTest):
 
         # Try with invalid hostnames and invalid IPs.
         hosts         = reverse('main:host_list')
-        invalid_expect = 201 # hostname validation is disabled for now.
+        invalid_expect = 400 # hostname validation is disabled for now.
         data = dict(name='', inventory=inv.pk)
         with self.current_user(self.super_django_user):
             response = self.post(hosts, data=data, expect=400)
-        data = dict(name='not a valid host name', inventory=inv.pk)
-        with self.current_user(self.super_django_user):
-            response = self.post(hosts, data=data, expect=invalid_expect)
+        #data = dict(name='not a valid host name', inventory=inv.pk)
+        #with self.current_user(self.super_django_user):
+        #    response = self.post(hosts, data=data, expect=invalid_expect)
         data = dict(name='validhost:99999', inventory=inv.pk)
         with self.current_user(self.super_django_user):
             response = self.post(hosts, data=data, expect=invalid_expect)
-        data = dict(name='123.234.345.456', inventory=inv.pk)
-        with self.current_user(self.super_django_user):
-            response = self.post(hosts, data=data, expect=invalid_expect)
-        data = dict(name='2001::1::3F', inventory=inv.pk)
-        with self.current_user(self.super_django_user):
-            response = self.post(hosts, data=data, expect=invalid_expect)
+        #data = dict(name='123.234.345.456', inventory=inv.pk)
+        #with self.current_user(self.super_django_user):
+        #    response = self.post(hosts, data=data, expect=invalid_expect)
+        #data = dict(name='2001::1::3F', inventory=inv.pk)
+        #with self.current_user(self.super_django_user):
+        #    response = self.post(hosts, data=data, expect=invalid_expect)
 
         #########################################################
         # FIXME: TAGS

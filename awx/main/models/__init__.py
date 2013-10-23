@@ -109,7 +109,7 @@ class VarsDictProperty(object):
                 pass
         if d is None and self.key_value:
             d = {}
-            for kv in [x.decode('utf-8') for x in shlex.split(extra_vars, posix=True)]:
+            for kv in [x.decode('utf-8') for x in shlex.split(v, posix=True)]:
                 if '=' in kv:
                     k, v = kv.split('=', 1)
                     d[k] = v

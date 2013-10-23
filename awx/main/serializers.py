@@ -523,9 +523,9 @@ class HostSerializer(BaseSerializerWithVariables):
         d['groups'] = [{'id': g.id, 'name': g.name} for g in obj.groups.all()]
         return d
 
-    def _validate_name(self, attrs, source):
-        name = unicode(attrs.get(source, ''))
+    def _get_host_port_from_name(self, name):
         # Allow hostname (except IPv6 for now) to specify the port # inline.
+        port = None
         if name.count(':') == 1:
             name, port = name.split(':')
             try:
@@ -533,20 +533,52 @@ class HostSerializer(BaseSerializerWithVariables):
                 if port < 1 or port > 65535:
                     raise ValueError
             except ValueError:
-                raise serializers.ValidationError('Invalid port specification')
-        for family in (socket.AF_INET, socket.AF_INET6):
-            try:
-                socket.inet_pton(family, name)
-                return attrs
-            except socket.error:
-                pass
+                raise serializers.ValidationError('Invalid port specification: %s' % str(port))
+        return name, port
+
+    def validate_name(self, attrs, source):
+        name = unicode(attrs.get(source, ''))
+        # Validate here only, update in main validate method.
+        host, port = self._get_host_port_from_name(name)
+        #for family in (socket.AF_INET, socket.AF_INET6):
+        #    try:
+        #        socket.inet_pton(family, name)
+        #        return attrs
+        #    except socket.error:
+        #        pass
         # Hostname should match the following regular expression and have at
         # last one letter in the name (to catch invalid IPv4 addresses from
         # above).
-        valid_host_re = r'^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
-        if re.match(valid_host_re, name) and re.match(r'^.*?[a-zA-Z].*?$', name):
-            return attrs
-        raise serializers.ValidationError('Invalid host name or IP')
+        #valid_host_re = r'^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
+        #if re.match(valid_host_re, name) and re.match(r'^.*?[a-zA-Z].*?$', name):
+        #    return attrs
+        #raise serializers.ValidationError('Invalid host name or IP')
+        return attrs
+
+    def validate(self, attrs):
+        name = unicode(attrs.get('name', ''))
+        host, port = self._get_host_port_from_name(name)
+
+        if port:
+            attrs['name'] = host
+            if self.object:
+                variables = unicode(attrs.get('variables', self.object.variables) or '')
+            else:
+                variables = unicode(attrs.get('variables', ''))
+            try:
+                vars_dict = json.loads(variables.strip() or '{}')
+                vars_dict['ansible_ssh_port'] = port
+                attrs['variables'] = json.dumps(vars_dict)
+            except (ValueError, TypeError):
+                try:
+                    vars_dict = yaml.safe_load(variables)
+                    vars_dict['ansible_ssh_port'] = port
+                    attrs['variables'] = yaml.dump(vars_dict)
+                except (yaml.YAMLError, TypeError):
+                    raise serializers.ValidationError('Must be valid JSON or YAML')
+
+        return attrs
+
 
 class GroupSerializer(BaseSerializerWithVariables):
 
@@ -588,7 +620,8 @@ class GroupTreeSerializer(GroupSerializer):
     class Meta:
         model = Group
         fields = BASE_FIELDS + ('inventory', 'variables', 'has_active_failures',
-                                'hosts_with_active_failures',
+                                'total_hosts', 'hosts_with_active_failures',
+                                'total_groups', 'groups_with_active_failures',
                                 'has_inventory_sources', 'children')
 
     def get_children(self, obj):
@@ -642,6 +675,7 @@ class InventorySourceSerializer(BaseSerializer):
                   'source_regions', 'source_tags', 'overwrite',
                   'overwrite_vars', 'update_on_launch', 'update_interval',
                   'last_update_failed', 'status', 'last_updated')
+        read_only_fields = ('inventory', 'group')
 
     def to_native(self, obj):
         ret = super(InventorySourceSerializer, self).to_native(obj)
