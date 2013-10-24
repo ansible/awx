@@ -74,8 +74,11 @@ REMOTE_HOST_HEADERS = ['REMOTE_ADDR', 'REMOTE_HOST']
 # the celery task.
 #AWX_TASK_ENV['FOO'] = 'BAR'
 
-# If set, uses -vvv for project updates instead of just -v for more output.
+# If set, use -vvv for project updates instead of -v for more output.
 # PROJECT_UPDATE_VVV=True
+
+# Set verbosity for inventory import command when running inventory updates.
+# INVENTORY_UPDATE_VERBOSITY=1
 
 ###############################################################################
 # EMAIL SETTINGS

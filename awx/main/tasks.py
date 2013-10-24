@@ -805,7 +805,8 @@ class RunInventoryUpdate(BaseTask):
             args.append(rax_path)
         elif inventory_source.source == 'file':
             args.append(inventory_source.source_path)
-        args.append('-v2')
+        verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)
+        args.append('-v%d' % verbosity)
         if settings.DEBUG:
             args.append('--traceback')
         return args
