@@ -824,7 +824,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    source_username: scope['source_username'],
                    source_password: scope['source_password'],
                    source_regions: scope['source_regions'],
-                   source_tags: scope['source_tags'],
                    overwrite: scope['overwrite'],
                    overwrite_vars: scope['overwrite_vars'],
                    update_on_launch: scope['update_on_launch'],

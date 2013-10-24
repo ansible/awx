@@ -672,9 +672,9 @@ class InventorySourceSerializer(BaseSerializer):
         fields = ('id', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'inventory', 'group', 'source', 'source_path',
                   'source_vars', 'source_username', 'source_password',
-                  'source_regions', 'source_tags', 'overwrite',
-                  'overwrite_vars', 'update_on_launch', 'update_interval',
-                  'last_update_failed', 'status', 'last_updated')
+                  'source_regions', 'overwrite', 'overwrite_vars',
+                  'update_on_launch', 'update_interval', 'last_update_failed',
+                  'status', 'last_updated')
         read_only_fields = ('inventory', 'group')
 
     def to_native(self, obj):
@@ -761,10 +761,6 @@ class InventorySourceSerializer(BaseSerializer):
         return attrs
 
     def validate_source_regions(self, attrs, source):
-        # FIXME
-        return attrs
-
-    def validate_source_tags(self, attrs, source):
         # FIXME
         return attrs
 

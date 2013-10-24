@@ -336,8 +336,9 @@ class Ec2Inventory(object):
         # Add to index
         self.index[dest] = [region, instance.id]
 
+        # For AWX: do not output group based on instance ID!!!
         # Inventory: Group by instance ID (always a group of 1)
-        self.inventory[instance.id] = [dest]
+        # self.inventory[instance.id] = [dest]
 
         # Inventory: Group by region
         self.push(self.inventory, region, dest)

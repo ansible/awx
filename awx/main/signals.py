@@ -41,8 +41,6 @@ def update_inventory_computed_fields(sender, **kwargs):
             sender_name = unicode(sender._meta.verbose_name)
         if kwargs['signal'] == post_save:
             sender_action = 'saved'
-            if instance.active: # No need to update for active instances.
-                return
         elif kwargs['signal'] == post_delete:
             sender_action = 'deleted'
         elif kwargs['signal'] == m2m_changed and kwargs['action'] in ('post_add', 'post_remove', 'post_clear'):

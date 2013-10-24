@@ -155,19 +155,6 @@ angular.module('GroupFormDefinition', [])
                     "Only hosts associated with the list of regions will be included in the update process.</p>",
                 dataContainer: 'body'
                 },
-            source_tags: {
-                label: 'Tags',
-                excludeModal: true,
-                type: 'text',
-                ngShow: "source.value == 'ec2'",
-                addRequired: false,
-                editRequired: false,
-                dataTitle: 'Source Regions',
-                dataPlacement: 'left',
-                awPopOver: "<p>Comma separated list of tags. Tag names must match those defined at the inventory source." + 
-                           " Only hosts associated with the list of tags will be included in the update process.</p>",
-                dataContainer: 'body'
-                },
             source_vars: {
                 label: 'Source Variables',
                 ngShow: "source.value == 'file' || source.value == 'ec2'",
