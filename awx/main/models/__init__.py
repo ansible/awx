@@ -686,6 +686,7 @@ class InventorySource(PrimordialModel):
         blank=True,
         default='',
     )
+    # FIXME: Remove tags field when making other migrations for credential changes!
     source_tags = models.CharField(
         max_length=1024,
         blank=True,

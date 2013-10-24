@@ -5,6 +5,7 @@
 import datetime
 import json
 import os
+import re
 
 # Django
 from django.conf import settings
@@ -1021,6 +1022,9 @@ class InventoryUpdatesTest(BaseTransactionTest):
             source_pks = group.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
             self.assertTrue(group.has_inventory_sources)
+            # Make sure EC2 instance ID groups are excluded.
+            self.assertFalse(re.match(r'^i-[0-9a-f]{8}$', group.name, re.I),
+                             group.name)
 
     def test_update_from_ec2(self):
         source_username = getattr(settings, 'TEST_AWS_ACCESS_KEY_ID', '')
