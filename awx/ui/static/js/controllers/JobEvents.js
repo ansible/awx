@@ -30,7 +30,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     scope.selected = [];
     scope.expand = true;    //on load, automatically expand all nodes
 
-    scope.parentNode = 'parent-event';  // used in ngClass to dynamicall set row level class and control
+    scope.parentNode = 'parent-event';  // used in ngClass to dynamically set row level class and control
     scope.childNode = 'child-event';    // link color and cursor
     
     if (scope.removeSetHostLinks) {

@@ -15,6 +15,7 @@
 @blue:        #1778c3;   /* logo blue */
 @blue-link:   #0088cc;
 @grey:        #A9A9A9;
+@well:        #f5f5f5;   /* well background color */
 @green:       #5bb75b;
 @info:        #d9edf7;   /* alert info background color */
 @info-border: #bce8f1;   /* alert info border color */
@@ -995,11 +996,10 @@ select.field-mini-height {
     ul {
       list-style-type: none;
       padding-left: 16px;
-      padding-top: 5px;
     }
-
-    li { 
-      padding-bottom: 5px;
+    
+    li {
+      padding-top: 3px;
     }
 
     .tree-root {
@@ -1019,11 +1019,18 @@ select.field-mini-height {
       font-weight: bold;
     }
 
-    div {
+    .expand-container,
+    .badge-container,
+    .title-container {
       display: inline-block;
       vertical-align: top;
     }
 
+    .badge-container,
+    .title-container {
+      border-bottom: 1px solid @well;
+    }
+    
     .expand-container {
       width: 14px;
       text-align: center;
@@ -1052,6 +1059,14 @@ select.field-mini-height {
   .host-failure-filter {
     padding: 10px;   
   }
+
+// drag-n-drop tree styles
+.droppable-hover { 
+  background-color: #C0C0C0;
+  color: @black; 
+  border: 1px solid #808080;
+  font-weight: normal;
+}
 
 .disabled {
   color: @grey; 
@@ -1265,7 +1280,11 @@ tr td button i {
 /* Large desktop */
 
 @media (min-width: 1200px) {
-   
+  
+  .container {
+    max-width: 96%;
+  }
+
   .delete-btn {
     /* Used on job and project page to make cancel and delete buttons have an equal width */
     width: 60px;

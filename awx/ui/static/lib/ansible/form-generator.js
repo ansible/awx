@@ -1234,12 +1234,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "<hr class=\"tree-control-divider\">\n";
           */
           html += "<div class=\"row\">\n";
-          html += "<div class=\"col-lg-3\">\n" +
+          html += "<div class=\"col-lg-4\">\n" +
                   "<div class=\"search-tree well\">\n" +
                   "<div id=\"search-tree-container\"></div>\n" +
                   "</div><!-- search-tree well -->\n" + 
                   "</div>\n";
-          html += "<div class=\"col-lg-9 tree-form-container\">\n";
+          html += "<div class=\"col-lg-8 tree-form-container\">\n";
           html += "<div id=\"tree-form\">\n</div>\n";
           html += "</div>\n";
           //html += "</div><!-- well -->\n";
@@ -1272,12 +1272,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           */
 
           html += "<div class=\"row\">\n";
-          html += "<div class=\"col-lg-3\" id=\"search-tree-target\">\n";
+          html += "<div class=\"col-lg-4\" id=\"search-tree-target\">\n";
           html += "<div class=\"search-tree well\">\n";
           html += "<div id=\"search-tree-container\">\n</div><!-- search-tree-container -->\n";
           html += "</div><!-- search-tree well -->\n";
-          html += "</div><!-- col-lg-3 -->\n";
-          html += "<div class=\"col-lg-9\">\n"; 
+          html += "</div><!-- col-lg-4 -->\n";
+          html += "<div class=\"col-lg-8\">\n"; 
 
           html += "<div class=\"hosts-well well\">\n";
 

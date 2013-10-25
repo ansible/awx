@@ -21,6 +21,7 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
             var html = '';
             var toolTip = 'Hosts have failed jobs?';
             var idx = 0;
+            var level = 0;
 
             function refresh(parent) {
                 var group, title;
@@ -119,8 +120,11 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                     if (link.hasClass('activate')) {
                        link.unbind('click', activate);
                        link.bind('click', activate);
+                       //link.parent().parent().draggable({ containment: target_id });
                     }
                 }
+
+                $('#inventory-tree').sortable();
                  
                 // Attempt to stop the title from dropping to the next 
                 // line
@@ -130,88 +134,38 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                        $(this).css('width','80%');
                     } 
                     });
-                
-                // Make the tree drag-n-droppable
-                
-                $('#selector-tree .activate').draggable({
-                    cursor: "pointer",
-                    cursorAt: { top: -16, left: -10 },
-                    revert: 'invalid',
-                    helper: 'clone',
-                    start: function (e, ui) {
-                        var txt = '[ ' + ui.helper.text() + ' ]';
-                        ui.helper.css({ 'font-weight': 'normal', 'color': '#A9A9A9', 'background-color': '#f5f5f5' }).text(txt);
-                        }
-                    })
-                    .droppable({
-                        //hoverClass: 'droppable-hover',
-                        tolerance: 'pointer',
-                        over: function (e, ui) {
-                            var p = $(this).parent().parent();
-                            p.find('div').each(function(idx) {
-                                if (idx > 0 && idx < 3) {
-                                   $(this).css({ 'border-bottom': '1px dotted #808080' });
-                                }
-                                });
-                            var c = p.find('.expand-container').first();
-                            c.empty().html('<i class="icon-double-angle-right"></i>');
-                            },
-                        out: function (e, ui) {
-                            var p = $(this).parent().parent();
-                            p.find('div').each(function(idx) {
-                                if (idx > 0 && idx < 3) {
-                                   $(this).css({ 'border-bottom': '1px solid #f5f5f5' });
-                                }
-                                });
-                            var c = p.find('.expand-container');
-                            var icon;
-                            c.first().empty();
-                            if (c.length > 1) {
-                               // has children, put expander icon back
-                               icon = (p.attr('data-state') == 'opened') ? 'icon-caret-down' : 'icon-caret-right';
-                               c.first().html('<a class="expand"><i class="' + icon + '"></i></a>');
-                               c.first().find('a').first().bind('click', toggle);
-                            }
-                            }
-                        })
 
                 Wait('stop');
                 });
 
-            function buildHTML(tree_data) {
-                var sorted = SortNodes(tree_data);
-                html += (sorted.length > 0) ? "<ul>\n" : "";
-                for(var i=0; i < sorted.length; i++) {
-                   html += "<li id=\"search-node-0" + idx + "\" data-state=\"opened\" data-hosts=\"" + sorted[i].related.hosts + "\" " +
-                       "data-description=\"" + sorted[i].description + "\" " + 
-                       "data-failures=\"" + sorted[i].has_active_failures + "\" " +
-                       "data-groups=\"" + sorted[i].related.groups + "\" " + 
-                       "data-name=\"" + sorted[i].name + "\" " +
-                       "data-group-id=\"" + sorted[i].id + "\" " + 
-                       "><div class=\"expand-container\">"; 
-
-                   if (sorted[i].children.length > 0) {
-                      html += "<a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a>";
-                   }
-                   else { 
-                      html += " ";
-                   }
-                   html += "</div> " +
-                       "<div class=\"badge-container\"><i class=\"field-badge icon-failures-" + sorted[i].has_active_failures + "\" " +
-                       "aw-tool-tip=\"" + toolTip + "\" data-placement=\"top\"></i></div> " +
-                       "<div class=\"title-container\"><a href=\"\" class=\"activate\">" + sorted[i].name + "</a></div>";
-                   idx++;
-                   if (sorted[i].children.length > 0) {
-                      buildHTML(sorted[i].children);
-                   }
-                   else {
-                      //html += "<ul></ul>\n";
-                      html += "</li>\n";
-                   }
+            function buildHTML(data) {
+                //var sorted = SortNodes(tree_data);
+                var node;
+                for (var i=0; i < data.length; i++) {
+                    node = data[i];
+                    html += "<li id=\"search-node-0" + idx + "\" data-state=\"opened\" data-hosts=\"" + node.related.hosts + "\" " +
+                        "data-description=\"" + node.description + "\" " + 
+                        "data-failures=\"" + node.has_active_failures + "\" " +
+                        "data-groups=\"" + node.related.groups + "\" " + 
+                        "data-name=\"" + node.name + "\" " +
+                        "data-group-id=\"" + node.id + "\" " + 
+                        "data-level=\"" + level + "\" " +
+                        "><div class=\"expand-container\"><a href=\"\" class=\"expand\"><i class=\"icon-caret-down\"></i></a></div> " +
+                        "<div class=\"badge-container\"><i class=\"field-badge icon-failures-" + node.has_active_failures + "\" " +
+                        "aw-tool-tip=\"" + toolTip + "\" data-placement=\"top\"></i></div> " +
+                        "<div class=\"title-container\"><a href=\"\" class=\"activate\">" + node.name + "</a></div>" + 
+                        "</li>\n";
+                    idx++;
+                    if (node.children.length > 0) {
+                       level++;
+                       buildHTML(node.children);
+                    }
+                    else {
+                       level=1;
+                    }
                 }
-                html += "</ul>\n";  
             }
-
+            
             // Build the HTML for our tree
             if (scope.buildAllGroupsRemove) {
                scope.buildAllGroupsRemove();
@@ -220,8 +174,9 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                 Rest.setUrl(inventory_tree);
                 Rest.get()
                     .success( function(data, status, headers, config) {
+                        level=1;
                         buildHTML(data);
-                        scope.$emit('searchTreeReady', html + "</li>\n</ul>\n</div>\n");
+                        scope.$emit('searchTreeReady', html + "</ul>\n");
                         })
                     .error( function(data, status, headers, config) {
                         ProcessErrors(scope, data, status, null,
@@ -261,16 +216,17 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
             Rest.get()
                  .success( function(data, status, headers, config) {
                      html += "<div class=\"title\">Group Selector:</div>\n" +
-                       "<div id=\"selector-tree\">\n" +
                        "<ul id=\"inventory-tree\" class=\"tree-root\">\n" +
                        "<li id=\"inventory-root-node\" data-state=\"opened\" data-hosts=\"" + data.related.hosts + "\" " +
                        "data-description=\"" + data.description + "\" " + 
                        "data-failures=\"" + data.has_active_failures + "\" " +
                        "data-groups=\"" + data.related.groups + "\" " + 
                        "data-name=\"" + data.name + "\" " +
+                       "data-level=\"0\" " +
                        ">" +
                        "<i class=\"icon-sitemap\"></i> " +
-                       "<a href=\"\" class=\"activate active\">" + data.name + "</a>";
+                       "<a href=\"\" class=\"activate active\">" + data.name + "</a>" +
+                       "</li>\n";
                      
                      scope.$emit('buildAllGroups', data.name, data.related.tree, data.related.groups);
                      
