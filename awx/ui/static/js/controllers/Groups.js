@@ -37,7 +37,8 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
            scope: scope,
            inventory_id: id,
            emit_on_select: 'NodeSelect',
-           target_id: 'search-tree-container'
+           target_id: 'search-tree-container',
+           moveable: true
            });
        if (!scope.$$phase) {
           scope.$digest();

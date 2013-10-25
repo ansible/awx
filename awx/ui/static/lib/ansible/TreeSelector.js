@@ -17,6 +17,8 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
             var emit_on_select = params.emit_on_select;
             var target_id = params.target_id;
             var refresh_tree = (params.refresh == undefined || params.refresh == false) ? false : true;
+            var moveable = (params.moveable == undefined || params.moveable == false) ? false : true;
+            var group_id = params.group_id;
 
             var html = '';
             var toolTip = 'Hosts have failed jobs?';
@@ -100,6 +102,119 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                 }
                 }
 
+            if (scope.moveNodeRemove) {
+               scope.moveNodeRemove();
+            }
+            scope.moveNodeRemove = scope.$on('MoveNode', function(e, node, parent, target) {
+                var inv_id = scope['inventory_id'];
+                var variables;
+
+                function cleanUp(state) {
+                    if (state !== 'fail') {
+                        // Visually move the element. Elment will be appended to the
+                        // end of target element list
+                        var elm = $('#' + node.attr('id')).detach();
+                        if (target.find('ul').length > 0) {
+                           // parent has children
+                           target.find('ul').first().append(elm);
+                        }
+                        else {
+                           target.append('<ul></ul>');
+                           target.find('ul').first().append(elm);
+                        }
+                        
+                        // Remove any styling that might be left on the target 
+                        // and put the expander icon back the way it should be
+                        target.find('div').each(function(idx) {
+                            if (idx > 0 && idx < 3) {
+                               $(this).css({ 'border-bottom': '2px solid #f5f5f5' });
+                            }
+                            });
+                        
+                        // Make sure the parent and target have the correct expander class/icon.
+                        function setExpander(n) {
+                            var c = n.find('.expand-container');
+                            var icon;
+                            c.first().empty();
+                            if (n.attr('id') == 'inventory-root-node') {
+                               c.first().html('<i class=\"icon-sitemap\"></i>');
+                            }
+                            else if (c.length > 1) {
+                               // not root and has children, put expander icon back
+                               icon = (n.attr('data-state') == 'opened') ? 'icon-caret-down' : 'icon-caret-right';
+                               c.first().html('<a class="expand"><i class="' + icon + '"></i></a>');
+                               c.first().find('a').first().bind('click', toggle);
+                            }
+                            }
+                        setExpander(target);
+                        setExpander(parent);
+                    }
+                    Wait('stop');
+                    }
+
+                // disassociate the group from the original parent
+                if (scope.removeGroupRemove) {
+                   scope.removeGroupRemove(); 
+                }
+                scope.removeGroupRemove = scope.$on('removeGroup', function() {
+                    var url = (parent.attr('data-group-id')) ? GetBasePath('base') + 'groups/' + parent.attr('data-group-id') + '/children/' : 
+                        GetBasePath('inventory') + inv_id + '/groups/';
+                    Rest.setUrl(url);
+                    Rest.post({ id: node.attr('data-group-id'), disassociate: 1 })
+                        .success( function(data, status, headers, config) {
+                            cleanUp('success');
+                            })
+                        .error( function(data, status, headers, config) {
+                            cleanUp('fail');
+                            ProcessErrors(scope, data, status, null,
+                                { hdr: 'Error!', msg: 'Failed to remove ' + node.attr('name') + ' from ' + 
+                                  parent.attr('name') + '. POST returned status: ' + status });
+                            });
+                    });
+
+                if (scope['addToTargetRemove']) {
+                   scope.addToTargetRemove();
+                }
+                scope.addToTargetRemove = scope.$on('addToTarget', function() {
+                   // add the new group to the target parent
+                   var url = (target.attr('data-group-id')) ? GetBasePath('base') + 'groups/' + target.attr('data-group-id') + '/children/' :
+                       GetBasePath('inventory') + inv_id + '/groups/';
+                   var group = { 
+                       id: node.attr('data-group-id'),
+                       name: node.attr('data-name'),
+                       description: node.attr('data-description'),
+                       inventory: inv_id
+                       }
+                   Rest.setUrl(url);
+                   Rest.post(group)
+                       .success( function(data, status, headers, config) {
+                           scope.$emit('removeGroup');
+                           })
+                       .error( function(data, status, headers, config) {
+                           cleanUp('fail');
+                           ProcessErrors(scope, data, status, null,
+                              { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
+                              target.attr('name') + '. POST returned status: ' + status });
+                           });
+                   });
+
+                Wait('start');
+                // Lookup the inventory. We already have what we need except for variables.
+                var url = GetBasePath('base') + 'groups/' + node.attr('data-group-id') + '/';
+                Rest.setUrl(url);
+                Rest.get()
+                    .success( function(data, status, headers, config) {
+                        variables = (data.variables) ? JSON.parse(data.variables) : "";
+                        scope.$emit('addToTarget');
+                        })
+                    .error( function(data, status, headers, config) {
+                        cleanUp('fail');
+                        ProcessErrors(scope, data, status, null,
+                            { hdr: 'Error!', msg: 'Failed to lookup group ' + node.attr('name') + 
+                            '. GET returned status: ' + status });
+                        });
+                });
+
             // The HTML is ready. Insert it into the view.
             if (scope.searchTreeReadyRemove) {
                scope.searchTreeReadyRemove();
@@ -121,6 +236,10 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                        link.bind('click', activate);
                     }
                 }
+
+                if (refresh_tree && group_id !== undefined) {
+                   $('li[data-group-id="' + group_id + '"]').first().click();
+                }
                  
                 // Attempt to stop the title from dropping to the next 
                 // line
@@ -132,48 +251,63 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                     });
                 
                 // Make the tree drag-n-droppable
-                
-                $('#selector-tree .activate').draggable({
-                    cursor: "pointer",
-                    cursorAt: { top: -16, left: -10 },
-                    revert: 'invalid',
-                    helper: 'clone',
-                    start: function (e, ui) {
-                        var txt = '[ ' + ui.helper.text() + ' ]';
-                        ui.helper.css({ 'font-weight': 'normal', 'color': '#A9A9A9', 'background-color': '#f5f5f5' }).text(txt);
-                        }
-                    })
-                    .droppable({
-                        //hoverClass: 'droppable-hover',
-                        tolerance: 'pointer',
-                        over: function (e, ui) {
-                            var p = $(this).parent().parent();
-                            p.find('div').each(function(idx) {
-                                if (idx > 0 && idx < 3) {
-                                   $(this).css({ 'border-bottom': '1px dotted #808080' });
-                                }
-                                });
-                            var c = p.find('.expand-container').first();
-                            c.empty().html('<i class="icon-double-angle-right"></i>');
-                            },
-                        out: function (e, ui) {
-                            var p = $(this).parent().parent();
-                            p.find('div').each(function(idx) {
-                                if (idx > 0 && idx < 3) {
-                                   $(this).css({ 'border-bottom': '1px solid #f5f5f5' });
-                                }
-                                });
-                            var c = p.find('.expand-container');
-                            var icon;
-                            c.first().empty();
-                            if (c.length > 1) {
-                               // has children, put expander icon back
-                               icon = (p.attr('data-state') == 'opened') ? 'icon-caret-down' : 'icon-caret-right';
-                               c.first().html('<a class="expand"><i class="' + icon + '"></i></a>');
-                               c.first().find('a').first().bind('click', toggle);
-                            }
+                if (moveable) {
+                    $('#selector-tree .activate').draggable({
+                        cursor: "pointer",
+                        cursorAt: { top: -16, left: -10 },
+                        revert: 'invalid',
+                        helper: 'clone',
+                        start: function (e, ui) {
+                            var txt = '[ ' + ui.helper.text() + ' ]';
+                            ui.helper.css({ 'font-weight': 'normal', 'color': '#A9A9A9', 'background-color': '#f5f5f5' }).text(txt);
                             }
                         })
+                        .droppable({
+                            //hoverClass: 'droppable-hover',
+                            tolerance: 'pointer',
+                            over: function (e, ui) {
+                                var p = $(this).parent().parent(); 
+                                p.find('div').each(function(idx) {
+                                    if (idx > 0 && idx < 3) {
+                                       $(this).css({ 'border-bottom': '2px solid #A9A9A9' });
+                                    }
+                                });
+                                var c = p.find('.expand-container').first();
+                                c.empty().html('<i class="icon-arrow-right" style="color: #A9A9A9;"></i>');
+                                },
+                            out: function (e, ui) {
+                                var p = $(this).parent().parent();
+                                p.find('div').each(function(idx) {
+                                    if (idx > 0 && idx < 3) {
+                                       $(this).css({ 'border-bottom': '2px solid #f5f5f5' });
+                                    }
+                                    });
+                                var c = p.find('.expand-container');
+                                var icon;
+                                c.first().empty();
+                                if (c.length > 1) {
+                                   // has children, put expander icon back
+                                   icon = (p.attr('data-state') == 'opened') ? 'icon-caret-down' : 'icon-caret-right';
+                                   c.first().html('<a class="expand"><i class="' + icon + '"></i></a>');
+                                   c.first().find('a').first().bind('click', toggle);
+                                }
+                                },
+                            drop: function (e,ui) {
+                                var variables;
+                                var node = ui.draggable.parent().parent();    // node being moved
+                                var parent = node.parent().parent();          // node from
+                                var target = $(this).parent().parent();       // node to
+                                scope.$emit('MoveNode', node, parent, target);
+                                
+                                // Make sure angular picks up changes and jQuery doesn't
+                                // leave us in limbo... 
+                                if (!scope.$$phase) {
+                                   scope.$digest();
+                                }
+                                e.preventDefault(); 
+                                }
+                            });
+                } // if moveable
 
                 Wait('stop');
                 });
@@ -199,7 +333,7 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                    html += "</div> " +
                        "<div class=\"badge-container\"><i class=\"field-badge icon-failures-" + sorted[i].has_active_failures + "\" " +
                        "aw-tool-tip=\"" + toolTip + "\" data-placement=\"top\"></i></div> " +
-                       "<div class=\"title-container\"><a href=\"\" class=\"activate\">" + sorted[i].name + "</a></div>";
+                       "<div class=\"title-container\"><a class=\"activate\">" + sorted[i].name + "</a></div>";
                    idx++;
                    if (sorted[i].children.length > 0) {
                       buildHTML(sorted[i].children);
@@ -268,14 +402,17 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                        "data-failures=\"" + data.has_active_failures + "\" " +
                        "data-groups=\"" + data.related.groups + "\" " + 
                        "data-name=\"" + data.name + "\" " +
-                       ">" +
-                       "<i class=\"icon-sitemap\"></i> " +
-                       "<a href=\"\" class=\"activate active\">" + data.name + "</a>";
+                       ">"+
+                       "<div class=\"expand-container\" id=\"root-expand-container\"><i class=\"icon-sitemap\"></i></div>" +
+                       "<div class=\"badge-container\"><i class=\"field-badge icon-failures-" + data.has_active_failures + "\" " +
+                       "aw-tool-tip=\"" + toolTip + "\" data-placement=\"top\"></i></div>" +
+                       "<div class=\"title-container\"><a class=\"activate\">" + data.name + "</a></div>";
                      
                      scope.$emit('buildAllGroups', data.name, data.related.tree, data.related.groups);
                      
                      if (!refresh_tree) {
-                        // if caller requests refresh, let caller handle next steps / node selection
+                        // if caller requests with refresh true, let caller handle next steps / node selection
+                        // otherwise, we're refreshing to summary page
                         scope.$emit(emit_on_select, 'inventory-root-node', null, 'All Hosts');
                      }
 
@@ -307,7 +444,6 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
             if (inventory_id !== null) {
                 $('#inventory-root-node').attr('data-name', name).attr('data-description', descr).find('.activate').first().text(name);
             }
-
             }
             }])
 

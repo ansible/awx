@@ -459,7 +459,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 inventory_id: scope['inventory_id'],
                 emit_on_select: 'NodeSelect',
                 target_id: 'search-tree-container',
-                refresh: true
+                refresh: true,
+                moveable: true
                 });
             }
 
@@ -514,9 +515,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree', 'ParseTypeChange', 'GroupsEdit',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'BuildTree',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, RefreshTree, ParseTypeChange, GroupsEdit) {
+        GetBasePath, ParseTypeChange, GroupsEdit, BuildTree) {
     return function(params) {
 
         var inventory_id = params.inventory_id;
@@ -578,29 +579,25 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                if (inventory_id) {
                   data['inventory'] = inventory_id;
                }
+               
+               data.variables = json_data; 
 
                Rest.setUrl(defaultUrl);
                Rest.post(data)
                    .success( function(data, status, headers, config) {
                        var id = data.id;
                        scope.showGroupHelp = false;  // get rid of the Hint
-                       if (scope.variables) {
-                          Rest.setUrl(data.related.variable_data);
-                          Rest.put(json_data)
-                              .success( function(data, status, headers, config) {
-                                  $('#form-modal').modal('hide');
-                                  RefreshTree({ scope: scope, group_id: id });
-                              })
-                              .error( function(data, status, headers, config) {
-                                  ProcessErrors(scope, data, status, form,
-                                     { hdr: 'Error!', msg: 'Failed to add group varaibles. PUT returned status: ' + status });
-                              });
-                       }
-                       else {
-                          $('#form-modal').modal('hide');
-                          RefreshTree({ scope: scope, group_id: id });
-                       }
-                       })
+                       $('#form-modal').modal('hide');
+                       BuildTree({
+                           scope: scope,
+                           inventory_id: scope['inventory_id'],
+                           emit_on_select: 'NodeSelect',
+                           target_id: 'search-tree-container',
+                           refresh: true,
+                           moveable: true,
+                           group_id: id
+                           });
+                       }) 
                    .error( function(data, status, headers, config) {
                        scope.formModalActionDisabled = false;
                        ProcessErrors(scope, data, status, form,

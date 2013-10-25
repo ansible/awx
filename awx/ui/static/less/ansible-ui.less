@@ -1012,11 +1012,15 @@ select.field-mini-height {
     }
 
     .activate:hover {
-      background-color: #ddd; 
+      background-color: #ddd;
+      cursor: pointer;
     }
 
     .active {
       font-weight: bold;
+      box-shadow: 3px 3px 3px 0 @grey;
+      border-bottom: 1px solid @grey;
+      border-right: 1px solid @grey;
     }
 
     .expand-container,
@@ -1028,12 +1032,17 @@ select.field-mini-height {
 
     .badge-container,
     .title-container {
-      border-bottom: 1px solid @well;
+      border-bottom: 2px solid @well;
     }
-    
+
     .expand-container {
       width: 14px;
       text-align: center;
+    }
+
+    #root-expand-container {
+      width: 20px;
+      text-align: left;
     }
 
     .expand { 
@@ -1059,14 +1068,6 @@ select.field-mini-height {
   .host-failure-filter {
     padding: 10px;   
   }
-
-// drag-n-drop tree styles
-.droppable-hover { 
-  background-color: #C0C0C0;
-  color: @black; 
-  border: 1px solid #808080;
-  font-weight: normal;
-}
 
 .disabled {
   color: @grey; 
