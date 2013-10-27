@@ -418,7 +418,11 @@ class Command(NoArgsCommand):
         self.logger = logging.getLogger('awx.main.commands.inventory_import')
         self.logger.setLevel(log_levels.get(self.verbosity, 0))
         handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+        class Formatter(logging.Formatter):
+            def format(self, record):
+                record.relativeSeconds = record.relativeCreated / 1000.0
+                return super(Formatter, self).format(record)
+        formatter = Formatter('%(relativeSeconds)9.3f %(levelname)-8s %(message)s')
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
         self.logger.propagate = False
