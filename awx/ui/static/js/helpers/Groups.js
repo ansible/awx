@@ -78,9 +78,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }])
 
     .factory('GroupsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupList', 'GenerateList', 
-        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'RefreshTree', 'SelectionInit',
+        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'SelectionInit',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupList, GenerateList, Prompt, SearchInit, PaginateInit,
-        ProcessErrors, GetBasePath, GroupsAdd, RefreshTree, SelectionInit) {
+        ProcessErrors, GetBasePath, GroupsAdd, SelectionInit) {
     return function(params) {
         
         // build and present the list of groups we can add to an existing group
@@ -180,7 +180,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            scope.removeModalClosed();
         }
         scope.removeModalClosed = scope.$on('modalClosed', function() {
-            RefreshTree({ scope: scope });
+            /* RefreshTree({ scope: scope }); */
             });
         }
         }])
@@ -188,9 +188,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('InventoryStatus', [ '$rootScope', '$routeParams', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
         'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'ShowUpdateStatus', 'HelpDialog',
-        'ShowGroupHelp', 'InventorySummaryHelp', 'BuildTree', 'ClickNode',
+        'InventorySummaryHelp', 'BuildTree', 'ClickNode',
     function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, SearchInit, 
-        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus, HelpDialog, ShowGroupHelp, InventorySummaryHelp, BuildTree, ClickNode) {
+        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus, HelpDialog, InventorySummaryHelp, BuildTree, ClickNode) {
     return function(params) {
         //Build a summary of a given inventory
         
@@ -516,8 +516,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 }
             }
             }
-
-        ShowGroupHelp({ scope: scope });
     } 
     }])
 
@@ -653,7 +651,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         
         GetSourceTypeOptions({ scope: scope, variable: 'source_type_options' });
         scope.update_interval_options = GetUpdateIntervalOptions();
-        scope.source = null;
+        scope.source = form.fields.source['default'];
         scope.parseType = 'yaml';
         scope[form.fields['source_vars'].parseTypeName] = 'yaml';
         scope.sourcePasswordRequired = false;

@@ -14,253 +14,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                     'InventoryFormDefinition', 'ParseHelper', 'InventorySummaryDefinition'
                                     ]) 
 
-    .factory('LoadTreeData', ['Alert', 'Rest', 'Authorization', '$http', 'Wait', 'SortNodes', 'HideElement',
-    function(Alert, Rest, Authorization, $http, Wait, SortNodes, HideElement) {
-    return function(params) {
-
-        var scope = params.scope;
-        var inventory = params.inventory;
-        var group_id = params.group_id; 
-        var group_idx;
-        var groups = inventory.related.root_groups;
-        var hosts = inventory.related.hosts; 
-        var inventory_name = inventory.name; 
-        var inventory_url = inventory.url;
-        var inventory_id = inventory.id;
-        var has_active_failures = inventory.has_active_failures;
-        var inventory_descr = inventory.description;
-        var idx=0;
-        var treeData =
-            [{ 
-                data: {
-                    title: inventory_name
-                    }, 
-                attr: {
-                    type: 'inventory',
-                    id: 'inventory-node',
-                    url: inventory_url,
-                    'inventory_id': inventory_id,
-                    name: inventory_name,
-                    description: inventory_descr,
-                    "data-failures": inventory.has_active_failures
-                    },
-                state: 'open',
-                children:[] 
-                }];
-
-        function addNodes(tree, data) {
-            var sorted = SortNodes(data);
-            for (var i=0; i < sorted.length; i++) {
-                tree.children.push({
-                    data: {
-                        title: sorted[i].name
-                        },
-                    attr: {
-                        id: idx,
-                        group_id: sorted[i].id,
-                        type: 'group',
-                        name: sorted[i].name, 
-                        description: sorted[i].description,
-                        "data-failures": sorted[i].has_active_failures,
-                        inventory: sorted[i].inventory
-                        },
-                    state: 'open',
-                    children:[]
-                    });
-                if (sorted[i].id == group_id) {
-                   group_idx = idx;  
-                }
-                idx++;
-                if (sorted[i].children.length > 0) {
-                   var node = tree.children.length - 1;
-                   addNodes(tree.children[node], sorted[i].children);
-                }
-            }
-            }
-
-        Rest.setUrl(scope.treeData); 
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                var sorted = SortNodes(data);
-                addNodes(treeData[0], sorted);
-                scope.$emit('buildTree', treeData, idx, group_idx);  
-            })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, form,
-                    { hdr: 'Error!', msg: 'Failed to retrieve inventory tree data. GET returned status: ' + status });
-            });
-
-        }
-        }])
-
-
-    .factory('TreeInit', ['Alert', 'Rest', 'Authorization', '$http', 'LoadTreeData', 'GetBasePath', 'ProcessErrors', 'Wait',
-        'LoadRootGroups', 'ShowElement',
-    function(Alert, Rest, Authorization, $http, LoadTreeData, GetBasePath, ProcessErrors, Wait, LoadRootGroups, ShowElement) {
-    return function(params) {
-
-        var scope = params.scope;
-        var inventory = params.inventory;
-        var group_id = params.group_id;
-
-        var groups = inventory.related.root_groups;
-        var hosts = inventory.related.hosts; 
-        var inventory_name = inventory.name; 
-        var inventory_url = inventory.url;
-        var inventory_id = inventory.id;
-        var inventory_descr = inventory.description;
-        var tree_id = '#tree-view';
-        var json_tree_data; 
-
-        // After loading the Inventory top-level data, initialize the tree
-        if (scope.buildTreeRemove) {
-           scope.buildTreeRemove();
-        }
-        scope.buildTreeRemove = scope.$on('buildTree', function(e, treeData, index, group_idx) {
-            var idx = index;
-            var selected = (group_idx !== undefined && group_idx !== null) ? group_idx : 'inventory-node';
-            json_tree_data = treeData;
-            $(tree_id).jstree({
-                "core": { //"initially_open":['inventory-node'],
-                    "html_titles": true
-                    },
-                "plugins": ['themes', 'json_data', 'ui', 'dnd', 'crrm', 'sort'],
-                "themes": {
-                    "theme": "ansible",
-                    "dots": false,
-                    "icons": true
-                    },
-                "ui": { 
-                    "initially_select": [ selected ],
-                    "select_limit": 1
-                    },
-                "json_data": {
-                    data: json_tree_data
-                    },
-                "dnd": { },
-                "crrm": { 
-                    "move": {
-                        "check_move": function(m) {
-                            if (m.np.attr('id') == 'tree-view') {
-                               return false;
-                            }
-                            if (m.op.attr('id') == m.np.attr('id')) {
-                               // old parent and new parent cannot be the same
-                               return false;
-                            }
-                            return true;
-                            }
-                        }
-                    },
-                "crrm" : { }
-                });
-            });
-            
-        $(tree_id).bind("loaded.jstree", function () {   
-            // Force root node styling changes
-            $('#tree-view').prepend("<div class=\"title\">Group Selector:</div>");
-            $('#inventory-node ins').first().remove();
-            //$('#inventory-node a ins').first().css('background-image', 'none').append('<i class="icon-sitemap"></i>').css('margin-right','10px');
-            
-            $('#tree-view ul').first().css('opacity','100'); // all our changes are done. display the tree
-            scope['treeLoading'] = false;
-            Wait('stop');
-            
-            scope.$emit('treeLoaded');
-            });
-
-        $(tree_id).bind('move_node.jstree', function(e, data) {
-            // When user drags-n-drops a node, update the API 
-            Wait('start');
-
-            var node, target, url, parent, inv_id, variables;
-            node = $('#tree-view li[id="' + data.rslt.o[0].id + '"]');  // node being moved
-            parent = $('#tree-view li[id="' + data.args[0].op[0].id + '"]');  //node moving from
-            target = $('#tree-view li[id="' + data.rslt.np[0].id + '"]');  // node moving to
-            inv_id = inventory_id;
-            
-            function cleanUp() {
-                LoadRootGroups({ scope: scope });
-                Wait('stop');
-                }
-
-            // disassociate the group from the original parent
-            if (scope.removeGroupRemove) {
-               scope.removeGroupRemove(); 
-            }
-            scope.removeGroupRemove = scope.$on('removeGroup', function() {
-                var url = (parent.attr('type') == 'group') ? GetBasePath('base') + 'groups/' + parent.attr('group_id') + '/children/' : 
-                    GetBasePath('inventory') + inv_id + '/groups/';
-                Rest.setUrl(url);
-                Rest.post({ id: node.attr('group_id'), disassociate: 1 })
-                    .success( function(data, status, headers, config) {
-                        cleanUp();
-                        })
-                    .error( function(data, status, headers, config) {
-                        cleanUp();
-                        ProcessErrors(scope, data, status, null,
-                            { hdr: 'Error!', msg: 'Failed to remove ' + node.attr('name') + ' from ' + 
-                              parent.attr('name') + '. POST returned status: ' + status });
-                        });
-                });
-
-            if (scope['addToTargetRemove']) {
-               scope.addToTargetRemove();
-            }
-            scope.addToTargetRemove = scope.$on('addToTarget', function() {
-               // add the new group to the target parent
-               var url = (target.attr('type') == 'group') ? GetBasePath('base') + 'groups/' + target.attr('group_id') + '/children/' :
-                   GetBasePath('inventory') + inv_id + '/groups/';
-               var group = { 
-                   id: node.attr('group_id'),
-                   name: node.attr('name'),
-                   description: node.attr('description'),
-                   inventory: node.attr('inventory')
-                   }
-               Rest.setUrl(url);
-               Rest.post(group)
-                   .success( function(data, status, headers, config) {
-                       scope.$emit('removeGroup');
-                       })
-                   .error( function(data, status, headers, config) {
-                       cleanUp();
-                       ProcessErrors(scope, data, status, null,
-                          { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
-                          target.attr('name') + '. POST returned status: ' + status });
-                       });
-               });
-
-            
-            // Lookup the inventory. We already have what we need except for variables.
-            Rest.setUrl(GetBasePath('base') + 'groups/' + node.attr('group_id') + '/');
-            Rest.get()
-                .success( function(data, status, headers, config) {
-                    variables = (data.variables) ? JSON.parse(data.variables) : "";
-                    scope.$emit('addToTarget');
-                    })
-                .error( function(data, status, headers, config) {
-                    cleanUp();
-                    ProcessErrors(scope, data, status, null,
-                        { hdr: 'Error!', msg: 'Failed to lookup group ' + node.attr('name') + 
-                        '. GET returned status: ' + status });
-                    });
-
-            if (!scope.$$phase) {
-               scope.$digest();
-            } 
-            });
-            
-        // When user clicks on a group
-        $(tree_id).bind("select_node.jstree", function(e, data){
-            scope.$emit('NodeSelect', data.inst.get_json()[0]);
-            });
-            
-        Wait('start');
-        LoadTreeData(params);
-        
-        }
-        }])
-
     .factory('LoadRootGroups', ['Rest', 'ProcessErrors', function(Rest, ProcessErrors) {
     return function(params) {
         
@@ -352,48 +105,10 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         }
         }])
 
-
-    .factory('RefreshGroupName', [ function() {
-    return function(node, name, description) {
-        // Call after GroupsEdit controller saves changes
-        $('#tree-view').jstree('rename_node', node, name);
-        node.attr('description', description);
-        scope = angular.element(document.getElementById('htmlTemplate')).scope();
-        scope['selectedNodeName'] = name;
-        }
-        }])
-
-
-    .factory('RefreshTree', ['Alert', 'Rest', 'Authorization', '$http', 'TreeInit', 'LoadInventory', 'HideElement',
-    function(Alert, Rest, Authorization, $http, TreeInit, LoadInventory, HideElement) {
-    return function(params) {
-
-        // Call after an Edit or Add to refresh tree data
-        
-        var scope = params.scope;
-        var group_id = params.group_id;
-        
-        if (scope.inventoryLoadedRemove) {
-           scope.inventoryLoadedRemove();
-        }
-        scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
-            $('#tree-view').jstree('destroy');
-            scope.TreeParams.group_id = group_id;
-            TreeInit(scope.TreeParams);
-            });
-        
-        $('#tree-view ul').first().css('opacity','0');   //Hide the tree until all the changes are made
-        scope.treeLoading = true;
-        LoadInventory({ scope: scope, doPostSteps: true });
-        
-        }
-        }])
-
-   
     .factory('SaveInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
-        'GetBasePath', 'ParseTypeChange', 'LoadInventory', 'RefreshGroupName',
+        'GetBasePath', 'ParseTypeChange', 'LoadInventory',
     function(InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange,
-        LoadInventory, RefreshGroupName) {
+        LoadInventory) {
     return function(params) {
         
         // Save inventory property modifications
@@ -454,8 +169,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         catch(err) {
             Alert("Error", "Error parsing inventory variables. Parser returned: " + err);  
             }
-    }
-    }])
+        }
+        }])
 
     .factory('PostLoadInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 'GetBasePath',
     function(InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath) {
@@ -495,13 +210,14 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         if (!scope.$$phase) {
           scope.$digest();
         } 
-    }
-    }])
+        
+        }
+        }])
 
     .factory('EditInventory', ['InventoryForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
-        'GetBasePath', 'ParseTypeChange', 'LoadInventory', 'RefreshGroupName', 'SaveInventory', 'PostLoadInventory',
+        'GetBasePath', 'ParseTypeChange', 'LoadInventory', 'SaveInventory', 'PostLoadInventory',
     function(InventoryForm, GenerateForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange,
-        LoadInventory, RefreshGroupName, SaveInventory, PostLoadInventory) {
+        LoadInventory, SaveInventory, PostLoadInventory) {
     return function(params) {
 
         var generator = GenerateForm;
@@ -549,55 +265,12 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         }
         scope.removeInventorySaved = scope.$on('inventorySaved', function() {
             $('#form-modal').modal('hide');           
-            // Make sure the inventory name appears correctly in the tree and the navbar
-            RefreshGroupName($('#inventory-node'), scope['inventory_name'], scope['inventory_description']);
-           });
+            });
 
         scope.formModalAction = function() {
             SaveInventory({ scope: scope });
-        }
+        }    
         
-    }
-    }])
-
-    .factory('ShowGroupHelp', ['Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
-    return function(params) {
-        // Check if inventory has groups. If not, turn on hints to let user know groups are required
-        // before hosts can be added
-        var scope = params.scope;
-        var url = GetBasePath('inventory') + scope.inventory_id + '/groups/?page=1';
-        Rest.setUrl(url);
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                if (data.count == 0) {
-                   // no groups exist, show help
-                   scope.$emit('ShowHelp');
-                }
-                })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, form,
-                    { hdr: 'Error!', msg: 'Failed to retrieve inventory group count. ' + url + ' GET status: ' + status });
-                });
-    }
-    }])
-
-    .factory('SortNodes', [ function() {
-    return function(data) {
-        //Sort nodes by name
-        var names = [];
-        var newData = [];
-        for (var i=0; i < data.length; i++) {
-            names.push(data[i].name);
         }
-        names.sort();
-        for (var j=0; j < names.length; j++) {
-            for (i=0; i < data.length; i++) {
-                if (data[i].name == names[j]) {
-                   newData.push(data[i]);
-                }
-            }
-        }
-        return newData;
-    }
-    }]);
+        }]);
 

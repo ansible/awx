@@ -7,11 +7,31 @@
  *
  */
 
-angular.module('TreeSelector', ['Utilities', 'RestServices'])
+angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector'])
+    
+    .factory('SortNodes', [ function() {
+        return function(data) {
+            //Sort nodes by name
+            var names = [];
+            var newData = [];
+            for (var i=0; i < data.length; i++) {
+                names.push(data[i].name);
+            }
+            names.sort();
+            for (var j=0; j < names.length; j++) {
+                for (i=0; i < data.length; i++) {
+                    if (data[i].name == names[j]) {
+                       newData.push(data[i]);
+                    }
+                }
+            }
+            return newData;
+            }
+            }])
+
     .factory('BuildTree', ['Rest', 'GetBasePath', 'ProcessErrors', '$compile', '$rootScope', 'Wait', 'SortNodes',
         function(Rest, GetBasePath, ProcessErrors, $compile, $rootScope, Wait, SortNodes) {
         return function(params) {
-
             var scope = params.scope; 
             var inventory_id = params.inventory_id;
             var emit_on_select = params.emit_on_select;
@@ -359,7 +379,7 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                    }
                 }
                 html += "</ul>\n";  
-            }
+                }
 
             // Build the HTML for our tree
             if (scope.buildAllGroupsRemove) {
@@ -475,6 +495,3 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
             $(selector).first().detach();
             }
             }]);
-
-
-

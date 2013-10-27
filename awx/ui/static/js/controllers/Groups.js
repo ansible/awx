@@ -10,7 +10,7 @@
 function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryGroupsForm,
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt,
                           BuildTree, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
-                          GroupsDelete, RefreshGroupName, EditInventory, InventoryStatus)
+                          GroupsDelete, EditInventory, InventoryStatus)
 {
 
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
@@ -159,6 +159,6 @@ InventoryGroups.$inject = [
     '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryGroupsForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt',
     'BuildTree', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
-    'GroupsDelete', 'RefreshGroupName', 'EditInventory', 'InventoryStatus'
+    'GroupsDelete', 'EditInventory', 'InventoryStatus'
     ]; 
   
