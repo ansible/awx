@@ -973,7 +973,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           }
           
           // Start the well
-          if ( this.has('well') ) {
+          if ( !this.modal && this.has('well') ) {
              html += "<div class=\"well\">\n";
           }
 
@@ -1118,7 +1118,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           }
           html += "</form>\n";
           
-          if ( this.has('well') ) {
+          if ( !this.modal && this.has('well') ) {
              html += "</div>\n";
           }
 
@@ -1190,49 +1190,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                 icon: 'icon-sitemap'
                 }
             };
-    
        
        if (form.type == 'groupsview') {
-
           navigation.inventory.active = false; 
           navigation.hosts.active = false;
           navigation.groups.active = true; 
-          
           html += this.breadCrumbs(options, navigation);
-
-          // build the groups page
-          //html += "<div ng-show=\"showGroupHelp\" class=\"alert alert-dismissable alert-info\">\n";
-          //html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
-          //html += "<p><strong>Hint:</strong> Get started building your inventory by adding a group. After creating a group " +
-          //    "go to the <a href=\"/#/inventories/\{\{ inventory_id \}\}/hosts\"><em>Hosts</em></a> page to " +
-          //    "add hosts to the group.</p>";
-          //html += "</div>\n";
-
-          /*
-          html += "<div class=\"row\">\n";
-          html += "<div class=\"col-lg-12\">\n";
-          html += "<div class=\"tree-view-container well\">\n";
-          html += "<div class=\"row tree-controls\">\n";
-          html += "<div class=\"col-lg-4\">\n";
-          html += "<div class=\"title\" ng-bind=\"selectedNodeName\"></div>\n";
-          html += "</div>\n";
-          html += "<div class=\"col-lg-8 btn-container\">\n";
-          html += "<div class=\"btn-container-inner\">\n";
-          html += "<button type=\"button\" id=\"copy_group_btn\" class=\"btn btn-success btn-sm\" ng-click=\"addGroup()\" ng-hide=\"groupAddHide\" " +
-              "aw-tool-tip=\"Copy existing groups to the selected group\" data-placement=\"bottom\" ng-disabled=\"grpBtnDisable\"><i class=\"icon-check\"></i> Copy</button>\n";
-          html += "<button type=\"button\" id=\"create_group_btn\" class=\"btn btn-success btn-sm\" ng-click=\"createGroup()\" ng-hide=\"groupCreateHide\" " +
-              "aw-tool-tip=\"Create a brand new group and add it to the selected group\" data-placement=\"bottom\" ng-disabled=\"grpBtnDisable\"><i class=\"icon-plus\"></i> Create New</button>\n";
-          html += "<button type=\"button\" id=\"update_group_btn\" class=\"btn btn-success btn-sm\" ng-click=\"updateGroup()\" ng-hide=\"groupUpdateHide\" " +
-              "aw-tool-tip=\"Start the inventory update process to refresh the group.\" " +
-              "data-placement=\"bottom\" ng-disabled=\"grpBtnDisable\"><i class=\"icon-cloud-download\"></i> Update</button>\n";
-          html += "<button type=\"button\" id=\"delete_group_btn\" class=\"btn btn-danger btn-sm\" ng-click=\"deleteGroup()\" ng-hide=\"groupDeleteHide\" " +
-              "aw-tool-tip=\"Permanently delete the selected group. Any hosts in the group will still be available in All Hosts.\" " +
-              "data-placement=\"bottom\" ng-disabled=\"grpBtnDisable\"><i class=\"icon-trash\"></i> Delete</button>\n";
-          html += "</div>\n";
-          html += "</div>\n";
-          html += "</div><!-- tree controls -->\n";
-          html += "<hr class=\"tree-control-divider\">\n";
-          */
           html += "<div class=\"row\">\n";
           html += "<div class=\"col-lg-4\">\n" +
                   "<div class=\"search-tree well\">\n" +
@@ -1242,35 +1205,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "<div class=\"col-lg-8 tree-form-container\">\n";
           html += "<div id=\"tree-form\">\n</div>\n";
           html += "</div>\n";
-          //html += "</div><!-- well -->\n";
-          //html += "</div><!-- col-lg-12 -->\n";
           html += "</div><!-- row -->\n";
-       
        }
        else {
           // build the hosts page
-
           navigation.inventory.active = false; 
           navigation.hosts.active = true;
           navigation.groups.active = false; 
-          
           html += this.breadCrumbs(options, navigation);
-  
-          // Hint text
-         /*
-          html += "<div ng-show=\"showGroupHelp\" class=\"alert alert-dismissable alert-info\">\n";
-          html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
-          html += "<p><strong>Hint:</strong> Get started building your inventory by adding a group on the " + 
-              "<a href=\"/#/inventories/\{\{ inventory_id \}\}/groups\"><em>Inventories->Groups</em></a> page. After creating a group, " +
-              "return here and add hosts to the group.</p>";
-          html += "</div>\n";
-
-          html += "<div ng-show=\"group_id == null && !showGroupHelp && helpCount < 2\" class=\"alert alert-dismissable alert-info\">\n";
-          html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
-          html += "<p><strong>Hint:</strong> To add hosts to the inventory, select a group using the Group Selector.</p>";
-          html += "</div>\n";
-          */
-
           html += "<div class=\"row\">\n";
           html += "<div class=\"col-lg-4\" id=\"search-tree-target\">\n";
           html += "<div class=\"search-tree well\">\n";
@@ -1278,38 +1220,18 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           html += "</div><!-- search-tree well -->\n";
           html += "</div><!-- col-lg-4 -->\n";
           html += "<div class=\"col-lg-8\">\n"; 
-
           html += "<div class=\"hosts-well well\">\n";
-
           html += SearchWidget({ iterator: form.iterator, template: form, mini: true, size: 'col-md-5 col-lg-5'});
-          
           html += "<div class=\"col-md-6 col-lg-6\">\n"
           html += "<div class=\"list-actions\">\n";
+          
           // Add actions(s)
           for (var action in form.actions) {
-              /*html += "<button type=\"button\" class=\"btn ";
-              html += (form.actions[action]['class']) ? form.actions[action]['class'] : "btn-success";
-              html += "\" ";
-              if (form['actions'][action].id) {
-                 html += this.attr(form['actions'][action],'id');
-              }
-              else {
-                 html += "id=\"" + action + "_btn\" ";
-              }
-              html += this.attr(form['actions'][action],'ngClick');
-              html += (form['actions'][action].awToolTip) ? this.attr(form['actions'][action],'awToolTip') : "";
-              html += (form['actions'][action].awToolTip && form['actions'][action].dataPlacement) ? 
-                  this.attr(form['actions'][action], 'dataPlacement') : "data-placement=\"top\" ";
-              html += (form['actions'][action].ngHide) ? this.attr(form['actions'][action],'ngHide') : "";
-              html += "><i class=\"" + form['actions'][action].icon + "\"></i>";
-              html += (form['actions'][action].label) ?  " " + form['actions'][action].label : ""; 
-              html += "</button>\n";*/
               html += this.button(form.actions[action], action);
           }
           html += "</div><!-- list-actions -->\n";
           html += "</div>\n";
           html += "</div><!-- row -->\n";
-          
           html += "<div class=\"title\" ng-bind=\"groupTitle\"></div>\n";
           
           // Start the list

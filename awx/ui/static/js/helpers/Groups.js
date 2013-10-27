@@ -13,13 +13,26 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                                  'PromptDialog', 'InventorySummaryHelpDefinition', 'TreeSelector'
                                  ])
 
-    .factory('GetSourceTypeOptions', [ function() {
-        return function() {
-            return [
-                { label: 'none', value: null },
-                { label: 'ec2', value: 'ec2' },
-                { label: 'rackspace', value: 'rackspace' }
-                ];
+    .factory('GetSourceTypeOptions', [ 'Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
+        return function(params) {
+            // Lookup options for source and build an array of drop-down choices
+            var scope = params.scope;
+            var variable = params.variable;
+            if (scope[variable] == undefined) {
+                scope[variable] = [];
+                Rest.setUrl(GetBasePath('inventory_sources'));
+                Rest.options()
+                    .success( function(data, status, headers, config) { 
+                        var choices = data.actions.GET.source.choices
+                        for (var i=0; i < choices.length; i++) {
+                            scope[variable].push({ label: [ (choices[i][0] == "") ? 'Manual' : choices[i][1] ], value: choices[i][0] });
+                        }
+                        })
+                    .error( function(data, status, headers, config) { 
+                        ProcessErrors(scope, data, status, null,
+                            { hdr: 'Error!', msg: 'Failed to retrieve options for inventory_sources.source. OPTIONS status: ' + status });
+                    });
+            }
         }
         }])
 
@@ -175,9 +188,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('InventoryStatus', [ '$rootScope', '$routeParams', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
         'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'ShowUpdateStatus', 'HelpDialog',
-        'ShowGroupHelp', 'InventorySummaryHelp', 'BuildTree',
+        'ShowGroupHelp', 'InventorySummaryHelp', 'BuildTree', 'ClickNode',
     function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, SearchInit, 
-        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus, HelpDialog, ShowGroupHelp, InventorySummaryHelp, BuildTree) {
+        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus, HelpDialog, ShowGroupHelp, InventorySummaryHelp, BuildTree, ClickNode) {
     return function(params) {
         //Build a summary of a given inventory
         
@@ -361,12 +374,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         // Click on group name
         scope.GroupsEdit = function(group_id) {
             // On the tree, select the first occurrance of the requested group
-            var node = $('#tree-view').find("li[group_id='" + group_id + "']").first();
-            var selected = $('#tree-view').jstree('get_selected');
-            selected.each(function(idx) {
-                $('#tree-view').jstree('deselect_node', $(this));
-                });
-            $('#tree-view').jstree('select_node', node);
+            ClickNode({ selector: '#inventory-tree li[data-group-id="' + group_id + '"]' });
             }
 
         if (scope.removeCancelUpdate) {
@@ -515,9 +523,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'BuildTree',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'BuildTree', 'ClickNode',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, ParseTypeChange, GroupsEdit, BuildTree) {
+        GetBasePath, ParseTypeChange, GroupsEdit, BuildTree, ClickNode) {
     return function(params) {
 
         var inventory_id = params.inventory_id;
@@ -529,20 +537,22 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var form = GroupForm;
         var generator = GenerateForm;
         var scope = generator.inject(form, {mode: 'add', modal: true, related: false});
+        var groupCreated = false;
         
         scope.formModalActionLabel = 'Save';
         scope.formModalHeader = 'Create New Group';
         scope.formModalCancelShow = true;
         scope.parseType = 'yaml';
-        scope.source = { label: 'Manual', value: null };
+        scope.source = null;
         ParseTypeChange(scope);
 
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
-        $('#form-modal').off('hide.bs.modal').on('hide.bs.modal', function() {
-            //GroupsEdit({ "inventory_id": scope['inventory_id'], group_id: scope['group_id'] });
-            scope.$emit('NodeSelect', scope['nodeSelectValue']);
+        $('#form-modal').on('hidden.bs.modal', function () {
+            if (!groupCreated) {
+               ClickNode({ selector: '#' + scope['selectedNode'].attr('id') });
+            } 
             });
-
+        
         generator.reset();
         var master={};
 
@@ -551,9 +561,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
 
         // Save
-        scope.formModalAction  = function() {
+        scope.formModalAction = function() {
            try { 
-               
                scope.formModalActionDisabled = true;
 
                // Make sure we have valid variable data
@@ -579,14 +588,17 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                if (inventory_id) {
                   data['inventory'] = inventory_id;
                }
-               
-               data.variables = json_data; 
+
+               if (json_data) {
+                  data['variables'] = JSON.stringify(json_data, undefined, '\t');
+               }
 
                Rest.setUrl(defaultUrl);
                Rest.post(data)
                    .success( function(data, status, headers, config) {
-                       var id = data.id;
-                       scope.showGroupHelp = false;  // get rid of the Hint
+                       groupCreated = true;
+                       scope.formModalActionDisabled = false;
+                       scope.showGroupHelp = false;  //get rid of the Hint
                        $('#form-modal').modal('hide');
                        BuildTree({
                            scope: scope,
@@ -595,7 +607,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                            target_id: 'search-tree-container',
                            refresh: true,
                            moveable: true,
-                           group_id: id
+                           group_id: data.id
                            });
                        }) 
                    .error( function(data, status, headers, config) {
@@ -638,9 +650,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         generator.reset();
         var master = {};
         var relatedSets = {};
-
-        scope.source_type_options = GetSourceTypeOptions();
+        
+        GetSourceTypeOptions({ scope: scope, variable: 'source_type_options' });
         scope.update_interval_options = GetUpdateIntervalOptions();
+        scope.source = null;
         scope.parseType = 'yaml';
         scope[form.fields['source_vars'].parseTypeName] = 'yaml';
         scope.sourcePasswordRequired = false;
@@ -652,9 +665,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         
         ParseTypeChange(scope);
         ParseTypeChange(scope, 'source_vars', form.fields['source_vars'].parseTypeName);
-
-        //$('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
-        
         
         // After the group record is loaded, retrieve related data
         if (scope.groupLoadedRemove) {
@@ -704,16 +714,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                            }
                            if (fld == 'source') {
                               var found = false;
-                              if (data['source'] == '') { 
-                                 data['source'] = null; 
-                              }
                               for (var i=0; i < scope.source_type_options.length; i++) {
                                   if (scope.source_type_options[i].value == data['source']) {
                                      scope['source'] = scope.source_type_options[i];
                                      found = true;
                                   }  
                               }
-                              if (!found || scope['source'].value == null) {
+                              if (!found || scope['source'].value == "") {
                                  scope['groupUpdateHide'] = true;
                               }
                               else {
@@ -749,10 +756,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                               master[fld] = scope[fld];
                            }
                        }
-                       scope['group_update_url'] = data.related['update'];           
+                       scope['group_update_url'] = data.related['update'];    
+                       scope.sourceChange();
                        })
                    .error( function(data, status, headers, config) {
-                       scope.source = null;
+                       scope.source = "";
                        ProcessErrors(scope, data, status, form,
                            { hdr: 'Error!', msg: 'Failed to retrieve inventory source. GET status: ' + status });
                        });
@@ -1027,20 +1035,21 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('GroupsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'RefreshTree', 'Wait',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'BuildTree', 'Wait', 'ClickNode',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, RefreshTree, Wait) {
+        GetBasePath, BuildTree, Wait, ClickNode) {
     return function(params) {
         // Delete the selected group node. Disassociates it from its parent.
         var scope = params.scope;
         var group_id = params.group_id; 
         var inventory_id = params.inventory_id;
-        var obj = $('#tree-view li[group_id="' + group_id + '"]');
-        var parent = (obj.parent().last().prop('tagName') == 'LI') ? obj.parent().last() : obj.parent().parent().last();
+        var obj = scope['selectedNode'];
+        var parent = obj.parent().parent();
+        //var parent = (obj.parent().last().prop('tagName') == 'LI') ? obj.parent().last() : obj.parent().parent().last();
         var url; 
         
-        if (parent.attr('type') == 'group') {
-           url = GetBasePath('base') + 'groups/' + parent.attr('group_id') + '/children/';
+        if (parent.attr('data-group-id')) {
+           url = GetBasePath('base') + 'groups/' + parent.attr('data-group-id') + '/children/';
         }
         else {
            url = GetBasePath('inventory') + inventory_id + '/groups/';
@@ -1051,20 +1060,28 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             Rest.setUrl(url);
             Rest.post({ id: group_id, disassociate: 1 })
                .success( function(data, status, headers, config) {
-                   scope.selectedNode = scope.selectedNode.parent().parent();
-                   RefreshTree({ scope: scope });
+                   //DeleteNode({ selector: '#' + obj.attr('id') });
+                   BuildTree({
+                       scope: scope,
+                       inventory_id: scope['inventory_id'],
+                       emit_on_select: 'NodeSelect',
+                       target_id: 'search-tree-container',
+                       refresh: true,
+                       id: parent.attr('id'),
+                       moveable: true
+                       });
+                   Wait('stop');
                    })
                .error( function(data, status, headers, config) {
-                   //$('#prompt-modal').modal('hide');
-                   RefreshTree({ scope: scope });
+                   Wait('stop');
                    ProcessErrors(scope, data, status, null,
                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                    });      
             };
         //Force binds to work. Not working usual way.
         $('#prompt-header').text('Delete Group');
-        $('#prompt-body').html('<p>Are you sure you want to remove group <em>' + $(obj).attr('name') + '</em> from group <em>' +
-            parent.attr('name') + '</em>?</p>');
+        $('#prompt-body').html('<p>Are you sure you want to remove group <em>' + $(obj).attr('data-name') + '</em> from group <em>' +
+            parent.attr('data-name') + '</em>?</p>');
         $('#prompt-action-btn').addClass('btn-danger');
         scope.promptAction = action_to_take;  // for some reason this binds?
         $('#prompt-modal').modal({

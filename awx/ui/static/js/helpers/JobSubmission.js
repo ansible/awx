@@ -385,8 +385,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
 
     // Sumbit Inventory Update request
     .factory('InventoryUpdate',['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert', 
-        'GroupForm', 'InventorySummary',
-    function(PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, GroupForm, InventorySummary) { 
+        'GroupForm', 'BuildTree',
+    function(PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, GroupForm, BuildTree) { 
     return function(params) {
         
         var scope = params.scope; 
@@ -404,13 +404,21 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                // Refresh the project list after update request submitted
                Alert('Update Started', 'The request to start the inventory update process was submitted. Monitor progress from the inventory summary screen. ' +
                    'The screen will refresh every 10 seconds, or refresh manually by clicking the <em>Refresh</em> button.', 'alert-info');
-               var node = $('#inventory-node')
-               var selected = $('#tree-view').jstree('get_selected');
-               scope['inventorySummaryGroup'] = null; 
-               selected.each(function(idx) {
-                   $('#tree-view').jstree('deselect_node', $(this));
+               //var node = $('#inventory-node')
+               //var selected = $('#tree-view').jstree('get_selected');
+               //scope['inventorySummaryGroup'] = null; 
+               //selected.each(function(idx) {
+               //    $('#tree-view').jstree('deselect_node', $(this));
+               //    });
+               //$('#tree-view').jstree('select_node', node);
+               BuildTree({
+                   scope: scope,
+                   inventory_id: scope['inventory_id'],
+                   emit_on_select: 'NodeSelect',
+                   target_id: 'search-tree-container',
+                   refresh: false,
+                   moveable: true
                    });
-               $('#tree-view').jstree('select_node', node);
             }
             });
         

@@ -19,6 +19,7 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
             var refresh_tree = (params.refresh == undefined || params.refresh == false) ? false : true;
             var moveable = (params.moveable == undefined || params.moveable == false) ? false : true;
             var group_id = params.group_id;
+            var id = params.id;
 
             var html = '';
             var toolTip = 'Hosts have failed jobs?';
@@ -110,6 +111,7 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                 var variables;
 
                 function cleanUp(state) {
+                    /*
                     if (state !== 'fail') {
                         // Visually move the element. Elment will be appended to the
                         // end of target element list
@@ -150,6 +152,11 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                         setExpander(parent);
                     }
                     Wait('stop');
+                    */
+                    // Reload the tree
+                    html = '';
+                    idx = 0;
+                    loadTreeData();
                     }
 
                 // disassociate the group from the original parent
@@ -238,7 +245,15 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                 }
 
                 if (refresh_tree && group_id !== undefined) {
-                   $('li[data-group-id="' + group_id + '"]').first().click();
+                   // pick a specific node on the tree
+                   $('li[data-group-id="' + group_id + '"] .activate').first().click();
+                }
+                else if (refresh_tree && id !== undefined) {
+                   $('#' + id + ' .activate').first().click();
+                }
+                else if (!refresh_tree) {
+                   // default to the root node
+                   $('#inventory-root-node .activate').first().click();
                 }
                  
                 // Attempt to stop the title from dropping to the next 
@@ -259,7 +274,7 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                         helper: 'clone',
                         start: function (e, ui) {
                             var txt = '[ ' + ui.helper.text() + ' ]';
-                            ui.helper.css({ 'font-weight': 'normal', 'color': '#A9A9A9', 'background-color': '#f5f5f5' }).text(txt);
+                            ui.helper.css({ 'font-weight': 'normal', 'color': '#171717', 'background-color': '#f5f5f5' }).text(txt);
                             }
                         })
                         .droppable({
@@ -269,11 +284,11 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                                 var p = $(this).parent().parent(); 
                                 p.find('div').each(function(idx) {
                                     if (idx > 0 && idx < 3) {
-                                       $(this).css({ 'border-bottom': '2px solid #A9A9A9' });
+                                       $(this).css({ 'border-bottom': '2px solid #171717' });
                                     }
                                 });
                                 var c = p.find('.expand-container').first();
-                                c.empty().html('<i class="icon-arrow-right" style="color: #A9A9A9;"></i>');
+                                c.empty().html('<i class="icon-circle-arrow-right" style="color: #171717;"></i>');
                                 },
                             out: function (e, ui) {
                                 var p = $(this).parent().parent();
@@ -388,39 +403,39 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
                     });
                 });
 
-            Wait('start');
+           
+            function loadTreeData() {
+                // Load the inventory root node
+                Wait('start');
+                Rest.setUrl (GetBasePath('inventory') + inventory_id + '/');
+                Rest.get()
+                    .success( function(data, status, headers, config) {
+                        html += "<div class=\"title\">Group Selector:</div>\n" +
+                            "<div id=\"selector-tree\">\n" +
+                            "<ul id=\"inventory-tree\" class=\"tree-root\">\n" +
+                            "<li id=\"inventory-root-node\" data-state=\"opened\" data-hosts=\"" + data.related.hosts + "\" " +
+                            "data-description=\"" + data.description + "\" " + 
+                            "data-failures=\"" + data.has_active_failures + "\" " +
+                            "data-groups=\"" + data.related.groups + "\" " + 
+                            "data-name=\"" + data.name + "\" " +
+                            "data-inventory=\"" + data.id + "\"" +
+                            ">" +
+                            "<div class=\"expand-container\" id=\"root-expand-container\"><i class=\"icon-sitemap\"></i></div>" +
+                            "<div class=\"badge-container\"><i class=\"field-badge icon-failures-" + data.has_active_failures + "\" " +
+                            "aw-tool-tip=\"" + toolTip + "\" data-placement=\"top\"></i></div>" +
+                            "<div class=\"title-container\" id=\"root-title-container\"><a class=\"activate\">" + data.name + "</a></div>";
+                         
+                        scope.$emit('buildAllGroups', data.name, data.related.tree, data.related.groups);
+                         
+                        })
+                    .error( function(data, status, headers, config) {
+                        ProcessErrors(scope, data, status, null,
+                            { hdr: 'Error!', msg: 'Failed to get inventory: ' + inventory_id + '. GET returned: ' + status });
+                        });
+                }
 
-            // Load the inventory root node
-            Rest.setUrl (GetBasePath('inventory') + inventory_id + '/');
-            Rest.get()
-                 .success( function(data, status, headers, config) {
-                     html += "<div class=\"title\">Group Selector:</div>\n" +
-                       "<div id=\"selector-tree\">\n" +
-                       "<ul id=\"inventory-tree\" class=\"tree-root\">\n" +
-                       "<li id=\"inventory-root-node\" data-state=\"opened\" data-hosts=\"" + data.related.hosts + "\" " +
-                       "data-description=\"" + data.description + "\" " + 
-                       "data-failures=\"" + data.has_active_failures + "\" " +
-                       "data-groups=\"" + data.related.groups + "\" " + 
-                       "data-name=\"" + data.name + "\" " +
-                       ">"+
-                       "<div class=\"expand-container\" id=\"root-expand-container\"><i class=\"icon-sitemap\"></i></div>" +
-                       "<div class=\"badge-container\"><i class=\"field-badge icon-failures-" + data.has_active_failures + "\" " +
-                       "aw-tool-tip=\"" + toolTip + "\" data-placement=\"top\"></i></div>" +
-                       "<div class=\"title-container\"><a class=\"activate\">" + data.name + "</a></div>";
-                     
-                     scope.$emit('buildAllGroups', data.name, data.related.tree, data.related.groups);
-                     
-                     if (!refresh_tree) {
-                        // if caller requests with refresh true, let caller handle next steps / node selection
-                        // otherwise, we're refreshing to summary page
-                        scope.$emit(emit_on_select, 'inventory-root-node', null, 'All Hosts');
-                     }
+            loadTreeData();
 
-                     })
-                 .error( function(data, status, headers, config) {
-                     ProcessErrors(scope, data, status, null,
-                         { hdr: 'Error!', msg: 'Failed to get inventory: ' + inventory_id + '. GET returned: ' + status });
-                     });
             }
             }])
 
@@ -452,8 +467,14 @@ angular.module('TreeSelector', ['Utilities', 'RestServices'])
             var selector = params.selector;   //jquery selector string to find the correct <li>
             $(selector + ' .activate').first().click();
             }
-            }]);
+            }])
 
+    .factory('DeleteNode', [ function() {
+        return function(params) {
+            var selector = params.selector;   //jquery selector string to find the correct <li>
+            $(selector).first().detach();
+            }
+            }]);
 
 
 

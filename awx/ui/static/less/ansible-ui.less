@@ -997,18 +997,13 @@ select.field-mini-height {
       list-style-type: none;
       padding-left: 16px;
     }
-    
-    li {
-      padding-top: 3px;
-    }
-
+  
     .tree-root {
       padding-left: 0;
     }
 
     .activate {
-      padding-left: 3px;
-      padding-right: 3px;
+      padding: 3px;
     }
 
     .activate:hover {
@@ -1027,17 +1022,19 @@ select.field-mini-height {
     .badge-container,
     .title-container {
       display: inline-block;
-      vertical-align: top;
-    }
-
-    .badge-container,
-    .title-container {
+      vertical-align: middle;
       border-bottom: 2px solid @well;
     }
 
     .expand-container {
       width: 14px;
       text-align: center;
+    }
+
+    .badge-container {
+      vertical-align: none;
+      margin-bottom: 3px;
+      padding-bottom: 2px;
     }
 
     #root-expand-container {
@@ -1053,6 +1050,10 @@ select.field-mini-height {
       word-break: break-all;
     }
 
+    #root-title-container {
+      margin-left: 5px;
+    }
+    
     .expand-container:hover {
       background-color: #ddd;
     }
@@ -1060,7 +1061,7 @@ select.field-mini-height {
     .field-badge {
       font-size: 10px;
       line-height: normal;
-      vertical-align: baseline;
+      /*vertical-align: baseline;*/
     }
 
   }
