@@ -125,20 +125,6 @@ class BaseTestMixin(object):
             ))
         return results
 
-    def check_pagination_and_size(self, data, desired_count, previous=None, next=None):
-        self.assertTrue('results' in data)
-        self.assertEqual(data['count'], desired_count)
-        self.assertEqual(data['previous'], previous)
-        self.assertEqual(data['next'], next)
-
-    def check_list_ids(self, data, queryset, check_order=False):
-        data_ids = [x['id'] for x in data['results']]
-        qs_ids = queryset.values_list('pk', flat=True)
-        if check_order:
-            self.assertEqual(tuple(data_ids), tuple(qs_ids))
-        else:
-            self.assertEqual(set(data_ids), set(qs_ids))
-
     def setup_users(self, just_super_user=False):
         # Create a user.
         self.super_username  = 'admin'
@@ -296,12 +282,34 @@ class BaseTestMixin(object):
                     else:
                         f(url, expect=401)
 
+    def check_pagination_and_size(self, data, desired_count, previous=False,
+                                  next=False):
+        self.assertTrue('results' in data)
+        self.assertEqual(data['count'], desired_count)
+        if previous:
+            self.assertTrue(data['previous'])
+        else:
+            self.assertFalse(data['previous'])
+        if next:
+            self.assertTrue(data['next'])
+        else:
+            self.assertFalse(data['next'])
+
+    def check_list_ids(self, data, queryset, check_order=False):
+        data_ids = [x['id'] for x in data['results']]
+        qs_ids = queryset.values_list('pk', flat=True)
+        if check_order:
+            self.assertEqual(tuple(data_ids), tuple(qs_ids))
+        else:
+            self.assertEqual(set(data_ids), set(qs_ids))
+
     def check_get_list(self, url, user, qs, fields=None, expect=200,
-                       check_order=False):
+                       check_order=False, offset=None, limit=None):
         '''
         Check that the given list view URL returns results for the given user
         that match the given queryset.
         '''
+        offset = offset or 0
         with self.current_user(user):
             if expect == 400:
                 self.options(url, expect=200)
@@ -311,7 +319,14 @@ class BaseTestMixin(object):
             response = self.get(url, expect=expect)
         if expect != 200:
             return
-        self.check_pagination_and_size(response, qs.count())
+        total = qs.count()
+        if limit is not None:
+            if limit > 0:
+                qs = qs[offset:offset+limit]
+            else:
+                qs = qs.none()
+        self.check_pagination_and_size(response, total, offset > 0,
+                                       limit and ((offset + limit) < total))
         self.check_list_ids(response, qs, check_order)
         if fields:
             for obj in response['results']:

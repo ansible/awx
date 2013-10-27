@@ -150,6 +150,7 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
         'awx.main.filters.ActiveOnlyBackend',
         'awx.main.filters.FieldLookupBackend',
+        'rest_framework.filters.SearchFilter',
         'awx.main.filters.OrderByBackend',
     ),
     'DEFAULT_PARSER_CLASSES': (

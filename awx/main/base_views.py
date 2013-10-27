@@ -168,6 +168,8 @@ class GenericAPIView(generics.GenericAPIView, APIView):
                 actions['GET'] = serializer.metadata()
         if actions:
             ret['actions'] = actions
+        if getattr(self, 'search_fields', None):
+            ret['search_fields'] = self.search_fields
         return ret
 
 class ListAPIView(generics.ListAPIView, GenericAPIView):
@@ -187,6 +189,15 @@ class ListAPIView(generics.ListAPIView, GenericAPIView):
             'order_field': order_field,
         })
         return d
+
+    @property
+    def search_fields(self):
+        fields = []
+        for field in self.model._meta.fields:
+            if field.name in ('username', 'first_name', 'last_name', 'email',
+                              'name', 'description', 'email'):
+                fields.append(field.name)
+        return fields
 
 class ListCreateAPIView(ListAPIView, generics.ListCreateAPIView):
     # Base class for a list view that allows creating new objects.
