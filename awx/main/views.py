@@ -515,7 +515,7 @@ class GroupChildrenList(SubListCreateAPIView):
     parent_model = Group
     relationship = 'children'
 
-    def unattach(self, request, *args, **kwargs):
+    def _unattach(self, request, *args, **kwargs): # FIXME: Disabled for now for UI support.
         '''
         Special case for disassociating a child group from the parent. If the
         child group has no more parents, then automatically mark it inactive.

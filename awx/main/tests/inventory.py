@@ -673,7 +673,7 @@ class InventoryTest(BaseTest):
             data = {'id': removed_group.pk, 'disassociate': 1}
             self.post(parent_children_url, data, expect=204, auth=self.get_super_credentials())
         removed_group = Group.objects.get(pk=result['id'])
-        self.assertFalse(removed_group.active)
+        #self.assertFalse(removed_group.active) # FIXME: Disabled for now because automatically deleting group with no parents is also disabled.
 
         # Removing a group from a hierarchy should migrate its children to the
         # parent.  The group itself will be deleted (marked inactive), and all
@@ -686,9 +686,9 @@ class InventoryTest(BaseTest):
         with self.current_user(self.super_django_user):
             response = self.post(url, data, expect=204)
         gx3 = Group.objects.get(pk=gx3.pk)
-        self.assertFalse(gx3.active)
+        #self.assertFalse(gx3.active) # FIXME: Disabled for now....
         self.assertFalse(gx3 in gx2.children.all())
-        self.assertTrue(gx4 in gx2.children.all())
+        #self.assertTrue(gx4 in gx2.children.all())
 
         # Try with invalid hostnames and invalid IPs.
         hosts         = reverse('main:host_list')
