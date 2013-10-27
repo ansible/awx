@@ -14,7 +14,7 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
 {
 
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
-                                //scope.
+                                 //scope.
 
     var generator = GenerateForm;
     var form = InventoryGroupsForm;
