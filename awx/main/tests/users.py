@@ -9,6 +9,7 @@ import urllib
 # Django
 from django.conf import settings
 from django.contrib.auth.models import User, Group
+from django.db.models import Q
 import django.test
 from django.test.client import Client
 from django.core.urlresolvers import reverse
@@ -423,9 +424,33 @@ class UsersTest(BaseTest):
         url = '%s?username__regex=%s' % (base_url, urllib.quote_plus('['))
         self.check_get_list(url, self.super_django_user, base_qs, expect=400)
 
+        # Filter by multiple usernames (AND).
+        url = '%s?username=normal&username=nobody' % base_url
+        qs = base_qs.filter(username='normal', username__exact='nobody')
+        self.assertFalse(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Filter by multiple usernames (OR).
+        url = '%s?or__username=normal&or__username=nobody' % base_url
+        qs = base_qs.filter(Q(username='normal') | Q(username='nobody'))
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
         # Exclude by username.
         url = '%s?not__username=normal' % base_url
         qs = base_qs.exclude(username='normal')
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Exclude by multiple usernames.
+        url = '%s?not__username=normal&not__username=nobody' % base_url
+        qs = base_qs.filter(~Q(username='normal') & ~Q(username='nobody'))
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Exclude by multiple usernames with OR.
+        url = '%s?or__not__username=normal&or__not__username=nobody' % base_url
+        qs = base_qs.filter(~Q(username='normal') | ~Q(username='nobody'))
         self.assertTrue(qs.count())
         self.check_get_list(url, self.super_django_user, qs)
 
@@ -624,6 +649,52 @@ class UsersTest(BaseTest):
         self.check_get_list(url, self.super_django_user, qs)
         url = u'%s?user\u2605name=normal' % base_url
         self.check_get_list(url, self.super_django_user, base_qs, expect=400)
+
+    def test_user_list_pagination(self):
+        base_url = reverse('main:user_list')
+        base_qs = User.objects.distinct()
+
+        # Check list view with page size of 1.
+        url = '%s?order_by=username&page_size=1' % base_url
+        qs = base_qs.order_by('username')
+        self.check_get_list(url, self.super_django_user, qs, check_order=True,
+                            limit=1)
+
+        # Check list view with page size of 1, remaining pages.
+        qs = base_qs.order_by('username')
+        for n in xrange(1, base_qs.count()):
+            url = '%s?order_by=username&page_size=1&page=%d' % (base_url, n+1)
+            self.check_get_list(url, self.super_django_user, qs,
+                                check_order=True, offset=n, limit=1)
+
+        # Check list view with page size of 2.
+        qs = base_qs.order_by('username')
+        for n in xrange(0, base_qs.count(), 2):
+            url = '%s?order_by=username&page_size=2&page=%d' % (base_url, (n/2)+1)
+            self.check_get_list(url, self.super_django_user, qs,
+                                check_order=True, offset=n, limit=2)
+
+        # Check list view with page size of 0 (to allow getting count of items
+        # matching a given filter). # FIXME: Make this work at some point!
+        #url = '%s?order_by=username&page_size=0' % base_url
+        #qs = base_qs.order_by('username')
+        #self.check_get_list(url, self.super_django_user, qs, check_order=True,
+        #                    limit=0)
+
+    def test_user_list_searching(self):
+        base_url = reverse('main:user_list')
+        base_qs = User.objects.distinct()
+
+        # Check search query parameter.
+        url = '%s?search=no' % base_url
+        qs = base_qs.filter(username__icontains='no')
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Check search query parameter.
+        url = '%s?search=example' % base_url
+        qs = base_qs.filter(email__icontains='example')
+        self.check_get_list(url, self.super_django_user, qs)
+
 
 class LdapTest(BaseTest):
 

@@ -33,7 +33,8 @@ class FieldLookupBackend(BaseFilterBackend):
     Filter using field lookups provided via query string parameters.
     '''
 
-    RESERVED_NAMES = ('page', 'page_size', 'format', 'order', 'order_by')
+    RESERVED_NAMES = ('page', 'page_size', 'format', 'order', 'order_by',
+                      'search')
 
     SUPPORTED_LOOKUPS = ('exact', 'iexact', 'contains', 'icontains',
                          'startswith', 'istartswith', 'endswith', 'iendswith',
@@ -109,33 +110,57 @@ class FieldLookupBackend(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         try:
-            # Apply filters and excludes specified via QUERY_PARAMS.
-            filters = {}
-            excludes = {}
-            for key, value in request.QUERY_PARAMS.items():
+            # Apply filters specified via QUERY_PARAMS. Each entry in the lists
+            # below is (negate, field, value).
+            and_filters = []
+            or_filters = []
+            for key, values in request.QUERY_PARAMS.lists():
                 if key in self.RESERVED_NAMES:
                     continue
+
                 # Custom __int filter suffix (internal use only).
+                q_int = False
                 if key.endswith('__int'):
                     key = key[:-5]
-                    value = int(value)
+                    q_int = True
+                # Custom or__ filter prefix (or__ can precede not__).
+                q_or = False
+                if key.startswith('or__'):
+                    key = key[4:]
+                    q_or = True
                 # Custom not__ filter prefix.
                 q_not = False
                 if key.startswith('not__'):
                     key = key[5:]
                     q_not = True
-            
-                # Convert value to python and add to the appropriate dict.
-                value = self.value_to_python(queryset.model, key, value)
-                if q_not:
-                    excludes[key] = value
-                else:
-                    filters[key] = value
 
-            if filters:
-                queryset = queryset.filter(**filters)
-            if excludes:
-                queryset = queryset.exclude(**excludes)
+                # Convert value(s) to python and add to the appropriate list.
+                for value in values:
+                    if q_int:
+                        value = int(value)
+                    value = self.value_to_python(queryset.model, key, value)
+                    if q_or:
+                        or_filters.append((q_not, key, value))
+                    else:
+                        and_filters.append((q_not, key, value))
+
+            # Now build Q objects for database query filter.
+            if and_filters or or_filters:
+                args = []
+                for n, k, v in and_filters:
+                    if n:
+                        args.append(~Q(**{k:v}))
+                    else:
+                        args.append(Q(**{k:v}))
+                if or_filters:
+                    q = Q()
+                    for n,k,v in or_filters:
+                        if n:
+                            q |= ~Q(**{k:v})
+                        else:
+                            q |= Q(**{k:v})
+                    args.append(q)
+                queryset = queryset.filter(*args)
             return queryset
         except (FieldError, FieldDoesNotExist, ValueError), e:
             raise ParseError(e.args[0])

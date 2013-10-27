@@ -47,6 +47,15 @@ a particular page of results.
 The `previous` and `next` links returned with the results will set these query
 string parameters automatically.
 
+## Searching
+
+Use the `search` query string parameter to perform a case-insensitive search
+within all designated text fields of a model.
+
+    ?search=findme
+
+_New in AWX 1.4_
+
 ## Filtering
 
 Any additional query string parameters may be used to filter the list of
@@ -65,6 +74,14 @@ To exclude results matching certain criteria, prefix the field parameter with
 `not__`:
 
     ?not__field=value
+
+(_New in AWX 1.4_) By default, all query string filters are AND'ed together, so
+only the results matching *all* filters will be returned.  To combine results
+matching *any* one of multiple criteria, prefix each query string parameter
+with `or__`:
+
+    ?or__field=value&or__field=othervalue
+    ?or__not__field=value&or__field=othervalue
 
 Field lookups may also be used for more advanced queries, by appending the
 lookup to the field name:
