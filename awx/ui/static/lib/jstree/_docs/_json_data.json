@@ -1,4 +1,0 @@
-[
-	{ "data" : "A node", "children" : [ { "data" : "Only child", "state" : "closed" } ], "state" : "open" },
-	"Ajax node"
-]
