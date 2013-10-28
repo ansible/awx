@@ -552,6 +552,7 @@ class GroupPotentialChildrenList(SubListAPIView):
         parent = self.get_parent_object()
         self.check_parent_access(parent)
         qs = self.request.user.get_queryset(self.model)
+        qs = qs.filter(inventory__pk=parent.inventory.pk)
         except_pks = set([parent.pk])
         except_pks.update(parent.all_parents.values_list('pk', flat=True))
         except_pks.update(parent.all_children.values_list('pk', flat=True))
