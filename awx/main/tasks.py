@@ -754,7 +754,7 @@ class RunInventoryUpdate(BaseTask):
         credential = inventory_source.credential
         if credential:
             passwords['source_username'] = credential.username
-            passwords['source_password'] = decrypt_field(credential, 'password'))
+            passwords['source_password'] = decrypt_field(credential, 'password')
         return passwords
 
     def build_env(self, inventory_update, **kwargs):
