@@ -97,6 +97,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
               // remove lingering popover <div>. Seems to be a bug in TB3 RC1
               $(this).remove();
               });
+       
+       $(window).unbind('resize');
 
        // Prepend an asterisk to required field label
        $('.form-control[required]').each(function() {
@@ -1197,7 +1199,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
           navigation.groups.active = true; 
           html += this.breadCrumbs(options, navigation);
           html += "<div class=\"row\">\n";
-          html += "<div class=\"col-lg-4\">\n" +
+          html += "<div class=\"col-lg-4\" id=\"search-tree-target\">\n" +
                   "<div class=\"search-tree well\">\n" +
                   "<div id=\"search-tree-container\"></div>\n" +
                   "</div><!-- search-tree well -->\n" + 

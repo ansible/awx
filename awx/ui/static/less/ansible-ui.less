@@ -21,6 +21,11 @@
 @info-border: #bce8f1;   /* alert info border color */
 @info-color:  #3a87ad;
 
+@tip-background: #0088CC;
+/*rgb(58, 135, 173);*/
+@tip-color: #fff;
+
+
 html {
   background-color: @black;
 }
@@ -96,9 +101,56 @@ body {
   z-index: 2000;
 }
 
-.tooltip {
-  z-index: 1050;
-}
+/* TB tooltip overrides */
+  .tooltip {
+    z-index: 1050;
+    opacity: 1.0;
+  }
+
+/*
+  .tooltip-inner {
+    color: @tip-color;
+    background-color: @tip-background;
+    border-radius: 6px;
+    padding: 5px;
+  }
+
+  .tooltip.in {
+    opacity: 1.0;
+  }
+
+  .tooltip.top .tooltip-arrow {
+    border-top-color: @tip-background;
+  }
+
+  .tooltip.top-left .tooltip-arrow {
+    border-top-color: @tip-background;
+  }
+
+  .tooltip.top-right .tooltip-arrow {
+    border-top-color: @tip-background;
+  }
+
+  .tooltip.right .tooltip-arrow {
+    border-top-color: @tip-background;
+  }
+
+  .tooltip.left .tooltip-arrow {
+    border-top-color: @tip-background;
+  }
+
+  .tooltip.bottom .tooltip-arrow {
+    border-top-color: @tip-background;
+  }
+
+  .tooltip.bottom-left .tooltip-arrow {
+    border-top-color: @tip-background;
+  }
+
+  .tooltip.bottom-right .tooltip-arrow {
+    border-top-color: @tip-background;
+  }
+*/
 
 hr {
   border-color: #e3e3e3;
@@ -973,7 +1025,13 @@ select.field-mini-height {
     }
   }
 
+  /* Allow tree node title to float above surrounding elements on hover */
+  #search-tree-target {
+    z-index: 10;
+  }
+
   .search-tree { 
+
     padding: 10px 3px 10px 10px;
 
     .title {
@@ -997,10 +1055,17 @@ select.field-mini-height {
     }
 
     .activate {
-      padding: 3px;
+      display: block;
+      padding: 2px 3px 1px 3px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      height: 23px;
     }
 
     .activate:hover {
+      display: inline-block;
+      overflow: visible; 
       background-color: #ddd;
       cursor: pointer;
     }
@@ -1010,6 +1075,11 @@ select.field-mini-height {
       box-shadow: 3px 3px 3px 0 @grey;
       border-bottom: 1px solid @grey;
       border-right: 1px solid @grey;
+      background-color: #fff;
+     
+      .activate:hover {
+        background-color: #fff;
+      }
     }
 
     .expand-container,
@@ -1027,25 +1097,21 @@ select.field-mini-height {
 
     .badge-container {
       vertical-align: none;
-      margin-bottom: 3px;
+      padding-top: 2px;
       padding-bottom: 2px;
     }
 
-    #root-expand-container {
-      width: 20px;
-      text-align: left;
+    #root-badge-container {
+      margin-right: -2px;
+      margin-left: 3px;
     }
-
+   
     .expand { 
       padding: 3px;
     }
 
     .title-container {
-      word-break: break-all;
-    }
-
-    #root-title-container {
-      margin-left: 5px;
+      height: 25px;
     }
     
     .expand-container:hover {

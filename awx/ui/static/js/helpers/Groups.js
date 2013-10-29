@@ -76,11 +76,91 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 ];
         }
         }])
+    
+    .factory('HostsStatusMsg', [ function() {
+    return function(params) {  
+        var active_failures = params.active_failures; 
+        var total_hosts = params.total_hosts;
+        var inventory_id = params.inventory_id;
+        var tips, link, html_class;
+
+        // Return values for use on host status indicator
+        
+        if (active_failures > 0) {
+           tip = "Contains " + active_failures +
+               [ (active_failures == 1) ? ' host' : ' hosts' ] + ' with failed jobs. Click to view the offending ' +
+               [ (active_failures == 1) ? ' host' : ' hosts' ] + '.';
+           link = '/#/inventories/' + inventory_id + '/hosts?has_active_failures=true';
+           html_class = 'true';
+        }
+        else {
+           if (total_hosts == 0) {
+              // no hosts
+              tip = "There are no hosts in this group. It's a sad empty shell. Click to view the hosts page and add a host.";
+              link = '/#/inventories/' + inventory_id + '/hosts';
+              html_class = 'na';
+           }
+           else if (total_hosts == 1) {
+              // on host with 0 failures
+              tip = "The 1 host in this group is happy! It does not have a job failure. " + 
+                  " Click to view the host.";
+              link = '/#/inventories/' + inventory_id + '/hosts';
+              html_class = 'false';
+           }
+           else {
+              // many hosts with 0 failures
+              tip = "All " + total_hosts + " hosts in this group are happy! None of them have " + 
+                  " a recent job failure. Click to view the hosts.";
+              links = '/#/inventories/' + inventory_id + '/hosts';
+              html_class = 'false';
+           }
+        }
+
+        return { tooltip: tip, url: link, 'class': html_class };
+        
+        }
+        }])
+
+    .factory('UpdateStatusMsg', [ function() {
+    return function(params) {  
+        
+        var status = params.status; 
+        var stat, stat_class, status_tip;
+        stat = status;
+        stat_class = stat;
+        
+        switch (status) {
+            case 'never updated':
+                stat = 'never';
+                stat_class = 'never';
+                status_tip = 'Inventory update has not been performed. Click the Update button to start it now.';
+                break;
+            case 'none':
+            case '':
+                stat = 'n/a';
+                stat_class = 'na';
+                status_tip = 'Not configured for inventory update.';
+                break;
+            case 'failed':
+                status_tip = 'Inventory update completed with errors. Click to view process output.';
+                break;
+            case 'successful':
+                status_tip = 'Inventory update completed with no errors. Click to view process output.';
+                break; 
+            case 'updating':
+                status_tip = 'Inventory update process running now.';
+                break;
+            }
+
+        return { 'class': stat_class, tooltip: status_tip, status: stat }
+        
+        }
+        }])
 
     .factory('GroupsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupList', 'GenerateList', 
-        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'SelectionInit',
+        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'SelectionInit', 'BuildTree',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupList, GenerateList, Prompt, SearchInit, PaginateInit,
-        ProcessErrors, GetBasePath, GroupsAdd, SelectionInit) {
+        ProcessErrors, GetBasePath, GroupsAdd, SelectionInit, BuildTree) {
     return function(params) {
         
         // build and present the list of groups we can add to an existing group
@@ -108,7 +188,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').modal({ backdrop: 'static', keyboard: false });
         
-        var url = (group_id) ? GetBasePath('groups') + group_id + '/potential_children/' :
+        var url = (group_id) ? GetBasePath('groups') + group_id + '/children/' :
             GetBasePath('inventory') + inventory_id + '/groups/'; 
         
         SelectionInit({ scope: scope, list: list, url: url });
@@ -167,9 +247,12 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
             });
         */
+        
+        var searchUrl = (group_id) ? GetBasePath('groups') + group_id + '/potential_children/' :
+            GetBasePath('inventory') + inventory_id + '/groups/'; 
 
-        SearchInit({ scope: scope, set: 'groups', list: list, url: url });
-        PaginateInit({ scope: scope, list: list, url: url, mode: 'lookup' });
+        SearchInit({ scope: scope, set: 'groups', list: list, url: searchUrl });
+        PaginateInit({ scope: scope, list: list, url: searchUrl, mode: 'lookup' });
         scope.search(list.iterator);
 
         if (!scope.$$phase) {
@@ -180,17 +263,24 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            scope.removeModalClosed();
         }
         scope.removeModalClosed = scope.$on('modalClosed', function() {
-            /* RefreshTree({ scope: scope }); */
+            BuildTree({
+                scope: scope,
+                inventory_id: inventory_id,
+                emit_on_select: 'NodeSelect',
+                target_id: 'search-tree-container',
+                refresh: true,
+                moveable: true
+                });
             });
         }
         }])
 
-
     .factory('InventoryStatus', [ '$rootScope', '$routeParams', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
         'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'ShowUpdateStatus', 'HelpDialog',
-        'InventorySummaryHelp', 'BuildTree', 'ClickNode',
+        'InventorySummaryHelp', 'BuildTree', 'ClickNode', 'HostsStatusMsg', 'UpdateStatusMsg',
     function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, SearchInit, 
-        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus, HelpDialog, InventorySummaryHelp, BuildTree, ClickNode) {
+        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus, HelpDialog, InventorySummaryHelp, BuildTree, ClickNode,
+        HostsStatusMsg, UpdateStatusMsg) {
     return function(params) {
         //Build a summary of a given inventory
         
@@ -202,7 +292,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var scope = view.inject(InventorySummary, { mode: 'summary', id: 'tree-form', breadCrumbs: false });
         var defaultUrl = GetBasePath('inventory') + scope['inventory_id'] + '/groups/';
             //?group__isnull=false';
-        
+        var msg, update_status;
+
         if (scope.PostRefreshRemove) {
            scope.PostRefreshRemove();
         }
@@ -210,90 +301,43 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             for (var i=0; i < scope.groups.length; i++) {
                 var last_update = (scope.groups[i].summary_fields.inventory_source.last_updated == null) ? null : 
                     FormatDate(new Date(scope.groups[i].summary_fields.inventory_source.last_updated));    
-                
-                var stat, stat_class, status_tip;
-
-                stat = scope.groups[i].summary_fields.inventory_source.status;
-                stat_class = stat;
-                
-                switch (scope.groups[i].summary_fields.inventory_source.status) {
-                    case 'never updated':
-                        stat = 'never';
-                        stat_class = 'never';
-                        status_tip = 'Inventory update has not been performed. Click Update button to start it now.';
-                        break;
-                    case 'none':
-                    case '':
-                        stat = 'n/a';
-                        stat_class = 'na';
-                        status_tip = 'Not configured for inventory update.';
-                        break;
-                    case 'failed':
-                        status_tip = 'Inventory update completed with errors. Click to view process output.';
-                        break;
-                    case 'successful':
-                        status_tip = 'Inventory update completed with no errors. Click to view process output.';
-                        break; 
-                    case 'updating':
-                        status_tip = 'Inventory update process running now.';
-                        break;
-                    }
-
-                if (scope.groups[i].hosts_with_active_failures > 0) {
-                   scope.groups[i].active_failures_params = "/?has_active_failures=true";
-                }
-                else {
-                   scope.groups[i].active_failures_params = "/?has_active_failures=false";
-                } 
-
-
+                 
                 // Set values for Failed Hosts column
                 scope.groups[i].failed_hosts = scope.groups[i].hosts_with_active_failures + ' / ' + scope.groups[i].total_hosts;
-                if (scope.groups[i].hosts_with_active_failures > 0) {
-                   scope.groups[i].failed_hosts_tip = "Contains " + scope.groups[i].hosts_with_active_failures +
-                       [ (scope.groups[i].hosts_with_active_failures == 1) ? ' host' : ' hosts' ] + ' where the latest job failed. Click to view the ' +
-                       [ (scope.groups[i].hosts_with_active_failures == 1) ? ' offending host.' : ' hosts with failed jobs.' ];
-                   scope.groups[i].failed_hosts_link = '/#/inventories/' + scope.groups[i].inventory + '/hosts?has_active_failures=true';
-                   scope.groups[i].failed_hosts_class = 'true';
-                }
-                else {
-                   if (scope.groups[i].total_hosts == 0) {
-                      // no hosts
-                      scope.groups[i].failed_hosts_tip = "There are no hosts in this inventory. It's a sad empty shell. Click to view the hosts page and add a host.";
-                      scope.groups[i].failed_hosts_link = '/#/inventories/' + scope.groups[i].inventory + '/hosts';
-                      scope.groups[i].failed_hosts_class = 'na';
-                   }
-                   else if (scope.groups[i].total_hosts == 1) {
-                      // on host with 0 failures
-                      scope.groups[i].failed_hosts_tip = "The 1 host contained in this inventory does not have a current job failure. It's happy!" + 
-                          " Click to view the host.";
-                      scope.groups[i].failed_hosts_link = '/#/inventories/' + scope.groups[i].inventory + '/hosts';
-                      scope.groups[i].failed_hosts_class = 'false';
-                   }
-                   else {
-                      // many hosts with 0 failures
-                      scope.groups[i].failed_hosts_tip = "All " + scope.groups[i].total_hosts + " hosts are happy! None of them have " + 
-                          " a recent job failure. Click to view the hosts.";
-                      scope.groups[i].failed_hosts_link = '/#/inventories/' + scope.groups[i].inventory + '/hosts';
-                      scope.groups[i].failed_hosts_class = 'false';
-                   }
-                }
                 
-                scope.groups[i].status = stat;
+                msg = HostsStatusMsg({
+                    active_failures: scope.groups[i].hosts_with_active_failures,
+                    total_hosts: scope.groups[i].total_hosts,
+                    inventory_id: scope['inventory_id']
+                    });
+                
+                update_status = UpdateStatusMsg({ status: scope.groups[i].summary_fields.inventory_source.status });
+
+                scope.groups[i].failed_hosts_tip = msg['tooltip']; 
+                scope.groups[i].failed_hosts_link = msg['url'];
+                scope.groups[i].failed_hosts_class = msg['class'];
+                scope.groups[i].status = update_status['status'];
                 scope.groups[i].source = scope.groups[i].summary_fields.inventory_source.source;
                 scope.groups[i].last_updated = last_update;
-                scope.groups[i].status_badge_class = stat_class;
-                scope.groups[i].status_badge_tooltip = status_tip;
+                scope.groups[i].status_badge_class = update_status['class'];
+                scope.groups[i].status_badge_tooltip = update_status['tooltip'];
             }
+
+            if (scope.groups.length == 0) {
+                // Force display for help tooltip when no groups exist
+                $('#inventory-summary-help').focus();
+            }
+            
             });
         
         SearchInit({ scope: scope, set: 'groups', list: list, url: defaultUrl });
         PaginateInit({ scope: scope, list: list, url: defaultUrl });
         
-        if (scope['inventorySummaryGroup']) {
+        if (scope['inventorySummaryGroup'] || $routeParams['name']) {
            scope[list.iterator + 'SearchField'] = 'name';
            scope[list.iterator + 'SearchType'] = 'iexact';
-           scope[list.iterator + 'SearchValue'] = scope['inventorySummaryGroup'];
+           scope[list.iterator + 'SearchValue'] = (scope['inventorySummaryGroup']) ?
+               scope['inventorySummaryGroup'] : $routeParams['name'];
            scope[list.iterator + 'SearchFieldLabel'] = list.fields['name'].label;
         }
         else if ($routeParams['has_external_source']) {
@@ -320,14 +364,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
         scope.search(list.iterator, false, true);
  
-        if (scope.removeShowHelp) {
-           scope.removeShowHelp();
-        }
-        scope.removeShowHelp = scope.$on('ShowHelp', function() {
-            // Force display fo help tooltip when no groups exist
-            $('#inventory-summary-help').focus();
-            });
-
         scope.showHelp = function() {
             // Display help dialog
             $('.btn').blur();  //remove focus from the help button and all buttons
@@ -457,11 +493,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
         // Respond to refresh button
         scope.refresh = function() {
-            
-            //scope['groupSearchSpin'] = true;
-            //scope['groupLoading'] = false;
             scope.search(list.iterator, false, true);
-
             BuildTree({
                 scope: scope,
                 inventory_id: scope['inventory_id'],
@@ -518,7 +550,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
     } 
     }])
-
 
     .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'BuildTree', 'ClickNode',
@@ -1154,8 +1185,12 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         { hdr: 'Error!', msg: 'Failed to retrieve last update: ' + last_update + '. GET status: ' + status });
                     });
         }
-    }
-    }]);
+        
+        }
+        }]);
+
+
+
 
 
 

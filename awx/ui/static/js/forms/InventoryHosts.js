@@ -22,7 +22,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
                 },
             active_failures: {
-                label: 'Job Status?',
+                label: 'Job Status',
                 ngHref: "\{\{ host.activeFailuresLink \}\}", 
                 awToolTip: "\{\{ host.badgeToolTip \}\}",
                 dataPlacement: 'top',
@@ -55,7 +55,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 nosort: true
                 },
             has_active_failures: {
-                label: 'Has failed job?',
+                label: 'Has failed jobs?',
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',

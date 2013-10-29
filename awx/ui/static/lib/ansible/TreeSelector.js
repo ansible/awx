@@ -7,7 +7,7 @@
  *
  */
 
-angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector'])
+angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector', 'GroupsHelper'])
     
     .factory('SortNodes', [ function() {
         return function(data) {
@@ -28,9 +28,150 @@ angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector'])
             return newData;
             }
             }])
+    
+    // Figure out the group level tool tip
+    .factory('GetToolTip', [ 'FormatDate', function(FormatDate) {
+        return function(params) {
+            
+            var node = params.node;   
+      
+            var tip = ''; 
+            var link = '';
+            var html_class = '';
+            var active_failures = node.hosts_with_active_failures;
+            var total_hosts = node.total_hosts;
+            var source = node.summary_fields.inventory_source.source;
+            var status = node.summary_fields.inventory_source.status;
 
-    .factory('BuildTree', ['Rest', 'GetBasePath', 'ProcessErrors', '$compile', '$rootScope', 'Wait', 'SortNodes',
-        function(Rest, GetBasePath, ProcessErrors, $compile, $rootScope, Wait, SortNodes) {
+            // Return values for the status indicator
+            var status_date = node.summary_fields.inventory_source.last_updated
+            var last_update = ( status_date == "" || status_date == null ) ? null : FormatDate(new Date(status_date));  
+            
+            switch (status) {
+                case 'never updated':
+                    html_class = 'na';
+                    tip = '<p>Inventory update has not been performed.</p>';
+                    link = '';
+                    break;
+                case 'failed':
+                    tip = '<p>Inventory update failed! Click to view process output.</p>';
+                    link = '/#/inventories/' + node.inventory + '/groups?name=' + node.name;
+                    html_class = true;
+                    break;
+                case 'successful':
+                    tip = '<p>Inventory update completed on ' + last_update + '.</p>';
+                    html_class = false;
+                    link = '';
+                    break; 
+                case 'updating':
+                    tip = '<p>Inventory update process running now. Click to view status.</p>';
+                    link = '/#/inventories/' + node.inventory + '/groups?name=' + node.name;
+                    html_class = false;
+                    break;
+                }
+            
+            if (status !== 'failed' && status !== 'updating') {
+                // update status will not override job status
+                if (active_failures > 0) {
+                    tip += "<p>Contains " + active_failures +
+                        [ (active_failures == 1) ? ' host' : ' hosts' ] + ' with failed jobs. Click to view the offending ' +
+                        [ (active_failures == 1) ? ' host' : ' hosts' ] + '.</p>';
+                        link = '/#/inventories/' + node.inventory + '/hosts?has_active_failures=true';
+                        html_class = 'true';
+                }
+                else {
+                    if (total_hosts == 0) {
+                        // no hosts
+                        tip += "<p>There are no hosts in this group. It's a sad empty shell.</p>";
+                        html_class = (html_class == '') ? 'na' : html_class;
+                    }
+                    else if (total_hosts == 1) {
+                        // on host with 0 failures
+                        tip += "<p>The 1 host in this group is happy! It does not have a job failure.</p>";
+                        html_class = 'false';
+                    } 
+                    else {
+                        // many hosts with 0 failures
+                        tip += "<p>All " + total_hosts + " hosts in this group are happy! None of them have " + 
+                            " job failures.</p>";
+                        html_class = 'false';
+                    }
+                }
+            }
+
+            return { tooltip: tip, url: link, 'class': html_class };
+      
+            }
+            }])
+
+    .factory('GetInventoryToolTip', [ 'FormatDate', function(FormatDate) {
+        return function(params) {
+            
+            var node = params.node;   
+      
+            var tip = ''; 
+            var link = '';
+            var html_class = '';
+            var active_failures = node.hosts_with_active_failures;
+            var total_hosts = node.total_hosts;
+            var group_failures = node.groups_with_active_failures;
+            var total_groups = node.total_groups; 
+            var inventory_sources = node.total_inventory_sources;
+      
+            if (group_failures > 0) {
+               tip += "Has " + group_failures +
+                   [ (group_failures == 1) ? ' group' : ' groups' ] + ' with failed inventory updates. ' + 
+                   'Click to view the offending ' +
+                   [ (group_failures == 1) ? ' group.' : ' groups.' ];
+               link = '/#/inventories/' + node.id + '/groups?status=failed';
+               html_class = 'true';
+            }
+            else if (inventory_sources == 1) {
+                // on host with 0 failures
+                tip += "<p>1 group with an inventory source is happy! No updates have failed.</p>";
+                link = '';
+                html_class = 'false';
+            }
+            else if (inventory_sources > 0) {
+                tip += "<p>" + inventory_sources + " groups with an inventory source are happy! No updates have failed.</p>";
+                link = 0;
+                html_class = 'false';
+            } 
+
+            if (html_class !== 'true') {
+               // Add job status
+               if (active_failures > 0) {
+                  tip += "<p>Contains " + scope.inventories[i].hosts_with_active_failures +
+                      [ (active_failures == 1) ? ' host' : ' hosts' ] + ' with job failures. Click to view the offending ' +
+                      [ (active_failures == 1) ? ' host' : ' hosts' ] + '.</p>';
+                  link = '/#/inventories/' + node.id + '/hosts?has_active_failures=true';
+                  html_class = 'true';
+               }
+               else if (total_hosts == 0) {
+                   tip += "<p>There are no hosts in this inventory. It's a sad empty shell.</p>";
+                   link = "";
+                   html_class = (html_class == '') ? 'na' : html_class;
+               }
+               else if (total_hosts == 1) {
+                   tip += "<p>The 1 host found in this inventory is happy! There are no job failures.</p>";
+                   link = "";
+                   html_class = "false";
+               }
+               else if (total_hosts > 0) {
+                   tip += "<p>All " + total_hosts + " hosts are happy! There are no job failures.";
+                   link = "";
+                   html_class = "false";
+               }
+            } 
+
+            return { tooltip: tip, url: link, 'class': html_class };
+      
+            }
+            }])
+
+    .factory('BuildTree', ['Rest', 'GetBasePath', 'ProcessErrors', '$compile', '$rootScope', 'Wait', 'SortNodes', 'GetToolTip',
+        'GetInventoryToolTip',
+        function(Rest, GetBasePath, ProcessErrors, $compile, $rootScope, Wait, SortNodes, GetToolTip, GetInventoryToolTip) {
         return function(params) {
             var scope = params.scope; 
             var inventory_id = params.inventory_id;
@@ -65,7 +206,7 @@ angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector'])
                 var elm = angular.element(e.target);  //<a>
                 var parent = angular.element(e.target.parentNode.parentNode); //<li>
                 $('.search-tree .active').removeClass('active');
-                elm.addClass('active');
+                elm.parent().addClass('active');  // add active class to <div>
                 refresh(parent);
                 }
 
@@ -108,10 +249,14 @@ angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector'])
                    parent.attr('data-state','closed'); 
                    icon.removeClass('icon-caret-down').addClass('icon-caret-right');
                    var childlists = parent.find('ul');
+                   var sublist, subicon;
                    if (childlists && childlists.length > 0) {
                       // has childen
                       for (var i=0; i < childlists.length; i++) {
-                          angular.element(childlists[i]).addClass('hidden');
+                          sublist = angular.element(childlists[i]);
+                          sublist.addClass('hidden');
+                          subicon = list.find('li')[0].children()[0];
+                          subicon.removeClass('icon-caret-down').addClass('icon-caret-right');
                       }
                    }
                    /* When the active node's parent is closed, activate the parent */
@@ -247,10 +392,41 @@ angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector'])
                scope.searchTreeReadyRemove();
             }
             scope.searchTreeReadyRemove = scope.$on('searchTreeReady', function(e, html) {
+                
                 var container = angular.element(document.getElementById(target_id));
                 container.empty();
                 var compiled = $compile(html)(scope);
                 container.append(compiled);
+                
+                function setTitleWidth(elm) {
+                    // Fix for overflowing title text
+                    var container = $('#search-tree-target');
+                    var container_offset = container.offset();
+                    var parent = elm.parent(); // <li>
+                    var parent_offset = parent.offset();
+                    var expander = parent.find('.expand-container').first();
+                    var badge = parent.find('.badge-container').first(); 
+                    var width = container.width() - parent_offset.left + container_offset.left - 
+                        badge.width() - expander.width() - 10;
+                    elm.css('width', width + 'px');
+                    }
+
+                // Fix overflowing title text now
+                $('#' + target_id).find('.title-container').each(function(idx) {
+                    setTitleWidth($(this));
+                    });
+                
+                // Fix overflowing title text on screen resize
+                var timeout;
+                $(window).resize(function() {
+                    clearTimeout(timeout); //remove prior timer so we don't resize a million times
+                    timeout = setTimeout(function() {
+                        $('#' + target_id).find('.title-container').each(function(idx) {
+                            setTitleWidth($(this));
+                            });
+                        }, 500);
+                    });
+
                 var links = container.find('a');
                 for (var i=0; i < links.length; i++) {
                     var link = angular.element(links[i]);
@@ -265,25 +441,17 @@ angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector'])
                 }
 
                 if (refresh_tree && group_id !== undefined) {
-                   // pick a specific node on the tree
+                   // pick a node by group_id
                    $('li[data-group-id="' + group_id + '"] .activate').first().click();
                 }
                 else if (refresh_tree && id !== undefined) {
+                   // pick a node by id
                    $('#' + id + ' .activate').first().click();
                 }
                 else if (!refresh_tree) {
                    // default to the root node
                    $('#inventory-root-node .activate').first().click();
                 }
-                 
-                // Attempt to stop the title from dropping to the next 
-                // line
-                $(container).find('.title-container').each(function(idx) {
-                    var parent = $(this).parent();
-                    if ($(this).width() >= parent.width()) {
-                       $(this).css('width','80%');
-                    } 
-                    });
                 
                 // Make the tree drag-n-droppable
                 if (moveable) {
@@ -294,7 +462,9 @@ angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector'])
                         helper: 'clone',
                         start: function (e, ui) {
                             var txt = '[ ' + ui.helper.text() + ' ]';
-                            ui.helper.css({ 'font-weight': 'normal', 'color': '#171717', 'background-color': '#f5f5f5' }).text(txt);
+                            ui.helper.css({ 'display': 'inline-block', 'font-weight': 'normal', 'color': '#171717', 
+                                'background-color': '#f5f5f5', 'overflow': 'visible', 'white-space': 'normal',
+                                'z-index': 5000 }).text(txt);
                             }
                         })
                         .droppable({
@@ -349,6 +519,8 @@ angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector'])
 
             function buildHTML(tree_data) {
                 var sorted = SortNodes(tree_data);
+                var toolTip;
+
                 html += (sorted.length > 0) ? "<ul>\n" : "";
                 for(var i=0; i < sorted.length; i++) {
                    html += "<li id=\"search-node-0" + idx + "\" data-state=\"opened\" data-hosts=\"" + sorted[i].related.hosts + "\" " +
@@ -365,10 +537,20 @@ angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector'])
                    else { 
                       html += " ";
                    }
-                   html += "</div> " +
-                       "<div class=\"badge-container\"><i class=\"field-badge icon-failures-" + sorted[i].has_active_failures + "\" " +
-                       "aw-tool-tip=\"" + toolTip + "\" data-placement=\"top\"></i></div> " +
-                       "<div class=\"title-container\"><a class=\"activate\">" + sorted[i].name + "</a></div>";
+                   html += "</div>";
+
+                   toolTip = GetToolTip({ node: sorted[i] });
+
+                   html += "<div class=\"badge-container\">";
+                   html += "<a aw-tool-tip=\"" + toolTip.tooltip + "\" data-placement=\"top\"";
+                   html += (toolTip.url !== '') ? " href=\"" + toolTip.url + "\"": ""; 
+                   html += ">"; 
+                   html += "<i class=\"field-badge icon-failures-" + toolTip['class'] + "\" ></i>";
+                   html += "</a>";
+                   html += "</div> ";
+
+                   html += "<div class=\"title-container\"><a class=\"activate\">" + sorted[i].name + "</a></div>";
+                   
                    idx++;
                    if (sorted[i].children.length > 0) {
                       buildHTML(sorted[i].children);
@@ -430,6 +612,9 @@ angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector'])
                 Rest.setUrl (GetBasePath('inventory') + inventory_id + '/');
                 Rest.get()
                     .success( function(data, status, headers, config) {
+                        
+                        var tip = GetInventoryToolTip({ node: data });
+                        
                         html += "<div class=\"title\">Group Selector:</div>\n" +
                             "<div id=\"selector-tree\">\n" +
                             "<ul id=\"inventory-tree\" class=\"tree-root\">\n" +
@@ -441,9 +626,16 @@ angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector'])
                             "data-inventory=\"" + data.id + "\"" +
                             ">" +
                             "<div class=\"expand-container\" id=\"root-expand-container\"><i class=\"icon-sitemap\"></i></div>" +
-                            "<div class=\"badge-container\"><i class=\"field-badge icon-failures-" + data.has_active_failures + "\" " +
-                            "aw-tool-tip=\"" + toolTip + "\" data-placement=\"top\"></i></div>" +
-                            "<div class=\"title-container\" id=\"root-title-container\"><a class=\"activate\">" + data.name + "</a></div>";
+                            "<div class=\"badge-container\" id=\"root-badge-container\">\n"; 
+                        
+                        html += "<a aw-tool-tip=\"" + tip['tooltip'] + "\" data-placement=\"top\"";
+                        html += (tip.link) ? " href=\"" + tip['link'] + "\"" : ""; 
+                        html += ">";
+                        html += "<i class=\"field-badge icon-failures-" + tip['class'] + "\"></i></a>";
+                        html += "</div>\n";
+
+                        html += "<div class=\"title-container\" id=\"root-title-container\">" +
+                            "<a class=\"activate\">" + data.name + "</a></div>";
                          
                         scope.$emit('buildAllGroups', data.name, data.related.tree, data.related.groups);
                          

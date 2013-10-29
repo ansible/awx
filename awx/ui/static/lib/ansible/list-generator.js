@@ -72,6 +72,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               // remove lingering popover <div>. Seems to be a bug in TB3 RC1
               $(this).remove();
               });
+       $(window).unbind('resize');
        
        try {
            $('#help-modal').empty().dialog('destroy');

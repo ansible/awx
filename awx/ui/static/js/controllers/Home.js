@@ -11,8 +11,8 @@
 'use strict';
 
 function Home ($routeParams, $scope, $rootScope, $location, Wait, ObjectCount, JobStatus, InventorySyncStatus, SCMSyncStatus, 
-    ClearScope)
-{
+    ClearScope) {
+    
     ClearScope('home');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                          //scope.
 
@@ -36,7 +36,7 @@ function Home ($routeParams, $scope, $rootScope, $location, Wait, ObjectCount, J
            Wait('stop');
         }
         });
-}
+    }
 
 Home.$inject=[ '$routeParams', '$scope', '$rootScope', '$location', 'Wait', 'ObjectCount', 'JobStatus', 'InventorySyncStatus',
     'SCMSyncStatus', 'ClearScope'];

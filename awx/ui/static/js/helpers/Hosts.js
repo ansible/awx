@@ -50,7 +50,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            scope.removeModalClosed();
         }
         scope.removeModalClosed = scope.$on('modalClosed', function() {
-            // if the modal cloased, assume something got changed and reload the host list
+            // if the modal closed, assume something got changed and reload the host list
             HostsReload(params);
         });
         
@@ -408,15 +408,15 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }])
 
 
-    .factory('HostsReload', ['$routeParams', 'SearchInit', 'PaginateInit', 'InventoryHostsForm', 'GetBasePath', 'Wait',
-    function($routeParams, SearchInit, PaginateInit, InventoryHostsForm, GetBasePath, Wait) {
+    .factory('HostsReload', ['$location', '$routeParams', 'SearchInit', 'PaginateInit', 'InventoryHostsForm', 'GetBasePath', 'Wait',
+    function($location, $routeParams, SearchInit, PaginateInit, InventoryHostsForm, GetBasePath, Wait) {
     return function(params) {
         // Rerfresh the Hosts view on right side of page
         
         var scope = params.scope;
         var group_id = scope.group_id;
-        var postAction = params.action; 
-
+        var postAction = params.action;
+        
         scope['hosts'] = null;
         scope['toggleAllFlag'] = false;
         scope['hostDeleteHide'] = true;
@@ -496,6 +496,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            scope[InventoryHostsForm.iterator + 'SearchField'] = 'has_active_failures';
            scope[InventoryHostsForm.iterator + 'SearchFieldLabel'] = InventoryHostsForm.fields['has_active_failures'].label;
            scope[InventoryHostsForm.iterator + 'SearchSelectValue'] = ($routeParams['has_active_failures'] == 'true') ? { value: 1 } : { value: 0 };
+           
         }
         else if ($routeParams['name']) {
            scope[InventoryHostsForm.iterator + 'InputDisable'] = false;
@@ -504,7 +505,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            scope[InventoryHostsForm.iterator + 'SearchFieldLabel'] = InventoryHostsForm.fields['name'].label;
            scope[InventoryHostsForm.iterator + 'SearchSelectValue'] = null;
         }
-        
+
         scope.search(InventoryHostsForm.iterator);
         
         if (!params.scope.$$phase) {

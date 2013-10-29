@@ -7,13 +7,26 @@
  */
 angular.module('Utilities',['RestServices', 'Utilities'])
    
-   .factory('ClearScope', function() {
+   .factory('ClearScope', [ function() {
    return function(id) {
        var element = document.getElementById(id);
        var scope = angular.element(element).scope();
        scope.$destroy();
+
+       $('.tooltip').each( function(index) {
+           // Remove any lingering tooltip and popover <div> elements
+           $(this).remove();
+           });
+   
+       $('.popover').each(function(index) {
+           // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+           $(this).remove();
+           });
+
+       $(window).unbind('resize');
+       
        }
-       })
+       }])
 
    .factory('ToggleClass', function() {
    return function(selector, cssClass) {
