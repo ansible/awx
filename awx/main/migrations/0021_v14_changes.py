@@ -31,7 +31,7 @@ class Migration(SchemaMigration):
 
         # Adding field 'Credential.kind'
         db.add_column(u'main_credential', 'kind',
-                      self.gf('django.db.models.fields.CharField')(default='machine', max_length=32),
+                      self.gf('django.db.models.fields.CharField')(default='ssh', max_length=32),
                       keep_default=False)
 
         # Adding field 'Credential.username'

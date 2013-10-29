@@ -59,7 +59,7 @@ SUMMARIZABLE_FK_FIELDS = {
                                        'groups_with_active_failures',
                                        'has_inventory_sources'),
     'project': DEFAULT_SUMMARY_FIELDS + ('status',),
-    'credential': DEFAULT_SUMMARY_FIELDS,
+    'credential': DEFAULT_SUMMARY_FIELDS + ('kind',),
     'permission': DEFAULT_SUMMARY_FIELDS,
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'job_template': DEFAULT_SUMMARY_FIELDS,
@@ -883,6 +883,8 @@ class CredentialSerializer(BaseSerializer):
 
     def validate(self, attrs):
         ''' some fields cannot be changed once written '''
+        return attrs
+        # FIXME: Don't need this anymore?
         if self.object is not None:
             # this is an update
             if 'user' in attrs and self.object.user != attrs['user']:
@@ -927,13 +929,14 @@ class JobSerializer(BaseSerializer):
 
     class Meta:
         model = Job
-        fields = BASE_FIELDS + ('job_template', 'job_type', 'inventory',
-                                'project', 'playbook', 'credential',
-                                'forks', 'limit', 'verbosity', 'extra_vars',
-                                'job_tags', 'launch_type', 'status', 'failed',
-                                'result_stdout', 'result_traceback',
-                                'passwords_needed_to_start', 'job_args',
-                                'job_cwd', 'job_env')
+        fields = ('id', 'url', 'related', 'summary_fields', 'created',
+                  'modified', 'job_template', 'job_type', 'inventory',
+                  'project', 'playbook', 'credential',
+                  'forks', 'limit', 'verbosity', 'extra_vars',
+                  'job_tags', 'launch_type', 'status', 'failed',
+                  'result_stdout', 'result_traceback',
+                  'passwords_needed_to_start', 'job_args',
+                  'job_cwd', 'job_env')
 
     def get_related(self, obj):
         if obj is None:

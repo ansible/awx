@@ -1050,7 +1050,7 @@ class Credential(CommonModelNameNotUnique):
         ('rax', _('Rackspace')),
     ]
 
-    PASSWORD_FIELDS = ('ssh_password', 'password', 'ssh_key_data', 'ssh_key_unlock', 'sudo_password')
+    PASSWORD_FIELDS = ('password', 'ssh_key_data', 'ssh_key_unlock', 'sudo_password')
 
     class Meta:
         app_label = 'main'
@@ -1075,7 +1075,7 @@ class Credential(CommonModelNameNotUnique):
     kind = models.CharField(
         max_length=32,
         choices=KIND_CHOICES,
-        default='machine',
+        default='ssh',
     )
 
     #ssh_username = models.CharField(
@@ -1134,8 +1134,8 @@ class Credential(CommonModelNameNotUnique):
     )
 
     @property
-    def needs_ssh_password(self):
-        return not self.ssh_key_data and self.ssh_password == 'ASK'
+    def needs_password(self):
+        return not self.ssh_key_data and self.password == 'ASK'
 
     @property
     def needs_ssh_key_unlock(self):
@@ -1149,7 +1149,7 @@ class Credential(CommonModelNameNotUnique):
     @property
     def passwords_needed(self):
         needed = []
-        for field in ('ssh_password', 'sudo_password', 'ssh_key_unlock'):
+        for field in ('password', 'sudo_password', 'ssh_key_unlock'):
             if getattr(self, 'needs_%s' % field):
                 needed.append(field)
         return needed
@@ -1551,6 +1551,9 @@ class ProjectUpdate(CommonTask):
         on_delete=models.CASCADE,
         editable=False,
     )
+
+    def get_absolute_url(self):
+        return reverse('main:project_update_detail', args=(self.pk,))
 
     def _get_parent_instance(self):
         return self.project
