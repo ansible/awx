@@ -24,11 +24,20 @@ class Migration(DataMigration):
                 inventory_update.save()
 
         # Change credential ssh_username/ssh_password to username/password.
-        for credential in orm.Credential.objects.all():
+        for credential in orm.Credential.objects.order_by('-pk'):
             credential.username = credential.ssh_username
             credential.password = decrypt_field(credential, 'ssh_password')
             credential.password = encrypt_field(credential, 'password', True)
-            # FIXME: handle where credential would violate future unique constraint
+            # Rename any credentials that would violate future unique
+            # constraint between kind/name/user/team.
+            credential_name = credential.name
+            qs = orm.Credential.objects.exclude(pk=credential.pk)
+            qs = qs.filter(kind='ssh', user=credential.user, team=credential.team)
+            n = 2
+            while qs.filter(name=credential_name).count():
+                credential_name = '%s %d' % (credential.name, n)
+                n += 1
+            credential.name = credential_name
             credential.save()
 
         # Migrate project scm credential fields to new credential object.
@@ -39,11 +48,17 @@ class Migration(DataMigration):
             scm_password = decrypt_field(project, 'scm_password')
             scm_key_data = decrypt_field(project, 'scm_key_data')
             scm_key_unlock = decrypt_field(project, 'scm_key_unlock')
-            # FIXME: Determine if needs to be user/team credential!
-            # FIXME: Check for duplicate credentials?
-            credential_name = '%s SCM Credential' % project.name.title()
-            #orm.Credential.objects.filter(name=credential_name)
-            credential = orm.Credential.objects.create(name=credential_name, kind='scm')
+            # Set credential by default to be owned by admin user.
+            qs = orm['auth.User'].objects.filter(is_superuser=True, is_active=True)
+            credential_user = qs.order_by('pk')[0]
+            # Rename credentials that would violate the future unique constraint.
+            credential_name = '%s Credential' % project.name.title()
+            n = 2
+            qs = orm.Credential.objects.filter(kind='scm', user=credential_user, team=None)
+            while qs.filter(name=credential_name).count():
+                credential_name = '%s Credential %d' % (project.name.title(), n)
+                n += 1
+            credential = orm.Credential.objects.create(name=credential_name, kind='scm', user=credential_user)
             credential.username = scm_username
             credential.password = scm_password
             credential.password = encrypt_field(credential, 'password', True)
@@ -66,12 +81,21 @@ class Migration(DataMigration):
             group_name = inventory_source.group.name
             source_username = inventory_source.source_username
             source_password = decrypt_field(inventory_source, 'source_password')
-            # FIXME: Determine if needs to be user/team credential!
-            # FIXME: Check for duplicate credentials?
+            # Set credential by default to be owned by admin user.
+            qs = orm['auth.User'].objects.filter(is_superuser=True, is_active=True)
+            credential_user = qs.order_by('pk')[0]
             if inventory_source.source == 'ec2':
-                credential = orm.Credential.objects.create(name='%s AWS Credential' % group_name, kind='aws')
+                credential_kind = 'aws'
             elif inventory_source.source == 'rackspace':
-                credential = orm.Credential.objects.create(name='%s RAX Credential' % group_name, kind='rax')
+                credential_kind = 'rax'
+            # Rename credentials that would violate the future unique constraint.
+            credential_name = '%s %s Credential' % (group_name.title(), credential_kind.upper())
+            n = 2
+            qs = orm.Credential.objects.filter(kind=credential_kind, user=credential_user, team=None)
+            while qs.filter(name=credential_name).count():
+                credential_name = '%s %s Credential %d' % (group_name.title(), credential_kind.upper(), n)
+                n += 1
+            credential = orm.Credential.objects.create(name=credential_name, kind=credential_kind, user=credential_user)
             credential.username = source_username
             credential.password = source_password
             credential.password = encrypt_field(credential, 'password', True)
@@ -83,8 +107,16 @@ class Migration(DataMigration):
         "Write your backwards methods here."
 
         # Handle where team name would violate unique constraint.
-        for team in orm.Team.objects.all():
-            pass # FIXME
+        for team in orm.Team.objects.order_by('-pk'):
+            team_name = team.name
+            n = 2
+            qs = orm.Team.objects.exclude(pk=team.pk)
+            while qs.filter(name=team_name).count():
+                team_name = '%s %d' % (team.name, n)
+                n += 1
+            if team.name != team_name:
+                team.name = team_name
+                team.save()
 
         # Change credential password back to ssh_password.
         for credential in orm.Credential.objects.all():
