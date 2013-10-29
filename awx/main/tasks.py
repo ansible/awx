@@ -301,7 +301,7 @@ class RunJob(BaseTask):
         passwords = super(RunJob, self).build_passwords(job, **kwargs)
         creds = job.credential
         if creds:
-            for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password'):
+            for field in ('ssh_key_unlock', 'password', 'sudo_password'):
                 value = kwargs.get(field, decrypt_field(creds, field))
                 if value not in ('', 'ASK'):
                     passwords[field] = value
@@ -340,7 +340,7 @@ class RunJob(BaseTask):
         creds = job.credential
         ssh_username, sudo_username = '', ''
         if creds:
-            ssh_username = kwargs.get('ssh_username', creds.ssh_username)
+            ssh_username = kwargs.get('username', creds.username)
             sudo_username = kwargs.get('sudo_username', creds.sudo_username)
         # Always specify the normal SSH user as root by default.  Since this
         # task is normally running in the background under a service account,
@@ -392,8 +392,8 @@ class RunJob(BaseTask):
         d = super(RunJob, self).get_password_prompts()
         d.update({
             r'sudo password.*:': 'sudo_password',
-            r'SSH password:': 'ssh_password',
-            r'Password:': 'ssh_password',
+            r'SSH password:': 'password',
+            r'Password:': 'password',
         })
         return d
 
@@ -509,7 +509,8 @@ class RunProjectUpdate(BaseTask):
         Return SSH private key data needed for this project update.
         '''
         project = project_update.project
-        return decrypt_field(project, 'scm_key_data') or None
+        if project.credential:
+            return decrypt_field(project.credential, 'ssh_key_data') or None
 
     def build_passwords(self, project_update, **kwargs):
         '''
@@ -519,12 +520,13 @@ class RunProjectUpdate(BaseTask):
         passwords = super(RunProjectUpdate, self).build_passwords(project_update,
                                                                   **kwargs)
         project = project_update.project
-        value = kwargs.get('scm_key_unlock', decrypt_field(project, 'scm_key_unlock'))
-        if value not in ('', 'ASK'):
-            passwords['ssh_key_unlock'] = value
-        passwords['scm_username'] = project.scm_username
-        passwords['scm_password'] = kwargs.get('scm_password',
-                                               decrypt_field(project, 'scm_password'))
+        if project.credential:
+            value = kwargs.get('scm_key_unlock', decrypt_field(project.credential, 'ssh_key_unlock'))
+            if value not in ('', 'ASK'):
+                passwords['scm_key_unlock'] = value
+            passwords['scm_username'] = project.scm_username
+            passwords['scm_password'] = kwargs.get('scm_password',
+                                                   decrypt_field(project.credential, 'password'))
         return passwords
 
     def build_env(self, project_update, **kwargs):
@@ -547,9 +549,9 @@ class RunProjectUpdate(BaseTask):
         scm_type = project.scm_type
         scm_url = update_scm_url(scm_type, project.scm_url)
         scm_url_parts = urlparse.urlsplit(scm_url)
-        scm_username = kwargs.get('passwords', {}).get('scm_username', '')
+        scm_username = kwargs.get('passwords', {}).get('username', '')
         scm_username = scm_username or scm_url_parts.username or ''
-        scm_password = kwargs.get('passwords', {}).get('scm_password', '')
+        scm_password = kwargs.get('passwords', {}).get('password', '')
         scm_password = scm_password or scm_url_parts.password or ''
         if scm_username and scm_password not in ('ASK', ''):
             if scm_type == 'svn':
@@ -731,9 +733,11 @@ class RunInventoryUpdate(BaseTask):
         elif inventory_source.source == 'rackspace':
             section = 'rackspace_cloud'
             cp.add_section(section)
-            cp.set(section, 'username', inventory_source.source_username)
-            cp.set(section, 'api_key', decrypt_field(inventory_source,
-                                                     'source_password'))
+            credential = inventory_source.credential
+            if credential:
+                cp.set(section, 'username', credential.username)
+                cp.set(section, 'api_key', decrypt_field(credential,
+                                                         'password'))
         # Return INI content.
         if cp.sections():
             f = cStringIO.StringIO()
@@ -747,9 +751,10 @@ class RunInventoryUpdate(BaseTask):
         passwords = super(RunInventoryUpdate, self).build_passwords(inventory_update,
                                                                     **kwargs)
         inventory_source = inventory_update.inventory_source
-        passwords['source_username'] = inventory_source.source_username
-        passwords['source_password'] = kwargs.get('source_password', \
-            decrypt_field(inventory_source, 'source_password'))
+        credential = inventory_source.credential
+        if credential:
+            passwords['source_username'] = credential.username
+            passwords['source_password'] = decrypt_field(credential, 'password'))
         return passwords
 
     def build_env(self, inventory_update, **kwargs):

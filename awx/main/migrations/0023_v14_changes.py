@@ -29,6 +29,9 @@ class Migration(SchemaMigration):
         # Deleting field 'Project.scm_username'
         db.delete_column(u'main_project', 'scm_username')
 
+        # Deleting field 'InventorySource.source_tags'
+        db.delete_column(u'main_inventorysource', 'source_tags')
+
         # Deleting field 'InventorySource.source_password'
         db.delete_column(u'main_inventorysource', 'source_password')
 
@@ -68,6 +71,11 @@ class Migration(SchemaMigration):
         # Adding field 'Project.scm_username'
         db.add_column(u'main_project', 'scm_username',
                       self.gf('django.db.models.fields.CharField')(default='', max_length=256, null=True, blank=True),
+                      keep_default=False)
+
+        # Adding field 'InventorySource.source_tags'
+        db.add_column(u'main_inventorysource', 'source_tags',
+                      self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True),
                       keep_default=False)
 
         # Adding field 'InventorySource.source_password'
@@ -231,7 +239,6 @@ class Migration(SchemaMigration):
             'source': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '32', 'blank': 'True'}),
             'source_path': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'source_regions': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
-            'source_tags': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'source_vars': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'status': ('django.db.models.fields.CharField', [], {'default': "'none'", 'max_length': '32', 'null': 'True'}),
             'update_interval': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),

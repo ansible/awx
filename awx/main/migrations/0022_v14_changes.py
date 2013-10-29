@@ -118,6 +118,8 @@ class Migration(DataMigration):
                 team.name = team_name
                 team.save()
 
+        # FIXME: Check backwards migrations!!!
+
         # Change credential password back to ssh_password.
         for credential in orm.Credential.objects.all():
             credential.ssh_username = credential.username

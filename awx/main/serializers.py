@@ -287,10 +287,6 @@ class OrganizationSerializer(BaseSerializer):
 
 class ProjectSerializer(BaseSerializer):
 
-    #scm_password = serializers.WritableField(required=False, default='')
-    #scm_key_data = serializers.WritableField(required=False, default='')
-    #scm_key_unlock = serializers.WritableField(required=False, default='')
-
     playbooks = serializers.Field(source='playbooks', help_text='Array of playbooks available within this project.')
     scm_delete_on_next_update = serializers.Field(source='scm_delete_on_next_update')
 
@@ -300,25 +296,7 @@ class ProjectSerializer(BaseSerializer):
                                 'scm_branch', 'scm_clean',
                                 'scm_delete_on_update', 'scm_delete_on_next_update',
                                 'scm_update_on_launch', 'credential',
-                                #'scm_username', 'scm_password', 'scm_key_data',
-                                #'scm_key_unlock',
                                 'last_update_failed', 'status', 'last_updated')
-
-    #def to_native(self, obj):
-        #ret = super(ProjectSerializer, self).to_native(obj)
-        # Replace the actual encrypted value with the string $encrypted$.
-        #for field in Project.PASSWORD_FIELDS:
-        #    if field in ret and unicode(ret[field]).startswith('$encrypted$'):
-        #        ret[field] = '$encrypted$'
-        #return ret
-
-    #def restore_object(self, attrs, instance=None):
-    #    # If the value sent to the API startswith $encrypted$, ignore it.
-    #    for field in Project.PASSWORD_FIELDS:
-    #        if unicode(attrs.get(field, '')).startswith('$encrypted$'):
-    #            attrs.pop(field, None)
-    #    instance = super(ProjectSerializer, self).restore_object(attrs, instance)
-    #    return instance
 
     def get_related(self, obj):
         if obj is None:
@@ -677,38 +655,10 @@ class InventorySourceSerializer(BaseSerializer):
         model = InventorySource
         fields = ('id', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'inventory', 'group', 'source', 'source_path',
-                  'source_vars', 'credential',
-                  # 'source_username', 'source_password',
-                  'source_regions', 'overwrite', 'overwrite_vars',
-                  'update_on_launch', 'update_interval', 'last_update_failed',
-                  'status', 'last_updated')
+                  'source_vars', 'credential', 'source_regions', 'overwrite',
+                  'overwrite_vars', 'update_on_launch', 'update_interval',
+                  'last_update_failed', 'status', 'last_updated')
         read_only_fields = ('inventory', 'group')
-
-    def to_native(self, obj):
-        ret = super(InventorySourceSerializer, self).to_native(obj)
-        # Replace the actual encrypted value with the string $encrypted$.
-        #for field in InventorySource.PASSWORD_FIELDS:
-        #    if field in ret and unicode(ret[field]).startswith('$encrypted$'):
-        #        ret[field] = '$encrypted$'
-        # Make regions/tags into a list of strings.
-        #for field in ('source_regions', 'source_tags'):
-        #    if field in ret:
-        #        value = ret[field]
-        #        if isinstance(value, basestring):
-        #            ret[field] = [x.strip() for x in value.split(',') if x.strip()]
-        return ret
-
-    def restore_object(self, attrs, instance=None):
-        # If the value sent to the API startswith $encrypted$, ignore it.
-        #for field in InventorySource.PASSWORD_FIELDS:
-        #    if unicode(attrs.get(field, '')).startswith('$encrypted$'):
-        #        attrs.pop(field, None)
-        #for field in ('source_regions', 'source_tags'):
-        #    value = attrs.get(field, [])
-        #    if isinstance(value, (list,tuple)):
-        #        attrs[field] = ','.join([unicode(x).strip() for x in value])
-        instance = super(InventorySourceSerializer, self).restore_object(attrs, instance)
-        return instance
 
     def get_related(self, obj):
         if obj is None:
@@ -855,21 +805,21 @@ class CredentialSerializer(BaseSerializer):
                                 'ssh_key_unlock', 'sudo_username',
                                 'sudo_password', 'user', 'team',)
 
-    #def to_native(self, obj):
-    #    ret = super(CredentialSerializer, self).to_native(obj)
-    #    # Replace the actual encrypted value with the string $encrypted$.
-    #    for field in Credential.PASSWORD_FIELDS:
-    #        if field in ret and unicode(ret[field]).startswith('$encrypted$'):
-    #            ret[field] = '$encrypted$'
-    #    return ret
+    def to_native(self, obj):
+        ret = super(CredentialSerializer, self).to_native(obj)
+        # Replace the actual encrypted value with the string $encrypted$.
+        for field in Credential.PASSWORD_FIELDS:
+            if field in ret and unicode(ret[field]).startswith('$encrypted$'):
+                ret[field] = '$encrypted$'
+        return ret
 
-    #def restore_object(self, attrs, instance=None):
-    #    # If the value sent to the API startswith $encrypted$, ignore it.
-    #    for field in Credential.PASSWORD_FIELDS:
-    #        if unicode(attrs.get(field, '')).startswith('$encrypted$'):
-    #            attrs.pop(field, None)
-    #    instance = super(CredentialSerializer, self).restore_object(attrs, instance)
-    #    return instance
+    def restore_object(self, attrs, instance=None):
+        # If the value sent to the API startswith $encrypted$, ignore it.
+        for field in Credential.PASSWORD_FIELDS:
+            if unicode(attrs.get(field, '')).startswith('$encrypted$'):
+                attrs.pop(field, None)
+        instance = super(CredentialSerializer, self).restore_object(attrs, instance)
+        return instance
 
     def get_related(self, obj):
         if obj is None:

@@ -748,8 +748,6 @@ class InventorySourceUpdateView(GenericAPIView):
         data = dict(
             can_update=obj.can_update,
         )
-        if obj.source:
-            data['passwords_needed_to_update'] = obj.source_passwords_needed
         return Response(data)
 
     def post(self, request, *args, **kwargs):
@@ -757,8 +755,7 @@ class InventorySourceUpdateView(GenericAPIView):
         if obj.can_update:
             inventory_update = obj.update(**request.DATA)
             if not inventory_update:
-                data = dict(passwords_needed_to_update=obj.source_passwords_needed)
-                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+                return Response({}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 headers = {'Location': inventory_update.get_absolute_url()}
                 return Response(status=status.HTTP_202_ACCEPTED, headers=headers)

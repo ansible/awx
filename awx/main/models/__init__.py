@@ -299,7 +299,7 @@ class CommonTask(PrimordialModel):
 
     def start(self, **kwargs):
         task_class = self._get_task_class()
-        needed = self._get_passwords_needed_to_start
+        needed = self._get_passwords_needed_to_start()
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
@@ -320,6 +320,7 @@ class CommonTask(PrimordialModel):
         return bool(self.status in ('pending', 'waiting', 'running'))
 
     def cancel(self):
+        # FIXME: Force cancel!
         if self.can_cancel:
             if not self.cancel_flag:
                 self.cancel_flag = True
@@ -822,23 +823,7 @@ class InventorySource(PrimordialModel):
         default=None,
         blank=True,
     )
-    #source_username = models.CharField( # FIXME: Remove after migration
-    #    max_length=1024,
-    #    blank=True,
-    #    default='',
-    #)
-    #source_password = models.CharField( # FIXME: Remove after migration
-    #    max_length=1024,
-    #    blank=True,
-    #    default='',
-    #)
     source_regions = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-    )
-    # FIXME: Remove tags field when making other migrations for credential changes!
-    source_tags = models.CharField(
         max_length=1024,
         blank=True,
         default='',
@@ -894,21 +879,6 @@ class InventorySource(PrimordialModel):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        # When first saving to the database, don't store any password field
-        # values, but instead save them until after the instance is created.
-        #if new_instance:
-        #    for field in self.PASSWORD_FIELDS:
-        #        value = getattr(self, field, '')
-        #        setattr(self, '_saved_%s' % field, value)
-        #        setattr(self, field, '')
-        # Otherwise, store encrypted values to the database.
-        #else:
-        #    for field in self.PASSWORD_FIELDS:
-        #        encrypted = encrypt_field(self, field, True)
-        #        if getattr(self, field) != encrypted:
-        #            setattr(self, field, encrypted)
-        #            if field not in update_fields:
-        #                update_fields.append(field)
         # Update status and last_updated fields.
         updated_fields = self.set_status_and_last_updated(save=False)
         for field in updated_fields:
@@ -921,31 +891,8 @@ class InventorySource(PrimordialModel):
                 update_fields.append('inventory')
         # Do the actual save.
         super(InventorySource, self).save(*args, **kwargs)
-        # After saving a new instance for the first time (to get a primary
-        # key), set the password fields and save again.
-        #if new_instance:
-        #    update_fields=[]
-        #    for field in self.PASSWORD_FIELDS:
-        #        saved_value = getattr(self, '_saved_%s' % field, '')
-        #        if getattr(self, field) != saved_value:
-        #            setattr(self, field, saved_value)
-        #            update_fields.append(field)
-        #    if update_fields:
-        #        self.save(update_fields=update_fields)
 
     source_vars_dict = VarsDictProperty('source_vars')
-
-    @property
-    def needs_source_password(self):
-        return self.source and self.source_password == 'ASK'
-
-    @property
-    def source_passwords_needed(self):
-        needed = []
-        for field in ('source_password',):
-            if getattr(self, 'needs_%s' % field):
-                needed.append(field)
-        return needed
 
     def set_status_and_last_updated(self, save=True):
         # Determine current status.
@@ -983,12 +930,8 @@ class InventorySource(PrimordialModel):
 
     def update(self, **kwargs):
         if self.can_update:
-            needed = self.source_passwords_needed
-            opts = dict([(field, kwargs.get(field, '')) for field in needed])
-            if not all(opts.values()):
-                return
             inventory_update = self.inventory_updates.create()
-            inventory_update.start(**opts)
+            inventory_update.start()
             return inventory_update
 
     def get_absolute_url(self):
@@ -1032,9 +975,6 @@ class InventoryUpdate(CommonTask):
         from awx.main.tasks import RunInventoryUpdate
         return RunInventoryUpdate
 
-    def _get_passwords_needed_to_start(self):
-        return self.inventory_source.source_passwords_needed
-
 
 class Credential(CommonModelNameNotUnique):
     '''
@@ -1077,14 +1017,6 @@ class Credential(CommonModelNameNotUnique):
         choices=KIND_CHOICES,
         default='ssh',
     )
-
-    #ssh_username = models.CharField(
-    #    blank=True,
-    #    default='',
-    #    max_length=1024,
-    #    verbose_name=_('SSH username'),
-    #    help_text=_('SSH username for a job using this credential.'),
-    #)
     username = models.CharField(
         blank=True,
         default='',
@@ -1092,13 +1024,6 @@ class Credential(CommonModelNameNotUnique):
         verbose_name=_('Username'),
         help_text=_('Username for this credential.'),
     )
-    #ssh_password = models.CharField(
-    #    blank=True,
-    #    default='',
-    #    max_length=1024,
-    #    verbose_name=_('SSH password'),
-    #    help_text=_('SSH password (or "ASK" to prompt the user).'),
-    #)
     password = models.CharField(
         blank=True,
         default='',
@@ -1217,8 +1142,6 @@ class Project(CommonModel):
         ('successful', 'Successful'),
     ]
         
-    #PASSWORD_FIELDS = ('scm_password', 'scm_key_data', 'scm_key_unlock')
-
     SCM_TYPE_CHOICES = [
         ('', _('Manual')),
         ('git', _('Git')),
@@ -1296,38 +1219,6 @@ class Project(CommonModel):
         null=True,
         default=None,
     )
-    #scm_username = models.CharField(
-    #    blank=True,
-    #    null=True,
-    #    default='',
-    #    max_length=256,
-    #    verbose_name=_('Username'),
-    #    help_text=_('SCM username for this project.'),
-    #)
-    #scm_password = models.CharField(
-    #    blank=True,
-    #    null=True,
-    #    default='',
-    #    max_length=1024,
-    #    verbose_name=_('Password'),
-    #    help_text=_('SCM password (or "ASK" to prompt the user).'),
-    #)
-    #scm_key_data = models.TextField(
-    #    blank=True,
-    #    null=True,
-    #    default='',
-    #    verbose_name=_('SSH private key'),
-    #    help_text=_('RSA or DSA private key to be used instead of password.'),
-    #)
-    #scm_key_unlock = models.CharField(
-    #    max_length=1024,
-    #    null=True,
-    #    blank=True,
-    #    default='',
-    #    verbose_name=_('SSH key unlock'),
-    #    help_text=_('Passphrase to unlock SSH private key if encrypted (or '
-    #                '"ASK" to prompt the user).'),
-    #)
     current_update = models.ForeignKey(
         'ProjectUpdate',
         null=True,
@@ -1364,21 +1255,6 @@ class Project(CommonModel):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        # When first saving to the database, don't store any password field
-        # values, but instead save them until after the instance is created.
-        #if new_instance:
-        #    for field in self.PASSWORD_FIELDS:
-        #        value = getattr(self, field, '')
-        #        setattr(self, '_saved_%s' % field, value)
-        #        setattr(self, field, '')
-        # Otherwise, store encrypted values to the database.
-        #else:
-        #    for field in self.PASSWORD_FIELDS:
-        #        encrypted = encrypt_field(self, field, bool(field != 'scm_key_data'))
-        #        if getattr(self, field) != encrypted:
-        #            setattr(self, field, encrypted)
-        #            if field not in update_fields:
-        #                update_fields.append(field)
         # Check if scm_type or scm_url changes.
         if self.pk:
             project_before = Project.objects.get(pk=self.pk)
@@ -1399,18 +1275,11 @@ class Project(CommonModel):
                 update_fields.append(field)
         # Do the actual save.
         super(Project, self).save(*args, **kwargs)
-        # After saving a new instance for the first time (to get a primary
-        # key), set the password fields and save again.
         if new_instance:
             update_fields=[]
             # Generate local_path for SCM after initial save (so we have a PK).
             if self.scm_type and not self.local_path.startswith('_'):
                 update_fields.append('local_path')
-        #    for field in self.PASSWORD_FIELDS:
-        #        saved_value = getattr(self, '_saved_%s' % field, '')
-        #        if getattr(self, field) != saved_value:
-        #            setattr(self, field, saved_value)
-        #            update_fields.append(field)
             if update_fields:
                 self.save(update_fields=update_fields)
         # If we just created a new project with SCM and it doesn't require any
@@ -1420,14 +1289,11 @@ class Project(CommonModel):
 
     @property
     def needs_scm_password(self):
-        return self.scm_type and not self.scm_key_data and \
-            self.scm_password == 'ASK'
+        return self.credential and self.credential.needs_password
 
     @property
     def needs_scm_key_unlock(self):
-        return self.scm_type and self.scm_key_data and \
-            'ENCRYPTED' in decrypt_field(self, 'scm_key_data') and \
-            (not self.scm_key_unlock or self.scm_key_unlock == 'ASK')
+        return self.credential and self.credential.needs_ssh_key_unlock
 
     @property
     def scm_passwords_needed(self):
@@ -1690,11 +1556,6 @@ class JobTemplate(CommonModel):
         '''
         save_job = kwargs.pop('save', True)
         kwargs['job_template'] = self
-        # Create new name with timestamp format to match jobs launched by the UI.
-        new_name = '%s %s' % (self.name, now().strftime('%Y-%m-%dT%H:%M:%S.%fZ'))
-        new_name = new_name[:-4] + 'Z'
-        kwargs.setdefault('name', new_name)
-        kwargs.setdefault('description', self.description)
         kwargs.setdefault('job_type', self.job_type)
         kwargs.setdefault('inventory', self.inventory)
         kwargs.setdefault('project', self.project)
