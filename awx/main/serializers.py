@@ -287,9 +287,9 @@ class OrganizationSerializer(BaseSerializer):
 
 class ProjectSerializer(BaseSerializer):
 
-    scm_password = serializers.WritableField(required=False, default='')
-    scm_key_data = serializers.WritableField(required=False, default='')
-    scm_key_unlock = serializers.WritableField(required=False, default='')
+    #scm_password = serializers.WritableField(required=False, default='')
+    #scm_key_data = serializers.WritableField(required=False, default='')
+    #scm_key_unlock = serializers.WritableField(required=False, default='')
 
     playbooks = serializers.Field(source='playbooks', help_text='Array of playbooks available within this project.')
     scm_delete_on_next_update = serializers.Field(source='scm_delete_on_next_update')
@@ -299,25 +299,26 @@ class ProjectSerializer(BaseSerializer):
         fields = BASE_FIELDS + ('local_path', 'scm_type', 'scm_url',
                                 'scm_branch', 'scm_clean',
                                 'scm_delete_on_update', 'scm_delete_on_next_update',
-                                'scm_update_on_launch',
-                                'scm_username', 'scm_password', 'scm_key_data',
-                                'scm_key_unlock', 'last_update_failed', 'status', 'last_updated')
+                                'scm_update_on_launch', 'credential',
+                                #'scm_username', 'scm_password', 'scm_key_data',
+                                #'scm_key_unlock',
+                                'last_update_failed', 'status', 'last_updated')
 
-    def to_native(self, obj):
-        ret = super(ProjectSerializer, self).to_native(obj)
+    #def to_native(self, obj):
+        #ret = super(ProjectSerializer, self).to_native(obj)
         # Replace the actual encrypted value with the string $encrypted$.
-        for field in Project.PASSWORD_FIELDS:
-            if field in ret and unicode(ret[field]).startswith('$encrypted$'):
-                ret[field] = '$encrypted$'
-        return ret
+        #for field in Project.PASSWORD_FIELDS:
+        #    if field in ret and unicode(ret[field]).startswith('$encrypted$'):
+        #        ret[field] = '$encrypted$'
+        #return ret
 
-    def restore_object(self, attrs, instance=None):
-        # If the value sent to the API startswith $encrypted$, ignore it.
-        for field in Project.PASSWORD_FIELDS:
-            if unicode(attrs.get(field, '')).startswith('$encrypted$'):
-                attrs.pop(field, None)
-        instance = super(ProjectSerializer, self).restore_object(attrs, instance)
-        return instance
+    #def restore_object(self, attrs, instance=None):
+    #    # If the value sent to the API startswith $encrypted$, ignore it.
+    #    for field in Project.PASSWORD_FIELDS:
+    #        if unicode(attrs.get(field, '')).startswith('$encrypted$'):
+    #            attrs.pop(field, None)
+    #    instance = super(ProjectSerializer, self).restore_object(attrs, instance)
+    #    return instance
 
     def get_related(self, obj):
         if obj is None:
@@ -330,6 +331,9 @@ class ProjectSerializer(BaseSerializer):
             update = reverse('main:project_update_view', args=(obj.pk,)),
             project_updates = reverse('main:project_updates_list', args=(obj.pk,)),
         ))
+        if obj.credential:
+            res['credential'] = reverse('main:credential_detail',
+                                        args=(obj.credential.pk,))
         if obj.current_update:
             res['current_update'] = reverse('main:project_update_detail',
                                             args=(obj.current_update.pk,))
@@ -371,49 +375,51 @@ class ProjectSerializer(BaseSerializer):
             raise serializers.ValidationError('SCM URL is required')
         return attrs
 
-    def validate_scm_username(self, attrs, source):
-        if self.object:
-            scm_type = attrs.get('scm_type', self.object.scm_type) or ''
-            scm_url = unicode(attrs.get('scm_url', self.object.scm_url) or '')
-            scm_username = attrs.get('scm_username', self.object.scm_username) or ''
-        else:
-            scm_type = attrs.get('scm_type', '') or ''
-            scm_url = unicode(attrs.get('scm_url', '') or '')
-            scm_username = attrs.get('scm_username', '') or ''
-        if not scm_type:
-            return attrs
-        try:
-            if scm_url and scm_username:
-                update_scm_url(scm_type, scm_url, scm_username)
-        except ValueError, e:
-            raise serializers.ValidationError((e.args or ('Invalid SCM username',))[0])
-        return attrs
+    #def validate_scm_username(self, attrs, source):
+    #    if self.object:
+    #        scm_type = attrs.get('scm_type', self.object.scm_type) or ''
+    #        scm_url = unicode(attrs.get('scm_url', self.object.scm_url) or '')
+    #        scm_username = attrs.get('scm_username', self.object.scm_username) or ''
+    #    else:
+    #        scm_type = attrs.get('scm_type', '') or ''
+    #        scm_url = unicode(attrs.get('scm_url', '') or '')
+    #        scm_username = attrs.get('scm_username', '') or ''
+    #    if not scm_type:
+    #        return attrs
+    #    try:
+    #        if scm_url and scm_username:
+    #            update_scm_url(scm_type, scm_url, scm_username)
+    #    except ValueError, e:
+    #        raise serializers.ValidationError((e.args or ('Invalid SCM username',))[0])
+    #    return attrs
 
-    def validate_scm_password(self, attrs, source):
-        if self.object:
-            scm_type = attrs.get('scm_type', self.object.scm_type) or ''
-            scm_url = unicode(attrs.get('scm_url', self.object.scm_url) or '')
-            scm_username = attrs.get('scm_username', self.object.scm_username) or ''
-            scm_password = attrs.get('scm_password', self.object.scm_password) or ''
-        else:
-            scm_type = attrs.get('scm_type', '') or ''
-            scm_url = unicode(attrs.get('scm_url', '') or '')
-            scm_username = attrs.get('scm_username', '') or ''
-            scm_password = attrs.get('scm_password', '') or ''
-        if not scm_type:
-            return attrs
-        try:
-            try:
-                if scm_url and scm_username:
-                    update_scm_url(scm_type, scm_url, scm_username)
-            except ValueError:
-                pass
-            else:
-                if scm_url and scm_username and scm_password:
-                    update_scm_url(scm_type, scm_url, scm_username, '**')
-        except ValueError, e:
-            raise serializers.ValidationError((e.args or ('Invalid SCM password',))[0])
-        return attrs
+    #def validate_scm_password(self, attrs, source):
+    #    if self.object:
+    #        scm_type = attrs.get('scm_type', self.object.scm_type) or ''
+    #        scm_url = unicode(attrs.get('scm_url', self.object.scm_url) or '')
+    #        scm_username = attrs.get('scm_username', self.object.scm_username) or ''
+    #        scm_password = attrs.get('scm_password', self.object.scm_password) or ''
+    #    else:
+    #        scm_type = attrs.get('scm_type', '') or ''
+    #        scm_url = unicode(attrs.get('scm_url', '') or '')
+    #        scm_username = attrs.get('scm_username', '') or ''
+    #        scm_password = attrs.get('scm_password', '') or ''
+    #    if not scm_type:
+    #        return attrs
+    #    try:
+    #        try:
+    #            if scm_url and scm_username:
+    #                update_scm_url(scm_type, scm_url, scm_username)
+    #        except ValueError:
+    #            pass
+    #        else:
+    #            if scm_url and scm_username and scm_password:
+    #                update_scm_url(scm_type, scm_url, scm_username, '**')
+    #    except ValueError, e:
+    #        raise serializers.ValidationError((e.args or ('Invalid SCM password',))[0])
+    #    return attrs
+    
+    # FIXME: Validate combination of SCM URL and credential!
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
 
@@ -487,7 +493,7 @@ class HostSerializer(BaseSerializerWithVariables):
 
     class Meta:
         model = Host
-        fields = BASE_FIELDS + ('inventory', 'enabled', 'variables',
+        fields = BASE_FIELDS + ('inventory', 'enabled', 'instance_id', 'variables',
                                 'has_active_failures', 'has_inventory_sources',
                                 'last_job', 'last_job_host_summary')
 
@@ -665,13 +671,14 @@ class GroupVariableDataSerializer(BaseVariableDataSerializer):
 
 class InventorySourceSerializer(BaseSerializer):
     
-    source_password = serializers.WritableField(required=False, default='')
+    #source_password = serializers.WritableField(required=False, default='')
 
     class Meta:
         model = InventorySource
         fields = ('id', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'inventory', 'group', 'source', 'source_path',
-                  'source_vars', 'source_username', 'source_password',
+                  'source_vars', 'credential',
+                  # 'source_username', 'source_password',
                   'source_regions', 'overwrite', 'overwrite_vars',
                   'update_on_launch', 'update_interval', 'last_update_failed',
                   'status', 'last_updated')
@@ -680,9 +687,9 @@ class InventorySourceSerializer(BaseSerializer):
     def to_native(self, obj):
         ret = super(InventorySourceSerializer, self).to_native(obj)
         # Replace the actual encrypted value with the string $encrypted$.
-        for field in InventorySource.PASSWORD_FIELDS:
-            if field in ret and unicode(ret[field]).startswith('$encrypted$'):
-                ret[field] = '$encrypted$'
+        #for field in InventorySource.PASSWORD_FIELDS:
+        #    if field in ret and unicode(ret[field]).startswith('$encrypted$'):
+        #        ret[field] = '$encrypted$'
         # Make regions/tags into a list of strings.
         #for field in ('source_regions', 'source_tags'):
         #    if field in ret:
@@ -693,9 +700,9 @@ class InventorySourceSerializer(BaseSerializer):
 
     def restore_object(self, attrs, instance=None):
         # If the value sent to the API startswith $encrypted$, ignore it.
-        for field in InventorySource.PASSWORD_FIELDS:
-            if unicode(attrs.get(field, '')).startswith('$encrypted$'):
-                attrs.pop(field, None)
+        #for field in InventorySource.PASSWORD_FIELDS:
+        #    if unicode(attrs.get(field, '')).startswith('$encrypted$'):
+        #        attrs.pop(field, None)
         #for field in ('source_regions', 'source_tags'):
         #    value = attrs.get(field, [])
         #    if isinstance(value, (list,tuple)):
@@ -717,6 +724,9 @@ class InventorySourceSerializer(BaseSerializer):
             res['inventory'] = reverse('main:inventory_detail', args=(obj.inventory.pk,))
         if obj.group:
             res['group'] = reverse('main:group_detail', args=(obj.group.pk,))
+        if obj.credential:
+            res['credential'] = reverse('main:credential_detail',
+                                        args=(obj.credential.pk,))
         if obj.current_update:
             res['current_update'] = reverse('main:inventory_update_detail',
                                             args=(obj.current_update.pk,))
@@ -751,14 +761,6 @@ class InventorySourceSerializer(BaseSerializer):
         except yaml.YAMLError:
             pass
         raise serializers.ValidationError('Must be valid JSON or YAML')
-
-    def validate_source_username(self, attrs, source):
-        # FIXME
-        return attrs
-
-    def validate_source_password(self, attrs, source):
-        # FIXME
-        return attrs
 
     def validate_source_regions(self, attrs, source):
         # FIXME
@@ -842,32 +844,32 @@ class CredentialSerializer(BaseSerializer):
 
     # FIXME: may want to make some of these filtered based on user accessing
 
-    ssh_password = serializers.WritableField(required=False, default='')
+    password = serializers.WritableField(required=False, default='')
     ssh_key_data = serializers.WritableField(required=False, default='')
     ssh_key_unlock = serializers.WritableField(required=False, default='')
     sudo_password = serializers.WritableField(required=False, default='')
 
     class Meta:
         model = Credential
-        fields = BASE_FIELDS + ('ssh_username', 'ssh_password', 'ssh_key_data',
+        fields = BASE_FIELDS + ('kind', 'ssh_username', 'ssh_password', 'ssh_key_data',
                                 'ssh_key_unlock', 'sudo_username',
                                 'sudo_password', 'user', 'team',)
 
-    def to_native(self, obj):
-        ret = super(CredentialSerializer, self).to_native(obj)
-        # Replace the actual encrypted value with the string $encrypted$.
-        for field in Credential.PASSWORD_FIELDS:
-            if field in ret and unicode(ret[field]).startswith('$encrypted$'):
-                ret[field] = '$encrypted$'
-        return ret
+    #def to_native(self, obj):
+    #    ret = super(CredentialSerializer, self).to_native(obj)
+    #    # Replace the actual encrypted value with the string $encrypted$.
+    #    for field in Credential.PASSWORD_FIELDS:
+    #        if field in ret and unicode(ret[field]).startswith('$encrypted$'):
+    #            ret[field] = '$encrypted$'
+    #    return ret
 
-    def restore_object(self, attrs, instance=None):
-        # If the value sent to the API startswith $encrypted$, ignore it.
-        for field in Credential.PASSWORD_FIELDS:
-            if unicode(attrs.get(field, '')).startswith('$encrypted$'):
-                attrs.pop(field, None)
-        instance = super(CredentialSerializer, self).restore_object(attrs, instance)
-        return instance
+    #def restore_object(self, attrs, instance=None):
+    #    # If the value sent to the API startswith $encrypted$, ignore it.
+    #    for field in Credential.PASSWORD_FIELDS:
+    #        if unicode(attrs.get(field, '')).startswith('$encrypted$'):
+    #            attrs.pop(field, None)
+    #    instance = super(CredentialSerializer, self).restore_object(attrs, instance)
+    #    return instance
 
     def get_related(self, obj):
         if obj is None:

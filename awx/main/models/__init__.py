@@ -44,7 +44,7 @@ __all__ = ['PrimordialModel', 'Organization', 'Team', 'Project',
            'Job', 'JobHostSummary', 'JobEvent', 'AuthToken',
            'PERM_INVENTORY_ADMIN', 'PERM_INVENTORY_READ',
            'PERM_INVENTORY_WRITE', 'PERM_INVENTORY_DEPLOY',
-           'PERM_INVENTORY_CHECK', 'JOB_STATUS_CHOICES',
+           'PERM_INVENTORY_CHECK', 'TASK_STATUS_CHOICES',
            'CLOUD_INVENTORY_SOURCES']
 
 logger = logging.getLogger('awx.main.models')
@@ -71,7 +71,7 @@ PERMISSION_TYPE_CHOICES = [
     (PERM_INVENTORY_CHECK, _('Deploy To Inventory (Dry Run)')),
 ]
 
-JOB_STATUS_CHOICES = [
+TASK_STATUS_CHOICES = [
     ('new', _('New')),                  # Job has been created, but not started.
     ('pending', _('Pending')),          # Job has been queued, but is not yet running.
     ('waiting', _('Waiting')),          # Job is waiting on an update/dependency.
@@ -186,6 +186,145 @@ class CommonModelNameNotUnique(PrimordialModel):
         abstract = True
 
     name          = models.CharField(max_length=512, unique=False)
+
+class CommonTask(PrimordialModel):
+    '''
+    Common fields for models run by the task engine.
+    '''
+
+    class Meta:
+        app_label = 'main'
+        abstract = True
+
+    cancel_flag = models.BooleanField(
+        blank=True,
+        default=False,
+        editable=False,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=TASK_STATUS_CHOICES,
+        default='new',
+        editable=False,
+    )
+    failed = models.BooleanField(
+        default=False,
+        editable=False,
+    )
+    job_args = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
+    job_cwd = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+    )
+    job_env = JSONField(
+        blank=True,
+        default={},
+        editable=False,
+    )
+    result_stdout = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
+    result_traceback = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
+    celery_task_id = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        editable=False,
+    )
+
+    def __unicode__(self):
+        return u'%s-%s-%s' % (self.created, self.id, self.status)
+
+    def _get_parent_instance(self):
+        return None
+
+    def _update_parent_instance(self):
+        parent_instance = self._get_parent_instance()
+        if parent_instance:
+            if self.status in ('pending', 'waiting', 'running'):
+                if parent_instance.current_update != self:
+                    parent_instance.current_update = self
+                    parent_instance.save(update_fields=['current_update'])
+            elif self.status in ('successful', 'failed', 'error', 'canceled'):
+                if parent_instance.current_update == self:
+                    parent_instance.current_update = None
+                parent_instance.last_update = self
+                parent_instance.last_update_failed = self.failed
+                parent_instance.save(update_fields=['current_update',
+                                                    'last_update',
+                                                    'last_update_failed'])
+
+    def save(self, *args, **kwargs):
+        # Get status before save...
+        status_before = self.status or 'new'
+        if self.pk:
+            self_before = self.__class__.objects.get(pk=self.pk)
+            if self_before.status != self.status:
+                status_before = self_before.status
+        self.failed = bool(self.status in ('failed', 'error', 'canceled'))
+        super(CommonTask, self).save(*args, **kwargs)
+        # If status changed, update parent instance....
+        if self.status != status_before:
+            self._update_parent_instance()
+
+    @property
+    def celery_task(self):
+        try:
+            if self.celery_task_id:
+                return TaskMeta.objects.get(task_id=self.celery_task_id)
+        except TaskMeta.DoesNotExist:
+            pass
+
+    @property
+    def can_start(self):
+        return bool(self.status == 'new')
+
+    def _get_task_class(self):
+        raise NotImplementedError
+
+    def _get_passwords_needed_to_start(self):
+        return []
+
+    def start(self, **kwargs):
+        task_class = self._get_task_class()
+        needed = self._get_passwords_needed_to_start
+        opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        if not all(opts.values()):
+            return False
+        self.status = 'pending'
+        self.save(update_fields=['status'])
+        task_result = task_class().delay(self.pk, **opts)
+        # Reload instance from database so we don't clobber results from task
+        # (mainly from tests when using Django 1.4.x).
+        instance = self.__class__.objects.get(pk=self.pk)
+        # The TaskMeta instance in the database isn't created until the worker
+        # starts processing the task, so we can only store the task ID here.
+        instance.celery_task_id = task_result.task_id
+        instance.save(update_fields=['celery_task_id'])
+        return True
+
+    @property
+    def can_cancel(self):
+        return bool(self.status in ('pending', 'waiting', 'running'))
+
+    def cancel(self):
+        if self.can_cancel:
+            if not self.cancel_flag:
+                self.cancel_flag = True
+                self.save(update_fields=['cancel_flag'])
+        return self.cancel_flag
 
 class Organization(CommonModel):
     '''
@@ -333,7 +472,7 @@ class Host(CommonModelNameNotUnique):
 
     class Meta:
         app_label = 'main'
-        unique_together = (("name", "inventory"),)
+        unique_together = (("name", "inventory"),) # FIXME: Add ('instance_id', 'inventory') after migration.
 
     inventory = models.ForeignKey(
         'Inventory',
@@ -343,6 +482,11 @@ class Host(CommonModelNameNotUnique):
     enabled = models.BooleanField(
         default=True,
         help_text=_('Is this host online and available for running jobs?'),
+    )
+    instance_id = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
     )
     variables = models.TextField(
         blank=True,
@@ -629,7 +773,7 @@ class InventorySource(PrimordialModel):
         ('ec2', _('Amazon EC2')),
     ]
 
-    PASSWORD_FIELDS = ('source_password',)
+    #PASSWORD_FIELDS = ('source_password',)
 
     INVENTORY_SOURCE_STATUS_CHOICES = [
         ('none', _('No External Source')),
@@ -671,16 +815,23 @@ class InventorySource(PrimordialModel):
         default='',
         help_text=_('Inventory source variables in YAML or JSON format.'),
     )
-    source_username = models.CharField(
-        max_length=1024,
+    credential = models.ForeignKey(
+        'Credential',
+        related_name='inventory_sources',
+        null=True,
+        default=None,
         blank=True,
-        default='',
     )
-    source_password = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-    )
+    #source_username = models.CharField( # FIXME: Remove after migration
+    #    max_length=1024,
+    #    blank=True,
+    #    default='',
+    #)
+    #source_password = models.CharField( # FIXME: Remove after migration
+    #    max_length=1024,
+    #    blank=True,
+    #    default='',
+    #)
     source_regions = models.CharField(
         max_length=1024,
         blank=True,
@@ -745,19 +896,19 @@ class InventorySource(PrimordialModel):
         update_fields = kwargs.get('update_fields', [])
         # When first saving to the database, don't store any password field
         # values, but instead save them until after the instance is created.
-        if new_instance:
-            for field in self.PASSWORD_FIELDS:
-                value = getattr(self, field, '')
-                setattr(self, '_saved_%s' % field, value)
-                setattr(self, field, '')
+        #if new_instance:
+        #    for field in self.PASSWORD_FIELDS:
+        #        value = getattr(self, field, '')
+        #        setattr(self, '_saved_%s' % field, value)
+        #        setattr(self, field, '')
         # Otherwise, store encrypted values to the database.
-        else:
-            for field in self.PASSWORD_FIELDS:
-                encrypted = encrypt_field(self, field, True)
-                if getattr(self, field) != encrypted:
-                    setattr(self, field, encrypted)
-                    if field not in update_fields:
-                        update_fields.append(field)
+        #else:
+        #    for field in self.PASSWORD_FIELDS:
+        #        encrypted = encrypt_field(self, field, True)
+        #        if getattr(self, field) != encrypted:
+        #            setattr(self, field, encrypted)
+        #            if field not in update_fields:
+        #                update_fields.append(field)
         # Update status and last_updated fields.
         updated_fields = self.set_status_and_last_updated(save=False)
         for field in updated_fields:
@@ -772,15 +923,15 @@ class InventorySource(PrimordialModel):
         super(InventorySource, self).save(*args, **kwargs)
         # After saving a new instance for the first time (to get a primary
         # key), set the password fields and save again.
-        if new_instance:
-            update_fields=[]
-            for field in self.PASSWORD_FIELDS:
-                saved_value = getattr(self, '_saved_%s' % field, '')
-                if getattr(self, field) != saved_value:
-                    setattr(self, field, saved_value)
-                    update_fields.append(field)
-            if update_fields:
-                self.save(update_fields=update_fields)
+        #if new_instance:
+        #    update_fields=[]
+        #    for field in self.PASSWORD_FIELDS:
+        #        saved_value = getattr(self, '_saved_%s' % field, '')
+        #        if getattr(self, field) != saved_value:
+        #            setattr(self, field, saved_value)
+        #            update_fields.append(field)
+        #    if update_fields:
+        #        self.save(update_fields=update_fields)
 
     source_vars_dict = VarsDictProperty('source_vars')
 
@@ -843,7 +994,7 @@ class InventorySource(PrimordialModel):
     def get_absolute_url(self):
         return reverse('main:inventory_source_detail', args=(self.pk,))
 
-class InventoryUpdate(PrimordialModel):
+class InventoryUpdate(CommonTask):
     '''
     Internal job for tracking inventory updates from external sources.
     '''
@@ -857,125 +1008,33 @@ class InventoryUpdate(PrimordialModel):
         on_delete=models.CASCADE,
         editable=False,
     )
-    cancel_flag = models.BooleanField(
-        blank=True,
+    license_error = models.BooleanField(
         default=False,
         editable=False,
     )
-    status = models.CharField(
-        max_length=20,
-        choices=JOB_STATUS_CHOICES,
-        default='new',
-        editable=False,
-    )
-    failed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    job_args = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
-    )
-    job_cwd = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        editable=False,
-    )
-    job_env = JSONField(
-        blank=True,
-        default={},
-        editable=False,
-    )
-    result_stdout = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
-    )
-    result_traceback = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
-    )
-    celery_task_id = models.CharField(
-        max_length=100,
-        blank=True,
-        default='',
-        editable=False,
-    )
-
-    def __unicode__(self):
-        return u'%s-%s-%s' % (self.created, self.id, self.status)
 
     def save(self, *args, **kwargs):
-        # Get status before save...
-        status_before = self.status or 'new'
-        if self.pk:
-            inventory_update_before = InventoryUpdate.objects.get(pk=self.pk)
-            if inventory_update_before.status != self.status:
-                status_before = inventory_update_before.status
-        self.failed = bool(self.status in ('failed', 'error', 'canceled'))
+        update_fields = kwargs.get('update_fields', [])
+        if bool('license' in self.result_stdout and
+                'exceeded' in self.result_stdout and not self.license_error):
+            self.license_error = True
+            if 'license_error' not in update_fields:
+                update_fields.append('license_error')
         super(InventoryUpdate, self).save(*args, **kwargs)
-        # If status changed, update inventory.
-        if self.status != status_before:
-            if self.status in ('pending', 'waiting', 'running'):
-                inventory_source = self.inventory_source
-                if inventory_source.current_update != self:
-                    inventory_source.current_update = self
-                    inventory_source.save(update_fields=['current_update'])
-            elif self.status in ('successful', 'failed', 'error', 'canceled'):
-                inventory_source = self.inventory_source
-                if inventory_source.current_update == self:
-                    inventory_source.current_update = None
-                inventory_source.last_update = self
-                inventory_source.last_update_failed = self.failed
-                inventory_source.save(update_fields=['current_update', 'last_update',
-                                            'last_update_failed'])
+        
+    def _get_parent_instance(self):
+        return self.inventory_source
 
     def get_absolute_url(self):
         return reverse('main:inventory_update_detail', args=(self.pk,))
 
-    @property
-    def celery_task(self):
-        try:
-            if self.celery_task_id:
-                return TaskMeta.objects.get(task_id=self.celery_task_id)
-        except TaskMeta.DoesNotExist:
-            pass
-
-    @property
-    def can_start(self):
-        return bool(self.status == 'new')
-
-    def start(self, **kwargs):
+    def _get_task_class(self):
         from awx.main.tasks import RunInventoryUpdate
-        needed = self.inventory_source.source_passwords_needed
-        opts = dict([(field, kwargs.get(field, '')) for field in needed])
-        if not all(opts.values()):
-            return False
-        self.status = 'pending'
-        self.save(update_fields=['status'])
-        task_result = RunInventoryUpdate().delay(self.pk, **opts)
-        # Reload inventory update from database so we don't clobber results
-        # from RunInventoryUpdate (mainly from tests when using Django 1.4.x).
-        inventory_update = InventoryUpdate.objects.get(pk=self.pk)
-        # The TaskMeta instance in the database isn't created until the worker
-        # starts processing the task, so we can only store the task ID here.
-        inventory_update.celery_task_id = task_result.task_id
-        inventory_update.save(update_fields=['celery_task_id'])
-        return True
+        return RunInventoryUpdate
 
-    @property
-    def can_cancel(self):
-        return bool(self.status in ('pending', 'waiting', 'running'))
+    def _get_passwords_needed_to_start(self):
+        return self.inventory_source.source_passwords_needed
 
-    def cancel(self):
-        if self.can_cancel:
-            if not self.cancel_flag:
-                self.cancel_flag = True
-                self.save(update_fields=['cancel_flag'])
-        return self.cancel_flag
 
 class Credential(CommonModelNameNotUnique):
     '''
@@ -984,27 +1043,68 @@ class Credential(CommonModelNameNotUnique):
     If used with sudo, a sudo password should be set if required.
     '''
 
-    PASSWORD_FIELDS = ('ssh_password', 'ssh_key_data', 'ssh_key_unlock', 'sudo_password')
+    KIND_CHOICES = [
+        ('ssh', _('Machine')),
+        ('scm', _('SCM')),
+        ('aws', _('AWS')),
+        ('rax', _('Rackspace')),
+    ]
+
+    PASSWORD_FIELDS = ('ssh_password', 'password', 'ssh_key_data', 'ssh_key_unlock', 'sudo_password')
 
     class Meta:
         app_label = 'main'
+        unique_together = [('user', 'team', 'kind', 'name')]
 
-    user            = models.ForeignKey('auth.User', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
-    team            = models.ForeignKey('Team', null=True, default=None, blank=True, on_delete=SET_NULL, related_name='credentials')
-
-    ssh_username = models.CharField(
+    user = models.ForeignKey(
+        'auth.User',
+        null=True,
+        default=None,
         blank=True,
-        default='',
-        max_length=1024,
-        verbose_name=_('SSH username'),
-        help_text=_('SSH username for a job using this credential.'),
+        on_delete=models.CASCADE,
+        related_name='credentials',
     )
-    ssh_password = models.CharField(
+    team = models.ForeignKey(
+        'Team',
+        null=True,
+        default=None,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='credentials',
+    )
+    kind = models.CharField(
+        max_length=32,
+        choices=KIND_CHOICES,
+        default='machine',
+    )
+
+    #ssh_username = models.CharField(
+    #    blank=True,
+    #    default='',
+    #    max_length=1024,
+    #    verbose_name=_('SSH username'),
+    #    help_text=_('SSH username for a job using this credential.'),
+    #)
+    username = models.CharField(
         blank=True,
         default='',
         max_length=1024,
-        verbose_name=_('SSH password'),
-        help_text=_('SSH password (or "ASK" to prompt the user).'),
+        verbose_name=_('Username'),
+        help_text=_('Username for this credential.'),
+    )
+    #ssh_password = models.CharField(
+    #    blank=True,
+    #    default='',
+    #    max_length=1024,
+    #    verbose_name=_('SSH password'),
+    #    help_text=_('SSH password (or "ASK" to prompt the user).'),
+    #)
+    password = models.CharField(
+        blank=True,
+        default='',
+        max_length=1024,
+        verbose_name=_('Password'),
+        help_text=_('Password for this credential.'),
     )
     ssh_key_data = models.TextField(
         blank=True,
@@ -1087,13 +1187,14 @@ class Credential(CommonModelNameNotUnique):
                 update_fields.append(field)
             self.save(update_fields=update_fields)
 
-class Team(CommonModel):
+class Team(CommonModelNameNotUnique):
     '''
     A team is a group of users that work on common projects.
     '''
 
     class Meta:
         app_label = 'main'
+        unique_together = [('organization', 'name')]
 
     projects        = models.ManyToManyField('Project', blank=True, related_name='teams')
     users           = models.ManyToManyField('auth.User', blank=True, related_name='teams')
@@ -1116,7 +1217,7 @@ class Project(CommonModel):
         ('successful', 'Successful'),
     ]
         
-    PASSWORD_FIELDS = ('scm_password', 'scm_key_data', 'scm_key_unlock')
+    #PASSWORD_FIELDS = ('scm_password', 'scm_key_data', 'scm_key_unlock')
 
     SCM_TYPE_CHOICES = [
         ('', _('Manual')),
@@ -1188,38 +1289,45 @@ class Project(CommonModel):
     scm_update_on_launch = models.BooleanField(
         default=False,
     )
-    scm_username = models.CharField(
+    credential = models.ForeignKey(
+        'Credential',
+        related_name='projects',
         blank=True,
         null=True,
-        default='',
-        max_length=256,
-        verbose_name=_('Username'),
-        help_text=_('SCM username for this project.'),
+        default=None,
     )
-    scm_password = models.CharField(
-        blank=True,
-        null=True,
-        default='',
-        max_length=1024,
-        verbose_name=_('Password'),
-        help_text=_('SCM password (or "ASK" to prompt the user).'),
-    )
-    scm_key_data = models.TextField(
-        blank=True,
-        null=True,
-        default='',
-        verbose_name=_('SSH private key'),
-        help_text=_('RSA or DSA private key to be used instead of password.'),
-    )
-    scm_key_unlock = models.CharField(
-        max_length=1024,
-        null=True,
-        blank=True,
-        default='',
-        verbose_name=_('SSH key unlock'),
-        help_text=_('Passphrase to unlock SSH private key if encrypted (or '
-                    '"ASK" to prompt the user).'),
-    )
+    #scm_username = models.CharField(
+    #    blank=True,
+    #    null=True,
+    #    default='',
+    #    max_length=256,
+    #    verbose_name=_('Username'),
+    #    help_text=_('SCM username for this project.'),
+    #)
+    #scm_password = models.CharField(
+    #    blank=True,
+    #    null=True,
+    #    default='',
+    #    max_length=1024,
+    #    verbose_name=_('Password'),
+    #    help_text=_('SCM password (or "ASK" to prompt the user).'),
+    #)
+    #scm_key_data = models.TextField(
+    #    blank=True,
+    #    null=True,
+    #    default='',
+    #    verbose_name=_('SSH private key'),
+    #    help_text=_('RSA or DSA private key to be used instead of password.'),
+    #)
+    #scm_key_unlock = models.CharField(
+    #    max_length=1024,
+    #    null=True,
+    #    blank=True,
+    #    default='',
+    #    verbose_name=_('SSH key unlock'),
+    #    help_text=_('Passphrase to unlock SSH private key if encrypted (or '
+    #                '"ASK" to prompt the user).'),
+    #)
     current_update = models.ForeignKey(
         'ProjectUpdate',
         null=True,
@@ -1258,19 +1366,19 @@ class Project(CommonModel):
         update_fields = kwargs.get('update_fields', [])
         # When first saving to the database, don't store any password field
         # values, but instead save them until after the instance is created.
-        if new_instance:
-            for field in self.PASSWORD_FIELDS:
-                value = getattr(self, field, '')
-                setattr(self, '_saved_%s' % field, value)
-                setattr(self, field, '')
+        #if new_instance:
+        #    for field in self.PASSWORD_FIELDS:
+        #        value = getattr(self, field, '')
+        #        setattr(self, '_saved_%s' % field, value)
+        #        setattr(self, field, '')
         # Otherwise, store encrypted values to the database.
-        else:
-            for field in self.PASSWORD_FIELDS:
-                encrypted = encrypt_field(self, field, bool(field != 'scm_key_data'))
-                if getattr(self, field) != encrypted:
-                    setattr(self, field, encrypted)
-                    if field not in update_fields:
-                        update_fields.append(field)
+        #else:
+        #    for field in self.PASSWORD_FIELDS:
+        #        encrypted = encrypt_field(self, field, bool(field != 'scm_key_data'))
+        #        if getattr(self, field) != encrypted:
+        #            setattr(self, field, encrypted)
+        #            if field not in update_fields:
+        #                update_fields.append(field)
         # Check if scm_type or scm_url changes.
         if self.pk:
             project_before = Project.objects.get(pk=self.pk)
@@ -1298,11 +1406,11 @@ class Project(CommonModel):
             # Generate local_path for SCM after initial save (so we have a PK).
             if self.scm_type and not self.local_path.startswith('_'):
                 update_fields.append('local_path')
-            for field in self.PASSWORD_FIELDS:
-                saved_value = getattr(self, '_saved_%s' % field, '')
-                if getattr(self, field) != saved_value:
-                    setattr(self, field, saved_value)
-                    update_fields.append(field)
+        #    for field in self.PASSWORD_FIELDS:
+        #        saved_value = getattr(self, '_saved_%s' % field, '')
+        #        if getattr(self, field) != saved_value:
+        #            setattr(self, field, saved_value)
+        #            update_fields.append(field)
             if update_fields:
                 self.save(update_fields=update_fields)
         # If we just created a new project with SCM and it doesn't require any
@@ -1429,7 +1537,7 @@ class Project(CommonModel):
                     results.append(playbook)
         return results
 
-class ProjectUpdate(PrimordialModel):
+class ProjectUpdate(CommonTask):
     '''
     Internal job for tracking project updates from SCM.
     '''
@@ -1443,128 +1551,17 @@ class ProjectUpdate(PrimordialModel):
         on_delete=models.CASCADE,
         editable=False,
     )
-    cancel_flag = models.BooleanField(
-        blank=True,
-        default=False,
-        editable=False,
-    )
-    status = models.CharField(
-        max_length=20,
-        choices=JOB_STATUS_CHOICES,
-        default='new',
-        editable=False,
-    )
-    failed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    job_args = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
-    )
-    job_cwd = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        editable=False,
-    )
-    job_env = JSONField(
-        blank=True,
-        default={},
-        editable=False,
-    )
-    result_stdout = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
-    )
-    result_traceback = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
-    )
-    celery_task_id = models.CharField(
-        max_length=100,
-        blank=True,
-        default='',
-        editable=False,
-    )
 
-    def __unicode__(self):
-        return u'%s-%s-%s' % (self.created, self.id, self.status)
+    def _get_parent_instance(self):
+        return self.project
 
-    def save(self, *args, **kwargs):
-        # Get status before save...
-        status_before = self.status or 'new'
-        if self.pk:
-            project_update_before = ProjectUpdate.objects.get(pk=self.pk)
-            if project_update_before.status != self.status:
-                status_before = project_update_before.status
-        self.failed = bool(self.status in ('failed', 'error', 'canceled'))
-        super(ProjectUpdate, self).save(*args, **kwargs)
-        # If status changed, update project.
-        if self.status != status_before:
-            if self.status in ('pending', 'waiting', 'running'):
-                project = self.project
-                if project.current_update != self:
-                    project.current_update = self
-                    project.save(update_fields=['current_update'])
-            elif self.status in ('successful', 'failed', 'error', 'canceled'):
-                project = self.project
-                if project.current_update == self:
-                    project.current_update = None
-                project.last_update = self
-                project.last_update_failed = self.failed
-                if not self.failed and project.scm_delete_on_next_update:
-                    project.scm_delete_on_next_update = False
-                project.save(update_fields=['current_update', 'last_update',
-                                            'last_update_failed',
-                                            'scm_delete_on_next_update'])
-
-    def get_absolute_url(self):
-        return reverse('main:project_update_detail', args=(self.pk,))
-
-    @property
-    def celery_task(self):
-        try:
-            if self.celery_task_id:
-                return TaskMeta.objects.get(task_id=self.celery_task_id)
-        except TaskMeta.DoesNotExist:
-            pass
-
-    @property
-    def can_start(self):
-        return bool(self.status == 'new')
-
-    def start(self, **kwargs):
+    def _get_task_class(self):
         from awx.main.tasks import RunProjectUpdate
-        needed = self.project.scm_passwords_needed
-        opts = dict([(field, kwargs.get(field, '')) for field in needed])
-        if not all(opts.values()):
-            return False
-        self.status = 'pending'
-        self.save(update_fields=['status'])
-        task_result = RunProjectUpdate().delay(self.pk, **opts)
-        # Reload project update from database so we don't clobber results
-        # from RunProjectUpdate (mainly from tests when using Django 1.4.x).
-        project_update = ProjectUpdate.objects.get(pk=self.pk)
-        # The TaskMeta instance in the database isn't created until the worker
-        # starts processing the task, so we can only store the task ID here.
-        project_update.celery_task_id = task_result.task_id
-        project_update.save(update_fields=['celery_task_id'])
-        return True
+        return RunProjectUpdate
 
-    @property
-    def can_cancel(self):
-        return bool(self.status in ('pending', 'waiting', 'running'))
+    def _get_passwords_needed_to_start(self):
+        return self.project.scm_passwords_needed
 
-    def cancel(self):
-        if self.can_cancel:
-            if not self.cancel_flag:
-                self.cancel_flag = True
-                self.save(update_fields=['cancel_flag'])
-        return self.cancel_flag
 
 class Permission(CommonModelNameNotUnique):
     '''
@@ -1648,6 +1645,14 @@ class JobTemplate(CommonModel):
         default=None,
         on_delete=models.SET_NULL,
     )
+    cloud_credential = models.ForeignKey(
+        'Credential',
+        related_name='job_templates_as_cloud_credential+',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
     forks = models.PositiveIntegerField(
         blank=True,
         default=0,
@@ -1692,6 +1697,7 @@ class JobTemplate(CommonModel):
         kwargs.setdefault('project', self.project)
         kwargs.setdefault('playbook', self.playbook)
         kwargs.setdefault('credential', self.credential)
+        kwargs.setdefault('cloud_credential', self.cloud_credential)
         kwargs.setdefault('forks', self.forks)
         kwargs.setdefault('limit', self.limit)
         kwargs.setdefault('verbosity', self.verbosity)
@@ -1721,7 +1727,7 @@ class JobTemplate(CommonModel):
                     needed.append(pw)
         return bool(self.credential and not len(needed))
 
-class Job(CommonModelNameNotUnique):
+class Job(CommonTask):
     '''
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the
@@ -1761,6 +1767,14 @@ class Job(CommonModelNameNotUnique):
         null=True,
         on_delete=models.SET_NULL,
     )
+    cloud_credential = models.ForeignKey(
+        'Credential',
+        related_name='jobs_as_cloud_credential+',
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.SET_NULL,
+    )
     project = models.ForeignKey(
         'Project',
         related_name='jobs',
@@ -1792,57 +1806,10 @@ class Job(CommonModelNameNotUnique):
         blank=True,
         default='',
     )
-    cancel_flag = models.BooleanField(
-        blank=True,
-        default=False,
-        editable=False,
-    )
     launch_type = models.CharField(
         max_length=20,
         choices=LAUNCH_TYPE_CHOICES,
         default='manual',
-        editable=False,
-    )
-    status = models.CharField(
-        max_length=20,
-        choices=JOB_STATUS_CHOICES,
-        default='new',
-        editable=False,
-    )
-    failed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    job_args = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
-    )
-    job_cwd = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-        editable=False,
-    )
-    job_env = JSONField(
-        blank=True,
-        default={},
-        editable=False,
-    )
-    result_stdout = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
-    )
-    result_traceback = models.TextField(
-        blank=True,
-        default='',
-        editable=False,
-    )
-    celery_task_id = models.CharField(
-        max_length=100,
-        blank=True,
-        default='',
         editable=False,
     )
     hosts = models.ManyToManyField(
@@ -1856,22 +1823,7 @@ class Job(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('main:job_detail', args=(self.pk,))
 
-    def __unicode__(self):
-        return u'%s-%s-%s' % (self.name, self.id, self.status)
-
-    def save(self, *args, **kwargs):
-        self.failed = bool(self.status in ('failed', 'error', 'canceled'))
-        super(Job, self).save(*args, **kwargs)
-
     extra_vars_dict = VarsDictProperty('extra_vars', True)
-
-    @property
-    def celery_task(self):
-        try:
-            if self.celery_task_id:
-                return TaskMeta.objects.get(task_id=self.celery_task_id)
-        except TaskMeta.DoesNotExist:
-            pass
 
     @property
     def task_auth_token(self):
@@ -1894,40 +1846,12 @@ class Job(CommonModelNameNotUnique):
                     needed.append(pw)
         return needed
 
-    @property
-    def can_start(self):
-        return bool(self.status == 'new')
-
-    def start(self, **kwargs):
+    def _get_task_class(self):
         from awx.main.tasks import RunJob
-        if not self.can_start:
-            return False
-        needed = self.passwords_needed_to_start
-        opts = dict([(field, kwargs.get(field, '')) for field in needed])
-        if not all(opts.values()):
-            return False
-        self.status = 'pending'
-        self.save(update_fields=['status'])
-        task_result = RunJob().delay(self.pk, **opts)
-        # Reload job from database so we don't clobber results from RunJob
-        # (mainly from tests when using Django 1.4.x).
-        job = Job.objects.get(pk=self.pk)
-        # The TaskMeta instance in the database isn't created until the worker
-        # starts processing the task, so we can only store the task ID here.
-        job.celery_task_id = task_result.task_id
-        job.save(update_fields=['celery_task_id'])
-        return True
-
-    @property
-    def can_cancel(self):
-        return bool(self.status in ('pending', 'waiting', 'running'))
-
-    def cancel(self):
-        if self.can_cancel:
-            if not self.cancel_flag:
-                self.cancel_flag = True
-                self.save(update_fields=['cancel_flag'])
-        return self.cancel_flag
+        return RunJob
+    
+    def _get_passwords_needed_to_start(self):
+        return self.passwords_needed_to_start
 
     @property
     def successful_hosts(self):
