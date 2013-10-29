@@ -192,10 +192,10 @@ class RunJobTest(BaseCeleryTest):
         opts = {
             'name': 'test-creds',
             'user': self.super_django_user,
-            'ssh_username': '',
+            'username': '',
             'ssh_key_data': '',
             'ssh_key_unlock': '',
-            'ssh_password': '',
+            'password': '',
             'sudo_username': '',
             'sudo_password': '',
         }
@@ -706,8 +706,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue('-l' in self.run_job_args)
 
     def test_ssh_username_and_password(self):
-        self.create_test_credential(ssh_username='sshuser',
-                                    ssh_password='sshpass')
+        self.create_test_credential(username='sshuser', password='sshpass')
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)

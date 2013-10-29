@@ -235,60 +235,60 @@ class BaseJobTestMixin(BaseTestMixin):
                                           TEST_SSH_KEY_DATA_LOCKED,
                                           TEST_SSH_KEY_DATA_UNLOCK)
         self.cred_bob = self.user_bob.credentials.create(
-            ssh_username='bob',
-            ssh_password='ASK',
+            username='bob',
+            password='ASK',
             created_by=self.user_sue,
         )
         self.cred_chuck = self.user_chuck.credentials.create(
-            ssh_username='chuck',
+            username='chuck',
             ssh_key_data=TEST_SSH_KEY_DATA,
             created_by=self.user_sue,
         )
         self.cred_doug = self.user_doug.credentials.create(
-            ssh_username='doug',
-            ssh_password='doug doesn\'t mind his password being saved. this '
+            username='doug',
+            password='doug doesn\'t mind his password being saved. this '
                          'is why we dont\'t let doug actually run jobs.',
             created_by=self.user_sue,
         )
         self.cred_eve = self.user_eve.credentials.create(
-            ssh_username='eve',
-            ssh_password='ASK',
+            username='eve',
+            password='ASK',
             sudo_username='root',
             sudo_password='ASK',
             created_by=self.user_sue,
         )
         self.cred_frank = self.user_frank.credentials.create(
-            ssh_username='frank',
-            ssh_password='fr@nk the t@nk',
+            username='frank',
+            password='fr@nk the t@nk',
             created_by=self.user_sue,
         )
         self.cred_greg = self.user_greg.credentials.create(
-            ssh_username='greg',
+            username='greg',
             ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
             ssh_key_unlock='ASK',
             created_by=self.user_sue,
         )
         self.cred_holly = self.user_holly.credentials.create(
-            ssh_username='holly',
-            ssh_password='holly rocks',
+            username='holly',
+            password='holly rocks',
             created_by=self.user_sue,
         )
         self.cred_iris = self.user_iris.credentials.create(
-            ssh_username='iris',
-            ssh_password='ASK',
+            username='iris',
+            password='ASK',
             created_by=self.user_sue,
         )
 
         # Each operations team also has shared credentials they can use.
         self.cred_ops_east = self.team_ops_east.credentials.create(
-            ssh_username='east',
+            username='east',
             ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
             ssh_key_unlock=TEST_SSH_KEY_DATA_UNLOCK,
             created_by = self.user_sue,
         )
         self.cred_ops_west = self.team_ops_west.credentials.create(
-            ssh_username='west',
-            ssh_password='Heading270',
+            username='west',
+            password='Heading270',
             created_by = self.user_sue,
         )
 
