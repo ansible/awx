@@ -112,7 +112,17 @@ angular.module('GroupFormDefinition', [])
                 type: 'text',
                 awRequiredWhen: {variable: "sourcePathRequired", init: "false" }
                 },
-            source_username: {
+            credential: { // FIXME: Lookup doesn't work yet!
+                label: 'Cloud Credential',
+                type: 'lookup',
+                sourceModel: 'credential',
+                sourceField: 'name',
+                ngClick: 'lookUpCredential()',
+                addRequired: false, 
+                editRequired: false,
+                column: 1
+                },
+            /*source_username: {
                 labelBind: 'sourceUsernameLabel',
                 excludeModal: true,
                 type: 'text',
@@ -141,7 +151,7 @@ angular.module('GroupFormDefinition', [])
                 awPassMatch: true,
                 associated: 'source_password',
                 autocomplete: false
-                },
+                },*/
             source_regions: {
                 label: 'Regions',
                 excludeModal: true,

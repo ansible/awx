@@ -29,6 +29,9 @@ angular.module('CredentialsListDefinition', [])
                 label: 'Description',
                 excludeModal: true
                 },
+            kind: {
+                label: 'Kind'
+                },
             team: {
                 label: 'Team',
                 ngBind: 'credential.team_name',

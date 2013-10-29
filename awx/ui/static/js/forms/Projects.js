@@ -128,7 +128,16 @@ angular.module('ProjectFormDefinition', [])
                 addRequired: false,
                 editRequired: false
                 },
-            auth_required: {
+            credential: { // FIXME: Lookup doesn't work yet!
+                label: 'SCM Credential',
+                type: 'lookup',
+                sourceModel: 'credential',
+                sourceField: 'name',
+                ngClick: 'lookUpCredential()',
+                addRequired: false, 
+                editRequired: false,
+                },
+            /*auth_required: {
                 label: 'Authorization required?',
                 type: 'checkbox',
                 ngShow: "scm_type !== '' && scm_type !== null",
@@ -194,7 +203,7 @@ angular.module('ProjectFormDefinition', [])
                 editRequired: false,
                 awPassMatch: true,
                 associated: 'scm_key_unlock'
-                },
+                },*/
             checkbox_group: {
                 label: 'SCM Options',
                 type: 'checkbox_group',

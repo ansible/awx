@@ -517,7 +517,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                           scope.groups[i].name + '</em>. Use the Refresh button to monitor the status.', 'alert-info'); 
                    }
                    else {
-                      if (scope.groups[i].summary_fields.inventory_source.source == 'ec2') {
+                      /*if (scope.groups[i].summary_fields.inventory_source.source == 'ec2') {
                          scope.sourceUsernameLabel = 'Access Key ID';
                          scope.sourcePasswordLabel = 'Secret Access Key';
                          scope.sourcePasswordConfirmLabel = 'Confirm Secret Access Key';
@@ -526,7 +526,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                          scope.sourceUsernameLabel = 'Username';
                          scope.sourcePasswordLabel = 'Password'; 
                          scope.sourcePasswordConfirmLabel = 'Confirm Password';
-                      }
+                      }*/
                       Rest.setUrl(scope.groups[i].related.inventory_source);
                       Rest.get()
                           .success( function(data, status, headers, config) {
@@ -685,11 +685,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.source = form.fields.source['default'];
         scope.parseType = 'yaml';
         scope[form.fields['source_vars'].parseTypeName] = 'yaml';
-        scope.sourcePasswordRequired = false;
+        /*scope.sourcePasswordRequired = false;
         scope.sourceUsernameRequired = false;
         scope.sourceUsernameLabel = 'Username';
         scope.sourcePasswordLabel = 'Password';
-        scope.sourcePasswordConfirmLabel = 'Confirm Password';
+        scope.sourcePasswordConfirmLabel = 'Confirm Password';*/
         scope.sourcePathRequired = false;
         
         ParseTypeChange(scope);
@@ -855,8 +855,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                var data = { group: group_id, 
                    source: scope['source'].value,
                    source_path: scope['source_path'],
-                   source_username: scope['source_username'],
-                   source_password: scope['source_password'],
+                   //source_username: scope['source_username'],
+                   //source_password: scope['source_password'],
                    source_regions: scope['source_regions'],
                    overwrite: scope['overwrite'],
                    overwrite_vars: scope['overwrite_vars'],
@@ -955,7 +955,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             };
 
         scope.sourceChange = function() {
-            if (scope['source'].value == 'ec2' || scope['source'].value == 'rackspace') {
+            /*if (scope['source'].value == 'ec2' || scope['source'].value == 'rackspace') {
                scope.sourcePasswordRequired = true;
                scope.sourceUsernameRequired = true;
                if (scope['source'].value == 'ec2') {
@@ -977,7 +977,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                scope.source_password_confirm = '';
                scope.source_username = ''; 
                scope[form.name + '_form']['source_username'].$setValidity('required',true);
-            }
+            }*/
             
             if (scope['source'].value == 'file') {
                scope.sourcePathRequired = true;
@@ -991,7 +991,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
 
         // Password change
-        scope.clearPWConfirm = function(fld) {
+        /*scope.clearPWConfirm = function(fld) {
             // If password value changes, make sure password_confirm must be re-entered
             scope[fld] = '';
             scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
@@ -1018,6 +1018,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
             scope[form.name + '_form'].$setDirty();
             }
+        */
         
         // Start the update process
         scope.updateGroup = function() {
@@ -1030,7 +1031,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                   scope.summary_fields.group.name + '</em>. Use the Refresh button to monitor the status.', 'alert-info'); 
             }
             else {
-              if (scope.source == 'Amazon EC2') {
+              /*if (scope.source == 'Amazon EC2') {
                  scope.sourceUsernameLabel = 'Access Key ID';
                  scope.sourcePasswordLabel = 'Secret Access Key';
                  scope.sourcePasswordConfirmLabel = 'Confirm Secret Access Key';
@@ -1039,7 +1040,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                  scope.sourceUsernameLabel = 'Username';
                  scope.sourcePasswordLabel = 'Password'; 
                  scope.sourcePasswordConfirmLabel = 'Confirm Password';
-              }
+              }*/
               InventoryUpdate({
                   scope: scope, 
                   group_id: group_id,

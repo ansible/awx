@@ -465,6 +465,14 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
            LookUpInit({
                scope: scope,
                form: form,
+               current_item: data.cloud_credential,
+               list: CredentialList, 
+               field: 'cloud_credential' 
+               });
+
+           LookUpInit({
+               scope: scope,
+               form: form,
                current_item: data.project,
                list: ProjectList, 
                field: 'project'

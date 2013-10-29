@@ -28,31 +28,37 @@ angular.module('CredentialFormDefinition', [])
                 addRequired: false,
                 editRequired: false
                 },
-            "ssh_username": {
-                label: 'SSH Username',
+            kind: {
+                label: 'Kind',
+                type: 'radio',  // FIXME: Make select, pull from OPTIONS request
+                options: [{ label: 'Machine', value: 'ssh' }, { label: 'SCM', value: 'scm'}, { label: 'AWS', value: 'aws'}, { label: 'Rackspace', value: 'rax'}],
+                //ngChange: 'selectCategory()'
+                },
+            "username": {
+                label: 'Username',
                 type: 'text',
                 addRequired: false,
                 editRequired: false,
                 autocomplete: false
                 },
-            "ssh_password": {
-                label: 'SSH Password',
+            "password": {
+                label: 'Password',
                 type: 'password',
                 addRequired: false,
                 editRequired: false,
-                ngChange: "clearPWConfirm('ssh_password_confirm')",
+                ngChange: "clearPWConfirm('password_confirm')",
                 ask: true,
                 clear: true,
-                associated: 'ssh_password_confirm',
+                associated: 'password_confirm',
                 autocomplete: false
                 },
-            "ssh_password_confirm": {
-                label: 'Confirm SSH Password',
+            "password_confirm": {
+                label: 'Confirm Password',
                 type: 'password',
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,
-                associated: 'ssh_password',
+                associated: 'password',
                 autocomplete: false
                 },
             "ssh_key_data": {
