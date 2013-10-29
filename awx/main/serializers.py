@@ -851,7 +851,7 @@ class CredentialSerializer(BaseSerializer):
 
     class Meta:
         model = Credential
-        fields = BASE_FIELDS + ('kind', 'ssh_username', 'ssh_password', 'ssh_key_data',
+        fields = BASE_FIELDS + ('kind', 'username', 'password', 'ssh_key_data',
                                 'ssh_key_unlock', 'sudo_username',
                                 'sudo_password', 'user', 'team',)
 

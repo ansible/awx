@@ -160,7 +160,7 @@ class CredentialAdmin(BaseModelAdmin):
 
     fieldsets = (
         (None, {'fields': (('name', 'active'), ('user', 'team'), 'description')}),
-        (_('Auth Info'), {'fields': (('ssh_username', 'ssh_password'),
+        (_('Auth Info'), {'fields': (('username', 'password'),
                                      'ssh_key_data', 'ssh_key_unlock',
                                      ('sudo_username', 'sudo_password'))}),
         (_('Tags'), {'fields': ('tags',)}),
@@ -288,10 +288,10 @@ class JobEventInlineForJob(JobEventInline):
 
 class JobAdmin(BaseModelAdmin):
 
-    list_display = ('name', 'job_template', 'project', 'playbook', 'status')
+    list_display = ('__unicode__', 'job_template', 'project', 'playbook', 'status')
     list_filter = ('status',)
     fieldsets = (
-        (None, {'fields': ('name', 'job_template', 'description')}),
+        (None, {'fields': ('job_template', 'description')}),
         (_('Job Parameters'), {'fields': ('inventory', 'project', 'playbook',
                                           'credential', 'job_type')}),
         (_('More Options'), {'fields': ('forks', 'limit', 'verbosity',
@@ -316,7 +316,7 @@ class JobAdmin(BaseModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         ro_fields = list(super(JobAdmin, self).get_readonly_fields(request, obj))
         if obj and obj.pk and obj.status != 'new':
-            ro_fields.extend(['name', 'description', 'job_template',
+            ro_fields.extend(['description', 'job_template',
                               'inventory', 'project', 'playbook', 'credential',
                               'job_type', 'forks', 'limit',
                               'verbosity', 'extra_vars', 'job_tags'])
