@@ -229,7 +229,6 @@ class RunJobTest(BaseCeleryTest):
             self.job = job_template.create_job(**kwargs)
         else:
             opts = {
-                'name': 'test-job %s' % str(now()),
                 'inventory': self.inventory,
                 'project': self.project,
                 'credential': self.credential,
@@ -544,7 +543,6 @@ class RunJobTest(BaseCeleryTest):
         self.inventory = Inventory.objects.get(pk=self.inventory.pk)
         self.assertFalse(self.inventory.has_active_failures)
         # Un-mark job as inactive (need to force update of flag)
-        job.name = '_'.join(job.name.split('_')[3:]) or 'undeleted job'
         job.active = True
         job.save()
         # Need to manually update last_job on host...
@@ -720,7 +718,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue('--ask-pass' in self.run_job_args)
 
     def test_ssh_ask_password(self):
-        self.create_test_credential(ssh_password='ASK')
+        self.create_test_credential(password='ASK')
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)

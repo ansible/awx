@@ -631,6 +631,22 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.setup_users()
 
     def create_project(self, **kwargs):
+        cred_fields = ['scm_username', 'scm_password', 'scm_key_data',
+                       'scm_key_unlock']
+        if set(cred_fields) & set(kwargs.keys()):
+            kw = {
+                'kind': 'scm',
+                'user': self.super_django_user,
+            }
+            for field in cred_fields:
+                if field not in kwargs:
+                    continue
+                if field.startswith('scm_key_'):
+                    kw[field.replace('scm_key_', 'ssh_key_')] = kwargs.pop(field)
+                else:
+                    kw[field.replace('scm_', '')] = kwargs.pop(field)
+            credential = Credential.objects.create(**kw)
+            kwargs['credential'] = credential
         project = Project.objects.create(**kwargs)
         project_path = project.get_project_path(check_if_exists=False)
         self._temp_project_dirs.append(project_path)
@@ -877,28 +893,32 @@ class ProjectUpdatesTest(BaseTransactionTest):
         #return pu
         # Make sure scm_password doesn't show up anywhere in args or output
         # from project update.
-        scm_password = kwargs.get('scm_password',
-                                  decrypt_field(project, 'scm_password'))
-        if scm_password not in ('', 'ASK'):
-            self.assertFalse(scm_password in pu.job_args, pu.job_args)
-            self.assertFalse(scm_password in json.dumps(pu.job_env),
-                             json.dumps(pu.job_env))
-            self.assertFalse(scm_password in pu.result_stdout,
-                             pu.result_stdout)
-            self.assertFalse(scm_password in pu.result_traceback,
-                             pu.result_traceback)
+        if project.credential:
+            scm_password = kwargs.get('scm_password',
+                                      decrypt_field(project.credential,
+                                                    'password'))
+            if scm_password not in ('', 'ASK'):
+                self.assertFalse(scm_password in pu.job_args, pu.job_args)
+                self.assertFalse(scm_password in json.dumps(pu.job_env),
+                                 json.dumps(pu.job_env))
+                self.assertFalse(scm_password in pu.result_stdout,
+                                 pu.result_stdout)
+                self.assertFalse(scm_password in pu.result_traceback,
+                                 pu.result_traceback)
         # Make sure scm_key_unlock doesn't show up anywhere in args or output
         # from project update.
-        scm_key_unlock = kwargs.get('scm_key_unlock',
-                                    decrypt_field(project, 'scm_key_unlock'))
-        if scm_key_unlock not in ('', 'ASK'):
-            self.assertFalse(scm_key_unlock in pu.job_args, pu.job_args)
-            self.assertFalse(scm_key_unlock in json.dumps(pu.job_env),
-                             json.dumps(pu.job_env))
-            self.assertFalse(scm_key_unlock in pu.result_stdout,
-                             pu.result_stdout)
-            self.assertFalse(scm_key_unlock in pu.result_traceback,
-                             pu.result_traceback)
+        if project.credential:
+            scm_key_unlock = kwargs.get('scm_key_unlock',
+                                        decrypt_field(project.credential,
+                                                      'ssh_key_unlock'))
+            if scm_key_unlock not in ('', 'ASK'):
+                self.assertFalse(scm_key_unlock in pu.job_args, pu.job_args)
+                self.assertFalse(scm_key_unlock in json.dumps(pu.job_env),
+                                 json.dumps(pu.job_env))
+                self.assertFalse(scm_key_unlock in pu.result_stdout,
+                                 pu.result_stdout)
+                self.assertFalse(scm_key_unlock in pu.result_traceback,
+                                 pu.result_traceback)
         project = Project.objects.get(pk=project.pk)
         self.assertEqual(project.last_update, pu)
         self.assertEqual(project.last_update_failed, pu.failed)
@@ -994,7 +1014,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         # Change username/password for private projects and verify the update
         # fails (but doesn't cause the task to hang).
         scm_url_parts = urlparse.urlsplit(project.scm_url)
-        if project.scm_username and project.scm_password not in ('', 'ASK'):
+        if 0 and project.scm_username and project.scm_password not in ('', 'ASK'):
             scm_username = project.scm_username
             should_still_fail = not (getpass.getuser() == scm_username and
                                      scm_url_parts.hostname == 'localhost' and

@@ -301,8 +301,11 @@ class RunJob(BaseTask):
         passwords = super(RunJob, self).build_passwords(job, **kwargs)
         creds = job.credential
         if creds:
-            for field in ('ssh_key_unlock', 'password', 'sudo_password'):
-                value = kwargs.get(field, decrypt_field(creds, field))
+            for field in ('ssh_key_unlock', 'ssh_password', 'sudo_password'):
+                if field == 'ssh_password':
+                    value = kwargs.get(field, decrypt_field(creds, 'password'))
+                else:
+                    value = kwargs.get(field, decrypt_field(creds, field))
                 if value not in ('', 'ASK'):
                     passwords[field] = value
         return passwords
@@ -524,7 +527,7 @@ class RunProjectUpdate(BaseTask):
             value = kwargs.get('scm_key_unlock', decrypt_field(project.credential, 'ssh_key_unlock'))
             if value not in ('', 'ASK'):
                 passwords['scm_key_unlock'] = value
-            passwords['scm_username'] = project.scm_username
+            passwords['scm_username'] = project.credential.username
             passwords['scm_password'] = kwargs.get('scm_password',
                                                    decrypt_field(project.credential, 'password'))
         return passwords
@@ -549,9 +552,9 @@ class RunProjectUpdate(BaseTask):
         scm_type = project.scm_type
         scm_url = update_scm_url(scm_type, project.scm_url)
         scm_url_parts = urlparse.urlsplit(scm_url)
-        scm_username = kwargs.get('passwords', {}).get('username', '')
+        scm_username = kwargs.get('passwords', {}).get('scm_username', '')
         scm_username = scm_username or scm_url_parts.username or ''
-        scm_password = kwargs.get('passwords', {}).get('password', '')
+        scm_password = kwargs.get('passwords', {}).get('scm_password', '')
         scm_password = scm_password or scm_url_parts.password or ''
         if scm_username and scm_password not in ('ASK', ''):
             if scm_type == 'svn':
@@ -633,6 +636,7 @@ class RunProjectUpdate(BaseTask):
         output_replacements = []
         before_url = self._build_scm_url_extra_vars(project_update,
                                                     **kwargs)[0]
+        scm_username = kwargs.get('passwords', {}).get('scm_username', '')
         scm_password = kwargs.get('passwords', {}).get('scm_password', '')
         pwdict = dict(kwargs.get('passwords', {}).items())
         for pw_name, pw_val in pwdict.items():
@@ -645,13 +649,13 @@ class RunProjectUpdate(BaseTask):
         if after_url != before_url:
             output_replacements.append((before_url, after_url))
         project = project_update.project
-        if project.scm_type == 'svn' and project.scm_username and scm_password:
+        if project.scm_type == 'svn' and scm_username and scm_password:
             d_before = {
-                'username': project.scm_username,
+                'username': scm_username,
                 'password': scm_password,
             }
             d_after = {
-                'username': project.scm_username,
+                'username': scm_username,
                 'password': '*'*len(scm_password),
             }
             pattern1 = "username=\"%(username)s\" password=\"%(password)s\""

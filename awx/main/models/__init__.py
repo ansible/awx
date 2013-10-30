@@ -299,6 +299,8 @@ class CommonTask(PrimordialModel):
 
     def start(self, **kwargs):
         task_class = self._get_task_class()
+        if not self.can_start:
+            return False
         needed = self._get_passwords_needed_to_start()
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
@@ -1431,6 +1433,24 @@ class ProjectUpdate(CommonTask):
     def _get_passwords_needed_to_start(self):
         return self.project.scm_passwords_needed
 
+    def _update_parent_instance(self):
+        parent_instance = self._get_parent_instance()
+        if parent_instance:
+            if self.status in ('pending', 'waiting', 'running'):
+                if parent_instance.current_update != self:
+                    parent_instance.current_update = self
+                    parent_instance.save(update_fields=['current_update'])
+            elif self.status in ('successful', 'failed', 'error', 'canceled'):
+                if parent_instance.current_update == self:
+                    parent_instance.current_update = None
+                parent_instance.last_update = self
+                parent_instance.last_update_failed = self.failed
+                if not self.failed and parent_instance.scm_delete_on_next_update:
+                    parent_instance.scm_delete_on_next_update = False
+                parent_instance.save(update_fields=['current_update',
+                                                    'last_update',
+                                                    'last_update_failed',
+                                                    'scm_delete_on_next_update'])
 
 class Permission(CommonModelNameNotUnique):
     '''
@@ -1582,13 +1602,13 @@ class JobTemplate(CommonModel):
         '''
         needed = []
         if self.credential:
-            needed.extend(self.credential.passwords_needed)
+            for pw in self.credential.passwords_needed:
+                if pw == 'password':
+                    needed.append('ssh_password')
+                else:
+                    needed.append(pw)
         if self.project.scm_update_on_launch:
             needed.extend(self.project.scm_passwords_needed)
-        for inventory_source in self.inventory.inventory_sources.filter(active=True, update_on_launch=True):
-            for pw in inventory_source.source_passwords_needed:
-                if pw not in needed:
-                    needed.append(pw)
         return bool(self.credential and not len(needed))
 
 class Job(CommonTask):
@@ -1701,13 +1721,13 @@ class Job(CommonTask):
         '''Return list of password field names needed to start the job.'''
         needed = []
         if self.credential:
-            needed.extend(self.credential.passwords_needed)
+            for pw in self.credential.passwords_needed:
+                if pw == 'password':
+                    needed.append('ssh_password')
+                else:
+                    needed.append(pw)
         if self.project.scm_update_on_launch:
             needed.extend(self.project.scm_passwords_needed)
-        for inventory_source in self.inventory.inventory_sources.filter(active=True, update_on_launch=True):
-            for pw in inventory_source.source_passwords_needed:
-                if pw not in needed:
-                    needed.append(pw)
         return needed
 
     def _get_task_class(self):

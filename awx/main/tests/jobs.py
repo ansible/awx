@@ -677,9 +677,9 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         self.assertEqual(job.status, 'new')
         with self.current_user(self.user_sue):
             data = self.get(url)
-            data['name'] = '%s-updated' % data['name']
+            data['limit'] = '%s-updated' % data['limit']
             response = self.put(url, data)
-            #patch_data = dict(name='%s-changed' % data['name'])
+            #patch_data = dict(limit='%s-changed' % data['limit'])
             #response = self.patch(url, patch_data)
 
         # sue cannot update the job detail if it is in any other state.
@@ -689,9 +689,9 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
             job.save()
             with self.current_user(self.user_sue):
                 data = self.get(url)
-                data['name'] = '%s-updated' % data['name']
+                data['limit'] = '%s-updated' % data['limit']
                 self.put(url, data, expect=405)
-                #patch_data = dict(name='%s-changed' % data['name'])
+                #patch_data = dict(limit='%s-changed' % data['limit'])
                 #self.patch(url, patch_data, expect=405)
 
         # FIXME: Check with other credentials and readonly fields.
@@ -777,7 +777,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
         # Sue can start a job (when passwords are already saved) as long as the
         # status is new.  Reverse list so "new" will be last.
-        for status in reversed([x[0] for x in JOB_STATUS_CHOICES]):
+        for status in reversed([x[0] for x in TASK_STATUS_CHOICES]):
             if status == 'waiting':
                 continue
             job.status = status
@@ -865,7 +865,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         self.check_invalid_auth(url, methods=('post',))
 
         # sue can cancel the job, but only when it is pending or running.
-        for status in [x[0] for x in JOB_STATUS_CHOICES]:
+        for status in [x[0] for x in TASK_STATUS_CHOICES]:
             if status == 'waiting':
                 continue
             job.status = status
