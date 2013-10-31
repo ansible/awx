@@ -810,7 +810,7 @@ class RunInventoryUpdate(BaseTask):
             ec2_path = self.get_path_to('..', 'plugins', 'inventory', 'ec2.py')
             args.append(ec2_path)
         elif inventory_source.source == 'rackspace':
-            rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax2.py')
+            rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax.py')
             args.append(rax_path)
         elif inventory_source.source == 'file':
             args.append(inventory_source.source_path)
