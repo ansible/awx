@@ -743,5 +743,7 @@ class Command(NoArgsCommand):
             self.inventory_update.save(update_fields=['status', 'result_traceback'])
             transaction.commit()
             
-        if exc:
+        if exc and isinstance(exc, CommandError):
+            sys.exit(1)
+        elif exc:
             raise exc

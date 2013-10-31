@@ -65,8 +65,8 @@ SUMMARIZABLE_FK_FIELDS = {
     'job_template': DEFAULT_SUMMARY_FIELDS,
     'last_job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'last_job_host_summary': DEFAULT_SUMMARY_FIELDS + ('failed',),
-    'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
-    'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
+    'last_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
+    'current_update': DEFAULT_SUMMARY_FIELDS + ('status', 'failed', 'license_error'),
     'inventory_source': ('source', 'last_updated', 'status'),
 }
 
@@ -723,7 +723,7 @@ class InventoryUpdateSerializer(BaseSerializer):
         fields = ('id', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'inventory_source', 'status', 'failed',
                   'result_stdout', 'result_traceback', 'job_args', 'job_cwd',
-                  'job_env')
+                  'job_env', 'license_error')
 
     def get_related(self, obj):
         if obj is None:
