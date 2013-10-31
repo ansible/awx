@@ -27,10 +27,10 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
     var url = GetBasePath('base') + $location.path() + '/';
     SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
     
-    if (scope.PostRefreshRemove) {
-       scope.PostRefreshRemove();
+    if (scope.removePostRefresh) {
+       scope.removePostRefresh();
     }
-    scope.PostRefershRemove = scope.$on('PostRefresh', function() {
+    scope.removePostRefresh = scope.$on('PostRefresh', function() {
          // After a refresh, populate the organization name on each row
         if (scope.teams) {
            for ( var i=0; i < scope.teams.length; i++) {

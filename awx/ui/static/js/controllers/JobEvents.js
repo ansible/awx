@@ -121,10 +121,10 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
         return html;
         }
 
-    if (scope.PostRefreshRemove) {
-       scope.PostRefreshRemove();
+    if (scope.removePostRefresh) {
+       scope.removePostRefresh();
     }
-    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
+    scope.removePostRefresh = scope.$on('PostRefresh', function() {
         // Initialize the parent levels
         var set = scope[list.name];
         var cDate;

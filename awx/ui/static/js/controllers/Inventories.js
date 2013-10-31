@@ -31,10 +31,10 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
 
     LoadBreadCrumbs();
 
-    if (scope.projectsPostRefresh) {
-       scope.projectsPostRefresh();
+    if (scope.removePostRefresh) {
+       scope.removePostRefresh();
     }
-    scope.projectsPostRefresh = scope.$on('PostRefresh', function() {
+    scope.removePostRefresh = scope.$on('PostRefresh', function() {
         for (var i=0; i < scope.inventories.length; i++) {
             
             // Set values for Failed Hosts column

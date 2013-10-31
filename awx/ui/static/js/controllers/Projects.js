@@ -32,10 +32,10 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
        SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
     }
 
-    if (scope.projectsPostRefresh) {
-       scope.projectsPostRefresh();
+    if (scope.removePostRefresh) {
+       scope.removePostRefresh();
     }
-    scope.projectsPostRefresh = scope.$on('PostRefresh', function() {
+    scope.removePostRefresh = scope.$on('PostRefresh', function() {
         if (scope.projects) {
            for (var i=0; i < scope.projects.length; i++) {
                if (scope.projects[i].status == 'ok') {

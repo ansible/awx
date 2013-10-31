@@ -24,10 +24,10 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     $rootScope.flashMessage = null;
     scope.selected = [];
   
-    if (scope.PostRefreshRemove) {
-       scope.PostRefreshRemove();
+    if (scope.removePostRefresh) {
+       scope.removePostRefresh();
     }
-    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
+    scope.removePostRefresh = scope.$on('PostRefresh', function() {
         $("tr.success").each(function(index) {
             // Make sure no rows have a green background
             var ngc = $(this).attr('ng-class');

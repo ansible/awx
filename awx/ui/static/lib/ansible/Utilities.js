@@ -434,12 +434,26 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        var scope = params.scope;
        var url = params.url; 
        var field = params.field;
-       var emit_callback = params.emit;
-
+       var variable = params.variable;
+       var callback = params.callback;   // Optional. Provide if you want scop.$emit on completion. 
+       
+       if (scope[variable]) {
+          scope[variable].length = 0;
+       }
+       else {
+          scope[variable] = [];
+       }
+       
        Rest.setUrl(url);
        Rest.options()
            .success( function(data, status, headers, config) {
-               scope.$emit(emit_callback, data.actions['GET'][field].choices);
+               var choices = data.actions.GET[field].choices
+               for (var i=0; i < choices.length; i++) {
+                   scope[variable].push({ label: choices[i][1], value: choices[i][0] });
+               }
+               if (callback) {
+                  scope.$emit(callback);
+               }
                })
            .error(  function(data, status, headers, config) {
                ProcessErrors(scope, data, status, null,
@@ -466,7 +480,18 @@ angular.module('Utilities',['RestServices', 'Utilities'])
            }
            });
       }
-      }]);
+      }])
+   
+   /* Empty()
+    *
+    * Test if a value is 'empty'. Returns true if val is null/''/undefined
+    *
+    */
+   .factory('Empty', [ function() {
+   return function(val) {
+       return (val === null || val === undefined || val === '') ? true : false;
+       }
+       }]);
 
 
 

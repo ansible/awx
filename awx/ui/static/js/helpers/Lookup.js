@@ -15,8 +15,8 @@
  */
  
 angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'PaginateHelper', 'ListGenerator', 'ApiLoader' ])  
-    .factory('LookUpInit', ['Alert', 'Rest', 'GenerateList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'FormatDate',
-    function(Alert, Rest, GenerateList, SearchInit, PaginateInit, GetBasePath, FormatDate) {
+    .factory('LookUpInit', ['Alert', 'Rest', 'GenerateList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'FormatDate', 'Empty',
+    function(Alert, Rest, GenerateList, SearchInit, PaginateInit, GetBasePath, FormatDate, Empty) {
     return function(params) {
         
         var scope = params.scope;  // form scope
@@ -34,11 +34,22 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
         $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-url',defaultUrl + 
             '?' + form.fields[field].sourceField + '__' + 'iexact=:value');
         $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-source',field);
-
+  
         scope['lookUp' + name] = function() {
             var listGenerator = GenerateList;
             var listScope = listGenerator.inject(list, { mode: 'lookup', hdr: hdr });
-            listScope = scope;
+            
+            $('#lookup-modal').on('hidden.bs.modal', function() {
+                // If user clicks cancel without making a selection, make sure that field values are 
+                // in synch. 
+                if (scope[field] == '' || scope[field] == null) {
+                    scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] = '';
+                    if (!scope.$$phase) {
+                        scope.$digest();
+                    }
+                }
+                });
+            
             listScope.selectAction = function() {
                 var found = false;
                 var name;
@@ -100,9 +111,26 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
                       }
                    } 
                 }
-                listScope['toggle_' + list.iterator](scope[field]);
-                });
+                // List generator creates the form, resetting it and losing the previously selected value. 
+                // Put it back based on the value of sourceModel_sourceName
+                if (scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] !== '' && 
+                    scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] !== null) {
+                    for (var i=0; i < listScope[list.name].length; i++) {
+                        if (listScope[list.name][i][form.fields[field].sourceField] ==
+                            scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField]) {
+                            scope[field] = listScope[list.name][i].id;
+                            break;
+                        }
+                    }
+                
+                }
+                
+                if (!Empty(current_item)) {
+                   listScope['toggle_' + list.iterator](current_item);
+                }
 
+                });
+            
             listScope.search(list.iterator);
             
             }

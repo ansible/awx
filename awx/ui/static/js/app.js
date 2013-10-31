@@ -78,7 +78,8 @@ angular.module('ansible', [
     'InventoryStatusDefinition',
     'InventorySummaryHelpDefinition',
     'InventoryHostsHelpDefinition',
-    'TreeSelector'
+    'TreeSelector',
+    'CredentialsHelper'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.
@@ -204,6 +205,9 @@ angular.module('ansible', [
 
             when('/credentials', { templateUrl: urlPrefix + 'partials/credentials.html',
                                    controller: CredentialsList }).
+
+            when('/credentials/add', { templateUrl: urlPrefix + 'partials/credentials.html',
+                                       controller: CredentialsAdd }).
 
             when('/credentials/:credential_id', { templateUrl: urlPrefix + 'partials/credentials.html',
                                                   controller: CredentialsEdit }).

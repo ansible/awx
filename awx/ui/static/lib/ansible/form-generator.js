@@ -131,12 +131,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              $(options.modal_selector).on('shown.bs.modal', function() {
                  $(options.modal_select + ' input:first').focus();
                  });
+             $(options.modal_selector).unbind('hidden.bs.modal');
           }
           else {
              $('#form-modal').modal({ show: true, backdrop: 'static', keyboard: true });
              $('#form-modal').on('shown.bs.modal', function() {
                  $('#form-modal input:first').focus();
                  });
+             $('#form-modal').on('hidden.bs.modal');
           }
           $(document).bind('keydown', function(e) {
               if (e.keyCode === 27) {
@@ -376,27 +378,41 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
            return html;
            }
 
-       function buildCheckbox(form, field, fld, idx) {
-           var html='';
-           html += "<label class=\"";
-           html += (field.inline == undefined || field.inline == true) ? "checkbox-inline" : "";
-           html += (field.labelClass) ? " " + field.labelClass : "";
-           html += "\">";
+       function buildCheckbox(form, field, fld, idx, includeLabel) {
+           var html = '';
+           var label = (includeLabel !== undefined && includeLabel == false) ? false : true;
+           
+           if (label) {
+               html += "<label class=\"";
+               html += (field.inline == undefined || field.inline == true) ? "checkbox-inline" : "";
+               html += (field.labelClass) ? " " + field.labelClass : "";
+               html += "\">";
+           }
+           
            html += "<input type=\"checkbox\" "; 
+           html += (!label) ? "style=\"padding-top:5px;\" " : "";
            html += Attr(field,'type');
            html += "ng-model=\"" + fld + '" ';
            html += "name=\"" + fld + '" ';
            html += (field.ngChange) ? Attr(field,'ngChange') : "";
            html += "id=\"" + form.name + "_" +  fld + "_chbox\" ";
            html += (idx !== undefined) ? "_" + idx : "";
-           html += (field['class']) ? Attr(field,'class') : "";
+           html += "class=\"";
+           html += (field['class']) ? field['class'] + " " : "";
+           html += (!label) ? "checkbox-no-label" : "";
+           html += "\"";
            html += (field.trueValue !== undefined) ? Attr(field,'trueValue') : "";
            html += (field.falseValue !== undefined) ? Attr(field,'falseValue') : "";
            html += (field.checked) ? "checked " : "";
            html += (field.readonly) ? "disabled " : "";
-           html += " > " + field.label + "\n";
-           html += (field.awPopOver) ? Attr(field, 'awPopOver', fld) : "";
-           html += "</label>\n";
+           html += " > ";
+
+           if (label) {
+               html += field.label + " ";
+               html += (field.awPopOver) ? Attr(field, 'awPopOver', fld) : "";
+               html += "</label>\n";
+           }
+
            return html;
            }
        
@@ -564,7 +580,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
                html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
                html += ">\n";
                html += (field.awPopOver && !field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
-               html += "<label class=\"control-label\" for=\"" + fld + '">';
+               html += "<label class=\"control-label\" ";
+               html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
+               html += "for=\"" + fld + "\">";
                html += field.label + '</label>' + "\n";
                html += (field.awPopOver && field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
                html += "</div>\n";
@@ -737,11 +755,25 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
          //checkbox
          if (field.type == 'checkbox') {
-            html += "<label class=\"control-label " + getLabelWidth() + "\" > </label>\n";
+            html += "<div class=\"label-text " + getLabelWidth();
+            html += (field.labelClass) ? " " + field.labelClass : "";
+            html += "\" ";
+            html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
+            html += ">\n";
+            html += (field.awPopOver && !field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
+            html += "<label ";
+            html += "class=\"control-label";
+            html += "\" ";
+            html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
+            html += "for=\"" + fld + '">';
+            html += (field.icon) ? this.icon(field.icon) : "";
+            html += field.label + '</label>' + "\n";
+            html += (field.awPopOver && field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
+            html += "</div>\n";
             html += "<div ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-            html += "class=\"" + getFieldWidth() + " bold-text\">\n"; 
-            html += buildCheckbox(this.form, field, fld);
+            html += "class=\"" + getFieldWidth() + "\">\n"; 
+            html += buildCheckbox(this.form, field, fld, undefined, false);
             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
             html += "</div>\n"
          }

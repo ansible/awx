@@ -86,6 +86,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           this.scope.formModalActionDisabled = false;
           this.scope.lookupHeader = options.hdr;
           $('#lookup-modal').modal({ backdrop: 'static', keyboard: true });
+          $('#lookup-modal').unbind('hidden.bs.modal');
           $(document).bind('keydown', function(e) {
               if (e.keyCode === 27) {
                  $('#lookup-modal').modal('hide');

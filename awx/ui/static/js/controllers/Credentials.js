@@ -29,10 +29,10 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
 
     SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
     
-    if (scope.PostRefreshRemove) {
-       scope.PostRefreshRemove();
+    if (scope.removePostRefresh) {
+       scope.removePostRefresh();
     }
-    scope.PostRefershRemove = scope.$on('PostRefresh', function() {
+    scope.removePostRefresh = scope.$on('PostRefresh', function() {
          // After a refresh, populate the organization name on each row
         for(var i=0; i < scope.credentials.length; i++) {
            if (scope.credentials[i].summary_fields.user) {
@@ -89,7 +89,8 @@ CredentialsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$route
 
 function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-                         GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList, GetBasePath) 
+                         GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList, GetBasePath,
+                         GetChoices, Empty, KindChange) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -100,40 +101,114 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    var generator = GenerateForm;
    var scope = generator.inject(form, {mode: 'add', related: false});
    var base = $location.path().replace(/^\//,'').split('/')[0];
-   var defaultUrl = GetBasePath(base); 
-   defaultUrl += (base == 'teams') ? $routeParams.team_id + '/credentials/' :  $routeParams.user_id + '/credentials/';
+   var defaultUrl = GetBasePath('credentials');
    generator.reset();
    LoadBreadCrumbs();
+
+   // Load the list of options for Kind
+   GetChoices({
+        scope: scope,
+        url: defaultUrl,
+        field: 'kind',
+        variable: 'credential_kind_options'
+        });
+
+   LookUpInit({
+       scope: scope,
+       form: form,
+       current_item: ($routeParams.user_id) ? $routeParams.user_id : null,
+       list: UserList, 
+       field: 'user' 
+       });
+
+   LookUpInit({
+       scope: scope,
+       form: form,
+       current_item: ($routeParams.team_id) ? $routeParams.team_id : null,
+       list: TeamList, 
+       field: 'team' 
+       });
+
+   if (!Empty($routeParams.user_id)) {
+      // Get the username based on incoming route
+      var url = GetBasePath('users') + $routeParams.user_id + '/';
+      scope['user'] = $routeParams.user_id;
+      Rest.setUrl(url);
+      Rest.get()
+          .success( function(data, status, headers, config) { 
+              scope['user_username'] = data.username;
+              })
+          .error( function(data, status, headers, config) {
+              ProcessErrors(scope, data, status, null,
+                  { hdr: 'Error!', msg: 'Failed to retrieve user. GET status: ' + status });
+              }); 
+   }
    
+   if (!Empty($routeParams.team_id)) {
+      // Get the username based on incoming route
+      var url = GetBasePath('teams') + $routeParams.team_id + '/';
+      scope['team'] = $routeParams.team_id;
+      Rest.setUrl(url);
+      Rest.get()
+          .success( function(data, status, headers, config) {
+              scope['team_name'] = data.name;
+              })
+          .error( function(data, status, headers, config) {
+              ProcessErrors(scope, data, status, null,
+                  { hdr: 'Error!', msg: 'Failed to retrieve team. GET status: ' + status });
+              }); 
+   }
+
+   // Handle Kind change
+   scope.kindChange = function () {
+       KindChange({ scope: scope, form: form, reset: true });
+       }
+
    // Save
    scope.formSave = function() {
       generator.clearApiErrors();
-      Rest.setUrl(defaultUrl);
+      
       var data = {}
       for (var fld in form.fields) {
-          data[fld] = scope[fld];
-      }
+          if (scope[fld] === null) {
+             data[fld] = "";
+          }
+          else {
+             data[fld] = scope[fld];
+          }
+      } 
       
-      if (base == 'teams') {
-         data['team'] = $routeParams.team_id; 
+      if (!Empty(scope.team)) {
+         data.team = scope.team;
       }
       else {
-         data['user'] = $routeParams.user_id;
+         data.user = scope.user;
       }
 
-      Rest.post(data)
-          .success( function(data, status, headers, config) {
-              ReturnToCaller(1);
-              })
-          .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to add new Credential. Post returned status: ' + status });
-              });
+      data['kind'] = scope['kind'].value;
+
+      if (!Empty(data.team) && empty(data.user)) {
+          Alert('Missing User or Team', 'You must provide either a User or a Team. If this credential will only be accessed by a specific ' + 
+              'user, select a User. To allow a team of users to access this credential, select a Team.', 'alert-danger');  
+      }
+      else {
+          var url = (!Empty(data.team)) ? GetBasePath('teams') + data.team + '/credentials/' : 
+              GetBasePath('users') + data.user + '/credentials/';
+          Rest.setUrl(url);
+          Rest.post(data)
+              .success( function(data, status, headers, config) {
+                  var base = $location.path().replace(/^\//,'').split('/')[0];
+                  (base == 'credentials') ? ReturnToCaller() : ReturnToCaller(1);
+                  })
+              .error( function(data, status, headers, config) {
+                  ProcessErrors(scope, data, status, form,
+                      { hdr: 'Error!', msg: 'Failed to create new Credential. POST status: ' + status });
+                  });
+      }
       };
 
-   // Reset
+   // Reset defaults
    scope.formReset = function() {
-      // Defaults
       generator.reset();
       };
 
@@ -170,12 +245,15 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
 CredentialsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 'GenerateForm', 
                            'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
-                           'SearchInit', 'PaginateInit', 'LookUpInit', 'UserList', 'TeamList', 'GetBasePath' ]; 
+                           'SearchInit', 'PaginateInit', 'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty',
+                           'KindChange' ]; 
 
 
 function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
-                          RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath) 
+                          RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
+                          KindChange, UserList, TeamList, LookUpInit, Empty
+                          ) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -191,11 +269,10 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    var master = {};
    var id = $routeParams.credential_id;
    var relatedSets = {}; 
-   
 
    function setAskCheckboxes() {
        for (var fld in form.fields) {
-           if (form.fields[fld].type == 'password' && form.fields[fld].ask && scope[fld] == 'ASK') {
+           if (form.fields[fld].type == 'password' && scope[fld] == 'ASK') {
               // turn on 'ask' checkbox for password fields with value of 'ASK'
               $("#" + fld + "-clear-btn").attr("disabled","disabled");
               scope[fld + '_ask'] = true;
@@ -206,73 +283,150 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
            }
            master[fld + '_ask'] = scope[fld + '_ask'];
        }
+
+       // Set kind field to the correct option
+       for (var i=0; i < scope['credential_kind_options'].length; i++) {
+           if (scope['kind'] == scope['credential_kind_options'][i].value) {
+              scope['kind'] = scope['credential_kind_options'][i];
+              break;
+           }
+       }
        } 
 
-   // After Credential is loaded, retrieve each related set and any lookups
-   if (scope.credentialLoadedRemove) {
-      scope.credentialLoadedRemove();
+   if (scope.removeCredentialLoaded) {
+      scope.removeCredentialLoaded();
    }
-   scope.credentialLoadedRemove = scope.$on('credentialLoaded', function() {
-       for (var set in relatedSets) {
-           scope.search(relatedSets[set].iterator);
-       }     
-       });
-
-   // Retrieve detail record and prepopulate the form
-   Rest.setUrl(defaultUrl + ':id/'); 
-   Rest.get({ params: {id: id} })
-       .success( function(data, status, headers, config) {
-           LoadBreadCrumbs({ path: '/credentials/' + id, title: data.name });
-           for (var fld in form.fields) {
-              if (data[fld]) {
-                 scope[fld] = data[fld];
-                 master[fld] = scope[fld];
-              }
-           }
-           scope.team = data.team; 
-           scope.user = data.user; 
-           setAskCheckboxes();
-
-           var related = data.related;
-           for (var set in form.related) {
-               if (related[set]) {
-                  relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
-               }
-           }
-           
-           // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
-           RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
-           RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
-           scope.$emit('credentialLoaded');
-           })
-       .error( function(data, status, headers, config) {
-           ProcessErrors(scope, data, status, form,
-                         { hdr: 'Error!', msg: 'Failed to retrieve Credential: ' + $routeParams.id + '. GET status: ' + status });
+   scope.removeCredentialLoaded = scope.$on('credentialLoaded', function() {
+       LookUpInit({
+           scope: scope,
+           form: form,
+           current_item: ($scope['user_id']) ? scope['user_id'] : null,
+           list: UserList, 
+           field: 'user' 
            });
 
+       LookUpInit({
+           scope: scope,
+           form: form,
+           current_item: ($scope['team_id']) ? scope['team_id'] : null,
+           list: TeamList, 
+           field: 'team'
+           }); 
 
+       setAskCheckboxes();
+       KindChange({ scope: scope, form: form, reset: false });
+       });
+
+   if (scope.removeChoicesReady) {
+      scope.removeChoicesReady();
+   }
+   scope.removeChoicesReady = scope.$on('choicesReady', function() {
+       // Retrieve detail record and prepopulate the form
+       Rest.setUrl(defaultUrl + ':id/'); 
+       Rest.get({ params: {id: id} })
+           .success( function(data, status, headers, config) {
+               LoadBreadCrumbs({ path: '/credentials/' + id, title: data.name });
+               for (var fld in form.fields) {
+                  if (data[fld] !== null && data[fld] !== undefined) {  
+                     scope[fld] = data[fld];
+                     master[fld] = scope[fld];
+                  }
+                  if (form.fields[fld].type == 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
+                      scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
+                          data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                      master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                          scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
+                  }
+               }
+               scope.$emit('credentialLoaded');
+               })
+           .error( function(data, status, headers, config) {
+               ProcessErrors(scope, data, status, form,
+                   { hdr: 'Error!', msg: 'Failed to retrieve Credential: ' + $routeParams.id + '. GET status: ' + status });
+               });
+       });
+
+   GetChoices({
+       scope: scope,
+       url: defaultUrl,
+       field: 'kind',
+       variable: 'credential_kind_options',
+       callback: 'choicesReady'
+       });
+ 
    // Save changes to the parent
    scope.formSave = function() {
       generator.clearApiErrors();
-      Rest.setUrl(defaultUrl + id + '/');
+      
       var data = {}
       for (var fld in form.fields) {
-          data[fld] = scope[fld];   
+          if (scope[fld] === null) {
+             data[fld] = "";
+          }
+          else {
+             data[fld] = scope[fld];
+          }
       } 
       
-      data.team = scope.team; 
-      data.user = scope.user; 
+      if (!Empty(scope.team)) {
+         data.team = scope.team;
+      }
+      else {
+         data.user = scope.user;
+      }
 
-      Rest.put(data)
-          .success( function(data, status, headers, config) {
-              var base = $location.path().replace(/^\//,'').split('/')[0];
-              (base == 'credentials') ? ReturnToCaller() : ReturnToCaller(1);
-              })
-          .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to update Credential: ' + $routeParams.id + '. PUT status: ' + status });
-              });
-      };
+      data['kind'] = scope['kind'].value;
+
+      if (!Empty(data.team) && empty(data.user)) {
+          Alert('Missing User or Team', 'You must provide either a User or a Team. If this credential will only be accessed by a specific ' + 
+              'user, select a User. To allow a team of users to access this credential, select a Team.', 'alert-danger');  
+      }
+      else {
+          // Save changes to the credential record
+          Rest.setUrl(defaultUrl + id + '/');
+          Rest.put(data)
+              .success( function(data, status, headers, config) {
+                  scope.$emit('moveUser', data);
+                  })
+              .error( function(data, status, headers, config) {
+                  ProcessErrors(scope, data, status, form,
+                      { hdr: 'Error!', msg: 'Failed to update Credential. PUT status: ' + status });
+                  });
+      }
+      }
+   
+   // When we're finally done updating the API, navigate out of here
+   function finished() {
+       var base = $location.path().replace(/^\//,'').split('/')[0];
+       (base == 'credentials') ? ReturnToCaller() : ReturnToCaller(1);
+       }
+
+   // Did we change users?
+   if (scope.removeMoveUser) {
+      scope.removeMoveUser();
+   }
+   scope.removeMoveUser = scope.$on('moveUser', function(e, data) {
+       if (master.user !== scope.user && !Empty(scope.user)) {
+           var url = GetBasePath('users') + scope.user + '/';
+           Rest.setUrl(url);
+           Rest.post(data)
+              .success( function(data, status, headers, config) {
+                  finished();
+                  })
+              .error( function(data, status, headers, config) {
+                  ProcessErrors(scope, data, status, null,
+                     { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST status: ' + status });
+                  });
+       }
+       else {
+           finished();
+       }
+       });
+
+   // Handle Kind change
+   scope.kindChange = function () {
+       KindChange({ scope: scope, form: form, reset: true });
+       }
 
    // Cancel
    scope.formReset = function() {
@@ -355,5 +509,6 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 
 CredentialsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
-                            'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath' ]; 
+                            'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
+                            'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty']; 
   

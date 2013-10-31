@@ -159,7 +159,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
         require: 'ngModel',
         link: function(scope, elm, attrs, ctrl) {
             ctrl.$parsers.unshift( function(viewValue) {
-                if (viewValue !== '') {
+                if (viewValue !== '' && viewValue !== null) {
                    var url = elm.attr('data-url');
                    url = url.replace(/\:value/,escape(viewValue));
                    scope[elm.attr('data-source')] = null;
@@ -179,7 +179,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                           return undefined;
                        }
                        });
-                
                 }
                 else {
                    ctrl.$setValidity('awlookup', true);

@@ -28,33 +28,81 @@ angular.module('CredentialFormDefinition', [])
                 addRequired: false,
                 editRequired: false
                 },
+            user: {
+                label: 'User',
+                type: 'lookup',
+                sourceModel: 'user',
+                sourceField: 'username',
+                ngClick: 'lookUpUser()',
+                ngShow: "team == '' || team == null",
+                awPopOver: "<p>A credential must be associated with either a user or a team. Choosing a user allows only the selected user access " + 
+                    "to the credential.</p>",
+                dataTitle: 'User',
+                dataPlacement: 'right',
+                dataContainer: "body"
+                },
+            team: {
+                label: 'Team',
+                type: 'lookup',
+                sourceModel: 'team',
+                sourceField: 'name',
+                ngClick: 'lookUpTeam()',
+                ngShow: "user == '' || user == null",
+                awPopOver: "<p>A credential must be associated with either a user or a team. Choose a team to share a credential with " +
+                    "all users in the team.</p>",
+                dataTitle: 'Team',
+                dataPlacement: 'right',
+                dataContainer: "body"
+                },
             kind: {
-                label: 'Kind',
-                type: 'radio',  // FIXME: Make select, pull from OPTIONS request
-                options: [{ label: 'Machine', value: 'ssh' }, { label: 'SCM', value: 'scm'}, { label: 'AWS', value: 'aws'}, { label: 'Rackspace', value: 'rax'}],
-                //ngChange: 'selectCategory()'
+                label: 'Type',
+                excludeModal: true,
+                type: 'select',
+                ngOptions: 'kind.label for kind in credential_kind_options',
+                ngChange: 'kindChange()',
+                addRequired: true, 
+                editRequired: true
+                },
+            access_key: {
+                label: 'Access Key',
+                type: 'text',
+                ngShow: "kind.value == 'aws'",
+                awRequiredWhen: {variable: "aws_required", init: "false" },
+                autocomplete: false,
+                apiField: 'username'
+                },
+            secret_key: {
+                label: 'Secrent Key',
+                type: 'password',
+                ngShow: "kind.value == 'aws'",
+                awRequiredWhen: {variable: "aws_required", init: "false" },
+                autocomplete: false,
+                ask: false,
+                clear: false,
+                apiField: 'passwowrd'
                 },
             "username": {
-                label: 'Username',
+                labelBind: 'usernameLabel',
                 type: 'text',
-                addRequired: false,
-                editRequired: false,
+                ngShow: "kind.value && kind.value !== 'aws'",
+                awRequiredWhen: {variable: 'rackspace_required', init: false },
                 autocomplete: false
                 },
             "password": {
-                label: 'Password',
+                labelBind: 'passwordLabel',
                 type: 'password',
-                addRequired: false,
-                editRequired: false,
+                ngShow: "kind.value && kind.value !== 'aws'",
+                awRequiredWhen: {variable: 'rackspace_required', init: false },
                 ngChange: "clearPWConfirm('password_confirm')",
-                ask: true,
-                clear: true,
+                ask: false,
+                clear: false,
                 associated: 'password_confirm',
                 autocomplete: false
                 },
             "password_confirm": {
-                label: 'Confirm Password',
+               labelBind: 'passwordConfirmLabel',
                 type: 'password',
+                ngShow: "kind.value && kind.value !== 'aws'",
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,
@@ -62,17 +110,18 @@ angular.module('CredentialFormDefinition', [])
                 autocomplete: false
                 },
             "ssh_key_data": {
-                label: 'SSH Private Key',
+                labelBind: 'sshKeyDataLabel',
                 type: 'textarea',
+                ngShow: "kind.value == 'ssh' || kind.value == 'scm'",
                 addRequired: false,
                 editRequired: false,
                 'class': 'ssh-key-field',
-                rows: 10,
-                xtraWide: true
+                rows: 10
                 },
             "ssh_key_unlock": {
                 label: 'Key Password',
                 type: 'password',
+                ngShow: "kind.value == 'ssh'",
                 addRequired: false,
                 editRequired: false,
                 ngChange: "clearPWConfirm('ssh_key_unlock_confirm')",
@@ -83,6 +132,7 @@ angular.module('CredentialFormDefinition', [])
             "ssh_key_unlock_confirm": {
                 label: 'Confirm Key Password',
                 type: 'password',
+                ngShow: "kind.value == 'ssh'",
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,
@@ -91,6 +141,7 @@ angular.module('CredentialFormDefinition', [])
             "sudo_username": {
                 label: 'Sudo Username',
                 type: 'text',
+                ngShow: "kind.value == 'ssh'",
                 addRequired: false,
                 editRequired: false,
                 autocomplete: false
@@ -98,6 +149,7 @@ angular.module('CredentialFormDefinition', [])
             "sudo_password": {
                 label: 'Sudo Password',
                 type: 'password',
+                ngShow: "kind.value == 'ssh'",
                 addRequired: false,
                 editRequired: false,
                 ngChange: "clearPWConfirm('sudo_password_confirm')",
@@ -109,6 +161,7 @@ angular.module('CredentialFormDefinition', [])
             "sudo_password_confirm": {
                 label: 'Confirm Sudo Password',
                 type: 'password',
+                ngShow: "kind.value == 'ssh'",
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,

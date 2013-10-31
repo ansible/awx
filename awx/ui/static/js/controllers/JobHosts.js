@@ -54,10 +54,10 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
         });
 
     // After a refresh, populate any needed summary field values on each row
-    if (scope.PostRefreshRemove) {
-       scope.PostRefreshRemove();
+    if (scope.removePostRefresh) {
+       scope.removePostRefresh();
     }
-    scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
+    scope.removePostRefresh = scope.$on('PostRefresh', function() {
         
         // Set status, tooltips, badget icons, etc.
         for( var i=0; i < scope.jobhosts.length; i++) {
