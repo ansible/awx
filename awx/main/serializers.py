@@ -16,6 +16,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
 
@@ -71,6 +72,16 @@ SUMMARIZABLE_FK_FIELDS = {
 }
 
 class ChoiceField(fields.ChoiceField):
+
+    def __init__(self, *args, **kwargs):
+        super(ChoiceField, self).__init__(*args, **kwargs)
+        if not self.required:
+            # Remove extra blank option if one is already present (for writable
+            # field) or if present at all for read-only fields.
+            if ([x[0] for x in self.choices].count(u'') > 1 or self.read_only) \
+                and BLANK_CHOICE_DASH[0] in self.choices:
+                self.choices = [x for x in self.choices
+                                if x != BLANK_CHOICE_DASH[0]]
 
     def metadata(self):
         metadata = super(ChoiceField, self).metadata()
