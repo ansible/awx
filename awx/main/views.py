@@ -437,7 +437,7 @@ class UserDetail(RetrieveUpdateDestroyAPIView):
             if changed:
                 raise PermissionDenied('Cannot change %s' % ', '.join(changed.keys()))
 
-class CredentialList(ListAPIView):
+class CredentialList(ListCreateAPIView):
 
     model = Credential
     serializer_class = CredentialSerializer
