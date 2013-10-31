@@ -20,6 +20,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.utils.timezone import now, make_aware, get_default_timezone
@@ -1084,6 +1085,10 @@ class Credential(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('main:credential_detail', args=(self.pk,))
 
+    def clean(self):
+        if self.user and self.team:
+            raise ValidationError('Credential cannot be assigned to both a user and team')
+        
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
         # When first saving to the database, don't store any password field

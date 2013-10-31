@@ -831,18 +831,6 @@ class CredentialSerializer(BaseSerializer):
             res['team'] = reverse('main:team_detail', args=(obj.team.pk,))
         return res
 
-    def validate(self, attrs):
-        ''' some fields cannot be changed once written '''
-        return attrs
-        # FIXME: Don't need this anymore?
-        if self.object is not None:
-            # this is an update
-            if 'user' in attrs and self.object.user != attrs['user']:
-                raise serializers.ValidationError("user cannot be changed")
-            if 'team' in attrs and self.object.team != attrs['team']:
-                raise serializers.ValidationError("team cannot be changed")
-        return attrs
-
 class JobTemplateSerializer(BaseSerializer):
 
     class Meta:
