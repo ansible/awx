@@ -363,7 +363,7 @@ def load_inventory_source(source, all_group=None):
     logger.debug('Analyzing type of source: %s', source)
     original_all_group = all_group
     if not os.path.exists(source):
-        raise CommandError('Source does not exist: %s' % source)
+        raise IOError('Source does not exist: %s' % source)
     if os.path.isdir(source):
         all_group = all_group or MemGroup('all', source)
         for filename in glob.glob(os.path.join(source, '*')):
@@ -421,7 +421,7 @@ class Command(NoArgsCommand):
         class Formatter(logging.Formatter):
             def format(self, record):
                 record.relativeSeconds = record.relativeCreated / 1000.0
-                return super(Formatter, self).format(record)
+                return logging.Formatter.format(self, record)
         formatter = Formatter('%(relativeSeconds)9.3f %(levelname)-8s %(message)s')
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)

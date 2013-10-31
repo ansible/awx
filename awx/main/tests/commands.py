@@ -514,7 +514,7 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         result, stdout, stderr = self.run_command('inventory_import',
                                                   inventory_id=inventory_id,
                                                   source=invalid_source)
-        self.assertTrue(isinstance(result, CommandError), result)
+        self.assertTrue(isinstance(result, IOError), result)
         self.assertTrue('not exist' in str(result))
         # Invalid inventory ID.
         invalid_id = Inventory.objects.order_by('-pk')[0].pk + 1
