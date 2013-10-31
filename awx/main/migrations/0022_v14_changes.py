@@ -48,9 +48,13 @@ class Migration(DataMigration):
             scm_password = decrypt_field(project, 'scm_password')
             scm_key_data = decrypt_field(project, 'scm_key_data')
             scm_key_unlock = decrypt_field(project, 'scm_key_unlock')
-            # Set credential by default to be owned by admin user.
-            qs = orm['auth.User'].objects.filter(is_superuser=True, is_active=True)
-            credential_user = qs.order_by('pk')[0]
+            # Set credential by default to be owned by user who created project
+            # falling back to first admin user.
+            if project.created_by and project.created_by.is_active:
+                credential_user = project.created_by
+            else:
+                qs = orm['auth.User'].objects.filter(is_superuser=True, is_active=True)
+                credential_user = qs.order_by('pk')[0]
             # Rename credentials that would violate the future unique constraint.
             credential_name = '%s Credential' % project.name.title()
             n = 2
@@ -81,7 +85,8 @@ class Migration(DataMigration):
             group_name = inventory_source.group.name
             source_username = inventory_source.source_username
             source_password = decrypt_field(inventory_source, 'source_password')
-            # Set credential by default to be owned by admin user.
+            # Set credential by default to be owned by admin user (doesn't 
+            # affect upgrades since this is new in 1.4).
             qs = orm['auth.User'].objects.filter(is_superuser=True, is_active=True)
             credential_user = qs.order_by('pk')[0]
             if inventory_source.source == 'ec2':
