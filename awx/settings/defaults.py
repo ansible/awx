@@ -212,9 +212,13 @@ EMAIL_USE_TLS = False
 try:
     import debug_toolbar
     INSTALLED_APPS += ('debug_toolbar',)
-    MIDDLEWARE_CLASSES += (
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
-    )
+    # Add debug toolbar middleware before Transaction middleware.
+    new_mc = []
+    for mc in MIDDLEWARE_CLASSES:
+        if mc == 'django.middleware.transaction.TransactionMiddleware':
+            new_mc.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+        new_mc.append(mc)
+    MIDDLEWARE_CLASSES = tuple(new_mc)
 except ImportError:
     pass
 
