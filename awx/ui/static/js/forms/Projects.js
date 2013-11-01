@@ -52,9 +52,8 @@ angular.module('ProjectFormDefinition', [])
                 type: 'select',
                 ngOptions: 'type.label for type in scm_type_options',
                 ngChange: 'scmChange()',
-                defaultOption: 'Manual',
-                addRequired: false, 
-                editRequired: false
+                addRequired: true, 
+                editRequired: true
                 },
             missing_path_alert: {
                 type: 'alertblock', 
@@ -71,7 +70,7 @@ angular.module('ProjectFormDefinition', [])
                 type: 'textarea',
                 "class": 'col-lg-6',
                 showonly: true,
-                ngShow: "scm_type == '' || scm_type == null",
+                ngShow: "scm_type.value == ''",
                 awPopOver: '<p>Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
                   'Together the base path and selected playbook directory provide the full path used to locate playbooks.</p>' + 
                   '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
@@ -85,7 +84,7 @@ angular.module('ProjectFormDefinition', [])
                 id: 'local-path-select',
                 ngOptions: 'path for path in project_local_paths',
                 awRequiredWhen: { variable: "pathRequired", init: "true" },
-                ngShow: "scm_type == '' || scm_type == null",
+                ngShow: "scm_type.value == ''",
                 awPopOver: '<p>Select from the list of directories found in the base path.' +
                   'Together the base path and the playbook directory provide the full path used to locate playbooks.</p>' + 
                   '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
@@ -96,7 +95,7 @@ angular.module('ProjectFormDefinition', [])
             scm_url: {
                 label: 'SCM URL',
                 type: 'text',
-                ngShow: "scm_type !== '' && scm_type !== null",
+                ngShow: "scm_type.value !== ''",
                 awRequiredWhen: { variable: "scm_type", init: "true" },
                 helpCollapse: [
                     { hdr: 'GIT URLs',
@@ -124,86 +123,20 @@ angular.module('ProjectFormDefinition', [])
             scm_branch: {
                 labelBind: "scmBranchLabel",
                 type: 'text',
-                ngShow: "scm_type !== '' && scm_type !== null",
+                ngShow: "scm_type.value !== ''",
                 addRequired: false,
                 editRequired: false
                 },
-            credential: { // FIXME: Lookup doesn't work yet!
+            credential: {
                 label: 'SCM Credential',
                 type: 'lookup',
+                ngShow: "scm_type.value !== ''",
                 sourceModel: 'credential',
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
                 addRequired: false, 
                 editRequired: false,
                 },
-            /*auth_required: {
-                label: 'Authorization required?',
-                type: 'checkbox',
-                ngShow: "scm_type !== '' && scm_type !== null",
-                addRequired: false,
-                editRequired: false,
-                ngChange: 'authChange()'
-                },
-            scm_username: {
-                label: 'SCM Username',
-                type: 'text', 
-                ngShow: "scm_type !== '' && scm_type !== null && auth_required",
-                addRequired: false, 
-                editRequired: false
-                },
-            "scm_password": {
-                label: 'SCM Password',
-                type: 'password',
-                ngShow: "scm_type !== '' && scm_type !== null && auth_required",
-                addRequired: false,
-                editRequired: false,
-                ngChange: "clearPWConfirm('scm_password_confirm')",
-                ask: true,
-                clear: true,
-                associated: 'scm_password_confirm',
-                autocomplete: false
-                },
-            "scm_password_confirm": {
-                label: 'Confirm SCM Password',
-                type: 'password',
-                ngShow: "scm_type !== '' && scm_type !== null && auth_required",
-                addRequired: false,
-                editRequired: false,
-                awPassMatch: true,
-                associated: 'scm_password',
-                autocomplete: false
-                },
-            "scm_key_data": {
-                label: 'SCM Private Key',
-                type: 'textarea',
-                ngShow: "scm_type !== '' && scm_type !== null && auth_required",
-                xtraWide: true,
-                addRequired: false,
-                editRequired: false,
-                'class': 'ssh-key-field',
-                rows: 10
-                },
-            "scm_key_unlock": {
-                label: 'SCM Key Password',
-                type: 'password',
-                ngShow: "scm_type !== '' && scm_type !== null && scm_key_data && auth_required",
-                addRequired: false,
-                editRequired: false,
-                ngChange: "clearPWConfirm('scm_key_unlock_confirm')",
-                associated: 'scm_key_unlock_confirm',
-                ask: true,
-                clear: true
-                },
-            "scm_key_unlock_confirm": {
-                label: 'Confirm SCM Key Password',
-                type: 'password',
-                ngShow: "scm_type !== '' && scm_type !== null && scm_key_data && auth_required",
-                addRequired: false,
-                editRequired: false,
-                awPassMatch: true,
-                associated: 'scm_key_unlock'
-                },*/
             checkbox_group: {
                 label: 'SCM Options',
                 type: 'checkbox_group',
@@ -214,7 +147,7 @@ angular.module('ProjectFormDefinition', [])
                         name: 'scm_clean',
                         label: 'Clean',
                         type: 'checkbox',
-                        ngShow: "scm_type !== '' && scm_type !== null",
+                        ngShow: "scm_type.value !== ''",
                         addRequired: false,
                         editRequired: false,
                         awPopOver: '<p>Remove any local modifications prior to performing an update.</p>',
@@ -227,7 +160,7 @@ angular.module('ProjectFormDefinition', [])
                         name: 'scm_delete_on_update',
                         label: 'Delete on Update',
                         type: 'checkbox',
-                        ngShow: "scm_type !== '' && scm_type !== null",
+                        ngShow: "scm_type.value !== ''",
                         addRequired: false,
                         editRequired: false,
                         awPopOver: '<p>Delete the local repository in its entirety prior to performing an update.</p><p>Depending on the size of the ' +
@@ -241,7 +174,7 @@ angular.module('ProjectFormDefinition', [])
                         name: 'scm_update_on_launch',
                         label: 'Update on Launch',
                         type: 'checkbox',
-                        ngShow: "scm_type !== '' && scm_type !== null",
+                        ngShow: "scm_type.value !== ''",
                         addRequired: false,
                         editRequired: false,
                         awPopOver: '<p>Each time a job runs using this project, perform an update to the local repository prior to starting the job.</p>',

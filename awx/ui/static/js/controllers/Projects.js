@@ -230,7 +230,8 @@ ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routePar
 
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
                       GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, 
-                      GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList) 
+                      GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList,
+                      CredentialList, GetChoices) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -248,19 +249,45 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    LoadBreadCrumbs();
    GetProjectPath({ scope: scope, master: master });
    
-   scope.scm_type = null;
-   master.scm_type = null;
-   scope.scm_type_options = [
-       { label: 'Git', value: 'git' },
-       { label: 'SVN', value: 'svn' },
-       { label: 'Mercurial', value: 'hg'}];
+   //scope.scm_type = null;
+   //master.scm_type = null;
+   
+   if (scope.removeChoicesReady) {
+       scope.removeChoicesReady();
+   }
+   scope.removeChoicesReady = scope.$on('choicesReady', function() {
+       console.log('setting type');
+       var found = false; 
+       for (var i=0; i < scope.scm_type_options.length; i++) {
+           if (scope.scm_type_options[i].value == '') {
+               scope['scm_type'] = scope.scm_type_options[i];
+               found = true;
+               break;
+           }  
+       }
+       });
+
+   // Load the list of options for Kind
+   GetChoices({
+        scope: scope,
+        url: defaultUrl,
+        field: 'scm_type',
+        variable: 'scm_type_options',
+        callback: 'choicesReady'
+        });
 
    LookUpInit({
        scope: scope,
        form: form,
-       current_item: null,
        list: OrganizationList, 
        field: 'organization' 
+       });
+
+   LookUpInit({
+       scope: scope,
+       form: form,
+       list: CredentialList, 
+       field: 'credential' 
        });
 
    // Save
@@ -278,7 +305,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
                  data[fld] = scope[fld];
               }
            }
-        }
+       }
        if (scope.scm_type) {
           data.scm_type = scope.scm_type.value;
           delete data.local_path;
@@ -337,14 +364,14 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
 
 ProjectsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
                         'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
-                        'ReturnToCaller', 'GetProjectPath', 'LookUpInit', 'OrganizationList'
+                        'ReturnToCaller', 'GetProjectPath', 'LookUpInit', 'OrganizationList', 'CredentialList', 'GetChoices'
                         ];
 
 
 function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
                        GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
                        RelatedPaginateInit, Prompt, ClearScope, GetBasePath, ReturnToCaller, GetProjectPath,
-                       Authorization) 
+                       Authorization, CredentialList, LookUpInit, GetChoices) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -361,11 +388,6 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    var id = $routeParams.id;
    var relatedSets = {}; 
 
-   scope.scm_type_options = [
-       { label: 'Git', value: 'git' },
-       { label: 'SVN', value: 'svn' },
-       { label: 'Mercurial', value: 'hg'}];
-   
    scope.project_local_paths = [];
    scope.base_dir = ''; 
 
@@ -401,66 +423,95 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
           scope.project_local_paths = opts;
           scope.base_dir = 'You do not have access to view this property';
        }
+
+       LookUpInit({
+           scope: scope,
+           form: form,
+           list: CredentialList, 
+           field: 'credential' 
+           });
+
        scope.auth_required = (scope.scm_type && (scope.scm_username || scope.scm_password || scope.scm_key_data)) ? true : false;
        master.auth_required = scope.auth_required;
        });
 
-   // Retrieve detail record and prepopulate the form
-   Rest.setUrl(defaultUrl); 
-   Rest.get({ params: {id: id} })
-       .success( function(data, status, headers, config) {
-           LoadBreadCrumbs({ path: '/projects/' + id, title: data.name });
-           for (var fld in form.fields) {
-              if (form.fields[fld].type == 'checkbox_group') {
-                 for (var i=0; i < form.fields[fld].fields.length; i++) {
-                     scope[form.fields[fld].fields[i].name] = data[form.fields[fld].fields[i].name];
-                     master[form.fields[fld].fields[i].name] = data[form.fields[fld].fields[i].name];
-                 }
-              }
-              else {
-                 if (data[fld]) {
-                    scope[fld] = data[fld];
-                    master[fld] = data[fld];
-                 }
-              }
-           }
-           var related = data.related;
-           for (var set in form.related) {
-               if (related[set]) {
-                  relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
-               }
-           }
-
-           if (data.scm_type !== "") {
-              for (var i=0; i < scope.scm_type_options.length; i++) {
-                  if (scope.scm_type_options[i].value == data.scm_type) {
-                     scope.scm_type = scope.scm_type_options[i];
-                     break;
+   if (scope.removeChoicesReady) {
+       scope.removeChoicesReady();
+   }
+   scope.removeChoicesReady = scope.$on('choicesReady', function() {
+       // Retrieve detail record and prepopulate the form
+       Rest.setUrl(defaultUrl); 
+       Rest.get({ params: {id: id} })
+           .success( function(data, status, headers, config) {
+               LoadBreadCrumbs({ path: '/projects/' + id, title: data.name });
+               for (var fld in form.fields) {
+                  if (form.fields[fld].type == 'checkbox_group') {
+                     for (var i=0; i < form.fields[fld].fields.length; i++) {
+                         scope[form.fields[fld].fields[i].name] = data[form.fields[fld].fields[i].name];
+                         master[form.fields[fld].fields[i].name] = data[form.fields[fld].fields[i].name];
+                     }
                   }
-              }
-              scope.pathRequired = false;
-           }
-           else {
-              scope.pathRequired = true;
-           }
+                  else {
+                     if (data[fld]) {
+                        scope[fld] = data[fld];
+                        master[fld] = data[fld];
+                     }
+                  }
+                  if (fld !== 'organization' && form.fields[fld].sourceModel && 
+                      data.summary_fields && data.summary_fields[form.fields[fld].sourceModel]) {
+                     scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
+                        data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                     master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
+                        data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                  }
+               }
+               var related = data.related;
+               for (var set in form.related) {
+                   if (related[set]) {
+                      relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
+                   }
+               }
 
-           master['scm_type'] = scope['scm_type'];
-           master['auth_required'] = scope['auth_required'];
+               if (data.scm_type !== "") {
+                  for (var i=0; i < scope.scm_type_options.length; i++) {
+                      if (scope.scm_type_options[i].value == data.scm_type) {
+                         scope.scm_type = scope.scm_type_options[i];
+                         break;
+                      }
+                  }
+                  scope.pathRequired = false;
+               }
+               else {
+                  scope.pathRequired = true;
+               }
 
-           scope.scmBranchLabel = (scope.scm_type && scope.scm_type.value && scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch';
-           setAskCheckboxes();
-           
-           // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
-           RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
-           RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
-           scope.$emit('projectLoaded');
-           })
-       .error( function(data, status, headers, config) {
-           ProcessErrors(scope, data, status, form,
-                         { hdr: 'Error!', msg: 'Failed to retrieve project: ' + id + '. GET status: ' + status });
-           });
-   
-   
+               master['scm_type'] = scope['scm_type'];
+               master['auth_required'] = scope['auth_required'];
+
+               scope.scmBranchLabel = (scope.scm_type && scope.scm_type.value && scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch';
+               setAskCheckboxes();
+               
+               // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
+               RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
+               RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
+               scope.$emit('projectLoaded');
+               })
+           .error( function(data, status, headers, config) {
+               ProcessErrors(scope, data, status, form,
+                             { hdr: 'Error!', msg: 'Failed to retrieve project: ' + id + '. GET status: ' + status });
+               });
+       });
+
+   // Load the list of options for Kind
+   GetChoices({
+        scope: scope,
+        url: defaultUrl,
+        field: 'scm_type',
+        variable: 'scm_type_options',
+        callback: 'choicesReady'
+        });
+
+
    // Save changes to the parent
    scope.formSave = function() {
        generator.clearApiErrors();
@@ -590,5 +641,5 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
 ProjectsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
                          'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit',
                          'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 
-                         'GetProjectPath', 'Authorization'
+                         'GetProjectPath', 'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices'
                           ];

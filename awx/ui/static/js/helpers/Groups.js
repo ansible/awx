@@ -781,6 +781,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                               scope[fld] = data[fld];
                               master[fld] = scope[fld];
                            }
+
+                           if (form.fields[fld].sourceModel && data.summary_fields &&
+                               data.summary_fields[form.fields[fld].sourceModel]) {
+                               scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
+                                  data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                               master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
+                                  data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                           }
                        }
                        
                        LookUpInit({
