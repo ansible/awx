@@ -25,7 +25,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     .success( function(data, status, headers, config) { 
                         var choices = data.actions.GET.source.choices
                         for (var i=0; i < choices.length; i++) {
-                            scope[variable].push({ label: [ (choices[i][0] == "") ? 'Manual' : choices[i][1] ], value: choices[i][0] });
+                            if (choices[i][0] !== 'file') {
+                                scope[variable].push({ label: [ (choices[i][0] == "") ? 'Manual' : choices[i][1] ], value: choices[i][0] });
+                            }
                         }
                         })
                     .error( function(data, status, headers, config) { 

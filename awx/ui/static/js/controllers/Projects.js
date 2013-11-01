@@ -249,19 +249,13 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    LoadBreadCrumbs();
    GetProjectPath({ scope: scope, master: master });
    
-   //scope.scm_type = null;
-   //master.scm_type = null;
-   
    if (scope.removeChoicesReady) {
        scope.removeChoicesReady();
    }
    scope.removeChoicesReady = scope.$on('choicesReady', function() {
-       console.log('setting type');
-       var found = false; 
        for (var i=0; i < scope.scm_type_options.length; i++) {
            if (scope.scm_type_options[i].value == '') {
                scope['scm_type'] = scope.scm_type_options[i];
-               found = true;
                break;
            }  
        }
