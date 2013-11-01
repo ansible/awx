@@ -10,7 +10,7 @@
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
                                  'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'GroupsHelper',
                                  'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper', 'RefreshHelper',
-                                 'PromptDialog', 'InventorySummaryHelpDefinition', 'TreeSelector'
+                                 'PromptDialog', 'InventorySummaryHelpDefinition', 'TreeSelector', 'CredentialsListDefinition'
                                  ])
 
     .factory('GetSourceTypeOptions', [ 'Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
@@ -662,9 +662,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-        'GetUpdateIntervalOptions', 'ClickNode',
+        'GetUpdateIntervalOptions', 'ClickNode', 'LookUpInit', 'CredentialList',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions, ClickNode) {
+        GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions, ClickNode,
+        LookUpInit, CredentialList) {
     return function(params) {
         
         var group_id = params.group_id;
@@ -685,11 +686,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.source = form.fields.source['default'];
         scope.parseType = 'yaml';
         scope[form.fields['source_vars'].parseTypeName] = 'yaml';
-        /*scope.sourcePasswordRequired = false;
-        scope.sourceUsernameRequired = false;
-        scope.sourceUsernameLabel = 'Username';
-        scope.sourcePasswordLabel = 'Password';
-        scope.sourcePasswordConfirmLabel = 'Confirm Password';*/
         scope.sourcePathRequired = false;
         
         ParseTypeChange(scope);
@@ -703,6 +699,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             for (var set in relatedSets) {
                 scope.search(relatedSets[set].iterator);
             }
+
             if (scope.variable_url) {
                // get group variables
                Rest.setUrl(scope.variable_url);
@@ -785,6 +782,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                               master[fld] = scope[fld];
                            }
                        }
+                       
+                       LookUpInit({
+                           scope: scope,
+                           form: form,
+                           list: CredentialList, 
+                           field: 'credential' 
+                           });
+
                        scope['group_update_url'] = data.related['update'];    
                        scope.sourceChange();
                        })
@@ -855,8 +860,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                var data = { group: group_id, 
                    source: scope['source'].value,
                    source_path: scope['source_path'],
-                   //source_username: scope['source_username'],
-                   //source_password: scope['source_password'],
+                   credential: scope['credential'],
                    source_regions: scope['source_regions'],
                    overwrite: scope['overwrite'],
                    overwrite_vars: scope['overwrite_vars'],
@@ -878,7 +882,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        if (typeof json_data !== 'object') {
                           throw "failed to return an object!";
                        }
-                       data.source_vars = JSON.stringify(json_data, undefined, '\t');
+                       
+                       // Send JSON as a string
+                       if ($.isEmptyObject(json_data)) {
+                          data.source_vars = "";
+                       }
+                       else {
+                          data.source_vars = JSON.stringify(json_data, undefined, '\t'); 
+                       }
                   }
                   catch(err) {
                        parseError = true;

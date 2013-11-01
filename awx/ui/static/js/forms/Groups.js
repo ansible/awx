@@ -112,46 +112,16 @@ angular.module('GroupFormDefinition', [])
                 type: 'text',
                 awRequiredWhen: {variable: "sourcePathRequired", init: "false" }
                 },
-            credential: { // FIXME: Lookup doesn't work yet!
+            credential: {
                 label: 'Cloud Credential',
                 type: 'lookup',
+                ngShow: "source.value !== ''",
                 sourceModel: 'credential',
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
                 addRequired: false, 
-                editRequired: false,
-                column: 1
+                editRequired: false
                 },
-            /*source_username: {
-                labelBind: 'sourceUsernameLabel',
-                excludeModal: true,
-                type: 'text',
-                ngShow: "source.value == 'rackspace' || source.value == 'ec2'",
-                awRequiredWhen: {variable: "sourceUsernameRequired", init: "false" }
-                },
-            source_password: {
-                labelBind: 'sourcePasswordLabel',
-                excludeModal: true,
-                type: 'password',
-                ngShow: "source.value == 'rackspace' || source.value == 'ec2'",
-                editRequired: false,
-                addRequired: false,
-                ngChange: "clearPWConfirm('source_password_confirm')",
-                ask: true,
-                clear: true,
-                associated: 'source_password_confirm',
-                autocomplete: false
-                },
-            source_password_confirm: {
-                labelBind: 'sourcePasswordConfirmLabel',
-                type: 'password',
-                ngShow: "source.value == 'rackspace' || source.value == 'ec2'",
-                addRequired: false,
-                editRequired: false,
-                awPassMatch: true,
-                associated: 'source_password',
-                autocomplete: false
-                },*/
             source_regions: {
                 label: 'Regions',
                 excludeModal: true,

@@ -21,7 +21,6 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
         
         var scope = params.scope;  // form scope
         var form = params.form;    // form object
-        var current_item = params.current_item;    //id of the item that should be selected on open
         var list = params.list;    // list object
         var field = params.field;  // form field
         var postAction = params.postAction  //action to perform post user selection
@@ -125,8 +124,8 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
                 
                 }
                 
-                if (!Empty(current_item)) {
-                   listScope['toggle_' + list.iterator](current_item);
+                if (!Empty(scope[field])) {
+                   listScope['toggle_' + list.iterator](scope[field]);
                 }
 
                 });

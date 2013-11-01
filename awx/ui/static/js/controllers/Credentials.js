@@ -90,7 +90,7 @@ CredentialsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$route
 function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
                          GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList, GetBasePath,
-                         GetChoices, Empty, KindChange) 
+                         GetChoices, Empty, KindChange, OwnerChange) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -131,8 +131,9 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
    if (!Empty($routeParams.user_id)) {
       // Get the username based on incoming route
-      var url = GetBasePath('users') + $routeParams.user_id + '/';
+      scope['owner'] == 'user';
       scope['user'] = $routeParams.user_id;
+      var url = GetBasePath('users') + $routeParams.user_id + '/';
       Rest.setUrl(url);
       Rest.get()
           .success( function(data, status, headers, config) { 
@@ -143,11 +144,11 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
                   { hdr: 'Error!', msg: 'Failed to retrieve user. GET status: ' + status });
               }); 
    }
-   
-   if (!Empty($routeParams.team_id)) {
+   else if (!Empty($routeParams.team_id)) {
       // Get the username based on incoming route
-      var url = GetBasePath('teams') + $routeParams.team_id + '/';
+      scope['owner'] == 'team';
       scope['team'] = $routeParams.team_id;
+      var url = GetBasePath('teams') + $routeParams.team_id + '/';
       Rest.setUrl(url);
       Rest.get()
           .success( function(data, status, headers, config) {
@@ -157,6 +158,9 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
               ProcessErrors(scope, data, status, null,
                   { hdr: 'Error!', msg: 'Failed to retrieve team. GET status: ' + status });
               }); 
+   }
+   else {
+     scope['owner'] = 'team';
    }
 
    // Handle Kind change
@@ -187,7 +191,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
       data['kind'] = scope['kind'].value;
 
-      if (!Empty(data.team) && empty(data.user)) {
+      if (!Empty(data.team) && Empty(data.user)) {
           Alert('Missing User or Team', 'You must provide either a User or a Team. If this credential will only be accessed by a specific ' + 
               'user, select a User. To allow a team of users to access this credential, select a Team.', 'alert-danger');  
       }
@@ -205,7 +209,12 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
                       { hdr: 'Error!', msg: 'Failed to create new Credential. POST status: ' + status });
                   });
       }
-      };
+      }
+
+   // Handle Owner change
+   scope.ownerChange = function() {
+       OwnerChange({ scope: scope }); 
+       }
 
    // Reset defaults
    scope.formReset = function() {
@@ -246,13 +255,13 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 CredentialsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 'GenerateForm', 
                            'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
                            'SearchInit', 'PaginateInit', 'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty',
-                           'KindChange' ]; 
+                           'KindChange', 'OwnerChange']; 
 
 
 function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
-                          KindChange, UserList, TeamList, LookUpInit, Empty
+                          KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange
                           ) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
@@ -338,6 +347,15 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                           scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
                   }
                }
+               
+               if (!Empty(scope['user'])) {
+                  scope['owner'] = 'user';
+               }
+               else {
+                  scope['owner'] = 'team';
+               }
+               master['owner'] = scope['owner']; 
+
                scope.$emit('credentialLoaded');
                })
            .error( function(data, status, headers, config) {
@@ -377,7 +395,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 
       data['kind'] = scope['kind'].value;
 
-      if (!Empty(data.team) && empty(data.user)) {
+      if (Empty(data.team) && Empty(data.user)) {
           Alert('Missing User or Team', 'You must provide either a User or a Team. If this credential will only be accessed by a specific ' + 
               'user, select a User. To allow a team of users to access this credential, select a Team.', 'alert-danger');  
       }
@@ -386,7 +404,8 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
           Rest.setUrl(defaultUrl + id + '/');
           Rest.put(data)
               .success( function(data, status, headers, config) {
-                  scope.$emit('moveUser', data);
+                  var base = $location.path().replace(/^\//,'').split('/')[0];
+                  (base == 'credentials') ? ReturnToCaller() : ReturnToCaller(1);
                   })
               .error( function(data, status, headers, config) {
                   ProcessErrors(scope, data, status, form,
@@ -395,33 +414,10 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       }
       }
    
-   // When we're finally done updating the API, navigate out of here
-   function finished() {
-       var base = $location.path().replace(/^\//,'').split('/')[0];
-       (base == 'credentials') ? ReturnToCaller() : ReturnToCaller(1);
+   // Handle Owner change
+   scope.ownerChange = function() {
+       OwnerChange({ scope: scope }); 
        }
-
-   // Did we change users?
-   if (scope.removeMoveUser) {
-      scope.removeMoveUser();
-   }
-   scope.removeMoveUser = scope.$on('moveUser', function(e, data) {
-       if (master.user !== scope.user && !Empty(scope.user)) {
-           var url = GetBasePath('users') + scope.user + '/';
-           Rest.setUrl(url);
-           Rest.post(data)
-              .success( function(data, status, headers, config) {
-                  finished();
-                  })
-              .error( function(data, status, headers, config) {
-                  ProcessErrors(scope, data, status, null,
-                     { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST status: ' + status });
-                  });
-       }
-       else {
-           finished();
-       }
-       });
 
    // Handle Kind change
    scope.kindChange = function () {
@@ -510,5 +506,5 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 CredentialsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
-                            'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty']; 
+                            'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange' ]; 
   

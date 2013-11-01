@@ -16,7 +16,7 @@ angular.module('CredentialsHelper', ['Utilities'])
         var form = params.form;
         var reset = params.reset;
 
-        // Set field lables
+        // Set field labels
         if (scope.kind.value !== 'ssh') {
            scope['usernameLabel'] = 'Username';
            scope['passwordLabel'] = 'Password';
@@ -59,5 +59,24 @@ angular.module('CredentialsHelper', ['Utilities'])
         }
 
         }
-        }]);
-        
+        }])
+
+    .factory('OwnerChange', [ function() {
+    return function(params) {
+        var scope = params.scope;
+        var owner = scope['owner'];
+        if (owner == 'team') {
+           scope['team_required'] = true;
+           scope['user_required'] = false;
+           scope['user'] = null;
+           scope['user_username'] = null;
+        }
+        else {
+           scope['team_required'] = false;
+           scope['user_required'] = true;
+           scope['team'] = null;
+           scope['team_name'] = null;
+        }
+
+        }
+        }]);        

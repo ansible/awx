@@ -28,18 +28,28 @@ angular.module('CredentialFormDefinition', [])
                 addRequired: false,
                 editRequired: false
                 },
+            owner: {
+                label: 'Owned By?',
+                type: 'radio',
+                ngChange: "ownerChange()",
+                options: [
+                    { label: 'User', value: 'user' },
+                    { label: 'Team', value: 'team' }
+                    ],
+                awPopOver: "<p>A credential must be associated with either a user or a team. Choosing a user allows only the selected user access " + 
+                    "to the credential. Choosing a team shares the credential with all team members.</p>",
+                dataTitle: 'Owner',
+                dataPlacement: 'right',
+                dataContainer: "body",
+                },
             user: {
                 label: 'User',
                 type: 'lookup',
                 sourceModel: 'user',
                 sourceField: 'username',
                 ngClick: 'lookUpUser()',
-                ngShow: "team == '' || team == null",
-                awPopOver: "<p>A credential must be associated with either a user or a team. Choosing a user allows only the selected user access " + 
-                    "to the credential.</p>",
-                dataTitle: 'User',
-                dataPlacement: 'right',
-                dataContainer: "body"
+                ngShow: "owner == 'user'",
+                awRequiredWhen: { variable: "user_required", init: "false" }
                 },
             team: {
                 label: 'Team',
@@ -47,12 +57,8 @@ angular.module('CredentialFormDefinition', [])
                 sourceModel: 'team',
                 sourceField: 'name',
                 ngClick: 'lookUpTeam()',
-                ngShow: "user == '' || user == null",
-                awPopOver: "<p>A credential must be associated with either a user or a team. Choose a team to share a credential with " +
-                    "all users in the team.</p>",
-                dataTitle: 'Team',
-                dataPlacement: 'right',
-                dataContainer: "body"
+                ngShow: "owner == 'team'",
+                awRequiredWhen: { variable: "team_required", init: "false" }
                 },
             kind: {
                 label: 'Type',
@@ -67,7 +73,7 @@ angular.module('CredentialFormDefinition', [])
                 label: 'Access Key',
                 type: 'text',
                 ngShow: "kind.value == 'aws'",
-                awRequiredWhen: {variable: "aws_required", init: "false" },
+                awRequiredWhen: { variable: "aws_required", init: "false" },
                 autocomplete: false,
                 apiField: 'username'
                 },
@@ -75,7 +81,7 @@ angular.module('CredentialFormDefinition', [])
                 label: 'Secrent Key',
                 type: 'password',
                 ngShow: "kind.value == 'aws'",
-                awRequiredWhen: {variable: "aws_required", init: "false" },
+                awRequiredWhen: { variable: "aws_required", init: "false" },
                 autocomplete: false,
                 ask: false,
                 clear: false,
