@@ -60,7 +60,7 @@ SUMMARIZABLE_FK_FIELDS = {
                                        'groups_with_active_failures',
                                        'has_inventory_sources'),
     'project': DEFAULT_SUMMARY_FIELDS + ('status',),
-    'credential': DEFAULT_SUMMARY_FIELDS + ('kind',),
+    'credential': DEFAULT_SUMMARY_FIELDS + ('kind', 'cloud'),
     'permission': DEFAULT_SUMMARY_FIELDS,
     'job': DEFAULT_SUMMARY_FIELDS + ('status', 'failed',),
     'job_template': DEFAULT_SUMMARY_FIELDS,
@@ -812,9 +812,9 @@ class CredentialSerializer(BaseSerializer):
 
     class Meta:
         model = Credential
-        fields = BASE_FIELDS + ('kind', 'username', 'password', 'ssh_key_data',
-                                'ssh_key_unlock', 'sudo_username',
-                                'sudo_password', 'user', 'team',)
+        fields = BASE_FIELDS + ('user', 'team', 'kind', 'cloud', 'username',
+                                'password', 'ssh_key_data', 'ssh_key_unlock',
+                                'sudo_username', 'sudo_password',)
 
     def to_native(self, obj):
         ret = super(CredentialSerializer, self).to_native(obj)

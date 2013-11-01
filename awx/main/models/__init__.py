@@ -1020,6 +1020,10 @@ class Credential(CommonModelNameNotUnique):
         choices=KIND_CHOICES,
         default='ssh',
     )
+    cloud = models.BooleanField(
+        default=False,
+        editable=False,
+    )
     username = models.CharField(
         blank=True,
         default='',
@@ -1091,6 +1095,7 @@ class Credential(CommonModelNameNotUnique):
         
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
+        update_fields = kwargs.get('update_fields', [])
         # When first saving to the database, don't store any password field
         # values, but instead save them until after the instance is created.
         if new_instance:
@@ -1102,12 +1107,16 @@ class Credential(CommonModelNameNotUnique):
         else:
             # If update_fields has been specified, add our field names to it,
             # if hit hasn't been specified, then we're just doing a normal save.
-            update_fields = kwargs.get('update_fields', [])
             for field in self.PASSWORD_FIELDS:
                 encrypted = encrypt_field(self, field, bool(field != 'ssh_key_data'))
                 setattr(self, field, encrypted)
                 if field not in update_fields:
                     update_fields.append(field)
+        cloud = self.kind in ('aws', 'rax')
+        if self.cloud != cloud:
+            self.cloud = cloud
+            if 'cloud' not in update_fields:
+                update_field.append('cloud')
         super(Credential, self).save(*args, **kwargs)
         # After saving a new instance for the first time, set the password
         # fields and save again.
