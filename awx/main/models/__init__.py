@@ -1116,7 +1116,7 @@ class Credential(CommonModelNameNotUnique):
         if self.cloud != cloud:
             self.cloud = cloud
             if 'cloud' not in update_fields:
-                update_field.append('cloud')
+                update_fields.append('cloud')
         super(Credential, self).save(*args, **kwargs)
         # After saving a new instance for the first time, set the password
         # fields and save again.
