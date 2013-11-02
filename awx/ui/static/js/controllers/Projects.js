@@ -279,6 +279,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
 
    LookUpInit({
        scope: scope,
+       url: GetBasePath('credentials') + '?kind=scm',
        form: form,
        list: CredentialList, 
        field: 'credential' 
@@ -498,8 +499,8 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
 
    // Load the list of options for Kind
    GetChoices({
+        url: GetBasePath('credentials') + '?kind=scm',
         scope: scope,
-        url: defaultUrl,
         field: 'scm_type',
         variable: 'scm_type_options',
         callback: 'choicesReady'

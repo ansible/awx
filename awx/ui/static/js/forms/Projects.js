@@ -135,7 +135,7 @@ angular.module('ProjectFormDefinition', [])
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
                 addRequired: false, 
-                editRequired: false,
+                editRequired: false
                 },
             checkbox_group: {
                 label: 'SCM Options',

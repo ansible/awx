@@ -131,7 +131,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
    if (!Empty($routeParams.user_id)) {
       // Get the username based on incoming route
-      scope['owner'] == 'user';
+      scope['owner'] = 'user';
       scope['user'] = $routeParams.user_id;
       var url = GetBasePath('users') + $routeParams.user_id + '/';
       Rest.setUrl(url);
@@ -146,7 +146,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    }
    else if (!Empty($routeParams.team_id)) {
       // Get the username based on incoming route
-      scope['owner'] == 'team';
+      scope['owner'] = 'team';
       scope['team'] = $routeParams.team_id;
       var url = GetBasePath('teams') + $routeParams.team_id + '/';
       Rest.setUrl(url);
@@ -157,12 +157,9 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
           .error( function(data, status, headers, config) {
               ProcessErrors(scope, data, status, null,
                   { hdr: 'Error!', msg: 'Failed to retrieve team. GET status: ' + status });
-              }); 
+              });
    }
-   else {
-     scope['owner'] = 'team';
-   }
-
+   
    // Handle Kind change
    scope.kindChange = function () {
        KindChange({ scope: scope, form: form, reset: true });

@@ -101,13 +101,22 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
        $(window).unbind('resize');
 
        // Prepend an asterisk to required field label
-       $('.form-control[required]').each(function() {
+       $('.form-control[required], input[type="radio"][required]').each(function() {
             var label = $(this).parent().parent().find('label');
-            if (label && !label.hasClass('prepend-asterisk')) {
-               label.addClass('prepend-asterisk');
+            if ($(this).attr('type') == 'radio') {
+               label = $(this).parent().parent().parent().find('label').first();
+            }
+            if (label) {
+               var span = label.find('span');
+               if (span && !span.hasClass('prepend-asterisk')) {
+                  span.addClass('prepend-asterisk');
+               }
+               else if (!label.hasClass('prepend-asterisk') && !label.find('.prepend-asterisk')) {
+                  label.addClass('prepend-asterisk');
+               }
             }
             });
-       
+
        try {
            $('#help-modal').empty().dialog('destroy');
        }
@@ -454,7 +463,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
              html += "for=\"" + fld + '">';
              html += (field.icon) ? this.icon(field.icon) : "";
-             html += field.label + '</label>' + "\n";
+             html += "<span>" + field.label + '</span></label>' + "\n";
              html += (field.awPopOver && field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
              html += "</div>\n";
              html += "<div ";
@@ -767,7 +776,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
             html += "for=\"" + fld + '">';
             html += (field.icon) ? this.icon(field.icon) : "";
-            html += field.label + '</label>' + "\n";
+            html += '<span>' + field.label + '</span></label>' + "\n";
             html += (field.awPopOver && field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
             html += "</div>\n";
             html += "<div ";
@@ -782,7 +791,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
          if (field.type == 'radio') {
             html += "<label class=\"control-label " + getLabelWidth() + "\" for=\"" + fld + '">';
             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-            html += field.label + '</label>' + "\n";
+            html += '<span>' + field.label + '</span></label>' + "\n";
             html += "<div ";
             html += "id=\"" + this.form.name + "_" + fld + "_radio_grp\" ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 

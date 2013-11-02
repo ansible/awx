@@ -32,6 +32,8 @@ angular.module('CredentialFormDefinition', [])
                 label: 'Owned By?',
                 type: 'radio',
                 ngChange: "ownerChange()",
+                addRequired: true,
+                editRequired: true,
                 options: [
                     { label: 'User', value: 'user' },
                     { label: 'Team', value: 'team' }
@@ -40,7 +42,7 @@ angular.module('CredentialFormDefinition', [])
                     "to the credential. Choosing a team shares the credential with all team members.</p>",
                 dataTitle: 'Owner',
                 dataPlacement: 'right',
-                dataContainer: "body",
+                dataContainer: "body"
                 },
             user: {
                 label: 'User',

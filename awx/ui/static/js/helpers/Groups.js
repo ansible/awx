@@ -609,12 +609,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                   throw "failed to return an object!";
                }
                
-               var data = {}
-               for (var fld in form.fields) {
-                   if (fld != 'variables') {
-                      data[fld] = scope[fld];   
-                   }
-               }
+               var data = {
+                   name: form.name,
+                   description: form.description,
+                   scm_tags: '' };
 
                if (inventory_id) {
                   data['inventory'] = inventory_id;
@@ -794,9 +792,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        }
                        
                        LookUpInit({
+                           url: GetBasePath('credentials') + '?cloud=true',   
                            scope: scope,
                            form: form,
-                           list: CredentialList, 
+                           list: CredentialList,
                            field: 'credential' 
                            });
 

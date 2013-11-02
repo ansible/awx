@@ -24,10 +24,18 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
         var list = params.list;    // list object
         var field = params.field;  // form field
         var postAction = params.postAction  //action to perform post user selection
+
+        var defaultUrl;
+        if (params.url) {
+           // pass in a url value to override the default
+           defaultUrl = params.url;  
+        }
+        else {
+          defaultUrl = (list.name == 'inventories') ? GetBasePath('inventory') : GetBasePath(list.name);
+        }
         
         // Show pop-up 
         var name = list.iterator.charAt(0).toUpperCase() + list.iterator.substring(1);
-        var defaultUrl = (list.name == 'inventories') ? GetBasePath('inventory') : GetBasePath(list.name);
         var hdr = (params.hdr) ? params.hdr : 'Select ' + name;
 
         $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-url',defaultUrl + 
