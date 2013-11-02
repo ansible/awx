@@ -16,34 +16,36 @@ angular.module('CredentialsHelper', ['Utilities'])
         var form = params.form;
         var reset = params.reset;
 
-        // Set field labels
-        if (scope.kind.value !== 'ssh') {
-           scope['usernameLabel'] = 'Username';
-           scope['passwordLabel'] = 'Password';
-           scope['passwordConfirmLabel'] = 'Confirm Password';
-           scope['sshKeyDataLabel'] = 'SCM Private Key';
-        }
-        else {
-           scope['usernameLabel'] = 'SSH Username';
-           scope['passwordLabel'] = 'SSH Password';
-           scope['passwordConfirmLabel'] = 'Confirm SSH Password';
-           scope['sshKeyDataLabel'] = 'SSH Private Key';
-        }
+        // Put things in a default state
+        scope['usernameLabel'] = 'Username';
+        scope['passwordLabel'] = 'Password';
+        scope['passwordConfirmLabel'] = 'Confirm Password';
+        scope['aws_required'] = false;
+        scope['rackspace_required'] = false;
+        scope['sshKeyDataLabel'] = 'SSH Private Key';
+        form.fields['password'].clear = true; 
+        form.fields['password'].ask = true;
        
-        scope['aws_required'] = (scope.kind.value == 'aws') ? true : false;
-        
-        if (scope.kind.value == 'rax') {
-            scope['rackspace_required'] = true;
-            form.fields['password'].clear = true; 
-            form.fields['password'].ask = true; 
-        }
-        else {
-            scope['rackspace_required'] = false;
-            form.fields['password'].clear = false; 
-            form.fields['password'].ask = false; 
-        }
+        // Apply kind specific settings
+        switch(scope['kind'].value) {
+            case 'aws':
+                scope['aws_required'] = true;
+                break; 
+            case 'rax': 
+                scope['rackspace_required'] =  true;
+                form.fields['password'].ask = false; 
+                break;
+            case 'ssh': 
+                scope['usernameLabel'] = 'SSH Username';
+                scope['passwordLabel'] = 'SSH Password';
+                scope['passwordConfirmLabel'] = 'Confirm SSH Password';
+                break; 
+            case 'scm':
+                scope['sshKeyDataLabel'] = 'SCM Private Key';
+                break;
+        } 
 
-        // Reset all the fields related to Kind.
+        // Reset all the field values related to Kind.
         if (reset) {
            scope['access_key'] = null;
            scope['secret_key'] = null;

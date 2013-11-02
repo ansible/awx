@@ -610,15 +610,18 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                }
                
                var data = {
-                   name: form.name,
-                   description: form.description,
-                   scm_tags: '' };
+                   name: scope['name'],
+                   description: scope['description'],
+                  };
 
                if (inventory_id) {
                   data['inventory'] = inventory_id;
                }
 
-               if (json_data) {
+               if ($.isEmptyObject(json_data)) {
+                  data['variables'] = "";
+               }
+               else {
                   data['variables'] = JSON.stringify(json_data, undefined, '\t');
                }
 

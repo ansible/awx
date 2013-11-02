@@ -116,7 +116,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    LookUpInit({
        scope: scope,
        form: form,
-       current_item: ($routeParams.user_id) ? $routeParams.user_id : null,
+       current_item: (!Empty($routeParams.user_id)) ? $routeParams.user_id : null,
        list: UserList, 
        field: 'user' 
        });
@@ -124,7 +124,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    LookUpInit({
        scope: scope,
        form: form,
-       current_item: ($routeParams.team_id) ? $routeParams.team_id : null,
+       current_item: (!Empty($routeParams.team_id)) ? $routeParams.team_id : null,
        list: TeamList, 
        field: 'team' 
        });
@@ -188,7 +188,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
       data['kind'] = scope['kind'].value;
 
-      if (!Empty(data.team) && Empty(data.user)) {
+      if (Empty(data.team) && Empty(data.user)) {
           Alert('Missing User or Team', 'You must provide either a User or a Team. If this credential will only be accessed by a specific ' + 
               'user, select a User. To allow a team of users to access this credential, select a Team.', 'alert-danger');  
       }
@@ -306,7 +306,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        LookUpInit({
            scope: scope,
            form: form,
-           current_item: ($scope['user_id']) ? scope['user_id'] : null,
+           current_item: (!Empty($scope['user_id'])) ? scope['user_id'] : null,
            list: UserList, 
            field: 'user' 
            });
@@ -314,13 +314,14 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        LookUpInit({
            scope: scope,
            form: form,
-           current_item: ($scope['team_id']) ? scope['team_id'] : null,
+           current_item: (!Empty($scope['team_id'])) ? scope['team_id'] : null,
            list: TeamList, 
            field: 'team'
            }); 
 
        setAskCheckboxes();
        KindChange({ scope: scope, form: form, reset: false });
+       OwnerChange({ scope: scope });
        });
 
    if (scope.removeChoicesReady) {
@@ -428,6 +429,8 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
           scope[fld] = master[fld];
       }
       setAskCheckboxes();
+      KindChange({ scope: scope, form: form, reset: false });
+      OwnerChange({ scope: scope });
       };
 
    // Related set: Add button

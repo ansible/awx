@@ -72,7 +72,7 @@ angular.module('JobTemplateFormDefinition', [])
                 awRequiredWhen: {variable: "playbookrequired", init: "true" },
                 column: 1
                 },
-            credential: { // FIXME: Lookup only credentials with kind=ssh
+            credential: {
                 label: 'Credential',
                 type: 'lookup',
                 sourceModel: 'credential',
@@ -82,7 +82,7 @@ angular.module('JobTemplateFormDefinition', [])
                 editRequired: false,
                 column: 1
                 },
-            cloud_credential: { // FIXME: Lookup only credentials with kind=aws/rax
+            cloud_credential: {
                 label: 'Cloud Credential',
                 type: 'lookup',
                 sourceModel: 'cloud_credential',

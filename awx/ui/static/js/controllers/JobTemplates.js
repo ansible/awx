@@ -124,11 +124,21 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
       });
 
    LookUpInit({
+      url: GetBasePath('credentials') + '?cloud=false',
       scope: scope,
       form: form,
       current_item: null,
       list: CredentialList, 
       field: 'credential' 
+      });
+
+   LookUpInit({
+      url: GetBasePath('credentials') + '?cloud=true',
+      scope: scope,
+      form: form,
+      current_item: null,
+      list: CredentialList, 
+      field: 'cloud_credential' 
       });
 
    // Update playbook select whenever project value changes

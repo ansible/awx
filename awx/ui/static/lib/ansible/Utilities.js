@@ -462,29 +462,35 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        }
        }])
 
-   /* DeugForm(form_name)
+   /* DeugForm({ form: <form object>, scope: <current scope object> });
     *
-    * Use to log the $pristine and $invalid properties of each form element. Helpful when form
+    * Use to log the $pristine and $valid properties of each form element. Helpful when form
     * buttons fail to enable/disable properly. 
     *
     */
    .factory('DebugForm', [ function() {
-   return function(form_name) {
-       $('form[name="' + form_name + '"]').find('select, input, button, textarea').each(function(index){
-           var name = $(this).attr('name');
-           if (name) {
-              if (scope['job_templates_form'][name]) {
-                  console.log(name + ' pristine: ' + scope['job_templates_form'][name].$pristine);
-                  console.log(name + ' invalid: ' + scope['job_templates_form'][name].$invalid);
-              }
-           }
-           });
+   return function(params) {
+       var form = params.form; 
+       var scope = params.scope; 
+       for (var fld in form.fields) {
+          if (scope[form.name + '_form'][fld]) {
+             console.log(fld + ' valid: ' + scope[form.name + '_form'][fld].$valid); 
+          }
+          if (form.fields[fld].sourceModel) {
+             if (scope[form.name + '_form'][form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField]) {
+                console.log(form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField + ' valid: ' +
+                    scope[form.name + '_form'][form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField].$valid);
+             }
+          }
+      }
+      console.log('form pristine: ' + scope[form.name + '_form'].$pristine);
+      console.log('form valid: ' + scope[form.name + '_form'].$valid);
       }
       }])
    
    /* Empty()
     *
-    * Test if a value is 'empty'. Returns true if val is null/''/undefined
+    * Test if a value is 'empty'. Returns true if val is null | '' | undefined
     *
     */
    .factory('Empty', [ function() {
