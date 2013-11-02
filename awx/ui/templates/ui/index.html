@@ -139,8 +139,8 @@
               <li ng-show="current_user.username != null && current_user.username != undefined">
                  <a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
               <li ng-show="userLoggedIn == true"><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
-              <li ng-show="userLoggedIn == true"><a id="main_contact_support" 
-                  href="mailto:support@ansibleworks.com?subject=AWX%20Help%20Request">Contact Support</a><li>
+              <li ng-show="userLoggedIn == true"><a id="main_contact_support" target="_blank"
+                  href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a><li>
               <li ng-show="userLoggedIn == true"><a id="main_logout" href="#/logout">Logout</a></li>
             </ul>
          </div><!-- nav-collapse -->
@@ -354,13 +354,13 @@
     <div class="container">
       <div class="help pull-left">
         <!-- <a href="https://github.com/ansible" target="_blank"><i class="icon-github"></i></a>
-        <a href="https://www.facebook.com/pages/Ansibleworks/258737970923512?ref=hl" target="_blanck"><i class="icon-facebook"></i></a>
-        <a href="http://www.twitter.com/ansibleworks" target="_blanck"><i class="icon-twitter"></i></a>
-        <a href="http://www.linkedin.com/company/ansibleworks" target="_blanck"><i class="icon-linkedin"></i></a> -->
-        <a href="mailto:support@ansibleworks.com?subject=AWX%20Support%20Request"><i class="icon-question-sign"></i> Contact Support</a>
+        <a href="https://www.facebook.com/pages/Ansibleworks/258737970923512?ref=hl" target="_blank"><i class="icon-facebook"></i></a>
+        <a href="http://www.twitter.com/ansibleworks" target="_blank"><i class="icon-twitter"></i></a>
+        <a href="http://www.linkedin.com/company/ansibleworks" target="_blank"><i class="icon-linkedin"></i></a> -->
+        <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" target="_blank"><i class="icon-question-sign"></i> Contact Support</a>
       </div>
       <div class="copyright">
-        Copyright &copy; 2013 AnsibleWorks, Inc. All rights reservied.<br />
+        Copyright &copy; 2013 AnsibleWorks, Inc. All rights reserved.<br />
         1482 East Valley Road, Suite 888 &middot; Santa Barbara, California 93108 &middot; +1-800-825-0212<br />
         <a href="http://www.ansibleworks.com" target="_blank">www.ansibleworks.com</a>
       </div>
