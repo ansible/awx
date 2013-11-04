@@ -12,11 +12,6 @@ class Migration(SchemaMigration):
         db.add_column(u'main_credential', 'cloud',
                       self.gf('django.db.models.fields.BooleanField')(default=False),
                       keep_default=False)
-        
-        # Modified to update value after adding new column.
-        for credential in orm.Credential.objects.filter(kind__in=('aws', 'rax')):
-            credential.cloud = True
-            credential.save()
 
 
     def backwards(self, orm):
