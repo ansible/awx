@@ -9,7 +9,7 @@
 
 angular.module('CredentialsHelper', ['Utilities'])  
     
-    .factory('KindChange', [ function() {
+    .factory('KindChange', [ 'Empty', function(Empty) {
     return function(params) {
       
         var scope = params.scope; 
@@ -22,21 +22,23 @@ angular.module('CredentialsHelper', ['Utilities'])
         scope['rackspace_required'] = false;
         scope['sshKeyDataLabel'] = 'SSH Private Key';
         
-        // Apply kind specific settings
-        switch(scope['kind'].value) {
-            case 'aws':
-                scope['aws_required'] = true;
-                break; 
-            case 'rax': 
-                scope['rackspace_required'] = true;
-                break;
-            case 'ssh':
-                scope['usernameLabel'] = 'SSH Username';
-                break; 
-            case 'scm':
-                scope['sshKeyDataLabel'] = 'SCM Private Key';
-                break;
-        } 
+        if (!Empty(scope['kind'])) {
+            // Apply kind specific settings
+            switch(scope['kind'].value) {
+                case 'aws':
+                    scope['aws_required'] = true;
+                    break; 
+                case 'rax': 
+                    scope['rackspace_required'] = true;
+                    break;
+                case 'ssh':
+                    scope['usernameLabel'] = 'SSH Username';
+                    break; 
+                case 'scm':
+                    scope['sshKeyDataLabel'] = 'SCM Private Key';
+                    break;
+            } 
+        }
 
         // Reset all the field values related to Kind.
         if (reset) {
@@ -51,6 +53,20 @@ angular.module('CredentialsHelper', ['Utilities'])
            scope['sudo_username'] = null;
            scope['sudo_password'] = null;
            scope['sudo_password_confirm'] = null;
+        }
+
+        // Collapse or open help widget based on whether scm value is selected
+        var collapse = $('#credential_kind').parent().find('.panel-collapse').first();
+        var id = collapse.attr('id');
+        if (!Empty(scope.kind) && scope.kind.value !== '') {   
+           if ( $('#' + id + '-icon').hasClass('icon-minus') ) {
+              scope.accordionToggle('#' + id);
+           }
+        }
+        else {
+           if ( $('#' + id + '-icon').hasClass('icon-plus') ) {
+              scope.accordionToggle('#' + id);
+           }
         }
 
         }

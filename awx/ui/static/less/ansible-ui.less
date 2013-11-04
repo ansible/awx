@@ -165,17 +165,26 @@ hr {
 }
 
 /* help collapse */
-h4.panel-title {
-  font-size: 14px;
-}
+  h4.panel-title {
+    font-size: 14px;
+  }
 
-.panel-heading:hover {
-  cursor: pointer;  
-}
+  .panel-heading:hover {
+    cursor: pointer;  
+  }
 
-.panel-default>.panel-heading .collapse-help-icon {
-  color: @grey;
-}
+  .panel-default>.panel-heading .collapse-help-icon {
+    color: @grey;
+  }
+
+  .collapsible-help {
+    dl {
+      margin-left: 15px;
+    }   
+    dt {
+      margin-top: 15px;
+    }  
+  }
 
 th.actions-column,
 td.actions {

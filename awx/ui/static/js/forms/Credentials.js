@@ -13,6 +13,7 @@ angular.module('CredentialFormDefinition', [])
         editTitle: '{{ name }}',                                   //Legend in edit mode
         name: 'credential',
         well: true,
+        forceListeners: true,
 
         fields: {
             name: {
@@ -69,7 +70,24 @@ angular.module('CredentialFormDefinition', [])
                 ngOptions: 'kind.label for kind in credential_kind_options',
                 ngChange: 'kindChange()',
                 addRequired: true, 
-                editRequired: true
+                editRequired: true,
+                helpCollapse: [
+                    { hdr: 'Credential Type',
+                      content: '<p>Choose a type based on how this credential will be used: ' +
+                               '<dl>\n' +
+                               '<dt>AWS</dt>\n' +
+                               '<dd>Access keys for running cloud inventory sync with Amazon Web Services.</dd>\n' +
+                               '<dt>Machine</dt>\n' +
+                               '<dd>Define SSH and Sudo access for playbooks. Used when submitting jobs to run playbooks ' +
+                                   'on a remote host.</dd>' +
+                               '<dt>Rackspace</dt>\n' + 
+                               '<dd>Credentials for running cloud inventory sync with Rackspace.</dd>\n' + 
+                               '<dt>SCM</dt>\n' +
+                               '<dd>Used on projects to clone and update local source code repositories ' + 
+                                   ' from a remote revision control system such as Git, SVN or Mercurial.</dd>\n' +
+                               '</dl>\n'
+
+                    }]
                 },
             access_key: {
                 label: 'Access Key',
