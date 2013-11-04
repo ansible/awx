@@ -485,10 +485,10 @@ class ProjectsTest(BaseTest):
         self.check_pagination_and_size(response, qs.count())
         self.check_list_ids(response, qs)
 
-        # POST should fail for all users.
+        # POST should now work for all users.
         with self.current_user(self.super_django_user):
             data = dict(name='xyz', user=self.super_django_user.pk)
-            self.post(url, data, expect=405)
+            self.post(url, data, expect=201)
     
         # FIXME: Check list as other users.
 
