@@ -59,6 +59,7 @@ angular.module('ProjectPathHelper', ['RestServices', 'Utilities'])
                     }
                 }
                 scope.base_dir = data.project_base_dir;
+                master.local_path = scope.local_path;
                 master.base_dir = scope.base_dir;  // Keep in master object so that it doesn't get
                                                    // wiped out on form reset.
                 if (opts.length == 0) {

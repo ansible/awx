@@ -305,8 +305,11 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
            }
        }
        data.scm_type = scope.scm_type.value;
-       if (data.scm_type.value !== '') {
+       if (scope.scm_type.value !== '') {
           delete data.local_path;
+       }
+       else {
+          data.local_path = scope.local_path.value;
        }
 
        var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
@@ -514,6 +517,9 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
        params.scm_type = scope.scm_type.value;
        if (scope.scm_type.value !== '') {   
           delete params.local_path;
+       }
+       else {
+          params.local_path = scope.local_path.value;
        }
 
        Rest.setUrl(defaultUrl);
