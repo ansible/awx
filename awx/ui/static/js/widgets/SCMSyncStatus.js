@@ -27,9 +27,9 @@ angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
 
             function makeRow(label, count, fail) {
                 var value; 
-                for (var i=0; i < scm_choices.length; i++) {
-                    if (scm_choices[i][1] == label) {
-                       value = scm_choices[i][0];
+                for (var i=0; i < scope['projectChoices'].length; i++) {
+                    if (scope['projectChoices'][i].label == label) {
+                       value = scope['projectChoices'][i].value;
                        break;
                     }
                 }
@@ -87,17 +87,17 @@ angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
             });
       
 
-        scope.removeCountProjects = scope.$on('CountProjects', function(e, choices) {
+        scope.removeCountProjects = scope.$on('CountProjects', function() {
             
-            scm_choices = choices; 
+            var choices = scope['projectChoices']; 
 
             function getScmLabel(config) {
                 var url = config.url; 
                 var scm_type = url.match(/scm_type=.*\&/)[0].replace(/scm_type=/,'').replace(/\&/,'');
                 var label;
                 for (var i=0; i < choices.length; i++) {
-                   if (choices[i][0] == scm_type) {
-                      label = choices[i][1];
+                   if (choices[i].value == scm_type) {
+                      label = choices[i].label;
                       break;
                    }
                 }
@@ -106,14 +106,14 @@ angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
             
             // Remove ---- option from list of choices
             for (var i=0; i < choices.length; i++) {
-                if (choices[i][1].match(/^---/)) {
+                if (choices[i].value.match(/^---/)) {
                    choices.splice(i,1);
                    break;
                 }
             }
             // Remove Manual option from list of choices
             for (var i=0; i < choices.length; i++) {
-                if (choices[i][1].match(/Manual/)) {
+                if (choices[i].label.match(/Manual/)) {
                    choices.splice(i,1);
                    break;
                 }
@@ -122,8 +122,8 @@ angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
             expected = choices.length; 
 
             for (var i=0; i < choices.length; i++) {
-                if (!choices[i][1].match(/^---/)) {
-                   var url = GetBasePath('projects') + '?scm_type=' + choices[i][0] + '&page=1';
+                if (!choices[i].label.match(/^---/)) {
+                   var url = GetBasePath('projects') + '?scm_type=' + choices[i].value + '&page=1';
                    Rest.setUrl(url);
                    Rest.get()
                        .success( function(data, status, headers, config) {
@@ -146,7 +146,13 @@ angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
             }
             });
 
-        GetChoices({ scope: scope, url: GetBasePath('projects'), field: 'scm_type', emit: 'CountProjects'});
+        GetChoices({
+            scope: scope,
+            url: GetBasePath('projects'),
+            variable: 'projectChoices',
+            field: 'scm_type',
+            callback: 'CountProjects'
+            });
 
         }
         }]);

@@ -28,7 +28,9 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
             function makeRow(label, count, fail) {
                 var html = '';
                 html += "<tr>\n";
-                html += "<td><a href=\"/#/" + label.toLowerCase() + "\">"  + label + "</a></td>\n";
+                html += "<td><a href=\"/#/" + label.toLowerCase() + "\"";
+                html += (label == 'Hosts' || label == 'Groups') ? " class=\"pad-left-sm\" " : "";
+                html += ">"  + label + "</a></td>\n";
                 html += "<td class=\"failed-column text-right\">";
                 html += (fail > 0) ? "<a href=\"/blah/blah\">" + fail + "</a>" : ""; 
                 html += "</td>\n";

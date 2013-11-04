@@ -30,7 +30,9 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
             
             function makeRow(label, count, fail) {
                 var html = "<tr>\n";
-                html += "<td><a href=\"/#/" + label.toLowerCase() + "\">"  + label + "</a></td>\n";
+                html += "<td><a href=\"/#/" + label.toLowerCase() + "\"";
+                html += (label == 'Hosts' || label == 'Groups') ? " class=\"pad-left-sm\" " : "";
+                html += ">"  + label + "</a></td>\n";
                 html += "<td class=\"failed-column text-right\">";
                 html += (fail > 0) ? "<a href=\"/blah/blah\">" + fail + "</a>" : "";
                 html += "</td>\n";
@@ -141,25 +143,31 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
-
+        
+        if (scope.removeTypesReady) {
+            scope.removeTypesReady();
+        }
         scope.removeTypesReady = scope.$on('TypesReady', function (e, label, count, fail) {
             results.push({ label: label, count: count, fail: fail });  
             if (results.length == expected) {
                scope.$emit('CountReceived');
             }
             });
-
-        scope.removeCountProjects = scope.$on('CountTypes', function(e, choices) {
+        
+        if (scope.CountProjects) {
+            scope.CountProjects();
+        }
+        scope.removeCountProjects = scope.$on('CountTypes', function() {
             
-            scm_choices = choices; 
+            var choices = scope['inventorySources']; 
 
             function getLabel(config) {
                 var url = config.url; 
                 var type = url.match(/source=.*\&/)[0].replace(/source=/,'').replace(/\&/,'');
                 var label;
                 for (var i=0; i < choices.length; i++) {
-                   if (choices[i][0] == type) {
-                      label = choices[i][1];
+                   if (choices[i].value == type) {
+                      label = choices[i].label;
                       break;
                    }
                 }
@@ -168,24 +176,24 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
             
             // Remove ---- option from list of choices
             for (var i=0; i < choices.length; i++) {
-                if (choices[i][1].match(/^---/)) {
+                if (choices[i].label.match(/^---/)) {
                    choices.splice(i,1);
                    break;
                 }
             }
 
             for (var i=0; i < choices.length; i++) {
-                if (choices[i][1].match(/^Local/)) {
+                if (choices[i].label.match(/^Local/)) {
                    choices.splice(i,1);
                    break;
                 }
             }
             
             expected = choices.length; 
-
+            
             for (var i=0; i < choices.length; i++) {
-                if (!choices[i][1].match(/^---/)) {
-                   var url = GetBasePath('inventory_sources') + '?source=' + choices[i][0] + '&page=1';
+                if (!choices[i].label.match(/^---/)) {
+                   var url = GetBasePath('inventory_sources') + '?source=' + choices[i].value + '&page=1';
                    Rest.setUrl(url);
                    Rest.get()
                        .success( function(data, status, headers, config) {
@@ -210,8 +218,9 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
 
         GetChoices({ scope: scope,
             url: GetBasePath('inventory_sources'),
+            variable: 'inventorySources',
             field: 'source',
-            emit: 'CountTypes' });
+            callback: 'CountTypes' });
 
         }
         }]);
