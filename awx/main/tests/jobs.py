@@ -436,7 +436,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
                            'job_tags', 'host_config_key',)
 
     def test_get_job_template_list(self):
-        url = reverse('main:job_template_list')
+        url = reverse('api:job_template_list')
         qs = JobTemplate.objects.distinct()
         fields = self.JOB_TEMPLATE_FIELDS
 
@@ -474,7 +474,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         # FIXME: Check with other credentials.
 
     def test_post_job_template_list(self):
-        url = reverse('main:job_template_list')
+        url = reverse('api:job_template_list')
         data = dict(
             name         = 'new job template',
             job_type     = PERM_INVENTORY_DEPLOY,
@@ -489,7 +489,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
         # sue can always add job templates.
         with self.current_user(self.user_sue):
             response = self.post(url, data, expect=201)
-            detail_url = reverse('main:job_template_detail',
+            detail_url = reverse('api:job_template_detail',
                                  args=(response['id'],))
             self.assertEquals(response['url'], detail_url)
 
@@ -530,7 +530,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_get_job_template_detail(self):
         jt = self.jt_eng_run
-        url = reverse('main:job_template_detail', args=(jt.pk,))
+        url = reverse('api:job_template_detail', args=(jt.pk,))
 
         # Test with no auth and with invalid login.
         self.check_invalid_auth(url)
@@ -551,7 +551,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_put_job_template_detail(self):
         jt = self.jt_eng_run
-        url = reverse('main:job_template_detail', args=(jt.pk,))
+        url = reverse('api:job_template_detail', args=(jt.pk,))
 
         # Test with no auth and with invalid login.
         self.check_invalid_auth(url, methods=('put',))# 'patch'))
@@ -568,7 +568,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_get_job_template_job_list(self):
         jt = self.jt_eng_run
-        url = reverse('main:job_template_jobs_list', args=(jt.pk,))
+        url = reverse('api:job_template_jobs_list', args=(jt.pk,))
 
         # Test with no auth and with invalid login.
         self.check_invalid_auth(url)
@@ -586,7 +586,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_post_job_template_job_list(self):
         jt = self.jt_eng_run
-        url = reverse('main:job_template_jobs_list', args=(jt.pk,))
+        url = reverse('api:job_template_jobs_list', args=(jt.pk,))
         data = dict(
             name='new job from template',
             credential=self.cred_bob.pk,
@@ -604,7 +604,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 class JobTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_get_job_list(self):
-        url = reverse('main:job_list')
+        url = reverse('api:job_list')
 
         # Test with no auth and with invalid login.
         self.check_invalid_auth(url)
@@ -622,7 +622,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         # FIXME: Check with other credentials.
 
     def test_post_job_list(self):
-        url = reverse('main:job_list')
+        url = reverse('api:job_list')
         data = dict(
             name='new job without template',
             job_type=PERM_INVENTORY_DEPLOY,
@@ -652,7 +652,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_get_job_detail(self):
         job = self.job_ops_east_run
-        url = reverse('main:job_detail', args=(job.pk,))
+        url = reverse('api:job_detail', args=(job.pk,))
 
         # Test with no auth and with invalid login.
         self.check_invalid_auth(url)
@@ -668,7 +668,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
 
     def test_put_job_detail(self):
         job = self.job_ops_west_run
-        url = reverse('main:job_detail', args=(job.pk,))
+        url = reverse('api:job_detail', args=(job.pk,))
 
         # Test with no auth and with invalid login.
         self.check_invalid_auth(url, methods=('put',))# 'patch'))
@@ -697,7 +697,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
         # FIXME: Check with other credentials and readonly fields.
 
     def _test_mainline(self):
-        url = reverse('main:job_list')
+        url = reverse('api:job_list')
 
         # job templates
         data = self.get('/api/v1/job_templates/', expect=401)
@@ -769,7 +769,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
     def test_job_start(self):
         job = self.job_ops_east_run
-        url = reverse('main:job_start', args=(job.pk,))
+        url = reverse('api:job_start', args=(job.pk,))
 
         # Test with no auth and with invalid login.
         self.check_invalid_auth(url)
@@ -797,7 +797,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
         # Test with a job that prompts for SSH and sudo passwords.
         job = self.job_sup_run
-        url = reverse('main:job_start', args=(job.pk,))
+        url = reverse('api:job_start', args=(job.pk,))
         with self.current_user(self.user_sue):
             response = self.get(url)
             self.assertTrue(response['can_start'])
@@ -821,7 +821,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             credential=self.cred_greg,
             created_by=self.user_sue,
         )
-        url = reverse('main:job_start', args=(job.pk,))
+        url = reverse('api:job_start', args=(job.pk,))
         with self.current_user(self.user_sue):
             response = self.get(url)
             self.assertTrue(response['can_start'])
@@ -841,7 +841,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             credential=self.cred_greg,
             created_by=self.user_sue,
         )
-        url = reverse('main:job_start', args=(job.pk,))
+        url = reverse('api:job_start', args=(job.pk,))
         with self.current_user(self.user_sue):
             response = self.get(url)
             self.assertTrue(response['can_start'])
@@ -858,7 +858,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
     def test_job_cancel(self):
         job = self.job_ops_east_run
-        url = reverse('main:job_cancel', args=(job.pk,))
+        url = reverse('api:job_cancel', args=(job.pk,))
 
         # Test with no auth and with invalid login.
         self.check_invalid_auth(url)
@@ -887,7 +887,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         job.start()
 
         # Check that the job detail has been updated.
-        url = reverse('main:job_detail', args=(job.pk,))
+        url = reverse('api:job_detail', args=(job.pk,))
         with self.current_user(self.user_sue):
             response = self.get(url)
             self.assertEqual(response['status'], 'successful',
@@ -895,7 +895,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             self.assertTrue(response['result_stdout'])
 
         # Test job events for completed job.
-        url = reverse('main:job_job_events_list', args=(job.pk,))
+        url = reverse('api:job_job_events_list', args=(job.pk,))
         with self.current_user(self.user_sue):
             response = self.get(url)
             qs = job.job_events.all()
@@ -908,13 +908,13 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         for job_event in job.job_events.all():
             if job_event.host:
                 host_ids.add(job_event.host.pk)
-            url = reverse('main:job_event_detail', args=(job_event.pk,))
+            url = reverse('api:job_event_detail', args=(job_event.pk,))
             with self.current_user(self.user_sue):
                 response = self.get(url)
 
         # Also test job event list for each host.
         for host in Host.objects.filter(pk__in=host_ids):
-            url = reverse('main:host_job_events_list', args=(host.pk,))
+            url = reverse('api:host_job_events_list', args=(host.pk,))
             with self.current_user(self.user_sue):
                 response = self.get(url)
                 qs = host.job_events.all()
@@ -924,7 +924,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
         # Test job event list for groups.
         for group in self.inv_ops_east.groups.all():
-            url = reverse('main:group_job_events_list', args=(group.pk,))
+            url = reverse('api:group_job_events_list', args=(group.pk,))
             with self.current_user(self.user_sue):
                 response = self.get(url)
                 qs = group.job_events.all()
@@ -933,7 +933,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 self.check_list_ids(response, qs)
 
         # Test global job event list.
-        url = reverse('main:job_event_list')
+        url = reverse('api:job_event_list')
         with self.current_user(self.user_sue):
             response = self.get(url)
             qs = JobEvent.objects.all()
@@ -942,7 +942,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             self.check_list_ids(response, qs)
 
         # Test job host summaries for completed job.
-        url = reverse('main:job_job_host_summaries_list', args=(job.pk,))
+        url = reverse('api:job_job_host_summaries_list', args=(job.pk,))
         with self.current_user(self.user_sue):
             response = self.get(url)
             qs = job.job_host_summaries.all()
@@ -956,14 +956,14 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
         # Test individual job host summary records.
         for job_host_summary in job.job_host_summaries.all():
-            url = reverse('main:job_host_summary_detail',
+            url = reverse('api:job_host_summary_detail',
                           args=(job_host_summary.pk,))
             with self.current_user(self.user_sue):
                 response = self.get(url)
 
         # Test job host summaries for each host.
         for host in Host.objects.filter(pk__in=host_ids):
-            url = reverse('main:host_job_host_summaries_list', args=(host.pk,))
+            url = reverse('api:host_job_host_summaries_list', args=(host.pk,))
             with self.current_user(self.user_sue):
                 response = self.get(url)
                 qs = host.job_host_summaries.all()
@@ -973,7 +973,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
         # Test job host summaries for groups.
         for group in self.inv_ops_east.groups.all():
-            url = reverse('main:group_job_host_summaries_list', args=(group.pk,))
+            url = reverse('api:group_job_host_summaries_list', args=(group.pk,))
             with self.current_user(self.user_sue):
                 response = self.get(url)
                 qs = group.job_host_summaries.all()
@@ -1115,7 +1115,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             job_template = jt
             break
         self.assertTrue(job_template)
-        url = reverse('main:job_template_callback', args=(job_template.pk,))
+        url = reverse('api:job_template_callback', args=(job_template.pk,))
         data = dict(host_config_key=job_template.host_config_key)
 
         # Test a POST to start a new job.
@@ -1254,7 +1254,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             job_template = jt
             break
         self.assertTrue(job_template)
-        url = reverse('main:job_template_callback', args=(job_template.pk,))
+        url = reverse('api:job_template_callback', args=(job_template.pk,))
         data = dict(host_config_key=job_template.host_config_key)
 
         # Should get an error when multiple hosts match to the same IP.
@@ -1278,7 +1278,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             job_template = jt
             break
         self.assertTrue(job_template)
-        url = reverse('main:job_template_callback', args=(job_template.pk,))
+        url = reverse('api:job_template_callback', args=(job_template.pk,))
         data = dict(host_config_key=job_template.host_config_key)
 
         # Test POST to start a new job when the template has no credential.
@@ -1300,7 +1300,7 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             job_template = jt
             break
         self.assertTrue(job_template)
-        url = reverse('main:job_template_callback', args=(job_template.pk,))
+        url = reverse('api:job_template_callback', args=(job_template.pk,))
         data = dict(host_config_key=job_template.host_config_key)
 
         # Test POST to start a new job when the credential would require user

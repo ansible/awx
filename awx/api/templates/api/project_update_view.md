@@ -15,4 +15,4 @@ If successful, the response status code will be 202.  If any required passwords
 are not provided, a 400 status code will be returned.  If the project cannot be
 updated, a 405 status code will be returned.
 
-{% include "main/_new_in_awx.md" %}
+{% include "api/_new_in_awx.md" %}

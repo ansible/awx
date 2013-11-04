@@ -98,7 +98,7 @@ class APIView(views.APIView):
         template_list = []
         for klass in inspect.getmro(type(self)):
             template_basename = camelcase_to_underscore(klass.__name__)
-            template_list.append('main/%s.md' % template_basename)
+            template_list.append('api/%s.md' % template_basename)
         context = self.get_description_context()
         return render_to_string(template_list, context)
 

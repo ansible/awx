@@ -130,28 +130,29 @@ INSTALLED_APPS = (
     'kombu.transport.django',
     'taggit',
     'awx.main',
+    'awx.api',
     'awx.ui',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_SERIALIZER_CLASS': 'awx.main.pagination.PaginationSerializer',
+    'DEFAULT_PAGINATION_SERIALIZER_CLASS': 'awx.api.pagination.PaginationSerializer',
     'PAGINATE_BY': 25,
     'PAGINATE_BY_PARAM': 'page_size',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
-        'awx.main.authentication.TokenAuthentication',
+        'awx.api.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'awx.main.permissions.ModelAccessPermission',
+        'awx.api.permissions.ModelAccessPermission',
     ),
     'DEFAULT_FILTER_BACKENDS': (
-        'awx.main.filters.ActiveOnlyBackend',
-        'awx.main.filters.FieldLookupBackend',
+        'awx.api.filters.ActiveOnlyBackend',
+        'awx.api.filters.FieldLookupBackend',
         'rest_framework.filters.SearchFilter',
-        'awx.main.filters.OrderByBackend',
+        'awx.api.filters.OrderByBackend',
     ),
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
@@ -160,10 +161,10 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
-        'awx.main.renderers.BrowsableAPIRenderer',
+        'awx.api.renderers.BrowsableAPIRenderer',
     ),
-    'VIEW_NAME_FUNCTION': 'awx.main.base_views.get_view_name',
-    'VIEW_DESCRIPTION_FUNCTION': 'awx.main.base_views.get_view_description',
+    'VIEW_NAME_FUNCTION': 'awx.api.generics.get_view_name',
+    'VIEW_DESCRIPTION_FUNCTION': 'awx.api.generics.get_view_description',
 }
 
 AUTHENTICATION_BACKENDS = (
@@ -250,7 +251,7 @@ DEVSERVER_MODULES = (
 try:
     import django_jenkins
     INSTALLED_APPS += ('django_jenkins',)
-    PROJECT_APPS = ('awx.main',)
+    PROJECT_APPS = ('awx.main', 'awx.api',)
 except ImportError:
     pass
 
@@ -303,7 +304,7 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse',
         },
         'require_debug_true': {
-            '()': 'awx.main.compat.RequireDebugTrue',
+            '()': 'awx.lib.compat.RequireDebugTrue',
         },
         'require_debug_true_or_test': {
             '()': 'awx.main.utils.RequireDebugTrueOrTest',
@@ -360,11 +361,11 @@ LOGGING = {
             'handlers': ['null'],
             'propagate': False,
         },
-        'awx.main.permissions': {
+        'awx.main.signals': {
             'handlers': ['null'],
             'propagate': False,
         },
-        'awx.main.signals': {
+        'awx.api.permissions': {
             'handlers': ['null'],
             'propagate': False,
         },

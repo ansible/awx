@@ -10,4 +10,4 @@ Make a POST request to this resource to cancel a pending or running inventory
 update.  The response status code will be 202 if successful, or 405 if the
 update cannot be canceled.
 
-{% include "main/_new_in_awx.md" %}
+{% include "api/_new_in_awx.md" %}

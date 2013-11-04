@@ -3,6 +3,6 @@
 Make a GET request to this resource to retrieve the list of
 {{ model_verbose_name_plural }}.
 
-{% include "main/_list_common.md" %}
+{% include "api/_list_common.md" %}
 
-{% include "main/_new_in_awx.md" %}
+{% include "api/_new_in_awx.md" %}

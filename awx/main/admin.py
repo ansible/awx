@@ -15,7 +15,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
 
-from awx.main.compat import format_html
+from awx.lib.compat import format_html
 from awx.main.models import *
 from awx.main.forms import *
 

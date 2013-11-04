@@ -35,7 +35,7 @@ from taggit.managers import TaggableManager
 from djcelery.models import TaskMeta
 
 # AWX
-from awx.main.compat import slugify
+from awx.lib.compat import slugify
 from awx.main.fields import AutoOneToOneField
 from awx.main.utils import encrypt_field, decrypt_field
 
@@ -343,7 +343,7 @@ class Organization(CommonModel):
     projects = models.ManyToManyField('Project', blank=True, related_name='organizations')
 
     def get_absolute_url(self):
-        return reverse('main:organization_detail', args=(self.pk,))
+        return reverse('api:organization_detail', args=(self.pk,))
 
     def __unicode__(self):
         return self.name
@@ -412,7 +412,7 @@ class Inventory(CommonModel):
     )
 
     def get_absolute_url(self):
-        return reverse('main:inventory_detail', args=(self.pk,))
+        return reverse('api:inventory_detail', args=(self.pk,))
 
     def mark_inactive(self, save=True):
         '''
@@ -537,7 +537,7 @@ class Host(CommonModelNameNotUnique):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('main:host_detail', args=(self.pk,))
+        return reverse('api:host_detail', args=(self.pk,))
 
     def mark_inactive(self, save=True):
         '''
@@ -667,7 +667,7 @@ class Group(CommonModelNameNotUnique):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('main:group_detail', args=(self.pk,))
+        return reverse('api:group_detail', args=(self.pk,))
 
     def mark_inactive(self, save=True):
         '''
@@ -938,7 +938,7 @@ class InventorySource(PrimordialModel):
             return inventory_update
 
     def get_absolute_url(self):
-        return reverse('main:inventory_source_detail', args=(self.pk,))
+        return reverse('api:inventory_source_detail', args=(self.pk,))
 
 class InventoryUpdate(CommonTask):
     '''
@@ -972,7 +972,7 @@ class InventoryUpdate(CommonTask):
         return self.inventory_source
 
     def get_absolute_url(self):
-        return reverse('main:inventory_update_detail', args=(self.pk,))
+        return reverse('api:inventory_update_detail', args=(self.pk,))
 
     def _get_task_class(self):
         from awx.main.tasks import RunInventoryUpdate
@@ -1087,7 +1087,7 @@ class Credential(CommonModelNameNotUnique):
         return needed
 
     def get_absolute_url(self):
-        return reverse('main:credential_detail', args=(self.pk,))
+        return reverse('api:credential_detail', args=(self.pk,))
 
     def clean(self):
         if self.user and self.team:
@@ -1142,7 +1142,7 @@ class Team(CommonModelNameNotUnique):
     organization    = models.ForeignKey('Organization', blank=False, null=True, on_delete=SET_NULL, related_name='teams')
 
     def get_absolute_url(self):
-        return reverse('main:team_detail', args=(self.pk,))
+        return reverse('api:team_detail', args=(self.pk,))
 
 class Project(CommonModel):
     '''
@@ -1377,7 +1377,7 @@ class Project(CommonModel):
             return project_update
 
     def get_absolute_url(self):
-        return reverse('main:project_detail', args=(self.pk,))
+        return reverse('api:project_detail', args=(self.pk,))
 
     def get_project_path(self, check_if_exists=True):
         local_path = os.path.basename(self.local_path)
@@ -1435,7 +1435,7 @@ class ProjectUpdate(CommonTask):
     )
 
     def get_absolute_url(self):
-        return reverse('main:project_update_detail', args=(self.pk,))
+        return reverse('api:project_update_detail', args=(self.pk,))
 
     def _get_parent_instance(self):
         return self.project
@@ -1507,7 +1507,7 @@ class Permission(CommonModelNameNotUnique):
         ))
 
     def get_absolute_url(self):
-        return reverse('main:permission_detail', args=(self.pk,))
+        return reverse('api:permission_detail', args=(self.pk,))
 
 # TODO: other job types (later)
 
@@ -1607,7 +1607,7 @@ class JobTemplate(CommonModel):
         return job
 
     def get_absolute_url(self):
-        return reverse('main:job_template_detail', args=(self.pk,))
+        return reverse('api:job_template_detail', args=(self.pk,))
 
     def can_start_without_user_input(self):
         '''
@@ -1719,7 +1719,7 @@ class Job(CommonTask):
     )
 
     def get_absolute_url(self):
-        return reverse('main:job_detail', args=(self.pk,))
+        return reverse('api:job_detail', args=(self.pk,))
 
     extra_vars_dict = VarsDictProperty('extra_vars', True)
 
@@ -1829,7 +1829,7 @@ class JobHostSummary(models.Model):
              self.processed, self.skipped)
 
     def get_absolute_url(self):
-        return reverse('main:job_host_summary_detail', args=(self.pk,))
+        return reverse('api:job_host_summary_detail', args=(self.pk,))
 
     def save(self, *args, **kwargs):
         self.failed = bool(self.dark or self.failures)
@@ -1982,7 +1982,7 @@ class JobEvent(models.Model):
     )
 
     def get_absolute_url(self):
-        return reverse('main:job_event_detail', args=(self.pk,))
+        return reverse('api:job_event_detail', args=(self.pk,))
 
     def __unicode__(self):
         return u'%s @ %s' % (self.get_event_display(), self.created.isoformat())

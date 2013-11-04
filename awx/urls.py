@@ -10,7 +10,7 @@ handler500 = 'awx.main.views.handle_500'
 
 urlpatterns = patterns('',
     url(r'', include('awx.ui.urls', namespace='ui', app_name='ui')),
-    url(r'^api/', include('awx.main.urls', namespace='main', app_name='main')),
+    url(r'^api/', include('awx.api.urls', namespace='api', app_name='api')),
 )
 
 if 'django.contrib.admin' in settings.INSTALLED_APPS:

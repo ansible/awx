@@ -14,7 +14,7 @@ from awx.main.tests.base import BaseTest
 class OrganizationsTest(BaseTest):
 
     def collection(self):
-        return reverse('main:organization_list')
+        return reverse('api:organization_list')
 
     def setUp(self):
         super(OrganizationsTest, self).setUp()
@@ -53,7 +53,7 @@ class OrganizationsTest(BaseTest):
         self.organizations[1].admins.add(self.normal_django_user)
 
     def test_get_organization_list(self):
-        url = reverse('main:organization_list')
+        url = reverse('api:organization_list')
 
         # no credentials == 401
         self.options(url, expect=401)
@@ -280,7 +280,7 @@ class OrganizationsTest(BaseTest):
 
     def test_post_item_subobjects_users(self):
 
-        url = reverse('main:organization_users_list', args=(self.organizations[1].pk,))
+        url = reverse('api:organization_users_list', args=(self.organizations[1].pk,))
         users = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(users['count'], 2)
         self.post(url, dict(id=self.normal_django_user.pk), expect=204, auth=self.get_normal_credentials())
@@ -293,7 +293,7 @@ class OrganizationsTest(BaseTest):
         # post a completely new user to verify we can add users to the subcollection directly
         new_user = dict(username='NewUser9000')
         which_org = self.normal_django_user.admin_of_organizations.all()[0]
-        url = reverse('main:organization_users_list', args=(which_org.pk,))
+        url = reverse('api:organization_users_list', args=(which_org.pk,))
         posted = self.post(url, new_user, expect=201, auth=self.get_normal_credentials())
 
         all_users = self.get(url, expect=200, auth=self.get_normal_credentials())
@@ -301,7 +301,7 @@ class OrganizationsTest(BaseTest):
 
     def test_post_item_subobjects_admins(self):
 
-        url = reverse('main:organization_admins_list', args=(self.organizations[1].pk,))
+        url = reverse('api:organization_admins_list', args=(self.organizations[1].pk,))
         admins = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEqual(admins['count'], 2)
         self.post(url, dict(id=self.other_django_user.pk), expect=204, auth=self.get_normal_credentials())
@@ -395,7 +395,7 @@ class OrganizationsTest(BaseTest):
         self.delete(self.collection(), expect=405, auth=self.get_super_credentials())
 
     def test_invalid_post_data(self):
-        url = reverse('main:organization_list')
+        url = reverse('api:organization_list')
         # API should gracefully handle data of an invalid type.
         self.post(url, expect=400, data=None, auth=self.get_super_credentials())
         self.post(url, expect=400, data=99, auth=self.get_super_credentials())
@@ -403,7 +403,7 @@ class OrganizationsTest(BaseTest):
         self.post(url, expect=400, data=3.14, auth=self.get_super_credentials())
         self.post(url, expect=400, data=True, auth=self.get_super_credentials())
         self.post(url, expect=400, data=[1,2,3], auth=self.get_super_credentials())
-        url = reverse('main:organization_users_list', args=(self.organizations[0].pk,))
+        url = reverse('api:organization_users_list', args=(self.organizations[0].pk,))
         self.post(url, expect=400, data=None, auth=self.get_super_credentials())
         self.post(url, expect=400, data=99, auth=self.get_super_credentials())
         self.post(url, expect=400, data='abcd', auth=self.get_super_credentials())

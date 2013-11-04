@@ -23,7 +23,7 @@ __all__ = ['UsersTest', 'LdapTest']
 class UsersTest(BaseTest):
 
     def collection(self):
-        return reverse('main:user_list')
+        return reverse('api:user_list')
 
     def setUp(self):
         super(UsersTest, self).setUp()
@@ -34,7 +34,7 @@ class UsersTest(BaseTest):
         self.organizations[0].users.add(self.normal_django_user)
  
     def test_only_super_user_or_org_admin_can_add_users(self):
-        url = reverse('main:user_list')
+        url = reverse('api:user_list')
         new_user = dict(username='blippy')
         new_user2 = dict(username='blippy2')
         self.post(url, expect=401, data=new_user, auth=None)
@@ -46,7 +46,7 @@ class UsersTest(BaseTest):
         self.post(url, expect=400, data=new_user2, auth=self.get_normal_credentials())
 
     def test_auth_token_login(self):
-        auth_token_url = reverse('main:auth_token_view')
+        auth_token_url = reverse('api:auth_token_view')
 
         # Always returns a 405 for any GET request, regardless of credentials.
         self.get(auth_token_url, expect=405, auth=None)
@@ -69,7 +69,7 @@ class UsersTest(BaseTest):
         auth_token = response['token']
 
         # Verify we can access our own user information with the auth token.
-        response = self.get(reverse('main:user_me_list'), expect=200,
+        response = self.get(reverse('api:user_me_list'), expect=200,
                             auth=auth_token)
         self.assertEquals(response['results'][0]['username'], 'normal')
         self.assertEquals(response['count'], 1)
@@ -77,7 +77,7 @@ class UsersTest(BaseTest):
         # If we simulate a different remote address, should not be able to use
         # the first auth token.
         remote_addr = '127.0.0.2'
-        response = self.get(reverse('main:user_me_list'), expect=401,
+        response = self.get(reverse('api:user_me_list'), expect=401,
                             auth=auth_token, remote_addr=remote_addr)
         self.assertEqual(response['detail'], 'Invalid token')
 
@@ -97,28 +97,28 @@ class UsersTest(BaseTest):
 
         # Verify we can access our own user information with the second auth
         # token from the other remote address.
-        response = self.get(reverse('main:user_me_list'), expect=200,
+        response = self.get(reverse('api:user_me_list'), expect=200,
                             auth=auth_token2, remote_addr=remote_addr)
         self.assertEquals(response['results'][0]['username'], 'normal')
         self.assertEquals(response['count'], 1)
 
         # The second auth token also can't be used from the first address, but
         # the first auth token is still valid from its address.
-        response = self.get(reverse('main:user_me_list'), expect=401,
+        response = self.get(reverse('api:user_me_list'), expect=401,
                                     auth=auth_token2)
         self.assertEqual(response['detail'], 'Invalid token')
         response_header = response.response.get('WWW-Authenticate', '')
         self.assertEqual(response_header.split()[0], 'Token')
-        response = self.get(reverse('main:user_me_list'), expect=200,
+        response = self.get(reverse('api:user_me_list'), expect=200,
                                     auth=auth_token)
 
         # A request without authentication should ask for Basic by default.
-        response = self.get(reverse('main:user_me_list'), expect=401)
+        response = self.get(reverse('api:user_me_list'), expect=401)
         response_header = response.response.get('WWW-Authenticate', '')
         self.assertEqual(response_header.split()[0], 'Basic')
         
         # A request that attempts Basic auth should request Basic auth again.
-        response = self.get(reverse('main:user_me_list'), expect=401,
+        response = self.get(reverse('api:user_me_list'), expect=401,
                                     auth=('invalid', 'password'))
         response_header = response.response.get('WWW-Authenticate', '')
         self.assertEqual(response_header.split()[0], 'Basic')
@@ -126,21 +126,21 @@ class UsersTest(BaseTest):
         # Invalidate a key (simulate expiration), now token auth should fail
         # with the first token, but still work with the second.
         self.normal_django_user.auth_tokens.get(key=auth_token).invalidate()
-        response = self.get(reverse('main:user_me_list'), expect=401,
+        response = self.get(reverse('api:user_me_list'), expect=401,
                             auth=auth_token)
         self.assertEqual(response['detail'], 'Token is expired')
-        response = self.get(reverse('main:user_me_list'), expect=200,
+        response = self.get(reverse('api:user_me_list'), expect=200,
                             auth=auth_token2, remote_addr=remote_addr)
 
         # Token auth should be denied if the user is inactive.
         self.normal_django_user.mark_inactive()
-        response = self.get(reverse('main:user_me_list'), expect=401,
+        response = self.get(reverse('api:user_me_list'), expect=401,
                             auth=auth_token2, remote_addr=remote_addr)
         self.assertEqual(response['detail'], 'User inactive or deleted')
 
     def test_ordinary_user_can_modify_some_fields_about_himself_but_not_all_and_passwords_work(self):
 
-        detail_url = reverse('main:user_detail', args=(self.other_django_user.pk,))
+        detail_url = reverse('api:user_detail', args=(self.other_django_user.pk,))
         data = self.get(detail_url, expect=200, auth=self.get_other_credentials())
 
         # can't change first_name, last_name, etc
@@ -182,7 +182,7 @@ class UsersTest(BaseTest):
     def test_user_created_with_password_can_login(self):
 
         # this is something an org admin can do...
-        url = reverse('main:user_list')
+        url = reverse('api:user_list')
         data  = dict(username='username',  password='password')
         data2 = dict(username='username2', password='password2')
         data = self.post(url, expect=201, data=data, auth=self.get_normal_credentials())
@@ -206,16 +206,16 @@ class UsersTest(BaseTest):
         self.assertTrue(orig.username != 'change')
  
     def test_password_not_shown_in_get_operations_for_list_or_detail(self):
-        url = reverse('main:user_detail', args=(self.super_django_user.pk,))
+        url = reverse('api:user_detail', args=(self.super_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_super_credentials())
         self.assertTrue('password' not in data)
 
-        url = reverse('main:user_list')
+        url = reverse('api:user_list')
         data = self.get(url, expect=200, auth=self.get_super_credentials())
         self.assertTrue('password' not in data['results'][0])
 
     def test_user_list_filtered(self):
-        url = reverse('main:user_list')
+        url = reverse('api:user_list')
         data3 = self.get(url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(data3['count'], 4)
         data2 = self.get(url, expect=200, auth=self.get_normal_credentials())
@@ -225,22 +225,22 @@ class UsersTest(BaseTest):
 
     def test_super_user_can_delete_a_user_but_only_marked_inactive(self):
         user_pk = self.normal_django_user.pk
-        url = reverse('main:user_detail', args=(user_pk,))
+        url = reverse('api:user_detail', args=(user_pk,))
         data = self.delete(url, expect=204, auth=self.get_super_credentials())
         data = self.get(url, expect=404, auth=self.get_super_credentials())
         obj = User.objects.get(pk=user_pk)
         self.assertEquals(obj.is_active, False)
  
     def test_non_org_admin_user_cannot_delete_any_user_including_himself(self):
-        url1 = reverse('main:user_detail', args=(self.super_django_user.pk,))
-        url2 = reverse('main:user_detail', args=(self.normal_django_user.pk,))
-        url3 = reverse('main:user_detail', args=(self.other_django_user.pk,))
+        url1 = reverse('api:user_detail', args=(self.super_django_user.pk,))
+        url2 = reverse('api:user_detail', args=(self.normal_django_user.pk,))
+        url3 = reverse('api:user_detail', args=(self.other_django_user.pk,))
         data = self.delete(url1, expect=403, auth=self.get_other_credentials())
         data = self.delete(url2, expect=403, auth=self.get_other_credentials())
         data = self.delete(url3, expect=403, auth=self.get_other_credentials())
 
     def test_there_exists_an_obvious_url_where_a_user_may_find_his_user_record(self):
-        url = reverse('main:user_me_list')
+        url = reverse('api:user_me_list')
         data = self.get(url, expect=401, auth=None)
         data = self.get(url, expect=401, auth=self.get_invalid_credentials())
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
@@ -254,7 +254,7 @@ class UsersTest(BaseTest):
         self.assertEquals(data['count'], 1)
 
     def test_superuser_can_change_admin_only_fields_about_himself(self):
-        url = reverse('main:user_detail', args=(self.super_django_user.pk,))
+        url = reverse('api:user_detail', args=(self.super_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_super_credentials())
         data['username'] += '2'
         data['first_name'] += ' Awesome'
@@ -267,7 +267,7 @@ class UsersTest(BaseTest):
     def test_user_related_resources(self):
 
         # organizations the user is a member of, should be 1
-        url = reverse('main:user_organizations_list',
+        url = reverse('api:user_organizations_list',
                       args=(self.normal_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 1) 
@@ -280,7 +280,7 @@ class UsersTest(BaseTest):
         data = self.get(url, expect=403, auth=self.get_nobody_credentials())
 
         # organizations the user is an admin of, should be 1
-        url = reverse('main:user_admin_of_organizations_list',
+        url = reverse('api:user_admin_of_organizations_list',
                       args=(self.normal_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 1)
@@ -293,7 +293,7 @@ class UsersTest(BaseTest):
         data = self.get(url, expect=403, auth=self.get_nobody_credentials())
  
         # teams the user is on, should be 0
-        url = reverse('main:user_teams_list', args=(self.normal_django_user.pk,))
+        url = reverse('api:user_teams_list', args=(self.normal_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 0)
         # also accessible via superuser
@@ -305,15 +305,15 @@ class UsersTest(BaseTest):
         data = self.get(url, expect=403, auth=self.get_nobody_credentials())
 
         # verify org admin can still read other user data too
-        url = reverse('main:user_organizations_list',
+        url = reverse('api:user_organizations_list',
                       args=(self.other_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 1)
-        url = reverse('main:user_admin_of_organizations_list',
+        url = reverse('api:user_admin_of_organizations_list',
                       args=(self.other_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 0)
-        url = reverse('main:user_teams_list',
+        url = reverse('api:user_teams_list',
                       args=(self.other_django_user.pk,))
         data = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data['count'], 0)
@@ -323,7 +323,7 @@ class UsersTest(BaseTest):
         # FIXME: add test that shows posting a projects w/o id to /organizations/2/projects/ can create a new one & associate
 
     def test_user_list_ordering(self):
-        base_url = reverse('main:user_list')
+        base_url = reverse('api:user_list')
         base_qs = User.objects.distinct()
 
         # Check list view with ordering by name.
@@ -351,7 +351,7 @@ class UsersTest(BaseTest):
 
     def test_user_list_filtering(self):
         # Also serves as general-purpose testing for custom API filters.
-        base_url = reverse('main:user_list')
+        base_url = reverse('api:user_list')
         base_qs = User.objects.distinct()
 
         # Filter by username.
@@ -651,7 +651,7 @@ class UsersTest(BaseTest):
         self.check_get_list(url, self.super_django_user, base_qs, expect=400)
 
     def test_user_list_pagination(self):
-        base_url = reverse('main:user_list')
+        base_url = reverse('api:user_list')
         base_qs = User.objects.distinct()
 
         # Check list view with page size of 1.
@@ -682,7 +682,7 @@ class UsersTest(BaseTest):
         #                    limit=0)
 
     def test_user_list_searching(self):
-        base_url = reverse('main:user_list')
+        base_url = reverse('api:user_list')
         base_qs = User.objects.distinct()
 
         # Check search query parameter.
@@ -826,12 +826,12 @@ class LdapTest(BaseTest):
             self.use_test_setting(name)
         user = self.check_login()
         self.setup_users()
-        url = reverse('main:api_v1_config_view')
+        url = reverse('api:api_v1_config_view')
         with self.current_user(self.super_django_user):
             response = self.get(url, expect=200)
         user_ldap_fields = response.get('user_ldap_fields', [])
         self.assertTrue(user_ldap_fields)
-        url = reverse('main:user_detail', args=(user.pk,))
+        url = reverse('api:user_detail', args=(user.pk,))
         for user_field in user_ldap_fields:
             with self.current_user(self.super_django_user):
                 data = self.get(url, expect=200)

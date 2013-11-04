@@ -132,14 +132,14 @@ class BaseSerializer(serializers.ModelSerializer):
         if obj is None:
             return ''
         elif isinstance(obj, User):
-            return reverse('main:user_detail', args=(obj.pk,))
+            return reverse('api:user_detail', args=(obj.pk,))
         else:
             return obj.get_absolute_url()
 
     def get_related(self, obj):
         res = SortedDict()
         if getattr(obj, 'created_by', None):
-            res['created_by'] = reverse('main:user_detail', args=(obj.created_by.pk,))
+            res['created_by'] = reverse('api:user_detail', args=(obj.created_by.pk,))
         return res
 
     def get_summary_fields(self, obj):
@@ -237,12 +237,12 @@ class UserSerializer(BaseSerializer):
             return {}
         res = super(UserSerializer, self).get_related(obj)
         res.update(dict(
-            teams                  = reverse('main:user_teams_list',               args=(obj.pk,)),
-            organizations          = reverse('main:user_organizations_list',       args=(obj.pk,)),
-            admin_of_organizations = reverse('main:user_admin_of_organizations_list', args=(obj.pk,)),
-            projects               = reverse('main:user_projects_list',            args=(obj.pk,)),
-            credentials            = reverse('main:user_credentials_list',         args=(obj.pk,)),
-            permissions            = reverse('main:user_permissions_list',         args=(obj.pk,)),
+            teams                  = reverse('api:user_teams_list',               args=(obj.pk,)),
+            organizations          = reverse('api:user_organizations_list',       args=(obj.pk,)),
+            admin_of_organizations = reverse('api:user_admin_of_organizations_list', args=(obj.pk,)),
+            projects               = reverse('api:user_projects_list',            args=(obj.pk,)),
+            credentials            = reverse('api:user_credentials_list',         args=(obj.pk,)),
+            permissions            = reverse('api:user_permissions_list',         args=(obj.pk,)),
         ))
         return res
 
@@ -286,13 +286,13 @@ class OrganizationSerializer(BaseSerializer):
             return {}
         res = super(OrganizationSerializer, self).get_related(obj)
         res.update(dict(
-            #audit_trail = reverse('main:organization_audit_trail_list',    args=(obj.pk,)),
-            projects    = reverse('main:organization_projects_list',       args=(obj.pk,)),
-            inventories = reverse('main:organization_inventories_list',    args=(obj.pk,)),
-            users       = reverse('main:organization_users_list',          args=(obj.pk,)),
-            admins      = reverse('main:organization_admins_list',         args=(obj.pk,)),
-            #tags        = reverse('main:organization_tags_list',           args=(obj.pk,)),
-            teams       = reverse('main:organization_teams_list',          args=(obj.pk,)),
+            #audit_trail = reverse('api:organization_audit_trail_list',    args=(obj.pk,)),
+            projects    = reverse('api:organization_projects_list',       args=(obj.pk,)),
+            inventories = reverse('api:organization_inventories_list',    args=(obj.pk,)),
+            users       = reverse('api:organization_users_list',          args=(obj.pk,)),
+            admins      = reverse('api:organization_admins_list',         args=(obj.pk,)),
+            #tags        = reverse('api:organization_tags_list',           args=(obj.pk,)),
+            teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
         ))
         return res
 
@@ -314,20 +314,20 @@ class ProjectSerializer(BaseSerializer):
             return {}
         res = super(ProjectSerializer, self).get_related(obj)
         res.update(dict(
-            organizations = reverse('main:project_organizations_list', args=(obj.pk,)),
-            teams = reverse('main:project_teams_list', args=(obj.pk,)),
-            playbooks = reverse('main:project_playbooks', args=(obj.pk,)),
-            update = reverse('main:project_update_view', args=(obj.pk,)),
-            project_updates = reverse('main:project_updates_list', args=(obj.pk,)),
+            organizations = reverse('api:project_organizations_list', args=(obj.pk,)),
+            teams = reverse('api:project_teams_list', args=(obj.pk,)),
+            playbooks = reverse('api:project_playbooks', args=(obj.pk,)),
+            update = reverse('api:project_update_view', args=(obj.pk,)),
+            project_updates = reverse('api:project_updates_list', args=(obj.pk,)),
         ))
         if obj.credential:
-            res['credential'] = reverse('main:credential_detail',
+            res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
         if obj.current_update:
-            res['current_update'] = reverse('main:project_update_detail',
+            res['current_update'] = reverse('api:project_update_detail',
                                             args=(obj.current_update.pk,))
         if obj.last_update:
-            res['last_update'] = reverse('main:project_update_detail',
+            res['last_update'] = reverse('api:project_update_detail',
                                          args=(obj.last_update.pk,))
         return res
 
@@ -433,8 +433,8 @@ class ProjectUpdateSerializer(BaseSerializer):
             return {}
         res = super(ProjectUpdateSerializer, self).get_related(obj)
         res.update(dict(
-            project = reverse('main:project_detail', args=(obj.project.pk,)),
-            cancel = reverse('main:project_update_cancel', args=(obj.pk,)),
+            project = reverse('api:project_detail', args=(obj.project.pk,)),
+            cancel = reverse('api:project_update_cancel', args=(obj.pk,)),
         ))
         return res
 
@@ -467,14 +467,14 @@ class InventorySerializer(BaseSerializerWithVariables):
             return {}
         res = super(InventorySerializer, self).get_related(obj)
         res.update(dict(
-            hosts         = reverse('main:inventory_hosts_list',        args=(obj.pk,)),
-            groups        = reverse('main:inventory_groups_list',       args=(obj.pk,)),
-            root_groups   = reverse('main:inventory_root_groups_list',  args=(obj.pk,)),
-            variable_data = reverse('main:inventory_variable_data',     args=(obj.pk,)),
-            script        = reverse('main:inventory_script_view',       args=(obj.pk,)),
-            tree          = reverse('main:inventory_tree_view',         args=(obj.pk,)),
-            organization  = reverse('main:organization_detail',         args=(obj.organization.pk,)),
-            inventory_sources = reverse('main:inventory_inventory_sources_list', args=(obj.pk,)),
+            hosts         = reverse('api:inventory_hosts_list',        args=(obj.pk,)),
+            groups        = reverse('api:inventory_groups_list',       args=(obj.pk,)),
+            root_groups   = reverse('api:inventory_root_groups_list',  args=(obj.pk,)),
+            variable_data = reverse('api:inventory_variable_data',     args=(obj.pk,)),
+            script        = reverse('api:inventory_script_view',       args=(obj.pk,)),
+            tree          = reverse('api:inventory_tree_view',         args=(obj.pk,)),
+            organization  = reverse('api:organization_detail',         args=(obj.organization.pk,)),
+            inventory_sources = reverse('api:inventory_inventory_sources_list', args=(obj.pk,)),
         ))
         return res
 
@@ -491,18 +491,18 @@ class HostSerializer(BaseSerializerWithVariables):
             return {}
         res = super(HostSerializer, self).get_related(obj)
         res.update(dict(
-            variable_data = reverse('main:host_variable_data',   args=(obj.pk,)),
-            inventory     = reverse('main:inventory_detail',     args=(obj.inventory.pk,)),
-            groups        = reverse('main:host_groups_list',     args=(obj.pk,)),
-            all_groups    = reverse('main:host_all_groups_list', args=(obj.pk,)),
-            job_events    = reverse('main:host_job_events_list',  args=(obj.pk,)),
-            job_host_summaries = reverse('main:host_job_host_summaries_list', args=(obj.pk,)),
-            #inventory_sources = reverse('main:host_inventory_sources_list', args=(obj.pk,)),
+            variable_data = reverse('api:host_variable_data',   args=(obj.pk,)),
+            inventory     = reverse('api:inventory_detail',     args=(obj.inventory.pk,)),
+            groups        = reverse('api:host_groups_list',     args=(obj.pk,)),
+            all_groups    = reverse('api:host_all_groups_list', args=(obj.pk,)),
+            job_events    = reverse('api:host_job_events_list',  args=(obj.pk,)),
+            job_host_summaries = reverse('api:host_job_host_summaries_list', args=(obj.pk,)),
+            #inventory_sources = reverse('api:host_inventory_sources_list', args=(obj.pk,)),
         ))
         if obj.last_job:
-            res['last_job'] = reverse('main:job_detail', args=(obj.last_job.pk,))
+            res['last_job'] = reverse('api:job_detail', args=(obj.last_job.pk,))
         if obj.last_job_host_summary:
-            res['last_job_host_summary'] = reverse('main:job_host_summary_detail', args=(obj.last_job_host_summary.pk,))
+            res['last_job_host_summary'] = reverse('api:job_host_summary_detail', args=(obj.last_job_host_summary.pk,))
         return res
 
     def get_summary_fields(self, obj):
@@ -589,16 +589,16 @@ class GroupSerializer(BaseSerializerWithVariables):
             return {}
         res = super(GroupSerializer, self).get_related(obj)
         res.update(dict(
-            variable_data = reverse('main:group_variable_data',   args=(obj.pk,)),
-            hosts         = reverse('main:group_hosts_list',      args=(obj.pk,)),
-            potential_children = reverse('main:group_potential_children_list',   args=(obj.pk,)),
-            children      = reverse('main:group_children_list',   args=(obj.pk,)),
-            all_hosts     = reverse('main:group_all_hosts_list',  args=(obj.pk,)),
-            inventory     = reverse('main:inventory_detail',       args=(obj.inventory.pk,)),
-            job_events    = reverse('main:group_job_events_list',   args=(obj.pk,)),
-            job_host_summaries = reverse('main:group_job_host_summaries_list', args=(obj.pk,)),
-            inventory_source = reverse('main:inventory_source_detail', args=(obj.inventory_source.pk,)),
-            #inventory_sources = reverse('main:group_inventory_sources_list', args=(obj.pk,)),
+            variable_data = reverse('api:group_variable_data',   args=(obj.pk,)),
+            hosts         = reverse('api:group_hosts_list',      args=(obj.pk,)),
+            potential_children = reverse('api:group_potential_children_list',   args=(obj.pk,)),
+            children      = reverse('api:group_children_list',   args=(obj.pk,)),
+            all_hosts     = reverse('api:group_all_hosts_list',  args=(obj.pk,)),
+            inventory     = reverse('api:inventory_detail',       args=(obj.inventory.pk,)),
+            job_events    = reverse('api:group_job_events_list',   args=(obj.pk,)),
+            job_host_summaries = reverse('api:group_job_host_summaries_list', args=(obj.pk,)),
+            inventory_source = reverse('api:inventory_source_detail', args=(obj.inventory_source.pk,)),
+            #inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
         ))
         return res
 
@@ -676,23 +676,23 @@ class InventorySourceSerializer(BaseSerializer):
             return {}
         res = super(InventorySourceSerializer, self).get_related(obj)
         res.update(dict(
-            update = reverse('main:inventory_source_update_view', args=(obj.pk,)),
-            inventory_updates = reverse('main:inventory_source_updates_list', args=(obj.pk,)),
-            #hosts = reverse('main:inventory_source_hosts_list', args=(obj.pk,)),
-            #groups = reverse('main:inventory_source_groups_list', args=(obj.pk,)),
+            update = reverse('api:inventory_source_update_view', args=(obj.pk,)),
+            inventory_updates = reverse('api:inventory_source_updates_list', args=(obj.pk,)),
+            #hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
+            #groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
         ))
         if obj.inventory:
-            res['inventory'] = reverse('main:inventory_detail', args=(obj.inventory.pk,))
+            res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         if obj.group:
-            res['group'] = reverse('main:group_detail', args=(obj.group.pk,))
+            res['group'] = reverse('api:group_detail', args=(obj.group.pk,))
         if obj.credential:
-            res['credential'] = reverse('main:credential_detail',
+            res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
         if obj.current_update:
-            res['current_update'] = reverse('main:inventory_update_detail',
+            res['current_update'] = reverse('api:inventory_update_detail',
                                             args=(obj.current_update.pk,))
         if obj.last_update:
-            res['last_update'] = reverse('main:inventory_update_detail',
+            res['last_update'] = reverse('api:inventory_update_detail',
                                          args=(obj.last_update.pk,))
         return res
 
@@ -741,8 +741,8 @@ class InventoryUpdateSerializer(BaseSerializer):
             return {}
         res = super(InventoryUpdateSerializer, self).get_related(obj)
         res.update(dict(
-            inventory_source = reverse('main:inventory_source_detail', args=(obj.inventory_source.pk,)),
-            cancel = reverse('main:inventory_update_cancel', args=(obj.pk,)),
+            inventory_source = reverse('api:inventory_source_detail', args=(obj.inventory_source.pk,)),
+            cancel = reverse('api:inventory_update_cancel', args=(obj.pk,)),
         ))
         return res
 
@@ -757,11 +757,11 @@ class TeamSerializer(BaseSerializer):
             return {}
         res = super(TeamSerializer, self).get_related(obj)
         res.update(dict(
-            projects     = reverse('main:team_projects_list',    args=(obj.pk,)),
-            users        = reverse('main:team_users_list',       args=(obj.pk,)),
-            credentials  = reverse('main:team_credentials_list', args=(obj.pk,)),
-            organization = reverse('main:organization_detail',   args=(obj.organization.pk,)),
-            permissions  = reverse('main:team_permissions_list', args=(obj.pk,)),
+            projects     = reverse('api:team_projects_list',    args=(obj.pk,)),
+            users        = reverse('api:team_users_list',       args=(obj.pk,)),
+            credentials  = reverse('api:team_credentials_list', args=(obj.pk,)),
+            organization = reverse('api:organization_detail',   args=(obj.organization.pk,)),
+            permissions  = reverse('api:team_permissions_list', args=(obj.pk,)),
         ))
         return res
 
@@ -777,13 +777,13 @@ class PermissionSerializer(BaseSerializer):
             return {}
         res = super(PermissionSerializer, self).get_related(obj)
         if obj.user:
-            res['user']        = reverse('main:user_detail', args=(obj.user.pk,))
+            res['user']        = reverse('api:user_detail', args=(obj.user.pk,))
         if obj.team:
-            res['team']        = reverse('main:team_detail', args=(obj.team.pk,))
+            res['team']        = reverse('api:team_detail', args=(obj.team.pk,))
         if obj.project:
-            res['project']     = reverse('main:project_detail', args=(obj.project.pk,)) 
+            res['project']     = reverse('api:project_detail', args=(obj.project.pk,)) 
         if obj.inventory:
-            res['inventory']   = reverse('main:inventory_detail', args=(obj.inventory.pk,))
+            res['inventory']   = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         return res
 
     def validate(self, attrs):
@@ -837,9 +837,9 @@ class CredentialSerializer(BaseSerializer):
             return {}
         res = super(CredentialSerializer, self).get_related(obj)
         if obj.user:
-            res['user'] = reverse('main:user_detail', args=(obj.user.pk,))
+            res['user'] = reverse('api:user_detail', args=(obj.user.pk,))
         if obj.team:
-            res['team'] = reverse('main:team_detail', args=(obj.team.pk,))
+            res['team'] = reverse('api:team_detail', args=(obj.team.pk,))
         return res
 
 class JobTemplateSerializer(BaseSerializer):
@@ -855,14 +855,14 @@ class JobTemplateSerializer(BaseSerializer):
             return {}
         res = super(JobTemplateSerializer, self).get_related(obj)
         res.update(dict(
-            inventory   = reverse('main:inventory_detail',   args=(obj.inventory.pk,)),
-            project     = reverse('main:project_detail',    args=(obj.project.pk,)),
-            jobs        = reverse('main:job_template_jobs_list', args=(obj.pk,)),
+            inventory   = reverse('api:inventory_detail',   args=(obj.inventory.pk,)),
+            project     = reverse('api:project_detail',    args=(obj.project.pk,)),
+            jobs        = reverse('api:job_template_jobs_list', args=(obj.pk,)),
         ))
         if obj.credential:
-            res['credential'] = reverse('main:credential_detail', args=(obj.credential.pk,))
+            res['credential'] = reverse('api:credential_detail', args=(obj.credential.pk,))
         if obj.host_config_key:
-            res['callback'] = reverse('main:job_template_callback', args=(obj.pk,))
+            res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
         return res
 
     def validate_playbook(self, attrs, source):
@@ -892,18 +892,18 @@ class JobSerializer(BaseSerializer):
             return {}
         res = super(JobSerializer, self).get_related(obj)
         res.update(dict(
-            inventory   = reverse('main:inventory_detail',   args=(obj.inventory.pk,)),
-            project     = reverse('main:project_detail',    args=(obj.project.pk,)),
-            credential  = reverse('main:credential_detail', args=(obj.credential.pk,)),
-            job_events  = reverse('main:job_job_events_list', args=(obj.pk,)),
-            job_host_summaries = reverse('main:job_job_host_summaries_list', args=(obj.pk,)),
+            inventory   = reverse('api:inventory_detail',   args=(obj.inventory.pk,)),
+            project     = reverse('api:project_detail',    args=(obj.project.pk,)),
+            credential  = reverse('api:credential_detail', args=(obj.credential.pk,)),
+            job_events  = reverse('api:job_job_events_list', args=(obj.pk,)),
+            job_host_summaries = reverse('api:job_job_host_summaries_list', args=(obj.pk,)),
         ))
         if obj.job_template:
-            res['job_template'] = reverse('main:job_template_detail', args=(obj.job_template.pk,))
+            res['job_template'] = reverse('api:job_template_detail', args=(obj.job_template.pk,))
         if obj.can_start or True:
-            res['start'] = reverse('main:job_start', args=(obj.pk,))
+            res['start'] = reverse('api:job_start', args=(obj.pk,))
         if obj.can_cancel or True:
-            res['cancel'] = reverse('main:job_cancel', args=(obj.pk,))
+            res['cancel'] = reverse('api:job_cancel', args=(obj.pk,))
         return res
 
     def from_native(self, data, files):
@@ -942,8 +942,8 @@ class JobHostSummarySerializer(BaseSerializer):
             return {}
         res = super(JobHostSummarySerializer, self).get_related(obj)
         res.update(dict(
-            job=reverse('main:job_detail', args=(obj.job.pk,)),
-            host=reverse('main:host_detail', args=(obj.host.pk,))
+            job=reverse('api:job_detail', args=(obj.job.pk,)),
+            host=reverse('api:host_detail', args=(obj.host.pk,))
         ))
         return res
 
@@ -975,17 +975,17 @@ class JobEventSerializer(BaseSerializer):
             return {}
         res = super(JobEventSerializer, self).get_related(obj)
         res.update(dict(
-            job = reverse('main:job_detail', args=(obj.job.pk,)),
-            #children = reverse('main:job_event_children_list', args=(obj.pk,)),
+            job = reverse('api:job_detail', args=(obj.job.pk,)),
+            #children = reverse('api:job_event_children_list', args=(obj.pk,)),
         ))
         if obj.parent:
-            res['parent'] = reverse('main:job_event_detail', args=(obj.parent.pk,))
+            res['parent'] = reverse('api:job_event_detail', args=(obj.parent.pk,))
         if obj.children.count():
-            res['children'] = reverse('main:job_event_children_list', args=(obj.pk,))
+            res['children'] = reverse('api:job_event_children_list', args=(obj.pk,))
         if obj.host:
-            res['host'] = reverse('main:host_detail', args=(obj.host.pk,))
+            res['host'] = reverse('api:host_detail', args=(obj.host.pk,))
         if obj.hosts.count():
-            res['hosts'] = reverse('main:job_event_hosts_list', args=(obj.pk,))
+            res['hosts'] = reverse('api:job_event_hosts_list', args=(obj.pk,))
         return res
 
     def get_summary_fields(self, obj):

@@ -18,7 +18,7 @@ additional results if there are more than will fit on a single page.  The
 
 Each {{ model_verbose_name }} data structure includes the following fields:
 
-{% include "main/_result_fields_common.md" %}
+{% include "api/_result_fields_common.md" %}
 
 ## Sorting
 

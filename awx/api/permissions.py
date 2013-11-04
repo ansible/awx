@@ -16,7 +16,7 @@ from awx.main.access import *
 from awx.main.models import *
 from awx.main.utils import get_object_or_400
 
-logger = logging.getLogger('awx.main.permissions')
+logger = logging.getLogger('awx.api.permissions')
 
 __all__ = ['ModelAccessPermission', 'JobTemplateCallbackPermission',
            'JobTaskPermission']

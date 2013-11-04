@@ -1,4 +1,4 @@
-{% include "main/sub_list_api_view.md" %}
+{% include "api/sub_list_api_view.md" %}
 
 # Create {{ model_verbose_name_plural|title }} for this {{ parent_model_verbose_name|title }}:
 
@@ -7,7 +7,7 @@ fields to create a new {{ model_verbose_name }} associated with this
 {{ parent_model_verbose_name }}.
 
 {% with write_only=1 %}
-{% include "main/_result_fields_common.md" %}
+{% include "api/_result_fields_common.md" %}
 {% endwith %}
 
 {% block post_create %}{% endblock %}
@@ -36,4 +36,4 @@ remove the {{ model_verbose_name }} from this {{ parent_model_verbose_name }}
 without deleting the {{ model_verbose_name }}.
 {% endif %}
 
-{% include "main/_new_in_awx.md" %}
+{% include "api/_new_in_awx.md" %}
