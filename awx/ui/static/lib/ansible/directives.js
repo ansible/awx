@@ -107,7 +107,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
             
             function checkIt () {
                var viewValue = elm.val();
-               var txt, label, p, l, s;
+               var txt, label;
                validity = true;
                if ( scope[attrs.awRequiredWhen] && (elm.attr('required') == null || elm.attr('required') == undefined) ) {
                   $(elm).attr('required','required');

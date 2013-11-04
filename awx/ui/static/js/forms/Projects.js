@@ -82,8 +82,8 @@ angular.module('ProjectFormDefinition', [])
                 label: 'Playbook Directory',
                 type: 'select',
                 id: 'local-path-select',
-                ngOptions: 'path for path in project_local_paths',
-                awRequiredWhen: { variable: "pathRequired", init: "true" },
+                ngOptions: 'path.label for path in project_local_paths',
+                awRequiredWhen: { variable: "pathRequired", init: false },
                 ngShow: "scm_type.value == ''",
                 awPopOver: '<p>Select from the list of directories found in the base path.' +
                   'Together the base path and the playbook directory provide the full path used to locate playbooks.</p>' + 
@@ -96,7 +96,7 @@ angular.module('ProjectFormDefinition', [])
                 label: 'SCM URL',
                 type: 'text',
                 ngShow: "scm_type.value !== ''",
-                awRequiredWhen: { variable: "scm_type", init: "true" },
+                awRequiredWhen: { variable: "scmRequired", init: false },
                 helpCollapse: [
                     { hdr: 'GIT URLs',
                       content: '<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
@@ -140,14 +140,12 @@ angular.module('ProjectFormDefinition', [])
             checkbox_group: {
                 label: 'SCM Options',
                 type: 'checkbox_group',
-                ngShow: "scm_type !== '' && scm_type !== null",
-
+                ngShow: "scm_type && scm_type.value !== ''",
                 fields: [
                     {
                         name: 'scm_clean',
                         label: 'Clean',
                         type: 'checkbox',
-                        ngShow: "scm_type.value !== ''",
                         addRequired: false,
                         editRequired: false,
                         awPopOver: '<p>Remove any local modifications prior to performing an update.</p>',
@@ -160,7 +158,6 @@ angular.module('ProjectFormDefinition', [])
                         name: 'scm_delete_on_update',
                         label: 'Delete on Update',
                         type: 'checkbox',
-                        ngShow: "scm_type.value !== ''",
                         addRequired: false,
                         editRequired: false,
                         awPopOver: '<p>Delete the local repository in its entirety prior to performing an update.</p><p>Depending on the size of the ' +
@@ -174,7 +171,6 @@ angular.module('ProjectFormDefinition', [])
                         name: 'scm_update_on_launch',
                         label: 'Update on Launch',
                         type: 'checkbox',
-                        ngShow: "scm_type.value !== ''",
                         addRequired: false,
                         editRequired: false,
                         awPopOver: '<p>Each time a job runs using this project, perform an update to the local repository prior to starting the job.</p>',

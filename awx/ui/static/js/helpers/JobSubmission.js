@@ -316,7 +316,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function(e, action) {
             // Refresh the project list after update request submitted
             Alert('Update Started', 'The request to start the SCM update process was submitted. ' +
-                'The Projects page will refresh every 10 seconds, or refresh manually by clicking the <em>Refresh</em> button.', 'alert-info');
+                'To monitor the update status, refresh the page by clicking the <em>Refresh</em> button.', 'alert-info');
             scope.refresh();
             });
         
@@ -402,8 +402,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function(e, action) {
             if (action == 'started') {
                // Refresh the project list after update request submitted
-               Alert('Update Started', 'The request to start the inventory update process was submitted. Monitor progress from the inventory summary screen. ' +
-                   'The screen will refresh every 10 seconds, or refresh manually by clicking the <em>Refresh</em> button.', 'alert-info');
+               Alert('Update Started', 'The request to start the inventory update process was submitted. Monitor progress of the update process ' +
+                   'by clicking the <em>Refresh</em> button.', 'alert-info');
                //var node = $('#inventory-node')
                //var selected = $('#tree-view').jstree('get_selected');
                //scope['inventorySummaryGroup'] = null; 

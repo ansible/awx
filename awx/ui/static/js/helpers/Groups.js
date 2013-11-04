@@ -611,7 +611,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                
                var data = {
                    name: scope['name'],
-                   description: scope['description'],
+                   description: scope['description']
                   };
 
                if (inventory_id) {

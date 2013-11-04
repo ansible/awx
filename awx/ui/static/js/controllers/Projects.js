@@ -231,7 +231,7 @@ ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routePar
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
                       GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, 
                       GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList,
-                      CredentialList, GetChoices) 
+                      CredentialList, GetChoices, DebugForm) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -247,6 +247,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
 
    generator.reset();
    LoadBreadCrumbs();
+   
    GetProjectPath({ scope: scope, master: master });
    
    if (scope.removeChoicesReady) {
@@ -259,6 +260,8 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
                break;
            }  
        }
+       scope.scmRequired = false;
+       master['scm_type'] = scope['scm_type'];
        });
 
    // Load the list of options for Kind
@@ -301,10 +304,11 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
               }
            }
        }
-       if (scope.scm_type) {
-          data.scm_type = scope.scm_type.value;
+       data.scm_type = scope.scm_type.value;
+       if (data.scm_type.value !== '') {
           delete data.local_path;
        }
+
        var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
        Rest.setUrl(url);
        Rest.post(data)
@@ -331,20 +335,9 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
 
    scope.scmChange = function() {
        // When an scm_type is set, path is not required
-       scope.pathRequired = (scope.scm_type) ? false : true;
-       scope.scmBranchLabel = (scope.scm_type && scope.scm_type.value && scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch'; 
-       }
-
-   scope.authChange = function() {
-       if (!scope.auth_required) {
-          scope.scm_username = null;
-          scope.scm_password = null;
-          scope.scm_password_confirm = null;
-          scope.scm_key_data = null;
-          scope.scm_key_unlock = null;
-          scope.scm_key_unlock_confirm = null;
-          scope.scm_password_ask = false;
-       }
+       scope.pathRequired = (scope.scm_type.value == '') ? true : false;
+       scope.scmRequired = (scope.scm_type.value !== '') ? true : false;
+       scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch'; 
        }
 
    // Cancel
@@ -354,19 +347,21 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
        for (var fld in master) {
            scope[fld] = master[fld];
        }
+       scope.scmChange();
        }; 
 }
 
 ProjectsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
                         'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
-                        'ReturnToCaller', 'GetProjectPath', 'LookUpInit', 'OrganizationList', 'CredentialList', 'GetChoices'
+                        'ReturnToCaller', 'GetProjectPath', 'LookUpInit', 'OrganizationList', 'CredentialList', 'GetChoices',
+                        'DebugForm'
                         ];
 
 
 function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
                        GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
                        RelatedPaginateInit, Prompt, ClearScope, GetBasePath, ReturnToCaller, GetProjectPath,
-                       Authorization, CredentialList, LookUpInit, GetChoices) 
+                       Authorization, CredentialList, LookUpInit, GetChoices, Empty, DebugForm) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -386,21 +381,6 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    scope.project_local_paths = [];
    scope.base_dir = ''; 
 
-   function setAskCheckboxes() {
-       for (var fld in form.fields) {
-           if (form.fields[fld].type == 'password' && form.fields[fld].ask && scope[fld] == 'ASK') {
-              // turn on 'ask' checkbox for password fields with value of 'ASK'
-              $("#" + fld + "-clear-btn").attr("disabled","disabled");
-              scope[fld + '_ask'] = true;
-           }
-           else {
-              scope[fld + '_ask'] = false;
-              $("#" + fld + "-clear-btn").removeAttr("disabled");
-           }
-           master[fld + '_ask'] = scope[fld + '_ask'];
-       }
-       } 
-
    // After the project is loaded, retrieve each related set
    if (scope.projectLoadedRemove) {
       scope.projectLoadedRemove();
@@ -409,25 +389,29 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
        for (var set in relatedSets) {
            scope.search(relatedSets[set].iterator);
        }
+       
        if (Authorization.getUserInfo('is_superuser') == true) {
           GetProjectPath({ scope: scope, master: master });
        }
        else {
           var opts = [];
-          opts.push(scope['local_path']);
+          opts.push({ label: scope['local_path'], value: scope['local_path'] });
           scope.project_local_paths = opts;
+          scope.local_path = scope['project_local_paths'][0];
           scope.base_dir = 'You do not have access to view this property';
        }
 
        LookUpInit({
+           url: GetBasePath('credentials') + '?kind=scm',
            scope: scope,
            form: form,
            list: CredentialList, 
-           field: 'credential' 
+           field: 'credential'
            });
 
-       scope.auth_required = (scope.scm_type && (scope.scm_username || scope.scm_password || scope.scm_key_data)) ? true : false;
-       master.auth_required = scope.auth_required;
+       scope.pathRequired = (scope.scm_type.value == '') ? true : false;
+       scope.scmRequired = (scope.scm_type.value !== '') ? true : false;
+       scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch'; 
        });
 
    if (scope.removeChoicesReady) {
@@ -466,26 +450,28 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
                       relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
                    }
                }
-
-               if (data.scm_type !== "") {
-                  for (var i=0; i < scope.scm_type_options.length; i++) {
-                      if (scope.scm_type_options[i].value == data.scm_type) {
-                         scope.scm_type = scope.scm_type_options[i];
-                         break;
-                      }
-                  }
+               
+               data.scm_type = (Empty(data.scm_type)) ? '' : data.scm_type; 
+               
+               for (var i=0; i < scope.scm_type_options.length; i++) {
+                   if (scope.scm_type_options[i].value == data.scm_type) {
+                      scope.scm_type = scope.scm_type_options[i];
+                      break;
+                   }
+               }
+               
+               if (scope.scm_type.value !== '') {
                   scope.pathRequired = false;
+                  scope.scmRequired = true;
                }
                else {
                   scope.pathRequired = true;
+                  scope.scmRequired = false;
                }
 
                master['scm_type'] = scope['scm_type'];
-               master['auth_required'] = scope['auth_required'];
-
-               scope.scmBranchLabel = (scope.scm_type && scope.scm_type.value && scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch';
-               setAskCheckboxes();
-               
+               scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch';
+              
                // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
                RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
                RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
@@ -499,7 +485,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
 
    // Load the list of options for Kind
    GetChoices({
-        url: GetBasePath('credentials') + '?kind=scm',
+        url: GetBasePath('projects'),
         scope: scope,
         field: 'scm_type',
         variable: 'scm_type_options',
@@ -524,10 +510,12 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
               }
            }
        }
-       if (scope.scm_type) {
-          params.scm_type = scope.scm_type.value;
+       
+       params.scm_type = scope.scm_type.value;
+       if (scope.scm_type.value !== '') {   
           delete params.local_path;
        }
+
        Rest.setUrl(defaultUrl);
        Rest.put(params)
            .success( function(data, status, headers, config) {
@@ -538,27 +526,6 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
                  { hdr: 'Error!', msg: 'Failed to update project: ' + id + '. PUT status: ' + status });
                });
        };
-
-   // Reset the form
-   scope.formReset = function() {
-       $rootScope.flashMessage = null;
-       generator.reset();
-       for (var fld in master) {
-           scope[fld] = master[fld];
-       }
-       };
-
-   scope.authChange = function() {
-       if (!scope.auth_required) {
-          scope.scm_username = null;
-          scope.scm_password = null;
-          scope.scm_password_confirm = null;
-          scope.scm_key_data = null;
-          scope.scm_key_unlock = null;
-          scope.scm_key_unlock_confirm = null;
-          scope.scm_password_ask = false;
-       }
-       }
 
    // Related set: Add button
    scope.add = function(set) {
@@ -595,46 +562,28 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
           action: action
           }); 
       }
-
-   // Password change
-   scope.clearPWConfirm = function(fld) {
-       // If password value changes, make sure password_confirm must be re-entered
-       scope[fld] = '';
-       scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
-       }
-    
-   // Respond to 'Ask at runtime?' checkbox
-   scope.ask = function(fld, associated) {
-       if (scope[fld + '_ask']) {
-          $("#" + fld + "-clear-btn").attr("disabled","disabled");
-          scope[fld] = 'ASK';
-          scope[associated] = '';
-          scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
-       }
-       else {
-          $("#" + fld + "-clear-btn").removeAttr("disabled");
-          scope[fld] = '';
-          scope[associated] = '';
-          scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
-       }
-       }
-
-   scope.clear = function(fld, associated) {
-       scope[fld] = '';
-       scope[associated] = '';
-       scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
-       scope[form.name + '_form'].$setDirty();
-       }
-
+  
    scope.scmChange = function() {
-       // When an scm_type is set, path is not required
-       scope.pathRequired = (scope.scm_type) ? false : true;
-       scope.scmBranchLabel = (scope.scm_type && scope.scm_type.value && scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch';  
+       scope.pathRequired = (scope.scm_type.value == '') ? true : false;
+       scope.scmRequired = (scope.scm_type.value !== '') ? true : false;
+       scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch';  
        }
+
+   // Reset the form
+   scope.formReset = function() {
+       $rootScope.flashMessage = null;
+       generator.reset();
+       for (var fld in master) {
+           scope[fld] = master[fld];
+       }
+       scope.scmChange();
+       //DebugForm({ scope: scope, form: form });
+       };
 }
 
 ProjectsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
                          'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit',
                          'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 
-                         'GetProjectPath', 'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices'
+                         'GetProjectPath', 'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
+                         'DebugForm'
                           ];
