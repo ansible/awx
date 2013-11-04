@@ -145,25 +145,20 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                       data[fld] = scope[fld];   
                    }
                }
+               
                data['inventory'] = inventory_id;
                
+               if ($.isEmptyObject(json_data)) {
+                  data['variables'] = "";
+               }
+               else {
+                  data['variables'] = JSON.stringify(json_data, undefined, '\t');
+               }
+
                Rest.setUrl(defaultUrl);
                Rest.post(data)
                    .success( function(data, status, headers, config) {
-                       if (scope.variables) {
-                          Rest.setUrl(data.related.variable_data);
-                          Rest.put(json_data)
-                              .success( function(data, status, headers, config) {
-                                  finished();
-                              })
-                              .error( function(data, status, headers, config) {
-                                  ProcessErrors(scope, data, status, form,
-                                     { hdr: 'Error!', msg: 'Failed to add host varaibles. PUT returned status: ' + status });
-                              });
-                       }
-                       else {
-                          finished();
-                       }
+                       finished();
                        })
                    .error( function(data, status, headers, config) {
                        scope.formModalActionDisabled = false;
@@ -306,24 +301,18 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     data[fld] = scope[fld];   
                 }
                 data['inventory'] = inventory_id;
+
+                if ($.isEmptyObject(json_data)) {
+                   data['variables'] = "";
+                }
+                else {
+                   data['variables'] = JSON.stringify(json_data, undefined, '\t');
+                }
+
                 Rest.setUrl(defaultUrl);
                 Rest.put(data)
                     .success( function(data, status, headers, config) {
-                        if (scope.variables) {
-                           //update host variables
-                           Rest.setUrl(GetBasePath('hosts') + data.id + '/variable_data/');
-                           Rest.put(json_data)
-                               .success( function(data, status, headers, config) {
-                                   finished();
-                               })
-                               .error( function(data, status, headers, config) {
-                                   ProcessErrors(scope, data, status, form,
-                                       { hdr: 'Error!', msg: 'Failed to update host varaibles. PUT returned status: ' + status });
-                                   });
-                        }
-                        else {
-                           finished();
-                        }
+                        finished();
                         })
                     .error( function(data, status, headers, config) {
                         ProcessErrors(scope, data, status, form,
