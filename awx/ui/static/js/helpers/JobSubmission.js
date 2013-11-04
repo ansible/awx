@@ -8,8 +8,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
     'LookUpHelper', 'ProjectFormDefinition', 'JobSubmissionHelper', 'GroupFormDefinition', 'GroupsHelper' ])
 
     .factory('PromptPasswords', ['CredentialForm', 'JobTemplateForm', 'GroupForm', 'ProjectsForm', '$compile', 'Rest', '$location', 'ProcessErrors',
-        'GetBasePath', 'Alert',
-    function(CredentialForm, JobTemplateForm, ProjectsForm, GroupForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert) {
+        'GetBasePath', 'Alert', 'Empty',
+    function(CredentialForm, JobTemplateForm, ProjectsForm, GroupForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert, Empty) {
     return function(params) {
         
         var scope = params.scope; 
@@ -73,7 +73,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                    value_supplied = true;
                 }
                 });
-            if (passwords.length == 0 || value_supplied) {
+            if (Empty(passwords) || passwords.length == 0 || value_supplied) {
                Rest.setUrl(start_url);
                Rest.post(pswd)
                    .success( function(data, status, headers, config) {
@@ -97,7 +97,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             }
             }
         
-        if (passwords.length > 0) {
+        if (passwords && passwords.length > 0) {
            // Prompt for passwords
            html += "<form class=\"form-horizontal\" name=\"password_form\" novalidate>\n";
            html += (extra_html) ? extra_html : "";
@@ -441,9 +441,9 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         Rest.get()
             .success( function(data, status, headers, config) {
                 if (data.can_update) {
-                   var extra_html = "<div class=\"inventory-passwd-msg\">Starting inventory update for <em>" + group_name + 
-                       "</em>. Please provide the " + group_source + " credentials:</div>\n";
-                   scope.$emit('InventorySubmit', data.passwords_needed_to_update, extra_html);
+                   //var extra_html = "<div class=\"inventory-passwd-msg\">Starting inventory update for <em>" + group_name + 
+                   //    "</em>. Please provide the " + group_source + " credentials:</div>\n";
+                   scope.$emit('InventorySubmit', data.passwords_needed_to_update);
                 } 
                 else {
                    Alert('Permission Denied', 'You do not have access to run the update. Please contact your system administrator.', 

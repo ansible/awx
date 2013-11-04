@@ -8,11 +8,11 @@
  * 
  */
 
-angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
+angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
     .factory('GenerateForm', [ '$location', '$cookieStore', '$compile', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column',
-        'NavigationLink', 'HelpCollapse', 'Button', 'DropDown',
+        'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty',
     function($location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse, Button,
-        DropDown) {
+        DropDown, Empty) {
     return {
     
     setForm: function(form) {
@@ -102,18 +102,20 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
 
        // Prepend an asterisk to required field label
        $('.form-control[required], input[type="radio"][required]').each(function() {
-            var label = $(this).parent().parent().find('label');
-            if ($(this).attr('type') == 'radio') {
-               label = $(this).parent().parent().parent().find('label').first();
-            }
-            if (label) {
-               var span = label.find('span');
-               if (span && !span.hasClass('prepend-asterisk')) {
-                  span.addClass('prepend-asterisk');
-               }
-               else if (!label.hasClass('prepend-asterisk') && !label.find('.prepend-asterisk')) {
-                  label.addClass('prepend-asterisk');
-               }
+            if ( Empty($(this).attr('aw-required-when')) ) {
+                var label = $(this).parent().parent().find('label').first();
+                if ($(this).attr('type') == 'radio') {
+                   label = $(this).parent().parent().parent().find('label').first();
+                }
+                if (label) {
+                   var span = label.find('span').first();
+                   if (span && !span.hasClass('prepend-asterisk')) {
+                      span.addClass('prepend-asterisk');
+                   }
+                   else if (!label.hasClass('prepend-asterisk') && !label.find('.prepend-asterisk')) {
+                      label.addClass('prepend-asterisk');
+                   }
+                }
             }
             });
 
@@ -463,7 +465,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
              html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
              html += "for=\"" + fld + '">';
              html += (field.icon) ? this.icon(field.icon) : "";
-             html += "<span>" + field.label + '</span></label>' + "\n";
+             html += "<span class=\"label-text\">" + field.label + '</span></label>' + "\n";
              html += (field.awPopOver && field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
              html += "</div>\n";
              html += "<div ";
@@ -776,7 +778,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
             html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
             html += "for=\"" + fld + '">';
             html += (field.icon) ? this.icon(field.icon) : "";
-            html += '<span>' + field.label + '</span></label>' + "\n";
+            html += '<span class=\"label-text\">' + field.label + '</span></label>' + "\n";
             html += (field.awPopOver && field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
             html += "</div>\n";
             html += "<div ";
@@ -791,7 +793,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies'])
          if (field.type == 'radio') {
             html += "<label class=\"control-label " + getLabelWidth() + "\" for=\"" + fld + '">';
             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-            html += '<span>' + field.label + '</span></label>' + "\n";
+            html += '<span class=\"label-text\">' + field.label + '</span></label>' + "\n";
             html += "<div ";
             html += "id=\"" + this.form.name + "_" + fld + "_radio_grp\" ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 

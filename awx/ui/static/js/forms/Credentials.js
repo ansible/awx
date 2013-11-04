@@ -75,15 +75,15 @@ angular.module('CredentialFormDefinition', [])
                 label: 'Access Key',
                 type: 'text',
                 ngShow: "kind.value == 'aws'",
-                awRequiredWhen: { variable: "aws_required", init: "false" },
+                awRequiredWhen: { variable: "aws_required", init: false },
                 autocomplete: false,
                 apiField: 'username'
                 },
             secret_key: {
-                label: 'Secrent Key',
+                label: 'Secret Key',
                 type: 'password',
                 ngShow: "kind.value == 'aws'",
-                awRequiredWhen: { variable: "aws_required", init: "false" },
+                awRequiredWhen: { variable: "aws_required", init: false },
                 autocomplete: false,
                 ask: false,
                 clear: false,
@@ -97,9 +97,9 @@ angular.module('CredentialFormDefinition', [])
                 autocomplete: false
                 },
             "password": {
-                labelBind: 'passwordLabel',
+                label: 'Password',
                 type: 'password',
-                ngShow: "kind.value && kind.value !== 'aws'",
+                ngShow: "kind.value == 'rax' || kind.value == 'scm'",
                 awRequiredWhen: {variable: 'rackspace_required', init: false },
                 ngChange: "clearPWConfirm('password_confirm')",
                 ask: false,
@@ -108,13 +108,35 @@ angular.module('CredentialFormDefinition', [])
                 autocomplete: false
                 },
             "password_confirm": {
-               labelBind: 'passwordConfirmLabel',
+                label: 'Confirm Password',
                 type: 'password',
-                ngShow: "kind.value && kind.value !== 'aws'",
+                ngShow: "kind.value == 'rax' || kind.value == 'scm'",
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,
                 associated: 'password',
+                autocomplete: false
+                },
+            "ssh_password": {
+                label: 'SSH Password',
+                type: 'password',
+                ngShow: "kind.value == 'ssh'",
+                ngChange: "clearPWConfirm('password_confirm')",
+                addRequired: false,
+                editRequired: false,
+                ask: true,
+                clear: true,
+                associated: 'ssh_password_confirm',
+                autocomplete: false
+                },
+            "ssh_password_confirm": {
+                label: 'Confirm SSH Password',
+                type: 'password',
+                ngShow: "kind.value == 'ssh'",
+                addRequired: false,
+                editRequired: false,
+                awPassMatch: true,
+                associated: 'ssh_password',
                 autocomplete: false
                 },
             "ssh_key_data": {

@@ -87,7 +87,7 @@ angular.module('JobTemplateFormDefinition', [])
                 type: 'lookup',
                 sourceModel: 'cloud_credential',
                 sourceField: 'name',
-                ngClick: 'lookUpCredential()',
+                ngClick: 'lookUpCloudcredential()',
                 addRequired: false, 
                 editRequired: false,
                 column: 1

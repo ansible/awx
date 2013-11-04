@@ -82,7 +82,8 @@ JobTemplatesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$rout
 
 function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-                          GetBasePath, InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange) 
+                          GetBasePath, InventoryList, CredentialList, ProjectList, LookUpInit,
+                          md5Setup, ParseTypeChange) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -123,22 +124,29 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
       field: 'inventory' 
       });
 
-   LookUpInit({
-      url: GetBasePath('credentials') + '?cloud=false',
-      scope: scope,
-      form: form,
-      current_item: null,
-      list: CredentialList, 
-      field: 'credential' 
-      });
-
+   // Clone the CredentialList object for use with cloud_credential. Cloning
+   // and changing properties to avoid collision.
+   var CloudCredentialList = {};
+   jQuery.extend(true, CloudCredentialList, CredentialList);
+   CloudCredentialList.name = 'cloudcredentials',
+   CloudCredentialList.iterator = 'cloudcredential',
+   
    LookUpInit({
       url: GetBasePath('credentials') + '?cloud=true',
       scope: scope,
       form: form,
       current_item: null,
-      list: CredentialList, 
+      list: CloudCredentialList, 
       field: 'cloud_credential' 
+      });
+   
+   LookUpInit({
+      url: GetBasePath('credentials') + '?kind=ssh',
+      scope: scope,
+      form: form,
+      current_item: null,
+      list: CredentialList, 
+      field: 'credential' 
       });
 
    // Update playbook select whenever project value changes
@@ -277,7 +285,8 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
 
 JobTemplatesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
-                            'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit', 'md5Setup', 'ParseTypeChange' ]; 
+                            'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
+                            'md5Setup', 'ParseTypeChange' ]; 
 
 
 function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, 

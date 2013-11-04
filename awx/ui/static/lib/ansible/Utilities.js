@@ -448,8 +448,9 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        Rest.options()
            .success( function(data, status, headers, config) {
                var choices = data.actions.GET[field].choices
+               // including 'name' property so list can be used by search
                for (var i=0; i < choices.length; i++) {
-                   scope[variable].push({ label: choices[i][1], value: choices[i][0] });
+                   scope[variable].push({ label: choices[i][1], value: choices[i][0], name: choices[i][1]});
                }
                if (callback) {
                   scope.$emit(callback);
@@ -490,7 +491,8 @@ angular.module('Utilities',['RestServices', 'Utilities'])
    
    /* Empty()
     *
-    * Test if a value is 'empty'. Returns true if val is null | '' | undefined
+    * Test if a value is 'empty'. Returns true if val is null | '' | undefined.
+    * Only works on non-Ojbect types.
     *
     */
    .factory('Empty', [ function() {

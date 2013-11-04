@@ -107,26 +107,26 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
             
             function checkIt () {
                var viewValue = elm.val();
-               var txt, label;
+               var txt, label, p, l, s;
                validity = true;
                if ( scope[attrs.awRequiredWhen] && (elm.attr('required') == null || elm.attr('required') == undefined) ) {
                   $(elm).attr('required','required');
                   if ($(elm).hasClass('lookup')) {
-                     $(elm).parent().parent().parent().find('label').addClass('prepend-asterisk');
+                     $(elm).parent().parent().parent().find('label').first().addClass('prepend-asterisk');
                   }
                   else {
-                     $(elm).parent().parent().find('label').addClass('prepend-asterisk');
+                     $(elm).parent().parent().find('label').first().addClass('prepend-asterisk');
                   }
                }
                else if (!scope[attrs.awRequiredWhen]) {
                   elm.removeAttr('required');
                   if ($(elm).hasClass('lookup')) {
-                     label = $(elm).parent().parent().parent().find('label');
+                     label = $(elm).parent().parent().parent().find('label').first();
+                     label.removeClass('prepend-asterisk');
                   }
                   else {
-                     label = $(elm).parent().parent().find('label');
+                     $(elm).parent().parent().find('label').first().removeClass('prepend-asterisk');
                   }
-                  label.removeClass('prepend-asterisk');
                }
                if (scope[attrs.awRequiredWhen] && (viewValue == undefined || viewValue == null || viewValue == '')) {
                   validity = false;

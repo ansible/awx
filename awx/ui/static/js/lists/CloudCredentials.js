@@ -1,19 +1,19 @@
 /*********************************************
  *  Copyright (c) 2013 AnsibleWorks, Inc.
  *
- *  Credentials.js 
+ *  CloudCredentials.js 
  *  List view object for Credential data model.
  *
  *  @dict
  */
-angular.module('CredentialsListDefinition', [])
+angular.module('CloudCredentialsListDefinition', [])
     .value(
-    'CredentialList', {
+    'CloudCredentialList', {
         
-        name: 'credentials',
-        iterator: 'credential',
-        selectTitle: 'Add Credentials',
-        editTitle: 'Credentials',
+        name: 'cloudcredentials',
+        iterator: 'cloudcredential',
+        selectTitle: 'Add Cloud Credentials',
+        editTitle: 'Cloud Credentials',
         selectInstructions: '<p>Select existing credentials by clicking each credential or checking the related checkbox. When finished, click the blue ' +
             '<em>Select</em> button, located bottom right.</p> <p>Create a brand new credential by clicking the green <em>Create New</em> button.</p>',
         index: true,
@@ -28,14 +28,6 @@ angular.module('CredentialsListDefinition', [])
                 label: 'Description',
                 excludeModal: false
                 },
-            kind: {
-                label: 'Type',
-                searchType: 'select',
-                searchOptions: [],   // will be set by Options call to credentials resource
-                excludeModal: true,
-                nosort: true
-                }
-            /*
             team: {
                 label: 'Team',
                 ngBind: 'credential.team_name',
@@ -50,7 +42,6 @@ angular.module('CredentialsListDefinition', [])
                 sourceField: 'username',
                 excludeModal: true
                 }
-            */
             },
         
         actions: {

@@ -12,7 +12,7 @@
 
 function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, CredentialList,
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                          ClearScope, ProcessErrors, GetBasePath, SelectionInit)
+                          ClearScope, ProcessErrors, GetBasePath, SelectionInit, GetChoices)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -33,20 +33,45 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
        scope.removePostRefresh();
     }
     scope.removePostRefresh = scope.$on('PostRefresh', function() {
-         // After a refresh, populate the organization name on each row
+        list.fields.kind.searchOptions = scope.credential_kind_options;
+        
+        // Translate the kind value
         for(var i=0; i < scope.credentials.length; i++) {
+           /*
            if (scope.credentials[i].summary_fields.user) {
               scope.credentials[i].user_username = scope.credentials[i].summary_fields.user.username;
            }
            if (scope.credentials[i].summary_fields.team) {
               scope.credentials[i].team_name = scope.credentials[i].summary_fields.team.name;  
            }
+           */
+           for (var j=0; j < scope.credential_kind_options.length; j++) {
+               if (scope.credential_kind_options[j].value == scope.credentials[i].kind) {
+                  scope.credentials[i].kind = scope.credential_kind_options[j].label
+                  break;
+               }
+           }
         }
         });
 
-    SearchInit({ scope: scope, set: 'credentials', list: list, url: defaultUrl });
-    PaginateInit({ scope: scope, list: list, url: defaultUrl });
-    scope.search(list.iterator);
+    if (scope.removeChoicesReady) {
+       scope.removeChoicesReady();
+    }
+    scope.removeChoicesReady = scope.$on('choicesReady', function() {
+        SearchInit({ scope: scope, set: 'credentials', list: list, url: defaultUrl });
+        PaginateInit({ scope: scope, list: list, url: defaultUrl });
+        scope.search(list.iterator);
+        });
+
+    // Load the list of options for Kind
+    GetChoices({
+        scope: scope,
+        url: defaultUrl,
+        field: 'kind',
+        variable: 'credential_kind_options',
+        callback: 'choicesReady'
+        });
+
 
     LoadBreadCrumbs();
     
@@ -84,7 +109,7 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
 
 CredentialsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'CredentialList', 'GenerateList', 
                             'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                            'GetBasePath', 'SelectionInit'];
+                            'GetBasePath', 'SelectionInit', 'GetChoices'];
 
 
 function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
@@ -171,22 +196,38 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
       
       var data = {}
       for (var fld in form.fields) {
-          if (scope[fld] === null) {
-             data[fld] = "";
-          }
-          else {
-             data[fld] = scope[fld];
+          if (fld !== 'access_key' && fld !== 'secret_key' && fld !== 'ssh_username' &&
+              fld !== 'ssh_password') {
+              if (scope[fld] === null) {
+                 data[fld] = "";
+              }
+              else {
+                 data[fld] = scope[fld];
+              }
           }
       } 
       
       if (!Empty(scope.team)) {
          data.team = scope.team;
+         data.user = "";
       }
       else {
          data.user = scope.user;
+         data.team = "";
       }
 
       data['kind'] = scope['kind'].value;
+
+      switch (data['kind']) { 
+          case 'ssh': 
+              data['username'] = scope['ssh_username'];
+              data['password'] = scope['ssh_password'];
+              break; 
+          case 'aws':
+              data['username'] = scope['access_key'];
+              data['password'] = scope['secret_key'];
+              break;
+      }
 
       if (Empty(data.team) && Empty(data.user)) {
           Alert('Missing User or Team', 'You must provide either a User or a Team. If this credential will only be accessed by a specific ' + 
@@ -353,6 +394,29 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                   scope['owner'] = 'team';
                }
                master['owner'] = scope['owner']; 
+               
+               for (var i=0; i < scope.credential_kind_options.length; i++) {
+                   if (scope.credential_kind_options[i].value == data.kind) {
+                      scope.kind = scope.credential_kind_options[i];
+                      break;
+                   }
+               }
+               master['kind'] = scope['kind'];
+
+               switch (data.kind) {
+                   case 'aws': 
+                       scope['access_key'] = data.username; 
+                       scope['secret_key'] = data.password;
+                       master['access_key'] = scope['access_key'];
+                       master['secret_key'] = scope['secret_key'];
+                       break; 
+                   case 'ssh':
+                       scope['ssh_username'] = data.username; 
+                       scope['ssh_password'] = data.password;
+                       master['ssh_username'] = scope['ssh_username'];
+                       master['ssh_password'] = scope['ssh_password'];
+                       break;  
+               }
 
                scope.$emit('credentialLoaded');
                })
@@ -373,25 +437,42 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    // Save changes to the parent
    scope.formSave = function() {
       generator.clearApiErrors();
-      
+
       var data = {}
       for (var fld in form.fields) {
-          if (scope[fld] === null) {
-             data[fld] = "";
-          }
-          else {
-             data[fld] = scope[fld];
+          if (fld !== 'access_key' && fld !== 'secret_key' && fld !== 'ssh_username' &&
+              fld !== 'ssh_password') {
+              if (scope[fld] === null) {
+                 data[fld] = "";
+              }
+              else {
+                 data[fld] = scope[fld];
+              }
           }
       } 
       
+      
       if (!Empty(scope.team)) {
          data.team = scope.team;
+         data.user = "";
       }
       else {
          data.user = scope.user;
+         data.team = "";
       }
 
       data['kind'] = scope['kind'].value;
+
+      switch (data['kind']) { 
+          case 'ssh': 
+              data['username'] = scope['ssh_username'];
+              data['password'] = scope['ssh_password'];
+              break; 
+          case 'aws':
+              data['username'] = scope['access_key'];
+              data['password'] = scope['secret_key'];
+              break;
+      }
 
       if (Empty(data.team) && Empty(data.user)) {
           Alert('Missing User or Team', 'You must provide either a User or a Team. If this credential will only be accessed by a specific ' + 

@@ -18,27 +18,20 @@ angular.module('CredentialsHelper', ['Utilities'])
 
         // Put things in a default state
         scope['usernameLabel'] = 'Username';
-        scope['passwordLabel'] = 'Password';
-        scope['passwordConfirmLabel'] = 'Confirm Password';
         scope['aws_required'] = false;
         scope['rackspace_required'] = false;
         scope['sshKeyDataLabel'] = 'SSH Private Key';
-        form.fields['password'].clear = true; 
-        form.fields['password'].ask = true;
-       
+        
         // Apply kind specific settings
         switch(scope['kind'].value) {
             case 'aws':
                 scope['aws_required'] = true;
                 break; 
             case 'rax': 
-                scope['rackspace_required'] =  true;
-                form.fields['password'].ask = false; 
+                scope['rackspace_required'] = true;
                 break;
-            case 'ssh': 
+            case 'ssh':
                 scope['usernameLabel'] = 'SSH Username';
-                scope['passwordLabel'] = 'SSH Password';
-                scope['passwordConfirmLabel'] = 'Confirm SSH Password';
                 break; 
             case 'scm':
                 scope['sshKeyDataLabel'] = 'SCM Private Key';

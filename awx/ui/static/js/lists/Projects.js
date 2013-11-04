@@ -41,7 +41,8 @@ angular.module('ProjectsListDefinition', [])
             last_updated: {
                 label: 'Last Updated',
                 type: 'date',
-                excludeModal: true
+                excludeModal: true,
+                searchable: false
                 }
             },
         
