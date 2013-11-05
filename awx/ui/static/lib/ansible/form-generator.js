@@ -104,17 +104,17 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        // Prepend an asterisk to required field label
        $('.form-control[required], input[type="radio"][required]').each(function() {
             if ( Empty($(this).attr('aw-required-when')) ) {
-                var label = $(this).parent().parent().find('label').first();
+                var label = $(this).parent().parent().find('label');
                 if ($(this).attr('type') == 'radio') {
-                   label = $(this).parent().parent().parent().find('label').first();
+                   label = $(this).parent().parent().parent().find('label');
                 }
-                if (label) {
-                   var span = label.find('span').first();
-                   if (span && !span.hasClass('prepend-asterisk')) {
-                      span.addClass('prepend-asterisk');
+                if (label.length > 0) {
+                   var span = label.children('span');
+                   if (span.length > 0 && !span.first().hasClass('prepend-asterisk')) {
+                      span.first().addClass('prepend-asterisk');
                    }
-                   else if (!label.hasClass('prepend-asterisk') && !label.find('.prepend-asterisk')) {
-                      label.addClass('prepend-asterisk');
+                   else if (!label.first().hasClass('prepend-asterisk')) {
+                      label.first().addClass('prepend-asterisk');
                    }
                 }
             }
