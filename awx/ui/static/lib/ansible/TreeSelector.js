@@ -252,12 +252,11 @@ angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector', 'Gr
                    var sublist, subicon;
                    if (childlists && childlists.length > 0) {
                       // has childen
-                      for (var i=0; i < childlists.length; i++) {
-                          sublist = angular.element(childlists[i]);
-                          sublist.addClass('hidden');
-                          subicon = list.find('li')[0].children()[0];
+                      childlists.each(function(idx) {
+                          $(this).addClass('hidden');
+                          subicon = $(this).find('li').first().find('.expand-container i');
                           subicon.removeClass('icon-caret-down').addClass('icon-caret-right');
-                      }
+                      });
                    }
                    /* When the active node's parent is closed, activate the parent */
                    if ($(parent).find('.active').length > 0) {
@@ -329,19 +328,24 @@ angular.module('TreeSelector', ['Utilities', 'RestServices', 'TreeSelector', 'Gr
                    scope.removeGroupRemove(); 
                 }
                 scope.removeGroupRemove = scope.$on('removeGroup', function() {
-                    var url = (parent.attr('data-group-id')) ? GetBasePath('base') + 'groups/' + parent.attr('data-group-id') + '/children/' : 
-                        GetBasePath('inventory') + inv_id + '/groups/';
-                    Rest.setUrl(url);
-                    Rest.post({ id: node.attr('data-group-id'), disassociate: 1 })
-                        .success( function(data, status, headers, config) {
-                            cleanUp('success');
-                            })
-                        .error( function(data, status, headers, config) {
-                            cleanUp('fail');
-                            ProcessErrors(scope, data, status, null,
-                                { hdr: 'Error!', msg: 'Failed to remove ' + node.attr('name') + ' from ' + 
-                                  parent.attr('name') + '. POST returned status: ' + status });
-                            });
+                    if (parent.attr('data-group-id')) {
+                        // Only remove a group from a parent when the parent is a group and not the inventory root
+                        var url = GetBasePath('base') + 'groups/' + parent.attr('data-group-id') + '/children/';
+                        Rest.setUrl(url);
+                        Rest.post({ id: node.attr('data-group-id'), disassociate: 1 })
+                            .success( function(data, status, headers, config) {
+                                cleanUp('success');
+                                })
+                            .error( function(data, status, headers, config) {
+                                cleanUp('fail');
+                                ProcessErrors(scope, data, status, null,
+                                    { hdr: 'Error!', msg: 'Failed to remove ' + node.attr('name') + ' from ' + 
+                                      parent.attr('name') + '. POST returned status: ' + status });
+                                });
+                    }
+                    else {
+                        cleanUp('success');
+                    }
                     });
 
                 if (scope['addToTargetRemove']) {
