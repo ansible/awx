@@ -315,7 +315,8 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
               if (fld == 'variables') {
                  // Parse extra_vars, converting to YAML.  
-                 if ($.isEmptyObject(data.extra_vars) || data.extra_vars == "\{\}" || data.extra_vars == "null") {
+                 if ($.isEmptyObject(data.extra_vars) || data.extra_vars == "\{\}" || data.extra_vars == "null"
+                     || data.extra_vars == "" || data.extra_vars == null) {
                     scope.variables = "---";
                  }
                  else {
