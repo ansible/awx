@@ -16,7 +16,7 @@
  */
 
 angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])  
-    .factory('SearchInit', ['Alert', 'Rest', 'Refresh', function(Alert, Rest, Refresh) {
+    .factory('SearchInit', ['Alert', 'Rest', 'Refresh', '$location', function(Alert, Rest, Refresh, $location) {
     return function(params) {
         
         var scope = params.scope;
@@ -132,14 +132,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            scope[iterator + 'HideSearchType'] = false;
            scope[iterator + 'InputHide'] = false;
            scope[iterator + 'InputDisable'] = false;
-           for (fld in list.fields) {
-               if (list.fields[fld].searchable == undefined || list.fields[fld].searchable == true) {
-                  scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
-                  scope[iterator + 'SearchField'] = fld;
-                  break;
-               }
-           }
-           scope.search(iterator);
+           // Force removal of search keys from the URL
+           window.location = '/#' + $location.path();
            }
 
         scope.setSearchType = function(iterator, type, label) {
