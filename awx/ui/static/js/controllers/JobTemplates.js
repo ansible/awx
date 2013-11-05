@@ -292,7 +292,8 @@ JobTemplatesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$l
 function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, 
                            GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                            RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList, CredentialList,
-                           ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, ParseTypeChange) 
+                           ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, ParseTypeChange,
+                           JobStatusToolTip, FormatDate) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -387,6 +388,25 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
           scope.playbook = null;
           getPlaybooks(scope.project);
           checkSCMStatus();
+       }
+       });
+
+   // Set the status/badge for each related job
+   if (scope.removeRelatedJobs) {
+      scope.removeRelatedJobs();
+   }
+   scope.removeRelatedJobs = scope.$on('relatedjobs', function() {
+       if (scope['jobs'] && scope['jobs'].length) {
+           var cDate;
+           for (var i=0; i < scope['jobs'].length; i++) {
+               // Convert created date to local time zone 
+               cDate = new Date(scope['jobs'][i].created);
+               scope['jobs'][i].created = FormatDate(cDate);
+               // Set tooltip and link
+               scope['jobs'][i].statusBadgeToolTip = JobStatusToolTip(scope['jobs'][i].status) + 
+                   " Click to view status details.";
+               scope['jobs'][i].statusLinkTo = '/#/jobs/' + scope['jobs'][i].id;
+           }
        }
        });
    
@@ -610,5 +630,6 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
 JobTemplatesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm', 
                              'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                              'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList',
-                             'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup', 'ParseTypeChange'
+                             'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup', 'ParseTypeChange',
+                             'JobStatusToolTip', 'FormatDate'
                              ]; 

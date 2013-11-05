@@ -34,23 +34,18 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
             scope[ngc] = "";
             });
 
-        if (scope[list.name]) {
-           // Convert created date to local time zone 
+        if (scope['jobs'] && scope['jobs'].length) { 
            var cDate;
-           for (var i=0; i < scope[list.name].length; i++) {
-               cDate = new Date(scope[list.name][i].created);
-               scope[list.name][i].created = FormatDate(cDate);
-           }
-        }
-        
-        if (scope.jobs && scope.jobs.length) {
-           for (var i=0; i < scope.jobs.length; i++) {
+           for (var i=0; i < scope['jobs'].length; i++) {
+               // Convert created date to local time zone
+               cDate = new Date(scope['jobs'][i].created);
+               scope['jobs'][i].created = FormatDate(cDate);
+               // Set tooltip and link
                scope.jobs[i].statusBadgeToolTip = JobStatusToolTip(scope.jobs[i].status) + 
                    " Click to view status details.";
                scope.jobs[i].statusLinkTo = '/#/jobs/' + scope.jobs[i].id;
            }
         }
-
         });
     
 

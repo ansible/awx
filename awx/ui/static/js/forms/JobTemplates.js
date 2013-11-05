@@ -267,26 +267,32 @@ angular.module('JobTemplateFormDefinition', [])
                         desc: true,
                         searchType: 'int'   
                         },
-                    name: {
-                        label: 'Name',
-                        link: true
-                        },
-                    description: {
-                        label: 'Description'
+                    created: {
+                        label: 'Date',
+                        link: false,
+                        searchable: false
                         },
                     status: {
                         label: 'Status',
-                        icon: 'icon-circle',
                         "class": 'job-\{\{ job.status \}\}',
                         searchType: 'select',
+                        linkTo: "\{\{ job.statusLinkTo \}\}",
                         searchOptions: [
-                            { name: "new", value: "new" }, 
+                            { name: "new", value: "new" },
+                            { name: "waiting", value: "waiting" },
                             { name: "pending", value: "pending" },
                             { name: "running", value: "running" }, 
                             { name: "successful", value: "successful" },
                             { name: "error", value: "error" },
                             { name: "failed", value: "failed" },
-                            { name: "canceled", value: "canceled" } ]
+                            { name: "canceled", value: "canceled" } ],
+                        badgeIcon: 'icon-job-\{\{ job.status \}\}',
+                        badgePlacement: 'left',
+                        badgeToolTip: "\{\{ job.statusBadgeToolTip \}\}",
+                        badgeTipPlacement: 'top',
+                        badgeNgHref: "\{\{ job.statusLinkTo \}\}",
+                        awToolTip: "\{\{ job.statusBadgeToolTip \}\}",
+                        dataPlacement: 'top'
                         }
                     },
                 
