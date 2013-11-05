@@ -186,9 +186,13 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
               scope['license_status'] = 'Demo';
               scope['status_color'] = 'license-demo';
            }
-           else if (license['date_warning'] !== undefined && license['date_warning'] == true) {
+           else if (license['date_expired'] !== undefined && license['date_expired'] == true) {
               scope['license_status'] = 'Expired';
               scope['status_color'] = 'license-expired';
+           }
+           else if (license['date_warning'] !== undefined && license['date_warning'] == true) {
+              scope['license_status'] = 'Expiration Warning';
+              scope['status_color'] = 'license-warning';
            }
            else if (license['free_instances'] !== undefined && parseInt(license['free_instances']) <= 0) {
               scope['license_status'] = 'No available managed hosts';
