@@ -21,6 +21,6 @@ var $AnsibleConfig =
                                       //   > password_strength = green
                                       // It also controls password validation. Passwords are rejected if the score is not > password_strength.  
    
-   session_timeout: 15                // Number of seconds before an inactive session is automatically timed out and forced to log in again.
+   session_timeout: 1800              // Number of seconds before an inactive session is automatically timed out and forced to log in again.
                                       // Separate from time out value set in API.   
    }
