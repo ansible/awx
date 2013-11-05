@@ -9,10 +9,10 @@
  */
 
 angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
-    .factory('GenerateForm', [ '$location', '$cookieStore', '$compile', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon', 'Column',
-        'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty',
-    function($location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink, HelpCollapse, Button,
-        DropDown, Empty) {
+    .factory('GenerateForm', ['$rootScope', '$location', '$cookieStore', '$compile', 'SearchWidget', 'PaginateWidget', 'Attr',
+        'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty',
+    function($rootScope, $location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink,
+        HelpCollapse, Button, DropDown, Empty) {
     return {
     
     setForm: function(form) {
@@ -26,14 +26,15 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
     accordion_count: 0,
 
     has: function(key) {
-       return (this.form[key] && this.form[key] != null && this.form[key] != undefined) ? true : false;
-       },
- 
+        return (this.form[key] && this.form[key] != null && this.form[key] != undefined) ? true : false;
+        },
+
     inject: function(form, options) {
        //
        // Use to inject the form as html into the view.  View MUST have an ng-bind for 'htmlTemplate'.
        // Returns scope of form.
        //
+       
        var element;
        if (options.modal) {
           if (options.modal_body_id) {
@@ -164,7 +165,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        if (!this.scope.$$phase) {
           this.scope.$digest();
        } 
+       
        return this.scope;
+
        },
 
     applyDefaults: function() {
@@ -181,42 +184,46 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        },
 
     reset: function() {
-       // The form field values cannot be reset with jQuery. Each field is tied to a model, so to clear the field
-       // value, you have to clear the model.
-       this.scope[this.form.name + '_form'].$setPristine();
-       for (var fld in this.form.fields) {
-           if (this.form.fields[fld].type == 'checkbox_group') {
+        // The form field values cannot be reset with jQuery. Each field is tied to a model, so to clear the field
+        // value, you have to clear the model.
+
+        if (this.scope[this.form.name + '_form']) {
+            this.scope[this.form.name + '_form'].$setPristine();
+        }
+
+        for (var fld in this.form.fields) {
+            if (this.form.fields[fld].type == 'checkbox_group') {
               for (var i=0; i < this.form.fields[fld].fields.length; i++) {
                   this.scope[this.form.fields[fld].fields[i].name] = '';
                   this.scope[this.form.fields[fld].fields[i].name + '_api_error'] = '';
               }
-           }
-           else {
+            }
+            else {
               this.scope[fld] = '';      
               this.scope[fld + '_api_error'] = '';  
-           }
-           if (this.form.fields[fld].sourceModel) {
+            }
+            if (this.form.fields[fld].sourceModel) {
               this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField] = '';
               this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '_api_error'] = '';
-           }
-           if ( this.form.fields[fld].type == 'lookup' &&
+            }
+            if ( this.form.fields[fld].type == 'lookup' &&
                 this.scope[this.form.name + '_form'][this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField] ) {
               this.scope[this.form.name + '_form'][this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField].$setPristine();
-           }
-           if (this.scope[this.form.name + '_form'][fld]) {
+            }
+            if (this.scope[this.form.name + '_form'][fld]) {
               this.scope[this.form.name + '_form'][fld].$setPristine();
-           }
-           //if (this.scope.fields[fld].awPassMatch) {
-           //   this.scope[this.form.name + '_form'][fld].$setValidity('awpassmatch', true); 
-           //}
-           if (this.form.fields[fld].ask) {
+            }
+            //if (this.scope.fields[fld].awPassMatch) {
+            //   this.scope[this.form.name + '_form'][fld].$setValidity('awpassmatch', true); 
+            //}
+            if (this.form.fields[fld].ask) {
               this.scope[fld + '_ask'] = false;
-           }
-       }
-       if (this.mode == 'add') {
-          this.applyDefaults();
-       }
-       },
+            }
+        }
+        if (this.mode == 'add') {
+            this.applyDefaults();
+        }
+        },
 
     addListeners: function() {
 

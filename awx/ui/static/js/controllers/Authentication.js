@@ -10,11 +10,32 @@
 
 'use strict';
 
-function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert, Wait)
+function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert, Wait, 
+    Timer, Empty)
 {
    var setLoginFocus = function() {
       $('#login-username').focus();
       };
+
+   var sessionExpired = function() {
+      return (Empty($rootScope.sessionExpired)) ? $cookieStore.get('sessionExpired') : $rootScope.sessionExpired;
+      }();
+   
+   var lastPath = function() {
+      return (Empty($rootScope.lastPath)) ? $cookieStore.get('lastPath') : $rootScope.lastPath;
+      }();
+
+   if ($AnsibleConfig.debug_mode && console) {
+      console.log('User session expired: ' + sessionExpired);
+      console.log('Last URL: ' + lastPath);
+   }
+   
+   // Hide any lingering modal dialogs
+   $('.modal[aria-hidden=false]').each( function() {
+       if ($(this).attr('id') !== 'login-modal') {
+          $(this).modal('hide');
+       }
+       });
 
    // Just in case, make sure the wait widget is not active
    Wait('stop');
@@ -70,6 +91,7 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
                  $('#login-modal').modal('hide');
                  token = data.token;
                  Authorization.setToken(data.token, data.expires);
+                 $rootScope.sessionTimer = Timer.init();
                  // Get all the profile/access info regarding the logged in user
                  Authorization.getUser()
                      .success(function(data, status, headers, config) {
@@ -77,7 +99,13 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
                          Authorization.getLicense()
                              .success(function(data, status, headers, config) {
                                  Authorization.setLicense(data['license_info']);
-                                 $location.url('/home?login=true');
+                                 if (lastPath) {
+                                     // Go back to most recent navigation path
+                                     $location.path(lastPath);
+                                 }
+                                 else {
+                                     $location.url('/home?login=true');
+                                 }
                                  })
                              .error(function(data, status, headers, config) {
                                  Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
@@ -113,5 +141,6 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
        }
 }
 
-Authenticate.$inject = ['$cookieStore', '$window', '$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait'];
+Authenticate.$inject = ['$cookieStore', '$window', '$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
+                        'Timer', 'Empty'];
 

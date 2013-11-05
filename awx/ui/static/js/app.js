@@ -79,7 +79,8 @@ angular.module('ansible', [
     'InventorySummaryHelpDefinition',
     'InventoryHostsHelpDefinition',
     'TreeSelector',
-    'CredentialsHelper'
+    'CredentialsHelper',
+    'TimerService'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.
@@ -248,22 +249,35 @@ angular.module('ansible', [
             otherwise({redirectTo: '/home'});
     }])
     .run(['$cookieStore', '$rootScope', 'CheckLicense', '$location', 'Authorization','LoadBasePaths', 'ViewLicense',
-         function($cookieStore, $rootScope, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense) {
+          'Timer',
+        function($cookieStore, $rootScope, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
+             Timer) {
         
         LoadBasePaths();
         
-        if ( !(typeof $AnsibleConfig.refresh_rate == 'number' && $AnsibleConfig.refresh_rate >= 3
-               && $AnsibleConfig.refresh_rate <= 99) ) {
-           $AnsibleConfig.refresh_rate = 10;
-        }
-
         $rootScope.breadcrumbs = new Array(); 
         $rootScope.crumbCache = new Array();
-        
+        $rootScope.sessionTimer = Timer.init(); 
+
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
             // On each navigation request, check that the user is logged in
+            
+            var tst = /login/;
+            var path = $location.path();
+            if ( !tst.test($location.path()) ) {
+                // capture most recent URL, excluding login
+                $rootScope.lastPath = path;
+                $cookieStore.put('lastPath', path);
+            } 
+
             if (Authorization.isUserLoggedIn() == false) {
                if ( next.templateUrl != (urlPrefix + 'partials/login.html') ) {
+                  $location.path('/login');
+               }
+            }
+            else if ($rootScope.sessionTimer.isExpired()) {
+               if ( next.templateUrl != (urlPrefix + 'partials/login.html') ) {
+                  $rootScope.sessionTimer.expireSession();
                   $location.path('/login');
                }
             }

@@ -91,8 +91,8 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        }
        }])
 
-   .factory('ProcessErrors', ['$cookieStore', '$log', '$location', '$rootScope', 'Alert',
-   function($cookieStore, $log, $location, $rootScope, Alert) {
+   .factory('ProcessErrors', ['$rootScope', '$cookieStore', '$log', '$location', 'Alert',
+   function($rootScope, $cookieStore, $log, $location, Alert) {
    return function(scope, data, status, form, defaultMsg) {
        if ($AnsibleConfig.debug_mode && console) {
           console.log('Debug status: ' + status);
@@ -110,15 +110,13 @@ angular.module('Utilities',['RestServices', 'Utilities'])
           Alert(defaultMsg.hdr, msg);
        }
        else if (status == 401 && data.detail && data.detail == 'Token is expired') {
-          $rootScope.sessionExpired = true;
-          $cookieStore.put('sessionExpired', true);
-          $location.path('/login');
+          $rootScope.sessionTimer.expireSession();
+          window.location = '/#/login';  //resetting location so that we drop search params
        }
        else if (status == 401 && data.detail && data.detail == 'Invalid token') {
           // should this condition be treated as an expired session?? Yes, for now.
-          $rootScope.sessionExpired = true;
-          $cookieStore.put('sessionExpired', true);
-          $location.path('/login');
+          $rootScope.sessionTimer.expireSession();
+          window.location = '/#/login';  //resetting location so that we drop search params
        }
        else if (data.non_field_errors) {
           Alert('Error!', data.non_field_errors);

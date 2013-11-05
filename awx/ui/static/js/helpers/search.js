@@ -65,7 +65,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
 
         var f = scope[iterator + 'SearchField']
         if (list.fields[f].searchType && ( list.fields[f].searchType == 'boolean' 
-              || list.fields[f].searchType == 'select')) {
+               || list.fields[f].searchType == 'select')) {
            scope[iterator + 'SelectShow'] = true;
            scope[iterator + 'SearchSelectOpts'] = list.fields[f].searchOptions;
         }
