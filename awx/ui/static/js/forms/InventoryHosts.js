@@ -34,25 +34,29 @@ angular.module('InventoryHostsFormDefinition', [])
                 searchable: false,
                 nosort: true
                 },
-            /*inventory_sources: {
-                label: 'External<br>Source?',
-                ngHref: "\{\{ host.has_inv_source_link \}\}",
-                badgeNgHref: "\{\{ host.has_inv_source_link \}\}",
-                badgeIcon: "\{\{ 'icon-cloud-' + host.has_inventory_sources \}\}",
+            enabled_flag: {
+                label: 'Enabled',
+                badgeIcon: "\{\{ 'icon-enabled-' + host.enabled \}\}", 
                 badgePlacement: 'left',
-                badgeToolTip: "\{\{ host.has_inv_source_tip \}\}",
-                awToolTip: "\{\{ host.has_inv_source_tip \}\}",
-                dataPlacement: 'top',
-                badgeTipPlacement: 'top',
+                badgeToolTip: "\{\{ host.enabledToolTip \}\}",
+                badgeTipPlacement: "top",
+                ngClick: "toggle_host_enabled(\{\{ host.id \}\}, \{\{ host.has_inventory_sources \}\})",
                 searchable: false,
-                nosort: true
-                },*/
+                showValue: false
+                },
             groups: {
                 label: 'Groups',
                 searchable: true,
                 sourceModel: 'groups',
                 sourceField: 'name',
                 nosort: true
+                },
+            enabled: {
+                label: 'Disabled?',
+                searchSingleValue: true,
+                searchType: 'boolean',
+                searchValue: 'false',
+                searchOnly: true
                 },
             has_active_failures: {
                 label: 'Has failed jobs?',
@@ -108,7 +112,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 type: 'DropDown',
                 label: 'Jobs',
                 icon: 'icon-zoom-in',
-                "class": "btn-default btn-sm",
+                "class": "btn-default btn-xs",
                 options: [
                     { ngClick: "allJobs(\{\{ host.id \}\})", label: 'All', ngShow: 'host.last_job' },
                     { ngClick: "allHostSummaries(\{\{ host.id \}\},'\{\{ host.name \}\}', \{\{ inventory_id \}\})", label: 'All summaries', 
@@ -125,7 +129,7 @@ angular.module('InventoryHostsFormDefinition', [])
             "delete": {
                 ngClick: "deleteHost(\{\{ host.id \}\},'\{\{ host.name \}\}')",
                 icon: 'icon-trash',
-                "class": 'btn-sm btn-danger',
+                "class": 'btn-xs btn-danger',
                 awToolTip: 'Delete host'
                 }
             }

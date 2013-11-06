@@ -104,16 +104,16 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        // Prepend an asterisk to required field label
        $('.form-control[required], input[type="radio"][required]').each(function() {
             if ( Empty($(this).attr('aw-required-when')) ) {
-                var label = $(this).parent().parent().find('label');
+                var label = $(this).parent().parent().find('label').first();
                 if ($(this).attr('type') == 'radio') {
-                   label = $(this).parent().parent().parent().find('label');
+                   label = $(this).parent().parent().parent().find('label').first();
                 }
                 if (label.length > 0) {
                    var span = label.children('span');
                    if (span.length > 0 && !span.first().hasClass('prepend-asterisk')) {
                       span.first().addClass('prepend-asterisk');
                    }
-                   else if (!label.first().hasClass('prepend-asterisk')) {
+                   else if (span.length <= 0 && !label.first().hasClass('prepend-asterisk')) {
                       label.first().addClass('prepend-asterisk');
                    }
                 }
@@ -817,6 +817,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                html += (field.readonly) ? "disabled " : "";
                html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
                html += (options.mode == 'add' && field.addRequired) ? "required " : "";
+               html += (field.ngDisabled) ? this.attr(field,'ngDisabled') : "";
                html += " > " + field.options[i].label + "\n";
                html += "</label>\n";
             }

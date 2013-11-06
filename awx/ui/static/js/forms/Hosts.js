@@ -39,10 +39,22 @@ angular.module('HostFormDefinition', [])
                 addRequired: false,
                 editRequired: false
                 },
-            inventory: {
-                type: 'hidden',
-                includeOnEdit: true, 
-                includeOnAdd: true
+            enabled: {
+                label: 'Enabled?',
+                type: 'radio',
+                addRequired: false,
+                editRequired: false,
+                options: [
+                    { label: 'Yes', value: 'true'},
+                    { label: 'No', value: 'false' }
+                    ],
+                "default": "true",
+                awPopOver: "<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that " +
+                    "are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
+                dataTitle: 'Host Enabled',
+                dataPlacement: 'right',
+                dataContainer: '#form-modal .modal-content',
+                ngDisabled: 'has_inventory_sources == true'
                 },
             variables: {
                 label: 'Variables',
@@ -62,6 +74,11 @@ angular.module('HostFormDefinition', [])
                 dataTitle: 'Host Variables',
                 dataPlacement: 'right',
                 dataContainer: '#form-modal .modal-content'
+                },
+            inventory: {
+                type: 'hidden',
+                includeOnEdit: true, 
+                includeOnAdd: true
                 }
             },
 

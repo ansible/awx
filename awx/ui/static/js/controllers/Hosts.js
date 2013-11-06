@@ -13,7 +13,7 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                          RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                          GetBasePath, HostsList, HostsAdd, HostsEdit, HostsDelete,
-                         HostsReload, BuildTree, EditHostGroups, InventoryHostsHelp, HelpDialog)
+                         HostsReload, BuildTree, EditHostGroups, InventoryHostsHelp, HelpDialog, Wait)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -33,11 +33,11 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
 
     // buildAllGroups emits from TreeSelector.js after the inventory object is ready
     if (scope.loadBreadCrumbsRemove) {
-      scope.loadBreadCrumbsRemove();
+        scope.loadBreadCrumbsRemove();
     }
     scope.loadBreadCrumbsRemove = scope.$on('buildAllGroups', function(e, inventory_name) {
-       LoadBreadCrumbs({ path: '/inventories/' + id, title: inventory_name });
-       });
+        LoadBreadCrumbs({ path: '/inventories/' + id, title: inventory_name });
+        });
 
     scope.filterHosts = function() {
         HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
@@ -75,6 +75,39 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
     scope.allJobs = function(id) {
         $location.url('/jobs/?job_host_summaries__host=' + id);
         } 
+    
+    scope.toggle_host_enabled = function(id, sources) {
+        var host;
+        var i;
+        if (!sources) {
+            // Host is not managed by an external source
+            Wait('start');
+            for (i=0; i < scope.hosts.length; i++) {
+                if (scope.hosts[i].id == id) {
+                   scope.hosts[i].enabled = (scope.hosts[i].enabled) ? false : true;
+                   scope.hosts[i].enabled_flag = scope.hosts[i].enabled;
+                   host = scope.hosts[i];
+                   break;
+                }    
+            }
+            Rest.setUrl(GetBasePath('hosts') + id + '/');
+            Rest.put(host)
+                .success( function(data, status, headers, config) {
+                    Wait('stop');
+                    })
+                .error( function(data, status, headers, config) {
+                    scope.hosts[i].enabled = (scope.hosts[i].enabled) ? false : true;
+                    scope.hosts[i].enabled_flag = scope.hosts[i].enabled;
+                    Wait('stop');
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Failed to update host. PUT returned status: ' + status });
+                    });
+        }
+        else {
+            Alert('External Host', 'This host is part of an external inventory. It can only be enabled or disabled by the ' + 
+                'inventory sync process.', 'alert-info');
+        }
+        }
 
     scope.allHostSummaries = function(id, name, inventory_id) {
         LoadBreadCrumbs({ path: '/hosts/' + id, title: name, altPath: '/inventories/' + inventory_id + '/hosts', 
@@ -118,15 +151,15 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
         scope.group_id = group;
         scope.helpCount++;
         if (scope.group_id == null) {
-           scope.groupTitle = 'All Hosts';
-           scope.hostAddHide = true;
-           scope.hostCreateHide = true; 
-           scope.hostDeleteHide = true;
+            scope.groupTitle = 'All Hosts';
+            scope.hostAddHide = true;
+            scope.hostCreateHide = true; 
+            scope.hostDeleteHide = true;
         }
         else {
-           scope.hostAddHide = false;
-           scope.hostCreateHide = false; 
-           scope.hostDeleteHide = false;
+            scope.hostAddHide = false;
+            scope.hostCreateHide = false; 
+            scope.hostDeleteHide = false;
         }
         scope['hostDeleteDisabled'] = true; 
         scope['hostDeleteDisabledClass'] = 'disabled';
@@ -135,11 +168,11 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
 
     // Load the tree. See TreeSelector.js
     BuildTree({
-           scope: scope,
-           inventory_id: id,
-           emit_on_select: 'refreshHost',
-           target_id: 'search-tree-container'
-           });
+        scope: scope,
+        inventory_id: id,
+        emit_on_select: 'refreshHost',
+        target_id: 'search-tree-container'
+        });
 
 }
 
@@ -147,6 +180,6 @@ InventoryHosts.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'GetBasePath', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete',
-                            'HostsReload', 'BuildTree', 'EditHostGroups', 'InventoryHostsHelp', 'HelpDialog'
+                            'HostsReload', 'BuildTree', 'EditHostGroups', 'InventoryHostsHelp', 'HelpDialog', 'Wait'
                             ]; 
   

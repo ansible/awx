@@ -155,6 +155,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                   data['variables'] = JSON.stringify(json_data, undefined, '\t');
                }
 
+               data['enabled'] = (scope['enabled'] == "true") ? true : false;
+
                Rest.setUrl(defaultUrl);
                Rest.post(data)
                    .success( function(data, status, headers, config) {
@@ -261,6 +263,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                        relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
                     }
                 }
+                scope['enabled'] = (data['enabled']) ? "true" : "false";
+                master['enabled'] = scope['enabled'];
                 scope.variable_url = data.related.variable_data;
                 scope.$emit('hostLoaded');
                 })
@@ -308,6 +312,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                 else {
                    data['variables'] = JSON.stringify(json_data, undefined, '\t');
                 }
+
+                data['enabled'] = (scope['enabled'] == "true") ? true : false;
 
                 Rest.setUrl(defaultUrl);
                 Rest.put(data)
@@ -430,22 +436,10 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     }
                 }
                 scope.hosts[i].groups = scope.hosts[i].groups.replace(/\, $/,'');
-               
-                if (scope.hosts[i].has_inventory_sources) {
-                   scope.hosts[i].inventory_sources = 'yes';
-                   scope.hosts[i].has_inv_source_link = '/#/inventories/' + scope['inventory_id'] + '/groups/?has_external_source=true';
-                   scope.hosts[i].has_inv_source_tip = 'Has an external source. Click to view inventory source details.';
-                }
-                else {
-                   scope.hosts[i].inventory_sources = 'no';
-                   scope.hosts[i].has_inv_source_link = '/#/inventories/' + scope['inventory_id'] + '/groups';
-                   scope.hosts[i].has_inv_source_tip = 'Has no external source.';
-                }
-
             }
-           
-            // Add the value displayed in Job Status column
+          
             for (var i=0; i < scope.hosts.length; i++) {
+                // Add the value displayed in Job Status column
                 scope.hosts[i].activeFailuresLink = '/#/hosts/' + scope.hosts[i].id + '/job_host_summaries/?inventory=' + scope['inventory_id'] +
                     '&host_name=' + escape(scope.hosts[i].name); 
                 if (scope.hosts[i].has_active_failures == true) {
@@ -460,7 +454,19 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                 else if (scope.hosts[i].has_active_failures == false && scope.hosts[i].last_job !== null) {
                    scope.hosts[i].badgeToolTip = "Most recent job successful. Click to view jobs.";
                    scope.hosts[i].active_failures = 'success';
-                }        
+                }
+                
+                scope.hosts[i].enabled_flag = scope.hosts[i].enabled; 
+                if (scope.hosts[i].has_inventory_sources) {
+                    // Inventory sync managed, so not clickable 
+                    scope.hosts[i].enabledToolTip = (scope.hosts[i].enabled) ? 'Ready! Availabe to running jobs.' :
+                        'Out to lunch! This host is not available to running jobs.';
+                }
+                else {
+                    // Clickable
+                    scope.hosts[i].enabledToolTip = (scope.hosts[i].enabled) ? 'Ready! Available to running jobs. Click to toggle.' :
+                        'Out to lunch! Host not available to running jobs. Click to toggle.';
+                }
             }
 
             if (group_id == null || group_id == undefined) {

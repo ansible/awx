@@ -373,7 +373,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        
        if (options.mode == 'select' && (options.selectButton == undefined || options.selectButton == true)) {
           html += "<div class=\"navigation-buttons\">\n";
-          html += " <button class=\"btn btn-small btn-primary pull-right\" aw-tool-tip=\"Complete your selection\" " +
+          html += " <button class=\"btn btn-sm btn-primary pull-right\" aw-tool-tip=\"Complete your selection\" " +
               "ng-click=\"finishSelection()\" ng-disabled=\"selected.length == 0\"><i class=\"icon-check\"></i> Select</button>\n";
           html += "</div>\n";
        }
