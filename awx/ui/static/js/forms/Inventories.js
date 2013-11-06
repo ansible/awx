@@ -11,7 +11,7 @@ angular.module('InventoryFormDefinition', [])
     'InventoryForm', {
         
         addTitle: 'Create Inventory',
-        editTitle: '{{ inventory_name }}',
+        editTitle: '{{ inventory_name | capitalize }}',
         name: 'inventory',
         parseTypeName: 'inventoryParseType',
         well: true,

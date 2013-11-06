@@ -12,7 +12,7 @@ angular.module('InventorySummaryDefinition', [])
 
         name: 'groups',
         iterator: 'group',
-        editTitle: '{{ inventory_name }}',
+        editTitle: '{{ inventory_name | capitalize }}',
         showTitle: true,
         well: true,
         index: false,
