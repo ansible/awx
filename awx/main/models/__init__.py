@@ -1130,8 +1130,6 @@ class Credential(CommonModelNameNotUnique):
             raise ValidationError(errors)
 
     def validate_unique(self, exclude=None):
-        #print 'validate_unique', exclude
-        #print self._get_unique_checks(exclude=exclude)
         errors = {}
         try:
             super(Credential, self).validate_unique(exclude)
