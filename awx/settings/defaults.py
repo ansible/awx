@@ -163,6 +163,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'awx.api.renderers.BrowsableAPIRenderer',
     ),
+    'EXCEPTION_HANDLER': 'awx.api.views.api_exception_handler',
     'VIEW_NAME_FUNCTION': 'awx.api.generics.get_view_name',
     'VIEW_DESCRIPTION_FUNCTION': 'awx.api.generics.get_view_description',
 }

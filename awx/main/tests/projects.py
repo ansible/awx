@@ -499,6 +499,12 @@ class ProjectsTest(BaseTest):
         with self.current_user(self.super_django_user):
             data = dict(name='xyz', user=self.super_django_user.pk)
             self.post(url, data, expect=400)
+
+        # Test with null where we expect a string value.
+        with self.current_user(self.super_django_user):
+            data = dict(name='zyx', user=self.super_django_user.pk, kind='ssh',
+                        sudo_username=None)
+            self.post(url, data, expect=400)
     
         # FIXME: Check list as other users.
 

@@ -12,18 +12,20 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Q
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.utils.datastructures import SortedDict
 from django.utils.timezone import now
 
 # Django REST Framework
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ParseError
 from rest_framework.parsers import YAMLParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.renderers import YAMLRenderer
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from rest_framework.views import exception_handler
 from rest_framework import status
 
 # AWX
@@ -34,6 +36,15 @@ from awx.api.authentication import JobTaskAuthentication
 from awx.api.permissions import *
 from awx.api.serializers import *
 from awx.api.generics import *
+
+
+def api_exception_handler(exc):
+    '''
+    Override default API exception handler to catch IntegrityError exceptions.
+    '''
+    if isinstance(exc, IntegrityError):
+        exc = ParseError(exc.args[0])
+    return exception_handler(exc)
 
 
 class ApiRootView(APIView):
