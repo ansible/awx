@@ -967,6 +967,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.organization.users.add(self.normal_django_user)
         self.inventory = self.organization.inventories.create(name='Cloud Inventory')
         self.group = self.inventory.groups.create(name='Cloud Group')
+        self.inventory2 = self.organization.inventories.create(name='Cloud Inventory 2')
+        self.group2 = self.inventory2.groups.create(name='Cloud Group 2')
 
     def update_inventory_source(self, group, **kwargs):
         inventory_source = group.inventory_source
@@ -1055,3 +1057,8 @@ class InventoryUpdatesTest(BaseTransactionTest):
             source='rackspace', credential=credential,
             source_regions=source_regions)
         self.check_inventory_source(inventory_source)
+        # If test source regions is given, test again with empty string.
+        if source_regions:
+            inventory_source2 = self.update_inventory_source(self.group2,
+                source='rackspace', credential=credential, source_regions='')
+            self.check_inventory_source(inventory_source2)
