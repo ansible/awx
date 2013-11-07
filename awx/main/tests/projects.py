@@ -444,17 +444,22 @@ class ProjectsTest(BaseTest):
         self.post(other_creds, data=new_credentials, expect=401)
         self.post(other_creds, data=new_credentials, expect=401, auth=self.get_invalid_credentials())
         self.post(other_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
+        new_credentials['name'] = 'credential2'
         self.post(other_creds, data=new_credentials, expect=201, auth=self.get_normal_credentials())
+        new_credentials['name'] = 'credential3'
         result = self.post(other_creds, data=new_credentials, expect=201, auth=self.get_other_credentials())
+        new_credentials['name'] = 'credential4'
         self.post(other_creds, data=new_credentials, expect=403, auth=self.get_nobody_credentials())
         cred_user = result['id']
 
-
         # can add credentials to a team
+        new_credentials['name'] = 'credential'
         self.post(team_creds, data=new_credentials, expect=401)
         self.post(team_creds, data=new_credentials, expect=401, auth=self.get_invalid_credentials())
         self.post(team_creds, data=new_credentials, expect=201, auth=self.get_super_credentials())
+        new_credentials['name'] = 'credential2'
         result = self.post(team_creds, data=new_credentials, expect=201, auth=self.get_normal_credentials())
+        new_credentials['name'] = 'credential3'
         self.post(team_creds, data=new_credentials, expect=403, auth=self.get_other_credentials())
         self.post(team_creds, data=new_credentials, expect=403, auth=self.get_nobody_credentials())
         cred_team = result['id']
@@ -489,6 +494,11 @@ class ProjectsTest(BaseTest):
         with self.current_user(self.super_django_user):
             data = dict(name='xyz', user=self.super_django_user.pk)
             self.post(url, data, expect=201)
+
+        # Repeating the same POST should violate a unique constraint.
+        with self.current_user(self.super_django_user):
+            data = dict(name='xyz', user=self.super_django_user.pk)
+            self.post(url, data, expect=400)
     
         # FIXME: Check list as other users.
 

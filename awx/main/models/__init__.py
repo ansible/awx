@@ -20,7 +20,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.utils.timezone import now, make_aware, get_default_timezone
@@ -171,6 +171,7 @@ class PrimordialModel(models.Model):
             self.active = False
             if save:
                 self.save()
+
 
 class CommonModel(PrimordialModel):
     ''' a base model where the name is unique '''
@@ -1092,7 +1093,58 @@ class Credential(CommonModelNameNotUnique):
     def clean(self):
         if self.user and self.team:
             raise ValidationError('Credential cannot be assigned to both a user and team')
-        
+
+    def _validate_unique_together_with_null(self, unique_check, exclude=None):
+        # Based on existing Django model validation code, except it doesn't
+        # skip the check for unique violations when a field is None.  See:
+        # https://github.com/django/django/blob/stable/1.5.x/django/db/models/base.py#L792
+        errors = {}
+        model_class = self.__class__
+        if set(exclude or []) & set(unique_check):
+            return
+        lookup_kwargs = {}
+        for field_name in unique_check:
+            f = self._meta.get_field(field_name)
+            lookup_value = getattr(self, f.attname)
+            if f.primary_key and not self._state.adding:
+                # no need to check for unique primary key when editing
+                continue
+            lookup_kwargs[str(field_name)] = lookup_value
+        if len(unique_check) != len(lookup_kwargs):
+            return
+        qs = model_class._default_manager.filter(**lookup_kwargs)
+        # Exclude the current object from the query if we are editing an
+        # instance (as opposed to creating a new one)
+        # Note that we need to use the pk as defined by model_class, not
+        # self.pk. These can be different fields because model inheritance
+        # allows single model to have effectively multiple primary keys.
+        # Refs #17615.
+        model_class_pk = self._get_pk_val(model_class._meta)
+        if not self._state.adding and model_class_pk is not None:
+            qs = qs.exclude(pk=model_class_pk)
+        if qs.exists():
+            key = NON_FIELD_ERRORS
+            errors.setdefault(key, []).append( \
+                self.unique_error_message(model_class, unique_check))
+        if errors:
+            raise ValidationError(errors)
+
+    def validate_unique(self, exclude=None):
+        #print 'validate_unique', exclude
+        #print self._get_unique_checks(exclude=exclude)
+        errors = {}
+        try:
+            super(Credential, self).validate_unique(exclude)
+        except ValidationError, e:
+            errors = e.update_error_dict(errors)
+        try:
+            unique_fields = ('user', 'team', 'kind', 'name')
+            self._validate_unique_together_with_null(unique_fields, exclude)
+        except ValidationError, e:
+            errors = e.update_error_dict(errors)
+        if errors:
+            raise ValidationError(errors)
+     
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
         update_fields = kwargs.get('update_fields', [])
