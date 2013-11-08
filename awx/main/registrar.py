@@ -1,5 +1,9 @@
+import logging
+
 from django.db.models.signals import pre_save, post_save, post_delete, m2m_changed
 from signals import activity_stream_create, activity_stream_update, activity_stream_delete, activity_stream_associate
+
+logger = logging.getLogger('awx.main.registrar')
 
 class ActivityStreamRegistrar(object):
 
@@ -15,9 +19,12 @@ class ActivityStreamRegistrar(object):
             post_delete.connect(activity_stream_delete, sender=model, dispatch_uid=str(self.__class__) + str(model) + "_delete")
 
             for m2mfield in model._meta.many_to_many:
-                m2m_attr = getattr(model, m2mfield.name)
-                m2m_changed.connect(activity_stream_associate, sender=m2m_attr.through,
-                                    dispatch_uid=str(self.__class__) + str(m2m_attr.through) + "_associate")
+                try:
+                    m2m_attr = getattr(model, m2mfield.name)
+                    m2m_changed.connect(activity_stream_associate, sender=m2m_attr.through,
+                                        dispatch_uid=str(self.__class__) + str(m2m_attr.through) + "_associate")
+                except AttributeError:
+                    logger.warning("Failed to attach m2m activity stream tracker on class %s attribute %s" % (model, m2mfield.name))
 
     def disconnect(self, model):
         if model in self.models:

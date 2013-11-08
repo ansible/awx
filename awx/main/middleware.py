@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.db.models.signals import pre_save
 from django.utils.functional import curry
-from awx.main.models import ActivityStream
+from awx.main.models.base import ActivityStream
 
 
-class ActvitiyStreamMiddleware(object):
+class ActivityStreamMiddleware(object):
 
     def process_request(self, request):
         if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated():
