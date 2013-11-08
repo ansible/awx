@@ -24,7 +24,8 @@ class ActivityStreamRegistrar(object):
                     m2m_changed.connect(activity_stream_associate, sender=m2m_attr.through,
                                         dispatch_uid=str(self.__class__) + str(m2m_attr.through) + "_associate")
                 except AttributeError:
-                    logger.warning("Failed to attach m2m activity stream tracker on class %s attribute %s" % (model, m2mfield.name))
+                    pass
+                    #logger.warning("Failed to attach m2m activity stream tracker on class %s attribute %s" % (model, m2mfield.name))
 
     def disconnect(self, model):
         if model in self.models:

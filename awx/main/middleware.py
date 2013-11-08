@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.db.models.signals import pre_save
 from django.utils.functional import curry
 from awx.main.models.base import ActivityStream
@@ -20,5 +21,5 @@ class ActivityStreamMiddleware(object):
         return response
 
     def set_actor(self, user, sender, instance, **kwargs):
-        if sender == ActivityStream and isinstance(user, settings.AUTH_USER_MODEL) and instance.user is None:
+        if sender == ActivityStream and isinstance(user, User) and instance.user is None:
             instance.user = user
