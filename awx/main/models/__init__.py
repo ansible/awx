@@ -38,6 +38,7 @@ from djcelery.models import TaskMeta
 from awx.lib.compat import slugify
 from awx.main.fields import AutoOneToOneField
 from awx.main.utils import encrypt_field, decrypt_field
+from awx.main.registrar import activity_stream_registrar
 
 __all__ = ['PrimordialModel', 'Organization', 'Team', 'Project',
            'ProjectUpdate', 'Credential', 'Inventory', 'Host', 'Group',
@@ -2242,6 +2243,31 @@ class AuthToken(models.Model):
     def __unicode__(self):
         return self.key
 
+class ActivityStream(models.Model):
+    '''
+    Model used to describe activity stream (audit) events
+    '''
+    OPERATION_CHOICES = [
+        ('create', _('Entity Created')),
+        ('update', _("Entity Updated")),
+        ('delete', _("Entity Deleted")),
+        ('associate', _("Entity Associated with another Entity")),
+        ('disaassociate', _("Entity was Disassociated with another Entity"))
+    ]
+
+    user = models.ForeignKey('auth.User', null=True, on_delete=SET_NULL)
+    operation = models.CharField(max_length=9, choices=OPERATION_CHOICES)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    changes = models.TextField(blank=True)
+
+    object1_id = models.PositiveIntegerField(db_index=True)
+    object1_type = models.TextField()
+
+    object2_id = models.PositiveIntegerField(db_index=True)
+    object2_type = models.TextField()
+
+    object_relationship_type = models.TextField()
+
 # TODO: reporting (MPD)
 
 # Add mark_inactive method to User model.
@@ -2276,3 +2302,20 @@ _PythonSerializer.handle_m2m_field = _new_handle_m2m_field
 
 # Import signal handlers only after models have been defined.
 import awx.main.signals
+
+activity_stream_registrar.connect(Organization)
+activity_stream_registrar.connect(Inventory)
+activity_stream_registrar.connect(Host)
+activity_stream_registrar.connect(Group)
+activity_stream_registrar.connect(InventorySource)
+activity_stream_registrar.connect(InventoryUpdate)
+activity_stream_registrar.connect(Credential)
+activity_stream_registrar.connect(Team)
+activity_stream_registrar.connect(Project)
+activity_stream_registrar.connect(ProjectUpdate)
+activity_stream_registrar.connect(Permission)
+activity_stream_registrar.connect(JobTemplate)
+activity_stream_registrar.connect(Job)
+activity_stream_registrar.connect(JobHostSummary)
+activity_stream_registrar.connect(JobEvent)
+activity_stream_registrar.connect(Profile)
