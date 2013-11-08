@@ -674,10 +674,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-        'GetUpdateIntervalOptions', 'ClickNode', 'LookUpInit', 'CredentialList',
+        'GetUpdateIntervalOptions', 'ClickNode', 'LookUpInit', 'CredentialList', 'Empty',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions, ClickNode,
-        LookUpInit, CredentialList) {
+        LookUpInit, CredentialList, Empty) {
     return function(params) {
         
         var group_id = params.group_id;
@@ -996,8 +996,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                // reset fields
                scope.source_path = '';
                scope[form.name + '_form']['source_path'].$setValidity('required',true);
-               scope['credential'] = ''; 
-               scope['credential_name'] = '';
             }
             LookUpInit({
                 url: GetBasePath('credentials') + 

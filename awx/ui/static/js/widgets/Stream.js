@@ -13,16 +13,25 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     .factory('ShowStream', [ function() {
     return function() {
         // Slide in the Stream widget
+        
+        // Make some style/position adjustments adjustments
         var stream = $('#stream-container');
         stream.css({ 
             position: 'absolute',
-            left: 0,
             top: 0,
+            left: 0,
             width: '100%',
             'min-height': '100%',
             'background-color': '#FFF'
             });
+        
+        // Try not to overlap footer. Because stream is positioned absolute, the parent
+        // doesn't resize correctly when stream is loaded.
+        $('#tab-content-container').css({ 'min-height': stream.height() });
+
+        // Slide in stream
         stream.show('slide', {'direction': 'left'}, {'duration': 500, 'queue': false });
+        
         }
         }])
 
@@ -40,6 +49,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
            stream.detach();
            stream.empty();
            stream.unbind();
+           $('#tab-content-container').css({ 'min-height': 0 }); //let the parent height go back to normal
            }, 500);
         }
         }])

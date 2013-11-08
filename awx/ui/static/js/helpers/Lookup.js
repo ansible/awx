@@ -126,6 +126,8 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
                         if (listScope[list.name][i][form.fields[field].sourceField] ==
                             scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField]) {
                             scope[field] = listScope[list.name][i].id;
+                             //scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] = 
+                             // listScope[list.name][i][form.fields[field].sourceField];
                             break;
                         }
                     }
