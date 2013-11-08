@@ -6,6 +6,7 @@ from awx.main.models.organization import *
 from awx.main.models.projects import *
 from awx.main.models.inventory import *
 from awx.main.models.jobs import *
+from awx.main.models.activity_stream import *
 from awx.main.registrar import activity_stream_registrar
 
 # Monkeypatch Django serializer to ignore django-taggit fields (which break
