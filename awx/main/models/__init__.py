@@ -27,3 +27,20 @@ User.add_to_class('can_access', check_user_access)
 
 # Import signal handlers only after models have been defined.
 import awx.main.signals
+
+activity_stream_registrar.connect(Organization)
+activity_stream_registrar.connect(Inventory)
+activity_stream_registrar.connect(Host)
+activity_stream_registrar.connect(Group)
+activity_stream_registrar.connect(InventorySource)
+activity_stream_registrar.connect(InventoryUpdate)
+activity_stream_registrar.connect(Credential)
+activity_stream_registrar.connect(Team)
+activity_stream_registrar.connect(Project)
+activity_stream_registrar.connect(ProjectUpdate)
+activity_stream_registrar.connect(Permission)
+activity_stream_registrar.connect(JobTemplate)
+activity_stream_registrar.connect(Job)
+activity_stream_registrar.connect(JobHostSummary)
+activity_stream_registrar.connect(JobEvent)
+activity_stream_registrar.connect(Profile)
