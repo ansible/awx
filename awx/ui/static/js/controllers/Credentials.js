@@ -227,6 +227,9 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
               data['username'] = scope['access_key'];
               data['password'] = scope['secret_key'];
               break;
+          case 'scm':
+              data['ssh_key_unlock'] = scope['scm_key_unlock'];
+              break;
       }
 
       if (Empty(data.team) && Empty(data.user)) {
@@ -415,7 +418,10 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                        scope['ssh_password'] = data.password;
                        master['ssh_username'] = scope['ssh_username'];
                        master['ssh_password'] = scope['ssh_password'];
-                       break;  
+                       break; 
+                   case 'scm':
+                       scope['scm_key_unlock'] = data['ssh_key_unlock'];
+                       break;
                }
 
                scope.$emit('credentialLoaded');
@@ -451,7 +457,6 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
           }
       } 
       
-      
       if (!Empty(scope.team)) {
          data.team = scope.team;
          data.user = "";
@@ -471,6 +476,9 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
           case 'aws':
               data['username'] = scope['access_key'];
               data['password'] = scope['secret_key'];
+              break;
+          case 'scm':
+              data['ssh_key_unlock'] = scope['scm_key_unlock'];
               break;
       }
 

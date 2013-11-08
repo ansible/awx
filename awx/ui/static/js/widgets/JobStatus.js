@@ -15,7 +15,7 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
         var scope = $rootScope.$new();
         var jobCount, jobFails, inventoryCount, inventoryFails, groupCount, groupFails, hostCount, hostFails; 
         var counts = 0;
-        var expectedCounts = 8;
+        var expectedCounts = 6;
         var target = params.target;        
 
         if (scope.removeCountReceived) {
@@ -25,17 +25,21 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
 
             var rowcount = 0;
 
-            function makeRow(label, count, fail) {
+            function makeRow(params) {
                 var html = '';
+                var label = params.label;
+                var link = params.link; 
+                var fail_link = params.fail_link;
+                var count = params.count; 
+                var fail = params.fail;
                 html += "<tr>\n";
-                html += "<td><a href=\"/#/" + label.toLowerCase() + "\"";
-                html += (label == 'Hosts' || label == 'Groups') ? " class=\"pad-left-sm\" " : "";
+                html += "<td><a href=\"" + link + "\"";
                 html += ">"  + label + "</a></td>\n";
                 html += "<td class=\"failed-column text-right\">";
-                html += (fail > 0) ? "<a href=\"/blah/blah\">" + fail + "</a>" : ""; 
+                html += "<a href=\"" + fail_link + "\">" + fail + "</a>"; 
                 html += "</td>\n";
                 html += "<td class=\"text-right\">"
-                html += (count > 0) ? "<a href=\"/blah/blah\">" + count + "</a>" : "";
+                html += "<a href=\"" + link + "\">" + count + "</a>";
                 html += "</td></tr>\n";
                 return html; 
                 }
@@ -57,19 +61,33 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                html += "<tbody>\n";
 
                if (jobCount > 0) {
-                  html += makeRow('Jobs', jobCount, jobFails);
-                  rowcount++;
-               }
-               if (inventoryCount > 0) {
-                  html += makeRow('Inventories', inventoryCount, inventoryFails);
+                   html += makeRow({
+                       label: 'Jobs',
+                       link: '/#/jobs',
+                       count: jobCount,
+                       fail: jobFails,
+                       fail_link: '/#/jobs/?status=failed'
+                       });
                   rowcount++;
                }
                if (groupCount > 0) {
-                  html += makeRow('Groups', groupCount, groupFails);
+                   html += makeRow({
+                       label: 'Groups', 
+                       link: '/#/home/groups',
+                       count: groupCount,
+                       fail: groupFails,
+                       fail_link: '/#/home/groups/?status=failed' 
+                       });
                   rowcount++;
                }
                if (hostCount > 0) {
-                  html += makeRow('Hosts', hostCount, hostFails);
+                   html += makeRow({
+                       label: 'Hosts',
+                       link: '#/home/hosts',
+                       count: hostCount,
+                       fail: hostFails,
+                       fail_link: '/#/home/hosts/?status=failed'
+                       });
                   rowcount++;
                }
               
@@ -114,7 +132,7 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
 
-        url = GetBasePath('inventory') + '?page=1';
+        /*url = GetBasePath('inventory') + '?page=1';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
@@ -136,7 +154,7 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
-                });
+                });*/
 
         url = GetBasePath('groups') + '?page=1';
         Rest.setUrl(url);

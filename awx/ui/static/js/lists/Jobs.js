@@ -81,7 +81,8 @@ angular.module('JobsListDefinition', [])
                 mode: 'all',
                 'class': 'btn-xs btn-primary',
                 awToolTip: "Refresh the page",
-                ngClick: "refresh()"
+                ngClick: "refresh()",
+                iconSize: 'large'
                 }
             },
 

@@ -78,7 +78,8 @@ angular.module('ProjectsListDefinition', [])
                 mode: 'all',
                 'class': 'btn-xs btn-primary',
                 awToolTip: "Refresh the page",
-                ngClick: "refresh()"
+                ngClick: "refresh()",
+                iconSize: 'large'
                 }
             },
 

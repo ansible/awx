@@ -1,8 +1,9 @@
 <div class="tab-pane" id="home">
    <div id="refresh-row" class="row">
       <div class="col-lg-12">
-        <div class="refresh-grp pull-right">
-          <button type="button" class="btn btn-primary btn-xs refresh-btn" ng-click="refreshCnt = 10; refresh()" id="refresh_btn" aw-tool-tip="Refresh page" data-placement="top" data-original-title="" title=""><i class="icon-refresh"></i></button>
+        <div class="list-actions pull-right">
+          <button type="button" class="btn btn-primary btn-xs refresh-btn" ng-click="refresh()" id="refresh_btn" aw-tool-tip="Refresh page" data-placement="top"><i class="icon-refresh icon-large"></i></button>
+          <button type="button" class="btn btn-primary btn-xs activity-btn" ng-click="showActivity()" id="activity_btn" aw-tool-tip="View activity stream" data-placement="top"><i class="icon-comments-alt icon-large"></i></button>
         </div>
       </div>
    </div>

@@ -92,7 +92,8 @@ angular.module('JobEventsListDefinition', [])
                 ngShow: "job_status == 'pending' || job_status == 'waiting' || job_status == 'running'",
                 'class': 'btn-xs btn-primary',
                 awToolTip: "Refresh the page",
-                ngClick: "refresh()"
+                ngClick: "refresh()",
+                iconSize: 'large'
                 }
             },
 

@@ -13,7 +13,7 @@
 function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                        ClearScope, ProcessErrors, GetBasePath, LookUpInit, SubmitJob, FormatDate, Refresh,
-                       JobStatusToolTip)
+                       JobStatusToolTip, Empty)
 {
     ClearScope('htmlTemplate');
     var list = JobList;
@@ -52,7 +52,7 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     if ($routeParams['job_host_summaries__host']) {
        defaultUrl += '?job_host_summaries__host=' + $routeParams['job_host_summaries__host'];
     }
-    if ($routeParams['inventory__int'] && $routeParams['status']) {
+    else if ($routeParams['inventory__int'] && $routeParams['status']) {
        defaultUrl += '?inventory__int=' + $routeParams['inventory__int'] + '&status=' + 
            $routeParams['status'];
     }
@@ -69,6 +69,18 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
        scope[list.iterator + 'SearchField'] = 'id'; 
        scope[list.iterator + 'SearchValue'] = $routeParams['id__int'];
        scope[list.iterator + 'SearchFieldLabel'] = 'Job ID';
+    }
+    if ($routeParams['status']) {
+       scope[list.iterator + 'SearchField'] = 'status';
+       scope[list.iterator + 'SelectShow'] = true;
+       scope[list.iterator + 'SearchSelectOpts'] = list.fields['status'].searchOptions;
+       scope[list.iterator + 'SearchFieldLabel'] = list.fields['status'].label.replace(/\<br\>/g,' ');
+       for (var opt in list.fields['status'].searchOptions) {
+           if (list.fields['status'].searchOptions[opt].value == $routeParams['status']) {
+               scope[list.iterator + 'SearchSelectValue'] = list.fields['status'].searchOptions[opt];
+               break;
+           }
+       }
     }
 
     scope.search(list.iterator);
@@ -162,7 +174,8 @@ function JobsListCtrl ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
 JobsListCtrl.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobList',
                          'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                         'ProcessErrors','GetBasePath', 'LookUpInit', 'SubmitJob', 'FormatDate', 'Refresh', 'JobStatusToolTip'
+                         'ProcessErrors','GetBasePath', 'LookUpInit', 'SubmitJob', 'FormatDate', 'Refresh', 'JobStatusToolTip',
+                         'Empty'
                          ];
 
 

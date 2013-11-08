@@ -55,6 +55,13 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        }
        this.setList(list);
        element.html(this.build(options));    // Inject the html
+       if (options.prepend) {                // Add any extra HTML passed in options
+          element.prepend(options.prepend);
+       }
+       if (options.append) {
+          element.append(options.prepend);
+       }
+
        this.scope = element.scope();         // Set scope specific to the element we're compiling, avoids circular reference
                                              // From here use 'scope' to manipulate the form, as the form is not in '$scope'
        $compile(element)(this.scope);
@@ -170,7 +177,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "<strong>Hint: </strong>" + list.editInstructions + "\n"; 
           html += "</div>\n";
        }
-
+       
        if (options.mode != 'lookup' && (list.well == undefined || list.well == true)) {
           html += "<div class=\"well\">\n";
        }
@@ -186,7 +193,10 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        }   
        */
        
-       if (options.mode == 'summary') {
+       if (options.searchSize) {
+          html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: options.searchSize });
+       } 
+       else if (options.mode == 'summary') {
           html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-6' });
        }
        else if (options.mode == 'lookup' || options.id != undefined) {
@@ -200,8 +210,13 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           //actions
           var base = $location.path().replace(/^\//,'').split('/')[0];
           
-          html += "<div class=\""; 
-          if (options.mode == 'summary') {
+          html += "<div class=\"";
+          if (options.searchSize) {
+             // User supplied searchSize, calc the remaining
+             var size = parseInt(options.searchSize.replace(/([A-Z]|[a-z]|\-)/g,''));
+             html += 'col-lg-' + (11 - size);
+          }
+          else if (options.mode == 'summary') {
              html += 'col-lg-5';
           }
           else if (options.id != undefined) {

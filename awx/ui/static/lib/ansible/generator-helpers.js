@@ -138,6 +138,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (btn.ngShow) ? Attr(btn, 'ngShow') : "";
         html += (btn.ngHide) ? Attr(btn, 'ngHide') : "";
         html += " >";
+        html += (btn['img']) ? "<img src=\"" + $basePath + "img/" + btn.img + "\" style=\"width: 12px; height: 12px;\" >" : "";
         html += (btn['icon']) ? Attr(btn,'icon') : "";
         html += (btn['awRefresh'] && !btn['icon']) ? "<i class=\"icon-refresh\"></i> " : "";
         html += (btn.label) ? " " + btn.label : "";
@@ -595,7 +596,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            html += "<select ng-model=\"" + iterator + "PageSize\" ng-change=\"changePageSize('" + 
                     set + "'," + "'" + iterator + "')\" ";
            html += "id=\"page_size_select\" ";
-           html += "class=\"page-size\">\n";
+           html += "class=\"page-size input-sm form-control\">\n";
            html += "<option value=\"10\" selected>10</option>\n";
            html += "<option value=\"20\" selected>20</option>\n";
            html += "<option value=\"40\">40</option>\n";

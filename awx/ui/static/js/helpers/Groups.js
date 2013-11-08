@@ -79,6 +79,49 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         }])
     
+    .factory('ViewUpdateStatus', [ 'Rest', 'ProcessErrors', 'GetBasePath', 'ShowUpdateStatus', 'Alert', 
+    function(Rest, ProcessErrors, GetBasePath, ShowUpdateStatus, Alert) {
+        return function(params) {
+        
+        var scope = params.scope;
+        var id = params.group_id;
+        var found = false;
+        var group;
+        for (var i=0; i < scope.groups.length; i++) {
+            if (scope.groups[i].id == id) {
+               found = true;
+               group = scope.groups[i];
+            }  
+        }
+        if (found) {
+           if (group.summary_fields.inventory_source.source == "" || group.summary_fields.inventory_source.source == null) {
+              Alert('Missing Configuration', 'The selected group is not configured for inventory updates. ' +
+                  'You must first edit the group, provide Source settings, and then run an update.', 'alert-info');
+           }
+           else if (group.summary_fields.inventory_source.status == "" || group.summary_fields.inventory_source.status == null ||
+                    group.summary_fields.inventory_source.status == "never updated") {
+              Alert('No Status Available', 'The inventory update process has not run for the selected group. Start the process by ' +
+                  'clicking the Update button.', 'alert-info');
+           }
+           else {
+              Rest.setUrl(group.related.inventory_source);
+              Rest.get()
+                  .success( function(data, status, headers, config) {
+                      var url = (data.related.current_update) ? data.related.current_update : data.related.last_update;
+                      ShowUpdateStatus({ group_name: data.summary_fields.group.name,
+                          last_update: url });
+                      })
+                  .error( function(data, status, headers, config) {
+                      ProcessErrors(scope, data, status, form,
+                          { hdr: 'Error!', msg: 'Failed to retrieve inventory source: ' + group.related.inventory_source + 
+                          ' POST returned status: ' + status });
+                      });
+           }
+        }
+
+        }
+        }])
+    
     .factory('HostsStatusMsg', [ function() {
     return function(params) {  
         var active_failures = params.active_failures; 
@@ -278,11 +321,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }])
 
     .factory('InventoryStatus', [ '$rootScope', '$routeParams', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
-        'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'ShowUpdateStatus', 'HelpDialog',
-        'InventorySummaryHelp', 'BuildTree', 'ClickNode', 'HostsStatusMsg', 'UpdateStatusMsg',
-    function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, SearchInit, 
-        PaginateInit, Refresh, InventoryUpdate, GroupsEdit, ShowUpdateStatus, HelpDialog, InventorySummaryHelp, BuildTree, ClickNode,
-        HostsStatusMsg, UpdateStatusMsg) {
+        'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'HelpDialog',
+        'InventorySummaryHelp', 'BuildTree', 'ClickNode', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus',
+    function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, 
+        SearchInit, PaginateInit, Refresh, InventoryUpdate, GroupsEdit, HelpDialog, InventorySummaryHelp, BuildTree, ClickNode,
+        HostsStatusMsg, UpdateStatusMsg, ViewUpdateStatus) {
     return function(params) {
         //Build a summary of a given inventory
         
@@ -373,41 +416,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             HelpDialog({ defn: InventorySummaryHelp });
             }
         
-        scope.viewUpdateStatus = function(id) {
-            var found = false;
-            var group;
-            for (var i=0; i < scope.groups.length; i++) {
-                if (scope.groups[i].id == id) {
-                   found = true;
-                   group = scope.groups[i];
-                }  
-            }
-            if (found) {
-               if (group.summary_fields.inventory_source.source == "" || group.summary_fields.inventory_source.source == null) {
-                  Alert('Missing Configuration', 'The selected group is not configured for inventory updates. ' +
-                      'You must first edit the group, provide Source settings, and then run an update.', 'alert-info');
-               }
-               else if (group.summary_fields.inventory_source.status == "" || group.summary_fields.inventory_source.status == null ||
-                        group.summary_fields.inventory_source.status == "never updated") {
-                  Alert('No Status Available', 'The inventory update process has not run for the selected group. Start the process by ' +
-                      'clicking the Update button.', 'alert-info');
-               }
-               else {
-                  Rest.setUrl(group.related.inventory_source);
-                  Rest.get()
-                      .success( function(data, status, headers, config) {
-                          var url = (data.related.current_update) ? data.related.current_update : data.related.last_update;
-                          ShowUpdateStatus({ group_name: data.summary_fields.group.name,
-                              last_update: url });
-                          })
-                      .error( function(data, status, headers, config) {
-                          ProcessErrors(scope, data, status, form,
-                              { hdr: 'Error!', msg: 'Failed to retrieve inventory source: ' + group.related.inventory_source + 
-                              ' POST returned status: ' + status });
-                          });
-               }
-            }
-            } 
+        scope.viewUpdateStatus = function(group_id) { ViewUpdateStatus({ scope: scope, group_id: group_id }) };
         
         // Click on group name
         scope.GroupsEdit = function(group_id) {

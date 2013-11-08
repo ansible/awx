@@ -90,6 +90,8 @@
   <script src="{{ STATIC_URL }}js/lists/JobEvents.js"></script>
   <script src="{{ STATIC_URL }}js/lists/JobHosts.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Permissions.js"></script>
+  <script src="{{ STATIC_URL }}js/lists/Streams.js"></script>
+  <script src="{{ STATIC_URL }}js/lists/HomeGroups.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/refresh-related.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-paginate.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-search.js"></script>
@@ -117,13 +119,14 @@
   <script src="{{ STATIC_URL }}js/widgets/InventorySyncStatus.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/SCMSyncStatus.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/ObjectCount.js"></script>
+  <script src="{{ STATIC_URL }}js/widgets/Stream.js"></script>
   <script src="{{ STATIC_URL }}js/help/InventorySummary.js"></script>
   <script src="{{ STATIC_URL }}js/help/InventoryHosts.js"></script>
   <script src="{{ STATIC_URL }}lib/less/less-1.4.1.min.js"></script>
 
   {% endif %}
   
- </head>
+</head>
 <body>
 
     <div class="navbar navbar-inverse navbar-fixed-top main-menu" role="navigation">
@@ -149,7 +152,7 @@
        </div>
     </div><!-- navbar -->
     
-    <div class="container main-container">
+    <div class="container main-container" id="main">
 
     <div class="row">
       <div class="col-lg-12">
@@ -165,7 +168,7 @@
           <li><a href="#jobs" id="main_jobs_tab" data-toggle="tab">Jobs</a></li>
         </ul>
      
-        <div class="tab-content">
+        <div class="tab-content" id="tab-content-container">
           <div ng-view id="main-view"></div>
         </div>
       </div>

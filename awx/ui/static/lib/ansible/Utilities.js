@@ -109,14 +109,10 @@ angular.module('Utilities',['RestServices', 'Utilities'])
           }
           Alert(defaultMsg.hdr, msg);
        }
-       else if (status == 401 && data.detail && data.detail == 'Token is expired') {
+       else if ( (status == 401 && data.detail && data.detail == 'Token is expired') || 
+           (status == 401 && data.detail && data.detail == 'Invalid token') ) {
           $rootScope.sessionTimer.expireSession();
-          window.location = '/#/login';  //resetting location so that we drop search params
-       }
-       else if (status == 401 && data.detail && data.detail == 'Invalid token') {
-          // should this condition be treated as an expired session?? Yes, for now.
-          $rootScope.sessionTimer.expireSession();
-          window.location = '/#/login';  //resetting location so that we drop search params
+          $location.url('/login');
        }
        else if (data.non_field_errors) {
           Alert('Error!', data.non_field_errors);

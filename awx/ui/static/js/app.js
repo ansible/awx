@@ -5,7 +5,7 @@
  *
  */
  
-var urlPrefix = '/static/';
+var urlPrefix = $basePath;
 
 angular.module('ansible', [
     'RestServices',
@@ -74,13 +74,16 @@ angular.module('ansible', [
     'InventorySyncStatusWidget',
     'SCMSyncStatusWidget',
     'ObjectCountWidget',
+    'StreamWidget',
     'JobsHelper',
     'InventoryStatusDefinition',
     'InventorySummaryHelpDefinition',
     'InventoryHostsHelpDefinition',
     'TreeSelector',
     'CredentialsHelper',
-    'TimerService'
+    'TimerService',
+    'StreamListDefinition',
+    'HomeGroupListDefinition'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.
@@ -245,13 +248,15 @@ angular.module('ansible', [
             when('/logout', { templateUrl: urlPrefix + 'partials/organizations.html', controller: Authenticate }).
 
             when('/home', { templateUrl: urlPrefix + 'partials/home.html', controller: Home }).
+
+            when('/home/groups', { templateUrl: urlPrefix + 'partials/subhome.html', controller: HomeGroups }).
             
             otherwise({redirectTo: '/home'});
     }])
     .run(['$cookieStore', '$rootScope', 'CheckLicense', '$location', 'Authorization','LoadBasePaths', 'ViewLicense',
-          'Timer',
+          'Timer', 'ClearScope', 'HideStream',
         function($cookieStore, $rootScope, CheckLicense, $location, Authorization, LoadBasePaths, ViewLicense,
-             Timer) {
+             Timer, ClearScope, HideStream) {
         
         LoadBasePaths();
         
@@ -260,12 +265,17 @@ angular.module('ansible', [
         $rootScope.sessionTimer = Timer.init(); 
 
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
+
+            // Before navigating away from current tab, make sure the primary view is visible
+            if ($('#stream-container').is(':visible')) {
+                HideStream();
+            }
+
             // On each navigation request, check that the user is logged in
-            
-            var tst = /login/;
+            var tst = /(login|logout)/;
             var path = $location.path();
             if ( !tst.test($location.path()) ) {
-                // capture most recent URL, excluding login
+                // capture most recent URL, excluding login/logout
                 $rootScope.lastPath = path;
                 $cookieStore.put('lastPath', path);
             } 
@@ -286,11 +296,6 @@ angular.module('ansible', [
                   Authorization.restoreUserInfo();   //user must have hit browser refresh 
                }
                CheckLicense();
-            }
-
-            if ($rootScope.timer) {
-               clearInterval($rootScope.timer);
-               $rootScope.timer = null;
             }
 
             // Make the correct tab active

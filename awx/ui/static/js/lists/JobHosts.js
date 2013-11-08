@@ -126,7 +126,8 @@ angular.module('JobHostDefinition', [])
                 ngShow: "host_id == null && (job_status == 'pending' || job_status == 'waiting' || job_status == 'running')",
                 'class': 'btn-xs btn-primary',
                 awToolTip: "Refresh the page",
-                ngClick: "refresh()"
+                ngClick: "refresh()",
+                iconSize: 'large'
                 }
             },
 

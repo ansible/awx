@@ -1,21 +1,20 @@
 /*********************************************
  *  Copyright (c) 2013 AnsibleWorks, Inc.
  *
- *  InventorySummary.js 
+ *  HomeGroups.js 
  *
- *  Summary of groups contained within an inventory
- * 
+ *  List view object for Group data model. Used
+ *  on the home tab.
+ *
  */
-angular.module('InventorySummaryDefinition', [])
+angular.module('HomeGroupListDefinition', [])
     .value(
-    'InventorySummary', {
-
+    'HomeGroupList', {
+        
         name: 'groups',
         iterator: 'group',
-        editTitle: '{{ inventory_name | capitalize }}',
-        showTitle: true,
-        well: true,
-        index: false,
+        editTitle: 'Groups',
+        index: true,
         hover: true,
         
         fields: {
@@ -23,7 +22,15 @@ angular.module('InventorySummaryDefinition', [])
                 key: true,
                 label: 'Group',
                 ngClick: "\{\{ 'GroupsEdit(' + group.id + ')' \}\}",
-                columnClass: 'col-lg-3 col-md3 col-sm-2'
+                columnClass: 'col-lg-3 col-md3 col-sm-2',
+                linkTo: "\{\{ '/#/inventories/' + group.inventory + '/groups/?name=' + group.name \}\}"
+                },
+            inventory_name: {
+                label: 'Inventory', 
+                sourceModel: 'inventory',
+                sourceField: 'name',
+                columnClass: 'col-lg-3 col-md3 col-sm-2',
+                linkTo: "\{\{ '/#/inventories/' + group.inventory \}\}"
                 },
             failed_hosts: {
                 label: 'Failed Hosts',
@@ -101,58 +108,12 @@ angular.module('InventorySummaryDefinition', [])
                 sourceField: 'status'
                 }
             },
-
+        
         actions: {
-            create: {
-                label: 'Create New',
-                mode: 'all',
-                icon: 'icon-plus',
-                'class': "btn-success btn-xs", 
-                ngClick: "createGroup()",
-                ngHide: "groupCreateHide", 
-                ngDisabled: 'grpBtnDisabled',
-                awToolTip: "Create a new top-level group", 
-                dataPlacement: 'top'
-                },
-            help: {
-                dataPlacement: 'top',
-                icon: "icon-question-sign",
-                mode: 'all',
-                'class': 'btn-xs btn-info btn-help',
-                awToolTip:
-                    //"<div style=\"text-align:left;\"><img src=\"/static/img/cow.png\" style=\"width:50px; height:56px; float:left; padding-right:5px;\">" +
-                    //"<p>Need help getting started creating your inventory?</p><p>Click here for help.</p></div>",
-                    "<div style=\"text-align:left;\"><p>Need help getting started creating your inventory?</p><p>Click here for help.</p></div>",
-                iconSize: 'large',
-                ngClick: "showHelp()",
-                id: "inventory-summary-help"
-                },
-            refresh: {
-                dataPlacement: 'top',
-                icon: "icon-refresh",
-                mode: 'all',
-                'class': 'btn-xs btn-primary',
-                awToolTip: "Refresh the page",
-                ngClick: "refresh()",
-                iconSize: 'large'
-                }
+           
             },
 
         fieldActions: {
-            group_update: {
-                label: 'Update',
-                icon: 'icon-cloud-download',
-                "class": 'btn-xs btn-success',
-                ngClick: 'updateGroup(\{\{ group.id \}\})',
-                awToolTip: 'Perform an update on this group'     
-                },
-            cancel: {
-                label: 'Cancel',
-                icon: 'icon-minus-sign',
-                ngClick: "cancelUpdate(\{\{ group.id \}\}, '\{\{ group.name \}\}')",
-                "class": 'btn-danger btn-xs delete-btn',
-                awToolTip: 'Cancel a running update process'
-                }
+           
             }
-    });
-            
+        });
