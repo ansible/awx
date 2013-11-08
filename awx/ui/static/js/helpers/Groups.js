@@ -804,7 +804,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        }
                        
                        LookUpInit({
-                           url: GetBasePath('credentials') + '?cloud=true',   
+                           url: GetBasePath('credentials') + 
+                               '?cloud=true&kind=' + [(scope.source.value == 'rackspace') ? 'rax' : 'aws'],   
                            scope: scope,
                            form: form,
                            list: CredentialList,
@@ -987,30 +988,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             };
 
         scope.sourceChange = function() {
-            /*if (scope['source'].value == 'ec2' || scope['source'].value == 'rackspace') {
-               scope.sourcePasswordRequired = true;
-               scope.sourceUsernameRequired = true;
-               if (scope['source'].value == 'ec2') {
-                  scope.sourceUsernameLabel = 'Access Key ID';
-                  scope.sourcePasswordLabel = 'Secret Access Key';
-                  scope.sourcePasswordConfirmLabel = 'Confirm Secret Access Key';
-               }
-               else {
-                  scope.sourceUsernameLabel = 'Username';
-                  scope.sourcePasswordLabel = 'Password'; 
-                  scope.sourcePasswordConfirmLabel = 'Confirm Password';
-               }
-            }
-            else {
-               scope.sourcePasswordRequired = false;
-               scope.sourceUsernameRequired = false;
-               // reset fields
-               scope.source_password = ''; 
-               scope.source_password_confirm = '';
-               scope.source_username = ''; 
-               scope[form.name + '_form']['source_username'].$setValidity('required',true);
-            }*/
-            
             if (scope['source'].value == 'file') {
                scope.sourcePathRequired = true;
             }
@@ -1019,39 +996,19 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                // reset fields
                scope.source_path = '';
                scope[form.name + '_form']['source_path'].$setValidity('required',true);
+               scope['credential'] = ''; 
+               scope['credential_name'] = '';
             }
-            }
-
-        // Password change
-        /*scope.clearPWConfirm = function(fld) {
-            // If password value changes, make sure password_confirm must be re-entered
-            scope[fld] = '';
-            scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
-            }
-
-        // Respond to 'Ask at runtime?' checkbox
-        scope.ask = function(fld, associated) {
-            if (scope[fld + '_ask']) {
-               scope[fld] = 'ASK';
-               scope[associated] = '';
-               scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
-            }
-            else {
-               scope[fld] = '';
-               scope[associated] = '';
-               scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
-            }
+            LookUpInit({
+                url: GetBasePath('credentials') + 
+                    '?cloud=true&kind=' + [(scope.source.value == 'rackspace') ? 'rax' : 'aws'],   
+                scope: scope,
+                form: form,
+                list: CredentialList,
+                field: 'credential' 
+                });
             }
 
-        // Click clear button
-        scope.clear = function(fld, associated) {
-            scope[fld] = '';
-            scope[associated] = '';
-            scope[form.name + '_form'][associated].$setValidity('awpassmatch', true);
-            scope[form.name + '_form'].$setDirty();
-            }
-        */
-        
         // Start the update process
         scope.updateGroup = function() {
             if (scope.source == "" || scope.source == null) {
