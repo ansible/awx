@@ -4,6 +4,7 @@
 # Python
 import logging
 import threading
+import json
 
 # Django
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, m2m_changed
@@ -215,8 +216,8 @@ def activity_stream_associate(sender, instance, **kwargs):
         obj1_id = obj1.id
         obj_rel = str(sender)
         for entity_acted in kwargs['pk_set']:
-            obj2 = entity_acted
-            obj2_id = entity_acted.id
+            obj2 = kwargs['model']
+            obj2_id = entity_acted
             activity_entry = ActivityStream(
                 operation=action,
                 object1_id=obj1_id,

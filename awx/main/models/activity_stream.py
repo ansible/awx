@@ -18,11 +18,11 @@ class ActivityStream(models.Model):
         ('update', _("Entity Updated")),
         ('delete', _("Entity Deleted")),
         ('associate', _("Entity Associated with another Entity")),
-        ('disaassociate', _("Entity was Disassociated with another Entity"))
+        ('disassociate', _("Entity was Disassociated with another Entity"))
     ]
 
     user = models.ForeignKey('auth.User', null=True, on_delete=models.SET_NULL, related_name='activity_stream')
-    operation = models.CharField(max_length=9, choices=OPERATION_CHOICES)
+    operation = models.CharField(max_length=13, choices=OPERATION_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
     changes = models.TextField(blank=True)
 
