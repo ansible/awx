@@ -73,14 +73,23 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
                     'contact <a href="mailto:info@ansibleworks.com"><strong>info@ansibleworks.com</strong></a> for assistance.';
               Alert(hdr, msg, status);
            }
-           if (license['date_warning'] !== undefined && license['date_warning'] == true) {
+           if (license['date_expired'] !== undefined && license['date_expired'] == true) {
+              // expired
               status = 'alert-info';
-              hdr = 'License Expired';
+              hdr = 'AWX License Expired';
               msg = 'Your AnsibleWorks AWX License has expired and is no longer compliant. ' + 
                     'You can continue, but you will be unable to add any additional hosts. Please ' +
                     '<a href="http://store.ansibleworks.com" target="_blank"><strong>visit the AnsibleWorks online store</strong></a> ' +
                     'for license and renewal information, or contact <a href="mailto:info@ansibleworks.com"><strong>info@ansibleworks.com</strong></a> ' +
                     'for assistance.';
+              Alert(hdr, msg, status);
+           }
+           else if (license['date_warning'] !== undefined && license['date_warning'] == true) {
+              status = 'alert-info';
+              hdr = 'AWX License Warning';
+              msg = 'Your AnsibleWorks AWX License is about to expire. To extend your license, please ' + 
+                    '<a href="http://store.ansibleworks.com" target="_blank"><strong>visit the AnsibleWorks online store</strong></a>, or ' +
+                    'contact <a href="mailto:info@ansibleworks.com"><strong>info@ansibleworks.com</strong></a> for more information.';
               Alert(hdr, msg, status);
            }
            if (license['free_instances'] !== undefined && parseInt(license['free_instances']) <= 0) {
