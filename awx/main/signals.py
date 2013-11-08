@@ -11,6 +11,7 @@ from django.dispatch import receiver
 
 # AWX
 from awx.main.models import *
+from awx.main.utils import model_instance_diff
 
 __all__ = []
 
@@ -168,3 +169,59 @@ def update_host_last_job_after_job_deleted(sender, **kwargs):
     hosts_pks = getattr(instance, '_saved_hosts_pks', [])
     for host in Host.objects.filter(pk__in=hosts_pks):
         _update_host_last_jhs(host)
+
+# Set via ActivityStreamRegistrar to record activity stream events
+
+def activity_stream_create(sender, instance, created, **kwargs):
+    if created:
+        activity_entry = ActivityStream(
+            operation='create',
+            object1_id=instance.id,
+            object1_type=instance.__class__)
+        activity_entry.save()
+
+def activity_stream_update(sender, instance, **kwargs):
+    try:
+        old = sender.objects.get(id=instance.id)
+    except sender.DoesNotExist:
+        pass
+
+    new = instance
+    changes = model_instance_diff(old, new)
+    activity_entry = ActivityStream(
+        operation='update',
+        object1_id=instance.id,
+        object1_type=instance.__class__,
+        changes=json.dumps(changes))
+    activity_entry.save()
+
+
+def activity_stream_delete(sender, instance, **kwargs):
+    activity_entry = ActivityStream(
+        operation='delete',
+        object1_id=instance.id,
+        object1_type=instance.__class__)
+    activity_entry.save()
+
+def activity_stream_associate(sender, instance, **kwargs):
+    if 'pre_add' in kwargs['action'] or 'pre_remove' in kwargs['action']:
+        if kwargs['action'] == 'pre_add':
+            action = 'associate'
+        elif kwargs['action'] == 'pre_remove':
+            action = 'disassociate'
+        else:
+            return
+        obj1 = instance
+        obj1_id = obj1.id
+        obj_rel = str(sender)
+        for entity_acted in kwargs['pk_set']:
+            obj2 = entity_acted
+            obj2_id = entity_acted.id
+            activity_entry = ActivityStream(
+                operation=action,
+                object1_id=obj1_id,
+                object1_type=obj1.__class__,
+                object2_id=obj2_id,
+                object2_type=obj2.__class__,
+                object_relationship_type=obj_rel)
+            activity_entry.save()
