@@ -410,6 +410,13 @@ class Command(NoArgsCommand):
         make_option('--source', dest='source', type='str', default=None,
                     metavar='s', help='inventory directory, file, or script '
                     'to load'),
+        make_option('--enabled-var', dest='enabled_var', type='str',
+                    default=None, metavar='v', help='host variable used to '
+                    'set/clear enabled flag when host is online/offline'),
+        make_option('--enabled-value', dest='enabled_value', type='str',
+                    default=None, metavar='v', help='value of host variable '
+                    'specified by --enabled-var that indicates host is '
+                    'enabled/online.'),
     )
 
     def init_logging(self):
@@ -512,7 +519,7 @@ class Command(NoArgsCommand):
             for group in del_groups:
                 group_name = group.name
                 group.delete()
-                self.logger.info('Deleted group "%s"', group_name)
+                self.logger.info('Group "%s" deleted', group_name)
 
         # If overwrite is set, clear all invalid child relationships for groups
         # and all invalid host memberships.  When importing from a cloud
@@ -532,7 +539,7 @@ class Command(NoArgsCommand):
                     if db_child not in db_group.children.all():
                         continue
                     db_group.children.remove(db_child)
-                    self.logger.info('Removed group "%s" from group "%s"',
+                    self.logger.info('Group "%s" removed from group "%s"',
                                      db_child.name, db_group.name)
                 db_hosts = db_group.hosts.all()
                 mem_hosts = self.all_group.all_groups[db_group.name].hosts
@@ -541,7 +548,7 @@ class Command(NoArgsCommand):
                     if db_host not in db_group.hosts.all():
                         continue
                     db_group.hosts.remove(db_host)
-                    self.logger.info('Removed host "%s" from group "%s"',
+                    self.logger.info('Host "%s" removed from group "%s"',
                                      db_host.name, db_group.name)
 
         # Update/overwrite variables from "all" group.  If importing from a
@@ -563,9 +570,9 @@ class Command(NoArgsCommand):
             all_obj.variables = json.dumps(db_variables)
             all_obj.save(update_fields=['variables'])
             if self.overwrite_vars or self.overwrite:
-                self.logger.info('Replaced %s variables from "all" group', all_name)
+                self.logger.info('%s variables replaced from "all" group', all_name.capitalize())
             else:
-                self.logger.info('Updated %s variables from "all" group', all_name)
+                self.logger.info('%s variables updated from "all" group', all_name.capitalize())
         else:
             self.logger.info('%s variables unmodified', all_name.capitalize())
 
@@ -581,7 +588,7 @@ class Command(NoArgsCommand):
             group, created = self.inventory.groups.get_or_create(name=k,
                                                                  defaults=defaults)
             if created:
-                self.logger.info('Added new group "%s"', k)
+                self.logger.info('Group "%s" added', k)
             else:
                 db_variables = group.variables_dict
                 if self.overwrite_vars or self.overwrite:
@@ -592,11 +599,11 @@ class Command(NoArgsCommand):
                     group.variables = json.dumps(db_variables)
                     group.save(update_fields=['variables'])
                     if self.overwrite_vars or self.overwrite:
-                        self.logger.info('Replaced variables for group "%s"', k)
+                        self.logger.info('Group "%s" variables replaced', k)
                     else:
-                        self.logger.info('Updated variables for group "%s"', k)
+                        self.logger.info('Group "%s" variables updated', k)
                 else:
-                    self.logger.info('Variables unmodified for group "%s"', k)
+                    self.logger.info('Group "%s" variables unmodified', k)
             if self.inventory_source.group:
                 self.inventory_source.group.children.add(group)
             group.inventory_sources.add(self.inventory_source)
@@ -608,25 +615,49 @@ class Command(NoArgsCommand):
         for k,v in self.all_group.all_hosts.iteritems():
             variables = json.dumps(v.variables)
             defaults = dict(variables=variables, description='imported')
+            enabled = None
+            if self.enabled_var and self.enabled_var in v.variables:
+                value = v.variables[self.enabled_var]
+                if self.enabled_value is not None:
+                    enabled = bool(unicode(self.enabled_value) == unicode(value))
+                else:
+                    enabled = bool(value)
+                defaults['enabled'] = enabled
             host, created = self.inventory.hosts.get_or_create(name=k,
                                                                defaults=defaults)
             if created:
-                self.logger.info('Added new host "%s"', k)
+                if enabled is False:
+                    self.logger.info('Host "%s" added (disabled)', k)
+                else:
+                    self.logger.info('Host "%s" added', k)
+                #self.logger.info('Host variables: %s', variables)
             else:
                 db_variables = host.variables_dict
                 if self.overwrite_vars or self.overwrite:
                     db_variables = v.variables
                 else:
                     db_variables.update(v.variables)
+                update_fields = []
                 if db_variables != host.variables_dict:
                     host.variables = json.dumps(db_variables)
-                    host.save(update_fields=['variables'])
+                    update_fields.append('variables')
+                if enabled is not None and host.enabled != enabled:
+                    host.enabled = enabled
+                    update_fields.append('enabled')
+                if update_fields:
+                    host.save(update_fields=update_fields)
+                if 'variables' in update_fields:
                     if self.overwrite_vars or self.overwrite:
-                        self.logger.info('Replaced variables for host "%s"', k)
+                        self.logger.info('Host "%s" variables replaced', k)
                     else:
-                        self.logger.info('Updated variables for host "%s"', k)
+                        self.logger.info('Host "%s" variables updated', k)
                 else:
-                    self.logger.info('Variables unmodified for host "%s"', k)
+                    self.logger.info('Host "%s" variables unmodified', k)
+                if 'enabled' in update_fields:
+                    if enabled:
+                        self.logger.info('Host "%s" is now enabled', k)
+                    else:
+                        self.logger.info('Host "%s" is now disabled', k)
             if self.inventory_source.group:
                 self.inventory_source.group.hosts.add(host)
             host.inventory_sources.add(self.inventory_source)
@@ -642,7 +673,7 @@ class Command(NoArgsCommand):
                 db_host = self.inventory.hosts.get(name=h.name)
                 if db_host not in db_group.hosts.all():
                     db_group.hosts.add(db_host)
-                    self.logger.info('Added host "%s" to group "%s"', h.name, k)
+                    self.logger.info('Host "%s" added to group "%s"', h.name, k)
                 else:
                     self.logger.info('Host "%s" already in group "%s"', h.name, k)
   
@@ -655,7 +686,7 @@ class Command(NoArgsCommand):
                 db_child = self.inventory.groups.get(name=g.name)
                 if db_child not in db_group.hosts.all():
                     db_group.children.add(db_child)
-                    self.logger.info('Added group "%s" as child of "%s"', g.name, k)
+                    self.logger.info('Group "%s" added as child of "%s"', g.name, k)
                 else:
                     self.logger.info('Group "%s" already child of group "%s"', g.name, k)
 
@@ -686,6 +717,8 @@ class Command(NoArgsCommand):
         self.overwrite_vars = bool(options.get('overwrite_vars', False))
         self.keep_vars = bool(options.get('keep_vars', False))
         self.source = options.get('source', None)
+        self.enabled_var = options.get('enabled_var', None)
+        self.enabled_value = options.get('enabled_value', None)
 
         # Load inventory and related objects from database.
         if self.inventory_name and self.inventory_id:

@@ -796,7 +796,6 @@ class RunInventoryUpdate(BaseTask):
         '''
         Build command line argument list for running inventory import.
         '''
-        # FIXME
         inventory_source = inventory_update.inventory_source
         inventory = inventory_source.group.inventory
         args = ['awx-manage', 'inventory_import']
@@ -809,9 +808,15 @@ class RunInventoryUpdate(BaseTask):
         if inventory_source.source == 'ec2':
             ec2_path = self.get_path_to('..', 'plugins', 'inventory', 'ec2.py')
             args.append(ec2_path)
+            args.extend(['--enabled-var', 'ec2_state'])
+            args.extend(['--enabled-value', 'running'])
+            #args.extend(['--instance-id', 'ec2_id'])
         elif inventory_source.source == 'rackspace':
             rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax.py')
             args.append(rax_path)
+            args.extend(['--enabled-var', 'rax_status'])
+            args.extend(['--enabled-value', 'ACTIVE'])
+            #args.extend(['--instance-id', 'rax_id'])
         elif inventory_source.source == 'file':
             args.append(inventory_source.source_path)
         verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)

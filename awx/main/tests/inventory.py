@@ -1006,12 +1006,13 @@ class InventoryUpdatesTest(BaseTransactionTest):
             pass # If should_fail is None, we don't care.
         return inventory_update
 
-    def check_inventory_source(self, inventory_source):
+    def check_inventory_source(self, inventory_source, initial=True):
         inventory_source = InventorySource.objects.get(pk=inventory_source.pk)
         inventory = inventory_source.group.inventory
         self.assertTrue(inventory_source.can_update)
-        self.assertEqual(inventory.groups.count(), 1)
-        self.assertEqual(inventory.hosts.count(), 0)
+        if initial:
+            self.assertEqual(inventory.groups.count(), 1)
+            self.assertEqual(inventory.hosts.count(), 0)
         inventory_update = self.check_inventory_update(inventory_source)
         inventory_source = InventorySource.objects.get(pk=inventory_source.pk)
         self.assertNotEqual(inventory.groups.count(), 1)
@@ -1020,6 +1021,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
             source_pks = host.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
             self.assertTrue(host.has_inventory_sources)
+            self.assertTrue(host.enabled)
         for group in inventory.groups.all():
             source_pks = group.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
@@ -1042,6 +1044,11 @@ class InventoryUpdatesTest(BaseTransactionTest):
             source='ec2', credential=credential, source_regions=source_regions,
             source_vars='---')
         self.check_inventory_source(inventory_source)
+        # Manually disable all hosts, verify a new update re-enables them.
+        for host in self.inventory.hosts.all():
+            host.enabled = False
+            host.save()
+        self.check_inventory_source(inventory_source, initial=False)
 
     def test_update_from_rackspace(self):
         source_username = getattr(settings, 'TEST_RACKSPACE_USERNAME', '')
@@ -1057,6 +1064,11 @@ class InventoryUpdatesTest(BaseTransactionTest):
             source='rackspace', credential=credential,
             source_regions=source_regions)
         self.check_inventory_source(inventory_source)
+        # Manually disable all hosts, verify a new update re-enables them.
+        for host in self.inventory.hosts.all():
+            host.enabled = False
+            host.save()
+        self.check_inventory_source(inventory_source, initial=False)
         # If test source regions is given, test again with empty string.
         if source_regions:
             inventory_source2 = self.update_inventory_source(self.group2,

@@ -497,7 +497,13 @@ class Ec2Inventory(object):
             key = self.to_safe('ec2_' + key)
 
             # Handle complex types
-            if type(value) in [int, bool]:
+            if key == 'ec2__state':
+                instance_vars['ec2_state'] = instance.state or ''
+                instance_vars['ec2_state_code'] = instance.state_code
+            elif key == 'ec2__previous_state':
+                instance_vars['ec2_previous_state'] = instance.previous_state or ''
+                instance_vars['ec2_previous_state_code'] = instance.previous_state_code
+            elif type(value) in [int, bool]:
                 instance_vars[key] = value
             elif type(value) in [str, unicode]:
                 instance_vars[key] = value.strip()
@@ -518,7 +524,7 @@ class Ec2Inventory(object):
                 instance_vars["ec2_security_group_ids"] = ','.join(group_ids)
                 instance_vars["ec2_security_group_names"] = ','.join(group_names)
             else:
-                pass
+                pass#instance_vars[key] = u'FIXME: ' + unicode(value)
                 # TODO Product codes if someone finds them useful
                 #print key
                 #print type(value)
