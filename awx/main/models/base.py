@@ -22,7 +22,7 @@ from taggit.managers import TaggableManager
 # Django-Celery
 from djcelery.models import TaskMeta
 
-__all__ = ['VarsDictProperty', 'PrimordialModel', 'CommonModel',
+__all__ = ['VarsDictProperty', 'PrimordialModel', 'CommonModel', 'ActivityStream',
            'CommonModelNameNotUnique', 'CommonTask', 'PERM_INVENTORY_ADMIN',
            'PERM_INVENTORY_READ', 'PERM_INVENTORY_WRITE',
            'PERM_INVENTORY_DEPLOY', 'PERM_INVENTORY_CHECK', 'JOB_TYPE_CHOICES',

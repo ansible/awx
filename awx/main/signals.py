@@ -177,21 +177,21 @@ def activity_stream_create(sender, instance, created, **kwargs):
         activity_entry = ActivityStream(
             operation='create',
             object1_id=instance.id,
-            object1_type=instance.__class__)
+            object1_type=str(instance.__class__))
         activity_entry.save()
 
 def activity_stream_update(sender, instance, **kwargs):
     try:
         old = sender.objects.get(id=instance.id)
     except sender.DoesNotExist:
-        pass
+        return
 
     new = instance
     changes = model_instance_diff(old, new)
     activity_entry = ActivityStream(
         operation='update',
         object1_id=instance.id,
-        object1_type=instance.__class__,
+        object1_type=str(instance.__class__),
         changes=json.dumps(changes))
     activity_entry.save()
 
@@ -200,7 +200,7 @@ def activity_stream_delete(sender, instance, **kwargs):
     activity_entry = ActivityStream(
         operation='delete',
         object1_id=instance.id,
-        object1_type=instance.__class__)
+        object1_type=str(instance.__class__))
     activity_entry.save()
 
 def activity_stream_associate(sender, instance, **kwargs):
@@ -220,8 +220,8 @@ def activity_stream_associate(sender, instance, **kwargs):
             activity_entry = ActivityStream(
                 operation=action,
                 object1_id=obj1_id,
-                object1_type=obj1.__class__,
+                object1_type=str(obj1.__class__),
                 object2_id=obj2_id,
-                object2_type=obj2.__class__,
+                object2_type=str(obj2.__class__),
                 object_relationship_type=obj_rel)
             activity_entry.save()
