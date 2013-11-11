@@ -15,7 +15,7 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
         var scope = $rootScope.$new();
         var jobCount, jobFails, inventoryCount, inventoryFails, groupCount, groupFails, hostCount, hostFails; 
         var counts = 0;
-        var expectedCounts = 6;
+        var expectedCounts = 8;
         var target = params.target;        
 
         if (scope.removeCountReceived) {
@@ -34,12 +34,13 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                 var fail = params.fail;
                 html += "<tr>\n";
                 html += "<td><a href=\"" + link + "\"";
+                html += (label == 'Hosts' || label == 'Groups') ? " class=\"pad-left-sm\" " : "";
                 html += ">"  + label + "</a></td>\n";
                 html += "<td class=\"failed-column text-right\">";
                 html += "<a href=\"" + fail_link + "\">" + fail + "</a>"; 
                 html += "</td>\n";
                 html += "<td class=\"text-right\">"
-                html += "<a href=\"" + link + "\">" + count + "</a>";
+                html += "<a href=\"" + link + "\" >" + count + "</a>";
                 html += "</td></tr>\n";
                 return html; 
                 }
@@ -70,13 +71,23 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                        });
                   rowcount++;
                }
+               if (inventoryCount > 0) {
+                   html += makeRow({
+                       label: 'Inventories', 
+                       link: '/#/home/inventories',
+                       count: inventoryCount,
+                       fail: inventoryFails,
+                       fail_link: '/#/home/inventories/?has_active_failures=true' 
+                       });
+                   rowcount++;
+               }
                if (groupCount > 0) {
                    html += makeRow({
                        label: 'Groups', 
                        link: '/#/home/groups',
                        count: groupCount,
                        fail: groupFails,
-                       fail_link: '/#/home/groups/?status=failed' 
+                       fail_link: '/#/home/groups/?has_active_failures=true' 
                        });
                   rowcount++;
                }
@@ -86,7 +97,7 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                        link: '#/home/hosts',
                        count: hostCount,
                        fail: hostFails,
-                       fail_link: '/#/home/hosts/?status=failed'
+                       fail_link: '/#/home/hosts/?has_active_failures=true'
                        });
                   rowcount++;
                }
@@ -132,7 +143,7 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
 
-        /*url = GetBasePath('inventory') + '?page=1';
+        url = GetBasePath('inventory') + '?page=1';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
@@ -154,7 +165,7 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
-                });*/
+                });
 
         url = GetBasePath('groups') + '?page=1';
         Rest.setUrl(url);
