@@ -88,6 +88,7 @@ class ApiV1RootView(APIView):
         data['hosts'] = reverse('api:host_list')
         data['job_templates'] = reverse('api:job_template_list')
         data['jobs'] = reverse('api:job_list')
+        data['activity_stream'] = reverse('api:activity_stream_list')
         return Response(data)
 
 class ApiV1ConfigView(APIView):
@@ -1058,6 +1059,15 @@ class JobJobEventsList(BaseJobEventsList):
                             headers=headers)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class ActivityStreamList(SimpleListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+
+class ActivityStreamDetail(RetrieveAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
 
 # Create view functions for all of the class-based views to simplify inclusion
 # in URL patterns and reverse URL lookups, converting CamelCase names to

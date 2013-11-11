@@ -3,6 +3,7 @@
 
 
 from django.db import models
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 class ActivityStream(models.Model):
@@ -33,3 +34,6 @@ class ActivityStream(models.Model):
     object2_type = models.TextField(null=True, blank=True)
 
     object_relationship_type = models.TextField(blank=True)
+
+    def get_absolute_url(self):
+        return reverse('api:activity_stream_detail', args=(self.pk,))

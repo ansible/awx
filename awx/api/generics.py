@@ -28,7 +28,7 @@ from awx.main.utils import *
 
 # FIXME: machinery for auto-adding audit trail logs to all CREATE/EDITS
 
-__all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'ListCreateAPIView',
+__all__ = ['APIView', 'GenericAPIView', 'ListAPIView', 'SimpleListAPIView', 'ListCreateAPIView',
            'SubListAPIView', 'SubListCreateAPIView', 'RetrieveAPIView',
            'RetrieveUpdateAPIView', 'RetrieveUpdateDestroyAPIView']
 
@@ -171,6 +171,9 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         if getattr(self, 'search_fields', None):
             ret['search_fields'] = self.search_fields
         return ret
+
+class SimpleListAPIView(generics.ListAPIView, GenericAPIView):
+    pass
 
 class ListAPIView(generics.ListAPIView, GenericAPIView):
     # Base class for a read-only list view.
