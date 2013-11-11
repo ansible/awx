@@ -141,10 +141,10 @@ job_event_urls = patterns('awx.api.views',
     url(r'^(?P<pk>[0-9]+)/hosts/$',                     'job_event_hosts_list'),
 )
 
-# activity_stream_urls = patterns('awx.api.views',
-#     url(r'^$',                                          'activity_stream_list'),
-#     url(r'^(?P<pk>[0-9]+)/$',                           'activity_stream_detail'),
-# )
+activity_stream_urls = patterns('awx.api.views',
+    url(r'^$',                                          'activity_stream_list'),
+    url(r'^(?P<pk>[0-9]+)/$',                           'activity_stream_detail'),
+)
 
 v1_urls = patterns('awx.api.views',
     url(r'^$',                      'api_v1_root_view'),
@@ -167,7 +167,7 @@ v1_urls = patterns('awx.api.views',
     url(r'^jobs/',                  include(job_urls)),
     url(r'^job_host_summaries/',    include(job_host_summary_urls)),
     url(r'^job_events/',            include(job_event_urls)),
-    # url(r'^activity_stream/',       include(activity_stream_urls)),
+    url(r'^activity_stream/',       include(activity_stream_urls)),
 )
 
 urlpatterns = patterns('awx.api.views',

@@ -999,6 +999,34 @@ class JobEventSerializer(BaseSerializer):
             pass
         return d
 
+class ActivityStreamSerializer(BaseSerializer):
+
+    class Meta:
+        model = ActivityStream
+        fields = ('id', 'url', 'related', 'summary_fields', 'timestamp', 'operation', 'changes')
+
+    def get_related(self, obj):
+        if obj is None:
+            return {}
+        # res = super(ActivityStreamSerializer, self).get_related(obj)
+        # res.update(dict(
+        #     #audit_trail = reverse('api:organization_audit_trail_list',    args=(obj.pk,)),
+        #     projects    = reverse('api:organization_projects_list',       args=(obj.pk,)),
+        #     inventories = reverse('api:organization_inventories_list',    args=(obj.pk,)),
+        #     users       = reverse('api:organization_users_list',          args=(obj.pk,)),
+        #     admins      = reverse('api:organization_admins_list',         args=(obj.pk,)),
+        #     #tags        = reverse('api:organization_tags_list',           args=(obj.pk,)),
+        #     teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
+        # ))
+        # return res
+
+    def get_summary_fields(self, obj):
+        if obj is None:
+            return {}
+        d = super(ActivityStreamSerializer, self).get_summary_fields(obj)
+        return d
+
+
 class AuthTokenSerializer(serializers.Serializer):
 
     username = serializers.CharField()
