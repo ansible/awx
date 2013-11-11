@@ -72,6 +72,7 @@ angular.module('CredentialsHelper', ['Utilities'])
         }
         }])
 
+
     .factory('OwnerChange', [ function() {
     return function(params) {
         var scope = params.scope;
@@ -90,4 +91,87 @@ angular.module('CredentialsHelper', ['Utilities'])
         }
 
         }
-        }]);        
+        }])
+
+    
+    .factory('FormSave', ['$location', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller',
+    function($location, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller) {
+    return function(params) {
+        var scope = params.scope;
+        var mode = params.mode; // add or edit
+        var form = CredentialForm;
+        var data = {}
+        
+        for (var fld in form.fields) {
+            if (fld !== 'access_key' && fld !== 'secret_key' && fld !== 'ssh_username' &&
+                fld !== 'ssh_password') {
+                if (scope[fld] === null) {
+                   data[fld] = "";
+                }
+                else {
+                   data[fld] = scope[fld];
+                }
+            }
+        } 
+        
+        if (!Empty(scope.team)) {
+           data.team = scope.team;
+           data.user = "";
+        }
+        else {
+           data.user = scope.user;
+           data.team = "";
+        }
+
+        data['kind'] = scope['kind'].value;
+
+        switch (data['kind']) { 
+            case 'ssh': 
+                data['username'] = scope['ssh_username'];
+                data['password'] = scope['ssh_password'];
+                break; 
+            case 'aws':
+                data['username'] = scope['access_key'];
+                data['password'] = scope['secret_key'];
+                break;
+            case 'scm':
+                data['ssh_key_unlock'] = scope['scm_key_unlock'];
+                break;
+        }
+
+        if (Empty(data.team) && Empty(data.user)) {
+            Alert('Missing User or Team', 'You must provide either a User or a Team. If this credential will only be accessed by a specific ' + 
+                'user, select a User. To allow a team of users to access this credential, select a Team.', 'alert-danger');  
+        }
+        else {
+            if (mode == 'add') {
+                var url = (!Empty(data.team)) ? GetBasePath('teams') + data.team + '/credentials/' : 
+                    GetBasePath('users') + data.user + '/credentials/';
+                Rest.setUrl(url);
+                Rest.post(data)
+                    .success( function(data, status, headers, config) {
+                        var base = $location.path().replace(/^\//,'').split('/')[0];
+                        (base == 'credentials') ? ReturnToCaller() : ReturnToCaller(1);
+                        })
+                    .error( function(data, status, headers, config) {
+                        ProcessErrors(scope, data, status, form,
+                            { hdr: 'Error!', msg: 'Failed to create new Credential. POST status: ' + status });
+                        });
+            }
+            else {
+                var url = GetBasePath('credentials') + scope.id + '/';
+                Rest.setUrl(url);
+                Rest.put(data)
+                    .success( function(data, status, headers, config) {
+                        var base = $location.path().replace(/^\//,'').split('/')[0];
+                        (base == 'credentials') ? ReturnToCaller() : ReturnToCaller(1);
+                        })
+                    .error( function(data, status, headers, config) {
+                        ProcessErrors(scope, data, status, form,
+                            { hdr: 'Error!', msg: 'Failed to update Credential. PUT status: ' + status });
+                        });
+            }
+        }
+        }  
+        }]);
+

@@ -115,7 +115,7 @@ CredentialsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$route
 function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
                          GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList, GetBasePath,
-                         GetChoices, Empty, KindChange, OwnerChange) 
+                         GetChoices, Empty, KindChange, OwnerChange, FormSave) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -191,66 +191,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
        }
 
    // Save
-   scope.formSave = function() {
-      generator.clearApiErrors();
-      
-      var data = {}
-      for (var fld in form.fields) {
-          if (fld !== 'access_key' && fld !== 'secret_key' && fld !== 'ssh_username' &&
-              fld !== 'ssh_password') {
-              if (scope[fld] === null) {
-                 data[fld] = "";
-              }
-              else {
-                 data[fld] = scope[fld];
-              }
-          }
-      } 
-      
-      if (!Empty(scope.team)) {
-         data.team = scope.team;
-         data.user = "";
-      }
-      else {
-         data.user = scope.user;
-         data.team = "";
-      }
-
-      data['kind'] = scope['kind'].value;
-
-      switch (data['kind']) { 
-          case 'ssh': 
-              data['username'] = scope['ssh_username'];
-              data['password'] = scope['ssh_password'];
-              break; 
-          case 'aws':
-              data['username'] = scope['access_key'];
-              data['password'] = scope['secret_key'];
-              break;
-          case 'scm':
-              data['ssh_key_unlock'] = scope['scm_key_unlock'];
-              break;
-      }
-
-      if (Empty(data.team) && Empty(data.user)) {
-          Alert('Missing User or Team', 'You must provide either a User or a Team. If this credential will only be accessed by a specific ' + 
-              'user, select a User. To allow a team of users to access this credential, select a Team.', 'alert-danger');  
-      }
-      else {
-          var url = (!Empty(data.team)) ? GetBasePath('teams') + data.team + '/credentials/' : 
-              GetBasePath('users') + data.user + '/credentials/';
-          Rest.setUrl(url);
-          Rest.post(data)
-              .success( function(data, status, headers, config) {
-                  var base = $location.path().replace(/^\//,'').split('/')[0];
-                  (base == 'credentials') ? ReturnToCaller() : ReturnToCaller(1);
-                  })
-              .error( function(data, status, headers, config) {
-                  ProcessErrors(scope, data, status, form,
-                      { hdr: 'Error!', msg: 'Failed to create new Credential. POST status: ' + status });
-                  });
-      }
-      }
+   scope.formSave = function() { generator.clearApiErrors(); FormSave({ scope: scope, mode: 'add' }) };
 
    // Handle Owner change
    scope.ownerChange = function() {
@@ -260,6 +201,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    // Reset defaults
    scope.formReset = function() {
       generator.reset();
+      //DebugForm({ form: CredentialForm, scope: scope });
       };
 
    // Password change
@@ -296,13 +238,13 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 CredentialsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 'GenerateForm', 
                            'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
                            'SearchInit', 'PaginateInit', 'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty',
-                           'KindChange', 'OwnerChange']; 
+                           'KindChange', 'OwnerChange', 'FormSave']; 
 
 
 function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
-                          KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange
+                          KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, FormSave
                           ) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
@@ -318,6 +260,8 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    
    var master = {};
    var id = $routeParams.credential_id;
+   scope['id'] = id; 
+
    var relatedSets = {}; 
 
    function setAskCheckboxes() {
@@ -389,7 +333,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                           scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
                   }
                }
-               
+
                if (!Empty(scope['user'])) {
                   scope['owner'] = 'user';
                }
@@ -441,65 +385,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        });
  
    // Save changes to the parent
-   scope.formSave = function() {
-      generator.clearApiErrors();
-
-      var data = {}
-      for (var fld in form.fields) {
-          if (fld !== 'access_key' && fld !== 'secret_key' && fld !== 'ssh_username' &&
-              fld !== 'ssh_password') {
-              if (scope[fld] === null) {
-                 data[fld] = "";
-              }
-              else {
-                 data[fld] = scope[fld];
-              }
-          }
-      } 
-      
-      if (!Empty(scope.team)) {
-         data.team = scope.team;
-         data.user = "";
-      }
-      else {
-         data.user = scope.user;
-         data.team = "";
-      }
-
-      data['kind'] = scope['kind'].value;
-
-      switch (data['kind']) { 
-          case 'ssh': 
-              data['username'] = scope['ssh_username'];
-              data['password'] = scope['ssh_password'];
-              break; 
-          case 'aws':
-              data['username'] = scope['access_key'];
-              data['password'] = scope['secret_key'];
-              break;
-          case 'scm':
-              data['ssh_key_unlock'] = scope['scm_key_unlock'];
-              break;
-      }
-
-      if (Empty(data.team) && Empty(data.user)) {
-          Alert('Missing User or Team', 'You must provide either a User or a Team. If this credential will only be accessed by a specific ' + 
-              'user, select a User. To allow a team of users to access this credential, select a Team.', 'alert-danger');  
-      }
-      else {
-          // Save changes to the credential record
-          Rest.setUrl(defaultUrl + id + '/');
-          Rest.put(data)
-              .success( function(data, status, headers, config) {
-                  var base = $location.path().replace(/^\//,'').split('/')[0];
-                  (base == 'credentials') ? ReturnToCaller() : ReturnToCaller(1);
-                  })
-              .error( function(data, status, headers, config) {
-                  ProcessErrors(scope, data, status, form,
-                      { hdr: 'Error!', msg: 'Failed to update Credential. PUT status: ' + status });
-                  });
-      }
-      }
+   scope.formSave = function() { generator.clearApiErrors(); FormSave({ scope: scope, mode: 'edit' }) };
    
    // Handle Owner change
    scope.ownerChange = function() {
@@ -595,5 +481,5 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 CredentialsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
-                            'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange' ]; 
+                            'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange', 'FormSave']; 
   
