@@ -83,7 +83,8 @@ angular.module('ansible', [
     'CredentialsHelper',
     'TimerService',
     'StreamListDefinition',
-    'HomeGroupListDefinition'
+    'HomeGroupListDefinition',
+    'HomeHostListDefinition'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.
@@ -250,6 +251,8 @@ angular.module('ansible', [
             when('/home', { templateUrl: urlPrefix + 'partials/home.html', controller: Home }).
 
             when('/home/groups', { templateUrl: urlPrefix + 'partials/subhome.html', controller: HomeGroups }).
+
+            when('/home/hosts', { templateUrl: urlPrefix + 'partials/subhome.html', controller: HomeHosts }).
             
             otherwise({redirectTo: '/home'});
     }])

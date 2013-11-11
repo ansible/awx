@@ -74,10 +74,10 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                if (inventoryCount > 0) {
                    html += makeRow({
                        label: 'Inventories', 
-                       link: '/#/home/inventories',
+                       link: '/#/inventories',
                        count: inventoryCount,
                        fail: inventoryFails,
-                       fail_link: '/#/home/inventories/?has_active_failures=true' 
+                       fail_link: '/#/inventories/?has_active_failures=true' 
                        });
                    rowcount++;
                }
@@ -94,7 +94,7 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
                if (hostCount > 0) {
                    html += makeRow({
                        label: 'Hosts',
-                       link: '#/home/hosts',
+                       link: '/#/home/hosts',
                        count: hostCount,
                        fail: hostFails,
                        fail_link: '/#/home/hosts/?has_active_failures=true'

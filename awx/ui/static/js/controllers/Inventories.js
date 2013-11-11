@@ -24,9 +24,19 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
     var scope = view.inject(InventoryList, { mode: mode });          // Inject our view
     
     $rootScope.flashMessage = null;
-  
+
     SearchInit({ scope: scope, set: 'inventories', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
+  
+    if ($routeParams['has_active_failures']) {
+        //scope.resetSearch(InventoryHostsForm.iterator);
+        scope[InventoryList.iterator + 'InputDisable'] = true;
+        scope[InventoryList.iterator + 'SearchValue'] = $routeParams['has_active_failures'];
+        scope[InventoryList.iterator + 'SearchField'] = 'has_active_failures';
+        scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields['has_active_failures'].label;
+        scope[InventoryList.iterator + 'SearchSelectValue'] = ($routeParams['has_active_failures'] == 'true') ? { value: 1 } : { value: 0 };
+    }
+
     scope.search(list.iterator);
 
     LoadBreadCrumbs();

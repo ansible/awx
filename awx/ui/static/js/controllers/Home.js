@@ -94,20 +94,14 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
     SearchInit({ scope: scope, set: 'groups', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
 
-    if ($routeParams['status']) {
-        // with status param, called post update-submit
-        scope[list.iterator + 'SearchField'] = 'status';
-        scope[list.iterator + 'SelectShow'] = true;
-        scope[list.iterator + 'SearchSelectOpts'] = list.fields['status'].searchOptions;
-        scope[list.iterator + 'SearchFieldLabel'] = list.fields['status'].label.replace(/\<br\>/g,' ');
-        for (var opt in list.fields['status'].searchOptions) {
-            if (list.fields['status'].searchOptions[opt].value == $routeParams['status']) {
-               scope[list.iterator + 'SearchSelectValue'] = list.fields['status'].searchOptions[opt];
-               break;
-            }
-        }
+    if ($routeParams['has_active_failures']) {
+        scope[HomeGroupList.iterator + 'InputDisable'] = true;
+        scope[HomeGroupList.iterator + 'SearchValue'] = $routeParams['has_active_failures'];
+        scope[HomeGroupList.iterator + 'SearchField'] = 'has_active_failures';
+        scope[HomeGroupList.iterator + 'SearchFieldLabel'] = HomeGroupList.fields['has_active_failures'].label;
+        scope[HomeGroupList.iterator + 'SearchSelectValue'] = ($routeParams['has_active_failures'] == 'true') ? { value: 1 } : { value: 0 };
     }
-
+    
     scope.search(list.iterator);
    
     LoadBreadCrumbs();
@@ -118,5 +112,53 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
 
 HomeGroups.$inject = [ '$location', '$routeParams', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus'
+    ];
+
+
+function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, 
+    GetBasePath, SearchInit, PaginateInit, FormatDate, SetHostStatus) {
+
+    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
+                                 //scope.
+
+    var generator = GenerateList;
+    var list = HomeHostList;
+    var defaultUrl=GetBasePath('hosts');
+
+    var scope = generator.inject(list, { mode: 'edit' });
+    var base = $location.path().replace(/^\//,'').split('/')[0];
+
+    if (scope.removePostRefresh) {
+       scope.removePostRefresh();
+    }
+    scope.removePostRefresh = scope.$on('PostRefresh', function() {
+        for (var i=0; i < scope.hosts.length; i++) {
+            scope['hosts'][i]['inventory_name'] = scope['hosts'][i]['summary_fields']['inventory']['name'];
+            SetHostStatus(scope['hosts'][i]);
+        }
+        });
+
+    SearchInit({ scope: scope, set: 'hosts', list: list, url: defaultUrl });
+    PaginateInit({ scope: scope, list: list, url: defaultUrl });
+
+    if ($routeParams['has_active_failures']) {
+        scope[HomeHostList.iterator + 'InputDisable'] = true;
+        scope[HomeHostList.iterator + 'SearchValue'] = $routeParams['has_active_failures'];
+        scope[HomeHostList.iterator + 'SearchField'] = 'has_active_failures';
+        scope[HomeHostList.iterator + 'SearchFieldLabel'] = HomeHostList.fields['has_active_failures'].label;
+        scope[HomeHostList.iterator + 'SearchSelectValue'] = ($routeParams['has_active_failures'] == 'true') ? { value: 1 } : { value: 0 };
+    }
+    
+    scope.search(list.iterator);
+   
+    LoadBreadCrumbs();
+
+    scope.viewUpdateStatus = function(id) { ViewUpdateStatus({ scope: scope, group_id: id }) };
+
+    }
+
+HomeGroups.$inject = [ '$location', '$routeParams', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
+    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus',
+    'SetHostStatus'
     ]; 
   

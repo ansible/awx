@@ -13,6 +13,42 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                                 'InventoryFormDefinition', 'SelectionHelper', 'HostGroupsFormDefinition', 
                                 'InventoryHostsFormDefinition'
                                 ])
+  
+    
+    .factory('SetHostStatus', [ function() {
+    return function(host) {  
+        // Set status related fields on a host object
+        host.activeFailuresLink = '/#/hosts/' + host.id + '/job_host_summaries/?inventory=' + host.inventory +
+            '&host_name=' + escape(host.name); 
+        if (host.has_active_failures == true) {
+            host.badgeToolTip = 'Most recent job failed. Click to view jobs.';
+            host.active_failures = 'failed';
+        }
+        else if (host.has_active_failures == false && host.last_job == null) {
+           host.has_active_failures = 'none';
+           host.badgeToolTip = "No job data available.";
+           host.active_failures = 'n/a';
+        }
+        else if (host.has_active_failures == false && host.last_job !== null) {
+           hast.badgeToolTip = "Most recent job successful. Click to view jobs.";
+           host.active_failures = 'success';
+        }
+
+        host.enabled_flag = host.enabled; 
+        if (host.has_inventory_sources) {
+            // Inventory sync managed, so not clickable 
+            host.enabledToolTip = (host.enabled) ? 'Ready! Availabe to running jobs.' :
+                'Out to lunch! This host is not available to running jobs.';
+        }
+        else {
+            // Clickable
+            host.enabledToolTip = (host.enabled) ? 'Ready! Available to running jobs. Click to toggle.' :
+                'Out to lunch! Host not available to running jobs. Click to toggle.';
+        }
+
+        }
+        }])
+
 
     .factory('HostsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostList', 'GenerateList', 
         'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'HostsAdd', 'HostsReload',
@@ -404,7 +440,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
 
     .factory('HostsReload', ['$location', '$routeParams', 'SearchInit', 'PaginateInit', 'InventoryHostsForm', 'GetBasePath', 'Wait',
-    function($location, $routeParams, SearchInit, PaginateInit, InventoryHostsForm, GetBasePath, Wait) {
+    'SetHostStatus',
+    function($location, $routeParams, SearchInit, PaginateInit, InventoryHostsForm, GetBasePath, Wait, SetHostStatus) {
     return function(params) {
         // Rerfresh the Hosts view on right side of page
         
@@ -439,34 +476,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             }
           
             for (var i=0; i < scope.hosts.length; i++) {
-                // Add the value displayed in Job Status column
-                scope.hosts[i].activeFailuresLink = '/#/hosts/' + scope.hosts[i].id + '/job_host_summaries/?inventory=' + scope['inventory_id'] +
-                    '&host_name=' + escape(scope.hosts[i].name); 
-                if (scope.hosts[i].has_active_failures == true) {
-                   scope.hosts[i].badgeToolTip = 'Most recent job failed. Click to view jobs.';
-                   scope.hosts[i].active_failures = 'failed';
-                }
-                else if (scope.hosts[i].has_active_failures == false && scope.hosts[i].last_job == null) {
-                   scope.hosts[i].has_active_failures = 'none';
-                   scope.hosts[i].badgeToolTip = "No job data available.";
-                   scope.hosts[i].active_failures = 'n/a';
-                }
-                else if (scope.hosts[i].has_active_failures == false && scope.hosts[i].last_job !== null) {
-                   scope.hosts[i].badgeToolTip = "Most recent job successful. Click to view jobs.";
-                   scope.hosts[i].active_failures = 'success';
-                }
-                
-                scope.hosts[i].enabled_flag = scope.hosts[i].enabled; 
-                if (scope.hosts[i].has_inventory_sources) {
-                    // Inventory sync managed, so not clickable 
-                    scope.hosts[i].enabledToolTip = (scope.hosts[i].enabled) ? 'Ready! Availabe to running jobs.' :
-                        'Out to lunch! This host is not available to running jobs.';
-                }
-                else {
-                    // Clickable
-                    scope.hosts[i].enabledToolTip = (scope.hosts[i].enabled) ? 'Ready! Available to running jobs. Click to toggle.' :
-                        'Out to lunch! Host not available to running jobs. Click to toggle.';
-                }
+                SetHostStatus(scope.hosts[i]);
             }
 
             if (group_id == null || group_id == undefined) {
