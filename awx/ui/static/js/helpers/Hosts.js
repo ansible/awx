@@ -48,7 +48,56 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         }
         }])
+    
+    .factory('ToggleHostEnabled', [ 'GetBasePath', 'Rest', 'Wait', 'ProcessErrors', 'Alert',
+    function(GetBasePath, Rest, Wait, ProcessErrors, Alert) {
+    return function(id, sources, scope) {
+        var i;
+        
+        function setMsg() {
+            scope['hosts'][i].enabled = (scope['hosts'][i].enabled) ? false : true;
+            scope['hosts'][i].enabled_flag = scope['hosts'][i].enabled;
+            if (scope['hosts'][i].has_inventory_sources) {
+                // Inventory sync managed, so not clickable 
+                scope['hosts'][i].enabledToolTip = (scope['hosts'][i].enabled) ? 'Ready! Availabe to running jobs.' :
+                    'Out to lunch! This host is not available to running jobs.';
+            }
+            else {
+                // Clickable
+                scope['hosts'][i].enabledToolTip = (scope['hosts'][i].enabled) ? 'Ready! Available to running jobs. Click to toggle.' :
+                    'Out to lunch! Host not available to running jobs. Click to toggle.';
+            }
+            }
 
+        if (!sources) {
+            // Host is not managed by an external source
+            Wait('start');
+            for (i=0; i < scope.hosts.length; i++) {
+                if (scope.hosts[i].id == id) {
+                    //host = scope.hosts[i];
+                    setMsg();
+                    break;
+                }    
+            }
+            Rest.setUrl(GetBasePath('hosts') + id + '/');
+            Rest.put(scope['hosts'][i])
+                .success( function(data, status, headers, config) {
+                    Wait('stop');
+                    })
+                .error( function(data, status, headers, config) {
+                    // Flip the enabled flag back
+                    setMsg();
+                    Wait('stop');
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Failed to update host. PUT returned status: ' + status });
+                    });
+        }
+        else {
+            Alert('External Host', 'This host is part of an external inventory. It can only be enabled or disabled by the ' + 
+                'inventory sync process.', 'alert-info');
+        }
+        }
+        }])
 
     .factory('HostsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostList', 'GenerateList', 
         'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'HostsAdd', 'HostsReload',

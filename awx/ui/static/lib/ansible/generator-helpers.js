@@ -296,6 +296,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
               html += (field.ngClick) ? "ng-click=\"" + field.ngClick + "\" " : "";
               html += " aw-tool-tip=\"" + field.badgeToolTip + "\"";
               html += (field.badgeTipPlacement) ? " data-placement=\"" + field.badgeTipPlacement + "\"" : "";
+              html += (field.badgeTipWatch) ? " data-tip-watch=\"" + field.badgeTipWatch + "\"" : "";
               html += (field.badgeShow) ? " ng-show=\"" + field.badgeShow + "\"" : "";
               html += ">";
            } 

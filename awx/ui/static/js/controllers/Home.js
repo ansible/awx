@@ -116,7 +116,7 @@ HomeGroups.$inject = [ '$location', '$routeParams', 'HomeGroupList', 'GenerateLi
 
 
 function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, 
-    GetBasePath, SearchInit, PaginateInit, FormatDate, SetHostStatus) {
+    GetBasePath, SearchInit, PaginateInit, FormatDate, SetHostStatus, ToggleHostEnabled) {
 
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -152,13 +152,13 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
     scope.search(list.iterator);
    
     LoadBreadCrumbs();
-
-    scope.viewUpdateStatus = function(id) { ViewUpdateStatus({ scope: scope, group_id: id }) };
+   
+    scope.toggle_host_enabled = function(id, sources) { ToggleHostEnabled(id, sources, scope); }
 
     }
 
 HomeGroups.$inject = [ '$location', '$routeParams', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus',
-    'SetHostStatus'
+    'SetHostStatus', 'ToggleHostEnabled'
     ]; 
   

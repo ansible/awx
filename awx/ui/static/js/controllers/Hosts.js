@@ -13,7 +13,8 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                          RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                          GetBasePath, HostsList, HostsAdd, HostsEdit, HostsDelete,
-                         HostsReload, BuildTree, EditHostGroups, InventoryHostsHelp, HelpDialog, Wait)
+                         HostsReload, BuildTree, EditHostGroups, InventoryHostsHelp, HelpDialog, Wait,
+                         ToggleHostEnabled)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -76,38 +77,7 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
         $location.url('/jobs/?job_host_summaries__host=' + id);
         } 
     
-    scope.toggle_host_enabled = function(id, sources) {
-        var host;
-        var i;
-        if (!sources) {
-            // Host is not managed by an external source
-            Wait('start');
-            for (i=0; i < scope.hosts.length; i++) {
-                if (scope.hosts[i].id == id) {
-                   scope.hosts[i].enabled = (scope.hosts[i].enabled) ? false : true;
-                   scope.hosts[i].enabled_flag = scope.hosts[i].enabled;
-                   host = scope.hosts[i];
-                   break;
-                }    
-            }
-            Rest.setUrl(GetBasePath('hosts') + id + '/');
-            Rest.put(host)
-                .success( function(data, status, headers, config) {
-                    Wait('stop');
-                    })
-                .error( function(data, status, headers, config) {
-                    scope.hosts[i].enabled = (scope.hosts[i].enabled) ? false : true;
-                    scope.hosts[i].enabled_flag = scope.hosts[i].enabled;
-                    Wait('stop');
-                    ProcessErrors(scope, data, status, null,
-                        { hdr: 'Error!', msg: 'Failed to update host. PUT returned status: ' + status });
-                    });
-        }
-        else {
-            Alert('External Host', 'This host is part of an external inventory. It can only be enabled or disabled by the ' + 
-                'inventory sync process.', 'alert-info');
-        }
-        }
+    scope.toggle_host_enabled = function(id, sources) { ToggleHostEnabled(id, sources, scope); }
 
     scope.allHostSummaries = function(id, name, inventory_id) {
         LoadBreadCrumbs({ path: '/hosts/' + id, title: name, altPath: '/inventories/' + inventory_id + '/hosts', 
@@ -180,6 +150,7 @@ InventoryHosts.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'GetBasePath', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete',
-                            'HostsReload', 'BuildTree', 'EditHostGroups', 'InventoryHostsHelp', 'HelpDialog', 'Wait'
+                            'HostsReload', 'BuildTree', 'EditHostGroups', 'InventoryHostsHelp', 'HelpDialog', 'Wait',
+                            'ToggleHostEnabled'
                             ]; 
   

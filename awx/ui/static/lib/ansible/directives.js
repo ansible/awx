@@ -234,6 +234,17 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
                    });  
                });
            $(element).tooltip({ placement: placement, delay: delay, html: true, title: attrs.awToolTip, container: 'body' });
+           
+           if (attrs.tipWatch) {
+              // Add 'data-tip-watch=<variable to watch>' and we'll watch for changes
+              scope.$watch(attrs.tipWatch, function(newVal, oldVal) {
+                  if (newVal !== oldVal) {
+                      // Where did fixTitle come frome?:
+                      //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
+                      $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle')
+                  }
+                  });
+           }
        }
        })
      

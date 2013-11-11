@@ -40,6 +40,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 badgePlacement: 'left',
                 badgeToolTip: "\{\{ host.enabledToolTip \}\}",
                 badgeTipPlacement: "top",
+                badgeTipWatch: "host.enabledToolTip",
                 ngClick: "toggle_host_enabled(\{\{ host.id \}\}, \{\{ host.has_inventory_sources \}\})",
                 searchable: false,
                 showValue: false

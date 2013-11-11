@@ -16,6 +16,7 @@ angular.module('HomeHostListDefinition', [])
         selectTitle: 'Add Existing Hosts',
         editTitle: 'Hosts',
         index: true,
+        hover: true,
         well: true,
 
         fields: {
@@ -30,7 +31,7 @@ angular.module('HomeHostListDefinition', [])
                 sourceModel: 'inventory',
                 sourceField: 'name',
                 columnClass: 'col-lg-3 col-md3 col-sm-2',
-                linkTo: "\{\{ '/#/inventories/' + group.inventory \}\}"
+                linkTo: "\{\{ '/#/inventories/?name=' + host.summary_fields.inventory.name \}\}"
                 },
             active_failures: {
                 label: 'Job Status',
@@ -51,16 +52,10 @@ angular.module('HomeHostListDefinition', [])
                 badgePlacement: 'left',
                 badgeToolTip: "\{\{ host.enabledToolTip \}\}",
                 badgeTipPlacement: "top",
+                badgeTipWatch: "host.enabledToolTip",
                 ngClick: "toggle_host_enabled(\{\{ host.id \}\}, \{\{ host.has_inventory_sources \}\})",
                 searchable: false,
                 showValue: false
-                },
-            groups: {
-                label: 'Groups',
-                searchable: true,
-                sourceModel: 'groups',
-                sourceField: 'name',
-                nosort: true
                 },
             enabled: {
                 label: 'Disabled?',

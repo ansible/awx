@@ -28,6 +28,14 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
     SearchInit({ scope: scope, set: 'inventories', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
   
+    if ($routeParams['name']) {
+        scope[InventoryList.iterator + 'InputDisable'] = false;
+        scope[InventoryList.iterator + 'SearchValue'] = $routeParams['name'];
+        scope[InventoryList.iterator + 'SearchField'] = 'name';
+        scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields['name'].label;
+        scope[InventoryList.iterator + 'SearchSelectValue'] = null;
+    }
+
     if ($routeParams['has_active_failures']) {
         //scope.resetSearch(InventoryHostsForm.iterator);
         scope[InventoryList.iterator + 'InputDisable'] = true;
