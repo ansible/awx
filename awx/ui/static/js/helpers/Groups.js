@@ -127,6 +127,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var active_failures = params.active_failures; 
         var total_hosts = params.total_hosts;
         var inventory_id = params.inventory_id;
+        var group_id = params.group_id;
         var tips, link, html_class;
 
         // Return values for use on host status indicator
@@ -135,28 +136,28 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            tip = "Contains " + active_failures +
                [ (active_failures == 1) ? ' host' : ' hosts' ] + ' with failed jobs. Click to view the offending ' +
                [ (active_failures == 1) ? ' host' : ' hosts' ] + '.';
-           link = '/#/inventories/' + inventory_id + '/hosts?has_active_failures=true';
+           link = '/#/inventories/' + inventory_id + '/hosts?group=' + group_id + '&has_active_failures=true';
            html_class = 'true';
         }
         else {
            if (total_hosts == 0) {
               // no hosts
               tip = "There are no hosts in this group. It's a sad empty shell. Click to view the hosts page and add a host.";
-              link = '/#/inventories/' + inventory_id + '/hosts';
+              link = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
               html_class = 'na';
            }
            else if (total_hosts == 1) {
               // on host with 0 failures
               tip = "The 1 host in this group is happy! It does not have a job failure. " + 
                   " Click to view the host.";
-              link = '/#/inventories/' + inventory_id + '/hosts';
+              link = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
               html_class = 'false';
            }
            else {
               // many hosts with 0 failures
               tip = "All " + total_hosts + " hosts in this group are happy! None of them have " + 
                   " a recent job failure. Click to view the hosts.";
-              links = '/#/inventories/' + inventory_id + '/hosts';
+              links = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
               html_class = 'false';
            }
         }
@@ -353,7 +354,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 msg = HostsStatusMsg({
                     active_failures: scope.groups[i].hosts_with_active_failures,
                     total_hosts: scope.groups[i].total_hosts,
-                    inventory_id: scope['inventory_id']
+                    inventory_id: scope['inventory_id'],
+                    group_id: scope['groups'][i]['id']
                     });
                 
                 update_status = UpdateStatusMsg({ status: scope.groups[i].summary_fields.inventory_source.status });

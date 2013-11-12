@@ -75,7 +75,8 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
             msg = HostsStatusMsg({
                 active_failures: scope.groups[i].hosts_with_active_failures,
                 total_hosts: scope.groups[i].total_hosts,
-                inventory_id: scope.groups[i].inventory
+                inventory_id: scope.groups[i].inventory,
+                group_id: scope.groups[i].id
                 });
             
             update_status = UpdateStatusMsg({ status: scope.groups[i].summary_fields.inventory_source.status });

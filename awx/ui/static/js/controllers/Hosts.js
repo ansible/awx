@@ -137,13 +137,26 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
         });
 
     // Load the tree. See TreeSelector.js
-    BuildTree({
-        scope: scope,
-        inventory_id: id,
-        emit_on_select: 'refreshHost',
-        target_id: 'search-tree-container'
-        });
-
+    var group_id = ($routeParams['group'] !== undefined) ? $routeParams['group'] : null;
+    if (group_id !== null) {
+        // group was passed as a search parameter. load the tree with the group selected.
+        BuildTree({
+            scope: scope,
+            inventory_id: id,
+            emit_on_select: 'refreshHost',
+            target_id: 'search-tree-container',
+            refresh: true,
+            group_id: group_id
+            });
+    }
+    else {
+        BuildTree({
+            scope: scope,
+            inventory_id: id,
+            emit_on_select: 'refreshHost',
+            target_id: 'search-tree-container'
+            });
+    }
 }
 
 InventoryHosts.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryHostsForm', 
