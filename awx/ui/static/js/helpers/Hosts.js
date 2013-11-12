@@ -278,6 +278,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var host_id = params.host_id;
         var inventory_id = params.inventory_id;
         var group_id = params.group_id;
+        var hostsReload = (params.hostsReload == undefined || params.hostsReload) ? true : false;
         
         var generator = GenerateForm;
         var form = HostForm;
@@ -367,7 +368,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             
             function finished() {
                 $('#form-modal').modal('hide');
-                scope.$emit('hostsReload');
+                if (hostsReload) {
+                    scope.$emit('hostsReload');
+                }
                 }
 
             try { 

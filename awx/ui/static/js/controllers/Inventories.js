@@ -37,12 +37,26 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
     }
 
     if ($routeParams['has_active_failures']) {
-        //scope.resetSearch(InventoryHostsForm.iterator);
         scope[InventoryList.iterator + 'InputDisable'] = true;
         scope[InventoryList.iterator + 'SearchValue'] = $routeParams['has_active_failures'];
         scope[InventoryList.iterator + 'SearchField'] = 'has_active_failures';
         scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields['has_active_failures'].label;
         scope[InventoryList.iterator + 'SearchSelectValue'] = ($routeParams['has_active_failures'] == 'true') ? { value: 1 } : { value: 0 };
+    }
+
+    if ($routeParams['has_inventory_sources']) {
+        scope[InventoryList.iterator + 'InputDisable'] = true;
+        scope[InventoryList.iterator + 'SearchValue'] = $routeParams['has_inventory_sources'];
+        scope[InventoryList.iterator + 'SearchField'] = 'has_inventory_sources';
+        scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields['has_inventory_sources'].label;
+        scope[InventoryList.iterator + 'SearchSelectValue'] = ($routeParams['has_inventory_sources'] == 'true') ? { value: 1 } : { value: 0 };
+    }
+
+    if ($routeParams['inventory_sources_with_failures']) {
+        // pass a value of true, however this field actually contains an integer value
+        scope[InventoryList.iterator + 'InputDisable'] = true;
+        scope[InventoryList.iterator + 'SearchField'] = 'inventory_sources_with_failures';
+        scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields['inventory_sources_with_failures'].label;
     }
 
     scope.search(list.iterator);

@@ -393,7 +393,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            scope[list.iterator + 'InputDisable'] = true;
            scope[list.iterator + 'SearchType'] = 'in';
            scope[list.iterator + 'SearchFieldLabel'] = list.fields['has_external_source'].label;
-           //=ec2,rackspace,file)
         }
         else if ($routeParams['status']) {
            // with status param, called post update-submit

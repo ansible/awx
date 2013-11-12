@@ -20,7 +20,7 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
         var hostCount = 0;
         var hostFails = 0; 
         var counts = 0;
-        var expectedCounts = 4;
+        var expectedCounts = 5;
         var target = params.target;
         var results = [];
         var expected;      
@@ -71,15 +71,15 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                    html += makeRow({ label: 'Inventories',
                        count: inventoryCount, 
                        fail: inventoryFails, 
-                       link: GetBasePath('inventory'), 
-                       fail_link: GetBasePath('inventory') + '/?status=failed' });
+                       link: '/#/inventories/?has_inventory_sources=true', 
+                       fail_link: '/#/inventories/?inventory_sources_with_failures=true' });
                    rowcount++;
                }
                if (groupCount > 0) {
                    html += makeRow({ label: 'Groups',
                        count: groupCount,
                        fail: groupFails,
-                       link: '/#/home/groups/?has_inventory_sources=true',
+                       link: '/#/home/groups/?has_external_source=true',
                        fail_link: '/#/home/groups/?status=failed' });
                   rowcount++;
                }
@@ -122,7 +122,17 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
         
-        inventoryFails = 0;
+        var url = GetBasePath('inventory') + '?inventory_sources_with_failures__gt=0&page=1';
+        Rest.setUrl(url);
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                inventoryFails=data.count;
+                scope.$emit('CountReceived');
+                })
+            .error( function(data, status, headers, config) {
+                ProcessErrors(scope, data, status, null,
+                    { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
+                });
         
         url = GetBasePath('inventory_sources') + '?source__in=ec2,rackspace&page=1';
         Rest.setUrl(url);
@@ -215,7 +225,6 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                    Rest.get()
                        .success( function(data, status, headers, config) {
                            // figure out the scm_type we're looking at and its label
-                           console.log('config');
                            var label = getLabel(config);
                            var count = data.count;
                            var fail = 0;

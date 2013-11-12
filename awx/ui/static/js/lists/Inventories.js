@@ -72,6 +72,11 @@ angular.module('InventoriesListDefinition', [])
                 searchType: 'boolean',
                 searchValue: 'true',
                 searchOnly: true
+                },
+            inventory_sources_with_failures: {
+                label: 'Has inventory update failures?',
+                searchType: 'gtzero', 
+                searchOnly: true
                 }
             },
         

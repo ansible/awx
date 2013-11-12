@@ -45,16 +45,30 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
                for (var i=0; i < keys.length; i++) {
                    html += "<tr><td class=\"capitalize\">\n";
                    html += "<a href=\"/#/";
-                   html += (keys[i] == 'inventory') ? 'inventories' : keys[i];
+                   var link;
+                   switch(keys[i]) {
+                       case 'inventory':
+                           link = 'inventories';  
+                           break;
+                       case 'hosts':
+                           link = 'home/hosts';
+                           break;
+                       case 'groups':
+                           link = 'home/groups';
+                           break;
+                       default:
+                           link = keys[i];
+                           break;   
+                   }
+                   html += link;
                    html += "\"";
                    html += (keys[i] == 'hosts' || keys[i] == 'groups') ? " class=\"pad-left-sm\" " : "";
                    html += ">";
                    if (keys[i] == 'inventory') {
-                      html += 'Inventories';
+                      html += 'inventories';
                    }
                    else {
                       html += keys[i].replace(/\_/g,' ');
-                      //html += txt.substring(0,1).toUpperCase() + txt.substring(1);
                    }
                    html += "</a></td>\n"
                    html += "<td class=\"text-right\"><a href=\"/#/";

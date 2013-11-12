@@ -25,57 +25,62 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         var list = params.list; 
         var iterator = (params.iterator) ? params.iterator : list.iterator;
         var sort_order; 
-
-        // Set default values
-        for (fld in list.fields) {
-            if (list.fields[fld].key) {
-               if (list.fields[fld].sourceModel) {
-                  var fka = list.fields[fld].sourceModel + '__' + list.fields[fld].sourceField;
-                  sort_order = (list.fields[fld].desc) ? '-' + fka : fka;
-               }
-               else {
-                  sort_order = (list.fields[fld].desc) ? '-' + fld : fld; 
-               }
-               if (list.fields[fld].searchable == undefined || list.fields[fld].searchable == true) {
-                  scope[iterator + 'SearchField'] = fld;
-                  scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
-               }
-               break;
+        
+        function setDefaults() {
+            // Set default values
+            for (fld in list.fields) {
+                if (list.fields[fld].key) {
+                   if (list.fields[fld].sourceModel) {
+                      var fka = list.fields[fld].sourceModel + '__' + list.fields[fld].sourceField;
+                      sort_order = (list.fields[fld].desc) ? '-' + fka : fka;
+                   }
+                   else {
+                      sort_order = (list.fields[fld].desc) ? '-' + fld : fld; 
+                   }
+                   if (list.fields[fld].searchable == undefined || list.fields[fld].searchable == true) {
+                      scope[iterator + 'SearchField'] = fld;
+                      scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
+                   }
+                   break;
+                }
             }
-        }
 
-        if (!scope[iterator + 'SearchField']) {
-           // A field marked as key may not be 'searchable'
-           for (fld in list.fields) {
-               if (list.fields[fld].searchable == undefined || list.fields[fld].searchable == true) { 
-                  scope[iterator + 'SearchField'] = fld;
-                  scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
-                  break;
+            if (!scope[iterator + 'SearchField']) {
+               // A field marked as key may not be 'searchable'
+               for (fld in list.fields) {
+                   if (list.fields[fld].searchable == undefined || list.fields[fld].searchable == true) { 
+                      scope[iterator + 'SearchField'] = fld;
+                      scope[iterator + 'SearchFieldLabel'] = list.fields[fld].label;
+                      break;
+                   }
                }
-           }
-        }
+            }
 
-        scope[iterator + 'SearchType'] = 'icontains';
-        scope[iterator + 'SearchTypeLabel'] = 'Contains';
-        scope[iterator + 'SearchParams'] = '';
-        scope[iterator + 'SearchValue'] = '';
-        scope[iterator + 'SelectShow'] = false;   // show/hide the Select
-        scope[iterator + 'HideSearchType'] = false;
-        scope[iterator + 'InputDisable'] = false; 
+            scope[iterator + 'SearchType'] = 'icontains';
+            scope[iterator + 'SearchTypeLabel'] = 'Contains';
+            scope[iterator + 'SearchParams'] = '';
+            scope[iterator + 'SearchValue'] = '';
+            scope[iterator + 'SelectShow'] = false;   // show/hide the Select
+            scope[iterator + 'HideSearchType'] = false;
+            scope[iterator + 'InputDisable'] = false;
+            scope[iterator + 'ExtraParms'] = '';
 
-        var f = scope[iterator + 'SearchField']
-        if (list.fields[f].searchType && ( list.fields[f].searchType == 'boolean' 
-               || list.fields[f].searchType == 'select')) {
-           scope[iterator + 'SelectShow'] = true;
-           scope[iterator + 'SearchSelectOpts'] = list.fields[f].searchOptions;
-        }
-        if (list.fields[f].searchType && list.fields[f].searchType == 'int') {
-           scope[iterator + 'HideSearchType'] = true;   
-        }
-        if (list.fields[f].searchType && list.fields[f].searchType == 'gtzero') {
-              scope[iterator + "InputHide"] = true;
-        }
-      
+            var f = scope[iterator + 'SearchField']
+            if (list.fields[f].searchType && ( list.fields[f].searchType == 'boolean' 
+                   || list.fields[f].searchType == 'select')) {
+               scope[iterator + 'SelectShow'] = true;
+               scope[iterator + 'SearchSelectOpts'] = list.fields[f].searchOptions;
+            }
+            if (list.fields[f].searchType && list.fields[f].searchType == 'int') {
+               scope[iterator + 'HideSearchType'] = true;   
+            }
+            if (list.fields[f].searchType && list.fields[f].searchType == 'gtzero') {
+                  scope[iterator + "InputHide"] = true;
+            }
+            }
+
+        setDefaults();
+       
         // Functions to handle search widget changes
         scope.setSearchField = function(iterator, fld, label) {
            scope[iterator + 'SearchFieldLabel'] = label;
@@ -126,12 +131,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
 
         scope.resetSearch = function(iterator) {
            // Respdond to click of reset button
-           scope[iterator + "SearchValue"] = '';
-           scope[iterator + "SearchSelectValue"] = '';
-           scope[iterator + 'SelectShow'] = false;
-           scope[iterator + 'HideSearchType'] = false;
-           scope[iterator + 'InputHide'] = false;
-           scope[iterator + 'InputDisable'] = false;
+           setDefaults();
            // Force removal of search keys from the URL
            window.location = '/#' + $location.path();
            }
@@ -223,6 +223,9 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            url += (scope[iterator + 'PageSize']) ? '&page_size=' + scope[iterator + 'PageSize'] : "";
            if (page) {
               url += '&page=' + page;
+           }
+           if (scope[iterator + 'ExtraParms']) {
+              url += scope[iterator + 'ExtraParms'];
            }
            Refresh({ scope: scope, set: set, iterator: iterator, url: url });
            }
