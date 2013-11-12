@@ -20,7 +20,7 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
         var hostCount = 0;
         var hostFails = 0; 
         var counts = 0;
-        var expectedCounts = 5;
+        var expectedCounts = 4;
         var target = params.target;
         var results = [];
         var expected;      
@@ -32,16 +32,21 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
 
             var rowcount = 0;
             
-            function makeRow(label, count, fail) {
+            function makeRow(params) {
+                var label = params.label;
+                var count = params.count; 
+                var fail = params.fail; 
+                var link = params.link; 
+                var fail_link = params.fail_link;
                 var html = "<tr>\n";
-                html += "<td><a href=\"/#/" + label.toLowerCase() + "\"";
+                html += "<td><a href=\"" + link + "\"";
                 html += (label == 'Hosts' || label == 'Groups') ? " class=\"pad-left-sm\" " : "";
                 html += ">"  + label + "</a></td>\n";
                 html += "<td class=\"failed-column text-right\">";
-                html += "<a href=\"/blah/blah\">" + fail + "</a>";
+                html += "<a href=\"" + fail_link + "\">" + fail + "</a>";
                 html += "</td>\n";
                 html += "<td class=\"text-right\">";
-                html += "<a href=\"/blah/blah\">" + count + "</a>";
+                html += "<a href=\"" + link + "\">" + count + "</a>";
                 html += "</td></tr>\n";
                 return html; 
                 }
@@ -63,21 +68,28 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                html += "<tbody>\n";
                
                if (inventoryCount > 0) {
-                  html += makeRow('Inventories', inventoryCount, inventoryFails);
-                  rowcount++;
+                   html += makeRow({ label: 'Inventories',
+                       count: inventoryCount, 
+                       fail: inventoryFails, 
+                       link: GetBasePath('inventory'), 
+                       fail_link: GetBasePath('inventory') + '/?status=failed' });
+                   rowcount++;
                }
                if (groupCount > 0) {
-                  html += makeRow('Groups', groupCount, groupFails);
+                   html += makeRow({ label: 'Groups',
+                       count: groupCount,
+                       fail: groupFails,
+                       link: '/#/home/groups/?has_inventory_sources=true',
+                       fail_link: '/#/home/groups/?status=failed' });
                   rowcount++;
                }
-               if (hostCount > 0) {
-                  html += makeRow('Hosts', hostCount, hostFails);
-                  rowcount++;
-               }
-
                for (var i=0; i < results.length; i++) {
                    if (results[i].count > 0) {
-                      html += makeRow(results[i].label, results[i].count, results[i].fail);
+                      html += makeRow({ label: results[i].label, 
+                          count: results[i].count, 
+                          fail: results[i].fail,
+                          link: '/#/home/groups/?source=' + results[i].source,
+                          fail_link: '/#/home/groups/?status=failed&source=' + results[i].source });
                       rowcount++;
                    }
                }
@@ -136,7 +148,7 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
         
-        url = GetBasePath('hosts') + '?has_inventory_sources=true&page=1';
+       /* url = GetBasePath('hosts') + '?has_inventory_sources=true&page=1';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
@@ -147,12 +159,13 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
-        
+        */
+
         if (scope.removeTypesReady) {
             scope.removeTypesReady();
         }
-        scope.removeTypesReady = scope.$on('TypesReady', function (e, label, count, fail) {
-            results.push({ label: label, count: count, fail: fail });  
+        scope.removeTypesReady = scope.$on('TypesReady', function (e, label, count, fail, source) {
+            results.push({ label: label, count: count, fail: fail, source: source });  
             if (results.length == expected) {
                scope.$emit('CountReceived');
             }
@@ -202,6 +215,7 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                    Rest.get()
                        .success( function(data, status, headers, config) {
                            // figure out the scm_type we're looking at and its label
+                           console.log('config');
                            var label = getLabel(config);
                            var count = data.count;
                            var fail = 0;
@@ -210,7 +224,8 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                                   fail++;
                                }
                            }
-                           scope.$emit('TypesReady', label, count, fail);
+                           scope.$emit('TypesReady', label, count, fail, 
+                                config.url.match(/source=.*\&/)[0].replace(/source=/,'').replace(/\&/,''));
                            })
                        .error( function(data, status, headers, config) {
                            ProcessErrors(scope, data, status, null,
