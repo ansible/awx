@@ -6,6 +6,7 @@ import json
 import re
 import socket
 import urlparse
+import logging
 
 # PyYAML
 import yaml
@@ -27,7 +28,9 @@ from rest_framework import serializers
 
 # AWX
 from awx.main.models import *
-from awx.main.utils import update_scm_url
+from awx.main.utils import update_scm_url, camelcase_to_underscore
+
+logger = logging.getLogger('awx.api.serializers')
 
 BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created', 'modified',
                'name', 'description')
@@ -1008,22 +1011,31 @@ class ActivityStreamSerializer(BaseSerializer):
     def get_related(self, obj):
         if obj is None:
             return {}
-        # res = super(ActivityStreamSerializer, self).get_related(obj)
-        # res.update(dict(
-        #     #audit_trail = reverse('api:organization_audit_trail_list',    args=(obj.pk,)),
-        #     projects    = reverse('api:organization_projects_list',       args=(obj.pk,)),
-        #     inventories = reverse('api:organization_inventories_list',    args=(obj.pk,)),
-        #     users       = reverse('api:organization_users_list',          args=(obj.pk,)),
-        #     admins      = reverse('api:organization_admins_list',         args=(obj.pk,)),
-        #     #tags        = reverse('api:organization_tags_list',           args=(obj.pk,)),
-        #     teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
-        # ))
-        # return res
+        rel = {}
+        if obj.user is not None:
+            rel['user'] = reverse('api:user_detail', args=(obj.user.pk,))
+        obj1_resolution = camelcase_to_underscore(obj.object1_type.split(".")[-1])
+        rel['object_1'] = reverse('api:' + obj1_resolution + '_detail', args=(obj.object1_id,))
+        if obj.operation in ('associate', 'disassociate'):
+            obj2_resolution = camelcase_to_underscore(obj.object2_type.split(".")[-1])
+            rel['object_2'] = reverse('api:' + obj2_resolution + '_detail', args(obj.object2_id,))
+        return rel
 
     def get_summary_fields(self, obj):
         if obj is None:
             return {}
         d = super(ActivityStreamSerializer, self).get_summary_fields(obj)
+        try:
+            obj1 = eval(obj.object1_type + ".objects.get(id=" + str(obj.object1_id) + ")")
+            d['object1'] = {'name': obj1.name, 'description': obj1.description}
+        except Exception, e:
+            logger.error("Error getting object 1 summary: " + str(e))
+        try:
+            if obj.operation in ('associate', 'disassociate'):
+                obj2 = eval(obj.object1_type + ".objects.get(id=" + str(obj.object2_id) + ")")
+                d['object2'] = {'name': obj2.name, 'description': obj2.description}
+        except Exception, e:
+            logger.error("Error getting object 2 summary: " + str(e))
         return d
 
 
