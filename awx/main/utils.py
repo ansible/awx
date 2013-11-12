@@ -255,3 +255,12 @@ def model_instance_diff(old, new):
         diff = None
 
     return diff
+
+def model_to_dict(obj):
+    """
+    Serialize a model instance to a dictionary as best as possible
+    """
+    attr_d = {}
+    for field in obj._meta.fields:
+        attr_d[field.name] = str(getattr(obj, field.name, None))
+    return attr_d
