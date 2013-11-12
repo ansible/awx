@@ -13,7 +13,14 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
     return function(params) {
         
         var scope = $rootScope.$new();
-        var jobCount, jobFails, inventoryCount, inventoryFails, groupCount, groupFails, hostCount, hostFails; 
+        var jobCount = 0;
+        var jobFails = 0; 
+        var inventoryCount = 0;
+        var inventoryFails = 0;
+        var groupCount = 0;
+        var groupFails = 0;
+        var hostCount = 0;
+        var hostFails = 0; 
         var counts = 0;
         var expectedCounts = 8;
         var target = params.target;        

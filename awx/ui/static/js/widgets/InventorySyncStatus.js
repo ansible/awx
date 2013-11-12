@@ -13,7 +13,11 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
     return function(params) {
         
         var scope = $rootScope.$new();
-        var inventoryCount, inventoryFails, groupCount, groupFails, hostCount;
+        var inventoryCount = 0;
+        var inventoryFails = 0;
+        var groupCount = 0;
+        var groupFails = 0;
+        var hostCount = 0;
         var hostFails = 0; 
         var counts = 0;
         var expectedCounts = 5;
@@ -34,10 +38,10 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                 html += (label == 'Hosts' || label == 'Groups') ? " class=\"pad-left-sm\" " : "";
                 html += ">"  + label + "</a></td>\n";
                 html += "<td class=\"failed-column text-right\">";
-                html += (fail > 0) ? "<a href=\"/blah/blah\">" + fail + "</a>" : "";
+                html += "<a href=\"/blah/blah\">" + fail + "</a>";
                 html += "</td>\n";
                 html += "<td class=\"text-right\">";
-                html += (count > 0) ? "<a href=\"/blah/blah\">" + count + "</a>" : "";
+                html += "<a href=\"/blah/blah\">" + count + "</a>";
                 html += "</td></tr>\n";
                 return html; 
                 }

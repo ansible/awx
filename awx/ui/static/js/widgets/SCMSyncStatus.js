@@ -36,10 +36,10 @@ angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
                 var html = ''
                 html += "<tr><td><a href=\"/#/projects/?source_type=" + value + "\">"  + label + "</a></td>\n";
                 html += "<td class=\"failed-column text-right\">";
-                html += (fail > 0) ? "<a href=\"/blah/blah\">" + fail + "</a>" : "";
+                html += "<a href=\"/blah/blah\">" + fail + "</a>";
                 html += "</td>\n"; 
                 html += "<td class=\"text-right\">";
-                html += (count > 0) ? "<a href=\"/blah/blah\">" + count + "</a>" : "";
+                html += "<a href=\"/blah/blah\">" + count + "</a>";
                 html += "</td>\n";
                 html += "</tr>\n";
                 return html; 
