@@ -34,7 +34,7 @@ class ActivityStreamMiddleware(object):
                     instance.save()
                 else:
                     obj1_type_actual = instance.object1_type.split(".")[-1]
-                    if obj1_type_actual in ("InventoryUpdate", "ProjectUpdate", "JobEvent") and instance.id is not None:
+                    if obj1_type_actual in ("InventoryUpdate", "ProjectUpdate", "JobEvent", "Job") and instance.id is not None:
                         instance.delete()
         return response
 
