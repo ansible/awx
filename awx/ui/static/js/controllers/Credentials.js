@@ -115,7 +115,7 @@ CredentialsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$route
 function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
                          GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList, GetBasePath,
-                         GetChoices, Empty, KindChange, OwnerChange, FormSave) 
+                         GetChoices, Empty, KindChange, OwnerChange, FormSave, DebugForm) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -158,6 +158,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
       // Get the username based on incoming route
       scope['owner'] = 'user';
       scope['user'] = $routeParams.user_id;
+      OwnerChange({ scope: scope }); 
       var url = GetBasePath('users') + $routeParams.user_id + '/';
       Rest.setUrl(url);
       Rest.get()
@@ -173,6 +174,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
       // Get the username based on incoming route
       scope['owner'] = 'team';
       scope['team'] = $routeParams.team_id;
+      OwnerChange({ scope: scope });
       var url = GetBasePath('teams') + $routeParams.team_id + '/';
       Rest.setUrl(url);
       Rest.get()
@@ -238,7 +240,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 CredentialsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 'GenerateForm', 
                            'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
                            'SearchInit', 'PaginateInit', 'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty',
-                           'KindChange', 'OwnerChange', 'FormSave']; 
+                           'KindChange', 'OwnerChange', 'FormSave', 'DebugForm']; 
 
 
 function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
