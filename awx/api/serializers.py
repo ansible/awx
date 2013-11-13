@@ -1018,7 +1018,7 @@ class ActivityStreamSerializer(BaseSerializer):
         rel['object_1'] = reverse('api:' + obj1_resolution + '_detail', args=(obj.object1_id,))
         if obj.operation in ('associate', 'disassociate'):
             obj2_resolution = camelcase_to_underscore(obj.object2_type.split(".")[-1])
-            rel['object_2'] = reverse('api:' + obj2_resolution + '_detail', args(obj.object2_id,))
+            rel['object_2'] = reverse('api:' + obj2_resolution + '_detail', args=(obj.object2_id,))
         return rel
 
     def get_summary_fields(self, obj):
