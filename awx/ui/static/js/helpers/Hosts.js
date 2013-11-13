@@ -30,7 +30,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            host.active_failures = 'n/a';
         }
         else if (host.has_active_failures == false && host.last_job !== null) {
-           hast.badgeToolTip = "Most recent job successful. Click to view jobs.";
+           host.badgeToolTip = "Most recent job successful. Click to view jobs.";
            host.active_failures = 'success';
         }
 
