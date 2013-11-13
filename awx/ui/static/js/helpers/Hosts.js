@@ -860,16 +860,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.removeHostsReload = scope.$on('hostsReload', function() {
             HostsReload(params);
         });
-        
-        
-        // After the group record is loaded, retrieve any group variables
-        if (scope.hostLoadedRemove) {
-           scope.hostLoadedRemove();
-        }
-        scope.hostLoadedRemove = scope.$on('hostLoaded', function() {
-            
-            });
-
        
         if (!scope.$$phase) {
            scope.$digest();
