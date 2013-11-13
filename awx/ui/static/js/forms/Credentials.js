@@ -139,7 +139,7 @@ angular.module('CredentialFormDefinition', [])
                 label: 'SSH Password',
                 type: 'password',
                 ngShow: "kind.value == 'ssh'",
-                ngChange: "clearPWConfirm('password_confirm')",
+                ngChange: "clearPWConfirm('ssh_password_confirm')",
                 addRequired: false,
                 editRequired: false,
                 ask: true,
