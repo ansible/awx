@@ -39,11 +39,12 @@ class ActivityStreamMiddleware(object):
         return response
 
     def set_actor(self, user, sender, instance, **kwargs):
-        if sender == ActivityStream:
-            if isinstance(user, User) and instance.user is None:
-                instance.user = user
-            elif not self.finished:
-                self.isActivityStreamEvent = True
-                self.instances.append(instance)
-        else:
+        if not self.finished:
+            if sender == ActivityStream:
+                if isinstance(user, User) and instance.user is None:
+                    instance.user = user
+                else:
+                    self.isActivityStreamEvent = True
+                    self.instances.append(instance)
+            else:
                 self.isActivityStreamEvent = False
