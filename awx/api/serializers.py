@@ -1046,7 +1046,7 @@ class ActivityStreamSerializer(BaseSerializer):
             if under_short_obj_type == "host" or under_short_obj_type == "group":
                 d['inventory'] = {'name': obj2.inventory.name, 'id': obj2.inventory.id}
         except Exception, e:
-            logger.error("Error getting object 2 summary: " + str(e))
+            pass
         return d
 
 
