@@ -18,7 +18,6 @@ import yaml
 # Django
 from django.conf import settings
 from django.db import models
-from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse

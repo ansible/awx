@@ -331,27 +331,32 @@ class ProjectSerializer(BaseSerializer):
                                          args=(obj.last_update.pk,))
         return res
 
+    def _get_scm_type(self, attrs, source=None):
+        if self.object:
+            return attrs.get(source or 'scm_type', self.object.scm_type) or u''
+        else:
+            return attrs.get(source or 'scm_type', u'') or u''
+
     def validate_local_path(self, attrs, source):
         # Don't allow assigning a local_path used by another project.
         # Don't allow assigning a local_path when scm_type is set.
         valid_local_paths = Project.get_local_path_choices()
-        if self.object:
-            scm_type = attrs.get('scm_type', self.object.scm_type)
-            if not scm_type:
-                valid_local_paths.append(self.object.local_path)
-        else:
-            scm_type = attrs.get('scm_type', '')
+        scm_type = self._get_scm_type(attrs)
+        if self.object and not scm_type:
+            valid_local_paths.append(self.object.local_path)
         if scm_type:
             attrs.pop(source, None)
         if source in attrs and attrs[source] not in valid_local_paths:
             raise serializers.ValidationError('Invalid path choice')
         return attrs
 
+    def validate_scm_type(self, attrs, source):
+        scm_type = self._get_scm_type(attrs, source)
+        attrs[source] = scm_type
+        return attrs
+
     def validate_scm_url(self, attrs, source):
-        if self.object:
-            scm_type = attrs.get('scm_type', self.object.scm_type) or ''
-        else:
-            scm_type = attrs.get('scm_type', '') or ''
+        scm_type = self._get_scm_type(attrs)
         scm_url = unicode(attrs.get(source, None) or '')
         if not scm_type:
             return attrs

@@ -87,21 +87,18 @@ class Project(CommonModel):
         max_length=8,
         choices=SCM_TYPE_CHOICES,
         blank=True,
-        null=True,
         default='',
         verbose_name=_('SCM Type'),
     )
     scm_url = models.CharField(
         max_length=1024,
         blank=True,
-        null=True,
         default='',
         verbose_name=_('SCM URL'),
     )
     scm_branch = models.CharField(
         max_length=256,
         blank=True,
-        null=True,
         default='',
         verbose_name=_('SCM Branch'),
         help_text=_('Specific branch, tag or commit to checkout.'),
@@ -154,7 +151,7 @@ class Project(CommonModel):
         choices=PROJECT_STATUS_CHOICES,
         default='ok',
         editable=False,
-        null=True,
+        null=True, # FIXME: Remove
     )
 
     def save(self, *args, **kwargs):

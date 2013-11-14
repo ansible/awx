@@ -18,7 +18,6 @@ import yaml
 # Django
 from django.conf import settings
 from django.db import models
-from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
@@ -91,7 +90,7 @@ class Team(CommonModelNameNotUnique):
         'Organization',
         blank=False,
         null=True,
-        on_delete=SET_NULL,
+        on_delete=models.SET_NULL,
         related_name='teams',
     )
 
@@ -108,12 +107,12 @@ class Permission(CommonModelNameNotUnique):
         app_label = 'main'
 
     # permissions are granted to either a user or a team:
-    user            = models.ForeignKey('auth.User', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
-    team            = models.ForeignKey('Team', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
+    user            = models.ForeignKey('auth.User', null=True, on_delete=models.SET_NULL, blank=True, related_name='permissions')
+    team            = models.ForeignKey('Team', null=True, on_delete=models.SET_NULL, blank=True, related_name='permissions')
 
     # to be used against a project or inventory (or a project and inventory in conjunction):
-    project         = models.ForeignKey('Project', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
-    inventory       = models.ForeignKey('Inventory', null=True, on_delete=SET_NULL, related_name='permissions')
+    project         = models.ForeignKey('Project', null=True, on_delete=models.SET_NULL, blank=True, related_name='permissions')
+    inventory       = models.ForeignKey('Inventory', null=True, on_delete=models.SET_NULL, related_name='permissions')
 
     # permission system explanation:
     #

@@ -212,9 +212,13 @@ class ProjectsTest(BaseTest):
             'name': 'My Test Project',
             'description': 'Does amazing things',
             'local_path': os.path.basename(project_dir),
+            'scm_type': None,
         }
+        # Adding a project with scm_type=None should work, but scm_type will be
+        # changed to an empty string.
         response = self.post(projects, project_data, expect=201,
                              auth=self.get_super_credentials())
+        self.assertEqual(response['scm_type'], u'')
 
         # can edit project using same local path.
         project_detail = reverse('api:project_detail', args=(response['id'],))

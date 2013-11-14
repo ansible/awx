@@ -50,7 +50,6 @@ class Inventory(CommonModel):
     variables = models.TextField(
         blank=True,
         default='',
-        null=True,
         help_text=_('Inventory variables in JSON or YAML format.'),
     )
     has_active_failures = models.BooleanField(
@@ -164,7 +163,6 @@ class Host(CommonModelNameNotUnique):
 
     inventory = models.ForeignKey(
         'Inventory',
-        null=False,
         related_name='hosts',
     )
     enabled = models.BooleanField(
@@ -289,7 +287,6 @@ class Group(CommonModelNameNotUnique):
 
     inventory = models.ForeignKey(
         'Inventory',
-        null=False,
         related_name='groups',
     )
     # Can also be thought of as: parents == member_of, children == members
@@ -562,7 +559,6 @@ class InventorySource(PrimordialModel):
         choices=INVENTORY_SOURCE_STATUS_CHOICES,
         default='none',
         editable=False,
-        null=True,
     )
 
     def save(self, *args, **kwargs):

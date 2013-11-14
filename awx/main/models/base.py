@@ -40,7 +40,6 @@ JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_CHECK, _('Check')),
 ]
 
-# FIXME: TODO: make sure all of these are used and consistent
 PERMISSION_TYPE_CHOICES = [
     (PERM_INVENTORY_READ, _('Read Inventory')),
     (PERM_INVENTORY_WRITE, _('Edit Inventory')),
