@@ -70,9 +70,11 @@ angular.module('PaginateHelper', ['RefreshHelper', 'ngCookies'])
            
            scope[iterator + 'Page'] = 0;
            var new_url = url.replace(/\?page_size\=\d+/,'');
-           var connect = (/\/$/.test(new_url)) ? '?' : '&'; 
+           console.log('new_url: ' + new_url);
+           var connect = (/\/$/.test(new_url)) ? '?' : '&';
            new_url += (scope[iterator + 'SearchParams']) ? connect + scope[iterator + 'SearchParams'] + '&page_size=' + scope[iterator + 'PageSize' ] :
-                + connect + 'page_size=' + scope[iterator + 'PageSize' ];
+                connect + 'page_size=' + scope[iterator + 'PageSize' ];
+           console.log('new_url: ' + new_url);
            Refresh({ scope: scope, set: set, iterator: iterator, url: new_url });  
            }
         }

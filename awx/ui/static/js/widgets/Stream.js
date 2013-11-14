@@ -61,7 +61,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     return function(params) {
     
         var list = StreamList;
-        var defaultUrl = $basePath + 'html/event_log.html/';
+        var defaultUrl = GetBasePath('activity_stream');
         var view = GenerateList;
         
         // Push the current page onto browser histor. If user clicks back button, restore current page without 
@@ -84,9 +84,10 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
            }  
 
         scope.refreshStream = function() {
-           scope['activities'].splice(10,10);
-           //scope.search(list.iterator);
-           } 
+           scope.search(list.iterator);
+           }
+
+        function fixUrl(u) { return u.replace(/\/api\/v1\//,'/#/'); }
 
         if (scope.removePostRefresh) {
             scope.removePostRefresh();    
@@ -94,10 +95,26 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         scope.removePostRefresh = scope.$on('PostRefresh', function() {
             for (var i=0; i < scope['activities'].length; i++) {
                 // Convert event_time date to local time zone
-                cDate = new Date(scope['activities'][i].event_time);
-                scope['activities'][i].event_time = FormatDate(cDate);
+                cDate = new Date(scope['activities'][i].timestamp);
+                scope['activities'][i].timestamp = FormatDate(cDate);
                 // Display username
-                scope['activities'][i].user = scope.activities[i].summary_fields.user.username;
+                scope['activities'][i].user = (scope['activities'][i].summary_fields.user) ? scope['activities'][i].summary_fields.user.username :
+                    'System';
+                if (scope['activities'][i].user !== 'System') {
+                    scope['activities'][i].userLink = (scope['activities'][i].summary_fields.user) ? fixUrl(scope['activities'][i].related.user) :
+                        "";
+                }
+
+                // Objects
+                var href;
+                if (scope['activities'][i].summary_fields.object1) {
+                    href = fixUrl(scope['activities'][i].related.object_1);
+                    scope['activities'][i].objects = "<a href=\"" + href + "\">" + scope['activities'][i].summary_fields.object1.name + "</a>";
+                }
+                if (scope['activities'][i].summary_fields.object2) {
+                    href = fixUrl(scope['activities'][i].related.object_2);
+                    scope['activities'][i].objects += ", <a href=\"" + href + "\">" + scope['activities'][i].summary_fields.object2.name + "</a>";
+                }
             }
             ShowStream();
             });

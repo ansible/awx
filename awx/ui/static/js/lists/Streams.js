@@ -19,17 +19,20 @@ angular.module('StreamListDefinition', [])
         "class": "table-condensed",
         
         fields: {
-            event_time: {
-                key: true,
-                label: 'When'
-                },
             user: {
-                label: 'Who',
+                label: 'User',
+                linkTo: "\{\{ activity.userLink \}\}",
                 sourceModel: 'user',
-                sourceField: 'username'
+                sourceField: 'username',
+                awToolTip: "\{\{ userToolTip \}\}",
+                dataPlacement: 'top'
                 },
-            operation: {
-                label: 'Operation'
+            timestamp: {
+                label: 'Event Time',
+                },
+            objects: {
+                label: 'Objects',
+                ngBindHtml: 'activity.objects'
                 },
             description: {
                 label: 'Description'

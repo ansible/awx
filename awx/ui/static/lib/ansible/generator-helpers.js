@@ -340,6 +340,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            html += (field.ngClass) ? Attr(field, 'ngClass') : "";
            html += (options.mode == 'lookup' || options.mode == 'select') ? " ng-click=\"toggle_" + list.iterator +"({{ " + list.iterator + ".id }})\"" : "";
            html += (field.columnShow) ? Attr(field, 'columnShow') : "";
+           html += (field.ngBindHtml) ? "ng-bind-html-unsafe=\"" + field.ngBindHtml + "\" " : "";
            html += ">\n";
 
            // Add ngShow
@@ -359,7 +360,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
 
            // Start the Link
            if ( (field.key || field.link || field.linkTo || field.ngClick || field.ngHref) &&
-                options['mode'] != 'lookup' && options['mode'] != 'select' && !field.noLink ) {
+                options['mode'] != 'lookup' && options['mode'] != 'select' && !field.noLink && !field.ngBindHtml) {
               var cap=false;
               if (field.linkTo) {
                  html += "<a href=\"" + field.linkTo + "\" ";
@@ -397,7 +398,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            }
 
            // Add data binds 
-           if (field.showValue == undefined || field.showValue == true) {
+           if (!field.ngBindHtml && (field.showValue == undefined || field.showValue == true)) {
               if (field.ngBind) {       
                  html += "{{ " + field.ngBind + " }}";
               }
@@ -417,7 +418,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             
            // close the link
            if ( (field.key || field.link || field.linkTo || field.ngClick || field.ngHref )
-                && options.mode != 'lookup' && options.mode != 'select' && !field.noLink ) {
+                && options.mode != 'lookup' && options.mode != 'select' && !field.noLink && !field.ngBindHtml ) {
               html += "</a>";
            }
            // close ngShow
