@@ -19,23 +19,45 @@ angular.module('StreamListDefinition', [])
         "class": "table-condensed",
         
         fields: {
+            timestamp: {
+                label: 'Event Time',
+                key: true,
+                desc: true,
+                noLink: true,
+                searchable: false
+                },
             user: {
                 label: 'User',
-                linkTo: "\{\{ activity.userLink \}\}",
+                ngBindHtml: 'activity.user',
                 sourceModel: 'user',
                 sourceField: 'username',
                 awToolTip: "\{\{ userToolTip \}\}",
                 dataPlacement: 'top'
                 },
-            timestamp: {
-                label: 'Event Time',
-                },
             objects: {
                 label: 'Objects',
-                ngBindHtml: 'activity.objects'
+                ngBindHtml: 'activity.objects',
+                sortField: "object1__name,object2__name",
+                searchable: false
+                },
+            object_name: {
+                label: 'Object name',
+                searchOnly: true,
+                searchType: 'or', 
+                searchFields: ['object1__name', 'object2__name']
                 },
             description: {
-                label: 'Description'
+                label: 'Description',
+                ngBindHtml: 'activity.description',
+                nosort: true, 
+                searchable: false
+                },
+            system_event: {
+                label: 'System event?',
+                searchOnly: true, 
+                searchType: 'isnull',
+                sourceModel: 'user',
+                sourceField: 'username'
                 }
             },
         
@@ -61,5 +83,14 @@ angular.module('StreamListDefinition', [])
             },
 
         fieldActions: {
+            edit: {
+                label: 'View',
+                ngClick: "showDetail(\{\{ activity.id \}\})",
+                icon: 'icon-zoom-in',
+                "class": 'btn-default btn-xs',
+                awToolTip: 'View event details',
+                dataPlacement: 'top'
+                }
             }
+
         });

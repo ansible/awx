@@ -84,7 +84,8 @@ angular.module('ansible', [
     'TimerService',
     'StreamListDefinition',
     'HomeGroupListDefinition',
-    'HomeHostListDefinition'
+    'HomeHostListDefinition',
+    'ActivityDetailDefinition'
      ])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.

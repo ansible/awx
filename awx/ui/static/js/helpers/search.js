@@ -125,7 +125,12 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            }
            else if (list.fields[fld].searchType && list.fields[fld].searchType == 'int') {
               scope[iterator + 'HideSearchType'] = true;   
-           }    
+           }
+           else if (list.fields[fld].searchType && list.fields[fld].searchType == 'isnull') {
+              scope[iterator + 'SearchType'] = 'isnull';
+              scope[iterator + 'InputDisable'] = true;
+              scope[iterator + 'SearchValue'] = 'true';
+           }
            scope.search(iterator);
            }
 
@@ -187,6 +192,16 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                             scope[iterator + 'SearchSelectValue'].value == null) ) {
                  scope[iterator + 'SearchParams'] += 'iexact=';
               }
+              else if ( (list.fields[scope[iterator + 'SearchField']].searchType && 
+                        (list.fields[scope[iterator + 'SearchField']].searchType == 'or')) ) {
+                 scope[iterator + 'SearchParams'] = ''; //start over
+                 for (var k=0; k < list.fields[scope[iterator + 'SearchField']].searchFields.length; k++) {
+                     scope[iterator + 'SearchParams'] += '&or__' +
+                         list.fields[scope[iterator + 'SearchField']].searchFields[k] +
+                         '__icontains=' + escape(scope[iterator + 'SearchValue']); 
+                 }
+                 scope[iterator + 'SearchParams'].replace(/^\&/,'');     
+              }
               else {
                  scope[iterator + 'SearchParams'] += scope[iterator + 'SearchType'] + '='; 
               }             
@@ -197,9 +212,10 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                  scope[iterator + 'SearchParams'] += scope[iterator + 'SearchSelectValue'].value;
               }
               else {
-                //if ( list.fields[scope[iterator + 'SearchField']].searchType == undefined || 
-                //        list.fields[scope[iterator + 'SearchField']].searchType == 'gtzero' ) {
-                 scope[iterator + 'SearchParams'] += escape(scope[iterator + 'SearchValue']);
+                 if ( (list.fields[scope[iterator + 'SearchField']].searchType && 
+                      (list.fields[scope[iterator + 'SearchField']].searchType !== 'or')) ) { 
+                     scope[iterator + 'SearchParams'] += escape(scope[iterator + 'SearchValue']);
+                 }
               }
               scope[iterator + 'SearchParams'] += (sort_order) ? '&order_by=' + escape(sort_order) : '';
            }

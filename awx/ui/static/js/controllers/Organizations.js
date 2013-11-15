@@ -12,7 +12,7 @@
 
 function OrganizationsList ($routeParams, $scope, $rootScope, $location, $log, Rest, Alert, LoadBreadCrumbs, Prompt,
                             GenerateList, OrganizationList, SearchInit, PaginateInit, ClearScope, ProcessErrors,
-                            GetBasePath, SelectionInit, Wait)
+                            GetBasePath, SelectionInit, Wait, Stream)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -35,6 +35,8 @@ function OrganizationsList ($routeParams, $scope, $rootScope, $location, $log, R
     SearchInit({ scope: scope, set: list.name, list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
+
+    scope.showActivity = function() { Stream(); } 
 
     scope.addOrganization = function() {
        $location.path($location.path() + '/add');
@@ -70,7 +72,7 @@ function OrganizationsList ($routeParams, $scope, $rootScope, $location, $log, R
 
 OrganizationsList.$inject=[ '$routeParams', '$scope', '$rootScope', '$location', '$log', 'Rest', 'Alert', 'LoadBreadCrumbs', 'Prompt',
                             'GenerateList', 'OrganizationList', 'SearchInit', 'PaginateInit', 'ClearScope', 'ProcessErrors',
-                            'GetBasePath', 'SelectionInit', 'Wait' ];
+                            'GetBasePath', 'SelectionInit', 'Wait', 'Stream'];
 
 
 function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm, 
