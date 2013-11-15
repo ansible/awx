@@ -852,8 +852,9 @@ class JobTemplateSerializer(BaseSerializer):
     class Meta:
         model = JobTemplate
         fields = BASE_FIELDS + ('job_type', 'inventory', 'project', 'playbook',
-                                'credential', 'forks', 'limit', 'verbosity',
-                                'extra_vars', 'job_tags', 'host_config_key')
+                                'credential', 'cloud_credential', 'forks',
+                                'limit', 'verbosity', 'extra_vars', 'job_tags',
+                                'host_config_key')
 
     def get_related(self, obj):
         if obj is None:
@@ -866,6 +867,9 @@ class JobTemplateSerializer(BaseSerializer):
         ))
         if obj.credential:
             res['credential'] = reverse('api:credential_detail', args=(obj.credential.pk,))
+        if obj.cloud_credential:
+            res['cloud_credential'] = reverse('api:credential_detail',
+                                              args=(obj.cloud_credential.pk,))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
         return res
@@ -885,7 +889,7 @@ class JobSerializer(BaseSerializer):
         model = Job
         fields = ('id', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'job_template', 'job_type', 'inventory',
-                  'project', 'playbook', 'credential',
+                  'project', 'playbook', 'credential', 'cloud_credential',
                   'forks', 'limit', 'verbosity', 'extra_vars',
                   'job_tags', 'launch_type', 'status', 'failed',
                   'result_stdout', 'result_traceback',
@@ -905,6 +909,9 @@ class JobSerializer(BaseSerializer):
         ))
         if obj.job_template:
             res['job_template'] = reverse('api:job_template_detail', args=(obj.job_template.pk,))
+        if obj.cloud_credential:
+            res['cloud_credential'] = reverse('api:credential_detail',
+                                              args=(obj.cloud_credential.pk,))
         if obj.can_start or True:
             res['start'] = reverse('api:job_start', args=(obj.pk,))
         if obj.can_cancel or True:
@@ -927,6 +934,8 @@ class JobSerializer(BaseSerializer):
             data.setdefault('playbook', job_template.playbook)
             if job_template.credential:
                 data.setdefault('credential', job_template.credential.pk)
+            if job_template.cloud_credential:
+                data.setdefault('cloud_credential', job_template.cloud_credential.pk)
             data.setdefault('forks', job_template.forks)
             data.setdefault('limit', job_template.limit)
             data.setdefault('verbosity', job_template.verbosity)
