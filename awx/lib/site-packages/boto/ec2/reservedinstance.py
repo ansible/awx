@@ -234,11 +234,12 @@ class PriceSchedule(object):
 
 class ReservedInstancesConfiguration(object):
     def __init__(self, connection=None, availability_zone=None, platform=None,
-                 instance_count=None):
+                 instance_count=None, instance_type=None):
         self.connection = connection
         self.availability_zone = availability_zone
         self.platform = platform
         self.instance_count = instance_count
+        self.instance_type = instance_type
 
     def startElement(self, name, attrs, connection):
         return None
@@ -250,6 +251,8 @@ class ReservedInstancesConfiguration(object):
             self.platform = value
         elif name == 'instanceCount':
             self.instance_count = int(value)
+        elif name == 'instanceType':
+            self.instance_type = value
         else:
             setattr(self, name, value)
 
@@ -271,12 +274,14 @@ class ModifyReservedInstancesResult(object):
 
 class ModificationResult(object):
     def __init__(self, connection=None, modification_id=None,
-                 availability_zone=None, platform=None, instance_count=None):
+                 availability_zone=None, platform=None, instance_count=None,
+                 instance_type=None):
         self.connection = connection
         self.modification_id = modification_id
         self.availability_zone = availability_zone
         self.platform = platform
         self.instance_count = instance_count
+        self.instance_type = instance_type
 
     def startElement(self, name, attrs, connection):
         return None
@@ -290,6 +295,8 @@ class ModificationResult(object):
             self.platform = value
         elif name == 'instanceCount':
             self.instance_count = int(value)
+        elif name == 'instanceType':
+            self.instance_type = value
         else:
             setattr(self, name, value)
 

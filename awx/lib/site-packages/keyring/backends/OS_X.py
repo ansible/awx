@@ -7,9 +7,10 @@ from keyring.backend import KeyringBackend
 from keyring.errors import PasswordSetError
 from keyring.errors import PasswordDeleteError
 from keyring.util import properties
+from keyring.py27compat import unicode_str
 
 
-class SecurityCommand(unicode):
+class SecurityCommand(unicode_str):
     """
     A string suitable for passing as the 'command' parameter to the
     OS X 'security' command.
@@ -91,7 +92,7 @@ class Keyring(KeyringBackend):
                 pw = group_dict.get('pw')
                 if hex:
                     # it's a weird hex password, decode it.
-                    return unicode(binascii.unhexlify(hex), 'utf-8')
+                    return unicode_str(binascii.unhexlify(hex), 'utf-8')
                 else:
                     # it's a normal password, send it back.
                     return pw

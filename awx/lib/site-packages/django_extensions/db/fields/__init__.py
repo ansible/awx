@@ -285,3 +285,8 @@ class UUIDField(CharField):
         args, kwargs = introspector(self)
         # That's our definition!
         return (field_class, args, kwargs)
+
+
+class PostgreSQLUUIDField(UUIDField):
+    def db_type(self, connection=None):
+        return "UUID"

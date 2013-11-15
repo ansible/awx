@@ -26,8 +26,6 @@ class ForeignKeySearchInput(ForeignKeyRawIdWidget):
         js_files = ['django_extensions/js/jquery.bgiframe.min.js',
                     'django_extensions/js/jquery.ajaxQueue.js',
                     'django_extensions/js/jquery.autocomplete.js']
-        if django.get_version() < "1.3":
-            js_files.append('django_extensions/js/jquery.js')
         return forms.Media(css={'all': ('django_extensions/css/jquery.autocomplete.css',)},
                            js=js_files)
 

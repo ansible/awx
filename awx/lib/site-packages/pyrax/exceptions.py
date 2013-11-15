@@ -41,6 +41,9 @@ class AuthSystemNotFound(PyraxException):
 class CDNFailed(PyraxException):
     pass
 
+class DBUpdateUnchanged(PyraxException):
+    pass
+
 class DNSCallTimedOut(PyraxException):
     pass
 
@@ -68,6 +71,9 @@ class DomainRecordUpdateFailed(PyraxException):
 class DomainUpdateFailed(PyraxException):
     pass
 
+class DuplicateQueue(PyraxException):
+    pass
+
 class DuplicateUser(PyraxException):
     pass
 
@@ -87,6 +93,9 @@ class FileNotFound(PyraxException):
     pass
 
 class FolderNotFound(PyraxException):
+    pass
+
+class InvalidEmail(PyraxException):
     pass
 
 class KeyringModuleNotInstalled(PyraxException):
@@ -143,6 +152,9 @@ class InvalidNodeParameters(PyraxException):
 class InvalidPTRRecord(PyraxException):
     pass
 
+class InvalidQueueName(PyraxException):
+    pass
+
 class InvalidSessionPersistenceType(PyraxException):
     pass
 
@@ -168,6 +180,12 @@ class InvalidVolumeResize(PyraxException):
     pass
 
 class MissingAuthSettings(PyraxException):
+    pass
+
+class MissingClaimParameters(PyraxException):
+    pass
+
+class MissingDBUserParameters(PyraxException):
     pass
 
 class MissingDNSSettings(PyraxException):
@@ -260,6 +278,9 @@ class PTRRecordDeletionFailed(PyraxException):
 class PTRRecordUpdateFailed(PyraxException):
     pass
 
+class QueueClientIDNotDefined(PyraxException):
+    pass
+
 class ServiceNotAvailable(PyraxException):
     pass
 
@@ -309,7 +330,7 @@ class ClientException(PyraxException):
     """
     def __init__(self, code, message=None, details=None, request_id=None):
         self.code = code
-        self.message = message or self.__class__.message
+        self.message = message or "-no error message returned-"
         self.details = details
         self.request_id = request_id
 
@@ -317,8 +338,8 @@ class ClientException(PyraxException):
         formatted_string = "%s (HTTP %s)" % (self.message, self.code)
         if self.request_id:
             formatted_string += " (Request-ID: %s)" % self.request_id
-
         return formatted_string
+
 
 class BadRequest(ClientException):
     """

@@ -762,8 +762,9 @@ class TestOperations(unittest.TestCase):
             ('spam', models.BooleanField(default=False))
         ])
         
-        db.add_column("test_add_unique_fk", "mock1", models.ForeignKey(db.mock_model('Mock', 'mock'), null=True, unique=True))
-        db.add_column("test_add_unique_fk", "mock2", models.OneToOneField(db.mock_model('Mock', 'mock'), null=True))
+        db.add_column("test_add_unique_fk", "mock1", models.ForeignKey(db.mock_model('User', 'auth_user'), null=True, unique=True))
+        db.add_column("test_add_unique_fk", "mock2", models.OneToOneField(db.mock_model('User', 'auth_user'), null=True))
+        db.execute_deferred_sql()
         
         db.delete_table("test_add_unique_fk")
         
@@ -878,6 +879,34 @@ class TestOperations(unittest.TestCase):
         # Make the FK null
         db.alter_column("test_make_fk_null", "foreik_id", models.ForeignKey(User, null=True))
         db.execute_deferred_sql()
+
+    def test_change_foreign_key_target(self):
+        # Tables for FK to target
+        User = db.mock_model(model_name='User', db_table='auth_user', db_tablespace='', pk_field_name='id', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
+        db.create_table("test_fk_changed_target", [
+            ('eggs', models.IntegerField(primary_key=True)),
+        ])
+        Egg = db.mock_model(model_name='Egg', db_table='test_fk_changed_target', db_tablespace='', pk_field_name='eggs', pk_field_type=models.AutoField, pk_field_args=[], pk_field_kwargs={})
+        # Table with a foreign key to the wrong table
+        db.create_table("test_fk_changing", [
+            ('egg', models.ForeignKey(User, null=True)),
+        ])
+        db.execute_deferred_sql()
+
+        # Change foreign key pointing
+        db.alter_column("test_fk_changing", "egg_id", models.ForeignKey(Egg, null=True))
+        db.execute_deferred_sql()
+
+        # Test that it is pointing at the right table now
+        try:
+            non_user_id = db.execute("SELECT MAX(id) FROM auth_user")[0][0] + 1
+        except (TypeError, IndexError):
+            # Got a "None" or no records, treat as 0
+            non_user_id = 17
+        db.execute("INSERT INTO test_fk_changed_target (eggs) VALUES (%s)", [non_user_id])
+        db.execute("INSERT INTO test_fk_changing (egg_id) VALUES (%s)", [non_user_id])
+        db.commit_transaction()
+        db.start_transaction()  # The test framework expects tests to end in transaction
 
     def test_alter_double_indexed_column(self):
         # Table for FK to target

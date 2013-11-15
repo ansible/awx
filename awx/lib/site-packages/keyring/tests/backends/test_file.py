@@ -48,5 +48,5 @@ class UncryptedFileKeyringTestCase(FileKeyringTests, unittest.TestCase):
         self.keyring.set_password('system', 'user', 'password')
 
         self.assertTrue(os.path.exists(self.keyring.file_path))
-        group_other_perms = os.stat(self.keyring.file_path).st_mode & 0077
+        group_other_perms = os.stat(self.keyring.file_path).st_mode & 0o077
         self.assertEqual(group_other_perms, 0)

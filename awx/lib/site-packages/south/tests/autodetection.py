@@ -7,6 +7,12 @@ from south.creator import freezer
 from south.orm import FakeORM
 from south.v2 import SchemaMigration
 
+try:
+    from django.utils.six.moves import reload_module
+except ImportError:
+    # Older django, no python3 support
+    reload_module = reload
+
 class TestComparison(unittest.TestCase):
     
     """
@@ -338,7 +344,8 @@ class TestNonManagedIgnored(Monkeypatcher):
 
             complete_apps = ['non_managed']
                     
-        from non_managed import models as dummy_import_to_force_loading_models # TODO: Does needing this indicate a bug in MokeyPatcher? 
+        from non_managed import models as dummy_import_to_force_loading_models # TODO: Does needing this indicate a bug in MokeyPatcher?
+        reload_module(dummy_import_to_force_loading_models) # really force... 
         
         migrations = Migrations("non_managed")
         initial_orm = FakeORM(InitialMigration, "non_managed")

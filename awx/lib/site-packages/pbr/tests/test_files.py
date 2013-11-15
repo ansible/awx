@@ -22,10 +22,10 @@ import os
 import fixtures
 
 from pbr.hooks import files
-from pbr import tests
+from pbr.tests import base
 
 
-class FilesConfigTest(tests.BaseTestCase):
+class FilesConfigTest(base.BaseTestCase):
 
     def setUp(self):
         super(FilesConfigTest, self).setUp()
@@ -49,7 +49,7 @@ class FilesConfigTest(tests.BaseTestCase):
         with open(os.path.join(subpackage, "__init__.py"), 'w') as foo_file:
             foo_file.write("# empty")
 
-        self.useFixture(tests.DiveDir(pkg_fixture.base))
+        self.useFixture(base.DiveDir(pkg_fixture.base))
 
     def test_implicit_auto_package(self):
         config = dict(

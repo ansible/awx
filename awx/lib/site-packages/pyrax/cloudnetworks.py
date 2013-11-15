@@ -17,7 +17,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from functools import wraps
 from pyrax.client import BaseClient
 import pyrax.exceptions as exc
 from pyrax.manager import BaseManager
@@ -106,7 +105,17 @@ class CloudNetworkManager(BaseManager):
     """
     Does nothing special, but is used in testing.
     """
-    pass
+    def _create_body(self, name, label=None, cidr=None):
+        """
+        Used to create the dict required to create a network. Accepts either
+        'label' or 'name' as the keyword parameter for the label attribute.
+        """
+        label = label or name
+        body = {"network": {
+                "label": label,
+                "cidr": cidr,
+                }}
+        return body
 
 
 
@@ -130,19 +139,6 @@ class CloudNetworkClient(BaseClient):
         """
         self._manager = CloudNetworkManager(self, resource_class=CloudNetwork,
                 response_key="network", uri_base="os-networksv2")
-
-
-    def _create_body(self, name, label=None, cidr=None):
-        """
-        Used to create the dict required to create a network. Accepts either
-        'label' or 'name' as the keyword parameter for the label attribute.
-        """
-        label = label or name
-        body = {"network": {
-                "label": label,
-                "cidr": cidr,
-                }}
-        return body
 
 
     def create(self, label=None, name=None, cidr=None):

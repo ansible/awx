@@ -101,6 +101,7 @@ except:
 if not skiptest:
     from south.tests.db import *
     from south.tests.db_mysql import *
+    from south.tests.db_firebird import *
     from south.tests.logic import *
     from south.tests.autodetection import *
     from south.tests.logger import *

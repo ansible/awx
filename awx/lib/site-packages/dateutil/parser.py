@@ -174,7 +174,7 @@ class parserinfo(object):
     # m from a.m/p.m, t from ISO T separator
     JUMP = [" ", ".", ",", ";", "-", "/", "'",
             "at", "on", "and", "ad", "m", "t", "of",
-            "st", "nd", "rd", "th"] 
+            "st", "nd", "rd", "th"]
 
     WEEKDAYS = [("Mon", "Monday"),
                 ("Tue", "Tuesday"),
@@ -305,7 +305,10 @@ class parser(object):
         if not default:
             default = datetime.datetime.now().replace(hour=0, minute=0,
                                                       second=0, microsecond=0)
-        res = self._parse(timestr, **kwargs)
+
+
+        res, skipped_tokens = self._parse(timestr, **kwargs)
+
         if res is None:
             raise ValueError("unknown string format")
         repl = {}
@@ -339,6 +342,10 @@ class parser(object):
                 ret = ret.replace(tzinfo=tz.tzutc())
             elif res.tzoffset:
                 ret = ret.replace(tzinfo=tz.tzoffset(res.tzname, res.tzoffset))
+
+        if skipped_tokens:
+            return ret, skipped_tokens
+
         return ret
 
     class _result(_resultbase):
@@ -346,7 +353,10 @@ class parser(object):
                      "hour", "minute", "second", "microsecond",
                      "tzname", "tzoffset"]
 
-    def _parse(self, timestr, dayfirst=None, yearfirst=None, fuzzy=False):
+    def _parse(self, timestr, dayfirst=None, yearfirst=None, fuzzy=False, fuzzy_with_tokens=False):
+        if fuzzy_with_tokens:
+            fuzzy = True
+
         info = self.info
         if dayfirst is None:
             dayfirst = info.dayfirst
@@ -354,6 +364,13 @@ class parser(object):
             yearfirst = info.yearfirst
         res = self._result()
         l = _timelex.split(timestr)
+
+
+        # keep up with the last token skipped so we can recombine
+        # consecutively skipped tokens (-2 for when i begins at 0).
+        last_skipped_token_i = -2
+        skipped_tokens = list()
+
         try:
 
             # year/month/day list
@@ -387,7 +404,7 @@ class parser(object):
                             res.minute = int(s[2:])
                     elif len_li == 6 or (len_li > 6 and l[i-1].find('.') == 6):
                         # YYMMDD or HHMMSS[.ss]
-                        s = l[i-1] 
+                        s = l[i-1]
                         if not ymd and l[i-1].find('.') == -1:
                             ymd.append(info.convertyear(int(s[:2])))
                             ymd.append(int(s[2:4]))
@@ -636,6 +653,13 @@ class parser(object):
                 if not (info.jump(l[i]) or fuzzy):
                     return None
 
+                if last_skipped_token_i == i - 1:
+                    # recombine the tokens
+                    skipped_tokens[-1] += l[i]
+                else:
+                    # just append
+                    skipped_tokens.append(l[i])
+                last_skipped_token_i = i
                 i += 1
 
             # Process year/month/day
@@ -705,7 +729,11 @@ class parser(object):
 
         if not info.validate(res):
             return None
-        return res
+
+        if fuzzy_with_tokens:
+            return res, tuple(skipped_tokens)
+
+        return res, None
 
 DEFAULTPARSER = parser()
 def parse(timestr, parserinfo=None, **kwargs):
@@ -888,7 +916,7 @@ class _tzparser(object):
 
         except (IndexError, ValueError, AssertionError):
             return None
-        
+
         return res
 
 

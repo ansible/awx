@@ -1,5 +1,4 @@
-from __future__ import absolute_import
-from __future__ import with_statement
+from __future__ import absolute_import, unicode_literals
 
 from contextlib import contextmanager
 from functools import wraps
@@ -9,8 +8,7 @@ from django.utils import translation
 
 @contextmanager
 def respect_language(language):
-    """
-    Context manager that changes the current translation language for
+    """Context manager that changes the current translation language for
     all code inside the following block.
 
     Can e.g. be used inside tasks like this::

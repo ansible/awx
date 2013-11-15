@@ -55,11 +55,11 @@ class Tag(object):
             self.key = value
         elif name == 'Value':
             self.value = value
-        elif name == 'PropogateAtLaunch':
+        elif name == 'PropagateAtLaunch':
             if value.lower() == 'true':
-                self.propogate_at_launch = True
+                self.propagate_at_launch = True
             else:
-                self.propogate_at_launch = False
+                self.propagate_at_launch = False
         elif name == 'ResourceId':
             self.resource_id = value
         elif name == 'ResourceType':

@@ -14,7 +14,8 @@ class EscapeTestCase(unittest.TestCase):
 
     def check_escape_unescape(self, initial):
         escaped = escape.escape(initial)
-        self.assertTrue(all(c in (escape.LEGAL_CHARS + '_') for c in escaped))
+        for c in escaped:
+            self.assertIn(c, escape.LEGAL_CHARS + '_')
         unescaped = escape.unescape(escaped)
         self.assertEqual(initial, unescaped)
 

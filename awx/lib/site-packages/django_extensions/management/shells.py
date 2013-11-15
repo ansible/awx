@@ -4,6 +4,54 @@ class ObjectImportError(Exception):
     pass
 
 
+def import_items(import_directives):
+    """
+    Import the items in import_directives and return a list of the imported items
+
+    Each item in import_directives should be one of the following forms
+        * a tuple like ('module.submodule', ('classname1', 'classname2')), which indicates a 'from module.submodule import classname1, classname2'
+        * a tuple like ('module.submodule', 'classname1'), which indicates a 'from module.submodule import classname1'
+        * a tuple like ('module.submodule', '*'), which indicates a 'from module.submodule import *'
+        * a simple 'module.submodule' which indicates 'import module.submodule'.
+
+    Returns a dict mapping the names to the imported items
+    """
+    imported_objects = {}
+    for directive in import_directives:
+        try:
+            # First try a straight import
+            if type(directive) is str:
+                imported_object = __import__(directive)
+                imported_objects[directive.split('.')[0]] = imported_object
+                print("import %s" % directive)
+                continue
+            try:
+                # Try the ('module.submodule', ('classname1', 'classname2')) form
+                for name in directive[1]:
+                    imported_object = getattr(__import__(directive[0], {}, {}, name), name)
+                    imported_objects[name] = imported_object
+                print("from %s import %s" % (directive[0], ', '.join(directive[1])))
+                # If it is a tuple, but the second item isn't a list, so we have something like ('module.submodule', 'classname1')
+            except AttributeError:
+                # Check for the special '*' to import all
+                if directive[1] == '*':
+                    imported_object = __import__(directive[0], {}, {}, directive[1])
+                    for k in dir(imported_object):
+                        imported_objects[k] = getattr(imported_object, k)
+                    print("from %s import *" % directive[0])
+                else:
+                    imported_object = getattr(__import__(directive[0], {}, {}, directive[1]), directive[1])
+                    imported_objects[directive[1]] = imported_object
+                    print("from %s import %s" % (directive[0], directive[1]))
+        except ImportError:
+            try:
+                print("Unable to import %s" % directive)
+            except TypeError:
+                print("Unable to import %s from %s" % directive)
+
+    return imported_objects
+
+
 def import_objects(options, style):
     # XXX: (Temporary) workaround for ticket #1796: force early loading of all
     # models from installed apps. (this is fixed by now, but leaving it here
@@ -20,6 +68,11 @@ def import_objects(options, style):
     quiet_load = options.get('quiet_load')
 
     model_aliases = getattr(settings, 'SHELL_PLUS_MODEL_ALIASES', {})
+
+    # Perform pre-imports before any other imports
+    imports = import_items(getattr(settings, 'SHELL_PLUS_PRE_IMPORTS', {}))
+    for k, v in imports.items():
+        imported_objects[k] = v
 
     for app_mod in get_apps():
         app_models = get_models(app_mod)
@@ -54,5 +107,10 @@ def import_objects(options, style):
                 continue
         if not quiet_load:
             print(style.SQL_COLTYPE("From '%s' autoload: %s" % (app_mod.__name__.split('.')[-2], ", ".join(model_labels))))
+
+    # Perform post-imports after any other imports
+    imports = import_items(getattr(settings, 'SHELL_PLUS_POST_IMPORTS', {}))
+    for k, v in imports.items():
+        imported_objects[k] = v
 
     return imported_objects

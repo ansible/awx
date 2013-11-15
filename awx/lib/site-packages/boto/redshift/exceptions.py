@@ -188,3 +188,272 @@ class AccessToSnapshotDeniedFault(JSONResponseError):
 
 class UnauthorizedOperationFault(JSONResponseError):
     pass
+
+
+class SnapshotCopyAlreadyDisabled(JSONResponseError):
+    pass
+
+
+class ClusterNotFound(JSONResponseError):
+    pass
+
+
+class UnknownSnapshotCopyRegion(JSONResponseError):
+    pass
+
+
+class InvalidClusterSubnetState(JSONResponseError):
+    pass
+
+
+class ReservedNodeQuotaExceeded(JSONResponseError):
+    pass
+
+
+class InvalidClusterState(JSONResponseError):
+    pass
+
+
+class HsmClientCertificateQuotaExceeded(JSONResponseError):
+    pass
+
+
+class SubscriptionCategoryNotFound(JSONResponseError):
+    pass
+
+
+class HsmClientCertificateNotFound(JSONResponseError):
+    pass
+
+
+class SubscriptionEventIdNotFound(JSONResponseError):
+    pass
+
+
+class ClusterSecurityGroupAlreadyExists(JSONResponseError):
+    pass
+
+
+class HsmConfigurationAlreadyExists(JSONResponseError):
+    pass
+
+
+class NumberOfNodesQuotaExceeded(JSONResponseError):
+    pass
+
+
+class ReservedNodeOfferingNotFound(JSONResponseError):
+    pass
+
+
+class BucketNotFound(JSONResponseError):
+    pass
+
+
+class InsufficientClusterCapacity(JSONResponseError):
+    pass
+
+
+class InvalidRestore(JSONResponseError):
+    pass
+
+
+class UnauthorizedOperation(JSONResponseError):
+    pass
+
+
+class ClusterQuotaExceeded(JSONResponseError):
+    pass
+
+
+class InvalidVPCNetworkState(JSONResponseError):
+    pass
+
+
+class ClusterSnapshotNotFound(JSONResponseError):
+    pass
+
+
+class AuthorizationQuotaExceeded(JSONResponseError):
+    pass
+
+
+class InvalidHsmClientCertificateState(JSONResponseError):
+    pass
+
+
+class SNSTopicArnNotFound(JSONResponseError):
+    pass
+
+
+class ResizeNotFound(JSONResponseError):
+    pass
+
+
+class ClusterSubnetGroupNotFound(JSONResponseError):
+    pass
+
+
+class SNSNoAuthorization(JSONResponseError):
+    pass
+
+
+class ClusterSnapshotQuotaExceeded(JSONResponseError):
+    pass
+
+
+class AccessToSnapshotDenied(JSONResponseError):
+    pass
+
+
+class InvalidClusterSecurityGroupState(JSONResponseError):
+    pass
+
+
+class NumberOfNodesPerClusterLimitExceeded(JSONResponseError):
+    pass
+
+
+class ClusterSubnetQuotaExceeded(JSONResponseError):
+    pass
+
+
+class SNSInvalidTopic(JSONResponseError):
+    pass
+
+
+class ClusterSecurityGroupNotFound(JSONResponseError):
+    pass
+
+
+class InvalidElasticIp(JSONResponseError):
+    pass
+
+
+class InvalidClusterParameterGroupState(JSONResponseError):
+    pass
+
+
+class InvalidHsmConfigurationState(JSONResponseError):
+    pass
+
+
+
+class ClusterAlreadyExists(JSONResponseError):
+    pass
+
+
+class HsmConfigurationQuotaExceeded(JSONResponseError):
+    pass
+
+
+class ClusterSnapshotAlreadyExists(JSONResponseError):
+    pass
+
+
+class SubscriptionSeverityNotFound(JSONResponseError):
+    pass
+
+
+class SourceNotFound(JSONResponseError):
+    pass
+
+
+class ReservedNodeAlreadyExists(JSONResponseError):
+    pass
+
+
+class ClusterSubnetGroupQuotaExceeded(JSONResponseError):
+    pass
+
+
+class ClusterParameterGroupNotFound(JSONResponseError):
+    pass
+
+
+class InvalidS3BucketName(JSONResponseError):
+    pass
+
+
+class InvalidS3KeyPrefix(JSONResponseError):
+    pass
+
+
+class SubscriptionAlreadyExist(JSONResponseError):
+    pass
+
+
+class HsmConfigurationNotFound(JSONResponseError):
+    pass
+
+
+class AuthorizationNotFound(JSONResponseError):
+    pass
+
+
+class ClusterSecurityGroupQuotaExceeded(JSONResponseError):
+    pass
+
+
+class EventSubscriptionQuotaExceeded(JSONResponseError):
+    pass
+
+
+class AuthorizationAlreadyExists(JSONResponseError):
+    pass
+
+
+class InvalidClusterSnapshotState(JSONResponseError):
+    pass
+
+
+class ClusterParameterGroupQuotaExceeded(JSONResponseError):
+    pass
+
+
+class SnapshotCopyDisabled(JSONResponseError):
+    pass
+
+
+class ClusterSubnetGroupAlreadyExists(JSONResponseError):
+    pass
+
+
+class ReservedNodeNotFound(JSONResponseError):
+    pass
+
+
+class HsmClientCertificateAlreadyExists(JSONResponseError):
+    pass
+
+
+class InvalidClusterSubnetGroupState(JSONResponseError):
+    pass
+
+
+class SubscriptionNotFound(JSONResponseError):
+    pass
+
+
+class InsufficientS3BucketPolicy(JSONResponseError):
+    pass
+
+
+class ClusterParameterGroupAlreadyExists(JSONResponseError):
+    pass
+
+
+class UnsupportedOption(JSONResponseError):
+    pass
+
+
+class CopyToRegionDisabled(JSONResponseError):
+    pass
+
+
+class SnapshotCopyAlreadyEnabled(JSONResponseError):
+    pass
+
+
+class IncompatibleOrderableOptions(JSONResponseError):
+    pass

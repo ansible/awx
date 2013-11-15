@@ -4,10 +4,8 @@
 import ConfigParser
 import datetime
 import json
-import os
 import re
 import requests
-import urlparse
 
 import pyrax
 import pyrax.exceptions as exc
@@ -71,6 +69,7 @@ class BaseAuth(object):
         self.services = {}
         self.regions = set()
         self.verify_ssl = verify_ssl
+        self._auth_endpoint = None
 
 
     @property
@@ -83,6 +82,11 @@ class BaseAuth(object):
     def auth_endpoint(self):
         """Abstracts out the logic for connecting to different auth endpoints."""
         return self._get_auth_endpoint()
+
+
+    @auth_endpoint.setter
+    def auth_endpoint(self, val):
+        self._auth_endpoint = val
 
 
     def _get_auth_endpoint(self):
@@ -458,7 +462,7 @@ class BaseAuth(object):
         # NOTE: the OpenStack docs say that the name key in the following dict
         # is supposed to be 'username', but the service actually expects 'name'.
         data = {"user": {
-                "name": name,
+                "username": name,
                 "email": email,
                 "enabled": enabled,
                 }}
@@ -473,6 +477,13 @@ class BaseAuth(object):
                     "users.")
         elif resp.status_code == 409:
             raise exc.DuplicateUser("User '%s' already exists." % name)
+        elif resp.status_code == 400:
+            status = json.loads(resp.text)
+            message = status["badRequest"]["message"]
+            if "Expecting valid email address" in message:
+                raise exc.InvalidEmail("%s is not valid" % email)
+            else:
+                raise exc.BadRequest(message)
 
 
     # Can we really update the ID? Docs seem to say we can

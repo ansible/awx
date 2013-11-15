@@ -37,13 +37,16 @@ def copy_column_constraints(func):
     def _column_cp(self, table_name, column_old, column_new, *args, **opts):
         # Copy foreign key constraint
         try:
-            constraint = self._find_foreign_constraints(table_name, column_old)[0]
-            (ftable, fcolumn) = self._lookup_constraint_references(table_name, constraint)
-            if ftable and fcolumn:
-                fk_sql = self.foreign_key_sql(
-                            table_name, column_new, ftable, fcolumn)
-                get_logger().debug("Foreign key SQL: " + fk_sql)
-                self.add_deferred_sql(fk_sql)
+            constraint = self._find_foreign_constraints(
+                table_name, column_old)[0]
+            refs = self._lookup_constraint_references(table_name, constraint)
+            if refs is not None:
+                (ftable, fcolumn) = refs
+                if ftable and fcolumn:
+                    fk_sql = self.foreign_key_sql(
+                        table_name, column_new, ftable, fcolumn)
+                    get_logger().debug("Foreign key SQL: " + fk_sql)
+                    self.add_deferred_sql(fk_sql)
         except IndexError:
             pass  # No constraint exists so ignore
         except DryRunError:
@@ -178,8 +181,12 @@ class DatabaseOperations(generic.DatabaseOperations):
         e.g. which storage engine (MySQL) or transaction serialisability level.
         """
         cursor = self._get_connection().cursor()
+        if cursor.execute("SHOW variables WHERE Variable_Name='default_storage_engine';"):
+            engine_var = 'default_storage_engine'
+        else:
+            engine_var = 'storage_engine'
         if self._has_setting('STORAGE_ENGINE') and self._get_setting('STORAGE_ENGINE'):
-            cursor.execute("SET storage_engine=%s;" % self._get_setting('STORAGE_ENGINE'))
+            cursor.execute("SET %s=%s;" % (engine_var, self._get_setting('STORAGE_ENGINE')))
 
     def start_transaction(self):
         super(DatabaseOperations, self).start_transaction()

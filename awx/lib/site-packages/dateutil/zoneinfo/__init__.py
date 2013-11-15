@@ -5,9 +5,12 @@ Copyright (c) 2003-2005  Gustavo Niemeyer <gustavo@niemeyer.net>
 This module offers extensions to the standard Python
 datetime module.
 """
-from dateutil.tz import tzfile
-from tarfile import TarFile
+import logging
 import os
+from subprocess import call
+from tarfile import TarFile
+
+from dateutil.tz import tzfile
 
 __author__ = "Tomi Pieviläinen <tomi.pievilainen@iki.fi>"
 __license__ = "Simplified BSD"
@@ -58,6 +61,11 @@ def gettz(name):
     return tzinfo
 
 def rebuild(filename, tag=None, format="gz"):
+    """Rebuild the internal timezone info in dateutil/zoneinfo/zoneinfo*tar*
+
+    filename is the timezone tarball from ftp.iana.org/tz.
+
+    """
     import tempfile, shutil
     tmpdir = tempfile.mkdtemp()
     zonedir = os.path.join(tmpdir, "zoneinfo")
@@ -75,7 +83,18 @@ def rebuild(filename, tag=None, format="gz"):
                     name == "leapseconds"):
                 tf.extract(name, tmpdir)
                 filepath = os.path.join(tmpdir, name)
-                os.system("zic -d %s %s" % (zonedir, filepath))
+                try:
+                    # zic will return errors for nontz files in the package
+                    # such as the Makefile or README, so check_call cannot
+                    # be used (or at least extra checks would be needed)
+                    call(["zic", "-d", zonedir, filepath])
+                except OSError as e:
+                    if e.errno == 2:
+                        logging.error(
+                            "Could not find zic. Perhaps you need to install "
+                            "libc-bin or some other package that provides it, "
+                            "or it's not in your PATH?")
+                    raise
         tf.close()
         target = os.path.join(moduledir, targetname)
         for entry in os.listdir(moduledir):

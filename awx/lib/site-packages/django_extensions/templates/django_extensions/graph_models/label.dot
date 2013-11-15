@@ -1,0 +1,30 @@
+{% load indent_text %}{% if use_subgraph %}  subgraph {{ graph.cluster_app_name }} {
+    label=<
+          <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+          <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER">
+          <FONT FACE="Helvetica Bold" COLOR="Black" POINT-SIZE="12">
+          {{ graph.app_name }}
+          </FONT>
+          </TD></TR>
+          </TABLE>
+          >
+    color=olivedrab4
+    style="rounded"{% endif %}
+{% indentby 2 if use_subgraph %}{% for model in graph.models %}
+  {{ model.app_name }}_{{ model.name }} [label=<
+    <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+    <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+    <FONT FACE="Helvetica Bold" COLOR="white">
+    {{ model.label }}{% if model.abstracts %}<BR/>&lt;<FONT FACE="Helvetica Italic">{{ model.abstracts|join:"," }}</FONT>&gt;{% endif %}
+    </FONT></TD></TR>
+  {% if not disable_fields %}{% for field in model.fields %}
+    <TR><TD ALIGN="LEFT" BORDER="0">
+    <FONT {% if not field.primary_key and field.blank %}COLOR="#7B7B7B" {% endif %}FACE="Helvetica {% if field.abstract %}Italic{% endif %}{% if field.relation or field.primary_key %}Bold{% endif %}">{{ field.label }}</FONT>
+    </TD><TD ALIGN="LEFT">
+    <FONT {% if not field.primary_key and field.blank %}COLOR="#7B7B7B" {% endif %}FACE="Helvetica {% if field.abstract %}Italic{% endif %}{% if field.relation or field.primary_key %}Bold{% endif %}">{{ field.type }}</FONT>
+    </TD></TR>
+  {% endfor %}{% endif %}
+    </TABLE>
+    >]
+{% endfor %}{% endindentby %}
+{% if use_subgraph %}  }{% endif %}

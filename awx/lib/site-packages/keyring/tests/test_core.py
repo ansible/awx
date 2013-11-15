@@ -72,7 +72,7 @@ class CoreTestCase(unittest.TestCase):
         """
         result = keyring.core.get_password("test", "user")
         backend.get_password.assert_called_once_with('test', 'user')
-        assert result is not None
+        self.assertIsNotNone(result)
 
     @mock_global_backend
     def test_delete_password(self, backend):

@@ -1,43 +1,38 @@
-/*****************************************************************************
- * jQuery autocomplete
- ****************************************************************************/
-.ac_results {
-    padding: 0px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    overflow: hidden;
-    z-index: 99999;
-    text-align: left;
+/**
+ * @fileOverview CSS for jquery-autocomplete, the jQuery Autocompleter
+ * @author <a href="mailto:dylan@dyve.net">Dylan Verheul</a>
+ * @license MIT | GPL | Apache 2.0, see LICENSE.txt
+ * @see https://github.com/dyve/jquery-autocomplete
+ */
+.acResults {
+	padding: 0px;
+	border: 1px solid WindowFrame;
+	background-color: Window;
+	overflow: hidden;
 }
 
-.ac_results ul {
-    width: 100%;
-    list-style-position: outside;
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.acResults ul {
+	margin: 0px;
+	padding: 0px;
+	list-style-position: outside;
+	list-style: none;	
 }
 
-.ac_results li {
-    margin: 0px;
-    padding: 3px 5px;
-    cursor: default;
-    display: block;
-    font: menu;
-    font-size: 12px;
-    line-height: 14px;
-    overflow: hidden;
+.acResults ul li {
+	margin: 0px;
+	padding: 2px 5px;
+	cursor: pointer;
+	display: block;
+	font: menu;
+	font-size: 12px;
+	overflow: hidden;
 }
 
-.ac_loading {
-    background: white url('../img/indicator.gif') right center no-repeat;
+.acLoading {
+	background : url('../img/indicator.gif') right center no-repeat;
 }
 
-.ac_odd {
-    background-color: #eee;
-}
-
-.ac_over {
-    background-color: #999;
-    color: white;
+.acSelect {
+	background-color: Highlight;
+	color: HighlightText;
 }

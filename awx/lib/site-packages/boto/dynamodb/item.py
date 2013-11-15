@@ -50,11 +50,11 @@ class Item(dict):
             if range_key == None:
                 range_key = attrs.get(self._range_key_name, None)
             self[self._range_key_name] = range_key
+        self._updates = {}
         for key, value in attrs.items():
             if key != self._hash_key_name and key != self._range_key_name:
                 self[key] = value
         self.consumed_units = 0
-        self._updates = {}
 
     @property
     def hash_key(self):

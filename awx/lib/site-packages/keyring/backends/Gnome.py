@@ -10,6 +10,7 @@ except ImportError:
 from keyring.backend import KeyringBackend
 from keyring.errors import PasswordSetError, PasswordDeleteError
 from keyring.util import properties
+from keyring.py27compat import unicode_str
 
 class Keyring(KeyringBackend):
     """Gnome Keyring"""
@@ -71,7 +72,7 @@ class Keyring(KeyringBackend):
             return None
 
         secret = items[0].secret
-        return secret if isinstance(secret, unicode) else secret.decode('utf-8')
+        return secret if isinstance(secret, unicode_str) else secret.decode('utf-8')
 
     def set_password(self, service, username, password):
         """Set password for the username of the service

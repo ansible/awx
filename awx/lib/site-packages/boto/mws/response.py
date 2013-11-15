@@ -33,20 +33,30 @@ class ComplexType(dict):
 
 class DeclarativeType(object):
     def __init__(self, _hint=None, **kw):
+        self._value = None
         if _hint is not None:
             self._hint = _hint
-        else:
-            class JITResponse(ResponseElement):
-                pass
-            self._hint = JITResponse
-            for name, value in kw.items():
-                setattr(self._hint, name, value)
-        self._value = None
+            return
+
+        class JITResponse(ResponseElement):
+            pass
+        self._hint = JITResponse
+        self._hint.__name__ = 'JIT_{0}/{1}'.format(self.__class__.__name__,
+                                                   hex(id(self._hint))[2:])
+        for name, value in kw.items():
+            setattr(self._hint, name, value)
+
+    def __repr__(self):
+        parent = getattr(self, '_parent', None)
+        return '<{0}_{1}/{2}_{3}>'.format(self.__class__.__name__,
+                                          parent and parent._name or '?',
+                                          getattr(self, '_name', '?'),
+                                          hex(id(self.__class__)))
 
     def setup(self, parent, name, *args, **kw):
         self._parent = parent
         self._name = name
-        self._clone = self.__class__(self._hint)
+        self._clone = self.__class__(_hint=self._hint)
         self._clone._parent = parent
         self._clone._name = name
         setattr(self._parent, self._name, self._clone)
@@ -58,10 +68,7 @@ class DeclarativeType(object):
         raise NotImplemented
 
     def teardown(self, *args, **kw):
-        if self._value is None:
-            delattr(self._parent, self._name)
-        else:
-            setattr(self._parent, self._name, self._value)
+        setattr(self._parent, self._name, self._value)
 
 
 class Element(DeclarativeType):
@@ -78,11 +85,6 @@ class SimpleList(DeclarativeType):
         DeclarativeType.__init__(self, *args, **kw)
         self._value = []
 
-    def teardown(self, *args, **kw):
-        if self._value == []:
-            self._value = None
-        DeclarativeType.teardown(self, *args, **kw)
-
     def start(self, *args, **kw):
         return None
 
@@ -93,35 +95,46 @@ class SimpleList(DeclarativeType):
 class ElementList(SimpleList):
     def start(self, *args, **kw):
         value = self._hint(parent=self._parent, **kw)
-        self._value += [value]
-        return self._value[-1]
+        self._value.append(value)
+        return value
 
     def end(self, *args, **kw):
         pass
 
 
-class MemberList(ElementList):
-    def __init__(self, *args, **kw):
-        self._this = kw.get('this')
-        ElementList.__init__(self, *args, **kw)
-
-    def start(self, attrs={}, **kw):
-        Class = self._this or self._parent._type_for(self._name, attrs)
-        if issubclass(self._hint, ResponseElement):
-            ListClass = ElementList
+class MemberList(Element):
+    def __init__(self, _member=None, _hint=None, *args, **kw):
+        message = 'Invalid `member` specification in {0}'.format(self.__class__.__name__)
+        assert 'member' not in kw, message
+        if _member is None:
+            if _hint is None:
+                Element.__init__(self, *args, member=ElementList(**kw))
+            else:
+                Element.__init__(self, _hint=_hint)
         else:
-            ListClass = SimpleList
-        setattr(Class, Class._member, ListClass(self._hint))
-        self._value = Class(attrs=attrs, parent=self._parent, **kw)
-        return self._value
+            if _hint is None:
+                if issubclass(_member, DeclarativeType):
+                    member = _member(**kw)
+                else:
+                    member = ElementList(_member, **kw)
+                Element.__init__(self, *args, member=member)
+            else:
+                message = 'Nonsensical {0} hint {1!r}'.format(self.__class__.__name__,
+                                                              _hint)
+                raise AssertionError(message)
 
-    def end(self, *args, **kw):
-        self._value = getattr(self._value, self._value._member)
-        ElementList.end(self, *args, **kw)
+    def teardown(self, *args, **kw):
+        if self._value is None:
+            self._value = []
+        else:
+            if isinstance(self._value.member, DeclarativeType):
+                self._value.member = []
+            self._value = self._value.member
+        Element.teardown(self, *args, **kw)
 
 
-def ResponseFactory(action):
-    result = globals().get(action + 'Result', ResponseElement)
+def ResponseFactory(action, force=None):
+    result = force or globals().get(action + 'Result', ResponseElement)
 
     class MWSResponse(Response):
         _name = action + 'Response'
@@ -141,18 +154,17 @@ def strip_namespace(func):
 
 class ResponseElement(dict):
     _override = {}
-    _member = 'member'
     _name = None
     _namespace = None
 
-    def __init__(self, connection=None, name=None, parent=None, attrs={}):
+    def __init__(self, connection=None, name=None, parent=None, attrs=None):
         if parent is not None and self._namespace is None:
             self._namespace = parent._namespace
         if connection is not None:
             self._connection = connection
         self._name = name or self._name or self.__class__.__name__
         self._declared('setup', attrs=attrs)
-        dict.__init__(self, attrs.copy())
+        dict.__init__(self, attrs and attrs.copy() or {})
 
     def _declared(self, op, **kw):
         def inherit(obj):
@@ -177,7 +189,7 @@ class ResponseElement(dict):
         do_show = lambda pair: not pair[0].startswith('_')
         attrs = filter(do_show, self.__dict__.items())
         name = self.__class__.__name__
-        if name == 'JITResponse':
+        if name.startswith('JIT_'):
             name = '^{0}^'.format(self._name or '')
         elif name == 'MWSResponse':
             name = '^{0}^'.format(self._name or name)
@@ -192,7 +204,7 @@ class ResponseElement(dict):
         attribute = getattr(self, name, None)
         if isinstance(attribute, DeclarativeType):
             return attribute.start(name=name, attrs=attrs,
-                                              connection=connection)
+                                   connection=connection)
         elif attrs.getLength():
             setattr(self, name, ComplexType(attrs.copy()))
         else:
@@ -316,7 +328,7 @@ class CreateInboundShipmentPlanResult(ResponseElement):
 
 
 class ListInboundShipmentsResult(ResponseElement):
-    ShipmentData = MemberList(Element(ShipFromAddress=Element()))
+    ShipmentData = MemberList(ShipFromAddress=Element())
 
 
 class ListInboundShipmentsByNextTokenResult(ListInboundShipmentsResult):
@@ -334,8 +346,8 @@ class ListInboundShipmentItemsByNextTokenResult(ListInboundShipmentItemsResult):
 class ListInventorySupplyResult(ResponseElement):
     InventorySupplyList = MemberList(
         EarliestAvailability=Element(),
-        SupplyDetail=MemberList(\
-            EarliestAvailabileToPick=Element(),
+        SupplyDetail=MemberList(
+            EarliestAvailableToPick=Element(),
             LatestAvailableToPick=Element(),
         )
     )
@@ -431,13 +443,9 @@ class FulfillmentPreviewItem(ResponseElement):
 
 class FulfillmentPreview(ResponseElement):
     EstimatedShippingWeight = Element(ComplexWeight)
-    EstimatedFees = MemberList(\
-        Element(\
-            Amount=Element(ComplexAmount),
-        ),
-    )
+    EstimatedFees = MemberList(Amount=Element(ComplexAmount))
     UnfulfillablePreviewItems = MemberList(FulfillmentPreviewItem)
-    FulfillmentPreviewShipments = MemberList(\
+    FulfillmentPreviewShipments = MemberList(
         FulfillmentPreviewItems=MemberList(FulfillmentPreviewItem),
     )
 
@@ -448,15 +456,14 @@ class GetFulfillmentPreviewResult(ResponseElement):
 
 class FulfillmentOrder(ResponseElement):
     DestinationAddress = Element()
-    NotificationEmailList = MemberList(str)
+    NotificationEmailList = MemberList(SimpleList)
 
 
 class GetFulfillmentOrderResult(ResponseElement):
     FulfillmentOrder = Element(FulfillmentOrder)
-    FulfillmentShipment = MemberList(Element(\
-            FulfillmentShipmentItem=MemberList(),
-            FulfillmentShipmentPackage=MemberList(),
-        )
+    FulfillmentShipment = MemberList(
+        FulfillmentShipmentItem=MemberList(),
+        FulfillmentShipmentPackage=MemberList(),
     )
     FulfillmentOrderItem = MemberList()
 
@@ -467,6 +474,11 @@ class ListAllFulfillmentOrdersResult(ResponseElement):
 
 class ListAllFulfillmentOrdersByNextTokenResult(ListAllFulfillmentOrdersResult):
     pass
+
+
+class GetPackageTrackingDetailsResult(ResponseElement):
+    ShipToAddress = Element()
+    TrackingEvents = MemberList(EventAddress=Element())
 
 
 class Image(ResponseElement):
@@ -533,17 +545,17 @@ class Product(ResponseElement):
     _namespace = 'ns2'
     Identifiers = Element(MarketplaceASIN=Element(),
                           SKUIdentifier=Element())
-    AttributeSets = Element(\
+    AttributeSets = Element(
         ItemAttributes=ElementList(ItemAttributes),
     )
-    Relationships = Element(\
+    Relationships = Element(
         VariationParent=ElementList(VariationRelationship),
     )
     CompetitivePricing = ElementList(CompetitivePricing)
-    SalesRankings = Element(\
+    SalesRankings = Element(
         SalesRank=ElementList(SalesRank),
     )
-    LowestOfferListings = Element(\
+    LowestOfferListings = Element(
         LowestOfferListing=ElementList(LowestOfferListing),
     )
 
@@ -567,6 +579,10 @@ class GetMatchingProductResponse(ProductsBulkOperationResponse):
 
 class GetMatchingProductForIdResult(ListMatchingProductsResult):
     pass
+
+
+class GetMatchingProductForIdResponse(ResponseResultList):
+    _ResultClass = GetMatchingProductForIdResult
 
 
 class GetCompetitivePricingForSKUResponse(ProductsBulkOperationResponse):
@@ -607,9 +623,9 @@ class GetProductCategoriesForASINResult(GetProductCategoriesResult):
 class Order(ResponseElement):
     OrderTotal = Element(ComplexMoney)
     ShippingAddress = Element()
-    PaymentExecutionDetail = Element(\
-        PaymentExecutionDetailItem=ElementList(\
-            PaymentExecutionDetailItem=Element(\
+    PaymentExecutionDetail = Element(
+        PaymentExecutionDetailItem=ElementList(
+            PaymentExecutionDetailItem=Element(
                 Payment=Element(ComplexMoney)
             )
         )

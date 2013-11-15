@@ -1,52 +1,9 @@
-"""
-Sync Media to S3
-================
-
-Django command that scans all files in your settings.MEDIA_ROOT folder and
-uploads them to S3 with the same directory structure.
-
-This command can optionally do the following but it is off by default:
-* gzip compress any CSS and Javascript files it finds and adds the appropriate
-  'Content-Encoding' header.
-* set a far future 'Expires' header for optimal caching.
-
-Note: This script requires the Python boto library and valid Amazon Web
-Services API keys.
-
-Required settings.py variables:
-AWS_ACCESS_KEY_ID = ''
-AWS_SECRET_ACCESS_KEY = ''
-AWS_BUCKET_NAME = ''
-
-When you call this command with the `--renamegzip` param, it will add
-the '.gz' extension to the file name. But Safari just doesn't recognize
-'.gz' files and your site won't work on it! To fix this problem, you can
-set any other extension (like .jgz) in the `SYNC_S3_RENAME_GZIP_EXT`
-variable.
-
-Command options are:
-  -p PREFIX, --prefix=PREFIX
-                        The prefix to prepend to the path on S3.
-  --gzip                Enables gzipping CSS and Javascript files.
-  --expires             Enables setting a far future expires header.
-  --force               Skip the file mtime check to force upload of all
-                        files.
-  --filter-list         Override default directory and file exclusion
-                        filters. (enter as comma seperated line)
-  --renamegzip          Enables renaming of gzipped files by appending '.gz'.
-                        to the original file name. This way your original
-                        assets will not be replaced by the gzipped ones.
-                        You can change the extension setting the
-                        `SYNC_S3_RENAME_GZIP_EXT` var in your settings.py
-                        file.
-  --invalidate          Invalidates the objects in CloudFront after uploaading
-                        stuff to s3.
+import warnings
+warnings.simplefilter('default')
+warnings.warn("sync_media_s3 is deprecated and will be removed on march 2014; use sync_s3 instead.",
+              PendingDeprecationWarning)
 
 
-TODO:
- * Use fnmatch (or regex) to allow more complex FILTER_LIST rules.
-
-"""
 import datetime
 import email
 import mimetypes
@@ -68,8 +25,9 @@ from django.core.management.base import BaseCommand, CommandError
 try:
     import boto
     import boto.exception
+    HAS_BOTO = True
 except ImportError:
-    raise ImportError("The boto Python library is not installed.")
+    HAS_BOTO = False
 
 
 class Command(BaseCommand):
@@ -127,6 +85,8 @@ class Command(BaseCommand):
     can_import_settings = True
 
     def handle(self, *args, **options):
+        if not HAS_BOTO:
+            raise ImportError("The boto Python library is not installed.")
 
         # Check for AWS keys in settings
         if not hasattr(settings, 'AWS_ACCESS_KEY_ID') or not hasattr(settings, 'AWS_SECRET_ACCESS_KEY'):
@@ -330,11 +290,3 @@ class Command(BaseCommand):
                 self.uploaded_files.append(file_key)
 
             file_obj.close()
-
-# Backwards compatibility for Django r9110
-if not [opt for opt in Command.option_list if opt.dest == 'verbosity']:
-    Command.option_list += (
-        make_option('-v', '--verbosity',
-                    dest='verbosity', default=1, action='count',
-                    help="Verbose mode. Multiple -v options increase the verbosity."),
-    )

@@ -47,6 +47,9 @@ def regions():
             RegionInfo(name='eu-west-1',
                        endpoint='glacier.eu-west-1.amazonaws.com',
                        connection_cls=Layer2),
+            RegionInfo(name='ap-southeast-2',
+                       endpoint='glacier.ap-southeast-2.amazonaws.com',
+                       connection_cls=Layer2),
             ]
 
 

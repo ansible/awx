@@ -44,10 +44,10 @@ import tarfile
 
 import fixtures
 
-from pbr import tests
+from pbr.tests import base
 
 
-class TestCore(tests.BaseTestCase):
+class TestCore(base.BaseTestCase):
 
     cmd_names = ('pbr_test_cmd', 'pbr_test_cmd_with_class')
 
@@ -122,7 +122,7 @@ class TestCore(tests.BaseTestCase):
         self.check_script_install(stdout)
 
 
-class TestGitSDist(tests.BaseTestCase):
+class TestGitSDist(base.BaseTestCase):
 
     def setUp(self):
         super(TestGitSDist, self).setUp()

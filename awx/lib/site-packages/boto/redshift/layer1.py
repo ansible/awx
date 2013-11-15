@@ -31,56 +31,31 @@ from boto.redshift import exceptions
 class RedshiftConnection(AWSQueryConnection):
     """
     Amazon Redshift **Overview**
-    This is the Amazon Redshift API Reference. This guide provides
-    descriptions and samples of the Amazon Redshift API.
+    This is an interface reference for Amazon Redshift. It contains
+    documentation for one of the programming or command line
+    interfaces you can use to manage Amazon Redshift clusters. Note
+    that Amazon Redshift is asynchronous, which means that some
+    interfaces may require techniques, such as polling or asynchronous
+    callback handlers, to determine when a command has been applied.
+    In this reference, the parameter descriptions indicate whether a
+    change is applied immediately, on the next instance reboot, or
+    during the next maintenance window. For a summary of the Amazon
+    Redshift cluster management interfaces, go to `Using the Amazon
+    Redshift Management Interfaces `_.
 
     Amazon Redshift manages all the work of setting up, operating, and
     scaling a data warehouse: provisioning capacity, monitoring and
     backing up the cluster, and applying patches and upgrades to the
     Amazon Redshift engine. You can focus on using your data to
     acquire new insights for your business and customers.
-    **Are You a First-Time Amazon Redshift User?**
+
     If you are a first-time user of Amazon Redshift, we recommend that
-    you begin by reading the following sections:
+    you begin by reading the The `Amazon Redshift Getting Started
+    Guide`_
 
-
-
-    + Service Highlights and Pricing - The `product detail page`_
-      provides the Amazon Redshift value proposition, service highlights
-      and pricing.
-    + Getting Started - The `Getting Started Guide`_ includes an
-      example that walks you through the process of creating a cluster,
-      creating database tables, uploading data, and testing queries.
-
-
-
-    After you complete the Getting Started Guide, we recommend that
-    you explore one of the following guides:
-
-
-    + Cluster Management - If you are responsible for managing Amazon
-      Redshift clusters, the `Cluster Management Guide`_ shows you how
-      to create and manage Amazon Redshift clusters. If you are an
-      application developer, you can use the Amazon Redshift Query API
-      to manage clusters programmatically. Additionally, the AWS SDK
-      libraries that wrap the underlying Amazon Redshift API simplify
-      your programming tasks. If you prefer a more interactive way of
-      managing clusters, you can use the Amazon Redshift console and the
-      AWS command line interface (AWS CLI). For information about the
-      API and CLI, go to the following manuals :
-
-        + API Reference ( this document )
-        + `CLI Reference`_
-
-    + Amazon Redshift Database Database Developer - If you are a
-      database developer, the Amazon Redshift `Database Developer
-      Guide`_ explains how to design, build, query, and maintain the
-      databases that make up your data warehouse.
-
-
-    For a list of supported AWS regions where you can provision a
-    cluster, go to the `Regions and Endpoints`_ section in the Amazon
-    Web Services Glossary .
+    If you are a database developer, the `Amazon Redshift Database
+    Developer Guide`_ explains how to design, build, query, and
+    maintain the databases that make up your data warehouse.
     """
     APIVersion = "2012-12-01"
     DefaultRegionName = "us-east-1"
@@ -88,48 +63,75 @@ class RedshiftConnection(AWSQueryConnection):
     ResponseError = JSONResponseError
 
     _faults = {
-        "ClusterNotFound": exceptions.ClusterNotFoundFault,
-        "InvalidClusterSubnetState": exceptions.InvalidClusterSubnetStateFault,
-        "InvalidClusterParameterGroupState": exceptions.InvalidClusterParameterGroupStateFault,
-        "ReservedNodeQuotaExceeded": exceptions.ReservedNodeQuotaExceededFault,
-        "InvalidClusterState": exceptions.InvalidClusterStateFault,
-        "InvalidRestore": exceptions.InvalidRestoreFault,
-        "ClusterSecurityGroupAlreadyExists": exceptions.ClusterSecurityGroupAlreadyExistsFault,
-        "NumberOfNodesQuotaExceeded": exceptions.NumberOfNodesQuotaExceededFault,
-        "ReservedNodeOfferingNotFound": exceptions.ReservedNodeOfferingNotFoundFault,
-        "InsufficientClusterCapacity": exceptions.InsufficientClusterCapacityFault,
-        "UnauthorizedOperation": exceptions.UnauthorizedOperationFault,
-        "ClusterQuotaExceeded": exceptions.ClusterQuotaExceededFault,
-        "InvalidVPCNetworkState": exceptions.InvalidVPCNetworkStateFault,
-        "ClusterSnapshotNotFound": exceptions.ClusterSnapshotNotFoundFault,
-        "AuthorizationQuotaExceeded": exceptions.AuthorizationQuotaExceededFault,
-        "InvalidSubne": exceptions.InvalidSubnet,
-        "ResizeNotFound": exceptions.ResizeNotFoundFault,
-        "ClusterSubnetGroupNotFound": exceptions.ClusterSubnetGroupNotFoundFault,
-        "ClusterSnapshotQuotaExceeded": exceptions.ClusterSnapshotQuotaExceededFault,
-        "AccessToSnapshotDenied": exceptions.AccessToSnapshotDeniedFault,
-        "InvalidClusterSecurityGroupState": exceptions.InvalidClusterSecurityGroupStateFault,
-        "NumberOfNodesPerClusterLimitExceeded": exceptions.NumberOfNodesPerClusterLimitExceededFault,
-        "ClusterSubnetQuotaExceeded": exceptions.ClusterSubnetQuotaExceededFault,
-        "UnsupportedOption": exceptions.UnsupportedOptionFault,
-        "ClusterSecurityGroupNotFound": exceptions.ClusterSecurityGroupNotFoundFault,
-        "ClusterAlreadyExists": exceptions.ClusterAlreadyExistsFault,
-        "ClusterSnapshotAlreadyExists": exceptions.ClusterSnapshotAlreadyExistsFault,
-        "ReservedNodeAlreadyExists": exceptions.ReservedNodeAlreadyExistsFault,
-        "ClusterSubnetGroupQuotaExceeded": exceptions.ClusterSubnetGroupQuotaExceededFault,
-        "ClusterParameterGroupNotFound": exceptions.ClusterParameterGroupNotFoundFault,
-        "AuthorizationNotFound": exceptions.AuthorizationNotFoundFault,
-        "ClusterSecurityGroupQuotaExceeded": exceptions.ClusterSecurityGroupQuotaExceededFault,
-        "AuthorizationAlreadyExists": exceptions.AuthorizationAlreadyExistsFault,
-        "InvalidClusterSnapshotState": exceptions.InvalidClusterSnapshotStateFault,
-        "ClusterParameterGroupQuotaExceeded": exceptions.ClusterParameterGroupQuotaExceededFault,
-        "ClusterSubnetGroupAlreadyExists": exceptions.ClusterSubnetGroupAlreadyExistsFault,
-        "ReservedNodeNotFound": exceptions.ReservedNodeNotFoundFault,
-        "InvalidClusterSubnetGroupState": exceptions.InvalidClusterSubnetGroupStateFault,
-        "ClusterParameterGroupAlreadyExists": exceptions.ClusterParameterGroupAlreadyExistsFault,
+        "SnapshotCopyAlreadyDisabled": exceptions.SnapshotCopyAlreadyDisabled,
+        "ClusterNotFound": exceptions.ClusterNotFound,
+        "UnknownSnapshotCopyRegion": exceptions.UnknownSnapshotCopyRegion,
+        "InvalidClusterSubnetState": exceptions.InvalidClusterSubnetState,
+        "InvalidSubnet": exceptions.InvalidSubnet,
+        "ReservedNodeQuotaExceeded": exceptions.ReservedNodeQuotaExceeded,
+        "InvalidClusterState": exceptions.InvalidClusterState,
+        "HsmClientCertificateQuotaExceeded": exceptions.HsmClientCertificateQuotaExceeded,
+        "SubscriptionCategoryNotFound": exceptions.SubscriptionCategoryNotFound,
+        "HsmClientCertificateNotFound": exceptions.HsmClientCertificateNotFound,
+        "SubscriptionEventIdNotFound": exceptions.SubscriptionEventIdNotFound,
+        "ClusterSecurityGroupAlreadyExists": exceptions.ClusterSecurityGroupAlreadyExists,
+        "HsmConfigurationAlreadyExists": exceptions.HsmConfigurationAlreadyExists,
+        "NumberOfNodesQuotaExceeded": exceptions.NumberOfNodesQuotaExceeded,
+        "ReservedNodeOfferingNotFound": exceptions.ReservedNodeOfferingNotFound,
+        "BucketNotFound": exceptions.BucketNotFound,
+        "InsufficientClusterCapacity": exceptions.InsufficientClusterCapacity,
+        "InvalidRestore": exceptions.InvalidRestore,
+        "UnauthorizedOperation": exceptions.UnauthorizedOperation,
+        "ClusterQuotaExceeded": exceptions.ClusterQuotaExceeded,
+        "InvalidVPCNetworkState": exceptions.InvalidVPCNetworkState,
+        "ClusterSnapshotNotFound": exceptions.ClusterSnapshotNotFound,
+        "AuthorizationQuotaExceeded": exceptions.AuthorizationQuotaExceeded,
+        "InvalidHsmClientCertificateState": exceptions.InvalidHsmClientCertificateState,
+        "SNSTopicArnNotFound": exceptions.SNSTopicArnNotFound,
+        "ResizeNotFound": exceptions.ResizeNotFound,
+        "ClusterSubnetGroupNotFound": exceptions.ClusterSubnetGroupNotFound,
+        "SNSNoAuthorization": exceptions.SNSNoAuthorization,
+        "ClusterSnapshotQuotaExceeded": exceptions.ClusterSnapshotQuotaExceeded,
+        "AccessToSnapshotDenied": exceptions.AccessToSnapshotDenied,
+        "InvalidClusterSecurityGroupState": exceptions.InvalidClusterSecurityGroupState,
+        "NumberOfNodesPerClusterLimitExceeded": exceptions.NumberOfNodesPerClusterLimitExceeded,
+        "ClusterSubnetQuotaExceeded": exceptions.ClusterSubnetQuotaExceeded,
+        "SNSInvalidTopic": exceptions.SNSInvalidTopic,
+        "ClusterSecurityGroupNotFound": exceptions.ClusterSecurityGroupNotFound,
+        "InvalidElasticIp": exceptions.InvalidElasticIp,
+        "InvalidClusterParameterGroupState": exceptions.InvalidClusterParameterGroupState,
+        "InvalidHsmConfigurationState": exceptions.InvalidHsmConfigurationState,
+        "ClusterAlreadyExists": exceptions.ClusterAlreadyExists,
+        "HsmConfigurationQuotaExceeded": exceptions.HsmConfigurationQuotaExceeded,
+        "ClusterSnapshotAlreadyExists": exceptions.ClusterSnapshotAlreadyExists,
+        "SubscriptionSeverityNotFound": exceptions.SubscriptionSeverityNotFound,
+        "SourceNotFound": exceptions.SourceNotFound,
+        "ReservedNodeAlreadyExists": exceptions.ReservedNodeAlreadyExists,
+        "ClusterSubnetGroupQuotaExceeded": exceptions.ClusterSubnetGroupQuotaExceeded,
+        "ClusterParameterGroupNotFound": exceptions.ClusterParameterGroupNotFound,
+        "InvalidS3BucketName": exceptions.InvalidS3BucketName,
+        "InvalidS3KeyPrefix": exceptions.InvalidS3KeyPrefix,
+        "SubscriptionAlreadyExist": exceptions.SubscriptionAlreadyExist,
+        "HsmConfigurationNotFound": exceptions.HsmConfigurationNotFound,
+        "AuthorizationNotFound": exceptions.AuthorizationNotFound,
+        "ClusterSecurityGroupQuotaExceeded": exceptions.ClusterSecurityGroupQuotaExceeded,
         "SubnetAlreadyInUse": exceptions.SubnetAlreadyInUse,
-        "AccessToSnapshotDenied": exceptions.AccessToSnapshotDeniedFault,
-        "UnauthorizedOperation": exceptions.UnauthorizedOperationFault,
+        "EventSubscriptionQuotaExceeded": exceptions.EventSubscriptionQuotaExceeded,
+        "AuthorizationAlreadyExists": exceptions.AuthorizationAlreadyExists,
+        "InvalidClusterSnapshotState": exceptions.InvalidClusterSnapshotState,
+        "ClusterParameterGroupQuotaExceeded": exceptions.ClusterParameterGroupQuotaExceeded,
+        "SnapshotCopyDisabled": exceptions.SnapshotCopyDisabled,
+        "ClusterSubnetGroupAlreadyExists": exceptions.ClusterSubnetGroupAlreadyExists,
+        "ReservedNodeNotFound": exceptions.ReservedNodeNotFound,
+        "HsmClientCertificateAlreadyExists": exceptions.HsmClientCertificateAlreadyExists,
+        "InvalidClusterSubnetGroupState": exceptions.InvalidClusterSubnetGroupState,
+        "SubscriptionNotFound": exceptions.SubscriptionNotFound,
+        "InsufficientS3BucketPolicy": exceptions.InsufficientS3BucketPolicy,
+        "ClusterParameterGroupAlreadyExists": exceptions.ClusterParameterGroupAlreadyExists,
+        "UnsupportedOption": exceptions.UnsupportedOption,
+        "CopyToRegionDisabled": exceptions.CopyToRegionDisabled,
+        "SnapshotCopyAlreadyEnabled": exceptions.SnapshotCopyAlreadyEnabled,
+        "IncompatibleOrderableOptions": exceptions.IncompatibleOrderableOptions,
     }
 
 
@@ -138,7 +140,8 @@ class RedshiftConnection(AWSQueryConnection):
         if not region:
             region = RegionInfo(self, self.DefaultRegionName,
                                 self.DefaultRegionEndpoint)
-        kwargs['host'] = region.endpoint
+        if 'host' not in kwargs:
+            kwargs['host'] = region.endpoint
         AWSQueryConnection.__init__(self, **kwargs)
         self.region = region
 
@@ -218,7 +221,10 @@ class RedshiftConnection(AWSQueryConnection):
             is authorized to restore.
 
         :type snapshot_cluster_identifier: string
-        :param snapshot_cluster_identifier:
+        :param snapshot_cluster_identifier: The identifier of the cluster the
+            snapshot was created from. This parameter is required if your IAM
+            user has a policy containing a snapshot resource element that
+            specifies anything other than * for the cluster name.
 
         :type account_with_restore_access: string
         :param account_with_restore_access: The identifier of the AWS customer
@@ -267,6 +273,15 @@ class RedshiftConnection(AWSQueryConnection):
 
         :type source_snapshot_cluster_identifier: string
         :param source_snapshot_cluster_identifier:
+        The identifier of the cluster the source snapshot was created from.
+            This parameter is required if your IAM user has a policy containing
+            a snapshot resource element that specifies anything other than *
+            for the cluster name.
+
+        Constraints:
+
+
+        + Must be the identifier for a valid cluster.
 
         :type target_snapshot_identifier: string
         :param target_snapshot_identifier:
@@ -304,7 +319,9 @@ class RedshiftConnection(AWSQueryConnection):
                        automated_snapshot_retention_period=None, port=None,
                        cluster_version=None, allow_version_upgrade=None,
                        number_of_nodes=None, publicly_accessible=None,
-                       encrypted=None):
+                       encrypted=None,
+                       hsm_client_certificate_identifier=None,
+                       hsm_configuration_identifier=None, elastic_ip=None):
         """
         Creates a new cluster. To create the cluster in virtual
         private cloud (VPC), you must provide cluster subnet group
@@ -323,7 +340,7 @@ class RedshiftConnection(AWSQueryConnection):
         To create additional databases after the cluster is created, connect to
             the cluster with a SQL client and use SQL commands to create a
             database. For more information, go to `Create a Database`_ in the
-            Amazon Redshift Developer Guide.
+            Amazon Redshift Database Developer Guide.
 
         Default: `dev`
 
@@ -334,7 +351,7 @@ class RedshiftConnection(AWSQueryConnection):
         + Must contain only lowercase letters.
         + Cannot be a word that is reserved by the service. A list of reserved
               words can be found in `Reserved Words`_ in the Amazon Redshift
-              Developer Guide.
+              Database Developer Guide.
 
         :type cluster_identifier: string
         :param cluster_identifier: A unique identifier for the cluster. You use
@@ -382,7 +399,7 @@ class RedshiftConnection(AWSQueryConnection):
         + Must be 1 - 128 alphanumeric characters.
         + First character must be a letter.
         + Cannot be a reserved word. A list of reserved words can be found in
-              `Reserved Words`_ in the Amazon Redshift Developer Guide.
+              `Reserved Words`_ in the Amazon Redshift Database Developer Guide.
 
         :type master_user_password: string
         :param master_user_password:
@@ -527,6 +544,23 @@ class RedshiftConnection(AWSQueryConnection):
         :param encrypted: If `True`, the data in cluster is encrypted at rest.
         Default: false
 
+        :type hsm_client_certificate_identifier: string
+        :param hsm_client_certificate_identifier: Specifies the name of the HSM
+            client certificate the Amazon Redshift cluster uses to retrieve the
+            data encryption keys stored in an HSM.
+
+        :type hsm_configuration_identifier: string
+        :param hsm_configuration_identifier: Specifies the name of the HSM
+            configuration that contains the information the Amazon Redshift
+            cluster can use to retrieve and store keys in an HSM.
+
+        :type elastic_ip: string
+        :param elastic_ip: The Elastic IP (EIP) address for the cluster.
+        Constraints: The cluster must be provisioned in EC2-VPC and publicly-
+            accessible through an Internet gateway. For more information about
+            provisioning clusters in EC2-VPC, go to `Supported Platforms to
+            Launch Your Cluster`_ in the Amazon Redshift Management Guide.
+
         """
         params = {
             'ClusterIdentifier': cluster_identifier,
@@ -571,6 +605,12 @@ class RedshiftConnection(AWSQueryConnection):
         if encrypted is not None:
             params['Encrypted'] = str(
                 encrypted).lower()
+        if hsm_client_certificate_identifier is not None:
+            params['HsmClientCertificateIdentifier'] = hsm_client_certificate_identifier
+        if hsm_configuration_identifier is not None:
+            params['HsmConfigurationIdentifier'] = hsm_configuration_identifier
+        if elastic_ip is not None:
+            params['ElasticIp'] = elastic_ip
         return self._make_request(
             action='CreateCluster',
             verb='POST',
@@ -756,6 +796,203 @@ class RedshiftConnection(AWSQueryConnection):
             verb='POST',
             path='/', params=params)
 
+    def create_event_subscription(self, subscription_name, sns_topic_arn,
+                                  source_type=None, source_ids=None,
+                                  event_categories=None, severity=None,
+                                  enabled=None):
+        """
+        Creates an Amazon Redshift event notification subscription.
+        This action requires an ARN (Amazon Resource Name) of an
+        Amazon SNS topic created by either the Amazon Redshift
+        console, the Amazon SNS console, or the Amazon SNS API. To
+        obtain an ARN with Amazon SNS, you must create a topic in
+        Amazon SNS and subscribe to the topic. The ARN is displayed in
+        the SNS console.
+
+        You can specify the source type, and lists of Amazon Redshift
+        source IDs, event categories, and event severities.
+        Notifications will be sent for all events you want that match
+        those criteria. For example, you can specify source type =
+        cluster, source ID = my-cluster-1 and mycluster2, event
+        categories = Availability, Backup, and severity = ERROR. The
+        subsription will only send notifications for those ERROR
+        events in the Availability and Backup categores for the
+        specified clusters.
+
+        If you specify both the source type and source IDs, such as
+        source type = cluster and source identifier = my-cluster-1,
+        notifiactions will be sent for all the cluster events for my-
+        cluster-1. If you specify a source type but do not specify a
+        source identifier, you will receive notice of the events for
+        the objects of that type in your AWS account. If you do not
+        specify either the SourceType nor the SourceIdentifier, you
+        will be notified of events generated from all Amazon Redshift
+        sources belonging to your AWS account. You must specify a
+        source type if you specify a source ID.
+
+        :type subscription_name: string
+        :param subscription_name:
+        The name of the event subscription to be created.
+
+        Constraints:
+
+
+        + Cannot be null, empty, or blank.
+        + Must contain from 1 to 255 alphanumeric characters or hyphens.
+        + First character must be a letter.
+        + Cannot end with a hyphen or contain two consecutive hyphens.
+
+        :type sns_topic_arn: string
+        :param sns_topic_arn: The Amazon Resource Name (ARN) of the Amazon SNS
+            topic used to transmit the event notifications. The ARN is created
+            by Amazon SNS when you create a topic and subscribe to it.
+
+        :type source_type: string
+        :param source_type: The type of source that will be generating the
+            events. For example, if you want to be notified of events generated
+            by a cluster, you would set this parameter to cluster. If this
+            value is not specified, events are returned for all Amazon Redshift
+            objects in your AWS account. You must specify a source type in
+            order to specify source IDs.
+        Valid values: cluster, cluster-parameter-group, cluster-security-group,
+            and cluster-snapshot.
+
+        :type source_ids: list
+        :param source_ids: A list of one or more identifiers of Amazon Redshift
+            source objects. All of the objects must be of the same type as was
+            specified in the source type parameter. The event subscription will
+            return only events generated by the specified objects. If not
+            specified, then events are returned for all objects within the
+            source type specified.
+        Example: my-cluster-1, my-cluster-2
+
+        Example: my-snapshot-20131010
+
+        :type event_categories: list
+        :param event_categories: Specifies the Amazon Redshift event categories
+            to be published by the event notification subscription.
+        Values: Configuration, Management, Monitoring, Security
+
+        :type severity: string
+        :param severity: Specifies the Amazon Redshift event severity to be
+            published by the event notification subscription.
+        Values: ERROR, INFO
+
+        :type enabled: boolean
+        :param enabled: A Boolean value; set to `True` to activate the
+            subscription, set to `False` to create the subscription but not
+            active it.
+
+        """
+        params = {
+            'SubscriptionName': subscription_name,
+            'SnsTopicArn': sns_topic_arn,
+        }
+        if source_type is not None:
+            params['SourceType'] = source_type
+        if source_ids is not None:
+            self.build_list_params(params,
+                                   source_ids,
+                                   'SourceIds.member')
+        if event_categories is not None:
+            self.build_list_params(params,
+                                   event_categories,
+                                   'EventCategories.member')
+        if severity is not None:
+            params['Severity'] = severity
+        if enabled is not None:
+            params['Enabled'] = str(
+                enabled).lower()
+        return self._make_request(
+            action='CreateEventSubscription',
+            verb='POST',
+            path='/', params=params)
+
+    def create_hsm_client_certificate(self,
+                                      hsm_client_certificate_identifier):
+        """
+        Creates an HSM client certificate that an Amazon Redshift
+        cluster will use to connect to the client's HSM in order to
+        store and retrieve the keys used to encrypt the cluster
+        databases.
+
+        The command returns a public key, which you must store in the
+        HSM. After creating the HSM certificate, you must create an
+        Amazon Redshift HSM configuration that provides a cluster the
+        information needed to store and retrieve database encryption
+        keys in the HSM. For more information, go to aLinkToHSMTopic
+        in the Amazon Redshift Management Guide.
+
+        :type hsm_client_certificate_identifier: string
+        :param hsm_client_certificate_identifier: The identifier to be assigned
+            to the new HSM client certificate that the cluster will use to
+            connect to the HSM to retrieve the database encryption keys.
+
+        """
+        params = {
+            'HsmClientCertificateIdentifier': hsm_client_certificate_identifier,
+        }
+        return self._make_request(
+            action='CreateHsmClientCertificate',
+            verb='POST',
+            path='/', params=params)
+
+    def create_hsm_configuration(self, hsm_configuration_identifier,
+                                 description, hsm_ip_address,
+                                 hsm_partition_name, hsm_partition_password,
+                                 hsm_server_public_certificate):
+        """
+        Creates an HSM configuration that contains the information
+        required by an Amazon Redshift cluster to store and retrieve
+        database encryption keys in a Hardware Storeage Module (HSM).
+        After creating the HSM configuration, you can specify it as a
+        parameter when creating a cluster. The cluster will then store
+        its encryption keys in the HSM.
+
+        Before creating an HSM configuration, you must have first
+        created an HSM client certificate. For more information, go to
+        aLinkToHSMTopic in the Amazon Redshift Management Guide.
+
+        :type hsm_configuration_identifier: string
+        :param hsm_configuration_identifier: The identifier to be assigned to
+            the new Amazon Redshift HSM configuration.
+
+        :type description: string
+        :param description: A text description of the HSM configuration to be
+            created.
+
+        :type hsm_ip_address: string
+        :param hsm_ip_address: The IP address that the Amazon Redshift cluster
+            must use to access the HSM.
+
+        :type hsm_partition_name: string
+        :param hsm_partition_name: The name of the partition in the HSM where
+            the Amazon Redshift clusters will store their database encryption
+            keys.
+
+        :type hsm_partition_password: string
+        :param hsm_partition_password: The password required to access the HSM
+            partition.
+
+        :type hsm_server_public_certificate: string
+        :param hsm_server_public_certificate: The public key used to access the
+            HSM client certificate, which was created by calling the Amazon
+            Redshift create HSM certificate command.
+
+        """
+        params = {
+            'HsmConfigurationIdentifier': hsm_configuration_identifier,
+            'Description': description,
+            'HsmIpAddress': hsm_ip_address,
+            'HsmPartitionName': hsm_partition_name,
+            'HsmPartitionPassword': hsm_partition_password,
+            'HsmServerPublicCertificate': hsm_server_public_certificate,
+        }
+        return self._make_request(
+            action='CreateHsmConfiguration',
+            verb='POST',
+            path='/', params=params)
+
     def delete_cluster(self, cluster_identifier,
                        skip_final_cluster_snapshot=None,
                        final_cluster_snapshot_identifier=None):
@@ -885,7 +1122,11 @@ class RedshiftConnection(AWSQueryConnection):
             `available` state.
 
         :type snapshot_cluster_identifier: string
-        :param snapshot_cluster_identifier:
+        :param snapshot_cluster_identifier: The unique identifier of the
+            cluster the snapshot was created from. This parameter is required
+            if your IAM user has a policy containing a snapshot resource
+            element that specifies anything other than * for the cluster name.
+        Constraints: Must be the name of valid cluster.
 
         """
         params = {'SnapshotIdentifier': snapshot_identifier, }
@@ -910,6 +1151,56 @@ class RedshiftConnection(AWSQueryConnection):
         }
         return self._make_request(
             action='DeleteClusterSubnetGroup',
+            verb='POST',
+            path='/', params=params)
+
+    def delete_event_subscription(self, subscription_name):
+        """
+        Deletes an Amazon Redshift event notification subscription.
+
+        :type subscription_name: string
+        :param subscription_name: The name of the Amazon Redshift event
+            notification subscription to be deleted.
+
+        """
+        params = {'SubscriptionName': subscription_name, }
+        return self._make_request(
+            action='DeleteEventSubscription',
+            verb='POST',
+            path='/', params=params)
+
+    def delete_hsm_client_certificate(self,
+                                      hsm_client_certificate_identifier):
+        """
+        Deletes the specified HSM client certificate.
+
+        :type hsm_client_certificate_identifier: string
+        :param hsm_client_certificate_identifier: The identifier of the HSM
+            client certificate to be deleted.
+
+        """
+        params = {
+            'HsmClientCertificateIdentifier': hsm_client_certificate_identifier,
+        }
+        return self._make_request(
+            action='DeleteHsmClientCertificate',
+            verb='POST',
+            path='/', params=params)
+
+    def delete_hsm_configuration(self, hsm_configuration_identifier):
+        """
+        Deletes the specified Amazon Redshift HSM configuration.
+
+        :type hsm_configuration_identifier: string
+        :param hsm_configuration_identifier: The identifier of the Amazon
+            Redshift HSM configuration to be deleted.
+
+        """
+        params = {
+            'HsmConfigurationIdentifier': hsm_configuration_identifier,
+        }
+        return self._make_request(
+            action='DeleteHsmConfiguration',
             verb='POST',
             path='/', params=params)
 
@@ -1334,6 +1625,67 @@ class RedshiftConnection(AWSQueryConnection):
             verb='POST',
             path='/', params=params)
 
+    def describe_event_categories(self, source_type=None):
+        """
+        Displays a list of event categories for all event source
+        types, or for a specified source type. For a list of the event
+        categories and source types, go to `Amazon Redshift Event
+        Notifications`_.
+
+        :type source_type: string
+        :param source_type: The source type, such as cluster or parameter
+            group, to which the described event categories apply.
+        Valid values: cluster, snapshot, parameter group, and security group.
+
+        """
+        params = {}
+        if source_type is not None:
+            params['SourceType'] = source_type
+        return self._make_request(
+            action='DescribeEventCategories',
+            verb='POST',
+            path='/', params=params)
+
+    def describe_event_subscriptions(self, subscription_name=None,
+                                     max_records=None, marker=None):
+        """
+        Lists descriptions of all the Amazon Redshift event
+        notifications subscription for a customer account. If you
+        specify a subscription name, lists the description for that
+        subscription.
+
+        :type subscription_name: string
+        :param subscription_name: The name of the Amazon Redshift event
+            notification subscription to be described.
+
+        :type max_records: integer
+        :param max_records: The maximum number of records to include in the
+            response. If more records exist than the specified MaxRecords
+            value, a pagination token called a marker is included in the
+            response so that the remaining results can be retrieved.
+        Default: 100
+
+        Constraints: minimum 20, maximum 100
+
+        :type marker: string
+        :param marker: An optional pagination token provided by a previous
+            DescribeOrderableClusterOptions request. If this parameter is
+            specified, the response includes only records beyond the marker, up
+            to the value specified by MaxRecords.
+
+        """
+        params = {}
+        if subscription_name is not None:
+            params['SubscriptionName'] = subscription_name
+        if max_records is not None:
+            params['MaxRecords'] = max_records
+        if marker is not None:
+            params['Marker'] = marker
+        return self._make_request(
+            action='DescribeEventSubscriptions',
+            verb='POST',
+            path='/', params=params)
+
     def describe_events(self, source_identifier=None, source_type=None,
                         start_time=None, end_time=None, duration=None,
                         max_records=None, marker=None):
@@ -1433,6 +1785,110 @@ class RedshiftConnection(AWSQueryConnection):
             params['Marker'] = marker
         return self._make_request(
             action='DescribeEvents',
+            verb='POST',
+            path='/', params=params)
+
+    def describe_hsm_client_certificates(self,
+                                         hsm_client_certificate_identifier=None,
+                                         max_records=None, marker=None):
+        """
+        Returns information about the specified HSM client
+        certificate. If no certificate ID is specified, returns
+        information about all the HSM certificates owned by your AWS
+        customer account.
+
+        :type hsm_client_certificate_identifier: string
+        :param hsm_client_certificate_identifier: The identifier of a specific
+            HSM client certificate for which you want information. If no
+            identifier is specified, information is returned for all HSM client
+            certificates associated with Amazon Redshift clusters owned by your
+            AWS customer account.
+
+        :type max_records: integer
+        :param max_records: The maximum number of records to include in the
+            response. If more records exist than the specified `MaxRecords`
+            value, a marker is included in the response so that the remaining
+            results may be retrieved.
+        Default: `100`
+
+        Constraints: minimum 20, maximum 100.
+
+        :type marker: string
+        :param marker: An optional marker returned from a previous
+            **DescribeOrderableClusterOptions** request. If this parameter is
+            specified, the response includes only records beyond the marker, up
+            to the value specified by `MaxRecords`.
+
+        """
+        params = {}
+        if hsm_client_certificate_identifier is not None:
+            params['HsmClientCertificateIdentifier'] = hsm_client_certificate_identifier
+        if max_records is not None:
+            params['MaxRecords'] = max_records
+        if marker is not None:
+            params['Marker'] = marker
+        return self._make_request(
+            action='DescribeHsmClientCertificates',
+            verb='POST',
+            path='/', params=params)
+
+    def describe_hsm_configurations(self, hsm_configuration_identifier=None,
+                                    max_records=None, marker=None):
+        """
+        Returns information about the specified Amazon Redshift HSM
+        configuration. If no configuration ID is specified, returns
+        information about all the HSM configurations owned by your AWS
+        customer account.
+
+        :type hsm_configuration_identifier: string
+        :param hsm_configuration_identifier: The identifier of a specific
+            Amazon Redshift HSM configuration to be described. If no identifier
+            is specified, information is returned for all HSM configurations
+            owned by your AWS customer account.
+
+        :type max_records: integer
+        :param max_records: The maximum number of records to include in the
+            response. If more records exist than the specified `MaxRecords`
+            value, a marker is included in the response so that the remaining
+            results may be retrieved.
+        Default: `100`
+
+        Constraints: minimum 20, maximum 100.
+
+        :type marker: string
+        :param marker: An optional marker returned from a previous
+            **DescribeOrderableClusterOptions** request. If this parameter is
+            specified, the response includes only records beyond the marker, up
+            to the value specified by `MaxRecords`.
+
+        """
+        params = {}
+        if hsm_configuration_identifier is not None:
+            params['HsmConfigurationIdentifier'] = hsm_configuration_identifier
+        if max_records is not None:
+            params['MaxRecords'] = max_records
+        if marker is not None:
+            params['Marker'] = marker
+        return self._make_request(
+            action='DescribeHsmConfigurations',
+            verb='POST',
+            path='/', params=params)
+
+    def describe_logging_status(self, cluster_identifier):
+        """
+        Describes whether information, such as queries and connection
+        attempts, is being logged for the specified Amazon Redshift
+        cluster.
+
+        :type cluster_identifier: string
+        :param cluster_identifier: The identifier of the cluster to get the
+            logging status from.
+        Example: `examplecluster`
+
+        """
+        params = {'ClusterIdentifier': cluster_identifier, }
+        return self._make_request(
+            action='DescribeLoggingStatus',
             verb='POST',
             path='/', params=params)
 
@@ -1607,6 +2063,132 @@ class RedshiftConnection(AWSQueryConnection):
             verb='POST',
             path='/', params=params)
 
+    def disable_logging(self, cluster_identifier):
+        """
+        Stops logging information, such as queries and connection
+        attempts, for the specified Amazon Redshift cluster.
+
+        :type cluster_identifier: string
+        :param cluster_identifier: The identifier of the cluster on which
+            logging is to be stopped.
+        Example: `examplecluster`
+
+        """
+        params = {'ClusterIdentifier': cluster_identifier, }
+        return self._make_request(
+            action='DisableLogging',
+            verb='POST',
+            path='/', params=params)
+
+    def disable_snapshot_copy(self, cluster_identifier):
+        """
+        Disables the automatic copying of snapshots from one region to
+        another region for a specified cluster.
+
+        :type cluster_identifier: string
+        :param cluster_identifier: The unique identifier of the source cluster
+            that you want to disable copying of snapshots to a destination
+            region.
+        Constraints: Must be the valid name of an existing cluster that has
+            cross-region snapshot copy enabled.
+
+        """
+        params = {'ClusterIdentifier': cluster_identifier, }
+        return self._make_request(
+            action='DisableSnapshotCopy',
+            verb='POST',
+            path='/', params=params)
+
+    def enable_logging(self, cluster_identifier, bucket_name,
+                       s3_key_prefix=None):
+        """
+        Starts logging information, such as queries and connection
+        attempts, for the specified Amazon Redshift cluster.
+
+        :type cluster_identifier: string
+        :param cluster_identifier: The identifier of the cluster on which
+            logging is to be started.
+        Example: `examplecluster`
+
+        :type bucket_name: string
+        :param bucket_name:
+        The name of an existing S3 bucket where the log files are to be stored.
+
+        Constraints:
+
+
+        + Must be in the same region as the cluster
+        + The cluster must have read bucket and put object permissions
+
+        :type s3_key_prefix: string
+        :param s3_key_prefix:
+        The prefix applied to the log file names.
+
+        Constraints:
+
+
+        + Cannot exceed 512 characters
+        + Cannot contain spaces( ), double quotes ("), single quotes ('), a
+              backslash (\), or control characters. The hexadecimal codes for
+              invalid characters are:
+
+            + x00 to x20
+            + x22
+            + x27
+            + x5c
+            + x7f or larger
+
+        """
+        params = {
+            'ClusterIdentifier': cluster_identifier,
+            'BucketName': bucket_name,
+        }
+        if s3_key_prefix is not None:
+            params['S3KeyPrefix'] = s3_key_prefix
+        return self._make_request(
+            action='EnableLogging',
+            verb='POST',
+            path='/', params=params)
+
+    def enable_snapshot_copy(self, cluster_identifier, destination_region,
+                             retention_period=None):
+        """
+        Enables the automatic copy of snapshots from one region to
+        another region for a specified cluster.
+
+        :type cluster_identifier: string
+        :param cluster_identifier: The unique identifier of the source cluster
+            to copy snapshots from.
+        Constraints: Must be the valid name of an existing cluster that does
+            not already have cross-region snapshot copy enabled.
+
+        :type destination_region: string
+        :param destination_region: The destination region that you want to copy
+            snapshots to.
+        Constraints: Must be the name of a valid region. For more information,
+            see `Regions and Endpoints`_ in the Amazon Web Services General
+            Reference.
+
+        :type retention_period: integer
+        :param retention_period: The number of days to retain automated
+            snapshots in the destination region after they are copied from the
+            source region.
+        Default: 7.
+
+        Constraints: Must be at least 1 and no more than 35.
+
+        """
+        params = {
+            'ClusterIdentifier': cluster_identifier,
+            'DestinationRegion': destination_region,
+        }
+        if retention_period is not None:
+            params['RetentionPeriod'] = retention_period
+        return self._make_request(
+            action='EnableSnapshotCopy',
+            verb='POST',
+            path='/', params=params)
+
     def modify_cluster(self, cluster_identifier, cluster_type=None,
                        node_type=None, number_of_nodes=None,
                        cluster_security_groups=None,
@@ -1615,7 +2197,9 @@ class RedshiftConnection(AWSQueryConnection):
                        cluster_parameter_group_name=None,
                        automated_snapshot_retention_period=None,
                        preferred_maintenance_window=None,
-                       cluster_version=None, allow_version_upgrade=None):
+                       cluster_version=None, allow_version_upgrade=None,
+                       hsm_client_certificate_identifier=None,
+                       hsm_configuration_identifier=None):
         """
         Modifies the settings for a cluster. For example, you can add
         another security or parameter group, update the preferred
@@ -1782,6 +2366,16 @@ class RedshiftConnection(AWSQueryConnection):
             automatically to the cluster during the maintenance window.
         Default: `False`
 
+        :type hsm_client_certificate_identifier: string
+        :param hsm_client_certificate_identifier: Specifies the name of the HSM
+            client certificate the Amazon Redshift cluster uses to retrieve the
+            data encryption keys stored in an HSM.
+
+        :type hsm_configuration_identifier: string
+        :param hsm_configuration_identifier: Specifies the name of the HSM
+            configuration that contains the information the Amazon Redshift
+            cluster can use to retrieve and store keys in an HSM.
+
         """
         params = {'ClusterIdentifier': cluster_identifier, }
         if cluster_type is not None:
@@ -1811,6 +2405,10 @@ class RedshiftConnection(AWSQueryConnection):
         if allow_version_upgrade is not None:
             params['AllowVersionUpgrade'] = str(
                 allow_version_upgrade).lower()
+        if hsm_client_certificate_identifier is not None:
+            params['HsmClientCertificateIdentifier'] = hsm_client_certificate_identifier
+        if hsm_configuration_identifier is not None:
+            params['HsmConfigurationIdentifier'] = hsm_configuration_identifier
         return self._make_request(
             action='ModifyCluster',
             verb='POST',
@@ -1877,6 +2475,116 @@ class RedshiftConnection(AWSQueryConnection):
             params['Description'] = description
         return self._make_request(
             action='ModifyClusterSubnetGroup',
+            verb='POST',
+            path='/', params=params)
+
+    def modify_event_subscription(self, subscription_name,
+                                  sns_topic_arn=None, source_type=None,
+                                  source_ids=None, event_categories=None,
+                                  severity=None, enabled=None):
+        """
+        Modifies an existing Amazon Redshift event notification
+        subscription.
+
+        :type subscription_name: string
+        :param subscription_name: The name of the modified Amazon Redshift
+            event notification subscription.
+
+        :type sns_topic_arn: string
+        :param sns_topic_arn: The Amazon Resource Name (ARN) of the SNS topic
+            to be used by the event notification subscription.
+
+        :type source_type: string
+        :param source_type: The type of source that will be generating the
+            events. For example, if you want to be notified of events generated
+            by a cluster, you would set this parameter to cluster. If this
+            value is not specified, events are returned for all Amazon Redshift
+            objects in your AWS account. You must specify a source type in
+            order to specify source IDs.
+        Valid values: cluster, cluster-parameter-group, cluster-security-group,
+            and cluster-snapshot.
+
+        :type source_ids: list
+        :param source_ids: A list of one or more identifiers of Amazon Redshift
+            source objects. All of the objects must be of the same type as was
+            specified in the source type parameter. The event subscription will
+            return only events generated by the specified objects. If not
+            specified, then events are returned for all objects within the
+            source type specified.
+        Example: my-cluster-1, my-cluster-2
+
+        Example: my-snapshot-20131010
+
+        :type event_categories: list
+        :param event_categories: Specifies the Amazon Redshift event categories
+            to be published by the event notification subscription.
+        Values: Configuration, Management, Monitoring, Security
+
+        :type severity: string
+        :param severity: Specifies the Amazon Redshift event severity to be
+            published by the event notification subscription.
+        Values: ERROR, INFO
+
+        :type enabled: boolean
+        :param enabled: A Boolean value indicating if the subscription is
+            enabled. `True` indicates the subscription is enabled
+
+        """
+        params = {'SubscriptionName': subscription_name, }
+        if sns_topic_arn is not None:
+            params['SnsTopicArn'] = sns_topic_arn
+        if source_type is not None:
+            params['SourceType'] = source_type
+        if source_ids is not None:
+            self.build_list_params(params,
+                                   source_ids,
+                                   'SourceIds.member')
+        if event_categories is not None:
+            self.build_list_params(params,
+                                   event_categories,
+                                   'EventCategories.member')
+        if severity is not None:
+            params['Severity'] = severity
+        if enabled is not None:
+            params['Enabled'] = str(
+                enabled).lower()
+        return self._make_request(
+            action='ModifyEventSubscription',
+            verb='POST',
+            path='/', params=params)
+
+    def modify_snapshot_copy_retention_period(self, cluster_identifier,
+                                              retention_period):
+        """
+        Modifies the number of days to retain automated snapshots in
+        the destination region after they are copied from the source
+        region.
+
+        :type cluster_identifier: string
+        :param cluster_identifier: The unique identifier of the cluster for
+            which you want to change the retention period for automated
+            snapshots that are copied to a destination region.
+        Constraints: Must be the valid name of an existing cluster that has
+            cross-region snapshot copy enabled.
+
+        :type retention_period: integer
+        :param retention_period: The number of days to retain automated
+            snapshots in the destination region after they are copied from the
+            source region.
+        If you decrease the retention period for automated snapshots that are
+            copied to a destination region, Amazon Redshift will delete any
+            existing automated snapshots that were copied to the destination
+            region and that fall outside of the new retention period.
+
+        Constraints: Must be at least 1 and no more than 35.
+
+        """
+        params = {
+            'ClusterIdentifier': cluster_identifier,
+            'RetentionPeriod': retention_period,
+        }
+        return self._make_request(
+            action='ModifySnapshotCopyRetentionPeriod',
             verb='POST',
             path='/', params=params)
 
@@ -1983,7 +2691,10 @@ class RedshiftConnection(AWSQueryConnection):
                                       allow_version_upgrade=None,
                                       cluster_subnet_group_name=None,
                                       publicly_accessible=None,
-                                      owner_account=None):
+                                      owner_account=None,
+                                      hsm_client_certificate_identifier=None,
+                                      hsm_configuration_identifier=None,
+                                      elastic_ip=None):
         """
         Creates a new cluster from a snapshot. Amazon Redshift creates
         the resulting cluster with the same configuration as the
@@ -2023,7 +2734,10 @@ class RedshiftConnection(AWSQueryConnection):
         Example: `my-snapshot-id`
 
         :type snapshot_cluster_identifier: string
-        :param snapshot_cluster_identifier:
+        :param snapshot_cluster_identifier: The name of the cluster the source
+            snapshot was created from. This parameter is required if your IAM
+            user has a policy containing a snapshot resource element that
+            specifies anything other than * for the cluster name.
 
         :type port: integer
         :param port: The port number on which the cluster accepts connections.
@@ -2060,6 +2774,19 @@ class RedshiftConnection(AWSQueryConnection):
             the snapshot. Required if you are restoring a snapshot you do not
             own, optional if you own the snapshot.
 
+        :type hsm_client_certificate_identifier: string
+        :param hsm_client_certificate_identifier: Specifies the name of the HSM
+            client certificate the Amazon Redshift cluster uses to retrieve the
+            data encryption keys stored in an HSM.
+
+        :type hsm_configuration_identifier: string
+        :param hsm_configuration_identifier: Specifies the name of the HSM
+            configuration that contains the information the Amazon Redshift
+            cluster can use to retrieve and store keys in an HSM.
+
+        :type elastic_ip: string
+        :param elastic_ip: The elastic IP (EIP) address for the cluster.
+
         """
         params = {
             'ClusterIdentifier': cluster_identifier,
@@ -2081,6 +2808,12 @@ class RedshiftConnection(AWSQueryConnection):
                 publicly_accessible).lower()
         if owner_account is not None:
             params['OwnerAccount'] = owner_account
+        if hsm_client_certificate_identifier is not None:
+            params['HsmClientCertificateIdentifier'] = hsm_client_certificate_identifier
+        if hsm_configuration_identifier is not None:
+            params['HsmConfigurationIdentifier'] = hsm_configuration_identifier
+        if elastic_ip is not None:
+            params['ElasticIp'] = elastic_ip
         return self._make_request(
             action='RestoreFromClusterSnapshot',
             verb='POST',
@@ -2155,7 +2888,10 @@ class RedshiftConnection(AWSQueryConnection):
             account can no longer access.
 
         :type snapshot_cluster_identifier: string
-        :param snapshot_cluster_identifier:
+        :param snapshot_cluster_identifier: The identifier of the cluster the
+            snapshot was created from. This parameter is required if your IAM
+            user has a policy containing a snapshot resource element that
+            specifies anything other than * for the cluster name.
 
         :type account_with_restore_access: string
         :param account_with_restore_access: The identifier of the AWS customer
@@ -2170,6 +2906,23 @@ class RedshiftConnection(AWSQueryConnection):
             params['SnapshotClusterIdentifier'] = snapshot_cluster_identifier
         return self._make_request(
             action='RevokeSnapshotAccess',
+            verb='POST',
+            path='/', params=params)
+
+    def rotate_encryption_key(self, cluster_identifier):
+        """
+        Rotates the encryption keys for a cluster.
+
+        :type cluster_identifier: string
+        :param cluster_identifier: The unique identifier of the cluster that
+            you want to rotate the encryption keys for.
+        Constraints: Must be the name of valid cluster that has encryption
+            enabled.
+
+        """
+        params = {'ClusterIdentifier': cluster_identifier, }
+        return self._make_request(
+            action='RotateEncryptionKey',
             verb='POST',
             path='/', params=params)
 

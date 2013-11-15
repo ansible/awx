@@ -1,3 +1,5 @@
+from collections import Callable
+
 class ClassProperty(property):
     """
     An implementation of a property callable on a class. Used to decorate a
@@ -41,7 +43,7 @@ class NonDataProperty(object):
 
     def __init__(self, fget):
         assert fget is not None, "fget cannot be none"
-        assert callable(fget), "fget must be callable"
+        assert isinstance(fget, Callable), "fget must be callable"
         self.fget = fget
 
     def __get__(self, obj, objtype=None):

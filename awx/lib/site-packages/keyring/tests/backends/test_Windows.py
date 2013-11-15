@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import sys
 
 from ..py30compat import unittest
@@ -41,9 +43,8 @@ class WinVaultKeyringTestCase(BackendBasicTests, unittest.TestCase):
         for cred in self.credentials_created:
             try:
                 self.keyring.delete_password(*cred)
-            except (Exception,):
-                e = sys.exc_info()[1]
-                print >> sys.stderr, e
+            except Exception as e:
+                print(e, file=sys.stderr)
 
     def init_keyring(self):
         return keyring.backends.Windows.WinVaultKeyring()
@@ -57,9 +58,8 @@ class RegistryKeyringTestCase(BackendBasicTests, unittest.TestCase):
         for cred in self.credentials_created:
             try:
                 self.keyring.delete_password(*cred)
-            except (Exception,):
-                e = sys.exc_info()[1]
-                print >> sys.stderr, e
+            except Exception as e:
+                print(e, file=sys.stderr)
 
     def init_keyring(self):
         return keyring.backends.Windows.RegistryKeyring()

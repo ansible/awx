@@ -418,6 +418,45 @@ class Table(object):
         item.load(item_data)
         return item
 
+    def lookup(self, *args, **kwargs):
+        """
+        Look up an entry in DynamoDB. This is mostly backwards compatible
+        with boto.dynamodb. Unlike get_item, it takes hash_key and range_key first,
+        although you may still specify keyword arguments instead.
+
+        Also unlike the get_item command, if the returned item has no keys 
+        (i.e., it does not exist in DynamoDB), a None result is returned, instead
+        of an empty key object.
+
+        Example::
+            >>> user = users.lookup(username)
+            >>> user = users.lookup(username, consistent=True)
+            >>> app = apps.lookup('my_customer_id', 'my_app_id')
+
+        """
+        if not self.schema:
+            self.describe()
+        for x, arg in enumerate(args):
+            kwargs[self.schema[x].name] = arg
+        ret = self.get_item(**kwargs)
+        if not ret.keys():
+            return None
+        return ret
+
+    def new_item(self, *args):
+        """
+        Returns a new, blank item
+
+        This is mostly for consistency with boto.dynamodb
+        """
+        if not self.schema:
+            self.describe()
+        data = {}
+        for x, arg in enumerate(args):
+            data[self.schema[x].name] = arg
+        return Item(self, data=data)
+
+
     def put_item(self, data, overwrite=False):
         """
         Saves an entire item to DynamoDB.

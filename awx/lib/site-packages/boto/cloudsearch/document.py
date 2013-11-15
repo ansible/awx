@@ -191,12 +191,9 @@ class DocumentServiceConnection(object):
         session = requests.Session()
         adapter = requests.adapters.HTTPAdapter(
             pool_connections=20,
-            pool_maxsize=50
+            pool_maxsize=50,
+            max_retries=5
         )
-        # Now kludge in the right number of retries.
-        # Once we're requiring ``requests>=1.2.1``, this can become an
-        # initialization parameter above.
-        adapter.max_retries = 5
         session.mount('http://', adapter)
         session.mount('https://', adapter)
         r = session.post(url, data=sdf, headers={'Content-Type': 'application/json'})

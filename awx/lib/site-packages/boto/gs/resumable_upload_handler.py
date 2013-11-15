@@ -482,7 +482,7 @@ class ResumableUploadHandler(object):
         # pool connections) because httplib requires a new HTTP connection per
         # transaction. (Without this, calling http_conn.getresponse() would get
         # "ResponseNotReady".)
-        http_conn = conn.new_http_connection(self.tracker_uri_host,
+        http_conn = conn.new_http_connection(self.tracker_uri_host, conn.port,
                                              conn.is_secure)
         http_conn.set_debuglevel(conn.debug)
 

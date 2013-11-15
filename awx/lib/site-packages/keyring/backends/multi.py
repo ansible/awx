@@ -56,7 +56,7 @@ class MultipartKeyringWrapper(KeyringBackend):
         count = itertools.count(1)
         while True:
             part_name = '%(username)s{{part_%(index)d}}' % dict(
-                index = count.next(), **vars())
+                index = next(count), **vars())
             try:
                 self._keyring.delete_password(service, part_name)
             except errors.PasswordDeleteError:

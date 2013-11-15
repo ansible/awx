@@ -2,15 +2,12 @@ from __future__ import absolute_import
 
 import sys
 
-from nose import SkipTest
-
 from kombu import compression
 
-from .utils import TestCase
-from .utils import mask_modules
+from .case import Case, SkipTest, mask_modules
 
 
-class test_compression(TestCase):
+class test_compression(Case):
 
     def setUp(self):
         try:

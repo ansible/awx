@@ -71,13 +71,7 @@ class KeyczarCrypterTestCase(unittest.TestCase):
         self.assertEqual(encrypting_location, kz_crypter.encrypting_keyset_location)
 
     def testEnvironCrypterThrowsExceptionOnMissingValues(self):
-        location = 'foo://baz'
-        encrypting_location = 'castle://aaargh'
         kz_crypter = keyczar.EnvironCrypter()
-        try:
-            locn = kz_crypter.keyset_location
-            self.assertTrue(False, msg="Should have thrown ValueError")
-        except ValueError:
-            # expected
-            pass
+        with self.assertRaises(ValueError):
+            kz_crypter.keyset_location
         self.assertIsNone(kz_crypter.encrypting_keyset_location)

@@ -80,11 +80,51 @@ class OpsWorksConnection(AWSQueryConnection):
     def _required_auth_capability(self):
         return ['hmac-v4']
 
+    def assign_volume(self, volume_id, instance_id=None):
+        """
+        Assigns one of the stack's registered Amazon EBS volumes to a
+        specified instance. The volume must first be registered with
+        the stack by calling RegisterVolume. For more information, see
+        ``_.
+
+        :type volume_id: string
+        :param volume_id: The volume ID.
+
+        :type instance_id: string
+        :param instance_id: The instance ID.
+
+        """
+        params = {'VolumeId': volume_id, }
+        if instance_id is not None:
+            params['InstanceId'] = instance_id
+        return self.make_request(action='AssignVolume',
+                                 body=json.dumps(params))
+
+    def associate_elastic_ip(self, elastic_ip, instance_id=None):
+        """
+        Associates one of the stack's registered Elastic IP addresses
+        with a specified instance. The address must first be
+        registered with the stack by calling RegisterElasticIp. For
+        more information, see ``_.
+
+        :type elastic_ip: string
+        :param elastic_ip: The Elastic IP address.
+
+        :type instance_id: string
+        :param instance_id: The instance ID.
+
+        """
+        params = {'ElasticIp': elastic_ip, }
+        if instance_id is not None:
+            params['InstanceId'] = instance_id
+        return self.make_request(action='AssociateElasticIp',
+                                 body=json.dumps(params))
+
     def attach_elastic_load_balancer(self, elastic_load_balancer_name,
                                      layer_id):
         """
-        Attaches an Elastic Load Balancing instance to a specified
-        layer.
+        Attaches an Elastic Load Balancing load balancer to a
+        specified layer.
 
         You must create the Elastic Load Balancing instance
         separately, by using the Elastic Load Balancing console, API,
@@ -136,8 +176,8 @@ class OpsWorksConnection(AWSQueryConnection):
             will be launched into this VPC, and you cannot change the ID later.
 
         + If your account supports EC2 Classic, the default value is no VPC.
-        + If you account does not support EC2 Classic, the default value is the
-              default VPC for the specified region.
+        + If your account does not support EC2 Classic, the default value is
+              the default VPC for the specified region.
 
 
         If the VPC ID corresponds to a default VPC and you have specified
@@ -559,7 +599,8 @@ class OpsWorksConnection(AWSQueryConnection):
                      custom_instance_profile_arn=None,
                      custom_security_group_ids=None, packages=None,
                      volume_configurations=None, enable_auto_healing=None,
-                     auto_assign_elastic_ips=None, custom_recipes=None,
+                     auto_assign_elastic_ips=None,
+                     auto_assign_public_ips=None, custom_recipes=None,
                      install_updates_on_boot=None):
         """
         Creates a layer. For more information, see `How to Create a
@@ -629,7 +670,13 @@ class OpsWorksConnection(AWSQueryConnection):
 
         :type auto_assign_elastic_ips: boolean
         :param auto_assign_elastic_ips: Whether to automatically assign an
-            `Elastic IP address`_ to the layer.
+            `Elastic IP address`_ to the layer's instances. For more
+            information, see `How to Edit a Layer`_.
+
+        :type auto_assign_public_ips: boolean
+        :param auto_assign_public_ips: For stacks that are running in a VPC,
+            whether to automatically assign a public IP address to the layer's
+            instances. For more information, see `How to Edit a Layer`_.
 
         :type custom_recipes: dict
         :param custom_recipes: A `LayerCustomRecipes` object that specifies the
@@ -668,6 +715,8 @@ class OpsWorksConnection(AWSQueryConnection):
             params['EnableAutoHealing'] = enable_auto_healing
         if auto_assign_elastic_ips is not None:
             params['AutoAssignElasticIps'] = auto_assign_elastic_ips
+        if auto_assign_public_ips is not None:
+            params['AutoAssignPublicIps'] = auto_assign_public_ips
         if custom_recipes is not None:
             params['CustomRecipes'] = custom_recipes
         if install_updates_on_boot is not None:
@@ -700,8 +749,8 @@ class OpsWorksConnection(AWSQueryConnection):
             into this VPC, and you cannot change the ID later.
 
         + If your account supports EC2 Classic, the default value is no VPC.
-        + If you account does not support EC2 Classic, the default value is the
-              default VPC for the specified region.
+        + If your account does not support EC2 Classic, the default value is
+              the default VPC for the specified region.
 
 
         If the VPC ID corresponds to a default VPC and you have specified
@@ -954,6 +1003,33 @@ class OpsWorksConnection(AWSQueryConnection):
         return self.make_request(action='DeleteUserProfile',
                                  body=json.dumps(params))
 
+    def deregister_elastic_ip(self, elastic_ip):
+        """
+        Deregisters a specified Elastic IP address. The address can
+        then be registered by another stack. For more information, see
+        ``_.
+
+        :type elastic_ip: string
+        :param elastic_ip: The Elastic IP address.
+
+        """
+        params = {'ElasticIp': elastic_ip, }
+        return self.make_request(action='DeregisterElasticIp',
+                                 body=json.dumps(params))
+
+    def deregister_volume(self, volume_id):
+        """
+        Deregisters an Amazon EBS volume. The volume can then be
+        registered by another stack. For more information, see ``_.
+
+        :type volume_id: string
+        :param volume_id: The volume ID.
+
+        """
+        params = {'VolumeId': volume_id, }
+        return self.make_request(action='DeregisterVolume',
+                                 body=json.dumps(params))
+
     def describe_apps(self, stack_id=None, app_ids=None):
         """
         Requests a description of a specified set of apps.
@@ -1047,7 +1123,7 @@ class OpsWorksConnection(AWSQueryConnection):
         return self.make_request(action='DescribeDeployments',
                                  body=json.dumps(params))
 
-    def describe_elastic_ips(self, instance_id=None, ips=None):
+    def describe_elastic_ips(self, instance_id=None, stack_id=None, ips=None):
         """
         Describes `Elastic IP addresses`_.
 
@@ -1057,6 +1133,11 @@ class OpsWorksConnection(AWSQueryConnection):
         :param instance_id: The instance ID. If you include this parameter,
             `DescribeElasticIps` returns a description of the Elastic IP
             addresses associated with the specified instance.
+
+        :type stack_id: string
+        :param stack_id: A stack ID. If you include this parameter,
+            `DescribeElasticIps` returns a description of the Elastic IP
+            addresses that are registered with the specified stack.
 
         :type ips: list
         :param ips: An array of Elastic IP addresses to be described. If you
@@ -1068,6 +1149,8 @@ class OpsWorksConnection(AWSQueryConnection):
         params = {}
         if instance_id is not None:
             params['InstanceId'] = instance_id
+        if stack_id is not None:
+            params['StackId'] = stack_id
         if ips is not None:
             params['Ips'] = ips
         return self.make_request(action='DescribeElasticIps',
@@ -1080,8 +1163,8 @@ class OpsWorksConnection(AWSQueryConnection):
         You must specify at least one of the parameters.
 
         :type stack_id: string
-        :param stack_id: A stack ID. The action describes the Elastic Load
-            Balancing instances for the stack.
+        :param stack_id: A stack ID. The action describes the stack's Elastic
+            Load Balancing instances.
 
         :type layer_ids: list
         :param layer_ids: A list of layer IDs. The action describes the Elastic
@@ -1130,7 +1213,7 @@ class OpsWorksConnection(AWSQueryConnection):
         return self.make_request(action='DescribeInstances',
                                  body=json.dumps(params))
 
-    def describe_layers(self, stack_id, layer_ids=None):
+    def describe_layers(self, stack_id=None, layer_ids=None):
         """
         Requests a description of one or more layers in a specified
         stack.
@@ -1146,7 +1229,9 @@ class OpsWorksConnection(AWSQueryConnection):
             description of every layer in the specified stack.
 
         """
-        params = {'StackId': stack_id, }
+        params = {}
+        if stack_id is not None:
+            params['StackId'] = stack_id
         if layer_ids is not None:
             params['LayerIds'] = layer_ids
         return self.make_request(action='DescribeLayers',
@@ -1285,8 +1370,8 @@ class OpsWorksConnection(AWSQueryConnection):
         return self.make_request(action='DescribeUserProfiles',
                                  body=json.dumps(params))
 
-    def describe_volumes(self, instance_id=None, raid_array_id=None,
-                         volume_ids=None):
+    def describe_volumes(self, instance_id=None, stack_id=None,
+                         raid_array_id=None, volume_ids=None):
         """
         Describes an instance's Amazon EBS volumes.
 
@@ -1296,6 +1381,10 @@ class OpsWorksConnection(AWSQueryConnection):
         :param instance_id: The instance ID. If you use this parameter,
             `DescribeVolumes` returns descriptions of the volumes associated
             with the specified instance.
+
+        :type stack_id: string
+        :param stack_id: A stack ID. The action describes the stack's
+            registered Amazon EBS volumes.
 
         :type raid_array_id: string
         :param raid_array_id: The RAID array ID. If you use this parameter,
@@ -1311,6 +1400,8 @@ class OpsWorksConnection(AWSQueryConnection):
         params = {}
         if instance_id is not None:
             params['InstanceId'] = instance_id
+        if stack_id is not None:
+            params['StackId'] = stack_id
         if raid_array_id is not None:
             params['RaidArrayId'] = raid_array_id
         if volume_ids is not None:
@@ -1321,7 +1412,7 @@ class OpsWorksConnection(AWSQueryConnection):
     def detach_elastic_load_balancer(self, elastic_load_balancer_name,
                                      layer_id):
         """
-        Detaches a specified Elastic Load Balancing instance from it's
+        Detaches a specified Elastic Load Balancing instance from its
         layer.
 
         :type elastic_load_balancer_name: string
@@ -1338,6 +1429,20 @@ class OpsWorksConnection(AWSQueryConnection):
             'LayerId': layer_id,
         }
         return self.make_request(action='DetachElasticLoadBalancer',
+                                 body=json.dumps(params))
+
+    def disassociate_elastic_ip(self, elastic_ip):
+        """
+        Disassociates an Elastic IP address from its instance. The
+        address remains registered with the stack. For more
+        information, see ``_.
+
+        :type elastic_ip: string
+        :param elastic_ip: The Elastic IP address.
+
+        """
+        params = {'ElasticIp': elastic_ip, }
+        return self.make_request(action='DisassociateElasticIp',
                                  body=json.dumps(params))
 
     def get_hostname_suggestion(self, layer_id):
@@ -1364,6 +1469,45 @@ class OpsWorksConnection(AWSQueryConnection):
         """
         params = {'InstanceId': instance_id, }
         return self.make_request(action='RebootInstance',
+                                 body=json.dumps(params))
+
+    def register_elastic_ip(self, elastic_ip, stack_id):
+        """
+        Registers an Elastic IP address with a specified stack. An
+        address can be registered with only one stack at a time. If
+        the address is already registered, you must first deregister
+        it by calling DeregisterElasticIp. For more information, see
+        ``_.
+
+        :type elastic_ip: string
+        :param elastic_ip: The Elastic IP address.
+
+        :type stack_id: string
+        :param stack_id: The stack ID.
+
+        """
+        params = {'ElasticIp': elastic_ip, 'StackId': stack_id, }
+        return self.make_request(action='RegisterElasticIp',
+                                 body=json.dumps(params))
+
+    def register_volume(self, stack_id, ec_2_volume_id=None):
+        """
+        Registers an Amazon EBS volume with a specified stack. A
+        volume can be registered with only one stack at a time. If the
+        volume is already registered, you must first deregister it by
+        calling DeregisterVolume. For more information, see ``_.
+
+        :type ec_2_volume_id: string
+        :param ec_2_volume_id: The Amazon EBS volume ID.
+
+        :type stack_id: string
+        :param stack_id: The stack ID.
+
+        """
+        params = {'StackId': stack_id, }
+        if ec_2_volume_id is not None:
+            params['Ec2VolumeId'] = ec_2_volume_id
+        return self.make_request(action='RegisterVolume',
                                  body=json.dumps(params))
 
     def set_load_based_auto_scaling(self, layer_id, enable=None,
@@ -1511,6 +1655,19 @@ class OpsWorksConnection(AWSQueryConnection):
         return self.make_request(action='StopStack',
                                  body=json.dumps(params))
 
+    def unassign_volume(self, volume_id):
+        """
+        Unassigns an assigned Amazon EBS volume. The volume remains
+        registered with the stack. For more information, see ``_.
+
+        :type volume_id: string
+        :param volume_id: The volume ID.
+
+        """
+        params = {'VolumeId': volume_id, }
+        return self.make_request(action='UnassignVolume',
+                                 body=json.dumps(params))
+
     def update_app(self, app_id, name=None, description=None, type=None,
                    app_source=None, domains=None, enable_ssl=None,
                    ssl_configuration=None, attributes=None):
@@ -1566,6 +1723,24 @@ class OpsWorksConnection(AWSQueryConnection):
         if attributes is not None:
             params['Attributes'] = attributes
         return self.make_request(action='UpdateApp',
+                                 body=json.dumps(params))
+
+    def update_elastic_ip(self, elastic_ip, name=None):
+        """
+        Updates a registered Elastic IP address's name. For more
+        information, see ``_.
+
+        :type elastic_ip: string
+        :param elastic_ip: The address.
+
+        :type name: string
+        :param name: The new name.
+
+        """
+        params = {'ElasticIp': elastic_ip, }
+        if name is not None:
+            params['Name'] = name
+        return self.make_request(action='UpdateElasticIp',
                                  body=json.dumps(params))
 
     def update_instance(self, instance_id, layer_ids=None,
@@ -1673,7 +1848,8 @@ class OpsWorksConnection(AWSQueryConnection):
                      attributes=None, custom_instance_profile_arn=None,
                      custom_security_group_ids=None, packages=None,
                      volume_configurations=None, enable_auto_healing=None,
-                     auto_assign_elastic_ips=None, custom_recipes=None,
+                     auto_assign_elastic_ips=None,
+                     auto_assign_public_ips=None, custom_recipes=None,
                      install_updates_on_boot=None):
         """
         Updates a specified layer.
@@ -1718,7 +1894,13 @@ class OpsWorksConnection(AWSQueryConnection):
 
         :type auto_assign_elastic_ips: boolean
         :param auto_assign_elastic_ips: Whether to automatically assign an
-            `Elastic IP address`_ to the layer.
+            `Elastic IP address`_ to the layer's instances. For more
+            information, see `How to Edit a Layer`_.
+
+        :type auto_assign_public_ips: boolean
+        :param auto_assign_public_ips: For stacks that are running in a VPC,
+            whether to automatically assign a public IP address to the layer's
+            instances. For more information, see `How to Edit a Layer`_.
 
         :type custom_recipes: dict
         :param custom_recipes: A `LayerCustomRecipes` object that specifies the
@@ -1756,6 +1938,8 @@ class OpsWorksConnection(AWSQueryConnection):
             params['EnableAutoHealing'] = enable_auto_healing
         if auto_assign_elastic_ips is not None:
             params['AutoAssignElasticIps'] = auto_assign_elastic_ips
+        if auto_assign_public_ips is not None:
+            params['AutoAssignPublicIps'] = auto_assign_public_ips
         if custom_recipes is not None:
             params['CustomRecipes'] = custom_recipes
         if install_updates_on_boot is not None:
@@ -1932,6 +2116,29 @@ class OpsWorksConnection(AWSQueryConnection):
         if ssh_public_key is not None:
             params['SshPublicKey'] = ssh_public_key
         return self.make_request(action='UpdateUserProfile',
+                                 body=json.dumps(params))
+
+    def update_volume(self, volume_id, name=None, mount_point=None):
+        """
+        Updates an Amazon EBS volume's name or mount point. For more
+        information, see ``_.
+
+        :type volume_id: string
+        :param volume_id: The volume ID.
+
+        :type name: string
+        :param name: The new name.
+
+        :type mount_point: string
+        :param mount_point: The new mount point.
+
+        """
+        params = {'VolumeId': volume_id, }
+        if name is not None:
+            params['Name'] = name
+        if mount_point is not None:
+            params['MountPoint'] = mount_point
+        return self.make_request(action='UpdateVolume',
                                  body=json.dumps(params))
 
     def make_request(self, action, body):

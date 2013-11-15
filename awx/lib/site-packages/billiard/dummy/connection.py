@@ -35,7 +35,7 @@ from __future__ import absolute_import
 
 __all__ = ['Client', 'Listener', 'Pipe']
 
-from Queue import Queue
+from billiard.five import Queue
 
 
 families = [None]

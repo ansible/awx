@@ -6,13 +6,13 @@ from django.dispatch import Signal
 from django.conf import settings
 
 # Sent at the start of the migration of an app
-pre_migrate = Signal(providing_args=["app"])
+pre_migrate = Signal(providing_args=["app", "verbosity", "interactive", "db"])
 
 # Sent after each successful migration of an app
-post_migrate = Signal(providing_args=["app"])
+post_migrate = Signal(providing_args=["app", "verbosity", "interactive", "db"])
 
 # Sent after each run of a particular migration in a direction
-ran_migration = Signal(providing_args=["app","migration","method"])
+ran_migration = Signal(providing_args=["app", "migration", "method", "verbosity", "interactive", "db"])
 
 # Compatibility code for django.contrib.auth
 # Is causing strange errors, removing for now (we might need to fix up orm first)

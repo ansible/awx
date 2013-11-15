@@ -9,8 +9,10 @@ from __future__ import absolute_import
 
 import logging
 
+from collections import Callable
 from functools import wraps
 
+from kombu.five import items
 from kombu.log import get_logger
 
 __all__ = ['setup_logging', 'Logwrapped']
@@ -35,22 +37,22 @@ class Logwrapped(object):
     def __getattr__(self, key):
         meth = getattr(self.instance, key)
 
-        if not callable(meth) or key in self.__ignore:
+        if not isinstance(meth, Callable) or key in self.__ignore:
             return meth
 
         @wraps(meth)
         def __wrapped(*args, **kwargs):
             info = ''
             if self.ident:
-                info += self.ident % vars(self.instance)
-            info += '%s(' % (meth.__name__, )
+                info += self.ident.format(self.instance)
+            info += '{0.__name__}('.format(meth)
             if args:
                 info += ', '.join(map(repr, args))
             if kwargs:
                 if args:
                     info += ', '
-                info += ', '.join('%s=%r' % (key, value)
-                                  for key, value in kwargs.iteritems())
+                info += ', '.join('{k}={v!r}'.format(k=key, v=value)
+                                  for key, value in items(kwargs))
             info += ')'
             self.logger.debug(info)
             return meth(*args, **kwargs)

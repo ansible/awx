@@ -95,7 +95,7 @@ class RawMessage:
 
     def endElement(self, name, value, connection):
         if name == 'Body':
-            self.set_body(self.decode(value))
+            self.set_body(value)
         elif name == 'MessageId':
             self.id = value
         elif name == 'ReceiptHandle':
@@ -104,6 +104,9 @@ class RawMessage:
             self.md5 = value
         else:
             setattr(self, name, value)
+
+    def endNode(self, connection):
+        self.set_body(self.decode(self.get_body()))
 
     def encode(self, value):
         """Transform body object into serialized byte array format."""
