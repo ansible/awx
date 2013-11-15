@@ -1007,7 +1007,7 @@ class ActivityStreamSerializer(BaseSerializer):
     class Meta:
         model = ActivityStream
         fields = ('id', 'url', 'related', 'summary_fields', 'timestamp', 'operation', 'changes',
-                  'object1_id', 'object1_type', 'object2_id', 'object2_type', 'object_relationship_type')
+                  'object1_id', 'object1', 'object1_type', 'object2_id', 'object2', 'object2_type', 'object_relationship_type')
 
     def get_related(self, obj):
         if obj is None:
@@ -1030,8 +1030,11 @@ class ActivityStreamSerializer(BaseSerializer):
             short_obj_type = obj.object1_type.split(".")[-1]
             under_short_obj_type = camelcase_to_underscore(short_obj_type)
             obj1 = eval(obj.object1_type + ".objects.get(id=" + str(obj.object1_id) + ")")
-            d['object1'] = {'name': obj1.name, 'description': obj1.description,
-                            'base': under_short_obj_type, 'id': obj.object1_id}
+            if hasattr(obj1, "name"):
+                d['object1'] = {'name': obj1.name, 'description': obj1.description,
+                                'base': under_short_obj_type, 'id': obj.object1_id}
+            else:
+                d['object1'] = {'base': under_short_obj_type, 'id': obj.object1_id}
             if under_short_obj_type == "host" or under_short_obj_type == "group":
                 d['inventory'] = {'name': obj1.inventory.name, 'id': obj1.inventory.id}
         except Exception, e:
@@ -1041,8 +1044,11 @@ class ActivityStreamSerializer(BaseSerializer):
             under_short_obj_type = camelcase_to_underscore(short_obj_type)
             if obj.operation in ('associate', 'disassociate'):
                 obj2 = eval(obj.object2_type + ".objects.get(id=" + str(obj.object2_id) + ")")
-                d['object2'] = {'name': obj2.name, 'description': obj2.description,
-                                'base': under_short_obj_type, 'id': obj.object2_id}
+                if hasattr(obj2, "name"):
+                    d['object2'] = {'name': obj2.name, 'description': obj2.description,
+                                    'base': under_short_obj_type, 'id': obj.object2_id}
+                else:
+                    d['object2'] = {'base': under_short_obj_type, 'id': obj.object2_id}
             if under_short_obj_type == "host" or under_short_obj_type == "group":
                 d['inventory'] = {'name': obj2.inventory.name, 'id': obj2.inventory.id}
         except Exception, e:

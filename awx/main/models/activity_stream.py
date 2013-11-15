@@ -28,9 +28,11 @@ class ActivityStream(models.Model):
     changes = models.TextField(blank=True)
 
     object1_id = models.PositiveIntegerField(db_index=True)
+    object1 = models.TextField()
     object1_type = models.TextField()
 
     object2_id = models.PositiveIntegerField(db_index=True, null=True)
+    object2 = models.TextField(null=True, blank=True)
     object2_type = models.TextField(null=True, blank=True)
 
     object_relationship_type = models.TextField(blank=True)
