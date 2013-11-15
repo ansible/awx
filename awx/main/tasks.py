@@ -671,6 +671,7 @@ class RunProjectUpdate(BaseTask):
             re.compile(r'^Password for.*:\s*?$', re.M): 'scm_password',
             re.compile(r'^Password:\s*?$', re.M): 'scm_password',
             re.compile(r'^\S+?@\S+?\'s\s+?password:\s*?$', re.M): 'scm_password',
+            re.compile(r'^Enter passphrase for .*:\s*?$', re.M): 'scm_key_unlock',
             # FIXME: Configure whether we should auto accept host keys?
             re.compile(r'^Are you sure you want to continue connecting \(yes/no\)\?\s*?$', re.M): 'yes',
         })

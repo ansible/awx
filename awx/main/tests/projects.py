@@ -901,6 +901,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             self.assertEqual(pu.status, 'successful',
                              pu.result_stdout + pu.result_traceback)
         else:
+            #print pu.result_stdout
             pass # If should_fail is None, we don't care.
         # Get the SCM URL from the job args, if it starts with a '/' we aren't
         # handling the URL correctly.
@@ -1393,6 +1394,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.check_project_update(project, should_fail=None,
                                   scm_key_unlock=TEST_SSH_KEY_DATA_UNLOCK,
                                   project_update=project_update)
+        # Verify that we responded to ssh-agent prompt.
+        self.assertTrue('Identity added' in project_update.result_stdout)
 
     def create_test_job_template(self, **kwargs):
         opts = {
