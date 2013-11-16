@@ -9,6 +9,7 @@ import distutils.version
 import json
 import logging
 import os
+import pipes
 import re
 import subprocess
 import stat
@@ -127,6 +128,9 @@ class BaseTask(Task):
             if hidden_re.search(k):
                 env[k] = '*'*len(str(v))
         return env
+
+    def args2cmdline(self, *args):
+        return ' '.join([pipes.quote(a) for a in args])
 
     def build_args(self, instance, **kwargs):
         raise NotImplementedError
@@ -378,8 +382,8 @@ class RunJob(BaseTask):
         args.append(job.playbook) # relative path to project.local_path
         ssh_key_path = kwargs.get('private_data_file', '')
         if ssh_key_path:
-            cmd = ' '.join([subprocess.list2cmdline(['ssh-add', ssh_key_path]),
-                            '&&', subprocess.list2cmdline(args)])
+            cmd = ' '.join([self.args2cmdline('ssh-add', ssh_key_path),
+                            '&&', self.args2cmdline(*args)])
             args = ['ssh-agent', 'sh', '-c', cmd]
         return args
 
@@ -612,7 +616,7 @@ class RunProjectUpdate(BaseTask):
         ssh_key_path = kwargs.get('private_data_file', '')
         if ssh_key_path:
             subcmds = [('ssh-add', ssh_key_path), args]
-            cmd = ' && '.join([subprocess.list2cmdline(x) for x in subcmds])
+            cmd = ' && '.join([self.args2cmdline(*x) for x in subcmds])
             args = ['ssh-agent', 'sh', '-c', cmd]
         return args
 
