@@ -78,7 +78,7 @@ angular.module('HomeGroupListDefinition', [])
                 searchOptions: [
                     { name: "ec2", value: "ec2" },
                     { name: "none", value: "" },
-                    { name: "rackspace", value: "rackspace" }],
+                    { name: "rax", value: "rax" }],
                 sourceModel: 'inventory_source',
                 sourceField: 'source',
                 searchOnly: true
@@ -86,7 +86,7 @@ angular.module('HomeGroupListDefinition', [])
             has_external_source: {
                 label: 'Has external source?', 
                 searchType: 'in', 
-                searchValue: 'ec2,rackspace',
+                searchValue: 'ec2,rax',
                 searchOnly: true,
                 sourceModel: 'inventory_source',
                 sourceField: 'source'

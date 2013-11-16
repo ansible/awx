@@ -816,7 +816,7 @@ class RunInventoryUpdate(BaseTask):
             args.extend(['--enabled-var', 'ec2_state'])
             args.extend(['--enabled-value', 'running'])
             #args.extend(['--instance-id', 'ec2_id'])
-        elif inventory_source.source in == 'rax':
+        elif inventory_source.source == 'rax':
             rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax.py')
             args.append(rax_path)
             args.extend(['--enabled-var', 'rax_status'])
