@@ -739,7 +739,7 @@ class RunInventoryUpdate(BaseTask):
             for k,v in ec2_opts.items():
                 cp.set(section, k, str(v))
         # Build pyrax creds INI for rax inventory script.
-        elif inventory_source.source == 'rackspace':
+        elif inventory_source.source == 'rax':
             section = 'rackspace_cloud'
             cp.add_section(section)
             credential = inventory_source.credential
@@ -785,7 +785,7 @@ class RunInventoryUpdate(BaseTask):
             env['AWS_ACCESS_KEY_ID'] = kwargs.get('passwords', {}).get('source_username', '')
             env['AWS_SECRET_ACCESS_KEY'] = kwargs.get('passwords', {}).get('source_password', '')
             env['EC2_INI_PATH'] = kwargs.get('private_data_file', '')
-        elif inventory_source.source == 'rackspace':
+        elif inventory_source.source == 'rax':
             env['RAX_CREDS_FILE'] = kwargs.get('private_data_file', '')
             env['RAX_REGION'] = inventory_source.source_regions or 'all'
             # Set this environment variable so the vendored package won't
@@ -816,7 +816,7 @@ class RunInventoryUpdate(BaseTask):
             args.extend(['--enabled-var', 'ec2_state'])
             args.extend(['--enabled-value', 'running'])
             #args.extend(['--instance-id', 'ec2_id'])
-        elif inventory_source.source == 'rackspace':
+        elif inventory_source.source in == 'rax':
             rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax.py')
             args.append(rax_path)
             args.extend(['--enabled-var', 'rax_status'])

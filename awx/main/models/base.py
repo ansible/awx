@@ -59,7 +59,7 @@ TASK_STATUS_CHOICES = [
     ('canceled', _('Canceled')),        # The job was canceled before completion.
 ]
 
-CLOUD_INVENTORY_SOURCES = ['ec2', 'rackspace']
+CLOUD_INVENTORY_SOURCES = ['ec2', 'rax']
 
 
 class VarsDictProperty(object):

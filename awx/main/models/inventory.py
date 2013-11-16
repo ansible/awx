@@ -457,7 +457,7 @@ class InventorySource(PrimordialModel):
 
     SOURCE_CHOICES = [
         ('file', _('Local File, Directory or Script')),
-        ('rackspace', _('Rackspace Cloud Servers')),
+        ('rax', _('Rackspace Cloud Servers')),
         ('ec2', _('Amazon EC2')),
     ]
 
