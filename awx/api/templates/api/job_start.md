@@ -5,7 +5,8 @@ whether any passwords are required to start the job.  The response will include
 the following fields:
 
 * `can_start`: Flag indicating if this job can be started (boolean, read-only)
-* `passwords_needed_to_start`: Password names required to start the job (array, read-only)
+* `passwords_needed_to_start`: Password names required to start the job (array,
+  read-only)
 
 Make a POST request to this resource to start the job.  If any passwords are
 required, they must be passed via POST data.

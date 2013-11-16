@@ -143,8 +143,6 @@ class JobTemplate(CommonModel):
                     needed.append('ssh_password')
                 else:
                     needed.append(pw)
-        if self.project.scm_update_on_launch:
-            needed.extend(self.project.scm_passwords_needed)
         return bool(self.credential and not len(needed))
 
 class Job(CommonTask):
@@ -262,8 +260,6 @@ class Job(CommonTask):
                     needed.append('ssh_password')
                 else:
                     needed.append(pw)
-        if self.project.scm_update_on_launch:
-            needed.extend(self.project.scm_passwords_needed)
         return needed
 
     def _get_task_class(self):

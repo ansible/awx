@@ -200,7 +200,8 @@ class Credential(CommonModelNameNotUnique):
         default='',
         max_length=1024,
         verbose_name=_('Password'),
-        help_text=_('Password for this credential.'),
+        help_text=_('Password for this credential (or "ASK" to prompt the '
+                    'user for machine credentials).'),
     )
     ssh_key_data = models.TextField(
         blank=True,
@@ -214,7 +215,7 @@ class Credential(CommonModelNameNotUnique):
         default='',
         verbose_name=_('SSH key unlock'),
         help_text=_('Passphrase to unlock SSH private key if encrypted (or '
-                    '"ASK" to prompt the user).'),
+                    '"ASK" to prompt the user for machine credentials).'),
     )
     sudo_username = models.CharField(
         max_length=1024,
@@ -231,16 +232,16 @@ class Credential(CommonModelNameNotUnique):
 
     @property
     def needs_password(self):
-        return not self.ssh_key_data and self.password == 'ASK'
+        return self.kind == 'ssh' and self.password == 'ASK'
 
     @property
     def needs_ssh_key_unlock(self):
-        return 'ENCRYPTED' in decrypt_field(self, 'ssh_key_data') and \
-            (not self.ssh_key_unlock or self.ssh_key_unlock == 'ASK')
+        return self.kind == 'ssh' and self.ssh_key_unlock == 'ASK' and \
+            'ENCRYPTED' in decrypt_field(self, 'ssh_key_data')
 
     @property
     def needs_sudo_password(self):
-        return self.sudo_password == 'ASK'
+        return self.kind == 'ssh' and self.sudo_password == 'ASK'
 
     @property
     def passwords_needed(self):
@@ -321,7 +322,8 @@ class Credential(CommonModelNameNotUnique):
             # If update_fields has been specified, add our field names to it,
             # if hit hasn't been specified, then we're just doing a normal save.
             for field in self.PASSWORD_FIELDS:
-                encrypted = encrypt_field(self, field, bool(field != 'ssh_key_data'))
+                ask = bool(self.kind == 'ssh' and field != 'ssh_key_data')
+                encrypted = encrypt_field(self, field, ask)
                 setattr(self, field, encrypted)
                 if field not in update_fields:
                     update_fields.append(field)

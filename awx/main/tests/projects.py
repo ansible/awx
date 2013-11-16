@@ -918,7 +918,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_password = kwargs.get('scm_password',
                                       decrypt_field(project.credential,
                                                     'password'))
-            if scm_password not in ('', 'ASK'):
+            if scm_password:
                 self.assertFalse(scm_password in pu.job_args, pu.job_args)
                 self.assertFalse(scm_password in json.dumps(pu.job_env),
                                  json.dumps(pu.job_env))
@@ -932,7 +932,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_key_unlock = kwargs.get('scm_key_unlock',
                                         decrypt_field(project.credential,
                                                       'ssh_key_unlock'))
-            if scm_key_unlock not in ('', 'ASK'):
+            if scm_key_unlock:
                 self.assertFalse(scm_key_unlock in pu.job_args, pu.job_args)
                 self.assertFalse(scm_key_unlock in json.dumps(pu.job_env),
                                  json.dumps(pu.job_env))
@@ -968,7 +968,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         project_path = project.get_project_path(check_if_exists=False)
         # If project could be auto-updated on creation, the project dir should
         # already exist, otherwise run an initial checkout.
-        if project.scm_type and not project.scm_passwords_needed:
+        if project.scm_type:
             self.assertTrue(project.last_update)
             self.check_project_update(project,
                                       project_udpate=project.last_update)
@@ -1035,7 +1035,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
         # Change username/password for private projects and verify the update
         # fails (but doesn't cause the task to hang).
         scm_url_parts = urlparse.urlsplit(project.scm_url)
-        if 0 and project.scm_username and project.scm_password not in ('', 'ASK'):
+        # FIXME: Implement these tests again with new credentials!
+        if 0 and project.scm_username and project.scm_password:
             scm_username = project.scm_username
             should_still_fail = not (getpass.getuser() == scm_username and
                                      scm_url_parts.hostname == 'localhost' and
@@ -1344,59 +1345,6 @@ class ProjectUpdatesTest(BaseTransactionTest):
         )
         self.check_project_scm(project)
 
-    def test_prompt_for_scm_password_on_update(self):
-        scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
-                          'https://github.com/ansible/ansible.github.com.git')
-        if not all([scm_url]):
-            self.skipTest('no public git repo defined for https!')
-        project = self.create_project(
-            name='my public git project over https',
-            scm_type='git',
-            scm_url=scm_url,
-            scm_username='nobody',
-            scm_password='ASK',
-        )
-        url = reverse('api:project_update_view', args=(project.pk,))
-        with self.current_user(self.super_django_user):
-            response = self.get(url, expect=200)
-        self.assertTrue(response['can_update'])
-        self.assertTrue('scm_password' in response['passwords_needed_to_update'])
-        with self.current_user(self.super_django_user):
-            response = self.post(url, {}, expect=400)
-        self.assertTrue('scm_password' in response['passwords_needed_to_update'])
-        with self.current_user(self.super_django_user):
-            response = self.post(url, {'scm_password': 'blah1234'}, expect=202)
-        project_update = project.project_updates.order_by('-pk')[0]
-        self.check_project_update(project, should_fail=False,
-                                  scm_password='blah1234',
-                                  project_update=project_update)
-
-    def test_prompt_for_scm_key_unlock_on_update(self):
-        scm_url = 'git@github.com:ansible/ansible.github.com.git'
-        project = self.create_project(
-            name='my public git project over ssh',
-            scm_type='git',
-            scm_url=scm_url,
-            scm_key_data=TEST_SSH_KEY_DATA_LOCKED,
-            scm_key_unlock='ASK',
-        )
-        url = reverse('api:project_update_view', args=(project.pk,))
-        with self.current_user(self.super_django_user):
-            response = self.get(url, expect=200)
-        self.assertTrue(response['can_update'])
-        self.assertTrue('scm_key_unlock' in response['passwords_needed_to_update'])
-        with self.current_user(self.super_django_user):
-            response = self.post(url, {}, expect=400)
-        self.assertTrue('scm_key_unlock' in response['passwords_needed_to_update'])
-        with self.current_user(self.super_django_user):
-            response = self.post(url, {'scm_key_unlock': TEST_SSH_KEY_DATA_UNLOCK}, expect=202)
-        project_update = project.project_updates.order_by('-pk')[0]
-        self.check_project_update(project, should_fail=None,
-                                  scm_key_unlock=TEST_SSH_KEY_DATA_UNLOCK,
-                                  project_update=project_update)
-        # Verify that we responded to ssh-agent prompt.
-        self.assertTrue('Identity added' in project_update.result_stdout)
-
     def create_test_job_template(self, **kwargs):
         opts = {
             'name': 'test-job-template %s' % str(now()),
@@ -1491,33 +1439,34 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_type='git',
             scm_url=scm_url,
             scm_username=scm_username,
-            scm_password='ASK',
+            scm_password=scm_password,
             scm_update_on_launch=True,
         )
-        self.check_project_update(self.project, scm_password=scm_password)
-        self.assertEqual(self.project.project_updates.count(), 1)
+        self.check_project_update(self.project)
+        self.assertEqual(self.project.project_updates.count(), 2)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
-        self.assertTrue(job.passwords_needed_to_start)
-        self.assertTrue('scm_password' in job.passwords_needed_to_start)
-        self.assertTrue(job.start(**{'scm_password': scm_password}))
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
         self.assertTrue(job.status in ('successful', 'failed'),
                         job.result_stdout + job.result_traceback)
-        self.assertEqual(self.project.project_updates.count(), 2)
-        # Try again but with a bad password - the job should flag an error
-        # because the project update failed.
+        self.assertEqual(self.project.project_updates.count(), 3)
+        # Try again but set a bad project password - the job should flag an
+        # error because the project update failed.
+        cred = self.project.credential
+        cred.password = 'bad scm password'
+        cred.save()
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
-        self.assertTrue(job.passwords_needed_to_start)
-        self.assertTrue('scm_password' in job.passwords_needed_to_start)
-        self.assertTrue(job.start(**{'scm_password': 'lasdkfjlsdkfj'}))
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.start())
         self.assertEqual(job.status, 'pending')
         job = Job.objects.get(pk=job.pk)
         # FIXME: Not quite sure why the project update still returns successful
         # in this case?
         #self.assertEqual(job.status, 'error',
         #                 '\n'.join([job.result_stdout, job.result_traceback]))
-        self.assertEqual(self.project.project_updates.count(), 3)
+        self.assertEqual(self.project.project_updates.count(), 4)

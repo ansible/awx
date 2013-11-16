@@ -440,9 +440,7 @@ class RunJob(BaseTask):
                     try:
                         project_update = pu_qs[0]
                     except IndexError:
-                        kw = dict([(k,v) for k,v in kwargs.items()
-                                   if k.startswith('scm_')])
-                        project_update = project.update(**kw)
+                        project_update = project.update()
                         if not project_update:
                             msg = 'Unable to update project before launch.'
                             job = self.update_model(pk, status='error',
@@ -460,10 +458,7 @@ class RunJob(BaseTask):
                         try:
                             inventory_update = iu_qs.filter(inventory_source=inventory_source)[0]
                         except IndexError:
-                            # FIXME: Doesn't support multiple sources!!!
-                            kw = dict([(k,v) for k,v in kwargs.items()
-                                       if k.startswith('source_')])
-                            inventory_update = inventory_source.update(**kw)
+                            inventory_update = inventory_source.update()
                             if not inventory_update:
                                 msgs.append('Unable to update inventory source %d before launch' % inventory_source.pk)
                                 continue
@@ -528,12 +523,12 @@ class RunProjectUpdate(BaseTask):
                                                                   **kwargs)
         project = project_update.project
         if project.credential:
-            value = kwargs.get('scm_key_unlock', decrypt_field(project.credential, 'ssh_key_unlock'))
+            value = decrypt_field(project.credential, 'ssh_key_unlock')
             if value not in ('', 'ASK'):
                 passwords['scm_key_unlock'] = value
             passwords['scm_username'] = project.credential.username
-            passwords['scm_password'] = kwargs.get('scm_password',
-                                                   decrypt_field(project.credential, 'password'))
+            passwords['scm_password'] = decrypt_field(project.credential,
+                                                     'password')
         return passwords
 
     def build_env(self, project_update, **kwargs):
