@@ -4,7 +4,8 @@ Make a GET request to this resource to determine if the project can be updated
 from its SCM source and whether any passwords are required for the update.  The
 response will include the following fields:
 
-* `can_start`: Flag indicating if this job can be started (boolean, read-only)
+* `can_update`: Flag indicating if this project can be updated (boolean,
+  read-only)
 * `passwords_needed_to_update`: Password names required to update the project
   (array, read-only)
 
