@@ -254,6 +254,16 @@ class Credential(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:credential_detail', args=(self.pk,))
 
+    def clean_ssh_key_unlock(self):
+        if self.pk:
+            ssh_key_data = decrypt_field(self, 'ssh_key_data')
+        else:
+            ssh_key_data = self.ssh_key_data
+        if 'ENCRYPTED' in ssh_key_data and not self.ssh_key_unlock:
+            raise ValidationError('SSH key unlock must be set when SSH key '
+                                  'data is encrypted')
+        return self.ssh_key_unlock
+
     def clean(self):
         if self.user and self.team:
             raise ValidationError('Credential cannot be assigned to both a user and team')
@@ -343,7 +353,7 @@ class Credential(CommonModelNameNotUnique):
                 update_fields.append(field)
             self.save(update_fields=update_fields)
 
-class Profile(models.Model):
+class Profile(BaseModel):
     '''
     Profile model related to User object. Currently stores LDAP DN for users
     loaded from LDAP.
@@ -368,7 +378,7 @@ class Profile(models.Model):
         default='',
     )
 
-class AuthToken(models.Model):
+class AuthToken(BaseModel):
     '''
     Custom authentication tokens per user with expiration and request-specific
     data.

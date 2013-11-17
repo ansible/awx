@@ -509,7 +509,13 @@ class ProjectsTest(BaseTest):
             data = dict(name='zyx', user=self.super_django_user.pk, kind='ssh',
                         sudo_username=None)
             self.post(url, data, expect=400)
-    
+
+        # Test with encrypted ssh key and no unlock password.
+        with self.current_user(self.super_django_user):
+            data = dict(name='zyx', user=self.super_django_user.pk, kind='ssh',
+                        ssh_key_data=TEST_SSH_KEY_DATA_LOCKED)
+            self.post(url, data, expect=400)
+
         # FIXME: Check list as other users.
 
         # can edit a credential

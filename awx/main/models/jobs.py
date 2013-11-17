@@ -303,7 +303,7 @@ class Job(CommonTask):
         return self._get_hosts(job_host_summaries__processed__gt=0)
 
 
-class JobHostSummary(models.Model):
+class JobHostSummary(BaseModel):
     '''
     Per-host statistics for each job.
     '''
@@ -367,7 +367,7 @@ class JobHostSummary(models.Model):
             self.host.save(update_fields=update_fields)
         self.host.update_computed_fields()
 
-class JobEvent(models.Model):
+class JobEvent(BaseModel):
     '''
     An event/message logged from the callback when running a job.
     '''
