@@ -106,9 +106,9 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         }])
 
     .factory('SaveInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
-        'GetBasePath', 'ParseTypeChange', 'LoadInventory',
+        'GetBasePath', 'ParseTypeChange', 'LoadInventory', 'Wait',
     function(InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange,
-        LoadInventory) {
+        LoadInventory, Wait) {
     return function(params) {
         
         // Save inventory property modifications
@@ -116,6 +116,8 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var scope = params.scope;
         var form = InventoryForm;
         var defaultUrl=GetBasePath('inventory');
+
+        Wait('start');
      
         try { 
             // Make sure we have valid variable data
@@ -150,6 +152,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                        Rest.setUrl(data.related.variable_data);
                        Rest.put(json_data)
                            .success( function(data, status, headers, config) {
+                               Wait('stop');
                                scope.$emit('inventorySaved');
                                })
                            .error( function(data, status, headers, config) {
@@ -162,11 +165,13 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     }
                     })
                 .error( function(data, status, headers, config) {
+                    Wait('stop');
                     ProcessErrors(scope, data, status, form,
                         { hdr: 'Error!', msg: 'Failed to update inventory. POST returned status: ' + status });
                     });
         }
         catch(err) {
+            Wait('stop');
             Alert("Error", "Error parsing inventory variables. Parser returned: " + err);  
             }
         }

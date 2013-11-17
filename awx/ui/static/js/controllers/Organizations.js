@@ -49,14 +49,17 @@ function OrganizationsList ($routeParams, $scope, $rootScope, $location, $log, R
     scope.deleteOrganization = function(id, name) {
        
        var action = function() {
+           Wait('start');
            var url = defaultUrl + id + '/';
            Rest.setUrl(url);
            Rest.destroy()
                .success( function(data, status, headers, config) {
+                   Wait('stop');
                    $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
                    })
                .error( function(data, status, headers, config) {
+                   Wait('stop');
                    $('#prompt-modal').modal('hide');
                    ProcessErrors(scope, data, status, null,
                             { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
@@ -77,7 +80,7 @@ OrganizationsList.$inject=[ '$routeParams', '$scope', '$rootScope', '$location',
 
 function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm, 
                            GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath,
-                           ReturnToCaller) 
+                           ReturnToCaller, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -94,12 +97,14 @@ function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $route
    // Save
    scope.formSave = function() {
       form.clearApiErrors();
+      Wait('start');
       var url = GetBasePath(base);
       url += (base != 'organizations') ? $routeParams['project_id'] + '/organizations/' : '';
       Rest.setUrl(url);
       Rest.post({ name: $scope.name, 
                   description: $scope.description })
           .success( function(data, status, headers, config) {  
+              Wait('stop');
               if (base == 'organizations') {
                  $rootScope.flashMessage = "New organization successfully created!";
                  $location.path('/organizations/' + data.id);
@@ -109,6 +114,7 @@ function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $route
               }
               })
           .error( function(data, status, headers, config) {
+              Wait('stop');
               ProcessErrors(scope, data, status, OrganizationForm,
                             { hdr: 'Error!', msg: 'Failed to add new organization. Post returned status: ' + status });
               });
@@ -123,12 +129,12 @@ function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $route
 
 OrganizationsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'OrganizationForm', 
                              'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
-                             'ReturnToCaller' ];
+                             'ReturnToCaller', 'Wait'];
 
 
 function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm, 
                             GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
-                            RelatedPaginateInit, Prompt, ClearScope, GetBasePath) 
+                            RelatedPaginateInit, Prompt, ClearScope, GetBasePath, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -186,6 +192,7 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
    // Save changes to the parent
    scope.formSave = function() {
       generator.clearApiErrors();
+      Wait('start');
       var params = {};
       for (var fld in form.fields) {
           params[fld] = scope[fld];
@@ -193,10 +200,12 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
       Rest.setUrl(defaultUrl + id + '/');
       Rest.put(params)
           .success( function(data, status, headers, config) {
+              Wait('stop');
               master = params;
               $rootScope.flashMessage = "Your changes were successfully saved!";
               })
           .error( function(data, status, headers, config) {
+              Wait('stop');
               ProcessErrors(scope, data, status, OrganizationForm,
                   { hdr: 'Error!', msg: 'Failed to update organization: ' + id + '. PUT status: ' + status });
               });
@@ -228,14 +237,17 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
       $rootScope.flashMessage = null;
       
       var action = function() {
+          Wait('start');
           var url = defaultUrl + $routeParams.organization_id + '/' + set + '/';
           Rest.setUrl(url);
           Rest.post({ id: itm_id, disassociate: 1 })
               .success( function(data, status, headers, config) {
+                  Wait('stop');
                   $('#prompt-modal').modal('hide');
                   scope.search(form.related[set].iterator);
                   })
               .error( function(data, status, headers, config) {
+                  Wait('stop');
                   $('#prompt-modal').modal('hide');
                   ProcessErrors(scope, data, status, null,
                             { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
@@ -252,4 +264,4 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
 
 OrganizationsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'OrganizationForm', 
                               'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit',
-                              'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath'];
+                              'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath', 'Wait'];

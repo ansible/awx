@@ -564,9 +564,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     }])
 
     .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'BuildTree', 'ClickNode',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'BuildTree', 'ClickNode', 'Wait',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, ParseTypeChange, GroupsEdit, BuildTree, ClickNode) {
+        GetBasePath, ParseTypeChange, GroupsEdit, BuildTree, ClickNode, Wait) {
     return function(params) {
 
         var inventory_id = params.inventory_id;
@@ -603,6 +603,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
         // Save
         scope.formModalAction = function() {
+           Wait('start');
            try { 
                scope.formModalActionDisabled = true;
 
@@ -638,6 +639,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                Rest.setUrl(defaultUrl);
                Rest.post(data)
                    .success( function(data, status, headers, config) {
+                       Wait('stop');
                        groupCreated = true;
                        scope.formModalActionDisabled = false;
                        scope.showGroupHelp = false;  //get rid of the Hint
@@ -653,12 +655,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                            });
                        }) 
                    .error( function(data, status, headers, config) {
+                       Wait('stop');
                        scope.formModalActionDisabled = false;
                        ProcessErrors(scope, data, status, form,
                            { hdr: 'Error!', msg: 'Failed to add new group. POST returned status: ' + status });
                        });
            }
            catch(err) {
+               Wait('stop');
                scope.formModalActionDisabled = false;
                Alert("Error", "Error parsing group variables. Parser returned: " + err);     
            }
@@ -675,10 +679,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-        'GetUpdateIntervalOptions', 'ClickNode', 'LookUpInit', 'CredentialList', 'Empty',
+        'GetUpdateIntervalOptions', 'ClickNode', 'LookUpInit', 'CredentialList', 'Empty', 'Wait',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions, ClickNode,
-        LookUpInit, CredentialList, Empty) {
+        LookUpInit, CredentialList, Empty, Wait) {
     return function(params) {
         
         var group_id = params.group_id;
@@ -942,6 +946,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
         // Save changes to the parent
         scope.formSave = function() {
+            Wait('start');
             try {
                 var refreshHosts = false;
        
@@ -967,6 +972,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 Rest.setUrl(defaultUrl);
                 Rest.put(data)
                     .success( function(data, status, headers, config) {
+                        Wait('stop');
                         if (scope.variables) {
                            //update group variables
                            Rest.setUrl(scope.variable_url);
@@ -979,11 +985,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         scope.$emit('formSaveSuccess', data.id);
                         })
                     .error( function(data, status, headers, config) {
+                        Wait('stop');
                         ProcessErrors(scope, data, status, form,
                             { hdr: 'Error!', msg: 'Failed to update group: ' + group_id + '. PUT status: ' + status });
                         });
             }
             catch(err) {
+               Wait('stop');
                Alert("Error", "Error parsing group variables. Parser returned: " + err);     
             }
             };

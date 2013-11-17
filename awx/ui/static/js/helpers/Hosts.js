@@ -161,9 +161,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
 
     .factory('HostsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, HostsReload, ParseTypeChange) {
+        GetBasePath, HostsReload, ParseTypeChange, Wait) {
     return function(params) {
 
         var inventory_id = params.inventory_id;
@@ -201,6 +201,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         // Save
         scope.formModalAction  = function() {
+           
+           Wait('start');
            
            function finished() {
                $('#form-modal').modal('hide');
@@ -245,15 +247,18 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                Rest.setUrl(defaultUrl);
                Rest.post(data)
                    .success( function(data, status, headers, config) {
+                       Wait('stop');
                        finished();
                        })
                    .error( function(data, status, headers, config) {
+                       Wait('stop');
                        scope.formModalActionDisabled = false;
                        ProcessErrors(scope, data, status, form,
                            { hdr: 'Error!', msg: 'Failed to add new host. POST returned status: ' + status });
                        });
            }
            catch(err) {
+               Wait('stop');
                scope.formModalActionDisabled = false;
                Alert("Error", "Error parsing host variables. Parser returned: " + err);  
            }
@@ -270,9 +275,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
 
     .factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, HostsReload, ParseTypeChange) {
+        GetBasePath, HostsReload, ParseTypeChange, Wait) {
     return function(params) {
         
         var host_id = params.host_id;
@@ -366,6 +371,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         // Save changes to the parent
         scope.formModalAction = function() {
             
+            Wait('start');
+
             function finished() {
                 $('#form-modal').modal('hide');
                 if (hostsReload) {
@@ -406,14 +413,17 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                 Rest.setUrl(defaultUrl);
                 Rest.put(data)
                     .success( function(data, status, headers, config) {
+                        Wait('stop');
                         finished();
                         })
                     .error( function(data, status, headers, config) {
+                        Wait('stop');
                         ProcessErrors(scope, data, status, form,
                             { hdr: 'Error!', msg: 'Failed to update host: ' + host_id + '. PUT returned status: ' + status });
                         });
             }
             catch(err) {
+               Wait('stop');
                Alert("Error", "Error parsing host variables. Parser returned: " + err);     
             }
             };

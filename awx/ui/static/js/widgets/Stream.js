@@ -195,6 +195,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
         // Add a container for the stream widget
         $('#tab-content-container').append('<div id="stream-container"><div id=\"stream-content\"></div></div><!-- Stream widget -->');
+
+        ShowStream();
         
         // Generate the list
         var scope = view.inject(list, { 
@@ -257,7 +259,6 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 }
                 scope['activities'][i].description = BuildDescription(scope['activities'][i]);
             }
-            ShowStream();
             });
 
         // Initialize search and paginate pieces and load data

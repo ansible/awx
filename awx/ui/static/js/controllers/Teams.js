@@ -12,7 +12,7 @@
 
 function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, TeamList,
                     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                    ClearScope, ProcessErrors, SetTeamListeners, GetBasePath, SelectionInit)
+                    ClearScope, ProcessErrors, SetTeamListeners, GetBasePath, SelectionInit, Wait)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -56,14 +56,17 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
     scope.deleteTeam = function(id, name) {
        
        var action = function() {
+           Wait('start');
            var url = defaultUrl + id + '/';
            Rest.setUrl(url);
            Rest.destroy()
                .success( function(data, status, headers, config) {
+                   Wait('stop');
                    $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
                    })
                .error( function(data, status, headers, config) {
+                   Wait('stop');
                    $('#prompt-modal').modal('hide');
                    ProcessErrors(scope, data, status, null,
                             { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
@@ -90,12 +93,12 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
 
 TeamsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'TeamList', 'GenerateList', 
                       'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                       'SetTeamListeners', 'GetBasePath', 'SelectionInit'];
+                       'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait'];
 
 
-function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, 
-                   GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-                   GenerateList, OrganizationList, SearchInit, PaginateInit, GetBasePath, LookUpInit) 
+function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm,
+                   Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList,
+                   OrganizationList, SearchInit, PaginateInit, GetBasePath, LookUpInit, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -120,6 +123,7 @@ function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    // Save
    scope.formSave = function() {
       generator.clearApiErrors();
+      Wait('start');
       Rest.setUrl(defaultUrl);
       var data = {}
       for (var fld in form.fields) {
@@ -127,10 +131,12 @@ function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
       } 
       Rest.post(data)
           .success( function(data, status, headers, config) {
+              Wait('stop');
               $rootScope.flashMessage = "New team successfully created!";
               $location.path('/teams/' + data.id);
               })
           .error( function(data, status, headers, config) {
+              Wait('stop');
               ProcessErrors(scope, data, status, form,
                             { hdr: 'Error!', msg: 'Failed to add new team. Post returned status: ' + status });
               });
@@ -145,13 +151,13 @@ function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
 TeamsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm', 'GenerateForm', 
                      'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
-                     'OrganizationList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'LookUpInit' ]; 
+                     'OrganizationList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'LookUpInit', 'Wait']; 
 
 
 function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, 
                     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                     RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, 
-                    GetBasePath, CheckAccess, OrganizationList) 
+                    GetBasePath, CheckAccess, OrganizationList, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -230,6 +236,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
    // Save changes to the parent
    scope.formSave = function() {
       generator.clearApiErrors();
+      Wait('start');
       $rootScope.flashMessage = null;
       Rest.setUrl(defaultUrl + $routeParams.team_id +'/');
       var data = {}
@@ -238,10 +245,12 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
       } 
       Rest.put(data)
           .success( function(data, status, headers, config) {
+              Wait('stop');
               var base = $location.path().replace(/^\//,'').split('/')[0];
               (base == 'teams') ? ReturnToCaller() : ReturnToCaller(1);
               })
           .error( function(data, status, headers, config) {
+              Wait('stop');
               ProcessErrors(scope, data, status, form,
                   { hdr: 'Error!', msg: 'Failed to update team: ' + $routeParams.team_id + '. PUT status: ' + status });
               });
@@ -335,6 +344,6 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 TeamsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm', 
                       'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                       'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
-                      'GetBasePath', 'CheckAccess', 'OrganizationList'
+                      'GetBasePath', 'CheckAccess', 'OrganizationList', 'Wait'
                       ]; 
   

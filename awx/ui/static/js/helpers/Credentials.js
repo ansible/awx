@@ -44,6 +44,7 @@ angular.module('CredentialsHelper', ['Utilities'])
         if (reset) {
            scope['access_key'] = null;
            scope['secret_key'] = null;
+           scope['api_key'] = null;
            scope['username'] = null;
            scope['password'] = null;
            scope['password_confirm'] = null;
@@ -94,14 +95,16 @@ angular.module('CredentialsHelper', ['Utilities'])
         }])
 
     
-    .factory('FormSave', ['$location', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller',
-    function($location, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller) {
+    .factory('FormSave', ['$location', 'Rest', 'ProcessErrors', 'Empty', 'GetBasePath', 'CredentialForm', 'ReturnToCaller', 'Wait',
+    function($location, Rest, ProcessErrors, Empty, GetBasePath, CredentialForm, ReturnToCaller, Wait) {
     return function(params) {
         var scope = params.scope;
         var mode = params.mode; // add or edit
         var form = CredentialForm;
         var data = {}
         
+        Wait('start');
+
         for (var fld in form.fields) {
             if (fld !== 'access_key' && fld !== 'secret_key' && fld !== 'ssh_username' &&
                 fld !== 'ssh_password') {
@@ -127,7 +130,6 @@ angular.module('CredentialsHelper', ['Utilities'])
 
         switch (data['kind']) { 
             case 'ssh': 
-                data['username'] = scope['ssh_username'];
                 data['password'] = scope['ssh_password'];
                 break; 
             case 'aws':
@@ -136,6 +138,9 @@ angular.module('CredentialsHelper', ['Utilities'])
                 break;
             case 'scm':
                 data['ssh_key_unlock'] = scope['scm_key_unlock'];
+                break;
+            case 'rax':
+                data['password'] = scope['api_key'];
                 break;
         }
 
@@ -150,10 +155,12 @@ angular.module('CredentialsHelper', ['Utilities'])
                 Rest.setUrl(url);
                 Rest.post(data)
                     .success( function(data, status, headers, config) {
+                        Wait('stop');
                         var base = $location.path().replace(/^\//,'').split('/')[0];
                         (base == 'credentials') ? ReturnToCaller() : ReturnToCaller(1);
                         })
                     .error( function(data, status, headers, config) {
+                        Wait('stop');
                         ProcessErrors(scope, data, status, form,
                             { hdr: 'Error!', msg: 'Failed to create new Credential. POST status: ' + status });
                         });
@@ -163,10 +170,12 @@ angular.module('CredentialsHelper', ['Utilities'])
                 Rest.setUrl(url);
                 Rest.put(data)
                     .success( function(data, status, headers, config) {
+                        Wait('stop');
                         var base = $location.path().replace(/^\//,'').split('/')[0];
                         (base == 'credentials') ? ReturnToCaller() : ReturnToCaller(1);
                         })
                     .error( function(data, status, headers, config) {
+                        Wait('stop');
                         ProcessErrors(scope, data, status, form,
                             { hdr: 'Error!', msg: 'Failed to update Credential. PUT status: ' + status });
                         });

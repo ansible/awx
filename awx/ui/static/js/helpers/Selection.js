@@ -12,8 +12,8 @@
  
 angular.module('SelectionHelper', ['Utilities', 'RestServices'])
 
-    .factory('SelectionInit', [ 'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 
-    function(Rest, Alert, ProcessErrors, ReturnToCaller) {
+    .factory('SelectionInit', [ 'Rest', 'Alert', 'ProcessErrors', 'ReturnToCaller', 'Wait',
+    function(Rest, Alert, ProcessErrors, ReturnToCaller, Wait) {
     return function(params) {
          
         var scope = params.scope;     // current scope
@@ -74,6 +74,8 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
                scope.queue = [];
                scope.formModalActionDisabled = true;
                
+               Wait('start');
+
                function finished() {
                    scope.selected = [];
                    if (returnToCaller !== undefined) {
@@ -92,6 +94,7 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
                   // We call the API for each selected item. We need to hang out until all the api
                   // calls are finished.
                   if (scope.queue.length == scope.selected.length) {
+                     Wait('stop');
                      var errors = 0;   
                      for (var i=0; i < scope.queue.length; i++) {
                          if (scope.queue[i].result == 'error') {
