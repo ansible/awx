@@ -17,8 +17,7 @@ angular.module('StreamListDefinition', [])
         index: false,
         hover: true,
         "class": "table-condensed",
-        searchWidgetLabel: 'Object',
-        searchWidgetLabel2: 'Modified by',
+        searchWidgets: 3,
         
         fields: {
             timestamp: {
@@ -29,14 +28,14 @@ angular.module('StreamListDefinition', [])
                 searchable: false
                 },
             user: {
-                label: 'User',
+                label: 'Initiated by',
                 ngBindHtml: 'activity.user',
                 sourceModel: 'user',
                 sourceField: 'username',
                 awToolTip: "\{\{ userToolTip \}\}",
                 dataPlacement: 'top',
-                searchPlaceholder: 'Username',
-                searchWidget: 2
+                searchPlaceholder: 'Initiated by username',
+                searchWidget: 1
                 },
             objects: {
                 label: 'Objects',
@@ -51,68 +50,162 @@ angular.module('StreamListDefinition', [])
                 searchable: false
                 },
             system_event: {
-                label: 'System',
+                label: 'System event',
                 searchOnly: true, 
                 searchType: 'isnull',
                 sourceModel: 'user',
                 sourceField: 'username',
-                searchWidget: 2
+                searchWidget: 1
                 },
-            // The following fields exist to forces loading each type of object into the search
+
+            // The following fields exist to force loading each type of object into the search
             // dropdown
             all_objects: {
                 label: 'All',
                 searchOnly: true, 
                 searchObject: 'all',
-                searchPlaceholder: ' '
+                searchPlaceholder: 'All primary objects',
+                searchWidget: 2,
+                searchField: 'object1'
                 },
             credential_search: {
                 label: 'Credential',
                 searchOnly: true,
                 searchObject: 'credentials',
-                searchPlaceholder: 'Credential name'
+                searchPlaceholder: 'Primary credential name',
+                searchWidget: 2,
+                searchField: 'object1'
                 },
             group_search: {
                 label: 'Group',
                 searchOnly: true,
                 searchObject: 'groups',
-                searchPlaceholder: 'Group name'
+                searchPlaceholder: 'Primary group name',
+                searchWidget: 2,
+                searchField: 'object1'
                 },
             host_search: {
                 label: 'Host',
                 searchOnly: true,
                 searchObject: 'hosts',
-                searchPlaceholder: 'Host name'
+                searchPlaceholder: 'Primary host name',
+                searchWidget: 2,
+                searchField: 'object1'
                 },
             inventory_search: {
                 label: 'Inventory',
                 searchOnly: true,
                 searchObject: 'inventories',
-                searchPlaceholder: 'Inventory name'
+                searchPlaceholder: 'Primary inventory name',
+                searchWidget: 2,
+                searchField: 'object1'
                 },
             job_template_search: {
                 label: 'Job Template',
                 searchOnly: true,
                 searchObject: 'job_templates',
-                searchPlaceholder: 'Job template name'
+                searchPlaceholder: 'Primary job template name',
+                searchWidget: 2,
+                searchField: 'object1'
                 },
             organization_search: {
                 label: 'Organization',
                 searchOnly: true,
                 searchObject: 'organizations',
-                searchPlaceholder: 'Organization name'
+                searchPlaceholder: 'Primary organization name',
+                searchWidget: 2,
+                searchField: 'object1'
                 },
             project_search: {
                 label: 'Project',
                 searchOnly: true,
                 searchObject: 'projects',
-                searchPlaceholder: 'Project name'
+                searchPlaceholder: 'Primary project name',
+                searchWidget: 2,
+                searchField: 'object1'
                 },
             user_search: {
                 label: 'User',
                 searchOnly: true,
                 searchObject: 'users',
-                searchPlaceholder: 'Username'
+                searchPlaceholder: 'Primary username',
+                searchWidget: 2,
+                searchField: 'object1'
+                },
+
+            // The following fields exist to force loading each type of object into the search
+            // dropdown
+            all_objects3: {
+                label: 'All',
+                searchOnly: true, 
+                searchObject: 'all',
+                searchPlaceholder: 'All related objects',
+                searchWidget: 3,
+                searchField: 'object2'
+                },
+            credential_search3: {
+                label: 'Credential',
+                searchOnly: true,
+                searchObject: 'credentials',
+                searchPlaceholder: 'Related credential name',
+                searchWidget: 3,
+                searchField: 'object2'
+                },
+            group_search3: {
+                label: 'Group',
+                searchOnly: true,
+                searchObject: 'groups',
+                searchPlaceholder: 'Related group name',
+                searchWidget: 3,
+                searchField: 'object2'
+                },
+            host_search3: {
+                label: 'Host',
+                searchOnly: true,
+                searchObject: 'hosts',
+                searchPlaceholder: 'Related host name',
+                searchWidget: 3,
+                searchField: 'object2'
+                },
+            inventory_search3: {
+                label: 'Inventory',
+                searchOnly: true,
+                searchObject: 'inventories',
+                searchPlaceholder: 'Related inventory name',
+                searchWidget: 3,
+                searchField: 'object2'
+                },
+            job_template_search3: {
+                label: 'Job Template',
+                searchOnly: true,
+                searchObject: 'job_templates',
+                searchPlaceholder: 'Related job template name',
+                searchWidget: 3,
+                searchField: 'object2'
+                },
+            organization_search3: {
+                label: 'Organization',
+                searchOnly: true,
+                searchObject: 'organizations',
+                searchPlaceholder: 'Related organization name',
+                searchWidget: 3,
+                searchField: 'object2'
+                },
+            project_search3: {
+                label: 'Project',
+                searchOnly: true,
+                searchObject: 'projects',
+                searchPlaceholder: 'Related project name',
+                searchWidget: 3,
+                searchField: 'object2'
+                },
+            user_search3: {
+                label: 'User',
+                searchOnly: true,
+                searchObject: 'users',
+                searchPlaceholder: 'Related username',
+                searchWidget: 3,
+                searchField: 'object2'
                 }
             },
         

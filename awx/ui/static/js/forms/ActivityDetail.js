@@ -39,7 +39,7 @@ angular.module('ActivityDetailDefinition', [])
             object1_name: {
                 label: 'Name',
                 type: 'text',
-                ngHide: '!object1',
+                ngHide: '!object1_name',
                 readonly: true
                 },
             object2: {
@@ -51,12 +51,13 @@ angular.module('ActivityDetailDefinition', [])
             object2_name: {
                 label: 'Name',
                 type: 'text',
-                ngHide: '!object2',
+                ngHide: '!object2_name',
                 readonly: true
                 },
             changes: {
                 label: 'Changes',
                 type: 'textarea',
+                ngHide: '!changes',
                 readonly: true
                 }
             }        

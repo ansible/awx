@@ -8,6 +8,8 @@ angular.module('RestServices',['ngCookies','AuthService'])
 .factory('Rest', ['$http','$rootScope','$cookieStore', '$q', 'Authorization',
 function($http, $rootScope, $cookieStore, $q, Authorization) {
     return {
+    
+    headers: {},
 
     setUrl: function (url) {
         this.url = url;
@@ -42,6 +44,13 @@ function($http, $rootScope, $cookieStore, $q, Authorization) {
            };
         return promise;
         },
+    
+    setHeader: function(hdr) {
+        // Passin in { key: value } pairs to be added to the header
+        for (var h in hdr) {
+            this.headers[h] = hdr.h;    
+        }
+        },
     get: function(args) {
         args = (args) ? args : {};
         this.params = (args.params) ? args.params : null;
@@ -52,9 +61,10 @@ function($http, $rootScope, $cookieStore, $q, Authorization) {
            return this.createResponse({ detail: 'Token is expired' }, 401);
         }
         else if (token) {
+           this.setHeader({ Authorization: 'Token ' + token });
            return $http({method: 'GET', 
                url: this.url,
-               headers: { 'Authorization': 'Token ' + token },
+               headers: this.headers,
                params: this.params
                });
         }

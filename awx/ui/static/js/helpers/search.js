@@ -25,7 +25,9 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         var defaultUrl = params.url;
         var list = params.list; 
         var iterator = (params.iterator) ? params.iterator : list.iterator;
-        var sort_order; 
+        var sort_order;
+        var expected_objects=0;
+        var found_objects=0;
          
         if (scope.searchTimer) {
             $timeout.cancel(scope.searchTimer);
@@ -114,74 +116,68 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         // Functions to handle search widget changes
         scope.setSearchField = function(iterator, fld, label, widget) {
            
-           var modifier = (widget == undefined || widget == 1) ? '' : widget;
-           scope[iterator + 'SearchFieldLabel' + modifier] = label;
-           scope[iterator + 'SearchField' + modifier] = fld;
-           scope[iterator + 'SearchValue' + modifier] = '';
-           scope[iterator + 'SelectShow' + modifier] = false;
-           scope[iterator + 'HideSearchType' + modifier] = false;
-           scope[iterator + 'InputHide' + modifier] = false;
-           scope[iterator + 'SearchType' + modifier] = 'icontains';
-           scope[iterator + 'SearchPlaceholder' + modifier] = (list.fields[fld].searchPlaceholder) ? list.fields[fld].searchPlaceholder : 'Search';
-           scope[iterator + 'InputDisable' + modifier] = (list.fields[fld].searchObject == 'all') ? true : false;
-           
-           if (list.fields[fld].searchType && list.fields[fld].searchType == 'gtzero') {
-              scope[iterator + "InputDisable" + modifier] = true;
-           }
-           else if (list.fields[fld].searchSingleValue){
-              // Query a specific attribute for one specific value
-              // searchSingleValue: true
-              // searchType: 'boolean|int|etc.'
-              // searchValue: < value to match for boolean use 'true'|'false' >
-              scope[iterator + 'InputDisable' + modifier] = true;
-              scope[iterator + "SearchValue" + modifier] = list.fields[fld].searchValue;
-              // For boolean type, SearchValue must be an object
-              if (list.fields[fld].searchType == 'boolean' && list.fields[fld].searchValue == 'true') {
-                 scope[iterator + "SearchSelectValue" + modifier] = { value: 1 }; 
-              }
-              else if (list.fields[fld].searchType == 'boolean' && list.fields[fld].searchValue == 'false') {
-                 scope[iterator + "SearchSelectValue" + modifier] = { value: 0 };
-              }
-              else {
-                 scope[iterator + "SearchSelectValue" + modifier] = { value: list.fields[fld].searchValue };
-              }
-           }
-           else if (list.fields[fld].searchType == 'in') {
-              scope[iterator + "SearchType" + modifier] = 'in';
-              scope[iterator + "SearchValue" + modifier] = list.fields[fld].searchValue;
-              scope[iterator + "InputDisable" + modifier] = true;
-           }
-           else if (list.fields[fld].searchType && (list.fields[fld].searchType == 'boolean' 
+            var modifier = (widget == undefined || widget == 1) ? '' : widget;
+            scope[iterator + 'SearchFieldLabel' + modifier] = label;
+            scope[iterator + 'SearchField' + modifier] = fld;
+            scope[iterator + 'SearchValue' + modifier] = '';
+            scope[iterator + 'SelectShow' + modifier] = false;
+            scope[iterator + 'HideSearchType' + modifier] = false;
+            scope[iterator + 'InputHide' + modifier] = false;
+            scope[iterator + 'SearchType' + modifier] = 'icontains';
+            scope[iterator + 'SearchPlaceholder' + modifier] = (list.fields[fld].searchPlaceholder) ? list.fields[fld].searchPlaceholder : 'Search';
+            scope[iterator + 'InputDisable' + modifier] = (list.fields[fld].searchObject == 'all') ? true : false;
+
+            if (list.fields[fld].searchType && list.fields[fld].searchType == 'gtzero') {
+                scope[iterator + "InputDisable" + modifier] = true;
+            }
+            else if (list.fields[fld].searchSingleValue){
+                // Query a specific attribute for one specific value
+                // searchSingleValue: true
+                // searchType: 'boolean|int|etc.'
+                // searchValue: < value to match for boolean use 'true'|'false' >
+                scope[iterator + 'InputDisable' + modifier] = true;
+                scope[iterator + "SearchValue" + modifier] = list.fields[fld].searchValue;
+                // For boolean type, SearchValue must be an object
+                if (list.fields[fld].searchType == 'boolean' && list.fields[fld].searchValue == 'true') {
+                   scope[iterator + "SearchSelectValue" + modifier] = { value: 1 }; 
+                }
+                else if (list.fields[fld].searchType == 'boolean' && list.fields[fld].searchValue == 'false') {
+                   scope[iterator + "SearchSelectValue" + modifier] = { value: 0 };
+                }
+                else {
+                   scope[iterator + "SearchSelectValue" + modifier] = { value: list.fields[fld].searchValue };
+                }
+            }
+            else if (list.fields[fld].searchType == 'in') {
+                scope[iterator + "SearchType" + modifier] = 'in';
+                scope[iterator + "SearchValue" + modifier] = list.fields[fld].searchValue;
+                scope[iterator + "InputDisable" + modifier] = true;
+            }
+            else if (list.fields[fld].searchType && (list.fields[fld].searchType == 'boolean' 
                 || list.fields[fld].searchType == 'select' || list.fields[fld].searchType == 'select_or')) {
-              scope[iterator + 'SelectShow' + modifier] = true;
-              scope[iterator + 'SearchSelectOpts' + modifier] = list.fields[fld].searchOptions;
-           }
-           else if (list.fields[fld].searchType && list.fields[fld].searchType == 'int') {
-              scope[iterator + 'HideSearchType' + modifier] = true;   
-           }
-           else if (list.fields[fld].searchType && list.fields[fld].searchType == 'isnull') {
-              scope[iterator + 'SearchType' + modifier] = 'isnull';
-              scope[iterator + 'InputDisable' + modifier] = true;
-              scope[iterator + 'SearchValue' + modifier] = 'true';
-           }
-           scope.search(iterator);
-           }
+                scope[iterator + 'SelectShow' + modifier] = true;
+                scope[iterator + 'SearchSelectOpts' + modifier] = list.fields[fld].searchOptions;
+            }
+            else if (list.fields[fld].searchType && list.fields[fld].searchType == 'int') {
+                scope[iterator + 'HideSearchType' + modifier] = true;   
+            }
+            else if (list.fields[fld].searchType && list.fields[fld].searchType == 'isnull') {
+                scope[iterator + 'SearchType' + modifier] = 'isnull';
+                scope[iterator + 'InputDisable' + modifier] = true;
+                scope[iterator + 'SearchValue' + modifier] = 'true';
+            }
+            scope.search(iterator);
+            }
 
         scope.resetSearch = function(iterator, widget) {
-           // Respdond to click of reset button
-           setDefaults(widget);
-           // Force removal of search keys from the URL
-           window.location = '/#' + $location.path();
-           scope.search(iterator);
-           }
+            // Respdond to click of reset button
+            setDefaults(widget);
+            // Force removal of search keys from the URL
+            window.location = '/#' + $location.path();
+            scope.search(iterator);
+            }
 
-        //scope.setSearchType = function(iterator, type, label) {
-        //   scope[iterator + 'SearchTypeLabel'] = label; 
-        //   scope[iterator + 'SearchType'] = type;
-        //   scope.search(iterator);
-        //   }
-
-
+        
         if (scope.removeDoSearch) {
             scope.removeDoSearch();
         }
@@ -212,85 +208,126 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             Refresh({ scope: scope, set: set, iterator: iterator, url: url });
             });
 
-        
+        if (scope.removeFoundObject) {
+           scope.removeFoundObject();
+        }
+        scope.removeFoundObject = scope.$on('foundObject', function(e, iterator, page, load, spin, widget, pk) {
+            found_objects++; 
+            // Add new criteria to search params
+            var modifier = (widget == 1) ? '' : widget;
+            var objs = list.fields[scope[iterator + 'SearchField' + modifier]].searchObject;
+            var o = (objs == 'inventories') ? 'inventory' : objs.replace(/s$/,'');
+            var searchFld = list.fields[scope[iterator + 'SearchField' + modifier]].searchField;
+            scope[iterator + 'SearchParams'] += '&' + searchFld + '__icontains=' + o;
+            if (!Empty(pk)) {
+               scope[iterator + 'SearchParams'] += '&' + searchFld + '_id__in=' + pk;
+            }
+            // Move to the next phase once all object types are processed
+            if (found_objects == expected_objects) {
+               scope.$emit('prepareSearch2', iterator, page, load, spin);
+            }
+            });
+
         if (scope.removePrepareSearch) {
             scope.removePrepareSearch();
         }
         scope.removePrepareSearch = scope.$on('prepareSearch', function(e, iterator, page, load, spin) {
             //
-            // Start build the search key/value pairs. This will process the first search widget, if the
+            // Start build the search key/value pairs. This will process search widget, if the
             // selected field is an object type (used on activity stream).
             //
-            scope[iterator + 'HoldInput'] = true;
             scope[iterator + 'SearchParams'] = '';
-            if (list.fields[scope[iterator + 'SearchField']].searchObject &&
-                 list.fields[scope[iterator + 'SearchField']].searchObject !== 'all') { 
-                //This is specifically for activity stream. We need to identify which type of object is being searched
-                //and then provide a list of PK values corresponding to the list of objects the user is interested in.
-                var objs = list.fields[scope[iterator + 'SearchField']].searchObject;
-                var o = (objs == 'inventories') ? 'inventory' : objs.replace(/s$/,'');
-                scope[iterator + 'SearchParams'] = 'or__object1=' + o + '&or__object2=' + o;
-                if (scope[iterator + 'SearchValue']) {
-                   var objUrl = GetBasePath('base') + objs + '/?name__icontains=' + scope[iterator + 'SearchValue'];
-                   Rest.setUrl(objUrl);
-                   Rest.get()
-                       .success( function(data, status, headers, config) {
-                           var list='';
-                           for (var i=0; i < data.results.length; i++) {
-                               list += "," + data.results[i].id;
-                           }
-                           list = list.replace(/^\,/,'');
-                           if (!Empty(list)) {
-                               scope[iterator + 'SearchParams'] += '&or__object1_id__in=' + list + '&or__object2_id__in=' + list;
-                           }
-                           //scope[iterator + 'SearchParams'] += (sort_order) ? '&order_by=' + escape(sort_order) : "";
-                           scope.$emit('prepareSearch2', iterator, page, load, spin, 2);
-                           })
-                       .error( function(data, status, headers, config) {
-                            ProcessErrors(scope, data, status, null,
-                                { hdr: 'Error!', msg: 'Retrieving list of ' + obj + ' where name contains: ' + scope[iterator + 'SearchValue'] +
-                                ' GET returned status: ' + status });
-                           });
-                }
-                else {
-                    scope.$emit('prepareSearch2', iterator, page, load, spin, 2);  
+            var widgets = (list.searchWidgets) ? list.searchWidgets : 1;
+            var modifier;
+            
+            // Determine how many object values we're dealing with.
+            expected_objects = 0;
+            found_objects = 0;
+            for (var i=1; i <= widgets; i++) {
+                modifier = (i == 1) ? '' : i;
+                if ($('#search-widget-container' + modifier) &&
+                    list.fields[scope[iterator + 'SearchField' + modifier]] &&
+                    list.fields[scope[iterator + 'SearchField' + modifier]].searchObject &&
+                    list.fields[scope[iterator + 'SearchField'  + modifier]].searchObject !== 'all') {
+                   expected_objects++;
                 }
             }
-            else {
-                scope.$emit('prepareSearch2', iterator, page, load, spin, 1);
+
+            for (var i=1; i <= widgets; i++) {
+                var modifier = (i == 1) ? '' : i;
+                if ( $('#search-widget-container' + modifier) ) {
+                    if (list.fields[scope[iterator + 'SearchField' + modifier]] &&
+                        list.fields[scope[iterator + 'SearchField' + modifier]].searchObject &&
+                        list.fields[scope[iterator + 'SearchField'  + modifier]].searchObject !== 'all') { 
+                        scope[iterator + 'HoldInput' + modifier] = true;
+                        if (scope[iterator + 'SearchValue' + modifier]) {
+                            var objs = list.fields[scope[iterator + 'SearchField' + modifier]].searchObject;
+                            var objUrl = GetBasePath('base') + objs + '/?name__icontains=' + scope[iterator + 'SearchValue'];
+                            Rest.setUrl(objUrl);
+                            Rest.get()
+                                .success( function(data, status, headers, config) {
+                                    var pk='';
+                                    for (var j=0; j < data.results.length; j++) {
+                                        pk += "," + data.results[j].id;
+                                    } 
+                                    pk = pk.replace(/^\,/,'');
+                                    console.log(config);
+                                    scope.$emit('foundObject', iterator, page, load, spin, i, pk);
+                                    })
+                               .error( function(data, status, headers, config) {
+                                    ProcessErrors(scope, data, status, null,
+                                        { hdr: 'Error!', msg: 'Retrieving list of ' + obj + ' where name contains: ' + scope[iterator + 'SearchValue'] +
+                                        ' GET returned status: ' + status });
+                                    });
+                        }
+                        else {
+                            scope.$emit('foundObject', iterator, page, load, spin, i, null);  
+                        }
+                    }
+                }
+            }
+            if (expected_objects == 0) {
+                // No search widgets contain objects
+                scope.$emit('prepareSearch2', iterator, page, load, spin);
             }
             });
         
         if (scope.removePrepareSearch2) {
             scope.removePrepareSearch2();
         }
-        scope.removePrepareSearch2 = scope.$on('prepareSearch2', function(e, iterator, page, load, spin, startingWidget) {  
+        scope.removePrepareSearch2 = scope.$on('prepareSearch2', function(e, iterator, page, load, spin) {  
             // Continue building the search by examining the remaining search widgets. If we're looking at activity_stream,
             // there's more than one.
-            for (var i=startingWidget; i <= 3; i++) {
-                var modifier = (i == 1) ? '' : i;
+            var widgets = (list.searchWidgets) ? list.searchWidgets : 1;
+            var modifier;
+            for (var i=1; i <= widgets; i++) {
+                modifier = (i == 1) ? '' : i;
                 scope[iterator + 'HoldInput' + modifier] = true; 
-                if ( $('#search-widget-container' + modifier) ) {
-                    // if the search widget exists, add its parameters to the query
+                if ($('#search-widget-container' + modifier) && 
+                    list.fields[scope[iterator + 'SearchField' + modifier]] &&
+                    !list.fields[scope[iterator + 'SearchField' + modifier]].searchObject) {
+                    
+                    // if the search widget exists and its value is not an object, add its parameters to the query
+                    
                     if ( (!scope[iterator + 'SelectShow' + modifier] && !Empty(scope[iterator + 'SearchValue' + modifier])) ||
                            (scope[iterator + 'SelectShow' + modifier] && scope[iterator + 'SearchSelectValue' + modifier]) || 
                            (list.fields[scope[iterator + 'SearchField' + modifier]] && 
                             list.fields[scope[iterator + 'SearchField' + modifier]].searchType == 'gtzero') ) {
                         if (list.fields[scope[iterator + 'SearchField' + modifier]].searchField) {
-                            scope[iterator + 'SearchParams'] = list.fields[scope[iterator + 'SearchField' + modifier]].searchField + '__'; 
+                            scope[iterator + 'SearchParams'] += '&' + list.fields[scope[iterator + 'SearchField' + modifier]].searchField + '__'; 
                         }
                         else if (list.fields[scope[iterator + 'SearchField' + modifier]].sourceModel) {
                             // handle fields whose source is a related model e.g. inventories.organization
-                            scope[iterator + 'SearchParams'] = list.fields[scope[iterator + 'SearchField' + modifier]].sourceModel + '__' + 
+                            scope[iterator + 'SearchParams'] += '&' + list.fields[scope[iterator + 'SearchField' + modifier]].sourceModel + '__' + 
                             list.fields[scope[iterator + 'SearchField' + modifier]].sourceField + '__';
                         }
                         else if ( (list.fields[scope[iterator + 'SearchField' + modifier]].searchType == 'select') && 
                                   (scope[iterator + 'SearchSelectValue' + modifier].value == '' || 
                                       scope[iterator + 'SearchSelectValue' + modifier].value == null) ) {
-                            scope[iterator + 'SearchParams'] = scope[iterator + 'SearchField' + modifier];
+                            scope[iterator + 'SearchParams'] += '&' + scope[iterator + 'SearchField' + modifier];
                         }
                         else {
-                            scope[iterator + 'SearchParams'] = scope[iterator + 'SearchField' + modifier] + '__'; 
+                            scope[iterator + 'SearchParams'] += '&' + scope[iterator + 'SearchField' + modifier] + '__'; 
                         }
                         
                         if ( list.fields[scope[iterator + 'SearchField' + modifier]].searchType && 
@@ -307,7 +344,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                                       scope[iterator + 'SearchSelectValue' + modifier].value == null) ) {
                             scope[iterator + 'SearchParams'] += 'iexact=';
                         }
-                        else if ( (list.fields[scope[iterator + 'SearchField' + modifier]].searchType && 
+                        /*else if ( (list.fields[scope[iterator + 'SearchField' + modifier]].searchType && 
                                   (list.fields[scope[iterator + 'SearchField' + modifier]].searchType == 'or')) ) {
                             scope[iterator + 'SearchParams'] = ''; //start over
                             var val = scope[iterator + 'SearchValue' + modifier];
@@ -317,7 +354,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                                     '__icontains=' + escape(val); 
                             }
                             scope[iterator + 'SearchParams'].replace(/^\&/,'');     
-                        }
+                        }*/
                         else {
                             scope[iterator + 'SearchParams'] += scope[iterator + 'SearchType' + modifier] + '='; 
                         }             

@@ -92,13 +92,19 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         }
         descr += activity.operation;
         descr += (/e$/.test(activity.operation)) ? 'd ' : 'ed ';
-        if (activity.summary_fields.object2) {
+        if (activity.summary_fields.object2 && activity.summary_fields.object2.name) {
             descr += activity.summary_fields.object2.base + ' <a href=\"' + BuildUrl(activity.summary_fields.object2) + '\">'
                 + activity.summary_fields.object2.name + '</a>' + [ (activity.operation == 'disassociate') ? ' from ' : ' to ']; 
         }
-        if (activity.summary_fields.object1) {
+        else if (activity.object2) { 
+            descr += activity.object2 + [ (activity.operation == 'disassociate') ? ' from ' : ' to '];
+        }
+        if (activity.summary_fields.object1 && activity.summary_fields.object1.name) {
             descr += activity.summary_fields.object1.base + ' <a href=\"' + BuildUrl(activity.summary_fields.object1) + '\">'
                 + activity.summary_fields.object1.name + '</a>'; 
+        }
+        else if (activity.object1) { 
+            descr += activity.object1;
         }
         return descr;
         }
@@ -241,7 +247,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 // Objects
                 var href;
                 var deleted = /^\_delete/;
-                if (scope['activities'][i].summary_fields.object1) {
+                if (scope['activities'][i].summary_fields.object1 && scope['activities'][i].summary_fields.object1.name) {
                     if ( !deleted.test(scope['activities'][i].summary_fields.object1.name) ) {
                         href = BuildUrl(scope['activities'][i].summary_fields.object1);
                         scope['activities'][i].objects = "<a href=\"" + href + "\">" + scope['activities'][i].summary_fields.object1.name + "</a>";
@@ -250,15 +256,23 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                         scope['activities'][i].objects = scope['activities'][i].summary_fields.object1.name;
                     }
                 }
-                if (scope['activities'][i].summary_fields.object2) {
+                else if (scope['activities'][i].object1) {
+                    scope['activities'][i].objects = scope['activities'][i].object1;
+                }
+                if (scope['activities'][i].summary_fields.object2 && scope['activities'][i].summary_fields.object2.name) {
                     if ( !deleted.test(scope['activities'][i].summary_fields.object2.name) ) {
                         href = BuildUrl(scope['activities'][i].summary_fields.object2);
                         scope['activities'][i].objects += ", <a href=\"" + href + "\">" + scope['activities'][i].summary_fields.object2.name + "</a>";
                     }
                     else {
-                        scope['activities'][i].objects += scope['activities'][i].summary_fields.object2.name;
+                        scope['activities'][i].objects += "," + scope['activities'][i].summary_fields.object2.name;
                     }
                 }
+                else if (scope['activities'][i].object2) {
+                    scope['activities'][i].objects += ", " + scope['activities'][i].object1;
+                }
+
+                // Description
                 scope['activities'][i].description = BuildDescription(scope['activities'][i]);
             }
             });
