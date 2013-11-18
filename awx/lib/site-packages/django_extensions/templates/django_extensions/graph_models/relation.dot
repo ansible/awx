@@ -1,0 +1,10 @@
+{% for model in graph.models %}{% for relation in model.relations %}{% if relation.needs_node %}  {{ relation.target_app }}_{{ relation.target }} [label=<
+  <TABLE BGCOLOR="palegoldenrod" BORDER="0" CELLBORDER="0" CELLSPACING="0">
+  <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+  <FONT FACE="Helvetica Bold" COLOR="white">{{ relation.target }}</FONT>
+  </TD></TR>
+  </TABLE>
+  >]{% endif %}
+  {{ model.app_name }}_{{ model.name }} -> {{ relation.target_app }}_{{ relation.target }}
+  [label="{{ relation.label }}"] {{ relation.arrows }};
+{% endfor %}{% endfor %}

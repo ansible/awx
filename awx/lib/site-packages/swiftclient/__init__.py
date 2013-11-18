@@ -27,6 +27,6 @@ from .client import *
 try:
     from swiftclient import version
 
-    __version__ = version.version_info.cached_version_string()
+    __version__ = version.version_string
 except Exception:
     pass

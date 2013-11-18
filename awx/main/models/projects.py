@@ -87,21 +87,18 @@ class Project(CommonModel):
         max_length=8,
         choices=SCM_TYPE_CHOICES,
         blank=True,
-        null=True,
         default='',
         verbose_name=_('SCM Type'),
     )
     scm_url = models.CharField(
         max_length=1024,
         blank=True,
-        null=True,
         default='',
         verbose_name=_('SCM URL'),
     )
     scm_branch = models.CharField(
         max_length=256,
         blank=True,
-        null=True,
         default='',
         verbose_name=_('SCM Branch'),
         help_text=_('Specific branch, tag or commit to checkout.'),
@@ -154,7 +151,7 @@ class Project(CommonModel):
         choices=PROJECT_STATUS_CHOICES,
         default='ok',
         editable=False,
-        null=True,
+        null=True, # FIXME: Remove
     )
 
     def save(self, *args, **kwargs):
@@ -189,26 +186,9 @@ class Project(CommonModel):
                 update_fields.append('local_path')
             if update_fields:
                 self.save(update_fields=update_fields)
-        # If we just created a new project with SCM and it doesn't require any
-        # passwords to update, start the initial update.
-        if new_instance and self.scm_type and not self.scm_passwords_needed:
+        # If we just created a new project with SCM, start the initial update.
+        if new_instance and self.scm_type:
             self.update()
-
-    @property
-    def needs_scm_password(self):
-        return self.credential and self.credential.needs_password
-
-    @property
-    def needs_scm_key_unlock(self):
-        return self.credential and self.credential.needs_ssh_key_unlock
-
-    @property
-    def scm_passwords_needed(self):
-        needed = []
-        for field in ('scm_password', 'scm_key_unlock'):
-            if getattr(self, 'needs_%s' % field):
-                needed.append(field)
-        return needed
 
     def set_status_and_last_updated(self, save=True):
         # Determine current status.
@@ -259,12 +239,8 @@ class Project(CommonModel):
 
     def update(self, **kwargs):
         if self.can_update:
-            needed = self.scm_passwords_needed
-            opts = dict([(field, kwargs.get(field, '')) for field in needed])
-            if not all(opts.values()):
-                return
             project_update = self.project_updates.create()
-            project_update.start(**opts)
+            project_update.start()
             return project_update
 
     def get_absolute_url(self):
@@ -334,9 +310,6 @@ class ProjectUpdate(CommonTask):
     def _get_task_class(self):
         from awx.main.tasks import RunProjectUpdate
         return RunProjectUpdate
-
-    def _get_passwords_needed_to_start(self):
-        return self.project.scm_passwords_needed
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()

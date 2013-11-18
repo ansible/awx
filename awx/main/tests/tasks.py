@@ -160,14 +160,13 @@ class RunJobTest(BaseCeleryTest):
         self.test_project_path = None
         self.setup_users()
         self.organization = self.make_organizations(self.super_django_user, 1)[0]
-        self.inventory = Inventory.objects.create(name='test-inventory',
-                                                  description='description for test-inventory',
-                                                  organization=self.organization)
-        self.host = self.inventory.hosts.create(name='host.example.com',
-                                                inventory=self.inventory)
-        self.group = self.inventory.groups.create(name='test-group',
-                                                  inventory=self.inventory)
+        self.inventory = self.organization.inventories.create(name='test-inventory',
+                                                              description='description for test-inventory')
+        self.host = self.inventory.hosts.create(name='host.example.com')
+        self.group = self.inventory.groups.create(name='test-group')
+        self.group2 = self.inventory.groups.create(name='test-group2')
         self.group.hosts.add(self.host)
+        self.group2.hosts.add(self.host)
         self.project = None
         self.credential = None
         # Monkeypatch RunJob to capture list of command line arguments.
@@ -702,6 +701,19 @@ class RunJobTest(BaseCeleryTest):
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'failed')
         self.assertTrue('-l' in self.run_job_args)
+
+    def test_limit_option_with_group_pattern_and_ssh_agent(self):
+        self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA)
+        self.create_test_project(TEST_PLAYBOOK)
+        job_template = self.create_test_job_template(limit='test-group:&test-group2')
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.start())
+        self.assertEqual(job.status, 'pending')
+        job = Job.objects.get(pk=job.pk)
+        self.check_job_result(job, 'successful')
+        self.assertTrue('ssh-agent' in self.run_job_args)
 
     def test_ssh_username_and_password(self):
         self.create_test_credential(username='sshuser', password='sshpass')

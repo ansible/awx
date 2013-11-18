@@ -9,6 +9,7 @@ import distutils.version
 import json
 import logging
 import os
+import pipes
 import re
 import subprocess
 import stat
@@ -127,6 +128,9 @@ class BaseTask(Task):
             if hidden_re.search(k):
                 env[k] = '*'*len(str(v))
         return env
+
+    def args2cmdline(self, *args):
+        return ' '.join([pipes.quote(a) for a in args])
 
     def build_args(self, instance, **kwargs):
         raise NotImplementedError
@@ -378,8 +382,8 @@ class RunJob(BaseTask):
         args.append(job.playbook) # relative path to project.local_path
         ssh_key_path = kwargs.get('private_data_file', '')
         if ssh_key_path:
-            cmd = ' '.join([subprocess.list2cmdline(['ssh-add', ssh_key_path]),
-                            '&&', subprocess.list2cmdline(args)])
+            cmd = ' '.join([self.args2cmdline('ssh-add', ssh_key_path),
+                            '&&', self.args2cmdline(*args)])
             args = ['ssh-agent', 'sh', '-c', cmd]
         return args
 
@@ -436,9 +440,7 @@ class RunJob(BaseTask):
                     try:
                         project_update = pu_qs[0]
                     except IndexError:
-                        kw = dict([(k,v) for k,v in kwargs.items()
-                                   if k.startswith('scm_')])
-                        project_update = project.update(**kw)
+                        project_update = project.update()
                         if not project_update:
                             msg = 'Unable to update project before launch.'
                             job = self.update_model(pk, status='error',
@@ -456,10 +458,7 @@ class RunJob(BaseTask):
                         try:
                             inventory_update = iu_qs.filter(inventory_source=inventory_source)[0]
                         except IndexError:
-                            # FIXME: Doesn't support multiple sources!!!
-                            kw = dict([(k,v) for k,v in kwargs.items()
-                                       if k.startswith('source_')])
-                            inventory_update = inventory_source.update(**kw)
+                            inventory_update = inventory_source.update()
                             if not inventory_update:
                                 msgs.append('Unable to update inventory source %d before launch' % inventory_source.pk)
                                 continue
@@ -524,12 +523,12 @@ class RunProjectUpdate(BaseTask):
                                                                   **kwargs)
         project = project_update.project
         if project.credential:
-            value = kwargs.get('scm_key_unlock', decrypt_field(project.credential, 'ssh_key_unlock'))
+            value = decrypt_field(project.credential, 'ssh_key_unlock')
             if value not in ('', 'ASK'):
                 passwords['scm_key_unlock'] = value
             passwords['scm_username'] = project.credential.username
-            passwords['scm_password'] = kwargs.get('scm_password',
-                                                   decrypt_field(project.credential, 'password'))
+            passwords['scm_password'] = decrypt_field(project.credential,
+                                                     'password')
         return passwords
 
     def build_env(self, project_update, **kwargs):
@@ -612,7 +611,7 @@ class RunProjectUpdate(BaseTask):
         ssh_key_path = kwargs.get('private_data_file', '')
         if ssh_key_path:
             subcmds = [('ssh-add', ssh_key_path), args]
-            cmd = ' && '.join([subprocess.list2cmdline(x) for x in subcmds])
+            cmd = ' && '.join([self.args2cmdline(*x) for x in subcmds])
             args = ['ssh-agent', 'sh', '-c', cmd]
         return args
 
@@ -671,6 +670,7 @@ class RunProjectUpdate(BaseTask):
             re.compile(r'^Password for.*:\s*?$', re.M): 'scm_password',
             re.compile(r'^Password:\s*?$', re.M): 'scm_password',
             re.compile(r'^\S+?@\S+?\'s\s+?password:\s*?$', re.M): 'scm_password',
+            re.compile(r'^Enter passphrase for .*:\s*?$', re.M): 'scm_key_unlock',
             # FIXME: Configure whether we should auto accept host keys?
             re.compile(r'^Are you sure you want to continue connecting \(yes/no\)\?\s*?$', re.M): 'yes',
         })
@@ -734,7 +734,7 @@ class RunInventoryUpdate(BaseTask):
             for k,v in ec2_opts.items():
                 cp.set(section, k, str(v))
         # Build pyrax creds INI for rax inventory script.
-        elif inventory_source.source == 'rackspace':
+        elif inventory_source.source == 'rax':
             section = 'rackspace_cloud'
             cp.add_section(section)
             credential = inventory_source.credential
@@ -780,7 +780,7 @@ class RunInventoryUpdate(BaseTask):
             env['AWS_ACCESS_KEY_ID'] = kwargs.get('passwords', {}).get('source_username', '')
             env['AWS_SECRET_ACCESS_KEY'] = kwargs.get('passwords', {}).get('source_password', '')
             env['EC2_INI_PATH'] = kwargs.get('private_data_file', '')
-        elif inventory_source.source == 'rackspace':
+        elif inventory_source.source == 'rax':
             env['RAX_CREDS_FILE'] = kwargs.get('private_data_file', '')
             env['RAX_REGION'] = inventory_source.source_regions or 'all'
             # Set this environment variable so the vendored package won't
@@ -811,7 +811,7 @@ class RunInventoryUpdate(BaseTask):
             args.extend(['--enabled-var', 'ec2_state'])
             args.extend(['--enabled-value', 'running'])
             #args.extend(['--instance-id', 'ec2_id'])
-        elif inventory_source.source == 'rackspace':
+        elif inventory_source.source == 'rax':
             rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax.py')
             args.append(rax_path)
             args.extend(['--enabled-var', 'rax_status'])

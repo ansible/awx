@@ -26,7 +26,6 @@ Django>=1.4
 django-debug-toolbar
 django-devserver
 unittest2
--e hg+https://bitbucket.org/logilab/astroid/@5ed6266#egg=astroid
 django-jenkins
 ipython
 

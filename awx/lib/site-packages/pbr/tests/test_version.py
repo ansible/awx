@@ -15,11 +15,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from pbr import tests
+from pbr.tests import base
 from pbr import version
 
 
-class DeferredVersionTestCase(tests.BaseTestCase):
+class DeferredVersionTestCase(base.BaseTestCase):
 
     def test_cached_version(self):
         class MyVersionInfo(version.VersionInfo):

@@ -340,14 +340,6 @@ class Instance(TaggedEC2Object):
             self.ami_launch_index = value
         elif name == 'previousState':
             self.previous_state = value
-        elif name == 'name':
-            self.state = value
-        elif name == 'code':
-            try:
-                self.state_code = int(value)
-            except ValueError:
-                boto.log.warning('Error converting code (%s) to int' % value)
-                self.state_code = value
         elif name == 'instanceType':
             self.instance_type = value
         elif name == 'rootDeviceName':

@@ -432,8 +432,8 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
     JOB_TEMPLATE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created',
                            'modified', 'name', 'description', 'job_type',
                            'inventory', 'project', 'playbook', 'credential',
-                           'forks', 'limit', 'verbosity', 'extra_vars',
-                           'job_tags', 'host_config_key',)
+                           'cloud_credential', 'forks', 'limit', 'verbosity',
+                           'extra_vars', 'job_tags', 'host_config_key',)
 
     def test_get_job_template_list(self):
         url = reverse('api:job_template_list')
@@ -541,6 +541,7 @@ class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
             self.head(url)
             response = self.get(url)
             self.assertEqual(response['url'], url)
+            self.assertEqual(response['cloud_credential'], None)
 
         # FIXME: Check other credentials and optional fields.
 
@@ -663,6 +664,7 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
             self.head(url)
             response = self.get(url)
             self.assertEqual(response['url'], url)
+            self.assertEqual(response['cloud_credential'], None)
 
         # FIXME: Check with other credentials and optional fields.
 

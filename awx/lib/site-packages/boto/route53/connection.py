@@ -18,22 +18,25 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #
 
-import xml.sax
-import uuid
+import exception
+import random
 import urllib
+import uuid
+import xml.sax
+
 import boto
 from boto.connection import AWSAuthConnection
 from boto import handler
+import boto.jsonresponse
 from boto.route53.record import ResourceRecordSets
 from boto.route53.zone import Zone
-import boto.jsonresponse
-import exception
+
 
 HZXML = """<?xml version="1.0" encoding="UTF-8"?>
 <CreateHostedZoneRequest xmlns="%(xmlns)s">
@@ -43,7 +46,7 @@ HZXML = """<?xml version="1.0" encoding="UTF-8"?>
     <Comment>%(comment)s</Comment>
   </HostedZoneConfig>
 </CreateHostedZoneRequest>"""
-        
+
 #boto.set_stream_logger('dns')
 
 
@@ -60,12 +63,13 @@ class Route53Connection(AWSAuthConnection):
     def __init__(self, aws_access_key_id=None, aws_secret_access_key=None,
                  port=None, proxy=None, proxy_port=None,
                  host=DefaultHost, debug=0, security_token=None,
-                 validate_certs=True):
+                 validate_certs=True, https_connection_factory=None):
         AWSAuthConnection.__init__(self, host,
                                    aws_access_key_id, aws_secret_access_key,
                                    True, port, proxy, proxy_port, debug=debug,
                                    security_token=security_token,
-                                   validate_certs=validate_certs)
+                                   validate_certs=validate_certs,
+                                   https_connection_factory=https_connection_factory)
 
     def _required_auth_capability(self):
         return ['route53']
@@ -79,7 +83,8 @@ class Route53Connection(AWSAuthConnection):
                 pairs.append(key + '=' + urllib.quote(str(val)))
             path += '?' + '&'.join(pairs)
         return AWSAuthConnection.make_request(self, action, path,
-                                              headers, data)
+                                              headers, data,
+                                              retry_handler=self._retry_handler)
 
     # Hosted Zones
 
@@ -118,7 +123,7 @@ class Route53Connection(AWSAuthConnection):
     def get_hosted_zone(self, hosted_zone_id):
         """
         Get detailed information about a particular Hosted Zone.
-        
+
         :type hosted_zone_id: str
         :param hosted_zone_id: The unique identifier for the Hosted Zone
 
@@ -158,7 +163,7 @@ class Route53Connection(AWSAuthConnection):
         """
         Create a new Hosted Zone.  Returns a Python data structure with
         information about the newly created Hosted Zone.
-        
+
         :type domain_name: str
         :param domain_name: The name of the domain. This should be a
             fully-specified domain, and should end with a final period
@@ -178,7 +183,7 @@ class Route53Connection(AWSAuthConnection):
             use that.
 
         :type comment: str
-        :param comment: Any comments you want to include about the hosted      
+        :param comment: Any comments you want to include about the hosted
             zone.
 
         """
@@ -204,7 +209,7 @@ class Route53Connection(AWSAuthConnection):
             raise exception.DNSServerError(response.status,
                                            response.reason,
                                            body)
-        
+
     def delete_hosted_zone(self, hosted_zone_id):
         uri = '/%s/hostedzone/%s' % (self.Version, hosted_zone_id)
         response = self.make_request('DELETE', uri)
@@ -226,7 +231,7 @@ class Route53Connection(AWSAuthConnection):
         """
         Retrieve the Resource Record Sets defined for this Hosted Zone.
         Returns the raw XML data returned by the Route53 call.
-        
+
         :type hosted_zone_id: str
         :param hosted_zone_id: The unique identifier for the Hosted Zone
 
@@ -401,3 +406,24 @@ class Route53Connection(AWSAuthConnection):
             if value and not value[-1] == '.':
                 value = "%s." % value
             return value
+
+    def _retry_handler(self, response, i, next_sleep):
+        status = None
+        boto.log.debug("Saw HTTP status: %s" % response.status)
+
+        if response.status == 400:
+            code = response.getheader('Code')
+
+            if code and 'PriorRequestNotComplete' in code:
+                # This is a case where we need to ignore a 400 error, as
+                # Route53 returns this. See
+                # http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/DNSLimitations.html
+                msg = "%s, retry attempt %s" % (
+                    'PriorRequestNotComplete',
+                    i
+                )
+                next_sleep = random.random() * (2 ** i)
+                i += 1
+                status = (msg, i, next_sleep)
+
+        return status

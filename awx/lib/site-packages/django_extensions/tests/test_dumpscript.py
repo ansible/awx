@@ -1,12 +1,11 @@
 import sys
+import six
 
-# conditional imports for python 3
-try:
-    import compiler  # NOQA
-    from StringIO import StringIO  # NOQA
-except ImportError:
+if sys.version_info[:2] >= (2, 6):
     import ast as compiler  # NOQA
-    from io import StringIO  # NOQA
+else:
+    import compiler  # NOQA
+
 from django.test import TestCase
 
 from django.core.management import call_command
@@ -20,8 +19,8 @@ class DumpScriptTests(TestCase):
     def setUp(self):
         self.real_stdout = sys.stdout
         self.real_stderr = sys.stderr
-        sys.stdout = StringIO()
-        sys.stderr = StringIO()
+        sys.stdout = six.StringIO()
+        sys.stderr = six.StringIO()
 
         self.original_installed_apps = settings.INSTALLED_APPS
         settings.INSTALLED_APPS = list(settings.INSTALLED_APPS)
@@ -46,10 +45,10 @@ class DumpScriptTests(TestCase):
     #----------------------------------------------------------------------
     def test_replaced_stdout(self):
         # check if stdout can be replaced
-        sys.stdout = StringIO()
+        sys.stdout = six.StringIO()
         n = Name(name='Mike')
         n.save()
-        tmp_out = StringIO()
+        tmp_out = six.StringIO()
         call_command('dumpscript', 'tests', stdout=tmp_out)
         self.assertTrue('Mike' in tmp_out.getvalue())  # script should go to tmp_out
         self.assertEqual(0, len(sys.stdout.getvalue()))  # there should not be any output to sys.stdout
@@ -60,8 +59,8 @@ class DumpScriptTests(TestCase):
         # check if stderr can be replaced, without changing stdout
         n = Name(name='Fred')
         n.save()
-        tmp_err = StringIO()
-        sys.stderr = StringIO()
+        tmp_err = six.StringIO()
+        sys.stderr = six.StringIO()
         call_command('dumpscript', 'tests', stderr=tmp_err)
         self.assertTrue('Fred' in sys.stdout.getvalue())  # script should still go to stdout
         self.assertTrue('Name' in tmp_err.getvalue())  # error output should go to tmp_err
@@ -84,7 +83,7 @@ class DumpScriptTests(TestCase):
         note2 = Note(note="This is the second note.")
         note2.save()
         p2.notes.add(note1, note2)
-        tmp_out = StringIO()
+        tmp_out = six.StringIO()
         call_command('dumpscript', 'tests', stdout=tmp_out)
         ast_syntax_tree = compiler.parse(tmp_out.getvalue())
         if hasattr(ast_syntax_tree, 'body'):

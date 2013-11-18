@@ -239,8 +239,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  }
               }
           }
-          html += "</div><!-- list-acitons -->\n";
-          
+
           //select instructions
           if (options.mode == 'select' && list.selectInstructions) {
              var btn = {
@@ -248,15 +247,16 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  dataPlacement: 'left',
                  dataContainer: 'body',
                  icon: "icon-question-sign",
-                 'class': 'btn-sm btn-help btn-info',
+                 'class': 'btn-xs btn-help btn-info',
                  awToolTip: 'Click for help',
                  dataTitle: 'Help',
                  iconSize: 'large'
                  };
              html += this.button(btn, 'select');
           }
+
+          html += "</div><!-- list-acitons -->\n";
           html += "</div><!-- col-lg-7 -->\n";
-       
        }
        else {
           html += "<div class=\"col-lg-7\"></div>\n";

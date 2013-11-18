@@ -148,6 +148,9 @@ class AutoScalingGroup(object):
         :type vpc_zone_identifier: str
         :param vpc_zone_identifier: The subnet identifier of the Virtual
             Private Cloud.
+            
+        :type tags: list
+        :param tags: List of :class:`boto.ec2.autoscale.tag.Tag`s            
 
         :type termination_policies: list
         :param termination_policies: A list of termination policies. Valid values
@@ -296,11 +299,22 @@ class AutoScalingGroup(object):
     def put_notification_configuration(self, topic, notification_types):
         """
         Configures an Auto Scaling group to send notifications when
-        specified events take place.
+        specified events take place. Valid notification types are:
+        'autoscaling:EC2_INSTANCE_LAUNCH',
+        'autoscaling:EC2_INSTANCE_LAUNCH_ERROR',
+        'autoscaling:EC2_INSTANCE_TERMINATE',
+        'autoscaling:EC2_INSTANCE_TERMINATE_ERROR',
+        'autoscaling:TEST_NOTIFICATION'        
         """
         return self.connection.put_notification_configuration(self,
                                                               topic,
                                                               notification_types)
+
+    def delete_notification_configuration(self, topic):
+        """
+        Deletes notifications created by put_notification_configuration.
+        """
+        return self.connection.delete_notification_configuration(self, topic)
 
     def suspend_processes(self, scaling_processes=None):
         """

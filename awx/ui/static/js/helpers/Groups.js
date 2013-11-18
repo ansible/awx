@@ -810,7 +810,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        
                        LookUpInit({
                            url: GetBasePath('credentials') + 
-                               '?cloud=true&kind=' + [(scope.source.value == 'rackspace') ? 'rax' : 'aws'],   
+                               '?cloud=true&kind=' + [(scope.source.value == 'rax') ? 'rax' : 'aws'],   
                            scope: scope,
                            form: form,
                            list: CredentialList,
@@ -1008,7 +1008,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
             LookUpInit({
                 url: GetBasePath('credentials') + 
-                    '?cloud=true&kind=' + [(scope.source.value == 'rackspace') ? 'rax' : 'aws'],   
+                    '?cloud=true&kind=' + [(scope.source.value == 'rax') ? 'rax' : 'aws'],   
                 scope: scope,
                 form: form,
                 list: CredentialList,

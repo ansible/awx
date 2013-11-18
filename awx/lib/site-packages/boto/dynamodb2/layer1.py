@@ -21,7 +21,11 @@
 #
 from binascii import crc32
 
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 import boto
 from boto.connection import AWSQueryConnection
 from boto.regioninfo import RegionInfo
@@ -67,7 +71,11 @@ class DynamoDBConnection(AWSQueryConnection):
                 if reg.name == region_name:
                     region = reg
                     break
-        kwargs['host'] = region.endpoint
+
+        # Only set host if it isn't manually overwritten
+        if 'host' not in kwargs:
+            kwargs['host'] = region.endpoint
+
         AWSQueryConnection.__init__(self, **kwargs)
         self.region = region
         self._validate_checksums = boto.config.getbool(
@@ -1467,13 +1475,13 @@ class DynamoDBConnection(AWSQueryConnection):
     def make_request(self, action, body):
         headers = {
             'X-Amz-Target': '%s.%s' % (self.TargetPrefix, action),
-            'Host': self.region.endpoint,
+            'Host': self.host,
             'Content-Type': 'application/x-amz-json-1.0',
             'Content-Length': str(len(body)),
         }
         http_request = self.build_base_http_request(
             method='POST', path='/', auth_path='/', params={},
-            headers=headers, data=body)
+            headers=headers, data=body, host=self.host)
         response = self._mexe(http_request, sender=None,
                               override_num_retries=self.NumberRetries,
                               retry_handler=self._retry_handler)

@@ -14,6 +14,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from pbr import version as pbr_version
+import pkg_resources
 
-version_info = pbr_version.VersionInfo('python-swiftclient')
+try:
+    # First, try to get our version out of PKG-INFO. If we're installed,
+    # this'll let us find our version without pulling in pbr. After all, if
+    # we're installed on a system, we're not in a Git-managed source tree, so
+    # pbr doesn't really buy us anything.
+    version_string = pkg_resources.get_provider(
+        pkg_resources.Requirement.parse('python-swiftclient')).version
+except pkg_resources.DistributionNotFound:
+    # No PKG-INFO? We're probably running from a checkout, then. Let pbr do
+    # its thing to figure out a version number.
+    import pbr.version
+    version_string = str(pbr.version.VersionInfo('python-swiftclient'))

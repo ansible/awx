@@ -1,35 +1,34 @@
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
-from south.v2 import SchemaMigration
+from south.v2 import DataMigration
 from django.db import models
 
-
-class Migration(SchemaMigration):
+class Migration(DataMigration):
 
     def forwards(self, orm):
-        # Adding model 'ActivityStream'
-        db.create_table(u'main_activitystream', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='activity_stream', null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('operation', self.gf('django.db.models.fields.CharField')(max_length=13)),
-            ('timestamp', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('changes', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('object1_id', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
-            ('object1', self.gf('django.db.models.fields.TextField')()),
-            ('object1_type', self.gf('django.db.models.fields.TextField')()),
-            ('object2_id', self.gf('django.db.models.fields.PositiveIntegerField')(null=True, db_index=True)),
-            ('object2', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('object2_type', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('object_relationship_type', self.gf('django.db.models.fields.TextField')(blank=True)),
-        ))
-        db.send_create_signal('main', ['ActivityStream'])
+        "Write your forwards methods here."
 
+        # Fix inventory fields that should be empty strings instead of None.
+        for inventory in orm.Inventory.objects.all():
+            inventory.variables = inventory.variables or ''
+            inventory.save()
+
+        # Fix inventory source fields that should never be None.
+        for inventory_source in orm.InventorySource.objects.all():
+            inventory_source.status = inventory_source.status or 'none'
+            inventory_source.save()
+
+        # Fix project fields that should be empty strings instead of None.
+        for project in orm.Project.objects.all():
+            project.scm_type = project.scm_type or ''
+            project.scm_url = project.scm_url or ''
+            project.scm_branch = project.scm_branch or ''
+            project.status = project.status or 'ok'
+            project.save()
 
     def backwards(self, orm):
-        # Deleting model 'ActivityStream'
-        db.delete_table(u'main_activitystream')
-
+        "Write your backwards methods here."
 
     models = {
         u'auth.group': {
@@ -67,21 +66,6 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        'main.activitystream': {
-            'Meta': {'object_name': 'ActivityStream'},
-            'changes': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'object1': ('django.db.models.fields.TextField', [], {}),
-            'object1_id': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
-            'object1_type': ('django.db.models.fields.TextField', [], {}),
-            'object2': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'object2_id': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'db_index': 'True'}),
-            'object2_type': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'object_relationship_type': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'operation': ('django.db.models.fields.CharField', [], {'max_length': '13'}),
-            'timestamp': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'activity_stream'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['auth.User']"})
         },
         'main.authtoken': {
             'Meta': {'object_name': 'AuthToken'},
@@ -423,3 +407,4 @@ class Migration(SchemaMigration):
     }
 
     complete_apps = ['main']
+    symmetrical = True

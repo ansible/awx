@@ -836,7 +836,7 @@ class IAMConnection(AWSQueryConnection):
         :param user_name: The username of the user
 
         :type serial_number: string
-        :param seriasl_number: The serial number which uniquely identifies
+        :param serial_number: The serial number which uniquely identifies
             the MFA device.
 
         :type auth_code_1: string
@@ -862,7 +862,7 @@ class IAMConnection(AWSQueryConnection):
         :param user_name: The username of the user
 
         :type serial_number: string
-        :param seriasl_number: The serial number which uniquely identifies
+        :param serial_number: The serial number which uniquely identifies
             the MFA device.
 
         """
@@ -879,7 +879,7 @@ class IAMConnection(AWSQueryConnection):
         :param user_name: The username of the user
 
         :type serial_number: string
-        :param seriasl_number: The serial number which uniquely identifies
+        :param serial_number: The serial number which uniquely identifies
             the MFA device.
 
         :type auth_code_1: string

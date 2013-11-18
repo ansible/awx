@@ -525,7 +525,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
              if (field.genMD5) {
                 html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"genMD5('" + fld + "')\" " + 
                    "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + this.form.name + "_" + fld + "_gen_btn\">" +
-                   "<i class=\"icon-repeat\"></i></button></span>\n</div>\n";
+                   "<i class=\"icon-magic\"></i></button></span>\n</div>\n";
              }
              
              // Add error messages

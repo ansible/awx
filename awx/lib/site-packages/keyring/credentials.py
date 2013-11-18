@@ -1,11 +1,12 @@
 import os
 import abc
 
+from keyring.py27compat import add_metaclass
+
+@add_metaclass(abc.ABCMeta)
 class Credential(object):
     """Abstract class to manage credentials
     """
-
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractproperty
     def username(self):

@@ -34,10 +34,11 @@ class SSHClient(object):
 
     def __init__(self, server,
                  host_key_file='~/.ssh/known_hosts',
-                 uname='root', ssh_pwd=None):
+                 uname='root', timeout=None, ssh_pwd=None):
         self.server = server
         self.host_key_file = host_key_file
         self.uname = uname
+        self._timeout = timeout
         self._pkey = paramiko.RSAKey.from_private_key_file(server.ssh_key_file,
                                                            password=ssh_pwd)
         self._ssh_client = paramiko.SSHClient()
@@ -52,7 +53,8 @@ class SSHClient(object):
             try:
                 self._ssh_client.connect(self.server.hostname,
                                          username=self.uname,
-                                         pkey=self._pkey)
+                                         pkey=self._pkey,
+                                         timeout=self._timeout)
                 return
             except socket.error, (value, message):
                 if value in (51, 61, 111):

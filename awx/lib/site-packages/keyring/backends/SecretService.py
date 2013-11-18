@@ -1,4 +1,3 @@
-import os
 import logging
 
 from keyring.util import properties
@@ -28,9 +27,6 @@ class Keyring(KeyringBackend):
             secretstorage.Collection(bus)
         except secretstorage.exceptions.SecretServiceNotAvailableException:
             raise RuntimeError("Unable to get initialize SecretService")
-        if 'DISPLAY' not in os.environ:
-            raise RuntimeError("SecretService cannot run without a DISPLAY "
-                "environment variable")
         return 5
 
     def get_default_collection(self):

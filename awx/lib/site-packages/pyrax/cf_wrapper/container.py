@@ -19,7 +19,6 @@
 
 
 import pyrax
-from pyrax import exceptions as exc
 
 # Used to indicate values that are lazy-loaded
 class Fault(object):
@@ -98,14 +97,18 @@ class Container(object):
         return objs
 
 
-    def get_object(self, name):
+    def get_object(self, name, cached=True):
         """
-        Return the StorageObject in this container with the
-        specified name.
+        Return the StorageObject in this container with the specified name. By
+        default, if a reference to that object has already been retrieved, a
+        cached reference will be returned. If you need to get an updated
+        version of the object, pass `cached=False` to the method call.
         """
         if isinstance(name, str):
             name = name.decode(pyrax.get_encoding())
-        ret = self._object_cache.get(name)
+        ret = None
+        if cached:
+            ret = self._object_cache.get(name)
         if not ret:
             ret = self.client.get_object(self, name)
             self._object_cache[name] = ret
@@ -118,20 +121,36 @@ class Container(object):
         Returns a list of the names of all the objects in this container. The
         same pagination parameters apply as in self.get_objects().
         """
-        objs = self.get_objects(marker=marker, limit=limit, prefix=prefix,
-                delimiter=delimiter, full_listing=full_listing)
-        return [obj.name for obj in objs]
+        return self.client.get_container_object_names(self.name, marker=marker,
+                limit=limit, prefix=prefix, delimiter=delimiter,
+                full_listing=full_listing)
+
+
+    def list_subdirs(self, marker=None, limit=None, prefix=None, delimiter=None,
+            full_listing=False):
+        """
+        Return a list of StorageObjects representing the pseudo-subdirectories
+        in this container. You can use the marker and limit params to handle
+        pagination, and the prefix and delimiter params to filter the objects
+        returned.
+        """
+        subdirs = self.client.list_container_subdirs(self.name, marker=marker,
+                limit=limit, prefix=prefix, delimiter=delimiter,
+                full_listing=full_listing)
+        return subdirs
 
 
     def store_object(self, obj_name, data, content_type=None, etag=None,
-            content_encoding=None, ttl=None):
+            content_encoding=None, ttl=None, return_none=False,
+            extra_info=None):
         """
         Creates a new object in this container, and populates it with
         the given data.
         """
         return self.client.store_object(self, obj_name, data,
                 content_type=content_type, etag=etag,
-                content_encoding=content_encoding, ttl=ttl)
+                content_encoding=content_encoding, ttl=ttl,
+                return_none=return_none, extra_info=extra_info)
 
 
     def upload_file(self, file_or_path, obj_name=None, content_type=None,
@@ -155,10 +174,26 @@ class Container(object):
         return self.client.delete_object(self, obj)
 
 
-    def delete_all_objects(self):
-        """Deletes all objects from this container."""
-        for obj_name in self.client.get_container_object_names(self):
-            self.client.delete_object(self, obj_name)
+    def delete_all_objects(self, async=False):
+        """
+        Deletes all objects from this container.
+
+        By default the call will block until all objects have been deleted. By
+        passing True for the 'async' parameter, this method will not block, and
+        instead return an object that can be used to follow the progress of the
+        deletion. When deletion is complete the bulk deletion object's
+        'results' attribute will be populated with the information returned
+        from the API call. In synchronous mode this is the value that is
+        returned when the call completes. It is a dictionary with the following
+        keys:
+
+            deleted - the number of objects deleted
+            not_found - the number of objects not found
+            status - the HTTP return status code. '200 OK' indicates success
+            errors - a list of any errors returned by the bulk delete call
+        """
+        nms = self.get_object_names(full_listing=True)
+        self.client.bulk_delete(self, nms, async=False)
 
 
     def remove_from_cache(self, obj):
@@ -210,11 +245,32 @@ class Container(object):
 
 
     def get_metadata(self):
+        """
+        Returns a dictionary containing the metadata for the container.
+        """
         return self.client.get_container_metadata(self)
 
 
-    def set_metadata(self, metadata, clear=False):
-        return self.client.set_container_metadata(self, metadata, clear=clear)
+    def set_metadata(self, metadata, clear=False, prefix=None):
+        """
+        Accepts a dictionary of metadata key/value pairs and updates the
+        specified container metadata with them.
+
+        If 'clear' is True, any existing metadata is deleted and only the
+        passed metadata is retained. Otherwise, the values passed here update
+        the container's metadata.
+
+        'extra_info' is an optional dictionary which will be populated with
+        'status', 'reason', and 'headers' keys from the underlying swiftclient
+        call.
+
+        By default, the standard container metadata prefix
+        ('X-Container-Meta-') is prepended to the header name if it isn't
+        present. For non-standard headers, you must include a non-None prefix,
+        such as an empty string.
+        """
+        return self.client.set_container_metadata(self, metadata, clear=clear,
+                prefix=prefix)
 
 
     def remove_metadata_key(self, key):
@@ -258,6 +314,26 @@ class Container(object):
         its TTL expires.
         """
         return self.client.make_container_private(self)
+
+
+    def copy_object(self, obj, new_container, new_obj_name=None,
+            extra_info=None):
+        """
+        Copies the object to the new container, optionally giving it a new name.
+        If you copy to the same container, you must supply a different name.
+        """
+        return self.client.copy_object(self, obj, new_container,
+                new_obj_name=new_obj_name, extra_info=extra_info)
+
+
+    def move_object(self, obj, new_container, new_obj_name=None,
+            extra_info=None):
+        """
+        Works just like copy_object, except that the source object is deleted
+        after a successful copy.
+        """
+        return self.client.move_object(self, obj, new_container,
+                new_obj_name=new_obj_name, extra_info=extra_info)
 
 
     def change_object_content_type(self, obj, new_ctype, guess=False):

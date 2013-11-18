@@ -501,6 +501,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                });
 
            LookUpInit({
+               url: GetBasePath('credentials') + '?kind=ssh',
                scope: scope,
                form: form,
                current_item: data.credential,
@@ -508,11 +509,19 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                field: 'credential' 
                });
 
+           // Clone the CredentialList object for use with cloud_credential. Cloning
+           // and changing properties to avoid collision.
+           var CloudCredentialList = {};
+           jQuery.extend(true, CloudCredentialList, CredentialList);
+           CloudCredentialList.name = 'cloudcredentials',
+           CloudCredentialList.iterator = 'cloudcredential',
+
            LookUpInit({
+               url: GetBasePath('credentials') + '?cloud=true',
                scope: scope,
                form: form,
                current_item: data.cloud_credential,
-               list: CredentialList, 
+               list: CloudCredentialList, 
                field: 'cloud_credential' 
                });
 

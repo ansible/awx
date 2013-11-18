@@ -1,5 +1,6 @@
 import os
 
+from keyring.py27compat import unicode_str
 from keyring.backend import KeyringBackend
 from keyring.errors import PasswordDeleteError
 from keyring.errors import PasswordSetError, ExceptionRaisedContext
@@ -76,7 +77,7 @@ class Keyring(KeyringBackend):
         result = wallet.readPassword(key)[1]
         # The string will be a PyQt4.QtCore.QString, so turn it into a unicode
         # object.
-        return unicode(result)
+        return unicode_str(result)
 
     def set_password(self, service, username, password):
         """Set password for the username of the service

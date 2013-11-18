@@ -56,9 +56,10 @@ class Testr(cmd.Command):
         ('testr-args=', 't', "Run 'testr' with these args"),
         ('omit=', 'o', 'Files to omit from coverage calculations'),
         ('slowest', None, "Show slowest test times after tests complete."),
+        ('no-parallel', None, "Run testr serially"),
     ]
 
-    boolean_options = ['coverage', 'slowest']
+    boolean_options = ['coverage', 'slowest', 'no_parallel']
 
     def _run_testr(self, *args):
         return commands.run_argv([sys.argv[0]] + list(args),
@@ -69,6 +70,7 @@ class Testr(cmd.Command):
         self.coverage = None
         self.omit = ""
         self.slowest = None
+        self.no_parallel = None
 
     def finalize_options(self):
         if self.testr_args is None:
@@ -85,7 +87,10 @@ class Testr(cmd.Command):
 
         if self.coverage:
             self._coverage_before()
-        testr_ret = self._run_testr("run", "--parallel", *self.testr_args)
+        if not self.no_parallel:
+            testr_ret = self._run_testr("run", "--parallel", *self.testr_args)
+        else:
+            testr_ret = self._run_testr("run", *self.testr_args)
         if testr_ret:
             raise distutils.errors.DistutilsError(
                 "testr failed (%d)" % testr_ret)

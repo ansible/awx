@@ -17,6 +17,6 @@ class Command(BaseCommand):
 
         count = Message.objects.filter(visible=False).count()
 
-        print('Removing %s invisible %s... ' % (
+        print('Removing {0} invisible {1} from database... '.format(
             count, pluralize('message', count)))
         Message.objects.cleanup()

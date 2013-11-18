@@ -22,15 +22,15 @@ class Message(base.Message):
 class Channel(base.StdChannel):
     open = True
     throw_decode_error = False
-    _ids = count(1).next
+    _ids = count(1)
 
     def __init__(self, connection):
         self.connection = connection
         self.called = []
-        self.deliveries = count(1).next
+        self.deliveries = count(1)
         self.to_deliver = []
         self.events = {'basic_return': set()}
-        self.channel_id = self._ids()
+        self.channel_id = next(self._ids)
 
     def _called(self, name):
         self.called.append(name)
@@ -105,7 +105,7 @@ class Channel(base.StdChannel):
     def message_to_python(self, message, *args, **kwargs):
         self._called('message_to_python')
         return Message(self, body=anyjson.dumps(message),
-                       delivery_tag=self.deliveries(),
+                       delivery_tag=next(self.deliveries),
                        throw_decode_error=self.throw_decode_error,
                        content_type='application/json',
                        content_encoding='utf-8')

@@ -277,6 +277,10 @@ class Dynamizer(object):
         if len(attr) > 1 or not attr:
             return attr
         dynamodb_type = attr.keys()[0]
+        if dynamodb_type.lower() == dynamodb_type:
+            # It's not an actual type, just a single character attr that
+            # overlaps with the DDB types. Return it.
+            return attr
         try:
             decoder = getattr(self, '_decode_%s' % dynamodb_type.lower())
         except AttributeError:

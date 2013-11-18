@@ -342,7 +342,7 @@ class LoadBalancer(object):
         """
         if isinstance(subnets, str) or isinstance(subnets, unicode):
             subnets = [subnets]
-        new_subnets = self.connection.detach_lb_to_subnets(self.name, subnets)
+        new_subnets = self.connection.detach_lb_from_subnets(self.name, subnets)
         self.subnets = new_subnets
 
     def apply_security_groups(self, security_groups):

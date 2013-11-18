@@ -18,7 +18,6 @@ import yaml
 # Django
 from django.conf import settings
 from django.db import models
-from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
@@ -91,7 +90,7 @@ class Team(CommonModelNameNotUnique):
         'Organization',
         blank=False,
         null=True,
-        on_delete=SET_NULL,
+        on_delete=models.SET_NULL,
         related_name='teams',
     )
 
@@ -108,12 +107,12 @@ class Permission(CommonModelNameNotUnique):
         app_label = 'main'
 
     # permissions are granted to either a user or a team:
-    user            = models.ForeignKey('auth.User', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
-    team            = models.ForeignKey('Team', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
+    user            = models.ForeignKey('auth.User', null=True, on_delete=models.SET_NULL, blank=True, related_name='permissions')
+    team            = models.ForeignKey('Team', null=True, on_delete=models.SET_NULL, blank=True, related_name='permissions')
 
     # to be used against a project or inventory (or a project and inventory in conjunction):
-    project         = models.ForeignKey('Project', null=True, on_delete=SET_NULL, blank=True, related_name='permissions')
-    inventory       = models.ForeignKey('Inventory', null=True, on_delete=SET_NULL, related_name='permissions')
+    project         = models.ForeignKey('Project', null=True, on_delete=models.SET_NULL, blank=True, related_name='permissions')
+    inventory       = models.ForeignKey('Inventory', null=True, on_delete=models.SET_NULL, related_name='permissions')
 
     # permission system explanation:
     #
@@ -201,7 +200,8 @@ class Credential(CommonModelNameNotUnique):
         default='',
         max_length=1024,
         verbose_name=_('Password'),
-        help_text=_('Password for this credential.'),
+        help_text=_('Password for this credential (or "ASK" to prompt the '
+                    'user for machine credentials).'),
     )
     ssh_key_data = models.TextField(
         blank=True,
@@ -215,7 +215,7 @@ class Credential(CommonModelNameNotUnique):
         default='',
         verbose_name=_('SSH key unlock'),
         help_text=_('Passphrase to unlock SSH private key if encrypted (or '
-                    '"ASK" to prompt the user).'),
+                    '"ASK" to prompt the user for machine credentials).'),
     )
     sudo_username = models.CharField(
         max_length=1024,
@@ -232,16 +232,16 @@ class Credential(CommonModelNameNotUnique):
 
     @property
     def needs_password(self):
-        return not self.ssh_key_data and self.password == 'ASK'
+        return self.kind == 'ssh' and self.password == 'ASK'
 
     @property
     def needs_ssh_key_unlock(self):
-        return 'ENCRYPTED' in decrypt_field(self, 'ssh_key_data') and \
-            (not self.ssh_key_unlock or self.ssh_key_unlock == 'ASK')
+        return self.kind == 'ssh' and self.ssh_key_unlock == 'ASK' and \
+            'ENCRYPTED' in decrypt_field(self, 'ssh_key_data')
 
     @property
     def needs_sudo_password(self):
-        return self.sudo_password == 'ASK'
+        return self.kind == 'ssh' and self.sudo_password == 'ASK'
 
     @property
     def passwords_needed(self):
@@ -253,6 +253,16 @@ class Credential(CommonModelNameNotUnique):
 
     def get_absolute_url(self):
         return reverse('api:credential_detail', args=(self.pk,))
+
+    def clean_ssh_key_unlock(self):
+        if self.pk:
+            ssh_key_data = decrypt_field(self, 'ssh_key_data')
+        else:
+            ssh_key_data = self.ssh_key_data
+        if 'ENCRYPTED' in ssh_key_data and not self.ssh_key_unlock:
+            raise ValidationError('SSH key unlock must be set when SSH key '
+                                  'data is encrypted')
+        return self.ssh_key_unlock
 
     def clean(self):
         if self.user and self.team:
@@ -322,7 +332,8 @@ class Credential(CommonModelNameNotUnique):
             # If update_fields has been specified, add our field names to it,
             # if hit hasn't been specified, then we're just doing a normal save.
             for field in self.PASSWORD_FIELDS:
-                encrypted = encrypt_field(self, field, bool(field != 'ssh_key_data'))
+                ask = bool(self.kind == 'ssh' and field != 'ssh_key_data')
+                encrypted = encrypt_field(self, field, ask)
                 setattr(self, field, encrypted)
                 if field not in update_fields:
                     update_fields.append(field)
@@ -342,7 +353,7 @@ class Credential(CommonModelNameNotUnique):
                 update_fields.append(field)
             self.save(update_fields=update_fields)
 
-class Profile(models.Model):
+class Profile(BaseModel):
     '''
     Profile model related to User object. Currently stores LDAP DN for users
     loaded from LDAP.
@@ -367,7 +378,7 @@ class Profile(models.Model):
         default='',
     )
 
-class AuthToken(models.Model):
+class AuthToken(BaseModel):
     '''
     Custom authentication tokens per user with expiration and request-specific
     data.

@@ -22,7 +22,7 @@
             {{ name }}_value = query;
         });
     };
-    $('#id_{{ name }}').bind(($.browser.opera ? "keypress" : "keyup"), function(event) {
+    $('#id_{{ name }}').bind('keyup', function(event) {
         if ($(this).val()) {
             if (event.keyCode == 27) {
                 reset();

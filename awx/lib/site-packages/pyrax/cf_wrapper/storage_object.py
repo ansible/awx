@@ -110,12 +110,12 @@ class StorageObject(object):
         return self.client.get_object_metadata(self.container, self)
 
 
-    def set_metadata(self, metadata, clear=False):
+    def set_metadata(self, metadata, clear=False, prefix=None):
         """
         Sets this object's metadata, optionally clearing existing metadata.
         """
         self.client.set_object_metadata(self.container, self, metadata,
-                clear=clear)
+                clear=clear, prefix=prefix)
 
 
     def remove_metadata_key(self, key):
@@ -124,6 +124,25 @@ class StorageObject(object):
         key does not exist in the metadata, nothing is done.
         """
         self.client.remove_object_metadata_key(self.container, self, key)
+
+
+    def copy(self, new_container, new_obj_name=None, extra_info=None):
+        """
+        Copies this object to the new container, optionally giving it a new name.
+        If you copy to the same container, you must supply a different name.
+        """
+        return self.container.copy_object(self, new_container,
+                new_obj_name=new_obj_name, extra_info=extra_info)
+
+
+    def move(self, new_container, new_obj_name=None, extra_info=None):
+        """
+        Works just like copy_object, except that this object is deleted after a
+        successful copy. This means that this storage_object reference will no
+        longer be valid.
+        """
+        return self.container.move_object(self, new_container,
+                new_obj_name=new_obj_name, extra_info=extra_info)
 
 
     def change_content_type(self, new_ctype, guess=False):

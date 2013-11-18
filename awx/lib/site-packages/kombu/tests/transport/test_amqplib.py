@@ -2,12 +2,9 @@ from __future__ import absolute_import
 
 import sys
 
-from nose import SkipTest
-
 from kombu import Connection
 
-from kombu.tests.utils import TestCase
-from kombu.tests.utils import mask_modules, Mock
+from kombu.tests.case import Case, SkipTest, Mock, mask_modules
 
 
 class MockConnection(dict):
@@ -35,7 +32,7 @@ else:
             pass
 
 
-class amqplibCase(TestCase):
+class amqplibCase(Case):
 
     def setUp(self):
         if amqplib is None:

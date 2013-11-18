@@ -77,7 +77,5 @@ class KDEKWalletInQApplication(unittest.TestCase):
 
         app = QApplication([])
         wallet = kwallet.open_kwallet()
-        self.assertTrue(isinstance(wallet, KWallet.Wallet),
-                        msg="The object wallet should be type "
-                        "<KWallet.Wallet> but it is: %s" % repr(wallet))
+        self.assertIsInstance(wallet, KWallet.Wallet)
         app.exit()

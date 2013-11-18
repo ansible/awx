@@ -18,7 +18,6 @@ import yaml
 # Django
 from django.conf import settings
 from django.db import models
-from django.db.models import CASCADE, SET_NULL, PROTECT
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
@@ -144,8 +143,6 @@ class JobTemplate(CommonModel):
                     needed.append('ssh_password')
                 else:
                     needed.append(pw)
-        if self.project.scm_update_on_launch:
-            needed.extend(self.project.scm_passwords_needed)
         return bool(self.credential and not len(needed))
 
 class Job(CommonTask):
@@ -263,8 +260,6 @@ class Job(CommonTask):
                     needed.append('ssh_password')
                 else:
                     needed.append(pw)
-        if self.project.scm_update_on_launch:
-            needed.extend(self.project.scm_passwords_needed)
         return needed
 
     def _get_task_class(self):
@@ -308,7 +303,7 @@ class Job(CommonTask):
         return self._get_hosts(job_host_summaries__processed__gt=0)
 
 
-class JobHostSummary(models.Model):
+class JobHostSummary(BaseModel):
     '''
     Per-host statistics for each job.
     '''
@@ -372,7 +367,7 @@ class JobHostSummary(models.Model):
             self.host.save(update_fields=update_fields)
         self.host.update_computed_fields()
 
-class JobEvent(models.Model):
+class JobEvent(BaseModel):
     '''
     An event/message logged from the callback when running a job.
     '''

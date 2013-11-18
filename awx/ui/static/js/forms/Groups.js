@@ -126,7 +126,7 @@ angular.module('GroupFormDefinition', [])
                 label: 'Regions',
                 excludeModal: true,
                 type: 'text',
-                ngShow: "source.value == 'rackspace' || source.value == 'ec2'",
+                ngShow: "source.value == 'rax' || source.value == 'ec2'",
                 addRequired: false,
                 editRequired: false,
                 dataTitle: 'Source Regions',

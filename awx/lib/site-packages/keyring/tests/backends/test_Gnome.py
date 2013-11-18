@@ -3,7 +3,7 @@ import sys
 
 from ..py30compat import unittest
 from ..test_backend import BackendBasicTests
-from ..util import ImportKiller, Environ, NoNoneDictMutator
+from ..util import Environ, NoNoneDictMutator
 from keyring.backends import Gnome
 
 

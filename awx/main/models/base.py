@@ -10,6 +10,7 @@ import yaml
 
 # Django
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
@@ -22,7 +23,7 @@ from taggit.managers import TaggableManager
 # Django-Celery
 from djcelery.models import TaskMeta
 
-__all__ = ['VarsDictProperty', 'PrimordialModel', 'CommonModel',
+__all__ = ['VarsDictProperty', 'BaseModel', 'PrimordialModel', 'CommonModel',
            'CommonModelNameNotUnique', 'CommonTask', 'PERM_INVENTORY_ADMIN',
            'PERM_INVENTORY_READ', 'PERM_INVENTORY_WRITE',
            'PERM_INVENTORY_DEPLOY', 'PERM_INVENTORY_CHECK', 'JOB_TYPE_CHOICES',
@@ -40,7 +41,6 @@ JOB_TYPE_CHOICES = [
     (PERM_INVENTORY_CHECK, _('Check')),
 ]
 
-# FIXME: TODO: make sure all of these are used and consistent
 PERMISSION_TYPE_CHOICES = [
     (PERM_INVENTORY_READ, _('Read Inventory')),
     (PERM_INVENTORY_WRITE, _('Edit Inventory')),
@@ -60,7 +60,7 @@ TASK_STATUS_CHOICES = [
     ('canceled', _('Canceled')),        # The job was canceled before completion.
 ]
 
-CLOUD_INVENTORY_SOURCES = ['ec2', 'rackspace']
+CLOUD_INVENTORY_SOURCES = ['ec2', 'rax']
 
 
 class VarsDictProperty(object):
@@ -98,7 +98,56 @@ class VarsDictProperty(object):
         raise AttributeError('readonly property')
 
 
-class PrimordialModel(models.Model):
+class BaseModel(models.Model):
+    '''
+    Base model class with common methods for all models.
+    '''
+
+    class Meta:
+        abstract = True
+
+    def __unicode__(self):
+        if hasattr(self, 'name'):
+            return u'%s-%s' % (self.name, self.id)
+        else:
+            return u'%s-%s' % (self._meta.verbose_name, self.id)
+
+    def clean_fields(self, exclude=None):
+        '''
+        Override default clean_fields to support methods for cleaning
+        individual model fields.
+        '''
+        exclude = exclude or []
+        errors = {}
+        try:
+            super(BaseModel, self).clean_fields(exclude)
+        except ValidationError, e:
+            errors = e.update_error_dict(errors)
+        for f in self._meta.fields:
+            if f.name in exclude:
+                continue
+            if hasattr(self, 'clean_%s' % f.name):
+                try:
+                    setattr(self, f.attname,
+                            getattr(self, 'clean_%s' % f.name)())
+                except ValidationError, e:
+                    errors[f.name] = e.messages
+        if errors:
+             raise ValidationError(errors)        
+
+    def save(self, *args, **kwargs):
+        # For compatibility with Django 1.4.x, attempt to handle any calls to
+        # save that pass update_fields.
+        try:
+            super(BaseModel, self).save(*args, **kwargs)
+        except TypeError:
+            if 'update_fields' not in kwargs:
+                raise
+            kwargs.pop('update_fields')
+            super(BaseModel, self).save(*args, **kwargs)
+
+
+class PrimordialModel(BaseModel):
     '''
     common model for all object types that have these standard fields
     must use a subclass CommonModel or CommonModelNameNotUnique though
@@ -137,26 +186,10 @@ class PrimordialModel(models.Model):
     )
     active = models.BooleanField(
         default=True,
+        editable=False,
     )
 
     tags = TaggableManager(blank=True)
-
-    def __unicode__(self):
-        if hasattr(self, 'name'):
-            return u'%s-%s' % (self.name, self.id)
-        else:
-            return u'%s-%s' % (self._meta.verbose_name, self.id)
-
-    def save(self, *args, **kwargs):
-        # For compatibility with Django 1.4.x, attempt to handle any calls to
-        # save that pass update_fields.
-        try:
-            super(PrimordialModel, self).save(*args, **kwargs)
-        except TypeError:
-            if 'update_fields' not in kwargs:
-                raise
-            kwargs.pop('update_fields')
-            super(PrimordialModel, self).save(*args, **kwargs)
 
     def mark_inactive(self, save=True):
         '''Use instead of delete to rename and mark inactive.'''
@@ -166,6 +199,10 @@ class PrimordialModel(models.Model):
             self.active = False
             if save:
                 self.save()
+
+    def clean_description(self):
+        # Description should always be empty string, never null.
+        return self.description or ''
 
 
 class CommonModel(PrimordialModel):

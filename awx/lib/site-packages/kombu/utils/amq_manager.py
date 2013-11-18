@@ -12,7 +12,7 @@ def get_manager(client, hostname=None, port=None, userid=None,
                 or getattr(client, name, None) or default)
 
     host = get('hostname', hostname, 'localhost')
-    port = port if port is not None else opt('manager_port', 55672)
+    port = port if port is not None else opt('manager_port', 15672)
     userid = get('userid', userid, 'guest')
     password = get('password', password, 'guest')
     return pyrabbit.Client('%s:%s' % (host, port), userid, password)

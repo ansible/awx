@@ -96,6 +96,7 @@ class ChoiceField(fields.ChoiceField):
 # ModelSerializer.
 serializers.ChoiceField = ChoiceField
 
+
 class BaseSerializer(serializers.ModelSerializer):
 
     # add the URL and related resources
@@ -187,10 +188,6 @@ class BaseSerializer(serializers.ModelSerializer):
         else:
             return obj.active
 
-    def validate_description(self, attrs, source):
-        # Description should always be empty string, never null.
-        attrs[source] = attrs.get(source, None) or ''
-        return attrs
 
 class UserSerializer(BaseSerializer):
 
@@ -278,6 +275,7 @@ class UserSerializer(BaseSerializer):
     def validate_is_superuser(self, attrs, source):
         return self._validate_ldap_managed_field(attrs, source)
 
+
 class OrganizationSerializer(BaseSerializer):
 
     class Meta:
@@ -298,6 +296,7 @@ class OrganizationSerializer(BaseSerializer):
             teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
         ))
         return res
+
 
 class ProjectSerializer(BaseSerializer):
 
@@ -334,27 +333,32 @@ class ProjectSerializer(BaseSerializer):
                                          args=(obj.last_update.pk,))
         return res
 
+    def _get_scm_type(self, attrs, source=None):
+        if self.object:
+            return attrs.get(source or 'scm_type', self.object.scm_type) or u''
+        else:
+            return attrs.get(source or 'scm_type', u'') or u''
+
     def validate_local_path(self, attrs, source):
         # Don't allow assigning a local_path used by another project.
         # Don't allow assigning a local_path when scm_type is set.
         valid_local_paths = Project.get_local_path_choices()
-        if self.object:
-            scm_type = attrs.get('scm_type', self.object.scm_type)
-            if not scm_type:
-                valid_local_paths.append(self.object.local_path)
-        else:
-            scm_type = attrs.get('scm_type', '')
+        scm_type = self._get_scm_type(attrs)
+        if self.object and not scm_type:
+            valid_local_paths.append(self.object.local_path)
         if scm_type:
             attrs.pop(source, None)
         if source in attrs and attrs[source] not in valid_local_paths:
             raise serializers.ValidationError('Invalid path choice')
         return attrs
 
+    def validate_scm_type(self, attrs, source):
+        scm_type = self._get_scm_type(attrs, source)
+        attrs[source] = scm_type
+        return attrs
+
     def validate_scm_url(self, attrs, source):
-        if self.object:
-            scm_type = attrs.get('scm_type', self.object.scm_type) or ''
-        else:
-            scm_type = attrs.get('scm_type', '') or ''
+        scm_type = self._get_scm_type(attrs)
         scm_url = unicode(attrs.get(source, None) or '')
         if not scm_type:
             return attrs
@@ -413,6 +417,7 @@ class ProjectSerializer(BaseSerializer):
     
     # FIXME: Validate combination of SCM URL and credential!
 
+
 class ProjectPlaybooksSerializer(ProjectSerializer):
 
     class Meta:
@@ -422,6 +427,7 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
     def to_native(self, obj):
         ret = super(ProjectPlaybooksSerializer, self).to_native(obj)
         return ret.get('playbooks', [])
+
 
 class ProjectUpdateSerializer(BaseSerializer):
 
@@ -441,6 +447,7 @@ class ProjectUpdateSerializer(BaseSerializer):
         ))
         return res
 
+
 class BaseSerializerWithVariables(BaseSerializer):
 
     def validate_variables(self, attrs, source):
@@ -452,6 +459,7 @@ class BaseSerializerWithVariables(BaseSerializer):
             except yaml.YAMLError:
                 raise serializers.ValidationError('Must be valid JSON or YAML')
         return attrs
+
 
 class InventorySerializer(BaseSerializerWithVariables):
 
@@ -480,6 +488,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             inventory_sources = reverse('api:inventory_inventory_sources_list', args=(obj.pk,)),
         ))
         return res
+
 
 class HostSerializer(BaseSerializerWithVariables):
 
@@ -611,6 +620,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             raise serializers.ValidationError('Invalid group name')
         return attrs
 
+
 class GroupTreeSerializer(GroupSerializer):
     
     children = serializers.SerializerMethodField('get_children')
@@ -628,6 +638,7 @@ class GroupTreeSerializer(GroupSerializer):
         children_qs = obj.children.filter(active=True)
         return GroupTreeSerializer(children_qs, many=True).data
 
+
 class BaseVariableDataSerializer(BaseSerializer):
 
     def to_native(self, obj):
@@ -643,11 +654,13 @@ class BaseVariableDataSerializer(BaseSerializer):
         data = {'variables': json.dumps(data)}
         return super(BaseVariableDataSerializer, self).from_native(data, files)
 
+
 class InventoryVariableDataSerializer(BaseVariableDataSerializer):
 
     class Meta:
         model = Inventory
         fields = ('variables',)
+
 
 class HostVariableDataSerializer(BaseVariableDataSerializer):
 
@@ -655,11 +668,13 @@ class HostVariableDataSerializer(BaseVariableDataSerializer):
         model = Host
         fields = ('variables',)
 
+
 class GroupVariableDataSerializer(BaseVariableDataSerializer):
 
     class Meta:
         model = Group
         fields = ('variables',)
+
 
 class InventorySourceSerializer(BaseSerializer):
     
@@ -730,6 +745,7 @@ class InventorySourceSerializer(BaseSerializer):
         # FIXME
         return attrs
 
+
 class InventoryUpdateSerializer(BaseSerializer):
 
     class Meta:
@@ -749,6 +765,7 @@ class InventoryUpdateSerializer(BaseSerializer):
         ))
         return res
 
+
 class TeamSerializer(BaseSerializer):
 
     class Meta:
@@ -767,6 +784,7 @@ class TeamSerializer(BaseSerializer):
             permissions  = reverse('api:team_permissions_list', args=(obj.pk,)),
         ))
         return res
+
 
 class PermissionSerializer(BaseSerializer):
 
@@ -789,6 +807,7 @@ class PermissionSerializer(BaseSerializer):
             res['inventory']   = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         return res
 
+
     def validate(self, attrs):
         # Can only set either user or team.
         if attrs['user'] and attrs['team']:
@@ -803,6 +822,7 @@ class PermissionSerializer(BaseSerializer):
             raise serializers.ValidationError('project is required when '
                                               'assigning deployment permissions')
         return attrs
+
 
 class CredentialSerializer(BaseSerializer):
 
@@ -845,13 +865,15 @@ class CredentialSerializer(BaseSerializer):
             res['team'] = reverse('api:team_detail', args=(obj.team.pk,))
         return res
 
+
 class JobTemplateSerializer(BaseSerializer):
 
     class Meta:
         model = JobTemplate
         fields = BASE_FIELDS + ('job_type', 'inventory', 'project', 'playbook',
-                                'credential', 'forks', 'limit', 'verbosity',
-                                'extra_vars', 'job_tags', 'host_config_key')
+                                'credential', 'cloud_credential', 'forks',
+                                'limit', 'verbosity', 'extra_vars', 'job_tags',
+                                'host_config_key')
 
     def get_related(self, obj):
         if obj is None:
@@ -864,6 +886,9 @@ class JobTemplateSerializer(BaseSerializer):
         ))
         if obj.credential:
             res['credential'] = reverse('api:credential_detail', args=(obj.credential.pk,))
+        if obj.cloud_credential:
+            res['cloud_credential'] = reverse('api:credential_detail',
+                                              args=(obj.cloud_credential.pk,))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
         return res
@@ -875,6 +900,7 @@ class JobTemplateSerializer(BaseSerializer):
             raise serializers.ValidationError('Playbook not found for project')
         return attrs
 
+
 class JobSerializer(BaseSerializer):
 
     passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
@@ -883,7 +909,7 @@ class JobSerializer(BaseSerializer):
         model = Job
         fields = ('id', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'job_template', 'job_type', 'inventory',
-                  'project', 'playbook', 'credential',
+                  'project', 'playbook', 'credential', 'cloud_credential',
                   'forks', 'limit', 'verbosity', 'extra_vars',
                   'job_tags', 'launch_type', 'status', 'failed',
                   'result_stdout', 'result_traceback',
@@ -903,6 +929,9 @@ class JobSerializer(BaseSerializer):
         ))
         if obj.job_template:
             res['job_template'] = reverse('api:job_template_detail', args=(obj.job_template.pk,))
+        if obj.cloud_credential:
+            res['cloud_credential'] = reverse('api:credential_detail',
+                                              args=(obj.cloud_credential.pk,))
         if obj.can_start or True:
             res['start'] = reverse('api:job_start', args=(obj.pk,))
         if obj.can_cancel or True:
@@ -925,12 +954,15 @@ class JobSerializer(BaseSerializer):
             data.setdefault('playbook', job_template.playbook)
             if job_template.credential:
                 data.setdefault('credential', job_template.credential.pk)
+            if job_template.cloud_credential:
+                data.setdefault('cloud_credential', job_template.cloud_credential.pk)
             data.setdefault('forks', job_template.forks)
             data.setdefault('limit', job_template.limit)
             data.setdefault('verbosity', job_template.verbosity)
             data.setdefault('extra_vars', job_template.extra_vars)
             data.setdefault('job_tags', job_template.job_tags)
         return super(JobSerializer, self).from_native(data, files)
+
 
 class JobHostSummarySerializer(BaseSerializer):
 
@@ -960,6 +992,7 @@ class JobHostSummarySerializer(BaseSerializer):
         except (KeyError, AttributeError):
             pass
         return d
+
 
 class JobEventSerializer(BaseSerializer):
 
@@ -1054,7 +1087,6 @@ class ActivityStreamSerializer(BaseSerializer):
         except Exception, e:
             pass
         return d
-
 
 class AuthTokenSerializer(serializers.Serializer):
 

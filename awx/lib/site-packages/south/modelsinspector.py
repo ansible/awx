@@ -164,6 +164,7 @@ allowed_fields = [
     "^django\.db",
     "^django\.contrib\.contenttypes\.generic",
     "^django\.contrib\.localflavor",
+    "^django_localflavor_\w\w",
 ]
 
 # Regexes of ignored fields (custom fields which look like fields, but have no column behind them)

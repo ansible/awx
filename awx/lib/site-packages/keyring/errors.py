@@ -36,8 +36,10 @@ class ExceptionInfo(object):
             info = sys.exc_info()
         self.type, self.value, self.traceback = info
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         Return True if an exception occurred
         """
         return bool(self.type)
+
+    __nonzero__ = __bool__

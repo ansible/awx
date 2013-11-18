@@ -3,11 +3,25 @@ import os
 import sys
 import logging
 
+try:
+    from importlib import import_module
+except ImportError:
+    try:
+        from django.utils.importlib import import_module
+    except ImportError:
+        def import_module(module):
+            return __import__(module, {}, {}, [''])
+
 
 def get_project_root():
     """ get the project root directory """
-    settings_mod = __import__(settings.SETTINGS_MODULE, {}, {}, [''])
-    return os.path.dirname(os.path.abspath(settings_mod.__file__))
+    django_settings_module = os.environ.get('DJANGO_SETTINGS_MODULE')
+    if not django_settings_module:
+        module_str = settings.SETTINGS_MODULE
+    else:
+        module_str = django_settings_module.split(".")[0]
+    mod = import_module(module_str)
+    return os.path.dirname(os.path.abspath(mod.__file__))
 
 
 def _make_writeable(filename):

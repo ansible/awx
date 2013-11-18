@@ -23,18 +23,12 @@ OpenStack Client interface. Handles the REST calls and responses.
 import httplib2
 import json
 import logging
-import os
-import pkg_resources
 import time
-from urllib import quote
+import urllib
 import urlparse
 
-from manager import BaseManager
-from resource import BaseResource
 import pyrax
 import pyrax.exceptions as exc
-import pyrax.service_catalog as service_catalog
-import pyrax.utils as utils
 
 
 class BaseClient(httplib2.Http):
@@ -86,7 +80,10 @@ class BaseClient(httplib2.Http):
 
     # The next 6 methods are simple pass-through to the manager.
     def list(self, limit=None, marker=None):
-        """Returns a list of all resources."""
+        """
+        Returns a list of resource objects. Pagination is supported through the
+        optional 'marker' and 'limit' parameters.
+        """
         return self._manager.list(limit=limit, marker=marker)
 
 
@@ -140,6 +137,14 @@ class BaseClient(httplib2.Http):
         self.times = []
 
 
+    def get_limits(self):
+        """
+        Returns a dict with the resource and rate limits for the account.
+        """
+        resp, resp_body = self.method_get("/limits")
+        return resp_body
+
+
     def http_log_req(self, args, kwargs):
         """
         When self.http_log_debug is True, outputs the equivalent `curl`
@@ -147,7 +152,6 @@ class BaseClient(httplib2.Http):
         """
         if not self.http_log_debug:
             return
-
         string_parts = ["curl -i"]
         for element in args:
             if element in ("GET", "POST", "PUT", "DELETE", "HEAD"):
@@ -174,6 +178,18 @@ class BaseClient(httplib2.Http):
         self._logger.debug("RESP: %s %s\n", resp, body)
 
 
+    def _add_custom_headers(self, dct):
+        """
+        Clients for some services must add headers that are required for that
+        service. This is a hook method to allow for such customization.
+
+        If a client needs to add a special header, the 'dct' parameter is a
+        dictionary of headers. Add the header(s) and their values as key/value
+        pairs to the 'dct'.
+        """
+        pass
+
+
     def request(self, *args, **kwargs):
         """
         Formats the request into a dict representing the headers
@@ -185,6 +201,8 @@ class BaseClient(httplib2.Http):
         if "body" in kwargs:
             kwargs["headers"]["Content-Type"] = "application/json"
             kwargs["body"] = json.dumps(kwargs["body"])
+        # Allow subclasses to add their own headers
+        self._add_custom_headers(kwargs["headers"])
         self.http_log_req(args, kwargs)
         resp, body = super(BaseClient, self).request(*args, **kwargs)
         self.http_log_resp(resp, body)
@@ -196,11 +214,10 @@ class BaseClient(httplib2.Http):
                 pass
         else:
             body = None
-
         if resp.status >= 400:
             raise exc.from_response(resp, body)
-
         return resp, body
+
 
     def _time_request(self, uri, method, **kwargs):
         """Wraps the request call and records the elapsed time."""
@@ -209,6 +226,7 @@ class BaseClient(httplib2.Http):
         self.times.append(("%s %s" % (method, uri),
                 start_time, time.time()))
         return resp, body
+
 
     def _api_request(self, uri, method, **kwargs):
         """
@@ -225,6 +243,17 @@ class BaseClient(httplib2.Http):
             # indicates that the service is not available.
             raise exc.ServiceNotAvailable("The '%s' service is not available."
                     % self)
+        if uri.startswith("http"):
+            parsed = list(urlparse.urlparse(uri))
+            for pos, item in enumerate(parsed):
+                if pos < 2:
+                    # Don't escape the scheme or netloc
+                    continue
+                parsed[pos] = urllib.quote(parsed[pos], safe="/.?&=,")
+            safe_uri = urlparse.urlunparse(parsed)
+        else:
+            safe_uri = "%s%s" % (self.management_url,
+                    urllib.quote(uri, safe="/.?&=,"))
         # Perform the request once. If we get a 401 back then it
         # might be because the auth token expired, so try to
         # re-authenticate and try again. If it still fails, bail.
@@ -232,18 +261,21 @@ class BaseClient(httplib2.Http):
             kwargs.setdefault("headers", {})["X-Auth-Token"] = id_svc.token
             if id_svc.tenant_id:
                 kwargs["headers"]["X-Auth-Project-Id"] = id_svc.tenant_id
-            resp, body = self._time_request(self.management_url +
-                    quote(uri, safe="/.?&="), method, **kwargs)
+            resp, body = self._time_request(safe_uri, method, **kwargs)
             return resp, body
         except exc.Unauthorized as ex:
             try:
                 id_svc.authenticate()
                 kwargs["headers"]["X-Auth-Token"] = id_svc.token
-                resp, body = self._time_request(self.management_url + uri,
-                        method, **kwargs)
+                resp, body = self._time_request(safe_uri, method, **kwargs)
                 return resp, body
             except exc.Unauthorized:
                 raise ex
+
+
+    def method_head(self, uri, **kwargs):
+        """Method used to make HEAD requests."""
+        return self._api_request(uri, "HEAD", **kwargs)
 
 
     def method_get(self, uri, **kwargs):
@@ -264,6 +296,11 @@ class BaseClient(httplib2.Http):
     def method_delete(self, uri, **kwargs):
         """Method used to make DELETE requests."""
         return self._api_request(uri, "DELETE", **kwargs)
+
+
+    def method_patch(self, uri, **kwargs):
+        """Method used to make PATCH requests."""
+        return self._api_request(uri, "PATCH", **kwargs)
 
 
     def authenticate(self):

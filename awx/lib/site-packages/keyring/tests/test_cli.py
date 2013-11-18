@@ -110,8 +110,8 @@ class CommandLineTestCase(unittest.TestCase):
             "-b", "keyring.backends.file.PlaintextKeyring",
             "foo", "bar"]))
         backend = keyring.get_keyring()
-        self.assertTrue(isinstance(backend,
-                                   keyring.backends.file.PlaintextKeyring))
+        self.assertIsInstance(backend,
+                              keyring.backends.file.PlaintextKeyring)
 
     def test_load_specific_backend_with_path(self):
         keyring_path = os.path.join(os.path.dirname(keyring.__file__), 'tests')
@@ -120,10 +120,9 @@ class CommandLineTestCase(unittest.TestCase):
                                           "-p", keyring_path,
                                           "foo", "bar"]))
 
-        backend = keyring.get_keyring()
         # Somehow, this doesn't work, because the full dotted name of the class
         # is not the same as the one expected :(
-        #self.assertTrue(isinstance(backend, FakeKeyring))
+        #self.assertIsInstance(keyring.get_keyring(), FakeKeyring)
         self.assertEqual(FakeKeyring.PASSWORD, self.password_returned)
 
     def test_load_wrong_keyrings(self):

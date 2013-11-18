@@ -188,13 +188,13 @@ class ELBConnection(AWSQueryConnection):
             (LoadBalancerPortNumber, InstancePortNumber, Protocol, InstanceProtocol,
             SSLCertificateId).
 
-            Where;
-            - LoadBalancerPortNumber and InstancePortNumber are integer
-              values between 1 and 65535.
-            - Protocol and InstanceProtocol is a string containing either 'TCP',
-              'SSL', 'HTTP', or 'HTTPS'
-            - SSLCertificateId is the ARN of an SSL certificate loaded into
-              AWS IAM
+            Where:
+                - LoadBalancerPortNumber and InstancePortNumber are integer
+                  values between 1 and 65535
+                - Protocol and InstanceProtocol is a string containing either 'TCP',
+                  'SSL', 'HTTP', or 'HTTPS'
+                - SSLCertificateId is the ARN of an SSL certificate loaded into
+                  AWS IAM
 
         :rtype: :class:`boto.ec2.elb.loadbalancer.LoadBalancer`
         :return: The newly created
@@ -272,13 +272,13 @@ class ELBConnection(AWSQueryConnection):
             (LoadBalancerPortNumber, InstancePortNumber, Protocol, InstanceProtocol,
             SSLCertificateId).
 
-            Where;
-            - LoadBalancerPortNumber and InstancePortNumber are integer 
-              values between 1 and 65535.
-            - Protocol and InstanceProtocol is a string containing either 'TCP',
-              'SSL', 'HTTP', or 'HTTPS'
-            - SSLCertificateId is the ARN of an SSL certificate loaded into
-              AWS IAM
+            Where:
+                - LoadBalancerPortNumber and InstancePortNumber are integer
+                  values between 1 and 65535
+                - Protocol and InstanceProtocol is a string containing either 'TCP',
+                  'SSL', 'HTTP', or 'HTTPS'
+                - SSLCertificateId is the ARN of an SSL certificate loaded into
+                  AWS IAM
 
         :return: The status of the request
         """

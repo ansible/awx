@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 from django.test import Client
 from django.core.handlers.wsgi import WSGIRequest
@@ -62,13 +62,13 @@ class MockRequest(object):
         return request
 
     def get(self, *args, **kwargs):
-        return self._make_request("get", *args, **kwargs)
+        return self._make_request('get', *args, **kwargs)
 
     def post(self, *args, **kwargs):
-        return self._make_request("post", *args, **kwargs)
+        return self._make_request('post', *args, **kwargs)
 
     def put(self, *args, **kwargs):
-        return self._make_request("put", *args, **kwargs)
+        return self._make_request('put', *args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        return self._make_request("delete", *args, **kwargs)
+        return self._make_request('delete', *args, **kwargs)

@@ -32,7 +32,7 @@ class _Frame(object):
 class _Object(object):
 
     def __init__(self, **kw):
-        [setattr(self, k, v) for k, v in kw.iteritems()]
+        [setattr(self, k, v) for k, v in kw.items()]
 
 
 class _Truncated(object):

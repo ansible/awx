@@ -188,7 +188,11 @@ class ActivityWorker(Actor):
     @wraps(Layer1.poll_for_activity_task)
     def poll(self, **kwargs):
         """PollForActivityTask."""
-        task = self._swf.poll_for_activity_task(self.domain, self.task_list,
+        task_list = self.task_list
+        if 'task_list' in kwargs:
+            task_list = kwargs.get('task_list')
+            del kwargs['task_list']
+        task = self._swf.poll_for_activity_task(self.domain, task_list,
                                                 **kwargs)
         self.last_tasktoken = task.get('taskToken')
         return task
@@ -211,12 +215,14 @@ class Decider(Actor):
     @wraps(Layer1.poll_for_decision_task)
     def poll(self, **kwargs):
         """PollForDecisionTask."""
-        result = self._swf.poll_for_decision_task(self.domain, self.task_list,
+        task_list = self.task_list
+        if 'task_list' in kwargs:
+            task_list = kwargs.get('task_list')
+            del kwargs['task_list']
+        decision_task = self._swf.poll_for_decision_task(self.domain, task_list,
                                                   **kwargs)
-        # Record task token.
-        self.last_tasktoken = result.get('taskToken')
-        # Record the last event.
-        return result
+        self.last_tasktoken = decision_task.get('taskToken')
+        return decision_task
 
 class WorkflowType(SWFBase):
 

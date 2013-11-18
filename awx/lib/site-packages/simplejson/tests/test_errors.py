@@ -1,4 +1,4 @@
-import sys
+import sys, pickle
 from unittest import TestCase
 
 import simplejson as json
@@ -33,3 +33,19 @@ class TestErrors(TestCase):
                 self.fail('Expected JSONDecodeError')
             self.assertEqual(err.lineno, 1)
             self.assertEqual(err.colno, 10)
+
+    def test_error_is_pickable(self):
+        err = None
+        try:
+            json.loads('{}\na\nb')
+        except json.JSONDecodeError:
+            err = sys.exc_info()[1]
+        else:
+            self.fail('Expected JSONDecodeError')
+        s = pickle.dumps(err)
+        e = pickle.loads(s)
+
+        self.assertEquals(err.msg, e.msg)
+        self.assertEquals(err.doc, e.doc)
+        self.assertEquals(err.pos, e.pos)
+        self.assertEquals(err.end, e.end)

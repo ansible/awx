@@ -109,7 +109,7 @@ class ForeignKeyAutocompleteAdmin(ModelAdmin):
                     other_qs.dup_select_related(queryset)
                     other_qs = other_qs.filter(reduce(operator.or_, or_queries))
                     queryset = queryset & other_qs
-                data = ''.join([six.u('%s|%s\n' % (to_string_function(f), f.pk)) for f in queryset])
+                data = ''.join([six.u('%s|%s\n') % (to_string_function(f), f.pk) for f in queryset])
             elif object_pk:
                 try:
                     obj = queryset.get(pk=object_pk)

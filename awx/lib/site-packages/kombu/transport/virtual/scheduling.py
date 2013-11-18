@@ -45,5 +45,5 @@ class FairCycle(object):
         pass
 
     def __repr__(self):
-        return '<FairCycle: %r/%r %r>' % (self.pos, len(self.resources),
-                                          self.resources, )
+        return '<FairCycle: {self.pos}/{size} {self.resources}>'.format(
+            self=self, size=len(self.resources))

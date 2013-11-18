@@ -134,7 +134,7 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
         
-        url = GetBasePath('inventory_sources') + '?source__in=ec2,rackspace&page=1';
+        url = GetBasePath('inventory_sources') + '?source__in=ec2,rax&page=1';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
@@ -146,7 +146,7 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
                     { hdr: 'Error!', msg: 'Failed to get ' + url + '. GET status: ' + status });
                 });
 
-        url = GetBasePath('inventory_sources') + '?status=failed&source__in=ec2,rackspace&page=1';
+        url = GetBasePath('inventory_sources') + '?status=failed&source__in=ec2,rax&page=1';
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {

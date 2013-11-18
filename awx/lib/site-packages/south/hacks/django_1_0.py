@@ -19,7 +19,7 @@ class SkipFlushCommand(FlushCommand):
 
 class Hacks:
     
-    def set_installed_apps(self, apps):
+    def set_installed_apps(self, apps, preserve_models=False):
         """
         Sets Django's INSTALLED_APPS setting to be effectively the list passed in.
         """
@@ -36,7 +36,7 @@ class Hacks:
             apps,
             settings.INSTALLED_APPS,
         )
-        self._redo_app_cache()
+        self._redo_app_cache(preserve_models=preserve_models)
     
     
     def reset_installed_apps(self):
@@ -47,7 +47,7 @@ class Hacks:
         self._redo_app_cache()
     
     
-    def _redo_app_cache(self):
+    def _redo_app_cache(self, preserve_models=False):
         """
         Used to repopulate AppCache after fiddling with INSTALLED_APPS.
         """
@@ -55,7 +55,8 @@ class Hacks:
         cache.handled = set() if django.VERSION >= (1, 6) else {}
         cache.postponed = []
         cache.app_store = SortedDict()
-        cache.app_models = SortedDict()
+        if not preserve_models:
+            cache.app_models = SortedDict()
         cache.app_errors = {}
         cache._populate()
     

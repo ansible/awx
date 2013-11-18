@@ -81,11 +81,13 @@ class DatabaseOperations(generic.DatabaseOperations):
 
     @generic.invalidate_table_constraints
     def create_table(self, table_name, fields):
-        qn = self.quote_name(table_name)
         columns = []
         autoinc_sql = ''
 
         for field_name, field in fields:
+            # avoid default values in CREATE TABLE statements (#925)
+            field._suppress_default = True
+            
             col = self.column_sql(table_name, field_name, field)
             if not col:
                 continue
@@ -95,8 +97,11 @@ class DatabaseOperations(generic.DatabaseOperations):
                 field_name = field.db_column or field.column
                 autoinc_sql = connection.ops.autoinc_sql(table_name, field_name)
 
-        sql = 'CREATE TABLE %s (%s);' % (qn, ', '.join([col for col in columns]))
-        self.execute(sql)
+        self.execute(self.create_table_sql % {
+            "table": self.quote_name(table_name),
+            "columns": ', '.join([col for col in columns if col]),
+        })
+        
         if autoinc_sql:
             self.execute(autoinc_sql[0])
             self.execute(autoinc_sql[1])
@@ -210,13 +215,17 @@ class DatabaseOperations(generic.DatabaseOperations):
             for stmt in field.post_create_sql(no_style(), table_name):
                 self.add_deferred_sql(stmt)
 
-        # In 1.2 and above, you have to ask the DatabaseCreation stuff for it.
-        # This also creates normal indexes in 1.1.
-        if hasattr(self._get_connection().creation, "sql_indexes_for_field"):
-            # Make a fake model to pass in, with only db_table
-            model = self.mock_model("FakeModelForGISCreation", table_name)
-            for stmt in self._get_connection().creation.sql_indexes_for_field(model, field, no_style()):
-                self.add_deferred_sql(stmt)
+        # Avoid double index creation (#1317)
+        # Firebird creates an index implicity for each foreign key field 
+        # sql_indexes_for_field tries to create an index for that field too
+        if not field.rel:
+            # In 1.2 and above, you have to ask the DatabaseCreation stuff for it.
+            # This also creates normal indexes in 1.1.
+            if hasattr(self._get_connection().creation, "sql_indexes_for_field"):
+                # Make a fake model to pass in, with only db_table
+                model = self.mock_model("FakeModelForGISCreation", table_name)
+                for stmt in self._get_connection().creation.sql_indexes_for_field(model, field, no_style()):
+                    self.add_deferred_sql(stmt)
 
         if sql:
             return sql % sqlparams

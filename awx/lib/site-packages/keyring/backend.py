@@ -5,10 +5,10 @@ Keyring implementation support
 from __future__ import absolute_import
 
 import abc
-import itertools
 
 from keyring import errors
 from keyring.util import properties
+from keyring.py27compat import add_metaclass, filter
 
 import keyring.util
 
@@ -26,11 +26,11 @@ class KeyringBackendMeta(abc.ABCMeta):
             classes.add(cls)
 
 
+@add_metaclass(KeyringBackendMeta)
 class KeyringBackend(object):
     """The abstract base class of the keyring, every backend must implement
     this interface.
     """
-    __metaclass__ = KeyringBackendMeta
 
     #@abc.abstractproperty
     def priority(cls):
@@ -122,6 +122,6 @@ def get_all_keyring():
         return True
 
     all_classes = KeyringBackend._classes
-    viable_classes = itertools.ifilter(is_class_viable, all_classes)
+    viable_classes = filter(is_class_viable, all_classes)
     return list(keyring.util.suppress_exceptions(viable_classes,
         exceptions=TypeError))

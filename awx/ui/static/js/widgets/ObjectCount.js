@@ -23,8 +23,8 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
            scope.removeCountReady();
         }
         scope.removeCountReady = scope.$on('countReady', function(e, obj, count) {
-            var keys=[ 'organizations', 'users', 'teams', 'projects', 'inventory', 'groups', 'hosts',
-                'credentials', 'job_templates', 'jobs' ];
+            var keys=[ 'organizations', 'users', 'teams', 'credentials', 'projects', 'inventory', 'groups', 'hosts',
+                'job_templates', 'jobs' ];
             var html, itm;
             var cnt = 0;
             for (itm in counts) {

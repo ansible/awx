@@ -11,29 +11,25 @@ more information.
 """
 
 import six
-import datetime
 from decimal import Decimal
 from django.db import models
 from django.conf import settings
-from django.utils import simplejson
+from django.core.serializers.json import DjangoJSONEncoder
 
-
-class JSONEncoder(simplejson.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Decimal):
-            return str(obj)
-        elif isinstance(obj, datetime.datetime):
-            assert settings.TIME_ZONE == 'UTC'
-            return obj.strftime('%Y-%m-%dT%H:%M:%SZ')
-        return simplejson.JSONEncoder.default(self, obj)
+try:
+    # Django <= 1.6 backwards compatibility
+    from django.utils import simplejson as json
+except ImportError:
+    # Django >= 1.7
+    import json
 
 
 def dumps(value):
-    return JSONEncoder().encode(value)
+    return DjangoJSONEncoder().encode(value)
 
 
 def loads(txt):
-    value = simplejson.loads(
+    value = json.loads(
         txt,
         parse_float=Decimal,
         encoding=settings.DEFAULT_CHARSET

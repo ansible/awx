@@ -53,7 +53,11 @@ class YearlyJob(BaseJob):
 
 
 def my_import(name):
-    imp = __import__(name)
+    try:
+        imp = __import__(name)
+    except ImportError as err:
+        raise JobError("Failed to import %s with error %s" % (name, err))
+
     mods = name.split('.')
     if len(mods) > 1:
         for mod in mods[1:]:

@@ -30,7 +30,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            host.active_failures = 'n/a';
         }
         else if (host.has_active_failures == false && host.last_job !== null) {
-           hast.badgeToolTip = "Most recent job successful. Click to view jobs.";
+           host.badgeToolTip = "Most recent job successful. Click to view jobs.";
            host.active_failures = 'success';
         }
 
@@ -870,16 +870,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.removeHostsReload = scope.$on('hostsReload', function() {
             HostsReload(params);
         });
-        
-        
-        // After the group record is loaded, retrieve any group variables
-        if (scope.hostLoadedRemove) {
-           scope.hostLoadedRemove();
-        }
-        scope.hostLoadedRemove = scope.$on('hostLoaded', function() {
-            
-            });
-
        
         if (!scope.$$phase) {
            scope.$digest();

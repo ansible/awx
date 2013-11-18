@@ -47,7 +47,9 @@ class AMQPError(Exception):
                            reply_text, method_sig, self.method_name)
 
     def __str__(self):
-        return '{0.method}: ({0.reply_code}) {0.reply_text}'.format(self)
+        if self.method:
+            return '{0.method}: ({0.reply_code}) {0.reply_text}'.format(self)
+        return self.reply_text or '<AMQPError: unknown error>'
 
     @property
     def method(self):

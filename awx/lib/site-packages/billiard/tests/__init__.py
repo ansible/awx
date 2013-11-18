@@ -13,6 +13,9 @@ def teardown():
     except (AttributeError, ImportError):
         pass
 
-    atexit._exithandlers[:] = [
-        e for e in atexit._exithandlers if e[0] not in cancelled
-    ]
+    try:
+        atexit._exithandlers[:] = [
+            e for e in atexit._exithandlers if e[0] not in cancelled
+        ]
+    except AttributeError:
+        pass

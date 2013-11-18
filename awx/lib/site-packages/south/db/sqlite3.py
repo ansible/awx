@@ -64,7 +64,7 @@ class DatabaseOperations(generic.DatabaseOperations):
         cursor = self._get_connection().cursor()
         # Get the index descriptions
         indexes = self._get_connection().introspection.get_indexes(cursor, table_name)
-        multi_indexes = self._get_multi_indexes(table_name)
+        standalone_indexes = self._get_standalone_indexes(table_name)
         # Work out new column defs.
         for column_info in self._get_full_table_description(self._get_connection(), cursor, table_name):
             name = column_info['name']
@@ -117,8 +117,9 @@ class DatabaseOperations(generic.DatabaseOperations):
         # Recreate multi-valued indexes
         # We can't do that before since it's impossible to rename indexes
         # and index name scope is global
-        self._make_multi_indexes(table_name, multi_indexes, renames=renames, deleted=deleted, uniques_deleted=uniques_deleted)
-    
+        self._make_standalone_indexes(table_name, standalone_indexes, renames=renames, deleted=deleted, uniques_deleted=uniques_deleted)
+        self.deferred_sql = [] # prevent double indexing
+
     def _copy_data(self, src, dst, field_renames={}, added={}):
         "Used to copy data into a new table"
         # Make a list of all the fields to select
@@ -149,32 +150,38 @@ class DatabaseOperations(generic.DatabaseOperations):
         ))
 
     def _create_unique(self, table_name, columns):
-        self.execute("CREATE UNIQUE INDEX %s ON %s(%s);" % (
-            self.quote_name('%s_%s' % (table_name, '__'.join(columns))),
+        self._create_index(table_name, columns, True)
+
+    def _create_index(self, table_name, columns, unique=False, index_name=None):
+        if index_name is None:
+            index_name = '%s_%s' % (table_name, '__'.join(columns))
+        self.execute("CREATE %sINDEX %s ON %s(%s);" % (
+            unique and "UNIQUE " or "",
+            self.quote_name(index_name),
             self.quote_name(table_name),
             ', '.join(self.quote_name(c) for c in columns),
         ))
 
-    def _get_multi_indexes(self, table_name):
+    def _get_standalone_indexes(self, table_name):
         indexes = []
         cursor = self._get_connection().cursor()
         cursor.execute('PRAGMA index_list(%s)' % self.quote_name(table_name))
         # seq, name, unique
         for index, unique in [(field[1], field[2]) for field in cursor.fetchall()]:
-            if not unique:
-                continue
             cursor.execute('PRAGMA index_info(%s)' % self.quote_name(index))
             info = cursor.fetchall()
-            if len(info) == 1:
+            if len(info) == 1 and unique:
+                # This index is already specified in the CREATE TABLE columns
+                # specification
                 continue
             columns = []
             for field in info:
                 columns.append(field[2])
-            indexes.append(columns)
+            indexes.append((index, columns, unique))
         return indexes
 
-    def _make_multi_indexes(self, table_name, indexes, deleted=[], renames={}, uniques_deleted=[]):
-        for index in indexes:
+    def _make_standalone_indexes(self, table_name, indexes, deleted=[], renames={}, uniques_deleted=[]):
+        for index_name, index, unique in indexes:
             columns = []
 
             for name in index:
@@ -188,9 +195,9 @@ class DatabaseOperations(generic.DatabaseOperations):
                     name = renames[name]
                 columns.append(name)
 
-            if columns and set(columns) != set(uniques_deleted):
-                self._create_unique(table_name, columns)
-    
+            if columns and (set(columns) != set(uniques_deleted) or not unique):
+                self._create_index(table_name, columns, unique, index_name)
+
     def _column_sql_for_create(self, table_name, name, field, explicit_name=True):
         "Given a field and its name, returns the full type for the CREATE TABLE (without unique/pk)"
         field.set_attributes_from_name(name)

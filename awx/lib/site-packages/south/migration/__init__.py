@@ -162,7 +162,7 @@ def migrate_app(migrations, target_name=None, merge=False, fake=False, db_dry_ru
 
     verbosity = int(verbosity)
     # Fire off the pre-migrate signal
-    pre_migrate.send(None, app=app_label)
+    pre_migrate.send(None, app=app_label, verbosity=verbosity, interactive=verbosity, db=database)
     
     # If there aren't any, quit quizically
     if not migrations:
@@ -220,7 +220,7 @@ def migrate_app(migrations, target_name=None, merge=False, fake=False, db_dry_ru
         success = migrator.migrate_many(target, workplan, database)
         # Finally, fire off the post-migrate signal
         if success:
-            post_migrate.send(None, app=app_label)
+            post_migrate.send(None, app=app_label, verbosity=verbosity, interactive=verbosity, db=database)
     else:
         if verbosity:
             # Say there's nothing.
@@ -232,4 +232,4 @@ def migrate_app(migrations, target_name=None, merge=False, fake=False, db_dry_ru
             migrator = LoadInitialDataMigrator(migrator=Forwards(verbosity=verbosity))
             migrator.load_initial_data(target, db=database)
         # Send signal.
-        post_migrate.send(None, app=app_label)
+        post_migrate.send(None, app=app_label, verbosity=verbosity, interactive=verbosity, db=database)

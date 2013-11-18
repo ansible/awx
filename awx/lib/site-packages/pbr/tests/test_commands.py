@@ -40,10 +40,10 @@
 
 from testtools import content
 
-from pbr import tests
+from pbr.tests import base
 
 
-class TestCommands(tests.BaseTestCase):
+class TestCommands(base.BaseTestCase):
     def test_custom_build_py_command(self):
         """Test custom build_py command.
 

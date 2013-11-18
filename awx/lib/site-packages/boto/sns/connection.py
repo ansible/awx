@@ -264,7 +264,7 @@ class SNSConnection(AWSQueryConnection):
         :type protocol: string
         :param protocol: The protocol used to communicate with
                          the subscriber.  Current choices are:
-                         email|email-json|http|https|sqs
+                         email|email-json|http|https|sqs|sms
 
         :type endpoint: string
         :param endpoint: The location of the endpoint for
@@ -274,6 +274,7 @@ class SNSConnection(AWSQueryConnection):
                          * For http, this would be a URL beginning with http
                          * For https, this would be a URL beginning with https
                          * For sqs, this would be the ARN of an SQS Queue
+                         * For sms, this would be a phone number of an SMS-enabled device 
         """
         params = {'TopicArn': topic,
                   'Protocol': protocol,

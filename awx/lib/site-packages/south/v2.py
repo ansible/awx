@@ -9,7 +9,9 @@ class BaseMigration(object):
     
     def gf(self, field_name):
         "Gets a field by absolute reference."
-        return ask_for_it_by_name(field_name)
+        field = ask_for_it_by_name(field_name)
+        field.model = FakeModel
+        return field
 
 class SchemaMigration(BaseMigration):
     pass
@@ -17,3 +19,7 @@ class SchemaMigration(BaseMigration):
 class DataMigration(BaseMigration):
     # Data migrations shouldn't be dry-run
     no_dry_run = True
+
+class FakeModel(object):
+    "Fake model so error messages on fields don't explode"
+    pass

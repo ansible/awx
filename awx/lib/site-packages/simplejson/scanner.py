@@ -41,6 +41,9 @@ class JSONDecodeError(ValueError):
         else:
             self.endlineno, self.endcolno = None, None
 
+    def __reduce__(self):
+        return self.__class__, (self.msg, self.doc, self.pos, self.end)
+
 
 def linecol(doc, pos):
     lineno = doc.count('\n', 0, pos) + 1

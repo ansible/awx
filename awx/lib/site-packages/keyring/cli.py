@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Simple command line interface to get/set password from a keyring"""
 
+from __future__ import print_function
+
 import getpass
 from optparse import OptionParser
 import sys
@@ -85,7 +87,7 @@ class CommandLineTool(object):
         This mostly exists to ease the testing process.
         """
 
-        print >> sys.stdout, password
+        print(password, file=sys.stdout)
 
 
 def main(argv=None):

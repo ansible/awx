@@ -1,5 +1,4 @@
 """Specific support for getpass."""
-import os
 import getpass
 
 import keyring.core

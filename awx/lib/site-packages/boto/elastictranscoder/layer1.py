@@ -387,8 +387,8 @@ class ElasticTranscoderConnection(AWSAuthConnection):
         :param description: A description of the preset.
 
         :type container: string
-        :param container: The container type for the output file. This value
-            must be `mp4`.
+        :param container: The container type for the output file. Valid values
+            include `mp3`, `mp4`, `ogg`, `ts`, and `webm`.
 
         :type video: dict
         :param video: A section of the request body that specifies the video
