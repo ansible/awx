@@ -22,3 +22,4 @@ pep8.txt
 .tox
 nohup.out
 reports
+*~
