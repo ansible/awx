@@ -10,9 +10,6 @@ import subprocess
 import sys
 import urlparse
 
-# Django
-from django.db.models import Model
-
 # Django REST Framework
 from rest_framework.exceptions import ParseError, PermissionDenied
 
@@ -228,6 +225,7 @@ def model_instance_diff(old, new):
     Calculate the differences between two model instances. One of the instances may be None (i.e., a newly
     created model or deleted model). This will cause all fields with a value to have changed (from None).
     """
+    from django.db.models import Model
     if not(old is None or isinstance(old, Model)):
         raise TypeError('The supplied old instance is not a valid model instance.')
     if not(new is None or isinstance(new, Model)):
