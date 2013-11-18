@@ -44,7 +44,8 @@ class ActivityStreamMiddleware(object):
                 if isinstance(user, User) and instance.user is None:
                     instance.user = user
                 else:
-                    self.isActivityStreamEvent = True
-                    self.instances.append(instance)
+                    if instance not in self.instances:
+                        self.isActivityStreamEvent = True
+                        self.instances.append(instance)
             else:
                 self.isActivityStreamEvent = False
