@@ -1,7 +1,7 @@
 
 function PermissionsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, PermissionList,
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                          ClearScope, ProcessErrors, GetBasePath, CheckAccess)
+                          ClearScope, ProcessErrors, GetBasePath, CheckAccess, Wait)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -35,14 +35,17 @@ function PermissionsList ($scope, $rootScope, $location, $log, $routeParams, Res
  
     scope.deletePermission = function(id, name) {
        var action = function() {
+           Wait('start');
            var url = GetBasePath('base') + 'permissions/' + id + '/';
            Rest.setUrl(url);
            Rest.destroy()
                .success( function(data, status, headers, config) {
+                   Wait('stop');
                    $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
                    })
                .error( function(data, status, headers, config) {
+                   Wait('stop');
                    $('#prompt-modal').modal('hide');
                    ProcessErrors(scope, data, status, null,
                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
@@ -60,13 +63,14 @@ function PermissionsList ($scope, $rootScope, $location, $log, $routeParams, Res
 
 PermissionsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'PermissionList',
                             'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller',
-                            'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess'
+                            'ClearScope', 'ProcessErrors', 'GetBasePath', 'CheckAccess', 'Wait'
                             ];
 
 
 function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, PermissionsForm, 
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, 
-                         GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess) 
+                         GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess,
+                         Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -110,6 +114,7 @@ function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    // Save
    scope.formSave = function() {
       generator.clearApiErrors();
+      Wait('start');
       if (scope.PermissionAddAllowed) {
          var data = {};
          for (var fld in form.fields) {
@@ -119,9 +124,11 @@ function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
          Rest.setUrl(url);
          Rest.post(data)
              .success( function(data, status, headers, config) {
+                 Wait('stop');
                  ReturnToCaller(1);
                  })
              .error( function(data, status, headers, config) {
+                 Wait('stop');
                  ProcessErrors(scope, data, status, PermissionsForm,
                      { hdr: 'Error!', msg: 'Failed to create new permission. Post returned status: ' + status });
                  });
@@ -153,13 +160,14 @@ function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
 PermissionsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'PermissionsForm', 
                            'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
-                           'ReturnToCaller', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess'
+                           'ReturnToCaller', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait'
                            ];
 
 
 function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, PermissionsForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, 
-                          ClearScope, Prompt, GetBasePath, InventoryList, ProjectList, LookUpInit, CheckAccess) 
+                          ClearScope, Prompt, GetBasePath, InventoryList, ProjectList, LookUpInit, CheckAccess,
+                          Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -247,6 +255,7 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    // Save changes to the parent
    scope.formSave = function() {
       generator.clearApiErrors();
+      Wait('start');
       var data = {}
       for (var fld in form.fields) {
           data[fld] = scope[fld];   
@@ -254,9 +263,11 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       Rest.setUrl(defaultUrl);
       Rest.put(data)
           .success( function(data, status, headers, config) {
+              Wait('stop');
               ReturnToCaller(1);
               })
           .error( function(data, status, headers, config) {
+              Wait('stop');
               ProcessErrors(scope, data, status, form,
                   { hdr: 'Error!', msg: 'Failed to update Permission: ' + $routeParams.id + '. PUT status: ' + status });
               });
@@ -286,6 +297,7 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 
 PermissionsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'PermissionsForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
-                            'ClearScope', 'Prompt', 'GetBasePath', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess'
+                            'ClearScope', 'Prompt', 'GetBasePath', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess',
+                            'Wait'
                             ]; 
   

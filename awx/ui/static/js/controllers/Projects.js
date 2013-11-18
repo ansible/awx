@@ -13,7 +13,7 @@
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                        ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate, ProjectStatus,
-                       FormatDate, Refresh)                        
+                       FormatDate, Refresh, Wait)                        
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -112,14 +112,17 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
  
     scope.deleteProject = function(id, name) {  
         var action = function() {
+            Wait('start');
             var url = defaultUrl + id + '/';
             Rest.setUrl(url);
             Rest.destroy()
                 .success( function(data, status, headers, config) {
+                    Wait('stop');
                     $('#prompt-modal').modal('hide');
                     scope.search(list.iterator);
                     })
                 .error( function(data, status, headers, config) {
+                    Wait('stop');
                     $('#prompt-modal').modal('hide');
                     ProcessErrors(scope, data, status, null,
                              { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
@@ -225,13 +228,13 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
 ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList', 
                          'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                         'GetBasePath', 'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate', 'Refresh' ];
+                         'GetBasePath', 'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate', 'Refresh', 'Wait' ];
 
 
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
                       GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, 
                       GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList,
-                      CredentialList, GetChoices, DebugForm) 
+                      CredentialList, GetChoices, DebugForm, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -291,6 +294,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    // Save
    scope.formSave = function() {
        generator.clearApiErrors();
+       Wait('start');
        var data = {};
        for (var fld in form.fields) {
            if (form.fields[fld].type == 'checkbox_group') {
@@ -322,6 +326,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
                Rest.setUrl(url);
                Rest.post(org)
                    .success( function(data, status, headers, config) {
+                       Wait('stop');
                        $rootScope.flashMessage = "New project successfully created!";
                        (base == 'projects') ? ReturnToCaller() : ReturnToCaller(1);
                        })
@@ -331,6 +336,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
                        });
                })
           .error( function(data, status, headers, config) {
+               Wait('stop');
                ProcessErrors(scope, data, status, ProjectsForm,
                    { hdr: 'Error!', msg: 'Failed to create new project. POST returned status: ' + status });
                });
@@ -357,14 +363,14 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
 ProjectsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'ProjectsForm', 
                         'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
                         'ReturnToCaller', 'GetProjectPath', 'LookUpInit', 'OrganizationList', 'CredentialList', 'GetChoices',
-                        'DebugForm'
+                        'DebugForm', 'Wait'
                         ];
 
 
 function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
                        GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
                        RelatedPaginateInit, Prompt, ClearScope, GetBasePath, ReturnToCaller, GetProjectPath,
-                       Authorization, CredentialList, LookUpInit, GetChoices, Empty, DebugForm) 
+                       Authorization, CredentialList, LookUpInit, GetChoices, Empty, DebugForm, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -499,6 +505,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
    // Save changes to the parent
    scope.formSave = function() {
        generator.clearApiErrors();
+       Wait('start');
        $rootScope.flashMessage = null;
        var params = {};
        for (var fld in form.fields) {
@@ -525,9 +532,11 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
        Rest.setUrl(defaultUrl);
        Rest.put(params)
            .success( function(data, status, headers, config) {
+                Wait('stop');
                 ReturnToCaller();
                })
            .error( function(data, status, headers, config) {
+               Wait('stop');
                ProcessErrors(scope, data, status, form,
                  { hdr: 'Error!', msg: 'Failed to update project: ' + id + '. PUT status: ' + status });
                });
@@ -591,5 +600,5 @@ ProjectsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log'
                          'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit',
                          'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 
                          'GetProjectPath', 'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
-                         'DebugForm'
+                         'DebugForm', 'Wait'
                           ];

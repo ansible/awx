@@ -150,6 +150,7 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
     scope.deleteInventory = function(id, name) {
        
         var action = function() {
+            Wait('start');
             var url = defaultUrl + id + '/';
             $('#prompt-modal').modal('hide');
             Wait('start');
@@ -207,7 +208,7 @@ InventoriesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$route
 function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
                          GenerateList, OrganizationList, SearchInit, PaginateInit, LookUpInit, GetBasePath,
-                         ParseTypeChange) 
+                         ParseTypeChange, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -239,6 +240,7 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    // Save
    scope.formSave = function() {
        generator.clearApiErrors();
+       Wait('start');
        try { 
            // Make sure we have valid variable data
            if (scope.inventoryParseType == 'json') {
@@ -273,23 +275,28 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
                       Rest.setUrl(data.related.variable_data);
                       Rest.put(json_data)
                           .success( function(data, status, headers, config) {
+                              Wait('stop');
                               $location.path('/inventories/' + inventory_id + '/groups');           
                               })
                           .error( function(data, status, headers, config) {
+                              Wait('stop');
                               ProcessErrors(scope, data, status, form,
                                  { hdr: 'Error!', msg: 'Failed to add inventory varaibles. PUT returned status: ' + status });
                           });
                    }
                    else {
+                      Wait('stop');
                       $location.path('/inventories/' + inventory_id + '/groups');
                    }
                    })
                .error( function(data, status, headers, config) {
+                   Wait('stop');
                    ProcessErrors(scope, data, status, form,
                        { hdr: 'Error!', msg: 'Failed to add new inventory. Post returned status: ' + status });
                    });
        }
        catch(err) {
+           Wait('stop');
            Alert("Error", "Error parsing inventory variables. Parser returned: " + err);  
            }      
        
@@ -304,13 +311,14 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
 InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm', 
                            'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
-                           'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange']; 
+                           'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait']; 
 
 
 function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, OrganizationList,
-                          GetBasePath, LoadInventory, ParseTypeChange, EditInventory, SaveInventory, PostLoadInventory) 
+                          GetBasePath, LoadInventory, ParseTypeChange, EditInventory, SaveInventory, PostLoadInventory
+                          ) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.

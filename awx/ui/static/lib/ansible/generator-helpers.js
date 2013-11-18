@@ -340,6 +340,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            html += (field.ngClass) ? Attr(field, 'ngClass') : "";
            html += (options.mode == 'lookup' || options.mode == 'select') ? " ng-click=\"toggle_" + list.iterator +"({{ " + list.iterator + ".id }})\"" : "";
            html += (field.columnShow) ? Attr(field, 'columnShow') : "";
+           html += (field.ngBindHtml) ? "ng-bind-html-unsafe=\"" + field.ngBindHtml + "\" " : "";
            html += ">\n";
 
            // Add ngShow
@@ -359,7 +360,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
 
            // Start the Link
            if ( (field.key || field.link || field.linkTo || field.ngClick || field.ngHref) &&
-                options['mode'] != 'lookup' && options['mode'] != 'select' && !field.noLink ) {
+                options['mode'] != 'lookup' && options['mode'] != 'select' && !field.noLink && !field.ngBindHtml) {
               var cap=false;
               if (field.linkTo) {
                  html += "<a href=\"" + field.linkTo + "\" ";
@@ -397,7 +398,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            }
 
            // Add data binds 
-           if (field.showValue == undefined || field.showValue == true) {
+           if (!field.ngBindHtml && (field.showValue == undefined || field.showValue == true)) {
               if (field.ngBind) {       
                  html += "{{ " + field.ngBind + " }}";
               }
@@ -417,7 +418,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             
            // close the link
            if ( (field.key || field.link || field.linkTo || field.ngClick || field.ngHref )
-                && options.mode != 'lookup' && options.mode != 'select' && !field.noLink ) {
+                && options.mode != 'lookup' && options.mode != 'select' && !field.noLink && !field.ngBindHtml ) {
               html += "</a>";
            }
            // close ngShow
@@ -476,20 +477,20 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var iterator = params.iterator; 
         var form = params.template; 
         var useMini = params.mini; 
-        var label = (params.label) ? params.label : null;
+        //var label = (params.label) ? params.label : null;
         var html= '';
+        var secondWidget = params.secondWidget; 
    
         html += "<div class=\"row search-widget\">\n";
         html += "<div class=\""; 
         html += (params.size) ? params.size : "col-lg-4 col-md-6 col-sm-11 col-xs-11";
-        html += "\">\n";
-        html += (label) ? "<label>" + label +"</label>" : "";
+        html += "\" id=\"search-widget-container\">\n";
+        html += (form.searchWidgetLabel) ? "<label style=\"display:block\">" + form.searchWidgetLabel +"</label>" : "";
         html += "<div class=\"input-group";
         html += (useMini) ? " input-group-sm" : " input-group-sm";
         html += "\">\n";
         html += "<div class=\"input-group-btn dropdown\">\n";
         
-        // Use standard button on mobile
         html += "<button type=\"button\" ";
         html += "id=\"search_field_ddown\" ";
         html += "class=\"btn "; 
@@ -498,27 +499,22 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "<span ng-bind=\"" + iterator + "SearchFieldLabel\"></span>\n";
         html += "<span class=\"caret\"></span>\n";
         html += "</button>\n";
-        
-        // Use link and hover activation on desktop
-        //html += "<a href=\"\" id=\"search_field_ddown\" class=\"btn btn-default visible-lg\">";
-        //html += "<span ng-bind=\"" + iterator + "SearchFieldLabel\"></span>\n";
-        //html += "<span class=\"caret\"></span>\n";
-        //html += "</a>\n";
-        
+
         html += "<ul class=\"dropdown-menu\" id=\"" + iterator + "SearchDropdown\">\n";
         for ( var fld in form.fields) {
-          if (form.fields[fld].searchable == undefined || form.fields[fld].searchable == true) {
-             html += "<li><a href=\"\" ng-click=\"setSearchField('" + iterator + "','";
-             html += fld + "','";
-             if (form.fields[fld].searchLabel) {
-                html += form.fields[fld].searchLabel + "')\">" +
-                    form.fields[fld].searchLabel + "</a></li>\n";
-             }
-             else {
-                html += form.fields[fld].label.replace(/\<br\>/g,' ') + "')\">" +
-                    form.fields[fld].label.replace(/\<br\>/g,' ') + "</a></li>\n";
-             }
-          }
+            if ( (form.fields[fld].searchable == undefined || form.fields[fld].searchable == true) 
+                   && (form.fields[fld].searchWidget == undefined || form.fields[fld].searchWidget == 1) ) {
+               html += "<li><a href=\"\" ng-click=\"setSearchField('" + iterator + "','";
+               html += fld + "','";
+               if (form.fields[fld].searchLabel) {
+                  html += form.fields[fld].searchLabel + "', 1)\">" +
+                      form.fields[fld].searchLabel + "</a></li>\n";
+               }
+               else {
+                  html += form.fields[fld].label.replace(/\<br\>/g,' ') + "')\">" +
+                      form.fields[fld].label.replace(/\<br\>/g,' ') + "</a></li>\n";
+               }
+            }
         }
         html += "</ul>\n";
         html += "</div><!-- input-group-btn -->\n";
@@ -528,37 +524,71 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "\"></select>\n";
 
         html += "<input id=\"search_value_input\" type=\"text\" ng-hide=\"" + iterator + "SelectShow || " + iterator + "InputHide\" class=\"form-control ";
-        html += "\" ng-model=\"" + iterator + "SearchValue\" ng-change=\"search('" + iterator + 
-                "')\" placeholder=\"Search\" type=\"text\" ng-disabled=\"" + iterator + "InputDisable\">\n";
-        
-        /*
-        html += "<div class=\"input-group-btn dropdown\">\n";
-        html += "<button type=\"button\" ";
-        html += "id=\"search_option_ddown\" ";
-        html += "ng-hide=\"" + iterator + "SelectShow || " + iterator + "HideSearchType || " + iterator + "InputHide\" class=\"btn ";
-        html += "dropdown-toggle\" data-toggle=\"dropdown\">\n";
-        html += "<span ng-bind=\"" + iterator + "SearchTypeLabel\"></span>\n";
-        html += "<span class=\"caret\"></span>\n";
-        html += "</button>\n";
-        html += "<ul class=\"dropdown-menu pull-right\">\n";
-        html += "<li><a href=\"\" ng-click=\"setSearchType('" + iterator + "','iexact','Exact Match')\">Exact Match</a></li>\n";
-        html += "<li><a href=\"\" ng-click=\"setSearchType('" + iterator + "','icontains','Contains')\">Contains</a></li>\n";
-        html += "</ul>\n";
-        html += "</div><!-- input-group-btn -->\n";
-        */
-        
+        html += "\" ng-model=\"" + iterator + "SearchValue\" ng-keydown=\"startSearch('" + iterator + "')\" " + 
+            "aw-placeholder=\"" + iterator + "SearchPlaceholder\" type=\"text\" ng-disabled=\"" + iterator + "InputDisable || " + iterator + 
+            "HoldInput\">\n";
         
         // Reset button
         html += "<div class=\"input-group-btn\">\n";
-        html += "<button type=\"button\" class=\"btn btn-default btn-small\" ng-click=\"resetSearch('" + iterator + "')\" " +
+        html += "<button type=\"button\" class=\"btn btn-default btn-small\" ng-click=\"resetSearch('" + iterator + "', 1)\" " +
             "aw-tool-tip=\"Reset filter\" data-placement=\"top\" " +
             "><i class=\"icon-undo\"></i></button>\n";
         html += "</div><!-- input-group-btn -->\n";
         html += "</div><!-- input-group -->\n";
-        
         html += "</div><!-- col-lg-x -->\n";
+
+        // Search Widget 2
+        // Used on activity stream. Set 'searchWidget2: true' on fields to be included.
+        if (secondWidget) {
+            html += "<div class=\"col-lg-3\" id=\"search-widget-container2\">\n";
+            html += (form.searchWidgetLabel2) ? "<label style=\"display:block\">" + form.searchWidgetLabel2 +"</label>" : "";
+            html += "<div class=\"input-group input-group-sm\">\n";
+            html += "<div class=\"input-group-btn dropdown2\">\n";
+            html += "<button type=\"button\" ";
+            html += "id=\"search_field_ddown2\" ";
+            html += "class=\"btn dropdown-toggle\" data-toggle=\"dropdown\">\n";
+            html += "<span ng-bind=\"" + iterator + "SearchFieldLabel2\"></span>\n";
+            html += "<span class=\"caret\"></span>\n";
+            html += "</button>\n";
+            
+            html += "<ul class=\"dropdown-menu\" id=\"" + iterator + "SearchDropdown2\">\n";
+            for ( var fld in form.fields) {
+                if ( (form.fields[fld].searchable == undefined || form.fields[fld].searchable == true)
+                       && form.fields[fld].searchWidget == 2 ) {
+                   html += "<li><a href=\"\" ng-click=\"setSearchField('" + iterator + "','";
+                   html += fld + "','";
+                   if (form.fields[fld].searchLabel) {
+                      html += form.fields[fld].searchLabel + "', 2)\">" +
+                          form.fields[fld].searchLabel + "</a></li>\n";
+                   }
+                   else {
+                      html += form.fields[fld].label.replace(/\<br\>/g,' ') + "', 2)\">" +
+                          form.fields[fld].label.replace(/\<br\>/g,' ') + "</a></li>\n";
+                   }
+                }
+            }
+            html += "</ul>\n";
+            html += "</div><!-- input-group-btn -->\n";
+
+            html += "<input id=\"search_value_input\" type=\"text\" ng-hide=\"" + iterator + "SelectShow2 || " + iterator + "InputHide2\" class=\"form-control ";
+            html += "\" ng-model=\"" + iterator + "SearchValue2\" ng-keydown=\"startSearch('" + iterator + "')\" " + 
+                "aw-placeholder=\"" + iterator + "SearchPlaceholder2\" type=\"text\" ng-disabled=\"" + iterator + "InputDisable2 || " + iterator + 
+                "HoldInput2\">\n";
+            
+            // Reset button
+            html += "<div class=\"input-group-btn\">\n";
+            html += "<button type=\"button\" class=\"btn btn-default btn-small\" ng-click=\"resetSearch('" + iterator + "', 2)\" " +
+                "aw-tool-tip=\"Reset filter\" data-placement=\"top\" " +
+                "><i class=\"icon-undo\"></i></button>\n";
+            html += "</div><!-- input-group-btn -->\n";
+            html += "</div><!-- input-group -->\n";
+            html += "</div><!-- col-lg-x -->\n";
+        }
+
+        // Spinner
         html += "<div class=\"col-lg-1 col-md-1 col-sm-1 col-xs-1\"><i class=\"icon-spinner icon-spin icon-large\" ng-show=\"" + iterator + 
                  "SearchSpin == true\"></i></div>\n";
+
         return html;
         
         }

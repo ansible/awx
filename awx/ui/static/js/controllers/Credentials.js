@@ -12,7 +12,7 @@
 
 function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, CredentialList,
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                          ClearScope, ProcessErrors, GetBasePath, SelectionInit, GetChoices)
+                          ClearScope, ProcessErrors, GetBasePath, SelectionInit, GetChoices, Wait)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -86,14 +86,17 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
     scope.deleteCredential = function(id, name) {
        
        var action = function() {
+           Wait('start');
            var url = defaultUrl + id + '/';
            Rest.setUrl(url);
            Rest.destroy()
                .success( function(data, status, headers, config) {
+                   Wait('stop');
                    $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
                    })
                .error( function(data, status, headers, config) {
+                   Wait('stop');
                    $('#prompt-modal').modal('hide');
                    ProcessErrors(scope, data, status, null,
                             { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
@@ -109,13 +112,13 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
 
 CredentialsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'CredentialList', 'GenerateList', 
                             'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                            'GetBasePath', 'SelectionInit', 'GetChoices'];
+                            'GetBasePath', 'SelectionInit', 'GetChoices', 'Wait' ];
 
 
 function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
                          GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList, GetBasePath,
-                         GetChoices, Empty, KindChange, OwnerChange, FormSave) 
+                         GetChoices, Empty, KindChange, OwnerChange, FormSave, DebugForm) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -158,6 +161,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
       // Get the username based on incoming route
       scope['owner'] = 'user';
       scope['user'] = $routeParams.user_id;
+      OwnerChange({ scope: scope }); 
       var url = GetBasePath('users') + $routeParams.user_id + '/';
       Rest.setUrl(url);
       Rest.get()
@@ -173,6 +177,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
       // Get the username based on incoming route
       scope['owner'] = 'team';
       scope['team'] = $routeParams.team_id;
+      OwnerChange({ scope: scope });
       var url = GetBasePath('teams') + $routeParams.team_id + '/';
       Rest.setUrl(url);
       Rest.get()
@@ -238,7 +243,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 CredentialsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 'GenerateForm', 
                            'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
                            'SearchInit', 'PaginateInit', 'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty',
-                           'KindChange', 'OwnerChange', 'FormSave']; 
+                           'KindChange', 'OwnerChange', 'FormSave', 'DebugForm']; 
 
 
 function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
@@ -358,13 +363,15 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                        master['secret_key'] = scope['secret_key'];
                        break; 
                    case 'ssh':
-                       scope['ssh_username'] = data.username; 
                        scope['ssh_password'] = data.password;
-                       master['ssh_username'] = scope['ssh_username'];
                        master['ssh_password'] = scope['ssh_password'];
                        break; 
                    case 'scm':
                        scope['scm_key_unlock'] = data['ssh_key_unlock'];
+                       break;
+                   case 'rax':
+                       scope['api_key'] = data['password'];
+                       master['api_key'] = scope['api_key'];
                        break;
                }
 

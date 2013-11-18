@@ -16,28 +16,33 @@ function Home ($routeParams, $scope, $rootScope, $location, Wait, ObjectCount, J
     ClearScope('home');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                          //scope.
 
-    var waitCount = 4;
-    var loadedCount = 0;
-    
-    if (!$routeParams['login']) {
-        // If we're not logging in, start the Wait widget. Otherwise, it's already running.
-        Wait('start');
-    }
-    
-    JobStatus({ target: 'container1' });
-    InventorySyncStatus({ target: 'container2' });
-    SCMSyncStatus({ target: 'container4' });
-    ObjectCount({ target: 'container3' });
-
-    $rootScope.showActivity = function() { Stream(); }
-     
-    $rootScope.$on('WidgetLoaded', function() {
-        // Once all the widgets report back 'loaded', turn off Wait widget
-        loadedCount++; 
-        if ( loadedCount == waitCount ) {
-           Wait('stop');
+    var load = function() {
+        var waitCount = 4;
+        var loadedCount = 0;
+        
+        if (!$routeParams['login']) {
+            // If we're not logging in, start the Wait widget. Otherwise, it's already running.
+            Wait('start');
         }
-        });
+        
+        JobStatus({ target: 'container1' });
+        InventorySyncStatus({ target: 'container2' });
+        SCMSyncStatus({ target: 'container4' });
+        ObjectCount({ target: 'container3' });
+        
+        $rootScope.$on('WidgetLoaded', function() {
+            // Once all the widgets report back 'loaded', turn off Wait widget
+            loadedCount++; 
+            if ( loadedCount == waitCount ) {
+               Wait('stop');
+            }
+            });
+        }
+
+    $rootScope.showActivity = function() { Stream(); } 
+    $rootScope.refresh = function() { load(); }
+
+    load();
     }
 
 Home.$inject=[ '$routeParams', '$scope', '$rootScope', '$location', 'Wait', 'ObjectCount', 'JobStatus', 'InventorySyncStatus',
@@ -96,6 +101,14 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
 
     // Process search params
+    if ($routeParams['name']) {
+        scope[list.iterator + 'InputDisable'] = false;
+        scope[list.iterator + 'SearchValue'] = $routeParams['name'];
+        scope[list.iterator + 'SearchField'] = 'name';
+        scope[list.iterator + 'SearchFieldLabel'] = list.fields['name'].label;
+        scope[list.iterator + 'SearchSelectValue'] = null;
+    }
+
     if ($routeParams['has_active_failures']) {
         scope[list.iterator + 'InputDisable'] = true;
         scope[list.iterator + 'SearchValue'] = $routeParams['has_active_failures'];
@@ -180,7 +193,15 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
 
     SearchInit({ scope: scope, set: 'hosts', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
-
+    
+    // Process search params
+    if ($routeParams['name']) {
+        scope[HomeHostList.iterator + 'InputDisable'] = false;
+        scope[HomeHostListiterator + 'SearchValue'] = $routeParams['name'];
+        scope[HomeHostList.iterator + 'SearchField'] = 'name';
+        scope[lHomeHostList.iterator + 'SearchFieldLabel'] = list.fields['name'].label;
+    }
+    
     if ($routeParams['has_active_failures']) {
         scope[HomeHostList.iterator + 'InputDisable'] = true;
         scope[HomeHostList.iterator + 'SearchValue'] = $routeParams['has_active_failures'];

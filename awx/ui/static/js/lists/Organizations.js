@@ -35,6 +35,15 @@ angular.module('OrganizationListDefinition', [])
                 ngClick: 'addOrganization()',
                 "class": 'btn-success btn-xs',
                 awToolTip: 'Create a new organization'
+                },
+            stream: {
+                'class': "btn-primary btn-xs activity-btn",
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                dataPlacement: "top",
+                icon: "icon-comments-alt",
+                mode: 'all',
+                iconSize: 'large'
                 }
             },
 

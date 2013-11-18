@@ -114,11 +114,22 @@ angular.module('CredentialFormDefinition', [])
                 awRequiredWhen: {variable: 'rackspace_required', init: false },
                 autocomplete: false
                 },
+            "api_key": {
+                label: 'API Key',
+                type: 'password',
+                ngShow: "kind.value == 'rax'",
+                awRequiredWhen: { variable: "rackspace_required", init: false },
+                autocomplete: false,
+                ask: false,
+                clear: false,
+                apiField: 'passwowrd'
+                },
             "password": {
                 label: 'Password',
                 type: 'password',
-                ngShow: "kind.value == 'rax' || kind.value == 'scm'",
-                awRequiredWhen: {variable: 'rackspace_required', init: false },
+                ngShow: "kind.value == 'scm'",
+                addRequired: false,
+                editRequired: false,
                 ngChange: "clearPWConfirm('password_confirm')",
                 ask: false,
                 clear: false,
@@ -128,7 +139,7 @@ angular.module('CredentialFormDefinition', [])
             "password_confirm": {
                 label: 'Confirm Password',
                 type: 'password',
-                ngShow: "kind.value == 'rax' || kind.value == 'scm'",
+                ngShow: "kind.value == 'scm'",
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,

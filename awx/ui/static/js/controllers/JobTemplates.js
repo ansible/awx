@@ -13,7 +13,7 @@
 function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobTemplateList,
                            GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                            ClearScope, ProcessErrors, GetBasePath, PromptPasswords, JobTemplateForm, CredentialList,
-                           LookUpInit, SubmitJob)
+                           LookUpInit, SubmitJob, Wait)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -49,14 +49,17 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
  
     scope.deleteJobTemplate = function(id, name) {
        var action = function() {
+           Wait('start');
            var url = defaultUrl + id + '/';
            Rest.setUrl(url);
            Rest.destroy()
                .success( function(data, status, headers, config) {
+                   Wait('stop');
                    $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
                    })
                .error( function(data, status, headers, config) {
+                   Wait('stop');
                    $('#prompt-modal').modal('hide');
                    ProcessErrors(scope, data, status, null,
                             { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
@@ -77,13 +80,13 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
 JobTemplatesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobTemplateList',
                              'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
                              'ProcessErrors','GetBasePath', 'PromptPasswords', 'JobTemplateForm', 'CredentialList', 'LookUpInit',
-                             'SubmitJob'
+                             'SubmitJob', 'Wait'
                              ];
 
 function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
                           GetBasePath, InventoryList, CredentialList, ProjectList, LookUpInit,
-                          md5Setup, ParseTypeChange) 
+                          md5Setup, ParseTypeChange, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -224,6 +227,7 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
    // Save
    scope.formSave = function() {
        generator.clearApiErrors();
+       Wait('start');
        var data = {}
        try {
            // Make sure we have valid variable data
@@ -258,16 +262,19 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
            Rest.setUrl(defaultUrl);
            Rest.post(data)
                .success( function(data, status, headers, config) {
+                   Wait('stop');
                    var base = $location.path().replace(/^\//,'').split('/')[0];
                    (base == 'job_templates') ? ReturnToCaller() : ReturnToCaller(1);
                    })
                .error( function(data, status, headers, config) {
+                   Wait('stop');
                    ProcessErrors(scope, data, status, form,
                        { hdr: 'Error!', msg: 'Failed to add new job template. POST returned status: ' + status });
                    });
 
        }
        catch(err) {
+           Wait('stop');
            Alert("Error", "Error parsing extra variables. Parser returned: " + err);     
        }
        };
@@ -286,14 +293,14 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
 JobTemplatesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
                             'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
-                            'md5Setup', 'ParseTypeChange' ]; 
+                            'md5Setup', 'ParseTypeChange', 'Wait']; 
 
 
 function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, 
                            GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                            RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList, CredentialList,
                            ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, ParseTypeChange,
-                           JobStatusToolTip, FormatDate) 
+                           JobStatusToolTip, FormatDate, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -539,6 +546,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
    // Save changes to the parent
    scope.formSave = function() {
        generator.clearApiErrors();
+       Wait('start');
        var data = {}
        try {
            // Make sure we have valid variable data
@@ -573,16 +581,19 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
            Rest.setUrl(defaultUrl + id + '/');
            Rest.put(data)
                .success( function(data, status, headers, config) {
+                   Wait('stop');
                    var base = $location.path().replace(/^\//,'').split('/')[0];
                    (base == 'job_templates') ? ReturnToCaller() : ReturnToCaller(1);
                    })
                .error( function(data, status, headers, config) {
+                   Wait('stop');
                    ProcessErrors(scope, data, status, form,
                        { hdr: 'Error!', msg: 'Failed to update job template. PUT returned status: ' + status });
                    });
 
        }
        catch(err) {
+           Wait('stop');
            Alert("Error", "Error parsing extra variables. Parser returned: " + err);     
        }
        };
@@ -640,5 +651,5 @@ JobTemplatesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$
                              'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                              'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList',
                              'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup', 'ParseTypeChange',
-                             'JobStatusToolTip', 'FormatDate'
+                             'JobStatusToolTip', 'FormatDate', 'Wait'
                              ]; 

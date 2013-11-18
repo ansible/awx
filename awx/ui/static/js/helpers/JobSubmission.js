@@ -8,8 +8,9 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
     'LookUpHelper', 'ProjectFormDefinition', 'JobSubmissionHelper', 'GroupFormDefinition', 'GroupsHelper' ])
 
     .factory('PromptPasswords', ['CredentialForm', 'JobTemplateForm', 'GroupForm', 'ProjectsForm', '$compile', 'Rest', '$location', 'ProcessErrors',
-        'GetBasePath', 'Alert', 'Empty',
-    function(CredentialForm, JobTemplateForm, ProjectsForm, GroupForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert, Empty) {
+        'GetBasePath', 'Alert', 'Empty', 'Wait',
+    function(CredentialForm, JobTemplateForm, ProjectsForm, GroupForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert, Empty,
+        Wait) {
     return function(params) {
         
         var scope = params.scope; 
@@ -65,6 +66,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         
         scope.startJob = function() {
             $('#password-modal').modal('hide');
+            Wait('start');
             var pswd = {};
             var value_supplied = false;
             $('.password-field').each(function(index) {
@@ -77,17 +79,20 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                Rest.setUrl(start_url);
                Rest.post(pswd)
                    .success( function(data, status, headers, config) {
+                       Wait('stop');
                        scope.$emit('UpdateSubmitted','started');
                        if (form.name == 'credential') {
                           navigate(false);
                        }
                        })
                    .error( function(data, status, headers, config) { 
+                       Wait('stop');
                        ProcessErrors(scope, data, status, null,
                            { hdr: 'Error!', msg: 'POST to ' + start_url + ' failed with status: ' + status });
                        });
             }
             else {
+               Wait('stop');
                Alert('No Passwords', 'Required password(s) not provided. The request was not submitted.', 'alert-info');
                if (form.name == 'credential') {
                   // No passwords provided, so we can't start the job. Rather than leave the job in a 'new'

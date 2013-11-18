@@ -10,4 +10,4 @@ from awx.main.tests.scripts import *
 from awx.main.tests.tasks import RunJobTest
 from awx.main.tests.licenses import LicenseTests
 from awx.main.tests.jobs import *
-
+from awx.main.tests.activity_stream import *

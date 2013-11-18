@@ -6,6 +6,7 @@ import json
 import re
 import socket
 import urlparse
+import logging
 
 # PyYAML
 import yaml
@@ -27,7 +28,9 @@ from rest_framework import serializers
 
 # AWX
 from awx.main.models import *
-from awx.main.utils import update_scm_url
+from awx.main.utils import update_scm_url, camelcase_to_underscore
+
+logger = logging.getLogger('awx.api.serializers')
 
 BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created', 'modified',
                'name', 'description')
@@ -1032,6 +1035,58 @@ class JobEventSerializer(BaseSerializer):
             pass
         return d
 
+class ActivityStreamSerializer(BaseSerializer):
+
+    class Meta:
+        model = ActivityStream
+        fields = ('id', 'url', 'related', 'summary_fields', 'timestamp', 'operation', 'changes',
+                  'object1_id', 'object1', 'object1_type', 'object2_id', 'object2', 'object2_type', 'object_relationship_type')
+
+    def get_related(self, obj):
+        if obj is None:
+            return {}
+        rel = {}
+        if obj.user is not None:
+            rel['user'] = reverse('api:user_detail', args=(obj.user.pk,))
+        obj1_resolution = camelcase_to_underscore(obj.object1_type.split(".")[-1])
+        rel['object1'] = reverse('api:' + obj1_resolution + '_detail', args=(obj.object1_id,))
+        if obj.operation in ('associate', 'disassociate'):
+            obj2_resolution = camelcase_to_underscore(obj.object2_type.split(".")[-1])
+            rel['object2'] = reverse('api:' + obj2_resolution + '_detail', args=(obj.object2_id,))
+        return rel
+
+    def get_summary_fields(self, obj):
+        if obj is None:
+            return {}
+        d = super(ActivityStreamSerializer, self).get_summary_fields(obj)
+        try:
+            short_obj_type = obj.object1_type.split(".")[-1]
+            under_short_obj_type = camelcase_to_underscore(short_obj_type)
+            obj1 = eval(obj.object1_type + ".objects.get(id=" + str(obj.object1_id) + ")")
+            if hasattr(obj1, "name"):
+                d['object1'] = {'name': obj1.name, 'description': obj1.description,
+                                'base': under_short_obj_type, 'id': obj.object1_id}
+            else:
+                d['object1'] = {'base': under_short_obj_type, 'id': obj.object1_id}
+            if under_short_obj_type == "host" or under_short_obj_type == "group":
+                d['inventory'] = {'name': obj1.inventory.name, 'id': obj1.inventory.id}
+        except Exception, e:
+            logger.error("Error getting object 1 summary: " + str(e))
+        try:
+            short_obj_type = obj.object2_type.split(".")[-1]
+            under_short_obj_type = camelcase_to_underscore(short_obj_type)
+            if obj.operation in ('associate', 'disassociate'):
+                obj2 = eval(obj.object2_type + ".objects.get(id=" + str(obj.object2_id) + ")")
+                if hasattr(obj2, "name"):
+                    d['object2'] = {'name': obj2.name, 'description': obj2.description,
+                                    'base': under_short_obj_type, 'id': obj.object2_id}
+                else:
+                    d['object2'] = {'base': under_short_obj_type, 'id': obj.object2_id}
+            if under_short_obj_type == "host" or under_short_obj_type == "group":
+                d['inventory'] = {'name': obj2.inventory.name, 'id': obj2.inventory.id}
+        except Exception, e:
+            pass
+        return d
 
 class AuthTokenSerializer(serializers.Serializer):
 

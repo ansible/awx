@@ -10,9 +10,9 @@
 
 'use strict';
 
-function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
-                    Alert, UserList, GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit,
-                    ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit)
+function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, UserList,
+                    GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
+                    ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -47,14 +47,17 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     scope.deleteUser = function(id, name) {
        
        var action = function() {
+           Wait('start')
            var url = defaultUrl + id + '/';
            Rest.setUrl(url);
            Rest.destroy()
                .success( function(data, status, headers, config) {
+                   Wait('stop');
                    $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
                    })
                .error( function(data, status, headers, config) {
+                   Wait('stop');
                    $('#prompt-modal').modal('hide');
                    ProcessErrors(scope, data, status, null,
                             { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
@@ -70,12 +73,12 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest,
 
 UsersList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'UserList', 'GenerateList', 
                       'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                      'GetBasePath', 'SelectionInit'];
+                      'GetBasePath', 'SelectionInit', 'Wait' ];
 
 
 function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
                    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-                   GetBasePath, LookUpInit, OrganizationList, ResetForm) 
+                   GetBasePath, LookUpInit, OrganizationList, ResetForm, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -121,6 +124,7 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    // Save
    scope.formSave = function() {
       generator.clearApiErrors();
+      Wait('start');
       if (scope.organization !== undefined && scope.organization !== null && scope.organization !== '') {
          Rest.setUrl(defaultUrl + scope.organization + '/users/');
              var data = {}
@@ -138,6 +142,7 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
              Rest.post(data)
                  .success( function(data, status, headers, config) {
+                     Wait('stop');
                      var base = $location.path().replace(/^\//,'').split('/')[0];
                      if (base == 'users') {
                         $rootScope.flashMessage = 'New user successfully created!';
@@ -148,6 +153,7 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                      }
                      })
                  .error( function(data, status, headers, config) {
+                     Wait('stop');
                      ProcessErrors(scope, data, status, form,
                          { hdr: 'Error!', msg: 'Failed to add new user. POST returned status: ' + status });
              });
@@ -174,12 +180,13 @@ function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
 UsersAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 'GenerateForm', 
                      'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 
-                     'LookUpInit', 'OrganizationList', 'ResetForm' ]; 
+                     'LookUpInit', 'OrganizationList', 'ResetForm', 'Wait' ]; 
 
 
 function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
                     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
-                    RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath, Prompt, CheckAccess, ResetForm) 
+                    RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath, Prompt, CheckAccess, 
+                    ResetForm, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -252,6 +259,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
        // Save changes to the parent
        scope.formSave = function() {
           generator.clearApiErrors();
+          Wait('start');
           $rootScope.flashMessage = null;
           Rest.setUrl(defaultUrl + id + '/');
           var data = {}
@@ -269,10 +277,12 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 
           Rest.put(data)
               .success( function(data, status, headers, config) {
+                  Wait('stop');
                   var base = $location.path().replace(/^\//,'').split('/')[0];
                   (base == 'users') ? ReturnToCaller() : ReturnToCaller(1);
                   })
               .error( function(data, status, headers, config) {
+                  Wait('stop');
                   ProcessErrors(scope, data, status, form,
                                 { hdr: 'Error!', msg: 'Failed to update users: ' + $routeParams.id + '. PUT status: ' + status });
                   });
@@ -425,5 +435,5 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 UsersEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 
                       'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                       'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Prompt', 'CheckAccess',
-                      'ResetForm' ]; 
+                      'ResetForm', 'Wait' ]; 
   
