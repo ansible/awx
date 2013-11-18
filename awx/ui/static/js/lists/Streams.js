@@ -17,6 +17,8 @@ angular.module('StreamListDefinition', [])
         index: false,
         hover: true,
         "class": "table-condensed",
+        searchWidgetLabel: 'Object',
+        searchWidgetLabel2: 'Modified by',
         
         fields: {
             timestamp: {
@@ -32,19 +34,15 @@ angular.module('StreamListDefinition', [])
                 sourceModel: 'user',
                 sourceField: 'username',
                 awToolTip: "\{\{ userToolTip \}\}",
-                dataPlacement: 'top'
+                dataPlacement: 'top',
+                searchPlaceholder: 'Username',
+                searchWidget: 2
                 },
             objects: {
                 label: 'Objects',
                 ngBindHtml: 'activity.objects',
-                sortField: "object1__name,object2__name",
+                nosort: true,
                 searchable: false
-                },
-            object_name: {
-                label: 'Object name',
-                searchOnly: true,
-                searchType: 'or', 
-                searchFields: ['object1__name', 'object2__name']
                 },
             description: {
                 label: 'Description',
@@ -53,11 +51,68 @@ angular.module('StreamListDefinition', [])
                 searchable: false
                 },
             system_event: {
-                label: 'System event?',
+                label: 'System',
                 searchOnly: true, 
                 searchType: 'isnull',
                 sourceModel: 'user',
-                sourceField: 'username'
+                sourceField: 'username',
+                searchWidget: 2
+                },
+            // The following fields exist to forces loading each type of object into the search
+            // dropdown
+            all_objects: {
+                label: 'All',
+                searchOnly: true, 
+                searchObject: 'all',
+                searchPlaceholder: ' '
+                },
+            credential_search: {
+                label: 'Credential',
+                searchOnly: true,
+                searchObject: 'credentials',
+                searchPlaceholder: 'Credential name'
+                },
+            group_search: {
+                label: 'Group',
+                searchOnly: true,
+                searchObject: 'groups',
+                searchPlaceholder: 'Group name'
+                },
+            host_search: {
+                label: 'Host',
+                searchOnly: true,
+                searchObject: 'hosts',
+                searchPlaceholder: 'Host name'
+                },
+            inventory_search: {
+                label: 'Inventory',
+                searchOnly: true,
+                searchObject: 'inventories',
+                searchPlaceholder: 'Inventory name'
+                },
+            job_template_search: {
+                label: 'Job Template',
+                searchOnly: true,
+                searchObject: 'job_templates',
+                searchPlaceholder: 'Job template name'
+                },
+            organization_search: {
+                label: 'Organization',
+                searchOnly: true,
+                searchObject: 'organizations',
+                searchPlaceholder: 'Organization name'
+                },
+            project_search: {
+                label: 'Project',
+                searchOnly: true,
+                searchObject: 'projects',
+                searchPlaceholder: 'Project name'
+                },
+            user_search: {
+                label: 'User',
+                searchOnly: true,
+                searchObject: 'users',
+                searchPlaceholder: 'Username'
                 }
             },
         

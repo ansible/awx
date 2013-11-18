@@ -33,11 +33,16 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities'])
                 scope[iterator + 'PageCount'] = Math.ceil((data.count / scope[iterator + 'PageSize']));
                 scope[iterator + 'SearchSpin'] = false;
                 scope[iterator + 'Loading'] = false;
+                for (var i=1; i <= 3; i++) {
+                    var modifier = (i == 1) ? '' : i;
+                    scope[iterator + 'HoldInput' + modifier] = false;
+                }
                 scope[set] = data['results'];
                 scope.$emit('PostRefresh');
                 })
             .error ( function(data, status, headers, config) {
                 scope[iterator + 'SearchSpin'] = false;
+                scope[iterator + 'HoldInput'] = false;
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to retrieve ' + set + '. GET returned status: ' + status });
                 });

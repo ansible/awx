@@ -196,11 +196,10 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
     
     // Process search params
     if ($routeParams['name']) {
-        scope[list.iterator + 'InputDisable'] = false;
-        scope[list.iterator + 'SearchValue'] = $routeParams['name'];
-        scope[list.iterator + 'SearchField'] = 'name';
-        scope[list.iterator + 'SearchFieldLabel'] = list.fields['name'].label;
-        scope[list.iterator + 'SearchSelectValue'] = null;
+        scope[HomeHostList.iterator + 'InputDisable'] = false;
+        scope[HomeHostListiterator + 'SearchValue'] = $routeParams['name'];
+        scope[HomeHostList.iterator + 'SearchField'] = 'name';
+        scope[lHomeHostList.iterator + 'SearchFieldLabel'] = list.fields['name'].label;
     }
     
     if ($routeParams['has_active_failures']) {

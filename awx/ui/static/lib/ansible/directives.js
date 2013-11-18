@@ -151,6 +151,20 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
             }
         }
         })
+    
+    // awPlaceholder: Dynamic placeholder set to a scope variable you want watched.
+    //                Value will be place in field placeholder attribute.
+    .directive('awPlaceholder', [ function() {
+        return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+            $(elm).attr('placeholder', scope[attrs.awPlaceholder]);
+            scope.$watch(attrs.awPlaceholder, function(newVal, oldVal) {
+                $(elm).attr('placeholder',newVal);
+                });
+            }
+        }
+        }])
 
     // lookup   Validate lookup value against API
     //           

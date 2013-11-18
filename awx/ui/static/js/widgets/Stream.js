@@ -174,9 +174,10 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         }])
 
     .factory('Stream', ['$rootScope', '$location', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'StreamList', 'SearchInit', 
-        'PaginateInit', 'GenerateList', 'FormatDate', 'ShowStream', 'HideStream', 'BuildDescription', 'FixUrl', 'ShowDetail',
+        'PaginateInit', 'GenerateList', 'FormatDate', 'ShowStream', 'HideStream', 'BuildDescription', 'FixUrl', 'BuildUrl', 
+        'ShowDetail',
     function($rootScope, $location, Rest, GetBasePath, ProcessErrors, Wait, StreamList, SearchInit, PaginateInit, GenerateList,
-        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, ShowDetail) {
+        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail) {
     return function(params) {
     
         var list = StreamList;
@@ -188,7 +189,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
            var type = (base == 'inventories') ? 'inventory' : base.replace(/s$/,'');
            defaultUrl += '?or__object1=' + type + '&or__object2=' + type;
         }
-
+        
         // Push the current page onto browser histor. If user clicks back button, restore current page without 
         // stream widget
         // window.history.pushState({}, "AnsibleWorks AWX", $location.path());
@@ -203,7 +204,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             mode: 'edit',
             id: 'stream-content', 
             breadCrumbs: true, 
-            searchSize: 'col-lg-4'
+            searchSize: 'col-lg-3',
+            secondWidget: true
             });
 
         scope.closeStream = function() { 
@@ -241,7 +243,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 var deleted = /^\_delete/;
                 if (scope['activities'][i].summary_fields.object1) {
                     if ( !deleted.test(scope['activities'][i].summary_fields.object1.name) ) {
-                        href = FixUrl(scope['activities'][i].related.object1);
+                        href = BuildUrl(scope['activities'][i].summary_fields.object1);
                         scope['activities'][i].objects = "<a href=\"" + href + "\">" + scope['activities'][i].summary_fields.object1.name + "</a>";
                     }
                     else {
@@ -250,7 +252,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 }
                 if (scope['activities'][i].summary_fields.object2) {
                     if ( !deleted.test(scope['activities'][i].summary_fields.object2.name) ) {
-                        href = FixUrl(scope['activities'][i].related.object2);
+                        href = BuildUrl(scope['activities'][i].summary_fields.object2);
                         scope['activities'][i].objects += ", <a href=\"" + href + "\">" + scope['activities'][i].summary_fields.object2.name + "</a>";
                     }
                     else {
@@ -264,7 +266,17 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         // Initialize search and paginate pieces and load data
         SearchInit({ scope: scope, set: list.name, list: list, url: defaultUrl });
         PaginateInit({ scope: scope, list: list, url: defaultUrl });
-        scope.search(list.iterator);    
+        scope.search(list.iterator);
+        
+        /*
+        scope.$watch(list.iterator + 'SearchField', function(newVal, oldVal) {
+            console.log('newVal: ' + newVal);
+            html += ""
+            html += "<input id=\"search_attribute_input\" type=\"text\" ng-show=\"" + iterator + "ShowAttribute\" class=\"form-control ";
+            html += "\" ng-model=\"" + iterator + "AttributeValue\" ng-change=\"search('" + iterator + 
+                "')\" aw-placeholder=\"" + iterator + "AttributePlaceholder\" type=\"text\">\n";
+            });*/
+
         }
         }]);
     

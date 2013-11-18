@@ -194,7 +194,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        */
        
        if (options.searchSize) {
-          html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: options.searchSize });
+          html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: options.searchSize, 
+              secondWidget: options.secondWidget });
        } 
        else if (options.mode == 'summary') {
           html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-6' });
@@ -214,6 +215,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           if (options.searchSize) {
              // User supplied searchSize, calc the remaining
              var size = parseInt(options.searchSize.replace(/([A-Z]|[a-z]|\-)/g,''));
+             size += (options.secondWidget) ? 3 : 0;
              html += 'col-lg-' + (11 - size);
           }
           else if (options.mode == 'summary') {

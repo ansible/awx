@@ -20,6 +20,11 @@ angular.module('ActivityDetailDefinition', [])
                 type: 'text',
                 readonly: true
                 },
+            id: {
+                label: 'Event ID', 
+                type: 'text',
+                readonly: true
+                },
             operation: {
                 label: 'Operation',
                 type: 'text',
