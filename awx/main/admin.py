@@ -61,7 +61,7 @@ class OrganizationAdmin(BaseModelAdmin):
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by')
+    readonly_fields = ('active', 'created', 'created_by')
     filter_horizontal = ('users', 'admins', 'projects')
 
 class InventoryHostInline(admin.StackedInline):
@@ -69,12 +69,14 @@ class InventoryHostInline(admin.StackedInline):
     model = Host
     extra = 0
     fields = ('name', 'description', 'active', 'tags')
+    readonly_fields = ('active',)
 
 class InventoryGroupInline(admin.StackedInline):
 
     model = Group
     extra = 0
     fields = ('name', 'description', 'active', 'parents', 'hosts', 'tags')
+    readonly_fields = ('active',)
     filter_horizontal = ('parents', 'hosts')
 
 class InventoryAdmin(BaseModelAdmin):
@@ -88,7 +90,7 @@ class InventoryAdmin(BaseModelAdmin):
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by')
+    readonly_fields = ('active', 'created', 'created_by')
     inlines = [InventoryHostInline, InventoryGroupInline]
 
 class JobHostSummaryInline(admin.TabularInline):
@@ -139,7 +141,7 @@ class HostAdmin(BaseModelAdmin):
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by')
+    readonly_fields = ('active', 'created', 'created_by')
     # FIXME: Edit reverse of many to many for groups.
     inlines = [JobHostSummaryInlineForHost, JobEventInlineForHost]
 
@@ -153,7 +155,7 @@ class GroupAdmin(BaseModelAdmin):
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by')
+    readonly_fields = ('active', 'created', 'created_by')
     filter_horizontal = ('parents', 'hosts')
 
 class CredentialAdmin(BaseModelAdmin):
@@ -166,7 +168,7 @@ class CredentialAdmin(BaseModelAdmin):
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by')
+    readonly_fields = ('active', 'created', 'created_by')
 
 class TeamAdmin(BaseModelAdmin):
 
@@ -194,7 +196,8 @@ class ProjectAdmin(BaseModelAdmin):
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by', 'get_playbooks_display')
+    readonly_fields = ('active', 'created', 'created_by',
+                       'get_playbooks_display')
     form = ProjectAdminForm
     inlines = [ProjectUpdateInline]
 
@@ -223,8 +226,8 @@ class JobTemplateAdmin(BaseModelAdmin):
         (_('Tags'), {'fields': ('tags',)}),
         (_('Audit'), {'fields': ('created', 'created_by',)}),
     )
-    readonly_fields = ('created', 'created_by', 'get_create_link_display',
-                       'get_jobs_link_display')
+    readonly_fields = ('active', 'created', 'created_by',
+                       'get_create_link_display', 'get_jobs_link_display')
     form = JobTemplateAdminForm
 
     def get_create_link_display(self, obj):
