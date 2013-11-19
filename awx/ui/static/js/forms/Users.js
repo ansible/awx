@@ -122,6 +122,15 @@ angular.module('UserFormDefinition', [])
                         icon: 'icon-plus',
                         label: 'Add',
                         awToolTip: 'Add a credential for this user'
+                        },
+                    reset: {
+                        dataPlacement: 'top',
+                        icon: "icon-undo",
+                        mode: 'all',
+                        'class': 'btn-xs btn-primary',
+                        awToolTip: "Reset the search filter",
+                        ngClick: "resetSearch('credential')",
+                        iconSize: 'large'
                         }
                     },
 
@@ -166,6 +175,15 @@ angular.module('UserFormDefinition', [])
                         label: 'Add',
                         awToolTip: 'Add a permission for this user',
                         ngShow: 'PermissionAddAllowed'
+                        },
+                    reset: {
+                        dataPlacement: 'top',
+                        icon: "icon-undo",
+                        mode: 'all',
+                        'class': 'btn-xs btn-primary',
+                        awToolTip: "Reset the search filter",
+                        ngClick: "resetSearch('permission')",
+                        iconSize: 'large'
                         }
                     },
 
@@ -221,6 +239,18 @@ angular.module('UserFormDefinition', [])
                 open: false,                                                // Open accordion on load?
                 base: '/organizations',
                 
+                actions: {
+                    reset: {
+                        dataPlacement: 'top',
+                        icon: "icon-undo",
+                        mode: 'all',
+                        'class': 'btn-xs btn-primary',
+                        awToolTip: "Reset the search filter",
+                        ngClick: "resetSearch('adminof')",
+                        iconSize: 'large'
+                        }
+                    },
+
                 fields: {
                     name: {
                         key: true,
@@ -238,6 +268,18 @@ angular.module('UserFormDefinition', [])
                 iterator: 'organization',
                 open: false,
                 
+                actions: {
+                    reset: {
+                        dataPlacement: 'top',
+                        icon: "icon-undo",
+                        mode: 'all',
+                        'class': 'btn-xs btn-primary',
+                        awToolTip: "Reset the search filter",
+                        ngClick: "resetSearch('organization')",
+                        iconSize: 'large'
+                        }
+                    },
+
                 fields: {
                     name: {
                         key: true,
@@ -255,6 +297,18 @@ angular.module('UserFormDefinition', [])
                 iterator: 'team',
                 open: false,
 
+                actions: {
+                    reset: {
+                        dataPlacement: 'top',
+                        icon: "icon-undo",
+                        mode: 'all',
+                        'class': 'btn-xs btn-primary',
+                        awToolTip: "Reset the search filter",
+                        ngClick: "resetSearch('team')",
+                        iconSize: 'large'
+                        }
+                    },
+
                 fields: {
                     name: {
                         key: true,
@@ -271,6 +325,18 @@ angular.module('UserFormDefinition', [])
                 title: 'Projects',
                 iterator: 'project',
                 open: false,
+
+                actions: {
+                    reset: {
+                        dataPlacement: 'top',
+                        icon: "icon-undo",
+                        mode: 'all',
+                        'class': 'btn-xs btn-primary',
+                        awToolTip: "Reset the search filter",
+                        ngClick: "resetSearch('project')",
+                        iconSize: 'large'
+                        }
+                    },
 
                 fields: {
                     name: {

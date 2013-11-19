@@ -182,7 +182,6 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             window.location = '/#' + $location.path();
             scope.search(iterator);
             }
-
         
         if (scope.removeDoSearch) {
             scope.removeDoSearch();

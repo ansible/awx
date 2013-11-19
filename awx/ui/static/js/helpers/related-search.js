@@ -16,7 +16,7 @@
  */
 
 angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelatedHelper'])  
-    .factory('RelatedSearchInit', ['Alert', 'Rest', 'RefreshRelated', function(Alert, Rest, RefreshRelated) {
+    .factory('RelatedSearchInit', ['$timeout', 'Alert', 'Rest', 'RefreshRelated', function($timeout, Alert, Rest, RefreshRelated) {
     return function(params) {
         
         var scope = params.scope;
@@ -24,36 +24,46 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
         var form = params.form; 
         
         // Set default values
-        var iterator, f;
-        for (var set in form.related) {
-            if (form.related[set].type != 'tree') {
-                iterator = form.related[set].iterator;
-                for (var fld in form.related[set].fields) {
-                    if (form.related[set].fields[fld].key) {
-                       scope[iterator + 'SearchField'] = fld
-                       scope[iterator + 'SearchFieldLabel'] = form.related[set].fields[fld].label;
-                       break;
+        function setDefaults(inIterator) {
+            var iterator, f;
+            for (var set in form.related) {
+                if (form.related[set].type != 'tree' && (inIterator === undefined || inIterator == form.related[set].iterator)) {
+                    iterator = form.related[set].iterator;
+                    for (var fld in form.related[set].fields) {
+                        if (form.related[set].fields[fld].key) {
+                           scope[iterator + 'SearchField'] = fld
+                           scope[iterator + 'SearchFieldLabel'] = form.related[set].fields[fld].label;
+                           break;
+                        }
+                    }
+                    scope[iterator + 'SortOrder'] = null;
+                    scope[iterator + 'SearchType'] = 'icontains';
+                    scope[iterator + 'SearchTypeLabel'] = 'Contains';
+                    scope[iterator + 'SearchValue'] = null;
+                    scope[iterator + 'SelectShow'] = false;
+                    scope[iterator + 'HideSearchType'] = false;
+                    f = scope[iterator + 'SearchField']
+                    if (form.related[set].fields[f].searchType && ( form.related[set].fields[f].searchType == 'boolean' 
+                          || form.related[set].fields[f].searchType == 'select')) {
+                       scope[iterator + 'SelectShow'] = true;
+                       scope[iterator + 'SearchSelectOpts'] = list.fields[f].searchOptions;
+                    }
+                    if (form.related[set].fields[f].searchType && form.related[set].fields[f].searchType == 'int') {
+                       scope[iterator + 'HideSearchType'] = true;   
+                    }
+                    if (form.related[set].fields[f].searchType && form.related[set].fields[f].searchType == 'gtzero') {
+                          scope[iterator + "InputHide"] = true;
                     }
                 }
-                scope[iterator + 'SortOrder'] = null;
-                scope[iterator + 'SearchType'] = 'contains';
-                scope[iterator + 'SearchTypeLabel'] = 'Contains';
-                scope[iterator + 'SelectShow'] = false;
-                scope[iterator + 'HideSearchType'] = false;
-                f = scope[iterator + 'SearchField']
-                if (form.related[set].fields[f].searchType && ( form.related[set].fields[f].searchType == 'boolean' 
-                      || form.related[set].fields[f].searchType == 'select')) {
-                   scope[iterator + 'SelectShow'] = true;
-                   scope[iterator + 'SearchSelectOpts'] = list.fields[f].searchOptions;
-                }
-                if (form.related[set].fields[f].searchType && form.related[set].fields[f].searchType == 'int') {
-                   scope[iterator + 'HideSearchType'] = true;   
-                }
-                if (form.related[set].fields[f].searchType && form.related[set].fields[f].searchType == 'gtzero') {
-                      scope[iterator + "InputHide"] = true;
-                }
+            } 
             }
-        } 
+
+        setDefaults();
+
+        scope.resetSearch = function(iterator) {
+            setDefaults(iterator);
+            scope.search(iterator);
+            }
         
         // Functions to handle search widget changes
         scope.setSearchField = function(iterator, fld, label) {
@@ -93,9 +103,23 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
            scope.search(model);
            }
 
+        scope.startSearch = function(iterator) {
+           //Called on each keydown event for seachValue field. Using a timer
+           //to prevent executing a search until user is finished typing. 
+           if (scope.searchTimer) {
+               $timeout.cancel(scope.searchTimer);
+           }
+           scope.searchTimer = $timeout(
+               function() {
+                   scope.search(iterator);
+                   } 
+               , 1000);
+           }
+
         scope.search = function(iterator) {
            scope[iterator + 'SearchSpin'] = true;
            scope[iterator + 'Loading'] = true;
+           scope[iterator + 'HoldInput'] = true;
 
            if (iterator == 'host') {
               if (scope['hostSearchField'] == 'has_active_failures') {
@@ -126,7 +150,7 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
                   break;
                }
            }
-
+           
            sort_order = (scope[iterator + 'SortOrder'] == null) ? sort_order : scope[iterator + 'SortOrder'];
 
            var f = form.related[set].fields[scope[iterator + 'SearchField']];

@@ -62,6 +62,15 @@ angular.module('OrganizationFormDefinition', [])
                         label: 'Add',
                         icon: 'icon-plus',
                         awToolTip: 'Add a new user'
+                        },
+                    reset: {
+                        dataPlacement: 'top',
+                        icon: "icon-undo",
+                        mode: 'all',
+                        'class': 'btn-xs btn-primary',
+                        awToolTip: "Reset the search filter",
+                        ngClick: "resetSearch('user')",
+                        iconSize: 'large'
                         }
                     },
                 
@@ -108,6 +117,15 @@ angular.module('OrganizationFormDefinition', [])
                         icon: 'icon-plus',
                         label: 'Add',
                         awToolTip: 'Add new administrator'
+                        },
+                    reset: {
+                        dataPlacement: 'top',
+                        icon: "icon-undo",
+                        mode: 'all',
+                        'class': 'btn-xs btn-primary',
+                        awToolTip: "Reset the search filter",
+                        ngClick: "resetSearch('admin')",
+                        iconSize: 'large'
                         }
                     },
                 fields: {

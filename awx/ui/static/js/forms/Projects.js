@@ -215,6 +215,15 @@ angular.module('ProjectFormDefinition', [])
                         icon: 'icon-plus',
                         label: 'Add',
                         awToolTip: 'Add an organization'
+                        },
+                    reset: {
+                        dataPlacement: 'top',
+                        icon: "icon-undo",
+                        mode: 'all',
+                        'class': 'btn-xs btn-primary',
+                        awToolTip: "Reset the search filter",
+                        ngClick: "resetSearch('organization')",
+                        iconSize: 'large'
                         }
                     },
 

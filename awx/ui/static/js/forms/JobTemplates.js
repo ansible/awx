@@ -257,7 +257,16 @@ angular.module('JobTemplateFormDefinition', [])
                 index: false,
                 open: false,
                 
-                actions: { 
+                actions: {
+                    reset: {
+                        dataPlacement: 'top',
+                        icon: "icon-undo",
+                        mode: 'all',
+                        'class': 'btn-xs btn-primary',
+                        awToolTip: "Reset the search filter",
+                        ngClick: "resetSearch('job')",
+                        iconSize: 'large'
+                        }
                     },
                 
                 fields: {

@@ -184,9 +184,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
     .factory('Stream', ['$rootScope', '$location', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'StreamList', 'SearchInit', 
         'PaginateInit', 'GenerateList', 'FormatDate', 'ShowStream', 'HideStream', 'BuildDescription', 'FixUrl', 'BuildUrl', 
-        'ShowDetail',
+        'ShowDetail', 'LoadBreadCrumbs',
     function($rootScope, $location, Rest, GetBasePath, ProcessErrors, Wait, StreamList, SearchInit, PaginateInit, GenerateList,
-        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail) {
+        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail, LoadBreadCrumbs) {
     return function(params) {
     
         var list = StreamList;
@@ -207,6 +207,10 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         $('#tab-content-container').append('<div id="stream-container"><div id=\"stream-content\"></div></div><!-- Stream widget -->');
 
         ShowStream();
+        if ($rootScope.breadcrumbs.length == 0) {
+            var title = base.substr(0,1).toUpperCase() + base.substr(1);
+            $rootScope.breadcrumbs.push({ path: $location.path(), title: title});
+        }
         
         // Generate the list
         var scope = view.inject(list, { 

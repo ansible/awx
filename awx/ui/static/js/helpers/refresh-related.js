@@ -22,7 +22,7 @@ angular.module('RefreshRelatedHelper', ['RestServices', 'Utilities'])
         var set = params.set;
         var iterator = params.iterator; 
         var url = params.url;
-
+        
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
@@ -33,6 +33,7 @@ angular.module('RefreshRelatedHelper', ['RestServices', 'Utilities'])
                 scope[iterator + 'PageCount'] = Math.ceil((data.count / scope[iterator + 'PageSize']));
                 scope[iterator + 'SearchSpin'] = false;
                 scope[iterator + 'Loading'] = false;
+                scope[iterator + 'HoldInput'] = false;
                 scope.$emit('related' + set);
                 if (!params.scope.$$phase) {
                    params.scope.$digest();
