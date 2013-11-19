@@ -657,10 +657,7 @@ class ProjectAccess(BaseAccess):
 class ProjectUpdateAccess(BaseAccess):
     '''
     I can see project updates when I can see the project.
-    I can change/delete when:
-     - I am a superuser.
-     - I am an admin in an organization associated with the project.
-     - I created it (for now?).
+    I can change when I can change the project.
     '''
 
     model = ProjectUpdate
@@ -668,18 +665,8 @@ class ProjectUpdateAccess(BaseAccess):
     def get_queryset(self):
         qs = ProjectUpdate.objects.filter(active=True).distinct()
         qs = qs.select_related('created_by', 'project')
-        #if self.user.is_superuser:
-        return qs
-        #allowed = [PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
-        #return qs.filter(
-        #    Q(created_by=self.user) |
-        #    Q(organizations__admins__in=[self.user]) |
-        #    Q(organizations__users__in=[self.user]) |
-        #    Q(teams__users__in=[self.user]) |
-        #    Q(permissions__user=self.user, permissions__permission_type__in=allowed) |
-        #    Q(permissions__team__users__in=[self.user], permissions__permission_type__in=allowed)
-        #)
-
+        projects_qs = self.user.get_queryset(Project)
+        return qs.filter(project__in=projects_qs)
 
 class PermissionAccess(BaseAccess):
     '''
