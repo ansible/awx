@@ -230,6 +230,8 @@ def model_instance_diff(old, new):
     created model or deleted model). This will cause all fields with a value to have changed (from None).
     """
     from django.db.models import Model
+    from awx.main.models.organization import Credential
+
     if not(old is None or isinstance(old, Model)):
         raise TypeError('The supplied old instance is not a valid model instance.')
     if not(new is None or isinstance(new, Model)):
@@ -250,8 +252,10 @@ def model_instance_diff(old, new):
         old_value = str(getattr(old, field.name, None))
         new_value = str(getattr(new, field.name, None))
 
-        if old_value != new_value:
+        if old_value != new_value and field.name not in Credential.PASSWORD_FIELDS:
             diff[field.name] = (old_value, new_value)
+        elif field.name in Credential.PASSWORD_FIELDS:
+            diff[field.name] = ("hidden", "hidden")
 
     if len(diff) == 0:
         diff = None
@@ -262,7 +266,12 @@ def model_to_dict(obj):
     """
     Serialize a model instance to a dictionary as best as possible
     """
+    from awx.main.models.organization import Credential
     attr_d = {}
     for field in obj._meta.fields:
-        attr_d[field.name] = str(getattr(obj, field.name, None))
+        # FIXME: This needs to be aware of fields not to be included in the AS delta log
+        if field not in Credential.PASSWORD_FIELDS:
+            attr_d[field.name] = str(getattr(obj, field.name, None))
+        else:
+            attr_d[field.name] = "hidden"
     return attr_d
