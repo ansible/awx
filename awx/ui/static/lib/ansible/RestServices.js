@@ -62,6 +62,7 @@ function($http, $rootScope, $cookieStore, $q, Authorization) {
         }
         else if (token) {
            this.setHeader({ Authorization: 'Token ' + token });
+           this.setHeader({ "X-Auth-Token": 'Token ' + token });
            return $http({method: 'GET', 
                url: this.url,
                headers: this.headers,
@@ -80,6 +81,7 @@ function($http, $rootScope, $cookieStore, $q, Authorization) {
         }
         else if (token) {
             this.setHeader({ Authorization: 'Token ' + token });
+            this.setHeader({ "X-Auth-Token": 'Token ' + token });
             return $http({
                 method: 'POST', 
                 url: this.url,
@@ -98,6 +100,7 @@ function($http, $rootScope, $cookieStore, $q, Authorization) {
         }
         else if (token) {
             this.setHeader({ Authorization: 'Token ' + token });
+            this.setHeader({ "X-Auth-Token": 'Token ' + token });
             return $http({
                 method: 'PUT', 
                 url: this.url,
@@ -116,6 +119,7 @@ function($http, $rootScope, $cookieStore, $q, Authorization) {
         }
         else if (token) {
             this.setHeader({ Authorization: 'Token ' + token });
+            this.setHeader({ "X-Auth-Token": 'Token ' + token });
             return $http({
                 method: 'DELETE',
                 url: this.url,
@@ -134,6 +138,7 @@ function($http, $rootScope, $cookieStore, $q, Authorization) {
         }
         else if (token) {
             this.setHeader({ Authorization: 'Token ' + token });
+            this.setHeader({ "X-Auth-Token": 'Token ' + token });
             return $http({
                 method: 'OPTIONS',
                 url: this.url,
