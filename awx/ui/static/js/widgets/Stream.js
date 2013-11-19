@@ -82,14 +82,14 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     .factory('BuildDescription', ['FixUrl', 'BuildUrl', function(FixUrl, BuildUrl) {
     return function(activity) {
         var descr = '';
-        if (activity.summary_fields.user) {
+        /*if (activity.summary_fields.user) {
             // this is a user transaction
             var usr = FixUrl(activity.related.user);
             descr += 'User <a href=\"' + usr + '\">' + activity.summary_fields.user.username + '</a> ';
         }
         else {
             descr += 'System '; 
-        }
+        }*/
         descr += activity.operation;
         descr += (/e$/.test(activity.operation)) ? 'd ' : 'ed ';
         if (activity.summary_fields.object2 && activity.summary_fields.object2.name) {
@@ -110,8 +110,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         }
         }])
 
-    .factory('ShowDetail', ['Rest', 'Alert', 'GenerateForm', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'ActivityDetailForm',
-    function(Rest, Alert, GenerateForm, ProcessErrors, GetBasePath, FormatDate, ActivityDetailForm) {
+    .factory('ShowDetail', ['Rest', 'Alert', 'GenerateForm', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'ActivityDetailForm', 'Empty',
+    function(Rest, Alert, GenerateForm, ProcessErrors, GetBasePath, FormatDate, ActivityDetailForm, Empty) {
     return function(activity_id) {
 
         var generator = GenerateForm;
@@ -157,7 +157,10 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 if (results.summary_fields.object2) {
                     scope['object2_name'] = results.summary_fields.object2.name; 
                 }
-                scope['changes'] = JSON.stringify(results['changes'], null, '\t');                
+                scope['user'] = (results.summary_fields.user) ? results.summary_fields.user.username : 'system';
+                scope['changes'] = results['changes'];
+                //scope['changes'] = (!Empty(results['changes'])) ?  JSON.parse(scope.variables) : '';
+                //scope['changes'] = JSON.stringify(results['changes'], null, '\t');                
                 scope.formModalAction = function() {
                     $('#form-modal').modal("hide");
                     }

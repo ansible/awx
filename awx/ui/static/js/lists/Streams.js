@@ -37,14 +37,8 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Initiated by username',
                 searchWidget: 1
                 },
-            objects: {
-                label: 'Objects',
-                ngBindHtml: 'activity.objects',
-                nosort: true,
-                searchable: false
-                },
             description: {
-                label: 'Description',
+                label: 'Action',
                 ngBindHtml: 'activity.description',
                 nosort: true, 
                 searchable: false
@@ -64,7 +58,7 @@ angular.module('StreamListDefinition', [])
                 label: 'All',
                 searchOnly: true, 
                 searchObject: 'all',
-                searchPlaceholder: 'All primary objects',
+                searchPlaceholder: 'All resources',
                 searchWidget: 2,
                 searchField: 'object1'
                 },
@@ -72,7 +66,7 @@ angular.module('StreamListDefinition', [])
                 label: 'Credential',
                 searchOnly: true,
                 searchObject: 'credentials',
-                searchPlaceholder: 'Primary credential name',
+                searchPlaceholder: 'Credential name',
                 searchWidget: 2,
                 searchField: 'object1'
                 },
@@ -80,7 +74,7 @@ angular.module('StreamListDefinition', [])
                 label: 'Group',
                 searchOnly: true,
                 searchObject: 'groups',
-                searchPlaceholder: 'Primary group name',
+                searchPlaceholder: 'Group name',
                 searchWidget: 2,
                 searchField: 'object1'
                 },
@@ -88,7 +82,7 @@ angular.module('StreamListDefinition', [])
                 label: 'Host',
                 searchOnly: true,
                 searchObject: 'hosts',
-                searchPlaceholder: 'Primary host name',
+                searchPlaceholder: 'Host name',
                 searchWidget: 2,
                 searchField: 'object1'
                 },
@@ -96,7 +90,7 @@ angular.module('StreamListDefinition', [])
                 label: 'Inventory',
                 searchOnly: true,
                 searchObject: 'inventories',
-                searchPlaceholder: 'Primary inventory name',
+                searchPlaceholder: 'Inventory name',
                 searchWidget: 2,
                 searchField: 'object1'
                 },
@@ -104,7 +98,7 @@ angular.module('StreamListDefinition', [])
                 label: 'Job Template',
                 searchOnly: true,
                 searchObject: 'job_templates',
-                searchPlaceholder: 'Primary job template name',
+                searchPlaceholder: 'Job template name',
                 searchWidget: 2,
                 searchField: 'object1'
                 },
@@ -112,7 +106,7 @@ angular.module('StreamListDefinition', [])
                 label: 'Organization',
                 searchOnly: true,
                 searchObject: 'organizations',
-                searchPlaceholder: 'Primary organization name',
+                searchPlaceholder: 'Organization name',
                 searchWidget: 2,
                 searchField: 'object1'
                 },
@@ -120,7 +114,7 @@ angular.module('StreamListDefinition', [])
                 label: 'Project',
                 searchOnly: true,
                 searchObject: 'projects',
-                searchPlaceholder: 'Primary project name',
+                searchPlaceholder: 'Project name',
                 searchWidget: 2,
                 searchField: 'object1'
                 },
@@ -139,7 +133,7 @@ angular.module('StreamListDefinition', [])
                 label: 'All',
                 searchOnly: true, 
                 searchObject: 'all',
-                searchPlaceholder: 'All related objects',
+                searchPlaceholder: 'All related resources',
                 searchWidget: 3,
                 searchField: 'object2'
                 },
@@ -217,6 +211,15 @@ angular.module('StreamListDefinition', [])
                 'class': 'btn-xs btn-primary',
                 awToolTip: "Refresh the page",
                 ngClick: "refreshStream()",
+                iconSize: 'large'
+                },
+            reset: {
+                dataPlacement: 'top',
+                icon: "icon-undo",
+                mode: 'all',
+                'class': 'btn-xs btn-primary',
+                awToolTip: "Reset the search filter",
+                ngClick: "resetSearch()",
                 iconSize: 'large'
                 },
             close: {

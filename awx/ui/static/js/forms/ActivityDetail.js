@@ -13,10 +13,17 @@ angular.module('ActivityDetailDefinition', [])
         editTitle: 'Activity Detail', 
         well: false,
         'class': 'horizontal-narrow',
+        formFieldSize: 'col-lg-10',
+        formLabelSize: 'col-lg-2',
 
         fields: {
             timestamp: {
                 label: 'Time',
+                type: 'text',
+                readonly: true
+                },
+            user: {
+                label: 'Initiated By',
                 type: 'text',
                 readonly: true
                 },
@@ -31,7 +38,7 @@ angular.module('ActivityDetailDefinition', [])
                 readonly: true
                 },
             object1: {
-                label: 'Object 1',
+                label: 'Resource',
                 type: 'text',
                 ngHide: '!object1',
                 readonly: true
@@ -43,7 +50,7 @@ angular.module('ActivityDetailDefinition', [])
                 readonly: true
                 },
             object2: {
-                label: 'Object 2',
+                label: 'Related',
                 type: 'text',
                 ngHide: '!object2',
                 readonly: true
@@ -56,8 +63,8 @@ angular.module('ActivityDetailDefinition', [])
                 },
             changes: {
                 label: 'Changes',
-                type: 'textarea',
-                ngHide: '!changes',
+                type: 'lgtextarea',
+                ngHide: "!changes || changes =='' || changes == 'null'",
                 readonly: true
                 }
             }        

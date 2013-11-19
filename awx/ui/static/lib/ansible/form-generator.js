@@ -898,6 +898,34 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
             html += "</div>\n";
          }
 
+         if (field.type == 'lgtextarea') {
+             // Use for modal, readonly textarea fields
+             html += "<div class=\"label-text " + getLabelWidth() + "\">\n";
+             html += "<label class=\"control-label\">";
+             html += (field.icon) ? this.icon(field.icon) : "";
+             html += (field.label) ? field.label : '';
+             html += "</label>";
+             html += "</div>\n";
+             html += "<div class=\"col-lg-12\">\n";
+             html += "<div style=\"padding-left:10px;\">"
+             html += "<textarea ";
+             html += (field.rows) ? this.attr(field, 'rows') : "";
+             html += "ng-model=\"" + fld + '" ';
+             html += 'name="' + fld + '" ';
+             html += "class=\"form-control";
+             html += (field['class']) ? " " + field['class'] : "";
+             html += "\" ";
+             html += (field.ngChange) ? this.attr(field,'ngChange') : "";
+             html += buildId(field, fld, this.form);
+             html += (field.placeholder) ? this.attr(field,'placeholder') : "";
+             html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
+             html += (options.mode == 'add' && field.addRequired) ? "required " : "";
+             html += (field.readonly || field.showonly) ? "readonly " : "";
+             html += "></textarea>\n";
+             html += "</div>\n";
+             html += "</div>\n";
+         }
+
          html += "</div>\n";
 
        }

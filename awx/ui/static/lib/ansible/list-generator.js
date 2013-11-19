@@ -216,7 +216,6 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
              // User supplied searchSize, calc the remaining
              var size = parseInt(options.searchSize.replace(/([A-Z]|[a-z]|\-)/g,''));
              size = (list.searchWidgets) ? list.searchWidgets * size : size;
-             console.log('size: ' + (12 - size - 1));
              html += 'col-lg-' + (12 - size - 1);
           }
           else if (options.mode == 'summary') {

@@ -46,9 +46,9 @@ function($http, $rootScope, $cookieStore, $q, Authorization) {
         },
     
     setHeader: function(hdr) {
-        // Passin in { key: value } pairs to be added to the header
+        // Pass in { key: value } pairs to be added to the header
         for (var h in hdr) {
-            this.headers[h] = hdr.h;    
+            this.headers[h] = hdr[h];    
         }
         },
     get: function(args) {
@@ -79,10 +79,11 @@ function($http, $rootScope, $cookieStore, $q, Authorization) {
             return this.createResponse({ detail: 'Token is expired' }, 401);
         }
         else if (token) {
+            this.setHeader({ Authorization: 'Token ' + token });
             return $http({
                 method: 'POST', 
                 url: this.url,
-                headers: { 'Authorization': 'Token ' + token }, 
+                headers: this.headers, 
                 data: data });
         }
         else {
@@ -96,10 +97,11 @@ function($http, $rootScope, $cookieStore, $q, Authorization) {
             return this.createResponse({ detail: 'Token is expired' }, 401);
         }
         else if (token) {
+            this.setHeader({ Authorization: 'Token ' + token });
             return $http({
                 method: 'PUT', 
                 url: this.url,
-                headers: { 'Authorization': 'Token ' + token }, 
+                headers: this.headers, 
                 data: data });
         }
         else {
@@ -113,10 +115,11 @@ function($http, $rootScope, $cookieStore, $q, Authorization) {
             return this.createResponse({ detail: 'Token is expired' }, 401);
         }
         else if (token) {
+            this.setHeader({ Authorization: 'Token ' + token });
             return $http({
                 method: 'DELETE',
                 url: this.url,
-                headers: { 'Authorization': 'Token ' + token },
+                headers: this.headers,
                 data: data });
          }
         else {
@@ -130,10 +133,11 @@ function($http, $rootScope, $cookieStore, $q, Authorization) {
             return this.createResponse({ detail: 'Token is expired' }, 401);
         }
         else if (token) {
+            this.setHeader({ Authorization: 'Token ' + token });
             return $http({
                 method: 'OPTIONS',
                 url: this.url,
-                headers: { 'Authorization': 'Token ' + token }
+                headers: this.headers
                 });
         }
         else {

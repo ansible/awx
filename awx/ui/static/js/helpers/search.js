@@ -105,8 +105,10 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 }
             }
             }
-
-        for (var i=1; i <= 3; i++) {
+        
+        // Set default values for each search widget on the page
+        var widgets = (list.searchWidgets) ? list.searchWidgets : 1;
+        for (var i=1; i <= widgets; i++) {
             var modifier = (i == 1) ? '' : i;
             if ( $('#search-widget-container' + modifier) ) {
                 setDefaults(i);
@@ -169,9 +171,13 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             scope.search(iterator);
             }
 
-        scope.resetSearch = function(iterator, widget) {
+        scope.resetSearch = function(iterator) {
             // Respdond to click of reset button
-            setDefaults(widget);
+            var widgets = (list.searchWidgets) ? list.searchWidgets : 1;
+            for (var i=1; i <= widgets; i++) {
+                // Clear each search widget
+                setDefaults(i);
+            }
             // Force removal of search keys from the URL
             window.location = '/#' + $location.path();
             scope.search(iterator);
@@ -245,6 +251,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             found_objects = 0;
             for (var i=1; i <= widgets; i++) {
                 modifier = (i == 1) ? '' : i;
+                scope[iterator + 'HoldInput' + modifier] = true; //Block any input until we're done. Refresh.js will flip this back.
                 if ($('#search-widget-container' + modifier) &&
                     list.fields[scope[iterator + 'SearchField' + modifier]] &&
                     list.fields[scope[iterator + 'SearchField' + modifier]].searchObject &&
@@ -258,12 +265,12 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 if ( $('#search-widget-container' + modifier) ) {
                     if (list.fields[scope[iterator + 'SearchField' + modifier]] &&
                         list.fields[scope[iterator + 'SearchField' + modifier]].searchObject &&
-                        list.fields[scope[iterator + 'SearchField'  + modifier]].searchObject !== 'all') { 
-                        scope[iterator + 'HoldInput' + modifier] = true;
+                        list.fields[scope[iterator + 'SearchField'  + modifier]].searchObject !== 'all') {
                         if (scope[iterator + 'SearchValue' + modifier]) {
                             var objs = list.fields[scope[iterator + 'SearchField' + modifier]].searchObject;
-                            var objUrl = GetBasePath('base') + objs + '/?name__icontains=' + scope[iterator + 'SearchValue'];
+                            var objUrl = GetBasePath('base') + objs + '/?name__icontains=' + scope[iterator + 'SearchValue' + modifier];
                             Rest.setUrl(objUrl);
+                            Rest.setHeader({ widget: i });
                             Rest.get()
                                 .success( function(data, status, headers, config) {
                                     var pk='';
@@ -271,8 +278,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                                         pk += "," + data.results[j].id;
                                     } 
                                     pk = pk.replace(/^\,/,'');
-                                    console.log(config);
-                                    scope.$emit('foundObject', iterator, page, load, spin, i, pk);
+                                    scope.$emit('foundObject', iterator, page, load, spin, config.headers['widget'], pk);
                                     })
                                .error( function(data, status, headers, config) {
                                     ProcessErrors(scope, data, status, null,

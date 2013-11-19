@@ -538,9 +538,13 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             html += "</div><!-- col-lg-x -->\n";
         }
 
-        // Spinner
-        html += "<div class=\"col-lg-1 col-md-1 col-sm-1 col-xs-1\"><i class=\"icon-spinner icon-spin icon-large\" ng-show=\"" + iterator + 
-                 "SearchSpin == true\"></i></div>\n";
+        // Reset button and spinner
+        html += "<div class=\"col-lg-1 col-md-1 col-sm-1 col-xs-1\">\n";
+        //html += "<button type=\"button\" class=\"btn btn-default btn-sm\" ng-click=\"resetSearch('" + iterator + "')\" " +
+        //    "aw-tool-tip=\"Reset filter\" data-placement=\"top\"><i class=\"icon-undo\"></i></button>\n";
+        html += "<i class=\"icon-spinner icon-spin icon-large\" ng-show=\"" + iterator +  "SearchSpin == true\"></i>\n";
+        html += "</div>\n";
+
 
         return html;
         
