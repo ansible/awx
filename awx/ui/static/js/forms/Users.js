@@ -13,12 +13,20 @@ angular.module('UserFormDefinition', [])
         addTitle: 'Create User',                             //Legend in add mode
         editTitle: '{{ username }}',                         //Legend in edit mode
         name: 'user',                                        //Form name attribute
-        well: true,                                          //Wrap the form with TB well        
-        /*collapse: true,
-        collapseTitle: 'User Settings',
-        collapseMode: 'edit',
-        collapseOpen: true,*/
+        well: true,                                          //Wrap the form with TB well
         forceListeners: true,
+
+        actions: {
+            stream: {
+                'class': "btn-primary btn-xs activity-btn",
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                dataPlacement: "top",
+                icon: "icon-comments-alt",
+                mode: 'edit',
+                iconSize: 'large'
+                }    
+            },
 
         fields: {
             first_name: { 

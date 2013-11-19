@@ -13,7 +13,7 @@
 function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobTemplateList,
                            GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                            ClearScope, ProcessErrors, GetBasePath, PromptPasswords, JobTemplateForm, CredentialList,
-                           LookUpInit, SubmitJob, Wait)
+                           LookUpInit, SubmitJob, Wait, Stream)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -38,6 +38,8 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
     scope.search(list.iterator);
 
     LoadBreadCrumbs();
+    
+    scope.showActivity = function() { Stream(); }
     
     scope.addJobTemplate = function() {
        $location.path($location.path() + '/add');
@@ -80,7 +82,7 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
 JobTemplatesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobTemplateList',
                              'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
                              'ProcessErrors','GetBasePath', 'PromptPasswords', 'JobTemplateForm', 'CredentialList', 'LookUpInit',
-                             'SubmitJob', 'Wait'
+                             'SubmitJob', 'Wait', 'Stream'
                              ];
 
 function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, 
@@ -300,7 +302,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                            GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                            RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList, CredentialList,
                            ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, ParseTypeChange,
-                           JobStatusToolTip, FormatDate, Wait) 
+                           JobStatusToolTip, FormatDate, Wait, Stream) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -598,6 +600,8 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
        }
        };
 
+   scope.showActivity = function() { Stream(); }
+
    // Cancel
    scope.formReset = function() {
       generator.reset();
@@ -651,5 +655,5 @@ JobTemplatesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$
                              'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                              'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList',
                              'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup', 'ParseTypeChange',
-                             'JobStatusToolTip', 'FormatDate', 'Wait'
+                             'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream'
                              ]; 

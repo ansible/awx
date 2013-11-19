@@ -932,6 +932,33 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        return html;
        },
 
+    getActions: function(options) {
+        // Use to add things like Activity Stream to a detail page  
+        html = "<div class=\"list-actions\">\n";
+        for (action in this.form.actions) {
+            if (this.form.actions[action].mode == 'all' || this.form.actions[action].mode == options.mode) {
+                html += this.button(this.form.actions[action], action);
+            }
+        }
+        html += "</div>\n";
+        return html;
+        },
+
+    /*
+    activityCrumbs: function() {
+       // Breadcrumbs for activity stream widget
+       // Make the links clickable using ng-click function so we can first remove the stream widget.
+       html = '';
+       html += "<div class=\"nav-path\">\n";
+       html += "<ul class=\"breadcrumb\">\n";
+       html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" ng-click=\"{{ crumb.ngClick }}\">{{ crumb.title | capitalize }}</a></li>\n";
+       html += "<li class=\"active\">";
+       html += this.form.editTitle;
+       html += "</li>\n</ul>\n</div>\n";
+       return html;
+       },
+       */
+
     breadCrumbs: function(options, navigation) {
        var html = '';
        
@@ -1010,7 +1037,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
              html += this.breadCrumbs(options);
           }
        }
-       
+ 
        if ((!this.modal && this.form.statusFields)) {
           // Add status fields section (used in Jobs form)
           html += "<div class=\"well\">\n";
@@ -1056,6 +1083,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
           // Start the well
           if ( !this.modal && this.has('well') ) {
              html += "<div class=\"well\">\n";
+          }
+
+          if (!this.modal && this.form.actions) {
+              html += this.getActions(options);
           }
 
           // Add a title and optionally a close button (used on Inventory->Groups)

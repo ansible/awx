@@ -14,7 +14,19 @@ angular.module('CredentialFormDefinition', [])
         name: 'credential',
         well: true,
         forceListeners: true,
-
+        
+        actions: {
+            stream: {
+                'class': "btn-primary btn-xs activity-btn",
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                dataPlacement: "top",
+                icon: "icon-comments-alt",
+                mode: 'edit',
+                iconSize: 'large'
+                }    
+            },
+            
         fields: {
             name: {
                 label: 'Name',

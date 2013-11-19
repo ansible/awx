@@ -12,7 +12,7 @@
 
 function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, CredentialList,
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                          ClearScope, ProcessErrors, GetBasePath, SelectionInit, GetChoices, Wait)
+                          ClearScope, ProcessErrors, GetBasePath, SelectionInit, GetChoices, Wait, Stream)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -74,6 +74,8 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
 
 
     LoadBreadCrumbs();
+
+    scope.showActivity = function() { Stream(); }
     
     scope.addCredential = function() {
        $location.path($location.path() + '/add');
@@ -112,7 +114,7 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
 
 CredentialsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'CredentialList', 'GenerateList', 
                             'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                            'GetBasePath', 'SelectionInit', 'GetChoices', 'Wait' ];
+                            'GetBasePath', 'SelectionInit', 'GetChoices', 'Wait', 'Stream' ];
 
 
 function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
@@ -249,7 +251,7 @@ CredentialsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
-                          KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, FormSave
+                          KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, FormSave, Stream
                           ) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
@@ -390,6 +392,8 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        variable: 'credential_kind_options',
        callback: 'choicesReady'
        });
+
+   scope.showActivity = function() { Stream(); }
  
    // Save changes to the parent
    scope.formSave = function() { generator.clearApiErrors(); FormSave({ scope: scope, mode: 'edit' }) };
@@ -488,5 +492,5 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 CredentialsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
-                            'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange', 'FormSave']; 
+                            'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange', 'FormSave', 'Stream']; 
   

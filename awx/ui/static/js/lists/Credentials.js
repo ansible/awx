@@ -61,6 +61,15 @@ angular.module('CredentialsListDefinition', [])
                 ngClick: 'addCredential()',
                 "class": 'btn-success btn-xs',
                 awToolTip: 'Create a new credential'
+                },
+            stream: {
+                'class': "btn-primary btn-xs activity-btn",
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                dataPlacement: "top",
+                icon: "icon-comments-alt",
+                mode: 'all',
+                iconSize: 'large'
                 }
             },
 

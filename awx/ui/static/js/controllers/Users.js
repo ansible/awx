@@ -12,7 +12,7 @@
 
 function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, UserList,
                     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                    ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait)
+                    ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait, Stream)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -35,6 +35,8 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
     var url = (base == 'organizations') ? GetBasePath('organizations') + $routeParams.organization_id + '/users/' :
         GetBasePath('teams') + $routeParams.team_id + '/users/';
     SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
+
+    scope.showActivity = function() { Stream(); } 
     
     scope.addUser = function() {
        $location.path($location.path() + '/add');
@@ -73,7 +75,7 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
 
 UsersList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'UserList', 'GenerateList', 
                       'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                      'GetBasePath', 'SelectionInit', 'Wait' ];
+                      'GetBasePath', 'SelectionInit', 'Wait', 'Stream'];
 
 
 function UsersAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
@@ -186,7 +188,7 @@ UsersAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$
 function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, 
                     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                     RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath, Prompt, CheckAccess, 
-                    ResetForm, Wait) 
+                    ResetForm, Wait, Stream) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -287,6 +289,8 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
                                 { hdr: 'Error!', msg: 'Failed to update users: ' + $routeParams.id + '. PUT status: ' + status });
                   });
           };
+
+       scope.showActivity = function() { Stream(); } 
 
        // Cancel
        scope.formReset = function() {
@@ -435,5 +439,5 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 UsersEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 
                       'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                       'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'Prompt', 'CheckAccess',
-                      'ResetForm', 'Wait' ]; 
+                      'ResetForm', 'Wait', 'Stream']; 
   

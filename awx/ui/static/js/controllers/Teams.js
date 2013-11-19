@@ -12,7 +12,7 @@
 
 function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, TeamList,
                     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                    ClearScope, ProcessErrors, SetTeamListeners, GetBasePath, SelectionInit, Wait)
+                    ClearScope, ProcessErrors, SetTeamListeners, GetBasePath, SelectionInit, Wait, Stream)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -44,6 +44,8 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
     scope.search(list.iterator);
 
     LoadBreadCrumbs();
+
+    scope.showActivity = function() { Stream(); }
     
     scope.addTeam = function() {
        $location.path($location.path() + '/add');
@@ -93,7 +95,7 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
 
 TeamsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'TeamList', 'GenerateList', 
                       'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                       'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait'];
+                      'SetTeamListeners', 'GetBasePath', 'SelectionInit', 'Wait', 'Stream' ];
 
 
 function TeamsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm,
@@ -157,7 +159,7 @@ TeamsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$
 function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, 
                     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                     RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, 
-                    GetBasePath, CheckAccess, OrganizationList, Wait) 
+                    GetBasePath, CheckAccess, OrganizationList, Wait, Stream) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -233,6 +235,8 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
                { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $routeParams.team_id + '. GET status: ' + status });
            });
 
+   scope.showActivity = function() { Stream(); }
+   
    // Save changes to the parent
    scope.formSave = function() {
       generator.clearApiErrors();
@@ -344,6 +348,6 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
 TeamsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'TeamForm', 
                       'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                       'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
-                      'GetBasePath', 'CheckAccess', 'OrganizationList', 'Wait'
+                      'GetBasePath', 'CheckAccess', 'OrganizationList', 'Wait', 'Stream'
                       ]; 
   

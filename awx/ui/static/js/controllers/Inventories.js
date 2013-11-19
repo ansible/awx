@@ -12,7 +12,7 @@
 
 function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, InventoryList,
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                          ClearScope, ProcessErrors, GetBasePath, Wait)
+                          ClearScope, ProcessErrors, GetBasePath, Wait, Stream)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -138,6 +138,8 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
 
         }
         });
+    
+    scope.showActivity = function() { Stream(); }
 
     scope.addInventory = function() {
         $location.path($location.path() + '/add');
@@ -202,7 +204,7 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
 
 InventoriesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'InventoryList', 'GenerateList', 
                             'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                            'GetBasePath', 'Wait' ];
+                            'GetBasePath', 'Wait', 'Stream' ];
 
 
 function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 
@@ -317,7 +319,8 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, OrganizationList,
-                          GetBasePath, LoadInventory, ParseTypeChange, EditInventory, SaveInventory, PostLoadInventory
+                          GetBasePath, LoadInventory, ParseTypeChange, EditInventory, SaveInventory, PostLoadInventory,
+                          Stream
                           ) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
@@ -346,6 +349,8 @@ function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 
    LoadInventory({ scope: scope, doPostSteps: false });
 
+   scope.showActivity = function() { Stream(); }
+
    // Cancel
    scope.formReset = function() {
       generator.reset();
@@ -372,6 +377,6 @@ InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$l
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'OrganizationList', 'GetBasePath', 'LoadInventory', 'ParseTypeChange', 'EditInventory', 
-                            'SaveInventory', 'PostLoadInventory'
+                            'SaveInventory', 'PostLoadInventory', 'Stream'
                             ]; 
   

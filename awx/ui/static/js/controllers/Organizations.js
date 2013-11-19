@@ -134,7 +134,7 @@ OrganizationsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$
 
 function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, OrganizationForm, 
                             GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
-                            RelatedPaginateInit, Prompt, ClearScope, GetBasePath, Wait) 
+                            RelatedPaginateInit, Prompt, ClearScope, GetBasePath, Wait, Stream) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -211,6 +211,8 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
               });
       };
 
+   scope.showActivity = function() { Stream(); } 
+
    // Reset the form
    scope.formReset = function() {
       $rootScope.flashMessage = null;
@@ -264,4 +266,4 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
 
 OrganizationsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'OrganizationForm', 
                               'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit',
-                              'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath', 'Wait'];
+                              'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath', 'Wait', 'Stream'];

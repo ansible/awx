@@ -13,7 +13,7 @@
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                        ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate, ProjectStatus,
-                       FormatDate, Refresh, Wait)                        
+                       FormatDate, Refresh, Wait, Stream)                        
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -67,6 +67,8 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     scope.search(list.iterator);
 
     LoadBreadCrumbs();
+
+    scope.showActivity = function() { Stream(); }
     
     scope.addProject = function() {
        $location.path($location.path() + '/add');
@@ -228,7 +230,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
 ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList', 
                          'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                         'GetBasePath', 'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate', 'Refresh', 'Wait' ];
+                         'GetBasePath', 'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate', 'Refresh', 'Wait', 'Stream'];
 
 
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
@@ -370,7 +372,7 @@ ProjectsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log',
 function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 
                        GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
                        RelatedPaginateInit, Prompt, ClearScope, GetBasePath, ReturnToCaller, GetProjectPath,
-                       Authorization, CredentialList, LookUpInit, GetChoices, Empty, DebugForm, Wait) 
+                       Authorization, CredentialList, LookUpInit, GetChoices, Empty, DebugForm, Wait, Stream) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -542,6 +544,8 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
                });
        };
 
+   scope.showActivity = function() { Stream(); }
+
    // Related set: Add button
    scope.add = function(set) {
        $rootScope.flashMessage = null;
@@ -600,5 +604,5 @@ ProjectsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log'
                          'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit',
                          'RelatedPaginateInit', 'Prompt', 'ClearScope', 'GetBasePath', 'ReturnToCaller', 
                          'GetProjectPath', 'Authorization', 'CredentialList', 'LookUpInit', 'GetChoices', 'Empty',
-                         'DebugForm', 'Wait'
+                         'DebugForm', 'Wait', 'Stream'
                           ];

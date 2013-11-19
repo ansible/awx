@@ -112,7 +112,18 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        var html = '';
        var list = this.list; 
 
-       if (options.mode != 'lookup' && (options.breadCrumbs == undefined || options.breadCrumbs == true)) {
+       if (options.activityStream) {
+          // Breadcrumbs for activity stream widget
+          // Make the links clickable using ng-click function so we can first remove the stream widget
+          // before navigation
+          html += "<div class=\"nav-path\">\n";
+          html += "<ul class=\"breadcrumb\">\n";
+          html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" ng-click=\"{{ crumb.ngClick }}\">{{ crumb.title | capitalize }}</a></li>\n";
+          html += "<li class=\"active\">";
+          html += list.editTitle;
+          html += "</li>\n</ul>\n</div>\n";
+       }
+       else if (options.mode != 'lookup' && (options.breadCrumbs == undefined || options.breadCrumbs == true)) {
            //Breadcrumbs
            html += "<div class=\"nav-path\">\n";
            html += "<ul class=\"breadcrumb\">\n";

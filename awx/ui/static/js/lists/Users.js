@@ -42,6 +42,15 @@ angular.module('UserListDefinition', [])
                 basePaths: ['organizations','users'],        // base path must be in list, or action not available
                 "class": 'btn-success btn-xs',
                 awToolTip: 'Create a new user'
+                },
+            stream: {
+                'class': "btn-primary btn-xs activity-btn",
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                dataPlacement: "top",
+                icon: "icon-comments-alt",
+                mode: 'all',
+                iconSize: 'large'
                 }
             },
 

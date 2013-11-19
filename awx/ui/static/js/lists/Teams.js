@@ -42,6 +42,15 @@ angular.module('TeamsListDefinition', [])
                 ngClick: 'addTeam()',
                 "class": 'btn-xs btn-success',
                 awToolTip: 'Create a new team'
+                },
+            stream: {
+                'class': "btn-primary btn-xs activity-btn",
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                dataPlacement: "top",
+                icon: "icon-comments-alt",
+                mode: 'all',
+                iconSize: 'large'
                 }
             },
 

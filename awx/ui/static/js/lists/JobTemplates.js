@@ -37,6 +37,15 @@ angular.module('JobTemplatesListDefinition', [])
                 "class": 'btn-success btn-xs',
                 basePaths: ['job_templates'], 
                 awToolTip: 'Create a new template'
+                },
+            stream: {
+                'class': "btn-primary btn-xs activity-btn",
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                dataPlacement: "top",
+                icon: "icon-comments-alt",
+                mode: 'all',
+                iconSize: 'large'
                 }
             },
 

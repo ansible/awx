@@ -35,7 +35,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         }
         }])
 
-    .factory('HideStream', [ function() {
+    .factory('HideStream', [ 'LoadBreadCrumbs', function(LoadBreadCrumbs) {
     return function() {
         // Remove the stream widget
         
@@ -52,6 +52,52 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
            stream.unbind();
            $('#tab-content-container').css({ 'min-height': 0 }); //let the parent height go back to normal
            }, 500);
+        
+        LoadBreadCrumbs();
+        }
+        }])
+
+    .factory('StreamBreadCrumbs', ['$rootScope', '$location', function($rootScope, $location) { 
+    return function() {
+        // Load the breadcrumbs array. We have to do things a bit different than our standing Utilities.LoadBreadcrumbs. 
+        // Rather than botch that all up, we'll do our own thing here.
+        $rootScope.breadcrumbs = [];
+        var paths = $location.path().split('/');
+        paths.splice(0,1);
+        var path, title;
+        for (var i=0; i < paths.length; i++) {
+            if (/^\d+/.test(paths[i])) {
+                path='';
+                title='';
+                for (j=0; j <= i; j++) {
+                    path += '/' + paths[j];
+                }
+                for (j=0; j < $rootScope.crumbCache.length; j++) {
+                    if ($rootScope.crumbCache[j].path == path) {
+                       title = $rootScope.crumbCache[j].title;
+                       break;
+                    }
+                }
+                if (!title) {
+                    title = paths[i - 1].substr(0,paths[i - 1].length - 1);
+                    title = (title == 'inventorie') ? 'inventory' : title;
+                }
+            }
+            else {
+                path='';
+                title='';
+                if (i > 0) {
+                    for (j=0; j <= i; j++) {
+                        path += '/' + paths[j];
+                    }
+                }
+                else {
+                   path = '/' + paths[i];
+                }
+                title = paths[i];
+            }
+            $rootScope.breadcrumbs.push({ path: path, title: title, ngClick: "closeStream('" + path + "')" });    
+        }
         }
         }])
 
@@ -184,9 +230,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
     .factory('Stream', ['$rootScope', '$location', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'StreamList', 'SearchInit', 
         'PaginateInit', 'GenerateList', 'FormatDate', 'ShowStream', 'HideStream', 'BuildDescription', 'FixUrl', 'BuildUrl', 
-        'ShowDetail', 'LoadBreadCrumbs',
+        'ShowDetail', 'StreamBreadCrumbs',
     function($rootScope, $location, Rest, GetBasePath, ProcessErrors, Wait, StreamList, SearchInit, PaginateInit, GenerateList,
-        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail, LoadBreadCrumbs) {
+        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail, StreamBreadCrumbs) {
     return function(params) {
     
         var list = StreamList;
@@ -195,22 +241,23 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         var base = $location.path().replace(/^\//,'').split('/')[0];
        
         if (base !== 'home') {
+           // Restrict what we're looking at based on the path
            var type = (base == 'inventories') ? 'inventory' : base.replace(/s$/,'');
-           defaultUrl += '?or__object1=' + type + '&or__object2=' + type;
+           var paths = $location.path().split('/');
+           paths.splice(0,1);
+           if (paths.length > 1 && /^\d+/.test(paths[1])) {
+               defaultUrl += '?object1=' + type + '&object1_id=' + paths[i];
+           }
+           else {
+               defaultUrl += '?or__object1=' + type + '&or__object2=' + type;
+           }
         }
-        
-        // Push the current page onto browser histor. If user clicks back button, restore current page without 
-        // stream widget
-        // window.history.pushState({}, "AnsibleWorks AWX", $location.path());
 
         // Add a container for the stream widget
         $('#tab-content-container').append('<div id="stream-container"><div id=\"stream-content\"></div></div><!-- Stream widget -->');
-
+        
+        StreamBreadCrumbs();
         ShowStream();
-        if ($rootScope.breadcrumbs.length == 0) {
-            var title = base.substr(0,1).toUpperCase() + base.substr(1);
-            $rootScope.breadcrumbs.push({ path: $location.path(), title: title});
-        }
         
         // Generate the list
         var scope = view.inject(list, { 
@@ -218,11 +265,15 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             id: 'stream-content', 
             breadCrumbs: true, 
             searchSize: 'col-lg-3',
-            secondWidget: true
+            secondWidget: true,
+            activityStream: true
             });
 
-        scope.closeStream = function() { 
+        scope.closeStream = function(inUrl) { 
             HideStream();
+            if (inUrl) {
+               $location.path(inUrl);   
+            }
             }  
 
         scope.refreshStream = function() {
@@ -288,15 +339,6 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         SearchInit({ scope: scope, set: list.name, list: list, url: defaultUrl });
         PaginateInit({ scope: scope, list: list, url: defaultUrl });
         scope.search(list.iterator);
-        
-        /*
-        scope.$watch(list.iterator + 'SearchField', function(newVal, oldVal) {
-            console.log('newVal: ' + newVal);
-            html += ""
-            html += "<input id=\"search_attribute_input\" type=\"text\" ng-show=\"" + iterator + "ShowAttribute\" class=\"form-control ";
-            html += "\" ng-model=\"" + iterator + "AttributeValue\" ng-change=\"search('" + iterator + 
-                "')\" aw-placeholder=\"" + iterator + "AttributePlaceholder\" type=\"text\">\n";
-            });*/
 
         }
         }]);

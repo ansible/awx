@@ -16,6 +16,18 @@ angular.module('JobTemplateFormDefinition', [])
         twoColumns: true,
         well: true,
 
+        actions: {
+            stream: {
+                'class': "btn-primary btn-xs activity-btn",
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                dataPlacement: "top",
+                icon: "icon-comments-alt",
+                mode: 'edit',
+                iconSize: 'large'
+                }    
+            },
+
         fields: {
             name: {
                 label: 'Name',

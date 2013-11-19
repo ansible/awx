@@ -15,6 +15,18 @@ angular.module('OrganizationFormDefinition', [])
         name: 'organization',                                   //entity or model name in singular form
         well: true, 			                                //Wrap the form with TB well/		  	
 
+        actions: {
+            stream: {
+                'class': "btn-primary btn-xs activity-btn",
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                dataPlacement: "top",
+                icon: "icon-comments-alt",
+                mode: 'edit',
+                iconSize: 'large'
+                }    
+            },
+
         fields: {
             name: {
                 label: 'Name',
