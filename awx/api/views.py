@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Q
+
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.utils.datastructures import SortedDict
@@ -1064,6 +1065,8 @@ class ActivityStreamList(SimpleListAPIView):
 
     def get_queryset(self):
         initial_qs = super(ActivityStreamList, self).get_queryset()
+        if not self.request.user.is_superuser:
+            return initial_qs.none()
         all_qs = Q()
         all_obj1_types = [x.object1_type for x in ActivityStream.objects.order_by('object1_type').distinct('object1_type')]
         all_obj2_types = [x.object2_type for x in ActivityStream.objects.order_by('object2_type').distinct('object2_type')]
