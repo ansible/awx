@@ -14,7 +14,7 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
                          RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
                          GetBasePath, HostsList, HostsAdd, HostsEdit, HostsDelete,
                          HostsReload, BuildTree, EditHostGroups, InventoryHostsHelp, HelpDialog, Wait,
-                         ToggleHostEnabled)
+                         ToggleHostEnabled, Stream)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -39,6 +39,8 @@ function InventoryHosts ($scope, $rootScope, $compile, $location, $log, $routePa
     scope.loadBreadCrumbsRemove = scope.$on('buildAllGroups', function(e, inventory_name) {
         LoadBreadCrumbs({ path: '/inventories/' + id, title: inventory_name });
         });
+
+    scope.showActivity = function() { Stream(); }
 
     scope.filterHosts = function() {
         HostsReload({ scope: scope, inventory_id: scope['inventory_id'], group_id: scope['group_id'] });
@@ -164,6 +166,6 @@ InventoryHosts.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
                             'GetBasePath', 'HostsList', 'HostsAdd', 'HostsEdit', 'HostsDelete',
                             'HostsReload', 'BuildTree', 'EditHostGroups', 'InventoryHostsHelp', 'HelpDialog', 'Wait',
-                            'ToggleHostEnabled'
+                            'ToggleHostEnabled', 'Stream'
                             ]; 
   

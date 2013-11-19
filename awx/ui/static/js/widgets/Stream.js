@@ -10,7 +10,17 @@
 angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', 'SearchHelper', 'PaginateHelper',
         'RefreshHelper', 'ListGenerator', 'StreamWidget'])
     
-    .factory('ShowStream', [ function() {
+    .factory('setStreamHeight', [ function() {
+    return function() {
+        // Try not to overlap footer. Because stream is positioned absolute, the parent
+        // doesn't resize correctly when stream is loaded.
+        var stream = $('#stream-container');
+        var height = stream.height() + 50;
+        $('#tab-content-container').css({ "min-height": height });
+        }
+        }])
+
+    .factory('ShowStream', [ 'setStreamHeight', function(setStreamHeight) {
     return function() {
         // Slide in the Stream widget
         
@@ -24,10 +34,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             'min-height': '100%',
             'background-color': '#FFF'
             });
-        
-        // Try not to overlap footer. Because stream is positioned absolute, the parent
-        // doesn't resize correctly when stream is loaded.
-        $('#tab-content-container').css({ 'min-height': stream.height() + 50 });
+
+        setStreamHeight();
 
         // Slide in stream
         stream.show('slide', {'direction': 'left'}, {'duration': 500, 'queue': false });
@@ -172,7 +180,6 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             .success( function(data, status, headers, config) {
                 // load up the form
                 var results = data;
-
                 $('#form-modal').on('show.bs.modal', function (e) {
                     $('#form-modal-body').css({
                         width:'auto',  //probably not needed
@@ -230,9 +237,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
     .factory('Stream', ['$rootScope', '$location', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'StreamList', 'SearchInit', 
         'PaginateInit', 'GenerateList', 'FormatDate', 'ShowStream', 'HideStream', 'BuildDescription', 'FixUrl', 'BuildUrl', 
-        'ShowDetail', 'StreamBreadCrumbs',
+        'ShowDetail', 'StreamBreadCrumbs', 'setStreamHeight',
     function($rootScope, $location, Rest, GetBasePath, ProcessErrors, Wait, StreamList, SearchInit, PaginateInit, GenerateList,
-        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail, StreamBreadCrumbs) {
+        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail, StreamBreadCrumbs, setStreamHeight) {
     return function(params) {
     
         var list = StreamList;
@@ -240,13 +247,20 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         var view = GenerateList;
         var base = $location.path().replace(/^\//,'').split('/')[0];
        
-        if (base !== 'home') {
+        if ($location.path() !== '/home') {
            // Restrict what we're looking at based on the path
            var type = (base == 'inventories') ? 'inventory' : base.replace(/s$/,'');
            var paths = $location.path().split('/');
            paths.splice(0,1);
-           if (paths.length > 1 && /^\d+/.test(paths[1])) {
-               defaultUrl += '?object1=' + type + '&object1_id=' + paths[i];
+           if (paths.length > 1 && /^\d+/.test(paths[paths.length - 1])) {
+               type = paths[paths.length - 2];
+               type = (type == 'inventories') ? 'inventory' : type.replace(/s$/,'');
+               defaultUrl += '?object1=' + type + '&object1_id=' + paths[paths.length - 1];
+           }
+           else if (paths.length > 1) {
+               type = paths[paths.length - 1];
+               type = (type == 'inventories') ? 'inventory' : type.replace(/s$/,'');
+               defaultUrl += '?or__object1=' + type + '&or__object2=' + type;
            }
            else {
                defaultUrl += '?or__object1=' + type + '&or__object2=' + type;
@@ -284,10 +298,10 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             ShowDetail(id);
             }
 
-        if (scope.removePostRefresh) {
-            scope.removePostRefresh();    
+        if (scope.removeStreamPostRefresh) {
+            scope.removeStreamPostRefresh();    
         }
-        scope.removePostRefresh = scope.$on('PostRefresh', function() {
+        scope.removeStreamPostRefresh = scope.$on('PostRefresh', function() {
             for (var i=0; i < scope['activities'].length; i++) {
                 // Convert event_time date to local time zone
                 cDate = new Date(scope['activities'][i].timestamp);
@@ -332,7 +346,10 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
                 // Description
                 scope['activities'][i].description = BuildDescription(scope['activities'][i]);
+
             }
+            // Give ng-repeate a chance to show the data before adjusting the page size.
+            setTimeout(function() { setStreamHeight(); }, 500);
             });
 
         // Initialize search and paginate pieces and load data

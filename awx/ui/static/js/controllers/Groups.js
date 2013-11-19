@@ -10,7 +10,7 @@
 function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryGroupsForm,
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt,
                           BuildTree, GetBasePath, GroupsList, GroupsAdd, GroupsEdit, LoadInventory,
-                          GroupsDelete, EditInventory, InventoryStatus)
+                          GroupsDelete, EditInventory, InventoryStatus, Stream)
 {
 
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
@@ -108,6 +108,8 @@ function InventoryGroups ($scope, $rootScope, $compile, $location, $log, $routeP
         }
         });
 
+    scope.showActivity = function() { Stream(); }
+
     scope.addGroup = function() {
         GroupsList({ "inventory_id": id, group_id: scope.group_id });
         }
@@ -159,6 +161,6 @@ InventoryGroups.$inject = [
     '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryGroupsForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'Prompt',
     'BuildTree', 'GetBasePath', 'GroupsList', 'GroupsAdd', 'GroupsEdit', 'LoadInventory',
-    'GroupsDelete', 'EditInventory', 'InventoryStatus'
+    'GroupsDelete', 'EditInventory', 'InventoryStatus', 'Stream'
     ]; 
   

@@ -50,7 +50,7 @@ Home.$inject=[ '$routeParams', '$scope', '$rootScope', '$location', 'Wait', 'Obj
 
 
 function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, 
-    GetBasePath, SearchInit, PaginateInit, FormatDate, HostsStatusMsg, UpdateStatusMsg, ViewUpdateStatus) {
+    GetBasePath, SearchInit, PaginateInit, FormatDate, HostsStatusMsg, UpdateStatusMsg, ViewUpdateStatus, Stream) {
 
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -158,18 +158,19 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
     scope.search(list.iterator);
    
     LoadBreadCrumbs();
-
+    
+    scope.showActivity = function() { Stream(); }
     scope.viewUpdateStatus = function(id) { ViewUpdateStatus({ scope: scope, group_id: id }) };
 
     }
 
 HomeGroups.$inject = [ '$location', '$routeParams', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
-    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus'
+    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus', 'Stream'
     ];
 
 
 function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, 
-    GetBasePath, SearchInit, PaginateInit, FormatDate, SetHostStatus, ToggleHostEnabled, HostsEdit) {
+    GetBasePath, SearchInit, PaginateInit, FormatDate, SetHostStatus, ToggleHostEnabled, HostsEdit, Stream) {
 
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -213,7 +214,8 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
     scope.search(list.iterator);
    
     LoadBreadCrumbs();
-   
+    
+    scope.showActivity = function() { Stream(); }
     scope.toggle_host_enabled = function(id, sources) { ToggleHostEnabled(id, sources, scope); }
 
     scope.editHost = function(host_id, host_name) {
@@ -233,6 +235,6 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
 
 HomeGroups.$inject = [ '$location', '$routeParams', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus',
-    'SetHostStatus', 'ToggleHostEnabled', 'HostsEdit'
+    'SetHostStatus', 'ToggleHostEnabled', 'HostsEdit', 'Stream'
     ]; 
   

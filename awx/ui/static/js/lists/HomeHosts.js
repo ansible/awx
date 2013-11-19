@@ -81,6 +81,15 @@ angular.module('HomeHostListDefinition', [])
             },
         
         actions: {
+            stream: {
+                'class': "btn-primary btn-xs activity-btn",
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                dataPlacement: "top",
+                icon: "icon-comments-alt",
+                mode: 'all',
+                iconSize: 'large'
+                }
             },
 
         fieldActions: {
