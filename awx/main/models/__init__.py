@@ -7,7 +7,6 @@ from awx.main.models.projects import *
 from awx.main.models.inventory import *
 from awx.main.models.jobs import *
 from awx.main.models.activity_stream import *
-from awx.main.registrar import activity_stream_registrar
 
 # Monkeypatch Django serializer to ignore django-taggit fields (which break
 # the dumpdata command; see https://github.com/alex/django-taggit/issues/155).
@@ -30,6 +29,7 @@ User.add_to_class('can_access', check_user_access)
 # Import signal handlers only after models have been defined.
 import awx.main.signals
 
+from awx.main.registrar import activity_stream_registrar
 activity_stream_registrar.connect(Organization)
 activity_stream_registrar.connect(Inventory)
 activity_stream_registrar.connect(Host)

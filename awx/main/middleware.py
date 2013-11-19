@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_save, post_save
 from django.utils.functional import curry
-from awx.main.models.activity_stream import ActivityStream
+from awx.main.models import ActivityStream
 import json
 import uuid
 import urllib2

@@ -33,7 +33,8 @@ from awx.main.fields import AutoOneToOneField
 from awx.main.utils import encrypt_field, decrypt_field
 from awx.main.models.base import *
 
-__all__ = ['Organization', 'Team', 'Permission', 'Credential', 'AuthToken']
+__all__ = ['Organization', 'Team', 'Permission', 'Credential', 'Profile',
+           'AuthToken']
 
 
 class Organization(CommonModel):

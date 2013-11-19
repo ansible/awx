@@ -6,6 +6,9 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
+__all__ = ['ActivityStream']
+
+
 class ActivityStream(models.Model):
     '''
     Model used to describe activity stream (audit) events
@@ -39,3 +42,5 @@ class ActivityStream(models.Model):
 
     def get_absolute_url(self):
         return reverse('api:activity_stream_detail', args=(self.pk,))
+
+print ActivityStream._meta.app_label
