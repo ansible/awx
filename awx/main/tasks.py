@@ -27,6 +27,7 @@ from celery import Task
 # Django
 from django.conf import settings
 from django.db import transaction
+from django.utils.datastructures import SortedDict
 from django.utils.timezone import now
 
 # AWX
@@ -152,10 +153,7 @@ class BaseTask(Task):
         Return a dictionary of prompt regular expressions and password lookup
         keys.
         '''
-        return {
-            r'Enter passphrase for .*:': 'ssh_key_unlock',
-            r'Bad passphrase, try again for .*:': '',
-        }
+        return SortedDict()
 
     def run_pexpect(self, instance, args, cwd, env, passwords,
                     output_replacements=None):
@@ -180,6 +178,7 @@ class BaseTask(Task):
         expect_list.extend([pexpect.TIMEOUT, pexpect.EOF])
         while child.isalive():
             result_id = child.expect(expect_list, timeout=pexpect_timeout)
+            #print 'pexpect result_id', result_id, expect_list[result_id], expect_passwords.get(result_id, None)
             if result_id in expect_passwords:
                 child.sendline(expect_passwords[result_id])
             updates = {'status': 'running',
@@ -407,11 +406,11 @@ class RunJob(BaseTask):
 
     def get_password_prompts(self):
         d = super(RunJob, self).get_password_prompts()
-        d.update({
-            r'sudo password.*:': 'sudo_password',
-            r'SSH password:': 'password',
-            r'Password:': 'password',
-        })
+        d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
+        d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
+        d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'sudo_password'
+        d[re.compile(r'^SSH password:\s*?$', re.M)] = 'password'
+        d[re.compile(r'^Password:\s*?$', re.M)] = 'password'
         return d
 
     def pre_run_check(self, job, **kwargs):
@@ -663,15 +662,14 @@ class RunProjectUpdate(BaseTask):
 
     def get_password_prompts(self):
         d = super(RunProjectUpdate, self).get_password_prompts()
-        d.update({
-            re.compile(r'^Username for.*:\s*?$', re.M): 'scm_username',
-            re.compile(r'^Password for.*:\s*?$', re.M): 'scm_password',
-            re.compile(r'^Password:\s*?$', re.M): 'scm_password',
-            re.compile(r'^\S+?@\S+?\'s\s+?password:\s*?$', re.M): 'scm_password',
-            re.compile(r'^Enter passphrase for .*:\s*?$', re.M): 'scm_key_unlock',
-            # FIXME: Configure whether we should auto accept host keys?
-            re.compile(r'^Are you sure you want to continue connecting \(yes/no\)\?\s*?$', re.M): 'yes',
-        })
+        d[re.compile(r'^Username for.*:\s*?$', re.M)] = 'scm_username'
+        d[re.compile(r'^Password for.*:\s*?$', re.M)] = 'scm_password'
+        d[re.compile(r'^Password:\s*?$', re.M)] = 'scm_password'
+        d[re.compile(r'^\S+?@\S+?\'s\s+?password:\s*?$', re.M)] = 'scm_password'
+        d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'scm_key_unlock'
+        d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
+        # FIXME: Configure whether we should auto accept host keys?
+        d[re.compile(r'^Are you sure you want to continue connecting \(yes/no\)\?\s*?$', re.M)] = 'yes'
         return d
 
     def get_idle_timeout(self):

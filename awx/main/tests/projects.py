@@ -1220,6 +1220,49 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.check_project_update(project2, should_fail=None)#,
                                   #should_error=should_error)
 
+    def test_scm_key_unlock_on_project_update(self):
+        scm_url = 'git@github.com:ansible/ansible.github.com.git'
+        project = self.create_project(
+            name='my git project over ssh with encrypted key',
+            scm_type='git',
+            scm_url=scm_url,
+            scm_key_data=TEST_SSH_KEY_DATA_LOCKED,
+            scm_key_unlock=TEST_SSH_KEY_DATA_UNLOCK,
+        )
+        url = reverse('api:project_update_view', args=(project.pk,))
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        self.assertTrue(response['can_update'])
+        with self.current_user(self.super_django_user):
+            response = self.post(url, {}, expect=202)
+        project_update = project.project_updates.order_by('-pk')[0]
+        self.check_project_update(project, should_fail=None,
+                                  project_update=project_update)
+        # Verify that we responded to ssh-agent prompt.
+        self.assertTrue('Identity added' in project_update.result_stdout,
+                        project_update.result_stdout)
+        # Try again with a bad unlock password.
+        project = self.create_project(
+            name='my git project over ssh with encrypted key and bad pass',
+            scm_type='git',
+            scm_url=scm_url,
+            scm_key_data=TEST_SSH_KEY_DATA_LOCKED,
+            scm_key_unlock='not the right password',
+        )
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        self.assertTrue(response['can_update'])
+        with self.current_user(self.super_django_user):
+            response = self.post(url, {}, expect=202)
+        project_update = project.project_updates.order_by('-pk')[0]
+        self.check_project_update(project, should_fail=None,
+                                  project_update=project_update)
+        # Verify response to ssh-agent prompt, did not accept password.
+        self.assertTrue('Bad passphrase' in project_update.result_stdout,
+                        project_update.result_stdout)
+        self.assertFalse('Identity added' in project_update.result_stdout,
+                         project_update.result_stdout)
+
     def create_local_git_repo(self):
         repo_dir = tempfile.mkdtemp()
         self._temp_project_dirs.append(repo_dir)
