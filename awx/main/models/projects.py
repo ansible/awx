@@ -10,6 +10,7 @@ import logging
 import os
 import re
 import shlex
+import urlparse
 import uuid
 
 # PyYAML
@@ -28,6 +29,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 # AWX
 from awx.lib.compat import slugify
 from awx.main.models.base import *
+from awx.main.utils import update_scm_url
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -153,6 +155,49 @@ class Project(CommonModel):
         editable=False,
         null=True, # FIXME: Remove
     )
+
+    def clean_scm_type(self):
+        return self.scm_type or ''
+
+    def clean_scm_url(self):
+        scm_url = unicode(self.scm_url or '')
+        if not self.scm_type:
+            return ''
+        try:
+            scm_url = update_scm_url(self.scm_type, scm_url,
+                                     check_special_cases=False)
+        except ValueError, e:
+            raise ValidationError((e.args or ('Invalid SCM URL',))[0])
+        scm_url_parts = urlparse.urlsplit(scm_url)
+        if self.scm_type and not any(scm_url_parts):
+            raise ValidationError('SCM URL is required')
+        return unicode(self.scm_url or '')
+
+    def clean_credential(self):
+        if not self.scm_type:
+            return None
+        cred = self.credential
+        if cred:
+            if cred.kind != 'scm':
+                raise ValidationError('Credential kind must be "scm"')
+            try:
+                scm_url = update_scm_url(self.scm_type, self.scm_url,
+                                         check_special_cases=False)
+                scm_url_parts = urlparse.urlsplit(scm_url)
+                # Prefer the username/password in the URL, if provided.
+                scm_username = scm_url_parts.username or cred.username or ''
+                if scm_url_parts.password or cred.password:
+                    scm_password = '********'
+                else:
+                    scm_password = ''
+                try:
+                    update_scm_url(self.scm_type, self.scm_url, scm_username,
+                                   scm_password)
+                except ValueError, e:
+                    raise ValidationError((e.args or ('Invalid credential',))[0])
+            except ValueError:
+                pass
+        return cred
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)

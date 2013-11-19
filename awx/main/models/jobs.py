@@ -106,6 +106,19 @@ class JobTemplate(CommonModel):
         default='',
     )
 
+    def clean_credential(self):
+        cred = self.credential
+        if cred and cred.kind != 'ssh':
+            raise ValidationError('Credential kind must be "ssh"')
+        return cred
+
+    def clean_cloud_credential(self):
+        cred = self.cloud_credential
+        if cred and cred.kind not in ('aws', 'rax'):
+            raise ValidationError('Cloud credential kind must be "aws" or '
+                                  '"rax"')
+        return cred
+
     def create_job(self, **kwargs):
         '''
         Create a new job based on this template.
@@ -237,6 +250,19 @@ class Job(CommonTask):
         editable=False,
         through='JobHostSummary',
     )
+
+    def clean_credential(self):
+        cred = self.credential
+        if cred and cred.kind != 'ssh':
+            raise ValidationError('Credential kind must be "ssh"')
+        return cred
+
+    def clean_cloud_credential(self):
+        cred = self.cloud_credential
+        if cred and cred.kind not in ('aws', 'rax'):
+            raise ValidationError('Cloud credential kind must be "aws" or '
+                                  '"rax"')
+        return cred
 
     def get_absolute_url(self):
         return reverse('api:job_detail', args=(self.pk,))

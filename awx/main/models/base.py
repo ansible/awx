@@ -128,8 +128,7 @@ class BaseModel(models.Model):
                 continue
             if hasattr(self, 'clean_%s' % f.name):
                 try:
-                    setattr(self, f.attname,
-                            getattr(self, 'clean_%s' % f.name)())
+                    setattr(self, f.name, getattr(self, 'clean_%s' % f.name)())
                 except ValidationError, e:
                     errors[f.name] = e.messages
         if errors:

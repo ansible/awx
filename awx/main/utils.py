@@ -128,7 +128,8 @@ def decrypt_field(instance, field_name):
     value = cipher.decrypt(encrypted)
     return value.rstrip('\x00')
 
-def update_scm_url(scm_type, url, username=True, password=True):
+def update_scm_url(scm_type, url, username=True, password=True,
+                   check_special_cases=True):
     '''
     Update the given SCM URL to add/replace/remove the username/password. When
     username/password is True, preserve existing username/password, when
@@ -198,16 +199,19 @@ def update_scm_url(scm_type, url, username=True, password=True):
         netloc_password = ''
 
     # Special handling for github/bitbucket SSH URLs.
-    special_git_hosts = ('github.com', 'bitbucket.org', 'altssh.bitbucket.org')
-    if scm_type == 'git' and parts.scheme == 'ssh' and parts.hostname in special_git_hosts and netloc_username != 'git':
-        raise ValueError('Username must be "git" for SSH access to %s.' % parts.hostname)
-    if scm_type == 'git' and parts.scheme == 'ssh' and parts.hostname in special_git_hosts and netloc_password:
-        raise ValueError('Password not allowed for SSH access to %s.' % parts.hostname)
-    special_hg_hosts = ('bitbucket.org', 'altssh.bitbucket.org')
-    if scm_type == 'hg' and parts.scheme == 'ssh' and parts.hostname in special_hg_hosts and netloc_username != 'hg':
-        raise ValueError('Username must be "hg" for SSH access to %s.' % parts.hostname)
-    if scm_type == 'hg' and parts.scheme == 'ssh' and netloc_password:
-        raise ValueError('Password not supported for SSH with Mercurial.')
+    if check_special_cases:
+        special_git_hosts = ('github.com', 'bitbucket.org', 'altssh.bitbucket.org')
+        if scm_type == 'git' and parts.scheme == 'ssh' and parts.hostname in special_git_hosts and netloc_username != 'git':
+            raise ValueError('Username must be "git" for SSH access to %s.' % parts.hostname)
+        if scm_type == 'git' and parts.scheme == 'ssh' and parts.hostname in special_git_hosts and netloc_password:
+            #raise ValueError('Password not allowed for SSH access to %s.' % parts.hostname)
+            netloc_password = ''
+        special_hg_hosts = ('bitbucket.org', 'altssh.bitbucket.org')
+        if scm_type == 'hg' and parts.scheme == 'ssh' and parts.hostname in special_hg_hosts and netloc_username != 'hg':
+            raise ValueError('Username must be "hg" for SSH access to %s.' % parts.hostname)
+        if scm_type == 'hg' and parts.scheme == 'ssh' and netloc_password:
+            #raise ValueError('Password not supported for SSH with Mercurial.')
+            netloc_password = ''
 
     if netloc_username and parts.scheme != 'file':
         netloc = u':'.join(filter(None, [netloc_username, netloc_password]))

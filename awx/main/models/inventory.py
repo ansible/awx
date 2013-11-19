@@ -561,6 +561,21 @@ class InventorySource(PrimordialModel):
         editable=False,
     )
 
+    def clean_credential(self):
+        if not self.source:
+            return None
+        cred = self.credential
+        if cred:
+            if self.source == 'ec2' and cred.kind != 'aws':
+                raise ValidationError('Credential kind must be "aws" for an '
+                                      '"ec2" source')
+            if self.source == 'rax' and cred.kind != 'rax':
+                raise ValidationError('Credential kind must be "rax" for a '
+                                    '"rax" source')
+        elif self.source in ('ec2', 'rax'):
+            raise ValidationError('Credential is required for a cloud source')
+        return cred
+
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
         # If update_fields has been specified, add our field names to it,

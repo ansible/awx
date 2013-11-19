@@ -333,17 +333,14 @@ class ProjectSerializer(BaseSerializer):
                                          args=(obj.last_update.pk,))
         return res
 
-    def _get_scm_type(self, attrs, source=None):
-        if self.object:
-            return attrs.get(source or 'scm_type', self.object.scm_type) or u''
-        else:
-            return attrs.get(source or 'scm_type', u'') or u''
-
     def validate_local_path(self, attrs, source):
         # Don't allow assigning a local_path used by another project.
         # Don't allow assigning a local_path when scm_type is set.
         valid_local_paths = Project.get_local_path_choices()
-        scm_type = self._get_scm_type(attrs)
+        if self.object:
+            scm_type = attrs.get('scm_type', self.object.scm_type) or u''
+        else:
+            scm_type = attrs.get('scm_type', u'') or u''
         if self.object and not scm_type:
             valid_local_paths.append(self.object.local_path)
         if scm_type:
@@ -351,71 +348,6 @@ class ProjectSerializer(BaseSerializer):
         if source in attrs and attrs[source] not in valid_local_paths:
             raise serializers.ValidationError('Invalid path choice')
         return attrs
-
-    def validate_scm_type(self, attrs, source):
-        scm_type = self._get_scm_type(attrs, source)
-        attrs[source] = scm_type
-        return attrs
-
-    def validate_scm_url(self, attrs, source):
-        scm_type = self._get_scm_type(attrs)
-        scm_url = unicode(attrs.get(source, None) or '')
-        if not scm_type:
-            return attrs
-        try:
-            scm_url = update_scm_url(scm_type, scm_url)
-        except ValueError, e:
-            raise serializers.ValidationError((e.args or ('Invalid SCM URL',))[0])
-        scm_url_parts = urlparse.urlsplit(scm_url)
-        if scm_type and not any(scm_url_parts):
-            raise serializers.ValidationError('SCM URL is required')
-        return attrs
-
-    #def validate_scm_username(self, attrs, source):
-    #    if self.object:
-    #        scm_type = attrs.get('scm_type', self.object.scm_type) or ''
-    #        scm_url = unicode(attrs.get('scm_url', self.object.scm_url) or '')
-    #        scm_username = attrs.get('scm_username', self.object.scm_username) or ''
-    #    else:
-    #        scm_type = attrs.get('scm_type', '') or ''
-    #        scm_url = unicode(attrs.get('scm_url', '') or '')
-    #        scm_username = attrs.get('scm_username', '') or ''
-    #    if not scm_type:
-    #        return attrs
-    #    try:
-    #        if scm_url and scm_username:
-    #            update_scm_url(scm_type, scm_url, scm_username)
-    #    except ValueError, e:
-    #        raise serializers.ValidationError((e.args or ('Invalid SCM username',))[0])
-    #    return attrs
-
-    #def validate_scm_password(self, attrs, source):
-    #    if self.object:
-    #        scm_type = attrs.get('scm_type', self.object.scm_type) or ''
-    #        scm_url = unicode(attrs.get('scm_url', self.object.scm_url) or '')
-    #        scm_username = attrs.get('scm_username', self.object.scm_username) or ''
-    #        scm_password = attrs.get('scm_password', self.object.scm_password) or ''
-    #    else:
-    #        scm_type = attrs.get('scm_type', '') or ''
-    #        scm_url = unicode(attrs.get('scm_url', '') or '')
-    #        scm_username = attrs.get('scm_username', '') or ''
-    #        scm_password = attrs.get('scm_password', '') or ''
-    #    if not scm_type:
-    #        return attrs
-    #    try:
-    #        try:
-    #            if scm_url and scm_username:
-    #                update_scm_url(scm_type, scm_url, scm_username)
-    #        except ValueError:
-    #            pass
-    #        else:
-    #            if scm_url and scm_username and scm_password:
-    #                update_scm_url(scm_type, scm_url, scm_username, '**')
-    #    except ValueError, e:
-    #        raise serializers.ValidationError((e.args or ('Invalid SCM password',))[0])
-    #    return attrs
-    
-    # FIXME: Validate combination of SCM URL and credential!
 
 
 class ProjectPlaybooksSerializer(ProjectSerializer):

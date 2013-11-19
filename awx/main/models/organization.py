@@ -255,6 +255,22 @@ class Credential(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:credential_detail', args=(self.pk,))
 
+    def clean_username(self):
+        username = self.username or ''
+        if not username and self.kind == 'aws':
+            raise ValidationError('Access key required for "aws" credential')
+        if not username and self.kind == 'rax':
+            raise ValidationError('Username required for "rax" credential')
+        return username
+
+    def clean_password(self):
+        password = self.password or ''
+        if not password and self.kind == 'aws':
+            raise ValidationError('Secret key required for "aws" credential')
+        if not password and self.kind == 'rax':
+            raise ValidationError('API key required for "rax" credential')
+        return password
+
     def clean_ssh_key_unlock(self):
         if self.pk:
             ssh_key_data = decrypt_field(self, 'ssh_key_data')

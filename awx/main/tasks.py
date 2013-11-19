@@ -337,6 +337,16 @@ class RunJob(BaseTask):
         except ValueError:
             pass
 
+        # Set environment variables for cloud credentials.
+        cloud_cred = job.cloud_credential
+        if cloud_cred and cloud_cred.kind == 'aws':
+            env['AWS_ACCESS_KEY'] = cloud_cred.username
+            env['AWS_SECRET_KEY'] = decrypt_field(cloud_cred, 'password')
+            # FIXME: Add EC2_URL, maybe EC2_REGION!
+        elif cloud_cred and cloud_cred.kind == 'rax':
+            env['RAX_USERNAME'] = cloud_cred.username
+            env['RAX_API_KEY'] = decrypt_field(cloud_cred, 'password')
+
         return env
 
     def build_args(self, job, **kwargs):
@@ -523,9 +533,8 @@ class RunProjectUpdate(BaseTask):
                                                                   **kwargs)
         project = project_update.project
         if project.credential:
-            value = decrypt_field(project.credential, 'ssh_key_unlock')
-            if value not in ('', 'ASK'):
-                passwords['scm_key_unlock'] = value
+            passwords['scm_key_unlock'] = decrypt_field(project.credential,
+                                                        'ssh_key_unlock')
             passwords['scm_username'] = project.credential.username
             passwords['scm_password'] = decrypt_field(project.credential,
                                                      'password')
@@ -549,36 +558,26 @@ class RunProjectUpdate(BaseTask):
         extra_vars = {}
         project = project_update.project
         scm_type = project.scm_type
-        scm_url = update_scm_url(scm_type, project.scm_url)
+        scm_url = update_scm_url(scm_type, project.scm_url,
+                                 check_special_cases=False)
         scm_url_parts = urlparse.urlsplit(scm_url)
         scm_username = kwargs.get('passwords', {}).get('scm_username', '')
-        scm_username = scm_username or scm_url_parts.username or ''
         scm_password = kwargs.get('passwords', {}).get('scm_password', '')
-        scm_password = scm_password or scm_url_parts.password or ''
-        if scm_username and scm_password not in ('ASK', ''):
+        # Prefer the username/password in the URL, if provided.
+        scm_username = scm_url_parts.username or scm_username or ''
+        scm_password = scm_url_parts.password or scm_password or ''
+        if scm_username:
             if scm_type == 'svn':
                 # FIXME: Need to somehow escape single/double quotes in username/password
                 extra_vars['scm_username'] = scm_username
                 extra_vars['scm_password'] = scm_password
-                if scm_url_parts.scheme == 'svn+ssh':
-                    scm_url = update_scm_url(scm_type, scm_url, scm_username, False)
-                else:
-                    scm_url = update_scm_url(scm_type, scm_url, False, False)
+                scm_password = False
+                if scm_url_parts.scheme != 'svn+ssh':
+                    scm_username = False
             elif scm_url_parts.scheme == 'ssh':
-                scm_url = update_scm_url(scm_type, scm_url, scm_username, False)
-            else:
-                scm_url = update_scm_url(scm_type, scm_url, scm_username,
-                                         scm_password)
-        elif scm_username:
-            if scm_type == 'svn':
-                extra_vars['scm_username'] = scm_username
-                extra_vars['scm_password'] = ''
-                if scm_url_parts.scheme == 'svn+ssh':
-                    scm_url = update_scm_url(scm_type, scm_url, scm_username, False)
-                else:
-                    scm_url = update_scm_url(scm_type, scm_url, False, False)
-            else:  
-                scm_url = update_scm_url(scm_type, scm_url, scm_username, False)
+                scm_password = False
+            scm_url = update_scm_url(scm_type, scm_url, scm_username,
+                                     scm_password)
         return scm_url, extra_vars
 
     def build_args(self, project_update, **kwargs):
@@ -604,7 +603,6 @@ class RunProjectUpdate(BaseTask):
             'scm_clean': project.scm_clean,
             'scm_delete_on_update': scm_delete_on_update,
         })
-        #print extra_vars
         args.extend(['-e', json.dumps(extra_vars)])
         args.append('project_update.yml')
 

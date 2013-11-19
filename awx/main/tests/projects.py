@@ -512,9 +512,11 @@ class ProjectsTest(BaseTest):
 
         # Test with encrypted ssh key and no unlock password.
         with self.current_user(self.super_django_user):
-            data = dict(name='zyx', user=self.super_django_user.pk, kind='ssh',
+            data = dict(name='wxy', user=self.super_django_user.pk, kind='ssh',
                         ssh_key_data=TEST_SSH_KEY_DATA_LOCKED)
             self.post(url, data, expect=400)
+            data['ssh_key_unlock'] = TEST_SSH_KEY_DATA_UNLOCK
+            self.post(url, data, expect=201)
 
         # FIXME: Check list as other users.
 
@@ -784,18 +786,19 @@ class ProjectUpdatesTest(BaseTransactionTest):
             ('hg', 'https://user:pass@host.xz/path/to/repo/#rev', None, 'https://testuser:pass@host.xz/path/to/repo/#rev', 'https://testuser:testpass@host.xz/path/to/repo/#rev'),
             ('hg', 'https://user:pass@host.xz:8443/path/to/repo#rev', None, 'https://testuser:pass@host.xz:8443/path/to/repo#rev', 'https://testuser:testpass@host.xz:8443/path/to/repo#rev'),
             # - ssh://[user@]host[:port]/[path][#revision]
-            ('hg', 'ssh://host.xz/path/to/repo/', None, 'ssh://testuser@host.xz/path/to/repo/', ValueError),
-            ('hg', 'ssh://host.xz:1022/path/to/repo', None, 'ssh://testuser@host.xz:1022/path/to/repo', ValueError),
-            ('hg', 'ssh://user@host.xz/path/to/repo/', None, 'ssh://testuser@host.xz/path/to/repo/', ValueError),
-            ('hg', 'ssh://user@host.xz:1022/path/to/repo', None, 'ssh://testuser@host.xz:1022/path/to/repo', ValueError),
-            ('hg', 'ssh://user:pass@host.xz/path/to/repo/', ValueError, ValueError, ValueError),
-            ('hg', 'ssh://user:pass@host.xz:1022/path/to/repo', ValueError, ValueError, ValueError),
-            ('hg', 'ssh://host.xz/path/to/repo/#rev', None, 'ssh://testuser@host.xz/path/to/repo/#rev', ValueError),
-            ('hg', 'ssh://host.xz:1022/path/to/repo#rev', None, 'ssh://testuser@host.xz:1022/path/to/repo#rev', ValueError),
-            ('hg', 'ssh://user@host.xz/path/to/repo/#rev', None, 'ssh://testuser@host.xz/path/to/repo/#rev', ValueError),
-            ('hg', 'ssh://user@host.xz:1022/path/to/repo#rev', None, 'ssh://testuser@host.xz:1022/path/to/repo#rev', ValueError),
-            ('hg', 'ssh://user:pass@host.xz/path/to/repo/#rev', ValueError, ValueError, ValueError),
-            ('hg', 'ssh://user:pass@host.xz:1022/path/to/repo#rev', ValueError, ValueError, ValueError),
+            # Password is always stripped out for hg when using SSH.
+            ('hg', 'ssh://host.xz/path/to/repo/', None, 'ssh://testuser@host.xz/path/to/repo/', 'ssh://testuser@host.xz/path/to/repo/'),
+            ('hg', 'ssh://host.xz:1022/path/to/repo', None, 'ssh://testuser@host.xz:1022/path/to/repo', 'ssh://testuser@host.xz:1022/path/to/repo'),
+            ('hg', 'ssh://user@host.xz/path/to/repo/', None, 'ssh://testuser@host.xz/path/to/repo/', 'ssh://testuser@host.xz/path/to/repo/'),
+            ('hg', 'ssh://user@host.xz:1022/path/to/repo', None, 'ssh://testuser@host.xz:1022/path/to/repo', 'ssh://testuser@host.xz:1022/path/to/repo'),
+            ('hg', 'ssh://user:pass@host.xz/path/to/repo/', 'ssh://user@host.xz/path/to/repo/', 'ssh://testuser@host.xz/path/to/repo/', 'ssh://testuser@host.xz/path/to/repo/'),
+            ('hg', 'ssh://user:pass@host.xz:1022/path/to/repo', 'ssh://user@host.xz:1022/path/to/repo', 'ssh://testuser@host.xz:1022/path/to/repo', 'ssh://testuser@host.xz:1022/path/to/repo'),
+            ('hg', 'ssh://host.xz/path/to/repo/#rev', None, 'ssh://testuser@host.xz/path/to/repo/#rev', 'ssh://testuser@host.xz/path/to/repo/#rev'),
+            ('hg', 'ssh://host.xz:1022/path/to/repo#rev', None, 'ssh://testuser@host.xz:1022/path/to/repo#rev', 'ssh://testuser@host.xz:1022/path/to/repo#rev'),
+            ('hg', 'ssh://user@host.xz/path/to/repo/#rev', None, 'ssh://testuser@host.xz/path/to/repo/#rev', 'ssh://testuser@host.xz/path/to/repo/#rev'),
+            ('hg', 'ssh://user@host.xz:1022/path/to/repo#rev', None, 'ssh://testuser@host.xz:1022/path/to/repo#rev', 'ssh://testuser@host.xz:1022/path/to/repo#rev'),
+            ('hg', 'ssh://user:pass@host.xz/path/to/repo/#rev', 'ssh://user@host.xz/path/to/repo/#rev', 'ssh://testuser@host.xz/path/to/repo/#rev', 'ssh://testuser@host.xz/path/to/repo/#rev'),
+            ('hg', 'ssh://user:pass@host.xz:1022/path/to/repo#rev', 'ssh://user@host.xz:1022/path/to/repo#rev', 'ssh://testuser@host.xz:1022/path/to/repo#rev', 'ssh://testuser@host.xz:1022/path/to/repo#rev'),
             # Special case for bitbucket URLs:
             ('hg', 'ssh://hg@bitbucket.org/foo/bar', None, ValueError, ValueError),
             ('hg', 'ssh://hg@altssh.bitbucket.org:443/foo/bar', None, ValueError, ValueError),
@@ -842,7 +845,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
                         (isinstance(e, type) and issubclass(e, Exception)))
         for url_opts in urls_to_test:
             scm_type, url, new_url, new_url_u, new_url_up = url_opts
-            #print url
+            #print scm_type, url
             new_url = new_url or url
             new_url_u = new_url_u or url
             new_url_up = new_url_up or url
@@ -1078,6 +1081,78 @@ class ProjectUpdatesTest(BaseTransactionTest):
             else:
                 self.check_project_update(project, should_fail=should_still_fail)
 
+    def test_create_project_with_scm(self):
+        scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
+                          'https://github.com/ansible/ansible.github.com.git')
+        if not all([scm_url]):
+            self.skipTest('no public git repo defined for https!')
+        projects_url = reverse('api:project_list')
+        credentials_url = reverse('api:credential_list')
+        # Test basic project creation without a credential.
+        project_data = {
+            'name': 'my public git project over https',
+            'scm_type': 'git',
+            'scm_url': scm_url,
+        }
+        with self.current_user(self.super_django_user):
+            self.post(projects_url, project_data, expect=201)
+        # Test with an invalid URL.
+        project_data = {
+            'name': 'my local git project',
+            'scm_type': 'git',
+            'scm_url': 'file:///path/to/repo.git',
+        }
+        with self.current_user(self.super_django_user):
+            self.post(projects_url, project_data, expect=400)
+        # Test creation with a credential.
+        credential_data = {
+            'name': 'my scm credential',
+            'kind': 'scm',
+            'user': self.super_django_user.pk,
+            'username': 'testuser',
+            'password': 'testpass',
+        }
+        with self.current_user(self.super_django_user):
+            response = self.post(credentials_url, credential_data, expect=201)
+            credential_id = response['id']
+        project_data = {
+            'name': 'my git project over https with credential',
+            'scm_type': 'git',
+            'scm_url': scm_url,
+            'credential': credential_id,
+        }
+        with self.current_user(self.super_django_user):
+            self.post(projects_url, project_data, expect=201)
+        # Test creation with an invalid credential type.
+        ssh_credential_data = {
+            'name': 'my ssh credential',
+            'kind': 'ssh',
+            'user': self.super_django_user.pk,
+            'username': 'testuser',
+            'password': 'testpass',
+        }
+        with self.current_user(self.super_django_user):
+            response = self.post(credentials_url, ssh_credential_data,
+                                 expect=201)
+            ssh_credential_id = response['id']
+        project_data = {
+            'name': 'my git project with invalid credential type',
+            'scm_type': 'git',
+            'scm_url': scm_url,
+            'credential': ssh_credential_id,
+        }
+        with self.current_user(self.super_django_user):
+            self.post(projects_url, project_data, expect=400)
+        # Test special case for github/bitbucket URLs.
+        project_data = {
+            'name': 'my github project over ssh',
+            'scm_type': 'git',
+            'scm_url': 'ssh://git@github.com/ansible/ansible.github.com.git',
+            'credential': credential_id,
+        }
+        with self.current_user(self.super_django_user):
+            self.post(projects_url, project_data, expect=201)
+
     def test_public_git_project_over_https(self):
         scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
                           'https://github.com/ansible/ansible.github.com.git')
@@ -1142,8 +1217,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_password=scm_password,
         )
         should_error = bool('github.com' in scm_url and scm_username != 'git')
-        self.check_project_update(project2, should_fail=True,
-                                  should_error=should_error)
+        self.check_project_update(project2, should_fail=None)#,
+                                  #should_error=should_error)
 
     def create_local_git_repo(self):
         repo_dir = tempfile.mkdtemp()
