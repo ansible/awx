@@ -104,7 +104,7 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
        setUserInfo: function(response) {
            // store the response values in $rootScope so we can get to them later
            $rootScope.current_user = response.results[0];
-           $cookieStore.put('current_user', response.results[0]);    //keep in session cookie incase user hits refresh
+           $cookieStore.put('current_user', response.results[0]);    //keep in session cookie in the event of browser refresh
            },
 
        restoreUserInfo: function() {
@@ -113,7 +113,14 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
 
        getUserInfo: function(key) {
            // Access values returned from the Me API call
-           return ($rootScope.current_user[key]) ? $rootScope.current_user[key] : null;
+           if ($rootScope.current_user ) {
+              return $rootScope.current_user[key]
+           }
+           else {
+              this.restoreUserInfo();
+              var cu = $cookieStore.get('current_user');
+              return cu[key];
+           }
            }
     }
 }]);

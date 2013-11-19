@@ -96,6 +96,7 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
                  Authorization.getUser()
                      .success(function(data, status, headers, config) {
                          Authorization.setUserInfo(data);
+                         $rootScope['user_is_superuser'] = data.results[0].is_superuser;
                          Authorization.getLicense()
                              .success(function(data, status, headers, config) {
                                  Authorization.setLicense(data['license_info']);

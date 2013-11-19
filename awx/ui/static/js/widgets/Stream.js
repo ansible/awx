@@ -8,7 +8,7 @@
  */
 
 angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', 'SearchHelper', 'PaginateHelper',
-        'RefreshHelper', 'ListGenerator', 'StreamWidget'])
+        'RefreshHelper', 'ListGenerator', 'StreamWidget', 'AuthService'])
     
     .factory('setStreamHeight', [ function() {
     return function() {
@@ -20,7 +20,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         }
         }])
 
-    .factory('ShowStream', [ 'setStreamHeight', function(setStreamHeight) {
+    .factory('ShowStream', [ 'setStreamHeight', 'Authorization', function(setStreamHeight, Authorization) {
     return function() {
         // Slide in the Stream widget
         

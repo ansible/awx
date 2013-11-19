@@ -16,6 +16,17 @@ angular.module('PermissionFormDefinition', [])
         name: 'permission',                                     //entity or model name in singular form
         well: true,                                             //Wrap the form with TB well/           
 
+        stream: {
+                'class': "btn-primary btn-xs activity-btn",
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                dataPlacement: "top",
+                icon: "icon-comments-alt",
+                mode: 'edit',
+                iconSize: 'large',
+                ngShow: "user_is_superuser"
+                },
+                
         fields: {
             category: {
                 label: 'Permission Type',

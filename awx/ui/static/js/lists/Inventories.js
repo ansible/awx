@@ -96,7 +96,8 @@ angular.module('InventoriesListDefinition', [])
                 dataPlacement: "top",
                 icon: "icon-comments-alt",
                 mode: 'all',
-                iconSize: 'large'
+                iconSize: 'large',
+                ngShow: "user_is_superuser"
                 }
             },
 

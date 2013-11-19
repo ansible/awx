@@ -208,6 +208,10 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
        var scope = generator.inject(form, {mode: 'edit', related: true});
        generator.reset();
       
+        if (scope.removePostRefresh) {
+           scope.removePostRefresh();
+        }
+
        scope.PermissionAddAllowed =  false; 
 
        // After the Organization is loaded, retrieve each related set

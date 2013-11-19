@@ -50,6 +50,16 @@ angular.module('PermissionListDefinition', [])
                 "class": 'btn-success btn-xs',
                 awToolTip: 'Add a new permission',
                 ngShow: 'PermissionAddAllowed'
+                },
+            stream: {
+                'class': "btn-primary btn-xs activity-btn",
+                ngClick: "showActivity()",
+                awToolTip: "View Activity Stream",
+                dataPlacement: "top",
+                icon: "icon-comments-alt",
+                mode: 'all',
+                iconSize: 'large',
+                ngShow: "user_is_superuser"
                 }
             },
 

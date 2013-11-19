@@ -24,7 +24,8 @@ angular.module('InventoryFormDefinition', [])
                 dataPlacement: "top",
                 icon: "icon-comments-alt",
                 mode: 'edit',
-                iconSize: 'large'
+                iconSize: 'large',
+                ngShow: "user_is_superuser"
                 }    
             },
         

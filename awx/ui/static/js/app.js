@@ -301,7 +301,7 @@ angular.module('ansible', [
                }
                CheckLicense();
             }
-
+            
             // Make the correct tab active
             var base = $location.path().replace(/^\//,'').split('/')[0];
             if (base == '') {
@@ -318,6 +318,10 @@ angular.module('ansible', [
            $rootScope.sessionExpired = false;
            $cookieStore.put('sessionExpired', false);
            $location.path('/login');
+        }
+        else {
+           // If browser refresh, set the user_is_superuser value
+           $rootScope['user_is_superuser'] = Authorization.getUserInfo('is_superuser');
         }
         
         // If browser refresh, activate the correct tab
