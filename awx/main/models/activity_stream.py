@@ -42,5 +42,3 @@ class ActivityStream(models.Model):
 
     def get_absolute_url(self):
         return reverse('api:activity_stream_detail', args=(self.pk,))
-
-print ActivityStream._meta.app_label
