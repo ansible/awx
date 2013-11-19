@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import base64
 import contextlib
 import datetime
 import json
@@ -175,7 +176,11 @@ class BaseTestMixin(object):
         auth = auth or self._current_auth
         if auth:
             if isinstance(auth, (list, tuple)):
-                client.login(username=auth[0], password=auth[1])
+                #client.login(username=auth[0], password=auth[1])
+                basic_auth = base64.b64encode('%s:%s' % (auth[0], auth[1]))
+                basic_auth = basic_auth.decode('ascii')
+                client_kwargs['HTTP_AUTHORIZATION'] = 'Basic %s' % basic_auth
+                client = Client(**client_kwargs)
             elif isinstance(auth, basestring):
                 client_kwargs['HTTP_AUTHORIZATION'] = 'Token %s' % auth
                 client = Client(**client_kwargs)

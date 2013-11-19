@@ -130,6 +130,7 @@ class ApiV1ConfigView(APIView):
 
 class AuthTokenView(APIView):
 
+    authentication_classes = []
     permission_classes = (AllowAny,)
     serializer_class = AuthTokenSerializer
     model = AuthToken
