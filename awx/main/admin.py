@@ -1,9 +1,13 @@
 # Copyright (c) 2013 AnsibleWorks, Inc.
 # All Rights Reserved.
 
+# Django admin isn't officially supported!
+
+# Python
 import json
 import urllib
 
+# Django
 from django.conf.urls import *
 from django.contrib import admin
 from django.contrib.admin.util import unquote
@@ -15,6 +19,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
 
+# AWX
 from awx.lib.compat import format_html
 from awx.main.models import *
 from awx.main.forms import *

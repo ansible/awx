@@ -117,7 +117,6 @@ ROOT_URLCONF = 'awx.urls'
 WSGI_APPLICATION = 'awx.wsgi.application'
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.messages',
@@ -133,6 +132,8 @@ INSTALLED_APPS = (
     'awx.main',
     'awx.api',
     'awx.ui',
+    # Django admin is disabled and not supported by default.
+    #'django.contrib.admin',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
@@ -144,7 +145,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
         'awx.api.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        #'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'awx.api.permissions.ModelAccessPermission',

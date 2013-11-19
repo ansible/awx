@@ -22,7 +22,13 @@ if 'django.contrib.admin' in settings.INSTALLED_APPS:
 
 if settings.DEBUG:
     urlpatterns += patterns('awx.main.views',
-        url(r'^(?:admin/)?403.html$', 'handle_403'),
-        url(r'^(?:admin/)?404.html$', 'handle_404'),
-        url(r'^(?:admin/)?500.html$', 'handle_500'),
+        url(r'^403.html$', 'handle_403'),
+        url(r'^404.html$', 'handle_404'),
+        url(r'^500.html$', 'handle_500'),
     )
+    if 'django.contrib.admin' in settings.INSTALLED_APPS:
+        urlpatterns += patterns('awx.main.views',
+            url(r'^admin/403.html$', 'handle_403'),
+            url(r'^admin/404.html$', 'handle_404'),
+            url(r'^admin/500.html$', 'handle_500'),
+        )
