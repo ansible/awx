@@ -979,7 +979,12 @@ class ActivityStreamSerializer(BaseSerializer):
     def get_changes(self, obj):
         if obj is None:
             return {}
-        return json.loads(obj.changes)
+        try:
+            d_changes = json.loads(obj.changes)
+            return d_changes
+        except Exception, e:
+            logger.warn("Error deserializing activity stream json changes")
+        return {}
 
     def get_related(self, obj):
         if obj is None:
