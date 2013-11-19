@@ -1041,7 +1041,7 @@ class JobJobEventsList(BaseJobEventsList):
     authentication_classes = [JobTaskAuthentication] + \
                              api_settings.DEFAULT_AUTHENTICATION_CLASSES
     permission_classes = (JobTaskPermission,)
-    
+
     # Post allowed for job event callback only.
     def post(self, request, *args, **kwargs):
         parent_obj = get_object_or_404(self.parent_model, pk=self.kwargs['pk'])
@@ -1073,8 +1073,8 @@ class ActivityStreamList(SimpleListAPIView):
                 type_qs = get_user_queryset(self.request.user, eval(this_type))
                 ids = [t.id for t in type_qs]
                 if len(ids) > 0:
-                    all_qs = all_qs | (Q(object1_type=this_type) & Q(object1_id__in=ids)) #ActivityStream.objects.filter(object1_type=this_type, object1_id__in=ids)
-                    all_qs = all_qs | (Q(object2_type=this_type) & Q(object2_id__in=ids)) #ActivityStream.objects.filter(object2_type=this_type, object2_id__in=ids)
+                    all_qs = all_qs | (Q(object1_type=this_type) & Q(object1_id__in=ids))
+                    all_qs = all_qs | (Q(object2_type=this_type) & Q(object2_id__in=ids))
             except Exception, e:
                 logger.warn("Error: " + str(e))
                 continue
