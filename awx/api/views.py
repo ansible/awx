@@ -32,6 +32,7 @@ from rest_framework import status
 from awx.main.licenses import LicenseReader
 from awx.main.models import *
 from awx.main.utils import *
+from awx.main.access import get_user_queryset
 from awx.api.authentication import JobTaskAuthentication
 from awx.api.permissions import *
 from awx.api.serializers import *
@@ -1060,6 +1061,25 @@ class ActivityStreamList(SimpleListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
+
+    def get_queryset(self):
+        initial_qs = super(ActivityStreamList, self).get_queryset()
+        all_qs = Q()
+        all_obj1_types = [x.object1_type for x in ActivityStream.objects.order_by('object1_type').distinct('object1_type')]
+        all_obj2_types = [x.object2_type for x in ActivityStream.objects.order_by('object2_type').distinct('object2_type')]
+        all_types = list(set(all_obj1_types + all_obj2_types))
+        for this_type in all_types:
+            try:
+                type_qs = get_user_queryset(self.request.user, eval(this_type))
+                ids = [t.id for t in type_qs]
+                if len(ids) > 0:
+                    all_qs = all_qs | (Q(object1_type=this_type) & Q(object1_id__in=ids)) #ActivityStream.objects.filter(object1_type=this_type, object1_id__in=ids)
+                    all_qs = all_qs | (Q(object2_type=this_type) & Q(object2_id__in=ids)) #ActivityStream.objects.filter(object2_type=this_type, object2_id__in=ids)
+            except Exception, e:
+                logger.warn("Error: " + str(e))
+                continue
+        initial_qs = initial_qs.filter(all_qs)
+        return initial_qs
 
 class ActivityStreamDetail(RetrieveAPIView):
 

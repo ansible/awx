@@ -35,14 +35,14 @@ class ActivityStreamTest(BaseTest):
         self.organization.projects.add(self.project)
         self.organization.users.add(self.normal_django_user)
 
-    def test_get_activity_stream_list(self):
-        url = self.collection()
+    # def test_get_activity_stream_list(self):
+    #     url = self.collection()
 
-        with self.current_user(self.normal_django_user):
-            self.options(url, expect=200)
-            self.head(url, expect=200)
-            response = self.get(url, expect=200)
-            self.check_pagination_and_size(response, 4, previous=None, next=None)
+    #     with self.current_user(self.normal_django_user):
+    #         self.options(url, expect=200)
+    #         self.head(url, expect=200)
+    #         response = self.get(url, expect=200)
+    #         self.check_pagination_and_size(response, 4, previous=None, next=None)
 
     def test_basic_fields(self):
         org_item = self.item(self.organization.id)
