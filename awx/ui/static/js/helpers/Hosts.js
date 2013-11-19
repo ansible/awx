@@ -242,8 +242,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                   data['variables'] = JSON.stringify(json_data, undefined, '\t');
                }
 
-               data['enabled'] = (scope['enabled'] == "true") ? true : false;
-
                Rest.setUrl(defaultUrl);
                Rest.post(data)
                    .success( function(data, status, headers, config) {
@@ -354,8 +352,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                        relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
                     }
                 }
-                scope['enabled'] = (data['enabled']) ? "true" : "false";
-                master['enabled'] = scope['enabled'];
                 scope.variable_url = data.related.variable_data;
                 scope.$emit('hostLoaded');
                 })
@@ -407,8 +403,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                 else {
                    data['variables'] = JSON.stringify(json_data, undefined, '\t');
                 }
-
-                data['enabled'] = (scope['enabled'] == "true") ? true : false;
 
                 Rest.setUrl(defaultUrl);
                 Rest.put(data)

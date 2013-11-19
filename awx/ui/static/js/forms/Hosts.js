@@ -41,14 +41,10 @@ angular.module('HostFormDefinition', [])
                 },
             enabled: {
                 label: 'Enabled?',
-                type: 'radio',
+                type: 'checkbox',
                 addRequired: false,
                 editRequired: false,
-                options: [
-                    { label: 'Yes', value: 'true'},
-                    { label: 'No', value: 'false' }
-                    ],
-                "default": "true",
+                "default": true,
                 awPopOver: "<p>Indicates if a host is available and should be included in running jobs.</p><p>For hosts that " +
                     "are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
                 dataTitle: 'Host Enabled',
