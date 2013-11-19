@@ -13,7 +13,6 @@ angular.module('InventoryFormDefinition', [])
         addTitle: 'Create Inventory',
         editTitle: '{{ inventory_name | capitalize }}',
         name: 'inventory',
-        parseTypeName: 'inventoryParseType',
         well: true,
 
         actions: {
@@ -79,6 +78,7 @@ angular.module('InventoryFormDefinition', [])
                 'class': 'span12',
                 addRequired: false,
                 editRequird: false, 
+                parseTypeName: 'inventoryParseType',
                 rows: 10,
                 "default": "---",
                 awPopOver: "<p>Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
