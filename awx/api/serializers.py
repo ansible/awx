@@ -969,10 +969,17 @@ class JobEventSerializer(BaseSerializer):
 
 class ActivityStreamSerializer(BaseSerializer):
 
+    changes = serializers.SerializerMethodField('get_changes')
+
     class Meta:
         model = ActivityStream
         fields = ('id', 'url', 'related', 'summary_fields', 'timestamp', 'operation', 'changes',
                   'object1_id', 'object1', 'object1_type', 'object2_id', 'object2', 'object2_type', 'object_relationship_type')
+
+    def get_changes(self, obj):
+        if obj is None:
+            return {}
+        return json.loads(obj.changes)
 
     def get_related(self, obj):
         if obj is None:
