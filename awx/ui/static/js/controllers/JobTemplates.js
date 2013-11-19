@@ -40,7 +40,7 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
     LoadBreadCrumbs();
     
     scope.showActivity = function() { Stream(); }
-    
+
     scope.addJobTemplate = function() {
        $location.path($location.path() + '/add');
        }
@@ -418,12 +418,34 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
            }
        }
        });
-   
+
+   if (scope.cloudCredentialReadyRemove) {
+      scope.cloudCredentialReadyRemove();
+   }
+   scope.cloudCredentialReadyRemove = scope.$on('cloudCredentialReady', function(e, name) {
+       scope['cloud_credential_name'] = name;
+       master['cloud_credential_name'] = name;
+       // Clone the CredentialList object for use with cloud_credential. Cloning
+       // and changing properties to avoid collision.
+       var CloudCredentialList = {};
+       jQuery.extend(true, CloudCredentialList, CredentialList);
+       CloudCredentialList.name = 'cloudcredentials',
+       CloudCredentialList.iterator = 'cloudcredential',
+       LookUpInit({
+           url: GetBasePath('credentials') + '?cloud=true',
+           scope: scope,
+           form: form,
+           current_item: scope['cloud_credential'],
+           list: CloudCredentialList, 
+           field: 'cloud_credential' 
+           });
+       });
+
    // Retrieve each related set and populate the playbook list
    if (scope.jobTemplateLoadedRemove) {
       scope.jobTemplateLoadedRemove();
    }
-   scope.jobTemplateLoadedRemove = scope.$on('jobTemplateLoaded', function() {
+   scope.jobTemplateLoadedRemove = scope.$on('jobTemplateLoaded', function(e, related_cloud_credential) {
        for (var set in relatedSets) {
            scope.search(relatedSets[set].iterator);
        }
@@ -437,7 +459,18 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
            check_field: 'allow_callbacks',
            default_val: dft
            });
-    
+       
+       if (related_cloud_credential) {
+           Rest.setUrl(related_cloud_credential);
+           Rest.get()
+               .success( function(data, status, headers, config) {
+                   scope.$emit('cloudCredentialReady', data.name);
+                   })
+               .error( function(data, status, headers, config) {
+                   ProcessErrors(scope, data, status, null,
+                       { hdr: 'Error!', msg: 'Failed to related cloud credential. GET returned status: ' + status });
+                   });
+       }
        });
 
    // Retrieve detail record and prepopulate the form
@@ -511,22 +544,6 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                field: 'credential' 
                });
 
-           // Clone the CredentialList object for use with cloud_credential. Cloning
-           // and changing properties to avoid collision.
-           var CloudCredentialList = {};
-           jQuery.extend(true, CloudCredentialList, CredentialList);
-           CloudCredentialList.name = 'cloudcredentials',
-           CloudCredentialList.iterator = 'cloudcredential',
-
-           LookUpInit({
-               url: GetBasePath('credentials') + '?cloud=true',
-               scope: scope,
-               form: form,
-               current_item: data.cloud_credential,
-               list: CloudCredentialList, 
-               field: 'cloud_credential' 
-               });
-
            LookUpInit({
                scope: scope,
                form: form,
@@ -538,7 +555,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
            // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
            RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
            RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
-           scope.$emit('jobTemplateLoaded');
+           scope.$emit('jobTemplateLoaded', data.related.cloud_credential);
            })
        .error( function(data, status, headers, config) {
            ProcessErrors(scope, data, status, form,
