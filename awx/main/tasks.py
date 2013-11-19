@@ -409,8 +409,8 @@ class RunJob(BaseTask):
         d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
         d[re.compile(r'^Bad passphrase, try again for .*:\s*?$', re.M)] = ''
         d[re.compile(r'^sudo password.*:\s*?$', re.M)] = 'sudo_password'
-        d[re.compile(r'^SSH password:\s*?$', re.M)] = 'password'
-        d[re.compile(r'^Password:\s*?$', re.M)] = 'password'
+        d[re.compile(r'^SSH password:\s*?$', re.M)] = 'ssh_password'
+        d[re.compile(r'^Password:\s*?$', re.M)] = 'ssh_password'
         return d
 
     def pre_run_check(self, job, **kwargs):
