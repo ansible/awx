@@ -47,6 +47,7 @@ class UsersTest(BaseTest):
 
     def test_auth_token_login(self):
         auth_token_url = reverse('api:auth_token_view')
+        user_me_url = reverse('api:user_me_list')
 
         # Always returns a 405 for any GET request, regardless of credentials.
         self.get(auth_token_url, expect=405, auth=None)
@@ -69,16 +70,26 @@ class UsersTest(BaseTest):
         auth_token = response['token']
 
         # Verify we can access our own user information with the auth token.
-        response = self.get(reverse('api:user_me_list'), expect=200,
-                            auth=auth_token)
+        response = self.get(user_me_url, expect=200, auth=auth_token)
+        self.assertEquals(response['results'][0]['username'], 'normal')
+        self.assertEquals(response['count'], 1)
+
+        # If basic auth is passed via the Authorization header and the UI also
+        # passes token auth via the X-Auth-Token header, the API should favor
+        # the X-Auth-Token value.
+        mixed_auth = {
+            'basic': self.get_super_credentials(),
+            'token': auth_token,
+        }
+        response = self.get(user_me_url, expect=200, auth=mixed_auth)
         self.assertEquals(response['results'][0]['username'], 'normal')
         self.assertEquals(response['count'], 1)
 
         # If we simulate a different remote address, should not be able to use
         # the first auth token.
         remote_addr = '127.0.0.2'
-        response = self.get(reverse('api:user_me_list'), expect=401,
-                            auth=auth_token, remote_addr=remote_addr)
+        response = self.get(user_me_url, expect=401, auth=auth_token,
+                            remote_addr=remote_addr)
         self.assertEqual(response['detail'], 'Invalid token')
 
         # The WWW-Authenticate header should specify Token auth, since that
@@ -97,45 +108,42 @@ class UsersTest(BaseTest):
 
         # Verify we can access our own user information with the second auth
         # token from the other remote address.
-        response = self.get(reverse('api:user_me_list'), expect=200,
-                            auth=auth_token2, remote_addr=remote_addr)
+        response = self.get(user_me_url, expect=200, auth=auth_token2,
+                            remote_addr=remote_addr)
         self.assertEquals(response['results'][0]['username'], 'normal')
         self.assertEquals(response['count'], 1)
 
         # The second auth token also can't be used from the first address, but
         # the first auth token is still valid from its address.
-        response = self.get(reverse('api:user_me_list'), expect=401,
-                                    auth=auth_token2)
+        response = self.get(user_me_url, expect=401, auth=auth_token2)
         self.assertEqual(response['detail'], 'Invalid token')
         response_header = response.response.get('WWW-Authenticate', '')
         self.assertEqual(response_header.split()[0], 'Token')
-        response = self.get(reverse('api:user_me_list'), expect=200,
-                                    auth=auth_token)
+        response = self.get(user_me_url, expect=200, auth=auth_token)
 
         # A request without authentication should ask for Basic by default.
-        response = self.get(reverse('api:user_me_list'), expect=401)
+        response = self.get(user_me_url, expect=401)
         response_header = response.response.get('WWW-Authenticate', '')
         self.assertEqual(response_header.split()[0], 'Basic')
         
         # A request that attempts Basic auth should request Basic auth again.
-        response = self.get(reverse('api:user_me_list'), expect=401,
-                                    auth=('invalid', 'password'))
+        response = self.get(user_me_url, expect=401,
+                            auth=('invalid', 'password'))
         response_header = response.response.get('WWW-Authenticate', '')
         self.assertEqual(response_header.split()[0], 'Basic')
 
         # Invalidate a key (simulate expiration), now token auth should fail
         # with the first token, but still work with the second.
         self.normal_django_user.auth_tokens.get(key=auth_token).invalidate()
-        response = self.get(reverse('api:user_me_list'), expect=401,
-                            auth=auth_token)
+        response = self.get(user_me_url, expect=401, auth=auth_token)
         self.assertEqual(response['detail'], 'Token is expired')
-        response = self.get(reverse('api:user_me_list'), expect=200,
-                            auth=auth_token2, remote_addr=remote_addr)
+        response = self.get(user_me_url, expect=200, auth=auth_token2,
+                            remote_addr=remote_addr)
 
         # Token auth should be denied if the user is inactive.
         self.normal_django_user.mark_inactive()
-        response = self.get(reverse('api:user_me_list'), expect=401,
-                            auth=auth_token2, remote_addr=remote_addr)
+        response = self.get(user_me_url, expect=401, auth=auth_token2,
+                            remote_addr=remote_addr)
         self.assertEqual(response['detail'], 'User inactive or deleted')
 
     def test_ordinary_user_can_modify_some_fields_about_himself_but_not_all_and_passwords_work(self):

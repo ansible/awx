@@ -85,7 +85,12 @@ class APIView(views.APIView):
                 continue
             if resp_hdr.split()[0] and resp_hdr.split()[0] == req_hdr.split()[0]:
                 return resp_hdr
-        return super(APIView, self).get_authenticate_header(request)
+        # If it can't be determined from the request, use the last
+        # authenticator (should be Basic).
+        try:
+            return authenticator.authenticate_header(request)
+        except NameError:
+            pass
 
     def get_description_context(self):
         return {

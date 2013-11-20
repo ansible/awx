@@ -172,18 +172,29 @@ class BaseTestMixin(object):
             client_kwargs['HTTP_ACCEPT'] = accept
         if remote_addr is not None:
             client_kwargs['REMOTE_ADDR'] = remote_addr
-        client = Client(**client_kwargs)
         auth = auth or self._current_auth
         if auth:
-            if isinstance(auth, (list, tuple)):
+            # Dict is only used to test case when both Authorization and
+            # X-Auth-Token headers are passed.
+            if isinstance(auth, dict):
+                basic = auth.get('basic', ())
+                if basic:
+                    basic_auth = base64.b64encode('%s:%s' % (basic[0], basic[1]))
+                    basic_auth = basic_auth.decode('ascii')
+                    client_kwargs['HTTP_AUTHORIZATION'] = 'Basic %s' % basic_auth
+                token = auth.get('token', '')
+                if token and not basic:
+                    client_kwargs['HTTP_AUTHORIZATION'] = 'Token %s' % token
+                elif token:
+                    client_kwargs['HTTP_X_AUTH_TOKEN'] = 'Token %s' % token
+            elif isinstance(auth, (list, tuple)):
                 #client.login(username=auth[0], password=auth[1])
                 basic_auth = base64.b64encode('%s:%s' % (auth[0], auth[1]))
                 basic_auth = basic_auth.decode('ascii')
                 client_kwargs['HTTP_AUTHORIZATION'] = 'Basic %s' % basic_auth
-                client = Client(**client_kwargs)
             elif isinstance(auth, basestring):
                 client_kwargs['HTTP_AUTHORIZATION'] = 'Token %s' % auth
-                client = Client(**client_kwargs)
+        client = Client(**client_kwargs)
         method = getattr(client, method_name)
         response = None
         if data is not None:
