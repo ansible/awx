@@ -20,7 +20,7 @@ angular.module('GroupFormDefinition', [])
         formFieldSize: 'col-lg-9',
         
         titleActions: {
-            copy_action: {
+            /*copy_action: {
                 'class': 'btn-success btn-xs',
                 ngClick: "addGroup()",
                 ngHide: "groupAddHide",
@@ -29,7 +29,7 @@ angular.module('GroupFormDefinition', [])
                 ngDisabled: "grpBtnDisable",
                 icon: "icon-check",
                 label: 'Copy'
-                },
+                },*/
             create_action: {
                 'class': 'btn-success btn-xs',
                 ngClick: "createGroup()",
