@@ -33,6 +33,7 @@ class ActivityStreamMiddleware(object):
             for instance in self.instances:
                 if self.cached_user is not None:
                     instance.user = self.cached_user
+                    instance.save()
                 elif "current_user" in request.COOKIES and "id" in request.COOKIES["current_user"]:
                     userInfo = json.loads(urllib2.unquote(request.COOKIES['current_user']).decode('utf8'))
                     userActual = User.objects.get(id=int(userInfo['id']))
