@@ -533,10 +533,10 @@ class ProjectsTest(BaseTest):
         self.put(edit_creds1, data=d_cred_user, expect=401, auth=self.get_invalid_credentials())
         self.put(edit_creds1, data=d_cred_user, expect=200, auth=self.get_super_credentials())
         self.put(edit_creds1, data=d_cred_user, expect=200, auth=self.get_normal_credentials())
-        # editing a credential to edit the user record is not legal, this is a test of the .validate
-        # method on the serializer to allow 'write once' fields
-        self.put(edit_creds1, data=d_cred_user2, expect=403, auth=self.get_normal_credentials())
-        cred_put_u = self.put(edit_creds1, data=d_cred_user, expect=200, auth=self.get_other_credentials())
+
+        # We now allow credential to be reassigned (with the right permissions).
+        cred_put_u = self.put(edit_creds1, data=d_cred_user2, expect=200, auth=self.get_normal_credentials())
+        self.put(edit_creds1, data=d_cred_user, expect=403, auth=self.get_other_credentials())
 
         self.put(edit_creds2, data=d_cred_team, expect=401)
         self.put(edit_creds2, data=d_cred_team, expect=401, auth=self.get_invalid_credentials())

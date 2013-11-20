@@ -524,14 +524,6 @@ class CredentialAccess(BaseAccess):
         return False
 
     def can_change(self, obj, data):
-        # Prevent moving a credential to a different user.
-        user_pk = get_pk_from_dict(data, 'user')
-        if obj and user_pk and obj.user and obj.user.pk != user_pk:
-            raise PermissionDenied('Unable to change user on a credential')
-        # Prevent moving a credential to a different team.
-        team_pk = get_pk_from_dict(data, 'team')
-        if obj and team_pk and obj.team and obj.team.pk != team_pk:
-            raise PermissionDenied('Unable to change team on a credential')
         if self.user.is_superuser:
             return True
         if self.user == obj.created_by:
