@@ -70,6 +70,15 @@ def get_view_description(cls, html=False):
 
 class APIView(views.APIView):
 
+    def initialize_request(self, request, *args, **kwargs):
+        '''
+        Store the Django REST Framework Request object as an attribute on the
+        normal Django request.
+        '''
+        drf_request = super(APIView, self).initialize_request(request, *args, **kwargs)
+        request.drf_request = drf_request
+        return drf_request
+
     def get_authenticate_header(self, request):
         """
         Determine the WWW-Authenticate header to use for 401 responses.  Try to

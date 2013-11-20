@@ -24,6 +24,9 @@ class ActivityStreamMiddleware(object):
         post_save.connect(set_actor, sender=ActivityStream, dispatch_uid=self.disp_uid, weak=False)
 
     def process_response(self, request, response):
+        drf_request = getattr(request, 'drf_request', None)
+        drf_user = getattr(drf_request, 'user', None)
+        # FIXME: Associate the user above from Django REST framework with instances.
         post_save.disconnect(dispatch_uid=self.disp_uid)
         self.finished = True
         if self.isActivityStreamEvent:
