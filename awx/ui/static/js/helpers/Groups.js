@@ -328,10 +328,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('InventoryStatus', [ '$rootScope', '$routeParams', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
         'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'HelpDialog',
-        'InventorySummaryHelp', 'BuildTree', 'ClickNode', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus',
+        'InventorySummaryHelp', 'BuildTree', 'ClickNode', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus', 'Wait',
     function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, 
         SearchInit, PaginateInit, Refresh, InventoryUpdate, GroupsEdit, HelpDialog, InventorySummaryHelp, BuildTree, ClickNode,
-        HostsStatusMsg, UpdateStatusMsg, ViewUpdateStatus) {
+        HostsStatusMsg, UpdateStatusMsg, ViewUpdateStatus, Wait) {
     return function(params) {
         //Build a summary of a given inventory
         
@@ -544,6 +544,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                          scope.sourcePasswordLabel = 'Password'; 
                          scope.sourcePasswordConfirmLabel = 'Confirm Password';
                       }*/
+                      Wait('start');
                       Rest.setUrl(scope.groups[i].related.inventory_source);
                       Rest.get()
                           .success( function(data, status, headers, config) {
@@ -556,6 +557,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                                   });
                               })
                           .error( function(data, status, headers, config) {
+                              Wait('stop');
                               ProcessErrors(scope, data, status, form,
                                   { hdr: 'Error!', msg: 'Failed to retrieve inventory source: ' + scope.groups[i].related.inventory_source + 
                                   ' POST returned status: ' + status });

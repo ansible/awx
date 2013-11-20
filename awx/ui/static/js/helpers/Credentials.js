@@ -102,9 +102,7 @@ angular.module('CredentialsHelper', ['Utilities'])
         var mode = params.mode; // add or edit
         var form = CredentialForm;
         var data = {}
-        
-        Wait('start');
-
+      
         for (var fld in form.fields) {
             if (fld !== 'access_key' && fld !== 'secret_key' && fld !== 'ssh_username' &&
                 fld !== 'ssh_password') {
@@ -149,6 +147,7 @@ angular.module('CredentialsHelper', ['Utilities'])
                 'user, select a User. To allow a team of users to access this credential, select a Team.', 'alert-danger');  
         }
         else {
+            Wait('start');
             if (mode == 'add') {
                 var url = (!Empty(data.team)) ? GetBasePath('teams') + data.team + '/credentials/' : 
                     GetBasePath('users') + data.user + '/credentials/';

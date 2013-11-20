@@ -103,6 +103,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             }
         
         if (passwords && passwords.length > 0) {
+           Wait('stop');
            // Prompt for passwords
            html += "<form class=\"form-horizontal\" name=\"password_form\" novalidate>\n";
            html += (extra_html) ? extra_html : "";
@@ -195,9 +196,9 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         }])
     
     .factory('SubmitJob',['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'CredentialList',
-    'LookUpInit', 'CredentialForm', 'ProcessErrors',
+    'LookUpInit', 'CredentialForm', 'ProcessErrors', 'JobTemplateForm', 'Wait',
     function(PromptPasswords, $compile, Rest, $location, GetBasePath, CredentialList, LookUpInit, CredentialForm,
-        ProcessErrors) {
+        ProcessErrors, JobTemplateForm, Wait) {
     return function(params) {
         var scope = params.scope; 
         var id = params.id;
@@ -213,6 +214,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             var dt = new Date().toISOString();
             var url = (data.related.jobs) ? data.related.jobs : data.related.job_template + 'jobs/';
             var name = (template_name) ? template_name : data.name;
+            Wait('start');
             Rest.setUrl(url);
             Rest.post({
                 name: name + ' ' + dt,        // job name required and unique
@@ -228,6 +230,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 extra_vars: data.extra_vars
                 })
                 .success( function(data, status, headers, config) {
+                    Wait('stop');
                     scope.job_id = data.id;
                     if (data.passwords_needed_to_start.length > 0) {
                        // Passwords needed. Prompt for passwords, then start job.
@@ -240,9 +243,11 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                     }
                     else {
                        // No passwords needed, start the job!
+                       Wait('start');
                        Rest.setUrl(data.related.start); 
                        Rest.post()
                            .success( function(data, status, headers, config) {
+                               Wait('stop');
                                var base = $location.path().replace(/^\//,'').split('/')[0];
                                if (base == 'jobs') {
                                   scope.refresh();
@@ -252,21 +257,25 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                                }
                                })
                            .error( function(data, status, headers, config) { 
+                               Wait('stop');
                                ProcessErrors(scope, data, status, null,
                                    { hdr: 'Error!', msg: 'Failed to start job. POST returned status: ' + status });
                                });
                     }
                     })
                 .error( function(data, status, headers, config) {
+                    Wait('stop');
                     ProcessErrors(scope, data, status, null,
                        { hdr: 'Error!', msg: 'Failed to create job. POST returned status: ' + status });
                     });
             };
         
         // Get the job or job_template record
+        Wait('start');
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
+                Wait('stop');
                 // Create a job record
                 scope.credential = '';
                 if (data.credential == '' || data.credential == null) {
@@ -300,6 +309,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 }
             })
             .error( function(data, status, headers, config) {
+                Wait('stop');
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get job template details. GET returned status: ' + status });
             });
@@ -308,8 +318,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
     
     // Sumbit SCM Update request
     .factory('ProjectUpdate',['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert',
-        'ProjectsForm',
-    function(PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, ProjectsForm) { 
+        'ProjectsForm', 'Wait',
+    function(PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, ProjectsForm, Wait) { 
     return function(params) {
         var scope = params.scope; 
         var project_id = params.project_id;
@@ -340,9 +350,11 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             });
         
         // Check to see if we have permission to perform the update and if any passwords are needed
+        Wait('start');
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
+                Wait('stop');
                 if (data.can_update) {
                    var extra_html = '';
                    for (var i=0; i < scope.projects.length; i++) {
@@ -381,6 +393,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 }   
             })
             .error( function(data, status, headers, config) {
+                Wait('stop');
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get project update details: ' +  url + ' GET status: ' + status });
             });
@@ -390,8 +403,8 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
 
     // Sumbit Inventory Update request
     .factory('InventoryUpdate',['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert', 
-        'GroupForm', 'BuildTree',
-    function(PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, GroupForm, BuildTree) { 
+        'GroupForm', 'BuildTree', 'Wait',
+    function(PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, GroupForm, BuildTree, Wait) { 
     return function(params) {
         
         var scope = params.scope; 
@@ -442,6 +455,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             });
         
         // Check to see if we have permission to perform the update and if any passwords are needed
+        Wait('start');
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
@@ -451,11 +465,13 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                    scope.$emit('InventorySubmit', data.passwords_needed_to_update);
                 } 
                 else {
+                   Wait('stop');
                    Alert('Permission Denied', 'You do not have access to run the update. Please contact your system administrator.', 
                        'alert-danger');
                 }   
             })
             .error( function(data, status, headers, config) {
+                Wait('stop');
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get inventory_source details. ' + url + 'GET status: ' + status });
             });

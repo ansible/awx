@@ -378,8 +378,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
               }).fadeIn(400);
        }
        else if (directive == 'stop' && $rootScope.waiting){
-          $rootScope.waiting = false;
-          $('.spinny, .overlay').fadeOut(500);
+          $('.spinny, .overlay').fadeOut(800, function(){ $rootScope.waiting = false; });
        }
        }
        }])

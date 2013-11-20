@@ -298,7 +298,6 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
    // Save
    scope.formSave = function() {
        generator.clearApiErrors();
-       Wait('start');
        var data = {};
        for (var fld in form.fields) {
            if (form.fields[fld].type == 'checkbox_group') {
@@ -321,6 +320,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
        }
 
        var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
+       Wait('start');
        Rest.setUrl(url);
        Rest.post(data)
            .success( function(data, status, headers, config) {
@@ -335,6 +335,7 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
                        (base == 'projects') ? ReturnToCaller() : ReturnToCaller(1);
                        })
                    .error( function(data, status, headers, config) {
+                       Wait('stop');
                        ProcessErrors(scope, data, status, ProjectsForm,
                            { hdr: 'Error!', msg: 'Failed to add organization to project. POST returned status: ' + status });
                        });
