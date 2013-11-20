@@ -521,12 +521,12 @@ class CredentialAccess(BaseAccess):
     def can_add(self, data):
         if self.user.is_superuser:
             return True
-        if 'user' in data:
-            user_pk = get_pk_from_dict(data, 'user')
+        user_pk = get_pk_from_dict(data, 'user')
+        if user_pk:
             user_obj = get_object_or_400(User, pk=user_pk)
             return self.user.can_access(User, 'change', user_obj, None)
-        if 'team' in data:
-            team_pk = get_pk_from_dict(data, 'team')
+        team_pk = get_pk_from_dict(data, 'team')
+        if team_pk:
             team_obj = get_object_or_400(Team, pk=team_pk)
             return self.user.can_access(Team, 'change', team_obj, None)
         return False
@@ -534,6 +534,8 @@ class CredentialAccess(BaseAccess):
     def can_change(self, obj, data):
         if self.user.is_superuser:
             return True
+        if not self.can_add(data):
+            return False
         if self.user == obj.created_by:
             return True
         if obj.user:

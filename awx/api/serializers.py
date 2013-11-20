@@ -746,7 +746,6 @@ class PermissionSerializer(BaseSerializer):
             res['inventory']   = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         return res
 
-
     def validate(self, attrs):
         # Can only set either user or team.
         if attrs['user'] and attrs['team']:

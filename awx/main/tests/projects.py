@@ -518,6 +518,19 @@ class ProjectsTest(BaseTest):
             data['ssh_key_unlock'] = TEST_SSH_KEY_DATA_UNLOCK
             self.post(url, data, expect=201)
 
+        # Test post as organization admin where team is part of org, but user
+        # creating credential is not a member of the team.  UI may pass user
+        # as an empty string instead of None.
+        normal_org = self.normal_django_user.admin_of_organizations.all()[0]
+        org_team = normal_org.teams.create(name='new empty team')
+        with self.current_user(self.normal_django_user):
+            data = {
+                'name': 'my team cred',
+                'team': org_team.pk,
+                'user': '',
+            }
+            self.post(url, data, expect=201)
+
         # FIXME: Check list as other users.
 
         # can edit a credential
