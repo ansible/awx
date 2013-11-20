@@ -222,8 +222,11 @@ class DashboardView(APIView):
         team_list = get_user_queryset(request.user, Team)
         credential_list = get_user_queryset(request.user, Credential)
         job_template_list = get_user_queryset(request.user, JobTemplate)
+        organization_list = get_user_queryset(request.user, Organization)
         data['users'] = {'url': reverse('api:user_list'),
                          'total': user_list.count()}
+        data['organizations'] = {'url': reverse('api:organization_list'),
+                                 'total': organization_list.count()}
         data['team'] = {'url': reverse('api:team_list'),
                         'total': team_list.count()}
         data['credentials'] = {'url': reverse('api:credential_list'),
