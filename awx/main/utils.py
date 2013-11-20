@@ -270,7 +270,7 @@ def model_to_dict(obj):
     attr_d = {}
     for field in obj._meta.fields:
         # FIXME: This needs to be aware of fields not to be included in the AS delta log
-        if field not in Credential.PASSWORD_FIELDS:
+        if field.name not in Credential.PASSWORD_FIELDS:
             attr_d[field.name] = str(getattr(obj, field.name, None))
         else:
             attr_d[field.name] = "hidden"
