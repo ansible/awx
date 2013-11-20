@@ -1,11 +1,15 @@
 from django.conf import settings
 from django.contrib.auth.models import User, AnonymousUser
 from django.db.models.signals import pre_save, post_save
+from django.db import IntegrityError
 from django.utils.functional import curry
 from awx.main.models import ActivityStream, AuthToken
 import json
 import uuid
 import urllib2
+
+import logging
+logger = logging.getLogger('awx.main.middleware')
 
 class ActivityStreamMiddleware(object):
 
@@ -28,10 +32,20 @@ class ActivityStreamMiddleware(object):
         post_save.disconnect(dispatch_uid=self.disp_uid)
         self.finished = True
         if self.isActivityStreamEvent:
-            for instance in self.instances:
+            for instance_id in self.instances:
+                instance = ActivityStream.objects.filter(id=instance_id)
+                if instance.exists():
+                    instance = instance[0]
+                else:
+                    logger.debug("Failed to look up Activity Stream instance for id : " + str(instance_id))
+                    continue
+
                 if drf_user is not None and drf_user.__class__ != AnonymousUser:
                     instance.user = drf_user
-                    instance.save()
+                    try:
+                        instance.save()
+                    except IntegrityError, e:
+                        logger.debug("Integrity Error saving Activity Stream instance for id : " + str(instance_id))
                 else:
                     obj1_type_actual = instance.object1_type.split(".")[-1]
                     if obj1_type_actual in ("InventoryUpdate", "ProjectUpdate", "JobEvent", "Job") and instance.id is not None:
@@ -44,8 +58,8 @@ class ActivityStreamMiddleware(object):
                 if isinstance(user, User) and instance.user is None:
                     instance.user = user
                 else:
-                    if instance not in self.instances:
+                    if instance.id not in self.instances:
                         self.isActivityStreamEvent = True
-                        self.instances.append(instance)
+                        self.instances.append(instance.id)
             else:
                 self.isActivityStreamEvent = False
