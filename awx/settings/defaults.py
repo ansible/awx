@@ -292,6 +292,33 @@ ANSIBLE_PARAMIKO_RECORD_HOST_KEYS = False
 # the celery task.
 AWX_TASK_ENV = {}
 
+# Not possible to get list of regions without authenticating, so use this list
+# instead (based on docs from:
+# http://docs.rackspace.com/loadbalancers/api/v1.0/clb-devguide/content/Service_Access_Endpoints-d1e517.html)
+RAX_REGION_CHOICES = [
+    ('ORD', 'Chicago'),
+    ('DFW', 'Dallas/Ft. Worth'),
+    ('IAD', 'Northern Virginia'),
+    ('LON', 'London'),
+    ('SYD', 'Sydney'),
+    ('HKG', 'Hong Kong'),
+]
+
+# AWS does not appear to provide pretty region names via any API, so store the
+# list of names here.  The available region IDs will be pulled from boto.
+# http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region
+EC2_REGION_NAMES = {
+    'us-east-1': 'US East (Northern Virginia)',
+    'us-west-2': 'US West (Oregon)',
+    'us-west-1': 'US West (Northern California)',
+    'eu-west-1': 'EU (Ireland)',
+    'ap-southeast-1': 'Asia Pacific (Singapore)',
+    'ap-southeast-2': 'Asia Pacific (Sydney)',
+    'ap-northeast-1': 'Asia Pacific (Tokyo)',
+    'sa-east-1': 'South America (Sao Paulo)',
+    'us-gov-west-1': 'US West (GovCloud)',
+}
+
 # Internal API URL for use by inventory scripts and callback plugin.
 if 'devserver' in INSTALLED_APPS:
     INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT

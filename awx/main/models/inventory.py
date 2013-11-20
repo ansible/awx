@@ -561,6 +561,36 @@ class InventorySource(PrimordialModel):
         editable=False,
     )
 
+    @classmethod
+    def get_ec2_region_choices(cls):
+        ec2_region_names = getattr(settings, 'EC2_REGION_NAMES', {})
+        ec2_name_replacements = {
+            'us': 'US',
+            'ap': 'Asia Pacific',
+            'eu': 'Europe',
+            'sa': 'South America',
+        }
+        import boto.ec2
+        regions = [('all', 'All')]
+        for region in boto.ec2.regions():
+            label = ec2_region_names.get(region.name, '')
+            if not label:
+                label_parts = []
+                for part in region.name.split('-'):
+                    part = ec2_name_replacements.get(part.lower(), part.title())
+                    label_parts.append(part)
+                label = ' '.join(label_parts)
+            regions.append((region.name, label))
+        return regions
+
+    @classmethod
+    def get_rax_region_choices(cls):
+        # Not possible to get rax regions without first authenticating, so use
+        # list from settings.
+        regions = list(getattr(settings, 'RAX_REGION_CHOICES', []))
+        regions.insert(0, ('ALL', 'All'))
+        return regions
+
     def clean_credential(self):
         if not self.source:
             return None
@@ -575,6 +605,31 @@ class InventorySource(PrimordialModel):
         elif self.source in ('ec2', 'rax'):
             raise ValidationError('Credential is required for a cloud source')
         return cred
+
+    def clean_source_regions(self):
+        regions = self.source_regions
+        if self.source == 'ec2':
+            valid_regions = [x[0] for x in self.get_ec2_region_choices()]
+            region_transform = lambda x: x.strip().lower()
+        elif self.source == 'rax':
+            valid_regions = [x[0] for x in self.get_rax_region_choices()]
+            region_transform = lambda x: x.strip().upper()
+        else:
+            return ''
+        all_region = region_transform('all')
+        valid_regions = [region_transform(x) for x in valid_regions]
+        regions = [region_transform(x) for x in regions.split(',') if x.strip()]
+        if all_region in regions:
+            return all_region
+        invalid_regions = []
+        for r in regions:
+            if r not in valid_regions and r not in invalid_regions:
+                invalid_regions.append(r)
+        if invalid_regions:
+            raise ValidationError('Invalid %s region%s: %s' % (self.source,
+                                  '' if len(invalid_regions) == 1 else 's',
+                                  ', '.join(invalid_regions)))
+        return ','.join(regions)
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)

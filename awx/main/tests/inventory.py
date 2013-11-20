@@ -1030,6 +1030,116 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.assertFalse(re.match(r'^i-[0-9a-f]{8}$', group.name, re.I),
                              group.name)
 
+    def test_put_inventory_source_detail_with_regions(self):
+        creds_url = reverse('api:credential_list')
+        inv_src_url1 = reverse('api:inventory_source_detail',
+                               args=(self.group.inventory_source.pk,))
+        inv_src_url2 = reverse('api:inventory_source_detail',
+                               args=(self.group2.inventory_source.pk,))
+        # Create an AWS credential to use for first inventory source.
+        aws_cred_data = {
+            'name': 'AWS key that does not need to have valid info because '
+                    'we do not care if the update actually succeeds',
+            'kind': 'aws',
+            'user': self.super_django_user.pk,
+            'username': 'aws access key id goes here',
+            'password': 'aws secret access key goes here',
+        }
+        with self.current_user(self.super_django_user):
+            aws_cred_response = self.post(creds_url, aws_cred_data, expect=201)
+        aws_cred_id = aws_cred_response['id']
+        # Create a RAX credential to use for second inventory source.
+        rax_cred_data = {
+            'name': 'RAX cred that does not need to have valid info because '
+                    'we do not care if the update actually succeeds',
+            'kind': 'rax',
+            'user': self.super_django_user.pk,
+            'username': 'rax username',
+            'password': 'rax api key',
+        }
+        with self.current_user(self.super_django_user):
+            rax_cred_response = self.post(creds_url, rax_cred_data, expect=201)
+        rax_cred_id = rax_cred_response['id']
+        # Verify the options request gives ec2 and rax region choices.
+        with self.current_user(self.super_django_user):
+            response = self.options(inv_src_url1, expect=200)
+            self.assertTrue('ec2_region_choices' in response['actions']['GET']['source_regions'])
+            self.assertTrue('rax_region_choices' in response['actions']['GET']['source_regions'])
+        # Updaate the first inventory source to use EC2 with empty regions.
+        inv_src_data = {
+            'source': 'ec2',
+            'credential': aws_cred_id,
+            'source_regions': '',
+        }
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
+            self.assertEqual(response['source_regions'], '')
+        # All region.
+        inv_src_data['source_regions'] = 'ALL'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
+            self.assertEqual(response['source_regions'], 'all')
+        # Invalid region.
+        inv_src_data['source_regions'] = 'us-north-99'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=400)
+        # All takes precedence over any other regions.
+        inv_src_data['source_regions'] = 'us-north-99,,all'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
+            self.assertEqual(response['source_regions'], 'all')
+        # Valid region.
+        inv_src_data['source_regions'] = 'us-west-1'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
+            self.assertEqual(response['source_regions'], 'us-west-1')
+        # Invalid region (along with valid one).
+        inv_src_data['source_regions'] = 'us-west-1, us-north-99'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=400)
+        # Valid regions.
+        inv_src_data['source_regions'] = 'us-west-1, us-east-1, '
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url1, inv_src_data, expect=200)
+            self.assertEqual(response['source_regions'], 'us-west-1,us-east-1')
+        # Updaate the second inventory source to use RAX with empty regions.
+        inv_src_data = {
+            'source': 'rax',
+            'credential': rax_cred_id,
+            'source_regions': '',
+        }
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url2, inv_src_data, expect=200)
+            self.assertEqual(response['source_regions'], '')
+        # All region.
+        inv_src_data['source_regions'] = 'all'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url2, inv_src_data, expect=200)
+            self.assertEqual(response['source_regions'], 'ALL')
+        # Invalid region.
+        inv_src_data['source_regions'] = 'RDU'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url2, inv_src_data, expect=400)
+        # All takes precedence over any other regions.
+        inv_src_data['source_regions'] = 'RDU,,all'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url2, inv_src_data, expect=200)
+            self.assertEqual(response['source_regions'], 'ALL')
+        # Valid region.
+        inv_src_data['source_regions'] = 'dfw'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url2, inv_src_data, expect=200)
+            self.assertEqual(response['source_regions'], 'DFW')
+        # Invalid region (along with valid one).
+        inv_src_data['source_regions'] = 'dfw, rdu'
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url2, inv_src_data, expect=400)
+        # Valid regions.
+        inv_src_data['source_regions'] = 'ORD, iad, '
+        with self.current_user(self.super_django_user):
+            response = self.put(inv_src_url2, inv_src_data, expect=200)
+            self.assertEqual(response['source_regions'], 'ORD,IAD')
+
     def test_post_inventory_source_update(self):
         creds_url = reverse('api:credential_list')
         inv_src_url = reverse('api:inventory_source_detail',
