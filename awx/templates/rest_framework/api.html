@@ -1,7 +1,7 @@
 {% extends 'rest_framework/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans 'AWX REST API' %}{% endblock %}
+{% block title %}{{ name }} &middot; {% trans 'AWX REST API' %}{% endblock %}
 
 {% block style %}
 {{ block.super }}
@@ -101,6 +101,7 @@ html body .description {
   font-size: 0.8em;
   text-align: center;
   padding-bottom: 1em;
+  line-height: 1.6em;
 }
 #footer a,
 #footer a:hover {
@@ -125,7 +126,7 @@ html body #push {
 {% endblock %}
 
 {% block branding %}
-  <a class="brand" href="/api/"><img class="logo" src="{{ STATIC_URL }}img/logo.png">{% trans 'REST API' %}</a>
+  <a class="brand" href="/api/"><img class="logo" src="{{ STATIC_URL }}img/logo.png">{% block branding_title %}{% trans 'REST API' %}{% endblock %}</a>
 {% endblock %}
 
 {% block userlinks %}
@@ -139,8 +140,9 @@ html body #push {
 {% block footer %}
 <div id="footer">
   <img class="awxlogo" src="{{ STATIC_URL }}img/AWX_logo.png" /><br/>
-  Copyright &copy; 2013 <a href="http://www.ansibleworks.com/">AnsibleWorks, Inc.</a> All rights reserved.<br />
-  1482 East Valley Road, Suite 888 &middot; Montecito, California, 93108 &middot; <a href="tel:18008250212">+1-800-825-0212<a/></div>
+  Copyright &copy; 2013 AnsibleWorks, Inc. All rights reserved.<br />
+  1482 East Valley Road, Suite 888 &middot; Santa Barbara, California 93108 &middot; +1-800-825-0212<br />
+  <a href="http://www.ansibleworks.com" target="_blank">www.ansibleworks.com</a>
 {% endblock %}
 
 {% block script %}

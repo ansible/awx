@@ -1,0 +1,28 @@
+{% extends "rest_framework/api.html" %}
+{% load i18n %}
+
+{% block style %}
+{{ block.super }}
+<style type="text/css">
+ul.breadcrumb {
+  visibility: hidden;
+  margin-top: 10px !important;
+}
+pre.err {
+  margin-bottom: 2em;
+}
+div.request-info, div.response-info {
+  display: none;
+}
+</style>
+{% endblock %}
+
+{% block branding_title %}{% endblock %}
+
+{% block breadcrumbs %}
+<ul class="breadcrumb">
+    <li>
+        <a href="{{ request.get_full_path }}" class="active">{{ name }}</a>
+    </li>
+</ul>
+{% endblock %}
