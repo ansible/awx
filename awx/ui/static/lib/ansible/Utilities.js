@@ -356,7 +356,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        }])
 
    .factory('Wait', [ '$rootScope', function($rootScope) {
-   return function(directive) {
+   return function(directive, callback) {
        // Display a spinning icon in the center of the screen to freeze the 
        // UI while waiting on async things to complete (i.e. API calls).    
        //   Wait('start' | 'stop');
@@ -375,11 +375,11 @@ angular.module('Utilities',['RestServices', 'Utilities'])
           $('.spinny').css({
               top: y, 
               left: x
-              }).fadeIn(400);
+              }).fadeIn(400, callback);
        }
        else {
           $rootScope.waiting = false;
-          $('.spinny, .overlay').fadeOut(1000);
+          $('.spinny, .overlay').fadeOut(500, callback);
        }
        }
        }])

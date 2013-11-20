@@ -79,8 +79,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         }])
     
-    .factory('ViewUpdateStatus', [ 'Rest', 'ProcessErrors', 'GetBasePath', 'ShowUpdateStatus', 'Alert', 
-    function(Rest, ProcessErrors, GetBasePath, ShowUpdateStatus, Alert) {
+    .factory('ViewUpdateStatus', [ 'Rest', 'ProcessErrors', 'GetBasePath', 'ShowUpdateStatus', 'Alert', 'Wait', 
+    function(Rest, ProcessErrors, GetBasePath, ShowUpdateStatus, Alert, Wait) {
         return function(params) {
         
         var scope = params.scope;
@@ -104,14 +104,19 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                   'clicking the Update button.', 'alert-info');
            }
            else {
+              Wait('start');
               Rest.setUrl(group.related.inventory_source);
               Rest.get()
                   .success( function(data, status, headers, config) {
                       var url = (data.related.current_update) ? data.related.current_update : data.related.last_update;
-                      ShowUpdateStatus({ group_name: data.summary_fields.group.name,
-                          last_update: url });
+                      ShowUpdateStatus({ 
+                          group_name: data.summary_fields.group.name,
+                          last_update: url,
+                          license_error: [ (data.summary_fields.last_update && data.summary_fields.last_update.license_error) ? true : false ]
+                          });
                       })
                   .error( function(data, status, headers, config) {
+                      Wait('stop');
                       ProcessErrors(scope, data, status, form,
                           { hdr: 'Error!', msg: 'Failed to retrieve inventory source: ' + group.related.inventory_source + 
                           ' POST returned status: ' + status });
@@ -1120,63 +1125,66 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('ShowUpdateStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm', 'Wait',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
-          FormatDate, InventoryStatusForm) {
+          FormatDate, InventoryStatusForm, Wait) {
     return function(params) {
 
         var group_name = params.group_name;
         var last_update = params.last_update;
         var generator = GenerateForm;
         var form = InventoryStatusForm;
+        var license_error = params.license_error
         var scope;
    
         if (last_update == undefined || last_update == null || last_update == ''){
+            Wait('stop');
             Alert('Missing Configuration', 'The selected group is not configured for inventory updates. ' +
                 'You must first edit the group, provide Source settings, and then run an update.', 'alert-info');
         }
         else {
+            if ($rootScope.removeShowStatus) {
+                $rootScope.removeShowStatus();
+            }
+            $rootScope.removeShowStatus = $rootScope.$on('showStatus', function(e, results) {
+                
+                });
+        
             // Retrieve detail record and prepopulate the form
             Rest.setUrl(last_update);
             Rest.get()
                 .success( function(data, status, headers, config) {
-                    // load up the form
+                    $('#form-modal').on('shown.bs.modal', function() {
+                        Wait('stop');
+                        });
                     scope = generator.inject(form, { mode: 'edit', modal: true, related: false});
                     generator.reset();
-                    var results = data;
                     for (var fld in form.fields) {
-                        if (results[fld]) {
+                        if (data[fld]) {
                            if (fld == 'created') {
-                              scope[fld] = FormatDate(new Date(results[fld]));
+                              scope[fld] = FormatDate(new Date(data[fld]));
                            }
                            else {
-                              scope[fld] = results[fld];
+                              scope[fld] = data[fld];
                            }
                         }
-                        //else {
-                        //   if (results.summary_fields.project[fld]) {
-                        //      scope[fld] = results.summary_fields.project[fld]
-                        //   }
-                        //}
                     }
-                    
+                    scope.license_error = license_error; 
                     scope.formModalAction = function() {
                         $('#form-modal').modal("hide");
                         }
-                    
                     scope.formModalActionLabel = 'OK';
                     scope.formModalCancelShow = false;
                     scope.formModalInfo = false;
                     scope.formModalHeader = group_name + '<span class="subtitle"> - Inventory Update</span>';
-                    
                     $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
                     $('#form-modal').addClass('skinny-modal');
-                    
                     if (!scope.$$phase) {
                        scope.$digest();
                     }
                     })
                 .error( function(data, status, headers, config) {
+                    Wait('stop');
                     $('#form-modal').modal("hide");
                     ProcessErrors(scope, data, status, null,
                         { hdr: 'Error!', msg: 'Failed to retrieve last update: ' + last_update + '. GET status: ' + status });

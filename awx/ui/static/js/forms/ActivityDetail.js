@@ -63,7 +63,7 @@ angular.module('ActivityDetailDefinition', [])
                 },
             changes: {
                 label: 'Changes',
-                type: 'lgtextarea',
+                type: 'textarea',
                 ngHide: "!changes || changes =='' || changes == 'null'",
                 readonly: true
                 }

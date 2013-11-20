@@ -437,10 +437,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        var html = '';
 
        if (field.type == 'alertblock') {
-          html += "<div class=\"alert alert-dismissable " + field['class'] + "\" "; 
+          html += "<div class=\"alert ";
+          html += (field.closeable == undefined || field.closeable == true) ? "alert-dismissable " : "";
+          html += field['class'] + "\" "; 
           html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
           html += ">\n";
-          html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n";
+          html += (field.closeable == undefined || field.closeable == true) ? 
+              "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n" : "";
           html += field.alertTxt;
           html += "</div>\n";
        }
