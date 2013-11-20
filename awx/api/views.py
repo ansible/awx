@@ -164,7 +164,7 @@ class DashboardView(APIView):
         failed_group_inventory = [g.inventory for g in user_groups if g.inventory.has_active_failures]
         group_with_job_failure = 0
         for i in failed_group_inventory:
-            for j in i.jobs:
+            for j in i.jobs.all():
                 if j.failed:
                     group_with_job_failure += 1
                     break
