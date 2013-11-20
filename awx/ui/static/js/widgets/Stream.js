@@ -164,8 +164,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         }
         }])
 
-    .factory('ShowDetail', ['Rest', 'Alert', 'GenerateForm', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'ActivityDetailForm', 'Empty',
-    function(Rest, Alert, GenerateForm, ProcessErrors, GetBasePath, FormatDate, ActivityDetailForm, Empty) {
+    .factory('ShowDetail', ['$rootScope', 'Rest', 'Alert', 'GenerateForm', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'ActivityDetailForm',
+    'Empty',
+    function($rootScope, Rest, Alert, GenerateForm, ProcessErrors, GetBasePath, FormatDate, ActivityDetailForm, Empty) {
     return function(activity_id) {
 
         var generator = GenerateForm;
@@ -180,6 +181,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             .success( function(data, status, headers, config) {
                 // load up the form
                 var results = data;
+                $rootScope.flashMessage = null;
+
                 $('#form-modal').on('show.bs.modal', function (e) {
                     $('#form-modal-body').css({
                         width:'auto',  //probably not needed
@@ -246,7 +249,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         var defaultUrl = GetBasePath('activity_stream');
         var view = GenerateList;
         var base = $location.path().replace(/^\//,'').split('/')[0];
-       
+        
+        $rootScope.flashMessage = null;
+
         if ($location.path() !== '/home') {
            // Restrict what we're looking at based on the path
            var type = (base == 'inventories') ? 'inventory' : base.replace(/s$/,'');
