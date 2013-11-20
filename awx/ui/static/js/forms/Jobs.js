@@ -78,7 +78,11 @@ angular.module('JobFormDefinition', [])
                 addRequired: true,
                 editRequired: true,
                 ngClick: 'lookUpInventory()',
-                column: 1
+                column: 1,
+                awPopOver: "<p>Select the inventory containing the hosts you want this job to manage.</p>",
+                dataTitle: 'Inventory',
+                dataPlacement: 'right',
+                dataContainer: "body"
                 },
             project: {
                 label: 'Project',
@@ -88,7 +92,11 @@ angular.module('JobFormDefinition', [])
                 addRequired: true,
                 editRequired: true,
                 ngClick: 'lookUpProject()',
-                column: 1
+                column: 1,
+                awPopOver: "<p>Select the project containing the playbook you want this job to execute.</p>",
+                dataTitle: 'Project',
+                dataPlacement: 'right',
+                dataContainer: "body"
                 },
             playbook: {
                 label: 'Playbook',
@@ -97,7 +105,11 @@ angular.module('JobFormDefinition', [])
                 id: 'playbook-select',
                 addRequired: true, 
                 editRequired: true,
-                column: 1
+                column: 1,
+                awPopOver: "<p>Select the playbook to be executed by this job.</p>",
+                dataTitle: 'Playbook',
+                dataPlacement: 'right',
+                dataContainer: "body"
                 },
             credential: { // FIXME: Lookup only credentials with kind=ssh
                 label: 'Credential',
@@ -107,7 +119,12 @@ angular.module('JobFormDefinition', [])
                 ngClick: 'lookUpCredential()',
                 addRequired: false, 
                 editRequired: false,
-                column: 1
+                column: 1,
+                awPopOver: "<p>Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " + 
+                 " the username and SSH key or password that Ansbile will need to log into the remote hosts.</p>",
+                dataTitle: 'Credential',
+                dataPlacement: 'right',
+                dataContainer: "body"
                 },
             cloud_credential: { // FIXME: Lookup only credentials with kind=aws/rax
                 label: 'Cloud Credential',
@@ -117,7 +134,12 @@ angular.module('JobFormDefinition', [])
                 ngClick: 'lookUpCredential()',
                 addRequired: false, 
                 editRequired: false,
-                column: 1
+                column: 1,
+                awPopOver: "<p>Selecting an optional cloud credential in the job template will pass along the access credentials to the " +
+                    "running playbook, allowing provisioning into the cloud without manually passing parameters to the included modules.</p>",
+                dataTitle: 'Cloud Credential',
+                dataPlacement: 'right',
+                dataContainer: "body"
                 },
             forks: {
                 label: 'Forks',

@@ -59,6 +59,7 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
    if ($location.path() == '/logout') {
       //if logout request, clear AuthToken and user session data
       Authorization.logout();
+      $location.url('/home');
    }
   
    $rootScope.userLoggedIn = false;             //hide the logout link. if you got here, you're logged out.

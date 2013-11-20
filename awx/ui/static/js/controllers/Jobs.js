@@ -230,12 +230,13 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
           getPlaybooks(scope.project);
        }
        });
+
    
    // Retrieve each related set and populate the playbook list
    if (scope.jobLoadedRemove) {
       scope.jobLoadedRemove();
    }
-   scope.jobLoadedRemove = scope.$on('jobLoaded', function() {
+   scope.jobLoadedRemove = scope.$on('jobLoaded', function(e, related_cloud_credential) {
        
        scope[form.name + 'ReadOnly'] = (scope.status == 'new') ? false : true;
        
@@ -272,6 +273,19 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                //    { hdr: 'Error!', msg: 'Failed to retrieve job: ' + $routeParams.id + '. GET status: ' + status });
                scope['callback_url'] = '<< Job template not found >>';
                });
+
+       if (related_cloud_credential) {
+           //Get the name of the cloud credential
+           Rest.setUrl(related_cloud_credential);
+           Rest.get()
+               .success( function(data, status, headers, config) {
+                   scope['cloud_credential_name'] = data.name;
+                   })
+               .error( function(data, status, headers, config) {
+                   ProcessErrors(scope, data, status, null,
+                       { hdr: 'Error!', msg: 'Failed to related cloud credential. GET returned status: ' + status });
+                   });
+       }
        
        });
 
@@ -289,6 +303,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
        var rows = (n) ? n.length : 1;
        return (rows > 15) ? 15 : rows;
        }
+
 
    // Retrieve detail record and prepopulate the form
    Rest.setUrl(defaultUrl + ':id/'); 
@@ -402,14 +417,6 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
            LookUpInit({
                scope: scope,
                form: form,
-               current_item: data.cloud_credential,
-               list: CredentialList, 
-               field: 'cloud_credential' 
-               });
-
-           LookUpInit({
-               scope: scope,
-               form: form,
                current_item: data.project,
                list: ProjectList, 
                field: 'project'
@@ -419,7 +426,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
            RelatedSearchInit({ scope: scope, form: form, relatedSets: relatedSets });
            RelatedPaginateInit({ scope: scope, relatedSets: relatedSets });
            scope.template_url = data.related.job_template;
-           scope.$emit('jobLoaded');
+           scope.$emit('jobLoaded', data.related.cloud_credential);
            })
        .error( function(data, status, headers, config) {
            ProcessErrors(scope, data, status, form,

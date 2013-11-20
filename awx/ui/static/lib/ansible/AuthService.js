@@ -53,6 +53,7 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
            $cookieStore.remove('token'); 
            $cookieStore.remove('token_expires');
            $cookieStore.remove('current_user');
+           $cookieStore.remove('lastPath');
            $cookieStore.put('userLoggedIn', false);
            $cookieStore.put('sessionExpired', false);
            $rootScope.current_user = {};
@@ -61,6 +62,7 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
            $rootScope.sessionExpired = false;
            $rootScope.token = null;
            $rootScope.token_expires = null;
+           $rootScope.lastPath = '/';
            },
 
        getLicense: function() {
