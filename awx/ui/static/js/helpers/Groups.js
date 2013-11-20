@@ -896,8 +896,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    source_regions: scope['source_regions'],
                    overwrite: scope['overwrite'],
                    overwrite_vars: scope['overwrite_vars'],
-                   update_on_launch: scope['update_on_launch'],
-                   update_interval: scope['update_interval'].value
+                   update_on_launch: scope['update_on_launch']
+                   //update_interval: scope['update_interval'].value
                    };
         
                if (scope['source'].value == 'ec2') {

@@ -159,7 +159,7 @@ angular.module('GroupFormDefinition', [])
                     '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
                 dataContainer: 'body'
                 },
-            update_interval: {
+            /*update_interval: {
                 label: 'Update Interval',
                 type: 'select',
                 ngOptions: 'interval.label for interval in update_interval_options',
@@ -173,7 +173,7 @@ angular.module('GroupFormDefinition', [])
                     "the last run.</p><p>With a value set, task manager will periodically compare the amount of elapsed time from the last run. If enough time " +
                     "has elapsed, it will go ahead and start an inventory update process.</p>",
                 dataContainer: 'body'
-                },
+                },*/
             checkbox_group: {
                 label: 'Update Options',
                 type: 'checkbox_group',
