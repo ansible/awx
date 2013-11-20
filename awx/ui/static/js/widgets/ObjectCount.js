@@ -13,125 +13,100 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
     function($rootScope, $compile, Rest, GetBasePath, ProcessErrors, Wait) {
     return function(params) {
         
-        var current_version; 
-        var scope = $rootScope.$new();
-        var counts = {};
+        var scope = params.scope;
         var target = params.target;
-        var expected;
+        var dashboard = params.dashboard; 
         
-        if (scope.removeCountReady) {
-           scope.removeCountReady();
-        }
-        scope.removeCountReady = scope.$on('countReady', function(e, obj, count) {
-            var keys=[ 'organizations', 'users', 'teams', 'credentials', 'projects', 'inventory', 'groups', 'hosts',
-                'job_templates', 'jobs' ];
-            var html, itm;
-            var cnt = 0;
-            for (itm in counts) {
-                cnt++;
+        
+        var keys=[ 'organizations', 'users', 'teams', 'credentials', 'projects', 'inventories', 'groups', 'hosts',
+            'job_templates', 'jobs' ];
+            
+        html = "<div class=\"panel panel-default\">\n";
+        html += "<div class=\"panel-heading\">System Summary</div>\n";
+        html += "<div class=\"panel-body\">\n";
+        html += "<table class=\"table table-condensed table-hover\">\n";
+        html += "<thead>\n";
+        html += "<tr>\n";
+        html += "<th class=\"col-md-5 col-lg-4\"></th>\n";
+        html += "<th class=\"col-md-1 col-lg-1 text-right\">Total</th>\n";
+        html += "</tr>\n";
+        html += "</thead>\n";
+        html += "<tbody>\n";
+        
+        /*function makeRow(params) {
+            var html = '';
+            var label = params.label;
+            var link = params.link; 
+            var fail_link = params.fail_link;
+            var count = params.count; 
+            var fail = params.fail;
+            
+            html += "<tr><td class=\"capitalize\">\n";
+            html += "<a href=\"/#/";
+            var link;
+            switch(label) {
+                case 'inventory':
+                    link = 'inventories';  
+                    break;
+                case 'hosts':
+                    link = 'home/hosts';
+                    break;
+                case 'groups':
+                    link = 'home/groups';
+                    break;
+                default:
+                    link = label;
+                    break;   
             }
-            if (cnt == expected) {
-               html = "<div class=\"panel panel-default\">\n";
-               html += "<div class=\"panel-heading\">System Summary</div>\n";
-               html += "<div class=\"panel-body\">\n";
-               html += "<table class=\"table table-condensed table-hover\">\n";
-               html += "<thead>\n";
-               html += "<tr>\n";
-               html += "<th class=\"col-md-5 col-lg-4\"></th>\n";
-               html += "<th class=\"col-md-1 col-lg-1 text-right\">Total</th>\n";
-               html += "</tr>\n";
-               html += "</thead>\n";
-               html += "<tbody>\n";
-               for (var i=0; i < keys.length; i++) {
-                   html += "<tr><td class=\"capitalize\">\n";
-                   html += "<a href=\"/#/";
-                   var link;
-                   switch(keys[i]) {
-                       case 'inventory':
-                           link = 'inventories';  
-                           break;
-                       case 'hosts':
-                           link = 'home/hosts';
-                           break;
-                       case 'groups':
-                           link = 'home/groups';
-                           break;
-                       default:
-                           link = keys[i];
-                           break;   
-                   }
-                   html += link;
-                   html += "\"";
-                   html += (keys[i] == 'hosts' || keys[i] == 'groups') ? " class=\"pad-left-sm\" " : "";
-                   html += ">";
-                   if (keys[i] == 'inventory') {
-                      html += 'inventories';
-                   }
-                   else {
-                      html += keys[i].replace(/\_/g,' ');
-                   }
-                   html += "</a></td>\n"
-                   html += "<td class=\"text-right\"><a href=\"/#/";
-                   html += (keys[i] == 'inventory') ? 'inventories' : keys[i];
-                   html += "\">";
-                   html += counts[keys[i]] + "</a></td></tr>\n";
-               }
-               html += "</tbody>\n";
-               html += "</table>\n";
-               html += "</div>\n";
-               html += "</div>\n"
-               var element = angular.element(document.getElementById(target));
-               element.html(html);
-               $compile(element)(scope);
-               $rootScope.$emit('WidgetLoaded');
+            html += link;
+            html += "\"";
+            html += (label == 'hosts' || label == 'groups') ? " class=\"pad-left-sm\" " : "";
+            html += ">";
+            if (label == 'inventory') {
+                html += 'inventories';
             }
-            });
+            else {
+                html += label.replace(/\_/g,' ');
+            }
+            html += "</a></td>\n"
+            html += "<td class=\"text-right\"><a href=\"/#/";
+            html += ( label == 'inventory') ? 'inventories' : label;
+            html += "\">";
+            html += counts[keys[i]] + "</a></td></tr>\n";
+            }
+            */
 
-        var getCount = function (obj) {
-            scope.collection = (obj == 'inventory') ? 'inventories' : obj;
-            var url = current_version + scope.collection + '/'; 
-            Rest.setUrl(url);
-            Rest.get()
-                .success( function(data, status, headers, config) {
-                    counts[obj] = data.count;
-                    scope.$emit('countReady');
-                    })
-                .error( function(data, status, headers, config) {
-                    ProcessErrors(scope, data, status, null,
-                        { hdr: 'Error!', msg: 'Failed to get count for ' + obj + '. GET status: ' + status });
-                    });
-             }
-
-        Rest.setUrl('/api/');
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                
-                current_version = data.current_version;
-                
-                Rest.setUrl(current_version);
-                Rest.get()
-                    .success( function(data, status, headers, config) {
-                        for (var obj in data) {
-                            if (obj == 'me' || obj == 'authtoken' || obj == 'config' || obj == 'inventory_sources') {
-                               delete data[obj]; 
-                            }
-                        }
-                        expected = 0;
-                        for (var obj in data) {
-                            expected++;
-                        }
-                        for (obj in data) {
-                            getCount(obj);
-                        }
-                        })
-                    .error( function(data, status, headers, config) {
-                        ProcessErrors(scope, data, status, null,
-                            { hdr: 'Error!', msg: 'Failed to get ' + current_version + '. GET status: ' + status });
-                        })
-                })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, null,
-                    { hdr: 'Error!', msg: 'Failed to get /api/. GET status: ' + status });
+        function makeRow(params) {
+            var html = '';
+            var label = params.label;
+            var link = params.link; 
+            var count = params.count; 
+            html += "<tr>\n";
+            html += "<td class=\"capitalize\"><a href=\"" + link + "\"";
+            html += (label == 'hosts' || label == 'groups') ? " class=\"pad-left-sm\" " : "";
+            html += ">"  + label.replace(/\_/g,' ') + "</a></td>\n";
+            html += "<td class=\"text-right\">"
+            html += "<a href=\"" + link + "\" >" + count + "</a>";
+            html += "</td></tr>\n";
+            return html; 
+            }      
+        
+        for (var i=0; i < keys.length; i++) {
+            html += makeRow({
+                label: keys[i],
+                link: '/#/' + keys[i],
+                count: [(dashboard[keys[i]] && dashboard[keys[i]].total) ? dashboard[keys[i]].total : 0],
                 });
+        }
+
+        html += "</tbody>\n";
+        html += "</table>\n";
+        html += "</div>\n";
+        html += "</div>\n"
+        var element = angular.element(document.getElementById(target));
+        element.html(html);
+        $compile(element)(scope);
+        scope.$emit('WidgetLoaded');
+        
         }
         }]);
