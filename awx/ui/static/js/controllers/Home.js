@@ -10,43 +10,60 @@
 
 'use strict';
 
-function Home ($routeParams, $scope, $rootScope, $location, Wait, ObjectCount, JobStatus, InventorySyncStatus, SCMSyncStatus, 
-    ClearScope, Stream) {
+function Home ($routeParams, $rootScope, $location, Wait, ObjectCount, JobStatus, InventorySyncStatus, SCMSyncStatus, 
+    ClearScope, Stream, Rest, GetBasePath, ProcessErrors) {
     
     ClearScope('home');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                          //scope.
-
-    var load = function() {
-        var waitCount = 4;
-        var loadedCount = 0;
+    
+    var scope = $rootScope.$new();
+    var waitCount = 4;
+    var loadedCount = 0;
         
-        if (!$routeParams['login']) {
-            // If we're not logging in, start the Wait widget. Otherwise, it's already running.
-            Wait('start');
-        }
-        
-        JobStatus({ target: 'container1' });
-        InventorySyncStatus({ target: 'container2' });
-        SCMSyncStatus({ target: 'container4' });
-        ObjectCount({ target: 'container3' });
-        
-        $rootScope.$on('WidgetLoaded', function() {
-            // Once all the widgets report back 'loaded', turn off Wait widget
-            loadedCount++; 
-            if ( loadedCount == waitCount ) {
-               Wait('stop');
-            }
-            });
-        }
-
-    $rootScope.showActivity = function() { Stream(); } 
-    $rootScope.refresh = function() { load(); }
-
-    load();
+    if (!$routeParams['login']) {
+        // If we're not logging in, start the Wait widget. Otherwise, it's already running.
+        Wait('start');
     }
 
-Home.$inject=[ '$routeParams', '$scope', '$rootScope', '$location', 'Wait', 'ObjectCount', 'JobStatus', 'InventorySyncStatus',
-    'SCMSyncStatus', 'ClearScope', 'Stream'];
+    if (scope.removeWidgetLoaded) {
+        scope.removeWidgetLoaded();
+    }
+    scope.removeWidgetLoaded = scope.$on('WidgetLoaded', function() {
+        // Once all the widgets report back 'loaded', turn off Wait widget
+        loadedCount++; 
+        console.log('count: ' + loadedCount);
+        if ( loadedCount == waitCount ) {
+            Wait('stop');
+        }
+        });
+
+    if (scope.removeDashboardReady) {
+        scope.removeDashboardReady();
+    }
+    scope.removeDashboardReady = scope.$on('dashboardReady', function(e, data) {
+        JobStatus({ scope: scope, target: 'container1', dashboard: data});
+        InventorySyncStatus({ scope: scope, target: 'container2', dashboard: data});
+        SCMSyncStatus({ scope: scope, target: 'container4', dashboard: data});
+        ObjectCount({ scope: scope, target: 'container3', dashboard: data});
+        });
+    
+    scope.showActivity = function() { Stream(); } 
+    scope.refresh = function() { load(); }
+    
+    Rest.setUrl(GetBasePath('dashboard'));
+    Rest.get()
+        .success( function(data, status, headers, config) {
+            scope.$emit('dashboardReady', data);
+        })
+        .error ( function(data, status, headers, config) {
+            Wait('stop');
+            ProcessErrors(scope, data, status, null,
+                { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
+        })
+    }
+
+Home.$inject=[ '$routeParams', '$rootScope', '$location', 'Wait', 'ObjectCount', 'JobStatus', 'InventorySyncStatus',
+    'SCMSyncStatus', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors'];
 
 
 function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, 
