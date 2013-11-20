@@ -1030,6 +1030,93 @@ class InventoryUpdatesTest(BaseTransactionTest):
             self.assertFalse(re.match(r'^i-[0-9a-f]{8}$', group.name, re.I),
                              group.name)
 
+    def test_post_inventory_source_update(self):
+        creds_url = reverse('api:credential_list')
+        inv_src_url = reverse('api:inventory_source_detail',
+                              args=(self.group.inventory_source.pk,))
+        inv_src_update_url = reverse('api:inventory_source_update_view',
+                                     args=(self.group.inventory_source.pk,))
+        # Create a credential to use for this inventory source.
+        aws_cred_data = {
+            'name': 'AWS key that does not need to have valid info because we '
+                    'do not care if the update actually succeeds',
+            'kind': 'aws',
+            'user': self.super_django_user.pk,
+            'username': 'aws access key id goes here',
+            'password': 'aws secret access key goes here',
+        }
+        with self.current_user(self.super_django_user):
+            aws_cred_response = self.post(creds_url, aws_cred_data, expect=201)
+        aws_cred_id = aws_cred_response['id']
+        # Updaate the inventory source to use EC2.
+        inv_src_data = {
+            'source': 'ec2',
+            'credential': aws_cred_id,
+        }
+        with self.current_user(self.super_django_user):
+            self.put(inv_src_url, inv_src_data, expect=200)
+        # Read the inventory source, verify the update URL returns can_update.
+        with self.current_user(self.super_django_user):
+            self.get(inv_src_url, expect=200)
+            response = self.get(inv_src_update_url, expect=200)
+            self.assertTrue(response['can_update'])
+        # Now do the update.
+        with self.current_user(self.super_django_user):
+            self.post(inv_src_update_url, {}, expect=202)
+        # Normal user should be allowed as an org admin.
+        with self.current_user(self.normal_django_user):
+            self.get(inv_src_url, expect=200)
+            response = self.get(inv_src_update_url, expect=200)
+            self.assertTrue(response['can_update'])
+        with self.current_user(self.normal_django_user):
+            self.post(inv_src_update_url, {}, expect=202)
+        # Other user should be denied as only an org user.
+        with self.current_user(self.other_django_user):
+            self.get(inv_src_url, expect=403)
+            response = self.get(inv_src_update_url, expect=403)
+        with self.current_user(self.other_django_user):
+            self.post(inv_src_update_url, {}, expect=403)
+        # If given read permission to the inventory, other user should be able
+        # to see the inventory source and update view, but not start an update.
+        other_perms_url = reverse('api:user_permissions_list',
+                                  args=(self.other_django_user.pk,))
+        other_perms_data = {
+            'name': 'read only inventory permission for other',
+            'user': self.other_django_user.pk,
+            'inventory': self.inventory.pk,
+            'permission_type': 'read',
+        }
+        with self.current_user(self.super_django_user):
+            self.post(other_perms_url, other_perms_data, expect=201)
+        with self.current_user(self.other_django_user):
+            self.get(inv_src_url, expect=200)
+            response = self.get(inv_src_update_url, expect=200)
+        with self.current_user(self.other_django_user):
+            self.post(inv_src_update_url, {}, expect=403)
+        # Once given write permission, the normal user is able to update the
+        # inventory source.
+        other_perms_data = {
+            'name': 'read-write inventory permission for other',
+            'user': self.other_django_user.pk,
+            'inventory': self.inventory.pk,
+            'permission_type': 'write',
+        }
+        with self.current_user(self.super_django_user):
+            self.post(other_perms_url, other_perms_data, expect=201)
+        with self.current_user(self.other_django_user):
+            self.get(inv_src_url, expect=200)
+            response = self.get(inv_src_update_url, expect=200)
+            # FIXME: This is misleading, as an update would fail...
+            self.assertTrue(response['can_update'])
+        with self.current_user(self.other_django_user):
+            self.post(inv_src_update_url, {}, expect=202)
+        # Nobody user should be denied as well.
+        with self.current_user(self.nobody_django_user):
+            self.get(inv_src_url, expect=403)
+            response = self.get(inv_src_update_url, expect=403)
+        with self.current_user(self.nobody_django_user):
+            self.post(inv_src_update_url, {}, expect=403)
+
     def test_update_from_ec2(self):
         source_username = getattr(settings, 'TEST_AWS_ACCESS_KEY_ID', '')
         source_password = getattr(settings, 'TEST_AWS_SECRET_ACCESS_KEY', '')

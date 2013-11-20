@@ -826,6 +826,7 @@ class InventorySourceUpdatesList(SubListAPIView):
 class InventorySourceUpdateView(GenericAPIView):
 
     model = InventorySource
+    is_job_start = True
     new_in_14 = True
 
     def get(self, request, *args, **kwargs):
@@ -838,7 +839,7 @@ class InventorySourceUpdateView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.can_update:
-            inventory_update = obj.update(**request.DATA)
+            inventory_update = obj.update()
             if not inventory_update:
                 return Response({}, status=status.HTTP_400_BAD_REQUEST)
             else:

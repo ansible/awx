@@ -81,6 +81,8 @@ def check_user_access(user, model_class, action, *args, **kwargs):
         access_instance = access_class(user)
         access_method = getattr(access_instance, 'can_%s' % action, None)
         if not access_method:
+            logger.debug('%s.%s not found', access_instance.__class__.__name__,
+                         'can_%s' % action)
             continue
         result = access_method(*args, **kwargs)
         logger.debug('%s.%s %r returned %r', access_instance.__class__.__name__,
@@ -464,6 +466,9 @@ class InventorySourceAccess(BaseAccess):
         else:
             return False
 
+    def can_start(self, obj):
+        return self.can_change(obj, {}) and obj.can_update
+
 class InventoryUpdateAccess(BaseAccess):
     '''
     I can see inventory updates when I can see the inventory source.
@@ -477,6 +482,9 @@ class InventoryUpdateAccess(BaseAccess):
         qs = qs.select_related('created_by', 'group')
         inventory_sources_qs = self.user.get_queryset(InventorySource)
         return qs.filter(inventory_source__in=inventory_sources_qs)
+
+    def can_cancel(self, obj):
+        return self.can_change(obj, {}) and obj.can_cancel
 
 class CredentialAccess(BaseAccess):
     '''
@@ -646,6 +654,9 @@ class ProjectAccess(BaseAccess):
     def can_delete(self, obj):
         return self.can_change(obj, None)
 
+    def can_start(self, obj):
+        return self.can_change(obj, {}) and obj.can_update
+
 class ProjectUpdateAccess(BaseAccess):
     '''
     I can see project updates when I can see the project.
@@ -659,6 +670,9 @@ class ProjectUpdateAccess(BaseAccess):
         qs = qs.select_related('created_by', 'project')
         projects_qs = self.user.get_queryset(Project)
         return qs.filter(project__in=projects_qs)
+
+    def can_cancel(self, obj):
+        return self.can_change(obj, {}) and obj.can_cancel
 
 class PermissionAccess(BaseAccess):
     '''
