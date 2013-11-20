@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_save, post_save
 from django.utils.functional import curry
-from awx.main.models import ActivityStream
+from awx.main.models import ActivityStream, AuthToken
 import json
 import uuid
 import urllib2
@@ -17,6 +17,7 @@ class ActivityStreamMiddleware(object):
             user = None
 
         self.instances = []
+        self.cached_user = None
         set_actor = curry(self.set_actor, user)
         self.disp_uid = str(uuid.uuid1())
         self.finished = False
@@ -27,11 +28,22 @@ class ActivityStreamMiddleware(object):
         self.finished = True
         if self.isActivityStreamEvent:
             for instance in self.instances:
-                if "current_user" in request.COOKIES and "id" in request.COOKIES["current_user"]:
+                if self.cached_user is not None:
+                    instance.user = self.cached_user
+                elif "current_user" in request.COOKIES and "id" in request.COOKIES["current_user"]:
                     userInfo = json.loads(urllib2.unquote(request.COOKIES['current_user']).decode('utf8'))
                     userActual = User.objects.get(id=int(userInfo['id']))
-                    instance.user = userActual
+                    self.cached_user = userActual
+                    instance.user = self.cached_user
                     instance.save()
+                elif "HTTP_AUTHORIZATION" in request.META:
+                    token_actual = request.META['HTTP_AUTHORIZATION']
+                    token_actual = token_actual.split(" ")[1]
+                    matching_tokens = AuthToken.objects.filter(key=token_actual)
+                    if matching_tokens.exists():
+                        self.cached_user = matching_tokens[0].user
+                        instance.user = self.cached_user
+                        instance.save()
                 else:
                     obj1_type_actual = instance.object1_type.split(".")[-1]
                     if obj1_type_actual in ("InventoryUpdate", "ProjectUpdate", "JobEvent", "Job") and instance.id is not None:
