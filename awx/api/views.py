@@ -140,9 +140,9 @@ class DashboardView(APIView):
         user_inventory = get_user_queryset(request.user, Inventory)
         failed_inventory = sum(i.inventory_sources_with_failures for i in user_inventory)
         data['inventories'] = SortedDict({'url': reverse('api:inventory_list'),
-                               'total': user_inventory.count(),
-                               #'job_failed'
-                               'inventory_failed': failed_inventory})
+                                          'total': user_inventory.count(),
+                                          #'job_failed'
+                                          'inventory_failed': failed_inventory})
         user_inventory_sources = get_user_queryset(request.user, InventorySource)
         rax_inventory_sources = user_inventory_sources.filter(source='rax')
         rax_inventory_failed = rax_inventory_sources.filter(status='failed')
@@ -155,31 +155,38 @@ class DashboardView(APIView):
                                                        'total': rax_inventory_sources.count(),
                                                        'failed': rax_inventory_failed.count()})
         data['inventory_sources']['ec2'] = SortedDict({'url': reverse('api:inventory_source_list') + "?source=ec2",
-                                            'failures_url': reverse('api:inventory_source_list') + "?source=ec2&status=failed",
-                                            'label': 'Amazon EC2',
-                                            'total': ec2_inventory_sources.count(),
-                                            'failed': ec2_inventory_failed.count()})
+                                                       'failures_url': reverse('api:inventory_source_list') + "?source=ec2&status=failed",
+                                                       'label': 'Amazon EC2',
+                                                       'total': ec2_inventory_sources.count(),
+                                                       'failed': ec2_inventory_failed.count()})
 
         user_groups = get_user_queryset(request.user, Group)
+        failed_group_inventory = [g.inventory for g in user_groups if g.inventory.has_active_failures]
+        group_with_job_failure = 0
+        for i in failed_group_inventory:
+            for j in i.jobs:
+                if j.failed:
+                    group_with_job_failure += 1
+                    break
         data['groups'] = SortedDict({'url': reverse('api:group_list'),
-                          'failures_url': '__fill__',
-                          'total': user_groups.count(),
-                          'job_failed': '__fill__',  # # of groups with job failures
-                          'inventory_failed': '__fill__'}) # # of groups with failed cloud updates
+                                     'failures_url': reverse('api:group_list') + "?has_active_failures=True",
+                                     'total': user_groups.count(),
+                                     'job_failed': group_with_job_failure,
+                                     'inventory_failed': len(failed_group_inventory)})
 
         user_hosts = get_user_queryset(request.user, Host)
         user_hosts_failed = user_hosts.filter(has_active_failures=True)
         data['hosts'] = SortedDict({'url': reverse('api:host_list'),
-                         'failures_url': reverse('api:host_list') + "?has_active_failures=True",
-                         'total': user_hosts.count(),
-                         'failed': user_hosts_failed.count()})
+                                    'failures_url': reverse('api:host_list') + "?has_active_failures=True",
+                                    'total': user_hosts.count(),
+                                    'failed': user_hosts_failed.count()})
 
         user_projects = get_user_queryset(request.user, Project)
         user_projects_failed = user_projects.filter(last_update_failed=True)
         data['projects'] = SortedDict({'url': reverse('api:project_list'),
-                            'failures_url': reverse('api:project_list') + "?last_update_failed=True",
-                            'total': user_projects.count(),
-                            'failed': user_projects_failed.count()})
+                                       'failures_url': reverse('api:project_list') + "?last_update_failed=True",
+                                       'total': user_projects.count(),
+                                       'failed': user_projects_failed.count()})
 
         git_projects = user_projects.filter(scm_type='git')
         git_failed_projects = git_projects.filter(last_update_failed=True)
@@ -189,20 +196,20 @@ class DashboardView(APIView):
         hg_failed_projects = hg_projects.filter(last_update_failed=True)
         data['scm_types'] = {}
         data['scm_types']['git'] = SortedDict({'url': reverse('api:project_list') + "?scm_type=git",
-                                    'label': 'Git',
-                                    'failures_url': reverse('api:project_list') + "?scm_type=git&last_update_failed=True",
-                                    'total': git_projects.count(),
-                                    'failed': git_failed_projects.count()})
+                                               'label': 'Git',
+                                               'failures_url': reverse('api:project_list') + "?scm_type=git&last_update_failed=True",
+                                               'total': git_projects.count(),
+                                               'failed': git_failed_projects.count()})
         data['scm_types']['svn'] = SortedDict({'url': reverse('api:project_list') + "?scm_type=svn",
-                                    'label': 'Subversion',
-                                    'failures_url': reverse('api:project_list') + "?scm_type=svn&last_update_failed=True",
-                                    'total': svn_projects.count(),
-                                    'failed': svn_failed_projects.count()})
+                                               'label': 'Subversion',
+                                               'failures_url': reverse('api:project_list') + "?scm_type=svn&last_update_failed=True",
+                                               'total': svn_projects.count(),
+                                               'failed': svn_failed_projects.count()})
         data['scm_types']['hg'] = SortedDict({'url': reverse('api:project_list') + "?scm_type=hg",
-                                   'label': 'Mercurial',
-                                   'failures_url': reverse('api:project_list') + "?scm_type=hg&last_update_failed=True",
-                                   'total': hg_projects.count(),
-                                   'failed': hg_failed_projects.count()})
+                                              'label': 'Mercurial',
+                                              'failures_url': reverse('api:project_list') + "?scm_type=hg&last_update_failed=True",
+                                              'total': hg_projects.count(),
+                                              'failed': hg_failed_projects.count()})
 
         user_jobs = get_user_queryset(request.user, Job)
         user_failed_jobs = user_jobs.filter(failed=True)
