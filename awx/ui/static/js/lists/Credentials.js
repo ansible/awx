@@ -62,6 +62,15 @@ angular.module('CredentialsListDefinition', [])
                 "class": 'btn-success btn-xs',
                 awToolTip: 'Create a new credential'
                 },
+            reset: {
+                dataPlacement: 'top',
+                icon: "icon-undo",
+                mode: 'all',
+                'class': 'btn-xs btn-primary',
+                awToolTip: "Reset the search filter",
+                ngClick: "resetSearch()",
+                iconSize: 'large'
+                },
             stream: {
                 'class': "btn-primary btn-xs activity-btn",
                 ngClick: "showActivity()",

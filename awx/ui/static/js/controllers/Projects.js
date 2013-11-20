@@ -13,7 +13,7 @@
 function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, ProjectList,
                        GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                        ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate, ProjectStatus,
-                       FormatDate, Refresh, Wait, Stream)                        
+                       FormatDate, Refresh, Wait, Stream, GetChoices)                        
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -41,34 +41,77 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         $('#prompt-modal').off();
 
         if (scope.projects) {
-           for (var i=0; i < scope.projects.length; i++) {
-               if (scope.projects[i].status == 'ok') {
-                  scope.projects[i].status = 'n/a';
-               }
-               switch(scope.projects[i].status) {
-                   case 'n/a':
-                      scope.projects[i].badge = 'none';
-                      break;
-                   case 'updating':
-                   case 'successful':
-                   case 'ok':
-                      scope.projects[i].badge = 'false';
-                      break;
-                   case 'never updated':
-                   case 'failed':
-                   case 'missing':
-                      scope.projects[i].badge = 'true'; 
-                      break;
-               }
-               scope.projects[i].last_updated = (scope.projects[i].last_updated !== null) ? 
-                   FormatDate(new Date(scope.projects[i].last_updated)) : null;
-           }
+            for (var i=0; i < scope.projects.length; i++) {
+                if (scope.projects[i].status == 'ok') {
+                    scope.projects[i].status = 'n/a';
+                }
+                switch(scope.projects[i].status) {
+                    case 'n/a':
+                       scope.projects[i].badge = 'none';
+                       break;
+                    case 'updating':
+                    case 'successful':
+                    case 'ok':
+                       scope.projects[i].badge = 'false';
+                       break;
+                    case 'never updated':
+                    case 'failed':
+                    case 'missing':
+                       scope.projects[i].badge = 'true'; 
+                       break;
+                }
+                scope.projects[i].last_updated = (scope.projects[i].last_updated !== null) ? 
+                    FormatDate(new Date(scope.projects[i].last_updated)) : null; 
+
+                for (var j=0; j < scope.project_scm_type_options.length; j++) {
+                    if (scope.project_scm_type_options[j].value == scope.projects[i].scm_type) {
+                        scope.projects[i].scm_type = scope.project_scm_type_options[j].label
+                        break;
+                    }
+                }
+            }
         }
         });
 
-    SearchInit({ scope: scope, set: 'projects', list: list, url: defaultUrl });
-    PaginateInit({ scope: scope, list: list, url: defaultUrl });
-    scope.search(list.iterator);
+    if (scope.removeChoicesReady) {
+       scope.removeChoicesReady();
+    }
+    scope.removeChoicesReady = scope.$on('choicesReady', function() {
+        
+        list.fields.scm_type.searchOptions = scope.project_scm_type_options;
+         
+        if ($routeParams['scm_type'] && $routeParams['status']) {
+           // Request coming from home page. User wants all errors for an scm_type
+           defaultUrl += '?status=' + $routeParams['status'];
+        }
+
+        SearchInit({ scope: scope, set: 'projects', list: list, url: defaultUrl });
+        PaginateInit({ scope: scope, list: list, url: defaultUrl });
+        
+        if ($routeParams['scm_type']) {
+            scope[list.iterator + 'SearchField'] = 'scm_type';
+            scope[list.iterator + 'SelectShow'] = true;
+            scope[list.iterator + 'SearchSelectOpts'] = list.fields['scm_type'].searchOptions;
+            scope[list.iterator + 'SearchFieldLabel'] = list.fields['scm_type'].label.replace(/\<br\>/g,' ');
+            for (var opt in list.fields['scm_type'].searchOptions) {
+                if (list.fields['scm_type'].searchOptions[opt].value == $routeParams['scm_type']) {
+                    scope[list.iterator + 'SearchSelectValue'] = list.fields['scm_type'].searchOptions[opt];
+                    break;
+                }
+            }
+        }
+        scope.search(list.iterator);
+        });
+
+    // Load the list of options for Kind
+    GetChoices({
+        scope: scope,
+        url: defaultUrl,
+        field: 'scm_type',
+        variable: 'project_scm_type_options',
+        callback: 'choicesReady'
+        });
+
 
     LoadBreadCrumbs();
 
@@ -232,7 +275,8 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
 ProjectsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'ProjectList', 'GenerateList', 
                          'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                         'GetBasePath', 'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate', 'Refresh', 'Wait', 'Stream'];
+                         'GetBasePath', 'SelectionInit', 'ProjectUpdate', 'ProjectStatus', 'FormatDate', 'Refresh', 'Wait', 'Stream',
+                         'GetChoices' ];
 
 
 function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, ProjectsForm, 

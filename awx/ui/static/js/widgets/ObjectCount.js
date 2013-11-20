@@ -32,50 +32,7 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
         html += "</tr>\n";
         html += "</thead>\n";
         html += "<tbody>\n";
-        
-        /*function makeRow(params) {
-            var html = '';
-            var label = params.label;
-            var link = params.link; 
-            var fail_link = params.fail_link;
-            var count = params.count; 
-            var fail = params.fail;
-            
-            html += "<tr><td class=\"capitalize\">\n";
-            html += "<a href=\"/#/";
-            var link;
-            switch(label) {
-                case 'inventory':
-                    link = 'inventories';  
-                    break;
-                case 'hosts':
-                    link = 'home/hosts';
-                    break;
-                case 'groups':
-                    link = 'home/groups';
-                    break;
-                default:
-                    link = label;
-                    break;   
-            }
-            html += link;
-            html += "\"";
-            html += (label == 'hosts' || label == 'groups') ? " class=\"pad-left-sm\" " : "";
-            html += ">";
-            if (label == 'inventory') {
-                html += 'inventories';
-            }
-            else {
-                html += label.replace(/\_/g,' ');
-            }
-            html += "</a></td>\n"
-            html += "<td class=\"text-right\"><a href=\"/#/";
-            html += ( label == 'inventory') ? 'inventories' : label;
-            html += "\">";
-            html += counts[keys[i]] + "</a></td></tr>\n";
-            }
-            */
-
+       
         function makeRow(params) {
             var html = '';
             var label = params.label;
@@ -95,7 +52,7 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
             html += makeRow({
                 label: keys[i],
                 link: '/#/' + keys[i],
-                count: [(dashboard[keys[i]] && dashboard[keys[i]].total) ? dashboard[keys[i]].total : 0],
+                count: [(dashboard[keys[i]] && dashboard[keys[i]].total) ? dashboard[keys[i]].total : 0]
                 });
         }
 

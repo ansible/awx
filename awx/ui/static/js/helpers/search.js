@@ -346,7 +346,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                         else if ( (list.fields[scope[iterator + 'SearchField' + modifier]].searchType == 'select') && 
                                   (scope[iterator + 'SearchSelectValue' + modifier].value == '' || 
                                       scope[iterator + 'SearchSelectValue' + modifier].value == null) ) {
-                            scope[iterator + 'SearchParams'] += '&' + scope[iterator + 'SearchField' + modifier];
+                            scope[iterator + 'SearchParams'] += '&' + scope[iterator + 'SearchField' + modifier] + '__';
                         }
                         else {
                             scope[iterator + 'SearchParams'] += '&' + scope[iterator + 'SearchField' + modifier] + '__'; 

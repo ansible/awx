@@ -89,6 +89,15 @@ angular.module('InventoriesListDefinition', [])
                 "class": 'btn-xs btn-success',
                 awToolTip: 'Create a new inventory'
                 },
+            reset: {
+                dataPlacement: 'top',
+                icon: "icon-undo",
+                mode: 'all',
+                'class': 'btn-xs btn-primary',
+                awToolTip: "Reset the search filter",
+                ngClick: "resetSearch()",
+                iconSize: 'large'
+                },
             stream: {
                 'class': "btn-primary btn-xs activity-btn",
                 ngClick: "showActivity()",

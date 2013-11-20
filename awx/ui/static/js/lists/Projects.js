@@ -29,6 +29,13 @@ angular.module('ProjectsListDefinition', [])
                 columnClass: 'hidden-sm hidden-xs',
                 excludeModal: true
                 },
+            scm_type: {
+                label: 'SCM Type',
+                searchType: 'select',
+                searchOptions: [],   // will be set by Options call to projects resource
+                excludeModal: true,
+                nosort: true
+                },
             status: {
                 label: 'Update Status',
                 ngClick: 'showSCMStatus(\{\{ project.id \}\})',
@@ -72,13 +79,22 @@ angular.module('ProjectsListDefinition', [])
                 dataTitle: 'Project Status',
                 iconSize: 'large'
                 },
-             refresh: {
+            refresh: {
                 dataPlacement: 'top',
                 icon: "icon-refresh",
                 mode: 'all',
                 'class': 'btn-xs btn-primary',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()",
+                iconSize: 'large'
+                },
+            reset: {
+                dataPlacement: 'top',
+                icon: "icon-undo",
+                mode: 'all',
+                'class': 'btn-xs btn-primary',
+                awToolTip: "Reset the search filter",
+                ngClick: "resetSearch()",
                 iconSize: 'large'
                 },
             stream: {
