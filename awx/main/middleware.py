@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.db.models.signals import pre_save, post_save
 from django.utils.functional import curry
 from awx.main.models import ActivityStream, AuthToken
@@ -17,7 +17,6 @@ class ActivityStreamMiddleware(object):
             user = None
 
         self.instances = []
-        self.cached_user = None
         set_actor = curry(self.set_actor, user)
         self.disp_uid = str(uuid.uuid1())
         self.finished = False
@@ -30,7 +29,7 @@ class ActivityStreamMiddleware(object):
         self.finished = True
         if self.isActivityStreamEvent:
             for instance in self.instances:
-                if drf_user is not None:
+                if drf_user is not None and drf_user.__class__ != AnonymousUser:
                     instance.user = drf_user
                     instance.save()
                 else:
