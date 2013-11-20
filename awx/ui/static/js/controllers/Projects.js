@@ -208,7 +208,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         }
 
     scope.refresh = function() {
-        scope['projectSearchSpin'] = true;
+        Wait('start');
         scope['projectLoading'] = false;
         Refresh({ scope: scope, set: 'projects', iterator: 'project', url: scope['current_url'] });
         }
