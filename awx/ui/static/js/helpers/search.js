@@ -16,8 +16,8 @@
  */
 
 angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])  
-    .factory('SearchInit', ['Alert', 'Rest', 'Refresh', '$location', 'GetBasePath', 'Empty', '$timeout',
-    function(Alert, Rest, Refresh, $location, GetBasePath, Empty, $timeout) {
+    .factory('SearchInit', ['Alert', 'Rest', 'Refresh', '$location', 'GetBasePath', 'Empty', '$timeout', 'Wait',
+    function(Alert, Rest, Refresh, $location, GetBasePath, Empty, $timeout, Wait) {
     return function(params) {
         
         var scope = params.scope;
@@ -190,7 +190,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             //
             // Execute the search
             //
-            scope[iterator + 'SearchSpin'] = (spin == undefined || spin == true) ? true : false;
+            //scope[iterator + 'SearchSpin'] = (spin == undefined || spin == true) ? true : false;
             scope[iterator + 'Loading'] = (load == undefined || load == true) ? true : false;
             var url = defaultUrl;
 
@@ -233,6 +233,15 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             }
             });
 
+        if (scope.removeResultWarning) {
+            scope.removeResultWarning();
+        }
+        scope.removeResultWarning = scope.$on('resultWarning', function(e, objs, length) {
+            // Alert the user that the # of objects was greater than 30
+            var label = (objs == 'inventory') ? 'inventories' : objs.replace(/s$/,'');
+            Alert('Warning', 'The number of matching ' + label + ' was too large. We limited your search to the first 30.', 'alert-info');
+            });
+
         if (scope.removePrepareSearch) {
             scope.removePrepareSearch();
         }
@@ -241,6 +250,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             // Start build the search key/value pairs. This will process search widget, if the
             // selected field is an object type (used on activity stream).
             //
+            Wait('start');
             scope[iterator + 'SearchParams'] = '';
             var widgets = (list.searchWidgets) ? list.searchWidgets : 1;
             var modifier;
@@ -258,7 +268,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                    expected_objects++;
                 }
             }
-
+            
             for (var i=1; i <= widgets; i++) {
                 var modifier = (i == 1) ? '' : i;
                 if ( $('#search-widget-container' + modifier) ) {
@@ -270,18 +280,25 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                             var objUrl = GetBasePath('base') + objs + '/?name__icontains=' + scope[iterator + 'SearchValue' + modifier];
                             Rest.setUrl(objUrl);
                             Rest.setHeader({ widget: i });
+                            Rest.setHeader({ object: objs });
                             Rest.get()
                                 .success( function(data, status, headers, config) {
                                     var pk='';
-                                    for (var j=0; j < data.results.length; j++) {
+                                    //limit result set to 30
+                                    var len = (data.results.length > 30) ? 30 : data.results.length;
+                                    for (var j=0; j < len; j++) {
                                         pk += "," + data.results[j].id;
                                     } 
                                     pk = pk.replace(/^\,/,'');
                                     scope.$emit('foundObject', iterator, page, load, spin, config.headers['widget'], pk);
+                                    if (data.results.length > 30) {
+                                        scope.$emit('resultWarning', config.headers['object'], data.results.length);
+                                    }
                                     })
                                .error( function(data, status, headers, config) {
+                                    Wait('stop');
                                     ProcessErrors(scope, data, status, null,
-                                        { hdr: 'Error!', msg: 'Retrieving list of ' + obj + ' where name contains: ' + scope[iterator + 'SearchValue'] +
+                                        { hdr: 'Error!', msg: 'Retrieving list of ' + objs + ' where name contains: ' + scope[iterator + 'SearchValue' + modifier] +
                                         ' GET returned status: ' + status });
                                     });
                         }
@@ -395,17 +412,11 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             scope.$emit('doSearch', iterator, page, load, spin);
         });
 
-        scope.startSearch = function(iterator) {
-           //Called on each keydown event for seachValue field. Using a timer
-           //to prevent executing a search until user is finished typing. 
-           if (scope.searchTimer) {
-               $timeout.cancel(scope.searchTimer);
+        scope.startSearch = function(e,iterator) {
+           // If use clicks enter while on input field, start the search
+           if (e.keyCode == 13) {
+              scope.search(iterator);
            }
-           scope.searchTimer = $timeout(
-               function() {
-                   scope.$emit('prepareSearch', iterator);
-                   } 
-               , 1000);
            }
 
         scope.search = function(iterator, page, load, spin) {

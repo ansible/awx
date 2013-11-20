@@ -524,26 +524,29 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             html += "\"></select>\n";
 
             html += "<input id=\"search_value_input\" type=\"text\" ng-hide=\"" + iterator + "SelectShow || " + iterator + "InputHide\" " + 
-                "class=\"form-control\" ng-model=\"" + iterator + "SearchValue" + modifier + "\" ng-keydown=\"startSearch('" + iterator +
-                "')\" aw-placeholder=\"" + iterator + "SearchPlaceholder" + modifier + "\" type=\"text\" ng-disabled=\"" + iterator + 
-                "InputDisable" + modifier + " || " + iterator + "HoldInput" + modifier + "\">\n";
+                "class=\"form-control\" ng-model=\"" + iterator + "SearchValue" + modifier + "\" " +
+                "aw-placeholder=\"" + iterator + "SearchPlaceholder" + modifier + "\" type=\"text\" ng-disabled=\"" + iterator + 
+                "InputDisable" + modifier + " || " + iterator + "HoldInput" + modifier + "\" ng-keypress=\"startSearch($event,'" + 
+                iterator + "')\">\n";
             
-            // Reset button
-            //html += "<div class=\"input-group-btn\">\n";
-            //html += "<button type=\"button\" class=\"btn btn-default btn-small\" ng-click=\"resetSearch('" + iterator + "', 1)\" " +
-            //    "aw-tool-tip=\"Reset filter\" data-placement=\"top\" " +
-            //    "><i class=\"icon-undo\"></i></button>\n";
-            //html += "</div><!-- input-group-btn -->\n";
+            // Go button
+            html += "<div class=\"input-group-btn\">\n";
+            html += "<button type=\"button\" class=\"btn btn-default btn-small\" ng-click=\"search('" + iterator + "')\" " +
+                "aw-tool-tip=\"Start the search\" data-placement=\"top\" ng-hide=\"" + iterator + "SelectShow || " + iterator + 
+                "InputHide\" ng-disabled=\"" + iterator + "InputDisable" + modifier + " || " + iterator + "HoldInput" + modifier + 
+                "\">Go!</button>\n";
+            html += "</div><!-- input-group-btn -->\n";
+
             html += "</div><!-- input-group -->\n";
             html += "</div><!-- col-lg-x -->\n";
         }
 
         // Reset button and spinner
-        html += "<div class=\"col-lg-1 col-md-1 col-sm-1 col-xs-1\">\n";
+        //html += "<div class=\"col-lg-1 col-md-1 col-sm-1 col-xs-1\">\n";
         //html += "<button type=\"button\" class=\"btn btn-default btn-sm\" ng-click=\"resetSearch('" + iterator + "')\" " +
         //    "aw-tool-tip=\"Reset filter\" data-placement=\"top\"><i class=\"icon-undo\"></i></button>\n";
-        html += "<i class=\"icon-spinner icon-spin icon-large\" ng-show=\"" + iterator +  "SearchSpin == true\"></i>\n";
-        html += "</div>\n";
+        //html += "<i class=\"icon-spinner icon-spin icon-large\" ng-show=\"" + iterator +  "SearchSpin == true\"></i>\n";
+        //html += "</div>\n";
 
 
         return html;

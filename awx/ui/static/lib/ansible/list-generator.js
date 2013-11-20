@@ -227,16 +227,16 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
              // User supplied searchSize, calc the remaining
              var size = parseInt(options.searchSize.replace(/([A-Z]|[a-z]|\-)/g,''));
              size = (list.searchWidgets) ? list.searchWidgets * size : size;
-             html += 'col-lg-' + (12 - size - 1);
+             html += 'col-lg-' + (12 - size);
           }
           else if (options.mode == 'summary') {
-             html += 'col-lg-5';
+             html += 'col-lg-6';
           }
           else if (options.id != undefined) {
-             html += "col-lg-3"; 
+             html += "col-lg-4"; 
           }
           else { 
-             html += "col-lg-7 col-md-5";
+             html += "col-lg-8 col-md-6";
           }
           html += "\">\n";
           

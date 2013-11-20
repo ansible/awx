@@ -1500,7 +1500,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
               html += "<div class=\"well\">\n";
               html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true });
  
-              html += "<div class=\"col-lg-7\">\n";
+              html += "<div class=\"col-lg-8\">\n";
               html += "<div class=\"list-actions\">\n";
               for (var act in form.related[itm].actions) {
                  var action = form.related[itm].actions[act];

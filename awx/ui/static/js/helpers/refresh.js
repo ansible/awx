@@ -15,7 +15,7 @@
  */
  
 angular.module('RefreshHelper', ['RestServices', 'Utilities'])  
-    .factory('Refresh', ['ProcessErrors', 'Rest', function(ProcessErrors, Rest) {
+    .factory('Refresh', ['ProcessErrors', 'Rest', 'Wait', function(ProcessErrors, Rest, Wait) {
     return function(params) {
         
         var scope = params.scope; 
@@ -27,11 +27,12 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities'])
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
+                Wait('stop');
                 scope[iterator + 'NextUrl'] = data.next;
                 scope[iterator + 'PrevUrl'] = data.previous;
                 scope[iterator + 'Count'] = data.count;
                 scope[iterator + 'PageCount'] = Math.ceil((data.count / scope[iterator + 'PageSize']));
-                scope[iterator + 'SearchSpin'] = false;
+                //scope[iterator + 'SearchSpin'] = false;
                 scope[iterator + 'Loading'] = false;
                 for (var i=1; i <= 3; i++) {
                     var modifier = (i == 1) ? '' : i;
@@ -41,7 +42,8 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities'])
                 scope.$emit('PostRefresh');
                 })
             .error ( function(data, status, headers, config) {
-                scope[iterator + 'SearchSpin'] = false;
+                Wait('stop');
+                //scope[iterator + 'SearchSpin'] = false;
                 scope[iterator + 'HoldInput'] = false;
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to retrieve ' + set + '. GET returned status: ' + status });

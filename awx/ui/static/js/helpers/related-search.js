@@ -16,7 +16,8 @@
  */
 
 angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelatedHelper'])  
-    .factory('RelatedSearchInit', ['$timeout', 'Alert', 'Rest', 'RefreshRelated', function($timeout, Alert, Rest, RefreshRelated) {
+    .factory('RelatedSearchInit', ['$timeout', 'Alert', 'Rest', 'RefreshRelated', 'Wait',
+    function($timeout, Alert, Rest, RefreshRelated, Wait) {
     return function(params) {
         
         var scope = params.scope;
@@ -103,21 +104,16 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
            scope.search(model);
            }
 
-        scope.startSearch = function(iterator) {
-           //Called on each keydown event for seachValue field. Using a timer
-           //to prevent executing a search until user is finished typing. 
-           if (scope.searchTimer) {
-               $timeout.cancel(scope.searchTimer);
+        scope.startSearch = function(e,iterator) {
+           // If use clicks enter while on input field, start the search
+           if (e.keyCode == 13) {
+              scope.search(iterator);
            }
-           scope.searchTimer = $timeout(
-               function() {
-                   scope.search(iterator);
-                   } 
-               , 1000);
            }
 
         scope.search = function(iterator) {
-           scope[iterator + 'SearchSpin'] = true;
+           //scope[iterator + 'SearchSpin'] = true;
+           Wait('start');
            scope[iterator + 'Loading'] = true;
            scope[iterator + 'HoldInput'] = true;
 
