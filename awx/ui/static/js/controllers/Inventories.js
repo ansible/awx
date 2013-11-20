@@ -67,6 +67,10 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
        scope.removePostRefresh();
     }
     scope.removePostRefresh = scope.$on('PostRefresh', function() {
+        //If we got here by deleting an inventory, stop the spinner and cleanup events
+        Wait('stop');
+        $('#prompt-modal').off();
+
         for (var i=0; i < scope.inventories.length; i++) {
             
             // Set values for Failed Hosts column
@@ -152,15 +156,15 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
     scope.deleteInventory = function(id, name) {
        
         var action = function() {
-            Wait('start');
             var url = defaultUrl + id + '/';
+            $('#prompt-modal').on('hidden.bs.modal', function() {
+                Wait('start');
+                });
             $('#prompt-modal').modal('hide');
-            Wait('start');
             Rest.setUrl(url);
             Rest.destroy()
                 .success( function(data, status, headers, config) {
-                    scope.search(list.iterator);
-                    Wait('stop');
+                    scope.search(list.iterator); 
                     })
                 .error( function(data, status, headers, config) {
                     Wait('stop');

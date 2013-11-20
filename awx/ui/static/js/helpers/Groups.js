@@ -1076,7 +1076,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var inventory_id = params.inventory_id;
         var obj = scope['selectedNode'];
         var parent = obj.parent().parent();
-        //var parent = (obj.parent().last().prop('tagName') == 'LI') ? obj.parent().last() : obj.parent().parent().last();
         var url; 
         
         if (parent.attr('data-group-id')) {
@@ -1086,8 +1085,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            url = GetBasePath('inventory') + inventory_id + '/groups/';
         }
         var action_to_take = function() {
+            $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('start'); });
             $('#prompt-modal').modal('hide');
-            Wait('start');
             Rest.setUrl(url);
             Rest.post({ id: group_id, disassociate: 1 })
                .success( function(data, status, headers, config) {
@@ -1101,7 +1100,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        id: parent.attr('id'),
                        moveable: true
                        });
-                   Wait('stop');
+                   $('#prompt-modal').off();
                    })
                .error( function(data, status, headers, config) {
                    Wait('stop');
@@ -1143,13 +1142,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 'You must first edit the group, provide Source settings, and then run an update.', 'alert-info');
         }
         else {
-            if ($rootScope.removeShowStatus) {
-                $rootScope.removeShowStatus();
-            }
-            $rootScope.removeShowStatus = $rootScope.$on('showStatus', function(e, results) {
-                
-                });
-        
             // Retrieve detail record and prepopulate the form
             Rest.setUrl(last_update);
             Rest.get()

@@ -25,6 +25,15 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
     var scope = view.inject(list, { mode: mode });
     $rootScope.flashMessage = null;
     
+    if (scope.removePostRefresh) {
+       scope.removePostRefresh();
+    }
+    scope.removePostRefresh = scope.$on('PostRefresh', function() {
+        // Cleanup after a delete
+        Wait('stop');
+        $('#prompt-modal').off();
+        });
+    
     SearchInit({ scope: scope, set: 'job_templates', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
 
@@ -51,20 +60,18 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
  
     scope.deleteJobTemplate = function(id, name) {
        var action = function() {
-           Wait('start');
+           $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('start'); });
+           $('#prompt-modal').modal('hide');
            var url = defaultUrl + id + '/';
            Rest.setUrl(url);
            Rest.destroy()
                .success( function(data, status, headers, config) {
-                   Wait('stop');
-                   $('#prompt-modal').modal('hide');
                    scope.search(list.iterator);
                    })
                .error( function(data, status, headers, config) {
                    Wait('stop');
-                   $('#prompt-modal').modal('hide');
                    ProcessErrors(scope, data, status, null,
-                            { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                       { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                    });      
            };
 

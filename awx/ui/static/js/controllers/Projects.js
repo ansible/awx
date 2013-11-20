@@ -36,6 +36,10 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
        scope.removePostRefresh();
     }
     scope.removePostRefresh = scope.$on('PostRefresh', function() {
+        // Cleanup after a delete
+        Wait('stop');
+        $('#prompt-modal').off();
+
         if (scope.projects) {
            for (var i=0; i < scope.projects.length; i++) {
                if (scope.projects[i].status == 'ok') {
@@ -114,20 +118,18 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
  
     scope.deleteProject = function(id, name) {  
         var action = function() {
-            Wait('start');
+            $('#prompt-modal').on('hiden.bs.modal', function(){ Wait('start'); });
+            $('#prompt-modal').modal('hide');
             var url = defaultUrl + id + '/';
             Rest.setUrl(url);
             Rest.destroy()
                 .success( function(data, status, headers, config) {
-                    Wait('stop');
-                    $('#prompt-modal').modal('hide');
                     scope.search(list.iterator);
                     })
                 .error( function(data, status, headers, config) {
                     Wait('stop');
-                    $('#prompt-modal').modal('hide');
                     ProcessErrors(scope, data, status, null,
-                             { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                     });      
             };
 

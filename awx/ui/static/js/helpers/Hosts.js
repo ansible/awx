@@ -435,8 +435,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
 
     .factory('HostsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'Prompt', 'ProcessErrors', 'GetBasePath',
-        'HostsReload',
-    function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload) {
+        'HostsReload', 'Wait',
+    function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload, Wait) {
     return function(params) {
         // Remove the selected host from the current group by disassociating
        
@@ -454,18 +454,20 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            scope.removeHostsReload();
         }
         scope.removeHostsReload = scope.$on('hostsReload', function() {
+            params.action = function() { $('#prompt-modal').off(); Wait('stop'); }
             HostsReload(params);
             });
 
         var action_to_take = function() {
+            $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('start'); })
+            $('#prompt-modal').modal('hide');
             Rest.setUrl(url);
             Rest.post({ id: host_id, disassociate: 1 })
-                .success( function(data, status, headers, config) {
-                    $('#prompt-modal').modal('hide');
+                .success( function(data, status, headers, config) { 
                     scope.$emit('hostsReload'); 
                     })
                 .error( function(data, status, headers, config) {
-                    $('#prompt-modal').modal('hide');
+                    Wait('stop');
                     scope.$emit('hostsReload'); 
                     ProcessErrors(scope, data, status, null,
                         { hdr: 'Error!', msg: 'Attempt to delete ' + host_name + ' failed. POST returned status: ' + status });
