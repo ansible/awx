@@ -47,13 +47,16 @@ angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
             return html; 
             }   
 
-        var tot = 0;
-        for (var type in dashboard.scm_types) {
-            tot += dashboard.scm_types[type].total;
+        var total_count = 0;
+        if (dashboard.scm_types) {
+            for (var type in dashboard.scm_types) {
+                total_count += (dashboard.scm_types[type].total) ? dashboard.scm_types[type].total : 0;
+            }
         }
+
         html += makeRow({ label: 'Projects',
             link: '/#/projects',
-            count: tot,
+            count: total_count,
             fail: [(dashboard.projects && dashboard.projects.failed) ? dashboard.projects.failed : 0],
             fail_link: '/#/projects/?status=failed'
             });

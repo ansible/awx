@@ -47,7 +47,7 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
             html += "</td></tr>\n";
             return html; 
             }
-        
+
         html += makeRow({ label: 'Inventories',
             count: [(dashboard.inventories && dashboard.inventories.total_with_inventory_source) ? 
                 dashboard.inventories.total_with_inventory_source : '?'], 
@@ -56,9 +56,18 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
             fail_link: '/#/inventories/?inventory_sources_with_failures=true'
             });
         
+        var group_total = 0;
+        var group_fail = 0;
+        if (dashboard.inventory_sources) {
+            for (var src in dashboard.inventory_sources) {
+                group_total += (dashboard.inventory_sources[src].total) ? dashboard.inventory_sources[src].total : 0;
+                group_fail += (dashboard.inventory_sources[src].failed) ? dashboard.inventory_sources[src].failed : 0;
+            }
+        }
+        
         html += makeRow({ label: 'Groups',
-            count: [(dashboard.groups && dashboard.groups.total_with_inventory_source) ? dashboard.groups.total_with_inventory_source : '?'],
-            fail: [(dashboard.groups && dashboard.groups.inventory_failed) ? dashboard.groups.inventory_failed : 0],
+            count: group_total,
+            fail: group_fail,
             link: '/#/home/groups/?has_external_source=true',
             fail_link: '/#/home/groups/?status=failed'
             });
