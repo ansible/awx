@@ -26,6 +26,10 @@ USE_MINIFIED_JS = True
 # URL used by inventory script and callback plugin to access API.
 INTERNAL_API_URL = 'http://127.0.0.1:80'
 
+# Absolute filesystem path to the directory for job status stdout
+# This directory should not be web-accessible
+JOBOUTPUT_ROOT = '/var/lib/awx/job_status/'
+
 # Load remaining settings from the global settings file specified in the
 # environment, defaulting to /etc/awx/settings.py.
 settings_file = os.environ.get('AWX_SETTINGS_FILE',
