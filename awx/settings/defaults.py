@@ -83,6 +83,10 @@ MEDIA_URL = '/media/'
 # This directory should not be web-accessible.
 PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
 
+# Absolute filesystem path to the directory to host job stdout
+# This directory should not be web-accessible.
+JOBOUTPUT_ROOT = os.path.join(BASE_DIR, 'job_output')
+
 SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.
