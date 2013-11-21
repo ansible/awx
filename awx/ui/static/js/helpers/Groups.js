@@ -892,7 +892,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         if (scope.removeChoicesComplete) {
             scope.removeChoicesComplete();
         }
-        scope.removeChoicesComplete = scope.$on('choicesReady', function() {
+        scope.removeChoicesComplete = scope.$on('choicesComplete', function() {
             
             generator.inject(form, { mode: 'edit', modal: false, related: false, id: 'tree-form', 
                 breadCrumbs: false, scope: scope });
@@ -932,7 +932,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.removeChoicesReady = scope.$on('choicesReady', function() {
             choicesReady++; 
             if (choicesReady == 2) {
-                scope.$emit('choicesReady');
+                scope.$emit('choicesComplete');
             }
             });
 
