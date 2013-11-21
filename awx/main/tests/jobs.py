@@ -1364,16 +1364,14 @@ class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         finally:
             t.join(20)
 
-    # FIXME: This test isn't working for now.
-    def _test_get_job_detail_while_job_running(self):
-        self.proj_async = self.make_project('async', 'async test',
-                                            self.user_sue, TEST_ASYNC_PLAYBOOK)
-        self.org_eng.projects.add(self.proj_async)
-        job = self.job_ops_east_run
-        job.project = self.proj_async
-        job.playbook = self.proj_async.playbooks[0]
-        job.verbosity = 3
-        job.save()
+    def test_for_job_deadlocks(self):
+        # Create lots of extra test hosts to trigger job event callbacks
+        job = self.job_eng_run
+        inv = job.inventory
+        for x in xrange(100):
+            h = inv.hosts.create(name='local-%d' % x)
+            for g in inv.groups.all():
+                g.hosts.add(h)
 
         job_detail_url = reverse('api:job_detail', args=(job.pk,))
         job_detail_url = urlparse.urljoin(self.live_server_url, job_detail_url)

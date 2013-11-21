@@ -615,54 +615,59 @@ class JobEvent(BaseModel):
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        res = self.event_data.get('res', None)
-        # Workaround for Ansible 1.2, where the runner_on_async_ok event is
-        # created even when the async task failed. Change the event to be
-        # correct.
-        if self.event == 'runner_on_async_ok':
-            try:
-                if res.get('failed', False) or res.get('rc', 0) != 0:
-                    self.event = 'runner_on_async_failed'
-            except (AttributeError, TypeError):
-                pass
-        if self.event in self.FAILED_EVENTS:
-            if not self.event_data.get('ignore_errors', False):
-                self.failed = True
-                if 'failed' not in update_fields:
-                    update_fields.append('failed')
-        if isinstance(res, dict) and res.get('changed', False):
-            self.changed = True
-            if 'changed' not in update_fields:
-                update_fields.append('changed')
-        if self.event == 'playbook_on_stats':
-            try:
-                failures_dict = self.event_data.get('failures', {})
-                dark_dict = self.event_data.get('dark', {})
-                self.failed = bool(sum(failures_dict.values()) + 
-                                   sum(dark_dict.values()))
-                if 'failed' not in update_fields:
-                    update_fields.append('failed')
-                changed_dict = self.event_data.get('changed', {})
-                self.changed = bool(sum(changed_dict.values()))
+        # Skip normal checks on save if we're only updating failed/changed
+        # flags triggered from a child event.
+        from_parent_update = kwargs.pop('from_parent_update', False)
+        if not from_parent_update:
+            res = self.event_data.get('res', None)
+            # Workaround for Ansible 1.2, where the runner_on_async_ok event is
+            # created even when the async task failed. Change the event to be
+            # correct.
+            if self.event == 'runner_on_async_ok':
+                try:
+                    if res.get('failed', False) or res.get('rc', 0) != 0:
+                        self.event = 'runner_on_async_failed'
+                except (AttributeError, TypeError):
+                    pass
+            if self.event in self.FAILED_EVENTS:
+                if not self.event_data.get('ignore_errors', False):
+                    self.failed = True
+                    if 'failed' not in update_fields:
+                        update_fields.append('failed')
+            if isinstance(res, dict) and res.get('changed', False):
+                self.changed = True
                 if 'changed' not in update_fields:
                     update_fields.append('changed')
-            except (AttributeError, TypeError):
+            if self.event == 'playbook_on_stats':
+                try:
+                    failures_dict = self.event_data.get('failures', {})
+                    dark_dict = self.event_data.get('dark', {})
+                    self.failed = bool(sum(failures_dict.values()) + 
+                                       sum(dark_dict.values()))
+                    if 'failed' not in update_fields:
+                        update_fields.append('failed')
+                    changed_dict = self.event_data.get('changed', {})
+                    self.changed = bool(sum(changed_dict.values()))
+                    if 'changed' not in update_fields:
+                        update_fields.append('changed')
+                except (AttributeError, TypeError):
+                    pass
+            try:
+                if not self.host and self.event_data.get('host', ''):
+                    self.host = self.job.inventory.hosts.get(name=self.event_data['host'])
+                    if 'host' not in update_fields:
+                        update_fields.append('host')
+            except (Host.DoesNotExist, AttributeError):
                 pass
-        try:
-            if not self.host and self.event_data.get('host', ''):
-                self.host = self.job.inventory.hosts.get(name=self.event_data['host'])
-                if 'host' not in update_fields:
-                    update_fields.append('host')
-        except (Host.DoesNotExist, AttributeError):
-            pass
-        self.play = self.event_data.get('play', '')
-        self.task = self.event_data.get('task', '')
-        self.parent = self._find_parent()
-        update_fields.extend(['play', 'task', 'parent'])
+            self.play = self.event_data.get('play', '')
+            self.task = self.event_data.get('task', '')
+            self.parent = self._find_parent()
+            update_fields.extend(['play', 'task', 'parent'])
         super(JobEvent, self).save(*args, **kwargs)
-        self.update_parent_failed_and_changed()
-        self.update_hosts()
-        self.update_host_summary_from_stats()
+        if not from_parent_update:
+            self.update_parent_failed_and_changed()
+            self.update_hosts()
+            self.update_host_summary_from_stats()
 
     def update_parent_failed_and_changed(self):
         # Propagage failed and changed flags to parent events.
@@ -676,7 +681,7 @@ class JobEvent(BaseModel):
                 parent.changed = True
                 update_fields.append('changed')
             if update_fields:
-                parent.save(update_fields=update_fields)
+                parent.save(update_fields=update_fields, from_parent_update=True)
                 parent.update_parent_failed_and_changed()
 
     def update_hosts(self, extra_hosts=None):
