@@ -149,7 +149,8 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
       form: form,
       current_item: null,
       list: CloudCredentialList, 
-      field: 'cloud_credential' 
+      field: 'cloud_credential',
+      hdr: 'Select Cloud Credential'
       });
    
    LookUpInit({
@@ -158,7 +159,8 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
       form: form,
       current_item: null,
       list: CredentialList, 
-      field: 'credential' 
+      field: 'credential',
+      hdr: 'Select Machine Credential'
       });
 
    // Update playbook select whenever project value changes
@@ -444,7 +446,8 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
            form: form,
            current_item: scope['cloud_credential'],
            list: CloudCredentialList, 
-           field: 'cloud_credential' 
+           field: 'cloud_credential',
+           hdr: 'Select Cloud Credential'
            });
        });
 
@@ -548,7 +551,8 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                form: form,
                current_item: data.credential,
                list: CredentialList, 
-               field: 'credential' 
+               field: 'credential',
+               hdr: 'Select Machine Credential'
                });
 
            LookUpInit({
