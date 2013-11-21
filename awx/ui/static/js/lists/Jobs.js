@@ -103,9 +103,9 @@ angular.module('JobsListDefinition', [])
                 'class': 'btn-default btn-xs',
                 options: [
                     { ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Status' },
-                    { ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Summary', 
-                        ngHide: "job.status == 'new'" },
                     { ngClick: "viewEvents(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Events',
+                        ngHide: "job.status == 'new'" },
+                    { ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Host Summary', 
                         ngHide: "job.status == 'new'" }
                     ]
                 },

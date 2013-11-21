@@ -25,16 +25,16 @@ angular.module('JobEventsListDefinition', [])
                 icon: 'icon-zoom-in',
                 ngShow: "job_id !== null"
                 },
-            hosts: {
-                href: "/#/jobs/{{ job_id }}/job_host_summaries",
-                label: 'Summary',
-                icon: 'icon-laptop'
-                },
             events: {
                 href: "/#/jobs/{{ job_id }}/job_events",
                 label: 'Events',
                 active: true,
                 icon: 'icon-list-ul'
+                },
+            hosts: {
+                href: "/#/jobs/{{ job_id }}/job_host_summaries",
+                label: 'Host Summary',
+                icon: 'icon-laptop'
                 }
             },
         
