@@ -47,9 +47,13 @@ angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
             return html; 
             }   
 
+        var tot = 0;
+        for (var type in dashboard.scm_types) {
+            tot += dashboard.scm_types[type].total;
+        }
         html += makeRow({ label: 'Projects',
             link: '/#/projects',
-            count: [(dashboard.projects && dashboard.projects.total) ? dashboard.projects.total : 0],
+            count: tot,
             fail: [(dashboard.projects && dashboard.projects.failed) ? dashboard.projects.failed : 0],
             fail_link: '/#/projects/?status=failed'
             });

@@ -49,14 +49,15 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
             }
         
         html += makeRow({ label: 'Inventories',
-            count: [(dashboard.inventories && dashboard.inventories.total) ? dashboard.inventories.total : 0], 
+            count: [(dashboard.inventories && dashboard.inventories.total_with_inventory_source) ? 
+                dashboard.inventories.total_with_inventory_source : '?'], 
             fail: [(dashboard.inventories && dashboard.inventories.inventory_failed) ? dashboard.inventories.inventory_failed : 0], 
             link: '/#/inventories/?has_inventory_sources=true', 
             fail_link: '/#/inventories/?inventory_sources_with_failures=true'
             });
         
         html += makeRow({ label: 'Groups',
-            count: [(dashboard.groups && dashboard.groups.total) ? dashboard.groups.total : 0],
+            count: [(dashboard.groups && dashboard.groups.total_with_inventory_source) ? dashboard.groups.total_with_inventory_source : '?'],
             fail: [(dashboard.groups && dashboard.groups.inventory_failed) ? dashboard.groups.inventory_failed : 0],
             link: '/#/home/groups/?has_external_source=true',
             fail_link: '/#/home/groups/?status=failed'
