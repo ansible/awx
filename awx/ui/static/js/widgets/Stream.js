@@ -214,9 +214,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     scope['object2_name'] = results.summary_fields.object2.name; 
                 }
                 scope['user'] = (results.summary_fields.user) ? results.summary_fields.user.username : 'system';
-                scope['changes'] = results['changes'];
-                //scope['changes'] = (!Empty(results['changes'])) ?  JSON.parse(scope.variables) : '';
-                //scope['changes'] = JSON.stringify(results['changes'], null, '\t');                
+                scope['changes'] = JSON.stringify(results['changes'], null, '\t');                
                 scope.formModalAction = function() {
                     $('#form-modal').modal("hide");
                     }

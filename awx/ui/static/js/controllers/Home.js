@@ -16,7 +16,8 @@ function Home ($routeParams, $rootScope, $location, Wait, ObjectCount, JobStatus
     ClearScope('home');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                          //scope.
     
-    var scope = $rootScope.$new();
+    var element = angular.element(document.getElementById('htmlTemplate'));
+    var scope = element.scope();
     var waitCount = 4;
     var loadedCount = 0;
         
@@ -31,7 +32,6 @@ function Home ($routeParams, $rootScope, $location, Wait, ObjectCount, JobStatus
     scope.removeWidgetLoaded = scope.$on('WidgetLoaded', function() {
         // Once all the widgets report back 'loaded', turn off Wait widget
         loadedCount++; 
-        console.log('count: ' + loadedCount);
         if ( loadedCount == waitCount ) {
             Wait('stop');
         }
@@ -48,18 +48,24 @@ function Home ($routeParams, $rootScope, $location, Wait, ObjectCount, JobStatus
         });
     
     scope.showActivity = function() { Stream(); } 
-    scope.refresh = function() { load(); }
+
+    scope.refresh = function() {
+        Wait('start');
+        loadedCount = 0;
+        Rest.setUrl(GetBasePath('dashboard'));
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                scope.$emit('dashboardReady', data);
+            })
+            .error ( function(data, status, headers, config) {
+                Wait('stop');
+                ProcessErrors(scope, data, status, null,
+                    { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
+            })
+        }
     
-    Rest.setUrl(GetBasePath('dashboard'));
-    Rest.get()
-        .success( function(data, status, headers, config) {
-            scope.$emit('dashboardReady', data);
-        })
-        .error ( function(data, status, headers, config) {
-            Wait('stop');
-            ProcessErrors(scope, data, status, null,
-                { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
-        })
+    scope.refresh();
+    
     }
 
 Home.$inject=[ '$routeParams', '$rootScope', '$location', 'Wait', 'ObjectCount', 'JobStatus', 'InventorySyncStatus',
