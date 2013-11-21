@@ -102,7 +102,7 @@ runserver:
 
 # Run to start the background celery worker for development.
 celeryd:
-	$(PYTHON) manage.py celeryd -l DEBUG -B --autoreload
+	$(PYTHON) manage.py celeryd -l DEBUG -B
 
 # Run all API unit tests.
 test:
