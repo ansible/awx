@@ -47,6 +47,8 @@ class BaseTestMixin(object):
         # commands that run from tests.
         for opt in ('ENGINE', 'NAME', 'USER', 'PASSWORD', 'HOST', 'PORT'):
             os.environ['AWX_TEST_DATABASE_%s' % opt] = settings.DATABASES['default'][opt]
+        if not os.path.exists(settings.JOBOUTPUT_ROOT):
+            os.makedirs(settings.JOBOUTPUT_ROOT)
 
     def tearDown(self):
         super(BaseTestMixin, self).tearDown()
