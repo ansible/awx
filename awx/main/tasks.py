@@ -193,10 +193,11 @@ class BaseTask(Task):
                 #task_stdout_handle.write(logfile.getvalue()[old_logfile_pos:logfile_pos])
                 #task_stdout_handle.flush()
                 last_stdout_update = time.time()
-            instance = self.get_model(instance.pk)
-            # Commit transaction needed when running unit tests. FIXME: Is it
-            # needed or breaks anything for normal operation?
-            transaction.commit()
+            # Update instance status here (also updates modified timestamp, so
+            # we have a way to know the task is still running, otherwise the
+            # post_run_hook below would cancel long-running tasks that are
+            # really still active).
+            instance = self.update_model(instance.pk, status='running')
             if instance.cancel_flag:
                 child.close(True)
                 canceled = True
