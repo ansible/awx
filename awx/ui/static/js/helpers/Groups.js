@@ -373,6 +373,28 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 scope.groups[i].last_updated = last_update;
                 scope.groups[i].status_badge_class = update_status['class'];
                 scope.groups[i].status_badge_tooltip = update_status['tooltip'];
+                
+                // Set cancel button attributes
+                if (scope.groups[i].summary_fields.inventory_source.status == 'updating' ||
+                     scope.groups[i].summary_fields.inventory_source.status == 'updating') {
+                     scope.groups[i].cancel_tooltip = "Cancel the update process";
+                     scope.groups[i].cancel_class = "";
+                }
+                else {
+                    scope.groups[i].cancel_tooltip = "Update process is not running";
+                    scope.groups[i].cancel_class = "btn-disabled";    
+                }
+
+                // Set update button attributes
+                if (scope.groups[i].summary_fields.inventory_source.source == "" || 
+                     scope.groups[i].summary_fields.inventory_source.source == null) {
+                     scope.groups[i].update_tooltip = "No external source. Does not require an update.";
+                     scope.groups[i].update_class = "btn-disabled";
+                }
+                else {
+                    scope.groups[i].update_tooltip = "Start the inventory update process";
+                    scope.groups[i].update_class = "";    
+                }
             }
 
             if (scope.groups.length == 0) {
@@ -485,7 +507,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             if (group.summary_fields.inventory_source.source !== '' &&
                    group.summary_fields.inventory_source.source !== null) {
                // the group has a source
-               if (group.summary_fields.inventory_source.status == 'updating') {
+               if (group.summary_fields.inventory_source.status == 'updating' || 
+                    group.summary_fields.inventory_source.status == 'pending')  {
                   // there is an update currently running
                   Rest.setUrl(group.related.inventory_source);
                   Rest.get()
@@ -497,7 +520,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                               { hdr: 'Error!', msg: 'Call to ' + group.related.inventory_source + ' failed. GET status: ' + status });
                           });
                }
-               else {
+            }
+            // The button appears disabled, so act like it is and do not respond to a click.
+           /*    else {
                   Alert('Update Not Found', 'An Inventory update does not appear to be running for group: <em>' + group.name + '</em>. Click the <em>Refresh</em> ' +
                       'button to view the latet status.', 'alert-info');
                }
@@ -505,7 +530,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             else {
                 Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group and provide external Source settings ' +
                     'before attempting an update.', 'alert-info');
-            }
+            }*/
+
             }
 
         // Respond to refresh button
@@ -526,8 +552,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             for (var i=0; i < scope.groups.length; i++) {
                 if (scope.groups[i].id == id) {
                    if (scope.groups[i].summary_fields.inventory_source.source == "" || scope.groups[i].summary_fields.inventory_source.source == null) {
-                      Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group and provide ' +
-                          'external Source settings before attempting an update.', 'alert-info');
+                      //Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group and provide ' +
+                      //    'external Source settings before attempting an update.', 'alert-info');
+                      // Do nothing. Act as though button is disabled.
                    }
                    else if (scope.groups[i].summary_fields.inventory_source.status == 'updating') {
                       Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +

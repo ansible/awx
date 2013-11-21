@@ -137,6 +137,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (btn.dataTitle) ? Attr(btn, 'dataTitle') : "";
         html += (btn.ngShow) ? Attr(btn, 'ngShow') : "";
         html += (btn.ngHide) ? Attr(btn, 'ngHide') : "";
+        html += (btn.ngDisabled) ? Attr(btn, 'ngHide') : "";
+        html += (btn.ngClass) ? Attr(btn, 'ngClass') : "";
         html += " >";
         html += (btn['img']) ? "<img src=\"" + $basePath + "img/" + btn.img + "\" style=\"width: 12px; height: 12px;\" >" : "";
         html += (btn['icon']) ? Attr(btn,'icon') : "";

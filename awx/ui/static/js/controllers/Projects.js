@@ -66,6 +66,14 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                 for (var j=0; j < scope.project_scm_type_options.length; j++) {
                     if (scope.project_scm_type_options[j].value == scope.projects[i].scm_type) {
                         scope.projects[i].scm_type = scope.project_scm_type_options[j].label
+                        if (scope.projects[i].scm_type == 'Manual') {
+                            scope.projects[i].scm_update_tooltip = 'Manaul projects do not require an SCM update';
+                            scope.projects[i].scm_type_class = 'btn-disabled';
+                        }
+                        else {
+                            scope.projects[i].scm_update_tooltip = "Start an SCM update";
+                            scope.projects[i].scm_type_class = "";
+                        }
                         break;
                     }
                 }
@@ -265,8 +273,11 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     scope.SCMUpdate = function(project_id) {
        for (var i=0; i < scope.projects.length; i++) {
            if (scope.projects[i].id == project_id) {
-              if (scope.projects[i].scm_type == "" || scope.projects[i].scm_type == null ) {
-                 Alert('Missing SCM Setup', 'Before running an SCM update, edit the project and provide the SCM access information.', 'alert-info');
+              if (scope.projects[i].scm_type == "Manual" || scope.projects[i].scm_type == "" || scope.projects[i].scm_type == null ) {
+                 // Do not respond. Button appears greyed out as if it is disabled. Not disabled though, because we need mouse over event
+                 // to work. So user can click, but we just won't do anything.
+                 //Alert('Missing SCM Setup', 'Before running an SCM update, edit the project and provide the SCM access information.', 'alert-info');
+                 break;
               }
               else if (scope.projects[i].status == 'updating') {
                  Alert('Update in Progress', 'The SCM update process is running. Use the Refresh button to monitor the status.', 'alert-info'); 

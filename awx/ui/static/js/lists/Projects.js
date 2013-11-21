@@ -122,7 +122,8 @@ angular.module('ProjectsListDefinition', [])
                 icon: 'icon-cloud-download',
                 "class": 'btn-xs btn-success',
                 ngClick: 'SCMUpdate(\{\{ project.id \}\})',
-                awToolTip: 'Perform an SCM update on this project'     
+                awToolTip: "\{\{ project.scm_update_tooltip \}\}",
+                ngClass: "project.scm_type_class"
                 },
             cancel: {
                 label: 'Cancel',

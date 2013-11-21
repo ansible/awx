@@ -163,14 +163,16 @@ angular.module('InventorySummaryDefinition', [])
                 icon: 'icon-cloud-download',
                 "class": 'btn-xs btn-success',
                 ngClick: 'updateGroup(\{\{ group.id \}\})',
-                awToolTip: 'Perform an update on this group'     
+                awToolTip: "\{\{ group.update_tooltip \}\}",
+                ngClass: "group.update_class"
                 },
             cancel: {
                 label: 'Cancel',
                 icon: 'icon-minus-sign',
                 ngClick: "cancelUpdate(\{\{ group.id \}\}, '\{\{ group.name \}\}')",
                 "class": 'btn-danger btn-xs delete-btn',
-                awToolTip: 'Cancel a running update process'
+                awToolTip: "\{\{ group.cancel_tooltip \}\}",
+                ngClass: "group.cancel_class"
                 }
             }
     });
