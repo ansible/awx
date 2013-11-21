@@ -273,6 +273,11 @@ class CommonTask(PrimordialModel):
         default='',
         editable=False,
     )
+    result_stdout_file = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
     result_traceback = models.TextField(
         blank=True,
         default='',

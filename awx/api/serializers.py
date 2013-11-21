@@ -7,6 +7,7 @@ import re
 import socket
 import urlparse
 import logging
+import os.path
 
 # PyYAML
 import yaml
@@ -188,6 +189,21 @@ class BaseSerializer(serializers.ModelSerializer):
         else:
             return obj.active
 
+class BaseTaskSerializer(BaseSerializer):
+
+    result_stdout = serializers.SerializerMethodField('get_result_stdout')
+
+    def get_result_stdout(self, obj):
+        if obj is None:
+            return ''
+        if obj.result_stdout_file != "":
+            if not os.path.exists(obj.result_stdout_file):
+                return "stdout capture is missing"
+            stdout_fd = open(obj.result_stdout_file, "r")
+            output = stdout_fd.read()
+            stdout_fd.close()
+            return output
+        return obj.result_stdout
 
 class UserSerializer(BaseSerializer):
 
@@ -361,7 +377,7 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
         return ret.get('playbooks', [])
 
 
-class ProjectUpdateSerializer(BaseSerializer):
+class ProjectUpdateSerializer(BaseTaskSerializer):
 
     class Meta:
         model = ProjectUpdate
@@ -685,7 +701,7 @@ class InventorySourceSerializer(BaseSerializer):
         return metadata
 
 
-class InventoryUpdateSerializer(BaseSerializer):
+class InventoryUpdateSerializer(BaseTaskSerializer):
 
     class Meta:
         model = InventoryUpdate
@@ -839,7 +855,7 @@ class JobTemplateSerializer(BaseSerializer):
         return attrs
 
 
-class JobSerializer(BaseSerializer):
+class JobSerializer(BaseTaskSerializer):
 
     passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
 
@@ -849,9 +865,8 @@ class JobSerializer(BaseSerializer):
                   'modified', 'job_template', 'job_type', 'inventory',
                   'project', 'playbook', 'credential', 'cloud_credential',
                   'forks', 'limit', 'verbosity', 'extra_vars',
-                  'job_tags', 'launch_type', 'status', 'failed',
-                  'result_stdout', 'result_traceback',
-                  'passwords_needed_to_start', 'job_args',
+                  'job_tags', 'launch_type', 'status', 'failed', 'result_stdout',
+                  'result_traceback', 'passwords_needed_to_start', 'job_args',
                   'job_cwd', 'job_env')
 
     def get_related(self, obj):

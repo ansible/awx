@@ -34,6 +34,8 @@ STATIC_ROOT = '/var/lib/awx/public/static'
 
 PROJECTS_ROOT = '/var/lib/awx/projects'
 
+JOBOUTPUT_ROOT = '/var/lib/awx/job_status'
+
 SECRET_KEY = file('/etc/awx/SECRET_KEY', 'rb').read().strip()
 
 ALLOWED_HOSTS = ['*']

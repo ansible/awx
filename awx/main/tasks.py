@@ -17,6 +17,7 @@ import tempfile
 import time
 import traceback
 import urlparse
+import uuid
 
 # Pexpect
 import pexpect
@@ -67,6 +68,9 @@ class BaseTask(Task):
             instance.save(update_fields=update_fields)
             transaction.commit()
         return instance
+
+    def get_model(self, pk):
+        return self.model.objects.get(pk=pk)
 
     def get_path_to(self, *args):
         '''
@@ -155,7 +159,7 @@ class BaseTask(Task):
         '''
         return SortedDict()
 
-    def run_pexpect(self, instance, args, cwd, env, passwords,
+    def run_pexpect(self, instance, args, cwd, env, passwords, task_stdout_handle,
                     output_replacements=None):
         '''
         Run the given command using pexpect to capture output and provide
@@ -176,18 +180,20 @@ class BaseTask(Task):
             expect_list.append(item[0])
             expect_passwords[n] = passwords.get(item[1], '') or ''
         expect_list.extend([pexpect.TIMEOUT, pexpect.EOF])
+        self.update_model(instance.pk, status='running', output_replacements=output_replacements)
         while child.isalive():
             result_id = child.expect(expect_list, timeout=pexpect_timeout)
             #print 'pexpect result_id', result_id, expect_list[result_id], expect_passwords.get(result_id, None)
             if result_id in expect_passwords:
                 child.sendline(expect_passwords[result_id])
-            updates = {'status': 'running',
-                       'output_replacements': output_replacements}
             if logfile_pos != logfile.tell():
+                old_logfile_pos = logfile_pos
                 logfile_pos = logfile.tell()
-                updates['result_stdout'] = logfile.getvalue()
+                #updates['result_stdout'] = logfile.getvalue()
+                task_stdout_handle.write(logfile.getvalue()[old_logfile_pos:logfile_pos])
+                task_stdout_handle.flush()
                 last_stdout_update = time.time()
-            instance = self.update_model(instance.pk, **updates)
+            instance = self.get_model(instance.pk)
             # Commit transaction needed when running unit tests. FIXME: Is it
             # needed or breaks anything for normal operation?
             transaction.commit()
@@ -213,6 +219,7 @@ class BaseTask(Task):
         '''
         if instance.status != 'pending':
             return False
+        # TODO: Check that we can write to the stdout data directory
         return True
 
     def post_run_hook(self, instance, **kwargs):
@@ -264,10 +271,11 @@ class BaseTask(Task):
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
             safe_env = self.build_safe_env(instance, **kwargs)
+            stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, str(uuid.uuid1()) + ".out")
+            stdout_handle = open(stdout_filename, 'w')
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
-                                         job_cwd=cwd, job_env=safe_env)
-            status, stdout = self.run_pexpect(instance, args, cwd, env,
-                                              kwargs['passwords'])
+                                         job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_filename)
+            status, stdout = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
         except Exception:
             tb = traceback.format_exc()
         finally:
@@ -276,7 +284,11 @@ class BaseTask(Task):
                     os.remove(kwargs['private_data_file'])
                 except IOError:
                     pass
-        instance = self.update_model(pk, status=status, result_stdout=stdout,
+                try:
+                    stdout_handle.close()
+                except Exception:
+                    pass
+        instance = self.update_model(pk, status=status,
                                      result_traceback=tb,
                                      output_replacements=output_replacements)
         self.post_run_hook(instance, **kwargs)
