@@ -68,9 +68,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        else {
           element.html(this.build(options));
        }
+       
+       if (options.scope) {
+          this.scope = options.scope;
+       }
+       else {
+          this.scope = element.scope();
+       }
 
-       this.scope = element.scope();       // Set scope specific to the element we're compiling, avoids circular reference
-                                           // From here use 'scope' to manipulate the form, as the form is not in '$scope'
        $compile(element)(this.scope);
  
        if (!options.buildTree && !options.html) {

@@ -894,7 +894,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         scope.removeChoicesComplete = scope.$on('choicesReady', function() {
             
-            generator.inject(form, { mode: 'edit', modal: false, related: false, id: 'tree-form', breadCrumbs: false });
+            generator.inject(form, { mode: 'edit', modal: false, related: false, id: 'tree-form', 
+                breadCrumbs: false, scope: scope });
             generator.reset();
       
             // Retrieve detail record and prepopulate the form
