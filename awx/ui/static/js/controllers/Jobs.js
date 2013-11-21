@@ -182,7 +182,8 @@ JobsListCtrl.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routePar
 function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, 
                   GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
                   RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList, CredentialList,
-                  ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, FormatDate, JobStatusToolTip) 
+                  ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, FormatDate,
+                  JobStatusToolTip, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -505,7 +506,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
       }
 
    scope.refresh = function() {
-      scope.statusSearchSpin = true;
+      Wait('start');
       Rest.setUrl(defaultUrl + id + '/'); 
       Rest.get()
           .success( function(data, status, headers, config) {
@@ -514,14 +515,10 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
               scope.result_traceback = data.result_traceback;
               scope['stdout_rows'] = calcRows(scope['result_stdout']);
               scope['traceback_rows'] = calcRows(scope['result_traceback']);
-              if (!(data.status == 'pending' || data.status == 'waiting' || data.status == 'running')) {
-                 if ($rootScope.timer) {
-                    clearInterval($rootScope.timer);
-                 }
-              }
-              scope.statusSearchSpin = false;
+              Wait('stop');
               })
           .error( function(data, status, headers, config) {
+              Wait('stop');
               ProcessErrors(scope, data, status, null,
                  { hdr: 'Error!', msg: 'Attempt to load job failed. GET returned status: ' + status });
               });
@@ -540,5 +537,5 @@ JobsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$
                      'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                      'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList',
                      'ProjectList', 'LookUpInit', 'PromptPasswords', 'GetBasePath', 'md5Setup', 'FormatDate',
-                     'JobStatusToolTip'
+                     'JobStatusToolTip', 'Wait'
                      ];
