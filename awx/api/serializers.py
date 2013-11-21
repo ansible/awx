@@ -189,22 +189,6 @@ class BaseSerializer(serializers.ModelSerializer):
         else:
             return obj.active
 
-class BaseTaskSerializer(BaseSerializer):
-
-    result_stdout = serializers.SerializerMethodField('get_result_stdout')
-
-    def get_result_stdout(self, obj):
-        if obj is None:
-            return ''
-        if obj.result_stdout_file != "":
-            if not os.path.exists(obj.result_stdout_file):
-                return "stdout capture is missing"
-            stdout_fd = open(obj.result_stdout_file, "r")
-            output = stdout_fd.read()
-            stdout_fd.close()
-            return output
-        return obj.result_stdout
-
 class UserSerializer(BaseSerializer):
 
     password = serializers.WritableField(required=False, default='',
@@ -377,7 +361,7 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
         return ret.get('playbooks', [])
 
 
-class ProjectUpdateSerializer(BaseTaskSerializer):
+class ProjectUpdateSerializer(BaseSerializer):
 
     class Meta:
         model = ProjectUpdate
@@ -701,7 +685,7 @@ class InventorySourceSerializer(BaseSerializer):
         return metadata
 
 
-class InventoryUpdateSerializer(BaseTaskSerializer):
+class InventoryUpdateSerializer(BaseSerializer):
 
     class Meta:
         model = InventoryUpdate
@@ -855,7 +839,7 @@ class JobTemplateSerializer(BaseSerializer):
         return attrs
 
 
-class JobSerializer(BaseTaskSerializer):
+class JobSerializer(BaseSerializer):
 
     passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
 
