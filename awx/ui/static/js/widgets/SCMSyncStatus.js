@@ -51,7 +51,7 @@ angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
             link: '/#/projects',
             count: [(dashboard.projects && dashboard.projects.total) ? dashboard.projects.total : 0],
             fail: [(dashboard.projects && dashboard.projects.failed) ? dashboard.projects.failed : 0],
-            fail_link: '/#/projects/?scm_type=&status=failed'
+            fail_link: '/#/projects/?status=failed'
             });
         
         var labelList = [];

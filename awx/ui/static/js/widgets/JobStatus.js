@@ -68,7 +68,7 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
             label: 'Groups', 
             link: '/#/home/groups',
             count: [(dashboard.groups && dashboard.groups.total) ? dashboard.groups.total : 0],
-            fail: [(dashboard.groups && dashboard.groups.fob_failed) ? dashboard.groups.job_failed : 0],
+            fail: [(dashboard.groups && dashboard.groups.job_failed) ? dashboard.groups.job_failed : 0],
             fail_link: '/#/home/groups/?has_active_failures=true' 
             });
         html += makeRow({

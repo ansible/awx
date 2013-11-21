@@ -99,6 +99,12 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                     break;
                 }
             }
+        } 
+        else if ($routeParams['status']) {
+            scope[list.iterator + 'SearchValue'] = $routeParams['status'];
+            scope[list.iterator + 'SearchField'] = 'status';
+            scope[list.iterator + 'SearchFieldLabel'] = list.fields['status'].label;
+            scope[list.iterator + 'SearchSelectValue'] = null; 
         }
         scope.search(list.iterator);
         });

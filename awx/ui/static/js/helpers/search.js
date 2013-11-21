@@ -389,7 +389,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                         else {
                             if ( (!list.fields[scope[iterator + 'SearchField' + modifier]].searchType) ||
                                 (list.fields[scope[iterator + 'SearchField' + modifier]].searchType && 
-                                    list.fields[scope[iterator + 'SearchField' + modifier]].searchType !== 'or') ) {
+                                    list.fields[scope[iterator + 'SearchField' + modifier]].searchType !== 'or' &&
+                                    list.fields[scope[iterator + 'SearchField' + modifier]].searchType !== 'gtzero') ) {
                                 scope[iterator + 'SearchParams'] += escape(scope[iterator + 'SearchValue' + modifier]);
                             }
                         }

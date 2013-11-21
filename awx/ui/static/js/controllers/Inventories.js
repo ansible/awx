@@ -55,8 +55,10 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
     if ($routeParams['inventory_sources_with_failures']) {
         // pass a value of true, however this field actually contains an integer value
         scope[InventoryList.iterator + 'InputDisable'] = true;
+        scope[InventoryList.iterator + 'SearchValue'] = $routeParams['inventory_sources_with_failures'];
         scope[InventoryList.iterator + 'SearchField'] = 'inventory_sources_with_failures';
         scope[InventoryList.iterator + 'SearchFieldLabel'] = InventoryList.fields['inventory_sources_with_failures'].label;
+        scope[InventoryList.iterator + 'SearchType'] = 'gtzero';
     }
 
     scope.search(list.iterator);
