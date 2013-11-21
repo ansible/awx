@@ -48,7 +48,7 @@ class ActivityStreamMiddleware(object):
                         logger.debug("Integrity Error saving Activity Stream instance for id : " + str(instance_id))
                 else:
                     obj1_type_actual = instance.object1_type.split(".")[-1]
-                    if obj1_type_actual in ("InventoryUpdate", "ProjectUpdate", "JobEvent", "Job") and instance.id is not None:
+                    if obj1_type_actual in ("InventoryUpdate", "ProjectUpdate", "Job") and instance.id is not None:
                         instance.delete()
         return response
 
