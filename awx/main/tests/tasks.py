@@ -46,7 +46,7 @@ TEST_ASYNC_OK_PLAYBOOK = '''
   tasks:
   - name: async task should pass
     command: sleep 4
-    async: 8
+    async: 16
     poll: 1
 '''
 
@@ -55,8 +55,8 @@ TEST_ASYNC_FAIL_PLAYBOOK = '''
   gather_facts: false
   tasks:
   - name: async task should fail
-    shell: sleep 6; test 1 = 0
-    async: 8
+    shell: sleep 4; test 1 = 0
+    async: 16
     poll: 1
 '''
 
@@ -65,7 +65,7 @@ TEST_ASYNC_TIMEOUT_PLAYBOOK = '''
   gather_facts: false
   tasks:
   - name: async task should timeout
-    command: sleep 12
+    command: sleep 16
     async: 8
     poll: 1
 '''
