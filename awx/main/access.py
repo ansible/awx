@@ -156,7 +156,8 @@ class UserAccess(BaseAccess):
     I can see user records when:
      - I'm a superuser.
      - I'm that user.
-     - I'm their org admin.
+     - I'm an org admin (org admins should be able to see all users, in order
+       to add those users to the org).
      - I'm in an org with that user.
      - I'm on a team with that user.
     I can change some fields for a user (mainly password) when I am that user.
@@ -170,6 +171,8 @@ class UserAccess(BaseAccess):
     def get_queryset(self):
         qs = self.model.objects.filter(is_active=True).distinct()
         if self.user.is_superuser:
+            return qs
+        if self.user.admin_of_organizations.count():
             return qs
         return qs.filter(
             Q(pk=self.user.pk) |

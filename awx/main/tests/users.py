@@ -226,8 +226,9 @@ class UsersTest(BaseTest):
         url = reverse('api:user_list')
         data3 = self.get(url, expect=200, auth=self.get_super_credentials())
         self.assertEquals(data3['count'], 4)
+        # Normal user is an org admin, can see all users.
         data2 = self.get(url, expect=200, auth=self.get_normal_credentials())
-        self.assertEquals(data2['count'], 2)
+        self.assertEquals(data2['count'], 4)
         data1 = self.get(url, expect=200, auth=self.get_other_credentials())
         self.assertEquals(data1['count'], 2)
 
