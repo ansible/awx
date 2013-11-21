@@ -129,10 +129,12 @@ angular.module('GroupFormDefinition', [])
                 ngShow: "source.value == 'rax' || source.value == 'ec2'",
                 addRequired: false,
                 editRequired: false,
+                awMultiselect: 'source_region_choices',
                 dataTitle: 'Source Regions',
                 dataPlacement: 'left',
-                awPopOver: "<p>Comma separated list of regions. Region names must match those defined at the inventory source. " +
-                    "Only hosts associated with the list of regions will be included in the update process.</p>",
+                awPopOver: "<p>Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, " +
+                    "or choose <em>All</em> to include all regions. AWX will only be updated with Hosts associated with the selected regions." +
+                    "</p>",
                 dataContainer: 'body'
                 },
             source_vars: {

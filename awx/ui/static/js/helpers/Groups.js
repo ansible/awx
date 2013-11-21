@@ -686,10 +686,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-        'GetUpdateIntervalOptions', 'ClickNode', 'LookUpInit', 'CredentialList', 'Empty', 'Wait',
+        'GetUpdateIntervalOptions', 'ClickNode', 'LookUpInit', 'CredentialList', 'Empty', 'Wait', 'GetChoices',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions, ClickNode,
-        LookUpInit, CredentialList, Empty, Wait) {
+        LookUpInit, CredentialList, Empty, Wait, GetChoices) {
     return function(params) {
         
         var group_id = params.group_id;
@@ -699,13 +699,16 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var defaultUrl =  GetBasePath('groups') + group_id + '/';
         
         $('#tree-form').hide().empty();
+
+        var element = angular.element(document.getElementById('tree-form'));
+        var scope = element.scope();
         
-        var scope = generator.inject(form, { mode: 'edit', modal: false, related: false, id: 'tree-form', breadCrumbs: false });
-        generator.reset();
+        //var scope = generator.inject(form, { mode: 'edit', modal: false, related: false, id: 'tree-form', breadCrumbs: false });
         var master = {};
         var relatedSets = {};
         
         GetSourceTypeOptions({ scope: scope, variable: 'source_type_options' });
+        
         scope.update_interval_options = GetUpdateIntervalOptions();
         scope.source = form.fields.source['default'];
         scope.parseType = 'yaml';
@@ -823,9 +826,32 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                            list: CredentialList,
                            field: 'credential' 
                            });
+                       
+                       scope.sourceChange();   //set defaults that rely on source value
+                       
+                       if (data['source_regions']) {
+                          if (data['source'] == 'ec2' || data['source'] == 'rax') {
+                             var set = (data['source'] == 'ec2') ? scope['ec2_regions'] : scope['rax_regions'];
+                             var opts = [];
+                             var list = data['source_regions'].split(','); 
+                             for (var i=0; i < list.length; i++) {
+                                 for (var j=0; j < set.length; j++) {
+                                     if (list[i] == set[j].value) {
+                                         opts.push({ id: set[j].value, text: set[j].label });
+                                     }
+                                 }
+                             }
+                             master['source_regions'] = opts;
+                             $('#s2id_group_source_regions').select2('data', opts);
+                          }
+                       }
+                       else {
+                          // If empty, default to all
+                          master['source_regions'] = [{ id: 'all', text: 'All' }];
+                       }
 
                        scope['group_update_url'] = data.related['update'];    
-                       scope.sourceChange();
+                       
                        })
                    .error( function(data, status, headers, config) {
                        scope.source = "";
@@ -835,31 +861,72 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
             });
 
-        // Retrieve detail record and prepopulate the form
-        Rest.setUrl(defaultUrl); 
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                for (var fld in form.fields) {
-                    if (data[fld]) {
-                       scope[fld] = data[fld];
-                       master[fld] = scope[fld];
+        
+        if (scope.removeChoicesComplete) {
+            scope.removeChoicesComplete();
+        }
+        scope.removeChoicesComplete = scope.$on('choicesReady', function() {
+            
+            generator.inject(form, { mode: 'edit', modal: false, related: false, id: 'tree-form', breadCrumbs: false });
+            generator.reset();
+      
+            // Retrieve detail record and prepopulate the form
+            Rest.setUrl(defaultUrl); 
+            Rest.get()
+                .success( function(data, status, headers, config) {
+                    for (var fld in form.fields) {
+                        if (data[fld]) {
+                           scope[fld] = data[fld];
+                           master[fld] = scope[fld];
+                        }
                     }
-                }
-                var related = data.related;
-                for (var set in form.related) {
-                    if (related[set]) {
-                       relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
+                    var related = data.related;
+                    for (var set in form.related) {
+                        if (related[set]) {
+                           relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
+                        }
                     }
-                }
-                scope.variable_url = data.related.variable_data;
-                scope.source_url = data.related.inventory_source;
-                scope.$emit('groupLoaded');
-                })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, form,
-                    { hdr: 'Error!', msg: 'Failed to retrieve group: ' + defaultUrl + '. GET status: ' + status });
-                });
-       
+                    scope.variable_url = data.related.variable_data;
+                    scope.source_url = data.related.inventory_source;
+                    scope.$emit('groupLoaded');
+                    })
+                .error( function(data, status, headers, config) {
+                    ProcessErrors(scope, data, status, form,
+                        { hdr: 'Error!', msg: 'Failed to retrieve group: ' + defaultUrl + '. GET status: ' + status });
+                    });
+            });
+        
+        var choicesReady = 0;
+
+        if (scope.removeChoicesReady) {
+            scope.removeChoicesReady();  
+        }
+        scope.removeChoicesReady = scope.$on('choicesReady', function() {
+            choicesReady++; 
+            if (choicesReady == 2) {
+                scope.$emit('choicesReady');
+            }
+            });
+
+        // Load options for source regions
+        GetChoices({
+            scope: scope, 
+            url: GetBasePath('inventory_sources'),
+            field: 'source_regions',
+            variable: 'rax_regions',
+            choice_name: 'rax_region_choices',
+            callback: 'choicesReady'
+            });
+
+        GetChoices({
+            scope: scope, 
+            url: GetBasePath('inventory_sources'),
+            field: 'source_regions',
+            variable: 'ec2_regions',
+            choice_name: 'ec2_region_choices',
+            callback: 'choicesReady'
+            }); 
+
         if (!scope.$$phase) {
            scope.$digest();
         }
@@ -869,10 +936,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         scope.removeSaveComplete = scope.$on('SaveComplete', function(e, error) {
             if (!error) {
-               // Reset the form, adjust buttons and let user know changese saved
-               //scope[form.name + '_form'].$setPristine();
-               //scope['groupUpdateHide'] = (scope['source'].value !== null && scope['source'].value !== '') ? false : true;
-               //Alert("Changes Saved", "Your changes to inventory group " + scope['name'] + " were successfully saved.", 'alert-info');
                scope['flashMessage'] = 'Your changes to ' + scope['name'] + ' were saved.';
                ClickNode({ selector: '#inventory-root-node' });
             }
@@ -895,13 +958,20 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    source: scope['source'].value,
                    source_path: scope['source_path'],
                    credential: scope['credential'],
-                   source_regions: scope['source_regions'],
                    overwrite: scope['overwrite'],
                    overwrite_vars: scope['overwrite_vars'],
                    update_on_launch: scope['update_on_launch']
                    //update_interval: scope['update_interval'].value
                    };
         
+               // Get the select list of regions
+               var regions = $('#s2id_group_source_regions').select2("data");
+               data['source_regions'] = '';
+               for (var i=0; i < regions.length; i++) {
+                   data['source_regions'] += regions[i].id + ',';
+               }
+               data['source_regions'] = data['source_regions'].replace(/\,$/,''); 
+
                if (scope['source'].value == 'ec2') {
                   try {
                        // Make sure we have valid variable data
@@ -1013,6 +1083,16 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                scope.source_path = '';
                scope[form.name + '_form']['source_path'].$setValidity('required',true);
             }
+            if (scope['source'].value == 'rax') {
+               scope['source_region_choices'] = scope['rax_regions'];
+               //$('#s2id_group_source_regions').select2('data', []);
+               $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
+            }
+            else if (scope['source'].value == 'ec2') {
+               scope['source_region_choices'] = scope['ec2_regions'];
+               //$('#s2id_group_source_regions').select2('data', []);
+               $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
+            }
             LookUpInit({
                 url: GetBasePath('credentials') + 
                     '?cloud=true&kind=' + [(scope.source.value == 'rax') ? 'rax' : 'aws'],   
@@ -1061,6 +1141,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 scope[fld] = master[fld];
             }
             scope.parseType = 'yaml';
+            $('#s2id_group_source_regions').select2('data', master['source_regions']);
             }
             
         }

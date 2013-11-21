@@ -505,6 +505,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                   field.awRequiredWhen.variable + "\" " : "";
                 html += (field.awValidUrl) ? "aw-valid-url " : ""; 
                 html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled=\"" + field.associated + "_ask\" " : "";
+                html += (field.awMultiselect) ? "aw-multiselect=\"" + field.awMultiselect + "\" " : "";
                 html += " >\n";
              }
              

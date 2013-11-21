@@ -51,7 +51,7 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
         for (var i=0; i < keys.length; i++) {
             html += makeRow({
                 label: keys[i],
-                link: '/#/' + keys[i],
+                link: '/#/' + [(keys[i] == 'hosts' || keys[i] == 'groups') ? 'home/' + keys[i] : keys[i] ],
                 count: [(dashboard[keys[i]] && dashboard[keys[i]].total) ? dashboard[keys[i]].total : 0]
                 });
         }

@@ -7,6 +7,9 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}css/custom-theme/jquery-ui-1.10.3.custom.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/font-awesome.min.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}css/select2.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}css/select2-bootstrap.css" />
+  
   {% if settings.USE_MINIFIED_JS %} 
   <link rel="stylesheet" href="{{ STATIC_URL }}css/awx.min.css" />
   {% else %}
@@ -381,6 +384,7 @@
   <script src="{{ STATIC_URL }}lib/twitter/bootstrap.min.js"></script>
   <script src="{{ STATIC_URL }}lib/js-yaml/js-yaml.min.js"></script>
   <script src="{{ STATIC_URL }}lib/md5/jquery.md5.js"></script>
+  <script src="{{ STATIC_URL }}lib/select2/select2.js"></script>
   
   <script>
       $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {

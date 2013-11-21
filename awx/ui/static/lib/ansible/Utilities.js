@@ -429,6 +429,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        var field = params.field;
        var variable = params.variable;
        var callback = params.callback;   // Optional. Provide if you want scop.$emit on completion. 
+       var choice_name = params.choice_name;   // Optional. Used when data is in something other than 'choices'
        
        if (scope[variable]) {
           scope[variable].length = 0;
@@ -440,7 +441,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        Rest.setUrl(url);
        Rest.options()
            .success( function(data, status, headers, config) {
-               var choices = data.actions.GET[field].choices
+               var choices = (choice_name) ? data.actions.GET[field][choice_name] : data.actions.GET[field].choices
                // including 'name' property so list can be used by search
                for (var i=0; i < choices.length; i++) {
                    scope[variable].push({ label: choices[i][1], value: choices[i][0], name: choices[i][1]});
