@@ -7,6 +7,7 @@ import re
 import socket
 import urlparse
 import logging
+import os.path
 
 # PyYAML
 import yaml
@@ -188,7 +189,6 @@ class BaseSerializer(serializers.ModelSerializer):
         else:
             return obj.active
 
-
 class UserSerializer(BaseSerializer):
 
     password = serializers.WritableField(required=False, default='',
@@ -362,6 +362,8 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
 
 
 class ProjectUpdateSerializer(BaseSerializer):
+
+    result_stdout = serializers.Field(source='result_stdout')
 
     class Meta:
         model = ProjectUpdate
@@ -687,6 +689,8 @@ class InventorySourceSerializer(BaseSerializer):
 
 class InventoryUpdateSerializer(BaseSerializer):
 
+    result_stdout = serializers.Field(source='result_stdout')
+
     class Meta:
         model = InventoryUpdate
         fields = ('id', 'url', 'related', 'summary_fields', 'created',
@@ -842,6 +846,7 @@ class JobTemplateSerializer(BaseSerializer):
 class JobSerializer(BaseSerializer):
 
     passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
+    result_stdout = serializers.Field(source='result_stdout')
 
     class Meta:
         model = Job
@@ -849,9 +854,8 @@ class JobSerializer(BaseSerializer):
                   'modified', 'job_template', 'job_type', 'inventory',
                   'project', 'playbook', 'credential', 'cloud_credential',
                   'forks', 'limit', 'verbosity', 'extra_vars',
-                  'job_tags', 'launch_type', 'status', 'failed',
-                  'result_stdout', 'result_traceback',
-                  'passwords_needed_to_start', 'job_args',
+                  'job_tags', 'launch_type', 'status', 'failed', 'result_stdout',
+                  'result_traceback', 'passwords_needed_to_start', 'job_args',
                   'job_cwd', 'job_env')
 
     def get_related(self, obj):

@@ -4,6 +4,7 @@
 # Python
 import json
 import shlex
+import os.path
 
 # PyYAML
 import yaml
@@ -268,7 +269,13 @@ class CommonTask(PrimordialModel):
         default={},
         editable=False,
     )
-    result_stdout = models.TextField(
+    _result_stdout = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+        db_column="result_stdout",
+    )
+    result_stdout_file = models.TextField(
         blank=True,
         default='',
         editable=False,
@@ -319,6 +326,17 @@ class CommonTask(PrimordialModel):
         # If status changed, update parent instance....
         if self.status != status_before:
             self._update_parent_instance()
+
+    @property
+    def result_stdout(self):
+        if self.result_stdout_file != "":
+            if not os.path.exists(self.result_stdout_file):
+                return "stdout capture is missing"
+            stdout_fd = open(self.result_stdout_file, "r")
+            output = stdout_fd.read()
+            stdout_fd.close()
+            return output
+        return self._result_stdout
 
     @property
     def celery_task(self):

@@ -47,6 +47,10 @@ if len(sys.argv) >= 2 and sys.argv[1] == 'test':
 # This directory should NOT be web-accessible.
 PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
 
+# Absolute filesystem path to the directory for job status stdout
+# This directory should not be web-accessible
+JOBOUTPUT_ROOT = os.path.join(BASE_DIR, 'job_status')
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
