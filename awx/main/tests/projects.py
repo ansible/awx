@@ -380,13 +380,13 @@ class ProjectsTest(BaseTest):
         self.get(team_users, expect=200, auth=self.get_normal_credentials())
         self.get(team_users, expect=200, auth=self.get_super_credentials())
 
-        # can add users to teams (but only users I can see)
+        # can add users to teams (but only users I can see - as an org admin, can now see all users)
         all_users = self.get(reverse('api:user_list'), expect=200, auth=self.get_normal_credentials())
         for x in all_users['results']:
             self.post(team_users, data=x, expect=403, auth=self.get_nobody_credentials())
             self.post(team_users, data=x, expect=204, auth=self.get_normal_credentials())
 
-        self.assertEqual(Team.objects.get(pk=team.pk).users.count(), 3)
+        self.assertEqual(Team.objects.get(pk=team.pk).users.count(), 4)
 
         # can remove users from teams
         for x in all_users['results']:
