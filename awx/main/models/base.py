@@ -4,6 +4,7 @@
 # Python
 import json
 import shlex
+import os.path
 
 # PyYAML
 import yaml

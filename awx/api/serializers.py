@@ -363,6 +363,8 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
 
 class ProjectUpdateSerializer(BaseSerializer):
 
+    result_stdout = serializers.Field(source='result_stdout')
+
     class Meta:
         model = ProjectUpdate
         fields = ('id', 'url', 'related', 'summary_fields', 'created',
@@ -687,6 +689,8 @@ class InventorySourceSerializer(BaseSerializer):
 
 class InventoryUpdateSerializer(BaseSerializer):
 
+    result_stdout = serializers.Field(source='result_stdout')
+
     class Meta:
         model = InventoryUpdate
         fields = ('id', 'url', 'related', 'summary_fields', 'created',
@@ -842,6 +846,7 @@ class JobTemplateSerializer(BaseSerializer):
 class JobSerializer(BaseSerializer):
 
     passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
+    result_stdout = serializers.Field(source='result_stdout')
 
     class Meta:
         model = Job
