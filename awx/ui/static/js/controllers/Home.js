@@ -256,8 +256,6 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
 
     }
 
-HomeGroups.$inject = [ '$location', '$routeParams', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
-    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus',
-    'SetHostStatus', 'ToggleHostEnabled', 'HostsEdit', 'Stream'
+HomeHosts.$inject = [ '$location', '$routeParams', 'HomeHostList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
+    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetHostStatus', 'ToggleHostEnabled', 'HostsEdit', 'Stream'
     ]; 
-  
