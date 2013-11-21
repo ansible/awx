@@ -38,8 +38,10 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
         var name = list.iterator.charAt(0).toUpperCase() + list.iterator.substring(1);
         var hdr = (params.hdr) ? params.hdr : 'Select ' + name;
 
-        $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-url',defaultUrl + 
-            '?' + form.fields[field].sourceField + '__' + 'iexact=:value');
+        var watchUrl = (/\/$/.test(defaultUrl)) ? defaultUrl + '?' : defaultUrl + '&';
+        watchUrl += form.fields[field].sourceField + '__' + 'iexact=:value';
+         
+        $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-url', watchUrl);
         $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-source',field);
   
         scope['lookUp' + name] = function() {
