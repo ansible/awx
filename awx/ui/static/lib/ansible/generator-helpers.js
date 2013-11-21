@@ -59,6 +59,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             case 'dataTitle':
                result = "data-title=\"" + value + "\" ";
                break;
+            case 'awTipPlacement':
+               result = "aw-tip-placement=\"" + value + "\" ";
+               break;
             case 'columnShow':
                result = "ng-show=\"" + value + "\" ";
                break;
@@ -139,6 +142,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (btn.ngHide) ? Attr(btn, 'ngHide') : "";
         html += (btn.ngDisabled) ? Attr(btn, 'ngHide') : "";
         html += (btn.ngClass) ? Attr(btn, 'ngClass') : "";
+        html += (btn.awTipPlacement) ? Attr(btn, 'awTipPlacement') : "";
         html += " >";
         html += (btn['img']) ? "<img src=\"" + $basePath + "img/" + btn.img + "\" style=\"width: 12px; height: 12px;\" >" : "";
         html += (btn['icon']) ? Attr(btn,'icon') : "";

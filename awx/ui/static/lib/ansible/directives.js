@@ -238,7 +238,13 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Hos
     .directive('awToolTip', function() {
        return function(scope, element, attrs) {
            var delay = (attrs.delay != undefined && attrs.delay != null) ? attrs.delay : $AnsibleConfig.tooltip_delay;
-           var placement = (attrs.placement != undefined && attrs.placement != null) ? attrs.placement : 'left';
+           var placement; 
+           if (attrs.awTipPlacement) { 
+               placement = attrs.awTipPlacement;
+           }
+           else {
+               placement = (attrs.placement != undefined && attrs.placement != null) ? attrs.placement : 'left';
+           }
            $(element).on('hidden.bs.tooltip', function( ) {
                // TB3RC1 is leaving behind tooltip <div> elements. This will remove them
                // after a tooltip fades away. If not, they lay overtop of other elements and 

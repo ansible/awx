@@ -117,6 +117,22 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         scope.search(list.iterator);
         });
 
+    if (scope.removeStatusOptionsReady) {
+       scope.removeStatusOptionsReady();
+    }
+    scope.removeStatusOptionsReady = scope.$on('statusOptionsReady', function() {
+        list.fields.status.searchOptions = scope.project_status_options;
+        });
+    
+    // Load options for status --used in search
+    GetChoices({
+        scope: scope,
+        url: defaultUrl,
+        field: 'status',
+        variable: 'project_status_options',
+        callback: 'statusOptionsReady'
+        });
+    
     // Load the list of options for Kind
     GetChoices({
         scope: scope,
@@ -125,7 +141,6 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         variable: 'project_scm_type_options',
         callback: 'choicesReady'
         });
-
 
     LoadBreadCrumbs();
 

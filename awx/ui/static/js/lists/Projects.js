@@ -30,7 +30,7 @@ angular.module('ProjectsListDefinition', [])
                 excludeModal: true
                 },
             scm_type: {
-                label: 'SCM Type',
+                label: 'Type',
                 searchType: 'select',
                 searchOptions: [],   // will be set by Options call to projects resource
                 excludeModal: true,
@@ -43,6 +43,8 @@ angular.module('ProjectsListDefinition', [])
                 dataPlacement: 'top',
                 badgeIcon: "\{\{ 'icon-failures-' + project.badge \}\}",
                 badgePlacement: 'left',
+                searchType: 'select',
+                searchOptions: [],   // will be set by Options call to projects resource
                 excludeModal: true
                 },
             last_updated: {
@@ -63,12 +65,13 @@ angular.module('ProjectsListDefinition', [])
                 awToolTip: 'Create a new project'
                 },
             help: {
-                awPopOver: "<dl>\n<dt>Updating</dt><dd>An SCM update is in progress.</dd>\n" +
-                    "<dt>Never Updated</dt><dd>No SCM update has ever run for the project.</dd>\n" +
-                    "<dt>Failed</dt><dd>An error occurred during the most recent SCM update.</dd>\n" +
-                    "<dt>Successful</dt><dd>The latest SCM update ran to completion without incident.</dd>\n" +
-                    "<dt>Missing</dt><dd>The local project directory is missing.</dd>\n" +
-                    "<dt>N/A</dt><dd>The project does not use SCM, so an update status is not available.</dd>\n" +
+                awPopOver: "<dl>\n<dt>Updating</dt><dd>A source control update is in progress.</dd>\n" +
+                    "<dt>Never Updated</dt><dd>This project has not yet been updated from source control.</dd>\n" +
+                    "<dt>Failed</dt><dd>An error occurred during the most recent source control update, click the status " +
+                    "text for more information.</dd>\n" +
+                    "<dt>Successful</dt><dd>TThe latest source control update completed successfully.</dd>\n" +
+                    "<dt>Missing</dt><dd>The previously configured local project directory is missing.</dd>\n" +
+                    "<dt>N/A</dt><dd>The project is not linked to source control, so updates are not applicable.</dd>\n" +
                     "</dl>\n",
                 dataPlacement: 'left',
                 dataContainer: 'body',
@@ -76,6 +79,7 @@ angular.module('ProjectsListDefinition', [])
                 mode: 'all',
                 'class': 'btn-xs btn-info btn-help',
                 awToolTip: 'Click for help',
+                awTipPlacement: 'top',
                 dataTitle: 'Project Status',
                 iconSize: 'large'
                 },
