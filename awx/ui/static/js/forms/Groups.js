@@ -205,7 +205,7 @@ angular.module('GroupFormDefinition', [])
                         addRequired: false,
                         editRequired: false,
                         awPopOver: '<p>If checked, all variables for child groups and hosts will be removed and replaced by those ' + 
-                          'found on the external source.</p><p>When not checked a merge will be performed, combinging local variables with ' +
+                          'found on the external source.</p><p>When not checked a merge will be performed, combining local variables with ' +
                           'those found on the external source.</p>',
                         dataTitle: 'Overwrite Variables',
                         dataContainer: 'body',
