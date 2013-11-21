@@ -81,12 +81,13 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         }
         });
 
-    if (scope.removeChoicesReady) {
-       scope.removeChoicesReady();
+    if (scope.removeChoicesHere) {
+       scope.removeChoicesHere();
     }
-    scope.removeChoicesReady = scope.$on('choicesReady', function() {
+    scope.removeChoicesHere = scope.$on('choicesHere', function() {
         
         list.fields.scm_type.searchOptions = scope.project_scm_type_options;
+        list.fields.status.searchOptions = scope.project_status_options;
          
         if ($routeParams['scm_type'] && $routeParams['status']) {
            // Request coming from home page. User wants all errors for an scm_type
@@ -111,17 +112,29 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         else if ($routeParams['status']) {
             scope[list.iterator + 'SearchValue'] = $routeParams['status'];
             scope[list.iterator + 'SearchField'] = 'status';
+            scope[list.iterator + 'SelectShow'] = true;
             scope[list.iterator + 'SearchFieldLabel'] = list.fields['status'].label;
-            scope[list.iterator + 'SearchSelectValue'] = null; 
+            scope[list.iterator + 'SearchSelectOpts'] = list.fields['status'].searchOptions;
+            for (var opt in list.fields['status'].searchOptions) {
+                if (list.fields['status'].searchOptions[opt].value == $routeParams['status']) {
+                    scope[list.iterator + 'SearchSelectValue'] = list.fields['status'].searchOptions[opt];
+                    break;
+                }
+            }
         }
         scope.search(list.iterator);
         });
 
-    if (scope.removeStatusOptionsReady) {
-       scope.removeStatusOptionsReady();
+    var choiceCount = 0;
+
+    if (scope.removeChoicesReady) {
+       scope.removeChoicesReady();
     }
-    scope.removeStatusOptionsReady = scope.$on('statusOptionsReady', function() {
-        list.fields.status.searchOptions = scope.project_status_options;
+    scope.removeChoicesReady = scope.$on('choicesReady', function() {
+        choiceCount++;
+        if (choiceCount == 2) {
+           scope.$emit('choicesHere');
+        }
         });
     
     // Load options for status --used in search
@@ -130,7 +143,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         url: defaultUrl,
         field: 'status',
         variable: 'project_status_options',
-        callback: 'statusOptionsReady'
+        callback: 'choicesReady'
         });
     
     // Load the list of options for Kind
