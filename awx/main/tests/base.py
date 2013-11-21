@@ -47,8 +47,10 @@ class BaseTestMixin(object):
         # commands that run from tests.
         for opt in ('ENGINE', 'NAME', 'USER', 'PASSWORD', 'HOST', 'PORT'):
             os.environ['AWX_TEST_DATABASE_%s' % opt] = settings.DATABASES['default'][opt]
-        if not os.path.exists(settings.JOBOUTPUT_ROOT):
-            os.makedirs(settings.JOBOUTPUT_ROOT)
+        # Make temp job status directory for unit tests.
+        job_status_dir = tempfile.mkdtemp()
+        self._temp_project_dirs.append(job_status_dir)
+        settings.JOBOUTPUT_ROOT = os.path.abspath(job_status_dir)
 
     def tearDown(self):
         super(BaseTestMixin, self).tearDown()

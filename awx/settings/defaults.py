@@ -83,8 +83,9 @@ MEDIA_URL = '/media/'
 # This directory should not be web-accessible.
 PROJECTS_ROOT = os.path.join(BASE_DIR, 'projects')
 
-# Absolute filesystem path to the directory to host job stdout
-# This directory should not be web-accessible.
+# Absolute filesystem path to the directory for job status stdout (default for
+# development and tests, default for production defined in production.py). This
+# directory should not be web-accessible
 JOBOUTPUT_ROOT = os.path.join(BASE_DIR, 'job_output')
 
 SITE_ID = 1

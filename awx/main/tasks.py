@@ -166,7 +166,7 @@ class BaseTask(Task):
         passwords when requested.
         '''
         status, stdout = 'error', ''
-        logfile = cStringIO.StringIO()
+        logfile = task_stdout_handle#cStringIO.StringIO()
         logfile_pos = logfile.tell()
         child = pexpect.spawn(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
@@ -187,11 +187,11 @@ class BaseTask(Task):
             if result_id in expect_passwords:
                 child.sendline(expect_passwords[result_id])
             if logfile_pos != logfile.tell():
-                old_logfile_pos = logfile_pos
+                #old_logfile_pos = logfile_pos
                 logfile_pos = logfile.tell()
                 #updates['result_stdout'] = logfile.getvalue()
-                task_stdout_handle.write(logfile.getvalue()[old_logfile_pos:logfile_pos])
-                task_stdout_handle.flush()
+                #task_stdout_handle.write(logfile.getvalue()[old_logfile_pos:logfile_pos])
+                #task_stdout_handle.flush()
                 last_stdout_update = time.time()
             instance = self.get_model(instance.pk)
             # Commit transaction needed when running unit tests. FIXME: Is it
@@ -210,7 +210,7 @@ class BaseTask(Task):
             status = 'successful'
         else:
             status = 'failed'
-        stdout = logfile.getvalue()
+        #stdout = logfile.getvalue()
         return status, stdout
 
     def pre_run_check(self, instance, **kwargs):
@@ -271,6 +271,8 @@ class BaseTask(Task):
             cwd = self.build_cwd(instance, **kwargs)
             env = self.build_env(instance, **kwargs)
             safe_env = self.build_safe_env(instance, **kwargs)
+            if not os.path.exists(settings.JOBOUTPUT_ROOT):
+                os.makedirs(settings.JOBOUTPUT_ROOT)
             stdout_filename = os.path.join(settings.JOBOUTPUT_ROOT, str(uuid.uuid1()) + ".out")
             stdout_handle = open(stdout_filename, 'w')
             instance = self.update_model(pk, job_args=json.dumps(safe_args),
