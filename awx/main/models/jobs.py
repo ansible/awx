@@ -377,7 +377,11 @@ class JobHostSummary(BaseModel):
         return reverse('api:job_host_summary_detail', args=(self.pk,))
 
     def save(self, *args, **kwargs):
+        # If update_fields has been specified, add our field names to it,
+        # if it hasn't been specified, then we're just doing a normal save.
+        update_fields = kwargs.get('update_fields', [])
         self.failed = bool(self.dark or self.failures)
+        update_fields.append('failed')
         super(JobHostSummary, self).save(*args, **kwargs)
         self.update_host_last_job_summary()
 
@@ -608,6 +612,9 @@ class JobEvent(BaseModel):
         return None
 
     def save(self, *args, **kwargs):
+        # If update_fields has been specified, add our field names to it,
+        # if it hasn't been specified, then we're just doing a normal save.
+        update_fields = kwargs.get('update_fields', [])
         res = self.event_data.get('res', None)
         # Workaround for Ansible 1.2, where the runner_on_async_ok event is
         # created even when the async task failed. Change the event to be
@@ -621,26 +628,37 @@ class JobEvent(BaseModel):
         if self.event in self.FAILED_EVENTS:
             if not self.event_data.get('ignore_errors', False):
                 self.failed = True
+                if 'failed' not in update_fields:
+                    update_fields.append('failed')
         if isinstance(res, dict) and res.get('changed', False):
             self.changed = True
+            if 'changed' not in update_fields:
+                update_fields.append('changed')
         if self.event == 'playbook_on_stats':
             try:
                 failures_dict = self.event_data.get('failures', {})
                 dark_dict = self.event_data.get('dark', {})
                 self.failed = bool(sum(failures_dict.values()) + 
                                    sum(dark_dict.values()))
+                if 'failed' not in update_fields:
+                    update_fields.append('failed')
                 changed_dict = self.event_data.get('changed', {})
                 self.changed = bool(sum(changed_dict.values()))
+                if 'changed' not in update_fields:
+                    update_fields.append('changed')
             except (AttributeError, TypeError):
                 pass
         try:
             if not self.host and self.event_data.get('host', ''):
                 self.host = self.job.inventory.hosts.get(name=self.event_data['host'])
+                if 'host' not in update_fields:
+                    update_fields.append('host')
         except (Host.DoesNotExist, AttributeError):
             pass
         self.play = self.event_data.get('play', '')
         self.task = self.event_data.get('task', '')
         self.parent = self._find_parent()
+        update_fields.extend(['play', 'task', 'parent'])
         super(JobEvent, self).save(*args, **kwargs)
         self.update_parent_failed_and_changed()
         self.update_hosts()
@@ -650,15 +668,15 @@ class JobEvent(BaseModel):
         # Propagage failed and changed flags to parent events.
         if self.parent:
             parent = self.parent
-            save_parent = False
+            update_fields = []
             if self.failed and not parent.failed:
                 parent.failed = True
-                save_parent = True
+                update_fields.append('failed')
             if self.changed and not parent.changed:
                 parent.changed = True
-                save_parent = True
-            if save_parent:
-                parent.save()
+                update_fields.append('changed')
+            if update_fields:
+                parent.save(update_fields=update_fields)
                 parent.update_parent_failed_and_changed()
 
     def update_hosts(self, extra_hosts=None):
@@ -700,14 +718,14 @@ class JobEvent(BaseModel):
             except Host.DoesNotExist:
                 continue
             host_summary = self.job.job_host_summaries.get_or_create(host=host)[0]
-            host_summary_changed = False
+            update_fields = []
             for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
                 try:
                     value = self.event_data.get(stat, {}).get(hostname, 0)
                     if getattr(host_summary, stat) != value:
                         setattr(host_summary, stat, value)
-                        host_summary_changed = True
+                        update_fields.append(stat)
                 except AttributeError: # in case event_data[stat] isn't a dict.
                     pass
-            if host_summary_changed:
-                host_summary.save()
+            if update_fields:
+                host_summary.save(update_fields=update_fields)

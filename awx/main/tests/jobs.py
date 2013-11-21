@@ -2,10 +2,12 @@
 # All Rights Reserved.
 
 # Python
-import datetime
+import contextlib
 import json
 import socket
 import struct
+import threading
+import urlparse
 import uuid
 
 # Django
@@ -17,18 +19,31 @@ import django.test
 from django.test.client import Client
 from django.test.utils import override_settings
 
+# Requests
+import requests
+
 # AWX
 from awx.main.models import *
 from awx.main.tests.base import BaseTestMixin
 
 __all__ = ['JobTemplateTest', 'JobTest', 'JobStartCancelTest',
-           'JobTemplateCallbackTest']
+           'JobTemplateCallbackTest', 'JobTransactionTest']
 
 TEST_PLAYBOOK = '''- hosts: all
   gather_facts: false
   tasks:
   - name: woohoo
     command: test 1 = 1
+'''
+
+TEST_ASYNC_PLAYBOOK = '''
+- hosts: all
+  gather_facts: false
+  tasks:
+  - name: async task should pass
+    command: sleep 10
+    async: 20
+    poll: 1
 '''
 
 class BaseJobTestMixin(BaseTestMixin):
@@ -1312,3 +1327,65 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         host = host_qs[0]
         host_ip = self.get_test_ips_for_host(host.name)[0]
         self.post(url, data, expect=400, remote_addr=host_ip)
+
+
+@override_settings(CELERY_ALWAYS_EAGER=True,
+                   CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                   ANSIBLE_TRANSPORT='local')
+class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
+    '''Job test of transaction locking using the celery task backend.'''
+
+    def setUp(self):
+        super(JobTransactionTest, self).setUp()
+        settings.INTERNAL_API_URL = self.live_server_url
+
+    def tearDown(self):
+        super(JobTransactionTest, self).tearDown()
+
+    def _job_detail_polling_thread(self, url, auth, errors):
+        while True:
+            try:
+                response = requests.get(url, auth=auth)
+                response.raise_for_status()
+                data = json.loads(response.content)
+                if data.get('status', '') not in ('new', 'pending', 'running'):
+                    break
+            except Exception, e:
+                errors.append(e)
+                break
+
+    @contextlib.contextmanager
+    def poll_job_detail(self, url, auth, errors):
+        try:
+            t = threading.Thread(target=self._job_detail_polling_thread,
+                                 args=(url, auth, errors))
+            t.start()
+            yield
+        finally:
+            t.join(20)
+
+    # FIXME: This test isn't working for now.
+    def _test_get_job_detail_while_job_running(self):
+        self.proj_async = self.make_project('async', 'async test',
+                                            self.user_sue, TEST_ASYNC_PLAYBOOK)
+        self.org_eng.projects.add(self.proj_async)
+        job = self.job_ops_east_run
+        job.project = self.proj_async
+        job.playbook = self.proj_async.playbooks[0]
+        job.verbosity = 3
+        job.save()
+
+        job_detail_url = reverse('api:job_detail', args=(job.pk,))
+        job_detail_url = urlparse.urljoin(self.live_server_url, job_detail_url)
+        auth = ('sue', self._user_passwords['sue'])
+        errors = []
+        with self.poll_job_detail(job_detail_url, auth, errors):
+            with self.current_user(self.user_sue):
+                url = reverse('api:job_start', args=(job.pk,))
+                response = self.get(url)
+                self.assertTrue(response['can_start'])
+                self.assertFalse(response['passwords_needed_to_start'])
+                response = self.post(url, {}, expect=202)
+                job = Job.objects.get(pk=job.pk)
+                self.assertEqual(job.status, 'successful', job.result_stdout)
+        self.assertFalse(errors)

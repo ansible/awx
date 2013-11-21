@@ -42,6 +42,8 @@ def update_inventory_computed_fields(sender, **kwargs):
         else:
             sender_name = unicode(sender._meta.verbose_name)
         if kwargs['signal'] == post_save:
+            if sender == Job and instance.active:
+                return
             sender_action = 'saved'
         elif kwargs['signal'] == post_delete:
             sender_action = 'deleted'
@@ -101,7 +103,7 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
 @receiver(pre_save, sender=Group)
 def save_related_pks_before_group_marked_inactive(sender, **kwargs):
     instance = kwargs['instance']
-    if not instance.pk:
+    if not instance.pk or instance.active:
         return
     instance._saved_parents_pks = set(instance.parents.values_list('pk', flat=True))
     instance._saved_hosts_pks = set(instance.hosts.values_list('pk', flat=True))
@@ -154,6 +156,8 @@ def _update_host_last_jhs(host):
 @receiver(post_save, sender=Job)
 def update_host_last_job_when_job_marked_inactive(sender, **kwargs):
     instance = kwargs['instance']
+    if instance.active:
+        return
     hosts_qs = Host.objects.filter(active=True, last_job__pk=instance.pk)
     for host in hosts_qs:
         _update_host_last_jhs(host)
