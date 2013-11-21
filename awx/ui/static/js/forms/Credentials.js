@@ -86,20 +86,21 @@ angular.module('CredentialFormDefinition', [])
                 editRequired: true,
                 helpCollapse: [
                     { hdr: 'Credential Type',
-                      content: '<p>Choose a type based on how this credential will be used: ' +
+                      content: '<p>Choose a type for this credential: ' +
                                '<dl>\n' +
                                '<dt>AWS</dt>\n' +
-                               '<dd>Access keys for running cloud inventory sync with Amazon Web Services.</dd>\n' +
+                               '<dd>Access keys for Amazon Web Services used for inventory management or deployment.</dd>\n' +
                                '<dt>Machine</dt>\n' +
-                               '<dd>Define SSH and Sudo access for playbooks. Used when submitting jobs to run playbooks ' +
-                                   'on a remote host.</dd>' +
+                               '<dd>Authentication for remote machine access. This can include SSH keys, usernames, passwords, ' +
+                               'and sudo information. Machine credentials are used when submitting jobs to run playbooks against ' +
+                               'remote hosts.</dd>' +
                                '<dt>Rackspace</dt>\n' + 
-                               '<dd>Credentials for running cloud inventory sync with Rackspace.</dd>\n' + 
+                               '<dd>Access information for Rackspace Cloud used for inventory management or deployment.</dd>\n' + 
                                '<dt>SCM</dt>\n' +
-                               '<dd>Used on projects to clone and update local source code repositories ' + 
-                                   ' from a remote revision control system such as Git, SVN or Mercurial.</dd>\n' +
+                               '<dd>Used to check out and synchronize playbook repositories with a remote source control ' +
+                               'management system such as Git, Subversion (svn), or Mercurial (hg). These credentials are ' +
+                               'used on the Projects tab.</dd>\n' +
                                '</dl>\n'
-
                     }]
                 },
             access_key: {
