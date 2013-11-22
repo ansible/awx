@@ -50,7 +50,7 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
 
         html += makeRow({ label: 'Inventories',
             count: [(dashboard.inventories && dashboard.inventories.total_with_inventory_source) ? 
-                dashboard.inventories.total_with_inventory_source : '?'], 
+                dashboard.inventories.total_with_inventory_source : 0 ], 
             fail: [(dashboard.inventories && dashboard.inventories.inventory_failed) ? dashboard.inventories.inventory_failed : 0], 
             link: '/#/inventories/?has_inventory_sources=true', 
             fail_link: '/#/inventories/?inventory_sources_with_failures=true'
