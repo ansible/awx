@@ -1365,6 +1365,8 @@ class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
             t.join(20)
 
     def test_for_job_deadlocks(self):
+        if 'postgresql' not in settings.DATABASES['default']['ENGINE']:
+            self.skipTest('Not using PostgreSQL')
         # Create lots of extra test hosts to trigger job event callbacks
         job = self.job_eng_run
         inv = job.inventory
