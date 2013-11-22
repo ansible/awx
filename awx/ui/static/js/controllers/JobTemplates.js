@@ -483,6 +483,10 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                        { hdr: 'Error!', msg: 'Failed to related cloud credential. GET returned status: ' + status });
                    });
        }
+       else {
+           // No existing cloud credential
+           scope.$emit('cloudCredentialReady', null);
+       }
        });
 
    // Retrieve detail record and prepopulate the form

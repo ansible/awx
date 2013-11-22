@@ -719,18 +719,18 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         LookUpInit, CredentialList, Empty, Wait, GetChoices) {
     return function(params) {
         
+        $('#tree-form').hide().empty();
+
         var group_id = params.group_id;
         var inventory_id = params.inventory_id;
         var generator = GenerateForm;
         var form = GroupForm;
         var defaultUrl =  GetBasePath('groups') + group_id + '/';
-        
-        $('#tree-form').hide().empty();
 
-        var element = angular.element(document.getElementById('tree-form'));
-        var scope = element.scope();
+        var scope = generator.inject(form, 
+            { mode: 'edit', modal: false, related: false, id: 'tree-form', breadCrumbs: false });
+        generator.reset();
         
-        //var scope = generator.inject(form, { mode: 'edit', modal: false, related: false, id: 'tree-form', breadCrumbs: false });
         var master = {};
         var relatedSets = {};
         
@@ -892,12 +892,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         if (scope.removeChoicesComplete) {
             scope.removeChoicesComplete();
         }
-        scope.removeChoicesComplete = scope.$on('choicesComplete', function() {
-            
-            generator.inject(form, { mode: 'edit', modal: false, related: false, id: 'tree-form', 
-                breadCrumbs: false, scope: scope });
-            generator.reset();
-      
+        scope.removeChoicesComplete = scope.$on('choicesCompleteGroup', function() {      
             // Retrieve detail record and prepopulate the form
             Rest.setUrl(defaultUrl); 
             Rest.get()
@@ -929,10 +924,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         if (scope.removeChoicesReady) {
             scope.removeChoicesReady();  
         }
-        scope.removeChoicesReady = scope.$on('choicesReady', function() {
+        scope.removeChoicesReady = scope.$on('choicesReadyGroup', function() {
             choicesReady++; 
             if (choicesReady == 2) {
-                scope.$emit('choicesComplete');
+                scope.$emit('choicesCompleteGroup');
             }
             });
 
@@ -943,7 +938,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             field: 'source_regions',
             variable: 'rax_regions',
             choice_name: 'rax_region_choices',
-            callback: 'choicesReady'
+            callback: 'choicesReadyGroup'
             });
 
         GetChoices({
@@ -952,7 +947,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             field: 'source_regions',
             variable: 'ec2_regions',
             choice_name: 'ec2_region_choices',
-            callback: 'choicesReady'
+            callback: 'choicesReadyGroup'
             }); 
 
         if (!scope.$$phase) {

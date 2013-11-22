@@ -15,8 +15,8 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                        ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate, ProjectStatus,
                        FormatDate, Refresh, Wait, Stream, GetChoices)                        
 {
-    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
-                                 //scope.
+    ClearScope('tree-form');
+    ClearScope('htmlTemplate');
     
     var list = ProjectList;
     var defaultUrl = GetBasePath('projects');
@@ -84,7 +84,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     if (scope.removeChoicesHere) {
        scope.removeChoicesHere();
     }
-    scope.removeChoicesHere = scope.$on('choicesHere', function() {
+    scope.removeChoicesHere = scope.$on('choicesCompleteProject', function() {
         
         list.fields.scm_type.searchOptions = scope.project_scm_type_options;
         list.fields.status.searchOptions = scope.project_status_options;
@@ -130,10 +130,10 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     if (scope.removeChoicesReady) {
        scope.removeChoicesReady();
     }
-    scope.removeChoicesReady = scope.$on('choicesReady', function() {
+    scope.removeChoicesReady = scope.$on('choicesReadyProject', function() {
         choiceCount++;
         if (choiceCount == 2) {
-           scope.$emit('choicesHere');
+           scope.$emit('choicesCompleteProject');
         }
         });
     
@@ -143,7 +143,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         url: defaultUrl,
         field: 'status',
         variable: 'project_status_options',
-        callback: 'choicesReady'
+        callback: 'choicesReadyProject'
         });
     
     // Load the list of options for Kind
@@ -152,7 +152,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         url: defaultUrl,
         field: 'scm_type',
         variable: 'project_scm_type_options',
-        callback: 'choicesReady'
+        callback: 'choicesReadyProject'
         });
 
     LoadBreadCrumbs();
@@ -329,8 +329,8 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
                       GetBasePath, ReturnToCaller, GetProjectPath, LookUpInit, OrganizationList,
                       CredentialList, GetChoices, DebugForm, Wait) 
 {
-   ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
-                                //scope.
+   ClearScope('tree-form');
+   ClearScope('htmlTemplate'); 
 
    // Inject dynamic view
    var form = ProjectsForm;
@@ -466,8 +466,8 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
                        RelatedPaginateInit, Prompt, ClearScope, GetBasePath, ReturnToCaller, GetProjectPath,
                        Authorization, CredentialList, LookUpInit, GetChoices, Empty, DebugForm, Wait, Stream) 
 {
-   ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
-                                //scope.
+   ClearScope('tree-form');
+   ClearScope('htmlTemplate');
 
    // Inject dynamic view
    var form = ProjectsForm;

@@ -14,6 +14,7 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                           ClearScope, ProcessErrors, GetBasePath, SelectionInit, GetChoices, Wait, Stream)
 {
+    ClearScope('tree-form');
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
     var list = CredentialList;
@@ -61,7 +62,7 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
     if (scope.removeChoicesReady) {
        scope.removeChoicesReady();
     }
-    scope.removeChoicesReady = scope.$on('choicesReady', function() {
+    scope.removeChoicesReady = scope.$on('choicesReadyCredential', function() {
         SearchInit({ scope: scope, set: 'credentials', list: list, url: defaultUrl });
         PaginateInit({ scope: scope, list: list, url: defaultUrl });
         scope.search(list.iterator);
@@ -73,7 +74,7 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
         url: defaultUrl,
         field: 'kind',
         variable: 'credential_kind_options',
-        callback: 'choicesReady'
+        callback: 'choicesReadyCredential'
         });
 
 
@@ -124,6 +125,7 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
                          GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList, GetBasePath,
                          GetChoices, Empty, KindChange, OwnerChange, FormSave, DebugForm) 
 {
+   ClearScope('tree-form');
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
 
@@ -256,6 +258,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                           KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, FormSave, Stream
                           ) 
 {
+   ClearScope('tree-form');
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
 
@@ -324,7 +327,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    if (scope.removeChoicesReady) {
       scope.removeChoicesReady();
    }
-   scope.removeChoicesReady = scope.$on('choicesReady', function() {
+   scope.removeChoicesReady = scope.$on('choicesReadyCredential', function() {
        // Retrieve detail record and prepopulate the form
        Rest.setUrl(defaultUrl + ':id/'); 
        Rest.get({ params: {id: id} })
@@ -392,7 +395,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        url: defaultUrl,
        field: 'kind',
        variable: 'credential_kind_options',
-       callback: 'choicesReady'
+       callback: 'choicesReadyCredential'
        });
 
    scope.showActivity = function() { Stream(); }

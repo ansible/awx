@@ -25,6 +25,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
     accordion_count: 0,
 
+    scope: null,
+
     has: function(key) {
         return (this.form[key] && this.form[key] != null && this.form[key] != undefined) ? true : false;
         },

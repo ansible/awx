@@ -9,9 +9,12 @@ angular.module('Utilities',['RestServices', 'Utilities'])
    
    .factory('ClearScope', [ function() {
    return function(id) {
+       
        var element = document.getElementById(id);
-       var scope = angular.element(element).scope();
-       scope.$destroy();
+       if (element) {
+           var scope = angular.element(element).scope();
+           scope.$destroy();
+       }
 
        $('.tooltip').each( function(index) {
            // Remove any lingering tooltip and popover <div> elements
@@ -378,7 +381,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
               }).fadeIn(400);
        }
        else if (directive == 'stop' && $rootScope.waiting){
-          $('.spinny, .overlay').fadeOut(800, function(){ $rootScope.waiting = false; });
+          $('.spinny, .overlay').fadeOut(400, function(){ $rootScope.waiting = false; });
        }
        }
        }])

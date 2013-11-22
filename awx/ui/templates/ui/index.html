@@ -9,13 +9,14 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}css/font-awesome.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/select2.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/select2-bootstrap.css" />
+
   
   {% if settings.USE_MINIFIED_JS %} 
   <link rel="stylesheet" href="{{ STATIC_URL }}css/awx.min.css" />
   {% else %}
   <link rel="stylesheet/less" type="text/css" href="{{ STATIC_URL }}less/ansible-ui.less" />
   {% endif %}
-
+  
   <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" />
   <script>
       var $basePath = "{{ STATIC_URL }}";

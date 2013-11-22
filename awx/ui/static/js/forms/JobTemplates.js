@@ -103,8 +103,8 @@ angular.module('JobTemplateFormDefinition', [])
                 sourceModel: 'credential',
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
-                addRequired: true, 
-                editRequired: true,
+                addRequired: false, 
+                editRequired: false,
                 column: 1,
                 awPopOver: "<p>Select the credential you want the job to use when accessing the remote hosts. Choose the credential containing " + 
                  " the username and SSH key or password that Ansbile will need to log into the remote hosts.</p>",

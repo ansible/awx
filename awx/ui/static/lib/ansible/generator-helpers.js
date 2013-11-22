@@ -498,7 +498,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             html += "<div class=\"input-group-btn dropdown\">\n"; 
             html += "<button type=\"button\" ";
             html += "id=\"search_field_ddown\" ";
-            html += "class=\"btn "; 
+            html += "class=\"btn btn-default "; 
             html += "dropdown-toggle\" data-toggle=\"dropdown\"";
             html += ">\n";
             html += "<span ng-bind=\"" + iterator + "SearchFieldLabel" + modifier + "\"></span>\n";
