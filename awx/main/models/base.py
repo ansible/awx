@@ -4,6 +4,7 @@
 # Python
 import json
 import shlex
+import os
 import os.path
 
 # PyYAML
@@ -326,6 +327,14 @@ class CommonTask(PrimordialModel):
         # If status changed, update parent instance....
         if self.status != status_before:
             self._update_parent_instance()
+
+    def delete(self):
+        if self.result_stdout_file != "":
+            try:
+                os.remove(self.result_stdout_file)
+            except Exception, e:
+                pass
+        super(CommonTask, self).delete()
 
     @property
     def result_stdout(self):
