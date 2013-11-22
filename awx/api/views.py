@@ -138,9 +138,11 @@ class DashboardView(APIView):
 
         data = SortedDict()
         user_inventory = get_user_queryset(request.user, Inventory)
+        user_inventory_external = user_inventory.filter(has_inventory_sources=True)
         failed_inventory = sum(i.inventory_sources_with_failures for i in user_inventory)
         data['inventories'] = {'url': reverse('api:inventory_list'),
                                'total': user_inventory.count(),
+                               'total_with_inventory_source': user_inventory_external.count(),
                                #'job_failed'
                                'inventory_failed': failed_inventory}
         user_inventory_sources = get_user_queryset(request.user, InventorySource)
