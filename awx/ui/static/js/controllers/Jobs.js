@@ -215,8 +215,11 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                    }
                    })
                .error( function(data, status, headers, config) {
-                   ProcessErrors(scope, data, status, form,
-                       { hdr: 'Error!', msg: 'Failed to get playbook list for ' + url +'. GET returned status: ' + status });
+                   //ProcessErrors(scope, data, status, form,
+                   //    { hdr: 'Error!', msg: 'Failed to get playbook list for ' + url +'. GET returned status: ' + status });
+                   
+                   // Ignore the error. We get this error when the project or playbook has been deleted 
+
                    });
        }
        }

@@ -80,6 +80,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             scope[iterator + 'HideSearchType' + modifier] = false;
             scope[iterator + 'InputDisable' + modifier] = false;
             scope[iterator + 'ExtraParms' + modifier] = '';
+            scope[iterator + 'ShowStartBtn' + modifier] = true;
+            scope[iterator + 'HideAllStartBtn' + modifier] = false;
             
             scope[iterator + 'SearchPlaceholder' + modifier] = 
                 (list.fields[scope[iterator + 'SearchField' + modifier]] &&
@@ -128,9 +130,12 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             scope[iterator + 'SearchType' + modifier] = 'icontains';
             scope[iterator + 'SearchPlaceholder' + modifier] = (list.fields[fld].searchPlaceholder) ? list.fields[fld].searchPlaceholder : 'Search';
             scope[iterator + 'InputDisable' + modifier] = (list.fields[fld].searchObject == 'all') ? true : false;
+            scope[iterator + 'ShowStartBtn' + modifier] = true;
 
             if (list.fields[fld].searchType && list.fields[fld].searchType == 'gtzero') {
                 scope[iterator + "InputDisable" + modifier] = true;
+                scope[iterator + 'ShowStartBtn' + modifier] = false;
+                scope.search(iterator);
             }
             else if (list.fields[fld].searchSingleValue){
                 // Query a specific attribute for one specific value
@@ -149,11 +154,13 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 else {
                    scope[iterator + "SearchSelectValue" + modifier] = { value: list.fields[fld].searchValue };
                 }
+                scope[iterator + 'ShowStartBtn' + modifier] = false;
             }
             else if (list.fields[fld].searchType == 'in') {
                 scope[iterator + "SearchType" + modifier] = 'in';
                 scope[iterator + "SearchValue" + modifier] = list.fields[fld].searchValue;
                 scope[iterator + "InputDisable" + modifier] = true;
+                scope[iterator + 'ShowStartBtn' + modifier] = false;
             }
             else if (list.fields[fld].searchType && (list.fields[fld].searchType == 'boolean' 
                 || list.fields[fld].searchType == 'select' || list.fields[fld].searchType == 'select_or')) {
@@ -161,14 +168,18 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 scope[iterator + 'SearchSelectOpts' + modifier] = list.fields[fld].searchOptions;
             }
             else if (list.fields[fld].searchType && list.fields[fld].searchType == 'int') {
-                scope[iterator + 'HideSearchType' + modifier] = true;   
+                //scope[iterator + 'HideSearchType' + modifier] = true;
+                scope[iterator + 'SearchType' + modifier] = 'int';
             }
             else if (list.fields[fld].searchType && list.fields[fld].searchType == 'isnull') {
                 scope[iterator + 'SearchType' + modifier] = 'isnull';
                 scope[iterator + 'InputDisable' + modifier] = true;
                 scope[iterator + 'SearchValue' + modifier] = 'true';
+                scope[iterator + 'ShowStartBtn' + modifier] = false;
             }
-            scope.search(iterator);
+            
+            scope.search(iterator);   
+            
             }
 
         scope.resetSearch = function(iterator) {
@@ -247,7 +258,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         }
         scope.removePrepareSearch = scope.$on('prepareSearch', function(e, iterator, page, load, spin) {
             //
-            // Start build the search key/value pairs. This will process search widget, if the
+            // Start building the search key/value pairs. This will process each search widget, if the
             // selected field is an object type (used on activity stream).
             //
             Wait('start');
@@ -273,37 +284,45 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 var modifier = (i == 1) ? '' : i;
                 if ( $('#search-widget-container' + modifier) ) {
                     if (list.fields[scope[iterator + 'SearchField' + modifier]] &&
-                        list.fields[scope[iterator + 'SearchField' + modifier]].searchObject &&
-                        list.fields[scope[iterator + 'SearchField'  + modifier]].searchObject !== 'all') {
-                        if (scope[iterator + 'SearchValue' + modifier]) {
-                            var objs = list.fields[scope[iterator + 'SearchField' + modifier]].searchObject;
-                            var objUrl = GetBasePath('base') + objs + '/?name__icontains=' + scope[iterator + 'SearchValue' + modifier];
-                            Rest.setUrl(objUrl);
-                            Rest.setHeader({ widget: i });
-                            Rest.setHeader({ object: objs });
-                            Rest.get()
-                                .success( function(data, status, headers, config) {
-                                    var pk='';
-                                    //limit result set to 30
-                                    var len = (data.results.length > 30) ? 30 : data.results.length;
-                                    for (var j=0; j < len; j++) {
-                                        pk += "," + data.results[j].id;
-                                    } 
-                                    pk = pk.replace(/^\,/,'');
-                                    scope.$emit('foundObject', iterator, page, load, spin, config.headers['widget'], pk);
-                                    if (data.results.length > 30) {
-                                        scope.$emit('resultWarning', config.headers['object'], data.results.length);
-                                    }
-                                    })
-                               .error( function(data, status, headers, config) {
-                                    Wait('stop');
-                                    ProcessErrors(scope, data, status, null,
-                                        { hdr: 'Error!', msg: 'Retrieving list of ' + objs + ' where name contains: ' + scope[iterator + 'SearchValue' + modifier] +
-                                        ' GET returned status: ' + status });
-                                    });
+                        list.fields[scope[iterator + 'SearchField' + modifier]].searchObject) {
+                        if (list.fields[scope[iterator + 'SearchField'  + modifier]].searchObject !== 'all') {
+                            scope[iterator + 'HideAllStartBtn' + modifier] = false;
+                            if (scope[iterator + 'SearchValue' + modifier]) {
+                                scope[iterator + 'ShowStartBtn' + modifier] = false;
+                                var objs = list.fields[scope[iterator + 'SearchField' + modifier]].searchObject;
+                                var objUrl = GetBasePath('base') + objs + '/?name__icontains=' + scope[iterator + 'SearchValue' + modifier];
+                                Rest.setUrl(objUrl);
+                                Rest.setHeader({ widget: i });
+                                Rest.setHeader({ object: objs });
+                                Rest.get()
+                                    .success( function(data, status, headers, config) {
+                                        var pk='';
+                                        //limit result set to 30
+                                        var len = (data.results.length > 30) ? 30 : data.results.length;
+                                        for (var j=0; j < len; j++) {
+                                            pk += "," + data.results[j].id;
+                                        } 
+                                        pk = pk.replace(/^\,/,'');
+                                        scope.$emit('foundObject', iterator, page, load, spin, config.headers['widget'], pk);
+                                        if (data.results.length > 30) {
+                                            scope.$emit('resultWarning', config.headers['object'], data.results.length);
+                                        }
+                                        })
+                                   .error( function(data, status, headers, config) {
+                                        Wait('stop');
+                                        ProcessErrors(scope, data, status, null,
+                                            { hdr: 'Error!', msg: 'Retrieving list of ' + objs + ' where name contains: ' + scope[iterator + 'SearchValue' + modifier] +
+                                            ' GET returned status: ' + status });
+                                        });
+                            }
+                            else {
+                                scope[iterator + 'ShowStartBtn' + modifier] = true;
+                                scope.$emit('foundObject', iterator, page, load, spin, i, null);  
+                            }
                         }
                         else {
-                            scope.$emit('foundObject', iterator, page, load, spin, i, null);  
+                            // Object Type set to All
+                            scope[iterator + 'HideAllStartBtn' + modifier] = true;
                         }
                     }
                 }
@@ -330,6 +349,11 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                     !list.fields[scope[iterator + 'SearchField' + modifier]].searchObject) {
                     
                     // if the search widget exists and its value is not an object, add its parameters to the query
+
+                    if (scope[iterator + 'SearchValue' + modifier]) {
+                        // if user typed a value in the input box, show the reset link
+                        scope[iterator + 'ShowStartBtn' + modifier] = false;
+                    }
                     
                     if ( (!scope[iterator + 'SelectShow' + modifier] && !Empty(scope[iterator + 'SearchValue' + modifier])) ||
                            (scope[iterator + 'SelectShow' + modifier] && scope[iterator + 'SearchSelectValue' + modifier]) || 

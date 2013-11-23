@@ -358,8 +358,8 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                    }
                    })
                .error( function(data, status, headers, config) {
-                   ProcessErrors(scope, data, status, form,
-                       { hdr: 'Error!', msg: 'Failed to get playbook list for ' + url +'. GET returned status: ' + status });
+                   Alert('Missing Playbooks', 'Unable to retrieve the list of playbooks for this project. Choose a different ' +
+                       ' project or make the playbooks available on the file system.', 'alert-info');
                    });
        }
        }

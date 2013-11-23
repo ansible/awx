@@ -246,7 +246,7 @@ angular.module('GroupFormDefinition', [])
                 ngClick: 'formReset()',
                 label: 'Reset',
                 'class': "btn btn-default",
-                icon: 'icon-trash',
+                icon: 'icon-undo',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },

@@ -209,7 +209,7 @@ angular.module('ProjectFormDefinition', [])
             reset: { 
                 ngClick: 'formReset()',
                 label: 'Reset',
-                icon: 'icon-trash',
+                icon: 'icon-undo',
                 'class': 'btn btn-default',
                 ngDisabled: true          //Disabled when $pristine
                 }
@@ -228,15 +228,6 @@ angular.module('ProjectFormDefinition', [])
                         icon: 'icon-plus',
                         label: 'Add',
                         awToolTip: 'Add an organization'
-                        },
-                    reset: {
-                        dataPlacement: 'top',
-                        icon: "icon-undo",
-                        mode: 'all',
-                        'class': 'btn-xs btn-primary',
-                        awToolTip: "Reset the search filter",
-                        ngClick: "resetSearch('organization')",
-                        iconSize: 'large'
                         }
                     },
 

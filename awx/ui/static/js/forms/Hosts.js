@@ -89,7 +89,7 @@ angular.module('HostFormDefinition', [])
             reset: { 
                 ngClick: 'formReset()',
                 label: 'Reset',
-                icon: 'icon-trash',
+                icon: 'icon-undo',
                 'class': 'btn btn-default',
                 ngDisabled: true          //Disabled when $pristine
                 }

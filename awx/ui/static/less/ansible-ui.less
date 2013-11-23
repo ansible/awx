@@ -489,16 +489,37 @@ select.page-size {
   vertical-align: middle;
 }
 
-.search-widget {
-  margin-bottom: 20px;
-}
+/* Search Widget */
+  .search-widget {
+    margin-bottom: 20px;
+  }
+ 
+  .search-widget label {
+    display: inline-block;
+    padding-right: 15px;
+    vertical-align: middle; 
+  }
+  
+  #search_value_input { 
+    padding-right: 25px;
+  }
 
-.search-widget label {
-  display: inline-block;
-  padding-right: 15px;
-  vertical-align: middle;
-}
+  .search-reset-start {
+    color: @grey;
+    float: right;
+    position: relative; 
+    top: -25px;
+    left: -10px;
+    z-index: 10;
+  }
 
+  .search-reset-start:hover { 
+    cursor: pointer;
+  }
+
+  .ui-widget-content a.search-reset-start {
+    color: @grey;
+  }
 
 /* breadcrumbs */
 .nav-path {

@@ -27,15 +27,15 @@ angular.module('JobFormDefinition', [])
                 active: true,
                 ngShow: "job_id !== null"
                 },
-            hosts: {
-                href: "/#/jobs/{{ job_id }}/job_host_summaries",
-                label: 'Summary',
-                icon: 'icon-laptop'
-                },
             events: {
                 href: "/#/jobs/{{ job_id }}/job_events",
                 label: 'Events',
                 icon: 'icon-list-ul'
+                },
+             hosts: {
+                href: "/#/jobs/{{ job_id }}/job_host_summaries",
+                label: 'Host Summary',
+                icon: 'icon-laptop'
                 }
             },
             
@@ -292,7 +292,7 @@ angular.module('JobFormDefinition', [])
             reset: { 
                 ngClick: 'formReset()',
                 label: 'Reset',
-                icon: 'icon-remove',
+                icon: 'icon-undo',
                 'class': 'btn btn-default',
                 ngDisabled: true          //Disabled when $pristine
                 }

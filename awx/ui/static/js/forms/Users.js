@@ -111,7 +111,7 @@ angular.module('UserFormDefinition', [])
             reset: { 
                 ngClick: 'formReset()',
                 label: 'Reset',
-                icon: 'icon-trash',
+                icon: 'icon-undo',
                 'class': 'btn btn-default',
                 ngDisabled: true          //Disabled when $pristine
                 }
@@ -131,15 +131,6 @@ angular.module('UserFormDefinition', [])
                         icon: 'icon-plus',
                         label: 'Add',
                         awToolTip: 'Add a credential for this user'
-                        },
-                    reset: {
-                        dataPlacement: 'top',
-                        icon: "icon-undo",
-                        mode: 'all',
-                        'class': 'btn-xs btn-primary',
-                        awToolTip: "Reset the search filter",
-                        ngClick: "resetSearch('credential')",
-                        iconSize: 'large'
                         }
                     },
 
@@ -184,15 +175,6 @@ angular.module('UserFormDefinition', [])
                         label: 'Add',
                         awToolTip: 'Add a permission for this user',
                         ngShow: 'PermissionAddAllowed'
-                        },
-                    reset: {
-                        dataPlacement: 'top',
-                        icon: "icon-undo",
-                        mode: 'all',
-                        'class': 'btn-xs btn-primary',
-                        awToolTip: "Reset the search filter",
-                        ngClick: "resetSearch('permission')",
-                        iconSize: 'large'
                         }
                     },
 
@@ -249,15 +231,6 @@ angular.module('UserFormDefinition', [])
                 base: '/organizations',
                 
                 actions: {
-                    reset: {
-                        dataPlacement: 'top',
-                        icon: "icon-undo",
-                        mode: 'all',
-                        'class': 'btn-xs btn-primary',
-                        awToolTip: "Reset the search filter",
-                        ngClick: "resetSearch('adminof')",
-                        iconSize: 'large'
-                        }
                     },
 
                 fields: {
@@ -278,15 +251,6 @@ angular.module('UserFormDefinition', [])
                 open: false,
                 
                 actions: {
-                    reset: {
-                        dataPlacement: 'top',
-                        icon: "icon-undo",
-                        mode: 'all',
-                        'class': 'btn-xs btn-primary',
-                        awToolTip: "Reset the search filter",
-                        ngClick: "resetSearch('organization')",
-                        iconSize: 'large'
-                        }
                     },
 
                 fields: {
@@ -307,15 +271,6 @@ angular.module('UserFormDefinition', [])
                 open: false,
 
                 actions: {
-                    reset: {
-                        dataPlacement: 'top',
-                        icon: "icon-undo",
-                        mode: 'all',
-                        'class': 'btn-xs btn-primary',
-                        awToolTip: "Reset the search filter",
-                        ngClick: "resetSearch('team')",
-                        iconSize: 'large'
-                        }
                     },
 
                 fields: {
@@ -336,15 +291,6 @@ angular.module('UserFormDefinition', [])
                 open: false,
 
                 actions: {
-                    reset: {
-                        dataPlacement: 'top',
-                        icon: "icon-undo",
-                        mode: 'all',
-                        'class': 'btn-xs btn-primary',
-                        awToolTip: "Reset the search filter",
-                        ngClick: "resetSearch('project')",
-                        iconSize: 'large'
-                        }
                     },
 
                 fields: {

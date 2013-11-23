@@ -94,15 +94,6 @@ angular.module('JobEventsListDefinition', [])
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()",
                 iconSize: 'large'
-                },
-            reset: {
-                dataPlacement: 'top',
-                icon: "icon-undo",
-                mode: 'all',
-                'class': 'btn-xs btn-primary',
-                awToolTip: "Reset the search filter",
-                ngClick: "resetSearch()",
-                iconSize: 'large'
                 }
             },
 

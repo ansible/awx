@@ -37,7 +37,7 @@ angular.module('ProjectsListDefinition', [])
                 nosort: true
                 },
             status: {
-                label: 'Update Status',
+                label: 'Status',
                 ngClick: 'showSCMStatus(\{\{ project.id \}\})',
                 awToolTip: 'View details of last SCM Update',
                 dataPlacement: 'top',
@@ -90,15 +90,6 @@ angular.module('ProjectsListDefinition', [])
                 'class': 'btn-xs btn-primary',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()",
-                iconSize: 'large'
-                },
-            reset: {
-                dataPlacement: 'top',
-                icon: "icon-undo",
-                mode: 'all',
-                'class': 'btn-xs btn-primary',
-                awToolTip: "Reset the search filter",
-                ngClick: "resetSearch()",
                 iconSize: 'large'
                 },
             stream: {

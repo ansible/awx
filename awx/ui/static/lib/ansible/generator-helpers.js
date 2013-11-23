@@ -491,7 +491,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             html += "<div class=\""; 
             html += (params.size) ? params.size : "col-lg-4 col-md-6 col-sm-11 col-xs-11";
             html += "\" id=\"search-widget-container" + modifier + "\">\n";
-            //html += (form.searchWidgetLabel) ? "<label style=\"display:block\">" + form.searchWidgetLabel +"</label>" : "";
+            
             html += "<div class=\"input-group";
             html += (useMini) ? " input-group-sm" : " input-group-sm";
             html += "\">\n";
@@ -529,21 +529,36 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             html += "ng-options=\"c.name for c in " + iterator + "SearchSelectOpts" + modifier + "\" class=\"form-control search-select";
             html += "\"></select>\n";
 
-            html += "<input id=\"search_value_input\" type=\"text\" ng-hide=\"" + iterator + "SelectShow || " + iterator + "InputHide\" " + 
+            
+            html += "<input id=\"search_value_input\" type=\"text\" ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + 
+                iterator + "InputHide" + modifier + "\" " + 
                 "class=\"form-control\" ng-model=\"" + iterator + "SearchValue" + modifier + "\" " +
                 "aw-placeholder=\"" + iterator + "SearchPlaceholder" + modifier + "\" type=\"text\" ng-disabled=\"" + iterator + 
                 "InputDisable" + modifier + " || " + iterator + "HoldInput" + modifier + "\" ng-keypress=\"startSearch($event,'" + 
                 iterator + "')\">\n";
-            
-            // Go button
-            html += "<div class=\"input-group-btn\">\n";
-            html += "<button type=\"button\" class=\"btn btn-default btn-small\" ng-click=\"search('" + iterator + "')\" " +
-                "aw-tool-tip=\"Start the search\" data-placement=\"top\" ng-hide=\"" + iterator + "SelectShow || " + iterator + 
-                "InputHide\" ng-disabled=\"" + iterator + "InputDisable" + modifier + " || " + iterator + "HoldInput" + modifier + 
-                "\">Go!</button>\n";
+          
+            // Reset button for drop-down
+            html += "<div class=\"input-group-btn\" ng-show=\"" + iterator + "SelectShow" + modifier + "\" >\n";
+            html += "<button type=\"button\" class=\"btn btn-default btn-small\" ng-click=\"resetSearch('" + iterator + "')\" " +
+                "aw-tool-tip=\"Clear the search\" data-placement=\"top\"><i class=\"icon-remove\"></i></button>\n";
             html += "</div><!-- input-group-btn -->\n";
 
             html += "</div><!-- input-group -->\n";
+
+            html += "<a class=\"search-reset-start\" ng-click=\"resetSearch('" + iterator + "')\"" +
+            "ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + iterator + "InputHide" + modifier + " || " + 
+            iterator + "ShowStartBtn" + modifier + " || " + 
+            iterator + "HoldInput" + modifier + " || " + 
+            iterator + "HideAllStartBtn" + modifier + "\"" +
+            "><i class=\"icon-remove\"></i></a>\n";
+            
+            html += "<a class=\"search-reset-start\" ng-click=\"search('" + iterator + "')\"" + 
+            "ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + iterator + "InputHide" + modifier + " || " +
+            "!" + iterator + "ShowStartBtn" + modifier + " || " + 
+            iterator + "HoldInput" + modifier + " || " + 
+            iterator + "HideAllStartBtn" + modifier + "\"" +
+            "><i class=\"icon-search\"></i></a>\n";
+
             html += "</div><!-- col-lg-x -->\n";
         }
 

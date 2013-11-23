@@ -213,15 +213,6 @@ angular.module('StreamListDefinition', [])
                 ngClick: "refreshStream()",
                 iconSize: 'large'
                 },
-            reset: {
-                dataPlacement: 'top',
-                icon: "icon-undo",
-                mode: 'all',
-                'class': 'btn-xs btn-primary',
-                awToolTip: "Reset the search filter",
-                ngClick: "resetSearch()",
-                iconSize: 'large'
-                },
             close: {
                 dataPlacement: 'top',
                 icon: "icon-arrow-left",

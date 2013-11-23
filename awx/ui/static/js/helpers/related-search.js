@@ -42,15 +42,15 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
                     scope[iterator + 'SearchTypeLabel'] = 'Contains';
                     scope[iterator + 'SearchValue'] = null;
                     scope[iterator + 'SelectShow'] = false;
-                    scope[iterator + 'HideSearchType'] = false;
+                    //scope[iterator + 'HideSearchType'] = false;
+                    scope[iterator + 'ShowStartBtn'] = true;
+                    scope[iterator + 'HideAllStartBtn'] = false;
+
                     f = scope[iterator + 'SearchField']
                     if (form.related[set].fields[f].searchType && ( form.related[set].fields[f].searchType == 'boolean' 
                           || form.related[set].fields[f].searchType == 'select')) {
                        scope[iterator + 'SelectShow'] = true;
                        scope[iterator + 'SearchSelectOpts'] = list.fields[f].searchOptions;
-                    }
-                    if (form.related[set].fields[f].searchType && form.related[set].fields[f].searchType == 'int') {
-                       scope[iterator + 'HideSearchType'] = true;   
                     }
                     if (form.related[set].fields[f].searchType && form.related[set].fields[f].searchType == 'gtzero') {
                           scope[iterator + "InputHide"] = true;
@@ -79,11 +79,13 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
            scope[iterator + 'SearchField'] = fld;
            scope[iterator + 'SearchValue'] = '';
            scope[iterator + 'SelectShow'] = false;
-           scope[iterator + 'HideSearchType'] = false;
+           //scope[iterator + 'HideSearchType'] = false;
            scope[iterator + 'InputHide'] = false;
+           scope[iterator + 'ShowStartBtn'] = true;
 
            if (f.searchType !== undefined && f.searchType == 'gtzero') {
               scope[iterator + "InputHide"] = true;
+              scope[iterator + 'ShowStartBtn'] = false;
            }
            if (f.searchType !== undefined && (f.searchType == 'boolean' 
                 || f.searchType == 'select')) {
@@ -91,7 +93,8 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
               scope[iterator + 'SearchSelectOpts'] = f.searchOptions;
            }
            if (f.searchType !== undefined && f.searchType == 'int') {
-              scope[iterator + 'HideSearchType'] = true;   
+              //scope[iterator + 'HideSearchType'] = true;   
+              scope[model + 'SearchType'] = 'int';
            }
 
            scope.search(iterator);
@@ -116,6 +119,11 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
            Wait('start');
            scope[iterator + 'Loading'] = true;
            scope[iterator + 'HoldInput'] = true;
+           
+           if (scope[iterator + 'SearchValue']) {
+              // User typed a value in input field
+              scope[iterator + 'ShowStartBtn'] = false;
+           }
 
            if (iterator == 'host') {
               if (scope['hostSearchField'] == 'has_active_failures') {
