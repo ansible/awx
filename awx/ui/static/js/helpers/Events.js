@@ -8,9 +8,9 @@
  */
 angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefinition'])
 .factory('EventView', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm', 
-         'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'JobEventDataForm',
+         'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'JobEventDataForm', 'Empty',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
-          FormatDate, JobEventDataForm) {
+          FormatDate, JobEventDataForm, Empty) {
     return function(params) {
         
         // We're going to manipulate the form object each time the user clicks on View button. We can't rely on what's
@@ -167,7 +167,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
         Rest.get()
             .success( function(data, status, headers, config) {
                 
-                // If event_data is not available, removed fields that depend on it
+                // If event_data is not available, remove fields that depend on it
                 if ($.isEmptyObject(data['event_data']) || !data['event_data']['res'] || typeof data['event_data']['res'] == 'string') {
                    for (var fld in form.fields) {
                        switch(fld) {
@@ -203,7 +203,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                         case 'stderr':
                         case 'msg':
                         case 'rc':
-                            if (data['event_data'] && data['event_data']['res'] && data['event_data']['res'][fld] == undefined) {
+                            if (data['event_data'] && data['event_data']['res'] && Empty(data['event_data']['res'][fld])) {
                                delete form.fields[fld];
                             }
                             else {
@@ -256,7 +256,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                     }
                 }
 
-                // load up the form
+                // load the form
                 scope = generator.inject(form, { mode: 'edit', modal: true, related: false});
                 generator.reset();
                 scope.formModalAction = function() {
@@ -320,10 +320,10 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                             break;
                         case 'start':
                         case 'end':
-                            if (data['event_data'] && data['event_data']['res'] && data['event_data']['res'][fld] !== undefined) {
-                               var cDate = new Date(data['event_data']['res'][fld]);
-                               scope[fld] = FormatDate(cDate);
+                            if (data['event_data'] && data['event_data']['res'] && !Empty(data['event_data']['res'][fld])) {
+                               scope[fld] = data['event_data']['res'][fld];
                             }
+
                             break;
                         case 'results': 
                             if (Array.isArray(data['event_data']['res'][fld]) && data['event_data']['res'][fld].length > 0 ) {

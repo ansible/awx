@@ -12,7 +12,7 @@
 
 function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobHostList,
                              GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                             ClearScope, ProcessErrors, GetBasePath, Refresh, JobStatusToolTip)
+                             ClearScope, ProcessErrors, GetBasePath, Refresh, JobStatusToolTip, Wait)
 {
     ClearScope('htmlTemplate');
     var list = JobHostList;
@@ -133,6 +133,7 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
         if (scope.host_id == null) {
            scope['jobSearchSpin'] = true;
            scope['jobLoading'] = true;
+           Wait('start');
            Refresh({ scope: scope, set: 'jobhosts', iterator: 'jobhost', url: scope['current_url'] });
         }
         }
@@ -141,5 +142,5 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
 
 JobHostSummaryList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobHostList',
                                'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                               'ProcessErrors', 'GetBasePath', 'Refresh', 'JobStatusToolTip'
+                               'ProcessErrors', 'GetBasePath', 'Refresh', 'JobStatusToolTip', 'Wait'
                                ];

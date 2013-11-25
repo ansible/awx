@@ -365,8 +365,8 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        //   Wait('start' | 'stop');
        if (directive == 'start' && !$rootScope.waiting) {
           $rootScope.waiting = true;
-          var docw = $(document).width(); 
-          var doch = $(document).height();
+          var docw = $(window).width(); 
+          var doch = $(window).height();
           var spinnyw = $('.spinny').width();
           var spinnyh = $('.spinny').height();
           var x = (docw - spinnyw) / 2; 

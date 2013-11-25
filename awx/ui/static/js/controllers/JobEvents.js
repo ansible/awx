@@ -13,7 +13,7 @@
 function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList,
                         GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                         ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,
-                        FormatDate, EventView)
+                        FormatDate, EventView, Refresh, Wait)
 {
     ClearScope('htmlTemplate');
     var list = JobEventList;
@@ -181,19 +181,14 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
             set[i].created = FormatDate(cDate);
         }
 
-        // need job_status so we can show/hide refresh button
+        // Need below lookup to get inventory_id, which is not on event record. Plus, good idea to get status and name
+        // from job in the event that there are no job event records
         Rest.setUrl(GetBasePath('jobs') + scope.job_id);
         Rest.get()
             .success( function(data, status, headers, config) {
                 scope.job_status = data.status;
                 scope.job_name = data.summary_fields.job_template.name;
-                //LoadBreadCrumbs({ path: '/jobs/' + scope.job_id, title: scope.job_name });
                 LoadBreadCrumbs({ path: '/jobs/' + scope.job_id, title: scope.job_id + ' - ' + data.summary_fields.job_template.name });
-                if (!(data.status == 'pending' || data.status == 'waiting' || data.status == 'running')) {
-                   if ($rootScope.timer) {
-                      clearInterval($rootScope.timer);
-                   }
-                }
                 scope.$emit('SetHostLinks', data.inventory);
                 })
             .error(  function(data, status, headers, config) {
@@ -232,13 +227,14 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
     scope.refresh = function() {
        scope['jobSearchSpin'] = true;
        scope['jobLoading'] = true;
+       Wait('start');
        Refresh({ scope: scope, set: 'jobevents', iterator: 'jobevent', url: scope['current_url'] });
        }
 }
 
 JobEventsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
                            'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                           'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView'
+                           'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView', 'Refresh', 'Wait'
                            ];
 
 function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventForm, GenerateForm,

@@ -1,0 +1,20 @@
+Identity added: /tmp/tmpfiRfw3 (/tmp/tmpfiRfw3)
+sudo password: 
+
+PLAY [Web Servers] ************************************************************ 
+
+GATHERING FACTS *************************************************************** 
+ok: [localhost]
+
+TASK: [ensure apache is at the latest version] ******************************** 
+failed: [localhost] => {"changed": false, "failed": true, "rc": 1, "results": ["Loaded plugins: fastestmirror\n"]}
+msg: You need to be root to perform this command.
+
+
+FATAL: all hosts have already failed -- aborting
+
+PLAY RECAP ******************************************************************** 
+           to retry, use: --limit @/home/ansible/web.retry
+
+localhost                  : ok=1    changed=0    unreachable=0    failed=1   
+

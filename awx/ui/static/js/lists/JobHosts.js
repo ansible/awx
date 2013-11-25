@@ -123,11 +123,11 @@ angular.module('JobHostDefinition', [])
                 dataPlacement: 'top',
                 icon: "icon-refresh",
                 mode: 'all',
-                ngShow: "host_id == null && (job_status == 'pending' || job_status == 'waiting' || job_status == 'running')",
                 'class': 'btn-xs btn-primary',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()",
-                iconSize: 'large'
+                iconSize: 'large',
+                ngShow: "host_id == null"    //don't show when viewing from inventory->hosts
                 }
             },
 
