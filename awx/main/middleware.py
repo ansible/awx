@@ -13,8 +13,12 @@ logger = logging.getLogger('awx.main.middleware')
 
 class ActivityStreamMiddleware(object):
 
-    def process_request(self, request):
+    def __init__(self):
+        self.disp_uid = None
         self.isActivityStreamEvent = False
+        self.finished = False
+
+    def process_request(self, request):
         if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated():
             user = request.user
         else:
@@ -23,13 +27,13 @@ class ActivityStreamMiddleware(object):
         self.instances = []
         set_actor = curry(self.set_actor, user)
         self.disp_uid = str(uuid.uuid1())
-        self.finished = False
         post_save.connect(set_actor, sender=ActivityStream, dispatch_uid=self.disp_uid, weak=False)
 
     def process_response(self, request, response):
         drf_request = getattr(request, 'drf_request', None)
         drf_user = getattr(drf_request, 'user', None)
-        post_save.disconnect(dispatch_uid=self.disp_uid)
+        if self.disp_uid is not None:
+            post_save.disconnect(dispatch_uid=self.disp_uid)
         self.finished = True
         if self.isActivityStreamEvent:
             for instance_id in self.instances:
@@ -61,5 +65,3 @@ class ActivityStreamMiddleware(object):
                     if instance.id not in self.instances:
                         self.isActivityStreamEvent = True
                         self.instances.append(instance.id)
-            else:
-                self.isActivityStreamEvent = False
