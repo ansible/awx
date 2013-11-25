@@ -790,6 +790,7 @@ class InventoryTreeView(RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         inventory = self.get_object()
         groups_qs = inventory.root_groups.filter(active=True)
+        groups_qs = groups_qs.select_related('inventory', 'inventory_source')
         data = GroupTreeSerializer(groups_qs, many=True).data
         return Response(data)
 

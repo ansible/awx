@@ -570,6 +570,7 @@ class GroupTreeSerializer(GroupSerializer):
         if obj is None:
             return {}
         children_qs = obj.children.filter(active=True)
+        children_qs = children_qs.select_related('inventory', 'inventory_source')
         return GroupTreeSerializer(children_qs, many=True).data
 
 

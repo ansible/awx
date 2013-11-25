@@ -389,7 +389,7 @@ class GroupAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'inventory')
+        qs = qs.select_related('created_by', 'inventory', 'inventory_source')
         qs = qs.prefetch_related('parents', 'children')
         inventories_qs = self.user.get_queryset(Inventory)
         return qs.filter(inventory__in=inventories_qs)
@@ -443,7 +443,7 @@ class InventorySourceAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'group')
+        qs = qs.select_related('created_by', 'group', 'inventory')
         inventories_qs = self.user.get_queryset(Inventory)
         return qs.filter(Q(inventory__in=inventories_qs) |
                          Q(group__inventory__in=inventories_qs))
@@ -482,7 +482,8 @@ class InventoryUpdateAccess(BaseAccess):
 
     def get_queryset(self):
         qs = InventoryUpdate.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'group')
+        qs = qs.select_related('created_by', 'inventory_source__group',
+                               'inventory_source__inventory')
         inventory_sources_qs = self.user.get_queryset(InventorySource)
         return qs.filter(inventory_source__in=inventory_sources_qs)
 
