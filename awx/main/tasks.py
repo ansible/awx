@@ -56,7 +56,7 @@ class BaseTask(Task):
         transaction.commit()
         instance = self.model.objects.get(pk=pk)
         if updates:
-            update_fields = []
+            update_fields = ['modified']
             for field, value in updates.items():
                 if field in ('result_stdout', 'result_traceback'):
                     for srch, repl in output_replacements:
@@ -166,7 +166,7 @@ class BaseTask(Task):
         passwords when requested.
         '''
         status, stdout = 'error', ''
-        logfile = task_stdout_handle#cStringIO.StringIO()
+        logfile = task_stdout_handle
         logfile_pos = logfile.tell()
         child = pexpect.spawn(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
@@ -183,15 +183,10 @@ class BaseTask(Task):
         self.update_model(instance.pk, status='running', output_replacements=output_replacements)
         while child.isalive():
             result_id = child.expect(expect_list, timeout=pexpect_timeout)
-            #print 'pexpect result_id', result_id, expect_list[result_id], expect_passwords.get(result_id, None)
             if result_id in expect_passwords:
                 child.sendline(expect_passwords[result_id])
             if logfile_pos != logfile.tell():
-                #old_logfile_pos = logfile_pos
                 logfile_pos = logfile.tell()
-                #updates['result_stdout'] = logfile.getvalue()
-                #task_stdout_handle.write(logfile.getvalue()[old_logfile_pos:logfile_pos])
-                #task_stdout_handle.flush()
                 last_stdout_update = time.time()
             # Update instance status here (also updates modified timestamp, so
             # we have a way to know the task is still running, otherwise the
@@ -211,7 +206,6 @@ class BaseTask(Task):
             status = 'successful'
         else:
             status = 'failed'
-        #stdout = logfile.getvalue()
         return status, stdout
 
     def pre_run_check(self, instance, **kwargs):
@@ -255,7 +249,7 @@ class BaseTask(Task):
     @transaction.commit_on_success
     def run(self, pk, **kwargs):
         '''
-        Run the job/task using ansible-playbook and capture its output.
+        Run the job/task and capture its output.
         '''
         instance = self.update_model(pk)
         status, stdout, tb = 'error', '', ''
@@ -524,6 +518,16 @@ class RunJob(BaseTask):
                 return False
             else:
                 return False
+
+    def post_run_hook(self, job, **kwargs):
+        '''
+        Hook for actions to run after job/task has completed.
+        '''
+        super(RunJob, self).post_run_hook(job, **kwargs)
+        # Update job event fields after job has completed.
+        for job_event in job.job_events.order_by('pk'):
+            job_event.save(post_process=True)
+         
 
 class RunProjectUpdate(BaseTask):
     

@@ -618,7 +618,10 @@ class JobEvent(BaseModel):
         # Skip normal checks on save if we're only updating failed/changed
         # flags triggered from a child event.
         from_parent_update = kwargs.pop('from_parent_update', False)
-        if not from_parent_update:
+        # Only update job event hierarchy and related models during post
+        # processing (after running job).
+        post_process = kwargs.pop('post_process', False)
+        if post_process and not from_parent_update:
             res = self.event_data.get('res', None)
             # Workaround for Ansible 1.2, where the runner_on_async_ok event is
             # created even when the async task failed. Change the event to be
@@ -664,7 +667,7 @@ class JobEvent(BaseModel):
             self.parent = self._find_parent()
             update_fields.extend(['play', 'task', 'parent'])
         super(JobEvent, self).save(*args, **kwargs)
-        if not from_parent_update:
+        if post_process and not from_parent_update:
             self.update_parent_failed_and_changed()
             self.update_hosts()
             self.update_host_summary_from_stats()

@@ -7,6 +7,7 @@ import json
 import socket
 import struct
 import threading
+import time
 import urlparse
 import uuid
 
@@ -1331,7 +1332,8 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-                   ANSIBLE_TRANSPORT='local')
+                   ANSIBLE_TRANSPORT='local')#,
+                   #MIDDLEWARE_CLASSES=MIDDLEWARE_CLASSES)
 class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
     '''Job test of transaction locking using the celery task backend.'''
 
@@ -1343,7 +1345,9 @@ class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         super(JobTransactionTest, self).tearDown()
 
     def _job_detail_polling_thread(self, url, auth, errors):
+        time.sleep(1)
         while True:
+            time.sleep(0.1)
             try:
                 response = requests.get(url, auth=auth)
                 response.raise_for_status()
@@ -1370,7 +1374,7 @@ class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         # Create lots of extra test hosts to trigger job event callbacks
         job = self.job_eng_run
         inv = job.inventory
-        for x in xrange(100):
+        for x in xrange(50):
             h = inv.hosts.create(name='local-%d' % x)
             for g in inv.groups.all():
                 g.hosts.add(h)
@@ -1389,3 +1393,4 @@ class JobTransactionTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 job = Job.objects.get(pk=job.pk)
                 self.assertEqual(job.status, 'successful', job.result_stdout)
         self.assertFalse(errors)
+
