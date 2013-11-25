@@ -20,9 +20,16 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
         var list = params.list;       // list object
         var target_url = params.url;  // URL to POST selected objects
         var returnToCaller = params.returnToCaller;
-        
-        scope.selected = [];   //array of selected row IDs
+
+        if (params.selected !== undefined) {
+           var selected = params.selected;
+        }
+        else { 
+           var selected = [];   //array of selected row IDs
+        }
+
         scope.formModalActionDisabled = true;
+        scope.disableSelectBtn = true;
 
         // toggle row selection
         scope['toggle_' + list.iterator] = function(id, ischeckbox) {
@@ -35,14 +42,14 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
                       
                       // add selected object to the array
                       var found = false;
-                      for  (var j=0; j < scope.selected.length; j++) {
-                           if (scope.selected[j].id == id) {
+                      for  (var j=0; j < selected.length; j++) {
+                           if (selected[j].id == id) {
                               found = true;
                               break;
                            }
                       }
                       if (!found) {
-                         scope.selected.push(scope[list.name][i]);
+                         selected.push(scope[list.name][i]);
                       }
                    }
                    else {
@@ -51,87 +58,89 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
                       scope[list.name][i]['success_class'] = '';
                       
                       // remove selected object from the array
-                      for  (var j=0; j < scope.selected.length; j++) {
-                           if (scope.selected[j].id == id) {
-                              scope.selected.splice(j,1);
+                      for  (var j=0; j < selected.length; j++) {
+                           if (selected[j].id == id) {
+                              selected.splice(j,1);
                               break;
                            }
                       }
                    }
                 }
             }
-            if (scope.selected.length > 0) {
-               scope.formModalActionDisabled = false; 
+            if (selected.length > 0) {
+               scope.formModalActionDisabled = false;
+               scope.disableSelectBtn = false;
             }
             else {
                scope.formModalActionDisabled = true;
+               scope.disableSelectBtn = true;
             }
             }
+        
+        // Add the selections
+        scope.finishSelection = function() {
+            Rest.setUrl(target_url);
+            var queue = [];
+            scope.formModalActionDisabled = true;
+            scope.disableSelectBtn = true;
+           
+            Wait('start');
 
-        if (target_url) {
-           scope.finishSelection = function() {
-               Rest.setUrl(target_url);
-               scope.queue = [];
-               scope.formModalActionDisabled = true;
-               
-               Wait('start');
+            function finished() {
+                selected = [];
+                if (returnToCaller !== undefined) {
+                   ReturnToCaller(returnToCaller);
+                }
+                else {
+                   $('#form-modal').modal('hide');
+                   scope.$emit('modalClosed');
+                }
+                }
+            
+            if (scope.callFinishedRemove) {
+               scope.callFinishedRemove();
+            }
+            scope.callFinishedRemove = scope.$on('callFinished', function() {
+               // We call the API for each selected item. We need to hang out until all the api
+                // calls are finished.
+               if (queue.length == selected.length) {
+                  Wait('stop');
+                  var errors = 0;   
+                  for (var i=0; i < queue.length; i++) {
+                      if (queue[i].result == 'error') {
+                          ProcessErrors(scope, queue[i].data, queue[i].status, null,
+                              { hdr: 'POST Failure', msg: 'Failed to add ' + list.iterator + 
+                              '. POST returned status: ' + queue[i].status });
+                          errors++;
+                      }
+                 }
+                 if (errors == 0) {
+                     finished();
+                 }
+              }
+              });
 
-               function finished() {
-                   scope.selected = [];
-                   if (returnToCaller !== undefined) {
-                      ReturnToCaller(returnToCaller);
-                   }
-                   else {
-                      $('#form-modal').modal('hide');
-                      scope.$emit('modalClosed');
-                   }
-                   }
-               
-               if (scope.callFinishedRemove) {
-                  scope.callFinishedRemove();
+            if (selected.length > 0 ) {
+                for (var j=0; j < selected.length; j++) {
+                   Rest.post(selected[j])
+                       .success( function(data, status, headers, config) {
+                           queue.push({ result: 'success', data: data, status: status });
+                           scope.$emit('callFinished');
+                           })
+                       .error( function(data, status, headers, config) {
+                           queue.push({ result: 'error', data: data, status: status, headers: headers });
+                           scope.$emit('callFinished');
+                           });
                }
-               scope.callFinishedRemove = scope.$on('callFinished', function() {
-                  // We call the API for each selected item. We need to hang out until all the api
-                  // calls are finished.
-                  if (scope.queue.length == scope.selected.length) {
-                     Wait('stop');
-                     var errors = 0;   
-                     for (var i=0; i < scope.queue.length; i++) {
-                         if (scope.queue[i].result == 'error') {
-                            ProcessErrors(scope, scope.queue[i].data, scope.queue[i].status, null,
-                                { hdr: 'POST Failure', msg: 'Failed to add ' + list.iterator + 
-                                '. POST returned status: ' + scope.queue[i].status });
-                            errors++;
-                         }
-                     }
-                     if (errors == 0) {
-                        finished();
-                     }
-                  }
-                  });
-
-               if (scope.selected.length > 0 ) {
-                  for (var j=0; j < scope.selected.length; j++) {
-                      Rest.post(scope.selected[j])
-                          .success( function(data, status, headers, config) {
-                              scope.queue.push({ result: 'success', data: data, status: status });
-                              scope.$emit('callFinished');
-                              })
-                          .error( function(data, status, headers, config) {
-                              scope.queue.push({ result: 'error', data: data, status: status, headers: headers });
-                              scope.$emit('callFinished');
-                              });
-                  }
-               }
-               else {
-                  finished();
-               }  
-               }
-        }
+            }
+            else {
+               finished();
+            }  
+            }
 
         scope.formModalAction = scope.finishSelection;
 
-        // Initialize our data set after a refresh
+        // Initialize our data set after a refresh (page change or search)
         if (scope.SelectPostRefreshRemove) {
            scope.SelectPostRefreshRemove();
         }
@@ -139,8 +148,8 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
             if (scope[list.name]) {
                for (var i=0; i < scope[list.name].length; i++) {
                    var found = false;
-                   for (var j=0; j < scope.selected.length; j++) {
-                       if (scope.selected[j].id == scope[list.name][i].id) {
+                   for (var j=0; j < selected.length; j++) {
+                       if (selected[j].id == scope[list.name][i].id) {
                           found = true; 
                           break;
                        }

@@ -25,6 +25,10 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
     var scope = view.inject(UserList, { mode: mode });         // Inject our view
     scope.selected = [];
 
+    var url = (base == 'organizations') ? GetBasePath('organizations') + $routeParams.organization_id + '/users/' :
+        GetBasePath('teams') + $routeParams.team_id + '/users/';
+    SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
+
     if (scope.removePostRefresh) {
        scope.removePostRefresh();
     }
@@ -41,10 +45,6 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
 
     LoadBreadCrumbs();
     
-    var url = (base == 'organizations') ? GetBasePath('organizations') + $routeParams.organization_id + '/users/' :
-        GetBasePath('teams') + $routeParams.team_id + '/users/';
-    SelectionInit({ scope: scope, list: list, url: url, returnToCaller: 1 });
-
     scope.showActivity = function() { Stream(); } 
     
     scope.addUser = function() {

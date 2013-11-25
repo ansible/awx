@@ -81,7 +81,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 ngClick: "addHost()",
                 ngHide: "hostAddHide",
                 awToolTip: "Copy an existing host to the selected group",
-                dataPlacement: 'bottom',
+                dataPlacement: 'top',
                 'class': 'btn-xs btn-success',
                 icon: 'icon-check'
                 },
@@ -90,7 +90,7 @@ angular.module('InventoryHostsFormDefinition', [])
                 ngClick: 'createHost()',
                 ngHide: 'hostCreateHide',
                 awToolTip: 'Create a new host and add it to the selected group',
-                dataPlacement: 'bottom',
+                dataPlacement: 'top',
                 'class': 'btn-xs btn-success',
                 icon: 'icon-plus'
                 },

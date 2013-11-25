@@ -239,18 +239,17 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').modal({ backdrop: 'static', keyboard: false });
         
+        // Initialize the selection list
         var url = (group_id) ? GetBasePath('groups') + group_id + '/children/' :
             GetBasePath('inventory') + inventory_id + '/groups/'; 
+        var selected = [];
+        SelectionInit({ scope: scope, list: list, url: url, selected: selected });
         
-        SelectionInit({ scope: scope, list: list, url: url });
-        
-        //var finish = scope.finishSelection; 
-
         scope.formModalAction = function() {
             var groups = [];
-            for (var j=0; j < scope.selected.length; j++) {
-                if (scope.inventoryRootGroups.indexOf(scope.selected[j].id) > -1) {
-                   groups.push(scope.selected[j].name);
+            for (var j=0; j < selected.length; j++) {
+                if (scope.inventoryRootGroups.indexOf(selected[j].id) > -1) {
+                   groups.push(selected[j].name);
                 }
             }
 
@@ -285,19 +284,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                scope.finishSelection();
             }
             }
-        
-        /* Now using /potential_children resource, so should not need to do this any longer.
-        if (scope.PostRefreshRemove) {
-           scope.PostRefreshRemove();
-        }
-        scope.PostRefreshRemove = scope.$on('PostRefresh', function() {
-            for (var i=0; i < scope.groups.length; i++) {
-                if (scope.groups[i].id == group_id) {
-                   scope.groups.splice(i,1);
-                }
-            }
-            });
-        */
         
         var searchUrl = (group_id) ? GetBasePath('groups') + group_id + '/potential_children/' :
             GetBasePath('inventory') + inventory_id + '/groups/'; 
