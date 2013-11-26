@@ -114,6 +114,7 @@ class FieldLookupBackend(BaseFilterBackend):
             # below is (negate, field, value).
             and_filters = []
             or_filters = []
+            chain_filters = []
             for key, values in request.QUERY_PARAMS.lists():
                 if key in self.RESERVED_NAMES:
                     continue
@@ -123,11 +124,18 @@ class FieldLookupBackend(BaseFilterBackend):
                 if key.endswith('__int'):
                     key = key[:-5]
                     q_int = True
-                # Custom or__ filter prefix (or__ can precede not__).
+
+                # Custom chain__ and or__ filters, mutually exclusive (both can
+                # precede not__).
+                q_chain = False
                 q_or = False
-                if key.startswith('or__'):
+                if key.startswith('chain__'):
+                    key = key[7:]
+                    q_chain = True
+                elif key.startswith('or__'):
                     key = key[4:]
                     q_or = True
+
                 # Custom not__ filter prefix.
                 q_not = False
                 if key.startswith('not__'):
@@ -139,13 +147,15 @@ class FieldLookupBackend(BaseFilterBackend):
                     if q_int:
                         value = int(value)
                     value = self.value_to_python(queryset.model, key, value)
-                    if q_or:
+                    if q_chain:
+                        chain_filters.append((q_not, key, value))
+                    elif q_or:
                         or_filters.append((q_not, key, value))
                     else:
                         and_filters.append((q_not, key, value))
 
             # Now build Q objects for database query filter.
-            if and_filters or or_filters:
+            if and_filters or or_filters or chain_filters:
                 args = []
                 for n, k, v in and_filters:
                     if n:
@@ -160,8 +170,14 @@ class FieldLookupBackend(BaseFilterBackend):
                         else:
                             q |= Q(**{k:v})
                     args.append(q)
+                for n,k,v in chain_filters:
+                    if n:
+                        q = ~Q(**{k:v})
+                    else:
+                        q = Q(**{k:v})
+                    queryset = queryset.filter(q)
                 queryset = queryset.filter(*args)
-            return queryset
+            return queryset.distinct()
         except (FieldError, FieldDoesNotExist, ValueError), e:
             raise ParseError(e.args[0])
         except ValidationError, e:

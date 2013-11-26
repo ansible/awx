@@ -28,10 +28,11 @@ class UsersTest(BaseTest):
     def setUp(self):
         super(UsersTest, self).setUp()
         self.setup_users()
-        self.organizations = self.make_organizations(self.super_django_user, 1)
+        self.organizations = self.make_organizations(self.super_django_user, 2)
         self.organizations[0].admins.add(self.normal_django_user)
         self.organizations[0].users.add(self.other_django_user)
         self.organizations[0].users.add(self.normal_django_user)
+        self.organizations[1].users.add(self.other_django_user)
  
     def test_only_super_user_or_org_admin_can_add_users(self):
         url = reverse('api:user_list')
@@ -557,6 +558,19 @@ class UsersTest(BaseTest):
         # Filter by int using custom __int suffix.
         url = '%s?pk__int=%d' % (base_url, self.super_django_user.pk)
         qs = base_qs.filter(pk=self.super_django_user.pk)
+        self.assertTrue(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+
+        # Verify difference between normal AND filter vs. filtering with
+        # chain__ prefix.
+        url = '%s?organizations__name__startswith=org0&organizations__name__startswith=org1' % base_url
+        qs = base_qs.filter(Q(organizations__name__startswith='org0'),
+                            Q(organizations__name__startswith='org1'))
+        self.assertFalse(qs.count())
+        self.check_get_list(url, self.super_django_user, qs)
+        url = '%s?chain__organizations__name__startswith=org0&chain__organizations__name__startswith=org1' % base_url
+        qs = base_qs.filter(organizations__name__startswith='org0')
+        qs = qs.filter(organizations__name__startswith='org1')
         self.assertTrue(qs.count())
         self.check_get_list(url, self.super_django_user, qs)
 

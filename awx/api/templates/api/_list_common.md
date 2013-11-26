@@ -83,6 +83,20 @@ with `or__`:
     ?or__field=value&or__field=othervalue
     ?or__not__field=value&or__field=othervalue
 
+(_New in AWX 1.5_) The default AND filtering applies all filters simultaneously
+to each related object being filtered across database relationships.  The chain
+filter instead applies filters separately for each related object. To use,
+prefix the query string parameter with `chain__`:
+
+    ?chain__related__field=value&chain__related__field2=othervalue
+    ?chain__not__related__field=value&chain__related__field2=othervalue
+
+If the first query above were written as
+`?related__field=value&related__field2=othervalue`, it would return only the
+primary objects where the *same* related object satisfied both conditions.  As
+written using the chain filter, it would return the intersection of primary
+objects matching each condition.
+
 Field lookups may also be used for more advanced queries, by appending the
 lookup to the field name:
 
