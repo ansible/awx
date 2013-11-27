@@ -32,6 +32,13 @@ TEST_PLAYBOOK2 = '''- hosts: test-group
     command: test 1 = 0
 '''
 
+TEST_ENV_PLAYBOOK = '''- hosts: test-group
+  gather_facts: False
+  tasks:
+  - shell: 'test -n "${%(env_var1)s}"'
+  - shell: 'test -n "${%(env_var2)s}"'
+'''
+
 TEST_IGNORE_ERRORS_PLAYBOOK = '''- hosts: test-group
   gather_facts: False
   tasks:
@@ -190,6 +197,7 @@ class RunJobTest(BaseCeleryTest):
     def create_test_credential(self, **kwargs):
         opts = {
             'name': 'test-creds',
+            'kind': 'ssh',
             'user': self.super_django_user,
             'username': '',
             'ssh_key_data': '',
@@ -202,6 +210,18 @@ class RunJobTest(BaseCeleryTest):
         self.credential = Credential.objects.create(**opts)
         return self.credential
 
+    def create_test_cloud_credential(self, **kwargs):
+        opts = {
+            'name': 'test-cloud-cred',
+            'kind': 'aws',
+            'user': self.super_django_user,
+            'username': '',
+            'password': '',
+        }
+        opts.update(kwargs)
+        self.cloud_credential = Credential.objects.create(**opts)
+        return self.cloud_credential
+
     def create_test_project(self, playbook_content):
         self.project = self.make_projects(self.normal_django_user, 1, playbook_content)[0]
         self.organization.projects.add(self.project)
@@ -212,6 +232,7 @@ class RunJobTest(BaseCeleryTest):
             'inventory': self.inventory,
             'project': self.project,
             'credential': self.credential,
+            'cloud_credential': self.cloud_credential,
             'job_type': 'run',
         }
         try:
@@ -231,6 +252,7 @@ class RunJobTest(BaseCeleryTest):
                 'inventory': self.inventory,
                 'project': self.project,
                 'credential': self.credential,
+                'cloud_credential': self.cloud_credential,
                 'job_type': 'run',
             }
             try:
@@ -840,6 +862,36 @@ class RunJobTest(BaseCeleryTest):
         self.check_job_result(job, 'successful')
         self.assertTrue('ssh-agent' in self.run_job_args)
         self.assertTrue('Bad passphrase' not in job.result_stdout)
+
+    def _test_cloud_credential_environment_variables(self, kind):
+        if kind == 'aws':
+            env_var1 = 'AWS_ACCESS_KEY'
+            env_var2 = 'AWS_SECRET_KEY'
+        elif kind == 'rax':
+            env_var1 = 'RAX_USERNAME'
+            env_var2 = 'RAX_API_KEY'
+        self.create_test_cloud_credential(name='%s cred' % kind, kind=kind,
+                                          username='my %s access' % kind,
+                                          password='my %s secret' % kind)
+        playbook = TEST_ENV_PLAYBOOK % {'env_var1': env_var1,
+                                        'env_var2': env_var2}
+        self.create_test_project(playbook)
+        job_template = self.create_test_job_template()
+        job = self.create_test_job(job_template=job_template)
+        self.assertEqual(job.status, 'new')
+        self.assertFalse(job.passwords_needed_to_start)
+        self.assertTrue(job.start())
+        self.assertEqual(job.status, 'pending')
+        job = Job.objects.get(pk=job.pk)
+        self.check_job_result(job, 'successful')
+        self.assertTrue(env_var1 in job.job_env)
+        self.assertTrue(env_var2 in job.job_env)
+
+    def test_aws_cloud_credential_environment_variables(self):
+        self._test_cloud_credential_environment_variables('aws')
+
+    def test_rax_cloud_credential_environment_variables(self):
+        self._test_cloud_credential_environment_variables('rax')
 
     def test_run_async_job(self):
         self.create_test_project(TEST_ASYNC_OK_PLAYBOOK)
