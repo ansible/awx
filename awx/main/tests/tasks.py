@@ -176,6 +176,7 @@ class RunJobTest(BaseCeleryTest):
         self.group2.hosts.add(self.host)
         self.project = None
         self.credential = None
+        self.cloud_credential = None
         # Monkeypatch RunJob to capture list of command line arguments.
         self.original_build_args = RunJob.build_args
         self.run_job_args = None
