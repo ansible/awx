@@ -373,9 +373,6 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                        scope['ssh_password'] = data.password;
                        master['ssh_password'] = scope['ssh_password'];
                        break; 
-                   case 'scm':
-                       scope['scm_key_unlock'] = data['ssh_key_unlock'];
-                       break;
                    case 'rax':
                        scope['api_key'] = data['password'];
                        master['api_key'] = scope['api_key'];

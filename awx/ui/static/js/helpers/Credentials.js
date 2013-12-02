@@ -134,9 +134,6 @@ angular.module('CredentialsHelper', ['Utilities'])
                 data['username'] = scope['access_key'];
                 data['password'] = scope['secret_key'];
                 break;
-            case 'scm':
-                data['ssh_key_unlock'] = scope['scm_key_unlock'];
-                break;
             case 'rax':
                 data['password'] = scope['api_key'];
                 break;

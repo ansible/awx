@@ -525,7 +525,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                 html += " ><i class=\"icon-undo\"></i></button>\n";
                 html += "</span>\n</div>\n";
                 if (field.ask) {
-                   html += "<label class=\"checkbox-inline ask-checkbox\">";
+                   html += "<label class=\"checkbox-inline ask-checkbox\" ";
+                   html += (field.askShow) ? "ng-show=\"" + field.askShow + "\" " : "";
+                   html += ">";
                    html += "<input type=\"checkbox\" ng-model=\"" + 
                        fld + "_ask\" ng-change=\"ask('" + fld + "','" + field.associated + "')\" ";
                    html += "id=\"" + this.form.name + "_" + fld + "_ask_chbox\" ";

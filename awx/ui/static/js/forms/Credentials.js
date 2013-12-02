@@ -194,42 +194,23 @@ angular.module('CredentialFormDefinition', [])
             "ssh_key_unlock": {
                 label: 'Key Password',
                 type: 'password',
-                ngShow: "kind.value == 'ssh'",
+                ngShow: "kind.value == 'ssh' || kind.value == 'scm'",
                 addRequired: false,
                 editRequired: false,
                 ngChange: "clearPWConfirm('ssh_key_unlock_confirm')",
                 associated: 'ssh_key_unlock_confirm',
                 ask: true,
+                askShow: "kind.value == 'ssh'",   //Only allow ask for machine credentials
                 clear: true
                 },
             "ssh_key_unlock_confirm": {
                 label: 'Confirm Key Password',
                 type: 'password',
-                ngShow: "kind.value == 'ssh'",
+                ngShow: "kind.value == 'ssh'  || kind.value == 'scm'",
                 addRequired: false,
                 editRequired: false,
                 awPassMatch: true,
                 associated: 'ssh_key_unlock'
-                },
-            "scm_key_unlock": {
-                label: 'Key Password',
-                type: 'password',
-                ngShow: "kind.value == 'scm'",
-                addRequired: false,
-                editRequired: false,
-                ngChange: "clearPWConfirm('scm_key_unlock_confirm')",
-                associated: 'scm_key_unlock_confirm',
-                ask: false,
-                clear: true
-                },
-            "scm_key_unlock_confirm": {
-                label: 'Confirm Key Password',
-                type: 'password',
-                ngShow: "kind.value == 'scm'",
-                addRequired: false,
-                editRequired: false,
-                awPassMatch: true,
-                associated: 'scm_key_unlock'
                 },
             "sudo_username": {
                 label: 'Sudo Username',
