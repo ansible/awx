@@ -53,6 +53,7 @@ angular.module('ansible', [
     'ProjectsHelper',
     'PermissionFormDefinition',
     'PermissionListDefinition',
+    'PermissionsHelper',
     'JobsListDefinition',
     'JobFormDefinition',
     'JobEventsListDefinition',

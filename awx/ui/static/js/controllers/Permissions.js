@@ -77,7 +77,7 @@ PermissionsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$route
 function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, PermissionsForm, 
                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, 
                          GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess,
-                         Wait) 
+                         Wait, PermissionCategoryChange) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -100,8 +100,8 @@ function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
    scope.category = 'Inventory';
    master.category = 'Inventory';
    master.inventoryrequired = true;
-   master.projectrequired = false
-
+   master.projectrequired = false;
+   
    LookUpInit({
       scope: scope,
       form: form,
@@ -152,29 +152,27 @@ function PermissionsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
       for (var fld in master) {
           scope[fld] = master[fld];
       }
+      scope.selectCategory();
       };
+   
+   scope.selectCategory = function() {  PermissionCategoryChange({ scope: scope, reset: true }); };
+       
 
-   scope.selectCategory = function() {
-       if (scope.category == 'Inventory') {
-          scope.projectrequired = false;
-       }
-       else {
-          scope.projectrequired = true;
-       }
-       scope.permission_type = null;
-       }
+  scope.selectCategory();
+
 }
 
 PermissionsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'PermissionsForm', 
                            'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
-                           'ReturnToCaller', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait'
+                           'ReturnToCaller', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess', 'Wait', 
+                           'PermissionCategoryChange'
                            ];
 
 
 function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, PermissionsForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, 
                           ClearScope, Prompt, GetBasePath, InventoryList, ProjectList, LookUpInit, CheckAccess,
-                          Wait) 
+                          Wait, PermissionCategoryChange) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -191,7 +189,11 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
    var master = {};
    var relatedSets = {}; 
    
-   CheckAccess({ scope: scope })
+   CheckAccess({ scope: scope });
+
+   scope.selectCategory = function(resetIn) { 
+       var reset = (resetIn == false) ? false : true;
+       PermissionCategoryChange({ scope: scope, reset: reset }); }
 
    // Retrieve detail record and prepopulate the form
    Rest.setUrl(defaultUrl); 
@@ -216,13 +218,10 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
            scope.category = 'Deploy';
            if (data['permission_type'] != 'run' && data['permission_type'] != 'check' ) {
               scope.category = 'Inventory';
-              scope.projectrequired = false;
-           }
-           else {
-              scope.projectrequired = true;
            }
            master['category'] = scope.category;
-           
+           scope.selectCategory(false);  //call without resetting scope.category value
+
            LookUpInit({
               scope: scope,
               form: form,
@@ -287,24 +286,14 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
       for (var fld in master) {
           scope[fld] = master[fld];
       }
+      scope.selectCategory(false);
       };
-
-
-   scope.selectCategory = function() {
-       if (scope.category == 'Inventory') {
-          scope.projectrequired = false;
-       }
-       else {
-          scope.projectrequired = true;
-       }
-       scope.permission_type = null;
-       }
 
 }
 
 PermissionsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'PermissionsForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
                             'ClearScope', 'Prompt', 'GetBasePath', 'InventoryList', 'ProjectList', 'LookUpInit', 'CheckAccess',
-                            'Wait'
+                            'Wait', 'PermissionCategoryChange'
                             ]; 
   

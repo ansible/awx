@@ -453,6 +453,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var content = params.content;
         var show = params.show;
         var idx = params.idx;
+        var bind = params.bind;  //Pass in scope variable containing html
         var html = '';
         html += "<div class=\"panel-group collapsible-help\" ";
         html += (show) ? "ng-show=\"" + show + "\"" : "";
@@ -465,8 +466,10 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "</h4>\n";
         html += "</div>\n";
         html += "<div id=\"accordion" + idx + "\" class=\"panel-collapse collapse in\">\n";
-        html += "<div class=\"panel-body\">\n";
-        html += content; 
+        html += "<div class=\"panel-body\" "; 
+        html += (bind) ? "ng-bind-html-unsafe=\"" + bind + "\" " : "";
+        html += ">\n";
+        html += (!bind) ? content : ""; 
         html += "</div>\n";
         html += "</div>\n";
         html += "</div>\n";

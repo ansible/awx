@@ -14,7 +14,8 @@ angular.module('PermissionFormDefinition', [])
         addTitle: 'Add Permission',                             //Title in add mode
         editTitle: '{{ name }}',                                //Title in edit mode
         name: 'permission',                                     //entity or model name in singular form
-        well: true,                                             //Wrap the form with TB well/           
+        well: true,                                             //Wrap the form with TB well
+        forceListeners: true,  
 
         stream: {
                 'class': "btn-primary btn-xs activity-btn",
@@ -83,18 +84,9 @@ angular.module('PermissionFormDefinition', [])
                     {label: 'Check', value: 'check', ngShow: "category == 'Deploy'" }
                     ],
                 addRequired: true,
-                editRequired: true
+                editRequired: true,
+                helpCollapse: [{ hdr: 'Permission', ngBind: 'permissionTypeHelp' }]
                 }
-                /* ,
-            deployment_permission_type: {
-                label: 'Permission',
-                type: 'radio',
-                ngShow: "category == 'Deploy'",
-                options: [
-                    {label: 'Deploy', value: 'PERM_INVENTORY_DEPLOY'},
-                    {label: 'Check', value: 'PERM_INVENTORY_CHECK'}
-                    ]
-                }*/
             },
 
         buttons: { //for now always generates <button> tags 

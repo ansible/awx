@@ -346,8 +346,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
             params.hdr = collapse_array[i].hdr; 
             params.content = collapse_array[i].content; 
             params.idx = this.accordion_count++;
-            params.show = (collapse_array[i].show) ? collapse_array[i].show : null;   
-            html += HelpCollapse(params);       
+            params.show = (collapse_array[i].show) ? collapse_array[i].show : null;
+            params.bind = (collapse_array[i].ngBind) ? collapse_array[i].ngBind : null;
+            html += HelpCollapse(params);      
         }
         return html;
         },
@@ -839,6 +840,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
               this.form.name + '_form.' + fld + ".$error.required\">A value is required!</div>\n";
             }
             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+
+            // Add help panel(s)
+            html += (field.helpCollapse) ? this.buildHelpCollapse(field.helpCollapse) : '';
+
             html += "</div>\n";
          }
 
