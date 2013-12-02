@@ -224,7 +224,7 @@ class DashboardView(APIView):
                          'total': user_list.count()}
         data['organizations'] = {'url': reverse('api:organization_list'),
                                  'total': organization_list.count()}
-        data['team'] = {'url': reverse('api:team_list'),
+        data['teams'] = {'url': reverse('api:team_list'),
                         'total': team_list.count()}
         data['credentials'] = {'url': reverse('api:credential_list'),
                                'total': credential_list.count()}
