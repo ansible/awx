@@ -15,8 +15,6 @@ class ActivityStreamMiddleware(object):
 
     def __init__(self):
         self.disp_uid = None
-        self.isActivityStreamEvent = False
-        self.finished = False
 
     def process_request(self, request):
         if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated():
@@ -34,34 +32,31 @@ class ActivityStreamMiddleware(object):
         drf_user = getattr(drf_request, 'user', None)
         if self.disp_uid is not None:
             post_save.disconnect(dispatch_uid=self.disp_uid)
-        self.finished = True
-        if self.isActivityStreamEvent:
-            for instance_id in self.instances:
-                instance = ActivityStream.objects.filter(id=instance_id)
-                if instance.exists():
-                    instance = instance[0]
-                else:
-                    logger.debug("Failed to look up Activity Stream instance for id : " + str(instance_id))
-                    continue
+        for instance_id in self.instances:
+            instance = ActivityStream.objects.filter(id=instance_id)
+            if instance.exists():
+                instance = instance[0]
+            else:
+                logger.debug("Failed to look up Activity Stream instance for id : " + str(instance_id))
+                continue
 
-                if drf_user is not None and drf_user.__class__ != AnonymousUser:
-                    instance.user = drf_user
-                    try:
-                        instance.save()
-                    except IntegrityError, e:
-                        logger.debug("Integrity Error saving Activity Stream instance for id : " + str(instance_id))
-                else:
-                    obj1_type_actual = instance.object1_type.split(".")[-1]
-                    if obj1_type_actual in ("InventoryUpdate", "ProjectUpdate", "Job") and instance.id is not None:
-                        instance.delete()
+            if drf_user is not None and drf_user.__class__ != AnonymousUser:
+                instance.user = drf_user
+                try:
+                    instance.save()
+                except IntegrityError, e:
+                    logger.debug("Integrity Error saving Activity Stream instance for id : " + str(instance_id))
+            else:
+                obj1_type_actual = instance.object1_type.split(".")[-1]
+                if obj1_type_actual in ("InventoryUpdate", "ProjectUpdate", "Job") and instance.id is not None:
+                    instance.delete()
         return response
 
     def set_actor(self, user, sender, instance, **kwargs):
-        if not self.finished:
-            if sender == ActivityStream:
-                if isinstance(user, User) and instance.user is None:
-                    instance.user = user
-                else:
-                    if instance.id not in self.instances:
-                        self.isActivityStreamEvent = True
-                        self.instances.append(instance.id)
+        if sender == ActivityStream:
+            if isinstance(user, User) and instance.user is None:
+                instance.user = user
+                instance.save()
+            else:
+                if instance.id not in self.instances:
+                    self.instances.append(instance.id)
