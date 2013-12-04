@@ -12,6 +12,8 @@ The current version under development is 1.4, and uses the master branch.
 
 1.3.1 was released on September 17, 2013.
 
+1.4.0 was released on November 25, 2013.
+
 Hotfixes should go on the appropriate release branch and be cherry-picked to
 master.
 
