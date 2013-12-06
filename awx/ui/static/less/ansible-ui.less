@@ -45,6 +45,43 @@ body {
 .grey-txt { color: @grey; }
 .text-center { text-align: center !important; }
 
+
+/* Old style TB default button with grey background */
+.btn-grey {
+  color: #333;
+  background-color: #ccc;
+  border-color: #ccc;
+}
+
+.btn-grey:hover {
+  background-color: #FFF;
+}
+
+/* Make button appear to be disabled, but allow mouse events */
+.btn-disabled {
+   opacity: 0.65;
+   filter: alpha(opacity=65);
+   -webkit-box-shadow: none;
+   box-shadow: none;
+}
+
+/* List Actions column */
+.actions {
+  a {
+    font-size: 14px;
+    margin-left: 15px;
+  }
+  a:first-child {
+    margin-left: 0;
+  }
+  a:hover {
+    cursor: pointer;
+  }
+  .dropdown {
+    margin-left: 15px;
+  }
+}
+
 .success-badge { 
   color: #ffffff;
   background-color: #5cb85c;
@@ -117,15 +154,6 @@ textarea {
     margin-bottom: 15px;
   }
 
-/* Make button appear to be disabled, but allow mouse events */
-  .btn-disabled {
-    opacity: 0.65;
-    filter: alpha(opacity=65);
-    -webkit-box-shadow: none;
-            box-shadow: none;
-  } 
-
-
 hr {
   border-color: #e3e3e3;
 }
@@ -174,11 +202,6 @@ td.actions {
 }
 
 .dropdown-toggle,
-.btn-default {
-  color: #333;
-  background-color: #ccc;
-  border-color: #ccc;
-}
 
 .dropdown-toggle:hover,
 .btn-default:visited,
@@ -631,6 +654,7 @@ input[type="checkbox"].checkbox-no-label {
 /* Display list actions next to search widget */
 .list-actions {
   text-align: right;
+  margin-bottom: 15px;
 
   button {
     margin-left: 4px;
@@ -767,7 +791,7 @@ input[type="checkbox"].checkbox-no-label {
     line-height: 1;
   }
 
-  /* Inventory job status badge */
+/* Inventory job status badge */
   .failures-true {
     background-color: @red;
     color: #fff;
@@ -885,18 +909,17 @@ input[type="checkbox"].checkbox-no-label {
     color: @black;
     cursor: default;
   }
-
-  .level-1 {
-    padding-left: 24px;
-  }
-
-  .level-2 {
-    padding-left: 48px;
-  }
-
-  .level-3 {
-    padding-left: 72px;
-  }
+  /* Padding levels used on job events and inventory groups */
+  .level-1 { padding-left: 20px; }
+  .level-2 { padding-left: 40px; }
+  .level-3 { padding-left: 60px; }
+  .level-4 { padding-left: 80px; }
+  .level-5 { padding-left: 100px; }
+  .level-6 { padding-left: 120px; }
+  .level-7 { padding-left: 140px; }
+  .level-8 { padding-left: 160px; }
+  .level-9 { padding-left: 180px; }
+  .level-10 { padding-left: 200px; }
 
   .level-3-detail {
     padding-left: 72px;
@@ -929,6 +952,11 @@ input[type="checkbox"].checkbox-no-label {
       margin-right: 20px;
     }
   }
+
+.inventory-title {
+  font-size: 16px; 
+  font-weight: bold;  
+}
 
 /* Inventory-> Groups */
   

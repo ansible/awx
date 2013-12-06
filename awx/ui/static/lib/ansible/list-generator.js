@@ -193,31 +193,27 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "<div class=\"well\">\n";
        }
        
-       /*
-       if (list.editTitle.match(/^Inventory Summary/)) {
-          html += "<div class=\"row groups-issue\">\n";
-          html += "<div class=\"col-lg-12\">\n";
-          html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"groupFailureFilter\" " +
-              "ng-change=\"search()\" id=\"groups-issue-chbox\"> Show only groups with errors</label>\n";
-          html += "</div>\n";
-          html += "</div>\n";
-       }   
-       */
-       
-       if (options.searchSize) {
-          html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: options.searchSize, 
-              searchWidgets: list.searchWidgets });
-       } 
-       else if (options.mode == 'summary') {
-          html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-6' });
-       }
-       else if (options.mode == 'lookup' || options.id != undefined) {
-          html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-8' });
+       if (list.name == 'groups') {
+           // Inventory groups
+           html += "<div class=\"row\">\n";
+           html += "<div class=\"inventory-title " + options.searchSize + "\">" + list.editTitle + "</div>\n"; 
        }
        else {
-          html += SearchWidget({ iterator: list.iterator, template: list, mini: true });
+           if (options.searchSize) {
+              html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: options.searchSize, 
+                  searchWidgets: list.searchWidgets });
+           } 
+           else if (options.mode == 'summary') {
+              html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-6' });
+           }
+           else if (options.mode == 'lookup' || options.id != undefined) {
+              html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-8' });
+           }
+           else {
+              html += SearchWidget({ iterator: list.iterator, template: list, mini: true });
+           }
        }
-     
+
        if (options.mode != 'lookup') {
           //actions
           var base = $location.path().replace(/^\//,'').split('/')[0];
@@ -241,12 +237,18 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "\">\n";
           
           html += "<div class=\"list-actions\">\n";
-          // all but refresh button
+          
           for (action in list.actions) {
               if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
                  if ( (list.actions[action].basePaths == undefined) || 
                       (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
-                    html += this.button(list.actions[action], action);
+                     list.actions[action]['class'] = 'btn-xs btn-primary';
+                     list.actions[action]['iconSize'] = 'large';
+                     delete list.actions[action]['label'];
+                     if (action == 'stream') {
+                         list.actions[action]['icon'] = 'icon-time';
+                     }
+                     html += this.button(list.actions[action], action);
                  }
               }
           }
@@ -258,7 +260,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  dataPlacement: 'left',
                  dataContainer: 'body',
                  icon: "icon-question-sign",
-                 'class': 'btn-xs btn-help btn-info',
+                 'class': 'btn-xs btn-help',
                  awToolTip: 'Click for help',
                  dataTitle: 'Help',
                  iconSize: 'large'
@@ -286,7 +288,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += "<table id=\"" + list.name + "_table\" ";
        html += "class=\"table"
        html += (list['class']) ? " " + list['class'] : "";
-       html += (options.mode !== 'summary' && (options.mode == 'lookup' || options.id)) ? ' table-hover-inverse' : '';
+       html += (options.mode !== 'summary' && options.mode !== 'edit' && (options.mode == 'lookup' || options.id)) ? 
+           ' table-hover-inverse' : '';
        html += (list.hover) ? ' table-hover' : '';
        html += (options.mode == 'summary') ? ' table-summary' : '';
        html += "\" ";
@@ -330,7 +333,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           html += "<th>Select</th>";
        }
        else if (options.mode == 'edit') {
-          html += "<th class=\"actions-column\"></th>\n";
+          html += "<th class=\"actions-column\">Actions</th>\n";
        }
        html += "</tr>\n";
        html += "</thead>\n";
@@ -378,7 +381,19 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                      });
               }
               else {
-                 html += this.button(list.fieldActions[action]);
+                 //list.fieldActions[action]['class'] = 'btn-xs btn-default';
+                 //list.fieldActions[action]['iconSize'] = 'large';
+                 //html += this.button(list.fieldActions[action]);
+                 var fAction = list.fieldActions[action];
+                 html += "<a ";
+                 html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
+                 html += (fAction.ngClick) ?  this.attr(fAction,'ngClick') : "";
+                 html += (fAction.ngHref) ?  this.attr(fAction,'ngHref') : "";
+                 html += (fAction.ngShow) ?  this.attr(fAction,'ngShow') : "";
+                 html += ">";
+                 html += (fAction.icon) ? this.attr(fAction, 'icon') : "";
+                 html += (fAction.label) ? list.fieldActions[action]['label'] : "";
+                 html += "</a>"; 
               }
           }
           html += "</td>";
@@ -400,23 +415,25 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += "</table>\n";
        
        if (options.mode == 'select' && (options.selectButton == undefined || options.selectButton == true)) {
-          html += "<div class=\"navigation-buttons\">\n";
-          html += " <button class=\"btn btn-sm btn-primary pull-right\" aw-tool-tip=\"Complete your selection\" " +
-              "ng-click=\"finishSelection()\" ng-disabled=\"disableSelectBtn\"><i class=\"icon-check\"></i> Select</button>\n";
-          html += "</div>\n";
+           html += "<div class=\"navigation-buttons\">\n";
+           html += " <button class=\"btn btn-sm btn-primary pull-right\" aw-tool-tip=\"Complete your selection\" " +
+               "ng-click=\"finishSelection()\" ng-disabled=\"disableSelectBtn\"><i class=\"icon-check\"></i> Select</button>\n";
+           html += "</div>\n";
        }
        
        if (options.mode != 'lookup' && (list.well == undefined || list.well == true)) {
-          html += "</div>\n";    //well
-       }
-
-       if ( options.mode == 'lookup' || (options.id && options.id == "form-modal-body") ) {
-          html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true, mode: 'lookup' });
-       }
-       else {
-          html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true });
+           html += "</div>\n";    //well
        }
        
+       if (list.name !== 'groups') {
+           if ( options.mode == 'lookup' || (options.id && options.id == "form-modal-body") ) {
+               html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true, mode: 'lookup' });
+           }
+           else {
+               html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true });
+           }
+       }
+
        return html;
        
        }

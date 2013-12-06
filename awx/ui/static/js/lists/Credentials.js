@@ -59,11 +59,11 @@ angular.module('CredentialsListDefinition', [])
                 label: 'Create New',
                 mode: 'all',                         // One of: edit, select, all
                 ngClick: 'addCredential()',
-                "class": 'btn-success btn-xs',
+                "class": 'btn-sm',
                 awToolTip: 'Create a new credential'
                 },
             stream: {
-                'class': "btn-primary btn-xs activity-btn",
+                'class': "btn-sm activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 dataPlacement: "top",
@@ -79,7 +79,7 @@ angular.module('CredentialsListDefinition', [])
                 ngClick: "editCredential(\{\{ credential.id \}\})",
                 icon: 'icon-edit',
                 label: 'Edit',
-                "class": 'btn-xs btn-default',
+                "class": 'btn-sm',
                 awToolTip: 'View/Edit credential'
                 },
 
@@ -87,7 +87,7 @@ angular.module('CredentialsListDefinition', [])
                 ngClick: "deleteCredential(\{\{ credential.id \}\},'\{\{ credential.name \}\}')",
                 icon: 'icon-trash',
                 label: 'Delete',
-                "class": 'btn-xs btn-danger',
+                "class": 'btn-sm',
                 awToolTip: 'Delete credential'
                 }
             }

@@ -32,7 +32,7 @@ angular.module('ansible', [
     'InventoryHelper',
     'InventoryHostsFormDefinition',
     'InventoryGroupsFormDefinition',
-    'InventorySummaryDefinition',
+    'InventoryGroupsDefinition',
     'AWFilters',
     'HostFormDefinition',
     'HostListDefinition',
@@ -59,8 +59,6 @@ angular.module('ansible', [
     'JobEventsListDefinition',
     'JobEventDataDefinition',
     'JobHostDefinition',
-    'GroupsHelper',
-    'HostsHelper',
     'ParseHelper',
     'ChildrenHelper',
     'EventsHelper',
@@ -80,7 +78,7 @@ angular.module('ansible', [
     'InventoryStatusDefinition',
     'InventorySummaryHelpDefinition',
     'InventoryHostsHelpDefinition',
-    'TreeSelector',
+    'InventoryTree',
     'CredentialsHelper',
     'TimerService',
     'StreamListDefinition',
@@ -138,14 +136,8 @@ angular.module('ansible', [
             when('/inventories/add', 
                 { templateUrl: urlPrefix + 'partials/inventories.html', controller: InventoriesAdd }).
 
-            when('/inventories/:id', 
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: InventoriesEdit }).
-
-            when('/inventories/:inventory_id/hosts', 
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: InventoryHosts }).
-
-            when('/inventories/:inventory_id/groups', 
-                { templateUrl: urlPrefix + 'partials/inventories.html', controller: InventoryGroups }).
+            when('/inventories/:inventory_id', 
+                { templateUrl: urlPrefix + 'partials/inventory-edit.html', controller: InventoriesEdit }).
 
             when('/organizations', { templateUrl: urlPrefix + 'partials/organizations.html',
                                      controller: OrganizationsList }).

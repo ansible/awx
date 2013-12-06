@@ -33,11 +33,11 @@ angular.module('OrganizationListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',                  // One of: edit, select, all
                 ngClick: 'addOrganization()',
-                "class": 'btn-success btn-xs',
+                "class": 'btn-xs',
                 awToolTip: 'Create a new organization'
                 },
             stream: {
-                'class': "btn-primary btn-xs activity-btn",
+                'class': "btn-xs activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 dataPlacement: "top",

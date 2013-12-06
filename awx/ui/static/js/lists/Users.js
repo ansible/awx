@@ -40,11 +40,11 @@ angular.module('UserListDefinition', [])
                 mode: 'all',                      // One of: edit, select, all
                 ngClick: 'addUser()',
                 basePaths: ['organizations','users'],        // base path must be in list, or action not available
-                "class": 'btn-success btn-xs',
+                "class": 'btn-xs',
                 awToolTip: 'Create a new user'
                 },
             stream: {
-                'class': "btn-primary btn-xs activity-btn",
+                'class': "btn-xs activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 dataPlacement: "top",

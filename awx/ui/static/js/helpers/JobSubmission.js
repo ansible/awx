@@ -5,11 +5,11 @@
  * 
  */
 angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'CredentialFormDefinition', 'CredentialsListDefinition',
-    'LookUpHelper', 'ProjectFormDefinition', 'JobSubmissionHelper', 'GroupFormDefinition', 'GroupsHelper' ])
+    'LookUpHelper', 'ProjectFormDefinition', 'JobSubmissionHelper' ])
 
-    .factory('PromptPasswords', ['CredentialForm', 'JobTemplateForm', 'GroupForm', 'ProjectsForm', '$compile', 'Rest', '$location', 'ProcessErrors',
+    .factory('PromptPasswords', ['CredentialForm', 'JobTemplateForm', '$compile', 'Rest', '$location', 'ProcessErrors',
         'GetBasePath', 'Alert', 'Empty', 'Wait',
-    function(CredentialForm, JobTemplateForm, ProjectsForm, GroupForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert, Empty,
+    function(CredentialForm, JobTemplateForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert, Empty,
         Wait) {
     return function(params) {
         
@@ -115,12 +115,14 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                   if (form.fields[passwords[i]]) {
                      current_form = form;
                   }
+                  /*
                   else if (ProjectsForm.fields[passwords[i]]) {
                      current_form = ProjectsForm;
                   }
                   else if (GroupForm.fields[passwords[i]]) {
                      current_form = GroupForm;
                   }
+                  */
                   else {
                      // No match found. Abandon ship!
                      Alert('Form Not Found', 'Could not locate form for: ' + passwords[i], 'alert-danger');

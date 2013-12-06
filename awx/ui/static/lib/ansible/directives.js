@@ -8,7 +8,7 @@
 var INTEGER_REGEXP = /^\-?\d*$/;
 
 
-angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'HostsHelper'])
+angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
     // awpassmatch:  Add to password_confirm field. Will test if value
     //               matches that of 'input[name="password"]'
     .directive('awpassmatch', function() {

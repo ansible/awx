@@ -109,9 +109,10 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "<button type=\"button\" ";
         html += "class=\"btn";
         if (btn.awRefresh && !btn['class']) {
-            html += ' btn-primary btn-xs refresh-btn';
+            html += ' btn-xs refresh-btn';
         }
-        else if (btn['class']) {
+        else 
+        if (btn['class']) {
             html += ' ' + btn['class']; 
         }
         else {
@@ -147,7 +148,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (btn['img']) ? "<img src=\"" + $basePath + "img/" + btn.img + "\" style=\"width: 12px; height: 12px;\" >" : "";
         html += (btn['icon']) ? Attr(btn,'icon') : "";
         html += (btn['awRefresh'] && !btn['icon']) ? "<i class=\"icon-refresh\"></i> " : "";
-        html += (btn.label) ? " " + btn.label : "";
+        html += (btn.label) ? "<br />" + btn.label : "";
         html += "</button> ";
         if (btn['awRefresh']) {
            html += '<span class=\"refresh-msg\" aw-refresh>{{ refreshMsg }}</span>\n';
@@ -492,7 +493,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         for (var i=1; i <= searchWidgets; i++) {
             var modifier = (i == 1) ? '' : i;    
             html += "<div class=\""; 
-            html += (params.size) ? params.size : "col-lg-4 col-md-6 col-sm-11 col-xs-11";
+            html += (params.size) ? params.size : "col-lg-4 col-md-6 col-sm-12 col-xs-12";
             html += "\" id=\"search-widget-container" + modifier + "\">\n";
             
             html += "<div class=\"input-group";

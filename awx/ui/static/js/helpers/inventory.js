@@ -11,7 +11,7 @@
 angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationListDefinition',
                                     'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService',
                                     'InventoryHelper', 'RelatedSearchHelper', 'RelatedPaginateHelper',
-                                    'InventoryFormDefinition', 'ParseHelper', 'InventorySummaryDefinition'
+                                    'InventoryFormDefinition', 'ParseHelper'
                                     ]) 
 
     .factory('LoadRootGroups', ['Rest', 'ProcessErrors', function(Rest, ProcessErrors) {

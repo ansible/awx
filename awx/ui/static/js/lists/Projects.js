@@ -61,7 +61,7 @@ angular.module('ProjectsListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addProject()',
-                "class": 'btn-success btn-xs',
+                "class": 'btn-xs',
                 awToolTip: 'Create a new project'
                 },
             help: {
@@ -77,7 +77,7 @@ angular.module('ProjectsListDefinition', [])
                 dataContainer: 'body',
                 icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-xs btn-info btn-help',
+                'class': 'btn-xs btn-help',
                 awToolTip: 'Click for help',
                 awTipPlacement: 'top',
                 dataTitle: 'Project Status',
@@ -87,13 +87,13 @@ angular.module('ProjectsListDefinition', [])
                 dataPlacement: 'top',
                 icon: "icon-refresh",
                 mode: 'all',
-                'class': 'btn-xs btn-primary',
+                'class': 'btn-xs',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()",
                 iconSize: 'large'
                 },
             stream: {
-                'class': "btn-primary btn-xs activity-btn",
+                'class': "btn-xs activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 dataPlacement: "top",

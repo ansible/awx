@@ -198,14 +198,6 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
      scope.viewFailedJobs = function(id) {
         $location.url('/jobs/?inventory__int=' + id + '&status=failed');
         }
-
-     scope.editHosts = function(id) {
-        $location.url('/inventories/' + id + '/hosts');
-        }
-
-     scope.editGroups = function(id) {
-        $location.url('/inventories/' + id + '/groups');
-        }
 }
 
 InventoriesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'InventoryList', 'GenerateList', 
@@ -322,67 +314,31 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
                            'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait']; 
 
 
-function InventoriesEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 
-                          GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
-                          RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, OrganizationList,
-                          GetBasePath, LoadInventory, ParseTypeChange, EditInventory, SaveInventory, PostLoadInventory,
-                          Stream
-                          ) 
+function InventoriesEdit ($rootScope, $location, $routeParams, GenerateList, ClearScope, InventoryGroups, BuildTree, Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
 
-   var generator = GenerateForm;
-   var form = InventoryForm;
-   var defaultUrl=GetBasePath('inventory');
-   var scope = generator.inject(form, { mode: 'edit', related: true });
-   var base = $location.path().replace(/^\//,'').split('/')[0];
-   var id = $routeParams.id;
+   var generator = GenerateList;
+   var list = InventoryGroups;
+   var base = $location.path().replace(/^\//,'').split('/')[0];  
+   var scope = $rootScope.$new();
+   var groupScope;
 
-   scope['inventoryParseType'] = 'yaml';
-   scope['inventory_id'] = id;
-   
-   ParseTypeChange(scope,'inventory_variables', 'inventoryParseType');
-   
-   // Retrieve each related sets and any lookups
-   if (scope.inventoryLoadedRemove) {
-      scope.inventoryLoadedRemove();
-   }
-   scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
-       LoadBreadCrumbs({ path: '/inventories/' + id, title: scope.inventory_name });
-       PostLoadInventory({ scope: scope });
-       });
+   scope.$on('searchTreeReady', function(e, inventory_name, groups) {
+      // After the tree data loads, generate the groups list
+      groupScope = generator.inject(list, { mode: 'edit', id: 'groups-container', breadCrumbs: false, searchSize: 'col-lg-5' });
+      Wait('stop');
+      groupScope.groups = groups;
+      groupScope.inventory_name = inventory_name;
+      groupScope.inventory_id = $routeParams.inventory_id;
+      });
 
-   LoadInventory({ scope: scope, doPostSteps: false });
-
-   scope.showActivity = function() { Stream(); }
-
-   // Cancel
-   scope.formReset = function() {
-      generator.reset();
-      for (var fld in scope.master) {
-          scope[fld] = scope.master[fld];
-      }
-      };
-
-   if (scope.removeInventorySaved) {
-      scope.removeInventorySaved();
-   }
-   scope.removeInventorySaved = scope.$on('inventorySaved', function() {
-       $location.path('/inventories');
-       });
-
-   scope.formSave = function() {
-      generator.clearApiErrors();
-      SaveInventory({ scope: scope });
-      }
+   BuildTree({ scope: scope, inventory_id: $routeParams.inventory_id });
 
 }
 
-InventoriesEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 
-                            'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
-                            'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'LookUpInit', 'Prompt',
-                            'OrganizationList', 'GetBasePath', 'LoadInventory', 'ParseTypeChange', 'EditInventory', 
-                            'SaveInventory', 'PostLoadInventory', 'Stream'
+InventoriesEdit.$inject = [ '$rootScope','$location', '$routeParams', 'GenerateList', 'ClearScope', 'InventoryGroups', 'BuildTree',
+                            'Wait'
                             ]; 
   

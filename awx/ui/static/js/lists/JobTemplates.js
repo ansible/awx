@@ -34,12 +34,12 @@ angular.module('JobTemplatesListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',                // One of: edit, select, all
                 ngClick: 'addJobTemplate()',
-                "class": 'btn-success btn-xs',
+                "class": 'btn-xs',
                 basePaths: ['job_templates'], 
                 awToolTip: 'Create a new template'
                 },
             stream: {
-                'class': "btn-primary btn-xs activity-btn",
+                'class': "btn-xs activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 dataPlacement: "top",

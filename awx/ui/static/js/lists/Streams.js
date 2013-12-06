@@ -208,7 +208,7 @@ angular.module('StreamListDefinition', [])
                 dataPlacement: 'top',
                 icon: "icon-refresh",
                 mode: 'all',
-                'class': 'btn-xs btn-primary',
+                'class': 'btn-xs',
                 awToolTip: "Refresh the page",
                 ngClick: "refreshStream()",
                 iconSize: 'large'
@@ -217,7 +217,7 @@ angular.module('StreamListDefinition', [])
                 dataPlacement: 'top',
                 icon: "icon-arrow-left",
                 mode: 'all',
-                'class': 'btn-xs btn-primary',
+                'class': 'btn-xs',
                 awToolTip: "Close Activity Stream view",
                 ngClick: "closeStream()",
                 iconSize: 'large'

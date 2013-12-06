@@ -35,7 +35,7 @@ angular.module('GroupListDefinition', [])
                 dataContainer: '#form-modal .modal-content',
                 icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-xs btn-info btn-help pull-right',
+                'class': 'btn-xs btn-help pull-right',
                 awToolTip: 'Click for help',
                 dataTitle: 'Adding Groups',
                 iconSize: 'large'
@@ -47,7 +47,7 @@ angular.module('GroupListDefinition', [])
                 label: 'Edit',
                 ngClick: "editGroup(\{\{ group.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-xs btn-default',
+                "class": 'btn-xs',
                 awToolTip: 'View/Edit group'
                 },
 
@@ -55,7 +55,7 @@ angular.module('GroupListDefinition', [])
                 label: 'Delete',
                 ngClick: "deleteGroup(\{\{ group.id \}\},'\{\{ group.name \}\}')",
                 icon: 'icon-trash',
-                "class": 'btn-xs btn-danger',
+                "class": 'btn-xs',
                 awToolTip: 'Delete group'
                 }
             }

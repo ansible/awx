@@ -47,7 +47,7 @@ angular.module('HostListDefinition', [])
                 label: 'Edit',
                 ngClick: "editHost(\{\{ host.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-xs btn-default',
+                "class": 'btn-xs',
                 awToolTip: 'View/Edit host'
                 },
 
@@ -55,7 +55,7 @@ angular.module('HostListDefinition', [])
                 label: 'Delete',
                 ngClick: "deleteHost(\{\{ host.id \}\},'\{\{ host.name \}\}')",
                 icon: 'icon-trash',
-                "class": 'btn-xs btn-danger',
+                "class": 'btn-xs',
                 awToolTip: 'Delete host'
                 }
             }

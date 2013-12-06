@@ -40,11 +40,11 @@ angular.module('TeamsListDefinition', [])
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addTeam()',
-                "class": 'btn-xs btn-success',
+                "class": 'btn-xs',
                 awToolTip: 'Create a new team'
                 },
             stream: {
-                'class': "btn-primary btn-xs activity-btn",
+                'class': "btn-xs activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 dataPlacement: "top",

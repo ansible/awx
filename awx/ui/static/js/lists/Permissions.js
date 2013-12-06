@@ -47,12 +47,12 @@ angular.module('PermissionListDefinition', [])
                 label: 'Create New',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addPermission()',
-                "class": 'btn-success btn-xs',
+                "class": 'btn-xs',
                 awToolTip: 'Add a new permission',
                 ngShow: 'PermissionAddAllowed'
                 },
             stream: {
-                'class': "btn-primary btn-xs activity-btn",
+                'class': "btn-xs activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 dataPlacement: "top",

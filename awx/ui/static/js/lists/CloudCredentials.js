@@ -50,7 +50,7 @@ angular.module('CloudCredentialsListDefinition', [])
                 label: 'Create New',
                 mode: 'all',                         // One of: edit, select, all
                 ngClick: 'addCredential()',
-                "class": 'btn-success btn-xs',
+                "class": 'btn-sm',
                 awToolTip: 'Create a new credential'
                 }
             },
@@ -60,7 +60,7 @@ angular.module('CloudCredentialsListDefinition', [])
                 ngClick: "editCredential(\{\{ credential.id \}\})",
                 icon: 'icon-edit',
                 label: 'Edit',
-                "class": 'btn-xs btn-default',
+                "class": 'btn-sm',
                 awToolTip: 'View/Edit credential'
                 },
 
@@ -68,7 +68,7 @@ angular.module('CloudCredentialsListDefinition', [])
                 ngClick: "deleteCredential(\{\{ credential.id \}\},'\{\{ credential.name \}\}')",
                 icon: 'icon-trash',
                 label: 'Delete',
-                "class": 'btn-xs btn-danger',
+                "class": 'btn-sm',
                 awToolTip: 'Delete credential'
                 }
             }

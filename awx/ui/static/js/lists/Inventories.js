@@ -82,28 +82,39 @@ angular.module('InventoriesListDefinition', [])
         
         actions: {
             add: {
-                label: 'Create New',
+                label: 'Add',
                 icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addInventory()',
-                "class": 'btn-xs btn-success',
                 awToolTip: 'Create a new inventory'
                 },
             stream: {
-                'class': "btn-primary btn-xs activity-btn",
+                label: 'Activity',
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 dataPlacement: "top",
                 icon: "icon-comments-alt",
                 mode: 'all',
-                iconSize: 'large',
                 ngShow: "user_is_superuser"
                 }
             },
 
         fieldActions: {
-            
-            dropdown: {
+            edit: {
+                label: 'Edit',
+                ngClick: "editInventory(\{\{ inventory.id \}\})",
+                icon: 'icon-edit',
+                "class": 'btn-xs btn-default',
+                awToolTip: 'Edit inventory'
+                },
+            "delete": {
+                label: 'Delete',
+                ngClick: "deleteInventory(\{\{ inventory.id \}\},'\{\{ inventory.name \}\}')",
+                icon: 'icon-trash',
+                "class": 'btn-xs btn-danger',
+                awToolTip: 'Delete inventory'
+                },
+             dropdown: {
                 type: 'DropDown',
                 label: 'Jobs',
                 icon: 'icon-zoom-in',
@@ -112,24 +123,6 @@ angular.module('InventoriesListDefinition', [])
                     { ngClick: 'viewJobs(\{\{ inventory.id \}\})', label: 'All' },
                     { ngClick: "viewFailedJobs(\{\{ inventory.id \}\})", label: 'Failed' }
                     ]
-                },
-            edit: { 
-                type: 'DropDown', 
-                label: 'Edit',
-                icon: 'icon-edit',
-                'class': 'btn-default btn-xs',
-                options: [
-                    { ngClick: "editInventory(\{\{ inventory.id \}\})", label: 'Properties' },
-                    { ngClick: "editHosts(\{\{ inventory.id \}\})", label: 'Hosts' }, 
-                    { ngClick: "editGroups(\{\{ inventory.id \}\})", label: 'Groups' }
-                    ]
-                },
-            "delete": {
-                label: 'Delete',
-                ngClick: "deleteInventory(\{\{ inventory.id \}\},'\{\{ inventory.name \}\}')",
-                icon: 'icon-trash',
-                "class": 'btn-xs btn-danger',
-                awToolTip: 'Delete inventory'
                 }
             }
         });
