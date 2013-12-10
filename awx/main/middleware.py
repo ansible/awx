@@ -15,6 +15,7 @@ class ActivityStreamMiddleware(object):
 
     def __init__(self):
         self.disp_uid = None
+        self.instances = []
 
     def process_request(self, request):
         if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated():
@@ -22,7 +23,6 @@ class ActivityStreamMiddleware(object):
         else:
             user = None
 
-        self.instances = []
         set_actor = curry(self.set_actor, user)
         self.disp_uid = str(uuid.uuid1())
         post_save.connect(set_actor, sender=ActivityStream, dispatch_uid=self.disp_uid, weak=False)
