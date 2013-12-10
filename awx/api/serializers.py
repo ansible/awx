@@ -243,6 +243,7 @@ class UserSerializer(BaseSerializer):
             projects               = reverse('api:user_projects_list',            args=(obj.pk,)),
             credentials            = reverse('api:user_credentials_list',         args=(obj.pk,)),
             permissions            = reverse('api:user_permissions_list',         args=(obj.pk,)),
+            activity_stream        = reverse('api:user_activity_stream_list',     args=(obj.pk,)),
         ))
         return res
 
@@ -294,6 +295,7 @@ class OrganizationSerializer(BaseSerializer):
             admins      = reverse('api:organization_admins_list',         args=(obj.pk,)),
             #tags        = reverse('api:organization_tags_list',           args=(obj.pk,)),
             teams       = reverse('api:organization_teams_list',          args=(obj.pk,)),
+            activity_stream = reverse('api:organization_activity_stream_list', args=(obj.pk,))
         ))
         return res
 
@@ -321,6 +323,7 @@ class ProjectSerializer(BaseSerializer):
             playbooks = reverse('api:project_playbooks', args=(obj.pk,)),
             update = reverse('api:project_update_view', args=(obj.pk,)),
             project_updates = reverse('api:project_updates_list', args=(obj.pk,)),
+            activity_list = reverse('api:project_activity_stream_list', args=(obj.pk,)),
         ))
         if obj.credential:
             res['credential'] = reverse('api:credential_detail',
@@ -420,6 +423,7 @@ class InventorySerializer(BaseSerializerWithVariables):
             tree          = reverse('api:inventory_tree_view',         args=(obj.pk,)),
             organization  = reverse('api:organization_detail',         args=(obj.organization.pk,)),
             inventory_sources = reverse('api:inventory_inventory_sources_list', args=(obj.pk,)),
+            activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
         ))
         return res
 
@@ -443,6 +447,7 @@ class HostSerializer(BaseSerializerWithVariables):
             all_groups    = reverse('api:host_all_groups_list', args=(obj.pk,)),
             job_events    = reverse('api:host_job_events_list',  args=(obj.pk,)),
             job_host_summaries = reverse('api:host_job_host_summaries_list', args=(obj.pk,)),
+            activity_stream = reverse('api:host_activity_stream_list', args=(obj.pk,)),
             #inventory_sources = reverse('api:host_inventory_sources_list', args=(obj.pk,)),
         ))
         if obj.last_job:
@@ -544,6 +549,7 @@ class GroupSerializer(BaseSerializerWithVariables):
             job_events    = reverse('api:group_job_events_list',   args=(obj.pk,)),
             job_host_summaries = reverse('api:group_job_host_summaries_list', args=(obj.pk,)),
             inventory_source = reverse('api:inventory_source_detail', args=(obj.inventory_source.pk,)),
+            activity_stream = reverse('api:group_activity_stream_list', args=(obj.pk,)),
             #inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
         ))
         return res
@@ -631,6 +637,7 @@ class InventorySourceSerializer(BaseSerializer):
         res.update(dict(
             update = reverse('api:inventory_source_update_view', args=(obj.pk,)),
             inventory_updates = reverse('api:inventory_source_updates_list', args=(obj.pk,)),
+            activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
             #hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
             #groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
         ))
@@ -726,6 +733,7 @@ class TeamSerializer(BaseSerializer):
             credentials  = reverse('api:team_credentials_list', args=(obj.pk,)),
             organization = reverse('api:organization_detail',   args=(obj.organization.pk,)),
             permissions  = reverse('api:team_permissions_list', args=(obj.pk,)),
+            activity_stream = reverse('api:team_activity_stream_list', args=(obj.pk,)),
         ))
         return res
 
@@ -802,6 +810,9 @@ class CredentialSerializer(BaseSerializer):
         if obj is None:
             return {}
         res = super(CredentialSerializer, self).get_related(obj)
+        res.update(dict(
+            activity_stream = reverse('api:credential_activity_stream_list', args=(obj.pk,))
+        ))
         if obj.user:
             res['user'] = reverse('api:user_detail', args=(obj.user.pk,))
         if obj.team:
@@ -826,6 +837,7 @@ class JobTemplateSerializer(BaseSerializer):
             inventory   = reverse('api:inventory_detail',   args=(obj.inventory.pk,)),
             project     = reverse('api:project_detail',    args=(obj.project.pk,)),
             jobs        = reverse('api:job_template_jobs_list', args=(obj.pk,)),
+            activity_stream = reverse('api:job_template_activity_stream_list', args=(obj.pk,)),
         ))
         if obj.credential:
             res['credential'] = reverse('api:credential_detail', args=(obj.credential.pk,))
@@ -869,6 +881,7 @@ class JobSerializer(BaseSerializer):
             credential  = reverse('api:credential_detail', args=(obj.credential.pk,)),
             job_events  = reverse('api:job_job_events_list', args=(obj.pk,)),
             job_host_summaries = reverse('api:job_job_host_summaries_list', args=(obj.pk,)),
+            activity_stream = reverse('api:job_activity_stream_list', args=(obj.pk,)),
         ))
         if obj.job_template:
             res['job_template'] = reverse('api:job_template_detail', args=(obj.job_template.pk,))
@@ -984,8 +997,22 @@ class ActivityStreamSerializer(BaseSerializer):
 
     class Meta:
         model = ActivityStream
-        fields = ('id', 'url', 'related', 'summary_fields', 'timestamp', 'operation', 'changes',
-                  'object1_id', 'object1', 'object1_type', 'object2_id', 'object2', 'object2_type', 'object_relationship_type')
+        fields = ('id', 'url', 'related', 'summary_fields', 'timestamp', 'operation', 'changes', 'object1', 'object2')
+
+    def get_fields(self):
+        ret = super(ActivityStreamSerializer, self).get_fields()
+        for key, field in ret.items():
+            if key == 'changes':
+                field.help_text = 'A summary of the new and changed values when an object is created, updated, or deleted'
+            if key == 'object1':
+                field.help_text = 'For create, update, and delete events this is the object type that was affected.  For associate and disassociate events this is the object type associated or disassociated with object2'
+            if key == 'object2':
+                field.help_text = 'Unpopulated for create, update, and delete events.  For associate and disassociate events this is the object type that object1 is being associated with'
+            if key == 'operation':
+                field.help_text = 'The action taken with respect to the given object(s).'
+
+        return ret
+
 
     def get_changes(self, obj):
         if obj is None:
@@ -1001,47 +1028,41 @@ class ActivityStreamSerializer(BaseSerializer):
         if obj is None:
             return {}
         rel = {}
-        if obj.user is not None:
-            rel['user'] = reverse('api:user_detail', args=(obj.user.pk,))
-        obj1_resolution = camelcase_to_underscore(obj.object1_type.split(".")[-1])
-        rel['object1'] = reverse('api:' + obj1_resolution + '_detail', args=(obj.object1_id,))
-        if obj.operation in ('associate', 'disassociate'):
-            obj2_resolution = camelcase_to_underscore(obj.object2_type.split(".")[-1])
-            rel['object2'] = reverse('api:' + obj2_resolution + '_detail', args=(obj.object2_id,))
+        if obj.actor is not None:
+            rel['actor'] = reverse('api:user_detail', args=(obj.actor.pk,))
+        for fk, _ in SUMMARIZABLE_FK_FIELDS.items():
+            if not hasattr(obj, fk):
+                continue
+            allm2m = getattr(obj, fk).all()
+            if allm2m.count() > 0:
+                rel[fk] = []
+                for thisItem in allm2m:
+                    rel[fk].append(reverse('api:' + fk + '_detail', args=(thisItem.id,)))
         return rel
 
     def get_summary_fields(self, obj):
-        if obj is None:
-            return {}
-        d = super(ActivityStreamSerializer, self).get_summary_fields(obj)
-        try:
-            short_obj_type = obj.object1_type.split(".")[-1]
-            under_short_obj_type = camelcase_to_underscore(short_obj_type)
-            obj1 = eval(obj.object1_type + ".objects.get(id=" + str(obj.object1_id) + ")")
-            if hasattr(obj1, "name"):
-                d['object1'] = {'name': obj1.name, 'description': obj1.description,
-                                'base': under_short_obj_type, 'id': obj.object1_id}
-            else:
-                d['object1'] = {'base': under_short_obj_type, 'id': obj.object1_id}
-            if under_short_obj_type == "host" or under_short_obj_type == "group":
-                d['inventory'] = {'name': obj1.inventory.name, 'id': obj1.inventory.id}
-        except Exception, e:
-            logger.error("Error getting object 1 summary: " + str(e))
-        try:
-            short_obj_type = obj.object2_type.split(".")[-1]
-            under_short_obj_type = camelcase_to_underscore(short_obj_type)
-            if obj.operation in ('associate', 'disassociate'):
-                obj2 = eval(obj.object2_type + ".objects.get(id=" + str(obj.object2_id) + ")")
-                if hasattr(obj2, "name"):
-                    d['object2'] = {'name': obj2.name, 'description': obj2.description,
-                                    'base': under_short_obj_type, 'id': obj.object2_id}
-                else:
-                    d['object2'] = {'base': under_short_obj_type, 'id': obj.object2_id}
-            if under_short_obj_type == "host" or under_short_obj_type == "group":
-                d['inventory'] = {'name': obj2.inventory.name, 'id': obj2.inventory.id}
-        except Exception, e:
-            pass
-        return d
+        summary_fields = SortedDict()
+        for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items():
+            try:
+                if not hasattr(obj, fk):
+                    continue
+                allm2m = getattr(obj, fk).all()
+                if allm2m.count() > 0:
+                    summary_fields[fk] = []
+                    for thisItem in allm2m:
+                        thisItemDict = {}
+                        for field in related_fields:
+                            fval = getattr(thisItem, field, None)
+                            if fval is not None:
+                                thisItemDict[field] = fval
+                        summary_fields[fk].append(thisItemDict)
+            except ObjectDoesNotExist:
+                pass
+        if obj.actor is not None:
+            summary_fields['actor'] = dict(username = obj.actor.username,
+                                           first_name = obj.actor.first_name,
+                                           last_name = obj.actor.last_name)
+        return summary_fields
 
 class AuthTokenSerializer(serializers.Serializer):
 

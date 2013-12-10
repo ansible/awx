@@ -32,34 +32,30 @@ class ActivityStreamTest(BaseTest):
         self.setup_users()
         self.org_created = self.post(reverse('api:organization_list'), dict(name='test org', description='test descr'), expect=201, auth=self.get_super_credentials())
 
-    # def test_get_activity_stream_list(self):
-    #      url = self.collection()
+    def test_get_activity_stream_list(self):
+         url = self.collection()
 
-    #      with self.current_user(self.super_django_user):
-    #          self.options(url, expect=200)
-    #          self.head(url, expect=200)
-    #          response = self.get(url, expect=200)
-    #          self.check_pagination_and_size(response, 1, previous=None, next=None)
+         with self.current_user(self.super_django_user):
+             self.options(url, expect=200)
+             self.head(url, expect=200)
+             response = self.get(url, expect=200)
+             self.check_pagination_and_size(response, 1, previous=None, next=None)
 
     def test_basic_fields(self):
         org_item = self.item(1)
 
         with self.current_user(self.super_django_user):
             response = self.get(org_item, expect=200)
-            self.assertEqual(response['object1_id'], self.org_created['id'])
-            self.assertEqual(response['object1_type'], "awx.main.models.organization.Organization")
-            self.assertEqual(response['object2_id'], None)
-            self.assertEqual(response['object2_type'], None)
 
             self.assertTrue("related" in response)
-            self.assertTrue("object1" in response['related'])
+            self.assertTrue("organization" in response['related'])
             self.assertTrue("summary_fields" in response)
-            self.assertTrue("object1" in response['summary_fields'])
-            self.assertEquals(response['summary_fields']['object1']['base'], "organization")
+            self.assertTrue("organization" in response['summary_fields'])
+            self.assertTrue(response['summary_fields']['organization'][0]['name'] == self.org_created['name'])
 
     def test_changeby_user(self):
         org_item = self.item(1)
 
         with self.current_user(self.super_django_user):
             response = self.get(org_item, expect=200)
-            self.assertEqual(response['summary_fields']['user']['username'], self.super_django_user.username)
+            self.assertEqual(response['summary_fields']['actor']['username'], self.super_django_user.username)

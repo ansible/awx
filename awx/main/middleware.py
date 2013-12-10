@@ -41,21 +41,21 @@ class ActivityStreamMiddleware(object):
                 continue
 
             if drf_user is not None and drf_user.__class__ != AnonymousUser:
-                instance.user = drf_user
+                instance.actor = drf_user
                 try:
                     instance.save()
                 except IntegrityError, e:
                     logger.debug("Integrity Error saving Activity Stream instance for id : " + str(instance_id))
-            else:
-                obj1_type_actual = instance.object1_type.split(".")[-1]
-                if obj1_type_actual in ("InventoryUpdate", "ProjectUpdate", "Job") and instance.id is not None:
-                    instance.delete()
+            # else:
+            #     obj1_type_actual = instance.object1_type.split(".")[-1]
+            #     if obj1_type_actual in ("InventoryUpdate", "ProjectUpdate", "Job") and instance.id is not None:
+            #         instance.delete()
         return response
 
     def set_actor(self, user, sender, instance, **kwargs):
         if sender == ActivityStream:
             if isinstance(user, User) and instance.user is None:
-                instance.user = user
+                instance.actor = user
                 instance.save()
             else:
                 if instance.id not in self.instances:

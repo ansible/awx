@@ -1017,6 +1017,60 @@ class JobEventAccess(BaseAccess):
     def can_delete(self, obj):
         return False
 
+class ActivityStreamAccess(BaseAccess):
+    '''
+    I can see activity stream events only when I have permission on all objects included in the event
+    '''
+
+    model = ActivityStream
+
+    def get_queryset(self):
+        qs = self.model.objects.distinct()
+        #qs = qs.select_related('created_by')
+        qs = qs.select_related('actor')
+        qs = qs.prefetch_related('organization', 'user', 'inventory', 'host', 'group', 'inventory_source',
+                                 'inventory_update', 'credential', 'team', 'project', 'project_update',
+                                 'permission', 'job_template', 'job')
+        if self.user.is_superuser:
+            return qs
+        organization_qs = self.user.get_queryset(Organization)
+        user_qs = self.user.get_queryset(User)
+        inventory_qs = self.user.get_queryset(Inventory)
+        host_qs = self.user.get_queryset(Host)
+        group_qs = self.user.get_queryset(Group)
+        inventory_source_qs = self.user.get_queryset(InventorySource)
+        inventory_update_qs = self.user.get_queryset(InventoryUpdate)
+        credential_qs = self.user.get_queryset(Credential)
+        team_qs = self.user.get_queryset(Team)
+        project_qs = self.user.get_queryset(Project)
+        project_update_qs = self.user.get_queryset(ProjectUpdate)
+        permission_qs = self.user.get_queryset(Permission)
+        job_template_qs = self.user.get_queryset(JobTemplate)
+        job_qs = self.user.get_queryset(Job)
+        qs = qs.filter(Q(organization__in=organization_qs) |
+                       Q(user__in=user_qs) |
+                       Q(inventory__in=inventory_qs) |
+                       Q(host__in=host_qs) |
+                       Q(group__in=group_qs) |
+                       Q(inventory_source__in=inventory_source_qs) |
+                       Q(credential__in=credential_qs) |
+                       Q(team__in=team_qs) |
+                       Q(project__in=project_qs) |
+                       Q(project_update__in=project_update_qs) |
+                       Q(permission__in=permission_qs) |
+                       Q(job_template__in=job_template_qs) |
+                       Q(job__in=job_qs))
+        return qs
+
+    def can_add(self, data):
+        return False
+
+    def can_change(self, obj, data):
+        return False
+
+    def can_delete(self, obj):
+        return False
+
 register_access(User, UserAccess)
 register_access(Organization, OrganizationAccess)
 register_access(Inventory, InventoryAccess)
@@ -1033,3 +1087,4 @@ register_access(JobTemplate, JobTemplateAccess)
 register_access(Job, JobAccess)
 register_access(JobHostSummary, JobHostSummaryAccess)
 register_access(JobEvent, JobEventAccess)
+register_access(ActivityStream, ActivityStreamAccess)

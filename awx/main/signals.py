@@ -179,13 +179,14 @@ def update_host_last_job_after_job_deleted(sender, **kwargs):
 
 def activity_stream_create(sender, instance, created, **kwargs):
     if created:
+        # TODO: Rethink details of the new instance
+        object1 = camelcase_to_underscore(instance.__class__.__name__)
         activity_entry = ActivityStream(
             operation='create',
-            object1_id=instance.id,
-            object1=camelcase_to_underscore(instance.__class__.__name__),
-            object1_type=instance.__class__.__module__ + "." + instance.__class__.__name__,
+            object1=object1,
             changes=json.dumps(model_to_dict(instance)))
         activity_entry.save()
+        getattr(activity_entry, object1).add(instance)
 
 def activity_stream_update(sender, instance, **kwargs):
     try:
@@ -193,23 +194,32 @@ def activity_stream_update(sender, instance, **kwargs):
     except sender.DoesNotExist:
         return
 
+    # Handle the AWX mark-inactive for delete event
+    if hasattr(instance, 'active') and not instance.active:
+        activity_stream_delete(sender, instance, **kwargs)
+        return
+
     new = instance
     changes = model_instance_diff(old, new)
+    object1 = camelcase_to_underscore(instance.__class__.__name__)
     activity_entry = ActivityStream(
         operation='update',
-        object1_id=instance.id,
-        object1=camelcase_to_underscore(instance.__class__.__name__),
-        object1_type=instance.__class__.__module__ + "." + instance.__class__.__name__,
+        object1=object1,
         changes=json.dumps(changes))
     activity_entry.save()
-
+    getattr(activity_entry, object1).add(instance)
 
 def activity_stream_delete(sender, instance, **kwargs):
+    try:
+        old = sender.objects.get(id=instance.id)
+    except sender.DoesNotExist:
+        return
+    changes = model_instance_diff(old, instance)
+    object1 = camelcase_to_underscore(instance.__class__.__name__)
     activity_entry = ActivityStream(
         operation='delete',
-        object1_id=instance.id,
-        object1=camelcase_to_underscore(instance.__class__.__name__),
-        object1_type=instance.__class__.__module__ + "." + instance.__class__.__name__)
+        changes=json.dumps(changes),
+        object1=object1)
     activity_entry.save()
 
 def activity_stream_associate(sender, instance, **kwargs):
@@ -221,18 +231,18 @@ def activity_stream_associate(sender, instance, **kwargs):
         else:
             return
         obj1 = instance
-        obj1_id = obj1.id
+        object1=camelcase_to_underscore(obj1.__class__.__name__)
         obj_rel = sender.__module__ + "." + sender.__name__
         for entity_acted in kwargs['pk_set']:
             obj2 = kwargs['model']
             obj2_id = entity_acted
+            obj2_actual = obj2.objects.get(id=obj2_id)
+            object2 = camelcase_to_underscore(obj2.__name__)
             activity_entry = ActivityStream(
                 operation=action,
-                object1_id=obj1_id,
-                object1=camelcase_to_underscore(obj1.__class__.__name__),
-                object1_type=obj1.__class__.__module__ + "." + obj1.__class__.__name__,
-                object2_id=obj2_id,
-                object2=camelcase_to_underscore(obj2.__name__),
-                object2_type=obj2.__module__ + "." + obj2.__name__,
+                object1=object1,
+                object2=object2,
                 object_relationship_type=obj_rel)
             activity_entry.save()
+            getattr(activity_entry, object1).add(obj1)
+            getattr(activity_entry, object2).add(obj2_actual)

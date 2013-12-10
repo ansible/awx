@@ -188,7 +188,9 @@ class GenericAPIView(generics.GenericAPIView, APIView):
         return ret
 
 class SimpleListAPIView(generics.ListAPIView, GenericAPIView):
-    pass
+
+    def get_queryset(self):
+        return self.request.user.get_queryset(self.model)
 
 class ListAPIView(generics.ListAPIView, GenericAPIView):
     # Base class for a read-only list view.

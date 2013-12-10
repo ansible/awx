@@ -25,20 +25,29 @@ class ActivityStream(models.Model):
         ('disassociate', _("Entity was Disassociated with another Entity"))
     ]
 
-    user = models.ForeignKey('auth.User', null=True, on_delete=models.SET_NULL, related_name='activity_stream')
+    actor = models.ForeignKey('auth.User', null=True, on_delete=models.SET_NULL, related_name='activity_stream')
     operation = models.CharField(max_length=13, choices=OPERATION_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
     changes = models.TextField(blank=True)
 
-    object1_id = models.PositiveIntegerField(db_index=True)
-    object1 = models.TextField()
-    object1_type = models.TextField()
-
-    object2_id = models.PositiveIntegerField(db_index=True, null=True)
-    object2 = models.TextField(null=True, blank=True)
-    object2_type = models.TextField(null=True, blank=True)
-
     object_relationship_type = models.TextField(blank=True)
+    object1 = models.TextField()
+    object2 = models.TextField()
+
+    user = models.ManyToManyField("auth.User", blank=True)
+    organization = models.ManyToManyField("Organization", blank=True)
+    inventory = models.ManyToManyField("Inventory", blank=True)
+    host = models.ManyToManyField("Host", blank=True)
+    group = models.ManyToManyField("Group", blank=True)
+    inventory_source = models.ManyToManyField("InventorySource", blank=True)
+    inventory_update = models.ManyToManyField("InventoryUpdate", blank=True)
+    credential = models.ManyToManyField("Credential", blank=True)
+    team = models.ManyToManyField("Team", blank=True)
+    project = models.ManyToManyField("Project", blank=True)
+    project_update = models.ManyToManyField("ProjectUpdate", blank=True)
+    permission = models.ManyToManyField("Permission", blank=True)
+    job_template = models.ManyToManyField("JobTemplate", blank=True)
+    job = models.ManyToManyField("Job", blank=True)
 
     def get_absolute_url(self):
         return reverse('api:activity_stream_detail', args=(self.pk,))

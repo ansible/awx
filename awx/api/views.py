@@ -301,6 +301,13 @@ class OrganizationTeamsList(SubListCreateAPIView):
     relationship = 'teams'
     parent_key = 'organization'
 
+class OrganizationActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = Organization
+    relationship = 'activitystream_set'
+
 class TeamList(ListCreateAPIView):
 
     model = Team
@@ -352,6 +359,13 @@ class TeamCredentialsList(SubListCreateAPIView):
     relationship = 'credentials'
     parent_key = 'team'
 
+class TeamActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = Team
+    relationship = 'activitystream_set'
+
 class ProjectList(ListCreateAPIView):
 
     model = Project
@@ -389,6 +403,13 @@ class ProjectTeamsList(SubListCreateAPIView):
     serializer_class = TeamSerializer
     parent_model = Project
     relationship = 'teams'
+
+class ProjectActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = Project
+    relationship = 'activitystream_set'
 
 class ProjectUpdatesList(SubListAPIView):
 
@@ -513,6 +534,20 @@ class UserAdminOfOrganizationsList(SubListAPIView):
     parent_model = User
     relationship = 'admin_of_organizations'
 
+class UserActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = User
+    relationship = 'activitystream_set'
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(Q(actor=parent) | Q(user__in=[parent]))
+
+
 class UserDetail(RetrieveUpdateDestroyAPIView):
 
     model = User
@@ -545,6 +580,13 @@ class CredentialDetail(RetrieveUpdateDestroyAPIView):
     model = Credential
     serializer_class = CredentialSerializer
 
+class CredentialActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = Credential
+    relationship = 'activitystream_set'
+
 class PermissionDetail(RetrieveUpdateDestroyAPIView):
 
     model = Permission
@@ -559,6 +601,13 @@ class InventoryDetail(RetrieveUpdateDestroyAPIView):
 
     model = Inventory
     serializer_class = InventorySerializer
+
+class InventoryActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = Inventory
+    relationship = 'activitystream_set'
 
 class HostList(ListCreateAPIView):
 
@@ -600,6 +649,13 @@ class HostAllGroupsList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         sublist_qs = parent.all_groups.distinct()
         return qs & sublist_qs
+
+class HostActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = Host
+    relationship = 'activitystream_set'
 
 class GroupList(ListCreateAPIView):
 
@@ -678,6 +734,14 @@ class GroupAllHostsList(SubListAPIView):
         qs = self.request.user.get_queryset(self.model)
         sublist_qs = parent.all_hosts.distinct()
         return qs & sublist_qs
+
+class GroupActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = Group
+    relationship = 'activitystream_set'
+
 
 class GroupDetail(RetrieveUpdateDestroyAPIView):
 
@@ -829,6 +893,14 @@ class InventorySourceDetail(RetrieveUpdateAPIView):
     serializer_class = InventorySourceSerializer
     new_in_14 = True
 
+class InventorySourceActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = InventorySource
+    relationship = 'activitystream_set'
+
+
 class InventorySourceUpdatesList(SubListAPIView):
 
     model = InventoryUpdate
@@ -898,6 +970,14 @@ class JobTemplateDetail(RetrieveUpdateDestroyAPIView):
 
     model = JobTemplate
     serializer_class = JobTemplateSerializer
+
+class JobTemplateActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = JobTemplate
+    relationship = 'activitystream_set'
+
 
 class JobTemplateCallback(GenericAPIView):
 
@@ -1030,6 +1110,13 @@ class JobDetail(RetrieveUpdateDestroyAPIView):
         if obj.status != 'new':
             return self.http_method_not_allowed(request, *args, **kwargs)
         return super(JobDetail, self).update(request, *args, **kwargs)
+
+class JobActivityStreamList(SubListAPIView):
+
+    model = ActivityStream
+    serializer_class = ActivityStreamSerializer
+    parent_model = Job
+    relationship = 'activitystream_set'
 
 class JobStart(GenericAPIView):
 
@@ -1170,27 +1257,6 @@ class ActivityStreamList(SimpleListAPIView):
 
     model = ActivityStream
     serializer_class = ActivityStreamSerializer
-
-    def get_queryset(self):
-        initial_qs = super(ActivityStreamList, self).get_queryset()
-        if not self.request.user.is_superuser:
-            return initial_qs.none()
-        all_qs = Q()
-        all_obj1_types = [x.object1_type for x in ActivityStream.objects.order_by('object1_type').distinct('object1_type')]
-        all_obj2_types = [x.object2_type for x in ActivityStream.objects.order_by('object2_type').distinct('object2_type')]
-        all_types = list(set(all_obj1_types + all_obj2_types))
-        for this_type in all_types:
-            try:
-                type_qs = get_user_queryset(self.request.user, eval(this_type))
-                ids = [t.id for t in type_qs]
-                if len(ids) > 0:
-                    all_qs = all_qs | (Q(object1_type=this_type) & Q(object1_id__in=ids))
-                    all_qs = all_qs | (Q(object2_type=this_type) & Q(object2_id__in=ids))
-            except Exception, e:
-                logger.warn("Error: " + str(e))
-                continue
-        initial_qs = initial_qs.filter(all_qs)
-        return initial_qs
 
 class ActivityStreamDetail(RetrieveAPIView):
 
