@@ -3,6 +3,7 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 
 class Migration(DataMigration):
 
@@ -14,7 +15,8 @@ class Migration(DataMigration):
                 if obj_type == 'orm.User':
                     obj_type = 'orm["auth.User"]'
                 obj1 = eval(obj_type + ".objects.get(id=" + str(activity_stream_object.object1_id) + ")")
-                getattr(activity_stream_object, activity_stream_object.object1).add(obj1)
+                if hasattr(activity_stream_object, activity_stream_object.object1):
+                    getattr(activity_stream_object, activity_stream_object.object1).add(obj1)
             except ObjectDoesNotExist, e:
                 print("Object 1 for AS id=%s does not exist. (Object Type: %s, id: %s" % (str(activity_stream_object.id),
                                                                                           activity_stream_object.object1_type,
