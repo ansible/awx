@@ -125,6 +125,12 @@ class BaseTask(Task):
         # Set environment variables needed for inventory and job event
         # callbacks to work.
         env['ANSIBLE_NOCOLOR'] = '1' # Prevent output of escape sequences.
+        # Update PYTHONPATH to use local site-packages.
+        python_paths = env.get('PYTHONPATH', '').split(os.pathsep)
+        local_site_packages = self.get_path_to('..', 'lib', 'site-packages')
+        if local_site_packages not in python_paths:
+            python_paths.insert(0, local_site_packages)
+        env['PYTHONPATH'] = os.pathsep.join(python_paths)
         return env
 
     def build_safe_env(self, instance, **kwargs):
@@ -799,12 +805,6 @@ class RunInventoryUpdate(BaseTask):
         Build environment dictionary for inventory import.
         '''
         env = super(RunInventoryUpdate, self).build_env(inventory_update, **kwargs)
-        # Update PYTHONPATH to use local site-packages for inventory scripts.
-        python_paths = env.get('PYTHONPATH', '').split(os.pathsep)
-        local_site_packages = self.get_path_to('..', 'lib', 'site-packages')
-        if local_site_packages not in python_paths:
-            python_paths.insert(0, local_site_packages)
-        env['PYTHONPATH'] = os.pathsep.join(python_paths)
         # Pass inventory source ID to inventory script.
         inventory_source = inventory_update.inventory_source
         env['INVENTORY_SOURCE_ID'] = str(inventory_source.pk)

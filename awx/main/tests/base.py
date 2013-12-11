@@ -47,6 +47,10 @@ class BaseTestMixin(object):
         # commands that run from tests.
         for opt in ('ENGINE', 'NAME', 'USER', 'PASSWORD', 'HOST', 'PORT'):
             os.environ['AWX_TEST_DATABASE_%s' % opt] = settings.DATABASES['default'][opt]
+        # For now, prevent tests from trying to use celery for job event
+        # callbacks.
+        if settings.BROKER_URL.startswith('amqp://'):
+            settings.BROKER_URL = 'django://'
         # Make temp job status directory for unit tests.
         job_status_dir = tempfile.mkdtemp()
         self._temp_project_dirs.append(job_status_dir)
