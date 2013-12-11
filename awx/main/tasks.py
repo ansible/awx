@@ -134,10 +134,19 @@ class BaseTask(Task):
         return env
 
     def build_safe_env(self, instance, **kwargs):
-        hidden_re = re.compile('API|TOKEN|KEY|SECRET|PASS')
+        hidden_re = re.compile(r'API|TOKEN|KEY|SECRET|PASS')
+        urlpass_re = re.compile(r'^.*?://.?:(.*?)@.*?$')
         env = self.build_env(instance, **kwargs)
         for k,v in env.items():
-            if hidden_re.search(k):
+            if k == 'BROKER_URL':
+                m = urlpass_re.match(v)
+                if m:
+                    env[k] = urlpass_re.sub('*'*len(m.groups()[0]), v)
+            elif k in ('REST_API_URL', 'AWS_ACCESS_KEY', 'AWS_ACCESS_KEY_ID'):
+                continue
+            elif k.startswith('ANSIBLE_'):
+                continue
+            elif hidden_re.search(k):
                 env[k] = '*'*len(str(v))
         return env
 
