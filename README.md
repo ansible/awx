@@ -4,7 +4,7 @@ AWX
 Formerly known as ansible-commander and AnsibleWorks, AWX provides a web-based
 user interface, REST API and task engine built on top of Ansible.
 
-The current version under development is 1.4, and uses the master branch.
+The current version under development is 1.4.5, and uses the master branch.
 
 1.2.2 was the initial version released on July 31, 2013.
 
