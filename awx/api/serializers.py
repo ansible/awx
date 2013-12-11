@@ -323,7 +323,7 @@ class ProjectSerializer(BaseSerializer):
             playbooks = reverse('api:project_playbooks', args=(obj.pk,)),
             update = reverse('api:project_update_view', args=(obj.pk,)),
             project_updates = reverse('api:project_updates_list', args=(obj.pk,)),
-            activity_list = reverse('api:project_activity_stream_list', args=(obj.pk,)),
+            activity_stream = reverse('api:project_activity_stream_list', args=(obj.pk,)),
         ))
         if obj.credential:
             res['credential'] = reverse('api:credential_detail',
