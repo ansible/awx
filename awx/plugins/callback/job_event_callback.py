@@ -47,6 +47,11 @@ except ImportError:
     sys.path.insert(0, local_site_packages)
     import requests
 
+# Celery
+from celery import Celery
+from celery.execute import send_task
+
+
 class TokenAuth(requests.auth.AuthBase):
 
     def __init__(self, token):
@@ -55,6 +60,7 @@ class TokenAuth(requests.auth.AuthBase):
     def __call__(self, request):
         request.headers['Authorization'] = 'Token %s' % self.token
         return request
+
 
 class CallbackModule(object):
     '''
@@ -78,8 +84,17 @@ class CallbackModule(object):
 
     def __init__(self):
         self.job_id = int(os.getenv('JOB_ID'))
-        self.base_url = os.getenv('REST_API_URL')
+        self.base_url = os.getenv('REST_API_URL', '')
         self.auth_token = os.getenv('REST_API_TOKEN', '')
+        self.broker_url = os.getenv('BROKER_URL', '')
+
+    def _post_msg(self, event, event_data):
+        app = Celery('tasks', broker=self.broker_url)
+        send_task('awx.main.tasks.save_job_event', kwargs={
+            'job_id': self.job_id,
+            'event': event,
+            'event_data': event_data,
+        }, serializer='json')
 
     def _post_data(self, event, event_data):
         data = json.dumps({
@@ -110,7 +125,10 @@ class CallbackModule(object):
         task = getattr(getattr(self, 'task', None), 'name', '')
         if task and event not in self.EVENTS_WITHOUT_TASK:
             event_data['task'] = task
-        self._post_data(event, event_data)
+        if self.broker_url:
+            self._post_msg(event, event_data)
+        else:
+            self._post_data(event, event_data)
 
     def on_any(self, *args, **kwargs):
         pass

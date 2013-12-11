@@ -32,7 +32,7 @@ from django.utils.datastructures import SortedDict
 from django.utils.timezone import now
 
 # AWX
-from awx.main.models import Job, ProjectUpdate, InventoryUpdate
+from awx.main.models import Job, JobEvent, ProjectUpdate, InventoryUpdate
 from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url
 
 __all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryImport']
@@ -45,6 +45,7 @@ class BaseTask(Task):
     
     name = None
     model = None
+    abstract = True
 
     def update_model(self, pk, **updates):
         '''
@@ -335,12 +336,14 @@ class RunJob(BaseTask):
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
+        if settings.BROKER_URL.startswith('amqp://'):
+            env['BROKER_URL'] = settings.BROKER_URL
 
         # When using Ansible >= 1.3, allow the inventory script to include host
         # variables inline via ['_meta']['hostvars'].
         try:
             Version = distutils.version.StrictVersion
-            if Version( get_ansible_version()) >= Version('1.3'):
+            if Version(get_ansible_version()) >= Version('1.3'):
                 env['INVENTORY_HOSTVARS'] = str(True)
         except ValueError:
             pass
@@ -524,14 +527,29 @@ class RunJob(BaseTask):
         Hook for actions to run after job/task has completed.
         '''
         super(RunJob, self).post_run_hook(job, **kwargs)
-        # Update job event fields after job has completed.
-        for job_event in job.job_events.order_by('pk'):
-            job_event.save(post_process=True)
-         
+        # Update job event fields after job has completed (only when using REST
+        # API callback).
+        if not settings.BROKER_URL.startswith('amqp://'):
+            for job_event in job.job_events.order_by('pk'):
+                job_event.save(post_process=True)
+
+
+class SaveJobEvent(Task):
+
+    name = 'awx.main.tasks.save_job_event'
+
+    @transaction.commit_on_success
+    def run(self, *args, **kwargs):
+        for key in kwargs.keys():
+            if key not in ('job_id', 'event', 'event_data'):
+                kwargs.pop(key)
+        job_event = JobEvent(**kwargs)
+        job_event.save(post_process=True)
+
 
 class RunProjectUpdate(BaseTask):
     
-    name = 'run_project_update'
+    name = 'awx.main.tasks.run_project_update'
     model = ProjectUpdate
 
     def build_private_data(self, project_update, **kwargs):
@@ -723,7 +741,7 @@ class RunProjectUpdate(BaseTask):
 
 class RunInventoryUpdate(BaseTask):
 
-    name = 'run_inventory_update'
+    name = 'awx.main.tasks.run_inventory_update'
     model = InventoryUpdate
 
     def build_private_data(self, inventory_update, **kwargs):

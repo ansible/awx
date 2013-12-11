@@ -12,6 +12,7 @@ import yaml
 
 # Django
 from django.db import models
+from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
@@ -375,6 +376,7 @@ class CommonTask(PrimordialModel):
             return False
         self.status = 'pending'
         self.save(update_fields=['status'])
+        transaction.commit()
         task_result = task_class().delay(self.pk, **opts)
         # Reload instance from database so we don't clobber results from task
         # (mainly from tests when using Django 1.4.x).
