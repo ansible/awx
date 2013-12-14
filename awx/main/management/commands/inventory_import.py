@@ -587,6 +587,8 @@ class Command(NoArgsCommand):
             defaults = dict(variables=variables, description='imported')
             group, created = self.inventory.groups.get_or_create(name=k,
                                                                  defaults=defaults)
+            # Access auto one-to-one attribute to create related object.
+            group.inventory_source
             if created:
                 self.logger.info('Group "%s" added', k)
             else:
