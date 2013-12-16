@@ -1033,33 +1033,93 @@ class ActivityStreamAccess(BaseAccess):
                                  'permission', 'job_template', 'job')
         if self.user.is_superuser:
             return qs
-        organization_qs = self.user.get_queryset(Organization)
-        user_qs = self.user.get_queryset(User)
+
+        user_admin_orgs = self.user.admin_of_organizations.all()
+        user_orgs = self.user.organizations.all()
+
+        #Organization filter
+        qs = qs.filter(Q(organization__admins__in=[self.user]) | Q(organization__users__in=[self.user]))
+
+        #User filter
+        qs = qs.filter(Q(user__pk=self.user.pk) |
+                       Q(user__organizations__in=user_admin_orgs) |
+                       Q(user__organizations__in=user_orgs))
+
+        #Inventory filter
         inventory_qs = self.user.get_queryset(Inventory)
-        host_qs = self.user.get_queryset(Host)
-        group_qs = self.user.get_queryset(Group)
-        inventory_source_qs = self.user.get_queryset(InventorySource)
-        inventory_update_qs = self.user.get_queryset(InventoryUpdate)
-        credential_qs = self.user.get_queryset(Credential)
-        team_qs = self.user.get_queryset(Team)
+        qs.filter(inventory__in=inventory_qs)
+
+        #Host filter
+        qs.filter(host__inventory__in=inventory_qs)
+
+        #Group filter
+        qs.filter(group__inventory__in=inventory_qs)
+
+        #Inventory Source Filter
+        qs.filter(Q(inventory_source__inventory__in=inventory_qs) |
+                  Q(inventory_source__group__inventory__in=inventory_qs))
+
+        #Inventory Update Filter
+        qs.filter(Q(inventory_update__inventory_source__inventory__in=inventory_qs) |
+                  Q(inventory_update__inventory_source__group__inventory__in=inventory_qs))
+
+        #Credential Update Filter
+        qs.filter(Q(credential__user=self.user) |
+                  Q(credential__user__organizations__in=user_admin_orgs) |
+                  Q(credential__user__admin_of_organizations__in=user_admin_orgs) |
+                  Q(credential__team__organization__in=user_admin_orgs) |
+                  Q(credential__team__users__in=[self.user]))
+
+        #Team Filter
+        qs.filter(Q(team__organization__admins__in=[self.user]) |
+                  Q(team__users__in=[self.user]))
+
+        #Project Filter
         project_qs = self.user.get_queryset(Project)
-        project_update_qs = self.user.get_queryset(ProjectUpdate)
+        qs.filter(project__in=project_qs)
+
+        #Project Update Filter
+        qs.filter(project_update__project__in=project_qs)
+
+        #Permission Filter
         permission_qs = self.user.get_queryset(Permission)
-        job_template_qs = self.user.get_queryset(JobTemplate)
+        qs.filter(permission__in=permission_qs)
+
+        #Job Template Filter
+        jobtemplate_qs = self.user.get_queryset(JobTemplate)
+        qs.filter(job_template__in=jobtemplate_qs)
+
+        #Job Filter
         job_qs = self.user.get_queryset(Job)
-        qs = qs.filter(Q(organization__in=organization_qs) |
-                       Q(user__in=user_qs) |
-                       Q(inventory__in=inventory_qs) |
-                       Q(host__in=host_qs) |
-                       Q(group__in=group_qs) |
-                       Q(inventory_source__in=inventory_source_qs) |
-                       Q(credential__in=credential_qs) |
-                       Q(team__in=team_qs) |
-                       Q(project__in=project_qs) |
-                       Q(project_update__in=project_update_qs) |
-                       Q(permission__in=permission_qs) |
-                       Q(job_template__in=job_template_qs) |
-                       Q(job__in=job_qs))
+        qs.filter(job__in=job_qs)
+
+        # organization_qs = self.user.get_queryset(Organization)
+        # user_qs = self.user.get_queryset(User)
+        # inventory_qs = self.user.get_queryset(Inventory)
+        # host_qs = self.user.get_queryset(Host)
+        # group_qs = self.user.get_queryset(Group)
+        # inventory_source_qs = self.user.get_queryset(InventorySource)
+        # inventory_update_qs = self.user.get_queryset(InventoryUpdate)
+        # credential_qs = self.user.get_queryset(Credential)
+        # team_qs = self.user.get_queryset(Team)
+        # project_qs = self.user.get_queryset(Project)
+        # project_update_qs = self.user.get_queryset(ProjectUpdate)
+        # permission_qs = self.user.get_queryset(Permission)
+        # job_template_qs = self.user.get_queryset(JobTemplate)
+        # job_qs = self.user.get_queryset(Job)
+        # qs = qs.filter(Q(organization__in=organization_qs) |
+        #                Q(user__in=user_qs) |
+        #                Q(inventory__in=inventory_qs) |
+        #                Q(host__in=host_qs) |
+        #                Q(group__in=group_qs) |
+        #                Q(inventory_source__in=inventory_source_qs) |
+        #                Q(credential__in=credential_qs) |
+        #                Q(team__in=team_qs) |
+        #                Q(project__in=project_qs) |
+        #                Q(project_update__in=project_update_qs) |
+        #                Q(permission__in=permission_qs) |
+        #                Q(job_template__in=job_template_qs) |
+        #                Q(job__in=job_qs))
         return qs
 
     def can_add(self, data):

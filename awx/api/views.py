@@ -420,7 +420,7 @@ class ProjectUpdatesList(SubListAPIView):
     new_in_13 = True
 
 class ProjectUpdateView(GenericAPIView):
-    
+
     model = Project
     new_in_13 = True
 
