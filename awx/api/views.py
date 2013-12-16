@@ -366,6 +366,16 @@ class TeamActivityStreamList(SubListAPIView):
     parent_model = Team
     relationship = 'activitystream_set'
 
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(Q(team=parent) |
+                         Q(project__in=parent.projects.all()) |
+                         Q(credential__in=parent.credentials.all()) |
+                         Q(permission__in=parent.permissions.all()))
+
+
 class ProjectList(ListCreateAPIView):
 
     model = Project
@@ -410,6 +420,13 @@ class ProjectActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Project
     relationship = 'activitystream_set'
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(Q(project=parent) | Q(credential__in=parent.credential))
+
 
 class ProjectUpdatesList(SubListAPIView):
 
@@ -609,6 +626,13 @@ class InventoryActivityStreamList(SubListAPIView):
     parent_model = Inventory
     relationship = 'activitystream_set'
 
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(Q(inventory=parent) | Q(host__in=parent.hosts.all()) | Q(group__in=parent.groups.all()))
+
+
 class HostList(ListCreateAPIView):
 
     model = Host
@@ -656,6 +680,13 @@ class HostActivityStreamList(SubListAPIView):
     serializer_class = ActivityStreamSerializer
     parent_model = Host
     relationship = 'activitystream_set'
+
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(Q(host=parent) | Q(inventory=parent.inventory))
+
 
 class GroupList(ListCreateAPIView):
 
@@ -742,6 +773,11 @@ class GroupActivityStreamList(SubListAPIView):
     parent_model = Group
     relationship = 'activitystream_set'
 
+    def get_queryset(self):
+        parent = self.get_parent_object()
+        self.check_parent_access(parent)
+        qs = self.request.user.get_queryset(self.model)
+        return qs.filter(Q(group=parent) | Q(host__in=parent.hosts.all()))
 
 class GroupDetail(RetrieveUpdateDestroyAPIView):
 
