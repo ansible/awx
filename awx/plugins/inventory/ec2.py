@@ -131,12 +131,15 @@ except ImportError:
 
 
 class Ec2Inventory(object):
+    def _empty_inventory(self):
+        return {"_meta" : {"hostvars" : {}}}
+
     def __init__(self):
         ''' Main execution path '''
 
         # Inventory grouped by instance IDs, tags, security groups, regions,
         # and availability zones
-        self.inventory = {}
+        self.inventory = self._empty_inventory()
 
         # Index of hostname (address) to instance ID
         self.index = {}
@@ -157,7 +160,7 @@ class Ec2Inventory(object):
 
         elif self.args.list:
             # Display list of instances for inventory
-            if len(self.inventory) == 0:
+            if self.inventory == self._empty_inventory():
                 data_to_print = self.get_inventory_from_cache()
             else:
                 data_to_print = self.json_format_dict(self.inventory, True)
@@ -248,7 +251,8 @@ class Ec2Inventory(object):
 
         for region in self.regions:
             self.get_instances_by_region(region)
-            self.get_rds_instances_by_region(region)
+            # Don't return RDS instances for AWX!
+            #self.get_rds_instances_by_region(region)
 
         self.write_to_cache(self.inventory, self.cache_path_cache)
         self.write_to_cache(self.index, self.cache_path_index)
@@ -336,9 +340,9 @@ class Ec2Inventory(object):
         # Add to index
         self.index[dest] = [region, instance.id]
 
-        # For AWX: do not output group based on instance ID!!!
+        # Do not output group based on instance ID for AWX!
         # Inventory: Group by instance ID (always a group of 1)
-        # self.inventory[instance.id] = [dest]
+        #self.inventory[instance.id] = [dest]
 
         # Inventory: Group by region
         self.push(self.inventory, region, dest)
@@ -373,6 +377,11 @@ class Ec2Inventory(object):
             route53_names = self.get_instance_route53_names(instance)
             for name in route53_names:
                 self.push(self.inventory, name, dest)
+
+        # Global Tag: tag all EC2 instances
+        self.push(self.inventory, 'ec2', dest)
+
+        self.inventory["_meta"]["hostvars"][dest] = self.get_host_info_dict_from_instance(instance)
 
 
     def add_rds_instance(self, instance, region):
@@ -425,6 +434,9 @@ class Ec2Inventory(object):
         # Inventory: Group by parameter group
         self.push(self.inventory, self.to_safe("rds_parameter_group_" + instance.parameter_group.name), dest)
 
+        # Global Tag: all RDS instances
+        self.push(self.inventory, 'rds', dest)
+
 
     def get_route53_records(self):
         ''' Get and store the map of resource records to domain names that
@@ -474,29 +486,14 @@ class Ec2Inventory(object):
         return list(name_list)
 
 
-    def get_host_info(self):
-        ''' Get variables about a specific host '''
-
-        if len(self.index) == 0:
-            # Need to load index from cache
-            self.load_index_from_cache()
-
-        if not self.args.host in self.index:
-            # try updating the cache
-            self.do_api_calls_update_cache()
-            if not self.args.host in self.index:
-                # host migh not exist anymore
-                return self.json_format_dict({}, True)
-
-        (region, instance_id) = self.index[self.args.host]
-
-        instance = self.get_instance(region, instance_id)
+    def get_host_info_dict_from_instance(self, instance):
         instance_vars = {}
         for key in vars(instance):
             value = getattr(instance, key)
             key = self.to_safe('ec2_' + key)
 
             # Handle complex types
+            # state/previous_state changed to properties in boto in https://github.com/boto/boto/commit/a23c379837f698212252720d2af8dec0325c9518
             if key == 'ec2__state':
                 instance_vars['ec2_state'] = instance.state or ''
                 instance_vars['ec2_state_code'] = instance.state_code
@@ -524,14 +521,32 @@ class Ec2Inventory(object):
                 instance_vars["ec2_security_group_ids"] = ','.join(group_ids)
                 instance_vars["ec2_security_group_names"] = ','.join(group_names)
             else:
-                pass#instance_vars[key] = u'FIXME: ' + unicode(value)
+                pass
                 # TODO Product codes if someone finds them useful
                 #print key
                 #print type(value)
                 #print value
 
-        return self.json_format_dict(instance_vars, True)
+        return instance_vars
 
+    def get_host_info(self):
+        ''' Get variables about a specific host '''
+
+        if len(self.index) == 0:
+            # Need to load index from cache
+            self.load_index_from_cache()
+
+        if not self.args.host in self.index:
+            # try updating the cache
+            self.do_api_calls_update_cache()
+            if not self.args.host in self.index:
+                # host migh not exist anymore
+                return self.json_format_dict({}, True)
+
+        (region, instance_id) = self.index[self.args.host]
+
+        instance = self.get_instance(region, instance_id)
+        return self.json_format_dict(self.get_host_info_dict_from_instance(instance), True)
 
     def push(self, my_dict, key, element):
         ''' Pushed an element onto an array that may not have been defined in
