@@ -95,6 +95,8 @@ class sdist_awx(_sdist, object):
                 continue
             if f.startswith('awx/plugins'):
                 continue
+            if f.startswith('awx/main/tests/data'):
+                continue
             if f.endswith('.py'):
                 log.info('using pyc for: %s', f)
                 py_compile.compile(f, doraise=True)

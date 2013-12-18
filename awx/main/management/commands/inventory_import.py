@@ -23,6 +23,7 @@ from django.contrib.auth.models import User
 
 # AWX
 from awx.main.models import *
+from awx.main.signals import ignore_inventory_computed_fields
 from awx.main.licenses import LicenseReader
 
 logger = logging.getLogger('awx.main.commands.inventory_import')
@@ -748,7 +749,9 @@ class Command(NoArgsCommand):
             self.all_group.debug_tree()
 
             # Merge/overwrite inventory into database.
-            self.load_into_database()
+            with ignore_inventory_computed_fields():
+                self.load_into_database()
+                self.inventory.update_computed_fields()
             self.check_license()
  
             if self.inventory_source.group:

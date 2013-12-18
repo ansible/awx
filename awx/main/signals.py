@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Python
+import contextlib
 import logging
 import threading
 import json
@@ -23,6 +24,17 @@ logger = logging.getLogger('awx.main.signals')
 # or when a Job is deleted or marked inactive.
 
 _inventory_updating = threading.local()
+
+@contextlib.contextmanager
+def ignore_inventory_computed_fields():
+    '''
+    Context manager to ignore updating inventory computed fields.
+    '''
+    try:
+        _inventory_updating.is_updating = True
+        yield
+    finally:
+        _inventory_updating.is_updating = False
 
 def update_inventory_computed_fields(sender, **kwargs):
     '''
@@ -53,13 +65,10 @@ def update_inventory_computed_fields(sender, **kwargs):
             return
         logger.debug('%s %s, updating inventory computed fields: %r %r',
                      sender_name, sender_action, sender, kwargs)
-        try:
-            _inventory_updating.is_updating = True
+        with ignore_inventory_computed_fields():
             inventory = instance.inventory
             update_hosts = issubclass(sender, Job)
             inventory.update_computed_fields(update_hosts=update_hosts)
-        finally:
-            _inventory_updating.is_updating = False
 
 post_save.connect(update_inventory_computed_fields, sender=Host)
 post_delete.connect(update_inventory_computed_fields, sender=Host)

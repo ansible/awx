@@ -9,6 +9,7 @@ import json
 import os
 import shutil
 import tempfile
+import time
 
 # PyYAML
 import yaml
@@ -55,6 +56,7 @@ class BaseTestMixin(object):
         job_status_dir = tempfile.mkdtemp()
         self._temp_project_dirs.append(job_status_dir)
         settings.JOBOUTPUT_ROOT = os.path.abspath(job_status_dir)
+        self._start_time = time.time()
 
     def tearDown(self):
         super(BaseTestMixin, self).tearDown()
@@ -63,6 +65,10 @@ class BaseTestMixin(object):
                 shutil.rmtree(project_dir, True)
         # Restore previous settings after each test.
         settings._wrapped = self._wrapped
+
+    def assertElapsedLessThan(self, seconds):
+        elapsed = time.time() - self._start_time
+        self.assertTrue(elapsed < seconds, 'elapsed time of %0.3fs is greater than %0.3fs' % (elapsed, seconds))
 
     @contextlib.contextmanager
     def current_user(self, user_or_username, password=None):

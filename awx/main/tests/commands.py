@@ -735,3 +735,23 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
     def test_executable_file_with_meta_hostvars(self):
         os.environ['INVENTORY_HOSTVARS'] = '1'
         self.test_executable_file()
+
+    def test_large_executable_file(self):
+        new_inv = self.organizations[0].inventories.create(name='newec2')
+        self.assertEqual(new_inv.hosts.count(), 0)
+        self.assertEqual(new_inv.groups.count(), 0)
+        inv_file = os.path.join(os.path.dirname(__file__), 'data',
+                                'large_ec2_inventory.py')
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=inv_file)
+        self.assertEqual(result, None)
+        # Check that inventory is populated as expected within a reasonable
+        # amount of time.  Computed fields should also be updated.
+        new_inv = Inventory.objects.get(pk=new_inv.pk)
+        self.assertNotEqual(new_inv.hosts.count(), 0)
+        self.assertNotEqual(new_inv.groups.count(), 0)
+        self.assertNotEqual(new_inv.total_hosts, 0)
+        self.assertNotEqual(new_inv.total_groups, 0)
+        self.assertElapsedLessThan(120)
+
