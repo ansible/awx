@@ -18,7 +18,7 @@ angular.module('InventoryHostsDefinition', [])
         index: false,
         hover: true,
         hasChildren: true,
-        class: 'table-condensed',
+        'class': 'table-condensed',
         
         fields: {
             name: {

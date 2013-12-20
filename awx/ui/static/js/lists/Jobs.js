@@ -88,7 +88,7 @@ angular.module('JobsListDefinition', [])
                 icon: 'icon-rocket',
                 mode: 'all',             
                 ngClick: "submitJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}' )",
-                "class": 'btn-success btn-xs',
+                'class': 'btn-success btn-xs',
                 awToolTip: 'Relaunch the job template, running it again from scratch'
                 },
             cancel: {
@@ -121,6 +121,6 @@ angular.module('JobsListDefinition', [])
                     { ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Host Summary', 
                         ngHide: "job.status == 'new'" }
                     ]
-                },
+                }
             }
         });
