@@ -148,7 +148,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                   if (typeof navigation[itm] == 'object' && navigation[itm].active) {
                      html += "<a href=\"\" class=\"toggle\" ";
                      html += "data-toggle=\"dropdown\" ";
-                     html += ">" + navigation[itm].label + " <i class=\"icon-chevron-sign-down crumb-icon\"></i></a>";
+                     html += ">" + navigation[itm].label + " <i class=\"fa fa-chevron-circle-down crumb-icon\"></i></a>";
                      break;
                   }
               }
@@ -254,11 +254,11 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  awPopOver: list.selectInstructions,
                  dataPlacement: 'left',
                  dataContainer: 'body',
-                 icon: "icon-question-sign",
+                 icon: "fa-question-circle",
                  'class': 'btn-xs btn-help',
                  awToolTip: 'Click for help',
                  dataTitle: 'Help',
-                 iconSize: 'large'
+                 iconSize: 'fa-lg'
                  };
              html += this.button(btn, 'select');
           }
@@ -409,7 +409,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        if (options.mode == 'select' && (options.selectButton == undefined || options.selectButton == true)) {
            html += "<div class=\"navigation-buttons\">\n";
            html += " <button class=\"btn btn-sm btn-primary pull-right\" aw-tool-tip=\"Complete your selection\" " +
-               "ng-click=\"finishSelection()\" ng-disabled=\"disableSelectBtn\"><i class=\"icon-check\"></i> Select</button>\n";
+               "ng-click=\"finishSelection()\" ng-disabled=\"disableSelectBtn\"><i class=\"fa fa-check\"></i> Select</button>\n";
            html += "</div>\n";
        }
        

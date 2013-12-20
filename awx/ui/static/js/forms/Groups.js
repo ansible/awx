@@ -236,17 +236,11 @@ angular.module('GroupFormDefinition', [])
             controlClass: 'col-lg-5',
 
             save: { 
-                label: 'Save', 
-                icon: 'icon-ok',
-                "class": 'btn btn-success',
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: true          //Disable when $pristine or $invalid, optional
                 },
             reset: { 
                 ngClick: 'formReset()',
-                label: 'Reset',
-                'class': "btn btn-default",
-                icon: 'icon-undo',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },

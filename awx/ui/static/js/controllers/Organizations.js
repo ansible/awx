@@ -130,7 +130,7 @@ function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $route
    // Cancel
    scope.formReset = function() {
       $rootScope.flashMessage = null;
-      form.reset();
+      generator.reset();
       }; 
 }
 
@@ -223,7 +223,7 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
    // Reset the form
    scope.formReset = function() {
       $rootScope.flashMessage = null;
-      form.reset();
+      generator.reset();
       for (var fld in master) {
           scope[fld] = master[fld];
       }

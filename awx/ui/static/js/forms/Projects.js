@@ -200,17 +200,11 @@ angular.module('ProjectFormDefinition', [])
 
         buttons: { //for now always generates <button> tags 
             save: { 
-                label: 'Save', 
-                icon: 'icon-ok',
-                "class": 'btn-success',
                 ngClick: 'formSave()',    //$scope.function to call on click, optional
                 ngDisabled: true          //Disable when $pristine or $invalid, optional
                 },
             reset: { 
                 ngClick: 'formReset()',
-                label: 'Reset',
-                icon: 'icon-undo',
-                'class': 'btn btn-default',
                 ngDisabled: true          //Disabled when $pristine
                 }
             },

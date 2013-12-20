@@ -1202,10 +1202,22 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                 html += "<div class=\"";
                 html += (this.form.buttons['controlClass']) ? this.form.buttons['controlClass'] : "col-lg-6"; 
                 html += " controls\">\n";
+                
                 for (var btn in this.form.buttons) {
                     if (typeof this.form.buttons[btn] == 'object') {
                        var button = this.form.buttons[btn];
-                       //button
+
+                       // Set default color and label for Save and Reset
+                       if (btn == 'save') {
+                           button.label = 'Save';
+                           button['class'] = 'btn-success';
+                       }
+                       if (btn == 'reset') {
+                           button.label = 'Reset';
+                           button['class'] = 'btn-default';
+                       }
+                       
+                       // Build button HTML
                        html += "<button type=\"button\" ";
                        html += "class=\"btn btn-sm";
                        html += (button['class']) ? " " + button['class'] : "";
