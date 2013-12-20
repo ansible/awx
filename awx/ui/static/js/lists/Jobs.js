@@ -87,19 +87,6 @@ angular.module('JobsListDefinition', [])
             },
 
         fieldActions: {
-            dropdown: {
-                type: 'DropDown',
-                label: 'View',
-                icon: 'icon-zoom-in',
-                'class': 'btn-default btn-xs',
-                options: [
-                    { ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Status' },
-                    { ngClick: "viewEvents(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Events',
-                        ngHide: "job.status == 'new'" },
-                    { ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Host Summary', 
-                        ngHide: "job.status == 'new'" }
-                    ]
-                },
             rerun: {
                 label: 'Launch',
                 icon: 'icon-rocket',
@@ -125,6 +112,19 @@ angular.module('JobsListDefinition', [])
                 "class": 'btn-danger btn-xs delete-btn',
                 awToolTip: 'Remove the selected job from the database',
                 ngShow: "job.status != 'pending' && job.status != 'running' && job.status != 'waiting'"
-                }
+                },
+             dropdown: {
+                type: 'DropDown',
+                label: 'View',
+                icon: 'icon-zoom-in',
+                'class': 'btn-default btn-xs',
+                options: [
+                    { ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Status' },
+                    { ngClick: "viewEvents(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Events',
+                        ngHide: "job.status == 'new'" },
+                    { ngClick: "viewSummary(\{{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Host Summary', 
+                        ngHide: "job.status == 'new'" }
+                    ]
+                },
             }
         });

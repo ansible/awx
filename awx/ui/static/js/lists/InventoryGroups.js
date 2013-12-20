@@ -22,8 +22,8 @@ angular.module('InventoryGroupsDefinition', [])
         
         fields: {
             name: {
+                label: 'Group',
                 key: true,
-                label: 'name',
                 ngClick: "\{\{ 'GroupsEdit(' + group.id + ')' \}\}",
                 //ngClass: "\{\{ 'level' + group.level \}\}",
                 hasChildren: true
@@ -103,13 +103,21 @@ angular.module('InventoryGroupsDefinition', [])
                 label: 'Add',
                 mode: 'all',
                 icon: 'icon-plus',
-                'class': "btn-sm", 
                 ngClick: "createGroup()",
                 ngHide: "groupCreateHide", 
                 ngDisabled: 'grpBtnDisabled',
-                awToolTip: "Create a new top-level group", 
-                dataPlacement: 'top',
-                iconSize: 'large'
+                awToolTip: "Create a new group", 
+                dataPlacement: 'top'
+                },
+            edit: {
+                label: 'Edit',
+                mode: 'all',
+                icon: 'icon-wrench',
+                'class': "btn-sm", 
+                ngHide: "groupEditHide", 
+                ngDisabled: 'grpBtnDisabled',
+                awToolTip: "Edit inventory properties", 
+                dataPlacement: 'top'
                 },
             refresh: {
                 label: 'Refresh',
@@ -118,18 +126,16 @@ angular.module('InventoryGroupsDefinition', [])
                 mode: 'all',
                 'class': 'btn-sm',
                 awToolTip: "Refresh the page",
-                ngClick: "refresh()",
-                iconSize: 'large'
+                ngClick: "refresh()"
                 },
             stream: {
                 label: 'Activity',
-                'class': "btn-sm activity-btn",
+                'class': "activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 dataPlacement: "top",
                 icon: "icon-comments-alt",
                 mode: 'all',
-                iconSize: 'large',
                 ngShow: "user_is_superuser"
                 },
              help: {
@@ -142,7 +148,6 @@ angular.module('InventoryGroupsDefinition', [])
                     //"<div style=\"text-align:left;\"><img src=\"/static/img/cow.png\" style=\"width:50px; height:56px; float:left; padding-right:5px;\">" +
                     //"<p>Need help getting started creating your inventory?</p><p>Click here for help.</p></div>",
                     "<div style=\"text-align:left;\"><p>Need help getting started creating your inventory?</p><p>Click here for help.</p></div>",
-                iconSize: 'large',
                 ngClick: "showHelp()",
                 id: "inventory-summary-help"
                 }
@@ -150,7 +155,7 @@ angular.module('InventoryGroupsDefinition', [])
 
         fieldActions: {
             group_update: {
-                label: 'Update',
+                label: 'Sync',
                 icon: 'icon-cloud-download',
                 "class": 'btn-xs btn-primary',
                 ngClick: 'updateGroup(\{\{ group.id \}\})',

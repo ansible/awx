@@ -5,7 +5,7 @@
  *
  *  InventoryTree.js
  *
- *    Build data for the tree selector table used on inventory detail page.
+ *  Build data for the tree selector table used on inventory detail page.
  *
  */
 
@@ -197,7 +197,8 @@ angular.module('InventoryTree', ['Utilities', 'RestServices'])
                        id: id,
                        event_level: level,
                        ngicon: (sorted[i].children.length > 0) ? 'icon-collapse-alt' : null,
-                       related: { children: (sorted[i].children.length > 0) ? sorted[i].related.children : '' }
+                       related: { children: (sorted[i].children.length > 0) ? sorted[i].related.children : '' },
+                       status: sorted[i].summary_fields.inventory_source.status
                        }
                    groups.push(group);
                    id++;

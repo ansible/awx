@@ -10,7 +10,7 @@
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
                                  'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'GroupsHelper',
                                  'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper', 'RefreshHelper',
-                                 'PromptDialog', 'InventorySummaryHelpDefinition', 'TreeSelector', 'CredentialsListDefinition'
+                                 'PromptDialog', 'InventorySummaryHelpDefinition', 'CredentialsListDefinition'
                                  ])
 
     .factory('GetSourceTypeOptions', [ 'Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
@@ -209,9 +209,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }])
 
     .factory('GroupsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupList', 'GenerateList', 
-        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'SelectionInit', 'BuildTree',
+        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'SelectionInit',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupList, GenerateList, Prompt, SearchInit, PaginateInit,
-        ProcessErrors, GetBasePath, GroupsAdd, SelectionInit, BuildTree) {
+        ProcessErrors, GetBasePath, GroupsAdd, SelectionInit) {
     return function(params) {
         
         // build and present the list of groups we can add to an existing group
@@ -300,23 +300,23 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            scope.removeModalClosed();
         }
         scope.removeModalClosed = scope.$on('modalClosed', function() {
-            BuildTree({
+            /*BuildTree({
                 scope: scope,
                 inventory_id: inventory_id,
                 emit_on_select: 'NodeSelect',
                 target_id: 'search-tree-container',
                 refresh: true,
                 moveable: true
-                });
+                });*/
             });
         }
         }])
 
     .factory('InventoryStatus', [ '$rootScope', '$routeParams', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
         'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'HelpDialog',
-        'InventorySummaryHelp', 'BuildTree', 'ClickNode', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus', 'Wait',
+        'InventorySummaryHelp', 'ClickNode', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus', 'Wait',
     function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, 
-        SearchInit, PaginateInit, Refresh, InventoryUpdate, GroupsEdit, HelpDialog, InventorySummaryHelp, BuildTree, ClickNode,
+        SearchInit, PaginateInit, Refresh, InventoryUpdate, GroupsEdit, HelpDialog, InventorySummaryHelp, ClickNode,
         HostsStatusMsg, UpdateStatusMsg, ViewUpdateStatus, Wait) {
     return function(params) {
         //Build a summary of a given inventory
@@ -522,7 +522,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
         // Respond to refresh button
         scope.refresh = function() {
-            scope.search(list.iterator, false, true);
+            /*scope.search(list.iterator, false, true);
             BuildTree({
                 scope: scope,
                 inventory_id: scope['inventory_id'],
@@ -530,7 +530,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 target_id: 'search-tree-container',
                 refresh: true,
                 moveable: true
-                });
+                });*/
             }
 
         // Start the update process
@@ -584,9 +584,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     }])
 
     .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'BuildTree', 'ClickNode', 'Wait',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'ClickNode', 'Wait',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, ParseTypeChange, GroupsEdit, BuildTree, ClickNode, Wait) {
+        GetBasePath, ParseTypeChange, GroupsEdit, ClickNode, Wait) {
     return function(params) {
 
         var inventory_id = params.inventory_id;
@@ -664,7 +664,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        scope.formModalActionDisabled = false;
                        scope.showGroupHelp = false;  //get rid of the Hint
                        $('#form-modal').modal('hide');
-                       BuildTree({
+                       /*BuildTree({
                            scope: scope,
                            inventory_id: scope['inventory_id'],
                            emit_on_select: 'NodeSelect',
@@ -672,7 +672,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                            refresh: true,
                            moveable: true,
                            group_id: data.id
-                           });
+                           });*/
                        }) 
                    .error( function(data, status, headers, config) {
                        Wait('stop');
@@ -1158,9 +1158,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('GroupsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'BuildTree', 'Wait', 'ClickNode',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'ClickNode',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, BuildTree, Wait, ClickNode) {
+        GetBasePath, Wait, ClickNode) {
     return function(params) {
         // Delete the selected group node. Disassociates it from its parent.
         var scope = params.scope;
@@ -1183,7 +1183,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             Rest.post({ id: group_id, disassociate: 1 })
                .success( function(data, status, headers, config) {
                    //DeleteNode({ selector: '#' + obj.attr('id') });
-                   BuildTree({
+                   /*BuildTree({
                        scope: scope,
                        inventory_id: scope['inventory_id'],
                        emit_on_select: 'NodeSelect',
@@ -1191,7 +1191,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                        refresh: true,
                        id: parent.attr('id'),
                        moveable: true
-                       });
+                       });*/
                    $('#prompt-modal').off();
                    })
                .error( function(data, status, headers, config) {

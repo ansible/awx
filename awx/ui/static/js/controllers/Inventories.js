@@ -314,31 +314,39 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
                            'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait']; 
 
 
-function InventoriesEdit ($rootScope, $location, $routeParams, GenerateList, ClearScope, InventoryGroups, BuildTree, Wait) 
+function InventoriesEdit ($rootScope, $location, $routeParams, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait, 
+                          UpdateStatusMsg, InjectHosts) 
 {
-   ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
-                                //scope.
+    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
+                                 //scope.
 
-   var generator = GenerateList;
-   var list = InventoryGroups;
-   var base = $location.path().replace(/^\//,'').split('/')[0];  
-   var scope = $rootScope.$new();
-   var groupScope;
+    var generator = GenerateList;
+    var list = InventoryGroups;
+    var base = $location.path().replace(/^\//,'').split('/')[0];  
+    var scope = $rootScope.$new();
+    var groupScope;
 
-   scope.$on('searchTreeReady', function(e, inventory_name, groups) {
-      // After the tree data loads, generate the groups list
-      groupScope = generator.inject(list, { mode: 'edit', id: 'groups-container', breadCrumbs: false, searchSize: 'col-lg-5' });
-      Wait('stop');
-      groupScope.groups = groups;
-      groupScope.inventory_name = inventory_name;
-      groupScope.inventory_id = $routeParams.inventory_id;
-      });
+    scope.$on('searchTreeReady', function(e, inventory_name, groups) {
+        // After the tree data loads, generate the groups list
+        groupScope = generator.inject(list, { mode: 'edit', id: 'groups-container', breadCrumbs: false, searchSize: 'col-lg-5' });
+        groupScope.groups = groups;
+        for (var i=0; i < groupScope.groups.length; i++) {
+            var stat = UpdateStatusMsg({ status: groupScope.groups[i].status });
+            groupScope.groups[i].status_badge_class = stat['class'];
+            groupScope.groups[i].status_badge_tooltip = stat['tooltip'];
+            groupScope.groups[i].status = stat['status'];
+        }
+        groupScope.inventory_name = inventory_name;
+        groupScope.inventory_id = $routeParams.inventory_id;
+        InjectHosts({ scope: groupScope });
+        Wait('stop');
+        });
 
-   BuildTree({ scope: scope, inventory_id: $routeParams.inventory_id });
+    BuildTree({ scope: scope, inventory_id: $routeParams.inventory_id });
 
 }
 
-InventoriesEdit.$inject = [ '$rootScope','$location', '$routeParams', 'GenerateList', 'ClearScope', 'InventoryGroups', 'BuildTree',
-                            'Wait'
+InventoriesEdit.$inject = [ '$rootScope','$location', '$routeParams', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts', 'BuildTree',
+                            'Wait', 'UpdateStatusMsg', 'InjectHosts'
                             ]; 
   

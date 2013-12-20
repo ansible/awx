@@ -62,8 +62,6 @@
   <script src="{{ STATIC_URL }}js/forms/Users.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Inventories.js"></script>
-  <script src="{{ STATIC_URL }}js/forms/InventoryHosts.js"></script>
-  <script src="{{ STATIC_URL }}js/forms/InventoryGroups.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Teams.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Groups.js"></script>
@@ -83,9 +81,8 @@
   <script src="{{ STATIC_URL }}js/lists/Admins.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Inventories.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Teams.js"></script>
-  <script src="{{ STATIC_URL }}js/lists/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/lists/InventoryGroups.js"></script>
-  <script src="{{ STATIC_URL }}js/lists/Groups.js"></script>
+  <script src="{{ STATIC_URL }}js/lists/InventoryHosts.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Credentials.js"></script>
   <script src="{{ STATIC_URL }}js/lists/JobTemplates.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Projects.js"></script>
@@ -96,6 +93,8 @@
   <script src="{{ STATIC_URL }}js/lists/Streams.js"></script>
   <script src="{{ STATIC_URL }}js/lists/HomeGroups.js"></script>
   <script src="{{ STATIC_URL }}js/lists/HomeHosts.js"></script>
+  <script src="{{ STATIC_URL }}js/lists/Groups.js"></script>
+  <script src="{{ STATIC_URL }}js/lists/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/refresh-related.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-paginate.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-search.js"></script>
@@ -118,6 +117,8 @@
   <script src="{{ STATIC_URL }}js/helpers/Jobs.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/Credentials.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/Permissions.js"></script>
+  <script src="{{ STATIC_URL }}js/helpers/Groups.js"></script>
+  <script src="{{ STATIC_URL }}js/helpers/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/JobStatus.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/InventorySyncStatus.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/SCMSyncStatus.js"></script>
@@ -361,17 +362,9 @@
   <div class="site-footer">
     <div class="container">
       <div class="help pull-left">
-        <!-- <a href="https://github.com/ansible" target="_blank"><i class="icon-github"></i></a>
-        <a href="https://www.facebook.com/pages/Ansibleworks/258737970923512?ref=hl" target="_blank"><i class="icon-facebook"></i></a>
-        <a href="http://www.twitter.com/ansibleworks" target="_blank"><i class="icon-twitter"></i></a>
-        <a href="http://www.linkedin.com/company/ansibleworks" target="_blank"><i class="icon-linkedin"></i></a> -->
         <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" target="_blank"><i class="icon-question-sign"></i> Contact Support</a>
       </div>
-      <div class="copyright">
-        Copyright &copy; 2013 AnsibleWorks, Inc. All rights reserved.<br />
-        1482 East Valley Road, Suite 888 &middot; Santa Barbara, California 93108 &middot; +1-800-825-0212<br />
-        <a href="http://www.ansibleworks.com" target="_blank">www.ansibleworks.com</a>
-      </div>
+      <div class="copyright"><a href="http://www.ansibleworks.com">Copyright &copy; 2013 AnsibleWorks, Inc. All rights reserved.</a></div>
       <div class="logo pull-right">
         <a href="http://www.ansibleworks.com" target="_blank"><img src="{{ STATIC_URL }}img/AWX_logo.png" /></a>
       </div>

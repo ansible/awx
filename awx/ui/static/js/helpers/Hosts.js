@@ -11,10 +11,37 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                                 'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'HostsHelper',
                                 'InventoryHelper', 'RelatedSearchHelper','RelatedPaginateHelper', 
                                 'InventoryFormDefinition', 'SelectionHelper', 'HostGroupsFormDefinition', 
-                                'InventoryHostsFormDefinition'
                                 ])
   
-    
+
+    .factory('HostsReload', [ 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 
+    function(Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit) {
+    return function(params) {
+        
+        var group_id = params.group_id;
+        var scope = params.scope;
+
+        var url = ( !Empty(group_id) ) ? GetBasePath('groups') + group_id + '/all_hosts/' :
+                  GetBasePath('inventory') + params.inventory_id + '/hosts/';
+          
+        SearchInit({ scope: scope, set: 'hosts', list: InventoryHosts, url: url });
+        PaginateInit({ scope: scope, list:  InventoryHosts, url: url });
+        scope.search(InventoryHosts.iterator);
+        }  
+        }])
+
+    .factory('InjectHosts', ['GenerateList', 'InventoryHosts', 'HostsReload',
+    function(GenerateList, InventoryHosts, HostsReload) {
+    return function(params) {
+
+        var scope = params.scope;
+      
+        var generator = GenerateList;
+        generator.inject(InventoryHosts, { mode: 'edit', id: 'hosts-container', breadCrumbs: false, searchSize: 'col-lg-5' });
+        HostsReload({ scope: scope, group_id: null });
+        }
+        }])
+
     .factory('SetHostStatus', [ function() {
     return function(host) {  
         // Set status related fields on a host object
@@ -496,7 +523,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }
         }])
 
-
+/*
     .factory('HostsReload', ['$location', '$routeParams', 'SearchInit', 'PaginateInit', 'InventoryHostsForm', 'GetBasePath', 'Wait',
     'SetHostStatus',
     function($location, $routeParams, SearchInit, PaginateInit, InventoryHostsForm, GetBasePath, Wait, SetHostStatus) {
@@ -576,6 +603,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }
         }
         }])
+
+*/
 
     .factory('EditHostGroups', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait',

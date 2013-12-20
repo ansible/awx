@@ -8,6 +8,7 @@
  */
 
 @black:       #171717;
+@white:       #FFF;
 @warning:     #FF9900;
 @red:         #da4f49;
 @red-hover:   #AE3F3A;
@@ -336,49 +337,46 @@ a:hover {
 }
 
 .site-footer {
-  width: 100%;
-  padding-top: 20px;
-  padding-bottom: 40px;
-  margin-top: 60px;
-  color: @grey;
-  text-align: center;
-  background-color: @black;
-  
-  a,
-  a:active,
-  a:visited {
-    margin-right: 15px;
+    width: 100%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-top: 60px;
     color: @grey;
-  }
+    text-align: center;
+    background-color: @black;
 
-  a:hover {
-    color: @blue;
-  }
+    a,
+    a:active,
+    a:visited {
+        margin-right: 15px;
+        color: @grey;
+    }
 
-  .help {
-    font-weight: normal;
-    fon-size: 12px;
-  }
+    a:hover {
+        color: @white;
+    }
 
-  .social {
-    display: inline-block;
-  }
+    .help {
+        padding-top: 15px;
+        font-weight: normal;
+    }
 
-  .logo {
-    display: inline-block;
-  }
+    .logo {
+        display: inline-block;
+    }
 
-  .logo img {
-    max-width: 125px; 
-  }
+    .logo img {
+        max-width: 125px; 
+    }
+
+    .copyright {
+        padding-top: 15px;
+        display: inline-block;
+        font-weight: normal;
+        text-align: center;
+    }
 }
 
-.copyright {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: normal;
-  text-align: center;
-}
 
 .login-header {
   text-align: center;
