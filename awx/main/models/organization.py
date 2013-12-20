@@ -350,7 +350,7 @@ class Credential(CommonModelNameNotUnique):
             # if hit hasn't been specified, then we're just doing a normal save.
             for field in self.PASSWORD_FIELDS:
                 ask = bool(self.kind == 'ssh' and field != 'ssh_key_data')
-                encrypted = encrypt_field(self, field, ask.encode('utf-8'))
+                encrypted = encrypt_field(self, field, ask)
                 setattr(self, field, encrypted)
                 if field not in update_fields:
                     update_fields.append(field)

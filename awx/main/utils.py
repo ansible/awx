@@ -104,6 +104,7 @@ def encrypt_field(instance, field_name, ask=False):
     value = getattr(instance, field_name)
     if not value or value.startswith('$encrypted$') or (ask and value == 'ASK'):
         return value
+    value = value.encode('utf-8')
     key = get_encryption_key(instance, field_name)
     cipher = AES.new(key, AES.MODE_ECB)
     while len(value) % cipher.block_size != 0:
