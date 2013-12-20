@@ -184,7 +184,7 @@ class BaseTask(Task):
         status, stdout = 'error', ''
         logfile = task_stdout_handle
         logfile_pos = logfile.tell()
-        child = pexpect.spawn(args[0], args[1:], cwd=cwd, env=env)
+        child = pexpect.spawnu(args[0], args[1:], cwd=cwd, env=env)
         child.logfile_read = logfile
         canceled = False
         last_stdout_update = time.time()
