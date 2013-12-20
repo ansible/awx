@@ -306,7 +306,7 @@ class Project(CommonModel):
         if project_path:
             for dirpath, dirnames, filenames in os.walk(project_path):
                 for filename in filenames:
-                    if os.path.splitext(filename)[-1] != '.yml':
+                    if os.path.splitext(filename)[-1] not in ['.yml', '.yaml']:
                         continue
                     playbook = os.path.join(dirpath, filename)
                     # Filter files that do not have either hosts or top-level
