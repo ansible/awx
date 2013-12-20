@@ -46,8 +46,6 @@ angular.module('CloudCredentialsListDefinition', [])
         
         actions: {
             add: {
-                icon: 'icon-plus',
-                label: 'Create New',
                 mode: 'all',                         // One of: edit, select, all
                 ngClick: 'addCredential()',
                 "class": 'btn-sm',
@@ -58,7 +56,7 @@ angular.module('CloudCredentialsListDefinition', [])
         fieldActions: {
             edit: {
                 ngClick: "editCredential(\{\{ credential.id \}\})",
-                icon: 'icon-edit',
+                icon: 'fa-edit',
                 label: 'Edit',
                 "class": 'btn-sm',
                 awToolTip: 'View/Edit credential'
@@ -66,7 +64,7 @@ angular.module('CloudCredentialsListDefinition', [])
 
             "delete": {
                 ngClick: "deleteCredential(\{\{ credential.id \}\},'\{\{ credential.name \}\}')",
-                icon: 'icon-trash',
+                icon: 'fa-trash-o',
                 label: 'Delete',
                 "class": 'btn-sm',
                 awToolTip: 'Delete credential'

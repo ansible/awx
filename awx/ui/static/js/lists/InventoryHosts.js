@@ -99,31 +99,21 @@ angular.module('InventoryHostsDefinition', [])
 
         actions: {
             create: {
-                label: 'Add',
                 mode: 'all',
-                icon: 'icon-plus',
                 ngClick: "createGroup()",
                 ngHide: "groupCreateHide", 
                 ngDisabled: 'grpBtnDisabled',
-                awToolTip: "Create a new host", 
-                dataPlacement: 'top'
+                awToolTip: "Create a new host"
                 },
             stream: {
-                label: 'Activity',
-                'class': "activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                dataPlacement: "top",
-                icon: "icon-comments-alt",
                 mode: 'all',
                 ngShow: "user_is_superuser"
                 },
              help: {
-                label: 'Help',
                 dataPlacement: 'top',
-                icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-sm btn-help',
                 awToolTip:
                     //"<div style=\"text-align:left;\"><img src=\"/static/img/cow.png\" style=\"width:50px; height:56px; float:left; padding-right:5px;\">" +
                     //"<p>Need help getting started creating your inventory?</p><p>Click here for help.</p></div>",

@@ -94,7 +94,7 @@ dbchange:
 
 # access database shell, asks for password
 dbshell:
-	sudo -u postgres psql -d awx
+	sudo -u postgres psql -d awx-dev
 
 # Run the built-in development webserver (by default on http://localhost:8013).
 runserver:

@@ -348,7 +348,6 @@ a:hover {
     a,
     a:active,
     a:visited {
-        margin-right: 15px;
         color: @grey;
     }
 
@@ -362,7 +361,7 @@ a:hover {
     }
 
     .logo {
-        display: inline-block;
+        text-align: right;
     }
 
     .logo img {
@@ -371,7 +370,6 @@ a:hover {
 
     .copyright {
         padding-top: 15px;
-        display: inline-block;
         font-weight: normal;
         text-align: center;
     }
@@ -1439,6 +1437,16 @@ tr td button i {
 
 /* Portrait tablet to landscape and desktop */
 
+@media (max-width: 1200px) {
+    .site-footer {
+        .logo {
+            text-align: center;
+            padding-top: 20px;
+            margin-bottom: 10px;
+        }
+    }
+}
+
 @media (min-width: 768px) and (max-width: 1199px) {
 
   .list-actions button, .list-actions .checkbox-inline {
@@ -1478,7 +1486,7 @@ tr td button i {
 /* Landscape phone to portrait tablet */
 
 @media (max-width: 767px) {
-
+ 
   /* Job events */
   
   .level-1,

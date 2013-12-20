@@ -18,11 +18,12 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
     function(Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit) {
     return function(params) {
         
-        var group_id = params.group_id;
         var scope = params.scope;
+        var group_id = params.group_id;
+        var inventory_id = params.inventory_id;
 
         var url = ( !Empty(group_id) ) ? GetBasePath('groups') + group_id + '/all_hosts/' :
-                  GetBasePath('inventory') + params.inventory_id + '/hosts/';
+                  GetBasePath('inventory') + inventory_id + '/hosts/';
           
         SearchInit({ scope: scope, set: 'hosts', list: InventoryHosts, url: url });
         PaginateInit({ scope: scope, list:  InventoryHosts, url: url });
@@ -35,10 +36,11 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
     return function(params) {
 
         var scope = params.scope;
-      
+        var inventory_id = params.inventory_id;
+
         var generator = GenerateList;
         generator.inject(InventoryHosts, { mode: 'edit', id: 'hosts-container', breadCrumbs: false, searchSize: 'col-lg-5' });
-        HostsReload({ scope: scope, group_id: null });
+        HostsReload({ scope: scope, group_id: null, inventory_id: inventory_id });
         }
         }])
 

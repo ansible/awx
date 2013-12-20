@@ -214,7 +214,7 @@
                 </form>
               </div>
               <div class="modal-footer">
-                <button ng-click="systemLogin(login_username, login_password)" id="login-button" class="btn btn-primary"><i class="icon-signin"></i> Sign In</button>
+                <button ng-click="systemLogin(login_username, login_password)" id="login-button" class="btn btn-primary"><i class="fa fa-sign-in"></i> Sign In</button>
               </div>
           </div><!-- modal-content -->
        </div><!-- modal-dialog -->
@@ -249,7 +249,7 @@
               <div class="modal-body" id="form-modal-body"></div>
               <div class="modal-footer">
                 <button ng-show="formModalInfo !== undefined && formModalInfo != ''" ng-click="formModalInfoAction()" 
-                    class="btn btn-sm pull-left"><i class="icon-zoom-in"></i> <span ng-bind="formModalInfo"></span></button>
+                    class="btn btn-sm pull-left"><i class="fa fa-search-plus"></i> <span ng-bind="formModalInfo"></span></button>
                 <a href="#" ng-show="formModalCancelShow" data-target="#form-modal" data-dismiss="modal" id="form_cancel_btn" class="btn btn-default">Cancel</a>
                 <a href="" ng-bind="formModalActionLabel" ng-click="formModalAction()" ng-disabled="formModalActionDisabled" id="form_ok_btn" class="btn btn-primary"></a>
               </div>
@@ -268,7 +268,7 @@
               <div class="modal-body" id="form-modal2-body"></div>
               <div class="modal-footer">
                 <a href="" ng-bind="formModal2Info" ng-show="formModal2Info !== undefined && formModal2Info != ''" ng-click="formModal2InfoAction()" 
-                    class="btn btn-default btn-sm pull-left"><i class="icon-zoom-in"></i> <span ng-bind="formModal2Info"></span></a>
+                    class="btn btn-default btn-sm pull-left"><i class="fa fa-search-plus"></i> <span ng-bind="formModal2Info"></span></a>
                 <a href="#" ng-show="formModal2CancelShow" data-target="#form-modal2" data-dismiss="modal" id="form2_cancel_btn"
                     class="btn btn-default">Cancel</a>
                 <a href="" ng-bind="formModal2ActionLabel" ng-click="formModal2Action()" id="form2_ok_btn" class="btn btn-primary"></a>
@@ -357,17 +357,23 @@
   </div><!-- container -->
   
   <div class="overlay"></div>
-  <div class="spinny"><i class="icon-cog icon-spin icon-2x"></i> <p>working...</p></div>
+  <div class="spinny"><i class="fa fa-cog fa-spin fa-2x"></i> <p>working...</p></div>
    
   <div class="site-footer">
     <div class="container">
-      <div class="help pull-left">
-        <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" target="_blank"><i class="icon-question-sign"></i> Contact Support</a>
-      </div>
-      <div class="copyright"><a href="http://www.ansibleworks.com">Copyright &copy; 2013 AnsibleWorks, Inc. All rights reserved.</a></div>
-      <div class="logo pull-right">
-        <a href="http://www.ansibleworks.com" target="_blank"><img src="{{ STATIC_URL }}img/AWX_logo.png" /></a>
-      </div>
+        <div class="row">
+            <div class="col-lg-3 text-left help">
+                <a href="https://ansibleworks.zendesk.com/anonymous_requests/new" target="_blank"><i class="fa fa-question-circle"></i> Contact Support</a>
+            </div>
+            <div class="col-lg-6 text-center copyright">
+                <a href="http://www.ansibleworks.com">Copyright &copy; 2013 AnsibleWorks, Inc. All rights reserved.</a>
+            </div>
+            <div class="col-lg-3">
+                <div class="logo">
+                    <a href="http://www.ansibleworks.com" target="_blank"><img src="{{ STATIC_URL }}img/AWX_logo.png" /></a>
+                </div>
+            </div>
+        </div>
     </div>
   </div><!-- site footer --> 
 

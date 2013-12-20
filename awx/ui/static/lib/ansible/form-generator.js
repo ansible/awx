@@ -10,9 +10,9 @@
 
 angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
     .factory('GenerateForm', ['$rootScope', '$location', '$cookieStore', '$compile', 'SearchWidget', 'PaginateWidget', 'Attr',
-        'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty',
+        'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty', 'SelectIcon',
     function($rootScope, $location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink,
-        HelpCollapse, Button, DropDown, Empty) {
+        HelpCollapse, Button, DropDown, Empty, SelectIcon) {
     return {
     
     setForm: function(form) {
@@ -60,11 +60,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        this.modal = (options.modal) ? true : false;
        this.setForm(form);
 
-       // Inject the html
-       if (options.buildTree) {
-          element.html(this.buildTree(options));
-       }
-       else if (options.html) {
+      if (options.html) {
           element.html(options.html);
        }
        else {
@@ -80,7 +76,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
        $compile(element)(this.scope);
  
-       if (!options.buildTree && !options.html) {
+       if (!options.html) {
           // Reset the scope to prevent displaying old data from our last visit to this form
           for (var fld in form.fields) {
               this.scope[fld] = null;
@@ -244,11 +240,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
         else {
            this.scope.accordionToggle = function(selector) {
                $(selector).collapse('toggle');
-               if ( $(selector + '-icon').hasClass('icon-minus') ) {
-                  $(selector + '-icon').removeClass('icon-minus').addClass('icon-plus');
+               if ( $(selector + '-icon').hasClass('fa-minus') ) {
+                  $(selector + '-icon').removeClass('fa-minus').addClass('fa-plus');
                }
                else {
-                  $(selector + '-icon').removeClass('icon-plus').addClass('icon-minus')
+                  $(selector + '-icon').removeClass('fa-plus').addClass('fa-minus')
                }
                }
 
@@ -523,7 +519,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                 html += "class=\"btn btn-default\" ng-click=\"clear('" + fld + "','" + field.associated + "')\" " + 
                    "aw-tool-tip=\"Clear " + field.label + "\" id=\"" + fld + "-clear-btn\" ";
                 html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
-                html += " ><i class=\"icon-undo\"></i></button>\n";
+                html += " ><i class=\"fa fa-undo\"></i></button>\n";
                 html += "</span>\n</div>\n";
                 if (field.ask) {
                    html += "<label class=\"checkbox-inline ask-checkbox\" ";
@@ -539,7 +535,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
              if (field.genMD5) {
                 html += "<span class=\"input-group-btn\"><button type=\"button\" class=\"btn btn-default\" ng-click=\"genMD5('" + fld + "')\" " + 
                    "aw-tool-tip=\"Generate " + field.label + "\" data-placement=\"top\" id=\"" + this.form.name + "_" + fld + "_gen_btn\">" +
-                   "<i class=\"icon-magic\"></i></button></span>\n</div>\n";
+                   "<i class=\"fa fa-magic\"></i></button></span>\n</div>\n";
              }
              
              // Add error messages
@@ -864,7 +860,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
             html += "class=\"" + getFieldWidth() + "\">\n";
             html += "<div class=\"input-group\">\n";
             html += "<span class=\"input-group-btn\">\n";
-            html += "<button type=\"button\" class=\"lookup-btn btn btn-default\" " + this.attr(field,'ngClick') + "><i class=\"icon-search\"></i></button>\n";
+            html += "<button type=\"button\" class=\"lookup-btn btn btn-default\" " + this.attr(field,'ngClick') + "><i class=\"fa fa-search\"></i></button>\n";
             html += "</span>\n";
             html += "<input type=\"text\" class=\"form-control input-medium lookup\" ";
             html += "ng-model=\"" + field.sourceModel + '_' + field.sourceField +  "\" ";
@@ -955,7 +951,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
         html = "<div class=\"list-actions\">\n";
         for (action in this.form.actions) {
             if (this.form.actions[action].mode == 'all' || this.form.actions[action].mode == options.mode) {
-                html += this.button(this.form.actions[action], action);
+                html += this.button({ btn: this.form.actions[action], action: action, toolbar: true });
             }
         }
         html += "</div>\n";
@@ -1006,7 +1002,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
               if (navigation[itm].active) {
                  html += "<a href=\"\" class=\"toggle\" ";
                  html += "data-toggle=\"dropdown\" ";
-                 html += ">" + navigation[itm].label + " <i class=\"icon-chevron-sign-down crumb-icon\"></i></a>";
+                 html += ">" + navigation[itm].label + " <i class=\"fa fa-chevron-circle-down crumb-icon\"></i></a>";
                  break;
               }
           }
@@ -1017,7 +1013,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                   navigation[itm].href + "\" ";
               // html += (navigation[itm].active) ? "class=\"active\" " : "";
               html += ">";
-              html += "<i class=\"icon-ok\" style=\"visibility: ";
+              html += "<i class=\"fa fa-check\" style=\"visibility: ";
               html += (navigation[itm].active) ? "visible" : "hidden";
               html += "\"></i> ";
               html += (navigation[itm].listLabel) ? navigation[itm].listLabel : navigation[itm].label;
@@ -1064,7 +1060,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
              var act;
              for (action in this.form.statusActions) {
                  act = this.form.statusActions[action];
-                 html += this.button(act, action);
+                 html += this.button({ btn: act, action: action, toolbar: true });
              }
              html += "</div>\n";
              //html += "<div class=\"status-spin\"><i class=\"icon-spinner icon-spin\" ng-show=\"statusSearchSpin == true\"></i></div>\n";
@@ -1114,7 +1110,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
              if (this.has('titleActions')) {
                 html += "<div class=\"title-actions pull-right\">\n";
                 for (btn in this.form.titleActions) {
-                    html += this.button(this.form.titleActions[btn]);
+                    html += this.button({ btn: this.form.titleActions[btn], action: btn, toolbar: true });
                 }
                 html += "</div>\n";
              }
@@ -1232,10 +1228,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                           }
                        }
                        html += ">";
-                       if (button.icon) {
-                          html += this.icon(button.icon);
-                       }
-                       html += button.label + "</button>\n";
+                       html += SelectIcon({ action: btn });
+                       html += " " + button.label + "</button>\n";
                     }
                 } 
                 html += "</div>\n";
@@ -1294,203 +1288,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        return html;
      
        },
-
-    buildTree: function(options) {
-       //
-       // Used to create the inventory detail view
-       //
-
-       var form = this.form;
-       var itm = "groups";
-       var html = '';
-       var navigation = {
-            inventory: {
-                href: "/#/inventories/{{ inventory_id }}",
-                label: "Properties",
-                icon: "icon-edit"
-                },
-            hosts: {
-                href: "/#/inventories/{{ inventory_id }}/hosts",
-                label: 'Hosts',  
-                icon: 'icon-laptop'
-                },
-            groups: {
-                href: "/#/inventories/{{ inventory_id }}/groups",
-                label: 'Groups',  
-                icon: 'icon-sitemap'
-                }
-            };
-       
-       if (form.type == 'groupsview') {
-          navigation.inventory.active = false; 
-          navigation.hosts.active = false;
-          navigation.groups.active = true; 
-          html += this.breadCrumbs(options, navigation);
-          html += "<div class=\"row\">\n";
-          html += "<div class=\"col-lg-4\" id=\"search-tree-target\">\n" +
-                  "<div class=\"search-tree well\">\n" +
-                  "<div id=\"search-tree-container\"></div>\n" +
-                  "</div><!-- search-tree well -->\n" + 
-                  "</div>\n";
-          html += "<div class=\"col-lg-8 tree-form-container\">\n";
-          html += "<div id=\"tree-form\">\n</div>\n";
-          html += "</div>\n";
-          html += "</div><!-- row -->\n";
-       }
-       else {
-          // build the hosts page
-          navigation.inventory.active = false; 
-          navigation.hosts.active = true;
-          navigation.groups.active = false; 
-          html += this.breadCrumbs(options, navigation);
-          html += "<div class=\"row\">\n";
-          html += "<div class=\"col-lg-4\" id=\"search-tree-target\">\n";
-          html += "<div class=\"search-tree well\">\n";
-          html += "<div id=\"search-tree-container\">\n</div><!-- search-tree-container -->\n";
-          html += "</div><!-- search-tree well -->\n";
-          html += "</div><!-- col-lg-4 -->\n";
-          html += "<div class=\"col-lg-8\">\n"; 
-          html += "<div class=\"hosts-well well\">\n";
-          html += SearchWidget({ iterator: form.iterator, template: form, mini: true, size: 'col-md-5 col-lg-5'});
-          html += "<div class=\"col-md-7 col-lg-7\">\n"
-          html += "<div class=\"list-actions\">\n";
-          
-          // Add actions(s)
-          for (var action in form.actions) {
-              html += this.button(form.actions[action], action);
-          }
-          html += "</div><!-- list-actions -->\n";
-          html += "</div>\n";
-          html += "</div><!-- row -->\n";
-          html += "<div class=\"title\" ng-bind=\"groupTitle\"></div>\n";
-          
-          // Start the list
-          html += "<div class=\"list\">\n";
-          html += "<table id=\"hosts_table\" class=\"" + form.iterator + " table table-condensed table-hover\">\n";
-          html += "<thead>\n";
-          html += "<tr>\n";
-          
-          for (var fld in form.fields) {
-              if (form.fields[fld].searchOnly == undefined || form.fields[fld].searchOnly == false) {
-                  html += "<th class=\"list-header\" id=\"" + fld + "-header\" ";
-                  html += (!form.fields[fld].nosort) ? "ng-click=\"sort('"+ fld + "')\"" : "";
-                  html += ">";
-                  html += (form['fields'][fld].label && form['fields'][fld].type !== 'DropDown') ? form['fields'][fld].label : '';
-                  if (form.fields[fld].nosort == undefined || form.fields[fld].nosort == false) {
-                     html += " <i class=\"";
-                     if (form.fields[fld].key) {
-                        if (form.fields[fld].desc) {
-                           html += "icon-sort-down";
-                        }
-                        else {
-                           html += "icon-sort-up";
-                        }
-                     }
-                     else {
-                        html += "icon-sort";
-                     }
-                     html += "\"></i>";
-                  }
-                  html += "</th>\n";
-              }
-          }
-
-          html += "<th></th>\n";
-          html += "</tr>\n";
-          html += "</thead>";
-          html += "<tbody>\n";
-                
-          html += "<tr ng-repeat=\"" + form.iterator + " in hosts\" >\n";
-
-          // Select checkbox
-          //html += "<td><input type=\"checkbox\" ng-model=\"" + form.iterator + ".selected\" ng-change=\"toggleOneHost()\" ></td>";
-          
-          var cnt = 0;
-          var rfield; 
-
-          for (var fld in form.fields) {
-              cnt++;
-              rfield = form.fields[fld];
-              if (fld == 'groups' ) {
-                 // generate group form control/button widget
-                 html += "<td class=\"col-lg-5 col-md-4 col-sm-3\">";
-                 html += "<div class=\"input-group input-group-sm\">\n";
-                 html += "<span class=\"input-group-btn\">\n";
-                 html += "<button class=\"btn btn-default\" type=\"button\" id=\"edit_groups_btn\" ng-click=\"editHostGroups({{ host.id }})\" " +
-                     "aw-tool-tip=\"Edit group associations\" data-placement=\"top\" >" + 
-                     "<i class=\"icon-sitemap\"></i></button>\n";
-                 html += "</span>\n";
-                 html += "<input type=\"text\" id=\"host_groups\" ng-model=\"host.groups\" class=\"form-control\" disabled=\"disabled\" >\n";
-                 html += "</div>\n";
-                 html += "</td>\n";
-              }
-              else {
-                if (form.fields[fld].searchOnly == undefined || form.fields[fld].searchOnly == false) {
-                   html += Column({ list: form, fld: fld, options: options, base: null });
-                }
-              }
-          }
-          
-          // Row level actions
-          html += "<td class=\"actions\">";
-          for (act in form.fieldActions) {
-             var action = form.fieldActions[act];
-             if (action.type && action.type == 'DropDown') {
-                html += DropDown({ field: action, td: false });
-             }
-             else {
-                html += "<button type=\"button\" ";
-                html += "id=\"row_" + act + "_btn\" ";
-                html += "class=\"btn"; 
-                html += (action['class']) ? " " + action['class'] : "";
-                html += "\" " + this.attr(action,'ngClick');
-                html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
-                html += (action.awToolTip) ? "data-placement=\"top\" " : "";
-                html += ">" + this.icon(action.icon);
-                html += (action.label) ?  " " + action.label : ""; 
-                html += "</button> ";
-             }
-          }
-          html += "</td>";
-          html += "</tr>\n";
-          cnt++;
-        
-          // Message for when a related collection is empty
-          html += "<tr class=\"info\" ng-show=\"" + form.iterator + "Loading == false && (hosts == null || hosts.length == 0)\">\n";
-          html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
-          html += "</tr>\n"; 
-
-          // Message for loading
-          html += "<tr class=\"info\" ng-show=\"HostsLoading == true\">\n";
-          html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">Loading...</div></td>\n";
-          html += "</tr>\n";
-
-          // End List
-          html += "</tbody>\n";
-          html += "</table>\n";
-          html += "</div>\n";    // close list
-
-          /*
-          html += "<div class=\"row host-failure-filter\">\n";
-          html += "<div class=\"col-lg-12\">\n";
-          html += "<label class=\"checkbox-inline pull-right\"><input type=\"checkbox\" ng-model=\"hostFailureFilter\" ng-change=\"filterHosts()\" > Only show hosts with failed jobs" +
-              "</label>\n";
-          html += "</div>\n";
-          html += "</div>\n";
-          */
-
-          html += "</div>\n";    // close well
-
-          html += PaginateWidget({ set: 'hosts', iterator: form.iterator, mini: true }); 
-
-          html += "</div>\n";
-          html += "</div>\n";
-
-          //html += "</div><!-- inventory-hosts -->\n";
-        
-        }
-        return html; 
-      },
 
     buildCollections: function(options) {
        //

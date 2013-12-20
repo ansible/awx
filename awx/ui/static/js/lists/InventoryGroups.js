@@ -24,7 +24,7 @@ angular.module('InventoryGroupsDefinition', [])
             name: {
                 label: 'Group',
                 key: true,
-                ngClick: "\{\{ 'GroupsEdit(' + group.id + ')' \}\}",
+                ngClick: "\{\{ 'showHosts(' + group.id + ')' \}\}",
                 //ngClass: "\{\{ 'level' + group.level \}\}",
                 hasChildren: true
                 },
@@ -100,50 +100,31 @@ angular.module('InventoryGroupsDefinition', [])
 
         actions: {
             create: {
-                label: 'Add',
                 mode: 'all',
-                icon: 'icon-plus',
                 ngClick: "createGroup()",
                 ngHide: "groupCreateHide", 
                 ngDisabled: 'grpBtnDisabled',
-                awToolTip: "Create a new group", 
-                dataPlacement: 'top'
+                awToolTip: "Create a new group"
                 },
-            edit: {
-                label: 'Edit',
+            properties: {
                 mode: 'all',
-                icon: 'icon-wrench',
-                'class': "btn-sm", 
                 ngHide: "groupEditHide", 
                 ngDisabled: 'grpBtnDisabled',
-                awToolTip: "Edit inventory properties", 
-                dataPlacement: 'top'
+                awToolTip: "Edit inventory properties" 
                 },
             refresh: {
-                label: 'Refresh',
-                dataPlacement: 'top',
-                icon: "icon-refresh",
                 mode: 'all',
-                'class': 'btn-sm',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()"
                 },
             stream: {
-                label: 'Activity',
-                'class': "activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                dataPlacement: "top",
-                icon: "icon-comments-alt",
                 mode: 'all',
                 ngShow: "user_is_superuser"
                 },
              help: {
-                label: 'Help',
-                dataPlacement: 'top',
-                icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-sm btn-help',
                 awToolTip:
                     //"<div style=\"text-align:left;\"><img src=\"/static/img/cow.png\" style=\"width:50px; height:56px; float:left; padding-right:5px;\">" +
                     //"<p>Need help getting started creating your inventory?</p><p>Click here for help.</p></div>",

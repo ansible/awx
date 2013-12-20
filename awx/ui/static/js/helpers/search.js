@@ -459,7 +459,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             $('.list-header').each(function(index) {
                 if ($(this).attr('id') != fld + '-header') {
                    var icon = $(this).find('i');
-                   icon.attr('class','icon-sort');
+                   icon.attr('class','fa-sort');
                 }
                 });
  
@@ -467,18 +467,18 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             // and set the sort direction  
             var icon = $('#' + fld + '-header i');
             var direction = '';
-            if (icon.hasClass('icon-sort')) {
-               icon.removeClass('icon-sort');
-               icon.addClass('icon-sort-up');
+            if (icon.hasClass('fa-sort')) {
+               icon.removeClass('fa-sort');
+               icon.addClass('fa-sort-up');
             }
-            else if (icon.hasClass('icon-sort-up')) {
-               icon.removeClass('icon-sort-up');
-               icon.addClass('icon-sort-down');
+            else if (icon.hasClass('fa-sort-up')) {
+               icon.removeClass('fa-sort-up');
+               icon.addClass('fa-sort-down');
                direction = '-';
             }
-            else if (icon.hasClass('icon-sort-down')) {
-               icon.removeClass('icon-sort-down');
-               icon.addClass('icon-sort-up');
+            else if (icon.hasClass('fa-sort-down')) {
+               icon.removeClass('fa-sort-down');
+               icon.addClass('fa-sort-up');
             }
 
             // Set the sorder order value and call the API to refresh the list with the new order

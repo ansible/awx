@@ -111,22 +111,17 @@ angular.module('JobHostDefinition', [])
                     "</dl>\n",
                 dataPlacement: 'left',
                 dataContainer: "body",
-                icon: "icon-question-sign",
                 mode: 'all',
                 'class': 'btn-xs btn-help',
                 awToolTip: 'Click for help',
                 dataTitle: 'Job Host Summary',
-                id: 'jobhost-help-button',
-                iconSize: 'large'
+                id: 'jobhost-help-button'
                 },
             refresh: {
-                dataPlacement: 'top',
-                icon: "icon-refresh",
                 mode: 'all',
                 'class': 'btn-xs',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()",
-                iconSize: 'large',
                 ngShow: "host_id == null"    //don't show when viewing from inventory->hosts
                 }
             },

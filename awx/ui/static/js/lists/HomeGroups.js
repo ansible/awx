@@ -11,12 +11,13 @@ angular.module('HomeGroupListDefinition', [])
     .value(
     'HomeGroupList', {
         
-        name: 'groups',
+        name: 'home_groups',
         iterator: 'group',
         editTitle: 'Groups',
         index: true,
         hover: true,
-        
+        well: true,
+
         fields: {
             name: {
                 key: true,
@@ -111,13 +112,9 @@ angular.module('HomeGroupListDefinition', [])
         
         actions: {
             stream: {
-                'class': "btn-xs activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                dataPlacement: "top",
-                icon: "icon-comments-alt",
                 mode: 'all',
-                iconSize: 'large',
                 ngShow: "user_is_superuser"
                 }
             },

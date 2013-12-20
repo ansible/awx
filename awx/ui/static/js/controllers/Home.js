@@ -10,14 +10,36 @@
 
 'use strict';
 
-function Home ($routeParams, $rootScope, $location, Wait, ObjectCount, JobStatus, InventorySyncStatus, SCMSyncStatus, 
-    ClearScope, Stream, Rest, GetBasePath, ProcessErrors) {
+function Home ($scope, $compile, $routeParams, $rootScope, $location, Wait, ObjectCount, JobStatus, InventorySyncStatus, SCMSyncStatus, 
+    ClearScope, Stream, Rest, GetBasePath, ProcessErrors, Button) {
     
     ClearScope('home');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                          //scope.
     
-    var element = angular.element(document.getElementById('htmlTemplate'));
-    var scope = element.scope();
+    //var element = angular.element(document.getElementById('htmlTemplate'));
+    //var scope = element.scope();
+
+    // Add buttons to the top of the Home page. We're using lib/ansible/generator_helpers.js-> Buttons()
+    // to build buttons dynamically and insure all styling and icons match the rest of the application.
+    var buttons = {
+        refresh: {
+            mode: 'all',
+            awToolTip: "Refresh the page",
+            ngClick: "refresh()"
+            },
+        stream: {
+            ngClick: "showActivity()",
+            awToolTip: "View Activity Stream",
+            mode: 'all',
+            ngShow: "user_is_superuser"
+            }
+        };
+    var html = Button({ btn: buttons.refresh, action: 'refresh', toolbar: true });
+    html += Button({ btn: buttons.stream, action: 'stream', toolbar: true });
+    var e = angular.element(document.getElementById('home-list-actions'));
+    e.html(html);
+    $compile(e)($scope);
+
     var waitCount = 4;
     var loadedCount = 0;
         
@@ -26,10 +48,10 @@ function Home ($routeParams, $rootScope, $location, Wait, ObjectCount, JobStatus
         Wait('start');
     }
 
-    if (scope.removeWidgetLoaded) {
-        scope.removeWidgetLoaded();
+    if ($scope.removeWidgetLoaded) {
+        $scope.removeWidgetLoaded();
     }
-    scope.removeWidgetLoaded = scope.$on('WidgetLoaded', function() {
+    $scope.removeWidgetLoaded = $scope.$on('WidgetLoaded', function() {
         // Once all the widgets report back 'loaded', turn off Wait widget
         loadedCount++; 
         if ( loadedCount == waitCount ) {
@@ -37,39 +59,39 @@ function Home ($routeParams, $rootScope, $location, Wait, ObjectCount, JobStatus
         }
         });
 
-    if (scope.removeDashboardReady) {
-        scope.removeDashboardReady();
+    if ($scope.removeDashboardReady) {
+        $scope.removeDashboardReady();
     }
-    scope.removeDashboardReady = scope.$on('dashboardReady', function(e, data) {
-        JobStatus({ scope: scope, target: 'container1', dashboard: data});
-        InventorySyncStatus({ scope: scope, target: 'container2', dashboard: data});
-        SCMSyncStatus({ scope: scope, target: 'container4', dashboard: data});
-        ObjectCount({ scope: scope, target: 'container3', dashboard: data});
+    $scope.removeDashboardReady = $scope.$on('dashboardReady', function(e, data) {
+        JobStatus({ scope: $scope, target: 'container1', dashboard: data});
+        InventorySyncStatus({ scope: $scope, target: 'container2', dashboard: data});
+        SCMSyncStatus({ scope: $scope, target: 'container4', dashboard: data});
+        ObjectCount({ scope: $scope, target: 'container3', dashboard: data});
         });
     
-    scope.showActivity = function() { Stream(); } 
+    $scope.showActivity = function() { Stream(); } 
 
-    scope.refresh = function() {
+    $scope.refresh = function() {
         Wait('start');
         loadedCount = 0;
         Rest.setUrl(GetBasePath('dashboard'));
         Rest.get()
             .success( function(data, status, headers, config) {
-                scope.$emit('dashboardReady', data);
+                $scope.$emit('dashboardReady', data);
             })
             .error ( function(data, status, headers, config) {
                 Wait('stop');
-                ProcessErrors(scope, data, status, null,
+                ProcessErrors($scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get dashboard: ' + status });
             })
         }
     
-    scope.refresh();
+    $scope.refresh();
     
     }
 
-Home.$inject=[ '$routeParams', '$rootScope', '$location', 'Wait', 'ObjectCount', 'JobStatus', 'InventorySyncStatus',
-    'SCMSyncStatus', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors'];
+Home.$inject=['$scope', '$compile', '$routeParams', '$rootScope', '$location', 'Wait', 'ObjectCount', 'JobStatus', 'InventorySyncStatus',
+    'SCMSyncStatus', 'ClearScope', 'Stream', 'Rest', 'GetBasePath', 'ProcessErrors', 'Button'];
 
 
 function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, 
@@ -90,37 +112,37 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
     }
     scope.removePostRefresh = scope.$on('PostRefresh', function() {
         var msg, update_status, last_update;
-        for (var i=0; i < scope.groups.length; i++) {
+        for (var i=0; i < scope.home_groups.length; i++) {
             
-            scope['groups'][i]['inventory_name'] = scope['groups'][i]['summary_fields']['inventory']['name'];
+            scope['home_groups'][i]['inventory_name'] = scope['home_groups'][i]['summary_fields']['inventory']['name'];
 
-            last_update = (scope.groups[i].summary_fields.inventory_source.last_updated == null) ? null : 
-                FormatDate(new Date(scope.groups[i].summary_fields.inventory_source.last_updated));    
+            last_update = (scope.home_groups[i].summary_fields.inventory_source.last_updated == null) ? null : 
+                FormatDate(new Date(scope.home_groups[i].summary_fields.inventory_source.last_updated));    
              
             // Set values for Failed Hosts column
-            scope.groups[i].failed_hosts = scope.groups[i].hosts_with_active_failures + ' / ' + scope.groups[i].total_hosts;
+            scope.home_groups[i].failed_hosts = scope.home_groups[i].hosts_with_active_failures + ' / ' + scope.home_groups[i].total_hosts;
             
             msg = HostsStatusMsg({
-                active_failures: scope.groups[i].hosts_with_active_failures,
-                total_hosts: scope.groups[i].total_hosts,
-                inventory_id: scope.groups[i].inventory,
-                group_id: scope.groups[i].id
+                active_failures: scope.home_groups[i].hosts_with_active_failures,
+                total_hosts: scope.home_groups[i].total_hosts,
+                inventory_id: scope.home_groups[i].inventory,
+                group_id: scope.home_groups[i].id
                 });
             
-            update_status = UpdateStatusMsg({ status: scope.groups[i].summary_fields.inventory_source.status });
+            update_status = UpdateStatusMsg({ status: scope.home_groups[i].summary_fields.inventory_source.status });
 
-            scope.groups[i].failed_hosts_tip = msg['tooltip']; 
-            scope.groups[i].failed_hosts_link = msg['url'];
-            scope.groups[i].failed_hosts_class = msg['class'];
-            scope.groups[i].status = update_status['status'];
-            scope.groups[i].source = scope.groups[i].summary_fields.inventory_source.source;
-            scope.groups[i].last_updated = last_update;
-            scope.groups[i].status_badge_class = update_status['class'];
-            scope.groups[i].status_badge_tooltip = update_status['tooltip'];
+            scope.home_groups[i].failed_hosts_tip = msg['tooltip']; 
+            scope.home_groups[i].failed_hosts_link = msg['url'];
+            scope.home_groups[i].failed_hosts_class = msg['class'];
+            scope.home_groups[i].status = update_status['status'];
+            scope.home_groups[i].source = scope.groups[i].summary_fields.inventory_source.source;
+            scope.home_groups[i].last_updated = last_update;
+            scope.home_groups[i].status_badge_class = update_status['class'];
+            scope.home_groups[i].status_badge_tooltip = update_status['tooltip'];
         }
         });
 
-    SearchInit({ scope: scope, set: 'groups', list: list, url: defaultUrl });
+    SearchInit({ scope: scope, set: 'home_groups', list: list, url: defaultUrl });
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
 
     // Process search params

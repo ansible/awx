@@ -36,7 +36,6 @@ angular.module('UserListDefinition', [])
         actions: {
             add: {
                 label: 'Create New',
-                icon: 'icon-plus',
                 mode: 'all',                      // One of: edit, select, all
                 ngClick: 'addUser()',
                 basePaths: ['organizations','users'],        // base path must be in list, or action not available
@@ -44,13 +43,9 @@ angular.module('UserListDefinition', [])
                 awToolTip: 'Create a new user'
                 },
             stream: {
-                'class': "btn-xs activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                dataPlacement: "top",
-                icon: "icon-comments-alt",
                 mode: 'all',
-                iconSize: 'large',
                 ngShow: "user_is_superuser"
                 }
             },

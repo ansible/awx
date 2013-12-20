@@ -31,14 +31,10 @@ angular.module('GroupListDefinition', [])
              help: {
                 awPopOver: "Choose groups by clicking on each group you wish to add. Click the <em>Select</em> button to add the groups to " +
                     "the selected inventory group.",
-                dataPlacement: 'left',
                 dataContainer: '#form-modal .modal-content',
-                icon: "icon-question-sign",
                 mode: 'all',
-                'class': 'btn-xs btn-help pull-right',
                 awToolTip: 'Click for help',
-                dataTitle: 'Adding Groups',
-                iconSize: 'large'
+                dataTitle: 'Adding Groups'
                 }
             },
 

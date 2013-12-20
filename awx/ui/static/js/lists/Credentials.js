@@ -55,21 +55,14 @@ angular.module('CredentialsListDefinition', [])
         
         actions: {
             add: {
-                icon: 'icon-plus',
-                label: 'Create New',
                 mode: 'all',                         // One of: edit, select, all
                 ngClick: 'addCredential()',
-                "class": 'btn-sm',
                 awToolTip: 'Create a new credential'
                 },
             stream: {
-                'class': "btn-sm activity-btn",
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                dataPlacement: "top",
-                icon: "icon-comments-alt",
                 mode: 'all',
-                iconSize: 'large',
                 ngShow: "user_is_superuser"
                 }
             },
@@ -77,7 +70,7 @@ angular.module('CredentialsListDefinition', [])
         fieldActions: {
             edit: {
                 ngClick: "editCredential(\{\{ credential.id \}\})",
-                icon: 'icon-edit',
+                icon: 'fa-edit',
                 label: 'Edit',
                 "class": 'btn-sm',
                 awToolTip: 'View/Edit credential'
@@ -85,7 +78,7 @@ angular.module('CredentialsListDefinition', [])
 
             "delete": {
                 ngClick: "deleteCredential(\{\{ credential.id \}\},'\{\{ credential.name \}\}')",
-                icon: 'icon-trash',
+                icon: 'fa-trash',
                 label: 'Delete',
                 "class": 'btn-sm',
                 awToolTip: 'Delete credential'

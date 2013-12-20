@@ -9,8 +9,8 @@
 
 angular.module('ListGenerator', ['GeneratorHelpers'])
     .factory('GenerateList', [ '$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
-        'Column', 'DropDown', 'NavigationLink', 'Button',
-    function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink, Button) {
+        'Column', 'DropDown', 'NavigationLink', 'Button', 'SelectIcon',
+    function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink, Button, SelectIcon) {
     return {
     
     setList: function(list) {
@@ -159,7 +159,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                          navigation[itm].href + "\" ";
                      // html += (navigation[itm].active) ? "class=\"active\" " : "";
                      html += ">";
-                     html += "<i class=\"icon-ok\" style=\"visibility: ";
+                     html += "<i class=\"fa fa-check\" style=\"visibility: ";
                      html += (navigation[itm].active) ? "visible" : "hidden";
                      html += "\"></i> ";
                      html += navigation[itm].label;
@@ -238,17 +238,12 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           
           html += "<div class=\"list-actions\">\n";
           
+          // Add toolbar buttons or 'actions'
           for (action in list.actions) {
               if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
                  if ( (list.actions[action].basePaths == undefined) || 
                       (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
-                     list.actions[action]['class'] = 'btn-xs btn-primary';
-                     list.actions[action]['iconSize'] = 'large';
-                     delete list.actions[action]['label'];
-                     if (action == 'stream') {
-                         list.actions[action]['icon'] = 'icon-time';
-                     }
-                     html += this.button(list.actions[action], action);
+                     html += this.button({ btn: list.actions[action], action: action, toolbar: true });
                  }
               }
           }
@@ -312,17 +307,17 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               html += ">";
               html += list.fields[fld].label; 
               if (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) {
-                 html += " <i class=\"";
+                 html += " <i class=\"fa ";
                  if (list.fields[fld].key) {
                     if (list.fields[fld].desc) {
-                       html += "icon-sort-down";
+                       html += "fa-sort-down";
                     }
                     else {
-                       html += "icon-sort-up";
+                       html += "fa-sort-up";
                     }
                  }
                  else {
-                    html += "icon-sort";
+                    html += "fa-sort";
                  }
                  html += "\"></i></a>";
               }
@@ -381,9 +376,6 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                      });
               }
               else {
-                 //list.fieldActions[action]['class'] = 'btn-xs btn-default';
-                 //list.fieldActions[action]['iconSize'] = 'large';
-                 //html += this.button(list.fieldActions[action]);
                  var fAction = list.fieldActions[action];
                  html += "<a ";
                  html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
@@ -391,8 +383,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  html += (fAction.ngHref) ?  this.attr(fAction,'ngHref') : "";
                  html += (fAction.ngShow) ?  this.attr(fAction,'ngShow') : "";
                  html += ">";
-                 html += (fAction.icon) ? this.attr(fAction, 'icon') : "";
-                 html += (fAction.label) ? list.fieldActions[action]['label'] : "";
+                 html += SelectIcon({ action: action });
+                 html += (fAction.label) ? " " + list.fieldActions[action]['label'] : "";
                  html += "</a>"; 
               }
           }

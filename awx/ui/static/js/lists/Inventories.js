@@ -82,17 +82,13 @@ angular.module('InventoriesListDefinition', [])
         
         actions: {
             add: {
-                label: 'Add',
-                icon: 'icon-plus',
                 mode: 'all',             // One of: edit, select, all
                 ngClick: 'addInventory()',
                 awToolTip: 'Create a new inventory'
                 },
             stream: {
-                label: 'Activity',
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                dataPlacement: "top",
                 icon: "icon-comments-alt",
                 mode: 'all',
                 ngShow: "user_is_superuser"

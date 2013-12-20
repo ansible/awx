@@ -205,30 +205,23 @@ angular.module('StreamListDefinition', [])
         
         actions: {
             refresh: {
-                dataPlacement: 'top',
-                icon: "icon-refresh",
                 mode: 'all',
                 'class': 'btn-xs',
                 awToolTip: "Refresh the page",
-                ngClick: "refreshStream()",
-                iconSize: 'large'
+                ngClick: "refreshStream()"
                 },
             close: {
-                dataPlacement: 'top',
-                icon: "icon-arrow-left",
                 mode: 'all',
-                'class': 'btn-xs',
                 awToolTip: "Close Activity Stream view",
-                ngClick: "closeStream()",
-                iconSize: 'large'
+                ngClick: "closeStream()"
                 }
             },
 
         fieldActions: {
-            edit: {
+            view: {
                 label: 'View',
                 ngClick: "showDetail(\{\{ activity.id \}\})",
-                icon: 'icon-zoom-in',
+                icon: 'fa-zoom-in',
                 "class": 'btn-default btn-xs',
                 awToolTip: 'View event details',
                 dataPlacement: 'top'

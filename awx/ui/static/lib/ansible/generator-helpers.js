@@ -54,7 +54,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                result += (obj.dataPlacement) ? "data-placement=\"" + obj['dataPlacement'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
                result += (obj.dataContainer) ? "data-container=\"" + obj['dataContainer'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
                result += "class=\"help-link\" ";
-               result += "><i class=\"icon-question-sign\"></i></a> ";
+               result += "><i class=\"fa fa-question-circle\"></i></a> ";
                break;
             case 'dataTitle':
                result = "data-title=\"" + value + "\" ";
@@ -73,8 +73,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                break;
             case 'icon':
                // new method of constructing <i> icon tag. Replces Icon method.
-               result = "<i class=\"" + value; 
-               result += (obj['iconSize']) ? " icon-" + obj['iconSize'] : "";
+               result = "<i class=\"fa fa-" + value; 
+               result += (obj['iconSize']) ? " " + obj['iconSize'] : "";
                result += "\"></i>";
                break;
             case 'autocomplete':
@@ -93,35 +93,102 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
 
     .factory('Icon', function() {
     return function(icon) {
-        return "<i class=\"" + icon + "\"></i> ";
+        return "<i class=\"fa " + icon + "\"></i> ";
         }
         })
 
-    .factory('Button', ['Attr', function(Attr) {
-    return function(btn, action) {
-        // pass in button object, get back html
-        var html = '';
-        if (btn.awRefresh) {
-           html += "<div class=\"refresh-grp\" ";
-           html += (btn.ngShow) ? Attr(btn, 'ngShow') : ""; 
-           html += ">\n";
+    .factory('SelectIcon', ['Icon', function(Icon) {
+    return function(params) {
+        // Common point for matching any type of action to the appropriate 
+        // icon. The intention is to maintain consistent meaning and presentation
+        // for every icon used in the application.
+        var icon; 
+        var action = params.action; 
+        var size = params.size;
+        switch(action) {
+            case 'help': 
+                icon = "fa-question-circle"; 
+                break;
+            case 'add':
+            case 'create': 
+                icon= "fa-plus";
+                break;
+            case 'edit':
+                icon = "fa-pencil";
+                break; 
+            case 'delete':
+                icon = "fa-trash-o"; 
+                break; 
+            case 'update':
+            case 'group_update':
+            case 'scm_update': 
+                icon = 'fa-cloud-download';
+                break;
+            case 'cancel':
+                icon = 'fa-minus-circle';
+                break;
+            case 'run':
+            case 'rerun': 
+            case 'submit':
+                icon = 'fa-rocket';
+                break;
+            case 'stream': 
+                icon = 'fa-clock-o';
+                break;
+            case 'refresh':
+                icon = 'fa-refresh';
+                break; 
+            case 'close':
+                icon='fa-arrow-left';
+                break;
+            case 'save': 
+                icon='fa-check-square-o';
+                break;
+            case 'reset': 
+                icon="fa-undo";
+                break;
+            case 'view':
+                icon="fa-search-plus";
+                break;   
+            }
+        icon += (size) ? " " + size : "";
+        return Icon(icon);
         }
+        }])
+
+
+    .factory('Button', ['Attr', 'SelectIcon', function(Attr, SelectIcon) {
+    return function(params) {
+        
+        // pass in button object, get back html
+
+        var btn = params.btn;
+        var action = params.action;
+        var toolbar = params.toolbar; 
+        
+        if (toolbar) {
+            //if this is a toolbar button, set some defaults
+            btn['class'] = 'btn-xs btn-primary';
+            btn['iconSize'] = 'fa-lg';
+            delete btn['label'];
+        }
+        
+        var html = '';
+        
         html += "<button type=\"button\" ";
         html += "class=\"btn";
-        if (btn.awRefresh && !btn['class']) {
-            html += ' btn-xs refresh-btn';
-        }
-        else 
+        
         if (btn['class']) {
             html += ' ' + btn['class']; 
         }
         else {
             html += " btn-sm";
         }
+        
         html += (btn['awPopOver']) ? " help-link-white" : "";
         html += "\" ";
         html += (btn.ngClick) ? Attr(btn, 'ngClick') : "";
-        html += (btn.awRefresh) ? " ng-click=\"refreshCnt = " + $AnsibleConfig.refresh_rate + "; refresh()\" " : "";
+        
         if (btn.id) {
            html += "id=\"" + btn.id + "\" ";
         }
@@ -130,10 +197,10 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
               html += "id=\"" + action + "_btn\" "; 
            }
         }
+        
         html += (btn.ngHide) ? Attr(btn,'ngHide') : "";
         html += (btn.awToolTip) ? Attr(btn,'awToolTip') : "";
         html += (btn.awToolTip && btn.dataPlacement == undefined) ? "data-placement=\"top\" " : "";
-        html += (btn.awRefresh && !btn.awTooltip) ? "aw-tool-tip=\"Refresh page\" data-placement=\"top\" ": "";
         html += (btn.awPopOver) ? "aw-pop-over=\"" + 
             btn.awPopOver.replace(/[\'\"]/g, '&quot;') + "\" " : "";
         html += (btn.dataPlacement) ? Attr(btn, 'dataPlacement') : "";
@@ -146,17 +213,16 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (btn.awTipPlacement) ? Attr(btn, 'awTipPlacement') : "";
         html += " >";
         html += (btn['img']) ? "<img src=\"" + $basePath + "img/" + btn.img + "\" style=\"width: 12px; height: 12px;\" >" : "";
-        html += (btn['icon']) ? Attr(btn,'icon') : "";
-        html += (btn['awRefresh'] && !btn['icon']) ? "<i class=\"icon-refresh\"></i> " : "";
-        html += (btn.label) ? "<br />" + btn.label : "";
+        
+        html += SelectIcon({ action: action, size: btn.iconSize });
+        
+        html += (btn.label) ? " " + btn.label : "";
         html += "</button> ";
-        if (btn['awRefresh']) {
-           html += '<span class=\"refresh-msg\" aw-refresh>{{ refreshMsg }}</span>\n';
-           html += "</div><!-- refresh-grp -->\n";
-        }
+        
         return html;
         }
         }])
+    
     
     .factory('NavigationLink', ['Attr', 'Icon', function(Attr, Icon) {
     return function(link) {
@@ -171,6 +237,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         return html;
         }
         }])
+
 
     .factory('DropDown', ['Attr', 'Icon', function(Attr, Icon) {
     return function(params) {
@@ -323,6 +390,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         }  
         }])
 
+
     .factory('Column', ['Attr', 'Icon', 'DropDown', 'Badge', 'BadgeCount', function(Attr, Icon, DropDown, Badge, BadgeCount) {
     return function(params) {
         var list = params['list'];
@@ -462,8 +530,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "<div class=\"panel panel-default\">\n";
         html += "<div class=\"panel-heading\" ng-click=\"accordionToggle('#accordion" + idx + "')\">\n";
         html += "<h4 class=\"panel-title\">\n";
-        html += "<i class=\"icon-question-sign help-collapse\"></i> " + hdr;
-        html += "<i class=\"icon-minus pull-right collapse-help-icon\" id=\"accordion" + idx + "-icon\"></i>";
+        html += "<i class=\"fa-question-circle help-collapse\"></i> " + hdr;
+        html += "<i class=\"fa fa-minus pull-right collapse-help-icon\" id=\"accordion" + idx + "-icon\"></i>";
         html += "</h4>\n";
         html += "</div>\n";
         html += "<div id=\"accordion" + idx + "\" class=\"panel-collapse collapse in\">\n";
@@ -544,7 +612,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             // Reset button for drop-down
             html += "<div class=\"input-group-btn\" ng-show=\"" + iterator + "SelectShow" + modifier + "\" >\n";
             html += "<button type=\"button\" class=\"btn btn-default btn-small\" ng-click=\"resetSearch('" + iterator + "')\" " +
-                "aw-tool-tip=\"Clear the search\" data-placement=\"top\"><i class=\"icon-remove\"></i></button>\n";
+                "aw-tool-tip=\"Clear the search\" data-placement=\"top\"><i class=\"fa fa-times\"></i></button>\n";
             html += "</div><!-- input-group-btn -->\n";
 
             html += "</div><!-- input-group -->\n";
@@ -554,14 +622,14 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             iterator + "ShowStartBtn" + modifier + " || " + 
             iterator + "HoldInput" + modifier + " || " + 
             iterator + "HideAllStartBtn" + modifier + "\"" +
-            "><i class=\"icon-remove\"></i></a>\n";
+            "><i class=\"fa fa-times\"></i></a>\n";
             
             html += "<a class=\"search-reset-start\" ng-click=\"search('" + iterator + "')\"" + 
             "ng-hide=\"" + iterator + "SelectShow" + modifier + " || " + iterator + "InputHide" + modifier + " || " +
             "!" + iterator + "ShowStartBtn" + modifier + " || " + 
             iterator + "HoldInput" + modifier + " || " + 
             iterator + "HideAllStartBtn" + modifier + "\"" +
-            "><i class=\"icon-search\"></i></a>\n";
+            "><i class=\"fa fa-search\"></i></a>\n";
 
             html += "</div><!-- col-lg-x -->\n";
         }
@@ -600,12 +668,12 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += (useMini) ? " btn-xs\" " : "\" ";
         html += "id=\"previous_page_btn\" ";
         html += "ng-click=\"prevSet('" + set + "','" + iterator + "')\" " +
-                "ng-disabled=\"" + iterator + "PrevUrl == null || " + iterator + "PrevUrl == undefined\"><i class=\"icon-caret-left\"></i> Prev</button>\n";
+                "ng-disabled=\"" + iterator + "PrevUrl == null || " + iterator + "PrevUrl == undefined\"><i class=\"fa fa-caret-left\"></i> Prev</button>\n";
         html += "<button type=\"button\" class=\"next btn btn-light";
         html += (useMini) ? " btn-xs\" " : "\" ";
         html += "id=\"next_page_btn\" ";
         html += " ng-click=\"nextSet('" + set + "','" + iterator + "')\"" + 
-                "ng-disabled=\"" + iterator + "NextUrl == null || " + iterator + "NextUrl == undefined\">Next <i class=\"icon-caret-right\"></i></button>\n";
+                "ng-disabled=\"" + iterator + "NextUrl == null || " + iterator + "NextUrl == undefined\">Next <i class=\"fa fa-caret-right\"></i></button>\n";
         
         if (mode != 'lookup') {
            html += "<label class=\"page-size-label\">Rows per page: </label>\n";

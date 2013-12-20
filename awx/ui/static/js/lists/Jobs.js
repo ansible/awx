@@ -76,13 +76,9 @@ angular.module('JobsListDefinition', [])
         
         actions: {
             refresh: {
-                dataPlacement: 'top',
-                icon: "icon-refresh",
                 mode: 'all',
-                'class': 'btn-xs',
                 awToolTip: "Refresh the page",
-                ngClick: "refresh()",
-                iconSize: 'large'
+                ngClick: "refresh()"
                 }
             },
 
