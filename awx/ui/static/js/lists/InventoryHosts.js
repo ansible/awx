@@ -32,7 +32,7 @@ angular.module('InventoryHostsDefinition', [])
                 awToolTip: "\{\{ host.badgeToolTip \}\}",
                 dataPlacement: 'top',
                 badgeNgHref: '\{\{ host.activeFailuresLink \}\}', 
-                badgeIcon: "\{\{ 'icon-failures-' + host.has_active_failures \}\}",
+                badgeIcon: "\{\{ 'fa icon-failures-' + host.has_active_failures \}\}",
                 badgePlacement: 'left',
                 badgeToolTip: "\{\{ host.badgeToolTip \}\}",
                 badgeTipPlacement: 'top',
@@ -41,7 +41,7 @@ angular.module('InventoryHostsDefinition', [])
                 },
             enabled_flag: {
                 label: 'Enabled',
-                badgeIcon: "\{\{ 'icon-enabled-' + host.enabled \}\}", 
+                badgeIcon: "\{\{ 'fa icon-enabled-' + host.enabled \}\}", 
                 badgePlacement: 'left',
                 badgeToolTip: "\{\{ host.enabledToolTip \}\}",
                 badgeTipPlacement: "top",

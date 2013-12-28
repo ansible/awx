@@ -34,7 +34,7 @@ angular.module('InventoriesListDefinition', [])
             failed_hosts: {
                 label: 'Failed Hosts',
                 ngHref: "\{\{ inventory.failed_hosts_link \}\}",
-                badgeIcon: "\{\{ 'icon-failures-' + inventory.failed_hosts_class \}\}",
+                badgeIcon: "\{\{ 'fa icon-failures-' + inventory.failed_hosts_class \}\}",
                 badgeNgHref: "\{\{ inventory.failed_hosts_link \}\}",
                 badgePlacement: 'left',
                 badgeToolTip: "\{\{ inventory.failed_hosts_tip \}\}",
@@ -48,7 +48,7 @@ angular.module('InventoriesListDefinition', [])
             status: { 
                 label: 'Status', 
                 ngHref: "\{\{ inventory.status_link \}\}",
-                badgeIcon: "\{\{ 'icon-cloud-' + inventory.status_class \}\}",
+                badgeIcon: "\{\{ 'fa icon-cloud-' + inventory.status_class \}\}",
                 badgeNgHref: "\{\{ inventory.status_link \}\}",
                 badgePlacement: 'left',
                 badgeTipPlacement: 'top',

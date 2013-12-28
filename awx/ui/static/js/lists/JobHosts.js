@@ -56,7 +56,7 @@ angular.module('JobHostDefinition', [])
             status: {
                 label: 'Status',
                 badgeNgHref: "\{\{ jobhost.statusLinkTo \}\}", 
-                badgeIcon: 'icon-job-\{\{ jobhost.status \}\}',
+                badgeIcon: 'fa icon-job-\{\{ jobhost.status \}\}',
                 badgePlacement: 'left',
                 badgeToolTip: "\{\{ jobhost.statusBadgeToolTip \}\}",
                 badgeTipPlacement: 'top',

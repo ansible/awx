@@ -57,7 +57,7 @@ angular.module('JobEventsListDefinition', [])
                 ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
                 awToolTip: "\{\{ jobevent.statusBadgeToolTip \}\}",
                 dataPlacement: 'top',
-                badgeIcon: 'icon-job-\{\{ jobevent.status \}\}',
+                badgeIcon: 'fa icon-job-\{\{ jobevent.status \}\}',
                 badgePlacement: 'left',
                 badgeToolTip: "\{\{ jobevent.statusBadgeToolTip \}\}",
                 badgeTipPlacement: 'top',

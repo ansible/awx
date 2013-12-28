@@ -10,70 +10,34 @@ angular.module('GroupFormDefinition', [])
     .value(
     'GroupForm', {
         
-        addTitle: 'Create Group',                            //Legend in add mode
-        editTitle: '{{ name }}',                             //Legend in edit mode
+        addTitle: 'Create Group',
+        editTitle: 'Edit Group',
         showTitle: true,
         cancelButton: false,
-        name: 'group',                                       //Form name attribute
-        well: true,                                          //Wrap the form with TB well
+        name: 'group',
+        well: true,
         formLabelSize: 'col-lg-3',
         formFieldSize: 'col-lg-9',
         
-        titleActions: {
-            copy_action: {
-                'class': 'btn-success btn-xs',
-                ngClick: "addGroup()",
-                ngHide: "groupAddHide",
-                awToolTip: "\{\{ addGroupHelp \}\}",
-                dataPlacement: 'top',
-                ngDisabled: "grpBtnDisable",
-                icon: "icon-check",
-                label: 'Copy'
-                },
-            create_action: {
-                'class': 'btn-success btn-xs',
-                ngClick: "createGroup()",
-                ngHide: "groupCreateHide",
-                awToolTip: "\{\{ createGroupHelp \}\}",
-                dataPlacement: "top",
-                ngDisabled: "grpBtnDisable",
-                icon: "icon-plus",
-                label: "Create New"
-                },
-            update_action: {
-                'class': 'btn-success btn-xs',
-                ngClick: "updateGroup()",
-                ngHide: "groupUpdateHide",
-                awToolTip: "\{\{ updateGroupHelp \}\}",
-                dataPlacement: "top",
-                ngDisabled: "grpBtnDisable",
-                icon: "icon-cloud-download",
-                label: 'Update'
-                },
-            delete_action: {
-                'class': "btn-danger btn-xs",
-                ngClick: "deleteGroup()",
-                ngHide: "groupDeleteHide",
-                awToolTip: "\{\{ deleteGroupHelp \}\}",
-                dataPlacement: "top",
-                ngDisabled: "grpBtnDisable",
-                icon: "icon-trash",
-                label: "Delete"
-                }
-            },
-
+        tabs: [
+            { name: 'properties', label: 'Properties'}, 
+            { name: 'source', label: 'Source' }
+            ],
+        
         fields: {
             name: {
                 label: 'Name',
                 type: 'text',
                 addRequired: true,
-                editRequired: true
+                editRequired: true,
+                tab: 'properties'
                 },
             description: { 
                 label: 'Description',
                 type: 'text',
                 addRequired: false,
-                editRequired: false
+                editRequired: false,
+                tab: 'properties'
                 },
             variables: {
                 label: 'Variables',
@@ -93,24 +57,25 @@ angular.module('GroupFormDefinition', [])
                     "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                     '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
                     '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
-                dataContainer: 'body'
+                dataContainer: 'body',
+                tab: 'properties'
                 },
             source: {
                 label: 'Source',
-                excludeModal: true,
                 type: 'select',
                 ngOptions: 'source.label for source in source_type_options',
                 ngChange: 'sourceChange()',
                 addRequired: false, 
                 editRequired: false,
-                'default': { label: 'Manual', value: '' }
+                'default': { label: 'Manual', value: '' },
+                tab: 'source'
                 },
             source_path: {
                 label: 'Script Path',
-                excludeModal: true,
                 ngShow: "source.value == 'file'",
                 type: 'text',
-                awRequiredWhen: {variable: "sourcePathRequired", init: "false" }
+                awRequiredWhen: {variable: "sourcePathRequired", init: "false" },
+                tab: 'source'
                 },
             credential: {
                 label: 'Cloud Credential',
@@ -120,11 +85,11 @@ angular.module('GroupFormDefinition', [])
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
                 addRequired: false, 
-                editRequired: false
+                editRequired: false,
+                tab: 'source'
                 },
             source_regions: {
                 label: 'Regions',
-                excludeModal: true,
                 type: 'text',
                 ngShow: "source.value == 'rax' || source.value == 'ec2'",
                 addRequired: false,
@@ -135,7 +100,8 @@ angular.module('GroupFormDefinition', [])
                 awPopOver: "<p>Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, " +
                     "or choose <em>All</em> to include all regions. AWX will only be updated with Hosts associated with the selected regions." +
                     "</p>",
-                dataContainer: 'body'
+                dataContainer: 'body',
+                tab: 'source'
                 },
             source_vars: {
                 label: 'Source Variables',
@@ -143,7 +109,6 @@ angular.module('GroupFormDefinition', [])
                 type: 'textarea',
                 addRequired: false,
                 editRequird: false, 
-                excludeModal: true,
                 rows: 10,
                 'default': '---',
                 parseTypeName: 'envParseType',
@@ -159,7 +124,8 @@ angular.module('GroupFormDefinition', [])
                     "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                     '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
                     '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
-                dataContainer: 'body'
+                dataContainer: 'body',
+                tab: 'source'
                 },
             /*update_interval: {
                 label: 'Update Interval',
@@ -180,6 +146,7 @@ angular.module('GroupFormDefinition', [])
                 label: 'Update Options',
                 type: 'checkbox_group',
                 ngShow: "source.value !== '' && source.value !== null",
+                tab: 'source',
 
                 fields: [
                     {
@@ -249,5 +216,5 @@ angular.module('GroupFormDefinition', [])
                
             }
 
-    }); //UserForm
+    });
 

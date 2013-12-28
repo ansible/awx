@@ -459,7 +459,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             $('.list-header').each(function(index) {
                 if ($(this).attr('id') != fld + '-header') {
                    var icon = $(this).find('i');
-                   icon.attr('class','fa-sort');
+                   icon.attr('class','fa fa-sort');
                 }
                 });
  

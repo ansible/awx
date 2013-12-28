@@ -39,13 +39,11 @@ angular.module('CredentialFormDefinition', [])
                 editRequired: false
                 },
             owner: {
-                label: 'Owned By?',
-                type: 'radio',
+                label: "Does this credential belong to a team or user?",
+                type: 'radio_group',
                 ngChange: "ownerChange()",
-                addRequired: true,
-                editRequired: true,
                 options: [
-                    { label: 'User', value: 'user' },
+                    { label: 'User', value: 'user', selected: true },
                     { label: 'Team', value: 'team' }
                     ],
                 awPopOver: "<p>A credential must be associated with either a user or a team. Choosing a user allows only the selected user access " + 
@@ -55,7 +53,7 @@ angular.module('CredentialFormDefinition', [])
                 dataContainer: "body"
                 },
             user: {
-                label: 'User',
+                label: 'User that owns this credential',
                 type: 'lookup',
                 sourceModel: 'user',
                 sourceField: 'username',
@@ -64,7 +62,7 @@ angular.module('CredentialFormDefinition', [])
                 awRequiredWhen: { variable: "user_required", init: "false" }
                 },
             team: {
-                label: 'Team',
+                label: 'Team that owns this credential',
                 type: 'lookup',
                 sourceModel: 'team',
                 sourceField: 'name',
@@ -81,9 +79,8 @@ angular.module('CredentialFormDefinition', [])
                 addRequired: true, 
                 editRequired: true,
                 helpCollapse: [
-                    { hdr: 'Credential Type',
-                      content: '<p>Choose a type for this credential: ' +
-                               '<dl>\n' +
+                    { hdr: 'Select a Credential Type',
+                      content: '<dl>\n' +
                                '<dt>AWS</dt>\n' +
                                '<dd>Access keys for Amazon Web Services used for inventory management or deployment.</dd>\n' +
                                '<dt>Machine</dt>\n' +

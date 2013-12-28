@@ -144,6 +144,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             case 'save': 
                 icon='fa-check-square-o';
                 break;
+            case 'properties':
+                icon="fa-wrench";
+                break;
             case 'reset': 
                 icon="fa-undo";
                 break;
@@ -163,7 +166,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         // pass in button object, get back html
 
         var btn = params.btn;
-        var action = params.action;
+        var action = params.action;  // label used to select the icon
         var toolbar = params.toolbar; 
         
         if (toolbar) {
@@ -530,7 +533,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += "<div class=\"panel panel-default\">\n";
         html += "<div class=\"panel-heading\" ng-click=\"accordionToggle('#accordion" + idx + "')\">\n";
         html += "<h4 class=\"panel-title\">\n";
-        html += "<i class=\"fa-question-circle help-collapse\"></i> " + hdr;
+        //html += "<i class=\"fa fa-question-circle help-collapse\"></i> " + hdr;
+        html += hdr;
         html += "<i class=\"fa fa-minus pull-right collapse-help-icon\" id=\"accordion" + idx + "-icon\"></i>";
         html += "</h4>\n";
         html += "</div>\n";

@@ -252,15 +252,15 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           if (options.mode == 'select' && list.selectInstructions) {
              var btn = {
                  awPopOver: list.selectInstructions,
-                 dataPlacement: 'left',
+                 dataPlacement: 'top',
                  dataContainer: 'body',
-                 icon: "fa-question-circle",
                  'class': 'btn-xs btn-help',
                  awToolTip: 'Click for help',
                  dataTitle: 'Help',
                  iconSize: 'fa-lg'
                  };
-             html += this.button(btn, 'select');
+             //html += this.button(btn, 'select');
+             html += this.button({ btn: btn, action: 'help', toolbar: true });
           }
 
           html += "</div><!-- list-acitons -->\n";

@@ -6,7 +6,9 @@
  *  Routines that handle group add/edit/delete on the Inventory tree widget.
  *  
  */
- 
+
+'use strict';
+
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
                                  'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'GroupsHelper',
                                  'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper', 'RefreshHelper',
@@ -26,7 +28,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         var choices = data.actions.GET.source.choices
                         for (var i=0; i < choices.length; i++) {
                             if (choices[i][0] !== 'file') {
-                                scope[variable].push({ label: [ (choices[i][0] == "") ? 'Manual' : choices[i][1] ], value: choices[i][0] });
+                                scope[variable].push({ label: (choices[i][0] == "") ? 'Manual' : choices[i][1] , value: choices[i][0] });
                             }
                         }
                         })
@@ -601,7 +603,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var groupCreated = false;
         
         scope.formModalActionLabel = 'Save';
-        scope.formModalHeader = 'Create New Group';
         scope.formModalCancelShow = true;
         scope.parseType = 'yaml';
         scope.source = null;
@@ -704,17 +705,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions, ClickNode,
         LookUpInit, CredentialList, Empty, Wait, GetChoices) {
     return function(params) {
-        
-        $('#tree-form').hide().empty();
-
+       
         var group_id = params.group_id;
         var inventory_id = params.inventory_id;
         var generator = GenerateForm;
         var form = GroupForm;
         var defaultUrl =  GetBasePath('groups') + group_id + '/';
 
-        var scope = generator.inject(form, 
-            { mode: 'edit', modal: false, related: false, id: 'tree-form', breadCrumbs: false });
+        var scope = generator.inject(form, { mode: 'edit', modal: true, related: false });
         generator.reset();
         
         var master = {};
@@ -722,7 +720,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         
         GetSourceTypeOptions({ scope: scope, variable: 'source_type_options' });
         
-        scope.update_interval_options = GetUpdateIntervalOptions();
+        //scope.update_interval_options = GetUpdateIntervalOptions();
+        scope.formModalActionLabel = 'Save';
+        scope.formModalCancelShow = true;
         scope.source = form.fields.source['default'];
         scope.parseType = 'yaml';
         scope[form.fields['source_vars'].parseTypeName] = 'yaml';
@@ -945,8 +945,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         scope.removeSaveComplete = scope.$on('SaveComplete', function(e, error) {
             if (!error) {
-               scope['flashMessage'] = 'Your changes to ' + scope['name'] + ' were saved.';
-               ClickNode({ selector: '#inventory-root-node' });
+                //scope['flashMessage'] = 'Your changes to ' + scope['name'] + ' were saved.';
+                //ClickNode({ selector: '#inventory-root-node' });
+                scope.formModalActionDisabled = false;
+                scope.showGroupHelp = false;  //get rid of the Hint
+                $('#form-modal').modal('hide');
             }
             });
 
@@ -955,15 +958,18 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         scope.removeFormSaveSuccess = scope.$on('formSaveSuccess', function(e, group_id) {
             
+            // Source data gets stored separately from the group. Validate and store Source
+            // related fields, then call SaveComplete to wrap things up.
+
             var parseError = false;
             var saveError = false;
             
             // Update the selector tree with new group name, descr
-            SetNodeName({ scope: scope['selectedNode'], group_id: group_id,
-                name: scope.name, description: scope.description });
+            //SetNodeName({ scope: scope['selectedNode'], group_id: group_id,
+            //    name: scope.name, description: scope.description });
 
             if (scope.source.value !== null && scope.source.value !== '') {
-               var data = { group: group_id, 
+                var data = { group: group_id, 
                    source: scope['source'].value,
                    source_path: scope['source_path'],
                    credential: scope['credential'],
@@ -972,46 +978,42 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    update_on_launch: scope['update_on_launch']
                    //update_interval: scope['update_interval'].value
                    };
-        
-               // Get the select list of regions
-               var regions = $('#s2id_group_source_regions').select2("data");
-               data['source_regions'] = '';
-               for (var i=0; i < regions.length; i++) {
-                   data['source_regions'] += regions[i].id + ',';
-               }
-               data['source_regions'] = data['source_regions'].replace(/\,$/,''); 
 
-               if (scope['source'].value == 'ec2') {
-                  try {
-                       // Make sure we have valid variable data
-                       if (scope.envParseType == 'json') {
-                          var json_data = JSON.parse(scope.source_vars);  //make sure JSON parses
-                       }
-                       else {
-                          var json_data = jsyaml.load(scope.source_vars);  //parse yaml
-                       }
-                      
-                       // Make sure our JSON is actually an object
-                       if (typeof json_data !== 'object') {
-                          throw "failed to return an object!";
-                       }
-                       
-                       // Send JSON as a string
-                       if ($.isEmptyObject(json_data)) {
-                          data.source_vars = "";
-                       }
-                       else {
-                          data.source_vars = JSON.stringify(json_data, undefined, '\t'); 
-                       }
-                  }
-                  catch(err) {
-                       parseError = true;
-                       scope.$emit('SaveComplete', true);
-                       Alert("Error", "Error parsing extra variables. Parser returned: " + err);     
-                  }
-               }
+                // Create a string out of selected list of regions
+                var regions = $('#s2id_group_source_regions').select2("data");
+                data['source_regions'] = regions.join();
+                
+                if (scope['source'].value == 'ec2') {
+                    // for ec2, validate variable data
+                    try {
+                         if (scope.envParseType == 'json') {
+                            var json_data = JSON.parse(scope.source_vars);  //make sure JSON parses
+                         }
+                         else {
+                            var json_data = jsyaml.load(scope.source_vars);  //parse yaml
+                         }
+                        
+                         // Make sure our JSON is actually an object
+                         if (typeof json_data !== 'object') {
+                            throw "failed to return an object!";
+                         }
+                         
+                         // Send JSON as a string
+                         if ($.isEmptyObject(json_data)) {
+                            data.source_vars = "";
+                         }
+                         else {
+                            data.source_vars = JSON.stringify(json_data, undefined, '\t'); 
+                         }
+                    }
+                    catch(err) {
+                         parseError = true;
+                         scope.$emit('SaveComplete', true);
+                         Alert("Error", "Error parsing extra variables. Parser returned: " + err);     
+                    }
+                }
 
-               if (!parseError) {           
+                if (!parseError) {           
                   Rest.setUrl(scope.source_url)
                   Rest.put(data)
                       .success( function(data, status, headers, config) {
@@ -1022,7 +1024,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                           ProcessErrors(scope, data, status, form,
                               { hdr: 'Error!', msg: 'Failed to update group inventory source. PUT status: ' + status });
                           });
-               }
+                }
             }
             else {
                // No source value
@@ -1030,8 +1032,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
             });
 
-        // Save changes to the parent
-        scope.formSave = function() {
+        // Save
+        scope.formModalAction = function() {
             Wait('start');
             try {
                 var refreshHosts = false;

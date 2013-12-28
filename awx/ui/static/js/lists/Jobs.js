@@ -30,7 +30,7 @@ angular.module('JobsListDefinition', [])
                 searchOnly: true
                 },
             created: {
-                label: 'Date',
+                label: 'Create On',
                 link: false,
                 searchable: false
                 },
@@ -64,7 +64,7 @@ angular.module('JobsListDefinition', [])
                     { name: "error", value: "error" },
                     { name: "failed", value: "failed" },
                     { name: "canceled", value: "canceled" } ],
-                badgeIcon: 'icon-job-\{\{ job.status \}\}',
+                badgeIcon: 'fa icon-job-\{\{ job.status \}\}',
                 badgePlacement: 'left',
                 badgeToolTip: "\{\{ job.statusBadgeToolTip \}\}",
                 badgeTipPlacement: 'top',

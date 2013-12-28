@@ -316,7 +316,7 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 
 
 function InventoriesEdit ($scope, $location, $routeParams, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait, 
-                          UpdateStatusMsg, InjectHosts, HostsReload) 
+                          UpdateStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -347,14 +347,21 @@ function InventoriesEdit ($scope, $location, $routeParams, GenerateList, ClearSc
 
     $scope.showHosts = function(group_id) {
         // Clicked on group
-        console.log('here');
         HostsReload({ scope: $scope, group_id: group_id, inventory_id: $scope.inventory_id });
+        }
+
+    $scope.createGroup = function() {
+        GroupsAdd({ scope: $scope, inventory_id: $scope.inventory_id, group_id: null });
+        }
+        
+    $scope.editGroup = function(group_id) {
+        GroupsEdit({ scope: $scope, inventory_id: $scope.inventory_id, group_id: group_id });
         }
 
     BuildTree({ scope: $scope, inventory_id: $scope.inventory_id });
 }
 
 InventoriesEdit.$inject = [ '$scope','$location', '$routeParams', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts', 'BuildTree',
-                            'Wait', 'UpdateStatusMsg', 'InjectHosts', 'HostsReload'
+                            'Wait', 'UpdateStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit'
                             ]; 
   

@@ -66,11 +66,6 @@ angular.module('UserFormDefinition', [])
                 awRequiredWhen: { variable: "not_ldap_user", init: true },
                 autocomplete: false
                 },
-            ldap_user: {
-                label: 'Created by LDAP?', 
-                type: 'checkbox',
-                readonly: true
-                },
             password: {
                 label: 'Password',
                 type: 'password',
@@ -91,13 +86,18 @@ angular.module('UserFormDefinition', [])
                 autocomplete: false
                 },
             is_superuser: {
-                label: 'Superuser?',
+                label: 'Superuser (User has full system administration privileges.)',
                 type: 'checkbox',
                 trueValue: 'true',
                 falseValue: 'false',
                 "default": 'false',
                 ngShow: "current_user['is_superuser'] == true"
-                }
+                },
+             ldap_user: {
+                label: 'Created by LDAP', 
+                type: 'checkbox',
+                readonly: true
+                },
             },
 
         buttons: { //for now always generates <button> tags 

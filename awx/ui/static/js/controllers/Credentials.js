@@ -195,6 +195,11 @@ function CredentialsAdd ($scope, $rootScope, $compile, $location, $log, $routePa
                   { hdr: 'Error!', msg: 'Failed to retrieve team. GET status: ' + status });
               });
    }
+   else {
+      // default type of owner to a user
+      scope['owner'] = 'user';
+      OwnerChange({ scope: scope });
+   }
    
    // Handle Kind change
    scope.kindChange = function () {

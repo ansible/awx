@@ -83,7 +83,7 @@ angular.module('ProjectFormDefinition', [])
             base_dir: {
                 label: 'Project Base Path',
                 type: 'textarea',
-                "class": 'col-lg-6',
+                //"class": 'col-lg-6',
                 showonly: true,
                 ngShow: "scm_type.value == ''",
                 awPopOver: '<p>Base path used for locating playbooks. Directories found inside this path will be listed in the playbook directory drop-down. ' +
@@ -153,7 +153,7 @@ angular.module('ProjectFormDefinition', [])
                 editRequired: false
                 },
             checkbox_group: {
-                label: 'SCM Options',
+                label: 'SCM Update Options',
                 type: 'checkbox_group',
                 ngShow: "scm_type && scm_type.value !== ''",
                 fields: [

@@ -187,7 +187,7 @@ angular.module('JobTemplateFormDefinition', [])
                     "YAML:<br />\n" +
                     "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n",
                 dataTitle: 'Extra Variables',
-                dataPlacement: 'left',
+                dataPlacement: 'right',
                 dataContainer: "body"
                 },
             job_tags: {
@@ -206,7 +206,7 @@ angular.module('JobTemplateFormDefinition', [])
                     "in the Job Tags field:<\p>\n" +
                     "<blockquote>configuration,packages</blockquote>\n",
                 dataTitle: "Job Tags",
-                dataPlacement: "left",
+                dataPlacement: "right",
                 dataContainer: "body"
                 },
             allow_callbacks: {
@@ -227,7 +227,7 @@ angular.module('JobTemplateFormDefinition', [])
                     "<p>Note the requesting host must be defined in your inventory. If ansible fails to locate the host either by name or IP address " +
                     "in one of your defined inventories, the request will be denied.</p>" +
                     "<p>Successful requests will result in an entry on the Jobs tab, where the results and history can be viewed.</p>",
-                detailPlacement: 'left',
+                dataPlacement: 'right',
                 dataTitle: 'Callback URL',
                 dataContainer: "body"
                 },
@@ -247,7 +247,7 @@ angular.module('JobTemplateFormDefinition', [])
                     "<p>Note the requesting host must be defined in your inventory. If ansible fails to locate the host either by name or IP address " +
                     "in one of your defined inventories, the request will be denied.</p>" +
                     "<p>Successful requests will result in an entry on the Jobs tab, where the results and history can be viewed.</p>",
-                detailPlacement: 'left',
+                dataPlacement: 'right',
                 dataTitle: 'Callback URL',
                 dataContainer: "body"
                 },
@@ -261,7 +261,7 @@ angular.module('JobTemplateFormDefinition', [])
                     "this key in the POST data of the request. Here's an example using curl:</p>\n" +
                     "<p class=\"code-breakable\">curl --data \"host_config_key=5a8ec154832b780b9bdef1061764ae5a\" " + 
                     "http://your.server.com:999/api/v1/job_templates/1/callback/</p>\n",
-                detailPlacement: 'left',
+                dataPlacement: 'right',
                 dataContainer: "body"
                 }
             },

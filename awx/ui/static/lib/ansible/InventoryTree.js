@@ -183,9 +183,9 @@ angular.module('InventoryTree', ['Utilities', 'RestServices'])
 
             function buildGroups(tree_data, parent, level) {
                 var sorted = SortNodes(tree_data);
-                for(var i=0; i < sorted.length; i++) {
-                   var currentId= id;
-                   var group = {
+                for (var i=0; i < sorted.length; i++) {
+                    var currentId= id;
+                    var group = {
                        name: sorted[i].name,
                        has_active_failures: sorted[i].has_active_failures,
                        total_hosts: sorted[i].total_hosts,
@@ -195,16 +195,17 @@ angular.module('InventoryTree', ['Utilities', 'RestServices'])
                        parent: parent, 
                        has_children: (sorted[i].children.length > 0) ? true : false,
                        id: id,
+                       group_id: sorted[i].id,
                        event_level: level,
                        ngicon: (sorted[i].children.length > 0) ? 'icon-collapse-alt' : null,
                        related: { children: (sorted[i].children.length > 0) ? sorted[i].related.children : '' },
                        status: sorted[i].summary_fields.inventory_source.status
                        }
-                   groups.push(group);
-                   id++;
-                   if (sorted[i].children.length > 0) {
-                      buildGroups(sorted[i].children, currentId, level + 1);
-                   }
+                    groups.push(group);
+                    id++;
+                    if (sorted[i].children.length > 0) {
+                        buildGroups(sorted[i].children, currentId, level + 1);
+                    }
                 }
             }
 

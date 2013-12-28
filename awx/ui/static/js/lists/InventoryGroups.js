@@ -32,7 +32,7 @@ angular.module('InventoryGroupsDefinition', [])
                 label: 'Sync Status',
                 ngClick: "viewUpdateStatus(\{\{ group.id \}\})",
                 searchType: 'select',
-                badgeIcon: "\{\{ 'icon-cloud-' + group.status_badge_class \}\}",
+                badgeIcon: "\{\{ 'fa icon-cloud-' + group.status_badge_class \}\}",
                 badgeToolTip: "\{\{ group.status_badge_tooltip \}\}",
                 awToolTip: "\{\{ group.status_badge_tooltip \}\}",
                 dataPlacement: 'top',
@@ -50,7 +50,7 @@ angular.module('InventoryGroupsDefinition', [])
             failed_hosts: {
                 label: 'Failed Hosts',
                 ngHref: "\{\{ group.failed_hosts_link \}\}",
-                badgeIcon: "\{\{ 'icon-failures-' + group.failed_hosts_class \}\}",
+                badgeIcon: "\{\{ 'fa icon-failures-' + group.failed_hosts_class \}\}",
                 badgeNgHref: "\{\{ group.failed_hosts_link \}\}",
                 badgePlacement: 'left',
                 badgeToolTip: "\{\{ group.failed_hosts_tip \}\}",
@@ -137,34 +137,26 @@ angular.module('InventoryGroupsDefinition', [])
         fieldActions: {
             group_update: {
                 label: 'Sync',
-                icon: 'icon-cloud-download',
-                "class": 'btn-xs btn-primary',
-                ngClick: 'updateGroup(\{\{ group.id \}\})',
+                ngClick: 'updateGroup(\{\{ group.group_id \}\})',
                 awToolTip: "\{\{ group.update_tooltip \}\}",
                 ngClass: "group.update_class",
                 awToolTip: "Start inventory sync"
                 },
             cancel: {
                 label: 'Cancel',
-                icon: 'icon-minus-sign',
-                ngClick: "cancelUpdate(\{\{ group.id \}\}, '\{\{ group.name \}\}')",
-                "class": 'btn-xs btn-primary',
+                ngClick: "cancelUpdate(\{\{ group.group_id \}\}, '\{\{ group.name \}\}')",
                 awToolTip: "\{\{ group.cancel_tooltip \}\}",
                 ngClass: "group.cancel_class",
                 ngShow: "group.status == 'running' || group.status == 'pending'"
                 },
-             edit: {
+            edit: {
                 label: 'Edit',
-                ngClick: "editGroup(\{\{ group.id \}\})",
-                icon: 'icon-edit',
-                "class": 'btn-xs btn-primary',
+                ngClick: "editGroup(\{\{ group.group_id \}\})",
                 awToolTip: 'Edit group'
                 },
             "delete": {
                 label: 'Delete',
-                ngClick: "deleteGroup(\{\{ group.id \}\},'\{\{ group.name \}\}')",
-                icon: 'icon-trash',
-                "class": 'btn-xs btn-primary',
+                ngClick: "deleteGroup(\{\{ group.group_id \}\},'\{\{ group.name \}\}')",
                 awToolTip: 'Delete group'
                 }
             }

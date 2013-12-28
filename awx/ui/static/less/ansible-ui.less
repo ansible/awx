@@ -393,17 +393,25 @@ a:hover {
   margin-bottom: 10px;
 }
 
+.form-group {
+   margin-bottom: 25px; 
+}
+
 .form-cancel {
-   float: right;
-   margin-right: 10px;
+  float: right;
+  margin-right: 10px;
 }
 
 .form-title-hr {
-   margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .form-horizontal .buttons {
   margin-top: 25px;  
+}
+
+.label-text {
+  padding-right: 10px;
 }
 
 /* Outline required fields in Red when focused */
@@ -659,9 +667,6 @@ input[type="checkbox"].checkbox-no-label {
 
 /* End Display list actions */
 
-.well {
-  padding-bottom: 0;
-}
 
 /* Enable table-hover to work when table is in a well */
 
@@ -695,8 +700,8 @@ input[type="checkbox"].checkbox-no-label {
   .icon-failures-true,
   .active-failures-true a,
   .active-failures-true a:active,
-  input[type="text"].job-failed,
-  input[type="text"].job-error {
+  .job-failed,
+  .job-error {
     color: #da4f49;
   }
 
@@ -715,15 +720,15 @@ input[type="checkbox"].checkbox-no-label {
   }
 
   
-  input[type="text"].job-new,
-  input[type="text"].job-canceled {
+  .job-new,
+  .job-canceled {
     color: #778899;
   }
 
   .icon-failures-false,
   .license-valid,
-  input[type="text"].job-success,
-  input[type="text"].job-successful {
+  .job-success,
+  .job-successful {
     color: @green;
   }
 
@@ -756,7 +761,8 @@ input[type="checkbox"].checkbox-no-label {
     color: @grey;
   }
 
-  .icon-job-changed {
+  .icon-job-changed,
+  .job-changed {
     color: @warning;
   }
 
@@ -1227,12 +1233,17 @@ input[type="checkbox"].checkbox-no-label {
 
 /* job_events syles */
 
-tr td i {
+#jobevents_table tr td i {
   float: none;
   padding-top: 3px;
   padding-left: 0;
   margin-right: 5px;
   margin-left: 0;
+}
+
+#jobevents_table .actions i {
+  padding-top: 0;
+  margin-right: 0;
 }
 
 tr td button i {

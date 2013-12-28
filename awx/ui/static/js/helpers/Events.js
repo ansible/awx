@@ -27,10 +27,9 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
             fields: {
                 status: {
                     labelClass: 'job-\{\{ status \}\}',
-                    icon: 'icon-job-\{\{ status \}\}',
                     type: 'custom',
                     section: 'Event',
-                    control: '<div class=\"job-event-status job-\{\{ status \}\}\">\{\{ status \}\}</div>'
+                    control: '<div class=\"job-event-status job-\{\{ status \}\}\"><i class=\"fa icon-job-{{ status }}"></i> \{\{ status \}\}</div>'
                     },
                 id: {
                     label: 'ID',
@@ -40,7 +39,7 @@ angular.module('EventsHelper', ['RestServices', 'Utilities', 'JobEventDataDefini
                     'class': 'span1'
                     },
                 created: {
-                    label: 'Created',
+                    label: 'Created On',
                     type: 'text',
                     section: 'Event',
                     readonly: true

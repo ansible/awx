@@ -33,7 +33,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
     inject: function(form, options) {
        //
-       // Use to inject the form as html into the view.  View MUST have an ng-bind for 'htmlTemplate'.
+       // Use to inject the form as html into the view.  View MUST have an ng-bind for 'htmlTemplate'.t
        // Returns scope of form.
        //
        
@@ -311,7 +311,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        }
        html += "<input type=\"text\" name=\"" + fld + "\" ";
        html += "ng-model=\"" + fld + "\" ";
-       html += (field['class']) ? this.attr(field, "class") : "";
+       html += (field['class']) ? Attr(field, "class") : "";
        html += " readonly />\n";
        return html;
        },
@@ -412,7 +412,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
            }
            
            html += "<input type=\"checkbox\" "; 
-           html += (!label) ? "style=\"padding-top:5px;\" " : "";
+           //html += (!label) ? "style=\"padding-top:5px;\" " : "";
            html += Attr(field,'type');
            html += "ng-model=\"" + fld + '" ';
            html += "name=\"" + fld + '" ';
@@ -421,7 +421,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
            html += (idx !== undefined) ? "_" + idx : "";
            html += "class=\"";
            html += (field['class']) ? field['class'] + " " : "";
-           html += (!label) ? "checkbox-no-label" : "";
+           //html += (!label) ? "checkbox-no-label" : "";
            html += "\"";
            html += (field.trueValue !== undefined) ? Attr(field,'trueValue') : "";
            html += (field.falseValue !== undefined) ? Attr(field,'falseValue') : "";
@@ -437,9 +437,32 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
            return html;
            }
+
+       function label() {
+           var html = '';
+           if (field.label || field.labelBind) {
+               html += "<label ";
+               html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
+               if (horizontal || field.labelClass) {
+                   html += "class=\"";
+                   html += (field.labelClass) ? field.labelClass : "";
+                   html += (horizontal) ? " " + getLabelWidth() : "";
+                   html += "\" ";
+               }
+               html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";         
+               html += "for=\"" + fld + '">';
+               //html += (field.awPopOver && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
+               html += (field.icon) ? this.icon(field.icon) : "";
+               html += "<span class=\"label-text\">" + field.label + "</span>";
+               html += (field.awPopOver && !field.awPopOverRight) ? Attr(field, 'awPopOver', fld) : "";
+               html += "</label>\n";
+           }
+           return html;
+           }
        
        var html = '';
-
+       var horizontal = (this.form.horizontal) ? true : false;
+       
        if (field.type == 'alertblock') {
           html += "<div class=\"alert ";
           html += (field.closeable == undefined || field.closeable == true) ? "alert-dismissable " : "";
@@ -459,7 +482,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
           }
        }
        
-       if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {  
+       if ( (! field.readonly) || (field.readonly && options.mode == 'edit') ) {
           html += "<div class=\"form-group\" ";
           html += (field.ngShow) ? this.attr(field,'ngShow') : "";
           html += (field.ngHide) ? this.attr(field,'ngHide') : "";
@@ -467,50 +490,54 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
           //text fields
           if (field.type == 'text' || field.type == 'password' || field.type == 'email') {
-             html += "<div class=\"label-text " + getLabelWidth();
-             html += (field.labelClass) ? " " + field.labelClass : "";
-             html += "\" ";
-             html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
-             html += ">\n";
-             html += (field.awPopOver && !field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
-             html += "<label ";
-             html += "class=\"control-label";
-             html += "\" ";
-             html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
-             html += "for=\"" + fld + '">';
-             html += (field.icon) ? this.icon(field.icon) : "";
-             html += "<span class=\"label-text\">" + field.label + '</span></label>' + "\n";
-             html += (field.awPopOver && field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
-             html += "</div>\n";
+             //html += "<div class=\"label-text " + getLabelWidth();
+             //html += (field.labelClass) ? " " + field.labelClass : "";
+             //html += "\" ";
+             //html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
+             //html += ">\n";
+             //html += (field.awPopOver && !field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
+             //html += "<label class=\"control-label\" ";
+             //html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
+             //html += "for=\"" + fld + '">';
+             //html += (field.icon) ? this.icon(field.icon) : "";
+             //html += "<span class=\"label-text\">" + field.label + '</span></label>' + "\n";
+             //html += (field.awPopOver && field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
+             //html += "</div>\n";
+             
+             html += label();
+
              html += "<div ";
-             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : "";
-             html += "class=\"" + getFieldWidth() + "\">\n";
+             html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
+             html += ">\n";
+             
              html += (field.clear || field.genMD5) ? "<div class=\"input-group\">\n" : "";
+             
              if (field.control === null || field.control === undefined || field.control) {
-                html += "<input ";
-                html += this.attr(field,'type');
-                html += "ng-model=\"" + fld + '" ';
-                html += 'name="' + fld + '" ';
-                html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-                html += (field.chkPass) ? "chk-pass " : "";
-                html += buildId(field, fld, this.form);
-                html += "class=\"form-control";
-                html += (field['class']) ? " " + this.attr(field, 'class') : "";
-                html += "\" ";
-                html += (field.placeholder) ? this.attr(field,'placeholder') : "";
-                html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
-                html += (options.mode == 'add' && field.addRequired) ? "required " : "";
-                html += (field.readonly || field.showonly) ? "readonly " : "";
-                html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
-                html += (field.capitalize) ? "capitalize " : "";
-                html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
-                html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
-                html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
-                  field.awRequiredWhen.variable + "\" " : "";
-                html += (field.awValidUrl) ? "aw-valid-url " : ""; 
-                html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled=\"" + field.associated + "_ask\" " : "";
-                html += (field.awMultiselect) ? "aw-multiselect=\"" + field.awMultiselect + "\" " : "";
-                html += " >\n";
+                 html += "<input ";
+                 html += this.attr(field,'type');
+                 html += "ng-model=\"" + fld + '" ';
+                 html += 'name="' + fld + '" ';
+                 html += (field.ngChange) ? this.attr(field,'ngChange') : "";
+                 html += (field.chkPass) ? "chk-pass " : "";
+                 html += buildId(field, fld, this.form);
+                 html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : "";
+                 html += "class=\"form-control";
+                 html += (field['class']) ? " " + this.attr(field, 'class') : "";
+                 html += "\" ";
+                 html += (field.placeholder) ? this.attr(field,'placeholder') : "";
+                 html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
+                 html += (options.mode == 'add' && field.addRequired) ? "required " : "";
+                 html += (field.readonly || field.showonly) ? "readonly " : "";
+                 html += (field.awPassMatch) ? "awpassmatch=\"" + field.associated + "\" " : "";
+                 html += (field.capitalize) ? "capitalize " : "";
+                 html += (field.ask) ? "ng-disabled=\"" + fld + "_ask\" " : "";
+                 html += (field.autocomplete !== undefined) ? this.attr(field, 'autocomplete') : "";
+                 html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
+                    field.awRequiredWhen.variable + "\" " : "";
+                 html += (field.awValidUrl) ? "aw-valid-url " : ""; 
+                 html += (field.associated && this.form.fields[field.associated].ask) ? "ng-disabled=\"" + field.associated + "_ask\" " : "";
+                 html += (field.awMultiselect) ? "aw-multiselect=\"" + field.awMultiselect + "\" " : "";
+                 html += " >\n";
              }
              
              if (field.clear) {
@@ -601,7 +628,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
          //textarea fields
          if (field.type == 'textarea') { 
              
-            if (field.label !== false) {
+            /*if (field.label !== false) {
                html += "<div class=\"label-text " + getLabelWidth();
                html += (field.labelClass) ? " " + field.labelClass : "";
                html += "\" ";
@@ -616,9 +643,17 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                html += "</div>\n";
                html += "<div ";
                html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-               html += "class=\"" + getFieldWidth() + "\">\n";
+               html += "class=\"" + getFieldWidth() + "\"";
+               html += ">\n";
             }
+           */
+            
+            html += label();
 
+            html += "<div ";
+            html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
+            html += ">\n";
+            
             // Variable editing
             if (fld == "variables" || fld == "extra_vars" || fld == 'inventory_variables' || fld == 'source_vars') {
               html += "<div class=\"parse-selection\" id=\"" + this.form.name + "_" + fld + "_parse_type\">Parse as: " +
@@ -627,7 +662,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
               html += "\" value=\"yaml\"> <span class=\"parse-label\">YAML</span>\n";
               html += "<input type=\"radio\" ng-model=\"";
               html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
-              html += "\" value=\"json\"> <span class=\"parse-label\">JSON</span>\n</div>\n";
+              html += "\" value=\"json\"> <span class=\"parse-label\">JSON</span>\n"
+              html += "</div>\n";
             }
 
             html += "<textarea ";
@@ -644,20 +680,20 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
             html += (options.mode == 'add' && field.addRequired) ? "required " : "";
             html += (field.readonly || field.showonly) ? "readonly " : "";
             html += "></textarea>\n";
+            
             // Add error messages
             if ( (options.mode == 'add' && field.addRequired) || (options.mode == 'edit' && field.editRequired) ) {
               html += "<div class=\"error\" ng-show=\"" + this.form.name + '_form.' + fld + ".$dirty && " + 
               this.form.name + '_form.' + fld + ".$error.required\">A value is required!</div>\n";
             }
             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
-            if (field.label !== false) {
-              html += "</div>\n";
-            }
+            html += "</div>\n";
          }
 
          //select field
          if (field.type == 'select') {
-            html += "<div class=\"label-text " + getLabelWidth();
+            
+            /*html += "<div class=\"label-text " + getLabelWidth();
             html += (field.labelClass) ? " " + field.labelClass : "";
             html += "\" ";
             html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
@@ -668,7 +704,16 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
             html += "</div>\n";
             html += "<div ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-            html += "class=\"" + getFieldWidth() + "\">\n";
+            html += "class=\"" + getFieldWidth() + "\"";
+            html += ">\n";
+            */
+            
+            html += label();
+
+            html += "<div ";
+            html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
+            html += ">\n";
+
             html += "<select ";
             html += "ng-model=\"" + fld + '" ';
             html += 'name="' + fld + '" ';
@@ -705,14 +750,24 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
          //number field
          if (field.type == 'number') { 
-            html += "<label class=\"control-label " + getLabelWidth() + "\" for=\"" + fld + '">';
+            /*html += "<label class=\"control-label " + getLabelWidth();
+            html += " for=\"" + fld + '">';
             html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
             html += field.label + '</label>' + "\n";
             html += "<div ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-            html += "class=\"" + getFieldWidth() + "\">\n";
+            html += "class=\"" + getFieldWidth() + "\"";
+            html += ">\n";
             // Use 'text' rather than 'number' so that our integer directive works correctly
             html += (field.slider) ? "<div class=\"slider\" id=\"" + fld + "-slider\"></div>\n" : "";
+            */
+
+            html += label();
+
+            html += "<div ";
+            html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
+            html += ">\n";
+
             html += "<input "; 
             html += (field.spinner) ? "" : "type=\"text\" ";
             html += "\" value=\"" + field['default'] + "\" ";
@@ -754,11 +809,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
          
          //checkbox group
          if (field.type == 'checkbox_group') {
-            html += "<label class=\"control-label " + getLabelWidth() + "\">" + 
-                field.label + "</label>\n";
-            html += "<div class=\"checkbox-group ";
-            html += getFieldWidth();
-            html += "\" ";
+            
+            html += label();
+
+            html += "<div ";
+            html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
+            html += ">\n";
+
+            html += "<div class=\"checkbox-group\" ";
             html += "id=\"" + this.form.name + "_" + fld + "_chbox_group\" "; 
             html += ">\n";
             for (var i=0; i < field.fields.length; i++) {
@@ -778,43 +836,57 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                   field.max + "</div>\n";
             }
             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+            html += "</div><!-- checkbox-group -->\n";
             html += "</div>\n";
          }
 
          //checkbox
          if (field.type == 'checkbox') {
-            html += "<div class=\"label-text " + getLabelWidth();
-            html += (field.labelClass) ? " " + field.labelClass : "";
-            html += "\" ";
-            html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
-            html += ">\n";
-            html += (field.awPopOver && !field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
+            //html += "<div class=\"label-text " + getLabelWidth();
+            //html += (field.labelClass) ? " " + field.labelClass : "";
+            //html += "\" ";
+            //html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
+            //html += ">\n";
+
+            //html += "</div>\n";
+            //html += "<div ";
+            //html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
+            //html += "class=\"" + getFieldWidth() + "\"";
+            //html += ">\n"; 
+            
+            if (horizontal) {
+                var fldWidth = getFieldWidth();
+                var offset = 12 - parsetInt(fldWidth.replace(/[A-Z,a-z,-]/g,''));
+                html += "<div class=\"" + fldWidth + " col-lg-offset-" + offset + "\">\n"; 
+            }
+
+            html += "<div class=\"checkbox\">\n";
             html += "<label ";
-            html += "class=\"control-label";
-            html += "\" ";
             html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
             html += "for=\"" + fld + '">';
-            html += (field.icon) ? this.icon(field.icon) : "";
-            html += '<span class=\"label-text\">' + field.label + '</span></label>' + "\n";
-            html += (field.awPopOver && field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
-            html += "</div>\n";
-            html += "<div ";
-            html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-            html += "class=\"" + getFieldWidth() + "\">\n"; 
             html += buildCheckbox(this.form, field, fld, undefined, false);
+            html += (field.icon) ? this.icon(field.icon) : "";
+            //html += (field.awPopOver && !field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
+            html += '<span class=\"label-text\">' + field.label + "</span>";
+            html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
+            html += "</label>\n";
             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
-            html += "</div>\n"
+            html += "</div><!-- checkbox -->\n"
+
+            if (horizontal) {
+               html += "</div>\n";
+            }
          }
 
-         //radio
-         if (field.type == 'radio') {
-            html += "<label class=\"control-label " + getLabelWidth() + "\" for=\"" + fld + '">';
-            html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-            html += '<span class=\"label-text\">' + field.label + '</span></label>' + "\n";
+         //radio group
+         if (field.type == 'radio_group') {
+            
+            html += label();
+
             html += "<div ";
-            html += "id=\"" + this.form.name + "_" + fld + "_radio_grp\" ";
-            html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-            html += "class=\"" + getFieldWidth() + "\">\n"; 
+            html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
+            html += ">\n";
+
             for (var i=0; i < field.options.length; i++) {
                html += "<label class=\"radio-inline\" ";
                html += (field.options[i].ngShow) ? this.attr(field.options[i],'ngShow') : "";
@@ -843,8 +915,41 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
             html += "</div>\n";
          }
 
+         // radio button
+         if (field.type == 'radio') {
+             
+             if (horizontal) {
+                 var fldWidth = getFieldWidth();
+                 var offset = 12 - parsetInt(fldWidth.replace(/[A-Z,a-z,-]/g,''));
+                 html += "<div class=\"" + fldWidth + " col-lg-offset-" + offset + "\">\n"; 
+             }
+
+             html += "<div class=\"radio\">\n";
+             html += "<label ";
+             html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
+             html += "for=\"" + fld + '">';
+             
+             html += "<input type=\"radio\" "; 
+             html += "name=\"" + fld + "\" ";
+             html += "value=\"" + field.value + "\" ";
+             html += "ng-model=\"" + field.ngModel + "\" ";
+             html += (field.ngChange) ? Attr(field,'ngChange') : "";
+             html += (field.readonly) ? "disabled " : "";
+             html += (field.ngDisabled) ? Attr(field,'ngDisabled') : "";
+             html += " > ";
+             html += field.label;
+             html += "</label>\n";
+             html += "<div class=\"error api-error\" ng-bind=\"" + fld + "_api_error\"></div>\n";
+             html += "</div><!-- radio -->\n"
+
+             if (horizontal) {
+                 html += "</div>\n";
+             }
+         }
+
          //lookup type fields
          if (field.type == 'lookup' && (field.excludeMode == undefined || field.excludeMode != options.mode)) {
+            /*
             html += "<div class=\"label-text " + getLabelWidth();
             html += (field.labelClass) ? " " + field.labelClass : "";
             html += "\" ";
@@ -857,7 +962,15 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
             html += "</div>\n";
             html += "<div ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-            html += "class=\"" + getFieldWidth() + "\">\n";
+            html += "class=\"" + getFieldWidth() + "\"";
+            html += ">\n";
+            */
+            html += label();
+
+            html += "<div ";
+            html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
+            html += ">\n";
+            
             html += "<div class=\"input-group\">\n";
             html += "<span class=\"input-group-btn\">\n";
             html += "<button type=\"button\" class=\"lookup-btn btn btn-default\" " + this.attr(field,'ngClick') + "><i class=\"fa fa-search\"></i></button>\n";
@@ -893,7 +1006,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
          //custom fields
          if (field.type == 'custom') {
-            html += "<div class=\"label-text " + getLabelWidth();
+            /*html += "<div class=\"label-text " + getLabelWidth();
             html += (field.labelClass) ? " " + field.labelClass : "";
             html += "\" ";
             html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
@@ -904,40 +1017,21 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
             html += (field.label) ? field.label : '';
             html += '</label>' + "\n";
             html += "</div>\n";
+            */
+
+            html += label();
+
+            html += "<div ";
+            html += (horizontal) ? "class=\"" + getFieldWidth() + "\"" : "";
+            html += ">\n";
+
             html += "<div ";
             html += "id=\"" + form.name + "_" + fld + "\" ";
             html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-            html += "class=\"" + getFieldWidth() + "\">\n"; 
+            html += ">\n"; 
             html += field.control;
             html += "</div>\n";
-         }
-
-         if (field.type == 'lgtextarea') {
-             // Use for modal, readonly textarea fields
-             html += "<div class=\"label-text " + getLabelWidth() + "\">\n";
-             html += "<label class=\"control-label\">";
-             html += (field.icon) ? this.icon(field.icon) : "";
-             html += (field.label) ? field.label : '';
-             html += "</label>";
-             html += "</div>\n";
-             html += "<div class=\"col-lg-12\">\n";
-             html += "<div style=\"padding-left:10px;\">"
-             html += "<textarea ";
-             html += (field.rows) ? this.attr(field, 'rows') : "";
-             html += "ng-model=\"" + fld + '" ';
-             html += 'name="' + fld + '" ';
-             html += "class=\"form-control";
-             html += (field['class']) ? " " + field['class'] : "";
-             html += "\" ";
-             html += (field.ngChange) ? this.attr(field,'ngChange') : "";
-             html += buildId(field, fld, this.form);
-             html += (field.placeholder) ? this.attr(field,'placeholder') : "";
-             html += (options.mode == 'edit' && field.editRequired) ? "required " : "";
-             html += (options.mode == 'add' && field.addRequired) ? "required " : "";
-             html += (field.readonly || field.showonly) ? "readonly " : "";
-             html += "></textarea>\n";
-             html += "</div>\n";
-             html += "</div>\n";
+            html += "</div>\n";
          }
 
          html += "</div>\n";
@@ -1065,7 +1159,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
              html += "</div>\n";
              //html += "<div class=\"status-spin\"><i class=\"icon-spinner icon-spin\" ng-show=\"statusSearchSpin == true\"></i></div>\n";
           }
-          html += "<div class=\"form-horizontal status-fields\">\n";
+          html += "<div class=\"form status-fields\">\n";
           for (var fld in this.form.statusFields) {
               field = this.form.statusFields[fld];
               html += this.buildField(fld, field, options, this.form);
@@ -1118,31 +1212,60 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
              html += "<hr class=\"form-title-hr\">\n";
           }
 
-          html += "<form class=\"form-horizontal";
+          html += "<form class=\"";
+          html += (this.form.horizontal) ? "form-horizontal" : "";
           html += (this.form['class']) ? ' ' + this.form['class'] : '';
           html += "\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "_form\" autocomplete=\"off\" novalidate>\n";
           html += "<div ng-show=\"flashMessage != null && flashMessage != undefined\" class=\"alert alert-info\">{{ flashMessage }}</div>\n";
 
           var field;
           if (this.form.twoColumns) { 
-             html += "<div class=\"row\">\n";
-             html += "<div class=\"col-lg-6\">\n";
-             for (var fld in this.form.fields) {
-                 field = this.form.fields[fld];
-                 if (field.column == 1) {
-                    html += this.buildField(fld, field, options, this.form);
-                 }
-             }
-             html += "</div><!-- column 1 -->\n";
-             html += "<div class=\"col-lg-6\">\n";
-             for (var fld in this.form.fields) {
-                 field = this.form.fields[fld];
-                 if (field.column == 2) {
-                    html += this.buildField(fld, field, options, this.form);
-                 }
-             }
-             html += "</div><!-- column 2 -->\n";
-             html += "</div>\n";
+              html += "<div class=\"row\">\n";
+              html += "<div class=\"col-lg-6\">\n";
+              for (var fld in this.form.fields) {
+                  field = this.form.fields[fld];
+                  if (field.column == 1) {
+                      html += this.buildField(fld, field, options, this.form);
+                  }
+              }
+              html += "</div><!-- column 1 -->\n";
+              html += "<div class=\"col-lg-6\">\n";
+              for (var fld in this.form.fields) {
+                  field = this.form.fields[fld];
+                  if (field.column == 2) {
+                      html += this.buildField(fld, field, options, this.form);
+                  }
+              }
+              html += "</div><!-- column 2 -->\n";
+              html += "</div>\n";
+          }
+          else if (this.form.tabs) {
+              html += "<ul class=\"nav nav-tabs\">\n";
+              for (var i=0; i < this.form.tabs.length; i++) {
+                  var tab = this.form.tabs[i];
+                  html += "<li"; 
+                  if (i == 0) {
+                      html += " class=\"active\""; 
+                  }
+                  html += "><a href=\"#" + tab.name + "\" data-toggle=\"tab\">" + tab.label + "</a></li>\n";
+              }
+              html += "</ul>\n";
+              html += "<div class=\"tab-content\">\n";
+              for (var i=0; i < this.form.tabs.length; i++) {
+                  var tab = this.form.tabs[i];
+                  html += "<div class=\"tab-pane"; 
+                  if (i == 0) {
+                      html += " active";
+                  }
+                  html += "\" id=\"" + tab.name + "\">\n";
+                  for (var fld in this.form.fields) {
+                      if (this.form.fields[fld].tab == tab.name) {
+                          html += this.buildField(fld, this.form.fields[fld], options, this.form);
+                      }
+                  } 
+                  html += "</div>\n"
+              }
+              html += "</div>\n";
           }
           else {
              // original, single-column form
@@ -1193,15 +1316,27 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                    html += "<hr />\n";
                 }
                 
-                html += "<div class=\"form-group buttons\" ";
+                html += "<div class=\"buttons\" ";
                 html += "id=\"" + this.form.name + "_controls\" ";
+                
                 html += ">\n";
-                html += "<label class=\"";
-                html += (this.form.buttons['labelClass']) ? this.form.buttons['labelClass'] : "col-lg-2";
-                html += " control-label\"> </label>\n";
-                html += "<div class=\"";
-                html += (this.form.buttons['controlClass']) ? this.form.buttons['controlClass'] : "col-lg-6"; 
-                html += " controls\">\n";
+       
+                if (this.form.horizontal) {
+                    var offset = 2;
+                    if (this.form.buttons['labelClass']) {
+                        offset = parseInt(this.form.buttons['labelClass'].replace(/[A-Z,a-z,-]/g,''));
+                    }
+                    var width = 12 - offset;
+                    html += "<div class=\"col-lg-offset-" + offset + " col-lg-" + width + ">\n";
+                }
+
+                //html += "<label class=\"";
+                //html += (this.form.buttons['labelClass']) ? this.form.buttons['labelClass'] : "col-lg-2";
+                //html += " control-label\"> </label>\n";
+                
+                //html += "<div class=\"";
+                //html += (this.form.buttons['controlClass']) ? this.form.buttons['controlClass'] : "col-lg-6"; 
+                //html += " controls\">\n";
                 
                 for (var btn in this.form.buttons) {
                     if (typeof this.form.buttons[btn] == 'object') {
@@ -1244,8 +1379,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                        html += " " + button.label + "</button>\n";
                     }
                 } 
-                html += "</div>\n";
-                html += "</div>\n";
+                html += "</div><!-- buttons -->\n";
+
+                if (this.form.horizontal) {
+                    html += "</div>\n";
+                }
+
                 if (this.form.twoColumns) {
                    html += "</div>\n";
                    html += "</div>\n";
@@ -1326,20 +1465,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
  
               html += "<div class=\"col-lg-8\">\n";
               html += "<div class=\"list-actions\">\n";
+              
               for (var act in form.related[itm].actions) {
                  var action = form.related[itm].actions[act];
-                 html += "<button type=\"button\" class=\"btn btn-xs ";
-                 html += (form.related[itm].actions[act]['class']) ? form.related[itm].actions[act]['class'] : "btn-success";
-                 html += "\" ";
-                 html += "id=\"" + itm + "_" + act + "_btn\" ";
-                 html += this.attr(action,'ngClick');
-                 html += (action['ngShow']) ? this.attr(action,'ngShow') : "";
-                 html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
-                 html += (action.awToolTip) ? "data-placement=\"top\" " : "";
-                 html += "><i class=\"" + action.icon + "\"></i>";
-                 html += (action.label) ? " " + action.label : "";
-                 html += "</button>\n";
+                 html += this.button({ btn: action, action: act, toolbar: true });
               }
+
               html += "</div>\n";
               html += "</div>\n";
               html += "</div><!-- row -->\n"
@@ -1391,18 +1522,16 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
               // Row level actions
               html += "<td class=\"actions\">";
               for (act in form.related[itm].fieldActions) {
-                 var action = form.related[itm].fieldActions[act];
-                 html += "<button type=\"button\" class=\"btn btn-xs"; 
-                 html += (action['class']) ? " " + action['class'] : "";
-                 html += "\" "; 
-                 html += "id=\"row" + act + "_btn\" ";
-                 html += this.attr(action,'ngClick');
-                 html += (action.ngShow) ? this.attr(action, 'ngShow') : "";
-                 html += (action.awToolTip) ? this.attr(action,'awToolTip') : "";
-                 html += (action.awToolTip) ? "data-placement=\"top\" " : "";
-                 html += ">" + this.icon(action.icon);
-                 html += (action.label) ?  " " + action.label : ""; 
-                 html += "</button> ";
+                 var fAction = form.related[itm].fieldActions[act];
+                 html += "<a ";
+                 html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
+                 html += (fAction.ngClick) ?  this.attr(fAction,'ngClick') : "";
+                 html += (fAction.ngHref) ?  this.attr(fAction,'ngHref') : "";
+                 html += (fAction.ngShow) ?  this.attr(fAction,'ngShow') : "";
+                 html += ">";
+                 html += SelectIcon({ action: act });
+                 html += (fAction.label) ? " " + fAction['label'] : "";
+                 html += "</a>";
               }
               html += "</td>";
               html += "</tr>\n";
