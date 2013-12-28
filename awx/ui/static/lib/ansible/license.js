@@ -22,18 +22,17 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
        forceListeners: true,
        fields: {
            license_status: {
-               label: 'Status',
                type: 'custom',
-               control: '<div ng-class=\"status_color\" class=\"license-status\"><i class="icon-circle"></i> \{\{ license_status \}\}</div>',
+               control: '<div class=\"license-status\" ng-class=\"status_color\"><i class="fa fa-circle"></i> \{\{ license_status \}\}</span></div>',
                readonly: true,
                section: 'License'
                },
            license_key: {
                label: 'Key',
                type: 'textarea',
-               section: 'License',
                'class': 'modal-input-xlarge',
-               readonly: true
+               readonly: true,
+               section: 'License'
                },
            license_date: {
                label: 'Expires On',

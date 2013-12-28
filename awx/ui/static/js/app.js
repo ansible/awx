@@ -67,7 +67,6 @@ angular.module('ansible', [
     'md5Helper',
     'AccessHelper',
     'SelectionHelper',
-    'LicenseFormDefinition',
     'License',
     'HostGroupsFormDefinition',
     'JobStatusWidget',
