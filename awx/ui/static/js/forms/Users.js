@@ -97,7 +97,7 @@ angular.module('UserFormDefinition', [])
                 label: 'Created by LDAP', 
                 type: 'checkbox',
                 readonly: true
-                },
+                }
             },
 
         buttons: { //for now always generates <button> tags 
