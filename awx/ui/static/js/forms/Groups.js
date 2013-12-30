@@ -47,7 +47,7 @@ angular.module('GroupFormDefinition', [])
                 rows: 10,
                 'default': '---',
                 dataTitle: 'Group Variables',
-                dataPlacement: 'left',
+                dataPlacement: 'right',
                 awPopOver: "<p>Variables defined here apply to all child groups and hosts.</p>" +
                     "<p>Enter variables using either JSON or YAML syntax. Use the " +
                     "radio button to toggle between the two.</p>" +
@@ -96,7 +96,7 @@ angular.module('GroupFormDefinition', [])
                 editRequired: false,
                 awMultiselect: 'source_region_choices',
                 dataTitle: 'Source Regions',
-                dataPlacement: 'left',
+                dataPlacement: 'right',
                 awPopOver: "<p>Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, " +
                     "or choose <em>All</em> to include all regions. AWX will only be updated with Hosts associated with the selected regions." +
                     "</p>",
@@ -113,7 +113,7 @@ angular.module('GroupFormDefinition', [])
                 'default': '---',
                 parseTypeName: 'envParseType',
                 dataTitle: 'Source Variables',
-                dataPlacement: 'left',
+                dataPlacement: 'right',
                 awPopOver: "<p>Override variables found in ec2.ini and used by the inventory update script. For a detailed description of these variables " +
                     "<a href=\"https://github.com/ansible/ansible/blob/devel/plugins/inventory/ec2.ini\" target=\"_blank\">" +
                     "view ec2.ini in the Ansible github repo.</a></p>" +
@@ -161,7 +161,7 @@ angular.module('GroupFormDefinition', [])
                            'remain untouched by the inventory update process.</p>',
                         dataTitle: 'Overwrite',
                         dataContainer: 'body',
-                        dataPlacement: 'left',
+                        dataPlacement: 'right',
                         labelClass: 'checkbox-options'
                         },
                     {
@@ -176,7 +176,7 @@ angular.module('GroupFormDefinition', [])
                           'those found on the external source.</p>',
                         dataTitle: 'Overwrite Variables',
                         dataContainer: 'body',
-                        dataPlacement: 'left',
+                        dataPlacement: 'right',
                         labelClass: 'checkbox-options'
                         },
                     {
@@ -190,7 +190,7 @@ angular.module('GroupFormDefinition', [])
                             'executing job tasks.</p>',
                         dataTitle: 'Update on Launch',
                         dataContainer: 'body',
-                        dataPlacement: 'left',
+                        dataPlacement: 'right',
                         labelClass: 'checkbox-options'
                         }
                     ]

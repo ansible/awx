@@ -12,7 +12,8 @@
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
                                  'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'GroupsHelper',
                                  'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper', 'RefreshHelper',
-                                 'PromptDialog', 'InventorySummaryHelpDefinition', 'CredentialsListDefinition'
+                                 'PromptDialog', 'InventorySummaryHelpDefinition', 'CredentialsListDefinition',
+                                 'InventoryTree'
                                  ])
 
     .factory('GetSourceTypeOptions', [ 'Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
@@ -586,13 +587,16 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     }])
 
     .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'ClickNode', 'Wait',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'ClickNode', 'Wait', 'GetChoices',
+        'GetSourceTypeOptions', 'CredentialList', 'LookUpInit', 'BuildTree',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, ParseTypeChange, GroupsEdit, ClickNode, Wait) {
+        GetBasePath, ParseTypeChange, GroupsEdit, ClickNode, Wait, GetChoices, GetSourceTypeOptions, CredentialList, 
+        LookUpInit, BuildTree) {
     return function(params) {
 
         var inventory_id = params.inventory_id;
         var group_id = (params.group_id !== undefined) ? params.group_id : null;
+        var inventory_scope = params.scope;
 
         // Inject dynamic view
         var defaultUrl = (group_id !== null) ? GetBasePath('groups') + group_id + '/children/' : 
@@ -610,84 +614,192 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         $('#form-modal').on('hidden.bs.modal', function () {
-            if (!groupCreated) {
-               ClickNode({ selector: '#' + scope['selectedNode'].attr('id') });
-            } 
+            //if (!groupCreated) {
+            //   ClickNode({ selector: '#' + scope['selectedNode'].attr('id') });
+            //} 
             });
         
         generator.reset();
         var master={};
 
-        if (!scope.$$phase) {
-           scope.$digest();
+        if (scope.removeSearchTreeReady) {
+            scope.removeSearchTreeReady();
         }
+        scope.removeSearchTreeReady = scope.$on('searchTreeReady', function(e) {
+            Wait('stop');
+            $('#form-modal').modal('hide');
+            });
+
+        if (scope.removeSaveComplete) {
+           scope.removeSaveComplete();
+        }
+        scope.removeSaveComplete = scope.$on('SaveComplete', function(e, error) {
+            if (!error) {
+                scope.formModalActionDisabled = false;
+                scope.showGroupHelp = false;  //get rid of the Hint
+                BuildTree({ scope: inventory_scope, inventory_id: inventory_id });
+            }
+            });
+
+        if (scope.removeFormSaveSuccess) {
+           scope.removeFormSaveSuccess();
+        }
+        scope.removeFormSaveSuccess = scope.$on('formSaveSuccess', function(e, group_id, url) {
+            
+            // Source data gets stored separately from the group. Validate and store Source
+            // related fields, then call SaveComplete to wrap things up.
+
+            var parseError = false;
+            var saveError = false;
+            
+            // Update the selector tree with new group name, descr
+            //SetNodeName({ scope: scope['selectedNode'], group_id: group_id,
+            //    name: scope.name, description: scope.description });
+
+            if (scope.source.value !== null && scope.source.value !== '') {
+                var data = {
+                   group: group_id, 
+                   source: scope['source'].value,
+                   source_path: scope['source_path'],
+                   credential: scope['credential'],
+                   overwrite: scope['overwrite'],
+                   overwrite_vars: scope['overwrite_vars'],
+                   update_on_launch: scope['update_on_launch']
+                   //update_interval: scope['update_interval'].value
+                   };
+
+                // Create a string out of selected list of regions
+                var regions = $('#s2id_group_source_regions').select2("data");
+                var r = [];
+                for (var i=0; i < regions.length; i++) {
+                    r.push(regions[i].id);
+                }
+                data['source_regions'] = r.join();
+                
+                if (scope['source'].value == 'ec2') {
+                    // for ec2, validate variable data
+                    try {
+                         if (scope.envParseType == 'json') {
+                            var json_data = JSON.parse(scope.source_vars);  //make sure JSON parses
+                         }
+                         else {
+                            var json_data = jsyaml.load(scope.source_vars);  //parse yaml
+                         }
+                        
+                         // Make sure our JSON is actually an object
+                         if (typeof json_data !== 'object') {
+                            throw "failed to return an object!";
+                         }
+                         
+                         // Send JSON as a string
+                         if ($.isEmptyObject(json_data)) {
+                            data.source_vars = "";
+                         }
+                         else {
+                            data.source_vars = JSON.stringify(json_data, undefined, '\t'); 
+                         }
+                    }
+                    catch(err) {
+                         parseError = true;
+                         scope.$emit('SaveComplete', true);
+                         Alert("Error", "Error parsing extra variables. Parser returned: " + err);     
+                    }
+                }
+
+                if (!parseError) {           
+                  Rest.setUrl(url)
+                  Rest.put(data)
+                      .success( function(data, status, headers, config) {
+                          scope.$emit('SaveComplete', false);
+                          })
+                      .error( function(data, status, headers, config) {
+                          scope.$emit('SaveComplete', true);
+                          ProcessErrors(scope, data, status, form,
+                              { hdr: 'Error!', msg: 'Failed to update group inventory source. PUT status: ' + status });
+                          });
+                }
+            }
+            else {
+               // No source value
+               scope.$emit('SaveComplete', false);
+            }
+            });
+
 
         // Save
         scope.formModalAction = function() {
-           Wait('start');
-           try { 
-               scope.formModalActionDisabled = true;
+            Wait('start');
+            try { 
+                scope.formModalActionDisabled = true;
 
-               // Make sure we have valid variable data
-               if (scope.parseType == 'json') {
-                  var json_data = JSON.parse(scope.variables);  //make sure JSON parses
-               }
-               else {
-                  var json_data = jsyaml.load(scope.variables);  //parse yaml
-               }
+                // Make sure we have valid variable data
+                if (scope.parseType == 'json') {
+                    var json_data = JSON.parse(scope.variables);  //make sure JSON parses
+                }
+                else {
+                    var json_data = jsyaml.load(scope.variables);  //parse yaml
+                }
 
-               // Make sure our JSON is actually an object
-               if (typeof json_data !== 'object') {
-                  throw "failed to return an object!";
-               }
-               
-               var data = {
-                   name: scope['name'],
-                   description: scope['description']
-                  };
+                // Make sure our JSON is actually an object
+                if (typeof json_data !== 'object') {
+                    throw "failed to return an object!";
+                }
 
-               if (inventory_id) {
-                  data['inventory'] = inventory_id;
-               }
+                var data = { 
+                    name: scope['name'],
+                    description: scope['description']
+                    };
 
-               if ($.isEmptyObject(json_data)) {
-                  data['variables'] = "";
-               }
-               else {
-                  data['variables'] = JSON.stringify(json_data, undefined, '\t');
-               }
+                if (inventory_id) {
+                    data['inventory'] = inventory_id;
+                }
 
-               Rest.setUrl(defaultUrl);
-               Rest.post(data)
-                   .success( function(data, status, headers, config) {
-                       Wait('stop');
-                       groupCreated = true;
-                       scope.formModalActionDisabled = false;
-                       scope.showGroupHelp = false;  //get rid of the Hint
-                       $('#form-modal').modal('hide');
-                       /*BuildTree({
-                           scope: scope,
-                           inventory_id: scope['inventory_id'],
-                           emit_on_select: 'NodeSelect',
-                           target_id: 'search-tree-container',
-                           refresh: true,
-                           moveable: true,
-                           group_id: data.id
-                           });*/
-                       }) 
-                   .error( function(data, status, headers, config) {
-                       Wait('stop');
-                       scope.formModalActionDisabled = false;
-                       ProcessErrors(scope, data, status, form,
-                           { hdr: 'Error!', msg: 'Failed to add new group. POST returned status: ' + status });
-                       });
-           }
-           catch(err) {
-               Wait('stop');
-               scope.formModalActionDisabled = false;
-               Alert("Error", "Error parsing group variables. Parser returned: " + err);     
-           }
-           }
+                if ($.isEmptyObject(json_data)) {
+                    data['variables'] = "";
+                }
+                else {
+                   data['variables'] = JSON.stringify(json_data, undefined, '\t');
+                }
+
+                Rest.setUrl(defaultUrl);
+                Rest.post(data)
+                    .success( function(data, status, headers, config) {
+                        scope.$emit('formSaveSuccess', data.id, GetBasePath('inventory_sources') + data.id + '/');
+                        }) 
+                    .error( function(data, status, headers, config) {
+                        Wait('stop');
+                        scope.formModalActionDisabled = false;
+                        ProcessErrors(scope, data, status, form,
+                            { hdr: 'Error!', msg: 'Failed to add new group. POST returned status: ' + status });
+                        });
+            }
+            catch(err) {
+                Wait('stop');
+                scope.formModalActionDisabled = false;
+                Alert("Error", "Error parsing group variables. Parser returned: " + err);     
+            }
+            }
+
+         scope.sourceChange = function() {
+             if (scope['source'].value == 'rax') {
+                 scope['source_region_choices'] = scope['rax_regions'];
+                 //$('#s2id_group_source_regions').select2('data', []);
+                 $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
+             }
+             else if (scope['source'].value == 'ec2') {
+                 scope['source_region_choices'] = scope['ec2_regions'];
+                 //$('#s2id_group_source_regions').select2('data', []);
+                 $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
+             }
+             LookUpInit({
+                 url: GetBasePath('credentials') + 
+                     '?cloud=true&kind=' + [ (scope.source.value == 'rax') ? 'rax' : 'aws' ],   
+                 scope: scope,
+                 form: form,
+                 list: CredentialList,
+                 field: 'credential' 
+                 });
+             }
 
         // Cancel
         scope.formReset = function() {
@@ -695,15 +807,50 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            generator.reset();
            }; 
 
+        var choicesReady = 0;
+
+        if (scope.removeChoicesReady) {
+            scope.removeChoicesReady();  
+        }
+        scope.removeChoicesReady = scope.$on('choicesReadyGroup', function() {
+            choicesReady++; 
+            if (choicesReady == 2) {
+                Wait('stop');
+            }
+            });
+
+        // Load options for source regions
+        GetChoices({
+            scope: scope, 
+            url: GetBasePath('inventory_sources'),
+            field: 'source_regions',
+            variable: 'rax_regions',
+            choice_name: 'rax_region_choices',
+            callback: 'choicesReadyGroup'
+            });
+
+        GetChoices({
+            scope: scope, 
+            url: GetBasePath('inventory_sources'),
+            field: 'source_regions',
+            variable: 'ec2_regions',
+            choice_name: 'ec2_region_choices',
+            callback: 'choicesReadyGroup'
+            });
+
+        GetSourceTypeOptions({ scope: scope, variable: 'source_type_options' });
+        
+        Wait('start');
+
         }
         }])
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-        'GetUpdateIntervalOptions', 'ClickNode', 'LookUpInit', 'CredentialList', 'Empty', 'Wait', 'GetChoices',
+        'GetUpdateIntervalOptions', 'ClickNode', 'LookUpInit', 'CredentialList', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions, ClickNode,
-        LookUpInit, CredentialList, Empty, Wait, GetChoices) {
+        LookUpInit, CredentialList, Empty, Wait, GetChoices, UpdateGroup) {
     return function(params) {
        
         var group_id = params.group_id;
@@ -711,7 +858,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var generator = GenerateForm;
         var form = GroupForm;
         var defaultUrl =  GetBasePath('groups') + group_id + '/';
+        var groups_scope = params.scope;
 
+        //var scope = 
         var scope = generator.inject(form, { mode: 'edit', modal: true, related: false });
         generator.reset();
         
@@ -741,140 +890,142 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
 
             if (scope.variable_url) {
-               // get group variables
-               Rest.setUrl(scope.variable_url);
-               Rest.get()
+                // get group variables
+                Rest.setUrl(scope.variable_url);
+                Rest.get()
                    .success( function(data, status, headers, config) {
                        if ($.isEmptyObject(data)) {
-                          scope.variables = "---";
+                           scope.variables = "---";
                        }
                        else {
-                          scope.variables = jsyaml.safeDump(data);
+                           scope.variables = jsyaml.safeDump(data);
                        }
+                       Wait('stop');
                        })
                    .error( function(data, status, headers, config) {
                        scope.variables = null;
+                       Wait('stop');
                        ProcessErrors(scope, data, status, form,
                            { hdr: 'Error!', msg: 'Failed to retrieve group variables. GET returned status: ' + status });
                        });
             }
             else {
-               scope.variables = "---";
+                scope.variables = "---";
             }
             master.variables = scope.variables;
 
             if (scope.source_url) {
-               // get source data
-               Rest.setUrl(scope.source_url);
-               Rest.get()
-                   .success( function(data, status, headers, config) {
-                       for (var fld in form.fields) {
-                           if (fld == 'checkbox_group') {
-                              for (var i = 0; i < form.fields[fld].fields.length; i++) {
-                                  var flag = form.fields[fld].fields[i];
-                                  if (data[flag.name] !== undefined) {
-                                     scope[flag.name] = data[flag.name];
-                                     master[flag.name] = scope[flag.name];
-                                  }
-                              }
-                           }
-                           if (fld == 'source') {
-                              var found = false;
-                              for (var i=0; i < scope.source_type_options.length; i++) {
-                                  if (scope.source_type_options[i].value == data['source']) {
-                                     scope['source'] = scope.source_type_options[i];
-                                     found = true;
-                                  }  
-                              }
-                              if (!found || scope['source'].value == "") {
-                                 scope['groupUpdateHide'] = true;
-                              }
-                              else {
-                                 scope['groupUpdateHide'] = false;
-                              }
-                              master['source'] = scope['source'];
-                           }
-                           else if (fld == 'update_interval') {
-                              if (data[fld] == '' || data[fld] == null || data[fld] == undefined) {
-                                 data[fld] = 0;
-                              }
-                              for (var i=0; i < scope.update_interval_options.length; i++) { 
-                                  if (scope.update_interval_options[i].value == 
-                                       data[fld]) {
-                                     scope[fld] = scope.update_interval_options[i];
-                                  }
-                              }
-                           }
-                           else if (fld == 'source_vars') {
-                              // Parse source_vars, converting to YAML.  
-                              if ($.isEmptyObject(data.source_vars) || data.source_vars == "\{\}" || 
-                                  data.source_vars == "null" || data.source_vars == "") {
-                                 scope.source_vars = "---";
-                              }
-                              else {
-                                 var json_obj = JSON.parse(data.extra_vars);
-                                 scope.source_vars = jsyaml.safeDump(json_obj);
-                              }
-                              master.source_vars = scope.variables;
-                           }
-                           else if (data[fld]) {
-                              scope[fld] = data[fld];
-                              master[fld] = scope[fld];
-                           }
+                // get source data
+                Rest.setUrl(scope.source_url);
+                Rest.get()
+                    .success( function(data, status, headers, config) {
+                        for (var fld in form.fields) {
+                            if (fld == 'checkbox_group') {
+                               for (var i = 0; i < form.fields[fld].fields.length; i++) {
+                                   var flag = form.fields[fld].fields[i];
+                                   if (data[flag.name] !== undefined) {
+                                       scope[flag.name] = data[flag.name];
+                                       master[flag.name] = scope[flag.name];
+                                   }
+                               }
+                            }
+                            if (fld == 'source') {
+                                var found = false;
+                                for (var i=0; i < scope.source_type_options.length; i++) {
+                                    if (scope.source_type_options[i].value == data['source']) {
+                                        scope['source'] = scope.source_type_options[i];
+                                        found = true;
+                                    }  
+                                }
+                                if (!found || scope['source'].value == "") {
+                                    scope['groupUpdateHide'] = true;
+                                }
+                                else {
+                                    scope['groupUpdateHide'] = false;
+                                }
+                                master['source'] = scope['source'];
+                            }
+                            else if (fld == 'update_interval') {
+                                if (data[fld] == '' || data[fld] == null || data[fld] == undefined) {
+                                    data[fld] = 0;
+                                }
+                                for (var i=0; i < scope.update_interval_options.length; i++) { 
+                                    if (scope.update_interval_options[i].value == 
+                                        data[fld]) {
+                                        scope[fld] = scope.update_interval_options[i];
+                                    }
+                                }
+                            }
+                            else if (fld == 'source_vars') {
+                                // Parse source_vars, converting to YAML.  
+                                if ($.isEmptyObject(data.source_vars) || data.source_vars == "\{\}" || 
+                                    data.source_vars == "null" || data.source_vars == "") {
+                                    scope.source_vars = "---";
+                                }
+                                else {
+                                    var json_obj = JSON.parse(data.extra_vars);
+                                    scope.source_vars = jsyaml.safeDump(json_obj);
+                                }
+                                master.source_vars = scope.variables;
+                            }
+                            else if (data[fld]) {
+                                scope[fld] = data[fld];
+                                master[fld] = scope[fld];
+                            }
 
-                           if (form.fields[fld].sourceModel && data.summary_fields &&
-                               data.summary_fields[form.fields[fld].sourceModel]) {
-                               scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
-                                  data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                               master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
-                                  data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                           }
-                       }
+                            if (form.fields[fld].sourceModel && data.summary_fields &&
+                                data.summary_fields[form.fields[fld].sourceModel]) {
+                                scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
+                                    data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                                master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
+                                    data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                            }
+                        }
                        
-                       LookUpInit({
-                           url: GetBasePath('credentials') + 
-                               '?cloud=true&kind=' + [(scope.source.value == 'rax') ? 'rax' : 'aws'],   
-                           scope: scope,
-                           form: form,
-                           list: CredentialList,
-                           field: 'credential' 
-                           });
+                        LookUpInit({
+                            url: GetBasePath('credentials') + 
+                                '?cloud=true&kind=' + (scope.source.value == 'rax') ? 'rax' : 'aws',   
+                            scope: scope,
+                            form: form,
+                            list: CredentialList,
+                            field: 'credential' 
+                            });
                        
-                       scope.sourceChange();   //set defaults that rely on source value
+                        scope.sourceChange();   //set defaults that rely on source value
                        
-                       if (data['source_regions']) {
-                          if (data['source'] == 'ec2' || data['source'] == 'rax') {
-                             var set = (data['source'] == 'ec2') ? scope['ec2_regions'] : scope['rax_regions'];
-                             var opts = [];
-                             var list = data['source_regions'].split(','); 
-                             for (var i=0; i < list.length; i++) {
-                                 for (var j=0; j < set.length; j++) {
-                                     if (list[i] == set[j].value) {
-                                         opts.push({ id: set[j].value, text: set[j].label });
-                                     }
-                                 }
-                             }
-                             master['source_regions'] = opts;
-                             $('#s2id_group_source_regions').select2('data', opts);
-                          }
-                       }
-                       else {
-                          // If empty, default to all
-                          master['source_regions'] = [{ id: 'all', text: 'All' }];
-                       }
-
-                       scope['group_update_url'] = data.related['update'];    
-                       
-                       })
-                   .error( function(data, status, headers, config) {
-                       scope.source = "";
-                       ProcessErrors(scope, data, status, form,
-                           { hdr: 'Error!', msg: 'Failed to retrieve inventory source. GET status: ' + status });
-                       });
+                        if (data['source_regions']) {
+                            if (data['source'] == 'ec2' || data['source'] == 'rax') {
+                                var set = (data['source'] == 'ec2') ? scope['ec2_regions'] : scope['rax_regions'];
+                                var opts = [];
+                                var list = data['source_regions'].split(','); 
+                                for (var i=0; i < list.length; i++) {
+                                    for (var j=0; j < set.length; j++) {
+                                        if (list[i] == set[j].value) {
+                                           opts.push({ id: set[j].value, text: set[j].label });
+                                        }
+                                    }
+                                }
+                                master['source_regions'] = opts;
+                                $('#s2id_group_source_regions').select2('data', opts);
+                            }
+                        }
+                        else {
+                            // If empty, default to all
+                            master['source_regions'] = [{ id: 'all', text: 'All' }];
+                        }
+                        scope['group_update_url'] = data.related['update'];    
+                        Wait('stop');
+                        })
+                    .error( function(data, status, headers, config) {
+                        scope.source = "";
+                        Wait('stop');
+                        ProcessErrors(scope, data, status, form,
+                            { hdr: 'Error!', msg: 'Failed to retrieve inventory source. GET status: ' + status });
+                        });
             }
             });
 
-        
+            
         if (scope.removeChoicesComplete) {
             scope.removeChoicesComplete();
         }
@@ -885,14 +1036,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 .success( function(data, status, headers, config) {
                     for (var fld in form.fields) {
                         if (data[fld]) {
-                           scope[fld] = data[fld];
-                           master[fld] = scope[fld];
+                            scope[fld] = data[fld];
+                            master[fld] = scope[fld];
                         }
                     }
                     var related = data.related;
                     for (var set in form.related) {
                         if (related[set]) {
-                           relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
+                            relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
                         }
                     }
                     scope.variable_url = data.related.variable_data;
@@ -935,20 +1086,30 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             choice_name: 'ec2_region_choices',
             callback: 'choicesReadyGroup'
             }); 
+        
+        Wait('start');
 
-        if (!scope.$$phase) {
-           scope.$digest();
-        }
+        //if (!scope.$$phase) {
+        //   scope.$digest();
+        //}
 
         if (scope.removeSaveComplete) {
            scope.removeSaveComplete();
         }
         scope.removeSaveComplete = scope.$on('SaveComplete', function(e, error) {
             if (!error) {
-                //scope['flashMessage'] = 'Your changes to ' + scope['name'] + ' were saved.';
-                //ClickNode({ selector: '#inventory-root-node' });
+                UpdateGroup({ 
+                    scope: groups_scope,
+                    group_id: group_id,
+                    properties: {
+                        name: scope.name,
+                        description: scope.description, 
+                        has_inventory_sources: (scope.source) ? true : false 
+                        }
+                    });
                 scope.formModalActionDisabled = false;
                 scope.showGroupHelp = false;  //get rid of the Hint
+                Wait('stop');
                 $('#form-modal').modal('hide');
             }
             });
@@ -981,7 +1142,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
                 // Create a string out of selected list of regions
                 var regions = $('#s2id_group_source_regions').select2("data");
-                data['source_regions'] = regions.join();
+                var r = [];
+                for (var i=0; i < regions.length; i++) {
+                    r.push(regions[i].id);
+                }
+                data['source_regions'] = r.join();
                 
                 if (scope['source'].value == 'ec2') {
                     // for ec2, validate variable data
@@ -1055,12 +1220,12 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 for (var fld in form.fields) {
                     data[fld] = scope[fld];   
                 }
+                
                 data['inventory'] = inventory_id;
                 
                 Rest.setUrl(defaultUrl);
                 Rest.put(data)
                     .success( function(data, status, headers, config) {
-                        Wait('stop');
                         if (scope.variables) {
                            //update group variables
                            Rest.setUrl(scope.variable_url);
@@ -1106,7 +1271,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
             LookUpInit({
                 url: GetBasePath('credentials') + 
-                    '?cloud=true&kind=' + [(scope.source.value == 'rax') ? 'rax' : 'aws'],   
+                    '?cloud=true&kind=' + (scope.source.value == 'rax') ? 'rax' : 'aws',   
                 scope: scope,
                 form: form,
                 list: CredentialList,

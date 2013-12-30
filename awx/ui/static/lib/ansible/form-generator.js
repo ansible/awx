@@ -1240,7 +1240,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
               html += "</div>\n";
           }
           else if (this.form.tabs) {
-              html += "<ul class=\"nav nav-tabs\">\n";
+              html += "<ul id=\"" + this.form.name + "_tabs\" class=\"nav nav-tabs\">\n";
               for (var i=0; i < this.form.tabs.length; i++) {
                   var tab = this.form.tabs[i];
                   html += "<li"; 

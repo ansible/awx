@@ -327,21 +327,15 @@ function InventoriesEdit ($scope, $location, $routeParams, GenerateList, ClearSc
     
     $scope.inventory_id = $routeParams.inventory_id;
     
-    $scope.$on('searchTreeReady', function(e, inventory_name, groups) {
+    if ($scope.removeSearchTreeReady) {
+        $scope.removeSearchTreeReady();
+    }
+    $scope.removeSearchTreeReady = $scope.$on('searchTreeReady', function(e, inventory_name, groups) {
         // After the tree data loads, generate the groups list
         generator.inject(list, { mode: 'edit', id: 'groups-container', breadCrumbs: false, searchSize: 'col-lg-5' });
         $scope.groups = groups;
         $scope.inventory_name = inventory_name;
-    
-        for (var i=0; i < $scope.groups.length; i++) {
-            var stat = UpdateStatusMsg({ status: $scope.groups[i].status });
-            $scope.groups[i].status_badge_class = stat['class'];
-            $scope.groups[i].status_badge_tooltip = stat['tooltip'];
-            $scope.groups[i].status = stat['status'];
-        }
-      
         InjectHosts({ scope: $scope, inventory_id: $scope.inventory_id }); 
-    
         Wait('stop');
         });
 

@@ -129,6 +129,10 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        else if (form) {
           var fieldErrors = false; 
           for (var field in form.fields ) {
+              if (data[field] && form.fields[field].tab) {
+                 // If the form is part of a tab group, activate the tab
+                 $('#' + form.name + "_tabs a[href=\"#" + form.fields[field].tab + '"]').tab('show');
+              }
               if (form.fields[field].realName) {
                  if (data[form.fields[field].realName]) {
                     scope[field + '_api_error'] = data[form.fields[field]][0];

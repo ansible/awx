@@ -9,7 +9,7 @@
  *
  */
 
-angular.module('InventoryTree', ['Utilities', 'RestServices'])
+angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
     
     .factory('SortNodes', [ function() {
         return function(data) {
@@ -171,8 +171,8 @@ angular.module('InventoryTree', ['Utilities', 'RestServices'])
             }
             }])
 
-    .factory('BuildTree', ['Rest', 'GetBasePath', 'ProcessErrors', 'SortNodes', 'Wait', 
-        function(Rest, GetBasePath, ProcessErrors, SortNodes, Wait) {
+    .factory('BuildTree', ['Rest', 'GetBasePath', 'ProcessErrors', 'SortNodes', 'Wait', 'UpdateStatusMsg', 
+        function(Rest, GetBasePath, ProcessErrors, SortNodes, Wait, UpdateStatusMsg) {
         return function(params) {
             
             var inventory_id = params.inventory_id;
@@ -185,6 +185,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices'])
                 var sorted = SortNodes(tree_data);
                 for (var i=0; i < sorted.length; i++) {
                     var currentId= id;
+                    var stat = UpdateStatusMsg({ status: sorted[i].status });
                     var group = {
                        name: sorted[i].name,
                        has_active_failures: sorted[i].has_active_failures,
@@ -194,12 +195,15 @@ angular.module('InventoryTree', ['Utilities', 'RestServices'])
                        groups_with_active_failures: sorted[i].groups_with_active_failures,
                        parent: parent, 
                        has_children: (sorted[i].children.length > 0) ? true : false,
+                       has_inventory_sources: sorted[i].has_inventory_sources,
                        id: id,
                        group_id: sorted[i].id,
                        event_level: level,
                        ngicon: (sorted[i].children.length > 0) ? 'icon-collapse-alt' : null,
                        related: { children: (sorted[i].children.length > 0) ? sorted[i].related.children : '' },
-                       status: sorted[i].summary_fields.inventory_source.status
+                       status: sorted[i].summary_fields.inventory_source.status,
+                       status_badge_class: stat['class'],
+                       status_badge_tooltip: stat['tooltip']
                        }
                     groups.push(group);
                     id++;
@@ -244,9 +248,28 @@ angular.module('InventoryTree', ['Utilities', 'RestServices'])
                 }
 
             loadTreeData();
-
             }
             }])
+    
+    // Update a group with a set of properties 
+    .factory('UpdateGroup', [ function() {
+        return function(params) {
+            
+            var scope = params.scope; 
+            var group_id = params.group_id; 
+            var properties = params.properties;   // object of key:value pairs to update
+            
+            for (var i=0; i < scope.groups.length; i++) {
+                if (scope.groups[i].group_id == group_id) {
+                    var grp = scope.groups[i]; 
+                    for (var p in properties) {
+                        scope.groups[i][p] = properties[p]; 
+                    }
+                }
+            }
+            }
+            }])
+
 
     // Set node name and description after an update to Group properties.
     .factory('SetNodeName', [ function() {
