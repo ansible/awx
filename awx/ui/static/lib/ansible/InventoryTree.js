@@ -177,15 +177,16 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
             
             var inventory_id = params.inventory_id;
             var scope = params.scope;
+            //var selected_id = params.
 
             var groups = [];
-            var id = 1;
+            var id = 0;
 
             function buildGroups(tree_data, parent, level) {
                 var sorted = SortNodes(tree_data);
                 for (var i=0; i < sorted.length; i++) {
-                    var currentId= id;
-                    var stat = UpdateStatusMsg({ status: sorted[i].status });
+                    var currentId = id;
+                    var stat = UpdateStatusMsg({ status: sorted[i].summary_fields.inventory_source.status });
                     var group = {
                        name: sorted[i].name,
                        has_active_failures: sorted[i].has_active_failures,
@@ -203,7 +204,8 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
                        related: { children: (sorted[i].children.length > 0) ? sorted[i].related.children : '' },
                        status: sorted[i].summary_fields.inventory_source.status,
                        status_badge_class: stat['class'],
-                       status_badge_tooltip: stat['tooltip']
+                       status_badge_tooltip: stat['tooltip'],
+                       selected_class: ''
                        }
                     groups.push(group);
                     id++;
@@ -265,6 +267,12 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
                     for (var p in properties) {
                         scope.groups[i][p] = properties[p]; 
                     }
+                }
+                if (scope.groups[i].id == scope.selected_tree_id) {
+                    //Make sure potential group name change gets reflected throughout the page
+                    scope.selected_group_name = scope.groups[i].name;
+                    scope.search_place_holder = 'Search ' + scope.groups[i].name;
+                    scope.hostSearchPlaceholder = 'Search ' + scope.groups[i].name;
                 }
             }
             }

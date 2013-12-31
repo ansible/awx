@@ -1461,6 +1461,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
               }
 
               html += "<div class=\"well\">\n";
+              html += "<div class=\"row\">\n";
+              
               html += SearchWidget({ iterator: form.related[itm].iterator, template: form.related[itm], mini: true });
  
               html += "<div class=\"col-lg-8\">\n";

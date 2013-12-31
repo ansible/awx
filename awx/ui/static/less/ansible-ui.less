@@ -14,7 +14,8 @@
 @red-hover:   #AE3F3A;
 @green:       #5bb75b;
 @blue:        #1778c3;   /* logo blue */
-@blue-link:   #0088cc;
+@blue-link:   #1778c3;
+@blue-dark:   #2a6496;   /* link hover */ 
 @grey:        #A9A9A9;
 @well:        #f5f5f5;   /* well background color */
 @green:       #5bb75b;
@@ -35,6 +36,7 @@ body {
   color: @black;
 }
 
+
 /* Helper Classes */
 .pad-right-sm { padding-right: 10px; }
 .pad-left-md { padding-left: 30px; }
@@ -46,6 +48,17 @@ body {
 .grey-txt { color: @grey; }
 .text-center { text-align: center !important; }
 
+
+a {
+  color: @blue;
+  text-decoration: none;
+}
+
+a:hover,
+a:focus {
+  color: @blue-dark;
+  text-decoration: none;
+}
 
 /* Old style TB default button with grey background */
 .btn-grey {
@@ -64,6 +77,15 @@ body {
    filter: alpha(opacity=65);
    -webkit-box-shadow: none;
    box-shadow: none;
+}
+
+/* Bring primary (blue) buttons in line with link colors */
+.btn-primary {
+   background-color: @blue;
+}
+
+.btn-primary:hover {
+   background-color: @blue-dark;
 }
 
 /* List Actions column */
@@ -320,10 +342,6 @@ dd {
   max-width: 260px;
 }
 
-a:hover {
-  text-decoration: none;
-}
-
 .help-link,
 .help-link:active,
 .help-link:visited {
@@ -517,10 +535,7 @@ select.page-size {
 }
 
 /* Search Widget */
-  .search-widget {
-    margin-bottom: 20px;
-  }
- 
+  
   .search-widget label {
     display: inline-block;
     padding-right: 15px;
@@ -658,7 +673,7 @@ input[type="checkbox"].checkbox-no-label {
 /* Display list actions next to search widget */
 .list-actions {
   text-align: right;
-  margin-bottom: 15px;
+  margin-bottom: 25px;
 
   button {
     margin-left: 4px;
@@ -897,9 +912,9 @@ input[type="checkbox"].checkbox-no-label {
     font-weight: bold;
   }
 
-  .form-items .search-widget {
+  /*.form-items .search-widget {
     margin-top: 15px;
-  }
+  }*/
 
   .form-items .item-count {
     display: inline-block;
@@ -955,236 +970,18 @@ input[type="checkbox"].checkbox-no-label {
     }
   }
 
+
+/* Inventory Edit */
+
+.selected {
+  font-weight: bold;
+  color: @blue-dark;  
+}
+
 .inventory-title {
   font-size: 16px; 
   font-weight: bold;  
 }
-
-/* Inventory-> Groups */
-  
-  .inventory-passwd-msg {
-    font-size: 14px;
-    margin-bottom: 25px;
-    margin-left: 10px;
-  }
-
-  .groups-issue {
-    margin-bottom: 10px;
-  }
-
-  .inventory-content {
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-  }
-
-  /*
-  .tree-view-container {
-    padding: 0 0 10px 0;
-
-    .col-lg-4 {
-      padding-right: 10px;
-    }
-  }
-  */
-
-  #tree-view {
-    background-color: #f5f5f5;
-    border: 1px solid #e3e3e3;
-    border-radius: 4px;
-    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-
-    /*border: 1px solid #e3e3e3;
-    border-radius: 6px;
-    background-color: #e3e3e3;
-    */
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-bottom: 10px;
-    min-height: 100px;
-
-    .title {
-       color: #888;
-       padding-bottom: 5px;
-       margin-left: 5px;
-    }
-  }
-  
-  #tree-form {
-    display: none;
-    /*padding: 15px 10px 10px 10px;
-    margin-top: 5px;
-    border: 1px solid #e3e3e3;
-    background-color: #e3e3e3;
-    border-radius: 6px;*/
-
-    .form-title {
-      color: #888;
-      padding-left: 0;
-    }
-
-    hr {
-      background-color: #ccc;
-      height: 1px;
-      margin-top: 5px;
-      margin-bottom: 15px;
-    }
-  }
-
-/* Inventory-> Hosts */
-
-  .hosts-well {
-    padding-top: 5px;
-
-    .search-widget {
-      margin-top: 10px;
-    }
-
-    .list-actions {
-      padding-top: 10px;
-    }
-
-    .title {
-      color: #888; 
-      font-size: 14px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-  }
-
-  .hosts-title p {
-    font-size: 12px;
-  }
-
-  .hosts-title h4 {
-    margin: 5px 0;
-  }
-
-  .host-groups {
-    margin-top: 15px;
-
-    select {
-      height: 150px;
-    }
-  }
-
-  .host-group-buttons {
-    margin-top: 20px;
-    text-align: center;
-
-    p {
-      padding-top: 10px;
-      font-size: 12px;
-      font-weight: normal;
-    }
-  }
-
-  /* Allow tree node title to float above surrounding elements on hover */
-  #search-tree-target {
-    z-index: 10;
-  }
-
-  .search-tree { 
-
-    padding: 10px 3px 10px 10px;
-
-    .title {
-      color: @grey;
-      font-weight: normal;
-      margin-bottom: 5px;
-      margin-top: 0;
-    }
-
-    .icon-sitemap {
-      color: @grey;
-    }
-
-    ul {
-      list-style-type: none;
-      padding-left: 15px;
-    }
-  
-    .tree-root {
-      padding-left: 0;
-    }
-
-    .activate {
-      display: block;
-      padding: 2px 3px 1px 3px;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      height: 23px;
-    }
-
-    .activate:hover {
-      display: inline-block;
-      overflow: visible; 
-      background-color: #ddd;
-      cursor: pointer;
-    }
-
-    .active {
-      font-weight: bold;
-      box-shadow: 3px 3px 3px 0 @grey;
-      border-bottom: 1px solid @grey;
-      border-right: 1px solid @grey;
-      background-color: #fff;
-     
-      .activate:hover {
-        background-color: #fff;
-      }
-    }
-
-    .expand-container,
-    .badge-container,
-    .title-container {
-      display: inline-block;
-      vertical-align: middle;
-      border-bottom: 2px solid @well;
-    }
-
-    .expand-container {
-      width: 14px;
-      text-align: left;
-    }
-
-    .badge-container {
-      vertical-align: none;
-      padding-top: 2px;
-      padding-bottom: 2px;
-      margin-left: 3px;
-    }
-
-    #root-badge-container {
-      margin-right: -2px;
-      margin-left: 3px;
-    }
-   
-    .expand { 
-      padding: 3px;
-    }
-
-    .title-container {
-      height: 25px;
-    }
-    
-    .expand-container:hover {
-      background-color: #ddd;
-    }
-
-    .field-badge {
-      font-size: 10px;
-      line-height: normal;
-      /*vertical-align: baseline;*/
-    }
-
-  }
-    
-  .host-failure-filter {
-    padding: 10px;   
-  }
 
 .disabled {
   color: @grey; 

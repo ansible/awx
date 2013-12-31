@@ -24,7 +24,8 @@ angular.module('InventoryHostsDefinition', [])
             name: {
                 key: true,
                 label: 'Name',
-                ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
+                ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
+                searchPlaceholder: "search_place_holder"
                 },
             active_failures: {
                 label: 'Job Status',
@@ -55,7 +56,8 @@ angular.module('InventoryHostsDefinition', [])
                 searchable: true,
                 sourceModel: 'groups',
                 sourceField: 'name',
-                nosort: true
+                nosort: true,
+                searchPlaceholder: "search_place_holder"
                 },
             enabled: {
                 label: 'Disabled?',

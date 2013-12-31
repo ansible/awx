@@ -393,7 +393,76 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         }  
         }])
 
+    .factory('Breadcrumbs', ['Attr', function(Attr) {
+    return function(params) {
+        
+        // Generats breadcrumbs using the list-generator.js method.
 
+        var list = params.list;
+        var mode = params.mode;
+        var html = '';
+
+        html += "<div class=\"nav-path\">\n";
+        html += "<ul class=\"breadcrumb\">\n";
+        html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title | capitalize }}</a></li>\n";
+
+        if (list.navigationLinks) {
+            var navigation = list.navigationLinks;
+            if (navigation['ngHide']) {
+                html += "<li class=\"active\" ng-show=\"" + navigation['ngHide'] + "\">";
+                html += list.editTitle;
+                html += "</li>\n";
+                html += "<li class=\"active\" ng-hide=\"" + navigation['ngHide'] + "\"> </li>\n";
+            }
+            else {
+                html += "<li class=\"active\"> </li>\n";
+                html += "</ul>\n";
+            }
+            html += "<div class=\"dropdown\" ";
+            html += (navigation['ngHide']) ? Attr(navigation, 'ngHide') : '';
+            html += ">\n";
+            for (var itm in navigation) {
+                if (typeof navigation[itm] == 'object' && navigation[itm].active) {
+                    html += "<a href=\"\" class=\"toggle\" ";
+                    html += "data-toggle=\"dropdown\" ";
+                    html += ">" + navigation[itm].label + " <i class=\"fa fa-chevron-circle-down crumb-icon\"></i></a>";
+                    break;
+                }
+            }
+            html += "<ul class=\"dropdown-menu\" role=\"menu\">\n";
+            for (var itm in navigation) {
+                if (typeof navigation[itm] == 'object') {
+                    html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"" +
+                        navigation[itm].href + "\" ";
+                    // html += (navigation[itm].active) ? "class=\"active\" " : "";
+                    html += ">";
+                    html += "<i class=\"fa fa-check\" style=\"visibility: ";
+                    html += (navigation[itm].active) ? "visible" : "hidden";
+                    html += "\"></i> ";
+                    html += navigation[itm].label;
+                    html += "</a></li>\n";
+                }
+            }
+            html += "</ul>\n";
+            html += "</div><!-- dropdown -->\n";
+            html += "</div><!-- nav-path -->\n";
+        }
+        else {
+            html += "<li class=\"active\">";
+            if (mode == 'select') {
+                html += list.selectTitle; 
+            }
+            else {
+                html += list.editTitle;
+            }
+            html += "</li>\n</ul>\n</div>\n";
+        }
+        
+        return html;
+
+        }
+        }])
+    
     .factory('Column', ['Attr', 'Icon', 'DropDown', 'Badge', 'BadgeCount', function(Attr, Icon, DropDown, Badge, BadgeCount) {
     return function(params) {
         var list = params['list'];
@@ -561,7 +630,6 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var useMini = params.mini; 
         var html= '';
         var searchWidgets = (params.searchWidgets) ? params.searchWidgets : 1;
-        html += "<div class=\"row search-widget\">\n";
         for (var i=1; i <= searchWidgets; i++) {
             var modifier = (i == 1) ? '' : i;    
             html += "<div class=\""; 
@@ -635,7 +703,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             iterator + "HideAllStartBtn" + modifier + "\"" +
             "><i class=\"fa fa-search\"></i></a>\n";
 
-            html += "</div><!-- col-lg-x -->\n";
+             html += "</div>\n"; 
         }
 
         // Reset button and spinner
@@ -644,7 +712,6 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         //    "aw-tool-tip=\"Reset filter\" data-placement=\"top\"><i class=\"icon-undo\"></i></button>\n";
         //html += "<i class=\"icon-spinner icon-spin icon-large\" ng-show=\"" + iterator +  "SearchSpin == true\"></i>\n";
         //html += "</div>\n";
-
 
         return html;
         

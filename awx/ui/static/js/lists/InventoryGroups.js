@@ -24,8 +24,8 @@ angular.module('InventoryGroupsDefinition', [])
             name: {
                 label: 'Group',
                 key: true,
-                ngClick: "\{\{ 'showHosts(' + group.id + ')' \}\}",
-                //ngClass: "\{\{ 'level' + group.level \}\}",
+                ngClick: "\{\{ 'showHosts(' + group.id + ',' + group.group_id + ')' \}\}",
+                ngClass: "group.selected_class",
                 hasChildren: true
                 },
             status: {

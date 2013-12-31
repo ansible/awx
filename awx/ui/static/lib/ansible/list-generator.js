@@ -9,8 +9,9 @@
 
 angular.module('ListGenerator', ['GeneratorHelpers'])
     .factory('GenerateList', [ '$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
-        'Column', 'DropDown', 'NavigationLink', 'Button', 'SelectIcon',
-    function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink, Button, SelectIcon) {
+        'Column', 'DropDown', 'NavigationLink', 'Button', 'SelectIcon', 'Breadcrumbs',
+    function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink, Button, SelectIcon,
+        Breadcrumbs) {
     return {
     
     setList: function(list) {
@@ -113,222 +114,178 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        var list = this.list; 
 
        if (options.activityStream) {
-          // Breadcrumbs for activity stream widget
-          // Make the links clickable using ng-click function so we can first remove the stream widget
-          // before navigation
-          html += "<div class=\"nav-path\">\n";
-          html += "<ul class=\"breadcrumb\">\n";
-          html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" ng-click=\"{{ crumb.ngClick }}\">{{ crumb.title | capitalize }}</a></li>\n";
-          html += "<li class=\"active\">";
-          html += list.editTitle;
-          html += "</li>\n</ul>\n</div>\n";
+           // Breadcrumbs for activity stream widget
+           // Make the links clickable using ng-click function so we can first remove the stream widget
+           // before navigation
+           html += "<div class=\"nav-path\">\n";
+           html += "<ul class=\"breadcrumb\">\n";
+           html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" ng-click=\"{{ crumb.ngClick }}\">{{ crumb.title | capitalize }}</a></li>\n";
+           html += "<li class=\"active\">";
+           html += list.editTitle;
+           html += "</li>\n</ul>\n</div>\n";
        }
        else if (options.mode != 'lookup' && (options.breadCrumbs == undefined || options.breadCrumbs == true)) {
            //Breadcrumbs
-           html += "<div class=\"nav-path\">\n";
-           html += "<ul class=\"breadcrumb\">\n";
-           html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title | capitalize }}</a></li>\n";
-           
-           if (list.navigationLinks) {
-              var navigation = list.navigationLinks;
-              if (navigation['ngHide']) {
-                  html += "<li class=\"active\" ng-show=\"" + navigation['ngHide'] + "\">";
-                  html += list.editTitle;
-                  html += "</li>\n";
-                  html += "<li class=\"active\" ng-hide=\"" + navigation['ngHide'] + "\"> </li>\n";
-              }
-              else {
-                  html += "<li class=\"active\"> </li>\n";
-                  html += "</ul>\n";
-              }
-              html += "<div class=\"dropdown\" ";
-              html += (navigation['ngHide']) ? Attr(navigation, 'ngHide') : '';
-              html += ">\n";
-              for (var itm in navigation) {
-                  if (typeof navigation[itm] == 'object' && navigation[itm].active) {
-                     html += "<a href=\"\" class=\"toggle\" ";
-                     html += "data-toggle=\"dropdown\" ";
-                     html += ">" + navigation[itm].label + " <i class=\"fa fa-chevron-circle-down crumb-icon\"></i></a>";
-                     break;
-                  }
-              }
-              html += "<ul class=\"dropdown-menu\" role=\"menu\">\n";
-              for (var itm in navigation) {
-                  if (typeof navigation[itm] == 'object') {
-                     html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\"" +
-                         navigation[itm].href + "\" ";
-                     // html += (navigation[itm].active) ? "class=\"active\" " : "";
-                     html += ">";
-                     html += "<i class=\"fa fa-check\" style=\"visibility: ";
-                     html += (navigation[itm].active) ? "visible" : "hidden";
-                     html += "\"></i> ";
-                     html += navigation[itm].label;
-                     html += "</a></li>\n";
-                  }
-              }
-              html += "</ul>\n";
-              html += "</div><!-- dropdown -->\n";
-              html += "</div><!-- nav-path -->\n";
-           }
-           else {
-              html += "<li class=\"active\">";
-              if (options.mode == 'select') {
-                 html += list.selectTitle; 
-              }
-              else {
-                 html += list.editTitle;
-              }
-              html += "</li>\n</ul>\n</div>\n";
-           }
+           html += Breadcrumbs({ list: list, mode: options.mode });
        }
        
        if (options.mode == 'edit' && list.editInstructions) {
-          html += "<div class=\"alert alert-info alert-block\">\n";
-          html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>\n";
-          html += "<strong>Hint: </strong>" + list.editInstructions + "\n"; 
-          html += "</div>\n";
+           html += "<div class=\"alert alert-info alert-block\">\n";
+           html += "<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>\n";
+           html += "<strong>Hint: </strong>" + list.editInstructions + "\n"; 
+           html += "</div>\n";
        }
        
        if (options.mode != 'lookup' && (list.well == undefined || list.well == true)) {
-          html += "<div class=\"well\">\n";
+           html += "<div class=\"well\">\n";
        }
        
-       if (list.name == 'groups') {
-           // Inventory groups
-           html += "<div class=\"row\">\n";
-           html += "<div class=\"inventory-title " + options.searchSize + "\">" + list.editTitle + "</div>\n"; 
-       }
-       else {
+       html += "<div class=\"row\">\n";
+           
+       if (list.name != 'groups') {
+       //    // Inventory groups
+       //    html += "<div class=\"inventory-title col-lg-5\">" + list.editTitle + "</div>\n";
+       //}
+       //else if (list.name == 'hosts') {
+       //    html += "<div class=\"col-lg-4\">\n";
+       //    html += "<span class=\"hosts-title\">{{ selected_group_name }}</span>";
+       //    html += "</div><!-- col-lg-4 -->";
+       //    html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-5', 
+       //        searchWidgets: list.searchWidgets });
+       //}
            if (options.searchSize) {
-              html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: options.searchSize, 
-                  searchWidgets: list.searchWidgets });
+               html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: options.searchSize, 
+                   searchWidgets: list.searchWidgets });
            } 
            else if (options.mode == 'summary') {
-              html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-6' });
+               html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-6' });
            }
            else if (options.mode == 'lookup' || options.id != undefined) {
-              html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-8' });
+               html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-8' });
            }
            else {
-              html += SearchWidget({ iterator: list.iterator, template: list, mini: true });
+               html += SearchWidget({ iterator: list.iterator, template: list, mini: true });
            }
        }
 
        if (options.mode != 'lookup') {
-          //actions
-          var base = $location.path().replace(/^\//,'').split('/')[0];
+           //actions
+           var base = $location.path().replace(/^\//,'').split('/')[0];
+           html += "<div class=\"";
+           if (list.name == 'groups') {
+               html += "col-lg-12";
+           }
+           else if (options.searchSize) {
+               // User supplied searchSize, calc the remaining
+               var size = parseInt(options.searchSize.replace(/([A-Z]|[a-z]|\-)/g,''));
+               size = (list.searchWidgets) ? list.searchWidgets * size : size;
+               html += 'col-lg-' + (12 - size);
+           }
+           else if (options.mode == 'summary') {
+               html += 'col-lg-6';
+           }
+           else if (options.id != undefined) {
+               html += "col-lg-4"; 
+           }
+           else { 
+               html += "col-lg-8 col-md-6";
+           }
+           html += "\">\n";
           
-          html += "<div class=\"";
-          if (options.searchSize) {
-             // User supplied searchSize, calc the remaining
-             var size = parseInt(options.searchSize.replace(/([A-Z]|[a-z]|\-)/g,''));
-             size = (list.searchWidgets) ? list.searchWidgets * size : size;
-             html += 'col-lg-' + (12 - size);
-          }
-          else if (options.mode == 'summary') {
-             html += 'col-lg-6';
-          }
-          else if (options.id != undefined) {
-             html += "col-lg-4"; 
-          }
-          else { 
-             html += "col-lg-8 col-md-6";
-          }
-          html += "\">\n";
+           html += "<div class=\"list-actions\">\n";
           
-          html += "<div class=\"list-actions\">\n";
-          
-          // Add toolbar buttons or 'actions'
-          for (action in list.actions) {
-              if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
-                 if ( (list.actions[action].basePaths == undefined) || 
-                      (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
-                     html += this.button({ btn: list.actions[action], action: action, toolbar: true });
-                 }
-              }
-          }
+           // Add toolbar buttons or 'actions'
+           for (action in list.actions) {
+               if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
+                   if ( (list.actions[action].basePaths == undefined) || 
+                        (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
+                       html += this.button({ btn: list.actions[action], action: action, toolbar: true });
+                   }
+               }
+           }
 
-          //select instructions
-          if (options.mode == 'select' && list.selectInstructions) {
-             var btn = {
-                 awPopOver: list.selectInstructions,
-                 dataPlacement: 'top',
-                 dataContainer: 'body',
-                 'class': 'btn-xs btn-help',
-                 awToolTip: 'Click for help',
-                 dataTitle: 'Help',
-                 iconSize: 'fa-lg'
-                 };
-             //html += this.button(btn, 'select');
-             html += this.button({ btn: btn, action: 'help', toolbar: true });
-          }
+           //select instructions
+           if (options.mode == 'select' && list.selectInstructions) {
+               var btn = {
+                   awPopOver: list.selectInstructions,
+                   dataPlacement: 'top',
+                   dataContainer: 'body',
+                   'class': 'btn-xs btn-help',
+                   awToolTip: 'Click for help',
+                   dataTitle: 'Help',
+                   iconSize: 'fa-lg'
+                   };
+              //html += this.button(btn, 'select');
+              html += this.button({ btn: btn, action: 'help', toolbar: true });
+           }
 
-          html += "</div><!-- list-acitons -->\n";
-          html += "</div><!-- col-lg-7 -->\n";
-       }
-       else {
-          html += "<div class=\"col-lg-7\"></div>\n";
-       }
+           html += "</div><!-- list-acitons -->\n";
+           html += "</div><!-- list-actions-column -->\n";
+        }
+        else {
+           //lookup
+           html += "<div class=\"col-lg-7\"></div>\n";
+        }
 
-       html += "</div><!-- row -->\n";
-       
-       // Add a title and optionally a close button (used on Inventory->Groups)
-       if (options.mode !== 'lookup' && list.showTitle) {
-          html += "<div class=\"form-title\">";
-          html += (options.mode == 'edit' || options.mode == 'summary') ? list.editTitle : list.addTitle;
-          html += "</div>\n";
-       }
+        html += "</div><!-- row -->\n";
+        
+        // Add a title and optionally a close button (used on Inventory->Groups)
+        if (options.mode !== 'lookup' && list.showTitle) {
+            html += "<div class=\"form-title\">";
+            html += (options.mode == 'edit' || options.mode == 'summary') ? list.editTitle : list.addTitle;
+            html += "</div>\n";
+        }
 
-       // table header row
-       html += "<table id=\"" + list.name + "_table\" ";
-       html += "class=\"table"
-       html += (list['class']) ? " " + list['class'] : "";
-       html += (options.mode !== 'summary' && options.mode !== 'edit' && (options.mode == 'lookup' || options.id)) ? 
-           ' table-hover-inverse' : '';
-       html += (list.hover) ? ' table-hover' : '';
-       html += (options.mode == 'summary') ? ' table-summary' : '';
-       html += "\" ";
-       html += ">\n";
-       html += "<thead>\n";
-       html += "<tr>\n";
-       if (list.index) {
-          html += "<th>#</th>\n";
-       }
-       for (var fld in list.fields) {
-           if ( (list.fields[fld].searchOnly == undefined || list.fields[fld].searchOnly == false) &&
-                !(options.mode == 'lookup' && list.fields[fld].excludeModal !== undefined && list.fields[fld].excludeModal == true) ) {
-              html += "<th class=\"list-header";
-              html += (list.fields[fld].columnClass) ? " " + list.fields[fld].columnClass : "";
-              html += "\" id=\""; 
-              html += (list.fields[fld].id) ? list.fields[fld].id : fld + "-header";
-              html += "\"";
-              html += (list.fields[fld].columnShow) ? " ng-show=\"" + list.fields[fld].columnShow + "\" " : "";
-              html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? "ng-click=\"sort('" + fld + "')\"" : "";
-              html += ">";
-              html += list.fields[fld].label; 
-              if (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) {
-                 html += " <i class=\"fa ";
-                 if (list.fields[fld].key) {
-                    if (list.fields[fld].desc) {
-                       html += "fa-sort-down";
+        // table header row
+        html += "<table id=\"" + list.name + "_table\" ";
+        html += "class=\"table"
+        html += (list['class']) ? " " + list['class'] : "";
+        html += (options.mode !== 'summary' && options.mode !== 'edit' && (options.mode == 'lookup' || options.id)) ? 
+            ' table-hover-inverse' : '';
+        html += (list.hover) ? ' table-hover' : '';
+        html += (options.mode == 'summary') ? ' table-summary' : '';
+        html += "\" ";
+        html += ">\n";
+        html += "<thead>\n";
+        html += "<tr>\n";
+        if (list.index) {
+            html += "<th>#</th>\n";
+        }
+        for (var fld in list.fields) {
+            if ( (list.fields[fld].searchOnly == undefined || list.fields[fld].searchOnly == false) &&
+                 !(options.mode == 'lookup' && list.fields[fld].excludeModal !== undefined && list.fields[fld].excludeModal == true) ) {
+                html += "<th class=\"list-header";
+                html += (list.fields[fld].columnClass) ? " " + list.fields[fld].columnClass : "";
+                html += "\" id=\""; 
+                html += (list.fields[fld].id) ? list.fields[fld].id : fld + "-header";
+                html += "\"";
+                html += (list.fields[fld].columnShow) ? " ng-show=\"" + list.fields[fld].columnShow + "\" " : "";
+                html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? "ng-click=\"sort('" + fld + "')\"" : "";
+                html += ">";
+                html += list.fields[fld].label; 
+                if (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) {
+                    html += " <i class=\"fa ";
+                    if (list.fields[fld].key) {
+                        if (list.fields[fld].desc) {
+                            html += "fa-sort-down";
+                        }
+                        else {
+                            html += "fa-sort-up";
+                        }
                     }
                     else {
-                       html += "fa-sort-up";
-                    }
-                 }
-                 else {
-                    html += "fa-sort";
-                 }
-                 html += "\"></i></a>";
-              }
-              html += "</th>\n";
-           }
+                        html += "fa-sort";
+                    } 
+                    html += "\"></i></a>";
+                }
+                html += "</th>\n";
+            }    
        }
        if (options.mode == 'select' || options.mode == 'lookup') {
-          html += "<th>Select</th>";
+           html += "<th>Select</th>";
        }
        else if (options.mode == 'edit') {
-          html += "<th class=\"actions-column\">Actions</th>\n";
+           html += "<th class=\"actions-column\">Actions</th>\n";
        }
        html += "</tr>\n";
        html += "</thead>\n";
@@ -343,7 +300,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += "\"";
        html += ">\n";
        if (list.index) {
-          html += "<td class=\"index-column\">{{ $index + (" + list.iterator + "Page * " + list.iterator + "PageSize) + 1 }}.</td>\n";
+           html += "<td class=\"index-column\">{{ $index + (" + list.iterator + "Page * " + list.iterator + "PageSize) + 1 }}.</td>\n";
        }
        var cnt = 2;
        var base = (list.base) ? list.base : list.name;

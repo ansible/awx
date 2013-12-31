@@ -311,12 +311,13 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
 
 InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'InventoryForm', 'GenerateForm', 
                            'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
-                           'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait']; 
+                           'OrganizationList', 'SearchInit', 'PaginateInit', 'LookUpInit', 'GetBasePath', 'ParseTypeChange', 'Wait'
+                           ]; 
 
 
 
-function InventoriesEdit ($scope, $location, $routeParams, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait, 
-                          UpdateStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit) 
+function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait, 
+                          UpdateStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, Breadcrumbs, LoadBreadCrumbs) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -327,20 +328,35 @@ function InventoriesEdit ($scope, $location, $routeParams, GenerateList, ClearSc
     
     $scope.inventory_id = $routeParams.inventory_id;
     
+    LoadBreadCrumbs();
+
     if ($scope.removeSearchTreeReady) {
         $scope.removeSearchTreeReady();
     }
     $scope.removeSearchTreeReady = $scope.$on('searchTreeReady', function(e, inventory_name, groups) {
         // After the tree data loads, generate the groups list
-        generator.inject(list, { mode: 'edit', id: 'groups-container', breadCrumbs: false, searchSize: 'col-lg-5' });
+        var e = angular.element(document.getElementById('breadcrumbs'));
+        e.html(Breadcrumbs({ list: list, mode: 'edit' }));
+        $compile(e)($scope);
+        generator.inject(list, { mode: 'edit', id: 'groups-container', breadCrumbs: false, searchSize: 'col-lg-5 col-md-5 col-sm-5' });
         $scope.groups = groups;
         $scope.inventory_name = inventory_name;
         InjectHosts({ scope: $scope, inventory_id: $scope.inventory_id }); 
         Wait('stop');
         });
-
-    $scope.showHosts = function(group_id) {
+    
+    $scope.showHosts = function(tree_id, group_id) {
         // Clicked on group
+        //$scope.groups[tree_id].selected_class = 'selected';
+        $scope.selected_tree_id = tree_id; 
+        $scope.selected_group_id = group_id;
+        for (var i=0; i < $scope.groups.length; i++) { 
+            $scope.groups[i].selected_class = ($scope.groups[i].id == tree_id) ? 'selected' : '';
+            if ($scope.groups[i].id == tree_id) {
+                $scope.selected_group_name = $scope.groups[i].name;
+            }
+        }
+        $scope.search_place_holder='Search ' + $scope.selected_group_name;
         HostsReload({ scope: $scope, group_id: group_id, inventory_id: $scope.inventory_id });
         }
 
@@ -355,7 +371,8 @@ function InventoriesEdit ($scope, $location, $routeParams, GenerateList, ClearSc
     BuildTree({ scope: $scope, inventory_id: $scope.inventory_id });
 }
 
-InventoriesEdit.$inject = [ '$scope','$location', '$routeParams', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts', 'BuildTree',
-                            'Wait', 'UpdateStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit'
+InventoriesEdit.$inject = [ '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts', 
+                            'BuildTree', 'Wait', 'UpdateStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'Breadcrumbs',
+                            'LoadBreadCrumbs'
                             ]; 
   

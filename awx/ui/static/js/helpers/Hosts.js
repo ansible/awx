@@ -39,7 +39,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var inventory_id = params.inventory_id;
 
         var generator = GenerateList;
-        generator.inject(InventoryHosts, { mode: 'edit', id: 'hosts-container', breadCrumbs: false, searchSize: 'col-lg-5' });
+        generator.inject(InventoryHosts, { mode: 'edit', id: 'hosts-container', breadCrumbs: false, searchSize: 'col-lg-6 col-md-6 col-sm-6' });
         HostsReload({ scope: scope, group_id: null, inventory_id: inventory_id });
         }
         }])

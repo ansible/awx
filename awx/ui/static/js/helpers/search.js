@@ -83,10 +83,21 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             scope[iterator + 'ShowStartBtn' + modifier] = true;
             scope[iterator + 'HideAllStartBtn' + modifier] = false;
             
-            scope[iterator + 'SearchPlaceholder' + modifier] = 
-                (list.fields[scope[iterator + 'SearchField' + modifier]] &&
-                    list.fields[scope[iterator + 'SearchField' + modifier]].searchPlaceholder) ?
-                    list.fields[scope[iterator + 'SearchField' + modifier]].searchPlaceholder : 'Search';
+            if (list.fields[scope[iterator + 'SearchField' + modifier]] &&
+                list.fields[scope[iterator + 'SearchField' + modifier]].searchPlaceholder) {
+                if (scope[list.fields[scope[iterator + 'SearchField' + modifier]].searchPlaceholder]) {
+                    // if set to a scope variable
+                    scope[iterator + 'SearchPlaceholder' + modifier] = scope[list.fields[scope[iterator + 'SearchField' + modifier]].searchPlaceholder];
+                }
+                else {
+                    // Set to a string value in the list definition
+                    scope[iterator + 'SearchPlaceholder' + modifier] = list.fields[scope[iterator + 'SearchField' + modifier]].searchPlaceholder;
+                }  
+            }
+            else {
+                // Default value
+                scope[iterator + 'SearchPlaceholder' + modifier] = 'Search';
+            }
             
             scope[iterator + 'InputDisable' + modifier] = 
                 (list.fields[scope[iterator + 'SearchField' + modifier]] &&
@@ -128,9 +139,24 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             scope[iterator + 'HideSearchType' + modifier] = false;
             scope[iterator + 'InputHide' + modifier] = false;
             scope[iterator + 'SearchType' + modifier] = 'icontains';
-            scope[iterator + 'SearchPlaceholder' + modifier] = (list.fields[fld].searchPlaceholder) ? list.fields[fld].searchPlaceholder : 'Search';
             scope[iterator + 'InputDisable' + modifier] = (list.fields[fld].searchObject == 'all') ? true : false;
             scope[iterator + 'ShowStartBtn' + modifier] = true;
+            
+            if (list.fields[scope[iterator + 'SearchField' + modifier]] &&
+                list.fields[scope[iterator + 'SearchField' + modifier]].searchPlaceholder) {
+                if (scope[list.fields[scope[iterator + 'SearchField' + modifier]].searchPlaceholder]) {
+                    // if set to a scope variable
+                    scope[iterator + 'SearchPlaceholder' + modifier] = scope[list.fields[scope[iterator + 'SearchField' + modifier]].searchPlaceholder];
+                }
+                else {
+                    // Set to a string value in the list definition
+                    scope[iterator + 'SearchPlaceholder' + modifier] = list.fields[scope[iterator + 'SearchField' + modifier]].searchPlaceholder;
+                }  
+            }
+            else {
+                // Default value
+                scope[iterator + 'SearchPlaceholder' + modifier] = 'Search';
+            }
 
             if (list.fields[fld].searchType && list.fields[fld].searchType == 'gtzero') {
                 scope[iterator + "InputDisable" + modifier] = true;
