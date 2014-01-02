@@ -1,3 +1,6 @@
+# Copyright (c) 2014 AnsibleWorks, Inc.
+# All Rights Reserved.
+
 import logging
 
 from django.db.models.signals import pre_save, post_save, post_delete, m2m_changed

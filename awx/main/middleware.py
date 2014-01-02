@@ -1,3 +1,6 @@
+# Copyright (c) 2014 AnsibleWorks, Inc.
+# All Rights Reserved.
+
 from django.conf import settings
 from django.contrib.auth.models import User, AnonymousUser
 from django.db.models.signals import pre_save, post_save

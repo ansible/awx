@@ -1,5 +1,5 @@
 /*********************************************
- *  Copyright (c) 2013 AnsibleWorks, Inc.
+ *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
  * PromptDialog
  * Prompt the user with a Yes/No dialog to confirm an action such 

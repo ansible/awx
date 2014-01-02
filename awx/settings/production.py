@@ -1,4 +1,4 @@
-# Copyright (c) 2013 AnsibleWorks, Inc.
+# Copyright (c) 2014 AnsibleWorks, Inc.
 # All Rights Reserved.
 
 # Production settings for AWX project.

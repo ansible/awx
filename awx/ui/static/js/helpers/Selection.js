@@ -1,5 +1,5 @@
 /*********************************************
- *  Copyright (c) 2013 AnsibleWorks, Inc.
+ *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
  *  SelectionHelper
  *  Used in list controllers where the list might also be used as a selection list.

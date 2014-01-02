@@ -1,5 +1,5 @@
 /*********************************************
- *  Copyright (c) 2013 AnsibleWorks, Inc.
+ *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
  *  InventoryStatus.js
  *  Form definition for Inventory Status -JSON view
