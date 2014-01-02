@@ -703,7 +703,7 @@ class _LDAPUser(object):
             if callable(uri):
                 uri = uri()
 
-            self._connection = ldap.initialize(uri)
+            self._connection = self.backend.ldap.initialize(uri)
 
             for opt, value in self.settings.CONNECTION_OPTIONS.iteritems():
                 self._connection.set_option(opt, value)

@@ -122,7 +122,7 @@ class Reservation(EC2Object):
                      Reservation.
     """
     def __init__(self, connection=None):
-        EC2Object.__init__(self, connection)
+        super(Reservation, self).__init__(connection)
         self.id = None
         self.owner_id = None
         self.groups = []
@@ -211,7 +211,7 @@ class Instance(TaggedEC2Object):
     """
 
     def __init__(self, connection=None):
-        TaggedEC2Object.__init__(self, connection)
+        super(Instance, self).__init__(connection)
         self.id = None
         self.dns_name = None
         self.public_dns_name = None
@@ -288,7 +288,7 @@ class Instance(TaggedEC2Object):
         return self._placement.tenancy
 
     def startElement(self, name, attrs, connection):
-        retval = TaggedEC2Object.startElement(self, name, attrs, connection)
+        retval = super(Instance, self).startElement(name, attrs, connection)
         if retval is not None:
             return retval
         if name == 'monitoring':
@@ -606,8 +606,7 @@ class Instance(TaggedEC2Object):
         )
 
 
-class ConsoleOutput:
-
+class ConsoleOutput(object):
     def __init__(self, parent=None):
         self.parent = parent
         self.instance_id = None
@@ -629,7 +628,6 @@ class ConsoleOutput:
 
 
 class InstanceAttribute(dict):
-
     ValidValues = ['instanceType', 'kernel', 'ramdisk', 'userData',
                    'disableApiTermination',
                    'instanceInitiatedShutdownBehavior',
@@ -668,7 +666,6 @@ class InstanceAttribute(dict):
 
 
 class SubParse(dict):
-
     def __init__(self, section, parent=None):
         dict.__init__(self)
         self.section = section

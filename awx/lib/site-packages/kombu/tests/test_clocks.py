@@ -70,6 +70,7 @@ class test_timetuple(Case):
 
     def test_order(self):
         t1 = time()
+        t2 = time() + 300  # windows clock not reliable
         a = timetuple(133, t1, 'A', 'obj')
         b = timetuple(140, t1, 'A', 'obj')
         self.assertTrue(a.__getnewargs__())
@@ -89,8 +90,8 @@ class test_timetuple(Case):
             NotImplemented,
         )
         self.assertGreater(
-            timetuple(134, time(), 'A', 'obj'),
-            timetuple(133, time(), 'A', 'obj'),
+            timetuple(134, t2, 'A', 'obj'),
+            timetuple(133, t1, 'A', 'obj'),
         )
         self.assertGreater(
             timetuple(134, t1, 'B', 'obj'),
@@ -98,6 +99,6 @@ class test_timetuple(Case):
         )
 
         self.assertGreater(
-            timetuple(None, time(), 'B', 'obj'),
+            timetuple(None, t2, 'B', 'obj'),
             timetuple(None, t1, 'A', 'obj'),
         )

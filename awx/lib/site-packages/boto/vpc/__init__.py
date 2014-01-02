@@ -571,7 +571,7 @@ class VPCConnection(EC2Connection):
         current network ACL with the default.
 
         :type subnet_id: str
-        :param association_id: The ID of the subnet to which the ACL belongs.
+        :param subnet_id: The ID of the subnet to which the ACL belongs.
 
         :type vpc_id: str
         :param vpc_id: The ID of the VPC to which the ACL/subnet belongs. Queries EC2 if omitted.

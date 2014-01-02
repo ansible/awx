@@ -51,7 +51,7 @@ class Icmp(object):
 class NetworkAcl(TaggedEC2Object):
 
     def __init__(self, connection=None):
-        TaggedEC2Object.__init__(self, connection)
+        super(NetworkAcl, self).__init__(connection)
         self.id = None
         self.vpc_id = None
         self.network_acl_entries = []

@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -26,7 +26,7 @@ import os, StringIO
 class CopyBot(ScriptBase):
 
     def __init__(self):
-        ScriptBase.__init__(self)
+        super(CopyBot, self).__init__()
         self.wdir = boto.config.get('Pyami', 'working_dir')
         self.log_file = '%s.log' % self.instance_id
         self.log_path = os.path.join(self.wdir, self.log_file)
@@ -80,7 +80,7 @@ class CopyBot(ScriptBase):
     def copy_log(self):
         key = self.dst.new_key(self.log_file)
         key.set_contents_from_filename(self.log_path)
-        
+
     def main(self):
         fp = StringIO.StringIO()
         boto.config.dump_safe(fp)
@@ -94,4 +94,4 @@ class CopyBot(ScriptBase):
         if boto.config.getbool(self.name, 'exit_on_completion', True):
             ec2 = boto.connect_ec2()
             ec2.terminate_instances([self.instance_id])
-        
+

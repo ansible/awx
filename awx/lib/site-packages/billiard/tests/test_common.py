@@ -21,13 +21,14 @@ def signo(name):
 
 
 @contextmanager
-def termsigs(*sigs):
+def termsigs(default, full):
     from billiard import common
-    prev, common.TERMSIGS = common.TERMSIGS, sigs
+    prev_def, common.TERMSIGS_DEFAULT = common.TERMSIGS_DEFAULT, default
+    prev_full, common.TERMSIGS_FULL = common.TERMSIGS_FULL, full
     try:
         yield
     finally:
-        common.TERMSIGS = prev
+        common.TERMSIGS_DEFAULT, common.TERMSIGS_FULL = prev_def, prev_full
 
 
 class test_reset_signals(Case):
@@ -39,21 +40,21 @@ class test_reset_signals(Case):
             self.assertEqual(os.WTERMSIG(exit.call_args[0][0]), 15)
 
     def test_does_not_reset_ignored_signal(self, sigs=['SIGTERM']):
-        with self.assert_context(sigs, signal.SIG_IGN) as (_, SET):
+        with self.assert_context(sigs, [], signal.SIG_IGN) as (_, SET):
             self.assertFalse(SET.called)
 
     def test_does_not_reset_if_current_is_None(self, sigs=['SIGTERM']):
-        with self.assert_context(sigs, None) as (_, SET):
+        with self.assert_context(sigs, [], None) as (_, SET):
             self.assertFalse(SET.called)
 
     def test_resets_for_SIG_DFL(self, sigs=['SIGTERM', 'SIGINT', 'SIGUSR1']):
-        with self.assert_context(sigs, signal.SIG_DFL) as (_, SET):
+        with self.assert_context(sigs, [], signal.SIG_DFL) as (_, SET):
             SET.assert_has_calls([
                 call(signo(sig), _shutdown_cleanup) for sig in sigs
             ])
 
     def test_resets_for_obj(self, sigs=['SIGTERM', 'SIGINT', 'SIGUSR1']):
-        with self.assert_context(sigs, object()) as (_, SET):
+        with self.assert_context(sigs, [], object()) as (_, SET):
             SET.assert_has_calls([
                 call(signo(sig), _shutdown_cleanup) for sig in sigs
             ])
@@ -61,19 +62,19 @@ class test_reset_signals(Case):
     def test_handles_errors(self, sigs=['SIGTERM']):
         for exc in (OSError(), AttributeError(),
                     ValueError(), RuntimeError()):
-            with self.assert_context(sigs, signal.SIG_DFL, exc) as (_, SET):
+            with self.assert_context(sigs, [], signal.SIG_DFL, exc) as (_, SET):
                 self.assertTrue(SET.called)
 
     @contextmanager
-    def assert_context(self, sigs, get_returns=None, set_effect=None):
-        with termsigs(*sigs):
+    def assert_context(self, default, full, get_returns=None, set_effect=None):
+        with termsigs(default, full):
             with patch('signal.getsignal') as GET:
                 with patch('signal.signal') as SET:
                     GET.return_value = get_returns
                     SET.side_effect = set_effect
                     reset_signals()
                     GET.assert_has_calls([
-                        call(signo(sig)) for sig in sigs
+                        call(signo(sig)) for sig in default
                     ])
                     yield GET, SET
 

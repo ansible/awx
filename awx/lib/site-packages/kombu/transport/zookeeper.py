@@ -33,6 +33,7 @@ import socket
 from anyjson import loads, dumps
 
 from kombu.five import Empty
+from kombu.utils.encoding import bytes_to_str
 
 from . import virtual
 
@@ -117,7 +118,7 @@ class Channel(virtual.Channel):
         if msg is None:
             raise Empty()
 
-        return loads(msg)
+        return loads(bytes_to_str(msg))
 
     def _purge(self, queue):
         count = 0

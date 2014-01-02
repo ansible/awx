@@ -27,6 +27,7 @@ import urllib
 import base64
 import time
 
+from boto.auth import detect_potential_s3sigv4
 import boto.utils
 from boto.connection import AWSAuthConnection
 from boto import handler
@@ -134,7 +135,7 @@ class ProtocolIndependentOrdinaryCallingFormat(OrdinaryCallingFormat):
         return url_base
 
 
-class Location:
+class Location(object):
 
     DEFAULT = ''  # US Classic Region
     EU = 'EU'
@@ -144,6 +145,7 @@ class Location:
     APNortheast = 'ap-northeast-1'
     APSoutheast = 'ap-southeast-1'
     APSoutheast2 = 'ap-southeast-2'
+    CNNorth1 = 'cn-north-1'
 
 
 class S3Connection(AWSAuthConnection):
@@ -165,7 +167,7 @@ class S3Connection(AWSAuthConnection):
         self.calling_format = calling_format
         self.bucket_class = bucket_class
         self.anon = anon
-        AWSAuthConnection.__init__(self, host,
+        super(S3Connection, self).__init__(host,
                 aws_access_key_id, aws_secret_access_key,
                 is_secure, port, proxy, proxy_port, proxy_user, proxy_pass,
                 debug=debug, https_connection_factory=https_connection_factory,
@@ -173,6 +175,7 @@ class S3Connection(AWSAuthConnection):
                 suppress_consec_slashes=suppress_consec_slashes,
                 validate_certs=validate_certs)
 
+    @detect_potential_s3sigv4
     def _required_auth_capability(self):
         if self.anon:
             return ['anon']
@@ -540,8 +543,8 @@ class S3Connection(AWSAuthConnection):
             boto.log.debug('path=%s' % path)
             auth_path += '?' + query_args
             boto.log.debug('auth_path=%s' % auth_path)
-        return AWSAuthConnection.make_request(
-            self, method, path, headers,
+        return super(S3Connection, self).make_request(
+            method, path, headers,
             data, host, auth_path, sender,
             override_num_retries=override_num_retries,
             retry_handler=retry_handler

@@ -47,7 +47,9 @@ def regions():
             SQSRegionInfo(name='ap-southeast-1',
                           endpoint='ap-southeast-1.queue.amazonaws.com'),
             SQSRegionInfo(name='ap-southeast-2',
-                          endpoint='ap-southeast-2.queue.amazonaws.com')
+                          endpoint='ap-southeast-2.queue.amazonaws.com'),
+            SQSRegionInfo(name='cn-north-1',
+                          endpoint='sqs.cn-north-1.amazonaws.com.cn'),
             ]
 
 

@@ -55,6 +55,9 @@ def regions():
                           connection_cls=IAMConnection),
             IAMRegionInfo(name='us-gov-west-1',
                           endpoint='iam.us-gov.amazonaws.com',
+                          connection_cls=IAMConnection),
+            IAMRegionInfo(name='cn-north-1',
+                          endpoint='iam.cn-north-1.amazonaws.com.cn',
                           connection_cls=IAMConnection)
             ]
 

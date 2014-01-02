@@ -14,12 +14,12 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-from boto.gs.bucket import Bucket            
+from boto.gs.bucket import Bucket
 from boto.s3.connection import S3Connection
 from boto.s3.connection import SubdomainCallingFormat
 from boto.s3.connection import check_lowercase_bucketname
@@ -40,7 +40,7 @@ class GSConnection(S3Connection):
                  host=DefaultHost, debug=0, https_connection_factory=None,
                  calling_format=SubdomainCallingFormat(), path='/',
                  suppress_consec_slashes=True):
-        S3Connection.__init__(self, gs_access_key_id, gs_secret_access_key,
+        super(GSConnection, self).__init__(gs_access_key_id, gs_secret_access_key,
                  is_secure, port, proxy, proxy_port, proxy_user, proxy_pass,
                  host, debug, https_connection_factory, calling_format, path,
                  "google", Bucket,
@@ -52,12 +52,12 @@ class GSConnection(S3Connection):
         """
         Creates a new bucket. By default it's located in the USA. You can
         pass Location.EU to create bucket in the EU. You can also pass
-        a LocationConstraint for where the bucket should be located, and 
+        a LocationConstraint for where the bucket should be located, and
         a StorageClass describing how the data should be stored.
 
         :type bucket_name: string
         :param bucket_name: The name of the new bucket.
-        
+
         :type headers: dict
         :param headers: Additional headers to pass along with the request to GCS.
 
@@ -70,7 +70,7 @@ class GSConnection(S3Connection):
 
         :type storage_class: string
         :param storage_class: Either 'STANDARD' or 'DURABLE_REDUCED_AVAILABILITY'.
-             
+
         """
         check_lowercase_bucketname(bucket_name)
 

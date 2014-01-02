@@ -35,7 +35,7 @@ class VmType(EC2Object):
 
     def __init__(self, connection=None, name=None, cores=None,
                  memory=None, disk=None):
-        EC2Object.__init__(self, connection)
+        super(VmType, self).__init__(connection)
         self.connection = connection
         self.name = name
         self.cores = cores

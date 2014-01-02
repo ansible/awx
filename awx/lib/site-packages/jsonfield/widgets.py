@@ -16,4 +16,3 @@ class JSONWidget(forms.Textarea):
 
 class JSONSelectWidget(forms.SelectMultiple):
     pass
-

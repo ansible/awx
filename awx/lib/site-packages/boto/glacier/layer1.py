@@ -54,7 +54,7 @@ class Layer1(AWSAuthConnection):
 
         self.region = region
         self.account_id = account_id
-        AWSAuthConnection.__init__(self, region.endpoint,
+        super(Layer1, self).__init__(region.endpoint,
                                    aws_access_key_id, aws_secret_access_key,
                                    is_secure, port, proxy, proxy_port,
                                    proxy_user, proxy_pass, debug,
@@ -72,7 +72,7 @@ class Layer1(AWSAuthConnection):
             headers = {}
         headers['x-amz-glacier-version'] = self.Version
         uri = '/%s/%s' % (self.account_id, resource)
-        response = AWSAuthConnection.make_request(self, verb, uri,
+        response = super(Layer1, self).make_request(verb, uri,
                                                   params=params,
                                                   headers=headers,
                                                   sender=sender,

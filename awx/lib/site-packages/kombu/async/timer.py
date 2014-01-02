@@ -74,7 +74,7 @@ class Entry(object):
             self.fun.__name__, self.args, self.kwargs)
 
     def __hash__(self):
-        return hash((self.fun, self.args, self.kwargs))
+        return hash((self.fun, self.args))
 
     if sys.version_info[0] == 3:  # pragma: no cover
 

@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -26,7 +26,7 @@ from StringIO import StringIO
 
 class ResponseGroup(xml.sax.ContentHandler):
     """A Generic "Response Group", which can
-    be anything from the entire list of Items to 
+    be anything from the entire list of Items to
     specific response elements within an item"""
 
     def __init__(self, connection=None, nodename=None):
@@ -45,7 +45,7 @@ class ResponseGroup(xml.sax.ContentHandler):
     #
     def get(self, name):
         return self.__dict__.get(name)
-    
+
     def set(self, name, value):
         self.__dict__[name] = value
 
@@ -90,14 +90,14 @@ class Item(ResponseGroup):
 
     def __init__(self, connection=None):
         """Initialize this Item"""
-        ResponseGroup.__init__(self, connection, "Item")
+        super(Item, self).__init__(connection, "Item")
 
 class ItemSet(ResponseGroup):
     """A special ResponseGroup that has built-in paging, and
     only creates new Items on the "Item" tag"""
 
     def __init__(self, connection, action, params, page=0):
-        ResponseGroup.__init__(self, connection, "Items")
+        super(ItemSet, self).__init__(connection, "Items")
         self.objs = []
         self.iter = None
         self.page = page
@@ -150,4 +150,4 @@ class ItemSet(ResponseGroup):
         """Override to first fetch everything"""
         for item in self:
             pass
-        return ResponseGroup.to_xml(self)
+        return super(ItemSet, self).to_xml()

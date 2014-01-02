@@ -46,7 +46,7 @@ class Channel(amqp.Channel, base.StdChannel):
             content_type=content_type,
             content_encoding=content_encoding,
             application_headers=headers,
-            **properties
+            **properties or {}
         )
 
     def message_to_python(self, raw_message):

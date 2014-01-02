@@ -28,7 +28,7 @@ from boto.ec2.ec2object import TaggedEC2Object
 class Subnet(TaggedEC2Object):
 
     def __init__(self, connection=None):
-        TaggedEC2Object.__init__(self, connection)
+        super(Subnet, self).__init__(connection)
         self.id = None
         self.vpc_id = None
         self.state = None

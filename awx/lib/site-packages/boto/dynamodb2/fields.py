@@ -91,10 +91,10 @@ class RangeKey(BaseSchemaField):
 
 class BaseIndexField(object):
     """
-    An abstract class for defining schema fields.
+    An abstract class for defining schema indexes.
 
-    Contains most of the core functionality for the field. Subclasses must
-    define an ``attr_type`` to pass to DynamoDB.
+    Contains most of the core functionality for the index. Subclasses must
+    define a ``projection_type`` to pass to DynamoDB.
     """
     def __init__(self, name, parts):
         self.name = name
@@ -139,7 +139,7 @@ class BaseIndexField(object):
                     },
                 ],
                 'Projection': {
-                    'ProjectionType': 'KEYS_ONLY,
+                    'ProjectionType': 'KEYS_ONLY',
                 }
             }
 
@@ -209,4 +209,126 @@ class IncludeIndex(BaseIndexField):
     def schema(self):
         schema_data = super(IncludeIndex, self).schema()
         schema_data['Projection']['NonKeyAttributes'] = self.includes_fields
+        return schema_data
+
+
+class GlobalBaseIndexField(BaseIndexField):
+    """
+    An abstract class for defining global indexes.
+
+    Contains most of the core functionality for the index. Subclasses must
+    define a ``projection_type`` to pass to DynamoDB.
+    """
+    throughput = {
+        'read': 5,
+        'write': 5,
+    }
+
+    def __init__(self, *args, **kwargs):
+        throughput = kwargs.pop('throughput', None)
+
+        if throughput is not None:
+            self.throughput = throughput
+
+        super(GlobalBaseIndexField, self).__init__(*args, **kwargs)
+
+    def schema(self):
+        """
+        Returns the schema structure DynamoDB expects.
+
+        Example::
+
+            >>> index.schema()
+            {
+                'IndexName': 'LastNameIndex',
+                'KeySchema': [
+                    {
+                        'AttributeName': 'username',
+                        'KeyType': 'HASH',
+                    },
+                ],
+                'Projection': {
+                    'ProjectionType': 'KEYS_ONLY',
+                },
+                'ProvisionedThroughput': {
+                    'ReadCapacityUnits': 5,
+                    'WriteCapacityUnits': 5
+                }
+            }
+
+        """
+        schema_data = super(GlobalBaseIndexField, self).schema()
+        schema_data['ProvisionedThroughput'] = {
+            'ReadCapacityUnits': int(self.throughput['read']),
+            'WriteCapacityUnits': int(self.throughput['write']),
+        }
+        return schema_data
+
+
+class GlobalAllIndex(GlobalBaseIndexField):
+    """
+    An index signifying all fields should be in the index.
+
+    Example::
+
+        >>> GlobalAllIndex('MostRecentlyJoined', parts=[
+        ...     HashKey('username'),
+        ...     RangeKey('date_joined')
+        ... ],
+        ... throughput={
+        ...     'read': 2,
+        ...     'write': 1,
+        ... })
+
+    """
+    projection_type = 'ALL'
+
+
+class GlobalKeysOnlyIndex(GlobalBaseIndexField):
+    """
+    An index signifying only key fields should be in the index.
+
+    Example::
+
+        >>> GlobalKeysOnlyIndex('MostRecentlyJoined', parts=[
+        ...     HashKey('username'),
+        ...     RangeKey('date_joined')
+        ... ],
+        ... throughput={
+        ...     'read': 2,
+        ...     'write': 1,
+        ... })
+
+    """
+    projection_type = 'KEYS_ONLY'
+
+
+class GlobalIncludeIndex(GlobalBaseIndexField, IncludeIndex):
+    """
+    An index signifying only certain fields should be in the index.
+
+    Example::
+
+        >>> GlobalIncludeIndex('GenderIndex', parts=[
+        ...     HashKey('username'),
+        ...     RangeKey('date_joined')
+        ... ],
+        ... includes=['gender'],
+        ... throughput={
+        ...     'read': 2,
+        ...     'write': 1,
+        ... })
+
+    """
+    projection_type = 'INCLUDE'
+
+    def __init__(self, *args, **kwargs):
+        IncludeIndex.__init__(self, *args, **kwargs)
+        GlobalBaseIndexField.__init__(self, *args, **kwargs)
+
+    def schema(self):
+        # Pick up the includes.
+        schema_data = IncludeIndex.schema(self)
+        # Also the throughput.
+        schema_data.update(GlobalBaseIndexField.schema(self))
         return schema_data

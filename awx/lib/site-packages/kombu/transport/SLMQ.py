@@ -16,7 +16,7 @@ import os
 
 from kombu.five import Empty, text_t
 from kombu.utils import cached_property  # , uuid
-from kombu.utils.encoding import safe_str
+from kombu.utils.encoding import bytes_to_str, safe_str
 
 from . import virtual
 
@@ -96,7 +96,7 @@ class Channel(virtual.Channel):
         rs = q.pop(1)
         if rs['items']:
             m = rs['items'][0]
-            payload = loads(m['body'])
+            payload = loads(bytes_to_str(m['body']))
             if queue in self._noack_queues:
                 q.message(m['id']).delete()
             else:

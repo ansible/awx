@@ -34,13 +34,14 @@ class BundleCommand(InstallCommand):
             ##                                           ##
             ##  Due to lack of interest and maintenance, ##
             ##  'pip bundle' and support for installing  ##
-            ##  from *.pybundle files is now deprecated, ##
-            ##  and will be removed in pip v1.5.         ##
+            ##  from *.pybundle files is deprecated, as  ##
+            ##  of v1.4 and will be removed in a         ##
+            ##  future release.                          ##
             ##                                           ##
             ###############################################
 
         """)
-        logger.notify(deprecation)
+        logger.warn(deprecation)
 
         if not args:
             raise InstallationError('You must give a bundle filename')

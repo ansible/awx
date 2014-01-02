@@ -3,12 +3,25 @@
 
 
 import os
+import sys
 import unittest
 import codecs
+import subprocess
 from setuptools.tests import environment
 from setuptools.compat import unicode, unichr
 
 from setuptools import svn_utils
+from setuptools.tests.py26compat import skipIf
+
+
+def _do_svn_check():
+    try:
+        subprocess.check_call(["svn", "--version"],
+                              shell=(sys.platform == 'win32'))
+        return True
+    except (OSError, subprocess.CalledProcessError):
+        return False
+_svn_check = _do_svn_check()
 
 
 class TestSvnVersion(unittest.TestCase):
@@ -20,7 +33,10 @@ class TestSvnVersion(unittest.TestCase):
                 path_variable = env
 
         if path_variable is None:
-            self.skipTest('Cannot figure out how to modify path')
+            try:
+                self.skipTest('Cannot figure out how to modify path')
+            except AttributeError:  # PY26 doesn't have this
+                return
 
         old_path = os.environ[path_variable]
         os.environ[path_variable] = ''
@@ -30,6 +46,7 @@ class TestSvnVersion(unittest.TestCase):
         finally:
             os.environ[path_variable] = old_path
 
+    @skipIf(not _svn_check, "No SVN to text, in the first place")
     def test_svn_should_exist(self):
         version = svn_utils.SvnInfo.get_svn_version()
         self.assertNotEqual(version, '')
@@ -169,11 +186,14 @@ class TestSvn(environment.ZippedEnvironment):
 
     def setUp(self):
         version = svn_utils.SvnInfo.get_svn_version()
+        if not version:  # empty or null
+            self.dataname = None
+            self.datafile = None
+            return
+
         self.base_version = tuple([int(x) for x in version.split('.')[:2]])
 
-        if not self.base_version:
-            raise ValueError('No SVN tools installed')
-        elif self.base_version < (1,3):
+        if self.base_version < (1,3):
             raise ValueError('Insufficient SVN Version %s' % version)
         elif self.base_version >= (1,9):
             #trying the latest version
@@ -184,10 +204,12 @@ class TestSvn(environment.ZippedEnvironment):
                                      'svn_data', self.dataname + ".zip")
         super(TestSvn, self).setUp()
 
+    @skipIf(not _svn_check, "No SVN to text, in the first place")
     def test_revision(self):
         rev = svn_utils.SvnInfo.load('.').get_revision()
         self.assertEqual(rev, 6)
 
+    @skipIf(not _svn_check, "No SVN to text, in the first place")
     def test_entries(self):
         expected = set([
             (os.path.join('a file'), 'file'),
@@ -200,6 +222,7 @@ class TestSvn(environment.ZippedEnvironment):
         info = svn_utils.SvnInfo.load('.')
         self.assertEqual(set(x for x in info.entries), expected)
 
+    @skipIf(not _svn_check, "No SVN to text, in the first place")
     def test_externals(self):
         if self.base_version >= (1,6):
             folder2 = 'third party2'

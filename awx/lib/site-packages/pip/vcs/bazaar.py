@@ -5,7 +5,7 @@ from pip.backwardcompat import urlparse
 from pip.log import logger
 from pip.util import rmtree, display_path, call_subprocess
 from pip.vcs import vcs, VersionControl
-from pip.download import path_to_url2
+from pip.download import path_to_url
 
 
 class Bazaar(VersionControl):
@@ -89,7 +89,7 @@ class Bazaar(VersionControl):
                 if line.startswith(x):
                     repo = line.split(x)[1]
                     if self._is_local_repository(repo):
-                        return path_to_url2(repo)
+                        return path_to_url(repo)
                     return repo
         return None
 

@@ -9,7 +9,6 @@ from __future__ import absolute_import
 
 import logging
 
-from collections import Callable
 from functools import wraps
 
 from kombu.five import items
@@ -37,7 +36,7 @@ class Logwrapped(object):
     def __getattr__(self, key):
         meth = getattr(self.instance, key)
 
-        if not isinstance(meth, Callable) or key in self.__ignore:
+        if not callable(meth) or key in self.__ignore:
             return meth
 
         @wraps(meth)

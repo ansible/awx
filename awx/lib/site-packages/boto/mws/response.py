@@ -82,7 +82,7 @@ class Element(DeclarativeType):
 
 class SimpleList(DeclarativeType):
     def __init__(self, *args, **kw):
-        DeclarativeType.__init__(self, *args, **kw)
+        super(SimpleList, self).__init__(*args, **kw)
         self._value = []
 
     def start(self, *args, **kw):
@@ -108,16 +108,16 @@ class MemberList(Element):
         assert 'member' not in kw, message
         if _member is None:
             if _hint is None:
-                Element.__init__(self, *args, member=ElementList(**kw))
+                super(MemberList, self).__init__(*args, member=ElementList(**kw))
             else:
-                Element.__init__(self, _hint=_hint)
+                super(MemberList, self).__init__(_hint=_hint)
         else:
             if _hint is None:
                 if issubclass(_member, DeclarativeType):
                     member = _member(**kw)
                 else:
                     member = ElementList(_member, **kw)
-                Element.__init__(self, *args, member=member)
+                super(MemberList, self).__init__(*args, member=member)
             else:
                 message = 'Nonsensical {0} hint {1!r}'.format(self.__class__.__name__,
                                                               _hint)
@@ -130,7 +130,7 @@ class MemberList(Element):
             if isinstance(self._value.member, DeclarativeType):
                 self._value.member = []
             self._value = self._value.member
-        Element.teardown(self, *args, **kw)
+        super(MemberList, self).teardown(*args, **kw)
 
 
 def ResponseFactory(action, force=None):
@@ -231,7 +231,7 @@ class Response(ResponseElement):
         if name == self._name:
             self.update(attrs)
         else:
-            return ResponseElement.startElement(self, name, attrs, connection)
+            return super(Response, self).startElement(name, attrs, connection)
 
     @property
     def _result(self):
@@ -247,7 +247,7 @@ class ResponseResultList(Response):
 
     def __init__(self, *args, **kw):
         setattr(self, self._action + 'Result', ElementList(self._ResultClass))
-        Response.__init__(self, *args, **kw)
+        super(ResponseResultList, self).__init__(*args, **kw)
 
 
 class FeedSubmissionInfo(ResponseElement):
@@ -374,13 +374,13 @@ class ComplexAmount(ResponseElement):
         if name not in ('CurrencyCode', self._amount):
             message = 'Unrecognized tag {0} in ComplexAmount'.format(name)
             raise AssertionError(message)
-        return ResponseElement.startElement(self, name, attrs, connection)
+        return super(ComplexAmount, self).startElement(name, attrs, connection)
 
     @strip_namespace
     def endElement(self, name, value, connection):
         if name == self._amount:
             value = Decimal(value)
-        ResponseElement.endElement(self, name, value, connection)
+        super(ComplexAmount, self).endElement(name, value, connection)
 
 
 class ComplexMoney(ComplexAmount):
@@ -402,13 +402,13 @@ class ComplexWeight(ResponseElement):
         if name not in ('Unit', 'Value'):
             message = 'Unrecognized tag {0} in ComplexWeight'.format(name)
             raise AssertionError(message)
-        return ResponseElement.startElement(self, name, attrs, connection)
+        return super(ComplexWeight, self).startElement(name, attrs, connection)
 
     @strip_namespace
     def endElement(self, name, value, connection):
         if name == 'Value':
             value = Decimal(value)
-        ResponseElement.endElement(self, name, value, connection)
+        super(ComplexWeight, self).endElement(name, value, connection)
 
 
 class Dimension(ComplexType):
@@ -501,7 +501,7 @@ class ItemAttributes(AttributeSet):
                  'MediaType', 'OperatingSystem', 'Platform')
         for name in names:
             setattr(self, name, SimpleList())
-        AttributeSet.__init__(self, *args, **kw)
+        super(ItemAttributes, self).__init__(*args, **kw)
 
 
 class VariationRelationship(ResponseElement):
@@ -605,7 +605,7 @@ class ProductCategory(ResponseElement):
 
     def __init__(self, *args, **kw):
         setattr(self, 'Parent', Element(ProductCategory))
-        ResponseElement.__init__(self, *args, **kw)
+        super(ProductCategory, self).__init__(*args, **kw)
 
 
 class GetProductCategoriesResult(ResponseElement):

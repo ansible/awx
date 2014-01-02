@@ -1,6 +1,7 @@
 from email.parser import FeedParser
 import os
 import imp
+import locale
 import pkg_resources
 import re
 import sys
@@ -11,9 +12,9 @@ import zipfile
 
 from distutils.util import change_root
 from pip.locations import (bin_py, running_under_virtualenv,PIP_DELETE_MARKER_FILENAME,
-                           write_delete_marker_file)
-from pip.exceptions import (InstallationError, UninstallationError,
-                            BestVersionAlreadyInstalled,
+                           write_delete_marker_file, bin_user)
+from pip.exceptions import (InstallationError, UninstallationError, UnsupportedWheel,
+                            BestVersionAlreadyInstalled, InvalidWheelFilename,
                             DistributionNotFound, PreviousBuildDirError)
 from pip.vcs import vcs
 from pip.log import logger
@@ -27,18 +28,43 @@ from pip.backwardcompat import (urlparse, urllib, uses_pycache,
                                 get_python_version, b)
 from pip.index import Link
 from pip.locations import build_prefix
-from pip.download import (get_file_content, is_url, url_to_path,
+from pip.download import (PipSession, get_file_content, is_url, url_to_path,
                           path_to_url, is_archive_file,
                           unpack_vcs_link, is_vcs_url, is_file_url,
                           unpack_file_url, unpack_http_url)
 import pip.wheel
-from pip.wheel import move_wheel_files
+from pip.wheel import move_wheel_files, Wheel, wheel_ext
+
+
+def read_text_file(filename):
+    """Return the contents of *filename*.
+
+    Try to decode the file contents with utf-8, the preffered system encoding
+    (e.g., cp1252 on some Windows machines) and latin1, in that order. Decoding
+    a byte string with latin1 will never raise an error. In the worst case, the
+    returned string will contain some garbage characters.
+
+    """
+    with open(filename, 'rb') as fp:
+        data = fp.read()
+
+    encodings = ['utf-8', locale.getpreferredencoding(False), 'latin1']
+    for enc in encodings:
+        try:
+            data = data.decode(enc)
+        except UnicodeDecodeError:
+            continue
+        break
+
+    assert type(data) != bytes  # Latin1 should have worked.
+    return data
+
 
 class InstallRequirement(object):
 
     def __init__(self, req, comes_from, source_dir=None, editable=False,
                  url=None, as_egg=False, update=True, prereleases=None,
-                 from_bundle=False):
+                 editable_options=None, from_bundle=False, pycompile=True):
         self.extras = ()
         if isinstance(req, string_types):
             req = pkg_resources.Requirement.parse(req)
@@ -47,6 +73,11 @@ class InstallRequirement(object):
         self.comes_from = comes_from
         self.source_dir = source_dir
         self.editable = editable
+
+        if editable_options is None:
+            editable_options = {}
+
+        self.editable_options = editable_options
         self.url = url
         self.as_egg = as_egg
         self._egg_info_path = None
@@ -68,6 +99,8 @@ class InstallRequirement(object):
         self.target_dir = None
         self.from_bundle = from_bundle
 
+        self.pycompile = pycompile
+
         # True if pre-releases are acceptable
         if prereleases:
             self.prereleases = True
@@ -84,7 +117,11 @@ class InstallRequirement(object):
         else:
             source_dir = None
 
-        res = cls(name, comes_from, source_dir=source_dir, editable=True, url=url, prereleases=True)
+        res = cls(name, comes_from, source_dir=source_dir,
+                  editable=True,
+                  url=url,
+                  editable_options=extras_override,
+                  prereleases=True)
 
         if extras_override is not None:
             res.extras = extras_override
@@ -122,6 +159,12 @@ class InstallRequirement(object):
             # Handle relative file URLs
             if link.scheme == 'file' and re.search(r'\.\./', url):
                 url = path_to_url(os.path.normpath(os.path.abspath(link.path)))
+
+            # fail early for invalid or unsupported wheels
+            if link.ext == wheel_ext:
+                wheel = Wheel(link.filename) # can raise InvalidWheelFilename
+                if not wheel.supported():
+                    raise UnsupportedWheel("%s is not a supported wheel on this platform." % wheel.filename)
 
         else:
             req = name
@@ -218,14 +261,24 @@ class InstallRequirement(object):
 
     @property
     def setup_py(self):
-        return os.path.join(self.source_dir, 'setup.py')
+        setup_file = 'setup.py'
+
+        if self.editable_options and 'subdirectory' in self.editable_options:
+            setup_py = os.path.join(self.source_dir,
+                                    self.editable_options['subdirectory'],
+                                    setup_file)
+
+        else:
+            setup_py = os.path.join(self.source_dir, setup_file)
+
+        return setup_py
 
     def run_egg_info(self, force_root_egg_info=False):
         assert self.source_dir
         if self.name:
-            logger.notify('Running setup.py egg_info for package %s' % self.name)
+            logger.notify('Running setup.py (path:%s) egg_info for package %s' % (self.setup_py, self.name))
         else:
-            logger.notify('Running setup.py egg_info for package from %s' % self.url)
+            logger.notify('Running setup.py (path:%s) egg_info for package from %s' % (self.setup_py, self.url))
         logger.indent += 2
         try:
 
@@ -271,6 +324,7 @@ __file__ = __SETUP_PY__
 from setuptools.command import egg_info
 import pkg_resources
 import os
+import tokenize
 def replacement_run(self):
     self.mkpath(self.egg_info)
     installer = self.distribution.fetch_build_egg
@@ -281,7 +335,7 @@ def replacement_run(self):
             writer(self, ep.name, os.path.join(self.egg_info,ep.name))
     self.find_sources()
 egg_info.egg_info.run = replacement_run
-exec(compile(open(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))
+exec(compile(getattr(tokenize, 'open', open)(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))
 """
 
     def egg_info_data(self, filename):
@@ -293,9 +347,7 @@ exec(compile(open(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))
         filename = self.egg_info_path(filename)
         if not os.path.exists(filename):
             return None
-        fp = open(filename, 'r')
-        data = fp.read()
-        fp.close()
+        data = read_text_file(filename)
         return data
 
     def egg_info_path(self, filename):
@@ -506,9 +558,13 @@ exec(compile(open(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))
         # find distutils scripts= scripts
         if dist.has_metadata('scripts') and dist.metadata_isdir('scripts'):
             for script in dist.metadata_listdir('scripts'):
-                paths_to_remove.add(os.path.join(bin_py, script))
+                if dist_in_usersite(dist):
+                    bin_dir = bin_user
+                else:
+                    bin_dir = bin_py
+                paths_to_remove.add(os.path.join(bin_dir, script))
                 if sys.platform == 'win32':
-                    paths_to_remove.add(os.path.join(bin_py, script) + '.bat')
+                    paths_to_remove.add(os.path.join(bin_dir, script) + '.bat')
 
         # find console_scripts
         if dist.has_metadata('entry_points.txt'):
@@ -516,11 +572,15 @@ exec(compile(open(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))
             config.readfp(FakeFile(dist.get_metadata_lines('entry_points.txt')))
             if config.has_section('console_scripts'):
                 for name, value in config.items('console_scripts'):
-                    paths_to_remove.add(os.path.join(bin_py, name))
+                    if dist_in_usersite(dist):
+                        bin_dir = bin_user
+                    else:
+                        bin_dir = bin_py
+                    paths_to_remove.add(os.path.join(bin_dir, name))
                     if sys.platform == 'win32':
-                        paths_to_remove.add(os.path.join(bin_py, name) + '.exe')
-                        paths_to_remove.add(os.path.join(bin_py, name) + '.exe.manifest')
-                        paths_to_remove.add(os.path.join(bin_py, name) + '-script.py')
+                        paths_to_remove.add(os.path.join(bin_dir, name) + '.exe')
+                        paths_to_remove.add(os.path.join(bin_dir, name) + '.exe.manifest')
+                        paths_to_remove.add(os.path.join(bin_dir, name) + '-script.py')
 
         paths_to_remove.remove(auto_confirm)
         self.uninstalled = paths_to_remove
@@ -592,7 +652,7 @@ exec(compile(open(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))
             self.install_editable(install_options, global_options)
             return
         if self.is_wheel:
-            self.move_wheel_files(self.source_dir)
+            self.move_wheel_files(self.source_dir, root=root)
             self.install_succeeded = True
             return
 
@@ -602,8 +662,8 @@ exec(compile(open(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))
             install_args = [sys.executable]
             install_args.append('-c')
             install_args.append(
-            "import setuptools;__file__=%r;"\
-            "exec(compile(open(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))" % self.setup_py)
+            "import setuptools, tokenize;__file__=%r;"\
+            "exec(compile(getattr(tokenize, 'open', open)(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))" % self.setup_py)
             install_args += list(global_options) + ['install','--record', record_filename]
 
             if not self.as_egg:
@@ -611,6 +671,11 @@ exec(compile(open(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))
 
             if root is not None:
                 install_args += ['--root', root]
+
+            if self.pycompile:
+                install_args += ["--compile"]
+            else:
+                install_args += ["--no-compile"]
 
             if running_under_virtualenv():
                 ## FIXME: I'm not sure if this is a reasonable location; probably not
@@ -687,7 +752,7 @@ exec(compile(open(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))
             ## FIXME: should we do --install-headers here too?
             call_subprocess(
                 [sys.executable, '-c',
-                 "import setuptools; __file__=%r; exec(compile(open(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))" % self.setup_py]
+                 "import setuptools, tokenize; __file__=%r; exec(compile(getattr(tokenize, 'open', open)(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))" % self.setup_py]
                 + list(global_options) + ['develop', '--no-deps'] + list(install_options),
 
                 cwd=self.source_dir, filter_stdout=self._filter_install,
@@ -811,8 +876,14 @@ exec(compile(open(__file__).read().replace('\\r\\n', '\\n'), __file__, 'exec'))
         self._bundle_build_dirs = bundle_build_dirs
         self._bundle_editable_dirs = bundle_editable_dirs
 
-    def move_wheel_files(self, wheeldir):
-        move_wheel_files(self.name, self.req, wheeldir, user=self.use_user_site, home=self.target_dir)
+    def move_wheel_files(self, wheeldir, root=None):
+        move_wheel_files(
+            self.name, self.req, wheeldir,
+            user=self.use_user_site,
+            home=self.target_dir,
+            root=root,
+            pycompile=self.pycompile,
+        )
 
     @property
     def delete_marker_filename(self):
@@ -852,7 +923,8 @@ class RequirementSet(object):
 
     def __init__(self, build_dir, src_dir, download_dir, download_cache=None,
                  upgrade=False, ignore_installed=False, as_egg=False, target_dir=None,
-                 ignore_dependencies=False, force_reinstall=False, use_user_site=False):
+                 ignore_dependencies=False, force_reinstall=False, use_user_site=False,
+                 session=None, pycompile=True):
         self.build_dir = build_dir
         self.src_dir = src_dir
         self.download_dir = download_dir
@@ -871,6 +943,8 @@ class RequirementSet(object):
         self.as_egg = as_egg
         self.use_user_site = use_user_site
         self.target_dir = target_dir #set from --target option
+        self.session = session or PipSession()
+        self.pycompile = pycompile
 
     def __str__(self):
         reqs = [req for req in self.requirements.values()
@@ -883,6 +957,7 @@ class RequirementSet(object):
         install_req.as_egg = self.as_egg
         install_req.use_user_site = self.use_user_site
         install_req.target_dir = self.target_dir
+        install_req.pycompile = self.pycompile
         if not name:
             #url or path requirement w/o an egg fragment
             self.unnamed_requirements.append(install_req)
@@ -1067,16 +1142,13 @@ class RequirementSet(object):
                     # inconsistencies are logged later, but do not fail the
                     # installation.
                     elif os.path.exists(os.path.join(location, 'setup.py')):
-                        msg = textwrap.dedent("""
+                        raise PreviousBuildDirError(textwrap.dedent("""
                           pip can't proceed with requirement '%s' due to a pre-existing build directory.
                            location: %s
                           This is likely due to a previous installation that failed.
                           pip is being responsible and not assuming it can delete this.
                           Please delete it and try again.
-                        """ % (req_to_install, location))
-                        e = PreviousBuildDirError(msg)
-                        logger.fatal(msg)
-                        raise e
+                        """ % (req_to_install, location)))
                     else:
                         ## FIXME: this won't upgrade when there's an existing package unpacked in `location`
                         if req_to_install.url is None:
@@ -1143,7 +1215,8 @@ class RequirementSet(object):
                                 install = False
                         # req_to_install.req is only avail after unpack for URL pkgs
                         # repeat check_if_exists to uninstall-on-upgrade (#14)
-                        req_to_install.check_if_exists()
+                        if not self.ignore_installed:
+                            req_to_install.check_if_exists()
                         if req_to_install.satisfied_by:
                             if self.upgrade or self.ignore_installed:
                                 #don't uninstall conflict if user install and and conflict is not user install
@@ -1235,7 +1308,7 @@ class RequirementSet(object):
         else:
             if self.download_cache:
                 self.download_cache = os.path.expanduser(self.download_cache)
-            retval = unpack_http_url(link, location, self.download_cache, self.download_dir)
+            retval = unpack_http_url(link, location, self.download_cache, self.download_dir, self.session)
             if only_download:
                 write_delete_marker_file(location)
             return retval
@@ -1394,13 +1467,20 @@ def _make_build_dir(build_dir):
 _scheme_re = re.compile(r'^(http|https|file):', re.I)
 
 
-def parse_requirements(filename, finder=None, comes_from=None, options=None):
+def parse_requirements(filename, finder=None, comes_from=None, options=None,
+                       session=None):
+    if session is None:
+        session = PipSession()
+
     skip_match = None
     skip_regex = options.skip_requirements_regex if options else None
     if skip_regex:
         skip_match = re.compile(skip_regex)
     reqs_file_dir = os.path.dirname(os.path.abspath(filename))
-    filename, content = get_file_content(filename, comes_from=comes_from)
+    filename, content = get_file_content(filename,
+        comes_from=comes_from,
+        session=session,
+    )
     for line_number, line in enumerate(content.splitlines()):
         line_number += 1
         line = line.strip()
@@ -1418,7 +1498,7 @@ def parse_requirements(filename, finder=None, comes_from=None, options=None):
                 req_url = urlparse.urljoin(filename, req_url)
             elif not _scheme_re.search(req_url):
                 req_url = os.path.join(os.path.dirname(filename), req_url)
-            for item in parse_requirements(req_url, finder, comes_from=filename, options=options):
+            for item in parse_requirements(req_url, finder, comes_from=filename, options=options, session=session):
                 yield item
         elif line.startswith('-Z') or line.startswith('--always-unzip'):
             # No longer used, but previously these were used in
@@ -1457,13 +1537,19 @@ def parse_requirements(filename, finder=None, comes_from=None, options=None):
             finder.allow_external |= set([normalize_name(line).lower()])
         elif line.startswith("--allow-all-external"):
             finder.allow_all_external = True
+        # Remove in 1.7
         elif line.startswith("--no-allow-external"):
-            finder.allow_external = False
+            pass
+        # Remove in 1.7
         elif line.startswith("--no-allow-insecure"):
-            finder.allow_all_insecure = False
+            pass
+        # Remove after 1.7
         elif line.startswith("--allow-insecure"):
             line = line[len("--allow-insecure"):].strip().lstrip("=")
-            finder.allow_insecure |= set([normalize_name(line).lower()])
+            finder.allow_unverified |= set([normalize_name(line).lower()])
+        elif line.startswith("--allow-unverified"):
+            line = line[len("--allow-unverified"):].strip().lstrip("=")
+            finder.allow_unverified |= set([normalize_name(line).lower()])
         else:
             comes_from = '-r %s (line %s)' % (filename, line_number)
             if line.startswith('-e') or line.startswith('--editable'):
@@ -1476,6 +1562,47 @@ def parse_requirements(filename, finder=None, comes_from=None, options=None):
             else:
                 req = InstallRequirement.from_line(line, comes_from, prereleases=getattr(options, "pre", None))
             yield req
+
+def _strip_postfix(req):
+    """
+        Strip req postfix ( -dev, 0.2, etc )
+    """
+    ## FIXME: use package_to_requirement?
+    match = re.search(r'^(.*?)(?:-dev|-\d.*)$', req)
+    if match:
+        # Strip off -dev, -0.2, etc.
+        req = match.group(1)
+    return req
+
+def _build_req_from_url(url):
+
+    parts = [p for p in url.split('#', 1)[0].split('/') if p]
+
+    req = None
+    if parts[-2] in ('tags', 'branches', 'tag', 'branch'):
+        req = parts[-3]
+    elif parts[-1] == 'trunk':
+        req = parts[-2]
+    return req
+
+def _build_editable_options(req):
+
+    """
+        This method generates a dictionary of the query string
+        parameters contained in a given editable URL.
+    """
+    regexp = re.compile(r"[\?#&](?P<name>[^&=]+)=(?P<value>[^&=]+)")
+    matched = regexp.findall(req)
+
+    if matched:
+        ret = dict()
+        for option in matched:
+            (name, value) = option
+            if name in ret:
+                raise Exception("%s option already defined" % name)
+            ret[name] = value
+        return ret
+    return None
 
 
 def parse_editable(editable_req, default_vcs=None):
@@ -1508,37 +1635,39 @@ def parse_editable(editable_req, default_vcs=None):
     for version_control in vcs:
         if url.lower().startswith('%s:' % version_control):
             url = '%s+%s' % (version_control, url)
+            break
+
     if '+' not in url:
         if default_vcs:
             url = default_vcs + '+' + url
         else:
             raise InstallationError(
-                '%s should either by a path to a local project or a VCS url beginning with svn+, git+, hg+, or bzr+' % editable_req)
+                '%s should either be a path to a local project or a VCS url beginning with svn+, git+, hg+, or bzr+' % editable_req)
+
     vc_type = url.split('+', 1)[0].lower()
+
     if not vcs.get_backend(vc_type):
         error_message = 'For --editable=%s only ' % editable_req + \
             ', '.join([backend.name + '+URL' for backend in vcs.backends]) + \
             ' is currently supported'
         raise InstallationError(error_message)
-    match = re.search(r'(?:#|#.*?&)egg=([^&]*)', editable_req)
-    if (not match or not match.group(1)) and vcs.get_backend(vc_type):
-        parts = [p for p in editable_req.split('#', 1)[0].split('/') if p]
-        if parts[-2] in ('tags', 'branches', 'tag', 'branch'):
-            req = parts[-3]
-        elif parts[-1] == 'trunk':
-            req = parts[-2]
-        else:
-            raise InstallationError(
-                '--editable=%s is not the right format; it must have #egg=Package'
-                % editable_req)
+
+    try:
+        options = _build_editable_options(editable_req)
+    except Exception:
+        message = sys.exc_info()[1]
+        raise InstallationError(
+            '--editable=%s error in editable options:%s' % (editable_req, message))
+
+    if not options or 'egg' not in options:
+        req = _build_req_from_url(editable_req)
+        if not req:
+            raise InstallationError('--editable=%s is not the right format; it must have #egg=Package' % editable_req)
     else:
-        req = match.group(1)
-    ## FIXME: use package_to_requirement?
-    match = re.search(r'^(.*?)(?:-dev|-\d.*)$', req)
-    if match:
-        # Strip off -dev, -0.2, etc.
-        req = match.group(1)
-    return req, url, None
+        req = options['egg']
+
+    package = _strip_postfix(req)
+    return package, url, options
 
 
 class UninstallPathSet(object):

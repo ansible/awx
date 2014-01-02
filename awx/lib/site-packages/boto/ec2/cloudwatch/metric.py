@@ -77,13 +77,6 @@ class Metric(object):
         :param statistics: A list of statistics names Valid values:
             Average | Sum | SampleCount | Maximum | Minimum
 
-        :type dimensions: dict
-        :param dimensions: A dictionary of dimension key/values where
-                           the key is the dimension name and the value
-                           is either a scalar value or an iterator
-                           of values to be associated with that
-                           dimension.
-
         :type unit: string
         :param unit: The unit for the metric.  Value values are:
             Seconds | Microseconds | Milliseconds | Bytes | Kilobytes |

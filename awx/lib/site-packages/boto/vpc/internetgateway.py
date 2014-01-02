@@ -28,7 +28,7 @@ from boto.resultset import ResultSet
 
 class InternetGateway(TaggedEC2Object):
     def __init__(self, connection=None):
-        TaggedEC2Object.__init__(self, connection)
+        super(InternetGateway, self).__init__(connection)
         self.id = None
         self.attachments = []
 

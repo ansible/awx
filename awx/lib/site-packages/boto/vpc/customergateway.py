@@ -29,7 +29,7 @@ from boto.ec2.ec2object import TaggedEC2Object
 class CustomerGateway(TaggedEC2Object):
 
     def __init__(self, connection=None):
-        TaggedEC2Object.__init__(self, connection)
+        super(CustomerGateway, self).__init__(connection)
         self.id = None
         self.type = None
         self.state = None

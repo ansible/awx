@@ -79,7 +79,7 @@ class Layer1(AWSAuthConnection):
                     break
 
         self.region = region
-        AWSAuthConnection.__init__(self, self.region.endpoint,
+        super(Layer1, self).__init__(self.region.endpoint,
                                    aws_access_key_id, aws_secret_access_key,
                                    is_secure, port, proxy, proxy_port,
                                    debug, session_token)

@@ -145,13 +145,14 @@ def eventloop(conn, limit=None, timeout=None, ignore_timeouts=False):
 
     ``eventloop`` is a generator::
 
-        >>> from kombu.common import eventloop
+        from kombu.common import eventloop
 
-        >>> it = eventloop(connection, timeout=1, ignore_timeouts=True)
-        >>> next(it)   # one event consumed, or timed out.
+        def run(connection):
+            it = eventloop(connection, timeout=1, ignore_timeouts=True)
+            next(it)   # one event consumed, or timed out.
 
-        >>> for _ in eventloop(connection, timeout=1, ignore_timeouts=True):
-        ...     pass  # loop forever.
+            for _ in eventloop(connection, timeout=1, ignore_timeouts=True):
+                pass  # loop forever.
 
     It also takes an optional limit parameter, and timeout errors
     are propagated by default::
@@ -235,14 +236,20 @@ def ignore_errors(conn, fun=None, *args, **kwargs):
     The first argument must be a connection object, or any other object
     with ``connection_error`` and ``channel_error`` attributes.
 
-    Can be used as a function::
+    Can be used as a function:
 
-        >>> ignore_errors(conn, consumer.channel.close)
+    .. code-block:: python
 
-    or as a context manager::
+        def example(connection):
+            ignore_errors(connection, consumer.channel.close)
 
-        >>> with ignore_errors(conn):
-        ...     consumer.channel.close()
+    or as a context manager:
+
+    .. code-block:: python
+
+        def example(connection):
+            with ignore_errors(connection):
+                consumer.channel.close()
 
 
     .. note::
@@ -292,6 +299,8 @@ class QoS(object):
 
     .. code-block:: python
 
+        >>> from kombu import Consumer, Connection
+        >>> connection = Connection('amqp://')
         >>> consumer = Consumer(connection)
         >>> qos = QoS(consumer.qos, initial_prefetch_count=2)
         >>> qos.update()  # set initial
@@ -305,7 +314,7 @@ class QoS(object):
         >>> def in_some_other_thread():
         ...     qos.decrement_eventually()
 
-        >>> while some_loop:
+        >>> while 1:
         ...    if qos.prev != qos.value:
         ...        qos.update()  # prefetch changed so update.
 
@@ -317,7 +326,7 @@ class QoS(object):
 
 
         >>> def set_qos(prefetch_count):
-        ...     some_object.change(prefetch=prefetch_count)
+        ...     print('prefetch count now: %r' % (prefetch_count, ))
         >>> QoS(set_qos, 10)
 
     """

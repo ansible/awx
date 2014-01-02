@@ -221,6 +221,14 @@ class Bucket(S3Bucket):
                                             marker, generation_marker,
                                             headers)
 
+    def validate_get_all_versions_params(self, params):
+        """
+        See documentation in boto/s3/bucket.py.
+        """
+        self.validate_kwarg_names(params,
+                                  ['version_id_marker', 'delimiter', 'marker',
+                                   'generation_marker', 'prefix', 'max_keys'])
+
     def delete_key(self, key_name, headers=None, version_id=None,
                    mfa_token=None, generation=None):
         """

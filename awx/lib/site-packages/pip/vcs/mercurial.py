@@ -6,7 +6,7 @@ from pip.util import call_subprocess
 from pip.util import display_path, rmtree
 from pip.log import logger
 from pip.vcs import vcs, VersionControl
-from pip.download import path_to_url2
+from pip.download import path_to_url
 from pip.backwardcompat import ConfigParser
 
 
@@ -86,7 +86,7 @@ class Mercurial(VersionControl):
             [self.cmd, 'showconfig', 'paths.default'],
             show_stdout=False, cwd=location).strip()
         if self._is_local_repository(url):
-            url = path_to_url2(url)
+            url = path_to_url(url)
         return url.strip()
 
     def get_tag_revs(self, location):

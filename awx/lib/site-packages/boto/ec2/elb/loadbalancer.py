@@ -122,6 +122,7 @@ class LoadBalancer(object):
         self.vpc_id = None
         self.scheme = None
         self.backends = None
+        self._attributes = None
 
     def __repr__(self):
         return 'LoadBalancer:%s' % self.name
@@ -202,6 +203,58 @@ class LoadBalancer(object):
             zones = [zones]
         new_zones = self.connection.disable_availability_zones(self.name, zones)
         self.availability_zones = new_zones
+
+    def get_attributes(self, force=False):
+        """
+        Gets the LbAttributes.  The Attributes will be cached.
+
+        :type force: bool
+        :param force: Ignore cache value and reload.
+
+        :rtype: boto.ec2.elb.attributes.LbAttributes
+        :return: The LbAttribues object
+        """
+        if not self._attributes or force:
+            self._attributes = self.connection.get_all_lb_attributes(self.name)
+        return self._attributes
+
+    def is_cross_zone_load_balancing(self, force=False):
+        """
+        Identifies if the ELB is current configured to do CrossZone Balancing.
+
+        :type force: bool
+        :param force: Ignore cache value and reload.
+
+        :rtype: bool
+        :return: True if balancing is enabled, False if not.
+        """
+        return self.get_attributes(force).cross_zone_load_balancing.enabled
+
+    def enable_cross_zone_load_balancing(self):
+        """
+        Turns on CrossZone Load Balancing for this ELB.
+
+        :rtype: bool
+        :return: True if successful, False if not.
+        """
+        success = self.connection.modify_lb_attribute(
+            self.name, 'crossZoneLoadBalancing', True)
+        if success and self._attributes:
+            self._attributes.cross_zone_load_balancing.enabled = True
+        return success
+
+    def disable_cross_zone_load_balancing(self):
+        """
+        Turns off CrossZone Load Balancing for this ELB.
+
+        :rtype: bool
+        :return: True if successful, False if not.
+        """
+        success = self.connection.modify_lb_attribute(
+            self.name, 'crossZoneLoadBalancing', False)
+        if success and self._attributes:
+            self._attributes.cross_zone_load_balancing.enabled = False
+        return success
 
     def register_instances(self, instances):
         """

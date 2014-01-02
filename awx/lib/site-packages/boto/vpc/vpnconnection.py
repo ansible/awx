@@ -152,7 +152,7 @@ class VpnConnection(TaggedEC2Object):
 
     """
     def __init__(self, connection=None):
-        TaggedEC2Object.__init__(self, connection)
+        super(VpnConnection, self).__init__(connection)
         self.id = None
         self.state = None
         self.customer_gateway_configuration = None

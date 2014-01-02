@@ -59,6 +59,9 @@ def regions():
             RegionInfo(name='sa-east-1',
                        endpoint='dynamodb.sa-east-1.amazonaws.com',
                        connection_cls=DynamoDBConnection),
+            RegionInfo(name='cn-north-1',
+                       endpoint='dynamodb.cn-north-1.amazonaws.com.cn',
+                       connection_cls=DynamoDBConnection),
             ]
 
 

@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -87,7 +87,7 @@ class Server(Model):
         return s
 
     def __init__(self, id=None, **kw):
-        Model.__init__(self, id, **kw)
+        super(Server, self).__init__(id, **kw)
         self._reservation = None
         self._instance = None
         self._ssh_client = None
@@ -123,13 +123,13 @@ class Server(Model):
         return self._instance
 
     instance = property(getInstance, setReadOnly, None, 'The Instance for the server')
-    
+
     def getAMI(self):
         if self.instance:
             return self.instance.image_id
 
     ami = property(getAMI, setReadOnly, None, 'The AMI for the server')
-    
+
     def getStatus(self):
         if self.instance:
             self.instance.update()
@@ -137,7 +137,7 @@ class Server(Model):
 
     status = property(getStatus, setReadOnly, None,
                       'The status of the server')
-    
+
     def getHostname(self):
         if self.instance:
             return self.instance.public_dns_name

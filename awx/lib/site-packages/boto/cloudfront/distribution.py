@@ -176,7 +176,7 @@ class StreamingDistributionConfig(DistributionConfig):
     def __init__(self, connection=None, origin='', enabled=False,
                  caller_reference='', cnames=None, comment='',
                  trusted_signers=None, logging=None):
-        DistributionConfig.__init__(self, connection=connection,
+        super(StreamingDistributionConfig, self).__init__(connection=connection,
                                     origin=origin, enabled=enabled,
                                     caller_reference=caller_reference,
                                     cnames=cnames, comment=comment,
@@ -684,8 +684,8 @@ class StreamingDistribution(Distribution):
 
     def __init__(self, connection=None, config=None, domain_name='',
                  id='', last_modified_time=None, status=''):
-        Distribution.__init__(self, connection, config, domain_name,
-                              id, last_modified_time, status)
+        super(StreamingDistribution, self).__init__(connection, config,
+                              domain_name, id, last_modified_time, status)
         self._object_class = StreamingObject
 
     def startElement(self, name, attrs, connection):
@@ -693,7 +693,8 @@ class StreamingDistribution(Distribution):
             self.config = StreamingDistributionConfig()
             return self.config
         else:
-            return Distribution.startElement(self, name, attrs, connection)
+            return super(StreamingDistribution, self).startElement(name, attrs,
+                connection)
 
     def update(self, enabled=None, cnames=None, comment=None):
         """

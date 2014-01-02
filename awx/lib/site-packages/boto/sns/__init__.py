@@ -60,6 +60,9 @@ def regions():
             RegionInfo(name='ap-southeast-2',
                        endpoint='sns.ap-southeast-2.amazonaws.com',
                        connection_cls=SNSConnection),
+            RegionInfo(name='cn-north-1',
+                       endpoint=' sns.cn-north-1.amazonaws.com.cn',
+                       connection_cls=SNSConnection),
             ]
 
 

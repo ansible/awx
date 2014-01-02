@@ -120,7 +120,7 @@ class SpotInstanceRequest(TaggedEC2Object):
     """
 
     def __init__(self, connection=None):
-        TaggedEC2Object.__init__(self, connection)
+        super(SpotInstanceRequest, self).__init__(connection)
         self.id = None
         self.price = None
         self.type = None
@@ -141,7 +141,8 @@ class SpotInstanceRequest(TaggedEC2Object):
         return 'SpotInstanceRequest:%s' % self.id
 
     def startElement(self, name, attrs, connection):
-        retval = TaggedEC2Object.startElement(self, name, attrs, connection)
+        retval = super(SpotInstanceRequest, self).startElement(name, attrs,
+            connection)
         if retval is not None:
             return retval
         if name == 'launchSpecification':

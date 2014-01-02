@@ -1,6 +1,6 @@
 from boto.resultset import ResultSet
 
-class Template:
+class Template(object):
     def __init__(self, connection=None):
         self.connection = connection
         self.description = None
@@ -19,7 +19,7 @@ class Template:
         else:
             setattr(self, name, value)
 
-class TemplateParameter:
+class TemplateParameter(object):
     def __init__(self, parent):
         self.parent = parent
         self.default_value = None

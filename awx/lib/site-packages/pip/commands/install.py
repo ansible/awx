@@ -51,8 +51,8 @@ class InstallCommand(Command):
             metavar='path/url',
             help='Install a project in editable mode (i.e. setuptools "develop mode") from a local project path or a VCS url.')
 
-        cmd_opts.add_option(cmdoptions.requirements)
-        cmd_opts.add_option(cmdoptions.build_dir)
+        cmd_opts.add_option(cmdoptions.requirements.make())
+        cmd_opts.add_option(cmdoptions.build_dir.make())
 
         cmd_opts.add_option(
             '-t', '--target',
@@ -68,7 +68,7 @@ class InstallCommand(Command):
             default=None,
             help="Download packages into <dir> instead of installing them, regardless of what's already installed.")
 
-        cmd_opts.add_option(cmdoptions.download_cache)
+        cmd_opts.add_option(cmdoptions.download_cache.make())
 
         cmd_opts.add_option(
             '--src', '--source', '--source-dir', '--source-directory',
@@ -99,23 +99,23 @@ class InstallCommand(Command):
             action='store_true',
             help='Ignore the installed packages (reinstalling instead).')
 
-        cmd_opts.add_option(cmdoptions.no_deps)
+        cmd_opts.add_option(cmdoptions.no_deps.make())
 
         cmd_opts.add_option(
             '--no-install',
             dest='no_install',
             action='store_true',
-            help="Download and unpack all packages, but don't actually install them.")
+            help="DEPRECATED. Download and unpack all packages, but don't actually install them.")
 
         cmd_opts.add_option(
             '--no-download',
             dest='no_download',
             action="store_true",
-            help="Don't download any packages, just install the ones already downloaded "
+            help="DEPRECATED. Don't download any packages, just install the ones already downloaded "
             "(completes an install run with --no-install).")
 
-        cmd_opts.add_option(cmdoptions.install_options)
-        cmd_opts.add_option(cmdoptions.global_options)
+        cmd_opts.add_option(cmdoptions.install_options.make())
+        cmd_opts.add_option(cmdoptions.global_options.make())
 
         cmd_opts.add_option(
             '--user',
@@ -127,7 +127,7 @@ class InstallCommand(Command):
             '--egg',
             dest='as_egg',
             action='store_true',
-            help="Install as self contained egg file, like easy_install does.")
+            help="Install packages as eggs, not 'flat', like pip normally does. This option is not about installing *from* eggs. (WARNING: Because this option overrides pip's normal install logic, requirements files may not behave as expected.)")
 
         cmd_opts.add_option(
             '--root',
@@ -136,7 +136,23 @@ class InstallCommand(Command):
             default=None,
             help="Install everything relative to this alternate root directory.")
 
-        cmd_opts.add_option(cmdoptions.use_wheel)
+        cmd_opts.add_option(
+            "--compile",
+            action="store_true",
+            dest="compile",
+            default=True,
+            help="Compile py files to pyc",
+        )
+
+        cmd_opts.add_option(
+            "--no-compile",
+            action="store_false",
+            dest="compile",
+            help="Do not compile py files to pyc",
+        )
+
+        cmd_opts.add_option(cmdoptions.use_wheel.make())
+        cmd_opts.add_option(cmdoptions.no_use_wheel.make())
 
         cmd_opts.add_option(
             '--pre',
@@ -144,14 +160,14 @@ class InstallCommand(Command):
             default=False,
             help="Include pre-release and development versions. By default, pip only finds stable versions.")
 
-        cmd_opts.add_option(cmdoptions.no_clean)
+        cmd_opts.add_option(cmdoptions.no_clean.make())
 
         index_opts = cmdoptions.make_option_group(cmdoptions.index_group, self.parser)
 
         self.parser.insert_option_group(0, index_opts)
         self.parser.insert_option_group(0, cmd_opts)
 
-    def _build_package_finder(self, options, index_urls):
+    def _build_package_finder(self, options, index_urls, session):
         """
         Create a package finder appropriate to this install command.
         This method is meant to be overridden by subclasses, not
@@ -159,14 +175,14 @@ class InstallCommand(Command):
         """
         return PackageFinder(find_links=options.find_links,
                              index_urls=index_urls,
-                             use_mirrors=options.use_mirrors,
-                             mirrors=options.mirrors,
                              use_wheel=options.use_wheel,
                              allow_external=options.allow_external,
-                             allow_insecure=options.allow_insecure,
+                             allow_unverified=options.allow_unverified,
                              allow_all_external=options.allow_all_external,
-                             allow_all_insecure=options.allow_all_insecure,
                              allow_all_prereleases=options.pre,
+                             process_dependency_links=
+                                options.process_dependency_links,
+                             session=session,
                             )
 
     def run(self, options, args):
@@ -196,7 +212,22 @@ class InstallCommand(Command):
             logger.notify('Ignoring indexes: %s' % ','.join(index_urls))
             index_urls = []
 
-        finder = self._build_package_finder(options, index_urls)
+        if options.use_mirrors:
+            logger.deprecated("1.7",
+                        "--use-mirrors has been deprecated and will be removed"
+                        " in the future. Explicit uses of --index-url and/or "
+                        "--extra-index-url is suggested.")
+
+        if options.mirrors:
+            logger.deprecated("1.7",
+                        "--mirrors has been deprecated and will be removed in "
+                        " the future. Explicit uses of --index-url and/or "
+                        "--extra-index-url is suggested.")
+            index_urls += options.mirrors
+
+        session = self._build_session(options)
+
+        finder = self._build_package_finder(options, index_urls, session)
 
         requirement_set = RequirementSet(
             build_dir=options.build_dir,
@@ -209,7 +240,10 @@ class InstallCommand(Command):
             ignore_dependencies=options.ignore_dependencies,
             force_reinstall=options.force_reinstall,
             use_user_site=options.use_user_site,
-            target_dir=temp_target_dir)
+            target_dir=temp_target_dir,
+            session=session,
+            pycompile=options.compile,
+        )
         for name in args:
             requirement_set.add_requirement(
                 InstallRequirement.from_line(name, None))
@@ -217,7 +251,7 @@ class InstallCommand(Command):
             requirement_set.add_requirement(
                 InstallRequirement.from_editable(name, default_vcs=options.default_vcs))
         for filename in options.requirements:
-            for req in parse_requirements(filename, finder=finder, options=options):
+            for req in parse_requirements(filename, finder=finder, options=options, session=session):
                 requirement_set.add_requirement(req)
         if not requirement_set.has_requirements:
             opts = {'name': self.name}
@@ -252,7 +286,8 @@ class InstallCommand(Command):
                 requirement_set.create_bundle(self.bundle_filename)
                 logger.notify('Created bundle in %s' % self.bundle_filename)
         except PreviousBuildDirError:
-            return
+            options.no_clean = True
+            raise
         finally:
             # Clean up
             if (not options.no_clean) and ((not options.no_install) or options.download_dir):

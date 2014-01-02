@@ -27,7 +27,7 @@ class HelpCommand(Command):
 
             raise CommandError(' - '.join(msg))
 
-        command = commands[cmd_name](self.main_parser)  # instantiate
+        command = commands[cmd_name]()
         command.parser.print_help()
 
         return SUCCESS

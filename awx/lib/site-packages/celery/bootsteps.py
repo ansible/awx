@@ -18,7 +18,6 @@ from .datastructures import DependencyGraph, GraphFormatter
 from .five import values, with_metaclass
 from .utils.imports import instantiate, qualname
 from .utils.log import get_logger
-from .utils.threads import default_socket_timeout
 
 try:
     from greenlet import GreenletExit
@@ -27,9 +26,6 @@ except ImportError:  # pragma: no cover
     IGNORE_ERRORS = ()
 
 __all__ = ['Blueprint', 'Step', 'StartStopStep', 'ConsumerStep']
-
-#: Default socket timeout at shutdown.
-SHUTDOWN_SOCKET_TIMEOUT = 5.0
 
 #: States
 RUN = 0x1
@@ -147,24 +143,23 @@ class Blueprint(object):
 
     def send_all(self, parent, method,
                  description=None, reverse=True, propagate=True, args=()):
-        description = description or method.capitalize()
+        description = description or method.replace('_', ' ')
         steps = reversed(parent.steps) if reverse else parent.steps
-        with default_socket_timeout(SHUTDOWN_SOCKET_TIMEOUT):  # Issue 975
-            for step in steps:
-                if step:
+        for step in steps:
+            if step:
+                fun = getattr(step, method, None)
+                if fun is not None:
                     self._debug('%s %s...',
                                 description.capitalize(), step.alias)
-                    fun = getattr(step, method, None)
-                    if fun:
-                        try:
-                            fun(parent, *args)
-                        except Exception as exc:
-                            if propagate:
-                                raise
-                            logger.error(
-                                'Error while %s %s: %r',
-                                description, step.alias, exc, exc_info=1,
-                            )
+                    try:
+                        fun(parent, *args)
+                    except Exception as exc:
+                        if propagate:
+                            raise
+                        logger.error(
+                            'Error on %s %s: %r',
+                            description, step.alias, exc, exc_info=1,
+                        )
 
     def stop(self, parent, close=True, terminate=False):
         what = 'terminating' if terminate else 'stopping'
@@ -410,11 +405,17 @@ class ConsumerStep(StartStopStep):
             consumer.consume()
 
     def stop(self, c):
+        self._close(c, True)
+
+    def shutdown(self, c):
+        self._close(c, False)
+
+    def _close(self, c, cancel_consumers=True):
         channels = set()
         for consumer in self.consumers or []:
-            ignore_errors(c.connection, consumer.cancel)
+            if cancel_consumers:
+                ignore_errors(c.connection, consumer.cancel)
             if consumer.channel:
                 channels.add(consumer.channel)
         for channel in channels:
             ignore_errors(c.connection, channel.close)
-    shutdown = stop

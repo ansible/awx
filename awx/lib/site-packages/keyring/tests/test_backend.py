@@ -92,7 +92,7 @@ class BackendBasicTests(object):
         password  = random_string(20, DIFFICULT_CHARS)
         service   = random_string(20, DIFFICULT_CHARS)
         self.keyring.set_password(service, username1, password)
-        self.keyring.set_password(service, username2, password)
+        self.set_password(service, username2, password)
         self.keyring.delete_password(service, username1)
         self.assertEqual(self.keyring.get_password(
            service, username2), password)

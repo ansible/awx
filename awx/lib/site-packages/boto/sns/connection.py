@@ -62,7 +62,7 @@ class SNSConnection(AWSQueryConnection):
                                 self.DefaultRegionEndpoint,
                                 connection_cls=SNSConnection)
         self.region = region
-        AWSQueryConnection.__init__(self, aws_access_key_id,
+        super(SNSConnection, self).__init__(aws_access_key_id,
                                     aws_secret_access_key,
                                     is_secure, port, proxy, proxy_port,
                                     proxy_user, proxy_pass,
@@ -274,7 +274,7 @@ class SNSConnection(AWSQueryConnection):
                          * For http, this would be a URL beginning with http
                          * For https, this would be a URL beginning with https
                          * For sqs, this would be the ARN of an SQS Queue
-                         * For sms, this would be a phone number of an SMS-enabled device 
+                         * For sms, this would be a phone number of an SMS-enabled device
         """
         params = {'TopicArn': topic,
                   'Protocol': protocol,

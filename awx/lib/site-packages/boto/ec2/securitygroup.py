@@ -31,7 +31,7 @@ class SecurityGroup(TaggedEC2Object):
 
     def __init__(self, connection=None, owner_id=None,
                  name=None, description=None, id=None):
-        TaggedEC2Object.__init__(self, connection)
+        super(SecurityGroup, self).__init__(connection)
         self.id = id
         self.owner_id = owner_id
         self.name = name
@@ -44,7 +44,8 @@ class SecurityGroup(TaggedEC2Object):
         return 'SecurityGroup:%s' % self.name
 
     def startElement(self, name, attrs, connection):
-        retval = TaggedEC2Object.startElement(self, name, attrs, connection)
+        retval = super(SecurityGroup, self).startElement(name, attrs,
+            connection)
         if retval is not None:
             return retval
         if name == 'ipPermissions':

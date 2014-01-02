@@ -25,8 +25,8 @@ class DBSnapshot(object):
 
     Properties reference available from the AWS documentation at http://docs.amazonwebservices.com/AmazonRDS/latest/APIReference/API_DBSnapshot.html
 
-    :ivar EngineVersion: Specifies the version of the database engine
-    :ivar LicenseModel: License model information for the restored DB instance
+    :ivar engine_version: Specifies the version of the database engine
+    :ivar license_model: License model information for the restored DB instance
     :ivar allocated_storage: Specifies the allocated storage size in gigabytes (GB)
     :ivar availability_zone: Specifies the name of the Availability Zone the DB Instance was located in at the time of the DB Snapshot
     :ivar connection: boto.rds.RDSConnection associated with the current object
@@ -38,12 +38,19 @@ class DBSnapshot(object):
     :ivar port: Specifies the port that the database engine was listening on at the time of the snapshot
     :ivar snapshot_create_time: Provides the time (UTC) when the snapshot was taken
     :ivar status: Specifies the status of this DB Snapshot. Possible values are [ available, backing-up, creating, deleted, deleting, failed, modifying, rebooting, resetting-master-credentials ]
+    :ivar iops: Specifies the Provisioned IOPS (I/O operations per second) value of the DB instance at the time of the snapshot.
+    :ivar option_group_name: Provides the option group name for the DB snapshot.
+    :ivar percent_progress: The percentage of the estimated data that has been transferred.
+    :ivar snapshot_type: Provides the type of the DB snapshot.
+    :ivar source_region: The region that the DB snapshot was created in or copied from.
+    :ivar vpc_id: Provides the Vpc Id associated with the DB snapshot.
     """
 
     def __init__(self, connection=None, id=None):
         self.connection = connection
         self.id = id
         self.engine = None
+        self.engine_version = None
         self.snapshot_create_time = None
         self.instance_create_time = None
         self.port = None
@@ -53,6 +60,13 @@ class DBSnapshot(object):
         self.allocated_storage = None
         self.instance_id = None
         self.availability_zone = None
+        self.license_model = None
+        self.iops = None
+        self.option_group_name = None
+        self.percent_progress = None
+        self.snapshot_type = None
+        self.source_region = None
+        self.vpc_id = None
 
     def __repr__(self):
         return 'DBSnapshot:%s' % self.id
@@ -63,6 +77,8 @@ class DBSnapshot(object):
     def endElement(self, name, value, connection):
         if name == 'Engine':
             self.engine = value
+        elif name == 'EngineVersion':
+            self.engine_version = value
         elif name == 'InstanceCreateTime':
             self.instance_create_time = value
         elif name == 'SnapshotCreateTime':
@@ -83,6 +99,20 @@ class DBSnapshot(object):
             self.allocated_storage = int(value)
         elif name == 'SnapshotTime':
             self.time = value
+        elif name == 'LicenseModel':
+            self.license_model = value
+        elif name == 'Iops':
+            self.iops = int(value)
+        elif name == 'OptionGroupName':
+            self.option_group_name = value
+        elif name == 'PercentProgress':
+            self.percent_progress = int(value)
+        elif name == 'SnapshotType':
+            self.snapshot_type = value
+        elif name == 'SourceRegion':
+            self.source_region = value
+        elif name == 'VpcId':
+            self.vpc_id = value
         else:
             setattr(self, name, value)
 

@@ -63,6 +63,9 @@ def regions():
             RegionInfo(name='sa-east-1',
                        endpoint='sa-east-1.elasticmapreduce.amazonaws.com',
                        connection_cls=EmrConnection),
+            RegionInfo(name='cn-north-1',
+                       endpoint='elasticmapreduce.cn-north-1.amazonaws.com.cn',
+                       connection_cls=EmrConnection),
             ]
 
 

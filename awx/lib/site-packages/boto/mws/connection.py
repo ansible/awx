@@ -251,7 +251,7 @@ class MWSConnection(AWSQueryConnection):
         kw.setdefault('host', 'mws.amazonservices.com')
         self.Merchant = kw.pop('Merchant', None) or kw.get('SellerId')
         self.SellerId = kw.pop('SellerId', None) or self.Merchant
-        AWSQueryConnection.__init__(self, *args, **kw)
+        super(MWSConnection, self).__init__(*args, **kw)
 
     def _required_auth_capability(self):
         return ['mws']

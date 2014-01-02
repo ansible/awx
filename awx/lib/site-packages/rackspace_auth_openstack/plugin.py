@@ -30,7 +30,7 @@ def _authenticate(cls, auth_url):
         "RAX-KSKEY:apiKeyCredentials": {
             "username": cls.user,
             "apiKey": cls.password},
-        "tenantName": cls.projectid}}
+        }}
     return cls._authenticate(auth_url, body)
 
 

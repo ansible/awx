@@ -1,28 +1,26 @@
 """Base Command class, and related routines"""
 
 import os
-import socket
 import sys
 import tempfile
 import traceback
 import time
 import optparse
 
+from pip import cmdoptions
+from pip.locations import running_under_virtualenv
 from pip.log import logger
-from pip.download import urlopen
+from pip.download import PipSession
 from pip.exceptions import (BadCommand, InstallationError, UninstallationError,
-                            CommandError)
+                            CommandError, PreviousBuildDirError)
 from pip.backwardcompat import StringIO
 from pip.baseparser import ConfigOptionParser, UpdatingDefaultsHelpFormatter
-from pip.status_codes import SUCCESS, ERROR, UNKNOWN_ERROR, VIRTUALENV_NOT_FOUND
+from pip.status_codes import (SUCCESS, ERROR, UNKNOWN_ERROR, VIRTUALENV_NOT_FOUND,
+                              PREVIOUS_BUILD_DIR_ERROR)
 from pip.util import get_prog
 
 
 __all__ = ['Command']
-
-
-# for backwards compatibiliy
-get_proxy = urlopen.get_proxy
 
 
 class Command(object):
@@ -30,7 +28,7 @@ class Command(object):
     usage = None
     hidden = False
 
-    def __init__(self, main_parser):
+    def __init__(self):
         parser_kw = {
             'usage': self.usage,
             'prog': '%s %s' % (get_prog(), self.name),
@@ -39,62 +37,59 @@ class Command(object):
             'name': self.name,
             'description': self.__doc__,
         }
-        self.main_parser = main_parser
+
         self.parser = ConfigOptionParser(**parser_kw)
 
         # Commands should add options to this option group
         optgroup_name = '%s Options' % self.name.capitalize()
         self.cmd_opts = optparse.OptionGroup(self.parser, optgroup_name)
 
-        # Re-add all options and option groups.
-        for group in main_parser.option_groups:
-            self._copy_option_group(self.parser, group)
+        # Add the general options
+        gen_opts = cmdoptions.make_option_group(cmdoptions.general_group, self.parser)
+        self.parser.add_option_group(gen_opts)
 
-        # Copies all general options from the main parser.
-        self._copy_options(self.parser, main_parser.option_list)
+    def _build_session(self, options):
+        session = PipSession()
 
-    def _copy_options(self, parser, options):
-        """Populate an option parser or group with options."""
-        for option in options:
-            if not option.dest:
-                continue
-            parser.add_option(option)
+        # Handle custom ca-bundles from the user
+        if options.cert:
+            session.verify = options.cert
 
-    def _copy_option_group(self, parser, group):
-        """Copy option group (including options) to another parser."""
-        new_group = optparse.OptionGroup(parser, group.title)
-        self._copy_options(new_group, group.option_list)
+        # Handle timeouts
+        if options.timeout:
+            session.timeout = options.timeout
 
-        parser.add_option_group(new_group)
+        # Handle configured proxies
+        if options.proxy:
+            session.proxies = {
+                "http": options.proxy,
+                "https": options.proxy,
+            }
 
-    def merge_options(self, initial_options, options):
-        # Make sure we have all global options carried over
-        attrs = ['log', 'proxy', 'require_venv',
-                 'log_explicit_levels', 'log_file',
-                 'timeout', 'default_vcs',
-                 'skip_requirements_regex',
-                 'no_input', 'exists_action',
-                 'cert']
-        for attr in attrs:
-            setattr(options, attr, getattr(initial_options, attr) or getattr(options, attr))
-        options.quiet += initial_options.quiet
-        options.verbose += initial_options.verbose
+        # Determine if we can prompt the user for authentication or not
+        session.auth.prompting = not options.no_input
+
+        return session
 
     def setup_logging(self):
         pass
 
-    def main(self, args, initial_options):
-        options, args = self.parser.parse_args(args)
-        self.merge_options(initial_options, options)
+    def parse_args(self, args):
+        # factored out for testability
+        return self.parser.parse_args(args)
+
+    def main(self, args):
+        options, args = self.parse_args(args)
 
         level = 1  # Notify
         level += options.verbose
         level -= options.quiet
         level = logger.level_for_integer(4 - level)
         complete_log = []
-        logger.consumers.extend(
-            [(level, sys.stdout),
-             (logger.DEBUG, complete_log.append)])
+        logger.add_consumers(
+            (level, sys.stdout),
+            (logger.DEBUG, complete_log.append),
+        )
         if options.log_explicit_levels:
             logger.explicit_levels = True
 
@@ -107,26 +102,19 @@ class Command(object):
             os.environ['PIP_NO_INPUT'] = '1'
 
         if options.exists_action:
-            os.environ['PIP_EXISTS_ACTION'] = ''.join(options.exists_action)
-
-        if options.cert:
-            os.environ['PIP_CERT'] = options.cert
+            os.environ['PIP_EXISTS_ACTION'] = ' '.join(options.exists_action)
 
         if options.require_venv:
             # If a venv is required check if it can really be found
-            if not os.environ.get('VIRTUAL_ENV'):
+            if not running_under_virtualenv():
                 logger.fatal('Could not find an activated virtualenv (required).')
                 sys.exit(VIRTUALENV_NOT_FOUND)
 
         if options.log:
             log_fp = open_logfile(options.log, 'a')
-            logger.consumers.append((logger.DEBUG, log_fp))
+            logger.add_consumers((logger.DEBUG, log_fp))
         else:
             log_fp = None
-
-        socket.setdefaulttimeout(options.timeout or None)
-
-        urlopen.setup(proxystr=options.proxy, prompting=not options.no_input)
 
         exit = SUCCESS
         store_log = False
@@ -136,6 +124,12 @@ class Command(object):
             # and when it is done, isinstance is not needed anymore
             if isinstance(status, int):
                 exit = status
+        except PreviousBuildDirError:
+            e = sys.exc_info()[1]
+            logger.fatal(str(e))
+            logger.info('Exception information:\n%s' % format_exc())
+            store_log = True
+            exit = PREVIOUS_BUILD_DIR_ERROR
         except (InstallationError, UninstallationError):
             e = sys.exc_info()[1]
             logger.fatal(str(e))
@@ -162,19 +156,19 @@ class Command(object):
             logger.fatal('Exception:\n%s' % format_exc())
             store_log = True
             exit = UNKNOWN_ERROR
-        if log_fp is not None:
-            log_fp.close()
         if store_log:
-            log_fn = options.log_file
+            log_file_fn = options.log_file
             text = '\n'.join(complete_log)
             try:
-                log_fp = open_logfile(log_fn, 'w')
+                log_file_fp = open_logfile(log_file_fn, 'w')
             except IOError:
                 temp = tempfile.NamedTemporaryFile(delete=False)
-                log_fn = temp.name
-                log_fp = open_logfile(log_fn, 'w')
-            logger.fatal('Storing complete log in %s' % log_fn)
-            log_fp.write(text)
+                log_file_fn = temp.name
+                log_file_fp = open_logfile(log_file_fn, 'w')
+            logger.fatal('Storing debug log for failure in %s' % log_file_fn)
+            log_file_fp.write(text)
+            log_file_fp.close()
+        if log_fp is not None:
             log_fp.close()
         return exit
 

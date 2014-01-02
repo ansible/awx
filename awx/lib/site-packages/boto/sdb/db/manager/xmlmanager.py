@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -27,7 +27,7 @@ from xml.dom.minidom import getDOMImplementation, parse, parseString, Node
 
 ISO8601 = '%Y-%m-%dT%H:%M:%SZ'
 
-class XMLConverter:
+class XMLConverter(object):
     """
     Responsible for converting base Python types to format compatible with underlying
     database.  For SimpleDB, that means everything needs to be converted to a string
@@ -179,7 +179,7 @@ class XMLConverter:
 
 
 class XMLManager(object):
-    
+
     def __init__(self, cls, db_name, db_user, db_passwd,
                  db_host, db_port, db_table, ddl_dir, enable_ssl):
         self.cls = cls
@@ -260,7 +260,7 @@ class XMLManager(object):
 
     def get_doc(self):
         return self.doc
-            
+
     def encode_value(self, prop, value):
         return self.converter.encode_prop(prop, value)
 
@@ -324,8 +324,8 @@ class XMLManager(object):
             if value != None:
                 props[prop.name] = value
         return (cls, props, id)
-        
-        
+
+
     def get_object(self, cls, id):
         if not self.connection:
             self._connect()
@@ -352,7 +352,7 @@ class XMLManager(object):
         query = str(self._build_query(cls, filters, limit, order_by))
         if query:
             url = "/%s?%s" % (self.db_name, urlencode({"query": query}))
-        else: 
+        else:
             url = "/%s" % self.db_name
         resp = self._make_request('GET', url)
         if resp.status == 200:
@@ -471,7 +471,7 @@ class XMLManager(object):
         else:
             doc = parse(fp)
         return self.get_object_from_doc(cls, id, doc)
-    
+
     def unmarshal_props(self, fp, cls=None, id=None):
         """
         Same as unmarshalling an object, except it returns
@@ -499,7 +499,7 @@ class XMLManager(object):
             return a[name]
         else:
             return None
-    
+
     def get_raw_item(self, obj):
         return self.domain.get_item(obj.id)
 

@@ -31,7 +31,7 @@ class ReservedInstancesOffering(EC2Object):
                  usage_price=None, description=None, instance_tenancy=None,
                  currency_code=None, offering_type=None,
                  recurring_charges=None, pricing_details=None):
-        EC2Object.__init__(self, connection)
+        super(ReservedInstancesOffering, self).__init__(connection)
         self.id = id
         self.instance_type = instance_type
         self.availability_zone = availability_zone
@@ -128,9 +128,10 @@ class ReservedInstance(ReservedInstancesOffering):
                  availability_zone=None, duration=None, fixed_price=None,
                  usage_price=None, description=None,
                  instance_count=None, state=None):
-        ReservedInstancesOffering.__init__(self, connection, id, instance_type,
-                                           availability_zone, duration, fixed_price,
-                                           usage_price, description)
+        super(ReservedInstance, self).__init__(connection, id, instance_type,
+                                           availability_zone, duration,
+                                           fixed_price, usage_price,
+                                           description)
         self.instance_count = instance_count
         self.state = state
         self.start = None
@@ -148,7 +149,7 @@ class ReservedInstance(ReservedInstancesOffering):
         elif name == 'start':
             self.start = value
         else:
-            ReservedInstancesOffering.endElement(self, name, value, connection)
+            super(ReservedInstance, self).endElement(name, value, connection)
 
 
 class ReservedInstanceListing(EC2Object):

@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -28,7 +28,7 @@ CannedACLStrings = ['private', 'public-read',
                     'log-delivery-write']
 
 
-class Policy:
+class Policy(object):
 
     def __init__(self, parent=None):
         self.parent = parent
@@ -74,7 +74,7 @@ class Policy:
         s += '</AccessControlPolicy>'
         return s
 
-class ACL:
+class ACL(object):
 
     def __init__(self, policy=None):
         self.policy = policy
@@ -111,8 +111,8 @@ class ACL:
             s += grant.to_xml()
         s += '</AccessControlList>'
         return s
-        
-class Grant:
+
+class Grant(object):
 
     NameSpace = 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
 
@@ -160,5 +160,5 @@ class Grant:
         s += '<Permission>%s</Permission>' % self.permission
         s += '</Grant>'
         return s
-        
-            
+
+

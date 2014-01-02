@@ -44,7 +44,7 @@ class CloudFrontConnection(AWSAuthConnection):
                  port=None, proxy=None, proxy_port=None,
                  host=DefaultHost, debug=0, security_token=None,
                  validate_certs=True):
-        AWSAuthConnection.__init__(self, host,
+        super(CloudFrontConnection, self).__init__(host,
                                    aws_access_key_id, aws_secret_access_key,
                                    True, port, proxy, proxy_port, debug=debug,
                                    security_token=security_token,

@@ -290,7 +290,7 @@ class Provider(object):
         # clear to users.
         metadata = get_instance_metadata(
             timeout=timeout, num_retries=attempts,
-            data='meta-data/iam/security-credentials')
+            data='meta-data/iam/security-credentials/')
         if metadata:
             # I'm assuming there's only one role on the instance profile.
             security = metadata.values()[0]

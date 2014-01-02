@@ -36,8 +36,10 @@ def regions():
                        connection_cls=STSConnection),
             RegionInfo(name='us-gov-west-1',
                        endpoint='sts.us-gov-west-1.amazonaws.com',
-                       connection_cls=STSConnection)
-
+                       connection_cls=STSConnection),
+            RegionInfo(name='cn-north-1',
+                       endpoint='sts.cn-north-1.amazonaws.com.cn',
+                       connection_cls=STSConnection),
             ]
 
 

@@ -27,7 +27,7 @@ import urlparse
 from boto.sqs.message import Message
 
 
-class Queue:
+class Queue(object):
 
     def __init__(self, connection=None, url=None, message_class=Message):
         self.connection = connection
@@ -238,7 +238,7 @@ class Queue:
         """
         return self.connection.send_message_batch(self, messages)
 
-    def new_message(self, body=''):
+    def new_message(self, body='', **kwargs):
         """
         Create new message of appropriate class.
 
@@ -248,7 +248,7 @@ class Queue:
         :rtype: :class:`boto.sqs.message.Message`
         :return: A new Message object
         """
-        m = self.message_class(self, body)
+        m = self.message_class(self, body, **kwargs)
         m.queue = self
         return m
 

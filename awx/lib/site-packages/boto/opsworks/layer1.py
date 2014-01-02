@@ -20,7 +20,11 @@
 # IN THE SOFTWARE.
 #
 
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 import boto
 from boto.connection import AWSQueryConnection
 from boto.regioninfo import RegionInfo
@@ -41,6 +45,23 @@ class OpsWorksConnection(AWSQueryConnection):
     lifecycle. For information about this product, go to the `AWS
     OpsWorks`_ details page.
 
+    **SDKs and CLI**
+
+    The most common way to use the AWS OpsWorks API is by using the
+    AWS Command Line Interface (CLI) or by using one of the AWS SDKs
+    to implement applications in your preferred language. For more
+    information, see:
+
+
+    + `AWS CLI`_
+    + `AWS SDK for Java`_
+    + `AWS SDK for .NET`_
+    + `AWS SDK for PHP 2`_
+    + `AWS SDK for Ruby`_
+    + `AWS SDK for Node.js`_
+    + `AWS SDK for Python(Boto)`_
+
+
     **Endpoints**
 
     AWS OpsWorks supports only one endpoint, opsworks.us-
@@ -53,7 +74,8 @@ class OpsWorksConnection(AWSQueryConnection):
     When you call CreateStack, CloneStack, or UpdateStack we recommend
     you use the `ConfigurationManager` parameter to specify the Chef
     version, 0.9 or 11.4. The default value is currently 0.9. However,
-    we expect to change the default value to 11.4 in September 2013.
+    we expect to change the default value to 11.4 in October 2013. For
+    more information, see `Using AWS OpsWorks with Chef 11`_.
     """
     APIVersion = "2013-02-18"
     DefaultRegionName = "us-east-1"
@@ -74,7 +96,7 @@ class OpsWorksConnection(AWSQueryConnection):
             region = RegionInfo(self, self.DefaultRegionName,
                                 self.DefaultRegionEndpoint)
         kwargs['host'] = region.endpoint
-        AWSQueryConnection.__init__(self, **kwargs)
+        super(OpsWorksConnection, self).__init__(**kwargs)
         self.region = region
 
     def _required_auth_capability(self):
@@ -85,7 +107,13 @@ class OpsWorksConnection(AWSQueryConnection):
         Assigns one of the stack's registered Amazon EBS volumes to a
         specified instance. The volume must first be registered with
         the stack by calling RegisterVolume. For more information, see
-        ``_.
+        `Resource Management`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type volume_id: string
         :param volume_id: The volume ID.
@@ -105,7 +133,13 @@ class OpsWorksConnection(AWSQueryConnection):
         Associates one of the stack's registered Elastic IP addresses
         with a specified instance. The address must first be
         registered with the stack by calling RegisterElasticIp. For
-        more information, see ``_.
+        more information, see `Resource Management`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type elastic_ip: string
         :param elastic_ip: The Elastic IP address.
@@ -130,6 +164,12 @@ class OpsWorksConnection(AWSQueryConnection):
         separately, by using the Elastic Load Balancing console, API,
         or CLI. For more information, see ` Elastic Load Balancing
         Developer Guide`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type elastic_load_balancer_name: string
         :param elastic_load_balancer_name: The Elastic Load Balancing
@@ -159,6 +199,11 @@ class OpsWorksConnection(AWSQueryConnection):
         """
         Creates a clone of a specified stack. For more information,
         see `Clone a Stack`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have an attached policy that explicitly grants permissions.
+        For more information on user permissions, see `Managing User
+        Permissions`_.
 
         :type source_stack_id: string
         :param source_stack_id: The source stack ID.
@@ -233,20 +278,20 @@ class OpsWorksConnection(AWSQueryConnection):
         :param hostname_theme: The stack's host name theme, with spaces are
             replaced by underscores. The theme is used to generate host names
             for the stack's instances. By default, `HostnameTheme` is set to
-            Layer_Dependent, which creates host names by appending integers to
-            the layer's short name. The other themes are:
+            `Layer_Dependent`, which creates host names by appending integers
+            to the layer's short name. The other themes are:
 
-        + Baked_Goods
-        + Clouds
-        + European_Cities
-        + Fruits
-        + Greek_Deities
-        + Legendary_Creatures_from_Japan
-        + Planets_and_Moons
-        + Roman_Deities
-        + Scottish_Islands
-        + US_Cities
-        + Wild_Cats
+        + `Baked_Goods`
+        + `Clouds`
+        + `European_Cities`
+        + `Fruits`
+        + `Greek_Deities`
+        + `Legendary_Creatures_from_Japan`
+        + `Planets_and_Moons`
+        + `Roman_Deities`
+        + `Scottish_Islands`
+        + `US_Cities`
+        + `Wild_Cats`
 
 
         To obtain a generated host name, call `GetHostNameSuggestion`, which
@@ -359,6 +404,12 @@ class OpsWorksConnection(AWSQueryConnection):
         Creates an app for a specified stack. For more information,
         see `Creating Apps`_.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
+
         :type stack_id: string
         :param stack_id: The stack ID.
 
@@ -430,6 +481,12 @@ class OpsWorksConnection(AWSQueryConnection):
         For more information, see `Deploying Apps`_ and `Run Stack
         Commands`_.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Deploy or Manage permissions level for the stack, or an
+        attached policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
+
         :type stack_id: string
         :param stack_id: The stack ID.
 
@@ -478,6 +535,12 @@ class OpsWorksConnection(AWSQueryConnection):
         """
         Creates an instance in a specified stack. For more
         information, see `Adding an Instance to a Layer`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type stack_id: string
         :param stack_id: The stack ID.
@@ -614,6 +677,12 @@ class OpsWorksConnection(AWSQueryConnection):
         number of custom layers, so you can call **CreateLayer** as
         many times as you like for that layer type.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
+
         :type stack_id: string
         :param stack_id: The layer stack ID.
 
@@ -736,6 +805,11 @@ class OpsWorksConnection(AWSQueryConnection):
         Creates a new stack. For more information, see `Create a New
         Stack`_.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have an attached policy that explicitly grants permissions.
+        For more information on user permissions, see `Managing User
+        Permissions`_.
+
         :type name: string
         :param name: The stack name.
 
@@ -798,20 +872,20 @@ class OpsWorksConnection(AWSQueryConnection):
         :param hostname_theme: The stack's host name theme, with spaces are
             replaced by underscores. The theme is used to generate host names
             for the stack's instances. By default, `HostnameTheme` is set to
-            Layer_Dependent, which creates host names by appending integers to
-            the layer's short name. The other themes are:
+            `Layer_Dependent`, which creates host names by appending integers
+            to the layer's short name. The other themes are:
 
-        + Baked_Goods
-        + Clouds
-        + European_Cities
-        + Fruits
-        + Greek_Deities
-        + Legendary_Creatures_from_Japan
-        + Planets_and_Moons
-        + Roman_Deities
-        + Scottish_Islands
-        + US_Cities
-        + Wild_Cats
+        + `Baked_Goods`
+        + `Clouds`
+        + `European_Cities`
+        + `Fruits`
+        + `Greek_Deities`
+        + `Legendary_Creatures_from_Japan`
+        + `Planets_and_Moons`
+        + `Roman_Deities`
+        + `Scottish_Islands`
+        + `US_Cities`
+        + `Wild_Cats`
 
 
         To obtain a generated host name, call `GetHostNameSuggestion`, which
@@ -902,9 +976,14 @@ class OpsWorksConnection(AWSQueryConnection):
                                  body=json.dumps(params))
 
     def create_user_profile(self, iam_user_arn, ssh_username=None,
-                            ssh_public_key=None):
+                            ssh_public_key=None, allow_self_management=None):
         """
         Creates a new user profile.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have an attached policy that explicitly grants permissions.
+        For more information on user permissions, see `Managing User
+        Permissions`_.
 
         :type iam_user_arn: string
         :param iam_user_arn: The user's IAM ARN.
@@ -915,18 +994,31 @@ class OpsWorksConnection(AWSQueryConnection):
         :type ssh_public_key: string
         :param ssh_public_key: The user's public SSH key.
 
+        :type allow_self_management: boolean
+        :param allow_self_management: Whether users can specify their own SSH
+            public key through the My Settings page. For more information, see
+            ``_.
+
         """
         params = {'IamUserArn': iam_user_arn, }
         if ssh_username is not None:
             params['SshUsername'] = ssh_username
         if ssh_public_key is not None:
             params['SshPublicKey'] = ssh_public_key
+        if allow_self_management is not None:
+            params['AllowSelfManagement'] = allow_self_management
         return self.make_request(action='CreateUserProfile',
                                  body=json.dumps(params))
 
     def delete_app(self, app_id):
         """
         Deletes a specified app.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type app_id: string
         :param app_id: The app ID.
@@ -942,6 +1034,12 @@ class OpsWorksConnection(AWSQueryConnection):
         Deletes a specified instance. You must stop an instance before
         you can delete it. For more information, see `Deleting
         Instances`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type instance_id: string
         :param instance_id: The instance ID.
@@ -969,6 +1067,12 @@ class OpsWorksConnection(AWSQueryConnection):
         all associated instances. For more information, see `How to
         Delete a Layer`_.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
+
         :type layer_id: string
         :param layer_id: The layer ID.
 
@@ -983,6 +1087,12 @@ class OpsWorksConnection(AWSQueryConnection):
         instances, layers, and apps. For more information, see `Shut
         Down a Stack`_.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
+
         :type stack_id: string
         :param stack_id: The stack ID.
 
@@ -994,6 +1104,11 @@ class OpsWorksConnection(AWSQueryConnection):
     def delete_user_profile(self, iam_user_arn):
         """
         Deletes a user profile.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have an attached policy that explicitly grants permissions.
+        For more information on user permissions, see `Managing User
+        Permissions`_.
 
         :type iam_user_arn: string
         :param iam_user_arn: The user's IAM ARN.
@@ -1007,7 +1122,13 @@ class OpsWorksConnection(AWSQueryConnection):
         """
         Deregisters a specified Elastic IP address. The address can
         then be registered by another stack. For more information, see
-        ``_.
+        `Resource Management`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type elastic_ip: string
         :param elastic_ip: The Elastic IP address.
@@ -1020,7 +1141,14 @@ class OpsWorksConnection(AWSQueryConnection):
     def deregister_volume(self, volume_id):
         """
         Deregisters an Amazon EBS volume. The volume can then be
-        registered by another stack. For more information, see ``_.
+        registered by another stack. For more information, see
+        `Resource Management`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type volume_id: string
         :param volume_id: The volume ID.
@@ -1035,6 +1163,12 @@ class OpsWorksConnection(AWSQueryConnection):
         Requests a description of a specified set of apps.
 
         You must specify at least one of the parameters.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
 
         :type stack_id: string
         :param stack_id: The app stack ID. If you use this parameter,
@@ -1061,6 +1195,12 @@ class OpsWorksConnection(AWSQueryConnection):
         Describes the results of specified commands.
 
         You must specify at least one of the parameters.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
 
         :type deployment_id: string
         :param deployment_id: The deployment ID. If you include this parameter,
@@ -1096,6 +1236,12 @@ class OpsWorksConnection(AWSQueryConnection):
 
         You must specify at least one of the parameters.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
+
         :type stack_id: string
         :param stack_id: The stack ID. If you include this parameter,
             `DescribeDeployments` returns a description of the commands
@@ -1128,6 +1274,12 @@ class OpsWorksConnection(AWSQueryConnection):
         Describes `Elastic IP addresses`_.
 
         You must specify at least one of the parameters.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
 
         :type instance_id: string
         :param instance_id: The instance ID. If you include this parameter,
@@ -1162,6 +1314,12 @@ class OpsWorksConnection(AWSQueryConnection):
 
         You must specify at least one of the parameters.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
+
         :type stack_id: string
         :param stack_id: A stack ID. The action describes the stack's Elastic
             Load Balancing instances.
@@ -1185,6 +1343,12 @@ class OpsWorksConnection(AWSQueryConnection):
         Requests a description of a set of instances.
 
         You must specify at least one of the parameters.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
 
         :type stack_id: string
         :param stack_id: A stack ID. If you use this parameter,
@@ -1220,6 +1384,12 @@ class OpsWorksConnection(AWSQueryConnection):
 
         You must specify at least one of the parameters.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
+
         :type stack_id: string
         :param stack_id: The stack ID.
 
@@ -1244,6 +1414,12 @@ class OpsWorksConnection(AWSQueryConnection):
 
         You must specify at least one of the parameters.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
+
         :type layer_ids: list
         :param layer_ids: An array of layer IDs.
 
@@ -1252,9 +1428,30 @@ class OpsWorksConnection(AWSQueryConnection):
         return self.make_request(action='DescribeLoadBasedAutoScaling',
                                  body=json.dumps(params))
 
-    def describe_permissions(self, iam_user_arn, stack_id):
+    def describe_my_user_profile(self):
+        """
+        Describes a user's SSH information.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have self-management enabled or an attached policy that
+        explicitly grants permissions. For more information on user
+        permissions, see `Managing User Permissions`_.
+
+
+        """
+        params = {}
+        return self.make_request(action='DescribeMyUserProfile',
+                                 body=json.dumps(params))
+
+    def describe_permissions(self, iam_user_arn=None, stack_id=None):
         """
         Describes the permissions for a specified stack.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type iam_user_arn: string
         :param iam_user_arn: The user's IAM ARN. For more information about IAM
@@ -1264,7 +1461,11 @@ class OpsWorksConnection(AWSQueryConnection):
         :param stack_id: The stack ID.
 
         """
-        params = {'IamUserArn': iam_user_arn, 'StackId': stack_id, }
+        params = {}
+        if iam_user_arn is not None:
+            params['IamUserArn'] = iam_user_arn
+        if stack_id is not None:
+            params['StackId'] = stack_id
         return self.make_request(action='DescribePermissions',
                                  body=json.dumps(params))
 
@@ -1273,6 +1474,12 @@ class OpsWorksConnection(AWSQueryConnection):
         Describe an instance's RAID arrays.
 
         You must specify at least one of the parameters.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
 
         :type instance_id: string
         :param instance_id: The instance ID. If you use this parameter,
@@ -1298,6 +1505,12 @@ class OpsWorksConnection(AWSQueryConnection):
                                 service_error_ids=None):
         """
         Describes AWS OpsWorks service errors.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
 
         :type stack_id: string
         :param stack_id: The stack ID. If you use this parameter,
@@ -1326,9 +1539,35 @@ class OpsWorksConnection(AWSQueryConnection):
         return self.make_request(action='DescribeServiceErrors',
                                  body=json.dumps(params))
 
+    def describe_stack_summary(self, stack_id):
+        """
+        Describes the number of layers and apps in a specified stack,
+        and the number of instances in each state, such as
+        `running_setup` or `online`.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
+
+        :type stack_id: string
+        :param stack_id: The stack ID.
+
+        """
+        params = {'StackId': stack_id, }
+        return self.make_request(action='DescribeStackSummary',
+                                 body=json.dumps(params))
+
     def describe_stacks(self, stack_ids=None):
         """
         Requests a description of one or more stacks.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
 
         :type stack_ids: list
         :param stack_ids: An array of stack IDs that specify the stacks to be
@@ -1349,6 +1588,12 @@ class OpsWorksConnection(AWSQueryConnection):
 
         You must specify at least one of the parameters.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
+
         :type instance_ids: list
         :param instance_ids: An array of instance IDs.
 
@@ -1357,16 +1602,23 @@ class OpsWorksConnection(AWSQueryConnection):
         return self.make_request(action='DescribeTimeBasedAutoScaling',
                                  body=json.dumps(params))
 
-    def describe_user_profiles(self, iam_user_arns):
+    def describe_user_profiles(self, iam_user_arns=None):
         """
         Describe specified users.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have an attached policy that explicitly grants permissions.
+        For more information on user permissions, see `Managing User
+        Permissions`_.
 
         :type iam_user_arns: list
         :param iam_user_arns: An array of IAM user ARNs that identify the users
             to be described.
 
         """
-        params = {'IamUserArns': iam_user_arns, }
+        params = {}
+        if iam_user_arns is not None:
+            params['IamUserArns'] = iam_user_arns
         return self.make_request(action='DescribeUserProfiles',
                                  body=json.dumps(params))
 
@@ -1376,6 +1628,12 @@ class OpsWorksConnection(AWSQueryConnection):
         Describes an instance's Amazon EBS volumes.
 
         You must specify at least one of the parameters.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Show, Deploy, or Manage permissions level for the
+        stack, or an attached policy that explicitly grants
+        permissions. For more information on user permissions, see
+        `Managing User Permissions`_.
 
         :type instance_id: string
         :param instance_id: The instance ID. If you use this parameter,
@@ -1415,6 +1673,12 @@ class OpsWorksConnection(AWSQueryConnection):
         Detaches a specified Elastic Load Balancing instance from its
         layer.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
+
         :type elastic_load_balancer_name: string
         :param elastic_load_balancer_name: The Elastic Load Balancing
             instance's name.
@@ -1435,7 +1699,13 @@ class OpsWorksConnection(AWSQueryConnection):
         """
         Disassociates an Elastic IP address from its instance. The
         address remains registered with the stack. For more
-        information, see ``_.
+        information, see `Resource Management`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type elastic_ip: string
         :param elastic_ip: The Elastic IP address.
@@ -1450,6 +1720,12 @@ class OpsWorksConnection(AWSQueryConnection):
         Gets a generated host name for the specified layer, based on
         the current host name theme.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
+
         :type layer_id: string
         :param layer_id: The layer ID.
 
@@ -1462,6 +1738,12 @@ class OpsWorksConnection(AWSQueryConnection):
         """
         Reboots a specified instance. For more information, see
         `Starting, Stopping, and Rebooting Instances`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type instance_id: string
         :param instance_id: The instance ID.
@@ -1477,7 +1759,13 @@ class OpsWorksConnection(AWSQueryConnection):
         address can be registered with only one stack at a time. If
         the address is already registered, you must first deregister
         it by calling DeregisterElasticIp. For more information, see
-        ``_.
+        `Resource Management`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type elastic_ip: string
         :param elastic_ip: The Elastic IP address.
@@ -1495,7 +1783,14 @@ class OpsWorksConnection(AWSQueryConnection):
         Registers an Amazon EBS volume with a specified stack. A
         volume can be registered with only one stack at a time. If the
         volume is already registered, you must first deregister it by
-        calling DeregisterVolume. For more information, see ``_.
+        calling DeregisterVolume. For more information, see `Resource
+        Management`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type ec_2_volume_id: string
         :param ec_2_volume_id: The Amazon EBS volume ID.
@@ -1522,6 +1817,12 @@ class OpsWorksConnection(AWSQueryConnection):
         only on the instances from that set, so you must ensure that
         you have created enough instances to handle the maximum
         anticipated load.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type layer_id: string
         :param layer_id: The layer ID.
@@ -1553,10 +1854,16 @@ class OpsWorksConnection(AWSQueryConnection):
                                  body=json.dumps(params))
 
     def set_permission(self, stack_id, iam_user_arn, allow_ssh=None,
-                       allow_sudo=None):
+                       allow_sudo=None, level=None):
         """
         Specifies a stack's permissions. For more information, see
         `Security and Permissions`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type stack_id: string
         :param stack_id: The stack ID.
@@ -1572,12 +1879,28 @@ class OpsWorksConnection(AWSQueryConnection):
         :param allow_sudo: The user is allowed to use **sudo** to elevate
             privileges.
 
+        :type level: string
+        :param level: The user's permission level, which must be set to one of
+            the following strings. You cannot set your own permissions level.
+
+        + `deny`
+        + `show`
+        + `deploy`
+        + `manage`
+        + `iam_only`
+
+
+        For more information on the permissions associated with these levels,
+            see `Managing User Permissions`_
+
         """
         params = {'StackId': stack_id, 'IamUserArn': iam_user_arn, }
         if allow_ssh is not None:
             params['AllowSsh'] = allow_ssh
         if allow_sudo is not None:
             params['AllowSudo'] = allow_sudo
+        if level is not None:
+            params['Level'] = level
         return self.make_request(action='SetPermission',
                                  body=json.dumps(params))
 
@@ -1587,6 +1910,12 @@ class OpsWorksConnection(AWSQueryConnection):
         Specify the time-based auto scaling configuration for a
         specified instance. For more information, see `Managing Load
         with Time-based and Load-based Instances`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type instance_id: string
         :param instance_id: The instance ID.
@@ -1607,6 +1936,12 @@ class OpsWorksConnection(AWSQueryConnection):
         Starts a specified instance. For more information, see
         `Starting, Stopping, and Rebooting Instances`_.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
+
         :type instance_id: string
         :param instance_id: The instance ID.
 
@@ -1618,6 +1953,12 @@ class OpsWorksConnection(AWSQueryConnection):
     def start_stack(self, stack_id):
         """
         Starts stack's instances.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type stack_id: string
         :param stack_id: The stack ID.
@@ -1635,6 +1976,12 @@ class OpsWorksConnection(AWSQueryConnection):
         without losing data. For more information, see `Starting,
         Stopping, and Rebooting Instances`_.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
+
         :type instance_id: string
         :param instance_id: The instance ID.
 
@@ -1647,6 +1994,12 @@ class OpsWorksConnection(AWSQueryConnection):
         """
         Stops a specified stack.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
+
         :type stack_id: string
         :param stack_id: The stack ID.
 
@@ -1658,7 +2011,14 @@ class OpsWorksConnection(AWSQueryConnection):
     def unassign_volume(self, volume_id):
         """
         Unassigns an assigned Amazon EBS volume. The volume remains
-        registered with the stack. For more information, see ``_.
+        registered with the stack. For more information, see `Resource
+        Management`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type volume_id: string
         :param volume_id: The volume ID.
@@ -1673,6 +2033,12 @@ class OpsWorksConnection(AWSQueryConnection):
                    ssl_configuration=None, attributes=None):
         """
         Updates a specified app.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Deploy or Manage permissions level for the stack, or an
+        attached policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type app_id: string
         :param app_id: The app ID.
@@ -1728,7 +2094,13 @@ class OpsWorksConnection(AWSQueryConnection):
     def update_elastic_ip(self, elastic_ip, name=None):
         """
         Updates a registered Elastic IP address's name. For more
-        information, see ``_.
+        information, see `Resource Management`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type elastic_ip: string
         :param elastic_ip: The address.
@@ -1750,6 +2122,12 @@ class OpsWorksConnection(AWSQueryConnection):
                         install_updates_on_boot=None):
         """
         Updates a specified instance.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type instance_id: string
         :param instance_id: The instance ID.
@@ -1854,6 +2232,12 @@ class OpsWorksConnection(AWSQueryConnection):
         """
         Updates a specified layer.
 
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
+
         :type layer_id: string
         :param layer_id: The layer ID.
 
@@ -1947,6 +2331,25 @@ class OpsWorksConnection(AWSQueryConnection):
         return self.make_request(action='UpdateLayer',
                                  body=json.dumps(params))
 
+    def update_my_user_profile(self, ssh_public_key=None):
+        """
+        Updates a user's SSH public key.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have self-management enabled or an attached policy that
+        explicitly grants permissions. For more information on user
+        permissions, see `Managing User Permissions`_.
+
+        :type ssh_public_key: string
+        :param ssh_public_key: The user's SSH public key.
+
+        """
+        params = {}
+        if ssh_public_key is not None:
+            params['SshPublicKey'] = ssh_public_key
+        return self.make_request(action='UpdateMyUserProfile',
+                                 body=json.dumps(params))
+
     def update_stack(self, stack_id, name=None, attributes=None,
                      service_role_arn=None,
                      default_instance_profile_arn=None, default_os=None,
@@ -1957,6 +2360,12 @@ class OpsWorksConnection(AWSQueryConnection):
                      default_root_device_type=None):
         """
         Updates a specified stack.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type stack_id: string
         :param stack_id: The stack ID.
@@ -1995,20 +2404,20 @@ class OpsWorksConnection(AWSQueryConnection):
         :param hostname_theme: The stack's new host name theme, with spaces are
             replaced by underscores. The theme is used to generate host names
             for the stack's instances. By default, `HostnameTheme` is set to
-            Layer_Dependent, which creates host names by appending integers to
-            the layer's short name. The other themes are:
+            `Layer_Dependent`, which creates host names by appending integers
+            to the layer's short name. The other themes are:
 
-        + Baked_Goods
-        + Clouds
-        + European_Cities
-        + Fruits
-        + Greek_Deities
-        + Legendary_Creatures_from_Japan
-        + Planets_and_Moons
-        + Roman_Deities
-        + Scottish_Islands
-        + US_Cities
-        + Wild_Cats
+        + `Baked_Goods`
+        + `Clouds`
+        + `European_Cities`
+        + `Fruits`
+        + `Greek_Deities`
+        + `Legendary_Creatures_from_Japan`
+        + `Planets_and_Moons`
+        + `Roman_Deities`
+        + `Scottish_Islands`
+        + `US_Cities`
+        + `Wild_Cats`
 
 
         To obtain a generated host name, call `GetHostNameSuggestion`, which
@@ -2096,9 +2505,14 @@ class OpsWorksConnection(AWSQueryConnection):
                                  body=json.dumps(params))
 
     def update_user_profile(self, iam_user_arn, ssh_username=None,
-                            ssh_public_key=None):
+                            ssh_public_key=None, allow_self_management=None):
         """
         Updates a specified user profile.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have an attached policy that explicitly grants permissions.
+        For more information on user permissions, see `Managing User
+        Permissions`_.
 
         :type iam_user_arn: string
         :param iam_user_arn: The user IAM ARN.
@@ -2109,19 +2523,32 @@ class OpsWorksConnection(AWSQueryConnection):
         :type ssh_public_key: string
         :param ssh_public_key: The user's new SSH public key.
 
+        :type allow_self_management: boolean
+        :param allow_self_management: Whether users can specify their own SSH
+            public key through the My Settings page. For more information, see
+            `Managing User Permissions`_.
+
         """
         params = {'IamUserArn': iam_user_arn, }
         if ssh_username is not None:
             params['SshUsername'] = ssh_username
         if ssh_public_key is not None:
             params['SshPublicKey'] = ssh_public_key
+        if allow_self_management is not None:
+            params['AllowSelfManagement'] = allow_self_management
         return self.make_request(action='UpdateUserProfile',
                                  body=json.dumps(params))
 
     def update_volume(self, volume_id, name=None, mount_point=None):
         """
         Updates an Amazon EBS volume's name or mount point. For more
-        information, see ``_.
+        information, see `Resource Management`_.
+
+        **Required Permissions**: To use this action, an IAM user must
+        have a Manage permissions level for the stack, or an attached
+        policy that explicitly grants permissions. For more
+        information on user permissions, see `Managing User
+        Permissions`_.
 
         :type volume_id: string
         :param volume_id: The volume ID.

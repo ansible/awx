@@ -55,12 +55,12 @@ class ElastiCacheConnection(AWSQueryConnection):
         else:
             del kwargs['region']
         kwargs['host'] = region.endpoint
-        AWSQueryConnection.__init__(self, **kwargs)
+        super(ElastiCacheConnection, self).__init__(**kwargs)
         self.region = region
 
 
     def _required_auth_capability(self):
-        return ['sign-v2']
+        return ['hmac-v4']
 
     def authorize_cache_security_group_ingress(self,
                                                cache_security_group_name,
@@ -99,8 +99,8 @@ class ElastiCacheConnection(AWSQueryConnection):
             verb='POST',
             path='/', params=params)
 
-    def create_cache_cluster(self, cache_cluster_id, num_cache_nodes,
-                             cache_node_type, engine,
+    def create_cache_cluster(self, cache_cluster_id, num_cache_nodes=None,
+                             cache_node_type=None, engine=None,
                              replication_group_id=None, engine_version=None,
                              cache_parameter_group_name=None,
                              cache_subnet_group_name=None,
@@ -244,10 +244,13 @@ class ElastiCacheConnection(AWSQueryConnection):
         """
         params = {
             'CacheClusterId': cache_cluster_id,
-            'NumCacheNodes': num_cache_nodes,
-            'CacheNodeType': cache_node_type,
-            'Engine': engine,
         }
+        if num_cache_nodes is not None:
+            params['NumCacheNodes'] = num_cache_nodes
+        if cache_node_type is not None:
+            params['CacheNodeType'] = cache_node_type
+        if engine is not None:
+            params['Engine'] = engine
         if replication_group_id is not None:
             params['ReplicationGroupId'] = replication_group_id
         if engine_version is not None:

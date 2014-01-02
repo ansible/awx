@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -33,7 +33,7 @@ class DhcpValueSet(list):
     def endElement(self, name, value, connection):
         if name == 'value':
             self.append(value)
-    
+
 class DhcpConfigSet(dict):
 
     def startElement(self, name, attrs, connection):
@@ -45,19 +45,19 @@ class DhcpConfigSet(dict):
     def endElement(self, name, value, connection):
         if name == 'key':
             self._name = value
-    
+
 class DhcpOptions(TaggedEC2Object):
 
     def __init__(self, connection=None):
-        TaggedEC2Object.__init__(self, connection)
+        super(DhcpOptions, self).__init__(connection)
         self.id = None
         self.options = None
 
     def __repr__(self):
         return 'DhcpOptions:%s' % self.id
-    
+
     def startElement(self, name, attrs, connection):
-        retval = TaggedEC2Object.startElement(self, name, attrs, connection)
+        retval = super(DhcpOptions, self).startElement(name, attrs, connection)
         if retval is not None:
             return retval
         if name == 'dhcpConfigurationSet':

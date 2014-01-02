@@ -1,2 +1,2 @@
-version = (1, 1, 6)
-version_string = '1.1.6'
+version = (1, 1, 7)
+version_string = '.'.join(map(str, version))

@@ -129,8 +129,8 @@ class AutoScalingGroup(object):
         :param health_check_type: The service you want the health status from,
             Amazon EC2 or Elastic Load Balancer.
 
-        :type launch_config_name: str or LaunchConfiguration
-        :param launch_config_name: Name of launch configuration (required).
+        :type launch_config: str or LaunchConfiguration
+        :param launch_config: Name of launch configuration (required).
 
         :type load_balancers: list
         :param load_balancers: List of load balancers.

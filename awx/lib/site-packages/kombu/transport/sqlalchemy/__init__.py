@@ -12,6 +12,7 @@ from sqlalchemy.orm import sessionmaker
 from kombu.five import Empty
 from kombu.transport import virtual
 from kombu.utils import cached_property
+from kombu.utils.encoding import bytes_to_str
 
 from .models import (ModelBase, Queue as QueueBase, Message as MessageBase,
                      class_registry, metadata)
@@ -102,7 +103,7 @@ class Channel(virtual.Channel):
                 .first()
             if msg:
                 msg.visible = False
-                return loads(msg.payload)
+                return loads(bytes_to_str(msg.payload))
             raise Empty()
         finally:
             self.session.commit()

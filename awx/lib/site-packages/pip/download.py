@@ -1,36 +1,38 @@
 import cgi
-import getpass
+import email.utils
 import hashlib
+import getpass
 import mimetypes
 import os
 import platform
 import re
 import shutil
-import socket
-import ssl
 import sys
 import tempfile
 
 import pip
 
-from pip.backwardcompat import (urllib, urllib2, httplib,
-                                urlparse, string_types, get_http_message_param,
-                                match_hostname, CertificateError)
+from pip.backwardcompat import urllib, urlparse, raw_input
 from pip.exceptions import InstallationError, HashMismatch
 from pip.util import (splitext, rmtree, format_size, display_path,
                       backup_dir, ask_path_exists, unpack_file,
                       create_download_cache_folder, cache_download)
 from pip.vcs import vcs
 from pip.log import logger
-from pip.locations import default_cert_path
+from pip._vendor import requests
+from pip._vendor.requests.adapters import BaseAdapter
+from pip._vendor.requests.auth import AuthBase, HTTPBasicAuth
+from pip._vendor.requests.exceptions import InvalidURL
+from pip._vendor.requests.models import Response
+from pip._vendor.requests.structures import CaseInsensitiveDict
 
-__all__ = ['get_file_content', 'urlopen',
-           'is_url', 'url_to_path', 'path_to_url', 'path_to_url2',
-           'geturl', 'is_archive_file', 'unpack_vcs_link',
+__all__ = ['get_file_content',
+           'is_url', 'url_to_path', 'path_to_url',
+           'is_archive_file', 'unpack_vcs_link',
            'unpack_file_url', 'is_vcs_url', 'is_file_url', 'unpack_http_url']
 
 
-def build_user_agent():
+def user_agent():
     """Return a string representing the user agent."""
     _implementation = platform.python_implementation()
 
@@ -41,7 +43,10 @@ def build_user_agent():
                                                 sys.pypy_version_info.minor,
                                                 sys.pypy_version_info.micro)
         if sys.pypy_version_info.releaselevel != 'final':
-            _implementation_version = ''.join([_implementation_version, sys.pypy_version_info.releaselevel])
+            _implementation_version = ''.join([
+                _implementation_version,
+                sys.pypy_version_info.releaselevel,
+            ])
     elif _implementation == 'Jython':
         _implementation_version = platform.python_version()  # Complete Guess
     elif _implementation == 'IronPython':
@@ -61,9 +66,182 @@ def build_user_agent():
                      '%s/%s' % (p_system, p_release)])
 
 
-def get_file_content(url, comes_from=None):
+class MultiDomainBasicAuth(AuthBase):
+
+    def __init__(self, prompting=True):
+        self.prompting = prompting
+        self.passwords = {}
+
+    def __call__(self, req):
+        parsed = urlparse.urlparse(req.url)
+
+        # Get the netloc without any embedded credentials
+        netloc = parsed.netloc.split("@", 1)[-1]
+
+        # Set the url of the request to the url without any credentials
+        req.url = urlparse.urlunparse(parsed[:1] + (netloc,) + parsed[2:])
+
+        # Use any stored credentials that we have for this netloc
+        username, password = self.passwords.get(netloc, (None, None))
+
+        # Extract credentials embedded in the url if we have none stored
+        if username is None:
+            username, password = self.parse_credentials(parsed.netloc)
+
+        if username or password:
+            # Store the username and password
+            self.passwords[netloc] = (username, password)
+
+            # Send the basic auth with this request
+            req = HTTPBasicAuth(username or "", password or "")(req)
+
+        # Attach a hook to handle 401 responses
+        req.register_hook("response", self.handle_401)
+
+        return req
+
+    def handle_401(self, resp, **kwargs):
+        # We only care about 401 responses, anything else we want to just
+        #   pass through the actual response
+        if resp.status_code != 401:
+            return resp
+
+        # We are not able to prompt the user so simple return the response
+        if not self.prompting:
+            return resp
+
+        parsed = urlparse.urlparse(resp.url)
+
+        # Prompt the user for a new username and password
+        username = raw_input("User for %s: " % parsed.netloc)
+        password = getpass.getpass("Password: ")
+
+        # Store the new username and password to use for future requests
+        if username or password:
+            self.passwords[parsed.netloc] = (username, password)
+
+        # Consume content and release the original connection to allow our new
+        #   request to reuse the same one.
+        resp.content
+        resp.raw.release_conn()
+
+        # Add our new username and password to the request
+        req = HTTPBasicAuth(username or "", password or "")(resp.request)
+
+        # Send our new request
+        new_resp = resp.connection.send(req, **kwargs)
+        new_resp.history.append(resp)
+
+        return new_resp
+
+    def parse_credentials(self, netloc):
+        if "@" in netloc:
+            userinfo = netloc.rsplit("@", 1)[0]
+            if ":" in userinfo:
+                return userinfo.split(":", 1)
+            return userinfo, None
+        return None, None
+
+
+class LocalFSResponse(object):
+
+    def __init__(self, fileobj):
+        self.fileobj = fileobj
+
+    def __getattr__(self, name):
+        return getattr(self.fileobj, name)
+
+    def read(self, amt=None, decode_content=None, cache_content=False):
+        return self.fileobj.read(amt)
+
+    # Insert Hacks to Make Cookie Jar work w/ Requests
+    @property
+    def _original_response(self):
+        class FakeMessage(object):
+            def getheaders(self, header):
+                return []
+
+            def get_all(self, header, default):
+                return []
+
+        class FakeResponse(object):
+            @property
+            def msg(self):
+                return FakeMessage()
+
+        return FakeResponse()
+
+
+class LocalFSAdapter(BaseAdapter):
+
+    def send(self, request, stream=None, timeout=None, verify=None, cert=None,
+             proxies=None):
+        parsed_url = urlparse.urlparse(request.url)
+
+        # We only work for requests with a host of localhost
+        if parsed_url.netloc.lower() != "localhost":
+            raise InvalidURL("Invalid URL %r: Only localhost is allowed" %
+                request.url)
+
+        real_url = urlparse.urlunparse(parsed_url[:1] + ("",) + parsed_url[2:])
+        pathname = url_to_path(real_url)
+
+        resp = Response()
+        resp.status_code = 200
+        resp.url = real_url
+
+        stats = os.stat(pathname)
+        modified = email.utils.formatdate(stats.st_mtime, usegmt=True)
+        resp.headers = CaseInsensitiveDict({
+            "Content-Type": mimetypes.guess_type(pathname)[0] or "text/plain",
+            "Content-Length": stats.st_size,
+            "Last-Modified": modified,
+        })
+
+        resp.raw = LocalFSResponse(open(pathname, "rb"))
+        resp.close = resp.raw.close
+
+        return resp
+
+    def close(self):
+        pass
+
+
+class PipSession(requests.Session):
+
+    timeout = None
+
+    def __init__(self, *args, **kwargs):
+        super(PipSession, self).__init__(*args, **kwargs)
+
+        # Attach our User Agent to the request
+        self.headers["User-Agent"] = user_agent()
+
+        # Attach our Authentication handler to the session
+        self.auth = MultiDomainBasicAuth()
+
+        # Enable file:// urls
+        self.mount("file://", LocalFSAdapter())
+
+    def request(self, method, url, *args, **kwargs):
+        # Make file:// urls not fail due to lack of a hostname
+        parsed = urlparse.urlparse(url)
+        if parsed.scheme == "file":
+            url = urlparse.urlunparse(parsed[:1] + ("localhost",) + parsed[2:])
+
+        # Allow setting a default timeout on a session
+        kwargs.setdefault("timeout", self.timeout)
+
+        # Dispatch the actual request
+        return super(PipSession, self).request(method, url, *args, **kwargs)
+
+
+def get_file_content(url, comes_from=None, session=None):
     """Gets the content of a file; it may be a filename, file: URL, or
     http: URL.  Returns (location, content).  Content is unicode."""
+    if session is None:
+        session = PipSession()
+
     match = _scheme_re.search(url)
     if match:
         scheme = match.group(1).lower()
@@ -84,9 +262,9 @@ def get_file_content(url, comes_from=None):
             url = path
         else:
             ## FIXME: catch some errors
-            resp = urlopen(url)
-            encoding = get_http_message_param(resp.headers, 'charset', 'utf-8')
-            return geturl(resp), resp.read().decode(encoding)
+            resp = session.get(url)
+            resp.raise_for_status()
+            return resp.url, resp.text
     try:
         f = open(url)
         content = f.read()
@@ -100,218 +278,6 @@ def get_file_content(url, comes_from=None):
 
 _scheme_re = re.compile(r'^(http|https|file):', re.I)
 _url_slash_drive_re = re.compile(r'/*([a-z])\|', re.I)
-
-class VerifiedHTTPSConnection(httplib.HTTPSConnection):
-    """
-    A connection that wraps connections with ssl certificate verification.
-    """
-    def connect(self):
-
-        self.connection_kwargs = {}
-
-        #TODO: refactor compatibility logic into backwardcompat?
-
-        # for > py2.5
-        if hasattr(self, 'timeout'):
-            self.connection_kwargs.update(timeout = self.timeout)
-
-        # for >= py2.7
-        if hasattr(self, 'source_address'):
-            self.connection_kwargs.update(source_address = self.source_address)
-
-        sock = socket.create_connection((self.host, self.port), **self.connection_kwargs)
-
-        # for >= py2.7
-        if getattr(self, '_tunnel_host', None):
-            self.sock = sock
-            self._tunnel()
-
-        # get alternate bundle or use our included bundle
-        cert_path = os.environ.get('PIP_CERT', '') or default_cert_path
-
-        self.sock = ssl.wrap_socket(sock,
-                                self.key_file,
-                                self.cert_file,
-                                cert_reqs=ssl.CERT_REQUIRED,
-                                ca_certs=cert_path)
-
-        try:
-            match_hostname(self.sock.getpeercert(), self.host)
-        except CertificateError:
-            self.sock.shutdown(socket.SHUT_RDWR)
-            self.sock.close()
-            raise
-
-
-
-class VerifiedHTTPSHandler(urllib2.HTTPSHandler):
-    """
-    A HTTPSHandler that uses our own VerifiedHTTPSConnection.
-    """
-    def __init__(self, connection_class = VerifiedHTTPSConnection):
-        self.specialized_conn_class = connection_class
-        urllib2.HTTPSHandler.__init__(self)
-    def https_open(self, req):
-        return self.do_open(self.specialized_conn_class, req)
-
-
-class URLOpener(object):
-    """
-    pip's own URL helper that adds HTTP auth and proxy support
-    """
-    def __init__(self):
-        self.passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        self.proxy_handler = None
-
-    def __call__(self, url):
-        """
-        If the given url contains auth info or if a normal request gets a 401
-        response, an attempt is made to fetch the resource using basic HTTP
-        auth.
-
-        """
-        url, username, password, scheme = self.extract_credentials(url)
-        if username is None:
-            try:
-                response = self.get_opener(scheme=scheme).open(url)
-            except urllib2.HTTPError:
-                e = sys.exc_info()[1]
-                if e.code != 401:
-                    raise
-                response = self.get_response(url)
-        else:
-            response = self.get_response(url, username, password)
-        return response
-
-    def get_request(self, url):
-        """
-        Wraps the URL to retrieve to protects against "creative"
-        interpretation of the RFC: http://bugs.python.org/issue8732
-        """
-        if isinstance(url, string_types):
-            url = urllib2.Request(url, headers={'Accept-encoding': 'identity'})
-        return url
-
-    def get_response(self, url, username=None, password=None):
-        """
-        does the dirty work of actually getting the rsponse object using urllib2
-        and its HTTP auth builtins.
-        """
-        scheme, netloc, path, query, frag = urlparse.urlsplit(url)
-        req = self.get_request(url)
-
-        stored_username, stored_password = self.passman.find_user_password(None, netloc)
-        # see if we have a password stored
-        if stored_username is None:
-            if username is None and self.prompting:
-                username = urllib.quote(raw_input('User for %s: ' % netloc))
-                password = urllib.quote(getpass.getpass('Password: '))
-            if username and password:
-                self.passman.add_password(None, netloc, username, password)
-            stored_username, stored_password = self.passman.find_user_password(None, netloc)
-        authhandler = urllib2.HTTPBasicAuthHandler(self.passman)
-        opener = self.get_opener(authhandler, scheme=scheme)
-        # FIXME: should catch a 401 and offer to let the user reenter credentials
-        return opener.open(req)
-
-    def get_opener(self, *args, **kwargs):
-        """
-        Build an OpenerDirector instance based on the scheme and proxy option
-        """
-
-        args = list(args)
-        if self.proxy_handler:
-            args.extend([self.proxy_handler, urllib2.CacheFTPHandler])
-
-        if kwargs.get('scheme') == 'https':
-            https_handler = VerifiedHTTPSHandler()
-            director = urllib2.build_opener(https_handler, *args)
-            #strip out HTTPHandler to prevent MITM spoof
-            for handler in director.handlers:
-                if isinstance(handler, urllib2.HTTPHandler):
-                    director.handlers.remove(handler)
-        else:
-            director = urllib2.build_opener(*args)
-
-        # Add our new headers to the opener
-        headers = [x for x in director.addheaders if x[0].lower() != "user-agent"]
-        headers.append(("User-agent", build_user_agent()))
-        director.addheaders = headers
-
-        return director
-
-    def setup(self, proxystr='', prompting=True):
-        """
-        Sets the proxy handler given the option passed on the command
-        line.  If an empty string is passed it looks at the HTTP_PROXY
-        environment variable.
-        """
-        self.prompting = prompting
-        proxy = self.get_proxy(proxystr)
-        if proxy:
-            self.proxy_handler = urllib2.ProxyHandler({"http": proxy, "ftp": proxy, "https": proxy})
-
-    def parse_credentials(self, netloc):
-        if "@" in netloc:
-            userinfo = netloc.rsplit("@", 1)[0]
-            if ":" in userinfo:
-                return userinfo.split(":", 1)
-            return userinfo, None
-        return None, None
-
-    def extract_credentials(self, url):
-        """
-        Extracts user/password from a url.
-
-        Returns a tuple:
-            (url-without-auth, username, password)
-        """
-        if isinstance(url, urllib2.Request):
-            result = urlparse.urlsplit(url.get_full_url())
-        else:
-            result = urlparse.urlsplit(url)
-        scheme, netloc, path, query, frag = result
-
-        username, password = self.parse_credentials(netloc)
-        if username is None:
-            return url, None, None, scheme
-        elif password is None and self.prompting:
-            # remove the auth credentials from the url part
-            netloc = netloc.replace('%s@' % username, '', 1)
-            # prompt for the password
-            prompt = 'Password for %s@%s: ' % (username, netloc)
-            password = urllib.quote(getpass.getpass(prompt))
-        else:
-            # remove the auth credentials from the url part
-            netloc = netloc.replace('%s:%s@' % (username, password), '', 1)
-
-        target_url = urlparse.urlunsplit((scheme, netloc, path, query, frag))
-        return target_url, username, password, scheme
-
-    def get_proxy(self, proxystr=''):
-        """
-        Get the proxy given the option passed on the command line.
-        If an empty string is passed it looks at the HTTP_PROXY
-        environment variable.
-        """
-        if not proxystr:
-            proxystr = os.environ.get('HTTP_PROXY', '')
-        if proxystr:
-            if '@' in proxystr:
-                user_password, server_port = proxystr.split('@', 1)
-                if ':' in user_password:
-                    user, password = user_password.split(':', 1)
-                else:
-                    user = user_password
-                    prompt = 'Password for %s@%s: ' % (user, server_port)
-                    password = urllib.quote(getpass.getpass(prompt))
-                return '%s:%s@%s' % (user, password, server_port)
-            else:
-                return proxystr
-        else:
-            return None
-
-urlopen = URLOpener()
 
 
 def is_url(name):
@@ -343,19 +309,6 @@ _url_drive_re = re.compile('^([a-z])[:|]', re.I)
 
 def path_to_url(path):
     """
-    Convert a path to a file: URL.  The path will be made absolute.
-    """
-    path = os.path.normcase(os.path.abspath(path))
-    if _drive_re.match(path):
-        path = path[0] + '|' + path[2:]
-    url = urllib.quote(path)
-    url = url.replace(os.path.sep, '/')
-    url = url.lstrip('/')
-    return 'file:///' + url
-
-
-def path_to_url2(path):
-    """
     Convert a path to a file: URL.  The path will be made absolute and have
     quoted path parts.
     """
@@ -366,30 +319,6 @@ def path_to_url2(path):
     if not drive:
         url = url.lstrip('/')
     return 'file:///' + drive + url
-
-
-def geturl(urllib2_resp):
-    """
-    Use instead of urllib.addinfourl.geturl(), which appears to have
-    some issues with dropping the double slash for certain schemes
-    (e.g. file://).  This implementation is probably over-eager, as it
-    always restores '://' if it is missing, and it appears some url
-    schemata aren't always followed by '//' after the colon, but as
-    far as I know pip doesn't need any of those.
-    The URI RFC can be found at: http://tools.ietf.org/html/rfc1630
-
-    This function assumes that
-        scheme:/foo/bar
-    is the same as
-        scheme:///foo/bar
-    """
-    url = urllib2_resp.geturl()
-    scheme, rest = url.split(':', 1)
-    if rest.startswith('//'):
-        return url
-    else:
-        # FIXME: write a good test to cover it
-        return '%s://%s' % (scheme, rest)
 
 
 def is_archive_file(name):
@@ -417,7 +346,7 @@ def unpack_file_url(link, location):
         # delete the location since shutil will create it again :(
         if os.path.isdir(location):
             rmtree(location)
-        shutil.copytree(source, location)
+        shutil.copytree(source, location, symlinks=True)
     else:
         unpack_file(source, location, content_type, link)
 
@@ -474,7 +403,7 @@ def _download_url(resp, link, temp_location):
         except ValueError:
             logger.warn("Unsupported hash name %s for package %s" % (link.hash_name, link))
     try:
-        total_length = int(resp.info()['content-length'])
+        total_length = int(resp.headers['content-length'])
     except (ValueError, KeyError, TypeError):
         total_length = 0
     downloaded = 0
@@ -491,10 +420,7 @@ def _download_url(resp, link, temp_location):
             logger.notify('Downloading %s' % show_url)
         logger.info('Downloading from URL %s' % link)
 
-        while True:
-            chunk = resp.read(4096)
-            if not chunk:
-                break
+        for chunk in resp.iter_content(4096):
             downloaded += len(chunk)
             if show_progress:
                 if not total_length:
@@ -534,7 +460,11 @@ def _copy_file(filename, location, content_type, link):
         logger.notify('Saved %s' % display_path(download_location))
 
 
-def unpack_http_url(link, location, download_cache, download_dir=None):
+def unpack_http_url(link, location, download_cache, download_dir=None,
+                    session=None):
+    if session is None:
+        session = PipSession()
+
     temp_dir = tempfile.mkdtemp('-unpack', 'pip-')
     temp_location = None
     target_url = link.url.split('#', 1)[0]
@@ -599,11 +529,18 @@ def unpack_http_url(link, location, download_cache, download_dir=None):
 
     # We don't have either a cached or a downloaded copy
     if not temp_location:
-        resp = _get_response_from_url(target_url, link)
-        content_type = resp.info().get('content-type', '')
+        try:
+            resp = session.get(target_url, stream=True)
+            resp.raise_for_status()
+        except requests.HTTPError as exc:
+            logger.fatal("HTTP error %s while getting %s" %
+                         (exc.response.status_code, link))
+            raise
+
+        content_type = resp.headers.get('content-type', '')
         filename = link.filename  # fallback
         # Have a look at the Content-Disposition header for a better guess
-        content_disposition = resp.info().get('content-disposition')
+        content_disposition = resp.headers.get('content-disposition')
         if content_disposition:
             type, params = cgi.parse_header(content_disposition)
             # We use ``or`` here because we don't want to use an "empty" value
@@ -614,8 +551,8 @@ def unpack_http_url(link, location, download_cache, download_dir=None):
             ext = mimetypes.guess_extension(content_type)
             if ext:
                 filename += ext
-        if not ext and link.url != geturl(resp):
-            ext = os.path.splitext(geturl(resp))[1]
+        if not ext and link.url != resp.url:
+            ext = os.path.splitext(resp.url)[1]
             if ext:
                 filename += ext
         temp_location = os.path.join(temp_dir, filename)
@@ -631,23 +568,3 @@ def unpack_http_url(link, location, download_cache, download_dir=None):
     if not (already_cached or already_downloaded):
         os.unlink(temp_location)
     os.rmdir(temp_dir)
-
-
-def _get_response_from_url(target_url, link):
-    try:
-        resp = urlopen(target_url)
-    except urllib2.HTTPError:
-        e = sys.exc_info()[1]
-        logger.fatal("HTTP error %s while getting %s" % (e.code, link))
-        raise
-    except IOError:
-        e = sys.exc_info()[1]
-        # Typically an FTP error
-        logger.fatal("Error %s while getting %s" % (e, link))
-        raise
-    return resp
-
-
-class Urllib2HeadRequest(urllib2.Request):
-    def get_method(self):
-        return "HEAD"

@@ -37,6 +37,7 @@ RegionData = {
     'ap-northeast-1': 'ec2.ap-northeast-1.amazonaws.com',
     'ap-southeast-1': 'ec2.ap-southeast-1.amazonaws.com',
     'ap-southeast-2': 'ec2.ap-southeast-2.amazonaws.com',
+    'cn-north-1': 'ec2.cn-north-1.amazonaws.com.cn',
 }
 
 

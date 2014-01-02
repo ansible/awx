@@ -77,6 +77,9 @@ def regions():
             S3RegionInfo(name='sa-east-1',
                          endpoint='s3-sa-east-1.amazonaws.com',
                          connection_cls=S3Connection),
+            S3RegionInfo(name='cn-north-1',
+                         endpoint='s3.cn-north-1.amazonaws.com.cn',
+                         connection_cls=S3Connection),
             ]
 
 

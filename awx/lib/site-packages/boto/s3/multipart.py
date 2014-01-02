@@ -199,7 +199,8 @@ class MultiPartUpload(object):
         else:
             setattr(self, name, value)
 
-    def get_all_parts(self, max_parts=None, part_number_marker=None):
+    def get_all_parts(self, max_parts=None, part_number_marker=None,
+                      encoding_type=None):
         """
         Return the uploaded parts of this MultiPart Upload.  This is
         a lower-level method that requires you to manually page through
@@ -213,6 +214,8 @@ class MultiPartUpload(object):
             query_args += '&max-parts=%d' % max_parts
         if part_number_marker:
             query_args += '&part-number-marker=%s' % part_number_marker
+        if encoding_type:
+            query_args += '&encoding-type=%s' % encoding_type
         response = self.bucket.connection.make_request('GET', self.bucket.name,
                                                        self.key_name,
                                                        query_args=query_args)
@@ -226,6 +229,14 @@ class MultiPartUpload(object):
                               cb=None, num_cb=10, md5=None, size=None):
         """
         Upload another part of this MultiPart Upload.
+
+        .. note::
+
+            After you initiate multipart upload and upload one or more parts,
+            you must either complete or abort multipart upload in order to stop
+            getting charged for storage of the uploaded parts. Only after you
+            either complete or abort multipart upload, Amazon S3 frees up the
+            parts storage and stops charging you for the parts storage.
 
         :type fp: file
         :param fp: The file object you want to upload.

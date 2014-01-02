@@ -39,7 +39,7 @@ class VPC(TaggedEC2Object):
         :ivar is_default: Indicates whether the VPC is the default VPC.
         :ivar instance_tenancy: The allowed tenancy of instances launched into the VPC.
         """
-        TaggedEC2Object.__init__(self, connection)
+        super(VPC, self).__init__(connection)
         self.id = None
         self.dhcp_options_id = None
         self.state = None

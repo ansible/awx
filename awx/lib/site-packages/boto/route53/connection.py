@@ -64,7 +64,7 @@ class Route53Connection(AWSAuthConnection):
                  port=None, proxy=None, proxy_port=None,
                  host=DefaultHost, debug=0, security_token=None,
                  validate_certs=True, https_connection_factory=None):
-        AWSAuthConnection.__init__(self, host,
+        super(Route53Connection, self).__init__(host,
                                    aws_access_key_id, aws_secret_access_key,
                                    True, port, proxy, proxy_port, debug=debug,
                                    security_token=security_token,
@@ -82,7 +82,7 @@ class Route53Connection(AWSAuthConnection):
                     continue
                 pairs.append(key + '=' + urllib.quote(str(val)))
             path += '?' + '&'.join(pairs)
-        return AWSAuthConnection.make_request(self, action, path,
+        return super(Route53Connection, self).make_request(action, path,
                                               headers, data,
                                               retry_handler=self._retry_handler)
 

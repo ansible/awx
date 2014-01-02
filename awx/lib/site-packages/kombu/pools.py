@@ -9,7 +9,6 @@ from __future__ import absolute_import
 
 import os
 
-from collections import Callable
 from itertools import chain
 
 from .connection import Resource
@@ -58,7 +57,7 @@ class ProducerPool(Resource):
         pass
 
     def prepare(self, p):
-        if isinstance(p, Callable):
+        if callable(p):
             p = p()
         if p._channel is None:
             conn = self._acquire_connection()

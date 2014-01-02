@@ -60,7 +60,7 @@ class EmrConnection(AWSQueryConnection):
             region = RegionInfo(self, self.DefaultRegionName,
                                 self.DefaultRegionEndpoint)
         self.region = region
-        AWSQueryConnection.__init__(self, aws_access_key_id,
+        super(EmrConnection, self).__init__(aws_access_key_id,
                                     aws_secret_access_key,
                                     is_secure, port, proxy, proxy_port,
                                     proxy_user, proxy_pass,
@@ -266,6 +266,42 @@ class EmrConnection(AWSQueryConnection):
             self.build_list_params(params, step_states, 'StepStateList.member')
 
         self.get_object('ListSteps', params, StepSummaryList)
+
+    def add_tags(self, resource_id, tags):
+        """
+        Create new metadata tags for the specified resource id.
+
+        :type resource_id: str
+        :param resource_id: The cluster id
+
+        :type tags: dict
+        :param tags: A dictionary containing the name/value pairs.
+                     If you want to create only a tag name, the
+                     value for that tag should be the empty string
+                     (e.g. '') or None.
+        """
+        assert isinstance(resource_id, basestring)
+        params = {
+            'ResourceId': resource_id,
+        }
+        params.update(self._build_tag_list(tags))
+        return self.get_status('AddTags', params, verb='POST')
+
+    def remove_tags(self, resource_id, tags):
+        """
+        Remove metadata tags for the specified resource id.
+
+        :type resource_id: str
+        :param resource_id: The cluster id
+
+        :type tags: list
+        :param tags: A list of tag names to remove.
+        """
+        params = {
+            'ResourceId': resource_id,
+        }
+        params.update(self._build_string_list('TagKeys', tags))
+        return self.get_status('RemoveTags', params, verb='POST')
 
     def terminate_jobflow(self, jobflow_id):
         """
@@ -621,6 +657,27 @@ class EmrConnection(AWSQueryConnection):
         for i, step in enumerate(steps):
             for key, value in step.iteritems():
                 params['Steps.member.%s.%s' % (i+1, key)] = value
+        return params
+
+    def _build_string_list(self, field, items):
+        if not isinstance(items, types.ListType):
+            items = [items]
+
+        params = {}
+        for i, item in enumerate(items):
+            params['%s.member.%s' % (field, i + 1)] = item
+        return params
+
+    def _build_tag_list(self, tags):
+        assert isinstance(tags, dict)
+
+        params = {}
+        for i, key_value in enumerate(sorted(tags.iteritems()), start=1):
+            key, value = key_value
+            current_prefix = 'Tags.member.%s' % i
+            params['%s.Key' % current_prefix] = key
+            if value:
+                params['%s.Value' % current_prefix] = value
         return params
 
     def _build_instance_common_args(self, ec2_keyname, availability_zone,

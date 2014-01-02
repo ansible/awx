@@ -1,9 +1,10 @@
 from __future__ import unicode_literals
+from operator import attrgetter
 
 from django import VERSION
 from django.contrib.contenttypes.generic import GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import models, router
 from django.db.models.fields import Field
 from django.db.models.fields.related import ManyToManyRel, RelatedField, add_lazy_relation
 from django.db.models.related import RelatedObject
@@ -29,8 +30,8 @@ def _model_name(model):
 
 
 class TaggableRel(ManyToManyRel):
-    def __init__(self, field):
-        self.related_name = None
+    def __init__(self, field, related_name):
+        self.related_name = related_name
         self.limit_choices_to = {}
         self.symmetrical = True
         self.multiple = True
@@ -56,30 +57,36 @@ class ExtraJoinRestriction(object):
     def as_sql(self, qn, connection):
         if len(self.content_types) == 1:
             extra_where = "%s.%s = %%s" % (qn(self.alias), qn(self.col))
-            params = [self.content_types[0]]
         else:
             extra_where = "%s.%s IN (%s)" % (qn(self.alias), qn(self.col),
                                              ','.join(['%s'] * len(self.content_types)))
-            params = self.content_types
-        return extra_where, params
+        return extra_where, self.content_types
 
     def relabel_aliases(self, change_map):
         self.alias = change_map.get(self.alias, self.alias)
 
+    def clone(self):
+        return self.__class__(self.alias, self.col, self.content_types[:])
+
 
 class TaggableManager(RelatedField, Field):
-    def __init__(self, verbose_name=_("Tags"),
-        help_text=_("A comma-separated list of tags."), through=None, blank=False):
-        Field.__init__(self, verbose_name=verbose_name, help_text=help_text, blank=blank)
+    _related_name_counter = 0
+
+    def __init__(self, verbose_name=_("Tags"), help_text=_("A comma-separated list of tags."),
+            through=None, blank=False, related_name=None):
+        Field.__init__(self, verbose_name=verbose_name, help_text=help_text, blank=blank, null=True, serialize=False)
         self.through = through or TaggedItem
-        self.rel = TaggableRel(self)
+        self.rel = TaggableRel(self, related_name)
 
     def __get__(self, instance, model):
         if instance is not None and instance.pk is None:
             raise ValueError("%s objects need to have a primary key value "
                 "before you can access their tags." % model.__name__)
         manager = _TaggableManager(
-            through=self.through, model=model, instance=instance
+            through=self.through,
+            model=model,
+            instance=instance,
+            prefetch_cache_name = self.name
         )
         return manager
 
@@ -89,6 +96,7 @@ class TaggableManager(RelatedField, Field):
         else:
             self.set_attributes_from_name(name)
         self.model = cls
+
         cls._meta.add_field(self)
         setattr(cls, name, self)
         if not cls._meta.abstract:
@@ -101,6 +109,7 @@ class TaggableManager(RelatedField, Field):
                 )
             else:
                 self.post_through_setup(cls)
+
 
     def __lt__(self, other):
         """
@@ -119,7 +128,12 @@ class TaggableManager(RelatedField, Field):
         self.related = RelatedObject(self.through, cls, self)
         if self.use_gfk:
             tagged_items = GenericRelation(self.through)
-            tagged_items.contribute_to_class(cls, "tagged_items")
+            tagged_items.contribute_to_class(cls, 'tagged_items')
+
+            for rel in cls._meta.local_many_to_many:
+                if isinstance(rel, TaggableManager) and rel.use_gfk and rel != self:
+                    raise ValueError('You can only have one TaggableManager per model'
+                        ' using generic relations.')
 
     def save_form_data(self, instance, value):
         getattr(instance, self.name).set(*value)
@@ -194,52 +208,6 @@ class TaggableManager(RelatedField, Field):
             params = content_type_ids
         return extra_where, params
 
-    def _get_mm_case_path_info(self, direct=False):
-        pathinfos = []
-        linkfield1 = self.through._meta.get_field_by_name('content_object')[0]
-        linkfield2 = self.through._meta.get_field_by_name(self.m2m_reverse_field_name())[0]
-        if direct:
-            join1infos, _, _, _ = linkfield1.get_reverse_path_info()
-            join2infos, opts, target, final = linkfield2.get_path_info()
-        else:
-            join1infos, _, _, _ = linkfield2.get_reverse_path_info()
-            join2infos, opts, target, final = linkfield1.get_path_info()
-        pathinfos.extend(join1infos)
-        pathinfos.extend(join2infos)
-        return pathinfos, opts, target, final
-
-    def _get_gfk_case_path_info(self, direct=False):
-        pathinfos = []
-        from_field = self.model._meta.pk
-        opts = self.through._meta
-        object_id_field = opts.get_field_by_name('object_id')[0]
-        linkfield = self.through._meta.get_field_by_name(self.m2m_reverse_field_name())[0]
-        if direct:
-            join1infos = [PathInfo(from_field, object_id_field, self.model._meta, opts, self, True, False)]
-            join2infos, opts, target, final = linkfield.get_path_info()
-        else:
-            join1infos, _, _, _ = linkfield.get_reverse_path_info()
-            join2infos = [PathInfo(object_id_field, from_field, opts, self.model._meta, self, True, False)]
-            target = from_field
-            final = self
-            opts = self.model._meta
-
-        pathinfos.extend(join1infos)
-        pathinfos.extend(join2infos)
-        return pathinfos, opts, target, final
-
-    def get_path_info(self):
-        if self.use_gfk:
-            return self._get_gfk_case_path_info(direct=True)
-        else:
-            return self._get_mm_case_path_info(direct=True)
-
-    def get_reverse_path_info(self):
-        if self.use_gfk:
-            return self._get_gfk_case_path_info(direct=False)
-        else:
-            return self._get_mm_case_path_info(direct=False)
-
     # This and all the methods till the end of class are only used in django >= 1.6
     def _get_mm_case_path_info(self, direct=False):
         pathinfos = []
@@ -309,13 +277,51 @@ class TaggableManager(RelatedField, Field):
 
 
 class _TaggableManager(models.Manager):
-    def __init__(self, through, model, instance):
+    def __init__(self, through, model, instance, prefetch_cache_name):
         self.through = through
         self.model = model
         self.instance = instance
+        self.prefetch_cache_name = prefetch_cache_name
+        self._db = None
+
+    def is_cached(self, instance):
+        return self.prefetch_cache_name in instance._prefetched_objects_cache
 
     def get_query_set(self):
-        return self.through.tags_for(self.model, self.instance)
+        try:
+            return self.instance._prefetched_objects_cache[self.prefetch_cache_name]
+        except (AttributeError, KeyError):
+            return self.through.tags_for(self.model, self.instance)
+
+    def get_prefetch_query_set(self, instances, queryset = None):
+        if queryset is not None:
+            raise ValueError("Custom queryset can't be used for this lookup.")
+
+        instance = instances[0]
+        from django.db import connections
+        db = self._db or router.db_for_read(instance.__class__, instance=instance)
+
+        fieldname = ('object_id' if issubclass(self.through, GenericTaggedItemBase)
+                     else 'content_object')
+        fk = self.through._meta.get_field(fieldname)
+        query = {
+            '%s__%s__in' % (self.through.tag_relname(), fk.name) :
+                set(obj._get_pk_val() for obj in instances)
+        }
+        join_table = self.through._meta.db_table
+        source_col = fk.column
+        connection = connections[db]
+        qn = connection.ops.quote_name
+        qs = self.get_query_set().using(db)._next_is_sticky().filter(**query).extra(
+            select = {
+                '_prefetch_related_val' : '%s.%s' % (qn(join_table), qn(source_col))
+            }
+        )
+        return (qs,
+                attrgetter('_prefetch_related_val'),
+                attrgetter(instance._meta.pk.name),
+                False,
+                self.prefetch_cache_name)
 
     # Django 1.6 renamed this
     get_queryset = get_query_set

@@ -18,9 +18,9 @@ else:
     _winapi = None  # noqa
 
 
-try:
+if sys.version_info > (2, 7, 5):
     buf_t, is_new_buffer = memoryview, True  # noqa
-except NameError:  # Py2.6
+else:
     buf_t, is_new_buffer = buffer, False  # noqa
 
 if hasattr(os, 'write'):
@@ -31,7 +31,7 @@ if hasattr(os, 'write'):
         def send_offset(fd, buf, offset):
             return __write__(fd, buf[offset:])
 
-    else:  # Py2.6
+    else:  # Py<2.7.6
 
         def send_offset(fd, buf, offset):  # noqa
             return __write__(fd, buf_t(buf, offset))

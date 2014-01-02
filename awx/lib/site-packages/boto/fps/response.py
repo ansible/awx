@@ -9,7 +9,7 @@ def ResponseFactory(action):
         # due to nodes receiving their closing tags
         def endElement(self, name, value, connection):
             if name != action + 'Response':
-                Response.endElement(self, name, value, connection)
+                super(FPSResponse, self).endElement(name, value, connection)
     return FPSResponse
 
 
@@ -48,7 +48,7 @@ class Response(ResponseElement):
         elif name == self._action + 'Result':
             setattr(self, name, self._Result(name=name))
         else:
-            return ResponseElement.startElement(self, name, attrs, connection)
+            return super(Response, self).startElement(name, attrs, connection)
         return getattr(self, name)
 
 
@@ -66,12 +66,12 @@ class ComplexAmount(ResponseElement):
         if name not in ('CurrencyCode', 'Value'):
             message = 'Unrecognized tag {0} in ComplexAmount'.format(name)
             raise AssertionError(message)
-        return ResponseElement.startElement(self, name, attrs, connection)
+        return super(ComplexAmount, self).startElement(name, attrs, connection)
 
     def endElement(self, name, value, connection):
         if name == 'Value':
             value = Decimal(value)
-        ResponseElement.endElement(self, name, value, connection)
+        super(ComplexAmount, self).endElement(name, value, connection)
 
 
 class AmountCollection(ResponseElement):
@@ -85,7 +85,7 @@ class AccountBalance(AmountCollection):
         if name == 'AvailableBalances':
             setattr(self, name, AmountCollection(name=name))
             return getattr(self, name)
-        return AmountCollection.startElement(self, name, attrs, connection)
+        return super(AccountBalance, self).startElement(name, attrs, connection)
 
 
 class GetAccountBalanceResult(ResponseElement):
@@ -93,7 +93,8 @@ class GetAccountBalanceResult(ResponseElement):
         if name == 'AccountBalance':
             setattr(self, name, AccountBalance(name=name))
             return getattr(self, name)
-        return Response.startElement(self, name, attrs, connection)
+        return super(GetAccountBalanceResult, self).startElement(name, attrs,
+            connection)
 
 
 class GetTotalPrepaidLiabilityResult(ResponseElement):
@@ -101,7 +102,8 @@ class GetTotalPrepaidLiabilityResult(ResponseElement):
         if name == 'OutstandingPrepaidLiability':
             setattr(self, name, AmountCollection(name=name))
             return getattr(self, name)
-        return Response.startElement(self, name, attrs, connection)
+        return super(GetTotalPrepaidLiabilityResult, self).startElement(name,
+            attrs, connection)
 
 
 class GetPrepaidBalanceResult(ResponseElement):
@@ -109,7 +111,8 @@ class GetPrepaidBalanceResult(ResponseElement):
         if name == 'PrepaidBalance':
             setattr(self, name, AmountCollection(name=name))
             return getattr(self, name)
-        return Response.startElement(self, name, attrs, connection)
+        return super(GetPrepaidBalanceResult, self).startElement(name, attrs,
+            connection)
 
 
 class GetOutstandingDebtBalanceResult(ResponseElement):
@@ -117,7 +120,8 @@ class GetOutstandingDebtBalanceResult(ResponseElement):
         if name == 'OutstandingDebt':
             setattr(self, name, AmountCollection(name=name))
             return getattr(self, name)
-        return Response.startElement(self, name, attrs, connection)
+        return super(GetOutstandingDebtBalanceResult, self).startElement(name,
+            attrs, connection)
 
 
 class TransactionPart(ResponseElement):
@@ -125,13 +129,14 @@ class TransactionPart(ResponseElement):
         if name == 'FeesPaid':
             setattr(self, name, ComplexAmount(name=name))
             return getattr(self, name)
-        return ResponseElement.startElement(self, name, attrs, connection)
+        return super(TransactionPart, self).startElement(name, attrs,
+            connection)
 
 
 class Transaction(ResponseElement):
     def __init__(self, *args, **kw):
         self.TransactionPart = []
-        ResponseElement.__init__(self, *args, **kw)
+        super(Transaction, self).__init__(*args, **kw)
 
     def startElement(self, name, attrs, connection):
         if name == 'TransactionPart':
@@ -140,19 +145,20 @@ class Transaction(ResponseElement):
         if name in ('TransactionAmount', 'FPSFees', 'Balance'):
             setattr(self, name, ComplexAmount(name=name))
             return getattr(self, name)
-        return ResponseElement.startElement(self, name, attrs, connection)
+        return super(Transaction, self).startElement(name, attrs, connection)
 
 
 class GetAccountActivityResult(ResponseElement):
     def __init__(self, *args, **kw):
         self.Transaction = []
-        ResponseElement.__init__(self, *args, **kw)
+        super(GetAccountActivityResult, self).__init__(*args, **kw)
 
     def startElement(self, name, attrs, connection):
         if name == 'Transaction':
             getattr(self, name).append(Transaction(name=name))
             return getattr(self, name)[-1]
-        return ResponseElement.startElement(self, name, attrs, connection)
+        return super(GetAccountActivityResult, self).startElement(name, attrs,
+            connection)
 
 
 class GetTransactionResult(ResponseElement):
@@ -160,16 +166,18 @@ class GetTransactionResult(ResponseElement):
         if name == 'Transaction':
             setattr(self, name, Transaction(name=name))
             return getattr(self, name)
-        return ResponseElement.startElement(self, name, attrs, connection)
+        return super(GetTransactionResult, self).startElement(name, attrs,
+            connection)
 
 
 class GetTokensResult(ResponseElement):
     def __init__(self, *args, **kw):
         self.Token = []
-        ResponseElement.__init__(self, *args, **kw)
+        super(GetTokensResult, self).__init__(*args, **kw)
 
     def startElement(self, name, attrs, connection):
         if name == 'Token':
             getattr(self, name).append(ResponseElement(name=name))
             return getattr(self, name)[-1]
-        return ResponseElement.startElement(self, name, attrs, connection)
+        return super(GetTokensResult, self).startElement(name, attrs,
+            connection)

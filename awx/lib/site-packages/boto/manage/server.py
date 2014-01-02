@@ -15,7 +15,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -134,7 +134,7 @@ class CommandLineGetter(object):
             if ami.location.find('pyami') >= 0:
                 my_amis.append((ami.location, ami))
         return my_amis
-    
+
     def get_region(self, params):
         region = params.get('region', None)
         if isinstance(region, str) or isinstance(region, unicode):
@@ -171,7 +171,7 @@ class CommandLineGetter(object):
             prop = StringProperty(name='zone', verbose_name='EC2 Availability Zone',
                                   choices=self.ec2.get_all_zones)
             params['zone'] = propget.get(prop)
-            
+
     def get_ami_id(self, params):
         valid = False
         while not valid:
@@ -271,20 +271,20 @@ class Server(Model):
         """
         Create a new instance based on the specified configuration file or the specified
         configuration and the passed in parameters.
-        
-        If the config_file argument is not None, the configuration is read from there. 
+
+        If the config_file argument is not None, the configuration is read from there.
         Otherwise, the cfg argument is used.
-        
+
         The config file may include other config files with a #import reference. The included
-        config files must reside in the same directory as the specified file. 
-        
-        The logical_volume argument, if supplied, will be used to get the current physical 
-        volume ID and use that as an override of the value specified in the config file. This 
-        may be useful for debugging purposes when you want to debug with a production config 
-        file but a test Volume. 
-        
-        The dictionary argument may be used to override any EC2 configuration values in the 
-        config file. 
+        config files must reside in the same directory as the specified file.
+
+        The logical_volume argument, if supplied, will be used to get the current physical
+        volume ID and use that as an override of the value specified in the config file. This
+        may be useful for debugging purposes when you want to debug with a production config
+        file but a test Volume.
+
+        The dictionary argument may be used to override any EC2 configuration values in the
+        config file.
         """
         if config_file:
             cfg = Config(path=config_file)
@@ -304,7 +304,7 @@ class Server(Model):
         zone = params.get('zone')
         # deal with possibly passed in logical volume:
         if logical_volume != None:
-           cfg.set('EBS', 'logical_volume_name', logical_volume.name) 
+           cfg.set('EBS', 'logical_volume_name', logical_volume.name)
         cfg_fp = StringIO.StringIO()
         cfg.write(cfg_fp)
         # deal with the possibility that zone and/or keypair are strings read from the config file:
@@ -328,7 +328,7 @@ class Server(Model):
             print 'Waiting for instance to start so we can set its elastic IP address...'
             # Sometimes we get a message from ec2 that says that the instance does not exist.
             # Hopefully the following delay will giv eec2 enough time to get to a stable state:
-            time.sleep(5) 
+            time.sleep(5)
             while instance.update() != 'running':
                 time.sleep(1)
             instance.use_ip(elastic_ip)
@@ -346,7 +346,7 @@ class Server(Model):
             l.append(s)
             i += 1
         return l
-    
+
     @classmethod
     def create_from_instance_id(cls, instance_id, name, description=''):
         regions = boto.ec2.regions()
@@ -393,9 +393,9 @@ class Server(Model):
                         s.put()
                         servers.append(s)
         return servers
-    
+
     def __init__(self, id=None, **kw):
-        Model.__init__(self, id, **kw)
+        super(Server, self).__init__(id, **kw)
         self.ssh_key_file = None
         self.ec2 = None
         self._cmdshell = None
@@ -421,7 +421,7 @@ class Server(Model):
                                             self._instance = instance
                             except EC2ResponseError:
                                 pass
-                            
+
     def _status(self):
         status = ''
         if self._instance:
@@ -484,14 +484,14 @@ class Server(Model):
         return kn
 
     def put(self):
-        Model.put(self)
+        super(Server, self).put()
         self._setup_ec2()
 
     def delete(self):
         if self.production:
             raise ValueError("Can't delete a production server")
         #self.stop()
-        Model.delete(self)
+        super(Server, self).delete()
 
     def stop(self):
         if self.production:
@@ -553,4 +553,4 @@ class Server(Model):
         return self.run('apt-get -y install %s' % pkg)
 
 
-    
+

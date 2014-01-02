@@ -35,6 +35,7 @@ REGION_ENDPOINTS = {
     'ap-northeast-1': 'swf.ap-northeast-1.amazonaws.com',
     'ap-southeast-1': 'swf.ap-southeast-1.amazonaws.com',
     'ap-southeast-2': 'swf.ap-southeast-2.amazonaws.com',
+    'cn-north-1': 'swf.cn-north-1.amazonaws.com.cn',
 }
 
 

@@ -16,6 +16,7 @@ import socket
 from anyjson import loads, dumps
 
 from kombu.five import Empty
+from kombu.utils.encoding import bytes_to_str
 
 from . import virtual
 
@@ -31,7 +32,7 @@ class Channel(virtual.Channel):
         item, dest = None, None
         if job:
             try:
-                item = loads(job.body)
+                item = loads(bytes_to_str(job.body))
                 dest = job.stats()['tube']
             except Exception:
                 job.bury()

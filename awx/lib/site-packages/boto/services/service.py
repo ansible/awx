@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -35,7 +35,7 @@ class Service(ScriptBase):
     ProcessingTime = 60
 
     def __init__(self, config_file=None, mimetype_files=None):
-        ScriptBase.__init__(self, config_file)
+        super(Service, self).__init__(config_file)
         self.name = self.__class__.__name__
         self.working_dir = boto.config.get('Pyami', 'working_dir')
         self.sd = ServiceDef(config_file)
@@ -100,7 +100,7 @@ class Service(ScriptBase):
             key = self.put_file(output_bucket, file, key_name)
             output_keys.append('%s;type=%s' % (key.name, type))
         output_message['OutputKey'] = ','.join(output_keys)
-            
+
     # write message to each output queue
     def write_message(self, message):
         message['Service-Write'] = get_ts()

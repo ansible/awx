@@ -32,6 +32,7 @@ RegionData = {
     'ap-northeast-1': 'cloudformation.ap-northeast-1.amazonaws.com',
     'ap-southeast-1': 'cloudformation.ap-southeast-1.amazonaws.com',
     'ap-southeast-2': 'cloudformation.ap-southeast-2.amazonaws.com',
+    'cn-north-1': 'cloudformation.cn-north-1.amazonaws.com.cn',
 }
 
 

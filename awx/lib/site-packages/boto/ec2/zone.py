@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -38,7 +38,7 @@ class MessageSet(list):
             self.append(value)
         else:
             setattr(self, name, value)
-            
+
 class Zone(EC2Object):
     """
     Represents an Availability Zone.
@@ -48,9 +48,9 @@ class Zone(EC2Object):
     :ivar region_name: The name of the region the zone is associated with.
     :ivar messages: A list of messages related to the zone.
     """
-    
+
     def __init__(self, connection=None):
-        EC2Object.__init__(self, connection)
+        super(Zone, self).__init__(connection)
         self.name = None
         self.state = None
         self.region_name = None
@@ -64,7 +64,7 @@ class Zone(EC2Object):
             self.messages = MessageSet()
             return self.messages
         return None
-    
+
     def endElement(self, name, value, connection):
         if name == 'zoneName':
             self.name = value

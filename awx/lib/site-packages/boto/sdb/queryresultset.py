@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -34,8 +34,8 @@ def query_lister(domain, query='', max_items=None, attr_names=None):
             num_results += 1
         next_token = rs.next_token
         more_results = next_token != None
-        
-class QueryResultSet:
+
+class QueryResultSet(object):
 
     def __init__(self, domain=None, query='', max_items=None, attr_names=None):
         self.max_items = max_items
@@ -60,7 +60,7 @@ def select_lister(domain, query='', max_items=None):
             num_results += 1
         next_token = rs.next_token
         more_results = next_token != None
-        
+
 class SelectResultSet(object):
 
     def __init__(self, domain=None, query='', max_items=None,

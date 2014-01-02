@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -36,7 +36,7 @@ Config file section::
 
     [EBS]
     volume_id = <the id of the EBS volume, should look like vol-xxxxxxxx>
-    logical_volume_name = <the name of the logical volume that contaings 
+    logical_volume_name = <the name of the logical volume that contaings
         a reference to the physical volume to be mounted. If this parameter
         is supplied, it overrides the volume_id setting.>
     device = <the linux device the EBS volume should be mounted on>
@@ -86,7 +86,7 @@ from boto.manage.volume import Volume
 for v in Volume.all():
     v.trim_snapshots(True)
 """
-    
+
 TagBasedBackupCleanupScript= """#!/usr/bin/env python
 import boto
 
@@ -102,7 +102,7 @@ class EBSInstaller(Installer):
     """
 
     def __init__(self, config_file=None):
-        Installer.__init__(self, config_file)
+        super(EBSInstaller, self).__init__(config_file)
         self.instance_id = boto.config.get('Instance', 'instance-id')
         self.device = boto.config.get('EBS', 'device', '/dev/sdp')
         self.volume_id = boto.config.get('EBS', 'volume_id')
@@ -130,7 +130,7 @@ class EBSInstaller(Installer):
                 attempt_attach = False
             except EC2ResponseError, e:
                 if e.error_code != 'IncorrectState':
-                    # if there's an EC2ResonseError with the code set to IncorrectState, delay a bit for ec2 
+                    # if there's an EC2ResonseError with the code set to IncorrectState, delay a bit for ec2
                     # to realize the instance is running, then try again. Otherwise, raise the error:
                     boto.log.info('Attempt to attach the EBS volume %s to this instance (%s) returned %s. Trying again in a bit.' % (self.volume_id, self.instance_id, e.errors))
                     time.sleep(2)
@@ -198,7 +198,7 @@ class EBSInstaller(Installer):
     def install(self):
         # First, find and attach the volume
         self.attach()
-        
+
         # Install the xfs tools
         self.run('apt-get -y install xfsprogs xfsdump')
 
@@ -221,7 +221,7 @@ class EBSInstaller(Installer):
         hour = boto.config.get('EBS', 'backup_cleanup_cron_hour')
         if (minute != None) and (hour != None):
             # Snapshot clean up can either be done via the manage module, or via the new tag based
-            # snapshot code, if the snapshots have been tagged with the name of the associated 
+            # snapshot code, if the snapshots have been tagged with the name of the associated
             # volume. Check for the presence of the new configuration flag, and use the appropriate
             # cleanup method / script:
             use_tag_based_cleanup = boto.config.has_option('EBS', 'use_tag_based_snapshot_cleanup')

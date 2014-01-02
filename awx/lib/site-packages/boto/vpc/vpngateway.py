@@ -45,7 +45,7 @@ class Attachment(object):
 class VpnGateway(TaggedEC2Object):
 
     def __init__(self, connection=None):
-        TaggedEC2Object.__init__(self, connection)
+        super(VpnGateway, self).__init__(connection)
         self.id = None
         self.type = None
         self.state = None
@@ -56,7 +56,7 @@ class VpnGateway(TaggedEC2Object):
         return 'VpnGateway:%s' % self.id
 
     def startElement(self, name, attrs, connection):
-        retval = TaggedEC2Object.startElement(self, name, attrs, connection)
+        retval = super(VpnGateway, self).startElement(name, attrs, connection)
         if retval is not None:
             return retval
         if name == 'item':

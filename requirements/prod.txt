@@ -10,6 +10,7 @@ Django>=1.4
   #django-celery
   #django-extensions
   #django-jsonfield
+  #django-split-settings
   #django-taggit
   #djangorestframework>=2.3.0,<2.4.0
   #Markdown

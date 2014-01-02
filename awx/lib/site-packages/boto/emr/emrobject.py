@@ -256,6 +256,7 @@ class Cluster(EmrObject):
         self.status = None
         self.ec2instanceattributes = None
         self.applications = None
+        self.tags = None
 
     def startElement(self, name, attrs, connection):
         if name == 'Status':
@@ -266,6 +267,9 @@ class Cluster(EmrObject):
             return self.ec2instanceattributes
         elif name == 'Applications':
             self.applications = ResultSet([('member', Application)])
+        elif name == 'Tags':
+            self.tags = ResultSet([('member', KeyValue)])
+            return self.tags
         else:
             return None
 

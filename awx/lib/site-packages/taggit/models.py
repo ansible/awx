@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import django
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.db import models, IntegrityError, transaction

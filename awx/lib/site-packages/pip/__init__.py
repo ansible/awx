@@ -9,12 +9,18 @@ from pip.exceptions import InstallationError, CommandError, PipError
 from pip.log import logger
 from pip.util import get_installed_distributions, get_prog
 from pip.vcs import git, mercurial, subversion, bazaar  # noqa
-from pip.baseparser import create_main_parser
-from pip.commands import commands, get_similar_commands, get_summaries
+from pip.baseparser import ConfigOptionParser, UpdatingDefaultsHelpFormatter
+from pip.commands import commands, get_summaries, get_similar_commands
 
+# This fixes a peculiarity when importing via __import__ - as we are
+# initialising the pip module, "from pip import cmdoptions" is recursive
+# and appears not to work properly in that situation.
+import pip.cmdoptions
+cmdoptions = pip.cmdoptions
 
 # The version as used in the setup.py and the docs conf.py
-__version__ = "1.4.1"
+__version__ = "1.5"
+
 
 def autocomplete():
     """Command and option completion for the main option parser (and options)
@@ -59,7 +65,7 @@ def autocomplete():
                     print(dist)
                 sys.exit(1)
 
-        subcommand = commands[subcommand_name](parser)
+        subcommand = commands[subcommand_name]()
         options += [(opt.get_opt_string(), opt.nargs)
                     for opt in subcommand.parser.option_list_all
                     if opt.help != optparse.SUPPRESS_HELP]
@@ -89,45 +95,76 @@ def autocomplete():
     sys.exit(1)
 
 
-def parseopts(args):
-    parser = create_main_parser()
+def create_main_parser():
+    parser_kw = {
+        'usage': '\n%prog <command> [options]',
+        'add_help_option': False,
+        'formatter': UpdatingDefaultsHelpFormatter(),
+        'name': 'global',
+        'prog': get_prog(),
+    }
+
+    parser = ConfigOptionParser(**parser_kw)
+    parser.disable_interspersed_args()
+
+    pip_pkg_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    parser.version = 'pip %s from %s (python %s)' % (
+        __version__,  pip_pkg_dir, sys.version[:3])
+
+    # add the general options
+    gen_opts = cmdoptions.make_option_group(cmdoptions.general_group, parser)
+    parser.add_option_group(gen_opts)
+
     parser.main = True # so the help formatter knows
 
-    # create command listing
+    # create command listing for description
     command_summaries = get_summaries()
-
     description = [''] + ['%-27s %s' % (i, j) for i, j in command_summaries]
     parser.description = '\n'.join(description)
 
-    options, args = parser.parse_args(args)
+    return parser
 
-    if options.version:
+
+def parseopts(args):
+    parser = create_main_parser()
+
+    # Note: parser calls disable_interspersed_args(), so the result of this call
+    # is to split the initial args into the general options before the
+    # subcommand and everything else.
+    # For example:
+    #  args: ['--timeout=5', 'install', '--user', 'INITools']
+    #  general_options: ['--timeout==5']
+    #  args_else: ['install', '--user', 'INITools']
+    general_options, args_else = parser.parse_args(args)
+
+    # --version
+    if general_options.version:
         sys.stdout.write(parser.version)
         sys.stdout.write(os.linesep)
         sys.exit()
 
-    # pip || pip help || pip --help -> print_help()
-    if not args or (args[0] == 'help' and len(args) == 1):
+    # pip || pip help -> print_help()
+    if not args_else or (args_else[0] == 'help' and len(args_else) == 1):
         parser.print_help()
         sys.exit()
 
-    if not args:
-        msg = ('You must give a command '
-               '(use "pip --help" to see a list of commands)')
-        raise CommandError(msg)
+    # the subcommand name
+    cmd_name = args_else[0].lower()
 
-    command = args[0].lower()
+    #all the args without the subcommand
+    cmd_args = args[:]
+    cmd_args.remove(args_else[0].lower())
 
-    if command not in commands:
-        guess = get_similar_commands(command)
+    if cmd_name not in commands:
+        guess = get_similar_commands(cmd_name)
 
-        msg = ['unknown command "%s"' % command]
+        msg = ['unknown command "%s"' % cmd_name]
         if guess:
             msg.append('maybe you meant "%s"' % guess)
 
         raise CommandError(' - '.join(msg))
 
-    return command, options, args, parser
+    return cmd_name, cmd_args
 
 
 def main(initial_args=None):
@@ -137,15 +174,15 @@ def main(initial_args=None):
     autocomplete()
 
     try:
-        cmd_name, options, args, parser = parseopts(initial_args)
+        cmd_name, cmd_args = parseopts(initial_args)
     except PipError:
         e = sys.exc_info()[1]
         sys.stderr.write("ERROR: %s" % e)
         sys.stderr.write(os.linesep)
         sys.exit(1)
 
-    command = commands[cmd_name](parser)  # see baseparser.Command
-    return command.main(args[1:], options)
+    command = commands[cmd_name]()
+    return command.main(cmd_args)
 
 
 def bootstrap():

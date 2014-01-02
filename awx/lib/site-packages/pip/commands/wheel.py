@@ -9,7 +9,7 @@ from pip.log import logger
 from pip.exceptions import CommandError, PreviousBuildDirError
 from pip.req import InstallRequirement, RequirementSet, parse_requirements
 from pip.util import normalize_path
-from pip.wheel import WheelBuilder, wheel_setuptools_support, setuptools_requirement
+from pip.wheel import WheelBuilder, wheel_setuptools_support
 from pip import cmdoptions
 
 DEFAULT_WHEEL_DIR = os.path.join(normalize_path(os.curdir), 'wheelhouse')
@@ -48,17 +48,18 @@ class WheelCommand(Command):
             metavar='dir',
             default=DEFAULT_WHEEL_DIR,
             help="Build wheels into <dir>, where the default is '<cwd>/wheelhouse'.")
-        cmd_opts.add_option(cmdoptions.use_wheel)
+        cmd_opts.add_option(cmdoptions.use_wheel.make())
+        cmd_opts.add_option(cmdoptions.no_use_wheel.make())
         cmd_opts.add_option(
             '--build-option',
             dest='build_options',
             metavar='options',
             action='append',
             help="Extra arguments to be supplied to 'setup.py bdist_wheel'.")
-        cmd_opts.add_option(cmdoptions.requirements)
-        cmd_opts.add_option(cmdoptions.download_cache)
-        cmd_opts.add_option(cmdoptions.no_deps)
-        cmd_opts.add_option(cmdoptions.build_dir)
+        cmd_opts.add_option(cmdoptions.requirements.make())
+        cmd_opts.add_option(cmdoptions.download_cache.make())
+        cmd_opts.add_option(cmdoptions.no_deps.make())
+        cmd_opts.add_option(cmdoptions.build_dir.make())
 
         cmd_opts.add_option(
             '--global-option',
@@ -74,7 +75,7 @@ class WheelCommand(Command):
             default=False,
             help="Include pre-release and development versions. By default, pip only finds stable versions.")
 
-        cmd_opts.add_option(cmdoptions.no_clean)
+        cmd_opts.add_option(cmdoptions.no_clean.make())
 
         index_opts = cmdoptions.make_option_group(cmdoptions.index_group, self.parser)
 
@@ -87,25 +88,40 @@ class WheelCommand(Command):
         try:
             import wheel.bdist_wheel
         except ImportError:
-            raise CommandError("'pip wheel' requires bdist_wheel from the 'wheel' distribution.")
+            raise CommandError("'pip wheel' requires the 'wheel' package. To fix this, run:  pip install wheel")
         if not wheel_setuptools_support():
-            raise CommandError("'pip wheel' requires %s." % setuptools_requirement)
+            raise CommandError("'pip wheel' requires setuptools>=0.8. To fix this, run: pip install --upgrade setuptools")
 
         index_urls = [options.index_url] + options.extra_index_urls
         if options.no_index:
             logger.notify('Ignoring indexes: %s' % ','.join(index_urls))
             index_urls = []
 
+        if options.use_mirrors:
+            logger.deprecated("1.7",
+                        "--use-mirrors has been deprecated and will be removed"
+                        " in the future. Explicit uses of --index-url and/or "
+                        "--extra-index-url is suggested.")
+
+        if options.mirrors:
+            logger.deprecated("1.7",
+                        "--mirrors has been deprecated and will be removed in "
+                        " the future. Explicit uses of --index-url and/or "
+                        "--extra-index-url is suggested.")
+            index_urls += options.mirrors
+
+        session = self._build_session(options)
+
         finder = PackageFinder(find_links=options.find_links,
                                index_urls=index_urls,
-                               use_mirrors=options.use_mirrors,
-                               mirrors=options.mirrors,
                                use_wheel=options.use_wheel,
                                allow_external=options.allow_external,
-                               allow_insecure=options.allow_insecure,
+                               allow_unverified=options.allow_unverified,
                                allow_all_external=options.allow_all_external,
-                               allow_all_insecure=options.allow_all_insecure,
                                allow_all_prereleases=options.pre,
+                               process_dependency_links=
+                                options.process_dependency_links,
+                               session=session,
                             )
 
         options.build_dir = os.path.abspath(options.build_dir)
@@ -115,7 +131,9 @@ class WheelCommand(Command):
             download_dir=None,
             download_cache=options.download_cache,
             ignore_dependencies=options.ignore_dependencies,
-            ignore_installed=True)
+            ignore_installed=True,
+            session=session,
+        )
 
         #parse args and/or requirements files
         for name in args:
@@ -126,7 +144,7 @@ class WheelCommand(Command):
                 InstallRequirement.from_line(name, None))
 
         for filename in options.requirements:
-            for req in parse_requirements(filename, finder=finder, options=options):
+            for req in parse_requirements(filename, finder=finder, options=options, session=session):
                 if req.editable or (req.name is None and req.url.endswith(".whl")):
                     logger.notify("ignoring %s" % req.url)
                     continue
@@ -151,8 +169,8 @@ class WheelCommand(Command):
                 )
             wb.build()
         except PreviousBuildDirError:
-            return
+            options.no_clean = True
+            raise
         finally:
             if not options.no_clean:
                 requirement_set.cleanup_files()
-

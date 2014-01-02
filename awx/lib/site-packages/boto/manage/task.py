@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -30,7 +30,7 @@ def check_hour(val):
         return
     if int(val) < 0 or int(val) > 23:
         raise ValueError
-    
+
 class Task(Model):
 
     """
@@ -40,10 +40,10 @@ class Task(Model):
 
     To keep the operation reasonably efficient and not cause excessive polling,
     the minimum granularity of a Task is hourly.  Some examples:
-    
+
          hour='*' - the task would be executed each hour
          hour='3' - the task would be executed at 3AM GMT each day.
-         
+
     """
     name = StringProperty()
     hour = StringProperty(required=True, validator=check_hour, default='*')
@@ -57,13 +57,13 @@ class Task(Model):
     def start_all(cls, queue_name):
         for task in cls.all():
             task.start(queue_name)
-            
+
     def __init__(self, id=None, **kw):
-        Model.__init__(self, id, **kw)
+        super(Task, self).__init__(id, **kw)
         self.hourly = self.hour == '*'
         self.daily = self.hour != '*'
         self.now = datetime.datetime.utcnow()
-        
+
     def check(self):
         """
         Determine how long until the next scheduled time for a Task.
@@ -76,7 +76,7 @@ class Task(Model):
 
         if self.hourly and not self.last_executed:
             return 0
-            
+
         if self.daily and not self.last_executed:
             if int(self.hour) == self.now.hour:
                 return 0
@@ -97,7 +97,7 @@ class Task(Model):
                     return 82800 # 23 hours, just to be safe
             else:
                 return max( (int(self.hour)-self.now.hour), (self.now.hour-int(self.hour)) )*60*60
-    
+
     def _run(self, msg, vtimeout):
         boto.log.info('Task[%s] - running:%s' % (self.name, self.command))
         log_fp = StringIO.StringIO()
@@ -170,6 +170,6 @@ class TaskPoller(object):
 
 
 
-    
 
-    
+
+

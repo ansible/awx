@@ -19,7 +19,6 @@ import sys
 import threading
 import array
 
-from collections import Callable
 from traceback import format_exc
 
 from . import Process, current_process, active_children, Pool, util, connection
@@ -123,7 +122,7 @@ def all_methods(obj):
     temp = []
     for name in dir(obj):
         func = getattr(obj, name)
-        if isinstance(func, Callable):
+        if callable(func):
             temp.append(name)
     return temp
 
@@ -492,8 +491,7 @@ class BaseManager(object):
         '''
         assert self._state.value == State.INITIAL
 
-        if initializer is not None and \
-                not isinstance(initializer, Callable):
+        if initializer is not None and not callable(initializer):
             raise TypeError('initializer must be a callable')
 
         # pipe over which we will retrieve address of server

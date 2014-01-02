@@ -37,7 +37,7 @@ class Address(EC2Object):
     """
 
     def __init__(self, connection=None, public_ip=None, instance_id=None):
-        EC2Object.__init__(self, connection)
+        super(Address, self).__init__(connection)
         self.connection = connection
         self.public_ip = public_ip
         self.instance_id = instance_id

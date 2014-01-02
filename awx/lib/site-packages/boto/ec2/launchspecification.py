@@ -44,7 +44,7 @@ class GroupList(list):
 class LaunchSpecification(EC2Object):
 
     def __init__(self, connection=None):
-        EC2Object.__init__(self, connection)
+        super(LaunchSpecification, self).__init__(connection)
         self.key_name = None
         self.instance_type = None
         self.image_id = None

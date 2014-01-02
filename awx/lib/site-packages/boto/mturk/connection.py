@@ -54,7 +54,7 @@ class MTurkConnection(AWSQueryConnection):
                 host = 'mechanicalturk.amazonaws.com'
         self.debug = debug
 
-        AWSQueryConnection.__init__(self, aws_access_key_id,
+        super(MTurkConnection, self).__init__(aws_access_key_id,
                                     aws_secret_access_key,
                                     is_secure, port, proxy, proxy_port,
                                     proxy_user, proxy_pass, host, debug,
@@ -875,7 +875,7 @@ class MTurkConnection(AWSQueryConnection):
         return duration
 
 
-class BaseAutoResultElement:
+class BaseAutoResultElement(object):
     """
     Base class to automatically add attributes when parsing XML
     """
@@ -955,7 +955,7 @@ class QualificationRequest(BaseAutoResultElement):
     """
 
     def __init__(self, connection):
-        BaseAutoResultElement.__init__(self, connection)
+        super(QualificationRequest, self).__init__(connection)
         self.answers = []
 
     def endElement(self, name, value, connection):
@@ -967,7 +967,7 @@ class QualificationRequest(BaseAutoResultElement):
             xml.sax.parseString(value, h)
             self.answers.append(answer_rs)
         else:
-            BaseAutoResultElement.endElement(self, name, value, connection)
+            super(QualificationRequest, self).endElement(name, value, connection)
 
 
 class Assignment(BaseAutoResultElement):
@@ -980,7 +980,7 @@ class Assignment(BaseAutoResultElement):
     """
 
     def __init__(self, connection):
-        BaseAutoResultElement.__init__(self, connection)
+        super(Assignment, self).__init__(connection)
         self.answers = []
 
     def endElement(self, name, value, connection):
@@ -992,7 +992,7 @@ class Assignment(BaseAutoResultElement):
             xml.sax.parseString(value, h)
             self.answers.append(answer_rs)
         else:
-            BaseAutoResultElement.endElement(self, name, value, connection)
+            super(Assignment, self).endElement(name, value, connection)
 
 
 class QuestionFormAnswer(BaseAutoResultElement):
@@ -1016,7 +1016,7 @@ class QuestionFormAnswer(BaseAutoResultElement):
     """
 
     def __init__(self, connection):
-        BaseAutoResultElement.__init__(self, connection)
+        super(QuestionFormAnswer, self).__init__(connection)
         self.fields = []
         self.qid = None
 

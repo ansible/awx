@@ -77,22 +77,22 @@ class RequiredParamError(boto.exception.BotoClientError):
     def __init__(self, required):
         self.required = required
         s = 'Required parameters are missing: %s' % self.required
-        boto.exception.BotoClientError.__init__(self, s)
+        super(RequiredParamError, self).__init__(s)
 
 class EncoderError(boto.exception.BotoClientError):
 
     def __init__(self, error_msg):
         s = 'Error encoding value (%s)' % error_msg
-        boto.exception.BotoClientError.__init__(self, s)
-        
+        super(EncoderError, self).__init__(s)
+
 class FilterError(boto.exception.BotoClientError):
 
     def __init__(self, filters):
         self.filters = filters
         s = 'Unknown filters: %s' % self.filters
-        boto.exception.BotoClientError.__init__(self, s)
-        
-class Encoder:
+        super(FilterError, self).__init__(s)
+
+class Encoder(object):
 
     @classmethod
     def encode(cls, p, rp, v, label=None):
@@ -103,7 +103,7 @@ class Encoder:
             mthd(p, rp, v, label)
         except AttributeError:
             raise EncoderError('Unknown type: %s' % p.ptype)
-        
+
     @classmethod
     def encode_string(cls, p, rp, v, l):
         if l:
@@ -122,7 +122,7 @@ class Encoder:
         else:
             label = p.name
         rp[label] = '%d' % v
-        
+
     @classmethod
     def encode_boolean(cls, p, rp, v, l):
         if l:
@@ -134,7 +134,7 @@ class Encoder:
         else:
             v = 'false'
         rp[label] = v
-        
+
     @classmethod
     def encode_datetime(cls, p, rp, v, l):
         if l:
@@ -142,7 +142,7 @@ class Encoder:
         else:
             label = p.name
         rp[label] = v
-        
+
     @classmethod
     def encode_array(cls, p, rp, v, l):
         v = boto.utils.mklist(v)
@@ -153,7 +153,7 @@ class Encoder:
         label = label + '.%d'
         for i, value in enumerate(v):
             rp[label%(i+1)] = value
-            
+
 class AWSQueryRequest(object):
 
     ServiceClass = None
@@ -290,7 +290,7 @@ class AWSQueryRequest(object):
         elif fmt and fmt['type'] == 'array':
             self.list_markers.append(prev_name)
             self.item_markers.append(fmt['name'])
-        
+
     def send(self, verb='GET', **args):
         self.process_args(**args)
         self.process_filters()
@@ -371,7 +371,7 @@ class AWSQueryRequest(object):
             if a.doc:
                 s += '\n\n\t%s - %s' % (a.long_name, a.doc)
         return s
-    
+
     def build_cli_parser(self):
         self.parser = optparse.OptionParser(description=self.Description,
                                             usage=self.get_usage())

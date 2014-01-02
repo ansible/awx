@@ -36,3 +36,11 @@ class PreviousBuildDirError(PipError):
 
 class HashMismatch(InstallationError):
     """Distribution file hash values don't match."""
+
+
+class InvalidWheelFilename(InstallationError):
+    """Invalid wheel filename."""
+
+
+class UnsupportedWheel(InstallationError):
+    """Unsupported wheel."""

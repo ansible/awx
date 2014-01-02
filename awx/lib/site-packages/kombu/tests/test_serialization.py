@@ -7,7 +7,7 @@ import sys
 
 from base64 import b64decode
 
-from kombu.exceptions import ContentDisallowed
+from kombu.exceptions import ContentDisallowed, EncodeError, DecodeError
 from kombu.five import text_t, bytes_t
 from kombu.serialization import (
     registry, register, SerializerNotInstalled,
@@ -185,6 +185,15 @@ class test_Serialization(Case):
             registry.disable.assert_has_calls([
                 call('pickle'), call('yaml'), call('doomsday')
             ])
+
+    def test_reraises_EncodeError(self):
+        with self.assertRaises(EncodeError):
+            dumps([object()], serializer='json')
+
+    def test_reraises_DecodeError(self):
+        with self.assertRaises(DecodeError):
+            loads(object(), content_type='application/json',
+                  content_encoding='utf-8')
 
     def test_json_loads(self):
         self.assertEqual(

@@ -55,6 +55,9 @@ def regions():
             RegionInfo(name='sa-east-1',
                        endpoint='elasticache.sa-east-1.amazonaws.com',
                        connection_cls=ElastiCacheConnection),
+            RegionInfo(name='cn-north-1',
+                       endpoint='elasticache.cn-north-1.amazonaws.com.cn',
+                       connection_cls=ElastiCacheConnection),
             ]
 
 

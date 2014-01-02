@@ -661,11 +661,11 @@ class Queue(MaybeChannelBound):
     def __repr__(self):
         s = super(Queue, self).__repr__
         if self.bindings:
-            return s('Queue {0.name!r} -> {bindings}'.format(
+            return s('Queue {0.name} -> {bindings}'.format(
                 self, bindings=pretty_bindings(self.bindings),
             ))
         return s(
-            'Queue {0.name!r} -> {0.exchange!r} -> {0.routing_key}'.format(
+            'Queue {0.name} -> {0.exchange!r} -> {0.routing_key}'.format(
                 self))
 
     @property

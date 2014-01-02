@@ -22,6 +22,7 @@
 from boto.rds.dbsecuritygroup import DBSecurityGroup
 from boto.rds.parametergroup import ParameterGroup
 from boto.rds.statusinfo import StatusInfo
+from boto.rds.dbsubnetgroup import DBSubnetGroup
 from boto.rds.vpcsecuritygroupmembership import VPCSecurityGroupMembership
 from boto.resultset import ResultSet
 
@@ -39,6 +40,8 @@ class DBInstance(object):
     :ivar engine: The database engine being used
     :ivar status: The status of the database in a string. e.g. "available"
     :ivar allocated_storage: The size of the disk in gigabytes (int).
+    :ivar auto_minor_version_upgrade: Indicates that minor version patches 
+        are applied automatically.
     :ivar endpoint: A tuple that describes the hostname and port of
         the instance. This is only available when the database is
         in status "available".
@@ -75,7 +78,14 @@ class DBInstance(object):
     :ivar read_replica_dbinstance_identifiers: List of read replicas
         associated with this DB instance.
     :ivar status_infos: The status of a Read Replica. If the instance is not a
-                        for a read replica, this will be blank.
+        for a read replica, this will be blank.
+    :ivar character_set_name: If present, specifies the name of the character 
+        set that this instance is associated with.
+    :ivar subnet_group: Specifies information on the subnet group associated 
+        with the DB instance, including the name, description, and subnets 
+        in the subnet group.
+    :ivar engine_version: Indicates the database engine version.
+    :ivar license_model: License model information for this DB instance.
     """
 
     def __init__(self, connection=None, id=None):
@@ -85,6 +95,7 @@ class DBInstance(object):
         self.engine = None
         self.status = None
         self.allocated_storage = None
+        self.auto_minor_version_upgrade = None
         self.endpoint = None
         self.instance_class = None
         self.master_username = None
@@ -104,6 +115,10 @@ class DBInstance(object):
         self._port = None
         self._address = None
         self.status_infos = None
+        self.character_set_name = None
+        self.subnet_group = None
+        self.engine_version = None
+        self.license_model = None
 
     def __repr__(self):
         return 'DBInstance:%s' % self.id
@@ -135,6 +150,9 @@ class DBInstance(object):
                 ('DBInstanceStatusInfo', StatusInfo)
             ])
             return self.status_infos
+        elif name == 'DBSubnetGroup':
+            self.subnet_group = DBSubnetGroup()
+            return self.subnet_group
         return None
 
     def endElement(self, name, value, connection):
@@ -150,6 +168,8 @@ class DBInstance(object):
             self.status = value
         elif name == 'AllocatedStorage':
             self.allocated_storage = int(value)
+        elif name == 'AutoMinorVersionUpgrade':
+            self.auto_minor_version_upgrade = value.lower() == 'true'
         elif name == 'DBInstanceClass':
             self.instance_class = value
         elif name == 'MasterUsername':
@@ -166,7 +186,7 @@ class DBInstance(object):
         elif name == 'AvailabilityZone':
             self.availability_zone = value
         elif name == 'BackupRetentionPeriod':
-            self.backup_retention_period = value
+            self.backup_retention_period = int(value)
         elif name == 'LatestRestorableTime':
             self.latest_restorable_time = value
         elif name == 'PreferredMaintenanceWindow':
@@ -178,6 +198,12 @@ class DBInstance(object):
                 self.multi_az = True
         elif name == 'Iops':
             self.iops = int(value)
+        elif name == 'CharacterSetName':
+            self.character_set_name = value
+        elif name == 'EngineVersion':
+            self.engine_version = value
+        elif name == 'LicenseModel':
+            self.license_model = value        
         else:
             setattr(self, name, value)
 
@@ -274,7 +300,8 @@ class DBInstance(object):
                multi_az=False,
                iops=None,
                vpc_security_groups=None,
-               apply_immediately=False):
+               apply_immediately=False,
+               new_instance_id=None):
         """
         Modify this DBInstance.
 
@@ -317,6 +344,9 @@ class DBInstance(object):
         :param apply_immediately: If true, the modifications will be
             applied as soon as possible rather than waiting for the
             next preferred maintenance window.
+            
+        :type new_instance_id: str
+        :param new_instance_id: The new DB instance identifier.
 
         :type backup_retention_period: int
         :param backup_retention_period: The number of days for which
@@ -364,7 +394,8 @@ class DBInstance(object):
                                                  multi_az,
                                                  apply_immediately,
                                                  iops,
-                                                 vpc_security_groups)
+                                                 vpc_security_groups,
+                                                 new_instance_id)
 
 
 class PendingModifiedValues(dict):

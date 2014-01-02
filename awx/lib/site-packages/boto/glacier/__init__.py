@@ -50,6 +50,9 @@ def regions():
             RegionInfo(name='ap-southeast-2',
                        endpoint='glacier.ap-southeast-2.amazonaws.com',
                        connection_cls=Layer2),
+            RegionInfo(name='cn-north-1',
+                       endpoint='glacier.cn-north-1.amazonaws.com.cn',
+                       connection_cls=Layer2),
             ]
 
 

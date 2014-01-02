@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -26,7 +26,7 @@ import boto
 class ServiceDef(Config):
 
     def __init__(self, config_file, aws_access_key_id=None, aws_secret_access_key=None):
-        Config.__init__(self, config_file)
+        super(ServiceDef, self).__init__(config_file)
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
         script = Config.get(self, 'Pyami', 'scripts')
@@ -37,22 +37,22 @@ class ServiceDef(Config):
 
 
     def get(self, name, default=None):
-        return Config.get(self, self.name, name, default)
+        return super(ServiceDef, self).get(self.name, name, default)
 
     def has_option(self, option):
-        return Config.has_option(self, self.name, option)
+        return super(ServiceDef, self).has_option(self.name, option)
 
     def getint(self, option, default=0):
         try:
-            val = Config.get(self, self.name, option)
+            val = super(ServiceDef, self).get(self.name, option)
             val = int(val)
         except:
             val = int(default)
         return val
-        
+
     def getbool(self, option, default=False):
         try:
-            val = Config.get(self, self.name, option)
+            val = super(ServiceDef, self).get(self.name, option)
             if val.lower() == 'true':
                 val = True
             else:
@@ -60,7 +60,7 @@ class ServiceDef(Config):
         except:
             val = default
         return val
-        
+
     def get_obj(self, name):
         """
         Returns the AWS object associated with a given option.
@@ -88,4 +88,4 @@ class ServiceDef(Config):
             obj = None
         return obj
 
-    
+

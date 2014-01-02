@@ -29,7 +29,7 @@ from boto.resultset import ResultSet
 class RouteTable(TaggedEC2Object):
 
     def __init__(self, connection=None):
-        TaggedEC2Object.__init__(self, connection)
+        super(RouteTable, self).__init__(connection)
         self.id = None
         self.vpc_id = None
         self.routes = []

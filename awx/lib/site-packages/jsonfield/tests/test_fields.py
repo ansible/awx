@@ -66,7 +66,7 @@ class JSONFieldTest(DjangoTestCase):
     def test_formfield_null_and_blank_clean_none(self):
         field = JSONField("test", null=True, blank=True)
         formfield = field.formfield()
-        self.assertEquals(formfield.clean(value=None), '')
+        self.assertEquals(formfield.clean(value=None), None)
 
     def test_formfield_blank_clean_blank(self):
         field = JSONField("test", null=False, blank=True)
@@ -74,9 +74,11 @@ class JSONFieldTest(DjangoTestCase):
         self.assertEquals(formfield.clean(value=''), '')
 
     def test_formfield_blank_clean_none(self):
+        # Hmm, I'm not sure how to do this. What happens if we pass a
+        # None to a field that has null=False?
         field = JSONField("test", null=False, blank=True)
         formfield = field.formfield()
-        self.assertEquals(formfield.clean(value=None), '')
+        self.assertEquals(formfield.clean(value=None), None)
 
     def test_default_value(self):
         obj = JSONFieldWithDefaultTestModel.objects.create()
@@ -143,3 +145,9 @@ class JSONFieldTest(DjangoTestCase):
     def test_invalid_json_default(self):
         with self.assertRaises(ValueError):
             field = JSONField('test', default='{"foo"}')
+
+class SavingModelsTest(DjangoTestCase):
+    def test_saving_null(self):
+        obj = BlankJSONFieldTestModel.objects.create(blank_json='', null_json=None)
+        self.assertEquals('', obj.blank_json)
+        self.assertEquals(None, obj.null_json)

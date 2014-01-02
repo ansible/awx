@@ -109,7 +109,7 @@ class FPSConnection(AWSQueryConnection):
     def __init__(self, *args, **kw):
         self.currencycode = kw.pop('CurrencyCode', self.currencycode)
         kw.setdefault('host', 'fps.sandbox.amazonaws.com')
-        AWSQueryConnection.__init__(self, *args, **kw)
+        super(FPSConnection, self).__init__(*args, **kw)
 
     def _required_auth_capability(self):
         return ['fps']

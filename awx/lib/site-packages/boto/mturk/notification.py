@@ -32,7 +32,7 @@ except ImportError:
 import base64
 import re
 
-class NotificationMessage:
+class NotificationMessage(object):
 
     NOTIFICATION_WSDL = "http://mechanicalturk.amazonaws.com/AWSMechanicalTurk/2006-05-05/AWSMechanicalTurkRequesterNotification.wsdl"
     NOTIFICATION_VERSION = '2006-05-05'
@@ -88,7 +88,7 @@ class NotificationMessage:
         signature_calc = base64.b64encode(h.digest())
         return self.signature == signature_calc
 
-class Event:
+class Event(object):
     def __init__(self, d):
         self.event_type = d['EventType']
         self.event_time_str = d['EventTime']

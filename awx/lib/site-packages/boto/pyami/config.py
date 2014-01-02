@@ -58,6 +58,8 @@ elif 'BOTO_PATH' in os.environ:
 class Config(ConfigParser.SafeConfigParser):
 
     def __init__(self, path=None, fp=None, do_load=True):
+        # We don't use ``super`` here, because ``ConfigParser`` still uses
+        # old-style classes.
         ConfigParser.SafeConfigParser.__init__(self, {'working_dir' : '/mnt/pyami',
                                                       'debug' : '0'})
         if do_load:

@@ -53,7 +53,7 @@ class TaggedEC2Object(EC2Object):
     """
 
     def __init__(self, connection=None):
-        EC2Object.__init__(self, connection)
+        super(TaggedEC2Object, self).__init__(connection)
         self.tags = TagSet()
 
     def startElement(self, name, attrs, connection):

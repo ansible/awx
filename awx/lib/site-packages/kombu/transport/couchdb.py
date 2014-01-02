@@ -17,6 +17,7 @@ from anyjson import loads, dumps
 
 from kombu.five import Empty
 from kombu.utils import uuid4
+from kombu.utils.encoding import bytes_to_str
 
 from . import virtual
 
@@ -56,7 +57,7 @@ class Channel(virtual.Channel):
 
         item = result.rows[0].value
         self.client.delete(item)
-        return loads(item['payload'])
+        return loads(bytes_to_str(item['payload']))
 
     def _purge(self, queue):
         result = self._query(queue)

@@ -3,40 +3,30 @@
 import sys
 import os
 import re
-import gzip
 import mimetypes
 import posixpath
 import pkg_resources
-import random
-import socket
-import ssl
-import string
-import zlib
-
-try:
-    import threading
-except ImportError:
-    import dummy_threading as threading
 
 from pip.log import logger
 from pip.util import Inf, normalize_name, splitext, is_prerelease
-from pip.exceptions import DistributionNotFound, BestVersionAlreadyInstalled,\
-    InstallationError
-from pip.backwardcompat import (WindowsError, BytesIO,
-                                Queue, urlparse,
-                                URLError, HTTPError, u,
-                                product, url2pathname,
-                                Empty as QueueEmpty)
-from pip.backwardcompat import CertificateError
-from pip.download import urlopen, path_to_url2, url_to_path, geturl, Urllib2HeadRequest
-from pip.wheel import Wheel, wheel_ext, wheel_setuptools_support, setuptools_requirement
+from pip.exceptions import (DistributionNotFound, BestVersionAlreadyInstalled,
+                            InstallationError, InvalidWheelFilename, UnsupportedWheel)
+from pip.backwardcompat import urlparse, url2pathname
+from pip.download import PipSession, url_to_path, path_to_url
+from pip.wheel import Wheel, wheel_ext, wheel_setuptools_support
 from pip.pep425tags import supported_tags, supported_tags_noarch, get_platform
-from pip.vendor import html5lib
+from pip._vendor import html5lib, requests
+from pip._vendor.requests.exceptions import SSLError
+
 
 __all__ = ['PackageFinder']
 
 
 DEFAULT_MIRROR_HOSTNAME = "last.pypi.python.org"
+
+INSECURE_SCHEMES = {
+    "http": ["https"],
+}
 
 
 class PackageFinder(object):
@@ -47,34 +37,28 @@ class PackageFinder(object):
     """
 
     def __init__(self, find_links, index_urls,
-            use_mirrors=False, mirrors=None, main_mirror_url=None,
-            use_wheel=False, allow_external=[], allow_insecure=[],
-            allow_all_external=False, allow_all_insecure=False,
-            allow_all_prereleases=False):
+            use_wheel=True, allow_external=[], allow_unverified=[],
+            allow_all_external=False, allow_all_prereleases=False,
+            process_dependency_links=False, session=None):
         self.find_links = find_links
         self.index_urls = index_urls
         self.dependency_links = []
         self.cache = PageCache()
         # These are boring links that have already been logged somehow:
         self.logged_links = set()
-        if use_mirrors:
-            self.mirror_urls = self._get_mirror_urls(mirrors, main_mirror_url)
-            logger.info('Using PyPI mirrors: %s' % ', '.join(self.mirror_urls))
-        else:
-            self.mirror_urls = []
+
         self.use_wheel = use_wheel
 
         # Do we allow (safe and verifiable) externally hosted files?
         self.allow_external = set(normalize_name(n) for n in allow_external)
 
         # Which names are allowed to install insecure and unverifiable files?
-        self.allow_insecure = set(normalize_name(n) for n in allow_insecure)
+        self.allow_unverified = set(
+            normalize_name(n) for n in allow_unverified
+        )
 
         # Do we allow all (safe and verifiable) externally hosted files?
         self.allow_all_external = allow_all_external
-
-        # Do we allow unsafe and unverifiable files?
-        self.allow_all_insecure = allow_all_insecure
 
         # Stores if we ignored any external links so that we can instruct
         #   end users how to install them if no distributions are available
@@ -82,10 +66,17 @@ class PackageFinder(object):
 
         # Stores if we ignored any unsafe links so that we can instruct
         #   end users how to install them if no distributions are available
-        self.need_warn_insecure = False
+        self.need_warn_unverified = False
 
         # Do we want to allow _all_ pre-releases?
         self.allow_all_prereleases = allow_all_prereleases
+
+        # Do we process dependency links?
+        self.process_dependency_links = process_dependency_links
+        self._have_warned_dependency_links = False
+
+        # The Session we'll use to make requests
+        self.session = session or PipSession()
 
     @property
     def use_wheel(self):
@@ -95,14 +86,22 @@ class PackageFinder(object):
     def use_wheel(self, value):
         self._use_wheel = value
         if self._use_wheel and not wheel_setuptools_support():
-            raise InstallationError("pip's wheel support requires %s." % setuptools_requirement)
+            raise InstallationError("pip's wheel support requires setuptools >= 0.8 for dist-info support.")
 
     def add_dependency_links(self, links):
         ## FIXME: this shouldn't be global list this, it should only
         ## apply to requirements of the package that specifies the
         ## dependency_links value
         ## FIXME: also, we should track comes_from (i.e., use Link)
-        self.dependency_links.extend(links)
+        if self.process_dependency_links:
+            if not self._have_warned_dependency_links:
+                logger.deprecated(
+                    "1.6",
+                    "Dependency Links processing has been deprecated with an "
+                    "accelerated time schedule and will be removed in pip 1.6",
+                )
+                self._have_warned_dependency_links = True
+            self.dependency_links.extend(links)
 
     def _sort_locations(self, locations):
         """
@@ -114,7 +113,7 @@ class PackageFinder(object):
 
         # puts the url for the given file path into the appropriate list
         def sort_path(path):
-            url = path_to_url2(path)
+            url = path_to_url(path)
             if mimetypes.guess_type(url, strict=False)[0] == 'text/html':
                 urls.append(url)
             else:
@@ -160,11 +159,13 @@ class PackageFinder(object):
         parsed_version, link, _ = link_tuple
         if self.use_wheel:
             support_num = len(supported_tags)
-            if link == InfLink: # existing install
+            if link == INSTALLED_VERSION:
                 pri = 1
-            elif link.wheel:
-                # all wheel links are known to be supported at this stage
-                pri = -(link.wheel.support_index_min())
+            elif link.ext == wheel_ext:
+                wheel = Wheel(link.filename) # can raise InvalidWheelFilename
+                if not wheel.supported():
+                    raise UnsupportedWheel("%s is not a supported wheel for this platform. It can't be sorted." % wheel.filename)
+                pri = -(wheel.support_index_min())
             else: # sdist
                 pri = -(support_num)
             return (parsed_version, pri)
@@ -202,14 +203,10 @@ class PackageFinder(object):
             if page is None:
                 url_name = self._find_url_name(Link(self.index_urls[0], trusted=True), url_name, req) or req.url_name
 
-        # Combine index URLs with mirror URLs here to allow
-        # adding more index URLs from requirements files
-        all_index_urls = self.index_urls + self.mirror_urls
-
         if url_name is not None:
             locations = [
                 mkurl_pypi_url(url)
-                for url in all_index_urls] + self.find_links
+                for url in self.index_urls] + self.find_links
         else:
             locations = list(self.find_links)
         for version in req.absolute_versions:
@@ -222,8 +219,7 @@ class PackageFinder(object):
         file_locations.extend(_flocations)
 
         # We trust every url that the user has given us whether it was given
-        #   via --index-url, --user-mirrors/--mirror, or --find-links or a
-        #   default option thereof
+        #   via --index-url or --find-links
         locations = [Link(url, trusted=True) for url in url_locations]
 
         # We explicitly do not trust links that came from dependency_links
@@ -232,6 +228,29 @@ class PackageFinder(object):
         logger.debug('URLs to search for versions for %s:' % req)
         for location in locations:
             logger.debug('* %s' % location)
+
+            # Determine if this url used a secure transport mechanism
+            parsed = urlparse.urlparse(str(location))
+            if parsed.scheme in INSECURE_SCHEMES:
+                secure_schemes = INSECURE_SCHEMES[parsed.scheme]
+
+                if len(secure_schemes) == 1:
+                    ctx = (location, parsed.scheme, secure_schemes[0],
+                           parsed.netloc)
+                    logger.warn("%s uses an insecure transport scheme (%s). "
+                                "Consider using %s if %s has it available" %
+                                ctx)
+                elif len(secure_schemes) > 1:
+                    ctx = (location, parsed.scheme, ", ".join(secure_schemes),
+                                                                parsed.netloc)
+                    logger.warn("%s uses an insecure transport scheme (%s). "
+                                "Consider using one of %s if %s has any of "
+                                "them available" % ctx)
+                else:
+                    ctx = (location, parsed.scheme)
+                    logger.warn("%s uses an insecure transport scheme (%s)." %
+                                ctx)
+
         found_versions = []
         found_versions.extend(
             self._package_versions(
@@ -258,14 +277,15 @@ class PackageFinder(object):
                 logger.warn("Some externally hosted files were ignored (use "
                             "--allow-external %s to allow)." % req.name)
 
-            if self.need_warn_insecure:
+            if self.need_warn_unverified:
                 logger.warn("Some insecure and unverifiable files were ignored"
-                            " (use --allow-insecure %s to allow)." % req.name)
+                            " (use --allow-unverified %s to allow)." %
+                            req.name)
 
             raise DistributionNotFound('No distributions at all found for %s' % req)
         installed_version = []
         if req.satisfied_by is not None:
-            installed_version = [(req.satisfied_by.parsed_version, InfLink, req.satisfied_by.version)]
+            installed_version = [(req.satisfied_by.parsed_version, INSTALLED_VERSION, req.satisfied_by.version)]
         if file_versions:
             file_versions.sort(reverse=True)
             logger.info('Local files found: %s' % ', '.join([url_to_path(link.url) for parsed, link, version in file_versions]))
@@ -280,14 +300,14 @@ class PackageFinder(object):
             elif is_prerelease(version) and not (self.allow_all_prereleases or req.prereleases):
                 # If this version isn't the already installed one, then
                 #   ignore it if it's a pre-release.
-                if link is not InfLink:
+                if link is not INSTALLED_VERSION:
                     logger.info("Ignoring link %s, version %s is a pre-release (use --pre to allow)." % (link, version))
                     continue
             applicable_versions.append((parsed_version, link, version))
         applicable_versions = self._sort_versions(applicable_versions)
-        existing_applicable = bool([link for parsed_version, link, version in applicable_versions if link is InfLink])
+        existing_applicable = bool([link for parsed_version, link, version in applicable_versions if link is INSTALLED_VERSION])
         if not upgrade and existing_applicable:
-            if applicable_versions[0][1] is InfLink:
+            if applicable_versions[0][1] is INSTALLED_VERSION:
                 logger.info('Existing installed version (%s) is most up-to-date and satisfies requirement'
                             % req.satisfied_by.version)
             else:
@@ -302,12 +322,13 @@ class PackageFinder(object):
                 logger.warn("Some externally hosted files were ignored (use "
                             "--allow-external to allow).")
 
-            if self.need_warn_insecure:
+            if self.need_warn_unverified:
                 logger.warn("Some insecure and unverifiable files were ignored"
-                            " (use --allow-insecure %s to allow)." % req.name)
+                            " (use --allow-unverified %s to allow)." %
+                            req.name)
 
             raise DistributionNotFound('No distributions matching the version for %s' % req)
-        if applicable_versions[0][1] is InfLink:
+        if applicable_versions[0][1] is INSTALLED_VERSION:
             # We have an existing version, and its the best version
             logger.info('Installed version (%s) is most up-to-date (past versions: %s)'
                         % (req.satisfied_by.version, ', '.join([version for parsed_version, link, version in applicable_versions[1:]]) or 'none'))
@@ -318,18 +339,22 @@ class PackageFinder(object):
 
         selected_version = applicable_versions[0][1]
 
-        # TODO: Remove after 1.4 has been released
         if (selected_version.internal is not None
                 and not selected_version.internal):
-            logger.warn("You are installing an externally hosted file. Future "
-                        "versions of pip will default to disallowing "
-                        "externally hosted files.")
+            logger.warn("%s an externally hosted file and may be "
+                        "unreliable" % req.name)
 
         if (selected_version.verifiable is not None
                 and not selected_version.verifiable):
-            logger.warn("You are installing a potentially insecure and "
-                        "unverifiable file. Future versions of pip will "
-                        "default to disallowing insecure files.")
+            logger.warn("%s is potentially insecure and "
+                        "unverifiable." % req.name)
+
+        if selected_version._deprecated_regex:
+            logger.deprecated(
+                "1.7",
+                "%s discovered using a deprecated method of parsing, "
+                "in the future it will no longer be discovered" % req.name
+            )
 
         return selected_version
 
@@ -354,38 +379,25 @@ class PackageFinder(object):
         return None
 
     def _get_pages(self, locations, req):
-        """Yields (page, page_url) from the given locations, skipping
-        locations that have errors, and adding download/homepage links"""
-        pending_queue = Queue()
-        for location in locations:
-            pending_queue.put(location)
-        done = []
+        """
+        Yields (page, page_url) from the given locations, skipping
+        locations that have errors, and adding download/homepage links
+        """
+        all_locations = list(locations)
         seen = set()
-        threads = []
-        for i in range(min(10, len(locations))):
-            t = threading.Thread(target=self._get_queued_page, args=(req, pending_queue, done, seen))
-            t.setDaemon(True)
-            threads.append(t)
-            t.start()
-        for t in threads:
-            t.join()
-        return done
 
-    _log_lock = threading.Lock()
-
-    def _get_queued_page(self, req, pending_queue, done, seen):
-        while 1:
-            try:
-                location = pending_queue.get(False)
-            except QueueEmpty:
-                return
+        while all_locations:
+            location = all_locations.pop(0)
             if location in seen:
                 continue
             seen.add(location)
+
             page = self._get_page(location, req)
             if page is None:
                 continue
-            done.append(page)
+
+            yield page
+
             for link in page.rel_links():
                 normalized = normalize_name(req.name).lower()
 
@@ -398,15 +410,14 @@ class PackageFinder(object):
 
                 if (link.trusted is not None
                         and not link.trusted
-                        and not normalized in self.allow_insecure
-                        and not self.allow_all_insecure):  # TODO: Remove after release
+                        and not normalized in self.allow_unverified):
                     logger.debug("Not searching %s for urls, it is an "
                                 "untrusted link and cannot produce safe or "
                                 "verifiable files." % link)
-                    self.need_warn_insecure = True
+                    self.need_warn_unverified = True
                     continue
 
-                pending_queue.put(link)
+                all_locations.append(link)
 
     _egg_fragment_re = re.compile(r'#egg=([^&]*)')
     _egg_info_re = re.compile(r'([a-z0-9_.]+)-([a-z0-9_.-]+)', re.I)
@@ -470,30 +481,39 @@ class PackageFinder(object):
                     logger.debug('Skipping link %s; macosx10 one' % (link))
                     self.logged_links.add(link)
                 return []
-            if link.wheel and link.wheel.name.lower() == search_name.lower():
-                version = link.wheel.version
-                if not link.wheel.supported():
+            if ext == wheel_ext:
+                try:
+                    wheel = Wheel(link.filename)
+                except InvalidWheelFilename:
+                    logger.debug('Skipping %s because the wheel filename is invalid' % link)
+                    return []
+                if wheel.name.lower() != search_name.lower():
+                    logger.debug('Skipping link %s; wrong project name (not %s)' % (link, search_name))
+                    return []
+                if not wheel.supported():
                     logger.debug('Skipping %s because it is not compatible with this Python' % link)
                     return []
-
                 # This is a dirty hack to prevent installing Binary Wheels from
-                #   PyPI or one of its mirrors unless it is a Windows Binary
-                #   Wheel. This is paired with a change to PyPI disabling
-                #   uploads for the same. Once we have a mechanism for enabling
-                #   support for binary wheels on linux that deals with the
-                #   inherent problems of binary distribution this can be
-                #   removed.
+                # PyPI unless it is a Windows or Mac Binary Wheel. This is
+                # paired with a change to PyPI disabling uploads for the
+                # same. Once we have a mechanism for enabling support for binary
+                # wheels on linux that deals with the inherent problems of
+                # binary distribution this can be removed.
                 comes_from = getattr(link, "comes_from", None)
-                if (not platform.startswith('win')
+                if ((
+                        not platform.startswith('win')
+                        and not platform.startswith('macosx')
+                        )
                     and comes_from is not None
                     and urlparse.urlparse(comes_from.url).netloc.endswith(
                                                         "pypi.python.org")):
-                    if not link.wheel.supported(tags=supported_tags_noarch):
+                    if not wheel.supported(tags=supported_tags_noarch):
                         logger.debug(
                             "Skipping %s because it is a pypi-hosted binary "
                             "Wheel on an unsupported platform" % link
                         )
                         return []
+                version = wheel.version
 
         if not version:
             version = self._egg_info_matches(egg_info, search_name, link)
@@ -513,14 +533,14 @@ class PackageFinder(object):
 
         if (link.verifiable is not None
                 and not link.verifiable
-                and not normalize_name(search_name).lower() in self.allow_insecure
-                and not self.allow_all_insecure):  # TODO: Remove after release
+                and not (normalize_name(search_name).lower()
+                    in self.allow_unverified)):
             # We have a link that we are sure we cannot verify it's integrity,
             #   so we should skip it unless we are allowing unsafe installs
             #   for this requirement.
             logger.debug("Skipping %s because it is an insecure and "
                          "unverifiable file." % link)
-            self.need_warn_insecure = True
+            self.need_warn_unverified = True
             return []
 
         match = self._py_version_re.search(version)
@@ -551,28 +571,10 @@ class PackageFinder(object):
             return None
 
     def _get_page(self, link, req):
-        return HTMLPage.get_page(link, req, cache=self.cache)
-
-    def _get_mirror_urls(self, mirrors=None, main_mirror_url=None):
-        """Retrieves a list of URLs from the main mirror DNS entry
-        unless a list of mirror URLs are passed.
-        """
-        if not mirrors:
-            mirrors = get_mirrors(main_mirror_url)
-            # Should this be made "less random"? E.g. netselect like?
-            random.shuffle(mirrors)
-
-        mirror_urls = set()
-        for mirror_url in mirrors:
-            mirror_url = mirror_url.rstrip('/')
-            # Make sure we have a valid URL
-            if not any([mirror_url.startswith(scheme) for scheme in ["http://", "https://", "file://"]]):
-                mirror_url = "http://%s" % mirror_url
-            if not mirror_url.endswith("/simple"):
-                mirror_url = "%s/simple" % mirror_url
-            mirror_urls.add(mirror_url + '/')
-
-        return list(mirror_urls)
+        return HTMLPage.get_page(link, req,
+            cache=self.cache,
+            session=self.session,
+        )
 
 
 class PageCache(object):
@@ -624,7 +626,10 @@ class HTMLPage(object):
         return self.url
 
     @classmethod
-    def get_page(cls, link, req, cache=None, skip_archives=True):
+    def get_page(cls, link, req, cache=None, skip_archives=True, session=None):
+        if session is None:
+            session = PipSession()
+
         url = link.url
         url = url.split('#', 1)[0]
         if cache.too_many_failures(url):
@@ -649,7 +654,9 @@ class HTMLPage(object):
                 filename = link.filename
                 for bad_ext in ['.tar', '.tar.gz', '.tar.bz2', '.tgz', '.zip']:
                     if filename.endswith(bad_ext):
-                        content_type = cls._get_content_type(url)
+                        content_type = cls._get_content_type(url,
+                            session=session,
+                        )
                         if content_type.lower().startswith('text/html'):
                             break
                         else:
@@ -668,18 +675,8 @@ class HTMLPage(object):
                 url = urlparse.urljoin(url, 'index.html')
                 logger.debug(' file: URL is directory, getting %s' % url)
 
-            resp = urlopen(url)
-
-            real_url = geturl(resp)
-            headers = resp.info()
-            contents = resp.read()
-            encoding = headers.get('Content-Encoding', None)
-            #XXX need to handle exceptions and add testing for this
-            if encoding is not None:
-                if encoding == 'gzip':
-                    contents = gzip.GzipFile(fileobj=BytesIO(contents)).read()
-                if encoding == 'deflate':
-                    contents = zlib.decompress(contents)
+            resp = session.get(url)
+            resp.raise_for_status()
 
             # The check for archives above only works if the url ends with
             #   something that looks like an archive. However that is not a
@@ -688,7 +685,7 @@ class HTMLPage(object):
             #   Unless we issue a HEAD request on every url we cannot know
             #   ahead of time for sure if something is HTML or not. However we
             #   can check after we've downloaded it.
-            content_type = headers.get('Content-Type', 'unknown')
+            content_type = resp.headers.get('Content-Type', 'unknown')
             if not content_type.lower().startswith("text/html"):
                 logger.debug('Skipping page %s because of Content-Type: %s' %
                                             (link, content_type))
@@ -696,59 +693,53 @@ class HTMLPage(object):
                     cache.set_is_archive(url)
                 return None
 
-            inst = cls(u(contents), real_url, headers, trusted=link.trusted)
-        except (HTTPError, URLError, socket.timeout, socket.error, OSError, WindowsError):
-            e = sys.exc_info()[1]
-            desc = str(e)
-            if isinstance(e, socket.timeout):
-                log_meth = logger.info
-                level =1
-                desc = 'timed out'
-            elif isinstance(e, URLError):
-                #ssl/certificate error
-                if hasattr(e, 'reason') and (isinstance(e.reason, ssl.SSLError) or isinstance(e.reason, CertificateError)):
-                    desc = 'There was a problem confirming the ssl certificate: %s' % e
-                    log_meth = logger.notify
-                else:
-                    log_meth = logger.info
-                if hasattr(e, 'reason') and isinstance(e.reason, socket.timeout):
-                    desc = 'timed out'
-                    level = 1
-                else:
-                    level = 2
-            elif isinstance(e, HTTPError) and e.code == 404:
-                ## FIXME: notify?
-                log_meth = logger.info
-                level = 2
-            else:
-                log_meth = logger.info
-                level = 1
-            log_meth('Could not fetch URL %s: %s' % (link, desc))
-            log_meth('Will skip URL %s when looking for download links for %s' % (link.url, req))
+            inst = cls(resp.text, resp.url, resp.headers, trusted=link.trusted)
+        except requests.HTTPError as exc:
+            level = 2 if exc.response.status_code == 404 else 1
+            cls._handle_fail(req, link, exc, url, cache=cache, level=level)
+        except requests.Timeout:
+            cls._handle_fail(req, link, "timed out", url, cache=cache)
+        except SSLError as exc:
+            reason = ("There was a problem confirming the ssl certificate: "
+                      "%s" % exc)
+            cls._handle_fail(req, link, reason, url,
+                cache=cache,
+                level=2,
+                meth=logger.notify,
+            )
+        else:
             if cache is not None:
-                cache.add_page_failure(url, level)
-            return None
-        if cache is not None:
-            cache.add_page([url, real_url], inst)
-        return inst
+                cache.add_page([url, resp.url], inst)
+            return inst
 
     @staticmethod
-    def _get_content_type(url):
+    def _handle_fail(req, link, reason, url, cache=None, level=1, meth=None):
+        if meth is None:
+            meth = logger.info
+
+        meth("Could not fetch URL %s: %s", link, reason)
+        meth("Will skip URL %s when looking for download links for %s" %
+             (link.url, req))
+
+        if cache is not None:
+            cache.add_page_failure(url, level)
+
+    @staticmethod
+    def _get_content_type(url, session=None):
         """Get the Content-Type of the given url, using a HEAD request"""
+        if session is None:
+            session = PipSession()
+
         scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
         if not scheme in ('http', 'https', 'ftp', 'ftps'):
             ## FIXME: some warning or something?
             ## assertion error?
             return ''
-        req = Urllib2HeadRequest(url, headers={'Host': netloc})
-        resp = urlopen(req)
-        try:
-            if hasattr(resp, 'code') and resp.code != 200 and scheme not in ('ftp', 'ftps'):
-                ## FIXME: doesn't handle redirects
-                return ''
-            return resp.info().get('content-type', '')
-        finally:
-            resp.close()
+
+        resp = session.head(url, allow_redirects=True)
+        resp.raise_for_status()
+
+        return resp.headers.get("Content-Type", "")
 
     @property
     def api_version(self):
@@ -828,7 +819,7 @@ class HTMLPage(object):
             if not url:
                 continue
             url = self.clean_link(urlparse.urljoin(self.base_url, url))
-            yield Link(url, self, trusted=False)
+            yield Link(url, self, trusted=False, _deprecated_regex=True)
 
     _clean_re = re.compile(r'[^a-z0-9$&+,/:;=?@.#%_\\|-]', re.I)
 
@@ -842,16 +833,13 @@ class HTMLPage(object):
 
 class Link(object):
 
-    def __init__(self, url, comes_from=None, internal=None, trusted=None):
+    def __init__(self, url, comes_from=None, internal=None, trusted=None,
+            _deprecated_regex=False):
         self.url = url
         self.comes_from = comes_from
         self.internal = internal
         self.trusted = trusted
-
-        # Set whether it's a wheel
-        self.wheel = None
-        if url != Inf and self.splitext()[1] == wheel_ext:
-            self.wheel = Wheel(self.filename)
+        self._deprecated_regex = _deprecated_regex
 
     def __str__(self):
         if self.comes_from:
@@ -900,6 +888,10 @@ class Link(object):
 
     def splitext(self):
         return splitext(posixpath.basename(self.path.rstrip('/')))
+
+    @property
+    def ext(self):
+        return self.splitext()[1]
 
     @property
     def url_without_fragment(self):
@@ -970,8 +962,10 @@ class Link(object):
             # This link came from an untrusted source and we cannot trust it
             return False
 
-#An "Infinite Link" that compares greater than other links
-InfLink = Link(Inf) #this object is not currently used as a sortable
+
+# An object to represent the "link" for the installed version of a requirement.
+# Using Inf as the url makes it sort higher.
+INSTALLED_VERSION = Link(Inf)
 
 
 def get_requirement_from_url(url):
@@ -997,45 +991,3 @@ def package_to_requirement(package_name):
         return '%s==%s' % (name, version)
     else:
         return name
-
-
-def get_mirrors(hostname=None):
-    """Return the list of mirrors from the last record found on the DNS
-    entry::
-
-    >>> from pip.index import get_mirrors
-    >>> get_mirrors()
-    ['a.pypi.python.org', 'b.pypi.python.org', 'c.pypi.python.org',
-    'd.pypi.python.org']
-
-    Originally written for the distutils2 project by Alexis Metaireau.
-    """
-    if hostname is None:
-        hostname = DEFAULT_MIRROR_HOSTNAME
-
-    # return the last mirror registered on PyPI.
-    last_mirror_hostname = None
-    try:
-        last_mirror_hostname = socket.gethostbyname_ex(hostname)[0]
-    except socket.gaierror:
-        return []
-    if not last_mirror_hostname or last_mirror_hostname == DEFAULT_MIRROR_HOSTNAME:
-        last_mirror_hostname = "z.pypi.python.org"
-    end_letter = last_mirror_hostname.split(".", 1)
-
-    # determine the list from the last one.
-    return ["%s.%s" % (s, end_letter[1]) for s in string_range(end_letter[0])]
-
-
-def string_range(last):
-    """Compute the range of string between "a" and last.
-
-    This works for simple "a to z" lists, but also for "a to zz" lists.
-    """
-    for k in range(len(last)):
-        for x in product(string.ascii_lowercase, repeat=k+1):
-            result = ''.join(x)
-            yield result
-            if result == last:
-                return
-

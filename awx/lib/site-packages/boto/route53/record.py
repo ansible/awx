@@ -54,7 +54,7 @@ class ResourceRecordSets(ResultSet):
         self.changes = []
         self.next_record_name = None
         self.next_record_type = None
-        ResultSet.__init__(self, [('ResourceRecordSet', Record)])
+        super(ResourceRecordSets, self).__init__([('ResourceRecordSet', Record)])
 
     def __repr__(self):
         if self.changes:
@@ -156,11 +156,11 @@ class ResourceRecordSets(ResultSet):
         elif name == 'NextRecordType':
             self.next_record_type = value
         else:
-            return ResultSet.endElement(self, name, value, connection)
+            return super(ResourceRecordSets, self).endElement(name, value, connection)
 
     def __iter__(self):
         """Override the next function to support paging"""
-        results = ResultSet.__iter__(self)
+        results = super(ResourceRecordSets, self).__iter__()
         truncated = self.is_truncated
         while results:
             for obj in results:

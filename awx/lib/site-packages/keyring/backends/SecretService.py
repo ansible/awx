@@ -24,9 +24,10 @@ class Keyring(KeyringBackend):
             raise RuntimeError("SecretService required")
         try:
             bus = secretstorage.dbus_init()
-            secretstorage.Collection(bus)
-        except secretstorage.exceptions.SecretServiceNotAvailableException:
-            raise RuntimeError("Unable to get initialize SecretService")
+            list(secretstorage.get_all_collections(bus))
+        except secretstorage.exceptions.SecretServiceNotAvailableException as e:
+            raise RuntimeError(
+                "Unable to initialize SecretService: %s" % e)
         return 5
 
     def get_default_collection(self):

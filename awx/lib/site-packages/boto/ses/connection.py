@@ -47,7 +47,7 @@ class SESConnection(AWSAuthConnection):
             region = RegionInfo(self, self.DefaultRegionName,
                                 self.DefaultRegionEndpoint)
         self.region = region
-        AWSAuthConnection.__init__(self, self.region.endpoint,
+        super(SESConnection, self).__init__(self.region.endpoint,
                                    aws_access_key_id, aws_secret_access_key,
                                    is_secure, port, proxy, proxy_port,
                                    proxy_user, proxy_pass, debug,

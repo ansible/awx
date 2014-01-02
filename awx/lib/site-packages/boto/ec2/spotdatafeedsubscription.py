@@ -29,7 +29,7 @@ class SpotDatafeedSubscription(EC2Object):
 
     def __init__(self, connection=None, owner_id=None,
                  bucket=None, prefix=None, state=None,fault=None):
-        EC2Object.__init__(self, connection)
+        super(SpotDatafeedSubscription, self).__init__(connection)
         self.owner_id = owner_id
         self.bucket = bucket
         self.prefix = prefix

@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -33,7 +33,7 @@ import datetime
 
 
 class CommandLineGetter(object):
-    
+
     def get_region(self, params):
         if not params.get('region', None):
             prop = self.cls.find_property('region_name')
@@ -44,7 +44,7 @@ class CommandLineGetter(object):
             prop = StringProperty(name='zone', verbose_name='EC2 Availability Zone',
                                   choices=self.ec2.get_all_zones)
             params['zone'] = propget.get(prop)
-            
+
     def get_name(self, params):
         if not params.get('name', None):
             prop = self.cls.find_property('name')
@@ -151,7 +151,7 @@ class Volume(Model):
         v.zone_name = self.zone_name
         v.put()
         return v
-    
+
     def get_ec2_connection(self):
         if self.server:
             return self.server.ec2
@@ -396,7 +396,7 @@ class Volume(Model):
                     boto.log.info('Deleting %s(%s) for %s' % (snap, snap.date, self.name))
                     snap.delete()
         return snaps
-                
+
     def grow(self, size):
         pass
 
@@ -411,10 +411,10 @@ class Volume(Model):
             self.detach()
             ec2 = self.get_ec2_connection()
             ec2.delete_volume(self.volume_id)
-        Model.delete(self)
+        super(Volume, self).delete()
 
     def archive(self):
         # snapshot volume, trim snaps, delete volume-id
         pass
-    
+
 

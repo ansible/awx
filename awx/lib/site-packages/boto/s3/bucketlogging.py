@@ -14,7 +14,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABIL-
 # ITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
@@ -22,7 +22,7 @@
 import xml.sax.saxutils
 from acl import Grant
 
-class BucketLogging:
+class BucketLogging(object):
 
     def __init__(self, target=None, prefix=None, grants=None):
         self.target = target
@@ -68,7 +68,7 @@ class BucketLogging:
         # caller is responsible to encode to utf-8
         s = u'<?xml version="1.0" encoding="UTF-8"?>'
         s += u'<BucketLoggingStatus xmlns="http://doc.s3.amazonaws.com/2006-03-01">'
-        if self.target is not None: 
+        if self.target is not None:
             s += u'<LoggingEnabled>'
             s += u'<TargetBucket>%s</TargetBucket>' % self.target
             prefix = self.prefix or ''

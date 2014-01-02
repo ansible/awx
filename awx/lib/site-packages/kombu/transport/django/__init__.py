@@ -8,6 +8,7 @@ from django.core import exceptions as errors
 
 from kombu.five import Empty
 from kombu.transport import virtual
+from kombu.utils.encoding import bytes_to_str
 
 from .models import Queue
 
@@ -37,7 +38,7 @@ class Channel(virtual.Channel):
         #self.refresh_connection()
         m = Queue.objects.fetch(queue)
         if m:
-            return loads(m)
+            return loads(bytes_to_str(m))
         raise Empty()
 
     def _size(self, queue):

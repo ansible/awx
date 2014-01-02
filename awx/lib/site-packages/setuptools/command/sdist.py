@@ -35,10 +35,10 @@ class re_finder(object):
             f.close()
         for match in self.pattern.finditer(data):
             path = match.group(1)
-            if postproc:
+            if self.postproc:
                 #postproc used to be used when the svn finder
                 #was an re_finder for calling unescape
-                path = postproc(path)
+                path = self.postproc(path)
             yield svn_utils.joinpath(dirname,path)
     def __call__(self, dirname=''):
         path = svn_utils.joinpath(dirname, self.path)
