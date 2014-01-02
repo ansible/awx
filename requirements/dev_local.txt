@@ -2,7 +2,7 @@
 # packages).  Install using "pip --no-index -r dev_local.txt".
 
 distribute-0.7.3.zip
-setuptools-1.3.2.tar.gz
+setuptools-2.0.2.tar.gz
 Django-1.5.5.tar.gz
 
 # The following packages are bundled with AWX (in awx/lib/site-packages):
