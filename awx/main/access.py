@@ -354,11 +354,14 @@ class HostAccess(BaseAccess):
             # but still go down *most* of the license code path.
             validation_info['free_instances'] = 99999999
 
+        if not validation_info.get('demo') and validation_info.get('time_remaining') < 0:
+            raise PermissionDenied("license has expired")
+
         if validation_info.get('free_instances', 0) > 0:
             # BOOKMARK
             return True
         instances = validation_info.get('available_instances', 0)
-        raise PermissionDenied("license range of %s instances has been exceed" % instances)
+        raise PermissionDenied("license range of %s instances has been exceeded" % instances)
 
     def can_change(self, obj, data):
         # Prevent moving a host to a different inventory.
