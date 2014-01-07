@@ -187,5 +187,9 @@ deb: sdist
 	@echo "awx_$(DEB_PKG_RELEASE).deb admin optional" > $(DEB_BUILD_DIR)/debian/realfiles
 	(cd $(DEB_BUILD_DIR) && PKG_RELEASE=$(DEB_PKG_RELEASE) dpkg-buildpackage -nc -us -uc -b --changes-option="-fdebian/realfiles")
 
+ami_release:
+	packer build -var-file=vars-awxkeys.json -var-file=vars-release.json awx.json
+ami_nightly:
+	packer build -var-file=vars-awxkeys.json -var-file=vars-nightly.json awx.json
 install:
 	$(PYTHON) setup.py install egg_info -b ""
