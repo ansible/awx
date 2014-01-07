@@ -189,9 +189,9 @@ deb: sdist
 
 ami:
 	if [ "$(OFFICIAL)" = "yes" ] ; then \
-	   packer build -var-file=vars-awxkeys.json -var-file=vars-release.json awx.json
+        (cd packaging/ami && packer build -var-file=vars-awxkeys.json -var-file=vars-release.json awx.json) ; \
 	else \
-	   packer build -var-file=vars-awxkeys.json -var-file=vars-nightly.json awx.json
+        (cd packaging/ami && packer build -var-file=vars-awxkeys.json -var-file=vars-nightly.json awx.json) ; \
 	fi
 
 install:
