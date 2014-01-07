@@ -1,5 +1,6 @@
 PYTHON=python
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
+PACKER ?= packer
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
@@ -189,9 +190,9 @@ deb: sdist
 
 ami:
 	if [ "$(OFFICIAL)" = "yes" ] ; then \
-        (cd packaging/ami && packer build -var-file=vars-awxkeys.json -var-file=vars-release.json awx.json) ; \
+        (cd packaging/ami && $(PACKER) build -var-file=vars-awxkeys.json -var-file=vars-release.json awx.json) ; \
 	else \
-        (cd packaging/ami && packer build -var-file=vars-awxkeys.json -var-file=vars-nightly.json awx.json) ; \
+        (cd packaging/ami && $(PACKER) build -var-file=vars-awxkeys.json -var-file=vars-nightly.json awx.json) ; \
 	fi
 
 install:
