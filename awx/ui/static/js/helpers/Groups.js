@@ -82,12 +82,12 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         }])
     
-    .factory('ViewUpdateStatus', [ 'Rest', 'ProcessErrors', 'GetBasePath', 'ShowUpdateStatus', 'Alert', 'Wait', 
-    function(Rest, ProcessErrors, GetBasePath, ShowUpdateStatus, Alert, Wait) {
+    .factory('ViewUpdateStatus', [ 'Rest', 'ProcessErrors', 'GetBasePath', 'ShowUpdateStatus', 'Alert', 'Wait', 'Empty', 
+    function(Rest, ProcessErrors, GetBasePath, ShowUpdateStatus, Alert, Wait, Empty) {
         return function(params) {
         
         var scope = params.scope;
-        var id = params.group_id;
+        var id = params.tree_id;
         var found = false;
         var group;
         for (var i=0; i < scope.groups.length; i++) {
@@ -97,14 +97,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }  
         }
         if (found) {
-           if (group.summary_fields.inventory_source.source == "" || group.summary_fields.inventory_source.source == null) {
-              Alert('Missing Configuration', 'The selected group is not configured for inventory updates. ' +
-                  'You must first edit the group, provide Source settings, and then run an update.', 'alert-info');
+           if (Empty(group.source)) {
+              Alert('Missing Configuration', 'The selected group is not configured for inventory sync. ' +
+                  'You must first edit the group, provide Source settings, and then run the sync process.', 'alert-info');
            }
-           else if (group.summary_fields.inventory_source.status == "" || group.summary_fields.inventory_source.status == null ||
-                    group.summary_fields.inventory_source.status == "never updated") {
-              Alert('No Status Available', 'The inventory update process has not run for the selected group. Start the process by ' +
-                  'clicking the Update button.', 'alert-info');
+           else if (Empty(group.status) || group.status == "never updated") {
+              Alert('No Status Available', 'An inventory sync has not been performed for the selected group. Start the process by ' +
+                  'clicking the <i class="fa fa-exchange"></i> button.', 'alert-info');
            }
            else {
               Wait('start');
@@ -115,7 +114,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                       ShowUpdateStatus({ 
                           group_name: data.summary_fields.group.name,
                           last_update: url,
-                          license_error: [ (data.summary_fields.last_update && data.summary_fields.last_update.license_error) ? true : false ]
+                          license_error: (data.summary_fields.last_update && data.summary_fields.last_update.license_error) ? true : false
                           });
                       })
                   .error( function(data, status, headers, config) {
@@ -167,7 +166,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                // many hosts with 0 failures
                tip = "All " + total_hosts + " hosts in this group are happy! None of them have " + 
                    " a recent job failure. Click to view the hosts.";
-               links = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
+               link = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
                html_class = 'false';
            }
         }
@@ -596,15 +595,53 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 }
             }
             }
-    } 
-    }])
+        } 
+        }])
+
+    .factory('SourceChange', [ 'GetBasePath', 'CredentialList', 'LookUpInit',
+    function(GetBasePath, CredentialList, LookUpInit){
+    return function(params) {
+        
+        var scope = params.scope; 
+        var form = params.form; 
+
+        if (scope['source'].value == 'file') {
+            scope.sourcePathRequired = true;
+        }
+        else {
+            scope.sourcePathRequired = false;
+            // reset fields
+            scope.source_path = '';
+            scope[form.name + '_form']['source_path'].$setValidity('required',true);
+        }
+        if (scope['source'].value == 'rax') {
+            scope['source_region_choices'] = scope['rax_regions'];
+            //$('#s2id_group_source_regions').select2('data', []);
+            $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
+        }
+        else if (scope['source'].value == 'ec2') {
+            scope['source_region_choices'] = scope['ec2_regions'];
+            //$('#s2id_group_source_regions').select2('data', []);
+            $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
+        }
+        var kind = (scope.source.value == 'rax') ? 'rax' : 'aws';
+        var url = GetBasePath('credentials') + '?cloud=true&kind=' + kind;  
+        LookUpInit({
+            url: url, 
+            scope: scope,
+            form: form,
+            list: CredentialList,
+            field: 'credential' 
+            });
+        } 
+        }])
 
     .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'ClickNode', 'Wait', 'GetChoices',
-        'GetSourceTypeOptions', 'CredentialList', 'LookUpInit', 'BuildTree',
+        'GetSourceTypeOptions', 'LookUpInit', 'BuildTree', 'SourceChange',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, ParseTypeChange, GroupsEdit, ClickNode, Wait, GetChoices, GetSourceTypeOptions, CredentialList, 
-        LookUpInit, BuildTree) {
+        GetBasePath, ParseTypeChange, GroupsEdit, ClickNode, Wait, GetChoices, GetSourceTypeOptions, LookUpInit, BuildTree,
+        SourceChange) {
     return function(params) {
 
         var inventory_id = params.inventory_id;
@@ -635,12 +672,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         generator.reset();
         var master={};
 
-        if (scope.removeSearchTreeReady) {
-            scope.removeSearchTreeReady();
+        if (scope.removeAddTreeRefreshed) {
+            scope.removeAddTreeRefreshed();
         }
-        scope.removeSearchTreeReady = scope.$on('searchTreeReady', function(e) {
+        scope.removeAddTreeRefreshed = scope.$on('groupTreeRefreshed', function(e) {
             Wait('stop');
             $('#form-modal').modal('hide');
+            scope.removeAddTreeRefreshed();
             });
 
         if (scope.removeSaveComplete) {
@@ -650,7 +688,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             if (!error) {
                 scope.formModalActionDisabled = false;
                 scope.showGroupHelp = false;  //get rid of the Hint
-                BuildTree({ scope: inventory_scope, inventory_id: inventory_id });
+                BuildTree({ scope: inventory_scope, inventory_id: inventory_id, refresh: true });
             }
             });
 
@@ -671,15 +709,15 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
             if (scope.source.value !== null && scope.source.value !== '') {
                 var data = {
-                   group: group_id, 
-                   source: scope['source'].value,
-                   source_path: scope['source_path'],
-                   credential: scope['credential'],
-                   overwrite: scope['overwrite'],
-                   overwrite_vars: scope['overwrite_vars'],
-                   update_on_launch: scope['update_on_launch']
-                   //update_interval: scope['update_interval'].value
-                   };
+                    group: group_id, 
+                    source: scope['source'].value,
+                    source_path: scope['source_path'],
+                    credential: scope['credential'],
+                    overwrite: scope['overwrite'],
+                    overwrite_vars: scope['overwrite_vars'],
+                    update_on_launch: scope['update_on_launch']
+                    //update_interval: scope['update_interval'].value
+                    };
 
                 // Create a string out of selected list of regions
                 var regions = $('#s2id_group_source_regions').select2("data");
@@ -793,32 +831,18 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
             }
 
-         scope.sourceChange = function() {
-             if (scope['source'].value == 'rax') {
-                 scope['source_region_choices'] = scope['rax_regions'];
-                 //$('#s2id_group_source_regions').select2('data', []);
-                 $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
-             }
-             else if (scope['source'].value == 'ec2') {
-                 scope['source_region_choices'] = scope['ec2_regions'];
-                 //$('#s2id_group_source_regions').select2('data', []);
-                 $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
-             }
-             LookUpInit({
-                 url: GetBasePath('credentials') + 
-                     '?cloud=true&kind=' + [ (scope.source.value == 'rax') ? 'rax' : 'aws' ],   
-                 scope: scope,
-                 form: form,
-                 list: CredentialList,
-                 field: 'credential' 
-                 });
-             }
+        scope.sourceChange = function() {
+            SourceChange({
+                scope: scope, 
+                form: GroupForm
+                });
+            }
 
         // Cancel
         scope.formReset = function() {
-           // Defaults
-           generator.reset();
-           }; 
+            // Defaults
+            generator.reset();
+            }; 
 
         var choicesReady = 0;
 
@@ -860,10 +884,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-        'GetUpdateIntervalOptions', 'ClickNode', 'LookUpInit', 'CredentialList', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup',
+        'GetUpdateIntervalOptions', 'ClickNode', 'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions, ClickNode,
-        LookUpInit, CredentialList, Empty, Wait, GetChoices, UpdateGroup) {
+        LookUpInit, Empty, Wait, GetChoices, UpdateGroup, SourceChange) {
     return function(params) {
        
         var group_id = params.group_id;
@@ -892,7 +916,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         
         ParseTypeChange(scope);
         ParseTypeChange(scope, 'source_vars', form.fields['source_vars'].parseTypeName);
-        
+
         // After the group record is loaded, retrieve related data
         if (scope.groupLoadedRemove) {
            scope.groupLoadedRemove();
@@ -994,15 +1018,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                                     data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                             }
                         }
-                       
-                        LookUpInit({
-                            url: GetBasePath('credentials') + 
-                                '?cloud=true&kind=' + (scope.source.value == 'rax') ? 'rax' : 'aws',   
-                            scope: scope,
-                            form: form,
-                            list: CredentialList,
-                            field: 'credential' 
-                            });
                        
                         scope.sourceChange();   //set defaults that rely on source value
                        
@@ -1262,36 +1277,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
             };
 
-        scope.sourceChange = function() {
-            if (scope['source'].value == 'file') {
-               scope.sourcePathRequired = true;
-            }
-            else {
-               scope.sourcePathRequired = false;
-               // reset fields
-               scope.source_path = '';
-               scope[form.name + '_form']['source_path'].$setValidity('required',true);
-            }
-            if (scope['source'].value == 'rax') {
-               scope['source_region_choices'] = scope['rax_regions'];
-               //$('#s2id_group_source_regions').select2('data', []);
-               $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
-            }
-            else if (scope['source'].value == 'ec2') {
-               scope['source_region_choices'] = scope['ec2_regions'];
-               //$('#s2id_group_source_regions').select2('data', []);
-               $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
-            }
-            LookUpInit({
-                url: GetBasePath('credentials') + 
-                    '?cloud=true&kind=' + (scope.source.value == 'rax') ? 'rax' : 'aws',   
-                scope: scope,
-                form: form,
-                list: CredentialList,
-                field: 'credential' 
-                });
-            }
-
         // Start the update process
         scope.updateGroup = function() {
             if (scope.source == "" || scope.source == null) {
@@ -1322,7 +1307,15 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                   });
             }
             }
-
+        
+        // Change the lookup and regions when the source changes
+        scope.sourceChange = function() {
+            SourceChange({
+                scope: scope, 
+                form: GroupForm
+                });
+            }
+        
         // Cancel
         scope.formReset = function() {
             generator.reset();
@@ -1338,20 +1331,37 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('GroupsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'ClickNode',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'Wait', 'ClickNode', 'BuildTree',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, Wait, ClickNode) {
+        GetBasePath, Wait, ClickNode, BuildTree) {
     return function(params) {
         // Delete the selected group node. Disassociates it from its parent.
-        var scope = params.scope;
-        var group_id = params.group_id; 
-        var inventory_id = params.inventory_id;
-        var obj = scope['selectedNode'];
-        var parent = obj.parent().parent();
-        var url; 
         
-        if (parent.attr('data-group-id')) {
-           url = GetBasePath('base') + 'groups/' + parent.attr('data-group-id') + '/children/';
+        var scope = params.scope;
+        var tree_id = params.tree_id; 
+        var inventory_id = params.inventory_id;
+        
+        var node, parent, url, parent_name; 
+
+        for (var i=0; i < scope.groups.length; i++) {
+            if (scope.groups[i].id == tree_id) {
+                node = scope.groups[i];
+            }
+        }
+        if (node.parent != 0) {
+           for (var i=0; i < scope.groups.length; i++) {
+                if (scope.groups[i].id == node.parent) {
+                    parent = scope.groups[i];
+                    parent_name = scope.groups[i].name;
+                }
+           }
+        }
+        else {
+           parent_name = scope.inventory_name;
+        }
+        
+        if (parent) {
+           url = GetBasePath('base') + 'groups/' + parent.group_id + '/children/';
         }
         else {
            url = GetBasePath('inventory') + inventory_id + '/groups/';
@@ -1360,37 +1370,33 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('start'); });
             $('#prompt-modal').modal('hide');
             Rest.setUrl(url);
-            Rest.post({ id: group_id, disassociate: 1 })
+            Rest.post({ id: node.group_id, disassociate: 1 })
                .success( function(data, status, headers, config) {
-                   //DeleteNode({ selector: '#' + obj.attr('id') });
-                   /*BuildTree({
-                       scope: scope,
-                       inventory_id: scope['inventory_id'],
-                       emit_on_select: 'NodeSelect',
-                       target_id: 'search-tree-container',
-                       refresh: true,
-                       id: parent.attr('id'),
-                       moveable: true
-                       });*/
                    $('#prompt-modal').off();
+                   scope.$emit('groupDeleteCompleted'); // Signal a group refresh to start
                    })
                .error( function(data, status, headers, config) {
                    Wait('stop');
                    ProcessErrors(scope, data, status, null,
-                       { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
+                       { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
                    });      
             };
+        
+        Prompt({ hdr: 'Delete Group', body: '<p>Are you sure you want to remove group <em>' + node.name +
+            '</em> from <em>' + parent_name + '</em>?</p>', action: action_to_take, 
+            'class': 'btn-danger' });
+
         //Force binds to work. Not working usual way.
-        $('#prompt-header').text('Delete Group');
-        $('#prompt-body').html('<p>Are you sure you want to remove group <em>' + $(obj).attr('data-name') + '</em> from group <em>' +
-            parent.attr('data-name') + '</em>?</p>');
-        $('#prompt-action-btn').addClass('btn-danger');
-        scope.promptAction = action_to_take;  // for some reason this binds?
-        $('#prompt-modal').modal({
-            backdrop: 'static',
-            keyboard: true,
-            show: true
-            });
+        //$('#prompt-header').text('Delete Group');
+        //$('#prompt-body').html('<p>Are you sure you want to remove group <em>' + $(obj).attr('data-name') + '</em> from group <em>' +
+        //    parent.attr('data-name') + '</em>?</p>');
+        //$('#prompt-action-btn').addClass('btn-danger');
+        //scope.promptAction = action_to_take;  // for some reason this binds?
+        //('#prompt-modal').modal({
+        //    backdrop: 'static',
+        //    keyboard: true,
+        //    show: true
+        //    });
         }
         }])
 

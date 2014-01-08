@@ -23,12 +23,13 @@ angular.module('InventoryGroupsDefinition', [])
         
         fields: {
             name: {
-                label: 'Group',
+                label: 'Groups',
                 key: true,
                 ngClick: "\{\{ 'showHosts(' + group.id + ',' + group.group_id + ')' \}\}",
                 ngClass: "group.selected_class",
                 hasChildren: true,
-                columnClass: 'col-lg-9'
+                columnClass: 'col-lg-9',
+                nosort: true
                 },
             source: {
                 label: 'Source',
@@ -87,7 +88,7 @@ angular.module('InventoryGroupsDefinition', [])
             refresh: {
                 mode: 'all',
                 awToolTip: "Refresh the page",
-                ngClick: "refresh()"
+                ngClick: "refreshGroups()"
                 },
             stream: {
                 ngClick: "showActivity()",
@@ -110,6 +111,7 @@ angular.module('InventoryGroupsDefinition', [])
             sync_status: {
                 mode: 'all',
                 ngClick: "viewUpdateStatus(\{\{ group.id \}\})",
+                ngShow: "group.id > 1", // hide for all hosts
                 awToolTip: "\{\{ group.status_tooltip \}\}",
                 ngClass: "group.status_class",
                 dataPlacement: "top"
@@ -117,6 +119,7 @@ angular.module('InventoryGroupsDefinition', [])
             failed_hosts: {
                 mode: 'all',
                 awToolTip: "\{\{ group.hosts_status_tip \}\}",
+                ngShow: "group.id > 1", // hide for all hosts
                 dataPlacement: "top",
                 ngClick: "viewFailedHosts(\{\{ group.id \}\})",
                 iconClass: "\{\{ 'fa icon-failures-' + group.hosts_status_class \}\}"
@@ -125,6 +128,7 @@ angular.module('InventoryGroupsDefinition', [])
                 //label: 'Sync',
                 ngClick: 'updateGroup(\{\{ group.id \}\})',
                 awToolTip: "\{\{ group.launch_tooltip \}\}",
+                ngShow: "group.id > 1", // hide for all hosts
                 ngClass: "group.launch_class",
                 dataPlacement: "top"
                 },
@@ -133,19 +137,21 @@ angular.module('InventoryGroupsDefinition', [])
                 ngClick: "cancelUpdate(\{\{ group.id \}\}, '\{\{ group.name \}\}')",
                 awToolTip: "Cancel sync process",
                 ngClass: "group.cancel_class",
-                ngShow: "group.status == 'running' || group.status == 'pending'",
+                ngShow: "group.id > 1 && (group.status == 'running' || group.status == 'pending')",
                 dataPlacement: "top"
                 },
             edit: {
                 //label: 'Edit',
                 ngClick: "editGroup(\{\{ group.group_id \}\})",
                 awToolTip: 'Edit group',
+                ngShow: "group.id > 1", // hide for all hosts
                 dataPlacement: "top"
                 },
             "delete": {
                 //label: 'Delete',
-                ngClick: "deleteGroup(\{\{ group.group_id \}\},'\{\{ group.name \}\}')",
+                ngClick: "deleteGroup(\{\{ group.id \}\})",
                 awToolTip: 'Delete group',
+                ngShow: "group.id != 1", // hide for all hosts
                 dataPlacement: "top"
                 }
             }

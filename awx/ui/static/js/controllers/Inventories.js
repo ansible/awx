@@ -276,7 +276,7 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
                       Rest.put(json_data)
                           .success( function(data, status, headers, config) {
                               Wait('stop');
-                              $location.path('/inventories/' + inventory_id + '/groups');           
+                              $location.path('/inventories/' + inventory_id + '/');           
                               })
                           .error( function(data, status, headers, config) {
                               Wait('stop');
@@ -286,7 +286,7 @@ function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routePa
                    }
                    else {
                       Wait('stop');
-                      $location.path('/inventories/' + inventory_id + '/groups');
+                      $location.path('/inventories/' + inventory_id + '/');
                    }
                    })
                .error( function(data, status, headers, config) {
@@ -317,8 +317,8 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 
 
 function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait, 
-                          GetSyncStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, Breadcrumbs, LoadBreadCrumbs, Empty, Rest,
-                          ProcessErrors, InventoryUpdate, Alert, ToggleChildren) 
+                          GetSyncStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, 
+                          Rest, ProcessErrors, InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -331,37 +331,61 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
     
     LoadBreadCrumbs();
 
-    if ($scope.removeSearchTreeReady) {
-        $scope.removeSearchTreeReady();
+    if ($scope.removeGroupTreeLoaded) {
+        $scope.removeGroupTreeLoaded();
     }
-    $scope.removeSearchTreeReady = $scope.$on('searchTreeReady', function(e, inventory_name, groups) {
+    $scope.removeGroupTreeLoaded = $scope.$on('groupTreeLoaded', function(e, inventory_name, groups) {
         // After the tree data loads, generate the groups list
         // Add breadcrumbs
         var e = angular.element(document.getElementById('breadcrumbs'));
         e.html(Breadcrumbs({ list: list, mode: 'edit' }));
         $compile(e)($scope);
-        // Add groups
+        
+        // Add groups view
         generator.inject(list, { mode: 'edit', id: 'groups-container', breadCrumbs: false, searchSize: 'col-lg-5 col-md-5 col-sm-5' });
         $scope.groups = groups;
         $scope.inventory_name = inventory_name;
-        // Add hosts
-        InjectHosts({ scope: $scope, inventory_id: $scope.inventory_id }); 
+
+        // Default the selected group to the first node
+        if ($scope.groups.length > 0) {
+            $scope.selected_tree_id = $scope.groups[0].id;
+            $scope.selected_group_id = $scope.groups[0].group_id;
+        }
+        else {
+            $scope.selected_tree_id = null;
+            $scope.selected_group_id = null;
+        } 
+
+        // Add hosts view
+        InjectHosts({ scope: $scope, inventory_id: $scope.inventory_id, tree_id: $scope.selected_tree_id, group_id: $scope.selected_group_id }); 
+        
         Wait('stop');
+        });
+
+    if ($scope.removeGroupTreeRefreshed) {
+        $scope.removeGroupTreeRefreshed();
+    }
+    $scope.removeGroupTreeRefreshed = $scope.$on('groupTreeRefreshed', function(e, inventory_name, groups) {
+        // Called after tree data is reloaded on refresh button click.
+        // Reselect the preveiously selected group node, causing host view to refresh.
+        $scope.showHosts($scope.selected_tree_id, $scope.selected_group_id);
+        });
+
+    if ($scope.removeGroupDeleteCompleted) {
+        $scope.removeGroupDeleteCompleted();
+    }
+    $scope.removeGroupDeleteCompleted = $scope.$on('groupDeleteCompleted', function(e) {
+        // Group was deleted. Now we need to refresh the group view.
+        BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: true });
         });
     
     $scope.showHosts = function(tree_id, group_id) {
         // Clicked on group
-        //$scope.groups[tree_id].selected_class = 'selected';
-        $scope.selected_tree_id = tree_id; 
-        $scope.selected_group_id = group_id;
-        for (var i=0; i < $scope.groups.length; i++) { 
-            $scope.groups[i].selected_class = ($scope.groups[i].id == tree_id) ? 'selected' : '';
-            if ($scope.groups[i].id == tree_id) {
-                $scope.selected_group_name = $scope.groups[i].name;
-            }
+        if (tree_id !== null) {
+            $scope.selected_tree_id = tree_id; 
+            $scope.selected_group_id = group_id;
+            HostsReload({ scope: $scope, group_id: group_id, tree_id: tree_id, inventory_id: $scope.inventory_id });
         }
-        $scope.search_place_holder='Search ' + $scope.selected_group_name;
-        HostsReload({ scope: $scope, group_id: group_id, inventory_id: $scope.inventory_id });
         }
 
     $scope.createGroup = function() {
@@ -407,20 +431,32 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         }
         }
     
-    // Expand/collapse nodes
     $scope.toggle = function(id) {
-        ToggleChildren({
-            scope: $scope, 
-            list: list,
-            id: id,
-            });
+        // Expand/collapse nodes
+        ToggleChildren({ scope: $scope, list: list, id: id });
         }
 
-    BuildTree({ scope: $scope, inventory_id: $scope.inventory_id });
+    $scope.refreshGroups = function() {
+        // Refresh the tree data when refresh button cicked
+        BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: true });
+        }
+
+    $scope.viewUpdateStatus = function(id) {
+        ViewUpdateStatus({ scope: $scope, tree_id: id });
+        }
+
+    $scope.deleteGroup = function(id) {
+        GroupsDelete({ scope: $scope, tree_id: id, inventory_id: $scope.inventory_id });
+        }
+    
+    //Load tree data for the first time
+    BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: false });
+
 }
 
 InventoriesEdit.$inject = [ '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts', 
-                            'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'Breadcrumbs',
-                            'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren'
+                            'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'GroupsDelete',
+                            'Breadcrumbs', 'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren',
+                            'ViewUpdateStatus'
                             ]; 
   

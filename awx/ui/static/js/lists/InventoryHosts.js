@@ -23,7 +23,7 @@ angular.module('InventoryHostsDefinition', [])
         fields: {
             name: {
                 key: true,
-                label: 'Name',
+                label: 'Hosts',
                 ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
                 searchPlaceholder: "search_place_holder"
                 },
@@ -51,14 +51,14 @@ angular.module('InventoryHostsDefinition', [])
                 searchable: false,
                 showValue: false
                 },
-            groups: {
+            /*groups: {
                 label: 'Groups',
                 searchable: true,
                 sourceModel: 'groups',
                 sourceField: 'name',
                 nosort: true,
                 searchPlaceholder: "search_place_holder"
-                },
+                },*/
             enabled: {
                 label: 'Disabled?',
                 searchSingleValue: true,
@@ -72,27 +72,28 @@ angular.module('InventoryHostsDefinition', [])
                 searchType: 'boolean',
                 searchValue: 'true',
                 searchOnly: true
-                },
+                }
+            /*    ,
             has_inventory_sources: {
                 label: 'Has external source?',
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
                 searchOnly: true
-                }
+                }*/
             },
         
         fieldActions: {
              edit: {
                 label: 'Edit',
-                ngClick: "editGroup(\{\{ group.id \}\})",
+                ngClick: "editGroup(\{\{ host.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-primary',
                 awToolTip: 'Edit host'
                 },
             "delete": {
                 label: 'Delete',
-                ngClick: "deleteGroup(\{\{ group.id \}\},'\{\{ group.name \}\}')",
+                ngClick: "deleteHoust(\{\{ host.id \}\},'\{\{ host.name \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-primary',
                 awToolTip: 'Delete host'

@@ -177,10 +177,17 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
             
             var inventory_id = params.inventory_id;
             var scope = params.scope;
+            var refresh = params.refresh;
+
             //var selected_id = params.
 
             var groups = [];
-            var id = 0;
+            var id = 1;
+
+            var all_hosts = {
+                name: 'All Hosts', id: 1, group_id: null, parent: 0, description: '', show: true, ngicon: null,
+                has_children: false, related: {}, selected_class: '' };
+            groups.push(all_hosts);
 
             function buildGroups(tree_data, parent, level) {
                 var sorted = SortNodes(tree_data);
@@ -243,7 +250,13 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
                     .success( function(data, status, headers, config) {
                         buildGroups(data, 0, 0);
                         //console.log(groups);
-                        scope.$emit('searchTreeReady', inventory_name, groups);
+                        if (refresh) {
+                            scope.groups = groups;
+                            scope.$emit('groupTreeRefreshed');
+                        }
+                        else {
+                            scope.$emit('groupTreeLoaded', inventory_name, groups);
+                        }
                         })
                     .error( function(data, status, headers, config) {
                         Wait('stop');

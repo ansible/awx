@@ -20,11 +20,20 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         
         var scope = params.scope;
         var group_id = params.group_id;
+        var tree_id = params.tree_id
         var inventory_id = params.inventory_id;
 
         var url = ( !Empty(group_id) ) ? GetBasePath('groups') + group_id + '/all_hosts/' :
                   GetBasePath('inventory') + inventory_id + '/hosts/';
-          
+        
+        for (var i=0; i < scope.groups.length; i++) { 
+            scope.groups[i].selected_class = (scope.groups[i].id == tree_id) ? 'selected' : '';
+            if (scope.groups[i].id == tree_id) {
+                scope.selected_group_name = scope.groups[i].name;
+            }
+        }
+        scope.search_place_holder='Search ' + scope.selected_group_name;
+
         SearchInit({ scope: scope, set: 'hosts', list: InventoryHosts, url: url });
         PaginateInit({ scope: scope, list:  InventoryHosts, url: url });
         scope.search(InventoryHosts.iterator);
@@ -37,10 +46,12 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         var scope = params.scope;
         var inventory_id = params.inventory_id;
+        var group_id = params.group_id;
+        var tree_id = params.tree_id;
 
         var generator = GenerateList;
         generator.inject(InventoryHosts, { mode: 'edit', id: 'hosts-container', breadCrumbs: false, searchSize: 'col-lg-6 col-md-6 col-sm-6' });
-        HostsReload({ scope: scope, group_id: null, inventory_id: inventory_id });
+        HostsReload({ scope: scope, group_id: group_id, tree_id: tree_id, inventory_id: inventory_id });
         }
         }])
 
