@@ -132,7 +132,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
             set[i].event_display = set[i].event_display.replace(/^\u00a0*/g,'');
             if (set[i].event_level < 3 ) {
                set[i]['ngclick'] = "toggleChildren(" + set[i].id + ", \"" + set[i].related.children + "\")";
-               set[i]['ngicon'] = 'icon-collapse-alt';
+               set[i]['ngicon'] = 'fa fa-minus-square-o';
                set[i]['class'] = 'parentNode';
             }
             else {

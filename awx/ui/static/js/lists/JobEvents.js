@@ -70,7 +70,8 @@ angular.module('JobEventsListDefinition', [])
                 nosort: true,
                 searchable: false,
                 ngClass: '\{\{ jobevent.class \}\}',
-                appendHTML: 'jobevent.event_detail'
+                appendHTML: 'jobevent.event_detail',
+                'columnClass': 'col-lg-4'
                 },
             host: {
                 label: 'Host',
@@ -80,7 +81,7 @@ angular.module('JobEventsListDefinition', [])
                 nosort: true,
                 searchOnly: false,
                 id: 'job-event-host-header',
-                columnClass: 'hidden-sm'
+                columnClass: 'col-lg-3 hidden-sm hidden-xs'
                 }
             },
         

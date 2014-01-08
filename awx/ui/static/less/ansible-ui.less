@@ -7,6 +7,9 @@
  *
  */
 
+@import "animations.less";
+
+
 @black:       #171717;
 @white:       #FFF;
 @warning:     #FF9900;
@@ -77,6 +80,10 @@ a:focus {
    filter: alpha(opacity=65);
    -webkit-box-shadow: none;
    box-shadow: none;
+}
+
+.btn-disabled {
+   cursor: not-allowed; 
 }
 
 /* Bring primary (blue) buttons in line with link colors */
@@ -801,6 +808,13 @@ input[type="checkbox"].checkbox-no-label {
     content: "\f111";
   }
 
+  .icon-failures-none,
+  .icon-failures-na,
+  .icon-failures-true,
+  .icon-failures-false {
+    font-size: 12px;
+  }
+
   .badge {
     padding: 2px 3px 3px 4px;
     font-size: 10px;
@@ -821,16 +835,18 @@ input[type="checkbox"].checkbox-no-label {
 
 /* Cloud inventory status. i.e. inventory_source.status values */
   
+  /*
   .icon-cloud-na:before,
   .icon-cloud-never:before,
   .icon-cloud-updating:before,
   .icon-cloud-successful:before {
     content: "\f111";
   }
-  
+
   .icon-cloud-failed:before {
     content: "\f06a";
   }
+  */
 
   .icon-cloud-na,
   .icon-cloud-never {
@@ -844,6 +860,10 @@ input[type="checkbox"].checkbox-no-label {
 
   .icon-cloud-failed {
     color: @red;
+  }
+
+  .icon-cloud-updating {
+    .pulsate();
   }
 
   .icon-enabled-true:before {
@@ -983,8 +1003,20 @@ input[type="checkbox"].checkbox-no-label {
   font-weight: bold;  
 }
 
+.inv-group-toggle {
+  margin-right: 3px;  
+}
+
 .disabled {
+  color: @grey;
+}
+
+a.disabled:hover {
   color: @grey; 
+  cursor: not-allowed;  
+}
+a.btn-disabled:hover {
+  cursor: not-allowed;  
 }
 
 .parse-selection {
@@ -1290,6 +1322,7 @@ tr td button i {
   }
  
 }
+
 
 /* Landscape phone to portrait tablet */
 

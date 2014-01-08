@@ -119,8 +119,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             case 'delete':
                 icon = "fa-trash-o"; 
                 break; 
-            case 'update':
             case 'group_update':
+                icon = 'fa-exchange';
+                break;
             case 'scm_update': 
                 icon = 'fa-cloud-download';
                 break;
@@ -152,7 +153,10 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                 break;
             case 'view':
                 icon="fa-search-plus";
-                break;   
+                break;
+            case 'sync_status':
+                icon="fa-cloud";
+                break; 
             }
         icon += (size) ? " " + size : "";
         return Icon(icon);

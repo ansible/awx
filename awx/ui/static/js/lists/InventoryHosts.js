@@ -102,9 +102,9 @@ angular.module('InventoryHostsDefinition', [])
         actions: {
             create: {
                 mode: 'all',
-                ngClick: "createGroup()",
-                ngHide: "groupCreateHide", 
-                ngDisabled: 'grpBtnDisabled',
+                ngClick: "createHost()",
+                ngHide: "hostCreateHide", 
+                ngDisabled: 'BtnDisabled',
                 awToolTip: "Create a new host"
                 },
             stream: {

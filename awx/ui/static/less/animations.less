@@ -1,0 +1,27 @@
+/*********************************************
+ *  Copyright (c) 2014 AnsibleWorks, Inc.
+ *  
+ *  animations.css
+ *  
+ *  custom animation mixins for ansible-ui
+ *
+ */
+
+
+.pulsate(@duration: 1.5s) {
+    -webkit-animation:pulsate @duration linear infinite alternate;
+    -moz-animation:pulsate @duration linear infinite alternate;
+    animation:pulsate @duration linear infinite alternate;
+}
+@-webkit-keyframes pulsate { 
+    0% { -moz-transform: scale(.3); opacity: .2; }
+    100% { -moz-transform: scale(1.1); opacity: 1; } 
+}
+@-webkit-keyframes pulsate { 
+    0% { -webkit-transform: scale(.3); opacity: .2; }
+    100% { -webkit-transform: scale(1.1); opacity: 1; } 
+}
+@keyframes pulsate { 
+    0% { -webkit-transform: scale(.3); transform:scale(.3); opacity: .2;}
+    100% { -webkit-transform: scale(1.1); transform:scale(1.1); opacity: 1;} 
+}

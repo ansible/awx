@@ -412,7 +412,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         var scope = params.scope; 
         var inventory_id = params.inventory_id;
         var url = params.url;
-        var group_id = params.group_id; 
         var group_name = params.group_name;
         var group_source = params.group_source; 
 

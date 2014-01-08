@@ -17,11 +17,10 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
         var scope = params.scope;
         var list = params.list;
         var id = params.id; 
-        var children = params.children; 
         var set = scope[list.name];   // set is now a pointer to scope[list.name]
         
         function expand(node) {
-           set[node]['ngicon'] = 'icon-collapse-alt'; 
+           set[node]['ngicon'] = 'fa fa-minus-square-o'; 
            for (var i = node + 1; i < set.length; i++) {
                if (set[i].parent == set[node].id) {
                   set[i]['show'] = true;
@@ -33,12 +32,12 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
         }
 
         function collapse(node) {
-           set[node]['ngicon'] = 'icon-expand-alt';
+           set[node]['ngicon'] = 'fa fa-plus-square-o';
            for (var i = node + 1; i < set.length; i++) {
                if (set[i].parent == set[node].id) {
                   set[i]['show'] = false;
                   if (set[i]['related']['children']) {
-                     collapse(i);
+                      collapse(i);
                   }
                }
            }
@@ -54,7 +53,7 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
             }
         }
         // Expand or collapse children based on clicked element's icon
-        if (set[clicked]['ngicon'] == 'icon-expand-alt') {
+        if (set[clicked]['ngicon'] == 'fa fa-plus-square-o') {
            // Expand: lookup and display children
            expand(clicked);
         }

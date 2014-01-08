@@ -95,7 +95,7 @@ Home.$inject=['$scope', '$compile', '$routeParams', '$rootScope', '$location', '
 
 
 function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, 
-    GetBasePath, SearchInit, PaginateInit, FormatDate, HostsStatusMsg, UpdateStatusMsg, ViewUpdateStatus, Stream) {
+    GetBasePath, SearchInit, PaginateInit, FormatDate, HostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream) {
 
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -129,7 +129,7 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
                 group_id: scope.home_groups[i].id
                 });
             
-            update_status = UpdateStatusMsg({ status: scope.home_groups[i].summary_fields.inventory_source.status });
+            update_status = GetSyncStatusMsg({ status: scope.home_groups[i].summary_fields.inventory_source.status });
 
             scope.home_groups[i].failed_hosts_tip = msg['tooltip']; 
             scope.home_groups[i].failed_hosts_link = msg['url'];
@@ -210,7 +210,7 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
     }
 
 HomeGroups.$inject = [ '$location', '$routeParams', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
-    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus', 'Stream'
+    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'HostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus', 'Stream'
     ];
 
 

@@ -18,6 +18,7 @@ angular.module('InventoryGroupsDefinition', [])
         index: false,
         hover: true,
         hasChildren: true,
+        filterBy: '\{ show: true \}',
         'class': 'table-condensed',
         
         fields: {
@@ -26,40 +27,8 @@ angular.module('InventoryGroupsDefinition', [])
                 key: true,
                 ngClick: "\{\{ 'showHosts(' + group.id + ',' + group.group_id + ')' \}\}",
                 ngClass: "group.selected_class",
-                hasChildren: true
-                },
-            status: {
-                label: 'Sync Status',
-                ngClick: "viewUpdateStatus(\{\{ group.id \}\})",
-                searchType: 'select',
-                badgeIcon: "\{\{ 'fa icon-cloud-' + group.status_badge_class \}\}",
-                badgeToolTip: "\{\{ group.status_badge_tooltip \}\}",
-                awToolTip: "\{\{ group.status_badge_tooltip \}\}",
-                dataPlacement: 'top',
-                badgeTipPlacement: 'top',
-                badgePlacement: 'left',
-                searchOptions: [
-                    { name: "failed", value: "failed" },
-                    { name: "never", value: "never updated" },
-                    { name: "n/a", value: "none" },
-                    { name: "successful", value: "successful" },
-                    { name: "updating", value: "updating" }],
-                sourceModel: 'inventory_source',
-                sourceField: 'status'
-                },
-            failed_hosts: {
-                label: 'Failed Hosts',
-                ngHref: "\{\{ group.failed_hosts_link \}\}",
-                badgeIcon: "\{\{ 'fa icon-failures-' + group.failed_hosts_class \}\}",
-                badgeNgHref: "\{\{ group.failed_hosts_link \}\}",
-                badgePlacement: 'left',
-                badgeToolTip: "\{\{ group.failed_hosts_tip \}\}",
-                badgeTipPlacement: 'top',
-                awToolTip: "\{\{ group.failed_hosts_tip \}\}",
-                dataPlacement: "top",
-                searchable: false,
-                excludeModal: true,
-                sortField: "hosts_with_active_failures"
+                hasChildren: true,
+                columnClass: 'col-lg-9'
                 },
             source: {
                 label: 'Source',
@@ -99,6 +68,9 @@ angular.module('InventoryGroupsDefinition', [])
             },
 
         actions: {
+            
+            columnClass: 'col-lg-3',
+            
             create: {
                 mode: 'all',
                 ngClick: "createGroup()",
@@ -135,29 +107,46 @@ angular.module('InventoryGroupsDefinition', [])
             },
 
         fieldActions: {
+            sync_status: {
+                mode: 'all',
+                ngClick: "viewUpdateStatus(\{\{ group.id \}\})",
+                awToolTip: "\{\{ group.status_tooltip \}\}",
+                ngClass: "group.status_class",
+                dataPlacement: "top"
+                },
+            failed_hosts: {
+                mode: 'all',
+                awToolTip: "\{\{ group.hosts_status_tip \}\}",
+                dataPlacement: "top",
+                ngClick: "viewFailedHosts(\{\{ group.id \}\})",
+                iconClass: "\{\{ 'fa icon-failures-' + group.hosts_status_class \}\}"
+                },
             group_update: {
-                label: 'Sync',
-                ngClick: 'updateGroup(\{\{ group.group_id \}\})',
-                awToolTip: "\{\{ group.update_tooltip \}\}",
-                ngClass: "group.update_class",
-                awToolTip: "Start inventory sync"
+                //label: 'Sync',
+                ngClick: 'updateGroup(\{\{ group.id \}\})',
+                awToolTip: "\{\{ group.launch_tooltip \}\}",
+                ngClass: "group.launch_class",
+                dataPlacement: "top"
                 },
             cancel: {
-                label: 'Cancel',
-                ngClick: "cancelUpdate(\{\{ group.group_id \}\}, '\{\{ group.name \}\}')",
-                awToolTip: "\{\{ group.cancel_tooltip \}\}",
+                //label: 'Cancel',
+                ngClick: "cancelUpdate(\{\{ group.id \}\}, '\{\{ group.name \}\}')",
+                awToolTip: "Cancel sync process",
                 ngClass: "group.cancel_class",
-                ngShow: "group.status == 'running' || group.status == 'pending'"
+                ngShow: "group.status == 'running' || group.status == 'pending'",
+                dataPlacement: "top"
                 },
             edit: {
-                label: 'Edit',
+                //label: 'Edit',
                 ngClick: "editGroup(\{\{ group.group_id \}\})",
-                awToolTip: 'Edit group'
+                awToolTip: 'Edit group',
+                dataPlacement: "top"
                 },
             "delete": {
-                label: 'Delete',
+                //label: 'Delete',
                 ngClick: "deleteGroup(\{\{ group.group_id \}\},'\{\{ group.name \}\}')",
-                awToolTip: 'Delete group'
+                awToolTip: 'Delete group',
+                dataPlacement: "top"
                 }
             }
     });

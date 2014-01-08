@@ -285,7 +285,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            html += "<th>Select</th>";
        }
        else if (options.mode == 'edit') {
-           html += "<th class=\"actions-column\">Actions</th>\n";
+           html += "<th class=\"actions-column";
+           html += (list.fieldActions && list.fieldActions.columnClass) ? " " + list.fieldActions.columnClass : ""; 
+           html += "\">Actions</th>\n";
        }
        html += "</tr>\n";
        html += "</thead>\n";
@@ -319,7 +321,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
        }
        else if (options.mode == 'edit' || options.mode == 'summary') {
+          
           // Row level actions
+          
           html += "<td class=\"actions\">";
           for (action in list.fieldActions) {
               if (list.fieldActions[action].type && list.fieldActions[action].type == 'DropDown') {
@@ -336,11 +340,18 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  var fAction = list.fieldActions[action];
                  html += "<a ";
                  html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
-                 html += (fAction.ngClick) ?  this.attr(fAction,'ngClick') : "";
-                 html += (fAction.ngHref) ?  this.attr(fAction,'ngHref') : "";
-                 html += (fAction.ngShow) ?  this.attr(fAction,'ngShow') : "";
+                 for (itm in fAction) {
+                     if (itm != 'href' && itm != 'label' && itm != 'icon' && itm != 'class' && itm != 'iconClass') {
+                         html += Attr(fAction, itm);
+                     }
+                 }
                  html += ">";
-                 html += SelectIcon({ action: action });
+                 if (fAction.iconClass) {
+                     html += "<i class=\"" + fAction.iconClass + "\"></i>"; 
+                 }
+                 else {
+                     html += SelectIcon({ action: action });
+                 }
                  html += (fAction.label) ? " " + list.fieldActions[action]['label'] : "";
                  html += "</a>"; 
               }

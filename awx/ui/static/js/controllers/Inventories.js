@@ -317,7 +317,8 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 
 
 function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait, 
-                          UpdateStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, Breadcrumbs, LoadBreadCrumbs) 
+                          GetSyncStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, Breadcrumbs, LoadBreadCrumbs, Empty, Rest,
+                          ProcessErrors, InventoryUpdate, Alert, ToggleChildren) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -335,12 +336,15 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
     }
     $scope.removeSearchTreeReady = $scope.$on('searchTreeReady', function(e, inventory_name, groups) {
         // After the tree data loads, generate the groups list
+        // Add breadcrumbs
         var e = angular.element(document.getElementById('breadcrumbs'));
         e.html(Breadcrumbs({ list: list, mode: 'edit' }));
         $compile(e)($scope);
+        // Add groups
         generator.inject(list, { mode: 'edit', id: 'groups-container', breadCrumbs: false, searchSize: 'col-lg-5 col-md-5 col-sm-5' });
         $scope.groups = groups;
         $scope.inventory_name = inventory_name;
+        // Add hosts
         InjectHosts({ scope: $scope, inventory_id: $scope.inventory_id }); 
         Wait('stop');
         });
@@ -361,18 +365,62 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         }
 
     $scope.createGroup = function() {
-        GroupsAdd({ scope: $scope, inventory_id: $scope.inventory_id, group_id: null });
+        GroupsAdd({ scope: $scope, inventory_id: $scope.inventory_id, group_id: $scope.selected_group_id  });
         }
         
     $scope.editGroup = function(group_id) {
         GroupsEdit({ scope: $scope, inventory_id: $scope.inventory_id, group_id: group_id });
         }
 
+    // Launch inventory sync
+    $scope.updateGroup = function(id) {
+        for (var i=0; i < $scope.groups.length; i++) {
+            if ($scope.groups[i].id == id) {
+                if (Empty($scope.groups[i].source)) {
+                    // if no source, do nothing. 
+                }
+                else if ($scope.groups[i].status == 'updating') {
+                    Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
+                        $scope.groups[i].name + '</em>. Use the Refresh button to monitor the status.', 'alert-info'); 
+                }
+                else {
+                    Wait('start');
+                    Rest.setUrl($scope.groups[i].related.inventory_source);
+                    Rest.get()
+                        .success( function(data, status, headers, config) {
+                            InventoryUpdate({
+                                scope: $scope, 
+                                url: data.related.update,
+                                group_name: data.summary_fields.group.name, 
+                                group_source: data.source
+                                });
+                            })
+                        .error( function(data, status, headers, config) {
+                            Wait('stop');
+                            ProcessErrors(scope, data, status, form,
+                                { hdr: 'Error!', msg: 'Failed to retrieve inventory source: ' + $scope.groups[i].related.inventory_source + 
+                                ' POST returned status: ' + status });
+                            });
+                }
+                break;
+            }
+        }
+        }
+    
+    // Expand/collapse nodes
+    $scope.toggle = function(id) {
+        ToggleChildren({
+            scope: $scope, 
+            list: list,
+            id: id,
+            });
+        }
+
     BuildTree({ scope: $scope, inventory_id: $scope.inventory_id });
 }
 
 InventoriesEdit.$inject = [ '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts', 
-                            'BuildTree', 'Wait', 'UpdateStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'Breadcrumbs',
-                            'LoadBreadCrumbs'
+                            'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'Breadcrumbs',
+                            'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren'
                             ]; 
   

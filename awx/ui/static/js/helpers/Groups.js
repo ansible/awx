@@ -130,43 +130,45 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         }])
     
-    .factory('HostsStatusMsg', [ function() {
+    .factory('GetHostsStatusMsg', [ function() {
     return function(params) {  
+        
         var active_failures = params.active_failures; 
         var total_hosts = params.total_hosts;
         var inventory_id = params.inventory_id;
         var group_id = params.group_id;
-        var tips, link, html_class;
+
+        var tip, link, html_class;
 
         // Return values for use on host status indicator
         
         if (active_failures > 0) {
-           tip = "Contains " + active_failures +
-               [ (active_failures == 1) ? ' host' : ' hosts' ] + ' with failed jobs. Click to view the offending ' +
-               [ (active_failures == 1) ? ' host' : ' hosts' ] + '.';
-           link = '/#/inventories/' + inventory_id + '/hosts?group=' + group_id + '&has_active_failures=true';
-           html_class = 'true';
+            tip = "Contains " + active_failures +
+                [ (active_failures == 1) ? ' host' : ' hosts' ] + ' with failed jobs. Click to view the offending ' +
+                [ (active_failures == 1) ? ' host' : ' hosts' ] + '.';
+            link = '/#/inventories/' + inventory_id + '/hosts?group=' + group_id + '&has_active_failures=true';
+            html_class = 'true';
         }
         else {
            if (total_hosts == 0) {
-              // no hosts
-              tip = "There are no hosts in this group. It's a sad empty shell. Click to view the hosts page and add a host.";
-              link = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
-              html_class = 'na';
+               // no hosts
+               tip = "There are no hosts in this group. It's a sad empty shell. Click to view the hosts page and add a host.";
+               link = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
+               html_class = 'na';
            }
            else if (total_hosts == 1) {
-              // on host with 0 failures
-              tip = "The 1 host in this group is happy! It does not have a job failure. " + 
-                  " Click to view the host.";
-              link = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
-              html_class = 'false';
+               // on host with 0 failures
+               tip = "The 1 host in this group is happy! It does not have a job failure. " + 
+                   " Click to view the host.";
+               link = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
+               html_class = 'false';
            }
            else {
-              // many hosts with 0 failures
-              tip = "All " + total_hosts + " hosts in this group are happy! None of them have " + 
-                  " a recent job failure. Click to view the hosts.";
-              links = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
-              html_class = 'false';
+               // many hosts with 0 failures
+               tip = "All " + total_hosts + " hosts in this group are happy! None of them have " + 
+                   " a recent job failure. Click to view the hosts.";
+               links = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
+               html_class = 'false';
            }
         }
 
@@ -175,39 +177,50 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         }])
 
-    .factory('UpdateStatusMsg', [ function() {
+    .factory('GetSyncStatusMsg', [ function() {
     return function(params) {  
         
-        var status = params.status; 
+        var status = params.status;
+
+        var launch_class = '';
+        var launch_tip = 'Start sync process';        
         var stat, stat_class, status_tip;
         stat = status;
-        stat_class = stat;
-        
+        stat_class = 'icon-cloud-' + stat;
+      
         switch (status) {
             case 'never updated':
                 stat = 'never';
-                stat_class = 'never';
-                status_tip = 'Inventory update has not been performed. Click the Update button to start it now.';
+                stat_class = 'icon-cloud-na disabled';
+                status_tip = 'Sync not performed. Click <i class="fa fa-rocket"></i> to start it now.';
                 break;
             case 'none':
             case '':
+                launch_class = 'btn-disabled',
                 stat = 'n/a';
-                stat_class = 'na';
-                status_tip = 'Not configured for inventory update.';
+                stat_class = 'icon-cloud-na disabled';
+                status_tip = 'Group source not configured. Click <i class="fa fa-pencil"></i> to update.';
+                launch_tip = status_tip;
                 break;
             case 'failed':
-                status_tip = 'Inventory update completed with errors. Click to view process output.';
+                status_tip = 'Failed with errors. Click to view log.';
                 break;
             case 'successful':
-                status_tip = 'Inventory update completed with no errors. Click to view process output.';
+                status_tip = 'Success! Click to view log.';
                 break; 
             case 'updating':
-                status_tip = 'Inventory update process running now.';
+                status_tip = 'Running';
                 break;
             }
 
-        return { 'class': stat_class, tooltip: status_tip, status: stat }
-        
+        return { 
+            'class': stat_class, 
+            tooltip: status_tip,
+            status: stat,
+            'launch_class': launch_class, 
+            'launch_tip': launch_tip
+            }
+
         }
         }])
 
@@ -317,10 +330,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('InventoryStatus', [ '$rootScope', '$routeParams', 'Rest', 'Alert', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventorySummary',
         'GenerateList', 'ClearScope', 'SearchInit', 'PaginateInit', 'Refresh', 'InventoryUpdate', 'GroupsEdit', 'HelpDialog',
-        'InventorySummaryHelp', 'ClickNode', 'HostsStatusMsg', 'UpdateStatusMsg', 'ViewUpdateStatus', 'Wait',
+        'InventorySummaryHelp', 'ClickNode', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus', 'Wait',
     function($rootScope, $routeParams, Rest, Alert, ProcessErrors, GetBasePath, FormatDate, InventorySummary, GenerateList, ClearScope, 
         SearchInit, PaginateInit, Refresh, InventoryUpdate, GroupsEdit, HelpDialog, InventorySummaryHelp, ClickNode,
-        HostsStatusMsg, UpdateStatusMsg, ViewUpdateStatus, Wait) {
+        GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Wait) {
     return function(params) {
         //Build a summary of a given inventory
         
@@ -345,14 +358,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 // Set values for Failed Hosts column
                 scope.groups[i].failed_hosts = scope.groups[i].hosts_with_active_failures + ' / ' + scope.groups[i].total_hosts;
                 
-                msg = HostsStatusMsg({
+                msg = GetHostsStatusMsg({
                     active_failures: scope.groups[i].hosts_with_active_failures,
                     total_hosts: scope.groups[i].total_hosts,
                     inventory_id: scope['inventory_id'],
                     group_id: scope['groups'][i]['id']
                     });
                 
-                update_status = UpdateStatusMsg({ status: scope.groups[i].summary_fields.inventory_source.status });
+                update_status = GetSyncStatusMsg({ status: scope.groups[i].summary_fields.inventory_source.status });
 
                 scope.groups[i].failed_hosts_tip = msg['tooltip']; 
                 scope.groups[i].failed_hosts_link = msg['url'];

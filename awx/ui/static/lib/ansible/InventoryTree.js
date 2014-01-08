@@ -171,8 +171,8 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
             }
             }])
 
-    .factory('BuildTree', ['Rest', 'GetBasePath', 'ProcessErrors', 'SortNodes', 'Wait', 'UpdateStatusMsg', 
-        function(Rest, GetBasePath, ProcessErrors, SortNodes, Wait, UpdateStatusMsg) {
+    .factory('BuildTree', ['Rest', 'GetBasePath', 'ProcessErrors', 'SortNodes', 'Wait', 'GetSyncStatusMsg', 'GetHostsStatusMsg',
+        function(Rest, GetBasePath, ProcessErrors, SortNodes, Wait, GetSyncStatusMsg, GetHostsStatusMsg) {
         return function(params) {
             
             var inventory_id = params.inventory_id;
@@ -185,32 +185,50 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
             function buildGroups(tree_data, parent, level) {
                 var sorted = SortNodes(tree_data);
                 for (var i=0; i < sorted.length; i++) {
-                    var currentId = id;
-                    var stat = UpdateStatusMsg({ status: sorted[i].summary_fields.inventory_source.status });
-                    var group = {
-                       name: sorted[i].name,
-                       has_active_failures: sorted[i].has_active_failures,
-                       total_hosts: sorted[i].total_hosts,
-                       hosts_with_active_failures: sorted[i].hosts_with_active_failures,
-                       total_groups: sorted[i].total_groups,
-                       groups_with_active_failures: sorted[i].groups_with_active_failures,
-                       parent: parent, 
-                       has_children: (sorted[i].children.length > 0) ? true : false,
-                       has_inventory_sources: sorted[i].has_inventory_sources,
-                       id: id,
-                       group_id: sorted[i].id,
-                       event_level: level,
-                       ngicon: (sorted[i].children.length > 0) ? 'icon-collapse-alt' : null,
-                       related: { children: (sorted[i].children.length > 0) ? sorted[i].related.children : '' },
-                       status: sorted[i].summary_fields.inventory_source.status,
-                       status_badge_class: stat['class'],
-                       status_badge_tooltip: stat['tooltip'],
-                       selected_class: ''
-                       }
-                    groups.push(group);
                     id++;
+                    var stat = GetSyncStatusMsg({ 
+                        status: sorted[i].summary_fields.inventory_source.status
+                        });   // from helpers/Groups.js
+                    var hosts_status = GetHostsStatusMsg({ 
+                        active_failures: sorted[i].hosts_with_active_failures,
+                        total_hosts: sorted[i].total_hosts,
+                        inventory_id: inventory_id, 
+                        group_id: sorted[i].id
+                        });   // from helpers/Groups.js
+                    var group = {
+                        name: sorted[i].name,
+                        has_active_failures: sorted[i].has_active_failures,
+                        total_hosts: sorted[i].total_hosts,
+                        hosts_with_active_failures: sorted[i].hosts_with_active_failures,
+                        total_groups: sorted[i].total_groups,
+                        groups_with_active_failures: sorted[i].groups_with_active_failures,
+                        parent: parent, 
+                        has_children: (sorted[i].children.length > 0) ? true : false,
+                        has_inventory_sources: sorted[i].has_inventory_sources,
+                        id: id,
+                        source: sorted[i].summary_fields.inventory_source.source,
+                        group_id: sorted[i].id,
+                        event_level: level,
+                        ngicon: (sorted[i].children.length > 0) ? 'fa  fa-minus-square-o inv-group-toggle' : null,
+                        ngclick: 'toggle(' + id + ')',
+                        related: { 
+                            children: (sorted[i].children.length > 0) ? sorted[i].related.children : '', 
+                            inventory_source: sorted[i].related.inventory_source
+                          },
+                        status: sorted[i].summary_fields.inventory_source.status,
+                        status_class: stat['class'],
+                        status_tooltip: stat['tooltip'],
+                        launch_tooltip: stat['launch_tip'],
+                        launch_class: stat['launch_class'],
+                        hosts_status_tip: hosts_status['tooltip'],
+                        hosts_status_link: hosts_status['link'],
+                        hosts_status_class: hosts_status['class'],
+                        selected_class: '',
+                        show: true
+                        }
+                    groups.push(group);
                     if (sorted[i].children.length > 0) {
-                        buildGroups(sorted[i].children, currentId, level + 1);
+                        buildGroups(sorted[i].children, id, level + 1);
                     }
                 }
             }
@@ -224,6 +242,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
                 Rest.get()
                     .success( function(data, status, headers, config) {
                         buildGroups(data, 0, 0);
+                        //console.log(groups);
                         scope.$emit('searchTreeReady', inventory_name, groups);
                         })
                     .error( function(data, status, headers, config) {
