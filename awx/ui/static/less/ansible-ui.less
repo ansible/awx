@@ -29,14 +29,21 @@
 @tip-background: #0088CC;
 @tip-color: #fff;
 
+html, body { height: 100%; }
 
 html {
-  background-color: @black;
+  background-color: @white;
 }
 
 body {
   padding-top: 100px;
   color: @black;
+}
+
+/* Bootstrap fix that's causing a right margin to appear
+   whenver a modal is opened */
+body.modal-open {
+  margin-right: 0;
 }
 
 
@@ -299,11 +306,24 @@ dd {
   min-height: 15px;
 }
 
-.main-container {
-  min-height: 700px;
+/* footer variables */
+@footer-height: 85px;
+@footer-margin: 60px;
+@push-height: (@footer-height + @footer-margin);
+@push-margin: 0px;
+#wrap {
+    min-height: 100%;
+    height: 100%;
+    height: auto !important;
+    margin: 0 auto -(@push-height + @push-margin);
+}
+#push {
+    height: (@footer-height + @footer-margin); /* push height = footer height + footer padding */
+    margin-bottom: (@footer-margin);
 }
 
-.main-menu {
+#navbar-container, .main-menu {
+  width: 100%;
   background-color: @black;
 }
 

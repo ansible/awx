@@ -132,29 +132,32 @@
 </head>
 <body>
 
-    <div class="navbar navbar-inverse navbar-fixed-top main-menu" role="navigation">
-       <div class="container">
-         <div class="navbar-header">
-            <a class="navbar-brand" href="#home"><img class="logo" src="{{ STATIC_URL }}img/logo.png" /></a>
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-         </div>
-         <div class="collapse navbar-collapse navbar-responsive-collapse">
-            <ul class="nav navbar-nav pull-right">
-              <li ng-show="current_user.username != null && current_user.username != undefined">
-                 <a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
-              <li ng-show="userLoggedIn == true"><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
-              <li ng-show="userLoggedIn == true"><a id="main_contact_support" target="_blank"
-                  href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a><li>
-              <li ng-show="userLoggedIn == true"><a id="main_logout" href="#/logout">Logout</a></li>
-            </ul>
-         </div><!-- nav-collapse -->
-       </div>
-    </div><!-- navbar -->
-    
+<div id="wrap">
+
+    <div id="navbar-container">
+        <div class="navbar navbar-inverse navbar-fixed-top main-menu" role="navigation">
+           <div class="container">
+             <div class="navbar-header">
+                <a class="navbar-brand" href="#home"><img class="logo" src="{{ STATIC_URL }}img/logo.png" /></a>
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+             </div>
+             <div class="collapse navbar-collapse navbar-responsive-collapse">
+                <ul class="nav navbar-nav pull-right">
+                  <li ng-show="current_user.username != null && current_user.username != undefined">
+                     <a id="main_view_user" href="" ng-click="viewCurrentUser()" ng-bind="'Hello! ' + current_user.username"></a></li>
+                  <li ng-show="userLoggedIn == true"><a id="main_view_license" href="" ng-click="viewLicense()">View License</a></li>
+                  <li ng-show="userLoggedIn == true"><a id="main_contact_support" target="_blank"
+                      href="https://ansibleworks.zendesk.com/anonymous_requests/new">Contact Support</a><li>
+                  <li ng-show="userLoggedIn == true"><a id="main_logout" href="#/logout">Logout</a></li>
+                </ul>
+             </div><!-- nav-collapse -->
+           </div>
+        </div><!-- navbar -->
+    </div>  
     <div class="container main-container" id="main">
 
     <div class="row">
@@ -352,12 +355,16 @@
 
     <!-- Help dialog -->
     <div id="help-modal"></div>
-     
+
   </div><!-- container -->
   
   <div class="overlay"></div>
   <div class="spinny"><i class="fa fa-cog fa-spin fa-2x"></i> <p>working...</p></div>
-   
+
+  <div id="push"></div>
+
+</div><!-- wrap -->
+
   <div class="site-footer">
     <div class="container">
         <div class="row">
