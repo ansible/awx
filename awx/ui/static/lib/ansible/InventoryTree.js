@@ -186,7 +186,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
 
             var all_hosts = {
                 name: 'All Hosts', id: 1, group_id: null, parent: 0, description: '', show: true, ngicon: null,
-                has_children: false, related: {}, selected_class: '' };
+                has_children: false, related: {}, selected_class: '', show_failures: false };
             groups.push(all_hosts);
 
             function buildGroups(tree_data, parent, level) {
@@ -228,7 +228,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
                         launch_tooltip: stat['launch_tip'],
                         launch_class: stat['launch_class'],
                         hosts_status_tip: hosts_status['tooltip'],
-                        hosts_status_link: hosts_status['link'],
+                        show_failures: hosts_status['failures'],
                         hosts_status_class: hosts_status['class'],
                         selected_class: '',
                         show: true
@@ -249,7 +249,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
                 Rest.get()
                     .success( function(data, status, headers, config) {
                         buildGroups(data, 0, 0);
-                        //console.log(groups);
+                        console.log(groups);
                         if (refresh) {
                             scope.groups = groups;
                             scope.$emit('groupTreeRefreshed');

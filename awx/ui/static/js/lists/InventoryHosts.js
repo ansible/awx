@@ -16,9 +16,9 @@ angular.module('InventoryHostsDefinition', [])
         showTitle: false,
         well: true,
         index: false,
-        hover: true,
+        hover: false,
         hasChildren: true,
-        'class': 'table-condensed',
+        'class': 'table-condensed table-no-border',
         
         fields: {
             name: {
@@ -85,15 +85,15 @@ angular.module('InventoryHostsDefinition', [])
         
         fieldActions: {
              edit: {
-                label: 'Edit',
+                //label: 'Edit',
                 ngClick: "editGroup(\{\{ host.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-primary',
                 awToolTip: 'Edit host'
                 },
             "delete": {
-                label: 'Delete',
-                ngClick: "deleteHoust(\{\{ host.id \}\},'\{\{ host.name \}\}')",
+                //label: 'Delete',
+                ngClick: "deleteHost(\{\{ host.id \}\},'\{\{ host.name \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-primary',
                 awToolTip: 'Delete host'
@@ -104,8 +104,7 @@ angular.module('InventoryHostsDefinition', [])
             create: {
                 mode: 'all',
                 ngClick: "createHost()",
-                ngHide: "hostCreateHide", 
-                ngDisabled: 'BtnDisabled',
+                ngHide: "!selected_tree_id", 
                 awToolTip: "Create a new host"
                 },
             stream: {

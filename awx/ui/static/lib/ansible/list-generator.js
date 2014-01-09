@@ -62,9 +62,14 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        if (options.append) {
           element.append(options.prepend);
        }
-
-       this.scope = element.scope();         // Set scope specific to the element we're compiling, avoids circular reference
-                                             // From here use 'scope' to manipulate the form, as the form is not in '$scope'
+       
+       if (options.scope) {
+          this.scope = options.scope; 
+       }
+       else {
+          this.scope = element.scope();         // Set scope specific to the element we're compiling, avoids circular reference
+       }                                        // From here use 'scope' to manipulate the form, as the form is not in '$scope'
+       
        $compile(element)(this.scope);
 
        // Reset the scope to prevent displaying old data from our last visit to this list 
@@ -294,8 +299,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
 
        // table body
        html += "<tbody>\n";     
-       html += "<tr ";
-       html += (options.mode == 'lookup' || options.mode == 'select') ? "ng-class=\"" + list.iterator + ".success_class\" " : "";
+       html += "<tr ng-class=\"" + list.iterator;
+       html += (options.mode == 'lookup' || options.mode == 'select') ?  ".success_class" : ".active_class";
+       html += "\" ";
        html += "class=\"" + list.iterator + "_class\" ng-repeat=\"" + list.iterator + " in " + list.name; 
        html += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
        html += (list.filterBy) ? " | filter: " + list.filterBy : ""; 

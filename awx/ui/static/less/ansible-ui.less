@@ -21,7 +21,6 @@
 @blue-dark:   #2a6496;   /* link hover */ 
 @grey:        #A9A9A9;
 @well:        #f5f5f5;   /* well background color */
-@green:       #5bb75b;
 @info:        #d9edf7;   /* alert info background color */
 @info-border: #bce8f1;   /* alert info border color */
 @info-color:  #3a87ad;
@@ -735,6 +734,17 @@ input[type="checkbox"].checkbox-no-label {
   border-bottom: 1px solid #ccc;
 }
 
+/* Table without row borders */
+
+.table-no-border thead > tr > th,
+.table-no-border tbody > tr > th,
+.table-no-border tfoot > tr > th,
+.table-no-border thead > tr > td,
+.table-no-border tbody > tr > td,
+.table-no-border tfoot > tr > td {
+  border-top: none;
+}
+
 /* Jobs pages */
 
   .license-expired,
@@ -1026,6 +1036,10 @@ input[type="checkbox"].checkbox-no-label {
 .inventory-title {
   font-size: 16px; 
   font-weight: bold;  
+}
+
+.active-row {
+   background-color: @white;
 }
 
 .node-toggle {

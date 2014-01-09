@@ -350,6 +350,9 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         if ($scope.groups.length > 0) {
             $scope.selected_tree_id = $scope.groups[0].id;
             $scope.selected_group_id = $scope.groups[0].group_id;
+            $scope.groups[0].selected_class = 'selected';
+            $scope.groups[0].active_class = 'active-row';
+            $scope.selected_group_name = $scope.groups[0].name;
         }
         else {
             $scope.selected_tree_id = null;
@@ -357,9 +360,9 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         } 
 
         // Add hosts view
+        $scope.show_failures = false;
         InjectHosts({ scope: $scope, inventory_id: $scope.inventory_id, tree_id: $scope.selected_tree_id, group_id: $scope.selected_group_id }); 
         
-        Wait('stop');
         });
 
     if ($scope.removeGroupTreeRefreshed) {
@@ -379,11 +382,25 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: true });
         });
     
-    $scope.showHosts = function(tree_id, group_id) {
+    $scope.showHosts = function(tree_id, group_id, show_failures) {
         // Clicked on group
         if (tree_id !== null) {
+            Wait('start');
             $scope.selected_tree_id = tree_id; 
             $scope.selected_group_id = group_id;
+            $scope.hosts = [];
+            $scope.show_failures = show_failures;  // turn on failed hosts filter in hosts view
+            for (var i=0; i < $scope.groups.length; i++) {
+                if ($scope.groups[i].id == tree_id) {
+                    $scope.groups[i].selected_class = 'selected';
+                    $scope.groups[i].active_class = 'active-row';
+                    $scope.selected_group_name = $scope.groups[i].name;
+                }
+                else {
+                    $scope.groups[i].selected_class = '';
+                    $scope.groups[i].active_class = '';
+                }
+            }
             HostsReload({ scope: $scope, group_id: group_id, tree_id: tree_id, inventory_id: $scope.inventory_id });
         }
         }

@@ -16,16 +16,16 @@ angular.module('InventoryGroupsDefinition', [])
         showTitle: false,
         well: true,
         index: false,
-        hover: true,
+        hover: false,
         hasChildren: true,
         filterBy: '\{ show: true \}',
-        'class': 'table-condensed',
+        'class': 'table-condensed table-no-border',
         
         fields: {
             name: {
                 label: 'Groups',
                 key: true,
-                ngClick: "\{\{ 'showHosts(' + group.id + ',' + group.group_id + ')' \}\}",
+                ngClick: "\{\{ 'showHosts(' + group.id + ',' + group.group_id + ', false)' \}\}",
                 ngClass: "group.selected_class",
                 hasChildren: true,
                 columnClass: 'col-lg-9',
@@ -121,7 +121,7 @@ angular.module('InventoryGroupsDefinition', [])
                 awToolTip: "\{\{ group.hosts_status_tip \}\}",
                 ngShow: "group.id > 1", // hide for all hosts
                 dataPlacement: "top",
-                ngClick: "viewFailedHosts(\{\{ group.id \}\})",
+                ngClick: "\{\{ 'showHosts(' + group.id + ',' + group.group_id + ',' + group.show_failures + ')' \}\}",
                 iconClass: "\{\{ 'fa icon-failures-' + group.hosts_status_class \}\}"
                 },
             group_update: {

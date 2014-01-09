@@ -137,41 +137,37 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var inventory_id = params.inventory_id;
         var group_id = params.group_id;
 
-        var tip, link, html_class;
+        var tip, failures, html_class;
 
         // Return values for use on host status indicator
         
         if (active_failures > 0) {
             tip = "Contains " + active_failures +
-                [ (active_failures == 1) ? ' host' : ' hosts' ] + ' with failed jobs. Click to view the offending ' +
+                [ (active_failures == 1) ? ' host' : ' hosts' ] + ' with failed jobs.' +
                 [ (active_failures == 1) ? ' host' : ' hosts' ] + '.';
-            link = '/#/inventories/' + inventory_id + '/hosts?group=' + group_id + '&has_active_failures=true';
             html_class = 'true';
+            failures = true;
         }
         else {
+           failures = false;
            if (total_hosts == 0) {
                // no hosts
-               tip = "There are no hosts in this group. It's a sad empty shell. Click to view the hosts page and add a host.";
-               link = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
+               tip = "There are no hosts in this group.";
                html_class = 'na';
            }
            else if (total_hosts == 1) {
                // on host with 0 failures
-               tip = "The 1 host in this group is happy! It does not have a job failure. " + 
-                   " Click to view the host.";
-               link = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
+               tip = "The host in this group does not have a recent job failure.";
                html_class = 'false';
            }
            else {
                // many hosts with 0 failures
-               tip = "All " + total_hosts + " hosts in this group are happy! None of them have " + 
-                   " a recent job failure. Click to view the hosts.";
-               link = '/#/inventories/' + inventory_id + '/hosts/?group=' + group_id;
+               tip = "None of the " + total_hosts + " hosts in this group have a recent job failure.";
                html_class = 'false';
            }
         }
 
-        return { tooltip: tip, url: link, 'class': html_class };
+        return { tooltip: tip, failures: failures, 'class': html_class };
         
         }
         }])
