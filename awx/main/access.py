@@ -221,7 +221,7 @@ class OrganizationAccess(BaseAccess):
     model = Organization
 
     def get_queryset(self):
-        qs = self.model.objects.distinct()
+        qs = self.model.objects.filter(active=True).distinct()
         qs = qs.select_related('created_by')
         if self.user.is_superuser:
             return qs
