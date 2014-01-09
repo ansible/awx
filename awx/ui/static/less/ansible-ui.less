@@ -55,6 +55,7 @@ body.modal-open {
 .no-bullets { list-style: none; }
 .capitalize { text-transform: capitalize; }
 .grey-txt { color: @grey; }
+.red-txt { color: @red; } a.red-txt:hover { color: @red; }  //make red links (for things like cancel)
 .text-center { text-align: center !important; }
 
 
@@ -1040,6 +1041,8 @@ input[type="checkbox"].checkbox-no-label {
 
 .active-row {
    background-color: @white;
+   border-bottom: 1px solid #ddd;
+   border-right: 1px solid #ddd;
 }
 
 .node-toggle {

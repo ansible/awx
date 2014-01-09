@@ -178,6 +178,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
             var inventory_id = params.inventory_id;
             var scope = params.scope;
             var refresh = params.refresh;
+            var emit = params.emit; 
 
             //var selected_id = params.
 
@@ -249,13 +250,13 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
                 Rest.get()
                     .success( function(data, status, headers, config) {
                         buildGroups(data, 0, 0);
-                        console.log(groups);
+                        //console.log(groups);
                         if (refresh) {
                             scope.groups = groups;
-                            scope.$emit('groupTreeRefreshed');
+                            scope.$emit('groupTreeRefreshed', inventory_name, groups, emit);
                         }
                         else {
-                            scope.$emit('groupTreeLoaded', inventory_name, groups);
+                            scope.$emit('groupTreeLoaded', inventory_name, groups, emit);
                         }
                         })
                     .error( function(data, status, headers, config) {

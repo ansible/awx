@@ -9,8 +9,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
 
     .factory('PromptPasswords', ['CredentialForm', 'JobTemplateForm', '$compile', 'Rest', '$location', 'ProcessErrors',
         'GetBasePath', 'Alert', 'Empty', 'Wait',
-    function(CredentialForm, JobTemplateForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert, Empty,
-        Wait) {
+    function(CredentialForm, JobTemplateForm, $compile, Rest, $location, ProcessErrors, GetBasePath, Alert, Empty, Wait) {
     return function(params) {
         
         var scope = params.scope; 
@@ -79,7 +78,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                Rest.setUrl(start_url);
                Rest.post(pswd)
                    .success( function(data, status, headers, config) {
-                       Wait('stop');
                        scope.$emit('UpdateSubmitted','started');
                        if (form.name == 'credential') {
                           navigate(false);
@@ -332,6 +330,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         }
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function(e, action) {
             // Refresh the project list after update request submitted
+            Wait('stop');
             Alert('Update Started', 'The request to start the SCM update process was submitted. ' +
                 'To monitor the update status, refresh the page by clicking the <em>Refresh</em> button.', 'alert-info');
             scope.refresh();
@@ -415,29 +414,21 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         var group_name = params.group_name;
         var group_source = params.group_source; 
 
+        if (scope.removeSubmitRefreshCompleted) {
+           scope.removeSubmitRefreshCompleted();
+        }
+        scope.removeSubmitRefreshCompleted = scope.$on('SubmitRefreshCompleted', function(e) {
+            Wait('stop');
+            Alert('Update Started', 'The request to start the inventory update process was submitted. Monitor progress of the update process ' +
+                   'by clicking the <i class="fa fa-refresh fa-lg"></i> button.', 'alert-info');
+            });
+
         if (scope.removeUpdateSubmitted) {
            scope.removeUpdateSubmitted();
         }
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function(e, action) {
             if (action == 'started') {
-               // Refresh the project list after update request submitted
-               Alert('Update Started', 'The request to start the inventory update process was submitted. Monitor progress of the update process ' +
-                   'by clicking the <em>Refresh</em> button.', 'alert-info');
-               //var node = $('#inventory-node')
-               //var selected = $('#tree-view').jstree('get_selected');
-               //scope['inventorySummaryGroup'] = null; 
-               //selected.each(function(idx) {
-               //    $('#tree-view').jstree('deselect_node', $(this));
-               //    });
-               //$('#tree-view').jstree('select_node', node);
-               BuildTree({
-                   scope: scope,
-                   inventory_id: scope['inventory_id'],
-                   emit_on_select: 'NodeSelect',
-                   target_id: 'search-tree-container',
-                   refresh: false,
-                   moveable: true
-                   });
+                scope.refreshGroups('SubmitRefreshComplete');
             }
             });
         

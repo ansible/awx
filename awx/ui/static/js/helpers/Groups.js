@@ -449,88 +449,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             ClickNode({ selector: '#inventory-tree li[data-group-id="' + group_id + '"]' });
             }
 
-        if (scope.removeCancelUpdate) {
-           scope.removeCancelUpdate();
-        }
-        scope.removeCancelUpdate = scope.$on('Cancel_Update', function(e, url) {
-            // Cancel the project update process
-            Rest.setUrl(url)
-            Rest.post()
-                .success( function(data, status, headers, config) {
-                    Alert('SCM Update Cancel', 'Your request to cancel the update was submitted to the task maanger.', 'alert-info');
-                    scope.refresh();
-                    })
-                .error( function(data, status, headers, config) {
-                    ProcessErrors(scope, data, status, null,
-                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST status: ' + status });
-                    });  
-            });
-
-        if (scope.removeCheckCancel) {
-           scope.removeCheckCancel();
-        }
-        scope.removeCheckCancel = scope.$on('Check_Cancel', function(e, last_update, current_update) {
-            // Check that we 'can' cancel the update
-            var url = (current_update) ? current_update : last_update;
-            url += 'cancel/';
-            Rest.setUrl(url);
-            Rest.get()
-                .success( function(data, status, headers, config) {
-                    if (data.can_cancel) {
-                       scope.$emit('Cancel_Update', url);
-                    }
-                    else {
-                       Alert('Cancel Not Allowed', 'Either you do not have access or the Inventory update process completed. Click the <em>Refresh</em> button to' +
-                          ' view the latest status.', 'alert-info');
-                    }
-                    })
-                .error( function(data, status, headers, config) {
-                    ProcessErrors(scope, data, status, null,
-                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. GET status: ' + status });
-                    });
-            });
-
-        scope.cancelUpdate = function(id, name) {
-            // Cancel the update process
-            var group;
-            var found = false;
-            for (var i=0; i < scope.groups.length; i++) {
-                if (scope.groups[i].id == id) {
-                   group = scope.groups[i];
-                   found = true;
-                   break;
-                }
-            }
-            if (group.summary_fields.inventory_source.source !== '' &&
-                   group.summary_fields.inventory_source.source !== null) {
-               // the group has a source
-               if (group.summary_fields.inventory_source.status == 'updating' || 
-                    group.summary_fields.inventory_source.status == 'pending')  {
-                  // there is an update currently running
-                  Rest.setUrl(group.related.inventory_source);
-                  Rest.get()
-                      .success( function(data, status, headers, config) {
-                          scope.$emit('Check_Cancel', data.related.last_update, data.related.current_update);
-                          })
-                      .error( function(data, status, headers, config) {
-                          ProcessErrors(scope, data, status, null,
-                              { hdr: 'Error!', msg: 'Call to ' + group.related.inventory_source + ' failed. GET status: ' + status });
-                          });
-               }
-            }
-            // The button appears disabled, so act like it is and do not respond to a click.
-           /*    else {
-                  Alert('Update Not Found', 'An Inventory update does not appear to be running for group: <em>' + group.name + '</em>. Click the <em>Refresh</em> ' +
-                      'button to view the latet status.', 'alert-info');
-               }
-            }
-            else {
-                Alert('Missing Configuration', 'The selected group is not configured for updates. You must first edit the group and provide external Source settings ' +
-                    'before attempting an update.', 'alert-info');
-            }*/
-
-            }
-
+        
         // Respond to refresh button
         scope.refresh = function() {
             /*scope.search(list.iterator, false, true);
@@ -630,6 +549,84 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             field: 'credential' 
             });
         } 
+        }])
+
+    
+    // Cancel a pending or running inventory sync
+    .factory('GroupsCancelUpdate', ['Rest', 'ProcessErrors', 'Alert', 'Wait', 'Find',
+    function(Rest, ProcessErrors, Alert, Wait, Find) {
+    return function(params) {
+        
+        var scope = params.scope;
+        var id = params.tree_id;
+
+        if (scope.removeCancelUpdate) {
+           scope.removeCancelUpdate();
+        }
+        scope.removeCancelUpdate = scope.$on('CancelUpdate', function(e, url) {
+            // Cancel the update process
+            Rest.setUrl(url)
+            Rest.post()
+                .success( function(data, status, headers, config) {
+                    Wait('stop');
+                    Alert('Inventory Sync Cancelled', 'Your request to cancel the update was submitted to the task maanger. ' +
+                        'Click the <i class="fa fa-refresh fa-lg"></i> to check the sync status.', 'alert-info');        
+                    })
+                .error( function(data, status, headers, config) {
+                    Wait('stop');
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST status: ' + status });
+                    });  
+            });
+
+        if (scope.removeCheckCancel) {
+           scope.removeCheckCancel();
+        }
+        scope.removeCheckCancel = scope.$on('CheckCancel', function(e, last_update, current_update) {
+            // Check that we have access to cancelling an update
+            var url = (current_update) ? current_update : last_update;
+            url += 'cancel/';
+            Rest.setUrl(url);
+            Rest.get()
+                .success( function(data, status, headers, config) {
+                    if (data.can_cancel) {
+                        scope.$emit('CancelUpdate', url);
+                    }
+                    else {
+                        Wait('stop');
+                        Alert('Cancel Inventory Sync', 'Either you do not have access or the sync process completed. ' + 
+                            'Click the <i class="fa fa-refresh fa-lg"></i> to view the latest status.', 'alert-info');
+                    }
+                    })
+                .error( function(data, status, headers, config) {
+                    Wait('stop');
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Call to ' + url + ' failed. GET status: ' + status });
+                    });
+            });
+
+        // Cancel the update process
+        var group = Find({ list: scope.groups, key: 'id', val: id });
+        if (group && (group.status == 'updating' || group.status == 'pending')) {
+            // We found the group, and there is a running update
+            Wait('start');
+            Rest.setUrl(group.related.inventory_source);
+            Rest.get()
+                .success( function(data, status, headers, config) {
+                    scope.$emit('CheckCancel', data.related.last_update, data.related.current_update);
+                    })
+                .error( function(data, status, headers, config) {
+                    Wait('stop');
+                    ProcessErrors(scope, data, status, null,
+                        { hdr: 'Error!', msg: 'Call to ' + group.related.inventory_source + ' failed. GET status: ' + status });
+                    });
+        }
+        else {
+            Alert('Cancel Inventory Sync', 'The sync process completed. Click the <i class="fa fa-refresh fa-lg"></i> to' +
+                  ' view the latest status.', 'alert-info');
+        }
+      
+        }
         }])
 
     .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
@@ -1344,24 +1341,24 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 node = scope.groups[i];
             }
         }
-        if (node.parent != 0) {
-           for (var i=0; i < scope.groups.length; i++) {
-                if (scope.groups[i].id == node.parent) {
-                    parent = scope.groups[i];
-                    parent_name = scope.groups[i].name;
-                }
-           }
-        }
-        else {
-           parent_name = scope.inventory_name;
-        }
+        //if (node.parent != 0) {
+        //   for (var i=0; i < scope.groups.length; i++) {
+        //        if (scope.groups[i].id == node.parent) {
+        //            parent = scope.groups[i];
+         //           parent_name = scope.groups[i].name;
+          //      }
+        //   }
+       // }
+       // else {
+       //    parent_name = scope.inventory_name;
+       // }
         
-        if (parent) {
-           url = GetBasePath('base') + 'groups/' + parent.group_id + '/children/';
-        }
-        else {
+        //if (parent) {
+        //   url = GetBasePath('base') + 'groups/' + parent.group_id + '/children/';
+        //}
+        //else {
            url = GetBasePath('inventory') + inventory_id + '/groups/';
-        }
+        //}
         var action_to_take = function() {
             $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('start'); });
             $('#prompt-modal').modal('hide');
@@ -1378,10 +1375,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                    });      
             };
         
-        Prompt({ hdr: 'Delete Group', body: '<p>Are you sure you want to remove group <em>' + node.name +
-            '</em> from <em>' + parent_name + '</em>?</p>', action: action_to_take, 
-            'class': 'btn-danger' });
-
+        Prompt({ hdr: 'Delete Group', body: '<p>Are you sure you want to delete group <em>' + node.name + '?</p>',
+            action: action_to_take, 'class': 'btn-danger' });
+  
+        //'</em> from <em>' + parent_name + '</em>
         //Force binds to work. Not working usual way.
         //$('#prompt-header').text('Delete Group');
         //$('#prompt-body').html('<p>Are you sure you want to remove group <em>' + $(obj).attr('data-name') + '</em> from group <em>' +

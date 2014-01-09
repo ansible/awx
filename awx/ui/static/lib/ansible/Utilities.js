@@ -463,8 +463,37 @@ angular.module('Utilities',['RestServices', 'Utilities'])
                });
        }
        }])
+   
+   /*
+    * Search an array of objects, returning the matchting object or null 
+    *
+    *  Find({ list: [], key: "key", val: <key value> });
+    */
+   .factory('Find', [ function(){
+   return function(params) {  
+       var list = params.list;
+       var key = params.key; 
+       var val = params.val;
+       var found = false;
+       if (typeof list == 'object' && Array.isArray(list)) {
+           for (var i=0; i < params.list.length; i++) {
+               if (list[i][key] == val) {
+                   found = true;
+                   break;
+               } 
+           }
+           return (found) ? list[i] : null;
+       }
+       else {
+           // list parameter is not an array
+           return null;
+       }
+       
+       }
+       }])
 
-   /* DeugForm({ form: <form object>, scope: <current scope object> });
+   /* 
+    * DeugForm({ form: <form object>, scope: <current scope object> });
     *
     * Use to log the $pristine and $valid properties of each form element. Helpful when form
     * buttons fail to enable/disable properly. 

@@ -318,7 +318,7 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 
 function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait, 
                           GetSyncStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, 
-                          Rest, ProcessErrors, InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus) 
+                          Rest, ProcessErrors, InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -362,16 +362,15 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         // Add hosts view
         $scope.show_failures = false;
         InjectHosts({ scope: $scope, inventory_id: $scope.inventory_id, tree_id: $scope.selected_tree_id, group_id: $scope.selected_group_id }); 
-        
         });
 
     if ($scope.removeGroupTreeRefreshed) {
         $scope.removeGroupTreeRefreshed();
     }
-    $scope.removeGroupTreeRefreshed = $scope.$on('groupTreeRefreshed', function(e, inventory_name, groups) {
+    $scope.removeGroupTreeRefreshed = $scope.$on('groupTreeRefreshed', function(e, inventory_name, groups, emit) {
         // Called after tree data is reloaded on refresh button click.
         // Reselect the preveiously selected group node, causing host view to refresh.
-        $scope.showHosts($scope.selected_tree_id, $scope.selected_group_id);
+        $scope.showHosts($scope.selected_tree_id, $scope.selected_group_id, false, emit);
         });
 
     if ($scope.removeGroupDeleteCompleted) {
@@ -382,7 +381,7 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: true });
         });
     
-    $scope.showHosts = function(tree_id, group_id, show_failures) {
+    $scope.showHosts = function(tree_id, group_id, show_failures, emit) {
         // Clicked on group
         if (tree_id !== null) {
             Wait('start');
@@ -401,7 +400,7 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
                     $scope.groups[i].active_class = '';
                 }
             }
-            HostsReload({ scope: $scope, group_id: group_id, tree_id: tree_id, inventory_id: $scope.inventory_id });
+            HostsReload({ scope: $scope, group_id: group_id, tree_id: tree_id, inventory_id: $scope.inventory_id, emit: emit });
         }
         }
 
@@ -445,7 +444,11 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
                 }
                 break;
             }
+        }      
         }
+
+    $scope.cancelUpdate = function(id) {
+        GroupsCancelUpdate({ scope: $scope, id: id });
         }
     
     $scope.toggle = function(id) {
@@ -453,9 +456,10 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         ToggleChildren({ scope: $scope, list: list, id: id });
         }
 
-    $scope.refreshGroups = function() {
+    $scope.refreshGroups = function(emit) {
         // Refresh the tree data when refresh button cicked
-        BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: true });
+        // Pass a string label value, if you want to attach scope.$on() to the completion of the refresh  
+        BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: true, emit: emit });
         }
 
     $scope.viewUpdateStatus = function(id) {
@@ -474,6 +478,6 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
 InventoriesEdit.$inject = [ '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts', 
                             'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'GroupsDelete',
                             'Breadcrumbs', 'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren',
-                            'ViewUpdateStatus'
+                            'ViewUpdateStatus', 'GroupsCancelUpdate'
                             ]; 
   

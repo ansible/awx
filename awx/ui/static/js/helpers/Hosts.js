@@ -14,19 +14,30 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                                 ])
   
 
-    .factory('HostsReload', [ 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 
-    function(Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit) {
+    .factory('HostsReload', [ 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait', 
+    function(Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait) {
     return function(params) {
         
         var scope = params.scope;
         var group_id = params.group_id;
         var tree_id = params.tree_id
         var inventory_id = params.inventory_id;
+        var emit = params.emit;
 
         var url = ( !Empty(group_id) ) ? GetBasePath('groups') + group_id + '/all_hosts/' :
                   GetBasePath('inventory') + inventory_id + '/hosts/';
         
         scope.search_place_holder='Search ' + scope.selected_group_name;
+
+        if (scope.removePostRefresh) {
+            scope.removePostRefresh();
+        }
+        scope.removePostRefresh = scope.$on('PostRefresh', function(e) {
+            Wait('stop');
+            if (emit) {
+                scope.$emit(emit);
+            }
+            });
 
         SearchInit({ scope: scope, set: 'hosts', list: InventoryHosts, url: url });
         PaginateInit({ scope: scope, list:  InventoryHosts, url: url });
@@ -42,10 +53,14 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var inventory_id = params.inventory_id;
         var group_id = params.group_id;
         var tree_id = params.tree_id;
+        var emit = params.emit; 
 
+        // Inject the list html
         var generator = GenerateList;
         generator.inject(InventoryHosts, { scope: scope, mode: 'edit', id: 'hosts-container', breadCrumbs: false, searchSize: 'col-lg-6 col-md-6 col-sm-6' });
-        HostsReload({ scope: scope, group_id: group_id, tree_id: tree_id, inventory_id: inventory_id });
+
+        // Load data
+        HostsReload({ scope: scope, group_id: group_id, tree_id: tree_id, inventory_id: inventory_id, emit: emit });
         }
         }])
 

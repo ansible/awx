@@ -75,14 +75,11 @@ angular.module('InventoryGroupsDefinition', [])
             create: {
                 mode: 'all',
                 ngClick: "createGroup()",
-                ngHide: "groupCreateHide", 
-                ngDisabled: 'grpBtnDisabled',
+                ngHide: 'selected_tree_id == 1',   //disable when 'All Hosts' selected
                 awToolTip: "Create a new group"
                 },
             properties: {
                 mode: 'all',
-                ngHide: "groupEditHide", 
-                ngDisabled: 'grpBtnDisabled',
                 awToolTip: "Edit inventory properties" 
                 },
             refresh: {
@@ -96,7 +93,7 @@ angular.module('InventoryGroupsDefinition', [])
                 mode: 'all',
                 ngShow: "user_is_superuser"
                 },
-             help: {
+            help: {
                 mode: 'all',
                 awToolTip:
                     //"<div style=\"text-align:left;\"><img src=\"/static/img/cow.png\" style=\"width:50px; height:56px; float:left; padding-right:5px;\">" +
@@ -126,22 +123,25 @@ angular.module('InventoryGroupsDefinition', [])
                 },
             group_update: {
                 //label: 'Sync',
+                mode: 'all',
                 ngClick: 'updateGroup(\{\{ group.id \}\})',
                 awToolTip: "\{\{ group.launch_tooltip \}\}",
-                ngShow: "group.id > 1", // hide for all hosts
+                ngShow: "group.id > 1 && (group.status !== 'running' && group.status !== 'pending' && group.status !== 'updating')",
                 ngClass: "group.launch_class",
                 dataPlacement: "top"
                 },
             cancel: {
                 //label: 'Cancel',
-                ngClick: "cancelUpdate(\{\{ group.id \}\}, '\{\{ group.name \}\}')",
+                mode: 'all',
+                ngClick: "cancelUpdate(\{\{ group.id \}\})",
                 awToolTip: "Cancel sync process",
-                ngClass: "group.cancel_class",
-                ngShow: "group.id > 1 && (group.status == 'running' || group.status == 'pending')",
+                'class': 'red-txt',
+                ngShow: "group.id > 1 && (group.status == 'running' || group.status == 'pending' || group.status == 'updating')",
                 dataPlacement: "top"
                 },
             edit: {
                 //label: 'Edit',
+                mode: 'all',
                 ngClick: "editGroup(\{\{ group.group_id \}\})",
                 awToolTip: 'Edit group',
                 ngShow: "group.id > 1", // hide for all hosts
@@ -149,6 +149,7 @@ angular.module('InventoryGroupsDefinition', [])
                 },
             "delete": {
                 //label: 'Delete',
+                mode: 'all',
                 ngClick: "deleteGroup(\{\{ group.id \}\})",
                 awToolTip: 'Delete group',
                 ngShow: "group.id != 1", // hide for all hosts
