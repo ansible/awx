@@ -94,12 +94,11 @@ angular.module('JobEventsListDefinition', [])
             },
 
         fieldActions: {
-            edit: {
+            view: {
                 label: 'View',
                 ngClick: "viewJobEvent(\{\{ jobevent.id \}\})",
-                icon: 'icon-zoom-in',
-                "class": 'btn-default btn-xs',
-                awToolTip: 'View event details'
+                awToolTip: 'View event details',
+                dataPlacement: 'top'
                 }
             }
         });

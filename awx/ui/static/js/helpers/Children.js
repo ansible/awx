@@ -57,7 +57,7 @@ angular.module('ChildrenHelper', ['RestServices', 'Utilities'])
            // Expand: lookup and display children
            expand(clicked);
         }
-        else {
+        else if (/minus-square-o/.test(set[clicked]['ngicon'])) {
            collapse(clicked);
         }
     }

@@ -136,6 +136,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                set[i]['class'] = 'parentNode';
             }
             else {
+               set[i]['ngicon'] = 'fa fa-square-o node-no-toggle';
                set[i]['class'] = 'childNode';
                set[i]['event_detail'] = formatJSON(set[i].event_data);
             }

@@ -453,13 +453,17 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         }      
         }
 
-    $scope.cancelUpdate = function(id) {
-        GroupsCancelUpdate({ scope: $scope, tree_id: id });
+    $scope.cancelUpdate = function(tree_id) {
+        GroupsCancelUpdate({ scope: $scope, tree_id: tree_id });
         }
     
-    $scope.toggle = function(id) {
+    $scope.toggle = function(tree_id) {
         // Expand/collapse nodes
-        ToggleChildren({ scope: $scope, list: list, id: id });
+        if (tree_id !== $scope.selected_tree_id) {
+           $scope.showHosts(tree_id, Find({ list: $scope.groups, key: 'id', val: tree_id }).group_id, false);
+           console.log('set group_id to: ' + $scope.selected_group_id);
+        }
+        ToggleChildren({ scope: $scope, list: list, id: tree_id });
         }
 
     $scope.refreshGroups = function(tree_id, group_id) {
