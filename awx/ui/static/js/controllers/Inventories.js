@@ -319,7 +319,7 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait, 
                           GetSyncStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, 
                           Rest, ProcessErrors, InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find,
-                          HostsCreate, EditInventoryProperties) 
+                          HostsCreate, EditInventoryProperties, HostsEdit, HostsDelete) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -487,6 +487,14 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         EditInventoryProperties({ scope: $scope, inventory_id: $scope.inventory_id });
         }
 
+    $scope.editHost = function(host_id) {
+        HostsEdit({ scope: $scope, host_id: host_id, inventory_id: $scope.inventory_id });
+        }
+
+    $scope.deleteHost = function(host_id, host_name) {
+        HostsDelete({ scope: $scope, host_id: host_id, host_name: host_name });
+        }
+
     //Load tree data for the first time
     BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: false });
 
@@ -495,6 +503,7 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
 InventoriesEdit.$inject = [ '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts', 
                             'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'GroupsDelete',
                             'Breadcrumbs', 'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren',
-                            'ViewUpdateStatus', 'GroupsCancelUpdate', 'Find', 'HostsCreate', 'EditInventoryProperties'
+                            'ViewUpdateStatus', 'GroupsCancelUpdate', 'Find', 'HostsCreate', 'EditInventoryProperties', 'HostsEdit', 
+                            'HostsDelete'
                             ]; 
   

@@ -325,46 +325,37 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
 
     .factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, HostsReload, ParseTypeChange, Wait) {
+        GetBasePath, HostsReload, ParseTypeChange, Wait, Find) {
     return function(params) {
         
+        var parent_scope = params.scope;
         var host_id = params.host_id;
         var inventory_id = params.inventory_id;
         var group_id = params.group_id;
-        var hostsReload = (params.hostsReload == undefined || params.hostsReload) ? true : false;
         
         var generator = GenerateForm;
         var form = HostForm;
         var defaultUrl =  GetBasePath('hosts') + host_id + '/';
-        var scope = generator.inject(form, { mode: 'edit', modal: true, related: false});
-        generator.reset();
+        var scope = generator.inject(form, { mode: 'edit', modal: true, related: false, show_modal: false });
         var master = {};
         var relatedSets = {};
-
+        
+        generator.reset();
         scope.formModalActionLabel = 'Save';
         scope.formModalHeader = 'Host Properties';
         scope.formModalCancelShow = true;
         scope.parseType = 'yaml';
         ParseTypeChange(scope);
 
-        if (scope.removeHostsReload) {
-           scope.removeHostsReload();
-        }
-        scope.removeHostsReload = scope.$on('hostsReload', function() {
-            HostsReload(params);
-        });
-        
         $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
-        //$('#form-modal').unbind('hidden');
-        //$('#form-modal').on('hidden', function () { scope.$emit('hostsReload'); });
-
-        // After the group record is loaded, retrieve any group variables
+        
         if (scope.hostLoadedRemove) {
-           scope.hostLoadedRemove();
+            scope.hostLoadedRemove();
         }
         scope.hostLoadedRemove = scope.$on('hostLoaded', function() {
+            // Retrieve host variables
             if (scope.variable_url) {
                Rest.setUrl(scope.variable_url);
                Rest.get()
@@ -375,6 +366,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                        else {
                           scope.variables = jsyaml.safeDump(data);
                        }
+                       Wait('stop');
+                       $('#form-modal').modal('show');
                        })
                    .error( function(data, status, headers, config) {
                        scope.variables = null;
@@ -384,9 +377,13 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             }
             else {
                scope.variables = "---";
+               Wait('stop');
+               $('#form-modal').modal('show');
             }
             master.variables = scope.variables;
             });
+         
+        Wait('start');
 
         // Retrieve detail record and prepopulate the form
         Rest.setUrl(defaultUrl); 
@@ -412,21 +409,23 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     { hdr: 'Error!', msg: 'Failed to retrieve host: ' + id + '. GET returned status: ' + status });
                 });
        
-        if (!scope.$$phase) {
-           scope.$digest();
+
+        if (scope.removeSaveCompleted) {
+            scope.removeSaveCompleted();
         }
-        
+        scope.removeSaveCompleted = scope.$on('saveCompleted', function() {
+            // Update the name on the list
+            var host = Find({ list: parent_scope.hosts, key: 'id', val: host_id });
+            host.name = scope.name;
+            // Close modal
+            Wait('stop');
+            $('#form-modal').modal('hide');
+            });
+
         // Save changes to the parent
         scope.formModalAction = function() {
             
             Wait('start');
-
-            function finished() {
-                $('#form-modal').modal('hide');
-                if (hostsReload) {
-                    scope.$emit('hostsReload');
-                }
-                }
 
             try { 
                 
@@ -459,8 +458,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                 Rest.setUrl(defaultUrl);
                 Rest.put(data)
                     .success( function(data, status, headers, config) {
-                        Wait('stop');
-                        finished();
+                        scope.$emit('saveCompleted');
                         })
                     .error( function(data, status, headers, config) {
                         Wait('stop');
@@ -487,31 +485,29 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
 
     .factory('HostsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'Prompt', 'ProcessErrors', 'GetBasePath',
-        'HostsReload', 'Wait',
-    function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload, Wait) {
+        'HostsReload', 'Wait', 'Find',
+    function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload, Wait, Find) {
     return function(params) {
         // Remove the selected host from the current group by disassociating
        
         var scope = params.scope;
-        var group_id = scope.group_id; 
-        var inventory_id = params.inventory_id;
         var host_id = params.host_id;
         var host_name = params.host_name;
-        var req = (params.request) ? params.request : null;
-
-        var url = (scope.group_id == null || req == 'delete') ? GetBasePath('inventory') + inventory_id + '/hosts/' : 
-            GetBasePath('groups') + scope.group_id + '/hosts/';
+        
+        var url = (scope.selected_group_id == null) ? GetBasePath('inventory') + scope.inventory_id + '/hosts/' : 
+            GetBasePath('groups') + scope.selected_group_id + '/hosts/';
+        
+        var group = (scope.selected_tree_id) ? Find({ list: scope.groups, key: 'id', val: scope.selected_tree_id }) : null;
         
         if (scope.removeHostsReload) {
            scope.removeHostsReload();
         }
         scope.removeHostsReload = scope.$on('hostsReload', function() {
-            params.action = function() { $('#prompt-modal').off(); Wait('stop'); }
-            HostsReload(params);
+            scope.showHosts(scope.selected_tree_id, scope.selected_group_id, false);
             });
 
         var action_to_take = function() {
-            $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('start'); })
+            $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('start'); });
             $('#prompt-modal').modal('hide');
             Rest.setUrl(url);
             Rest.post({ id: host_id, disassociate: 1 })
@@ -520,30 +516,15 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     })
                 .error( function(data, status, headers, config) {
                     Wait('stop');
-                    scope.$emit('hostsReload'); 
                     ProcessErrors(scope, data, status, null,
                         { hdr: 'Error!', msg: 'Attempt to delete ' + host_name + ' failed. POST returned status: ' + status });
                     });    
             }
-
-        //Force binds to work (not working usual way), and launch the confirmation prompt
-        if (scope.group_id == null || req == 'delete') {
-           scope['promptHeader'] = 'Delete Host';
-           scope['promptBody'] = 'Are you sure you want to permanently delete the selected hosts?';
-           scope['promptActionBtnClass'] = 'btn-danger';
-        }
-        
-        scope.promptAction = action_to_take;
-
-        $('#prompt-modal').modal({
-            backdrop: 'static',
-            keyboard: true,
-            show: true
-            });
-
-        if (!scope.$$phase) {
-           scope.$digest();
-        }
+            
+        var body = (group) ? '<p>Are you sure you want to delete host <em>' + host_name + '</em> from group <em>' + group.name + '</em>?</p>' :
+            '<p>Are you sure you want to delete host <em>' + host_name + '</em>?</p>';
+            
+        Prompt({ hdr: 'Delete Host', body: body, action: action_to_take, 'class': 'btn-danger' });
 
         }
         }])

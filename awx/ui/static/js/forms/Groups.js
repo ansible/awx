@@ -44,7 +44,7 @@ angular.module('GroupFormDefinition', [])
                 type: 'textarea',
                 addRequired: false,
                 editRequird: false, 
-                rows: 10,
+                rows: 6,
                 'default': '---',
                 dataTitle: 'Group Variables',
                 dataPlacement: 'right',

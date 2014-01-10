@@ -24,19 +24,9 @@ angular.module('InventoryHostsDefinition', [])
             name: {
                 key: true,
                 label: 'Hosts',
-                ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
-                searchPlaceholder: "search_place_holder"
-                },
-            enabled_flag: {
-                label: 'Enabled',
-                badgeIcon: "\{\{ 'fa icon-enabled-' + host.enabled \}\}", 
-                badgePlacement: 'left',
-                badgeToolTip: "\{\{ host.enabledToolTip \}\}",
-                badgeTipPlacement: "top",
-                badgeTipWatch: "host.enabledToolTip",
-                ngClick: "toggle_host_enabled(\{\{ host.id \}\}, \{\{ host.has_inventory_sources \}\})",
-                searchable: false,
-                showValue: false
+                ngClick: "editHost(\{\{ host.id \}\})",
+                searchPlaceholder: "search_place_holder",
+                columnClass: 'col-lg-9'
                 },
             /*groups: {
                 label: 'Groups',
@@ -71,33 +61,34 @@ angular.module('InventoryHostsDefinition', [])
             },
         
         fieldActions: {
+              enabled_flag: {
+                //label: 'Enabled',
+                iconClass: "\{\{ 'fa icon-enabled-' + host.enabled \}\}", 
+                dataPlacement: 'top',
+                awToolTip: "\{\{ host.enabledToolTip \}\}",
+                ngClick: "toggleHostEnabled(\{\{ host.id \}\}, \{\{ host.has_inventory_sources \}\})"
+                },
              active_failures: {
                 //label: 'Job Status',
-                
                 awToolTip: "\{\{ host.badgeToolTip \}\}",
                 dataPlacement: 'top',
-                badgeNgHref: '\{\{ host.activeFailuresLink \}\}', 
-                
-                iconClass: "\{\{ 'fa icon-failures-' + host.has_active_failures \}\}",
-                
-
-                badgePlacement: 'left',
-                badgeToolTip: "\{\{ host.badgeToolTip \}\}",
-                badgeTipPlacement: 'top'
+                iconClass: "\{\{ 'fa icon-failures-' + host.has_active_failures \}\}"
                 },
              edit: {
                 //label: 'Edit',
-                ngClick: "editGroup(\{\{ host.id \}\})",
+                ngClick: "editHost(\{\{ host.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-primary',
-                awToolTip: 'Edit host'
+                awToolTip: 'Edit host',
+                dataPlacement: 'top'
                 },
             "delete": {
                 //label: 'Delete',
                 ngClick: "deleteHost(\{\{ host.id \}\},'\{\{ host.name \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-primary',
-                awToolTip: 'Delete host'
+                awToolTip: 'Delete host',
+                dataPlacement: 'top'
                 }
             },
 

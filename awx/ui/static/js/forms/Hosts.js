@@ -57,7 +57,7 @@ angular.module('HostFormDefinition', [])
                 type: 'textarea',
                 addRequired: false,
                 editRequird: false, 
-                rows: 10,
+                rows: 6,
                 "class": "modal-input-xlarge",
                 "default": "---",
                 awPopOver: "<p>Enter variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
