@@ -79,7 +79,7 @@ angular.module('InventoryFormDefinition', [])
                 addRequired: false,
                 editRequird: false, 
                 parseTypeName: 'inventoryParseType',
-                rows: 10,
+                rows: 6,
                 "default": "---",
                 awPopOver: "<p>Enter inventory variables using either JSON or YAML syntax. Use the radio button to toggle between the two.</p>" +
                     "JSON:<br />\n" +
@@ -89,7 +89,7 @@ angular.module('InventoryFormDefinition', [])
                     '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
                     '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
                 dataTitle: 'Inventory Variables',
-                dataPlacement: 'left',
+                dataPlacement: 'right',
                 dataContainer: 'body'
                 }
             },

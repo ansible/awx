@@ -14,101 +14,9 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                     'InventoryFormDefinition', 'ParseHelper'
                                     ]) 
 
-    .factory('LoadRootGroups', ['Rest', 'ProcessErrors', function(Rest, ProcessErrors) {
-    return function(params) {
-        
-        // Build an array of root group IDs. We'll need this when copying IDs.
-        
-        var scope = params.scope;
-        Rest.setUrl(scope.inventoryRootGroupsUrl);
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                scope.inventoryRootGroups = [];
-                for (var i=0; i < data.results.length; i++){
-                    scope.inventoryRootGroups.push(data.results[i].id);
-                } 
-                })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, null,
-                    { hdr: 'Error!', msg: 'Failed to retrieve root groups for inventory: ' + 
-                    scope.inventory_id + '. GET status: ' + status });
-                });
-        }  
-        }])
-
-    .factory('LoadInventory', ['$routeParams', 'Alert', 'Rest', 'Authorization', '$http', 'ProcessErrors',
-        'RelatedSearchInit', 'RelatedPaginateInit', 'GetBasePath', 'LoadBreadCrumbs', 'InventoryForm', 'LoadRootGroups',
-    function($routeParams, Alert, Rest, Authorization, $http, ProcessErrors, RelatedSearchInit, RelatedPaginateInit,
-        GetBasePath, LoadBreadCrumbs, InventoryForm, LoadRootGroups) {
-    return function(params) {
-        
-        // Load inventory detail record
-        
-        var scope = params.scope;
-        var form = InventoryForm;
-        scope.relatedSets = [];
-        scope.master = {};
-        
-        if (scope.removeLevelOneGroups) {
-           scope.removeLevelOneGroups();
-        }
-        scope.removeLevelOneGroups = scope.$on('inventoryLoaded', function() {
-            LoadRootGroups({ scope: scope });
-            });
-
-        Rest.setUrl(GetBasePath('inventory') + scope['inventory_id'] + '/');
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                
-                LoadBreadCrumbs({ path: '/inventories/' + $routeParams.id, title: data.name });
-                
-                for (var fld in form.fields) {
-                    if (form.fields[fld].realName) {
-                       if (data[form.fields[fld].realName]) {
-                          scope[fld] = data[form.fields[fld].realName];
-                          scope.master[fld] = scope[fld];
-                       }
-                    }
-                    else {
-                       if (data[fld]) {
-                          scope[fld] = data[fld];
-                          scope.master[fld] = scope[fld];
-                       }
-                    }
-                    if (form.fields[fld].type == 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
-                        scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
-                            data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
-                        scope.master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                            scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
-                    }
-                }
-                
-                scope.inventoryGroupsUrl = data.related.groups;
-                scope.inventoryRootGroupsUrl = data.related.root_groups;
-                scope.TreeParams = { scope: scope, inventory: data };
-                scope.variable_url = data.related.variable_data;
-                scope.relatedSets['hosts'] = { url: data.related.hosts, iterator: 'host' };
-                scope.treeData = data.related.tree;
-
-                // Load the tree view
-                if (params.doPostSteps) {
-                   RelatedSearchInit({ scope: scope, form: form, relatedSets: scope.relatedSets });
-                   RelatedPaginateInit({ scope: scope, relatedSets: scope.relatedSets });
-                }
-                scope.$emit('inventoryLoaded');
-                })
-            .error( function(data, status, headers, config) {
-                ProcessErrors(scope, data, status, null,
-                    { hdr: 'Error!', msg: 'Failed to retrieve inventory: ' + $routeParams.id + '. GET status: ' + status });
-                });
-
-        }
-        }])
-
     .factory('SaveInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
-        'GetBasePath', 'ParseTypeChange', 'LoadInventory', 'Wait',
-    function(InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange,
-        LoadInventory, Wait) {
+        'GetBasePath', 'ParseTypeChange', 'Wait',
+    function(InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange, Wait) {
     return function(params) {
         
         // Save inventory property modifications
@@ -153,7 +61,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                        Rest.put(json_data)
                            .success( function(data, status, headers, config) {
                                Wait('stop');
-                               scope.$emit('inventorySaved');
+                               scope.$emit('InventorySaved');
                                })
                            .error( function(data, status, headers, config) {
                                ProcessErrors(scope, data, status, form,
@@ -161,7 +69,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                            });
                     }
                     else {
-                        scope.$emit('inventorySaved');
+                        scope.$emit('InventorySaved');
                     }
                     })
                 .error( function(data, status, headers, config) {
@@ -177,104 +85,111 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         }
         }])
 
-    .factory('PostLoadInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 'GetBasePath',
-    function(InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath) {
-    return function(params) {
-        
-        var scope = params.scope;
-        
-        LookUpInit({
-            scope: scope,
-            form: InventoryForm,
-            current_item: (scope.organization !== undefined) ? scope.organization : null,
-            list: OrganizationList, 
-            field: 'organization' 
-            });
 
-        if (scope.variable_url) {
-           Rest.setUrl(scope.variable_url);
-           Rest.get()
-               .success( function(data, status, headers, config) {
-                   if ($.isEmptyObject(data)) {
-                      scope.inventory_variables = "---";
-                   }
-                   else {
-                      scope.inventory_variables = jsyaml.safeDump(data);
-                   }
-                   scope.master.inventory_variables = scope.inventory_variables;
-                   })
-               .error( function(data, status, headers, config) {
-                   scope.inventory_variables = null;
-                   ProcessErrors(scope, data, status, form,
-                       { hdr: 'Error!', msg: 'Failed to retrieve inventory variables. GET returned status: ' + status });
-                   });
-        }
-        else {
-          scope.inventory_variables = "---";
-        }
-        if (!scope.$$phase) {
-          scope.$digest();
-        } 
-        
-        }
-        }])
-
-    .factory('EditInventory', ['InventoryForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
-        'GetBasePath', 'ParseTypeChange', 'LoadInventory', 'SaveInventory', 'PostLoadInventory',
-    function(InventoryForm, GenerateForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange,
-        LoadInventory, SaveInventory, PostLoadInventory) {
+    .factory('EditInventoryProperties', ['InventoryForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
+        'GetBasePath', 'ParseTypeChange', 'SaveInventory', 'Wait',
+    function(InventoryForm, GenerateForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange, SaveInventory,
+        Wait) {
     return function(params) {
+
+        var parent_scope = params.scope
+        var inventory_id = params.inventory_id; 
 
         var generator = GenerateForm;
         var form = InventoryForm;
         var defaultUrl=GetBasePath('inventory');
-        var scope = params.scope
-        
+        var master = {}; 
+
         form.well = false;
-        form.formLabelSize = 'col-lg-3';
-        form.formFieldSize = 'col-lg-9';
+        //form.formLabelSize = 'col-lg-3';
+        //form.formFieldSize = 'col-lg-9';
         
-        generator.inject(form, {mode: 'edit', modal: true, related: false});
+        var scope = generator.inject(form, {mode: 'edit', modal: true, related: false, modal_show: false });
         
         /* Reset form properties. Otherwise it screws up future requests of the Inventories detail page */
         form.well = true;
-        delete form.formLabelSize;
-        delete form.formFieldSize;
+        //delete form.formLabelSize;
+        //delete form.formFieldSize;
 
         ParseTypeChange(scope,'inventory_variables', 'inventoryParseType');
-
         scope.inventoryParseType = 'yaml';
-        scope['inventory_id'] = params['inventory_id'];
         scope.formModalActionLabel = 'Save';
         scope.formModalCancelShow = true;
         scope.formModalInfo = false;
-        $('#form-modal .btn-success').removeClass('btn-none').addClass('btn-success');
         scope.formModalHeader = 'Inventory Properties'; 
         
-        // Retrieve each related set and any lookups
-        if (scope.inventoryLoadedRemove) {
-           scope.inventoryLoadedRemove();
-        }
-        scope.inventoryLoadedRemove = scope.$on('inventoryLoaded', function() {
-           PostLoadInventory({ scope: scope });
-           });
-
-        LoadInventory({ scope: scope, doPostSteps: false });
+        $('#form-modal .btn-success').removeClass('btn-none').addClass('btn-success');
         
-        if (!scope.$$phase) {
-           scope.$digest();
-        }
+        Wait('start');
+        Rest.setUrl(GetBasePath('inventory') + inventory_id + '/');
+        Rest.get()
+            .success( function(data, status, headers, config) {
+                for (var fld in form.fields) {
+                    if (fld == 'inventory_variables') {
+                        // Parse variables, converting to YAML.  
+                        if ($.isEmptyObject(data.variables) || data.variables == "\{\}" || 
+                            data.variables == "null" || data.data_variables == "") {
+                            scope.inventory_variables = "---";
+                        }
+                        else {
+                            var json_obj = JSON.parse(data.variables);
+                            scope.inventory_variables = jsyaml.safeDump(json_obj);
+                        }
+                        master.inventory_variables = scope.variables;
+                    }
+                    else if (fld == 'inventory_name') {
+                        scope[fld] = data.name;
+                        master[fld] = scope[fld];
+                    }
+                    else if (fld == 'inventory_description') {
+                        scope[fld] = data.description;
+                        master[fld] = scope[fld];
+                    }
+                    else if (data[fld]) {
+                        scope[fld] = data[fld];
+                        master[fld] = scope[fld];
+                    }
 
+                    if (form.fields[fld].sourceModel && data.summary_fields &&
+                        data.summary_fields[form.fields[fld].sourceModel]) {
+                        scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
+                            data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                        master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] = 
+                            data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
+                    }
+                }
+
+                LookUpInit({
+                   scope: scope,
+                   form: form,
+                   current_item: scope.organization,
+                   list: OrganizationList, 
+                   field: 'organization' 
+                   });
+                
+                Wait('stop');
+                $('#form-modal').modal('show');
+
+                })
+            .error( function(data, status, headers, config) {
+                Wait('stop');
+                ProcessErrors(scope, data, status, null,
+                    { hdr: 'Error!', msg: 'Failed to get inventory: ' + inventory_id + '. GET returned: ' + status });
+                });
+       
         if (scope.removeInventorySaved) {
            scope.removeInventorySaved();
         }
-        scope.removeInventorySaved = scope.$on('inventorySaved', function() {
+        scope.removeInventorySaved = scope.$on('InventorySaved', function() {
             $('#form-modal').modal('hide');           
             });
 
         scope.formModalAction = function() {
+            scope.inventory_id = inventory_id;
+            parent_scope.inventory_name = scope.inventory_name;
+            console.log('set inventory_name to: ' + parent_scope.inventory_name);
             SaveInventory({ scope: scope });
-        }    
+            } 
         
         }
         }]);

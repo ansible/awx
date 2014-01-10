@@ -75,12 +75,12 @@ angular.module('InventoryGroupsDefinition', [])
             create: {
                 mode: 'all',
                 ngClick: "createGroup()",
-                ngHide: 'selected_tree_id == 1',   //disable when 'All Hosts' selected
                 awToolTip: "Create a new group"
                 },
             properties: {
                 mode: 'all',
-                awToolTip: "Edit inventory properties" 
+                awToolTip: "Edit inventory properties",
+                ngClick: 'editInventoryProperties()'
                 },
             refresh: {
                 mode: 'all',
@@ -107,7 +107,7 @@ angular.module('InventoryGroupsDefinition', [])
         fieldActions: {
             sync_status: {
                 mode: 'all',
-                ngClick: "viewUpdateStatus(\{\{ group.id \}\})",
+                ngClick: "viewUpdateStatus(\{\{ group.id + ',' + group.group_id \}\})",
                 ngShow: "group.id > 1", // hide for all hosts
                 awToolTip: "\{\{ group.status_tooltip \}\}",
                 ngClass: "group.status_class",
@@ -142,7 +142,7 @@ angular.module('InventoryGroupsDefinition', [])
             edit: {
                 //label: 'Edit',
                 mode: 'all',
-                ngClick: "editGroup(\{\{ group.group_id \}\})",
+                ngClick: "editGroup(\{\{ group.group_id + ',' + group.id \}\})",
                 awToolTip: 'Edit group',
                 ngShow: "group.id > 1", // hide for all hosts
                 dataPlacement: "top"
@@ -150,7 +150,7 @@ angular.module('InventoryGroupsDefinition', [])
             "delete": {
                 //label: 'Delete',
                 mode: 'all',
-                ngClick: "deleteGroup(\{\{ group.id \}\})",
+                ngClick: "deleteGroup(\{\{ group.id + ',' + group.group_id \}\})",
                 awToolTip: 'Delete group',
                 ngShow: "group.id != 1", // hide for all hosts
                 dataPlacement: "top"

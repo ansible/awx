@@ -178,7 +178,8 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
             var inventory_id = params.inventory_id;
             var scope = params.scope;
             var refresh = params.refresh;
-            var emit = params.emit; 
+            var emit = params.emit;
+            var new_group_id = params.new_group_id;
 
             //var selected_id = params.
 
@@ -235,6 +236,11 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
                         show: true
                         }
                     groups.push(group);
+                    if (new_group_id && group.group_id == new_group_id) {
+                        // For new group
+                        scope.selected_tree_id = id;
+                        scope.selected_group_id = group.group_id;
+                    }
                     if (sorted[i].children.length > 0) {
                         buildGroups(sorted[i].children, id, level + 1);
                     }
@@ -243,7 +249,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
 
             // Build the HTML for our tree
             if (scope.buildAllGroupsRemove) {
-               scope.buildAllGroupsRemove();
+                scope.buildAllGroupsRemove();
             }
             scope.buildAllGroupsRemove = scope.$on('buildAllGroups', function(e, inventory_name, inventory_tree) {
                 Rest.setUrl(inventory_tree);
@@ -253,10 +259,10 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
                         //console.log(groups);
                         if (refresh) {
                             scope.groups = groups;
-                            scope.$emit('groupTreeRefreshed', inventory_name, groups, emit);
+                            scope.$emit('GroupTreeRefreshed', inventory_name, groups, emit);
                         }
                         else {
-                            scope.$emit('groupTreeLoaded', inventory_name, groups, emit);
+                            scope.$emit('GroupTreeLoaded', inventory_name, groups, emit);
                         }
                         })
                     .error( function(data, status, headers, config) {
@@ -332,19 +338,5 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper'])
             if (inventory_id !== null) {
                 $('#inventory-root-node').attr('data-name', name).attr('data-description', descr).find('.activate').first().text(name);
             }
-            }
-            }])
-
-    .factory('ClickNode', [ function() {
-        return function(params) {
-            var selector = params.selector;   //jquery selector string to find the correct <li>
-            $(selector + ' .activate').first().click();
-            }
-            }])
-
-    .factory('DeleteNode', [ function() {
-        return function(params) {
-            var selector = params.selector;   //jquery selector string to find the correct <li>
-            $(selector).first().detach();
             }
             }]);

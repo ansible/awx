@@ -149,11 +149,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
              $(options.modal_selector).unbind('hidden.bs.modal');
           }
           else {
-             $('#form-modal').modal({ show: true, backdrop: 'static', keyboard: true });
+             var show = (options.show_modal == false) ? false : true; 
+             $('#form-modal').modal({ show: show, backdrop: 'static', keyboard: true });
              $('#form-modal').on('shown.bs.modal', function() {
                  $('#form-modal input:first').focus();
                  });
-             $('#form-modal').on('hidden.bs.modal');
+             $('#form-modal').off('hidden.bs.modal');
           }
           $(document).bind('keydown', function(e) {
               if (e.keyCode === 27) {

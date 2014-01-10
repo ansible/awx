@@ -27,19 +27,6 @@ angular.module('InventoryHostsDefinition', [])
                 ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')",
                 searchPlaceholder: "search_place_holder"
                 },
-            active_failures: {
-                label: 'Job Status',
-                ngHref: "\{\{ host.activeFailuresLink \}\}", 
-                awToolTip: "\{\{ host.badgeToolTip \}\}",
-                dataPlacement: 'top',
-                badgeNgHref: '\{\{ host.activeFailuresLink \}\}', 
-                badgeIcon: "\{\{ 'fa icon-failures-' + host.has_active_failures \}\}",
-                badgePlacement: 'left',
-                badgeToolTip: "\{\{ host.badgeToolTip \}\}",
-                badgeTipPlacement: 'top',
-                searchable: false,
-                nosort: true
-                },
             enabled_flag: {
                 label: 'Enabled',
                 badgeIcon: "\{\{ 'fa icon-enabled-' + host.enabled \}\}", 
@@ -84,6 +71,20 @@ angular.module('InventoryHostsDefinition', [])
             },
         
         fieldActions: {
+             active_failures: {
+                //label: 'Job Status',
+                
+                awToolTip: "\{\{ host.badgeToolTip \}\}",
+                dataPlacement: 'top',
+                badgeNgHref: '\{\{ host.activeFailuresLink \}\}', 
+                
+                iconClass: "\{\{ 'fa icon-failures-' + host.has_active_failures \}\}",
+                
+
+                badgePlacement: 'left',
+                badgeToolTip: "\{\{ host.badgeToolTip \}\}",
+                badgeTipPlacement: 'top'
+                },
              edit: {
                 //label: 'Edit',
                 ngClick: "editGroup(\{\{ host.id \}\})",
@@ -104,7 +105,7 @@ angular.module('InventoryHostsDefinition', [])
             create: {
                 mode: 'all',
                 ngClick: "createHost()",
-                ngHide: "!selected_tree_id", 
+                ngHide: 'selected_tree_id == 1',   //disable when 'All Hosts' selected
                 awToolTip: "Create a new host"
                 },
             stream: {

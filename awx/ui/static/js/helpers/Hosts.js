@@ -22,8 +22,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var group_id = params.group_id;
         var tree_id = params.tree_id
         var inventory_id = params.inventory_id;
-        var emit = params.emit;
-
+        
         var url = ( !Empty(group_id) ) ? GetBasePath('groups') + group_id + '/all_hosts/' :
                   GetBasePath('inventory') + inventory_id + '/hosts/';
         
@@ -34,9 +33,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }
         scope.removePostRefresh = scope.$on('PostRefresh', function(e) {
             Wait('stop');
-            if (emit) {
-                scope.$emit(emit);
-            }
+            scope.$emit('HostReloadComplete');
             });
 
         SearchInit({ scope: scope, set: 'hosts', list: InventoryHosts, url: url });
@@ -53,14 +50,13 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var inventory_id = params.inventory_id;
         var group_id = params.group_id;
         var tree_id = params.tree_id;
-        var emit = params.emit; 
-
+        
         // Inject the list html
         var generator = GenerateList;
         generator.inject(InventoryHosts, { scope: scope, mode: 'edit', id: 'hosts-container', breadCrumbs: false, searchSize: 'col-lg-6 col-md-6 col-sm-6' });
 
         // Load data
-        HostsReload({ scope: scope, group_id: group_id, tree_id: tree_id, inventory_id: inventory_id, emit: emit });
+        HostsReload({ scope: scope, group_id: group_id, tree_id: tree_id, inventory_id: inventory_id });
         }
         }])
 
@@ -214,9 +210,10 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
     function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, HostsReload, ParseTypeChange, Wait) {
     return function(params) {
-
-        var inventory_id = params.inventory_id;
-        var group_id = (params.group_id !== undefined) ? params.group_id : null;
+        
+        var parent_scope = params.scope;
+        var inventory_id = parent_scope.inventory_id;
+        var group_id = parent_scope.selected_group_id; 
 
         // Inject dynamic view
         var defaultUrl = GetBasePath('groups') + group_id + '/hosts/';
@@ -247,19 +244,26 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         if (!scope.$$phase) {
            scope.$digest();
         }
+       
+        if (scope.removeHostSaveComplete) {
+            scope.removeHostSaveComplete();
+        }
+        scope.removeHostSaveComplete = scope.$on('HostSaveComplete', function() {
+            Wait('stop');
+            $('#form-modal').modal('hide');
+            HostsReload({
+                scope: parent_scope,
+                group_id: parent_scope.selected_group_id,
+                tree_id: parent_scope.selected_tree_id,
+                inventory_id: parent_scope.inventory_id });
+            });
 
         // Save
         scope.formModalAction  = function() {
            
            Wait('start');
            
-           function finished() {
-               $('#form-modal').modal('hide');
-               scope.$emit('hostsReload'); 
-               }
-
-           try { 
-               
+           try {          
                scope.formModalActionDisabled = true;
 
                // Make sure we have valid variable data
@@ -294,8 +298,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                Rest.setUrl(defaultUrl);
                Rest.post(data)
                    .success( function(data, status, headers, config) {
-                       Wait('stop');
-                       finished();
+                       scope.$emit('HostSaveComplete');
                        })
                    .error( function(data, status, headers, config) {
                        Wait('stop');

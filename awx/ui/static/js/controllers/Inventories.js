@@ -318,7 +318,8 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 
 function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait, 
                           GetSyncStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, 
-                          Rest, ProcessErrors, InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate) 
+                          Rest, ProcessErrors, InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find,
+                          HostsCreate, EditInventoryProperties) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -329,12 +330,12 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
     
     $scope.inventory_id = $routeParams.inventory_id;
     
-    LoadBreadCrumbs();
+    LoadBreadCrumbs({ path: $location.path(), title: '{{ inventory_name }}' });
 
     if ($scope.removeGroupTreeLoaded) {
         $scope.removeGroupTreeLoaded();
     }
-    $scope.removeGroupTreeLoaded = $scope.$on('groupTreeLoaded', function(e, inventory_name, groups) {
+    $scope.removeGroupTreeLoaded = $scope.$on('GroupTreeLoaded', function(e, inventory_name, groups) {
         // After the tree data loads, generate the groups list
         // Add breadcrumbs
         var e = angular.element(document.getElementById('breadcrumbs'));
@@ -367,21 +368,23 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
     if ($scope.removeGroupTreeRefreshed) {
         $scope.removeGroupTreeRefreshed();
     }
-    $scope.removeGroupTreeRefreshed = $scope.$on('groupTreeRefreshed', function(e, inventory_name, groups, emit) {
+    $scope.removeGroupTreeRefreshed = $scope.$on('GroupTreeRefreshed', function(e, inventory_name, groups) {
         // Called after tree data is reloaded on refresh button click.
         // Reselect the preveiously selected group node, causing host view to refresh.
-        $scope.showHosts($scope.selected_tree_id, $scope.selected_group_id, false, emit);
+        $scope.showHosts($scope.selected_tree_id, $scope.selected_group_id, false);
         });
 
     if ($scope.removeGroupDeleteCompleted) {
         $scope.removeGroupDeleteCompleted();
     }
-    $scope.removeGroupDeleteCompleted = $scope.$on('groupDeleteCompleted', function(e) {
+    $scope.removeGroupDeleteCompleted = $scope.$on('GroupDeleteCompleted', function(e) {
         // Group was deleted. Now we need to refresh the group view.
+        $scope.selected_tree_id = 1;
+        $scope.selected_group_id = null;
         BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: true });
         });
     
-    $scope.showHosts = function(tree_id, group_id, show_failures, emit) {
+    $scope.showHosts = function(tree_id, group_id, show_failures) {
         // Clicked on group
         if (tree_id !== null) {
             Wait('start');
@@ -400,7 +403,10 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
                     $scope.groups[i].active_class = '';
                 }
             }
-            HostsReload({ scope: $scope, group_id: group_id, tree_id: tree_id, inventory_id: $scope.inventory_id, emit: emit });
+            HostsReload({ scope: $scope, group_id: group_id, tree_id: tree_id, inventory_id: $scope.inventory_id });
+        }
+        else {
+            Wait('stop');
         }
         }
 
@@ -408,47 +414,47 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         GroupsAdd({ scope: $scope, inventory_id: $scope.inventory_id, group_id: $scope.selected_group_id  });
         }
         
-    $scope.editGroup = function(group_id) {
-        GroupsEdit({ scope: $scope, inventory_id: $scope.inventory_id, group_id: group_id });
+    $scope.editGroup = function(group_id, tree_id) {
+        GroupsEdit({ scope: $scope, inventory_id: $scope.inventory_id, group_id: group_id, tree_id: tree_id });
         }
 
     // Launch inventory sync
     $scope.updateGroup = function(id) {
-        for (var i=0; i < $scope.groups.length; i++) {
-            if ($scope.groups[i].id == id) {
-                if (Empty($scope.groups[i].source)) {
-                    // if no source, do nothing. 
-                }
-                else if ($scope.groups[i].status == 'updating') {
-                    Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
-                        $scope.groups[i].name + '</em>. Use the Refresh button to monitor the status.', 'alert-info'); 
-                }
-                else {
-                    Wait('start');
-                    Rest.setUrl($scope.groups[i].related.inventory_source);
-                    Rest.get()
-                        .success( function(data, status, headers, config) {
-                            InventoryUpdate({
-                                scope: $scope, 
-                                url: data.related.update,
-                                group_name: data.summary_fields.group.name, 
-                                group_source: data.source
-                                });
-                            })
-                        .error( function(data, status, headers, config) {
-                            Wait('stop');
-                            ProcessErrors(scope, data, status, form,
-                                { hdr: 'Error!', msg: 'Failed to retrieve inventory source: ' + $scope.groups[i].related.inventory_source + 
-                                ' POST returned status: ' + status });
+        var group = Find({ list: $scope.groups, key: 'id', val: id});
+        if (group) {
+            if (Empty(group.source)) {
+                // if no source, do nothing. 
+            }
+            else if (group.status == 'updating') {
+                Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
+                    $scope.groups[i].name + '</em>. Use the Refresh button to monitor the status.', 'alert-info'); 
+            }
+            else {
+                Wait('start');
+                Rest.setUrl(group.related.inventory_source);
+                Rest.get()
+                    .success( function(data, status, headers, config) {
+                        InventoryUpdate({
+                            scope: $scope, 
+                            url: data.related.update,
+                            group_name: data.summary_fields.group.name, 
+                            group_source: data.source,
+                            tree_id: group.id,
+                            group_id: group.group_id
                             });
-                }
-                break;
+                        })
+                    .error( function(data, status, headers, config) {
+                        Wait('stop');
+                        ProcessErrors(scope, data, status, form,
+                            { hdr: 'Error!', msg: 'Failed to retrieve inventory source: ' + group.related.inventory_source + 
+                            ' POST returned status: ' + status });
+                        });
             }
         }      
         }
 
     $scope.cancelUpdate = function(id) {
-        GroupsCancelUpdate({ scope: $scope, id: id });
+        GroupsCancelUpdate({ scope: $scope, tree_id: id });
         }
     
     $scope.toggle = function(id) {
@@ -456,20 +462,31 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         ToggleChildren({ scope: $scope, list: list, id: id });
         }
 
-    $scope.refreshGroups = function(emit) {
+    $scope.refreshGroups = function(tree_id, group_id) {
         // Refresh the tree data when refresh button cicked
-        // Pass a string label value, if you want to attach scope.$on() to the completion of the refresh  
-        BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: true, emit: emit });
+        if (tree_id) {
+            $scope.selected_tree_id = tree_id;
+            $scope.selected_group_id = group_id;
+        }
+        BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: true });
         }
 
-    $scope.viewUpdateStatus = function(id) {
-        ViewUpdateStatus({ scope: $scope, tree_id: id });
+    $scope.viewUpdateStatus = function(tree_id, group_id) {
+        ViewUpdateStatus({ scope: $scope, tree_id: tree_id, group_id: group_id });
         }
 
-    $scope.deleteGroup = function(id) {
-        GroupsDelete({ scope: $scope, tree_id: id, inventory_id: $scope.inventory_id });
+    $scope.deleteGroup = function(tree_id, group_id) {
+        GroupsDelete({ scope: $scope, tree_id: tree_id, group_id: group_id, inventory_id: $scope.inventory_id });
+        }
+
+    $scope.createHost = function() {
+        HostsCreate({ scope: $scope });
         }
     
+    $scope.editInventoryProperties = function() { 
+        EditInventoryProperties({ scope: $scope, inventory_id: $scope.inventory_id });
+        }
+
     //Load tree data for the first time
     BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: false });
 
@@ -478,6 +495,6 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
 InventoriesEdit.$inject = [ '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts', 
                             'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'GroupsDelete',
                             'Breadcrumbs', 'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren',
-                            'ViewUpdateStatus', 'GroupsCancelUpdate'
+                            'ViewUpdateStatus', 'GroupsCancelUpdate', 'Find', 'HostsCreate', 'EditInventoryProperties'
                             ]; 
   

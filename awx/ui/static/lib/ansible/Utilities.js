@@ -181,7 +181,6 @@ angular.module('Utilities',['RestServices', 'Utilities'])
              $rootScope.crumbCache.push(crumb);
           }
        }
-
        var paths = $location.path().replace(/^\//,'').split('/');
        var ppath = '';
        $rootScope.breadcrumbs = [];
@@ -191,41 +190,41 @@ angular.module('Utilities',['RestServices', 'Utilities'])
              if (i > 0 && paths[i].match(/\d+/)) {
                 parent = paths[i-1];
                 if (parent == 'inventories') {
-                  child = 'inventory';
+                    child = 'inventory';
                 }
                 else {
-                   child = parent.substring(0,parent.length - 1);  //assumes parent ends with 's'
+                    child = parent.substring(0,parent.length - 1);  //assumes parent ends with 's'
                 }
                 // find the correct title
                 for (var j=0; j < $rootScope.crumbCache.length; j++) {
                     if ($rootScope.crumbCache[j].path == '/' + parent + '/' + paths[i]) {
-                       child = $rootScope.crumbCache[j].title;
-                       break;
+                        child = $rootScope.crumbCache[j].title;
+                        break;
                     }
                 }
                 if ($rootScope.crumbCache[j] && $rootScope.crumbCache[j]['altPath'] !== undefined) {
-                   // Use altPath to override default path construction
-                   $rootScope.breadcrumbs.push({ title: child, path: $rootScope.crumbCache[j].altPath });
+                    // Use altPath to override default path construction
+                    $rootScope.breadcrumbs.push({ title: child, path: $rootScope.crumbCache[j].altPath });
                 }
                 else { 
-                   if (paths[i - 1] == 'hosts') {
-                      // For hosts, there is no /hosts, so we need to link back to the inventory
-                      // We end up here when user has clicked refresh and the crumbcache is missing
-                      $rootScope.breadcrumbs.push({ title: child, 
-                          path: '/inventories/' + $routeParams.inventory + '/hosts' });
-                   }
-                   else { 
-                      $rootScope.breadcrumbs.push({ title: child, path: ppath + '/' + paths[i] });
-                   }
+                    if (paths[i - 1] == 'hosts') {
+                        // For hosts, there is no /hosts, so we need to link back to the inventory
+                        // We end up here when user has clicked refresh and the crumbcache is missing
+                        $rootScope.breadcrumbs.push({ title: child, 
+                            path: '/inventories/' + $routeParams.inventory + '/hosts' });
+                    }
+                    else { 
+                        $rootScope.breadcrumbs.push({ title: child, path: ppath + '/' + paths[i] });
+                    }
                 }
              }
              else {
                 if (paths[i] == 'hosts') {
-                   $rootScope.breadcrumbs.push({ title: paths[i], path: '/inventories/' + $routeParams.inventory +
-                       '/hosts' });
+                    $rootScope.breadcrumbs.push({ title: paths[i], path: '/inventories/' + $routeParams.inventory +
+                        '/hosts' });
                 }
                 else {
-                   $rootScope.breadcrumbs.push({ title: paths[i], path: ppath + '/' + paths[i] });
+                    $rootScope.breadcrumbs.push({ title: paths[i], path: ppath + '/' + paths[i] });
                 }
              }
              ppath += '/' + paths[i];

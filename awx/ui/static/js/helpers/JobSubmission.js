@@ -413,14 +413,17 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         var url = params.url;
         var group_name = params.group_name;
         var group_source = params.group_source; 
+        var group_id = params.group_id; 
+        var tree_id = params.tree_id;
 
-        if (scope.removeSubmitRefreshCompleted) {
-           scope.removeSubmitRefreshCompleted();
+        if (scope.removeHostReloadComplete) {
+           scope.removeHostReloadComplete();
         }
-        scope.removeSubmitRefreshCompleted = scope.$on('SubmitRefreshCompleted', function(e) {
+        scope.removeHostReloadComplete = scope.$on('HostReloadComplete', function(e) {
             Wait('stop');
             Alert('Update Started', 'The request to start the inventory update process was submitted. Monitor progress of the update process ' +
                    'by clicking the <i class="fa fa-refresh fa-lg"></i> button.', 'alert-info');
+            scope.removeHostReloadComplete();
             });
 
         if (scope.removeUpdateSubmitted) {
@@ -428,7 +431,10 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         }
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function(e, action) {
             if (action == 'started') {
-                scope.refreshGroups('SubmitRefreshComplete');
+                // Cancel the update process
+                scope.selected_tree_id = tree_id;
+                scope.selected_group_id = group_id;
+                scope.refreshGroups();
             }
             });
         
