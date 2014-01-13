@@ -50,7 +50,8 @@ angular.module('JobTemplatesListDefinition', [])
                 ngClick: "editJobTemplate(\{\{ job_template.id \}\})",
                 icon: 'icon-edit',
                 awToolTip: 'Edit template',
-                "class": 'btn-default btn-xs'
+                "class": 'btn-default btn-xs',
+                dataPlacement: 'top'
                 },
             submit: {
                 label: 'Launch',
@@ -58,14 +59,16 @@ angular.module('JobTemplatesListDefinition', [])
                 mode: 'all',
                 "class": 'btn-xs btn-success',
                 ngClick: 'submitJob(\{\{ job_template.id \}\})',
-                awToolTip: 'Start a job using this template'     
+                awToolTip: 'Start a job using this template',
+                dataPlacement: 'top'    
                 },
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteJobTemplate(\{\{ job_template.id \}\},'\{\{ job_template.name \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-danger btn-xs',
-                awToolTip: 'Delete template'
+                awToolTip: 'Delete template',
+                dataPlacement: 'top'
                 }
             }
         });

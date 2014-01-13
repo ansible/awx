@@ -100,13 +100,12 @@ angular.module('InventoryHostsDefinition', [])
                 awToolTip: "Create a new host"
                 },
             stream: {
+                mode: 'all',
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                mode: 'all',
                 ngShow: "user_is_superuser"
                 },
              help: {
-                dataPlacement: 'top',
                 mode: 'all',
                 awToolTip:
                     //"<div style=\"text-align:left;\"><img src=\"/static/img/cow.png\" style=\"width:50px; height:56px; float:left; padding-right:5px;\">" +

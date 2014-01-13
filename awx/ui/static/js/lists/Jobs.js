@@ -89,7 +89,8 @@ angular.module('JobsListDefinition', [])
                 mode: 'all',             
                 ngClick: "submitJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}' )",
                 'class': 'btn-success btn-xs',
-                awToolTip: 'Relaunch the job template, running it again from scratch'
+                awToolTip: 'Relaunch the job template, running it again from scratch',
+                dataPlacement: 'top'
                 },
             cancel: {
                 label: 'Cancel',
@@ -98,7 +99,8 @@ angular.module('JobsListDefinition', [])
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
                 "class": 'btn-danger btn-xs delete-btn',
                 awToolTip: 'Cancel a running or pending job',
-                ngShow: "job.status == 'pending' || job.status == 'running' || job.status == 'waiting'"
+                ngShow: "job.status == 'pending' || job.status == 'running' || job.status == 'waiting'",
+                dataPlacement: 'top'
                 },
             "delete": {
                 label: 'Delete',
@@ -107,7 +109,8 @@ angular.module('JobsListDefinition', [])
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
                 "class": 'btn-danger btn-xs delete-btn',
                 awToolTip: 'Remove the selected job from the database',
-                ngShow: "job.status != 'pending' && job.status != 'running' && job.status != 'waiting'"
+                ngShow: "job.status != 'pending' && job.status != 'running' && job.status != 'waiting'",
+                dataPlacement: 'top'
                 },
              dropdown: {
                 type: 'DropDown',

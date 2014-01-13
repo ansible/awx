@@ -450,8 +450,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
         var inventory_id = params.inventory_id;
         var group_id = (params.group_id !== undefined) ? params.group_id : null;
-        var inventory_scope = params.scope;
-
+        var parent_scope = params.scope;
+       
         // Inject dynamic view
         var defaultUrl = (group_id !== null) ? GetBasePath('groups') + group_id + '/children/' : 
             GetBasePath('inventory') + inventory_id + '/groups/';
@@ -459,14 +459,14 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var generator = GenerateForm;
         var scope = generator.inject(form, { mode: 'add', modal: true, related: false, show_modal: false });
         var groupCreated = false;
-        
+
+        $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
+
         scope.formModalActionLabel = 'Save';
         scope.formModalCancelShow = true;
         scope.parseType = 'yaml';
         scope.source = null;
         ParseTypeChange(scope);
-
-        $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         
         generator.reset();
         var master={};
@@ -475,24 +475,28 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             scope.removeAddTreeRefreshed();
         }
         scope.removeAddTreeRefreshed = scope.$on('GroupTreeRefreshed', function(e) {
+            $rootScope.formModalHeader = null; 
+            $rootScope.formModalCancleShow= null; 
+            $rootScope.formModalActionLabel = null; 
             Wait('stop');
             $('#form-modal').modal('hide');
             scope.removeAddTreeRefreshed();
             });
 
         if (scope.removeSaveComplete) {
-           scope.removeSaveComplete();
+            scope.removeSaveComplete();
         }
         scope.removeSaveComplete = scope.$on('SaveComplete', function(e, group_id, error) {
             if (!error) {
+                scope.searchCleanup();
                 scope.formModalActionDisabled = false;
                 scope.showGroupHelp = false;  //get rid of the Hint
-                BuildTree({ scope: inventory_scope, inventory_id: inventory_id, refresh: true, new_group_id: group_id });
+                BuildTree({ scope: parent_scope, inventory_id: inventory_id, refresh: true, new_group_id: group_id });
             }
             });
 
         if (scope.removeFormSaveSuccess) {
-           scope.removeFormSaveSuccess();
+            scope.removeFormSaveSuccess();
         }
         scope.removeFormSaveSuccess = scope.$on('formSaveSuccess', function(e, group_id, url) {
             
@@ -574,7 +578,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                scope.$emit('SaveComplete', group_id, false);
             }
             });
-
+        
+        // Cancel
+        scope.cancelModal = function() {
+            if (scope.searchCleanup) {
+                scope.searchCleanup();
+            }
+            }
 
         // Save
         scope.formModalAction = function() {
@@ -637,12 +647,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 });
             }
 
-        // Cancel
-        scope.formReset = function() {
-            // Defaults
-            generator.reset();
-            }; 
-
         var choicesReady = 0;
 
         if (scope.removeChoicesReady) {
@@ -699,7 +703,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var form = GroupForm;
         var defaultUrl =  GetBasePath('groups') + group_id + '/';
         var master = {};
-        var relatedSets = {};
 
         // Load the modal form
         var scope = generator.inject(form, { mode: 'edit', modal: true, related: false, show_modal: false });
@@ -726,10 +729,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             scope.groupLoadedRemove();
         }
         scope.groupLoadedRemove = scope.$on('groupLoaded', function() {
-            for (var set in relatedSets) {
-                scope.search(relatedSets[set].iterator);
-            }
-
             if (scope.variable_url) {
                 // get group variables
                 Rest.setUrl(scope.variable_url);
@@ -871,12 +870,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                             master[fld] = scope[fld];
                         }
                     }
-                    var related = data.related;
-                    for (var set in form.related) {
-                        if (related[set]) {
-                            relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
-                        }
-                    }
                     scope.variable_url = data.related.variable_data;
                     scope.source_url = data.related.inventory_source;
                     $('#form-modal').modal('show');
@@ -926,6 +919,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         scope.removeSaveComplete = scope.$on('SaveComplete', function(e, error) {
             if (!error) {
+                // Update the view with any changes
                 UpdateGroup({ 
                     scope: parent_scope,
                     group_id: group_id,
@@ -935,6 +929,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         has_inventory_sources: (scope.source) ? true : false 
                         }
                     });
+                //Clean up
+                scope.searchCleanup();
                 scope.formModalActionDisabled = false;
                 scope.showGroupHelp = false;  //get rid of the Hint
                 Wait('stop');
@@ -1024,6 +1020,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                scope.$emit('SaveComplete', false);
             }
             });
+
+        // Cancel
+        scope.cancelModal = function() {
+            if (scope.searchCleanup) {
+                scope.searchCleanup();
+            }
+            }
 
         // Save
         scope.formModalAction = function() {
@@ -1120,17 +1123,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 form: GroupForm
                 });
             }
-        
-        // Cancel
-        scope.formReset = function() {
-            generator.reset();
-            for (var fld in master) {
-                scope[fld] = master[fld];
-            }
-            scope.parseType = 'yaml';
-            $('#s2id_group_source_regions').select2('data', master['source_regions']);
-            }
-            
+
         }
         }])
 

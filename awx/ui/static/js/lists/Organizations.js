@@ -47,7 +47,8 @@ angular.module('OrganizationListDefinition', [])
                 ngClick: "editOrganization(\{\{ organization.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
-                awToolTip: 'View/Edit organization'
+                awToolTip: 'View/Edit organization',
+                dataPlacement: 'top'
                 },
 
             "delete": {
@@ -55,7 +56,8 @@ angular.module('OrganizationListDefinition', [])
                 ngClick: "deleteOrganization(\{\{ organization.id \}\},'\{\{ organization.name \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',
-                awToolTip: 'Delete organization'
+                awToolTip: 'Delete organization',
+                dataPlacement: 'top'
                 }
             }
         });

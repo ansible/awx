@@ -73,7 +73,8 @@ angular.module('CredentialsListDefinition', [])
                 icon: 'fa-edit',
                 label: 'Edit',
                 "class": 'btn-sm',
-                awToolTip: 'View/Edit credential'
+                awToolTip: 'View/Edit credential',
+                dataPlacement: 'top'
                 },
 
             "delete": {
@@ -81,7 +82,8 @@ angular.module('CredentialsListDefinition', [])
                 icon: 'fa-trash',
                 label: 'Delete',
                 "class": 'btn-sm',
-                awToolTip: 'Delete credential'
+                awToolTip: 'Delete credential',
+                dataPlacement: 'top'
                 }
             }
         });

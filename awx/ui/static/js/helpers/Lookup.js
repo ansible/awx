@@ -27,11 +27,11 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
 
         var defaultUrl;
         if (params.url) {
-           // pass in a url value to override the default
-           defaultUrl = params.url;  
+            // pass in a url value to override the default
+            defaultUrl = params.url;  
         }
         else {
-          defaultUrl = (list.name == 'inventories') ? GetBasePath('inventory') : GetBasePath(list.name);
+            defaultUrl = (list.name == 'inventories') ? GetBasePath('inventory') : GetBasePath(list.name);
         }
         
         // Show pop-up 
@@ -67,15 +67,15 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
                        found = true;
                        scope[field] = listScope[list.name][i].id;
                        if (scope[form.name + '_form'] && form.fields[field] && form.fields[field].sourceModel) {
-                          scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] = 
-                              listScope[list.name][i][form.fields[field].sourceField];
+                           scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] = 
+                               listScope[list.name][i][form.fields[field].sourceField];
                           if (scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField]) {
-                             scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField]
-                                 .$setValidity('awlookup',true);
+                              scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField]
+                                  .$setValidity('awlookup',true);
                           }
                        }
                        if (scope[form.name + '_form']) {
-                          scope[form.name + '_form'].$setDirty();
+                           scope[form.name + '_form'].$setDirty();
                        }
                        listGenerator.hide();
                     }
@@ -94,12 +94,12 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
             listScope['toggle_' + list.iterator] = function(id) {
                 for (var i=0; i < scope[list.name].length; i++) {
                     if (listScope[list.name][i]['id'] == id) {
-                       listScope[list.name][i]['checked'] = '1';
-                       listScope[list.name][i]['success_class'] = 'success';
+                        listScope[list.name][i]['checked'] = '1';
+                        listScope[list.name][i]['success_class'] = 'success';
                     }
                     else {
-                       listScope[list.name][i]['checked'] = '0';
-                       listScope[list.name][i]['success_class'] = '';
+                        listScope[list.name][i]['checked'] = '0';
+                        listScope[list.name][i]['success_class'] = '';
                     }
                 }
                 }
@@ -114,10 +114,10 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
             listScope.lookupPostRefreshRemove = scope.$on('PostRefresh', function() {
                 for (var fld in list.fields) {
                    if (list.fields[fld].type && list.fields[fld].type == 'date') {
-                      //convert dates to our standard format
-                      for (var i=0; i < scope[list.name].length; i++) {
-                          scope[list.name][i][fld] = FormatDate(new Date(scope[list.name][i][fld]));
-                      }
+                       //convert dates to our standard format
+                       for (var i=0; i < scope[list.name].length; i++) {
+                           scope[list.name][i][fld] = FormatDate(new Date(scope[list.name][i][fld]));
+                       }
                    } 
                 }
                 // List generator creates the form, resetting it and losing the previously selected value. 

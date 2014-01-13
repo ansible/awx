@@ -252,7 +252,7 @@
               <div class="modal-footer">
                 <button ng-show="formModalInfo !== undefined && formModalInfo != ''" ng-click="formModalInfoAction()" 
                     class="btn btn-sm pull-left"><i class="fa fa-search-plus"></i> <span ng-bind="formModalInfo"></span></button>
-                <a href="#" ng-show="formModalCancelShow" data-target="#form-modal" data-dismiss="modal" id="form_cancel_btn" class="btn btn-default">Cancel</a>
+                <a href="#" ng-show="formModalCancelShow" data-target="#form-modal" ng-click="cancelModal()" data-dismiss="modal" id="form_cancel_btn" class="btn btn-default">Cancel</a>
                 <a href="" ng-bind="formModalActionLabel" ng-click="formModalAction()" ng-disabled="formModalActionDisabled" id="form_ok_btn" class="btn btn-primary"></a>
               </div>
           </div><!-- modal-content -->

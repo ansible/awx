@@ -44,7 +44,8 @@ angular.module('GroupListDefinition', [])
                 ngClick: "editGroup(\{\{ group.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs',
-                awToolTip: 'View/Edit group'
+                awToolTip: 'View/Edit group',
+                dataPlacement: 'top'
                 },
 
             "delete": {
@@ -52,7 +53,8 @@ angular.module('GroupListDefinition', [])
                 ngClick: "deleteGroup(\{\{ group.id \}\},'\{\{ group.name \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-xs',
-                awToolTip: 'Delete group'
+                awToolTip: 'Delete group',
+                dataPlacement: 'top'
                 }
             }
         });

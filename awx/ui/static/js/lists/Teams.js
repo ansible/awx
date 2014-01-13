@@ -54,7 +54,8 @@ angular.module('TeamsListDefinition', [])
                 ngClick: "editTeam(\{\{ team.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
-                awToolTip: 'View/Edit team'
+                awToolTip: 'View/Edit team',
+                dataPlacement: 'top'
                 },
 
             "delete": {
@@ -62,7 +63,8 @@ angular.module('TeamsListDefinition', [])
                 ngClick: "deleteTeam(\{\{ team.id \}\},'\{\{ team.name \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',
-                awToolTip: 'Delete team'
+                awToolTip: 'Delete team',
+                dataPlacement: 'top'
                 }
             }
         });

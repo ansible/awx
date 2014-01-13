@@ -56,7 +56,8 @@ angular.module('UserListDefinition', [])
                 ngClick: "editUser(\{\{ user.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
-                awToolTip: 'View/Edit user'
+                awToolTip: 'View/Edit user',
+                dataPlacement: 'top'
                 },
 
             "delete": {
@@ -64,7 +65,8 @@ angular.module('UserListDefinition', [])
                 ngClick: "deleteUser(\{\{ user.id \}\},'\{\{ user.username \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',
-                awToolTip: 'Delete user'
+                awToolTip: 'Delete user',
+                dataPlacement: 'top'
                 }
             }
         });

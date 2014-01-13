@@ -101,14 +101,16 @@ angular.module('InventoriesListDefinition', [])
                 ngClick: "editInventory(\{\{ inventory.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
-                awToolTip: 'Edit inventory'
+                awToolTip: 'Edit inventory',
+                dataPlacement: 'top'
                 },
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteInventory(\{\{ inventory.id \}\},'\{\{ inventory.name \}\}')",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',
-                awToolTip: 'Delete inventory'
+                awToolTip: 'Delete inventory',
+                dataPlacement: 'top'
                 },
              dropdown: {
                 type: 'DropDown',
