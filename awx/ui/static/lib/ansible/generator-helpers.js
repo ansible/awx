@@ -62,6 +62,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             case 'awTipPlacement':
                result = "aw-tip-placement=\"" + value + "\" ";
                break;
+            case 'dataTipWatch':
+               result = "data-tip-watch=\"" + value + "\" ";
+               break;
             case 'columnShow':
                result = "ng-show=\"" + value + "\" ";
                break;
@@ -533,6 +536,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                  html += Attr(field, 'awToolTip');
                  if (field.dataPlacement) {
                     html += Attr(field,'dataPlacement');
+                 }
+                 if (field.dataTipWatch) {
+                    html += Attr(field,'dataTipWatch');
                  }
               }
               html += (cap) ? ">" : "";

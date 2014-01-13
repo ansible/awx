@@ -256,7 +256,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
            $(element).tooltip({ placement: placement, delay: delay, html: true, title: attrs.awToolTip, container: 'body' });
            
            if (attrs.tipWatch) {
-              // Add 'data-tip-watch=<variable to watch>' and we'll watch for changes
+              // Add dataTipWatch: 'variable_name'
               scope.$watch(attrs.tipWatch, function(newVal, oldVal) {
                   if (newVal !== oldVal) {
                       // Where did fixTitle come frome?:

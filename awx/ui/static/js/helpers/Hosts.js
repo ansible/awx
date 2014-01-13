@@ -14,8 +14,21 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                                 ])
   
 
-    .factory('HostsReload', [ 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait', 
-    function(Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait) {
+    .factory('SetEnabledMsg', [ function() {
+    return function(host) { 
+        if (host.has_inventory_sources) {
+            // Inventory sync managed, so not clickable 
+            host.enabledToolTip = (host.enabled) ? 'Host is available' : 'Host is not available';
+        }
+        else {
+            // Clickable
+            host.enabledToolTip = (host.enabled) ? 'Host is available. Click to toggle.' : 'Host is not available. Click to toggle.';
+        }
+        }
+        }])
+    
+    .factory('HostsReload', [ 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait', 'SetEnabledMsg', 
+    function(Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetEnabledMsg) {
     return function(params) {
         
         var scope = params.scope;
@@ -32,6 +45,10 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             scope.removePostRefresh();
         }
         scope.removePostRefresh = scope.$on('PostRefresh', function(e) {
+            for (var i=0; i < scope.hosts.length; i++) {
+                //Set tooltip for host enabled flag
+                SetEnabledMsg(scope.hosts[i]);  
+            }
             Wait('stop');
             scope.$emit('HostReloadComplete');
             });
@@ -94,53 +111,46 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         }
         }])
-    
-    .factory('ToggleHostEnabled', [ 'GetBasePath', 'Rest', 'Wait', 'ProcessErrors', 'Alert',
-    function(GetBasePath, Rest, Wait, ProcessErrors, Alert) {
-    return function(id, sources, scope) {
-        var i;
+
+    .factory('ToggleHostEnabled', [ 'GetBasePath', 'Rest', 'Wait', 'ProcessErrors', 'Alert', 'Find', 'SetEnabledMsg',
+    function(GetBasePath, Rest, Wait, ProcessErrors, Alert, Find, SetEnabledMsg) {
+    return function(params) {
         
-        function setMsg() {
-            scope['hosts'][i].enabled = (scope['hosts'][i].enabled) ? false : true;
-            scope['hosts'][i].enabled_flag = scope['hosts'][i].enabled;
-            if (scope['hosts'][i].has_inventory_sources) {
-                // Inventory sync managed, so not clickable 
-                scope['hosts'][i].enabledToolTip = (scope['hosts'][i].enabled) ? 'Ready! Availabe to running jobs.' :
-                    'Out to lunch! This host is not available to running jobs.';
-            }
-            else {
-                // Clickable
-                scope['hosts'][i].enabledToolTip = (scope['hosts'][i].enabled) ? 'Ready! Available to running jobs. Click to toggle.' :
-                    'Out to lunch! Host not available to running jobs. Click to toggle.';
-            }
+        var id = params.host_id; 
+        var external_source = params.external_source;
+        var scope = params.scope 
+
+        var host;
+        
+        function setMsg(host) {
+            host.enabled = (host.enabled) ? false : true;  
+            host.enabled_flag = host.enabled; 
+            SetEnabledMsg(host);
             }
 
-        if (!sources) {
+        if (!external_source) {
             // Host is not managed by an external source
             Wait('start');
-            for (i=0; i < scope.hosts.length; i++) {
-                if (scope.hosts[i].id == id) {
-                    //host = scope.hosts[i];
-                    setMsg();
-                    break;
-                }    
-            }
+            host = Find({ list: scope.hosts, key: 'id', val: id });
+            setMsg(host);
+            
             Rest.setUrl(GetBasePath('hosts') + id + '/');
-            Rest.put(scope['hosts'][i])
+            Rest.put(host)
                 .success( function(data, status, headers, config) {
                     Wait('stop');
                     })
                 .error( function(data, status, headers, config) {
                     // Flip the enabled flag back
-                    setMsg();
+                    setMsg(host);   
                     Wait('stop');
                     ProcessErrors(scope, data, status, null,
                         { hdr: 'Error!', msg: 'Failed to update host. PUT returned status: ' + status });
                     });
         }
         else {
-            Alert('External Host', 'This host is part of an external inventory. It can only be enabled or disabled by the ' + 
-                'inventory sync process.', 'alert-info');
+            Alert('Action Not Allowed', 'This host is part of a cloud inventory. It can only be disabled in the cloud.' +
+                ' After disabling it, run an inventory sync to see the new status reflected here.',
+                'alert-info');
         }
         }
         }])

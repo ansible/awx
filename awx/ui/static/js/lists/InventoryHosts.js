@@ -66,6 +66,7 @@ angular.module('InventoryHostsDefinition', [])
                 iconClass: "\{\{ 'fa icon-enabled-' + host.enabled \}\}", 
                 dataPlacement: 'top',
                 awToolTip: "\{\{ host.enabledToolTip \}\}",
+                dataTipWatch: "host.enabledToolTip",
                 ngClick: "toggleHostEnabled(\{\{ host.id \}\}, \{\{ host.has_inventory_sources \}\})"
                 },
              active_failures: {
