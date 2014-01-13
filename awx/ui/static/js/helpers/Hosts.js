@@ -47,6 +47,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.removePostRefresh = scope.$on('PostRefresh', function(e) {
             for (var i=0; i < scope.hosts.length; i++) {
                 //Set tooltip for host enabled flag
+                scope.hosts[i].enabled_flag = scope.hosts[i].enabled;
                 SetEnabledMsg(scope.hosts[i]);  
             }
             Wait('stop');
@@ -336,9 +337,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
 
     .factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find', 'SetEnabledMsg',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, HostsReload, ParseTypeChange, Wait, Find) {
+        GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetEnabledMsg) {
     return function(params) {
         
         var parent_scope = params.scope;
@@ -428,6 +429,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             // Update the name on the list
             var host = Find({ list: parent_scope.hosts, key: 'id', val: host_id });
             host.name = scope.name;
+            host.enabled = scope.enabled;
+            host.enabled_flag = scope.enabled;
+            SetEnabledMsg(host);
             // Close modal
             Wait('stop');
             $('#form-modal').modal('hide');

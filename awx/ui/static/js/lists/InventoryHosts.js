@@ -61,7 +61,7 @@ angular.module('InventoryHostsDefinition', [])
             },
         
         fieldActions: {
-              enabled_flag: {
+            enabled_flag: {
                 //label: 'Enabled',
                 iconClass: "\{\{ 'fa icon-enabled-' + host.enabled \}\}", 
                 dataPlacement: 'top',
@@ -69,13 +69,13 @@ angular.module('InventoryHostsDefinition', [])
                 dataTipWatch: "host.enabledToolTip",
                 ngClick: "toggleHostEnabled(\{\{ host.id \}\}, \{\{ host.has_inventory_sources \}\})"
                 },
-             active_failures: {
+            active_failures: {
                 //label: 'Job Status',
                 awToolTip: "\{\{ host.badgeToolTip \}\}",
                 dataPlacement: 'top',
                 iconClass: "\{\{ 'fa icon-failures-' + host.has_active_failures \}\}"
                 },
-             edit: {
+            edit: {
                 //label: 'Edit',
                 ngClick: "editHost(\{\{ host.id \}\})",
                 icon: 'icon-edit',
