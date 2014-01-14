@@ -512,6 +512,72 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
                 });
             }
         }
+        }])
+
+    
+    /*  
+     *  Make an element draggable. Used on inventory groups tree.
+     *
+     *  awDraggable: boolean || {{ expression }}
+     *
+     */ 
+    .directive('awDraggable', [ function() {
+        return function(scope, element, attrs) {
+    
+        if (attrs.awDraggable == "true") {
+            var containment = attrs.containment;  //provide dataContainment:"#id"
+            $(element).draggable({ 
+                containment: containment, 
+                scroll: true,
+                revert: "invalid",
+                helper: "clone", 
+                start: function(e, ui) {
+                    ui.helper.addClass('draggable-clone');
+                    }
+                });
+        }
+
+        }
+        }])
+    
+    /*  
+     *  Make an element droppable- it can receive draggable elements
+     *
+     *  awDroppable: boolean || {{ expression }}
+     *
+     */ 
+    .directive('awDroppable', ['Find', function(Find) {
+        return function(scope, element, attrs) {
+        if (attrs.awDroppable == "true") {
+            $(element).droppable({ 
+                // the following is inventory specific accept checking and 
+                // drop processing.
+                accept: function(draggable) {
+                    var node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id')) });
+                    if (node) {
+                        var group = draggable.attr('data-group-id');
+                        return (node.children.indexOf(group) > -1) ? false : true;
+                    }
+                    else {
+                        // this shouldn't be possible
+                        return false;
+                    }
+                    },
+                over: function(e, ui) {
+                    $(this).addClass('droppable-hover');
+                    },
+                out: function(e, ui) {
+                    $(this).removeClass('droppable-hover');
+                    },
+                drop: function(e, ui) {
+                    // Drag-n-drop succeeded. Trigger a response from the inventory.edit controller
+                    $(this).removeClass('droppable-hover');
+                    scope.$emit('CopyMoveGroup', ui.draggable.attr('data-tree-id'), $(this).attr('data-tree-id'));
+                    }
+                });
+        }
+
+        }
         }]);
 
 

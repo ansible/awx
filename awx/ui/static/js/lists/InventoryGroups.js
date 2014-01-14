@@ -29,9 +29,15 @@ angular.module('InventoryGroupsDefinition', [])
                 ngClass: "group.selected_class",
                 hasChildren: true,
                 columnClass: 'col-lg-9',
-                nosort: true
-                },
-            source: {
+                nosort: true,
+                awDroppable: "\{\{ group.isDroppable \}\}",
+                awDraggable: "\{\{ group.isDraggable \}\}",
+                dataContainment: "#groups_table",
+                dataTreeId: "\{\{ group.id \}\}",
+                dataGroupId: "\{\{ group.group_id \}\}",
+                dataAccept: "dropAccept" //function determining when draggable is accepted by droppable
+                }
+            /*source: {
                 label: 'Source',
                 searchType: 'select',
                 searchOptions: [
@@ -65,7 +71,7 @@ angular.module('InventoryGroupsDefinition', [])
                 searchOnly: true,
                 sourceModel: 'inventory_source',
                 sourceField: 'status'
-                }
+                }*/
             },
 
         actions: {

@@ -41,6 +41,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         }])
 
+
     .factory('GetUpdateIntervalOptions', [ function() {
         return function() {
             return [
@@ -217,110 +218,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         }])
 
-    .factory('GroupsList', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupList', 'GenerateList', 
-        'Prompt', 'SearchInit', 'PaginateInit', 'ProcessErrors', 'GetBasePath', 'GroupsAdd', 'SelectionInit',
-    function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupList, GenerateList, Prompt, SearchInit, PaginateInit,
-        ProcessErrors, GetBasePath, GroupsAdd, SelectionInit) {
-    return function(params) {
-        
-        // build and present the list of groups we can add to an existing group
-
-        var inventory_id = params.inventory_id;
-        var group_id = (params.group_id !== undefined) ? params.group_id : null;
-
-        var list = GroupList;
-        var defaultUrl = GetBasePath('inventory') + inventory_id + '/groups/';
-        var view = GenerateList;
-        
-        var scope = view.inject(GroupList, {
-            id: 'form-modal-body', 
-            mode: 'select',
-            breadCrumbs: false,
-            selectButton: false 
-            });
-
-        scope.formModalActionLabel = 'Select';
-        scope.formModalHeader = 'Copy Groups';
-        scope.formModalCancelShow = true;
-        scope.formModalActionClass = 'btn btn-success';
-        
-        $('.popover').popover('hide');  //remove any lingering pop-overs
-        $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
-        $('#form-modal').modal({ backdrop: 'static', keyboard: false });
-        
-        // Initialize the selection list
-        var url = (group_id) ? GetBasePath('groups') + group_id + '/children/' :
-            GetBasePath('inventory') + inventory_id + '/groups/'; 
-        var selected = [];
-        SelectionInit({ scope: scope, list: list, url: url, selected: selected });
-        
-        scope.formModalAction = function() {
-            var groups = [];
-            for (var j=0; j < selected.length; j++) {
-                if (scope.inventoryRootGroups.indexOf(selected[j].id) > -1) {
-                   groups.push(selected[j].name);
-                }
-            }
-
-            if (groups.length > 0) {
-               var action = function() {
-                   $('#prompt-modal').modal('hide');
-                   scope.finishSelection();
-                   }
-               if (groups.length == 1) {
-                  Prompt({ hdr: 'Warning', body: 'Be aware that ' + groups[0] + 
-                      ' is a top level group. Adding it to ' + scope.selectedNodeName + ' will remove it from the top level. Do you ' + 
-                      ' want to continue with this action?', 
-                      action: action });
-               }
-               else {
-                  var list = '';
-                  for (var i=0; i < groups.length; i++) {
-                      if (i+1 == groups.length) {
-                         list += ' and ' + groups[i];
-                      }
-                      else {
-                         list += groups[i] + ', ';
-                      }
-                  }
-                  Prompt({ hdr: 'Warning', body: 'Be aware that ' + list + 
-                      ' are top level groups. Adding them to ' + scope.selectedNodeName + ' will remove them from the top level. Do you ' + 
-                      ' want to continue with this action?', 
-                      action: action });
-               }
-            }
-            else {
-               scope.finishSelection();
-            }
-            }
-        
-        var searchUrl = (group_id) ? GetBasePath('groups') + group_id + '/potential_children/' :
-            GetBasePath('inventory') + inventory_id + '/groups/'; 
-
-        SearchInit({ scope: scope, set: 'groups', list: list, url: searchUrl });
-        PaginateInit({ scope: scope, list: list, url: searchUrl, mode: 'lookup' });
-        scope.search(list.iterator);
-
-        if (!scope.$$phase) {
-           scope.$digest();
-        }
-
-        if (scope.removeModalClosed) {
-           scope.removeModalClosed();
-        }
-        scope.removeModalClosed = scope.$on('modalClosed', function() {
-            /*BuildTree({
-                scope: scope,
-                inventory_id: inventory_id,
-                emit_on_select: 'NodeSelect',
-                target_id: 'search-tree-container',
-                refresh: true,
-                moveable: true
-                });*/
-            });
-        }
-        }])
-
     .factory('SourceChange', [ 'GetBasePath', 'CredentialList', 'LookUpInit',
     function(GetBasePath, CredentialList, LookUpInit){
     return function(params) {
@@ -488,7 +385,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         scope.removeSaveComplete = scope.$on('SaveComplete', function(e, group_id, error) {
             if (!error) {
-                scope.searchCleanup();
+                if (scope.searchCleanup)
+                    scope.searchCleanup();
                 scope.formModalActionDisabled = false;
                 scope.showGroupHelp = false;  //get rid of the Hint
                 BuildTree({ scope: parent_scope, inventory_id: inventory_id, refresh: true, new_group_id: group_id });

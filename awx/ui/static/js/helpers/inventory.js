@@ -187,7 +187,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         scope.formModalAction = function() {
             scope.inventory_id = inventory_id;
             parent_scope.inventory_name = scope.inventory_name;
-            console.log('set inventory_name to: ' + parent_scope.inventory_name);
             SaveInventory({ scope: scope });
             } 
         

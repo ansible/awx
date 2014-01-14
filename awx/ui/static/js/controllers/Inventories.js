@@ -319,7 +319,7 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait, 
                           GetSyncStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, 
                           Rest, ProcessErrors, InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find,
-                          HostsCreate, EditInventoryProperties, HostsEdit, HostsDelete, ToggleHostEnabled) 
+                          HostsCreate, EditInventoryProperties, HostsEdit, HostsDelete, ToggleHostEnabled, CopyMoveGroup) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -384,6 +384,13 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: true });
         });
     
+    if ($scope.removeCopMoveGroup) {
+        $scope.removeCopyMoveGroup();
+    }
+    $scope.removeCopyMoveGroup = $scope.$on('CopyMoveGroup', function(e, inbound_tree_id, target_tree_id) {
+        CopyMoveGroup({ scope: $scope, target_tree_id: target_tree_id, inbound_tree_id: inbound_tree_id });
+        });
+
     $scope.showHosts = function(tree_id, group_id, show_failures) {
         // Clicked on group
         if (tree_id !== null) {
@@ -512,6 +519,6 @@ InventoriesEdit.$inject = [ '$scope', '$location', '$routeParams', '$compile', '
                             'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'GroupsDelete',
                             'Breadcrumbs', 'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren',
                             'ViewUpdateStatus', 'GroupsCancelUpdate', 'Find', 'HostsCreate', 'EditInventoryProperties', 'HostsEdit', 
-                            'HostsDelete', 'ToggleHostEnabled'
+                            'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup'
                             ]; 
   

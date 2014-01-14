@@ -240,6 +240,7 @@ td.actions {
 
 .dropdown-toggle,
 
+/*
 .dropdown-toggle:hover,
 .btn-default:visited,
 .btn-default:hover,
@@ -249,6 +250,7 @@ td.actions {
   background-color: #bbb;
   border-color: #bbb;
 }
+*/
 
 .btn-light {
   color: #333;
@@ -1029,34 +1031,51 @@ input[type="checkbox"].checkbox-no-label {
 
 /* Inventory Edit */
 
-.selected {
-  font-weight: bold;
-  color: @blue-dark;  
-}
+  .selected {
+    font-weight: bold;
+    color: @blue-dark;  
+  }
 
-.inventory-title {
-  font-size: 16px; 
-  font-weight: bold;  
-}
+  .inventory-title {
+    font-size: 16px; 
+    font-weight: bold;  
+  }
 
-.active-row {
-   background-color: @white;
-   border-bottom: 1px solid #ddd;
-   border-right: 1px solid #ddd;
-}
+  .active-row {
+     background-color: @white;
+     border-bottom: 1px solid #ddd;
+     border-right: 1px solid #ddd;
+  }
 
-.node-toggle, .node-no-toggle {
-  /* also used on job evetns */
-  float: none;
-  padding-top: 3px;
-  padding-left: 0;
-  margin-right: 5px;
-  margin-left: 0;
-}
+  .node-toggle, .node-no-toggle {
+    /* also used on job evetns */
+    float: none;
+    padding-top: 3px;
+    padding-left: 0;
+    margin-right: 5px;
+    margin-left: 0;
+  }
 
-.node-no-toggle {
-  opacity: .30;
-}
+  .node-no-toggle {
+    opacity: .30;
+  }
+
+  .draggable-clone {
+  /*    padding: 4px;
+      border-radius: 6px;
+      background: transparent;
+      border: 1px solid @grey; */
+      font-weight: bold;
+  }
+
+  .droppable-hover {
+      background-color: @info;
+      color: @info-color;
+      padding: 4px;
+      border: 1px solid @info-border;
+      border-radius: 4px; 
+  }
+
 
 .disabled {
   color: @grey;
@@ -1336,7 +1355,7 @@ tr td button i {
     margin-top: 10px;    
   }
 
-  .tree-form-container {
+  /*.tree-form-container {
     padding-left: 15px;
     padding-right: 15px;
     
@@ -1358,7 +1377,7 @@ tr td button i {
 
   #tree-form {
     margin-top: 10px;
-  }
+  }*/
 
   .label-text {
     text-align: left;

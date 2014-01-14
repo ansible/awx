@@ -22,8 +22,6 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities'])
         var set = params.set;
         var iterator = params.iterator; 
         var url = params.url;
-        console.log('Inside refresh');
-        console.log(url);
         scope.current_url = url;
         Rest.setUrl(url);
         Rest.get()

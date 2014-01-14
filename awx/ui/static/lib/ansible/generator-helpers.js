@@ -13,82 +13,58 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
     return function(obj, key, fld) { 
         var result;
         var value = (typeof obj[key] === "string") ? obj[key].replace(/[\'\"]/g, '&quot;') : obj[key];
-        switch(key) {
-            case 'ngClick':
-               result = "ng-click=\"" + value + "\" ";
-               break;
-            case 'ngOptions':
-               result = "ng-options=\"" + value + "\" ";
-               break;
-            case 'ngClass':
-                result = "ng-class=\"" + value + "\" ";
-                break;
-            case 'ngChange':
-               result = "ng-change=\"" + value + "\" ";
-               break;
-            case 'ngDisabled':
-                result = "ng-disabled=\"" + value + "\" ";
-                break;
-            case 'ngShow':
-               result = "ng-show=\"" + value + "\" ";
-               break;
-            case 'ngHide':
-               result = "ng-hide=\"" + value + "\" ";
-               break;
-            case 'ngBind':
-                result = "ng-bind=\"" + value + "\" ";
-                break;
-            case 'trueValue':
-               result = "ng-true-value=\"" + value + "\" ";
-               break;
-            case 'falseValue':
-               result = "ng-false-value=\"" + value + "\" ";
-               break;
-            case 'awToolTip':
-               result = "aw-tool-tip=\"" + value + "\" ";
-               break;
-            case 'awPopOver':
-               // construct the entire help link
-               result = "<a id=\"awp-" + fld + "\" href=\"\" aw-pop-over=\'" + value + "\' ";
-               result += (obj.dataTitle) ? "data-title=\"" + obj['dataTitle'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
-               result += (obj.dataPlacement) ? "data-placement=\"" + obj['dataPlacement'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
-               result += (obj.dataContainer) ? "data-container=\"" + obj['dataContainer'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
-               result += "class=\"help-link\" ";
-               result += "><i class=\"fa fa-question-circle\"></i></a> ";
-               break;
-            case 'dataTitle':
-               result = "data-title=\"" + value + "\" ";
-               break;
-            case 'awTipPlacement':
-               result = "aw-tip-placement=\"" + value + "\" ";
-               break;
-            case 'dataTipWatch':
-               result = "data-tip-watch=\"" + value + "\" ";
-               break;
-            case 'columnShow':
-               result = "ng-show=\"" + value + "\" ";
-               break;
-            case 'dataPlacement':
-               result = "data-placement=\"" + value + "\" ";
-               break;
-            case 'dataContainer':
-               result = "data-container=\"" + value + "\" ";
-               break;
-            case 'icon':
-               // new method of constructing <i> icon tag. Replces Icon method.
-               result = "<i class=\"fa fa-" + value; 
-               result += (obj['iconSize']) ? " " + obj['iconSize'] : "";
-               result += "\"></i>";
-               break;
-            case 'autocomplete':
-               result = "autocomplete=\""; 
-               result += (value) ? 'true' : 'false';
-               result += "\" ";
-               break;
-            default: 
-               result = key + "=\"" + value + "\" ";
+
+        if (/^ng/.test(key)) {
+            result = 'ng-' + key.replace(/^ng/,'').toLowerCase() + "=\"" + value + "\" ";
         }
-        
+        else if (/^data|^aw/.test(key) && key != 'awPopOver') {
+            var s = '';
+            for (var i=0; i < key.length; i++) {
+                if (/[A-Z]/.test(key.charAt(i))) {
+                    s += '-' + key.charAt(i).toLowerCase();
+                }
+                else {
+                    s += key.charAt(i);
+                }
+            }
+            result = s + "=\"" + value + "\" ";
+        }
+        else {
+            switch(key) {
+                case 'trueValue':
+                   result = "ng-true-value=\"" + value + "\" ";
+                   break;
+                case 'falseValue':
+                   result = "ng-false-value=\"" + value + "\" ";
+                   break;
+                case 'awPopOver':
+                   // construct the entire help link
+                   result = "<a id=\"awp-" + fld + "\" href=\"\" aw-pop-over=\'" + value + "\' ";
+                   result += (obj.dataTitle) ? "data-title=\"" + obj['dataTitle'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
+                   result += (obj.dataPlacement) ? "data-placement=\"" + obj['dataPlacement'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
+                   result += (obj.dataContainer) ? "data-container=\"" + obj['dataContainer'].replace(/[\'\"]/g, '&quot;') + "\" " : "";
+                   result += "class=\"help-link\" ";
+                   result += "><i class=\"fa fa-question-circle\"></i></a> ";
+                   break;
+                case 'columnShow':
+                   result = "ng-show=\"" + value + "\" ";
+                   break;
+                case 'icon':
+                   // new method of constructing <i> icon tag. Replces Icon method.
+                   result = "<i class=\"fa fa-" + value; 
+                   result += (obj['iconSize']) ? " " + obj['iconSize'] : "";
+                   result += "\"></i>";
+                   break;
+                case 'autocomplete':
+                   result = "autocomplete=\""; 
+                   result += (value) ? 'true' : 'false';
+                   result += "\" ";
+                   break;
+                default: 
+                   result = key + "=\"" + value + "\" ";
+            }
+        }
+
         return  result; 
         
         }
@@ -532,14 +508,20 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                  html += "<a href=\"#/" + base + "/{{" + list.iterator + ".id }}\" ";
                  cap = true;
               }
+              if (field.awDroppable) {
+                  html += Attr(field, 'awDroppable');
+                  html += (field.dataAccept) ? Attr(field, 'dataAccept') : '';
+              }
+              if (field.awDraggable) {
+                  html += Attr(field, 'awDraggable');
+                  html += (field.dataContainment) ? Attr(field, 'dataContainment') : '';
+                  html += (field.dataTreeId) ? Attr(field, 'dataTreeId') : '';
+                  html += (field.dataGroupId) ? Attr(field, 'dataGroupId') : '';
+              }
               if (field.awToolTip) {
-                 html += Attr(field, 'awToolTip');
-                 if (field.dataPlacement) {
-                    html += Attr(field,'dataPlacement');
-                 }
-                 if (field.dataTipWatch) {
-                    html += Attr(field,'dataTipWatch');
-                 }
+                  html += Attr(field, 'awToolTip');
+                  html += (field.dataPlacement) ? Attr(field,'dataPlacement') : "";
+                  html += (field.dataTipWatch) ? Attr(field,'dataTipWatch') : "";
               }
               html += (cap) ? ">" : "";
            }
