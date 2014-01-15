@@ -75,7 +75,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                     
                     var children = [];
                     for (var j=0; j < sorted[i].children.length; j++) {
-                        children.push(sorted[i].children[j]);
+                        children.push(sorted[i].children[j].id);
                     }    
                     
                     var group = {

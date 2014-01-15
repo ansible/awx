@@ -417,7 +417,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                 })
             .error( function(data, status, headers, config) {
                 ProcessErrors(scope, data, status, form,
-                    { hdr: 'Error!', msg: 'Failed to retrieve host: ' + id + '. GET returned status: ' + status });
+                    { hdr: 'Error!', msg: 'Failed to retrieve host: ' + host_id + '. GET returned status: ' + status });
                 });
        
 

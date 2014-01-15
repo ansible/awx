@@ -554,14 +554,30 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
                 // the following is inventory specific accept checking and 
                 // drop processing.
                 accept: function(draggable) {
-                    var node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id')) });
-                    if (node) {
-                        var group = draggable.attr('data-group-id');
-                        return (node.children.indexOf(group) > -1) ? false : true;
+                    if ($(this).attr('data-group-id') == draggable.attr('data-group-id')) {
+                        // No dropping a node onto itself (or a copy)
+                        return false;
                     }
                     else {
-                        // this shouldn't be possible
-                        return false;
+                        // No dropping a node into a group that already has the node
+                        var node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id')) });
+                        if (node) {
+                            var group = parseInt(draggable.attr('data-group-id'));
+                            var found = false;
+                            // For whatever reason indexOf() would not work...
+                            for (var i=0; i < node.children.length; i++) {
+                                if (node.children[i] == group) {
+                                   found = true;
+                                   break;
+                                }
+
+                            }
+                            return (found) ? false : true;
+                        }
+                        else {
+                            // this shouldn't be possible
+                            return false;
+                        }
                     }
                     },
                 over: function(e, ui) {
