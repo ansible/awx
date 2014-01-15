@@ -141,7 +141,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         // Return values for use on host status indicator
         
         if (active_failures > 0) {
-            tip = "Contains " + active_failures +
+            tip = active_failures +
                 [ (active_failures == 1) ? ' host' : ' hosts' ] + ' with failed jobs.' +
                 [ (active_failures == 1) ? ' host' : ' hosts' ] + '.';
             html_class = 'true';
@@ -151,17 +151,12 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            failures = false;
            if (total_hosts == 0) {
                // no hosts
-               tip = "There are no hosts in this group.";
+               tip = "Group contains 0 hosts.";
                html_class = 'na';
-           }
-           else if (total_hosts == 1) {
-               // on host with 0 failures
-               tip = "The host in this group does not have a recent job failure.";
-               html_class = 'false';
            }
            else {
                // many hosts with 0 failures
-               tip = "None of the " + total_hosts + " hosts in this group have a recent job failure.";
+               tip = 'No job failures';
                html_class = 'false';
            }
         }
@@ -193,17 +188,17 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 launch_class = 'btn-disabled',
                 stat = 'n/a';
                 stat_class = 'icon-cloud-na disabled';
-                status_tip = 'Group source not configured. Click <i class="fa fa-pencil"></i> to update.';
+                status_tip = 'Cloud source not configured. Click <i class="fa fa-pencil"></i> to update.';
                 launch_tip = status_tip;
                 break;
             case 'failed':
-                status_tip = 'Failed with errors. Click to view log.';
+                status_tip = 'Sync failed. Click to view log.';
                 break;
             case 'successful':
-                status_tip = 'Success! Click to view log.';
+                status_tip = 'Sync completed. Click to view log.';
                 break; 
             case 'updating':
-                status_tip = 'Running';
+                status_tip = 'Sync running';
                 break;
             }
 
