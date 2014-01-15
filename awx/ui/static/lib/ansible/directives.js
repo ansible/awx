@@ -533,7 +533,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
                 helper: "clone", 
                 start: function(e, ui) {
                     ui.helper.addClass('draggable-clone');
-                    }
+                    },
+                zIndex: 100
                 });
         }
 
@@ -573,7 +574,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
                     // Drag-n-drop succeeded. Trigger a response from the inventory.edit controller
                     $(this).removeClass('droppable-hover');
                     scope.$emit('CopyMoveGroup', ui.draggable.attr('data-tree-id'), $(this).attr('data-tree-id'));
-                    }
+                    },
+                tolerance: 'touch'
                 });
         }
 

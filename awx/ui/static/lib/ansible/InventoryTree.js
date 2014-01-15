@@ -222,8 +222,8 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
     
 
     // Copy or Move a group on the tree after drag-n-drop
-    .factory('CopyMoveGroup', ['$compile', 'Alert', 'ProcessErrors', 'Find', 'Wait', 'Rest', 'Empty',
-        function($compile, Alert, ProcessErrors, Find, Wait, Rest, Empty) {
+    .factory('CopyMoveGroup', ['$compile', 'Alert', 'ProcessErrors', 'Find', 'Wait', 'Rest', 'Empty', 'GetBasePath',
+        function($compile, Alert, ProcessErrors, Find, Wait, Rest, Empty, GetBasePath) {
         return function(params) {
 
             var scope = params.scope; 
@@ -248,19 +248,22 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
             }
 
             html += "</div>\n";
-            html += "<div class=\"modal-body text-center\">\n";
+            html += "<div class=\"modal-body\">\n";
             
             if (target.id == 1) {
                 html += "<p>Are you sure you want to move group " + inbound.name + " to the top level?</p>";
             }
             else if (inbound.parent == 0) {
-                html += "<p>Are you sure you want to move group " + inbound.name + " away from the top level?</p>";
+                html += "<p>Are you sure you want to move group " + inbound.name + " from the top level and make it a child of " +
+                    target.name + "?</p>";
             }
             else {
+                html += "<div class=\"text-center\">\n";
                 html += "<p>Would you like to copy or move group <em>" + inbound.name + "</em> to group <em>" + target.name + "</em>?</p>\n";
                 html += "<div style=\"margin-top: 30px;\">\n";
                 html += "<a href=\"\" ng-click=\"moveGroup()\" class=\"btn btn-primary\" style=\"margin-right: 15px;\"><i class=\"fa fa-cut\"></i> Move</a>\n";
                 html += "<a href=\"\" ng-click=\"copyGroup()\" class=\"btn btn-primary\"><i class=\"fa fa-copy\"></i> Copy</a>\n";
+                html += "</div>\n";
                 html += "</div>\n";
             }
             
@@ -280,7 +283,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
             
             // Inject our custom dialog
             var e = angular.element(document.getElementById('inventory-modal-container'));
-            e.append(html);
+            e.empty().append(html);
             $compile(e)(scope);
             
             // Display it
@@ -303,7 +306,8 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                 scope.removeGroupRemove = scope.$on('removeGroup', function() {
                     if (inbound.parent > 0) {
                         // Only remove a group from a parent when the parent is a group and not the inventory root
-                        var url = GetBasePath('base') + 'groups/' + inbound.parent + '/children/';
+                        var parent = Find({ list: scope.groups, key: 'id', val: inbound.parent })
+                        var url = GetBasePath('base') + 'groups/' + parent.group_id + '/children/';
                         Rest.setUrl(url);
                         Rest.post({ id: inbound.group_id, disassociate: 1 })
                             .success( function(data, status, headers, config) {
@@ -311,9 +315,10 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                                 scope.$emit('GroupDeleteCompleted'); 
                                 })
                             .error( function(data, status, headers, config) {
+                                Wait('stop');
                                 ProcessErrors(scope, data, status, null,
                                     { hdr: 'Error!', msg: 'Failed to remove ' + inbound.name + 
-                                      ' from ' + target.name + '. POST returned status: ' + status });
+                                      ' from ' + parent.name + '. POST returned status: ' + status });
                                 });
                     }
                     else {
@@ -325,7 +330,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                 // add the new group to the target parent
                 var url = (!Empty(target.group_id)) ? 
                     GetBasePath('base') + 'groups/' + target.group_id + '/children/' : 
-                        GetBasePath('inventory') + inv_id + '/groups/';
+                        GetBasePath('inventory') + scope.inventory_id + '/groups/';
                 var group = { 
                     id: inbound.group_id,
                     name: inbound.name,
@@ -339,6 +344,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                         })
                     .error( function(data, status, headers, config) {
                         var target_name = (Empty(target.group_id)) ? 'inventory' : target.name;
+                        Wait('stop');
                         ProcessErrors(scope, data, status, null,
                             { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
                             target_name + '. POST returned status: ' + status });
@@ -348,10 +354,11 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
 
             scope.copyGroup = function() {
                 $('#copy-prompt-modal').modal('hide');
+                Wait('start');
                 // add the new group to the target parent
                 var url = (!Empty(target.group_id)) ? 
                     GetBasePath('base') + 'groups/' + target.group_id + '/children/' : 
-                        GetBasePath('inventory') + inv_id + '/groups/';
+                        GetBasePath('inventory') + scope.inventory_id + '/groups/';
                 var group = { 
                     id: inbound.group_id,
                     name: inbound.name,
@@ -366,6 +373,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                        })
                    .error( function(data, status, headers, config) {
                        var target_name = (Empty(target.group_id)) ? 'inventory' : target.name;
+                       Wait('stop');
                        ProcessErrors(scope, data, status, null,
                           { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
                           target_name + '. POST returned status: ' + status });

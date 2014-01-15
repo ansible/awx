@@ -56,7 +56,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         SearchInit({ scope: scope, set: 'hosts', list: InventoryHosts, url: url });
         PaginateInit({ scope: scope, list:  InventoryHosts, url: url });
-        console.log('before call to hosts search')
         scope.search(InventoryHosts.iterator);
         }  
         }])
