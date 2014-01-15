@@ -117,9 +117,9 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
                }
                else {
                   // many hosts with 0 failures
-                  scope.inventories[i].status_tip = 'Contains ' + scope.inventories[i].total_inventory_sources + 
+                  scope.inventories[i].status_tip = scope.inventories[i].total_inventory_sources + 
                       ' cloud ' + ( (scope.inventories[i].total_inventory_sources > 0) ? 'sources' : 'source' ) + 
-                      ' and no failures. Click to view details.';
+                      ' and 0 failures. Click to view details.';
                   scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/';
                   scope.inventories[i].status_class = 'successful';
                }  
@@ -315,11 +315,11 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
     
     LoadBreadCrumbs({ path: $location.path(), title: '{{ inventory_name }}' });
 
+    // After the tree data loads for the first time, generate the groups and hosts lists
     if ($scope.removeGroupTreeLoaded) {
         $scope.removeGroupTreeLoaded();
     }
     $scope.removeGroupTreeLoaded = $scope.$on('GroupTreeLoaded', function(e, inventory_name, groups) {
-        // After the tree data loads, generate the groups list
         // Add breadcrumbs
         var e = angular.element(document.getElementById('breadcrumbs'));
         e.html(Breadcrumbs({ list: list, mode: 'edit' }));
@@ -347,26 +347,28 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         $scope.show_failures = false;
         InjectHosts({ scope: $scope, inventory_id: $scope.inventory_id, tree_id: $scope.selected_tree_id, group_id: $scope.selected_group_id }); 
         });
+   
 
+    // Called after tree data is reloaded on refresh button click.
     if ($scope.removeGroupTreeRefreshed) {
         $scope.removeGroupTreeRefreshed();
     }
     $scope.removeGroupTreeRefreshed = $scope.$on('GroupTreeRefreshed', function(e, inventory_name, groups) {
-        // Called after tree data is reloaded on refresh button click.
         // Reselect the preveiously selected group node, causing host view to refresh.
         $scope.showHosts($scope.selected_tree_id, $scope.selected_group_id, false);
         });
-
+    
+    // Group was deleted. Now we need to refresh the group view.
     if ($scope.removeGroupDeleteCompleted) {
         $scope.removeGroupDeleteCompleted();
     }
     $scope.removeGroupDeleteCompleted = $scope.$on('GroupDeleteCompleted', function(e) {
-        // Group was deleted. Now we need to refresh the group view.
         $scope.selected_tree_id = 1;
         $scope.selected_group_id = null;
         BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: true });
         });
-    
+
+    // Respond to a group drag-n-drop
     if ($scope.removeCopMoveGroup) {
         $scope.removeCopyMoveGroup();
     }

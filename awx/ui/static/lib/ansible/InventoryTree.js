@@ -30,149 +30,6 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
             return newData;
             }
             }])
-    
-
-    // Figure out the group level tool tip
-    .factory('GetToolTip', [ 'FormatDate', function(FormatDate) {
-        return function(params) {
-            
-            var node = params.node;   
-      
-            var tip = ''; 
-            var link = '';
-            var html_class = '';
-            var active_failures = node.hosts_with_active_failures;
-            var total_hosts = node.total_hosts;
-            var source = node.summary_fields.inventory_source.source;
-            var status = node.summary_fields.inventory_source.status;
-
-            // Return values for the status indicator
-            var status_date = node.summary_fields.inventory_source.last_updated
-            var last_update = ( status_date == "" || status_date == null ) ? null : FormatDate(new Date(status_date));  
-            
-            switch (status) {
-                case 'never updated':
-                    html_class = 'na';
-                    tip = '<p>Inventory update has not been performed.</p>';
-                    link = '';
-                    break;
-                case 'failed':
-                    tip = '<p>Inventory update failed! Click to view process output.</p>';
-                    link = '/#/inventories/' + node.inventory + '/groups?name=' + node.name;
-                    html_class = true;
-                    break;
-                case 'successful':
-                    tip = '<p>Inventory update completed on ' + last_update + '.</p>';
-                    html_class = false;
-                    link = '';
-                    break; 
-                case 'updating':
-                    tip = '<p>Inventory update process running now. Click to view status.</p>';
-                    link = '/#/inventories/' + node.inventory + '/groups?name=' + node.name;
-                    html_class = false;
-                    break;
-                }
-            
-            if (status !== 'failed' && status !== 'updating') {
-                // update status will not override job status
-                if (active_failures > 0) {
-                    tip += "<p>Contains " + active_failures +
-                        [ (active_failures == 1) ? ' host' : ' hosts' ] + ' with failed jobs. Click to view the offending ' +
-                        [ (active_failures == 1) ? ' host' : ' hosts' ] + '.</p>';
-                        link = '/#/inventories/' + node.inventory + '/hosts?has_active_failures=true';
-                        html_class = 'true';
-                }
-                else {
-                    if (total_hosts == 0) {
-                        // no hosts
-                        tip += "<p>There are no hosts in this group. It's a sad empty shell.</p>";
-                        html_class = (html_class == '') ? 'na' : html_class;
-                    }
-                    else if (total_hosts == 1) {
-                        // on host with 0 failures
-                        tip += "<p>The 1 host in this group is happy! It does not have a job failure.</p>";
-                        html_class = 'false';
-                    } 
-                    else {
-                        // many hosts with 0 failures
-                        tip += "<p>All " + total_hosts + " hosts in this group are happy! None of them have " + 
-                            " job failures.</p>";
-                        html_class = 'false';
-                    }
-                }
-            }
-
-            return { tooltip: tip, url: link, 'class': html_class };
-      
-            }
-            }])
-
-
-    .factory('GetInventoryToolTip', [ 'FormatDate', function(FormatDate) {
-        return function(params) {
-            
-            var node = params.node;   
-      
-            var tip = ''; 
-            var link = '';
-            var html_class = '';
-            var active_failures = node.hosts_with_active_failures;
-            var total_hosts = node.total_hosts;
-            var group_failures = node.groups_with_active_failures;
-            var total_groups = node.total_groups; 
-            var inventory_sources = node.total_inventory_sources;
-      
-            if (group_failures > 0) {
-               tip += "Has " + group_failures +
-                   [ (group_failures == 1) ? ' group' : ' groups' ] + ' with failed inventory updates. ' + 
-                   'Click to view the offending ' +
-                   [ (group_failures == 1) ? ' group.' : ' groups.' ];
-               link = '/#/inventories/' + node.id + '/groups?status=failed';
-               html_class = 'true';
-            }
-            else if (inventory_sources == 1) {
-                // on host with 0 failures
-                tip += "<p>1 group with an inventory source is happy! No updates have failed.</p>";
-                link = '';
-                html_class = 'false';
-            }
-            else if (inventory_sources > 0) {
-                tip += "<p>" + inventory_sources + " groups with an inventory source are happy! No updates have failed.</p>";
-                link = 0;
-                html_class = 'false';
-            } 
-
-            if (html_class !== 'true') {
-               // Add job status
-               if (active_failures > 0) {
-                  tip += "<p>Contains " + scope.inventories[i].hosts_with_active_failures +
-                      [ (active_failures == 1) ? ' host' : ' hosts' ] + ' with job failures. Click to view the offending ' +
-                      [ (active_failures == 1) ? ' host' : ' hosts' ] + '.</p>';
-                  link = '/#/inventories/' + node.id + '/hosts?has_active_failures=true';
-                  html_class = 'true';
-               }
-               else if (total_hosts == 0) {
-                   tip += "<p>There are no hosts in this inventory. It's a sad empty shell.</p>";
-                   link = "";
-                   html_class = (html_class == '') ? 'na' : html_class;
-               }
-               else if (total_hosts == 1) {
-                   tip += "<p>The 1 host found in this inventory is happy! There are no job failures.</p>";
-                   link = "";
-                   html_class = "false";
-               }
-               else if (total_hosts > 0) {
-                   tip += "<p>All " + total_hosts + " hosts are happy! There are no job failures.";
-                   link = "";
-                   html_class = "false";
-               }
-            } 
-
-            return { tooltip: tip, url: link, 'class': html_class };
-      
-            }
-            }])
-
 
     .factory('BuildTree', ['Rest', 'GetBasePath', 'ProcessErrors', 'SortNodes', 'Wait', 'GetSyncStatusMsg', 'GetHostsStatusMsg',
         function(Rest, GetBasePath, ProcessErrors, SortNodes, Wait, GetSyncStatusMsg, GetHostsStatusMsg) {
@@ -204,9 +61,11 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                 var sorted = SortNodes(tree_data);
                 for (var i=0; i < sorted.length; i++) {
                     id++;
+                    
                     var stat = GetSyncStatusMsg({ 
                         status: sorted[i].summary_fields.inventory_source.status
                         });   // from helpers/Groups.js
+                    
                     var hosts_status = GetHostsStatusMsg({ 
                         active_failures: sorted[i].hosts_with_active_failures,
                         total_hosts: sorted[i].total_hosts,
@@ -215,8 +74,8 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                         });   // from helpers/Groups.js
                     
                     var children = [];
-                    for (var j=0; j < sorted[j].children.length; i++) {
-                        children.push(sorted[j].id);
+                    for (var j=0; j < sorted[i].children.length; j++) {
+                        children.push(sorted[i].children[j]);
                     }    
                     
                     var group = {
@@ -363,14 +222,15 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
     
 
     // Copy or Move a group on the tree after drag-n-drop
-    .factory('CopyMoveGroup', ['$compile', 'Alert', 'ProcessErrors', 'Find', 
-        function($compile, Alert, ProcessErrors, Find) {
+    .factory('CopyMoveGroup', ['$compile', 'Alert', 'ProcessErrors', 'Find', 'Wait', 'Rest', 'Empty',
+        function($compile, Alert, ProcessErrors, Find, Wait, Rest, Empty) {
         return function(params) {
-            var scope = params.scope;
-            
+
+            var scope = params.scope; 
             var target = Find({ list: scope.groups, key: 'id', val: params.target_tree_id });
             var inbound = Find({ list: scope.groups, key: 'id', val: params.inbound_tree_id });
             
+            // Build the html for our prompt dialog
             var html = '';
             html += "<div id=\"copy-prompt-modal\" class=\"modal fade\">\n";
             html += "<div class=\"modal-dialog\">\n";
@@ -430,15 +290,86 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                 show: true
                 });
             
-            // Respond to copy or move... 
+            // Respond to move 
             scope.moveGroup = function() {
+                
                 $('#copy-prompt-modal').modal('hide');
-                console.log('moving the group...');
+                Wait('start');
+                
+                // disassociate the group from the original parent
+                if (scope.removeGroupRemove) {
+                   scope.removeGroupRemove(); 
                 }
+                scope.removeGroupRemove = scope.$on('removeGroup', function() {
+                    if (inbound.parent > 0) {
+                        // Only remove a group from a parent when the parent is a group and not the inventory root
+                        var url = GetBasePath('base') + 'groups/' + inbound.parent + '/children/';
+                        Rest.setUrl(url);
+                        Rest.post({ id: inbound.group_id, disassociate: 1 })
+                            .success( function(data, status, headers, config) {
+                                //Triggers refresh of group list in inventory controller
+                                scope.$emit('GroupDeleteCompleted'); 
+                                })
+                            .error( function(data, status, headers, config) {
+                                ProcessErrors(scope, data, status, null,
+                                    { hdr: 'Error!', msg: 'Failed to remove ' + inbound.name + 
+                                      ' from ' + target.name + '. POST returned status: ' + status });
+                                });
+                    }
+                    else {
+                        //Triggers refresh of group list in inventory controller
+                        scope.$emit('GroupDeleteCompleted'); 
+                    }
+                    });
+
+                // add the new group to the target parent
+                var url = (!Empty(target.group_id)) ? 
+                    GetBasePath('base') + 'groups/' + target.group_id + '/children/' : 
+                        GetBasePath('inventory') + inv_id + '/groups/';
+                var group = { 
+                    id: inbound.group_id,
+                    name: inbound.name,
+                    description: inbound.description,
+                    inventory: scope.inventory_id
+                    }
+                Rest.setUrl(url);
+                Rest.post(group)
+                    .success( function(data, status, headers, config) {
+                        scope.$emit('removeGroup');
+                        })
+                    .error( function(data, status, headers, config) {
+                        var target_name = (Empty(target.group_id)) ? 'inventory' : target.name;
+                        ProcessErrors(scope, data, status, null,
+                            { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
+                            target_name + '. POST returned status: ' + status });
+                        });
+                }
+                
 
             scope.copyGroup = function() {
                 $('#copy-prompt-modal').modal('hide');
-                console.log('copying the group...');
+                // add the new group to the target parent
+                var url = (!Empty(target.group_id)) ? 
+                    GetBasePath('base') + 'groups/' + target.group_id + '/children/' : 
+                        GetBasePath('inventory') + inv_id + '/groups/';
+                var group = { 
+                    id: inbound.group_id,
+                    name: inbound.name,
+                    description: inbound.description,
+                    inventory: scope.inventory_id
+                    }
+                Rest.setUrl(url);
+                Rest.post(group)
+                   .success( function(data, status, headers, config) {
+                       //Triggers refresh of group list in inventory controller
+                       scope.$emit('GroupDeleteCompleted'); 
+                       })
+                   .error( function(data, status, headers, config) {
+                       var target_name = (Empty(target.group_id)) ? 'inventory' : target.name;
+                       ProcessErrors(scope, data, status, null,
+                          { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
+                          target_name + '. POST returned status: ' + status });
+                       });
                 }
 
             }
