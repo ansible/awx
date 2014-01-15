@@ -27,25 +27,6 @@ angular.module('InventoryFormDefinition', [])
                 ngShow: "user_is_superuser"
                 }    
             },
-        
-        navigationLinks: {
-            inventory: {
-                href: "/#/inventories/{{ inventory_id }}",
-                label: "Properties",
-                icon: "icon-edit",
-                active: true
-                },
-            hosts: {
-                href: "/#/inventories/{{ inventory_id }}/hosts",
-                label: 'Hosts',  
-                icon: 'icon-laptop'
-                },
-            groups: {
-                href: "/#/inventories/{{ inventory_id }}/groups",
-                label: 'Groups',  
-                icon: 'icon-sitemap'
-                }
-            },
 
         fields: {
             inventory_name: {
