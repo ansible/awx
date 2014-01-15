@@ -108,7 +108,7 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
     var base = $location.path().replace(/^\//,'').split('/')[0];
 
     if (scope.removePostRefresh) {
-       scope.removePostRefresh();
+        scope.removePostRefresh();
     }
     scope.removePostRefresh = scope.$on('PostRefresh', function() {
         var msg, update_status, last_update;

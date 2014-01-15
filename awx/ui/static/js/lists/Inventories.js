@@ -31,8 +31,8 @@ angular.module('InventoriesListDefinition', [])
                 sourceField: 'name',
                 excludeModal: true
                 },
-            failed_hosts: {
-                label: 'Failed Hosts',
+            /*failed_hosts: {
+                label: 'Failures',
                 ngHref: "\{\{ inventory.failed_hosts_link \}\}",
                 badgeIcon: "\{\{ 'fa icon-failures-' + inventory.failed_hosts_class \}\}",
                 badgeNgHref: "\{\{ inventory.failed_hosts_link \}\}",
@@ -48,7 +48,7 @@ angular.module('InventoriesListDefinition', [])
             status: { 
                 label: 'Status', 
                 ngHref: "\{\{ inventory.status_link \}\}",
-                badgeIcon: "\{\{ 'fa icon-cloud-' + inventory.status_class \}\}",
+                badgeIcon: "\{\{ 'fa fa-cloud icon-cloud-' + inventory.status_class \}\}",
                 badgeNgHref: "\{\{ inventory.status_link \}\}",
                 badgePlacement: 'left',
                 badgeTipPlacement: 'top',
@@ -58,24 +58,25 @@ angular.module('InventoriesListDefinition', [])
                 searchable: false,
                 excludeModal: true,
                 sortField: "inventory_sources_with_failures"
-                },
+                },*/
             has_inventory_sources: {
-                label: 'Has external sources?',
+                label: 'Cloud sourced',
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
                 searchOnly: true
                 },   
             has_active_failures: {
-                label: 'Has failed hosts?',
+                label: 'Failed hosts',
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
                 searchOnly: true
                 },
             inventory_sources_with_failures: {
-                label: 'Has inventory update failures?',
-                searchType: 'gtzero', 
+                label: 'Sync failures',
+                searchType: 'gtzero',
+                searchValue: 'true',
                 searchOnly: true
                 }
             },
@@ -96,22 +97,33 @@ angular.module('InventoriesListDefinition', [])
             },
 
         fieldActions: {
+             status: { 
+                //label: 'Status', 
+                ngHref: "\{\{ inventory.status_link \}\}",
+                iconClass: "\{\{ 'fa fa-cloud icon-cloud-' + inventory.status_class \}\}",
+                awToolTip: "\{\{ inventory.status_tip \}\}",
+                dataPlacement: "top"
+                },
+             failed_hosts: {
+                //label: 'Failures',
+                ngHref: "\{\{ inventory.failed_hosts_link \}\}",
+                iconClass: "\{\{ 'fa icon-failures-' + inventory.failed_hosts_class \}\}",
+                awToolTip: "\{\{ inventory.failed_hosts_tip \}\}",
+                dataPlacement: "top",
+                },
             edit: {
                 label: 'Edit',
                 ngClick: "editInventory(\{\{ inventory.id \}\})",
-                icon: 'icon-edit',
-                "class": 'btn-xs btn-default',
                 awToolTip: 'Edit inventory',
                 dataPlacement: 'top'
                 },
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteInventory(\{\{ inventory.id \}\},'\{\{ inventory.name \}\}')",
-                icon: 'icon-trash',
-                "class": 'btn-xs btn-danger',
                 awToolTip: 'Delete inventory',
                 dataPlacement: 'top'
-                },
+                }
+             /*,
              dropdown: {
                 type: 'DropDown',
                 label: 'Jobs',
@@ -122,5 +134,6 @@ angular.module('InventoriesListDefinition', [])
                     { ngClick: "viewFailedJobs(\{\{ inventory.id \}\})", label: 'Failed' }
                     ]
                 }
+                */
             }
         });

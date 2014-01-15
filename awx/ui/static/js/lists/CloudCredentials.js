@@ -59,7 +59,7 @@ angular.module('CloudCredentialsListDefinition', [])
                 icon: 'fa-edit',
                 label: 'Edit',
                 "class": 'btn-sm',
-                awToolTip: 'View/Edit credential',
+                awToolTip: 'Edit credential',
                 dataPlacement: 'top'
                 },
 

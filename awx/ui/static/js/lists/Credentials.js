@@ -73,7 +73,7 @@ angular.module('CredentialsListDefinition', [])
                 icon: 'fa-edit',
                 label: 'Edit',
                 "class": 'btn-sm',
-                awToolTip: 'View/Edit credential',
+                awToolTip: 'Edit credential',
                 dataPlacement: 'top'
                 },
 

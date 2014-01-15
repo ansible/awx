@@ -190,8 +190,8 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                 // Start our tree object with All Hosts
                 var children = [];
                 var sorted = SortNodes(tree_data);
-                for (var j=0; j < sorted[j].length; i++) {
-                     push(sorted[j].id);
+                for (var j=0; j < sorted.length; j++) {
+                     children.push(sorted[j].id);
                 }  
                 var all_hosts = {
                     name: 'All Hosts', id: 1, group_id: null, parent: 0, description: '', show: true, ngicon: null,

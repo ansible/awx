@@ -421,7 +421,7 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         }
         scope.removeHostReloadComplete = scope.$on('HostReloadComplete', function(e) {
             Wait('stop');
-            Alert('Update Started', 'The request to start the inventory update process was submitted. Monitor progress of the update process ' +
+            Alert('Update Started', 'Your request to start the inventory sync process was submitted. Monitor progress ' +
                    'by clicking the <i class="fa fa-refresh fa-lg"></i> button.', 'alert-info');
             scope.removeHostReloadComplete();
             });

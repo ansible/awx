@@ -95,7 +95,7 @@ angular.module('ProjectsListDefinition', [])
                 ngClick: "editProject(\{\{ project.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
-                awToolTip: 'View/edit project properties',
+                awToolTip: 'Edit project properties',
                 dataPlacement: 'top'
                 },
             scm_update: {

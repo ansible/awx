@@ -346,6 +346,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  var fAction = list.fieldActions[action];
                  html += "<a ";
                  html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
+                 html += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
                  html += (action == 'cancel') ? " class=\"red-txt\" " : "";
                  for (itm in fAction) {
                      if (itm != 'href' && itm != 'label' && itm != 'icon' && itm != 'class' && itm != 'iconClass') {

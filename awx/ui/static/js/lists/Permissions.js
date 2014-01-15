@@ -62,7 +62,7 @@ angular.module('PermissionListDefinition', [])
                 ngClick: "editPermission(\{\{ permission.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
-                awToolTip: 'View/Edit permission',
+                awToolTip: 'Edit permission',
                 dataPlacement: 'top'
                 },
 

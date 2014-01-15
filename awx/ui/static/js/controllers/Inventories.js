@@ -76,34 +76,25 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
         for (var i=0; i < scope.inventories.length; i++) {
             
             // Set values for Failed Hosts column
-            scope.inventories[i].failed_hosts = scope.inventories[i].hosts_with_active_failures + ' / ' + scope.inventories[i].total_hosts;
+            //scope.inventories[i].failed_hosts = scope.inventories[i].hosts_with_active_failures + ' / ' + scope.inventories[i].total_hosts;
+            
             if (scope.inventories[i].hosts_with_active_failures > 0) {
-               scope.inventories[i].failed_hosts_tip = "Contains " + scope.inventories[i].hosts_with_active_failures +
-                   [ (scope.inventories[i].hosts_with_active_failures == 1) ? ' host' : ' hosts' ] + ' with job failures. Click to view the offending ' +
-                   [ (scope.inventories[i].hosts_with_active_failures == 1) ? ' host' : ' hosts' ] + '.';
-               scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/hosts?has_active_failures=true';
+               scope.inventories[i].failed_hosts_tip = scope.inventories[i].hosts_with_active_failures +
+                   ( (scope.inventories[i].hosts_with_active_failures == 1) ? ' host' : ' hosts' ) + ' with job failures. Click to view details.';
+               scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/';
                scope.inventories[i].failed_hosts_class = 'true';
             }
             else {
                if (scope.inventories[i].total_hosts == 0) {
                   // no hosts
-                  scope.inventories[i].failed_hosts_tip = "There are no hosts in this inventory. It's a sad empty shell. Click to view the hosts page " +
-                      "and add a host.";
-                  scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/hosts';
+                  scope.inventories[i].failed_hosts_tip = "No hosts defined. Click to add.";
+                  scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/';
                   scope.inventories[i].failed_hosts_class = 'na';
-               }
-               else if (scope.inventories[i].total_hosts == 1) {
-                  // on host with 0 failures
-                  scope.inventories[i].failed_hosts_tip = "The 1 host found in this inventory is happy! There are no job failures." + 
-                      " Click to view the host.";
-                  scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/hosts';
-                  scope.inventories[i].failed_hosts_class = 'false';
                }
                else {
                   // many hosts with 0 failures
-                  scope.inventories[i].failed_hosts_tip = "All " + scope.inventories[i].total_hosts + " hosts are happy! There are no" + 
-                      " job failures. Click to view the hosts.";
-                  scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/hosts';
+                  scope.inventories[i].failed_hosts_tip = "No job failures. Click to view details.";
+                  scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/';
                   scope.inventories[i].failed_hosts_class = 'false';
                }
             }
@@ -111,33 +102,25 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
             // Set values for Status column
             scope.inventories[i].status = scope.inventories[i].inventory_sources_with_failures + ' / ' + scope.inventories[i].total_inventory_sources; 
             if (scope.inventories[i].inventory_sources_with_failures > 0) {
-               scope.inventories[i].status_tip = "Contains " + scope.inventories[i].inventory_sources_with_failures +
-                   [ (scope.inventories[i].inventory_sources_with_failures == 1) ? ' group' : ' groups' ] + ' with inventory update failures. ' + 
-                   'Click to view the ' +
-                   [ (scope.inventories[i].inventory_sources_with_failures == 1) ? ' offending group.' : ' groups.' ];
-               scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/groups?status=failed';
+               scope.inventories[i].status_tip = scope.inventories[i].inventory_sources_with_failures + ' cloud ' +
+                   ( (scope.inventories[i].inventory_sources_with_failures == 1) ? 'source' : 'sources' ) + 
+                   ' with failures. Click to view details.';
+               scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/';
                scope.inventories[i].status_class = 'failed'; 
             }
             else {
                if (scope.inventories[i].total_inventory_sources == 0) {
                   // no groups are reporting a source
-                  scope.inventories[i].status_tip = "Does not have an external inventory source. Click to view groups and " +
-                      "and add an inventory source.";
-                  scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/groups';
+                  scope.inventories[i].status_tip = "Not synced with a cloud source. Click to edit.";
+                  scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/';
                   scope.inventories[i].status_class = 'na';
-               }
-               else if (scope.inventories[i].total_inventory_sources == 1) {
-                  // on host with 0 failures
-                  scope.inventories[i].status_tip = "The 1 group with an inventory source is happy!. No updates have failed." + 
-                      " Click to view the group.";
-                  scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/groups?has_external_source=true';
-                  scope.inventories[i].status_class = 'successful';
                }
                else {
                   // many hosts with 0 failures
-                  scope.inventories[i].status_tip = scope.inventories[i].total_inventory_sources + " groups external inventory sources are happy! " +
-                      " No updates have failed. Click to view the groups.";
-                  scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/groups?has_external_source=true';
+                  scope.inventories[i].status_tip = 'Contains ' + scope.inventories[i].total_inventory_sources + 
+                      ' cloud ' + ( (scope.inventories[i].total_inventory_sources > 0) ? 'sources' : 'source' ) + 
+                      ' and no failures. Click to view details.';
+                  scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/';
                   scope.inventories[i].status_class = 'successful';
                }  
             }

@@ -91,7 +91,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var tree_id = params.tree_id;
         var group_id = params.group_id;
         var found = false;
-        var group = Find({ list: scope.group, key: 'id', val: tree_id });
+        var group = Find({ list: scope.groups, key: 'id', val: tree_id });
         
         scope.showHosts(tree_id, group_id, false);
         
@@ -274,8 +274,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             Rest.post()
                 .success( function(data, status, headers, config) {
                     Wait('stop');
-                    Alert('Inventory Sync Cancelled', 'Your request to cancel the update was submitted to the task maanger. ' +
-                        'Click the <i class="fa fa-refresh fa-lg"></i> to check the sync status.', 'alert-info');        
+                    Alert('Inventory Sync Cancelled', 'Your request to cancel the sync process was submitted to the task manger. ' +
+                        'Click the <i class="fa fa-refresh fa-lg"></i> button to monitor the status.', 'alert-info');        
                     })
                 .error( function(data, status, headers, config) {
                     Wait('stop');
@@ -299,8 +299,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     }
                     else {
                         Wait('stop');
-                        Alert('Cancel Inventory Sync', 'Either you do not have access or the sync process completed. ' + 
-                            'Click the <i class="fa fa-refresh fa-lg"></i> to view the latest status.', 'alert-info');
+                        Alert('Cancel Inventory Sync', 'Either you do not have access or the sync process completed.<br /> ' + 
+                            'Click the <i class="fa fa-refresh fa-lg"></i> button to view the latest status.', 'alert-info');
                     }
                     })
                 .error( function(data, status, headers, config) {
@@ -1080,8 +1080,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
    
         if (last_update == undefined || last_update == null || last_update == ''){
             Wait('stop');
-            Alert('Missing Configuration', 'The selected group is not configured for inventory updates. ' +
-                'You must first edit the group, provide Source settings, and then run an update.', 'alert-info');
+            Alert('Missing Configuration', 'The selected group is not configured for inventory sync. ' +
+                'Edit the group and provide Source information.', 'alert-info');
         }
         else {
             // Retrieve detail record and prepopulate the form
@@ -1110,12 +1110,12 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     scope.formModalActionLabel = 'OK';
                     scope.formModalCancelShow = false;
                     scope.formModalInfo = false;
-                    scope.formModalHeader = group_name + '<span class="subtitle"> - Inventory Update</span>';
-                    $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
-                    $('#form-modal').addClass('skinny-modal');
+                    scope.formModalHeader = group_name + '<span class="subtitle"> - Inventory Sync</span>';
+                    
                     if (!scope.$$phase) {
                        scope.$digest();
                     }
+
                     })
                 .error( function(data, status, headers, config) {
                     Wait('stop');

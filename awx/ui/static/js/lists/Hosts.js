@@ -44,7 +44,7 @@ angular.module('HostListDefinition', [])
                 ngClick: "editHost(\{\{ host.id \}\})",
                 icon: 'icon-edit',
                 "class": 'btn-xs',
-                awToolTip: 'View/Edit host',
+                awToolTip: 'Edit host',
                 dataPlacement: 'top'
                 },
 
