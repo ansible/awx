@@ -467,6 +467,8 @@ class HostSerializer(BaseSerializerWithVariables):
             pass
         d['all_groups'] = [{'id': g.id, 'name': g.name} for g in obj.all_groups.all()]
         d['groups'] = [{'id': g.id, 'name': g.name} for g in obj.groups.all()]
+        d['recent_jobs'] = [{'id': j.job.id, 'name': j.job.job_template.name, 'failed': j.job.status} \
+                            for j in obj.job_host_summaries.all().order_by('-created')[:5]]
         return d
 
     def _get_host_port_from_name(self, name):
