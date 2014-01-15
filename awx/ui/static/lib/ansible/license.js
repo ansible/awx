@@ -9,8 +9,8 @@
 
 angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'PromptDialog'])
    .factory('ViewLicense', ['$location', '$rootScope', 'GenerateForm', 'Rest', 'Alert', 'GetBasePath', 'ProcessErrors',
-       'FormatDate', 'Prompt',
-   function($location, $rootScope, GenerateForm, Rest, Alert, GetBasePath, ProcessErrors, FormatDate, Prompt) {
+       'FormatDate', 'Prompt', 'Empty',
+   function($location, $rootScope, GenerateForm, Rest, Alert, GetBasePath, ProcessErrors, FormatDate, Prompt, Empty) {
    return function() {
    
    var defaultUrl=GetBasePath('config');
@@ -88,31 +88,24 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
         };
 
    var base = $location.path().replace(/^\//,'').split('/')[0]; 
-   
-
-   function empty(x) {
-       var result = false;
-       if (x != 0 && (x === null || x === undefined || x == '') ) {
-          result = true;
-       }
-       return result;
-   }
+  
                 
    // Retrieve detail record and prepopulate the form
    Rest.setUrl(defaultUrl); 
    Rest.get()
        .success( function(data, status, headers, config) {
+           
            for (var fld in form.fields) {
-              if (fld != 'time_remaining' && fld != 'license_status') {
-                 if (empty(data['license_info'][fld])) {
-                    delete form.fields[fld];
-                 }
-              }
+               if (fld != 'time_remaining' && fld != 'license_status') {
+                   if (Empty(data['license_info'][fld])) {
+                      delete form.fields[fld];
+                   }
+               }
            }
 
-           if (empty(data['license_info']['license_date'])) {
-              delete form.fields['license_date'];
-              delete form.fields['time_remaining'];
+           if (data['license_info']['is_aws'] || Empty(data['license_info']['license_date'])) {
+               delete form.fields['license_date'];
+               delete form.fields['time_remaining'];
            }
 
            var scope = generator.inject(form, { mode: 'edit', modal: true, related: false});
@@ -125,10 +118,12 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
            scope.formModalActionLabel = 'OK';
            scope.formModalCancelShow = false;
            scope.formModalInfo = 'Purchase/Extend License';
-           $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
-           $('#form-modal').addClass('skinny-modal');
            scope.formModalHeader = 'AWX License';
 
+           //$('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
+           //$('#form-modal').addClass('skinny-modal');
+          
+           
            // Respond to license button
            scope.formModalInfoAction = function() {
                Prompt({
@@ -145,61 +140,61 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
                }
 
            for (var fld in form.fields) {
-               if (data['license_info'][fld] !== undefined) {
-                  scope[fld] = data['license_info'][fld];
+               if (!Empty(data['license_info'][fld])) {
+                   scope[fld] = data['license_info'][fld];
                }
            }
-
+           
            if (scope['license_date']) {
-              var dt = new Date(parseInt(scope['license_date']));
-              if (dt.getFullYear() == '1970') {
-                 // date was passed in seconds rather than milliseconds
-                 dt = new Date(parseInt(scope['license_date']) * 1000);
-                 scope['time_remaining'] = scope['time_remaining'] + '000';
-              } 
-              scope['license_date'] = FormatDate(dt);
+               var dt = new Date(parseInt(scope['license_date']));
+               if (dt.getFullYear() == '1970') {
+                   // date was passed in seconds rather than milliseconds
+                   dt = new Date(parseInt(scope['license_date']) * 1000);
+                   scope['time_remaining'] = scope['time_remaining'] + '000';
+               } 
+               scope['license_date'] = FormatDate(dt);
 
-              var days = parseInt(scope['time_remaining'] / 86400000);
-              var remainder = scope['time_remaining'] - (days * 86400000);
-              var hours = parseInt(remainder / 3600000);
-              remainder = remainder - (hours * 3600000);
-              var minutes = parseInt(remainder / 60000);
-              remainder = remainder - (minutes * 60000);
-              var seconds = parseInt(remainder / 1000);
-              scope['time_remaining'] = days + ' days ' + ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2) + ':' + ('0' + seconds).slice(-2); 
+               var days = parseInt(scope['time_remaining'] / 86400000);
+               var remainder = scope['time_remaining'] - (days * 86400000);
+               var hours = parseInt(remainder / 3600000);
+               remainder = remainder - (hours * 3600000);
+               var minutes = parseInt(remainder / 60000);
+               remainder = remainder - (minutes * 60000);
+               var seconds = parseInt(remainder / 1000);
+               scope['time_remaining'] = days + ' days ' + ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2) + ':' + ('0' + seconds).slice(-2); 
            }
 
            if (parseInt(scope['free_instances']) <= 0) {
-              scope['free_instances_class'] = 'field-failure';
+               scope['free_instances_class'] = 'field-failure';
            }
            else {
-              scope['free_instances_class'] = 'field-success';
+               scope['free_instances_class'] = 'field-success';
            }
 
            var license = data['license_info'];
            if (license['valid_key'] !== undefined && license['valid_key'] == false) {
-              scope['license_status'] = 'Invalid';
-              scope['status_color'] = 'license-invalid';
+               scope['license_status'] = 'Invalid';
+               scope['status_color'] = 'license-invalid';
            }
            else if (license['demo'] !== undefined && license['demo'] == true) {
-              scope['license_status'] = 'Demo';
-              scope['status_color'] = 'license-demo';
+               scope['license_status'] = 'Demo';
+               scope['status_color'] = 'license-demo';
            }
            else if (license['date_expired'] !== undefined && license['date_expired'] == true) {
-              scope['license_status'] = 'Expired';
-              scope['status_color'] = 'license-expired';
+               scope['license_status'] = 'Expired';
+               scope['status_color'] = 'license-expired';
            }
            else if (license['date_warning'] !== undefined && license['date_warning'] == true) {
-              scope['license_status'] = 'Expiration Warning';
-              scope['status_color'] = 'license-warning';
+               scope['license_status'] = 'Expiration Warning';
+               scope['status_color'] = 'license-warning';
            }
            else if (license['free_instances'] !== undefined && parseInt(license['free_instances']) <= 0) {
-              scope['license_status'] = 'No available managed hosts';
-              scope['status_color'] = 'license-invalid';
+               scope['license_status'] = 'No available managed hosts';
+               scope['status_color'] = 'license-invalid';
            }
            else {
-              scope['license_status'] = 'Valid';
-              scope['status_color'] = 'license-valid';
+               scope['license_status'] = 'Valid';
+               scope['status_color'] = 'license-valid';
            }
 
            })
