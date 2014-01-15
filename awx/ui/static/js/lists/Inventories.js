@@ -109,7 +109,7 @@ angular.module('InventoriesListDefinition', [])
                 ngHref: "\{\{ inventory.failed_hosts_link \}\}",
                 iconClass: "\{\{ 'fa icon-failures-' + inventory.failed_hosts_class \}\}",
                 awToolTip: "\{\{ inventory.failed_hosts_tip \}\}",
-                dataPlacement: "top",
+                dataPlacement: "top"
                 },
             edit: {
                 label: 'Edit',
