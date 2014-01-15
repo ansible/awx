@@ -26,9 +26,34 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }
         }
         }])
+
+    .factory('SetHostStatus', ['SetEnabledMsg', function(SetEnabledMsg) {
+    return function(host) {  
+        // Set status related fields on a host object
+        host.activeFailuresLink = '/#/hosts/' + host.id + '/job_host_summaries/?inventory=' + host.inventory +
+            '&host_name=' + escape(host.name); 
+        if (host.has_active_failures == true) {
+            host.badgeToolTip = 'Most recent job failed. Click to view jobs.';
+            host.active_failures = 'failed';
+        }
+        else if (host.has_active_failures == false && host.last_job == null) {
+           host.has_active_failures = 'none';
+           host.badgeToolTip = "No job data available.";
+           host.active_failures = 'n/a';
+        }
+        else if (host.has_active_failures == false && host.last_job !== null) {
+           host.badgeToolTip = "Most recent job successful. Click to view jobs.";
+           host.active_failures = 'success';
+        }
+
+        host.enabled_flag = host.enabled; 
+        SetEnabledMsg(host);
+      
+        }
+        }])
     
-    .factory('HostsReload', [ 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait', 'SetEnabledMsg', 
-    function(Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetEnabledMsg) {
+    .factory('HostsReload', [ 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait', 'SetHostStatus', 
+    function(Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus) {
     return function(params) {
         
         var scope = params.scope;
@@ -37,7 +62,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var inventory_id = params.inventory_id;
         
         var url = ( !Empty(group_id) ) ? GetBasePath('groups') + group_id + '/all_hosts/' :
-                  GetBasePath('inventory') + inventory_id + '/hosts/';
+            GetBasePath('inventory') + inventory_id + '/hosts/';
         
         scope.search_place_holder='Search ' + scope.selected_group_name;
 
@@ -48,7 +73,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             for (var i=0; i < scope.hosts.length; i++) {
                 //Set tooltip for host enabled flag
                 scope.hosts[i].enabled_flag = scope.hosts[i].enabled;
-                SetEnabledMsg(scope.hosts[i]);  
+                //SetEnabledMsg(scope.hosts[i]);  
+                SetHostStatus(scope.hosts[i]);
             }
             Wait('stop');
             scope.$emit('HostReloadComplete');
@@ -75,40 +101,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
         // Load data
         HostsReload({ scope: scope, group_id: group_id, tree_id: tree_id, inventory_id: inventory_id });
-        }
-        }])
-
-    .factory('SetHostStatus', [ function() {
-    return function(host) {  
-        // Set status related fields on a host object
-        host.activeFailuresLink = '/#/hosts/' + host.id + '/job_host_summaries/?inventory=' + host.inventory +
-            '&host_name=' + escape(host.name); 
-        if (host.has_active_failures == true) {
-            host.badgeToolTip = 'Most recent job failed. Click to view jobs.';
-            host.active_failures = 'failed';
-        }
-        else if (host.has_active_failures == false && host.last_job == null) {
-           host.has_active_failures = 'none';
-           host.badgeToolTip = "No job data available.";
-           host.active_failures = 'n/a';
-        }
-        else if (host.has_active_failures == false && host.last_job !== null) {
-           host.badgeToolTip = "Most recent job successful. Click to view jobs.";
-           host.active_failures = 'success';
-        }
-
-        host.enabled_flag = host.enabled; 
-        if (host.has_inventory_sources) {
-            // Inventory sync managed, so not clickable 
-            host.enabledToolTip = (host.enabled) ? 'Ready! Availabe to running jobs.' :
-                'Out to lunch! This host is not available to running jobs.';
-        }
-        else {
-            // Clickable
-            host.enabledToolTip = (host.enabled) ? 'Ready! Available to running jobs. Click to toggle.' :
-                'Out to lunch! Host not available to running jobs. Click to toggle.';
-        }
-
         }
         }])
 

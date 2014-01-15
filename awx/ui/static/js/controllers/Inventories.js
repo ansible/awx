@@ -93,7 +93,8 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
                }
                else {
                   // many hosts with 0 failures
-                  scope.inventories[i].failed_hosts_tip = "No job failures. Click to view details.";
+                  scope.inventories[i].failed_hosts_tip = scope.inventories[i].total_hosts + 
+                      ( (scope.inventories[i].total_hosts > 1) ? ' hosts' : ' host' ) + " with no failures. Click to view details.";
                   scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/';
                   scope.inventories[i].failed_hosts_class = 'false';
                }
@@ -118,8 +119,8 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
                else {
                   // many hosts with 0 failures
                   scope.inventories[i].status_tip = scope.inventories[i].total_inventory_sources + 
-                      ' cloud ' + ( (scope.inventories[i].total_inventory_sources > 0) ? 'sources' : 'source' ) + 
-                      ' and 0 failures. Click to view details.';
+                      ' cloud ' + ( (scope.inventories[i].total_inventory_sources > 1) ? 'sources' : 'source' ) + 
+                      ' with no failures. Click to view details.';
                   scope.inventories[i].status_link = '/#/inventories/' + scope.inventories[i].id + '/';
                   scope.inventories[i].status_class = 'successful';
                }  
