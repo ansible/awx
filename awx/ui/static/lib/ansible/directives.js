@@ -554,30 +554,41 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
                 // the following is inventory specific accept checking and 
                 // drop processing.
                 accept: function(draggable) {
-                    if ($(this).attr('data-group-id') == draggable.attr('data-group-id')) {
-                        // No dropping a node onto itself (or a copy)
-                        return false;
-                    }
-                    else {
-                        // No dropping a node into a group that already has the node
-                        var node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id')) });
-                        if (node) {
-                            var group = parseInt(draggable.attr('data-group-id'));
-                            var found = false;
-                            // For whatever reason indexOf() would not work...
-                            for (var i=0; i < node.children.length; i++) {
-                                if (node.children[i] == group) {
-                                   found = true;
-                                   break;
-                                }
-
-                            }
-                            return (found) ? false : true;
-                        }
-                        else {
-                            // this shouldn't be possible
+                    if (draggable.attr('data-type') == 'group') {
+                        // Dropped a group
+                        if ($(this).attr('data-group-id') == draggable.attr('data-group-id')) {
+                            // No dropping a node onto itself (or a copy)
                             return false;
                         }
+                        else {
+                            // No dropping a node into a group that already has the node
+                            var node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id')) });
+                            if (node) {
+                                var group = parseInt(draggable.attr('data-group-id'));
+                                var found = false;
+                                // For whatever reason indexOf() would not work...
+                                for (var i=0; i < node.children.length; i++) {
+                                    if (node.children[i] == group) {
+                                       found = true;
+                                       break;
+                                    }
+
+                                }
+                                return (found) ? false : true;
+                            }
+                            else {
+                                // Node not found. This shouldn't be possible
+                                return false;
+                            }
+                        }
+                    }
+                    else if (draggable.attr('data-type') == 'host') {
+                        // Dropped a host
+                        var node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id')) });
+                        return (node.id > 1) ? true : false;
+                    }
+                    else {
+                        return false;
                     }
                     },
                 over: function(e, ui) {
@@ -589,7 +600,12 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
                 drop: function(e, ui) {
                     // Drag-n-drop succeeded. Trigger a response from the inventory.edit controller
                     $(this).removeClass('droppable-hover');
-                    scope.$emit('CopyMoveGroup', ui.draggable.attr('data-tree-id'), $(this).attr('data-tree-id'));
+                    if (ui.draggable.attr('data-type') == 'group') {
+                        scope.$emit('CopyMoveGroup', ui.draggable.attr('data-tree-id'), $(this).attr('data-tree-id'));
+                    }
+                    else if (ui.draggable.attr('data-type') == 'host') {
+                        scope.$emit('CopyMoveHost', $(this).attr('data-tree-id'), ui.draggable.attr('data-host-id'));
+                    }
                     },
                 tolerance: 'touch'
                 });

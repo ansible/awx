@@ -35,43 +35,8 @@ angular.module('InventoryGroupsDefinition', [])
                 dataContainment: "#groups_table",
                 dataTreeId: "\{\{ group.id \}\}",
                 dataGroupId: "\{\{ group.group_id \}\}",
-                dataAccept: "dropAccept" //function determining when draggable is accepted by droppable
+                dataType: "group"
                 }
-            /*source: {
-                label: 'Source',
-                searchType: 'select',
-                searchOptions: [
-                    { name: "ec2", value: "ec2" },
-                    { name: "none", value: "" },
-                    { name: "rax", value: "rax" }],
-                sourceModel: 'inventory_source',
-                sourceField: 'source',
-                searchOnly: true
-                },
-            has_external_source: {
-                label: 'Has external source?', 
-                searchType: 'in', 
-                searchValue: 'ec2,rax',
-                searchOnly: true,
-                sourceModel: 'inventory_source',
-                sourceField: 'source'
-                },
-            has_active_failures: {
-                label: 'Has failed hosts?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true
-                },
-            last_update_failed: {
-                label: 'Update failed?',
-                searchType: 'select',
-                searchSingleValue: true,
-                searchValue: 'failed',
-                searchOnly: true,
-                sourceModel: 'inventory_source',
-                sourceField: 'status'
-                }*/
             },
 
         actions: {

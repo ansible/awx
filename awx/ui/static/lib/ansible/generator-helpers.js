@@ -517,6 +517,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                   html += (field.dataContainment) ? Attr(field, 'dataContainment') : '';
                   html += (field.dataTreeId) ? Attr(field, 'dataTreeId') : '';
                   html += (field.dataGroupId) ? Attr(field, 'dataGroupId') : '';
+                  html += (field.dataHostId) ? Attr(field, 'dataHostId') : '';
+                  html += (field.dataType) ? Attr(field, 'dataType') : '';
               }
               if (field.awToolTip) {
                   html += Attr(field, 'awToolTip');

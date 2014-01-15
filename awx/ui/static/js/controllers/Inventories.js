@@ -303,7 +303,7 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait, 
                           GetSyncStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, 
                           Rest, ProcessErrors, InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find,
-                          HostsCreate, EditInventoryProperties, HostsEdit, HostsDelete, ToggleHostEnabled, CopyMoveGroup) 
+                          HostsCreate, EditInventoryProperties, HostsEdit, HostsDelete, ToggleHostEnabled, CopyMoveGroup, CopyMoveHost) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -375,6 +375,14 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
     }
     $scope.removeCopyMoveGroup = $scope.$on('CopyMoveGroup', function(e, inbound_tree_id, target_tree_id) {
         CopyMoveGroup({ scope: $scope, target_tree_id: target_tree_id, inbound_tree_id: inbound_tree_id });
+        });
+
+    // Respond to a host drag-n-drop
+    if ($scope.removeCopMoveHost) {
+        $scope.removeCopyMoveHost();
+    }
+    $scope.removeCopyMoveHost = $scope.$on('CopyMoveHost', function(e, target_tree_id, host_id) {
+        CopyMoveHost({ scope: $scope, target_tree_id: target_tree_id, host_id: host_id });
         });
 
     $scope.showHosts = function(tree_id, group_id, show_failures) {
@@ -454,7 +462,6 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         // Expand/collapse nodes
         if (tree_id !== $scope.selected_tree_id) {
            $scope.showHosts(tree_id, Find({ list: $scope.groups, key: 'id', val: tree_id }).group_id, false);
-           console.log('set group_id to: ' + $scope.selected_group_id);
         }
         ToggleChildren({ scope: $scope, list: list, id: tree_id });
         }
@@ -505,6 +512,6 @@ InventoriesEdit.$inject = [ '$scope', '$location', '$routeParams', '$compile', '
                             'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'GroupsDelete',
                             'Breadcrumbs', 'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren',
                             'ViewUpdateStatus', 'GroupsCancelUpdate', 'Find', 'HostsCreate', 'EditInventoryProperties', 'HostsEdit', 
-                            'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup'
+                            'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost'
                             ]; 
   

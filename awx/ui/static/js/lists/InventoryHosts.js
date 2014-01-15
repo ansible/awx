@@ -26,7 +26,10 @@ angular.module('InventoryHostsDefinition', [])
                 label: 'Hosts',
                 ngClick: "editHost(\{\{ host.id \}\})",
                 searchPlaceholder: "search_place_holder",
-                columnClass: 'col-lg-9'
+                columnClass: 'col-lg-9',
+                dataHostId: "\{\{ host.id \}\}",
+                dataType: "host",
+                awDraggable: "true"
                 },
             /*groups: {
                 label: 'Groups',

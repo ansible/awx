@@ -15,19 +15,19 @@
  */
 
 angular.module('PromptDialog', ['Utilities'])
-    .factory('Prompt', ['Alert', function(Alert) {
+    .factory('Prompt', ['$rootScope', '$compile', 'Alert', function($rootScope, $compile, Alert) {
     return function(params) {
         
         var dialog = angular.element(document.getElementById('prompt-modal'));
-        var scope = dialog.scope(); 
+        var scope = dialog.scope();
         
         scope.promptHeader = params.hdr;
         scope.promptBody = params.body;
         scope.promptAction = params.action;
+        
         var cls = (params['class'] == null || params['class'] == undefined) ? 'btn-danger' : params['class'];
         
-        $('#prompt_action_btn').addClass(cls); // Use jquery because django template engine conflicts with Angular's
-                                               // use of {{...}}
+        $('#prompt_action_btn').removeClass(cls).addClass(cls); 
         
         $(dialog).modal({
             backdrop: 'static',

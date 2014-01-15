@@ -375,10 +375,116 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                        var target_name = (Empty(target.group_id)) ? 'inventory' : target.name;
                        Wait('stop');
                        ProcessErrors(scope, data, status, null,
-                          { hdr: 'Error!', msg: 'Failed to add ' + node.attr('name') + ' to ' + 
+                          { hdr: 'Error!', msg: 'Failed to add ' + inbound.name + ' to ' + 
                           target_name + '. POST returned status: ' + status });
                        });
                 }
 
+            }
+            }])
+    
+    // Copy a host after drag-n-drop
+    .factory('CopyMoveHost', ['$compile', 'Alert', 'ProcessErrors', 'Find', 'Wait', 'Rest', 'Empty', 'GetBasePath',
+        function($compile, Alert, ProcessErrors, Find, Wait, Rest, Empty, GetBasePath) {
+        return function(params) {
+
+            var scope = params.scope;
+            var target = Find({ list: scope.groups, key: 'id', val: params.target_tree_id });
+            var host = Find({ list: scope.hosts, key: 'id', val: params.host_id });
+            
+            var found = false;
+            
+            if (host.summary_fields.all_groups) {
+                for (var i=0; i< host.summary_fields.all_groups.length; i++) {
+                    if (host.summary_fields.all_groups[i].id == target.group_id) {
+                       found = true;
+                       break;
+                    }
+                }
+            }
+            if (found) {
+                var html = '';
+                html += "<div id=\"copy-alert-modal\" class=\"modal fade\">\n";
+                html += "<div class=\"modal-dialog\">\n";
+                html += "<div class=\"modal-content\">\n";
+                html += "<div class=\"modal-header\">\n";
+                html += "<button type=\"button\" class=\"close\" ng-hide=\"disableButtons\" data-target=\"#copy-alert-modal\"\n"; 
+                html += "data-dismiss=\"modal\" class=\"modal\" aria-hidden=\"true\">&times;</button>\n";
+                html += "<h3>Already in Group</h3>\n";
+                html += "</div>\n";
+                html += "<div class=\"modal-body\">\n";
+                html += "<div class=\"alert alert-info\"><p>Host " + host.name + " is already in group " + target.name + ".</p></div>\n";
+                html += "</div>\n";
+                html += "<div class=\"modal-footer\">\n";
+                html += "<a href=\"#\" data-target=\"#copy-alert-modal\" data-dismiss=\"modal\" class=\"btn btn-primary\">OK</a>\n";
+                html += "</div>\n";
+                html += "</div>\n";
+                html += "</div>\n";
+                html += "</div>\n";
+
+                // Inject our custom dialog
+                var e = angular.element(document.getElementById('inventory-modal-container'));
+                e.empty().append(html);
+                $compile(e)(scope);
+                
+                // Display it
+                $('#copy-alert-modal').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    show: true
+                    });
+                
+            }
+            else {
+                // Build the html for our prompt dialog
+                var html = '';
+                html += "<div id=\"copy-prompt-modal\" class=\"modal fade\">\n";
+                html += "<div class=\"modal-dialog\">\n";
+                html += "<div class=\"modal-content\">\n";
+                html += "<div class=\"modal-header\">\n";
+                html += "<button type=\"button\" class=\"close\" data-target=\"#copy-prompt-modal\" " + 
+                    "data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
+                html += "<h3>Copy Group</h3>\n";
+                html += "</div>\n";
+                html += "<div class=\"modal-body\">\n";
+                html += "<p>Are you sure you want to copy host " + host.name + ' to group ' + target.name + '?</p>';            
+                html += "</div>\n";
+                html += "<div class=\"modal-footer\">\n";
+                html += "<a href=\"#\" data-target=\"#prompt-modal\" data-dismiss=\"modal\" class=\"btn btn-default\">No</a>\n";
+                html += "<a href=\"\" data-target=\"#prompt-modal\" ng-click=\"copyHost()\" class=\"btn btn-primary\">Yes</a>\n";
+                html += "</div>\n";
+                html += "</div><!-- modal-content -->\n";
+                html += "</div><!-- modal-dialog -->\n";
+                html += "</div><!-- modal -->\n";
+                
+                // Inject our custom dialog
+                var e = angular.element(document.getElementById('inventory-modal-container'));
+                e.empty().append(html);
+                $compile(e)(scope);
+                
+                // Display it
+                $('#copy-prompt-modal').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    show: true
+                    });
+
+                scope.copyHost = function() {
+                    $('#copy-prompt-modal').modal('hide');
+                    Wait('start');
+                    Rest.setUrl(GetBasePath('groups') + target.group_id + '/hosts/');
+                    Rest.post(host)
+                        .success(function(data, status, headers, config) {
+                            // Signal the controller to refresh the hosts view
+                            scope.$emit('GroupTreeRefreshed');
+                            })
+                        .error(function(data, status, headers, config) {
+                            Wait('stop');
+                            ProcessErrors(scope, data, status, null,
+                                { hdr: 'Error!', msg: 'Failed to add ' + host.name + ' to ' + 
+                                  target.name + '. POST returned status: ' + status });
+                            });
+                    }
+            }
             }
             }]);
