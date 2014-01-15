@@ -41,7 +41,7 @@ angular.module('ProjectsListDefinition', [])
                 ngClick: 'showSCMStatus(\{\{ project.id \}\})',
                 awToolTip: 'View details of last SCM Update',
                 dataPlacement: 'top',
-                badgeIcon: "\{\{ 'icon-failures-' + project.badge \}\}",
+                badgeIcon: "\{\{ 'fa icon-failures-' + project.badge \}\}",
                 badgePlacement: 'left',
                 searchType: 'select',
                 searchOptions: [],   // will be set by Options call to projects resource

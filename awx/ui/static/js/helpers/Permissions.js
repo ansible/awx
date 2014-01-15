@@ -18,12 +18,12 @@ angular.module('PermissionsHelper', [])
             scope.projectrequired = false;
             scope.permissionTypeHelp = 
                 "<dl>\n" + 
-                "<dt>Admin</dt>\n" +
-                "<dd>Allow the user or team full access to the inventory. This includes reading, writing, deletion of the inventory and inventory sync operations.</dd>\n" +
                 "<dt>Read</dt>\n" +
                 "<dd>Only allow the user or team to view the inventory.</dd>\n" +
                 "<dt>Write</dt>\n" + 
                 "<dd>Allow the user or team to modify hosts and groups contained in the inventory, add new hosts and groups, and perform inventory sync operations.\n" +
+                "<dt>Admin</dt>\n" +
+                "<dd>Allow the user or team full access to the inventory. This includes reading, writing, deletion of the inventory and inventory sync operations.</dd>\n" +
                 "</dl>\n";
         }
         else {
@@ -40,7 +40,7 @@ angular.module('PermissionsHelper', [])
         }
 
         if (reset) {
-            scope.permission_type = null;
+            scope.permission_type = (scope.category == 'Inventory') ? 'read' : 'run';  //default to the first option
         }
          
         }

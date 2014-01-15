@@ -30,9 +30,12 @@ angular.module('PermissionFormDefinition', [])
                 
         fields: {
             category: {
-                label: 'Permission Type',
-                type: 'radio',
-                options: [{ label: 'Inventory', value: 'Inventory' }, { label: 'Deployment', value: 'Deploy'}],
+                label: '* Permission Type',
+                type: 'radio_group',
+                options: [
+                    { label: 'Inventory', value: 'Inventory', selected: true },
+                    { label: 'Deployment', value: 'Deploy'}
+                    ],
                 ngChange: 'selectCategory()'
                 },
             name: {
@@ -74,17 +77,15 @@ angular.module('PermissionFormDefinition', [])
                 awRequiredWhen: {variable: "inventoryrequired", init: "true" }
                 },
             permission_type: {
-                label: 'Permission',
-                type: 'radio',
+                label: '* Permission',
+                type: 'radio_group',
                 options: [
-                    {label: 'Admin', value: 'admin', ngShow: "category == 'Inventory'" },
                     {label: 'Read', value: 'read', ngShow: "category == 'Inventory'" },
                     {label: 'Write', value: 'write', ngShow: "category == 'Inventory'" },
+                    {label: 'Admin', value: 'admin', ngShow: "category == 'Inventory'" },   
                     {label: 'Run', value: 'run', ngShow: "category == 'Deploy'" },
                     {label: 'Check', value: 'check', ngShow: "category == 'Deploy'" }
                     ],
-                addRequired: true,
-                editRequired: true,
                 helpCollapse: [{ hdr: 'Permission', ngBind: 'permissionTypeHelp' }]
                 }
             },
