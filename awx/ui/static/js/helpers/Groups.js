@@ -603,7 +603,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         generator.reset();
        
         // Change the selected group
-        parent_scope.showHosts(tree_id, group_id, false);
+        if (parent_scope.selected_tree_id !== tree_id)
+            parent_scope.showHosts(tree_id, group_id, false);
         
         GetSourceTypeOptions({ scope: scope, variable: 'source_type_options' });
     
@@ -1037,7 +1038,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var node = Find({ list: scope.groups, key: 'id', val: tree_id });
         var url = GetBasePath('inventory') + inventory_id + '/groups/';
         
-        scope.showHosts(tree_id, group_id, false);
+        if (scope.selected_tree_id != tree_id)
+            scope.showHosts(tree_id, group_id, false);
 
         var action_to_take = function() {
             $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('start'); });

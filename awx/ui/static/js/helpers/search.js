@@ -356,7 +356,11 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                                 */
                             }    
                             else {
+                                // Search value is empty
                                 scope[iterator + 'ShowStartBtn' + modifier] = true;
+                                scope[iterator + 'SearchParams'] += '&' +
+                                    list.fields[scope[iterator + 'SearchField' + modifier]].searchField + 
+                                    '=' + list.fields[scope[iterator + 'SearchField' + modifier]].searchObject;
                                 //scope.$emit('foundObject', iterator, page, load, spin, i, null);  
                             }
                         }
