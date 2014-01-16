@@ -167,6 +167,7 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
    var selectPlaybook = function(oldValue, newValue) {
        if (oldValue != newValue) {
           if (scope.project) {
+             Wait('start');
              var url = GetBasePath('projects') + scope.project + '/playbooks/'; 
              Rest.setUrl(url);
              Rest.get()
@@ -176,8 +177,10 @@ function JobTemplatesAdd ($scope, $rootScope, $compile, $location, $log, $routeP
                          opts.push(data[i]);
                      }
                      scope.playbook_options = opts;
+                     Wait('stop');
                      })
                 .error( function(data, status, headers, config) {
+                     Wait('stop');
                      ProcessErrors(scope, data, status, form,
                          { hdr: 'Error!', msg: 'Failed to get playbook list for ' + url +'. GET returned status: ' + status });
                      });
@@ -343,6 +346,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
    function getPlaybooks(project) {
        if (project !== null && project !== '' && project !== undefined) {
            var url = GetBasePath('projects') + project + '/playbooks/';
+           Wait('start');
            Rest.setUrl(url);
            Rest.get()
                .success( function(data, status, headers, config) {                      
@@ -353,14 +357,19 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                           scope['job_templates_form']['playbook'].$setValidity('required',true);
                        }
                    }
+                   Wait('stop');
                    if (!scope.$$phase) {
                       scope.$digest();
                    }
                    })
                .error( function(data, status, headers, config) {
+                   Wait('stop');
                    Alert('Missing Playbooks', 'Unable to retrieve the list of playbooks for this project. Choose a different ' +
                        ' project or make the playbooks available on the file system.', 'alert-info');
                    });
+       }
+       else {
+            Wait('stop');
        }
        }
    
@@ -479,6 +488,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
                    scope.$emit('cloudCredentialReady', data.name);
                    })
                .error( function(data, status, headers, config) {
+                   Wait('stop');
                    ProcessErrors(scope, data, status, null,
                        { hdr: 'Error!', msg: 'Failed to related cloud credential. GET returned status: ' + status });
                    });
@@ -489,6 +499,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
        }
        });
 
+   Wait('start');
    // Retrieve detail record and prepopulate the form
    Rest.setUrl(defaultUrl + ':id/'); 
    Rest.get({ params: {id: id} })
@@ -575,6 +586,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
            scope.$emit('jobTemplateLoaded', data.related.cloud_credential);
            })
        .error( function(data, status, headers, config) {
+           Wait('stop');
            ProcessErrors(scope, data, status, form,
               { hdr: 'Error!', msg: 'Failed to retrieve job template: ' + $routeParams.id + '. GET status: ' + status });
            });

@@ -30,7 +30,8 @@ angular.module('PermissionFormDefinition', [])
                 
         fields: {
             category: {
-                label: '* Permission Type',
+                label: 'Permission Type',
+                labelClass: 'prepend-asterisk',
                 type: 'radio_group',
                 options: [
                     { label: 'Inventory', value: 'Inventory', selected: true },
@@ -77,7 +78,8 @@ angular.module('PermissionFormDefinition', [])
                 awRequiredWhen: {variable: "inventoryrequired", init: "true" }
                 },
             permission_type: {
-                label: '* Permission',
+                label: 'Permission',
+                labelClass: 'prepend-asterisk',
                 type: 'radio_group',
                 options: [
                     {label: 'Read', value: 'read', ngShow: "category == 'Inventory'" },

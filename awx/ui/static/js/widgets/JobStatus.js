@@ -41,7 +41,9 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
             html += "<td><a href=\"" + link + "\"";
             html += (label == 'Hosts' || label == 'Groups') ? " class=\"pad-left-sm\" " : "";
             html += ">"  + label + "</a></td>\n";
-            html += "<td class=\"failed-column text-right\">";
+            html += "<td class=\"";
+            html += (fail > 0) ? 'failed-column' : 'zero-column';
+            html += " text-right\">";
             html += "<a href=\"" + fail_link + "\">" + fail + "</a>"; 
             html += "</td>\n";
             html += "<td class=\"text-right\">"
