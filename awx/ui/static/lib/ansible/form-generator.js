@@ -198,30 +198,34 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
         for (var fld in this.form.fields) {
             if (this.form.fields[fld].type == 'checkbox_group') {
               for (var i=0; i < this.form.fields[fld].fields.length; i++) {
-                  this.scope[this.form.fields[fld].fields[i].name] = '';
-                  this.scope[this.form.fields[fld].fields[i].name + '_api_error'] = '';
+                   this.scope[this.form.fields[fld].fields[i].name] = '';
+                   this.scope[this.form.fields[fld].fields[i].name + '_api_error'] = '';
               }
             }
             else {
-              this.scope[fld] = '';      
-              this.scope[fld + '_api_error'] = '';  
+                this.scope[fld] = '';      
+                this.scope[fld + '_api_error'] = '';  
             }
             if (this.form.fields[fld].sourceModel) {
-              this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField] = '';
-              this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '_api_error'] = '';
+                this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField] = '';
+                this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '_api_error'] = '';
             }
             if ( this.form.fields[fld].type == 'lookup' &&
                 this.scope[this.form.name + '_form'][this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField] ) {
-              this.scope[this.form.name + '_form'][this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField].$setPristine();
+                this.scope[this.form.name + '_form'][this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField].$setPristine();
             }
             if (this.scope[this.form.name + '_form'][fld]) {
-              this.scope[this.form.name + '_form'][fld].$setPristine();
+                this.scope[this.form.name + '_form'][fld].$setPristine();
             }
-            //if (this.scope.fields[fld].awPassMatch) {
-            //   this.scope[this.form.name + '_form'][fld].$setValidity('awpassmatch', true); 
-            //}
+            if (this.form.fields[fld].chkPass && this.scope[this.form.name + '_form'][fld]) {
+                this.scope[this.form.name + '_form'][fld].$setValidity('complexity', true);
+                $('#progbar').css({ width: 0 });
+            }
+            if (this.form.fields[fld].awPassMatch && this.scope[this.form.name + '_form'][fld]) {
+                this.scope[this.form.name + '_form'][fld].$setValidity('awpassmatch', true);
+            }
             if (this.form.fields[fld].ask) {
-              this.scope[fld + '_ask'] = false;
+                this.scope[fld + '_ask'] = false;
             }
         }
         if (this.mode == 'add') {

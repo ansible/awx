@@ -308,6 +308,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
           for (var fld in master) {
               scope[fld] = master[fld];
           }
+          scope['password_confirm'] = scope['password'];
           };
 
        // Password change

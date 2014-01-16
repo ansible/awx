@@ -70,7 +70,8 @@ angular.module('UserFormDefinition', [])
                 label: 'Password',
                 type: 'password',
                 ngShow: 'ldap_user == false',
-                awRequiredWhen: { variable: "not_ldap_user", init: true },
+                addRequired: true,
+                editRequired: false,
                 ngChange: "clearPWConfirm('password_confirm')",
                 autocomplete: false,
                 chkPass: true
