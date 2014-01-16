@@ -1053,6 +1053,8 @@ class ActivityStreamSerializer(BaseSerializer):
                     summary_fields[fk] = []
                     for thisItem in allm2m:
                         thisItemDict = {}
+                        if 'id' not in related_fields:
+                            related_fields = related_fields + ('id',)
                         for field in related_fields:
                             fval = getattr(thisItem, field, None)
                             if fval is not None:
@@ -1061,7 +1063,8 @@ class ActivityStreamSerializer(BaseSerializer):
             except ObjectDoesNotExist:
                 pass
         if obj.actor is not None:
-            summary_fields['actor'] = dict(username = obj.actor.username,
+            summary_fields['actor'] = dict(id = obj.actor.id,
+                                           username = obj.actor.username,
                                            first_name = obj.actor.first_name,
                                            last_name = obj.actor.last_name)
         return summary_fields
