@@ -249,9 +249,9 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
     // Process search params
     if ($routeParams['name']) {
         scope[HomeHostList.iterator + 'InputDisable'] = false;
-        scope[HomeHostListiterator + 'SearchValue'] = $routeParams['name'];
+        scope[HomeHostList.iterator + 'SearchValue'] = $routeParams['name'];
         scope[HomeHostList.iterator + 'SearchField'] = 'name';
-        scope[lHomeHostList.iterator + 'SearchFieldLabel'] = list.fields['name'].label;
+        scope[HomeHostList.iterator + 'SearchFieldLabel'] = list.fields['name'].label;
     }
     
     if ($routeParams['has_active_failures']) {
@@ -267,7 +267,7 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
     LoadBreadCrumbs();
     
     scope.showActivity = function() { Stream(); }
-    scope.toggle_host_enabled = function(id, sources) { ToggleHostEnabled(id, sources, scope); }
+    scope.toggle_host_enabled = function(id, sources) { ToggleHostEnabled({ host_id: id, external_source: sources, scope: scope }); }
 
     scope.editHost = function(host_id, host_name) {
         var host;

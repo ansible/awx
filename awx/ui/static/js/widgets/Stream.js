@@ -239,7 +239,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
            if (paths.length > 1 && /^\d+/.test(paths[paths.length - 1])) {
                type = paths[paths.length - 2];
                type = (type == 'inventories') ? 'inventory' : type.replace(/s$/,'');
-               defaultUrl += '?object1=' + type + '&object1_id=' + paths[paths.length - 1];
+               //defaultUrl += '?object1=' + type + '&object1__id=' + 
+               defaultUrl += '?' + type + '__id=' + paths[paths.length - 1];
            }
            else if (paths.length > 1) {
                type = paths[paths.length - 1];
