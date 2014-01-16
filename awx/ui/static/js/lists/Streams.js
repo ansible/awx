@@ -56,10 +56,10 @@ angular.module('StreamListDefinition', [])
             // dropdown
             all_objects: {
                 label: 'All',
-                searchOnly: true, 
+                searchOnly: true,
                 searchObject: 'all',
                 searchPlaceholder: 'All resources',
-                searchWidget: 2,
+                searchWidget: 2
                 },
             credential_search: {
                 label: 'Credential',
