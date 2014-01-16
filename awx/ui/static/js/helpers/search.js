@@ -249,7 +249,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             }
             Refresh({ scope: scope, set: set, iterator: iterator, url: url });
             });
-
+        
+        /*
         if (scope.removeFoundObject) {
            scope.removeFoundObject();
         }
@@ -269,8 +270,9 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                scope.$emit('prepareSearch2', iterator, page, load, spin);
             }
             });
+        */
 
-        if (scope.removeResultWarning) {
+        /*if (scope.removeResultWarning) {
             scope.removeResultWarning();
         }
         scope.removeResultWarning = scope.$on('resultWarning', function(e, objs, length) {
@@ -278,6 +280,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             var label = (objs == 'inventory') ? 'inventories' : objs.replace(/s$/,'');
             Alert('Warning', 'The number of matching ' + label + ' was too large. We limited your search to the first 30.', 'alert-info');
             });
+        */
 
         if (scope.removePrepareSearch) {
             scope.removePrepareSearch();
@@ -293,6 +296,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             var modifier;
             
             // Determine how many object values we're dealing with.
+            /*
             expected_objects = 0;
             found_objects = 0;
             for (var i=1; i <= widgets; i++) {
@@ -305,18 +309,27 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                    expected_objects++;
                 }
             }
+            */
             
             for (var i=1; i <= widgets; i++) {
                 var modifier = (i == 1) ? '' : i;
                 if ( $('#search-widget-container' + modifier) ) {
                     if (list.fields[scope[iterator + 'SearchField' + modifier]] &&
                         list.fields[scope[iterator + 'SearchField' + modifier]].searchObject) {
+                        // Search field of object type
                         if (list.fields[scope[iterator + 'SearchField'  + modifier]].searchObject !== 'all') {
+                            // An object type is selected
                             scope[iterator + 'HideAllStartBtn' + modifier] = false;
                             if (scope[iterator + 'SearchValue' + modifier]) {
+                                // A search value was entered
                                 scope[iterator + 'ShowStartBtn' + modifier] = false;
-                                var objs = list.fields[scope[iterator + 'SearchField' + modifier]].searchObject;
-                                var objUrl = GetBasePath('base') + objs + '/?name__icontains=' + scope[iterator + 'SearchValue' + modifier];
+                                scope[iterator + 'SearchParams'] += '&' +
+                                    list.fields[scope[iterator + 'SearchField' + modifier]].searchObject + 
+                                    '__name__icontains=' +
+                                    scope[iterator + 'SearchValue' + modifier];
+
+                                //var objUrl = GetBasePath('base') + objs + '/?name__icontains=' + scope[iterator + 'SearchValue' + modifier];
+                                /*
                                 Rest.setUrl(objUrl);
                                 Rest.setHeader({ widget: i });
                                 Rest.setHeader({ object: objs });
@@ -340,10 +353,11 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                                             { hdr: 'Error!', msg: 'Retrieving list of ' + objs + ' where name contains: ' + scope[iterator + 'SearchValue' + modifier] +
                                             ' GET returned status: ' + status });
                                         });
-                            }
+                                */
+                            }    
                             else {
                                 scope[iterator + 'ShowStartBtn' + modifier] = true;
-                                scope.$emit('foundObject', iterator, page, load, spin, i, null);  
+                                //scope.$emit('foundObject', iterator, page, load, spin, i, null);  
                             }
                         }
                         else {
@@ -353,10 +367,11 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                     }
                 }
             }
-            if (expected_objects == 0) {
+            scope.$emit('prepareSearch2', iterator, page, load, spin);
+            //if (expected_objects == 0) {
                 // No search widgets contain objects
-                scope.$emit('prepareSearch2', iterator, page, load, spin);
-            }
+            //    scope.$emit('prepareSearch2', iterator, page, load, spin);
+            //}
             });
         
         if (scope.removePrepareSearch2) {

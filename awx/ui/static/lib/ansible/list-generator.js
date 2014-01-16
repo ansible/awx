@@ -289,7 +289,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        if (options.mode == 'select' || options.mode == 'lookup') {
            html += "<th>Select</th>";
        }
-       else if (options.mode == 'edit') {
+       else if (options.mode == 'edit' && list.fieldActions) {
            html += "<th class=\"actions-column";
            html += (list.fieldActions && list.fieldActions.columnClass) ? " " + list.fieldActions.columnClass : ""; 
            html += "\">Actions</th>\n";

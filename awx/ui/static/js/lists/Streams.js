@@ -29,12 +29,12 @@ angular.module('StreamListDefinition', [])
                 },
             user: {
                 label: 'Initiated by',
-                ngBindHtml: 'activity.user',
-                sourceModel: 'user',
+                //ngBindHtml: 'activity.user',
+                sourceModel: 'actor',
                 sourceField: 'username',
-                awToolTip: "\{\{ userToolTip \}\}",
-                dataPlacement: 'top',
-                searchPlaceholder: 'Initiated by username',
+                //awToolTip: "\{\{ userToolTip \}\}",
+                //dataPlacement: 'top',
+                searchPlaceholder: 'Username',
                 searchWidget: 1
                 },
             description: {
@@ -47,7 +47,7 @@ angular.module('StreamListDefinition', [])
                 label: 'System event',
                 searchOnly: true, 
                 searchType: 'isnull',
-                sourceModel: 'user',
+                sourceModel: 'actor',
                 sourceField: 'username',
                 searchWidget: 1
                 },
@@ -60,12 +60,11 @@ angular.module('StreamListDefinition', [])
                 searchObject: 'all',
                 searchPlaceholder: 'All resources',
                 searchWidget: 2,
-                searchField: 'object1'
                 },
             credential_search: {
                 label: 'Credential',
                 searchOnly: true,
-                searchObject: 'credentials',
+                searchObject: 'credential',
                 searchPlaceholder: 'Credential name',
                 searchWidget: 2,
                 searchField: 'object1'
@@ -73,7 +72,7 @@ angular.module('StreamListDefinition', [])
             group_search: {
                 label: 'Group',
                 searchOnly: true,
-                searchObject: 'groups',
+                searchObject: 'group',
                 searchPlaceholder: 'Group name',
                 searchWidget: 2,
                 searchField: 'object1'
@@ -81,7 +80,7 @@ angular.module('StreamListDefinition', [])
             host_search: {
                 label: 'Host',
                 searchOnly: true,
-                searchObject: 'hosts',
+                searchObject: 'host',
                 searchPlaceholder: 'Host name',
                 searchWidget: 2,
                 searchField: 'object1'
@@ -89,7 +88,7 @@ angular.module('StreamListDefinition', [])
             inventory_search: {
                 label: 'Inventory',
                 searchOnly: true,
-                searchObject: 'inventories',
+                searchObject: 'inventory',
                 searchPlaceholder: 'Inventory name',
                 searchWidget: 2,
                 searchField: 'object1'
@@ -97,7 +96,7 @@ angular.module('StreamListDefinition', [])
             job_template_search: {
                 label: 'Job Template',
                 searchOnly: true,
-                searchObject: 'job_templates',
+                searchObject: 'job_template',
                 searchPlaceholder: 'Job template name',
                 searchWidget: 2,
                 searchField: 'object1'
@@ -105,7 +104,7 @@ angular.module('StreamListDefinition', [])
             organization_search: {
                 label: 'Organization',
                 searchOnly: true,
-                searchObject: 'organizations',
+                searchObject: 'organization',
                 searchPlaceholder: 'Organization name',
                 searchWidget: 2,
                 searchField: 'object1'
@@ -113,7 +112,7 @@ angular.module('StreamListDefinition', [])
             project_search: {
                 label: 'Project',
                 searchOnly: true,
-                searchObject: 'projects',
+                searchObject: 'project',
                 searchPlaceholder: 'Project name',
                 searchWidget: 2,
                 searchField: 'object1'
@@ -121,7 +120,7 @@ angular.module('StreamListDefinition', [])
             user_search: {
                 label: 'User',
                 searchOnly: true,
-                searchObject: 'users',
+                searchObject: 'user',
                 searchPlaceholder: 'Primary username',
                 searchWidget: 2,
                 searchField: 'object1'
@@ -140,7 +139,7 @@ angular.module('StreamListDefinition', [])
             credential_search3: {
                 label: 'Credential',
                 searchOnly: true,
-                searchObject: 'credentials',
+                searchObject: 'credential',
                 searchPlaceholder: 'Related credential name',
                 searchWidget: 3,
                 searchField: 'object2'
@@ -148,7 +147,7 @@ angular.module('StreamListDefinition', [])
             group_search3: {
                 label: 'Group',
                 searchOnly: true,
-                searchObject: 'groups',
+                searchObject: 'group',
                 searchPlaceholder: 'Related group name',
                 searchWidget: 3,
                 searchField: 'object2'
@@ -156,7 +155,7 @@ angular.module('StreamListDefinition', [])
             host_search3: {
                 label: 'Host',
                 searchOnly: true,
-                searchObject: 'hosts',
+                searchObject: 'host',
                 searchPlaceholder: 'Related host name',
                 searchWidget: 3,
                 searchField: 'object2'
@@ -164,7 +163,7 @@ angular.module('StreamListDefinition', [])
             inventory_search3: {
                 label: 'Inventory',
                 searchOnly: true,
-                searchObject: 'inventories',
+                searchObject: 'inventory',
                 searchPlaceholder: 'Related inventory name',
                 searchWidget: 3,
                 searchField: 'object2'
@@ -172,7 +171,7 @@ angular.module('StreamListDefinition', [])
             job_template_search3: {
                 label: 'Job Template',
                 searchOnly: true,
-                searchObject: 'job_templates',
+                searchObject: 'job_template',
                 searchPlaceholder: 'Related job template name',
                 searchWidget: 3,
                 searchField: 'object2'
@@ -180,7 +179,7 @@ angular.module('StreamListDefinition', [])
             organization_search3: {
                 label: 'Organization',
                 searchOnly: true,
-                searchObject: 'organizations',
+                searchObject: 'organization',
                 searchPlaceholder: 'Related organization name',
                 searchWidget: 3,
                 searchField: 'object2'
@@ -188,7 +187,7 @@ angular.module('StreamListDefinition', [])
             project_search3: {
                 label: 'Project',
                 searchOnly: true,
-                searchObject: 'projects',
+                searchObject: 'project',
                 searchPlaceholder: 'Related project name',
                 searchWidget: 3,
                 searchField: 'object2'
@@ -196,7 +195,7 @@ angular.module('StreamListDefinition', [])
             user_search3: {
                 label: 'User',
                 searchOnly: true,
-                searchObject: 'users',
+                searchObject: 'user',
                 searchPlaceholder: 'Related username',
                 searchWidget: 3,
                 searchField: 'object2'

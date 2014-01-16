@@ -93,7 +93,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var found = false;
         var group = Find({ list: scope.groups, key: 'id', val: tree_id });
         
-        scope.showHosts(tree_id, group_id, false);
+        if (scope.showHosts) {
+            if (scope.selected_tree_id !== tree_id)
+                scope.showHosts(tree_id, group_id, false);
+        }
         
         if (group) {
            if (Empty(group.source)) {
@@ -141,9 +144,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         // Return values for use on host status indicator
         
         if (active_failures > 0) {
-            tip = active_failures +
-                [ (active_failures == 1) ? ' host' : ' hosts' ] + ' with failed jobs.' +
-                [ (active_failures == 1) ? ' host' : ' hosts' ] + '.';
+            tip = total_hosts + ( (total_hosts == 1) ? ' host' : ' hosts' ) + '. ' + active_failures + ' with failed jobs.';
             html_class = 'true';
             failures = true;
         }
@@ -156,7 +157,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
            }
            else {
                // many hosts with 0 failures
-               tip = 'No job failures';
+               tip = total_hosts + ( (total_hosts == 1) ? ' host' : ' hosts' ) + '. No job failures';
                html_class = 'false';
            }
         }

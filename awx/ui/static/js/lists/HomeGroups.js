@@ -24,7 +24,7 @@ angular.module('HomeGroupListDefinition', [])
                 label: 'Group',
                 ngClick: "\{\{ 'GroupsEdit(' + group.id + ')' \}\}",
                 columnClass: 'col-lg-3 col-md3 col-sm-2',
-                linkTo: "\{\{ '/#/inventories/' + group.inventory + '/groups/?name=' + group.name \}\}"
+                linkTo: "\{\{ '/#/inventories/' + group.inventory + '/' \}\}"
                 },
             inventory_name: {
                 label: 'Inventory', 
@@ -36,7 +36,7 @@ angular.module('HomeGroupListDefinition', [])
             failed_hosts: {
                 label: 'Failed Hosts',
                 ngHref: "\{\{ group.failed_hosts_link \}\}",
-                badgeIcon: "\{\{ 'icon-failures-' + group.failed_hosts_class \}\}",
+                badgeIcon: "\{\{ 'fa icon-failures-' + group.failed_hosts_class \}\}",
                 badgeNgHref: "\{\{ group.failed_hosts_link \}\}",
                 badgePlacement: 'left',
                 badgeToolTip: "\{\{ group.failed_hosts_tip \}\}",
@@ -51,7 +51,7 @@ angular.module('HomeGroupListDefinition', [])
                 label: 'Status',
                 ngClick: "viewUpdateStatus(\{\{ group.id \}\})",
                 searchType: 'select',
-                badgeIcon: "\{\{ 'icon-cloud-' + group.status_badge_class \}\}",
+                badgeIcon: "\{\{ 'fa fa-cloud ' + group.status_badge_class \}\}",
                 badgeToolTip: "\{\{ group.status_badge_tooltip \}\}",
                 awToolTip: "\{\{ group.status_badge_tooltip \}\}",
                 dataPlacement: 'top',
@@ -117,9 +117,6 @@ angular.module('HomeGroupListDefinition', [])
                 mode: 'all',
                 ngShow: "user_is_superuser"
                 }
-            },
-
-        fieldActions: {
-           
             }
+
         });

@@ -146,16 +146,20 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         }*/
         descr += activity.operation;
         descr += (/e$/.test(activity.operation)) ? 'd ' : 'ed ';
-        if (activity.summary_fields.object2 && activity.summary_fields.object2.name) {
-            descr += activity.summary_fields.object2.base + ' <a href=\"' + BuildUrl(activity.summary_fields.object2) + '\">'
-                + activity.summary_fields.object2.name + '</a>' + [ (activity.operation == 'disassociate') ? ' from ' : ' to ']; 
+        var obj1 = activity.object1;
+        var obj2 = activity.object2;
+        if (activity.summary_fields[obj2] && activity.summary_fields[obj2][0].name) {
+            activity.summary_fields[obj2][0].base = obj2;
+            descr += obj2 + ' <a href=\"' + BuildUrl(activity.summary_fields[obj2]) + '\">'
+                + activity.summary_fields[obj2][0].name + '</a>' + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' ); 
         }
         else if (activity.object2) { 
-            descr += activity.object2 + [ (activity.operation == 'disassociate') ? ' from ' : ' to '];
+            descr += activity.object2[0] + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
         }
-        if (activity.summary_fields.object1 && activity.summary_fields.object1.name) {
-            descr += activity.summary_fields.object1.base + ' <a href=\"' + BuildUrl(activity.summary_fields.object1) + '\">'
-                + activity.summary_fields.object1.name + '</a>'; 
+        if (activity.summary_fields[obj1] && activity.summary_fields[obj1][0].name) {
+            activity.summary_fields[obj1][0].base = obj2;
+            descr += obj1 + ' <a href=\"' + BuildUrl(activity.summary_fields[obj1]) + '\">'
+                + activity.summary_fields[obj1][0].name + '</a>'; 
         }
         else if (activity.object1) { 
             descr += activity.object1;
@@ -222,8 +226,6 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 scope.formModalCancelShow = false;
                 scope.formModalInfo = false;
                 //scope.formModalHeader = results.summary_fields.project.name + '<span class="subtitle"> - SCM Status</span>';
-                $('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
-                $('#form-modal').addClass('skinny-modal');
                 if (!scope.$$phase) {
                    scope.$digest();
                 }
@@ -311,40 +313,48 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 scope['activities'][i].timestamp = FormatDate(cDate);
                 
                 // Display username
-                scope['activities'][i].user = (scope['activities'][i].summary_fields.user) ? scope['activities'][i].summary_fields.user.username :
+                /*scope['activities'][i].user = (scope['activities'][i].summary_fields.user) ? scope['activities'][i].summary_fields.user.username :
                     'system';
                 if (scope['activities'][i].user !== 'system') {
                     // turn user into a link when not 'system'
                     scope['activities'][i].user = "<a href=\"" + FixUrl(scope['activities'][i].related.user) + "\">" + 
                         scope['activities'][i].user + "</a>";
+                }*/
+                if (scope['activities'][i]['summary_fields']['actor']) {
+                    scope['activities'][i]['user'] = scope['activities'][i]['summary_fields']['actor']['username'];
+                }
+                else {
+                    scope['activities'][i]['user'] = 'system';
                 }
                 
                 // Objects
                 var href;
                 var deleted = /^\_delete/;
-                if (scope['activities'][i].summary_fields.object1 && scope['activities'][i].summary_fields.object1.name) {
-                    if ( !deleted.test(scope['activities'][i].summary_fields.object1.name) ) {
+                var obj1 = scope['activities'][i].object1;
+                var obj2 = scope['activities'][i].object2;
+                if ( obj1 && scope['activities'][i].summary_fields[obj1] && scope['activities'][i].summary_fields[obj1].name) {
+                    if ( !deleted.test(scope['activities'][i].summary_fields[obj1].name) ) {
                         href = BuildUrl(scope['activities'][i].summary_fields.object1);
-                        scope['activities'][i].objects = "<a href=\"" + href + "\">" + scope['activities'][i].summary_fields.object1.name + "</a>";
+                        scope['activities'][i].objects = "<a href=\"" + href + "\">" + scope['activities'][i].summary_fields[obj1].name + "</a>";
                     }
                     else {
-                        scope['activities'][i].objects = scope['activities'][i].summary_fields.object1.name;
+                        scope['activities'][i].objects = scope['activities'][i].summary_fields[obj1].name;
                     }
                 }
                 else if (scope['activities'][i].object1) {
                     scope['activities'][i].objects = scope['activities'][i].object1;
                 }
-                if (scope['activities'][i].summary_fields.object2 && scope['activities'][i].summary_fields.object2.name) {
+                if (obj2 && scope['activities'][i].summary_fields[obj2] && scope['activities'][i].summary_fields[obj2].name) {
                     if ( !deleted.test(scope['activities'][i].summary_fields.object2.name) ) {
                         href = BuildUrl(scope['activities'][i].summary_fields.object2);
-                        scope['activities'][i].objects += ", <a href=\"" + href + "\">" + scope['activities'][i].summary_fields.object2.name + "</a>";
+                        scope['activities'][i].objects += ", <a href=\"" + href + "\">" + scope['activities'][i].summary_fields[obj2].name + "</a>";
                     }
                     else {
-                        scope['activities'][i].objects += "," + scope['activities'][i].summary_fields.object2.name;
+                        scope['activities'][i].objects += "," + scope['activities'][i].summary_fields[obj2].name;
                     }
                 }
                 else if (scope['activities'][i].object2) {
-                    scope['activities'][i].objects += ", " + scope['activities'][i].object1;
+                    scope['activities'][i].objects += ", " + scope['activities'][i].object2;
                 }
 
                 // Description

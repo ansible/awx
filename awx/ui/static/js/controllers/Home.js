@@ -95,7 +95,7 @@ Home.$inject=['$scope', '$compile', '$routeParams', '$rootScope', '$location', '
 
 
 function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, 
-    GetBasePath, SearchInit, PaginateInit, FormatDate, HostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream) {
+    GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream) {
 
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -122,7 +122,7 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
             // Set values for Failed Hosts column
             scope.home_groups[i].failed_hosts = scope.home_groups[i].hosts_with_active_failures + ' / ' + scope.home_groups[i].total_hosts;
             
-            msg = HostsStatusMsg({
+            msg = GetHostsStatusMsg({
                 active_failures: scope.home_groups[i].hosts_with_active_failures,
                 total_hosts: scope.home_groups[i].total_hosts,
                 inventory_id: scope.home_groups[i].inventory,
@@ -135,7 +135,8 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
             scope.home_groups[i].failed_hosts_link = msg['url'];
             scope.home_groups[i].failed_hosts_class = msg['class'];
             scope.home_groups[i].status = update_status['status'];
-            scope.home_groups[i].source = scope.groups[i].summary_fields.inventory_source.source;
+            scope.home_groups[i].source = (scope.home_groups[i].summary_fields.inventory_source) ? 
+                scope.home_groups[i].summary_fields.inventory_source.source : null;
             scope.home_groups[i].last_updated = last_update;
             scope.home_groups[i].status_badge_class = update_status['class'];
             scope.home_groups[i].status_badge_tooltip = update_status['tooltip'];
@@ -205,12 +206,17 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
     LoadBreadCrumbs();
     
     scope.showActivity = function() { Stream(); }
-    scope.viewUpdateStatus = function(id) { ViewUpdateStatus({ scope: scope, group_id: id }) };
+    
+    scope.viewUpdateStatus = function(id) { 
+        scope.groups = scope.home_groups;
+        ViewUpdateStatus({ scope: scope, tree_id: id }) 
+        };
 
     }
 
 HomeGroups.$inject = [ '$location', '$routeParams', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
-    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'HostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus', 'Stream'
+    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
+    'Stream'
     ];
 
 
