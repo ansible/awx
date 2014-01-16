@@ -17,18 +17,8 @@ angular.module('ActivityDetailDefinition', [])
         formLabelSize: 'col-lg-2',
 
         fields: {
-            timestamp: {
-                label: 'Time',
-                type: 'text',
-                readonly: true
-                },
             user: {
-                label: 'Initiated By',
-                type: 'text',
-                readonly: true
-                },
-            id: {
-                label: 'Event ID', 
+                label: "Initiated by",
                 type: 'text',
                 readonly: true
                 },
@@ -37,30 +27,18 @@ angular.module('ActivityDetailDefinition', [])
                 type: 'text',
                 readonly: true
                 },
-            object1: {
-                label: 'Resource',
+            /*object1_name: {
+                label: '\{\{ object1 \}\}',
                 type: 'text',
                 ngHide: '!object1',
                 readonly: true
                 },
-            object1_name: {
-                label: 'Name',
-                type: 'text',
-                ngHide: '!object1_name',
-                readonly: true
-                },
-            object2: {
-                label: 'Related',
+            object2_name: {
+                label: '\{\{ object2 \}\}',
                 type: 'text',
                 ngHide: '!object2',
                 readonly: true
-                },
-            object2_name: {
-                label: 'Name',
-                type: 'text',
-                ngHide: '!object2_name',
-                readonly: true
-                },
+                },*/
             changes: {
                 label: 'Changes',
                 type: 'textarea',

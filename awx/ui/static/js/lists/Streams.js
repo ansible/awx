@@ -29,7 +29,7 @@ angular.module('StreamListDefinition', [])
                 },
             user: {
                 label: 'Initiated by',
-                //ngBindHtml: 'activity.user',
+                ngBindHtml: 'activity.user',
                 sourceModel: 'actor',
                 sourceField: 'username',
                 //awToolTip: "\{\{ userToolTip \}\}",

@@ -136,105 +136,84 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
     .factory('BuildDescription', ['FixUrl', 'BuildUrl', function(FixUrl, BuildUrl) {
     return function(activity) {
         var descr = '';
-        /*if (activity.summary_fields.user) {
-            // this is a user transaction
-            var usr = FixUrl(activity.related.user);
-            descr += 'User <a href=\"' + usr + '\">' + activity.summary_fields.user.username + '</a> ';
-        }
-        else {
-            descr += 'System '; 
-        }*/
+        var descr_nolink;
         descr += activity.operation;
         descr += (/e$/.test(activity.operation)) ? 'd ' : 'ed ';
+        descr_nolink = descr;
         var obj1 = activity.object1;
         var obj2 = activity.object2;
         if (activity.summary_fields[obj2] && activity.summary_fields[obj2][0].name) {
-            activity.summary_fields[obj2][0].base = obj2;
-            descr += obj2 + ' <a href=\"' + BuildUrl(activity.summary_fields[obj2]) + '\">'
+            activity.summary_fields[obj2][0]['base'] = obj2;
+            descr += obj2 + ' <a href=\"' + BuildUrl(activity.summary_fields[obj2][0]) + '\">'
                 + activity.summary_fields[obj2][0].name + '</a>' + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' ); 
+            descr_nolink += obj2 + ' ' + activity.summary_fields[obj2][0].name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
         }
         else if (activity.object2) { 
             descr += activity.object2[0] + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
+            descr_nolink += activity.object2[0] + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
         }
         if (activity.summary_fields[obj1] && activity.summary_fields[obj1][0].name) {
-            activity.summary_fields[obj1][0].base = obj2;
-            descr += obj1 + ' <a href=\"' + BuildUrl(activity.summary_fields[obj1]) + '\">'
-                + activity.summary_fields[obj1][0].name + '</a>'; 
+            activity.summary_fields[obj1][0]['base'] = obj1;
+            descr += obj1 + ' <a href=\"' + BuildUrl(activity.summary_fields[obj1][0]) + '\">'
+                + activity.summary_fields[obj1][0].name + '</a>';
+            descr_nolink += obj1 + ' ' + activity.summary_fields[obj1][0].name; 
         }
         else if (activity.object1) { 
             descr += activity.object1;
+            descr_nolink += activity.object1;
         }
-        return descr;
+        activity['description'] = descr;
+        activity['description_nolink'] = descr_nolink;
         }
         }])
 
-    .factory('ShowDetail', ['$rootScope', 'Rest', 'Alert', 'GenerateForm', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'ActivityDetailForm',
-    'Empty',
-    function($rootScope, Rest, Alert, GenerateForm, ProcessErrors, GetBasePath, FormatDate, ActivityDetailForm, Empty) {
-    return function(activity_id) {
+    .factory('ShowDetail', ['$rootScope', 'Rest', 'Alert', 'GenerateForm', 'ProcessErrors', 'GetBasePath', 'FormatDate', 
+        'ActivityDetailForm', 'Empty', 'Find',
+    function($rootScope, Rest, Alert, GenerateForm, ProcessErrors, GetBasePath, FormatDate, ActivityDetailForm, Empty, Find) {
+    return function(params) {
 
+        var activity_id = params.activity_id;
+        var parent_scope = params.scope;
+        
         var generator = GenerateForm;
         var form = ActivityDetailForm;
-        var scope;
+        var activity = Find({list: parent_scope.activities, key: 'id', val: activity_id });
+       
+        // Setup changes field 
+        activity['changes'] = JSON.stringify(activity['changes'], null, '\t'); 
+        var n = activity['changes'].match(/\n/g);
+        var rows = (n) ? n.length : 1;
+        rows = (rows < 1) ? 3 : 10;
+        form.fields['changes'].rows = 10;             
         
-        var url = GetBasePath('activity_stream') + activity_id + '/';
+        // Load the form
+        var scope = generator.inject(form, { mode: 'edit', modal: true, related: false });
+        scope['changes'] = activity['changes'];
+        scope['user'] = ( (activity.summary_fields.actor) ? activity.summary_fields.actor.username : 'system' ) +
+            ' on ' + FormatDate(new Date(activity['timestamp']));
+        scope['operation'] = activity['description_nolink'];
         
-        // Retrieve detail record and prepopulate the form
-        Rest.setUrl(url);
-        Rest.get()
-            .success( function(data, status, headers, config) {
-                // load up the form
-                var results = data;
-                $rootScope.flashMessage = null;
-
-                $('#form-modal').on('show.bs.modal', function (e) {
-                    $('#form-modal-body').css({
-                        width:'auto',  //probably not needed
-                        height:'auto', //probably not needed 
-                        'max-height':'100%'
-                        });
-                    });
-
-                //var n = results['changes'].match(/\n/g);
-                //var rows = (n) ? n.length : 1;
-                //rows = (rows < 1) ? 3 : 10;
-                form.fields['changes'].rows = 10;
-                scope = generator.inject(form, { mode: 'edit', modal: true, related: false});
-                generator.reset();
-                for (var fld in form.fields) {
-                    if (results[fld]) {
-                       if (fld == 'timestamp') {
-                          scope[fld] = FormatDate(new Date(results[fld]));
-                       }
-                       else {
-                          scope[fld] = results[fld];
-                       }
-                    }
-                }
-                if (results.summary_fields.object1) {
-                    scope['object1_name'] = results.summary_fields.object1.name; 
-                }
-                if (results.summary_fields.object2) {
-                    scope['object2_name'] = results.summary_fields.object2.name; 
-                }
-                scope['user'] = (results.summary_fields.user) ? results.summary_fields.user.username : 'system';
-                scope['changes'] = JSON.stringify(results['changes'], null, '\t');                
-                scope.formModalAction = function() {
-                    $('#form-modal').modal("hide");
-                    }
-                scope.formModalActionLabel = 'OK';
-                scope.formModalCancelShow = false;
-                scope.formModalInfo = false;
-                //scope.formModalHeader = results.summary_fields.project.name + '<span class="subtitle"> - SCM Status</span>';
-                if (!scope.$$phase) {
-                   scope.$digest();
-                }
-                })
-            .error( function(data, status, headers, config) {
-                $('#form-modal').modal("hide");
-                ProcessErrors(scope, data, status, form,
-                    { hdr: 'Error!', msg: 'Failed to retrieve activity: ' + activity_id + '. GET status: ' + status });
+        scope.formModalAction = function() {
+            $('#form-modal').modal("hide");
+            }
+        
+        $('#form-modal').on('show.bs.modal', function (e) {
+            $('#form-modal-body').css({
+                width:'auto',  //probably not needed
+                height:'auto', //probably not needed 
+                'max-height':'100%'
                 });
+            });
+
+        scope.formModalActionLabel = 'OK';
+        scope.formModalCancelShow = false;
+        scope.formModalInfo = false;
+        scope.formModalHeader = "Event " + activity.id;
+        
+        if (!scope.$$phase) {
+           scope.$digest();
+        }
+
         }
         }])
 
@@ -300,7 +279,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             }
 
         scope.showDetail = function(id) {
-            ShowDetail(id);
+            ShowDetail({ scope: scope, activity_id: id });
             }
 
         if (scope.removeStreamPostRefresh) {
@@ -321,7 +300,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                         scope['activities'][i].user + "</a>";
                 }*/
                 if (scope['activities'][i]['summary_fields']['actor']) {
-                    scope['activities'][i]['user'] = scope['activities'][i]['summary_fields']['actor']['username'];
+                    scope['activities'][i]['user'] = "<a href=\"/#/users/" + scope['activities'][i]['summary_fields']['actor']['id'] + "\">" +
+                        scope['activities'][i]['summary_fields']['actor']['username'] + "</a>";
                 }
                 else {
                     scope['activities'][i]['user'] = 'system';
@@ -357,8 +337,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     scope['activities'][i].objects += ", " + scope['activities'][i].object2;
                 }
 
-                // Description
-                scope['activities'][i].description = BuildDescription(scope['activities'][i]);
+                BuildDescription(scope['activities'][i]);
 
             }
             // Give ng-repeate a chance to show the data before adjusting the page size.
