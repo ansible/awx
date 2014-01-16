@@ -108,14 +108,14 @@ a:focus {
     font-size: 14px;
     margin-right: 15px;
   }
-  /*a:first-child {
-    margin-left: 0;
-  }*/
   a:hover {
     cursor: pointer;
   }
-  .dropdown {
-    margin-left: 15px;
+  .cancel {
+    padding-right: 10px;
+  }
+  .dropdown .caret {
+    border-top-color: @blue;
   }
 }
 
@@ -1048,6 +1048,8 @@ input[type="checkbox"].checkbox-no-label {
      border-bottom: 1px solid #ddd;
      border-right: 1px solid #ddd;
   }
+
+  #groups_table .actions .cancel { padding-right: 0; }
 
   .node-toggle, .node-no-toggle {
     /* also used on job evetns */

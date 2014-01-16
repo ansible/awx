@@ -268,8 +268,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         html += " <span class=\"caret\"></span></button>\n";
         */
         html += "<div class=\"dropdown\">\n";
-        html += "<a href=\"\" class=\"toggle btn "; 
-        html += (field['class']) ? field['class'] : 'btn-default btn-xs';
+        html += "<a href=\"\" class=\"toggle";
         html += "\" ";
         html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
         html += "data-toggle=\"dropdown\" ";

@@ -93,25 +93,19 @@ angular.module('ProjectsListDefinition', [])
             edit: {
                 label: 'Edit',
                 ngClick: "editProject(\{\{ project.id \}\})",
-                icon: 'icon-edit',
-                "class": 'btn-xs btn-default',
                 awToolTip: 'Edit project properties',
                 dataPlacement: 'top'
                 },
             scm_update: {
                 label: 'Update',
-                icon: 'icon-cloud-download',
-                "class": 'btn-xs btn-success',
                 ngClick: 'SCMUpdate(\{\{ project.id \}\})',
                 awToolTip: "\{\{ project.scm_update_tooltip \}\}",
                 ngClass: "project.scm_type_class",
                 dataPlacement: 'top'
                 },
             cancel: {
-                label: 'Cancel',
-                icon: 'icon-minus-sign',
+                label: 'Stop',
                 ngClick: "cancelUpdate(\{\{ project.id \}\}, '\{\{ project.name \}\}')",
-                "class": 'btn-danger btn-xs delete-btn',
                 awToolTip: 'Cancel a running SCM update process',
                 ngShow: "project.status == 'updating'",
                 dataPlacement: 'top'
@@ -119,8 +113,6 @@ angular.module('ProjectsListDefinition', [])
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteProject(\{\{ project.id \}\},'\{\{ project.name \}\}')",
-                icon: 'icon-trash',
-                "class": 'btn-danger btn-xs delete-btn',
                 awToolTip: 'Permanently remove project from the database',
                 ngShow: "project.status !== 'updating'",
                 dataPlacement: 'top'

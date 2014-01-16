@@ -83,39 +83,34 @@ angular.module('JobsListDefinition', [])
             },
 
         fieldActions: {
-            rerun: {
+            submit: {
                 label: 'Launch',
                 icon: 'icon-rocket',
                 mode: 'all',             
                 ngClick: "submitJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}' )",
-                'class': 'btn-success btn-xs',
-                awToolTip: 'Relaunch the job template, running it again from scratch',
+                awToolTip: 'Start the job',
                 dataPlacement: 'top'
                 },
             cancel: {
-                label: 'Cancel',
-                icon: 'icon-minus-sign',
+                label: 'Stop',
                 mode: 'all',
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
-                "class": 'btn-danger btn-xs delete-btn',
                 awToolTip: 'Cancel a running or pending job',
                 ngShow: "job.status == 'pending' || job.status == 'running' || job.status == 'waiting'",
                 dataPlacement: 'top'
                 },
             "delete": {
                 label: 'Delete',
-                icon: 'icon-trash',
                 mode: 'all',
                 ngClick: 'deleteJob(\{\{ job.id \}\})',
-                "class": 'btn-danger btn-xs delete-btn',
-                awToolTip: 'Remove the selected job from the database',
+                awToolTip: 'Delete the job',
                 ngShow: "job.status != 'pending' && job.status != 'running' && job.status != 'waiting'",
                 dataPlacement: 'top'
                 },
              dropdown: {
                 type: 'DropDown',
                 label: 'View',
-                icon: 'icon-zoom-in',
+                icon: 'fa-search-plus',
                 'class': 'btn-default btn-xs',
                 options: [
                     { ngClick: "editJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}')", label: 'Status' },
