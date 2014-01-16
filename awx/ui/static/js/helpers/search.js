@@ -544,7 +544,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         scope.searchCleanup = function() {
             console.log('search cleanup!');
             scope.removeDoSearch();
-            scope.removeFoundObject();
+            //scope.removeFoundObject();
             scope.removeResultWarning();
             scope.removePrepareSearch(); 
             scope.removePrepareSearch2();

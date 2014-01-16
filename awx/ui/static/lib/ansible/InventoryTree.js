@@ -444,7 +444,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                 html += "<div class=\"modal-header\">\n";
                 html += "<button type=\"button\" class=\"close\" data-target=\"#copy-prompt-modal\" " + 
                     "data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
-                html += "<h3>Copy Group</h3>\n";
+                html += "<h3>Copy Host</h3>\n";
                 html += "</div>\n";
                 html += "<div class=\"modal-body\">\n";
                 html += "<p>Are you sure you want to copy host " + host.name + ' to group ' + target.name + '?</p>';            
