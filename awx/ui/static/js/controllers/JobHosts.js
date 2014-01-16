@@ -48,7 +48,7 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
     }
     scope.RemoveSetHostLink = scope.$on('setHostLink', function(e, inventory_id) {
         for (var i=0; i < scope.jobhosts.length; i++) {
-            scope.jobhosts[i].hostLinkTo = '/#/inventories/' + inventory_id + '/hosts/?name=' + 
+            scope.jobhosts[i].hostLinkTo = '/#/inventories/' + inventory_id + '/?host_name=' + 
                 escape(scope.jobhosts[i].summary_fields.host.name);
         }
         });
@@ -91,9 +91,10 @@ function JobHostSummaryList ($scope, $rootScope, $location, $log, $routeParams, 
         }
         else { 
            // Make the host name appear in breadcrumbs
-           LoadBreadCrumbs({ path: '/hosts/' + scope['host_id'], title: $routeParams['host_name'] });
+           LoadBreadCrumbs({ path: '/hosts/' + scope['host_id'],
+               title: ( (scope.jobhosts.length > 0) ? scope.jobhosts[0].summary_fields.host.name : 'Host' ) });
            if ($routeParams['inventory']) {
-              scope.$emit('setHostLink', $routeParams['inventory']);
+               scope.$emit('setHostLink', $routeParams['inventory']);
            }
         }
         });

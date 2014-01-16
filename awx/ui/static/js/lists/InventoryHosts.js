@@ -74,6 +74,7 @@ angular.module('InventoryHostsDefinition', [])
                 },
             active_failures: {
                 //label: 'Job Status',
+                ngHref: "\{\{'/#/hosts/' + host.id + '/job_host_summaries/?inventory=' + inventory_id \}\}",
                 awToolTip: "\{\{ host.badgeToolTip \}\}",
                 dataPlacement: 'top',
                 iconClass: "\{\{ 'fa icon-failures-' + host.has_active_failures \}\}"

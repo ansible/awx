@@ -52,8 +52,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }
         }])
     
-    .factory('HostsReload', [ 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait', 'SetHostStatus', 
-    function(Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus) {
+    .factory('HostsReload', [ '$routeParams', 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait', 'SetHostStatus', 
+    function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus) {
     return function(params) {
         
         var scope = params.scope;
@@ -61,6 +61,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         var tree_id = params.tree_id
         var inventory_id = params.inventory_id;
         
+        var list = InventoryHosts;
         var url = ( !Empty(group_id) ) ? GetBasePath('groups') + group_id + '/all_hosts/' :
             GetBasePath('inventory') + inventory_id + '/hosts/';
         
@@ -80,9 +81,27 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             scope.$emit('HostReloadComplete');
             });
 
-        SearchInit({ scope: scope, set: 'hosts', list: InventoryHosts, url: url });
-        PaginateInit({ scope: scope, list:  InventoryHosts, url: url });
-        scope.search(InventoryHosts.iterator);
+        SearchInit({ scope: scope, set: 'hosts', list: list, url: url });
+        PaginateInit({ scope: scope, list: list, url: url });
+
+        if ($routeParams['host_name']) {
+            scope[list.iterator + 'InputDisable'] = false;
+            scope[list.iterator + 'SearchValue'] = $routeParams['host_name'];
+            scope[list.iterator + 'SearchField'] = 'name';
+            scope[list.iterator + 'SearchFieldLabel'] = list.fields['name'].label;
+            scope[list.iterator + 'SearchSelectValue'] = null;
+        }
+
+        if (scope.show_failures) {
+            scope[list.iterator + 'InputDisable'] = true;
+            scope[list.iterator + 'SearchValue'] = 'true';
+            scope[list.iterator + 'SearchField'] = 'has_active_failures';
+            scope[list.iterator + 'SearchFieldLabel'] = list.fields['has_active_failures'].label;
+            scope[list.iterator + 'SearchSelectValue'] = { value: 1 };
+        }
+
+        scope.search(list.iterator);
+
         }  
         }])
 

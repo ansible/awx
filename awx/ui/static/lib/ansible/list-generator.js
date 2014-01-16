@@ -326,7 +326,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
               list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator +"({{ " + list.iterator + ".id }}, true)\" ng-true-value=\"1\" " +
               "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
        }
-       else if (options.mode == 'edit' || options.mode == 'summary') {
+       else if ((options.mode == 'edit' || options.mode == 'summary') && list.fieldActions) {
           
           // Row level actions
           
@@ -349,7 +349,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  html += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
                  html += (action == 'cancel') ? " class=\"cancel red-txt\" " : "";
                  for (itm in fAction) {
-                     if (itm != 'href' && itm != 'label' && itm != 'icon' && itm != 'class' && itm != 'iconClass') {
+                     if (itm != 'ngHref' && itm != 'href' && itm != 'label' && itm != 'icon' && itm != 'class' && itm != 'iconClass') {
                          html += Attr(fAction, itm);
                      }
                  }
