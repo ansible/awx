@@ -178,40 +178,42 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         var generator = GenerateForm;
         var form = ActivityDetailForm;
         var activity = Find({list: parent_scope.activities, key: 'id', val: activity_id });
-       
-        // Setup changes field 
-        activity['changes'] = JSON.stringify(activity['changes'], null, '\t'); 
-        var n = activity['changes'].match(/\n/g);
-        var rows = (n) ? n.length : 1;
-        rows = (rows < 1) ? 3 : 10;
-        form.fields['changes'].rows = 10;             
-        
-        // Load the form
-        var scope = generator.inject(form, { mode: 'edit', modal: true, related: false });
-        scope['changes'] = activity['changes'];
-        scope['user'] = ( (activity.summary_fields.actor) ? activity.summary_fields.actor.username : 'system' ) +
-            ' on ' + FormatDate(new Date(activity['timestamp']));
-        scope['operation'] = activity['description_nolink'];
-        
-        scope.formModalAction = function() {
-            $('#form-modal').modal("hide");
-            }
-        
-        $('#form-modal').on('show.bs.modal', function (e) {
-            $('#form-modal-body').css({
-                width:'auto',  //probably not needed
-                height:'auto', //probably not needed 
-                'max-height':'100%'
-                });
-            });
 
-        scope.formModalActionLabel = 'OK';
-        scope.formModalCancelShow = false;
-        scope.formModalInfo = false;
-        scope.formModalHeader = "Event " + activity.id;
-        
-        if (!scope.$$phase) {
-           scope.$digest();
+        if (activity) {
+            // Setup changes field 
+            activity['changes'] = JSON.stringify(activity['changes'], null, '\t'); 
+            var n = activity['changes'].match(/\n/g);
+            var rows = (n) ? n.length : 1;
+            rows = (rows < 1) ? 3 : 10;
+            form.fields['changes'].rows = 10;             
+            
+            // Load the form
+            var scope = generator.inject(form, { mode: 'edit', modal: true, related: false });
+            scope['changes'] = activity['changes'];
+            scope['user'] = ( (activity.summary_fields.actor) ? activity.summary_fields.actor.username : 'system' ) +
+                ' on ' + FormatDate(new Date(activity['timestamp']));
+            scope['operation'] = activity['description_nolink'];
+            
+            scope.formModalAction = function() {
+                $('#form-modal').modal("hide");
+                }
+            
+            $('#form-modal').on('show.bs.modal', function (e) {
+                $('#form-modal-body').css({
+                    width:'auto',  //probably not needed
+                    height:'auto', //probably not needed 
+                    'max-height':'100%'
+                    });
+                });
+
+            scope.formModalActionLabel = 'OK';
+            scope.formModalCancelShow = false;
+            scope.formModalInfo = false;
+            scope.formModalHeader = "Event " + activity.id;
+            
+            if (!scope.$$phase) {
+               scope.$digest();
+            }
         }
 
         }

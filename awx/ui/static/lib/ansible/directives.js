@@ -534,7 +534,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
                 start: function(e, ui) {
                     ui.helper.addClass('draggable-clone');
                     },
-                zIndex: 100
+                zIndex: 100,
+                cursorAt: { left: -1 }
                 });
         }
 
@@ -607,7 +608,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
                         scope.$emit('CopyMoveHost', $(this).attr('data-tree-id'), ui.draggable.attr('data-host-id'));
                     }
                     },
-                tolerance: 'touch'
+                tolerance: 'pointer'
                 });
         }
 
