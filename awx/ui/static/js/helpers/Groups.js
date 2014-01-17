@@ -93,11 +93,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var found = false;
         var group = Find({ list: scope.groups, key: 'id', val: tree_id });
         
-        if (scope.showHosts) {
-            if (scope.selected_tree_id !== tree_id)
-                scope.showHosts(tree_id, group_id, false);
-        }
-        
         if (group) {
            if (Empty(group.source)) {
               Alert('Missing Configuration', 'The selected group is not configured for inventory sync. ' +
@@ -116,7 +111,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                       ShowUpdateStatus({ 
                           group_name: data.summary_fields.group.name,
                           last_update: url,
-                          license_error: (data.summary_fields.last_update && data.summary_fields.last_update.license_error) ? true : false
+                          license_error: ( (data.summary_fields.last_update && data.summary_fields.last_update.license_error) ? true : false ),
+                          tree_id: tree_id,
+                          group_id: group_id,
+                          parent_scope: scope
                           });
                       })
                   .error( function(data, status, headers, config) {
@@ -1064,33 +1062,55 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('ShowUpdateStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm', 'Wait',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm', 'Wait', 'Empty',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
-          FormatDate, InventoryStatusForm, Wait) {
+          FormatDate, InventoryStatusForm, Wait, Empty) {
     return function(params) {
 
         var group_name = params.group_name;
         var last_update = params.last_update;
         var generator = GenerateForm;
         var form = InventoryStatusForm;
-        var license_error = params.license_error
-        var scope;
-   
+        var license_error = params.license_error;
+        var tree_id = params.tree_id;
+        var group_id = params.group_id;
+        var parent_scope = params.parent_scope;
+        
         if (last_update == undefined || last_update == null || last_update == ''){
             Wait('stop');
             Alert('Missing Configuration', 'The selected group is not configured for inventory sync. ' +
                 'Edit the group and provide Source information.', 'alert-info');
         }
         else {
+            var scope = generator.inject(form, { mode: 'edit', modal: true, related: false, showModal: false });
+            generator.reset();
+            
+            scope.formModalAction = function() {
+                console.log('tree_id: ' + tree_id);
+                console.log('selected_tree_id: ' + parent_scope.selected_tree_id);
+                $('#form-modal').modal("hide");
+                if (parent_scope && parent_scope.showHosts && !Empty(tree_id)) {
+                    if (parent_scope.selected_tree_id !== tree_id)
+                        parent_scope.showHosts(tree_id, group_id, false);
+                }
+                }
+
+            if (scope.removeUpdateStatusReady) {
+                scope.removeUpdateStatusReady();
+            }
+            scope.removeUpdateStatusReady = scope.$on('UpdateStatusReady', function(e) {
+                scope.formModalActionLabel = 'OK';
+                scope.formModalCancelShow = false;
+                scope.formModalInfo = false;
+                scope.formModalHeader = group_name + '<span class="subtitle"> - Inventory Sync</span>';
+                $('#form-modal').modal('show');
+                Wait('stop');
+                });
+            
             // Retrieve detail record and prepopulate the form
             Rest.setUrl(last_update);
             Rest.get()
-                .success( function(data, status, headers, config) {
-                    $('#form-modal').on('shown.bs.modal', function() {
-                        Wait('stop');
-                        });
-                    scope = generator.inject(form, { mode: 'edit', modal: true, related: false});
-                    generator.reset();
+                .success( function(data, status, headers, config) { 
                     for (var fld in form.fields) {
                         if (data[fld]) {
                            if (fld == 'created') {
@@ -1102,21 +1122,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         }
                     }
                     scope.license_error = license_error; 
-                    scope.formModalAction = function() {
-                        $('#form-modal').modal("hide");
-                        }
-                    scope.formModalActionLabel = 'OK';
-                    scope.formModalCancelShow = false;
-                    scope.formModalInfo = false;
-                    scope.formModalHeader = group_name + '<span class="subtitle"> - Inventory Sync</span>';
-                    
-                    if (!scope.$$phase) {
-                       scope.$digest();
-                    }
-
+                    scope.$emit('UpdateStatusReady');
                     })
                 .error( function(data, status, headers, config) {
-                    Wait('stop');
                     $('#form-modal').modal("hide");
                     ProcessErrors(scope, data, status, null,
                         { hdr: 'Error!', msg: 'Failed to retrieve last update: ' + last_update + '. GET status: ' + status });
