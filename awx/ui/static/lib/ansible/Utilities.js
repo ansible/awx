@@ -94,9 +94,10 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        }
        }])
 
-   .factory('ProcessErrors', ['$rootScope', '$cookieStore', '$log', '$location', 'Alert',
-   function($rootScope, $cookieStore, $log, $location, Alert) {
+   .factory('ProcessErrors', ['$rootScope', '$cookieStore', '$log', '$location', 'Alert', 'Wait',
+   function($rootScope, $cookieStore, $log, $location, Alert, Wait) {
    return function(scope, data, status, form, defaultMsg) {
+       Wait('stop');
        if ($AnsibleConfig.debug_mode && console) {
           console.log('Debug status: ' + status);
           console.log('Debug data: ');

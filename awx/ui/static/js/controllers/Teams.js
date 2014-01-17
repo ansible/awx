@@ -188,6 +188,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
            .success( function(data, status, headers, config) {
                scope['organization_name'] = data.name;
                master['organization_name'] = data.name;
+               Wait('stop');
                })
            .error( function(data, status, headers, config) {
                ProcessErrors(scope, data, status, null,
@@ -199,6 +200,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
        });
 
    // Retrieve detail record and prepopulate the form
+   Wait('stop');
    Rest.setUrl(defaultUrl + ':id/'); 
    Rest.get({ params: {id: id} })
        .success( function(data, status, headers, config) {

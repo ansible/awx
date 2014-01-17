@@ -273,8 +273,6 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                scope['callback_url'] = data.related['callback'];
                })
            .error( function(data, status, headers, config) {
-               //ProcessErrors(scope, data, status, form,
-               //    { hdr: 'Error!', msg: 'Failed to retrieve job: ' + $routeParams.id + '. GET status: ' + status });
                scope['callback_url'] = '<< Job template not found >>';
                });
 
@@ -291,6 +289,8 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                    });
        }
        
+       Wait('stop');
+
        });
 
    // Our job type options
@@ -308,8 +308,8 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
        return (rows > 15) ? 15 : rows;
        }
 
-
    // Retrieve detail record and prepopulate the form
+   Wait('start');
    Rest.setUrl(defaultUrl + ':id/'); 
    Rest.get({ params: {id: id} })
        .success( function(data, status, headers, config) {
@@ -436,77 +436,6 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
            ProcessErrors(scope, data, status, form,
                { hdr: 'Error!', msg: 'Failed to retrieve job: ' + $routeParams.id + '. GET status: ' + status });
            });
-
-   // Save changes to the parent
-   scope.formSave = function() {
-      generator.clearApiErrors();
-      Rest.setUrl(defaultUrl + $routeParams.id + '/');
-      var data = {}
-      for (var fld in form.fields) {
-          if (form.fields[fld].type == 'select' && fld != 'playbook') {
-             data[fld] = scope[fld].value;
-          }
-          else {
-             data[fld] = scope[fld];
-          }   
-      } 
-      Rest.put(data)
-          .success( function(data, status, headers, config) {
-              var base = $location.path().replace(/^\//,'').split('/')[0];
-              (base == 'job_templates') ? ReturnToCaller() : ReturnToCaller(1);
-              })
-          .error( function(data, status, headers, config) {
-              ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to update job ' + $routeParams.id + '. PUT returned status: ' + status });
-              });
-      };
-
-   // Cancel
-   scope.formReset = function() {
-      generator.reset();
-      for (var fld in master) {
-          scope[fld] = master[fld];
-      }
-      $('#forks-slider').slider("option", "value", scope.forks);
-      };
-
-   // Related set: Add button
-   scope.add = function(set) {
-      $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.id + '/' + set);
-      };
-
-   // Related set: Edit button
-   scope.edit = function(set, id, name) {
-      $rootScope.flashMessage = null;
-      $location.path('/' + base + '/' + $routeParams.id + '/' + set + '/' + id);
-      };
-
-   // Related set: Delete button
-   scope['delete'] = function(set, itm_id, name, title) {
-      $rootScope.flashMessage = null;
-      
-      var action = function() {
-          var url = defaultUrl + id + '/' + set + '/';
-          Rest.setUrl(url);
-          Rest.post({ id: itm_id, disassociate: 1 })
-              .success( function(data, status, headers, config) {
-                  $('#prompt-modal').modal('hide');
-                  scope.search(form.related[set].iterator);
-                  })
-              .error( function(data, status, headers, config) {
-                  $('#prompt-modal').modal('hide');
-                  ProcessErrors(scope, data, status, null,
-                      { hdr: 'Error!', msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
-                  });      
-          };
-
-      Prompt({ hdr: 'Delete', 
-               body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
-               action: action
-               });
-       
-      }
 
    scope.refresh = function() {
       Wait('start');

@@ -515,6 +515,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
        scope.pathRequired = (scope.scm_type.value == '') ? true : false;
        scope.scmRequired = (scope.scm_type.value !== '') ? true : false;
        scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch'; 
+       Wait('stop');
        });
 
    if (scope.removeChoicesReady) {
@@ -587,6 +588,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
        });
 
    // Load the list of options for Kind
+   Wait('start');
    GetChoices({
         url: GetBasePath('projects'),
         scope: scope,

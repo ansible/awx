@@ -166,9 +166,11 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
        for (var set in relatedSets) {
            scope.search(relatedSets[set].iterator);
        }
+       Wait('stop');
        });
 
    // Retrieve detail record and prepopulate the form
+   Wait('start');
    Rest.setUrl(defaultUrl + id + '/'); 
    Rest.get()
        .success( function(data, status, headers, config) {

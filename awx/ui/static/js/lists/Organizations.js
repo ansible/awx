@@ -44,7 +44,7 @@ angular.module('OrganizationListDefinition', [])
         fieldActions: {
             edit: {
                 label: 'Edit',
-                ngClick: "editOrganization(\{\{ organization.id \}\})",
+                ngClick: "editOrganization(organization.id)",
                 icon: 'icon-edit',
                 "class": 'btn-xs btn-default',
                 awToolTip: 'Edit organization',
@@ -53,7 +53,7 @@ angular.module('OrganizationListDefinition', [])
 
             "delete": {
                 label: 'Delete',
-                ngClick: "deleteOrganization(\{\{ organization.id \}\},'\{\{ organization.name \}\}')",
+                ngClick: "deleteOrganization(organization.id, organization.name)",
                 icon: 'icon-trash',
                 "class": 'btn-xs btn-danger',
                 awToolTip: 'Delete organization',

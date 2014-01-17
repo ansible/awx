@@ -228,6 +228,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
                scope.search(relatedSets[set].iterator);
            }
            CheckAccess({ scope: scope });  //Does the user have access to add/edit Permissions?
+           Wait('stop');
            });
 
        // Retrieve detail record and prepopulate the form
@@ -428,7 +429,8 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
                    { hdr: 'Error!', msg: 'Failed to retrieve application config. GET status: ' + status });
                });
        });
-   
+
+   Wait('start');
    Rest.setUrl(defaultUrl + id + '/');
    Rest.get()
         .success( function(data, status, headers, config) {

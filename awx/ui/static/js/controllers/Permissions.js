@@ -196,6 +196,7 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        PermissionCategoryChange({ scope: scope, reset: reset }); }
 
    // Retrieve detail record and prepopulate the form
+   Wait('start');
    Rest.setUrl(defaultUrl); 
    Rest.get()
        .success( function(data, status, headers, config) {
@@ -251,6 +252,7 @@ function PermissionsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                   }
                   });
            }
+           Wait('stop');
            })
        .error( function(data, status, headers, config) {
            ProcessErrors(scope, data, status, form,

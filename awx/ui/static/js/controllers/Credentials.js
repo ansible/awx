@@ -260,7 +260,8 @@ CredentialsAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm, 
                           GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, 
                           RelatedPaginateInit, ReturnToCaller, ClearScope, Prompt, GetBasePath, GetChoices,
-                          KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, FormSave, Stream
+                          KindChange, UserList, TeamList, LookUpInit, Empty, OwnerChange, FormSave, Stream,
+                          Wait
                           ) 
 {
    ClearScope('tree-form');
@@ -327,6 +328,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        setAskCheckboxes();
        KindChange({ scope: scope, form: form, reset: false });
        OwnerChange({ scope: scope });
+       Wait('stop');
        });
 
    if (scope.removeChoicesReady) {
@@ -391,6 +393,8 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
                    { hdr: 'Error!', msg: 'Failed to retrieve Credential: ' + $routeParams.id + '. GET status: ' + status });
                });
        });
+   
+   Wait('start');
 
    GetChoices({
        scope: scope,
@@ -499,5 +503,6 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
 CredentialsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 
                             'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 
                             'RelatedPaginateInit', 'ReturnToCaller', 'ClearScope', 'Prompt', 'GetBasePath', 'GetChoices',
-                            'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange', 'FormSave', 'Stream']; 
+                            'KindChange', 'UserList', 'TeamList', 'LookUpInit', 'Empty', 'OwnerChange', 'FormSave', 'Stream',
+                            'Wait']; 
   

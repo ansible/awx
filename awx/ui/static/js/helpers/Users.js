@@ -22,8 +22,6 @@ angular.module('UserHelper', [ 'UserFormDefinition' ])
        UserForm.fields['organization'].readonly = false;
        UserForm.fields['username'].awRequiredWhen = { variable: "not_ldap_user", init: true };
        UserForm.fields['username'].readonly = false;
-       //UserForm.fields['password'].awRequiredWhen = { variable: "not_ldap_user", init: true },
-       //UserForm.fields['password'].readonly = false;
        UserForm.fields['password'].editRequired = false; 
        UserForm.fields['password'].addRrequired = true;
     }

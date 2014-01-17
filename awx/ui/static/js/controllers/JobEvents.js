@@ -239,7 +239,8 @@ JobEventsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routePa
                            ];
 
 function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventForm, GenerateForm,
-                        Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, FormatDate, EventView) 
+                        Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, FormatDate, EventView,
+                        Wait) 
 {
    ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                 //scope.
@@ -253,6 +254,7 @@ function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routePar
    var base = $location.path().replace(/^\//,'').split('/')[0];
    
    // Retrieve detail record and prepopulate the form
+   Wait('start');
    Rest.setUrl(defaultUrl); 
    Rest.get()
        .success( function(data, status, headers, config) {
@@ -316,6 +318,7 @@ function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routePar
                      break;
               }
           }
+          Wait('stop');
           })
       .error( function(data, status, headers, config) {
           ProcessErrors(scope, data, status, null,
@@ -338,5 +341,5 @@ function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routePar
 
 JobEventsEdit.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobEventForm', 
                           'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath',
-                          'FormatDate', 'EventView'
+                          'FormatDate', 'EventView', 'Wait'
                           ];
