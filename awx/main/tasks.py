@@ -772,8 +772,9 @@ class RunInventoryUpdate(BaseTask):
             ec2_opts = dict(inventory_source.source_vars_dict.items())
             regions = inventory_source.source_regions or 'all'
             regions = ','.join([x.strip() for x in regions.split(',')])
+            regions_blacklist = ','.join(settings.EC2_REGIONS_BLACKLIST)
             ec2_opts['regions'] = regions
-            ec2_opts.setdefault('regions_exclude', 'us-gov-west-1')
+            ec2_opts.setdefault('regions_exclude', regions_blacklist)
             ec2_opts.setdefault('destination_variable', 'public_dns_name')
             ec2_opts.setdefault('vpc_destination_variable', 'ip_address')
             ec2_opts.setdefault('route53', 'False')

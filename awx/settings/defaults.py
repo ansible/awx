@@ -325,6 +325,11 @@ EC2_REGION_NAMES = {
     'us-gov-west-1': 'US West (GovCloud)',
 }
 
+EC2_REGIONS_BLACKLIST = [
+    'us-gov-west-1',
+    'cn-north-1',
+]
+
 # Internal API URL for use by inventory scripts and callback plugin.
 if 'devserver' in INSTALLED_APPS:
     INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
