@@ -599,10 +599,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         // Load the modal form
         var scope = generator.inject(form, { mode: 'edit', modal: true, related: false, show_modal: false });
         generator.reset();
-       
-        // Change the selected group
-        if (parent_scope.selected_tree_id !== tree_id)
-            parent_scope.showHosts(tree_id, group_id, false);
         
         GetSourceTypeOptions({ scope: scope, variable: 'source_type_options' });
     
@@ -823,12 +819,20 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         }
                     });
                 //Clean up
-                scope.searchCleanup();
+                if (scope.searchCleanUp)
+                    scope.searchCleanup();
                 scope.formModalActionDisabled = false;
                 scope.showGroupHelp = false;  //get rid of the Hint
-                Wait('stop');
-                $('#form-modal').modal('hide');
-            }
+                
+                $('#form-modal').modal('hide');     
+                
+                // Change the selected group
+                if (parent_scope.selected_tree_id !== tree_id)
+                    parent_scope.showHosts(tree_id, group_id, false);
+                }
+                else {
+                    Wait('stop');
+                }
             });
 
         if (scope.removeFormSaveSuccess) {
