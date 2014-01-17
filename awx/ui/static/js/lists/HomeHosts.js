@@ -87,6 +87,6 @@ angular.module('HomeHostListDefinition', [])
                 mode: 'all',
                 ngShow: "user_is_superuser"
                 }
-            },
+            }
 
         });
