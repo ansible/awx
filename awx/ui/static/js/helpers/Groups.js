@@ -1040,9 +1040,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var node = Find({ list: scope.groups, key: 'id', val: tree_id });
         var url = GetBasePath('inventory') + inventory_id + '/groups/';
         
-        if (scope.selected_tree_id != tree_id)
-            scope.showHosts(tree_id, group_id, false);
-
         var action_to_take = function() {
             $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('start'); });
             $('#prompt-modal').modal('hide');
