@@ -580,16 +580,17 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
-        'GetUpdateIntervalOptions', 'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange',
+        'GetUpdateIntervalOptions', 'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions,
-        LookUpInit, Empty, Wait, GetChoices, UpdateGroup, SourceChange) {
+        LookUpInit, Empty, Wait, GetChoices, UpdateGroup, SourceChange, Find) {
     return function(params) {
        
         var parent_scope = params.scope;
         var group_id = params.group_id;
         var tree_id = params.tree_id;
         var inventory_id = params.inventory_id;
+        var groups_reload = params.groups_reload;
         
         var generator = GenerateForm;
         var form = GroupForm;
@@ -809,15 +810,26 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         scope.removeSaveComplete = scope.$on('SaveComplete', function(e, error) {
             if (!error) {
                 // Update the view with any changes
-                UpdateGroup({ 
-                    scope: parent_scope,
-                    group_id: group_id,
-                    properties: {
-                        name: scope.name,
-                        description: scope.description, 
-                        has_inventory_sources: (scope.source) ? true : false 
-                        }
-                    });
+                if (groups_reload) {
+                    UpdateGroup({ 
+                        scope: parent_scope,
+                        group_id: group_id,
+                        properties: {
+                            name: scope.name,
+                            description: scope.description, 
+                            has_inventory_sources: (scope.source) ? true : false 
+                            }
+                        });
+                }
+                else if (scope.home_groups) {
+                    // When home.groups controller is calling, update the groups array
+                    var g = Find({ list: parent_scope.home_groups, key: 'id', val: group_id });
+                    if (g) {
+                        g.name = scope.name;
+                        g.description = scope.description;
+                    }
+                }
+               
                 //Clean up
                 if (scope.searchCleanUp)
                     scope.searchCleanup();
@@ -827,12 +839,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 $('#form-modal').modal('hide');     
                 
                 // Change the selected group
-                if (parent_scope.selected_tree_id !== tree_id)
+                if (groups_reload && parent_scope.selected_tree_id !== tree_id) {
                     parent_scope.showHosts(tree_id, group_id, false);
                 }
                 else {
                     Wait('stop');
                 }
+            }
             });
 
         if (scope.removeFormSaveSuccess) {

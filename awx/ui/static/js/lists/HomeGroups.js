@@ -22,16 +22,16 @@ angular.module('HomeGroupListDefinition', [])
             name: {
                 key: true,
                 label: 'Group',
-                ngClick: "\{\{ 'GroupsEdit(' + group.id + ')' \}\}",
-                columnClass: 'col-lg-3 col-md3 col-sm-2',
-                linkTo: "\{\{ '/#/inventories/' + group.inventory + '/' \}\}"
+                ngClick: "editGroup(group.id, group.inventory)",
+                columnClass: 'col-lg-3 col-md3 col-sm-2'
+                //linkTo: "\{\{ '/#/inventories/' + group.inventory + '/' \}\}"
                 },
             inventory_name: {
                 label: 'Inventory', 
                 sourceModel: 'inventory',
                 sourceField: 'name',
                 columnClass: 'col-lg-3 col-md3 col-sm-2',
-                linkTo: "\{\{ '/#/inventories/' + group.inventory \}\}"
+                linkTo: "\{\{ '/#/inventories/' + group.inventory + '/' \}\}"
                 },
             failed_hosts: {
                 label: 'Failed Hosts',
@@ -107,6 +107,10 @@ angular.module('HomeGroupListDefinition', [])
                 searchOnly: true,
                 sourceModel: 'inventory_source',
                 sourceField: 'status'
+                },
+            id: {
+                label: 'ID',
+                searchOnly: true
                 }
             },
         

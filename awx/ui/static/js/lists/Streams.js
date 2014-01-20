@@ -41,7 +41,8 @@ angular.module('StreamListDefinition', [])
                 label: 'Action',
                 ngBindHtml: 'activity.description',
                 nosort: true, 
-                searchable: false
+                searchable: false,
+                columnClass: 'col-lg-7'
                 },
             system_event: {
                 label: 'System event',

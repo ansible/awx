@@ -121,13 +121,13 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         switch(obj.base) {
            case 'group':
            case 'host': 
-               url += 'home/' + obj.base + 's/?name=' + obj.name;
+               url += 'home/' + obj.base + 's/?id=' + obj.id;
                break;
            case 'inventory':
-               url += 'inventories/' + obj.id;
+               url += 'inventories/' + obj.id + '/';
                break;
            default:
-               url += obj.base + 's/' + obj.id;
+               url += obj.base + 's/' + obj.id + '/';
         }
         return url;
         }
@@ -135,6 +135,11 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
     .factory('BuildDescription', ['FixUrl', 'BuildUrl', function(FixUrl, BuildUrl) {
     return function(activity) {
+        
+        function stripDeleted(s) {
+            return s.replace(/^_deleted_\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+\+\d+:\d+_/,'');
+            }
+        
         var descr = '';
         var descr_nolink;
         descr += activity.operation;
@@ -142,25 +147,47 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         descr_nolink = descr;
         var obj1 = activity.object1;
         var obj2 = activity.object2;
-        if (activity.summary_fields[obj2] && activity.summary_fields[obj2][0].name) {
+        var name;
+        if (activity.summary_fields[obj2] && activity.summary_fields[obj2][0].name 
+                && !/^_delete/.test(activity.summary_fields[obj2][0].name)) {
             activity.summary_fields[obj2][0]['base'] = obj2;
             descr += obj2 + ' <a href=\"' + BuildUrl(activity.summary_fields[obj2][0]) + '\">'
                 + activity.summary_fields[obj2][0].name + '</a>' + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' ); 
             descr_nolink += obj2 + ' ' + activity.summary_fields[obj2][0].name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
         }
-        else if (activity.object2) { 
-            descr += activity.object2[0] + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
-            descr_nolink += activity.object2[0] + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
+        else if (activity.object2) {
+            name = '';
+            if (activity.summary_fields[obj2] && activity.summary_fields[obj2][0].name) {
+                name = ' ' + stripDeleted(activity.summary_fields[obj2][0].name);
+            }
+            descr += activity.object2[0] + name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
+            descr_nolink += activity.object2[0] + name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
         }
-        if (activity.summary_fields[obj1] && activity.summary_fields[obj1][0].name) {
+        if (activity.summary_fields[obj1] && activity.summary_fields[obj1][0].name
+                && !/^\_delete/.test(activity.summary_fields[obj1][0].name)) {
             activity.summary_fields[obj1][0]['base'] = obj1;
             descr += obj1 + ' <a href=\"' + BuildUrl(activity.summary_fields[obj1][0]) + '\">'
                 + activity.summary_fields[obj1][0].name + '</a>';
             descr_nolink += obj1 + ' ' + activity.summary_fields[obj1][0].name; 
         }
-        else if (activity.object1) { 
-            descr += activity.object1;
-            descr_nolink += activity.object1;
+        else if (activity.object1) {
+            name = '';
+            if ( ((!(activity.summary_fields[obj1] && activity.summary_fields[obj1][0].name)) || 
+                    activity.summary_fields[obj1] && activity.summary_fields[obj1][0].name && 
+                   /^_delete/.test(activity.summary_fields[obj1][0].name))
+                   && (activity.changes && activity.changes.name) ) {
+                if (typeof activity.changes.name == 'string') {
+                    name = ' ' + activity.changes.name;
+                }
+                else if (typeof activity.changes.name == 'object' && Array.isArray(activity.changes.name)) {
+                    name = ' ' + activity.changes.name[0]
+                }
+            }
+            else if (activity.summary_fields[obj1] && activity.summary_fields[obj1][0].name) {
+                name = ' ' + stripDeleted(activity.summary_fields[obj1][0].name);
+            }
+            descr += activity.object1 + name;
+            descr_nolink += activity.object1 + name;
         }
         activity['description'] = descr;
         activity['description_nolink'] = descr_nolink;

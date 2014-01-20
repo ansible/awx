@@ -417,7 +417,7 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         }
         
     $scope.editGroup = function(group_id, tree_id) {
-        GroupsEdit({ scope: $scope, inventory_id: $scope.inventory_id, group_id: group_id, tree_id: tree_id });
+        GroupsEdit({ scope: $scope, inventory_id: $scope.inventory_id, group_id: group_id, tree_id: tree_id, groups_reload: true });
         }
 
     // Launch inventory sync

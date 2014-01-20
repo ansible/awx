@@ -95,7 +95,7 @@ Home.$inject=['$scope', '$compile', '$routeParams', '$rootScope', '$location', '
 
 
 function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, 
-    GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream) {
+    GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit) {
 
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -155,6 +155,14 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
         scope[list.iterator + 'SearchSelectValue'] = null;
     }
 
+    if ($routeParams['id']) {
+        scope[list.iterator + 'InputDisable'] = false;
+        scope[list.iterator + 'SearchValue'] = $routeParams['id'];
+        scope[list.iterator + 'SearchField'] = 'id';
+        scope[list.iterator + 'SearchFieldLabel'] = list.fields['id'].label;
+        scope[list.iterator + 'SearchSelectValue'] = null;
+    }
+
     if ($routeParams['has_active_failures']) {
         scope[list.iterator + 'InputDisable'] = true;
         scope[list.iterator + 'SearchValue'] = $routeParams['has_active_failures'];
@@ -206,6 +214,10 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
     LoadBreadCrumbs();
     
     scope.showActivity = function() { Stream(); }
+
+    scope.editGroup = function(group_id, inventory_id) { 
+        GroupsEdit({ scope: scope, group_id: group_id, inventory_id: inventory_id, groups_reload: false });
+        }
     
     scope.viewUpdateStatus = function(id) { 
         scope.groups = scope.home_groups;
@@ -216,12 +228,12 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
 
 HomeGroups.$inject = [ '$location', '$routeParams', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
-    'Stream'
+    'Stream', 'GroupsEdit'
     ];
 
 
 function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, 
-    GetBasePath, SearchInit, PaginateInit, FormatDate, SetHostStatus, ToggleHostEnabled, HostsEdit, Stream) {
+    GetBasePath, SearchInit, PaginateInit, FormatDate, SetHostStatus, ToggleHostEnabled, HostsEdit, Stream, Find) {
 
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -254,6 +266,14 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
         scope[HomeHostList.iterator + 'SearchFieldLabel'] = list.fields['name'].label;
     }
     
+    if ($routeParams['id']) {
+        scope[HomeHostList.iterator + 'InputDisable'] = false;
+        scope[HomeHostList.iterator + 'SearchValue'] = $routeParams['id'];
+        scope[HomeHostList.iterator + 'SearchField'] = 'id';
+        scope[HomeHostList.iterator + 'SearchFieldLabel'] = list.fields['id'].label;
+        scope[HomeHostList.iterator + 'SearchSelectValue'] = null;
+    }
+
     if ($routeParams['has_active_failures']) {
         scope[HomeHostList.iterator + 'InputDisable'] = true;
         scope[HomeHostList.iterator + 'SearchValue'] = $routeParams['has_active_failures'];
@@ -270,20 +290,15 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
     scope.toggle_host_enabled = function(id, sources) { ToggleHostEnabled({ host_id: id, external_source: sources, scope: scope }); }
 
     scope.editHost = function(host_id, host_name) {
-        var host;
-        for (var i=0; i < scope['hosts'].length; i++) {
-            if (scope['hosts'][i].id == host_id) {
-               host = scope['hosts'][i];
-               break;
-            }
-        }
+        var host = Find({ list: scope.hosts, key: 'id', val: host_id });
         if (host) {
-           HostsEdit({ host_id: host_id, inventory_id: host.inventory, group_id: null, hostsReload: false });
+            HostsEdit({ scope: scope, host_id: host_id, inventory_id: host.inventory, group_id: null, hostsReload: false });
         }
         }
 
     }
 
 HomeHosts.$inject = [ '$location', '$routeParams', 'HomeHostList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
-    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetHostStatus', 'ToggleHostEnabled', 'HostsEdit', 'Stream'
+    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetHostStatus', 'ToggleHostEnabled', 'HostsEdit', 'Stream',
+    'Find'
     ]; 

@@ -31,7 +31,7 @@ angular.module('HomeHostListDefinition', [])
                 sourceModel: 'inventory',
                 sourceField: 'name',
                 columnClass: 'col-lg-3 col-md3 col-sm-2',
-                linkTo: "\{\{ '/#/inventories/?name=' + host.summary_fields.inventory.name \}\}"
+                linkTo: "\{\{ '/#/inventories/' + host.inventory \}\}"
                 },
             active_failures: {
                 label: 'Job Status',
@@ -76,6 +76,10 @@ angular.module('HomeHostListDefinition', [])
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
+                searchOnly: true
+                },
+            id: {
+                label: 'ID',
                 searchOnly: true
                 }
             },
