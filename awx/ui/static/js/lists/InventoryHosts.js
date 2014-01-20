@@ -66,7 +66,7 @@ angular.module('InventoryHostsDefinition', [])
         fieldActions: {
             enabled_flag: {
                 //label: 'Enabled',
-                iconClass: "\{\{ 'fa icon-enabled-' + host.enabled \}\}", 
+                iconClass: "\{\{ 'fa icon-enabled-' + host.enabled \}\}",
                 dataPlacement: 'top',
                 awToolTip: "\{\{ host.enabledToolTip \}\}",
                 dataTipWatch: "host.enabledToolTip",
@@ -83,7 +83,6 @@ angular.module('InventoryHostsDefinition', [])
                 //label: 'Edit',
                 ngClick: "editHost(\{\{ host.id \}\})",
                 icon: 'icon-edit',
-                "class": 'btn-xs btn-primary',
                 awToolTip: 'Edit host',
                 dataPlacement: 'top'
                 },
@@ -91,7 +90,6 @@ angular.module('InventoryHostsDefinition', [])
                 //label: 'Delete',
                 ngClick: "deleteHost(\{\{ host.id \}\},'\{\{ host.name \}\}')",
                 icon: 'icon-trash',
-                "class": 'btn-xs btn-primary',
                 awToolTip: 'Delete host',
                 dataPlacement: 'top'
                 }
@@ -106,7 +104,7 @@ angular.module('InventoryHostsDefinition', [])
                 },
             stream: {
                 mode: 'all',
-                ngClick: "showActivity()",
+                ngClick: "showHostActivity()",
                 awToolTip: "View Activity Stream",
                 ngShow: "user_is_superuser"
                 },

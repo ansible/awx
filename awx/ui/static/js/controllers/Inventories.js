@@ -303,7 +303,8 @@ InventoriesAdd.$inject = [ '$scope', '$rootScope', '$compile', '$location', '$lo
 function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait, 
                           GetSyncStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, 
                           Rest, ProcessErrors, InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find,
-                          HostsCreate, EditInventoryProperties, HostsEdit, HostsDelete, ToggleHostEnabled, CopyMoveGroup, CopyMoveHost) 
+                          HostsCreate, EditInventoryProperties, HostsEdit, HostsDelete, ToggleHostEnabled, CopyMoveGroup, CopyMoveHost,
+                          Stream, GetBasePath) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -502,6 +503,16 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
     $scope.toggleHostEnabled = function(host_id, external_source) {
         ToggleHostEnabled({ scope: $scope, host_id: host_id, external_source: external_source });
         }
+    
+    $scope.showHostActivity = function() { 
+        var url = GetBasePath('activity_stream') + '?host__inventory__id=' + $scope.inventory_id;
+        Stream({ inventory_name: $scope.inventory_name, url: url });
+        }
+
+    $scope.showGroupActivity = function() { 
+        var url = GetBasePath('activity_stream') + '?group__inventory__id=' + $scope.inventory_id;
+        Stream({ inventory_name: $scope.inventory_name, url: url });
+        }
 
     //Load tree data for the first time
     BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: false });
@@ -512,6 +523,6 @@ InventoriesEdit.$inject = [ '$scope', '$location', '$routeParams', '$compile', '
                             'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'GroupsDelete',
                             'Breadcrumbs', 'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren',
                             'ViewUpdateStatus', 'GroupsCancelUpdate', 'Find', 'HostsCreate', 'EditInventoryProperties', 'HostsEdit', 
-                            'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost'
+                            'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost', 'Stream', 'GetBasePath'
                             ]; 
   

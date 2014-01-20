@@ -378,14 +378,14 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
     .factory('Breadcrumbs', ['Attr', function(Attr) {
     return function(params) {
         
-        // Generats breadcrumbs using the list-generator.js method.
+        // Generate breadcrumbs using the list-generator.js method.
 
         var list = params.list;
         var mode = params.mode;
         var html = '';
 
         html += "<div class=\"nav-path\">\n";
-        html += "<ul class=\"breadcrumb\">\n";
+        html += "<ul class=\"breadcrumb\" id=\"breadcrumb-list\">\n";
         html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title | capitalize }}</a></li>\n";
 
         if (list.navigationLinks) {

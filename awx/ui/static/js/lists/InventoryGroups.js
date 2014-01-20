@@ -59,7 +59,7 @@ angular.module('InventoryGroupsDefinition', [])
                 ngClick: "refreshGroups()"
                 },
             stream: {
-                ngClick: "showActivity()",
+                ngClick: "showGroupActivity()",
                 awToolTip: "View Activity Stream",
                 mode: 'all',
                 ngShow: "user_is_superuser"

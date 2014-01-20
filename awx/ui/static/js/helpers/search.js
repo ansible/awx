@@ -546,10 +546,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
 
         // Call after modal dialogs to remove any lingering callbacks
         scope.searchCleanup = function() {
-            console.log('search cleanup!');
             scope.removeDoSearch();
-            //scope.removeFoundObject();
-            //scope.removeResultWarning();
             scope.removePrepareSearch(); 
             scope.removePrepareSearch2();
             }

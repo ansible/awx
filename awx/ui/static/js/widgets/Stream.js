@@ -51,7 +51,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         stream.hide('slide', {'direction': 'left'}, {'duration': 500, 'queue': false }); 
         
         // Completely destroy the container so we don't experience random flashes of it later.
-        // There was some sort weirdness with the tab 'show' causing the stream to slide in when
+        // There was some sort of weirdness with the tab 'show' causing the stream to slide in when
         // a tab was clicked, after the stream had been hidden. Seemed like timing- wait long enough
         // before clicking a tab, and it would not happen.
         setTimeout( function() {
@@ -67,7 +67,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
     .factory('StreamBreadCrumbs', ['$rootScope', '$location', function($rootScope, $location) { 
     return function() {
-        // Load the breadcrumbs array. We have to do things a bit different than our standing Utilities.LoadBreadcrumbs. 
+        // Load the breadcrumbs array. We have to do things a bit different than Utilities.LoadBreadcrumbs. 
         // Rather than botch that all up, we'll do our own thing here.
         $rootScope.breadcrumbs = [];
         var paths = $location.path().split('/');
@@ -82,8 +82,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 }
                 for (j=0; j < $rootScope.crumbCache.length; j++) {
                     if ($rootScope.crumbCache[j].path == path) {
-                       title = $rootScope.crumbCache[j].title;
-                       break;
+                        title = $rootScope.crumbCache[j].title;
+                        break;
                     }
                 }
                 if (!title) {
@@ -221,61 +221,82 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
     .factory('Stream', ['$rootScope', '$location', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'StreamList', 'SearchInit', 
         'PaginateInit', 'GenerateList', 'FormatDate', 'ShowStream', 'HideStream', 'BuildDescription', 'FixUrl', 'BuildUrl', 
-        'ShowDetail', 'StreamBreadCrumbs', 'setStreamHeight',
+        'ShowDetail', 'StreamBreadCrumbs', 'setStreamHeight', 'Find',
     function($rootScope, $location, Rest, GetBasePath, ProcessErrors, Wait, StreamList, SearchInit, PaginateInit, GenerateList,
-        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail, StreamBreadCrumbs, setStreamHeight) {
+        FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail, StreamBreadCrumbs, setStreamHeight,
+        Find) {
     return function(params) {
     
         var list = StreamList;
         var defaultUrl = GetBasePath('activity_stream');
         var view = GenerateList;
         var base = $location.path().replace(/^\//,'').split('/')[0];
+
+        // pass in an inventory name to fix breadcrumb display
+        var inventory_name = (params) ? params.inventory_name : null;
+
+        // url will override the attempt to compute an activity_stream query
+        var url = (params) ? params.url : null;
         
         $rootScope.flashMessage = null;
-
-        if ($location.path() !== '/home') {
-           // Restrict what we're looking at based on the path
-           var type = (base == 'inventories') ? 'inventory' : base.replace(/s$/,'');
-           var paths = $location.path().split('/');
-           paths.splice(0,1);
-           if (paths.length > 1 && /^\d+/.test(paths[paths.length - 1])) {
-               type = paths[paths.length - 2];
-               type = (type == 'inventories') ? 'inventory' : type.replace(/s$/,'');
-               //defaultUrl += '?object1=' + type + '&object1__id=' + 
-               defaultUrl += '?' + type + '__id=' + paths[paths.length - 1];
-           }
-           else if (paths.length > 1) {
-               type = paths[paths.length - 1];
-               type = (type == 'inventories') ? 'inventory' : type.replace(/s$/,'');
-               defaultUrl += '?or__object1=' + type + '&or__object2=' + type;
-           }
-           else {
-               defaultUrl += '?or__object1=' + type + '&or__object2=' + type;
-           }
+        
+        if (url) {
+            defaultUrl = url;
         }
-
+        else {
+            if ($location.path() !== '/home') {
+                // Restrict what we're looking at based on the path
+                var type = (base == 'inventories') ? 'inventory' : base.replace(/s$/,'');
+                var paths = $location.path().split('/');
+                paths.splice(0,1);
+                if (paths.length > 1 && /^\d+/.test(paths[paths.length - 1])) {
+                    type = paths[paths.length - 2];
+                    type = (type == 'inventories') ? 'inventory' : type.replace(/s$/,'');
+                    //defaultUrl += '?object1=' + type + '&object1__id=' + 
+                    defaultUrl += '?' + type + '__id=' + paths[paths.length - 1];
+                }
+                else if (paths.length > 1) {
+                    type = paths[paths.length - 1];
+                    type = (type == 'inventories') ? 'inventory' : type.replace(/s$/,'');
+                    defaultUrl += '?or__object1=' + type + '&or__object2=' + type;
+                }
+                else {
+                    defaultUrl += '?or__object1=' + type + '&or__object2=' + type;
+                }
+            }
+        }
+        
         // Add a container for the stream widget
         $('#tab-content-container').append('<div id="stream-container"><div id=\"stream-content\"></div></div><!-- Stream widget -->');
         
         StreamBreadCrumbs();
+
+        // Fix inventory name. The way we're doing breadcrumbs doesn't support bind variables.
+        if (inventory_name) {
+            var itm = Find({ list: $rootScope.breadcrumbs, key: 'title', val: '{{ inventory_name }}' });
+            if (itm) {
+                itm.title = inventory_name;
+            }
+        }
+
         ShowStream();
         
         // Generate the list
         var scope = view.inject(list, { 
             mode: 'edit',
             id: 'stream-content', 
-            breadCrumbs: true, 
             searchSize: 'col-lg-3',
             secondWidget: true,
             activityStream: true
             });
-
+        
         scope.closeStream = function(inUrl) { 
             HideStream();
-            if (inUrl) {
-               $location.path(inUrl);   
+            if (scope.searchCleanup)
+                scope.searchCleanup();
+            if (inUrl)
+               $location.path(inUrl);
             }
-            }  
 
         scope.refreshStream = function() {
             scope.search(list.iterator);
