@@ -461,9 +461,6 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
     
     $scope.toggle = function(tree_id) {
         // Expand/collapse nodes
-        if (tree_id !== $scope.selected_tree_id) {
-           $scope.showHosts(tree_id, Find({ list: $scope.groups, key: 'id', val: tree_id }).group_id, false);
-        }
         ToggleChildren({ scope: $scope, list: list, id: tree_id });
         }
 
