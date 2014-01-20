@@ -181,15 +181,15 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
         if (activity) {
             // Setup changes field 
-            activity['changes'] = JSON.stringify(activity['changes'], null, '\t'); 
-            var n = activity['changes'].match(/\n/g);
+            activity['changes_stringified'] = JSON.stringify(activity['changes'], null, '\t'); 
+            var n = activity['changes_stringified'].match(/\n/g);
             var rows = (n) ? n.length : 1;
             rows = (rows < 1) ? 3 : 10;
             form.fields['changes'].rows = 10;             
             
             // Load the form
             var scope = generator.inject(form, { mode: 'edit', modal: true, related: false });
-            scope['changes'] = activity['changes'];
+            scope['changes'] = activity['changes_stringified'];
             scope['user'] = ( (activity.summary_fields.actor) ? activity.summary_fields.actor.username : 'system' ) +
                 ' on ' + FormatDate(new Date(activity['timestamp']));
             scope['operation'] = activity['description_nolink'];
@@ -265,7 +265,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 }
             }
         }
-        
+
         // Add a container for the stream widget
         $('#tab-content-container').append('<div id="stream-container"><div id=\"stream-content\"></div></div><!-- Stream widget -->');
         
