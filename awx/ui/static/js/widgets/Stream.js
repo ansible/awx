@@ -127,6 +127,10 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                url += 'inventories/' + obj.id + '/';
                break;
            default:
+               console.log('here');
+               console.log('url: ' + url);
+               console.log('base: ' + obj.base);
+               console.log('id: ' + obj.id);
                url += obj.base + 's/' + obj.id + '/';
         }
         return url;
@@ -147,12 +151,17 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         descr_nolink = descr;
         var obj1 = activity.object1;
         var obj2 = activity.object2;
+        
+        if (obj1 == 'user' || obj2 == 'user') {
+            activity.summary_fields['user'][0].name = activity.summary_fields['user'][0].username;
+        }
+        
         var name;
         if (activity.summary_fields[obj2] && activity.summary_fields[obj2][0].name 
                 && !/^_delete/.test(activity.summary_fields[obj2][0].name)) {
             activity.summary_fields[obj2][0]['base'] = obj2;
             descr += obj2 + ' <a href=\"' + BuildUrl(activity.summary_fields[obj2][0]) + '\">'
-                + activity.summary_fields[obj2][0].name + '</a>' + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' ); 
+                + activity.summary_fields[obj2][0].name  + '</a>' + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' ); 
             descr_nolink += obj2 + ' ' + activity.summary_fields[obj2][0].name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
         }
         else if (activity.object2) {
@@ -160,11 +169,11 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             if (activity.summary_fields[obj2] && activity.summary_fields[obj2][0].name) {
                 name = ' ' + stripDeleted(activity.summary_fields[obj2][0].name);
             }
-            descr += activity.object2[0] + name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
-            descr_nolink += activity.object2[0] + name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
+            descr += activity.object2 + name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
+            descr_nolink += activity.object2 + name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
         }
         if (activity.summary_fields[obj1] && activity.summary_fields[obj1][0].name
-                && !/^\_delete/.test(activity.summary_fields[obj1][0].name)) {
+                && !/^\_delete/.test(activity.summary_fields[obj1][0].name)) {     
             activity.summary_fields[obj1][0]['base'] = obj1;
             descr += obj1 + ' <a href=\"' + BuildUrl(activity.summary_fields[obj1][0]) + '\">'
                 + activity.summary_fields[obj1][0].name + '</a>';
