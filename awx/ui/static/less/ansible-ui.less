@@ -320,8 +320,8 @@ dd {
 }
 
 /* footer variables */
-@footer-height: 85px;
-@footer-margin: 60px;
+@footer-height: 96px;
+@footer-margin: 40px;
 @push-height: (@footer-height + @footer-margin);
 @push-margin: 0px;
 #wrap {
@@ -341,7 +341,7 @@ dd {
 }
 
 .main-menu .nav {
-  margin-top: 10px;
+  margin-top: 0;
 }
 
 .main-menu .nav > li > a {
@@ -367,7 +367,8 @@ dd {
 }
 
 .navbar>.container .navbar-brand {
-  margin-left: -10px;
+  margin-left: 0;
+  margin-top: 10px;
 }
 
 /* Using inline-block rather than block keeps 
@@ -396,8 +397,8 @@ dd {
 
 .site-footer {
     width: 100%;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     margin-top: 60px;
     color: @grey;
     text-align: center;
@@ -414,7 +415,7 @@ dd {
     }
 
     .help {
-        padding-top: 15px;
+        padding-top: 18px;
         font-weight: normal;
     }
 
@@ -427,19 +428,25 @@ dd {
     }
 
     .copyright {
-        padding-top: 15px;
+        padding-top: 18px;
         font-weight: normal;
         text-align: center;
     }
 }
 
 
-.login-header {
+.modal-header.login-header {
   text-align: center;
+  background-color: @black;
+  border-left: 1px solid #686868;
+  border-right: 1px solid #686868;
+  border-top: 1px solid #686868;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
 }
 
 .login-header img {
-  max-width: 100px;
+  width: 327px;
 }
 
 .form-title { 
