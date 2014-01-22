@@ -270,12 +270,10 @@ angular.module('ansible', [
             }
 
             // On each navigation request, check that the user is logged in
-            var tst = /(login|logout)/;
-            var path = $location.path();
-            if ( !tst.test($location.path()) ) {
+            if ( !/^\/(login|logout)/.test($location.path()) ) {
                 // capture most recent URL, excluding login/logout
-                $rootScope.lastPath = path;
-                $cookieStore.put('lastPath', path);
+                $rootScope.lastPath = $location.path();
+                $cookieStore.put('lastPath', $location.path());
             } 
 
             if (Authorization.isUserLoggedIn() == false) {

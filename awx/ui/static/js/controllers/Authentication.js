@@ -17,17 +17,15 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
       $('#login-username').focus();
       };
 
-   var sessionExpired = function() {
-      return (Empty($rootScope.sessionExpired)) ? $cookieStore.get('sessionExpired') : $rootScope.sessionExpired;
-      }();
+   var sessionExpired = (Empty($rootScope.sessionExpired)) ? $cookieStore.get('sessionExpired') : $rootScope.sessionExpired;
    
    var lastPath = function() {
       return (Empty($rootScope.lastPath)) ? $cookieStore.get('lastPath') : $rootScope.lastPath;
-      }();
+      }
 
    if ($AnsibleConfig.debug_mode && console) {
       console.log('User session expired: ' + sessionExpired);
-      console.log('Last URL: ' + lastPath);
+      console.log('Last URL: ' + lastPath());
    }
    
    // Hide any lingering modal dialogs
@@ -59,7 +57,6 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
    if ($location.path() == '/logout') {
       //if logout request, clear AuthToken and user session data
       Authorization.logout();
-      $location.url('/home');
    }
   
    $rootScope.userLoggedIn = false;             //hide the logout link. if you got here, you're logged out.
@@ -88,7 +85,6 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
            Wait('start');
            Authorization.retrieveToken(username, password)
              .success( function(data, status, headers, config) {
-                 Wait('stop');
                  $('#login-modal').modal('hide');
                  token = data.token;
                  Authorization.setToken(data.token, data.expires);
@@ -101,19 +97,21 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
                          Authorization.getLicense()
                              .success(function(data, status, headers, config) {
                                  Authorization.setLicense(data['license_info']);
-                                 if (lastPath) {
+                                 if (lastPath()) {
                                      // Go back to most recent navigation path
-                                     $location.path(lastPath);
+                                     $location.path(lastPath());
                                  }
                                  else {
                                      $location.url('/home?login=true');
                                  }
                                  })
                              .error(function(data, status, headers, config) {
+                                 Wait('stop');
                                  Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
                                  });
                          })
                      .error( function(data, status, headers, config) {
+                         Wait('stop');
                          Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
                          });
                  })
