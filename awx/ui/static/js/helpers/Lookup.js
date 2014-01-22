@@ -51,6 +51,9 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
             $('#lookup-modal').on('hidden.bs.modal', function() {
                 // If user clicks cancel without making a selection, make sure that field values are 
                 // in synch. 
+                if (listScope.searchCleanup) {
+                    listScope.searchCleanup();
+                }
                 if (scope[field] == '' || scope[field] == null) {
                     scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] = '';
                     if (!scope.$$phase) {
@@ -103,7 +106,6 @@ angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'P
                     }
                 }
                 }
-                
             SearchInit({ scope: listScope, set: list.name, list: list, url: defaultUrl });
             PaginateInit({ scope: listScope, list: list, url: defaultUrl, mode: 'lookup' });
             

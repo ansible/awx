@@ -233,11 +233,13 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
 
             //finalize and execute the query
             scope[iterator + 'Page'] = (page) ? parseInt(page) - 1 : 0;
-            if (/\/$/.test(url)) {
-                url += '?' + scope[iterator + 'SearchParams'];
-            }
-            else {
-                url += '&' + scope[iterator + 'SearchParams'];
+            if (scope[iterator + 'SearchParams']) {
+                if (/\/$/.test(url)) {
+                    url += '?' + scope[iterator + 'SearchParams'];
+                }
+                else {
+                    url += '&' + scope[iterator + 'SearchParams'];
+                }
             }
             url = url.replace(/\&\&/,'&');
             url += (scope[iterator + 'PageSize']) ? '&page_size=' + scope[iterator + 'PageSize'] : "";

@@ -55,11 +55,19 @@ body.modal-open {
 .pad-left-lg { padding-left: 50px; }
 .normal-weight { font-weight: normal; }
 .no-bullets { list-style: none; }
+.nowrap { white-space: nowrap; }
 .capitalize { text-transform: capitalize; }
 .grey-txt { color: @grey; }
 .red-txt { color: @red; } a.red-txt:hover { color: @red; }  //make red links (for things like cancel)
 .text-center { text-align: center !important; }
 
+
+/* Used on inventory groups/hosts lists for long names */
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;  
+}
 
 a {
   color: @blue;
@@ -200,10 +208,6 @@ hr {
 
 .help {
   display: inline-block;
-}
-
-.nowrap {
-  white-space: nowrap;
 }
 
 /* help collapse */

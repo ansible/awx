@@ -180,7 +180,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             case 'never updated':
                 stat = 'never';
                 stat_class = 'icon-cloud-na disabled';
-                status_tip = 'Sync not performed. Click <i class="fa fa-rocket"></i> to start it now.';
+                status_tip = 'Sync not performed. Click <i class="fa fa-exchange"></i> to start it now.';
                 break;
             case 'none':
             case '':
@@ -831,8 +831,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 }
                
                 //Clean up
-                if (scope.searchCleanUp)
+                if (scope.searchCleanUp) {
                     scope.searchCleanup();
+                }
+
                 scope.formModalActionDisabled = false;
                 scope.showGroupHelp = false;  //get rid of the Hint
                 

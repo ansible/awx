@@ -622,6 +622,3 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
 
         }
         }]);
-
-
-
