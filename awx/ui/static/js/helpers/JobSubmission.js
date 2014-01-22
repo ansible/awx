@@ -438,9 +438,10 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                     scope.selected_group_id = group_id;
                     scope.refreshGroups();
                 }
-                else {
-                    scope.$emit('HostReloadComplete');
+                else if (scope.refresh) {
+                    scope.refresh();
                 }
+                scope.$emit('HostReloadComplete');
             }
             });
         
