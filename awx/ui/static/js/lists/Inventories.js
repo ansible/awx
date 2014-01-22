@@ -4,7 +4,6 @@
  *  Inventories.js 
  *  List view object for Inventories data model.
  *
- * 
  */
 angular.module('InventoriesListDefinition', [])
     .value(
@@ -31,50 +30,22 @@ angular.module('InventoriesListDefinition', [])
                 sourceField: 'name',
                 excludeModal: true
                 },
-            /*failed_hosts: {
-                label: 'Failures',
-                ngHref: "\{\{ inventory.failed_hosts_link \}\}",
-                badgeIcon: "\{\{ 'fa icon-failures-' + inventory.failed_hosts_class \}\}",
-                badgeNgHref: "\{\{ inventory.failed_hosts_link \}\}",
-                badgePlacement: 'left',
-                badgeToolTip: "\{\{ inventory.failed_hosts_tip \}\}",
-                badgeTipPlacement: 'top',
-                awToolTip: "\{\{ inventory.failed_hosts_tip \}\}",
-                dataPlacement: "top",
-                searchable: false,
-                excludeModal: true,
-                sortField: "hosts_with_active_failures"
-                },
-            status: { 
-                label: 'Status', 
-                ngHref: "\{\{ inventory.status_link \}\}",
-                badgeIcon: "\{\{ 'fa fa-cloud icon-cloud-' + inventory.status_class \}\}",
-                badgeNgHref: "\{\{ inventory.status_link \}\}",
-                badgePlacement: 'left',
-                badgeTipPlacement: 'top',
-                badgeToolTip: "\{\{ inventory.status_tip \}\}",
-                awToolTip: "\{\{ inventory.status_tip \}\}",
-                dataPlacement: "top",
-                searchable: false,
-                excludeModal: true,
-                sortField: "inventory_sources_with_failures"
-                },*/
             has_inventory_sources: {
-                label: 'Cloud sourced',
+                label: 'Cloud sourced?',
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
                 searchOnly: true
                 },   
             has_active_failures: {
-                label: 'Failed hosts',
+                label: 'Failed hosts?',
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
                 searchOnly: true
                 },
             inventory_sources_with_failures: {
-                label: 'Sync failures',
+                label: 'Sync failures?',
                 searchType: 'gtzero',
                 searchValue: 'true',
                 searchOnly: true

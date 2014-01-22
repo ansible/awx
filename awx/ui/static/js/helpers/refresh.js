@@ -41,7 +41,6 @@ angular.module('RefreshHelper', ['RestServices', 'Utilities'])
                 scope.$emit('PostRefresh');
                 })
             .error ( function(data, status, headers, config) {
-                Wait('stop');
                 //scope[iterator + 'SearchSpin'] = false;
                 scope[iterator + 'HoldInput'] = false;
                 ProcessErrors(scope, data, status, null,

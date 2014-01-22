@@ -51,9 +51,85 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
       
         }
         }])
+
+    .factory('SetStatus', ['SetEnabledMsg', 'Empty', function(SetEnabledMsg, Empty) {
+    return function(params) {
+        
+        var scope = params.scope;
+        var host = params.host;
+        var html, title;
+  
+        function setMsg(host) {
+            if (host.has_active_failures == true || (host.has_active_failures == false && host.last_job !== null)) {
+                if (host.has_active_failures === true) {
+                    host.badgeToolTip = 'Most recent job failed. Click to view jobs.';
+                    host.active_failures = 'failed';
+                }
+                else {
+                    host.badgeToolTip = "Most recent job successful. Click to view jobs.";
+                    host.active_failures = 'success';
+                }
+                if (host.summary_fields.recent_jobs.length > 0) {
+                    // build html table of job status info
+                    var jobs = host.summary_fields.recent_jobs.sort( 
+                        function(a,b) {
+                            // reverse numerical order
+                            return -1 * (a - b);  
+                        });
+                    title = "Recent Jobs";
+                    html = "<table class=\"table table-condensed\">\n";
+                    html += "<thead>\n";
+                    html += "<tr>\n";
+                    html += "<th>ID</td>\n";
+                    html += "<th>Status</td>\n";
+                    html += "<th>Name</td>\n";
+                    html += "</tr>\n";
+                    html += "</thead>\n";
+                    html += "<tbody>\n";
+                    for (var j=0; j < jobs.length; j++) {
+                         var job = jobs[j];     
+                         html += "<tr>\n";
+                         html += "<td><a href=\"/#/jobs/" + job.id + "\">" + job.id + "</a></td>\n";
+                         html += "<td><a ng-click=\"showJobSummary(" + job.id + ")\"><i class=\"fa icon-job-" + job.status + "\"></i> " + job.status + "</a></td>\n";
+                         html += "<td>" + job.name + "</td>\n";
+                         html += "</tr>\n";
+                    }
+                    html += "</tbody>\n";
+                    html += "</table>\n";
+                }
+                else {
+                    title = 'No job data';
+                    html = '<p>No recent job data available for this host.</p>';
+                }
+            }
+            else if (host.has_active_failures == false && host.last_job == null) {
+                host.has_active_failures = 'none';
+                host.badgeToolTip = "No job data available.";
+                host.active_failures = 'n/a';
+            }
+            host.job_status_html = html; 
+            host.job_status_title = title;
+            }
+
+        if (!Empty(host)) {
+            // update single host
+            setMsg(host);
+            SetEnabledMsg(host);
+        }
+        else {
+            // update all hosts
+            for (var i=0; i < scope.hosts.length; i++) {
+                setMsg(scope.hosts[i]);
+                SetEnabledMsg(scope.hosts[i]);
+            }
+        }
+
+        }
+        }])
     
-    .factory('HostsReload', [ '$routeParams', 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait', 'SetHostStatus', 
-    function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus) {
+    .factory('HostsReload', [ '$routeParams', 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait', 
+    'SetHostStatus', 'SetStatus', 
+    function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus, SetStatus) {
     return function(params) {
         
         var scope = params.scope;
@@ -74,9 +150,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             for (var i=0; i < scope.hosts.length; i++) {
                 //Set tooltip for host enabled flag
                 scope.hosts[i].enabled_flag = scope.hosts[i].enabled;
-                //SetEnabledMsg(scope.hosts[i]);  
-                SetHostStatus(scope.hosts[i]);
+                //SetHostStatus(scope.hosts[i]);
             }
+            SetStatus({ scope: scope });
             Wait('stop');
             scope.$emit('HostReloadComplete');
             });
@@ -347,9 +423,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
 
     .factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find', 'SetEnabledMsg',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find', 'SetStatus',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetEnabledMsg) {
+        GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetStatus) {
     return function(params) {
         
         var parent_scope = params.scope;
@@ -371,7 +447,6 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.parseType = 'yaml';
         ParseTypeChange(scope);
 
-        $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
         
         if (scope.hostLoadedRemove) {
             scope.hostLoadedRemove();
@@ -441,7 +516,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
             host.name = scope.name;
             host.enabled = scope.enabled;
             host.enabled_flag = scope.enabled;
-            SetEnabledMsg(host);
+            SetStatus({ scope: parent_scope, host: host });
             // Close modal
             Wait('stop');
             $('#form-modal').modal('hide');

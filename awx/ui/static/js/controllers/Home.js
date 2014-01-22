@@ -95,7 +95,8 @@ Home.$inject=['$scope', '$compile', '$routeParams', '$rootScope', '$location', '
 
 
 function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, 
-    GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit) {
+    GetBasePath, SearchInit, PaginateInit, FormatDate, GetHostsStatusMsg, GetSyncStatusMsg, ViewUpdateStatus, Stream, GroupsEdit, Wait,
+    Alert, Rest, Empty, InventoryUpdate, Find) {
 
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -111,35 +112,39 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
         scope.removePostRefresh();
     }
     scope.removePostRefresh = scope.$on('PostRefresh', function() {
-        var msg, update_status, last_update;
+        var hosts_status, update_status, last_update, stat;
         for (var i=0; i < scope.home_groups.length; i++) {
             
             scope['home_groups'][i]['inventory_name'] = scope['home_groups'][i]['summary_fields']['inventory']['name'];
 
-            last_update = (scope.home_groups[i].summary_fields.inventory_source.last_updated == null) ? null : 
-                FormatDate(new Date(scope.home_groups[i].summary_fields.inventory_source.last_updated));    
-             
-            // Set values for Failed Hosts column
-            scope.home_groups[i].failed_hosts = scope.home_groups[i].hosts_with_active_failures + ' / ' + scope.home_groups[i].total_hosts;
-            
-            msg = GetHostsStatusMsg({
+            stat = GetSyncStatusMsg({ 
+                status: scope.home_groups[i].summary_fields.inventory_source.status
+                });   // from helpers/Groups.js
+    
+            hosts_status = GetHostsStatusMsg({
                 active_failures: scope.home_groups[i].hosts_with_active_failures,
                 total_hosts: scope.home_groups[i].total_hosts,
                 inventory_id: scope.home_groups[i].inventory,
                 group_id: scope.home_groups[i].id
                 });
+ 
+            scope['home_groups'][i].status_class = stat['class'],
+            scope['home_groups'][i].status_tooltip = stat['tooltip'],
+            scope['home_groups'][i].launch_tooltip = stat['launch_tip'],
+            scope['home_groups'][i].launch_class = stat['launch_class'],
+            scope['home_groups'][i].hosts_status_tip = hosts_status['tooltip'],
+            scope['home_groups'][i].show_failures = hosts_status['failures'],
+            scope['home_groups'][i].hosts_status_class = hosts_status['class'],
             
-            update_status = GetSyncStatusMsg({ status: scope.home_groups[i].summary_fields.inventory_source.status });
-
-            scope.home_groups[i].failed_hosts_tip = msg['tooltip']; 
-            scope.home_groups[i].failed_hosts_link = msg['url'];
-            scope.home_groups[i].failed_hosts_class = msg['class'];
-            scope.home_groups[i].status = update_status['status'];
+            //scope.home_groups[i].failed_hosts_tip = msg['tooltip']; 
+            //scope.home_groups[i].failed_hosts_link = msg['url'];
+            //scope.home_groups[i].failed_hosts_class = msg['class'];
+            scope.home_groups[i].status = scope.home_groups[i].summary_fields.inventory_source.status;
             scope.home_groups[i].source = (scope.home_groups[i].summary_fields.inventory_source) ? 
                 scope.home_groups[i].summary_fields.inventory_source.source : null;
-            scope.home_groups[i].last_updated = last_update;
-            scope.home_groups[i].status_badge_class = update_status['class'];
-            scope.home_groups[i].status_badge_tooltip = update_status['tooltip'];
+            //scope.home_groups[i].last_updated = last_update;
+            //scope.home_groups[i].status_badge_class = update_status['class'];
+            //scope.home_groups[i].status_badge_tooltip = update_status['tooltip'];
         }
         });
 
@@ -224,16 +229,52 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
         ViewUpdateStatus({ scope: scope, tree_id: id }) 
         };
 
+    // Launch inventory sync
+    scope.updateGroup = function(id) {
+        var group = Find({ list: scope.home_groups, key: 'id', val: id});
+        if (group) {
+            if (Empty(group.source)) {
+                // if no source, do nothing. 
+            }
+            else if (group.status == 'updating') {
+                Alert('Update in Progress', 'The inventory update process is currently running for group <em>' +
+                    scope.home_groups[i].name + '</em>. Use the Refresh button to monitor the status.', 'alert-info'); 
+            }
+            else {
+                Wait('start');
+                Rest.setUrl(group.related.inventory_source);
+                Rest.get()
+                    .success( function(data, status, headers, config) {
+                        InventoryUpdate({
+                            scope: scope, 
+                            url: data.related.update,
+                            group_name: data.summary_fields.group.name, 
+                            group_source: data.source,
+                            tree_id: group.id,
+                            group_id: group.id
+                            });
+                        })
+                    .error( function(data, status, headers, config) {
+                        ProcessErrors(scope, data, status, form,
+                            { hdr: 'Error!', msg: 'Failed to retrieve inventory source: ' + group.related.inventory_source + 
+                            ' POST returned status: ' + status });
+                        });
+            }
+        }      
+        }
+
+    scope.refresh = function() { scope.search(list.iterator, null, false, true); }
+
     }
 
 HomeGroups.$inject = [ '$location', '$routeParams', 'HomeGroupList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
     'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'GetHostsStatusMsg', 'GetSyncStatusMsg', 'ViewUpdateStatus',
-    'Stream', 'GroupsEdit'
+    'Stream', 'GroupsEdit', 'Wait', 'Alert', 'Rest', 'Empty', 'InventoryUpdate', 'Find'
     ];
 
 
 function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, 
-    GetBasePath, SearchInit, PaginateInit, FormatDate, SetHostStatus, ToggleHostEnabled, HostsEdit, Stream, Find) {
+    GetBasePath, SearchInit, PaginateInit, FormatDate, SetStatus, ToggleHostEnabled, HostsEdit, Stream, Find, ShowJobSummary) {
 
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -251,7 +292,8 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
     scope.removePostRefresh = scope.$on('PostRefresh', function() {
         for (var i=0; i < scope.hosts.length; i++) {
             scope['hosts'][i]['inventory_name'] = scope['hosts'][i]['summary_fields']['inventory']['name'];
-            SetHostStatus(scope['hosts'][i]);
+            //SetHostStatus(scope['hosts'][i]);
+            SetStatus({ scope: scope, host: scope['hosts'][i] });
         }
         });
 
@@ -287,6 +329,7 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
     LoadBreadCrumbs();
     
     scope.showActivity = function() { Stream(); }
+
     scope.toggle_host_enabled = function(id, sources) { ToggleHostEnabled({ host_id: id, external_source: sources, scope: scope }); }
 
     scope.editHost = function(host_id, host_name) {
@@ -296,9 +339,13 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
         }
         }
 
+    scope.showJobSummary = function(job_id) { 
+        ShowJobSummary({ job_id: job_id });
+        }
+
     }
 
 HomeHosts.$inject = [ '$location', '$routeParams', 'HomeHostList', 'GenerateList', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 
-    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetHostStatus', 'ToggleHostEnabled', 'HostsEdit', 'Stream',
-    'Find'
+    'ClearScope', 'GetBasePath', 'SearchInit', 'PaginateInit', 'FormatDate', 'SetStatus', 'ToggleHostEnabled', 'HostsEdit', 'Stream',
+    'Find', 'ShowJobSummary'
     ]; 

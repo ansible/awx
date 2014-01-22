@@ -33,30 +33,6 @@ angular.module('HomeHostListDefinition', [])
                 columnClass: 'col-lg-3 col-md3 col-sm-2',
                 linkTo: "\{\{ '/#/inventories/' + host.inventory \}\}"
                 },
-            active_failures: {
-                label: 'Job Status',
-                ngHref: "\{\{ host.activeFailuresLink \}\}", 
-                awToolTip: "\{\{ host.badgeToolTip \}\}",
-                dataPlacement: 'top',
-                badgeNgHref: '\{\{ host.activeFailuresLink \}\}', 
-                badgeIcon: "\{\{ 'fa icon-failures-' + host.has_active_failures \}\}",
-                badgePlacement: 'left',
-                badgeToolTip: "\{\{ host.badgeToolTip \}\}",
-                badgeTipPlacement: 'top',
-                searchable: false,
-                nosort: true
-                },
-            enabled_flag: {
-                label: 'Enabled',
-                badgeIcon: "\{\{ 'fa icon-enabled-' + host.enabled \}\}", 
-                badgePlacement: 'left',
-                badgeToolTip: "\{\{ host.enabledToolTip \}\}",
-                badgeTipPlacement: "top",
-                badgeTipWatch: "host.enabledToolTip",
-                ngClick: "toggle_host_enabled(\{\{ host.id \}\}, \{\{ host.has_inventory_sources \}\})",
-                searchable: false,
-                showValue: false
-                },
             enabled: {
                 label: 'Disabled?',
                 searchSingleValue: true,
@@ -83,7 +59,35 @@ angular.module('HomeHostListDefinition', [])
                 searchOnly: true
                 }
             },
-        
+
+        fieldActions: {
+            enabled_flag: {
+                //label: 'Enabled',
+                iconClass: "{{ 'fa icon-enabled-' + host.enabled }}",
+                dataPlacement: 'top',
+                awToolTip: "{{ host.enabledToolTip }}",
+                dataTipWatch: "host.enabledToolTip",
+                ngClick: "toggleHostEnabled(host.id, host.has_inventory_sources)"
+                },
+            active_failures: {
+                //label: 'Job Status',
+                //ngHref: "\{\{'/#/hosts/' + host.id + '/job_host_summaries/?inventory=' + inventory_id \}\}",
+                awPopOver: "{{ host.job_status_html }}",
+                dataTitle: "{{ host.job_status_title }}",
+                awToolTip: "{{ host.badgeToolTip }}",
+                awTipPlacement: 'top',
+                dataPlacement: 'left',
+                iconClass: "{{ 'fa icon-failures-' + host.has_active_failures }}"
+                },
+            edit: {
+                label: 'Edit',
+                ngClick: "editHost(host.id)",
+                icon: 'icon-edit',
+                awToolTip: 'Edit host',
+                dataPlacement: 'top'
+                }
+            },
+
         actions: {
             stream: {
                 ngClick: "showActivity()",

@@ -33,7 +33,7 @@ angular.module('HomeGroupListDefinition', [])
                 columnClass: 'col-lg-3 col-md3 col-sm-2',
                 linkTo: "\{\{ '/#/inventories/' + group.inventory + '/' \}\}"
                 },
-            failed_hosts: {
+            /*failed_hosts: {
                 label: 'Failed Hosts',
                 ngHref: "\{\{ group.failed_hosts_link \}\}",
                 badgeIcon: "\{\{ 'fa icon-failures-' + group.failed_hosts_class \}\}",
@@ -46,8 +46,8 @@ angular.module('HomeGroupListDefinition', [])
                 searchable: false,
                 excludeModal: true,
                 sortField: "hosts_with_active_failures"
-                },
-            status: {
+                },*/
+            /*status: {
                 label: 'Status',
                 ngClick: "viewUpdateStatus(\{\{ group.id \}\})",
                 searchType: 'select',
@@ -65,14 +65,14 @@ angular.module('HomeGroupListDefinition', [])
                     { name: "updating", value: "updating" }],
                 sourceModel: 'inventory_source',
                 sourceField: 'status'
-                },
-            last_updated: {
+                },*/
+            /*last_updated: {
                 label: 'Last<br>Updated',
                 sourceModel: 'inventory_source',
                 sourceField: 'last_updated',
                 searchable: false,
                 nosort: false
-                },
+                },*/
             source: {
                 label: 'Source',
                 searchType: 'select',
@@ -113,8 +113,55 @@ angular.module('HomeGroupListDefinition', [])
                 searchOnly: true
                 }
             },
+
+        fieldActions: {
+            sync_status: {
+                mode: 'all',
+                ngClick: "viewUpdateStatus(group.id, group.group_id)",
+                awToolTip: "\{\{ group.status_tooltip \}\}",
+                ngClass: "group.status_class",
+                dataPlacement: "top"
+                },
+            failed_hosts: {
+                mode: 'all',
+                awToolTip: "{{ group.hosts_status_tip }}",
+                dataPlacement: "top",
+                ngHref: "/#/inventories/{{ group.inventory }}/",
+                iconClass: "{{ 'fa icon-failures-' + group.hosts_status_class }}"
+                },
+            group_update: {
+                //label: 'Sync',
+                mode: 'all',
+                ngClick: 'updateGroup(\{\{ group.id \}\})',
+                awToolTip: "\{\{ group.launch_tooltip \}\}",
+                ngShow: "(group.status !== 'running' && group.status !== 'pending' && group.status !== 'updating')",
+                ngClass: "group.launch_class",
+                dataPlacement: "top"
+                },
+            cancel: {
+                //label: 'Cancel',
+                mode: 'all',
+                ngClick: "cancelUpdate(\{\{ group.id \}\})",
+                awToolTip: "Cancel sync process",
+                'class': 'red-txt',
+                ngShow: "(group.status == 'running' || group.status == 'pending' || group.status == 'updating')",
+                dataPlacement: "top"
+                },
+            edit: {
+                label: 'Edit',
+                mode: 'all',
+                ngClick: "editGroup(group.id)",
+                awToolTip: 'Edit group',
+                dataPlacement: "top"
+                }
+            },
         
         actions: {
+            refresh: {
+                mode: 'all',
+                awToolTip: "Refresh the page",
+                ngClick: "refresh()"
+                },
             stream: {
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",

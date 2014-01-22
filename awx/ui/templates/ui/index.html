@@ -4,12 +4,11 @@
   <meta charset="utf-8">
   <title>AnsibleWorks AWX</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="{{ STATIC_URL }}css/custom-theme/jquery-ui-1.10.3.custom.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}css/custom-theme/jquery-ui-1.10.3.custom.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/font-awesome.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/select2.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/select2-bootstrap.css" />
-
   
   {% if settings.USE_MINIFIED_JS %} 
   <link rel="stylesheet" href="{{ STATIC_URL }}css/awx.min.css" />
@@ -75,6 +74,7 @@
   <script src="{{ STATIC_URL }}js/forms/HostGroups.js"></script>
   <script src="{{ STATIC_URL }}js/forms/InventoryStatus.js"></script>
   <script src="{{ STATIC_URL }}js/forms/ActivityDetail.js"></script>
+  <script src="{{ STATIC_URL }}js/forms/JobSummary.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Users.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Admins.js"></script>
@@ -383,11 +383,13 @@
     </div>
   </div><!-- site footer --> 
 
-  <script src="{{ STATIC_URL }}lib/jquery/jquery-ui-1.10.3.custom.min.js"></script>
+  <!-- <script src="{{ STATIC_URL }}lib/jquery/jquery-ui-1.10.3.custom.min.js"></script> -->
+  
   <script src="{{ STATIC_URL }}lib/twitter/bootstrap.min.js"></script>
   <script src="{{ STATIC_URL }}lib/js-yaml/js-yaml.min.js"></script>
   <script src="{{ STATIC_URL }}lib/md5/jquery.md5.js"></script>
   <script src="{{ STATIC_URL }}lib/select2/select2.js"></script>
+  <script src="{{ STATIC_URL }}lib/jquery/jquery-ui-1.10.4.custom.min.js"></script>
   
   <script>
       $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {

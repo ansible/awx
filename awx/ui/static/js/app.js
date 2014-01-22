@@ -60,6 +60,7 @@ angular.module('ansible', [
     'JobEventsListDefinition',
     'JobEventDataDefinition',
     'JobHostDefinition',
+    'JobSummaryDefinition',
     'ParseHelper',
     'ChildrenHelper',
     'EventsHelper',

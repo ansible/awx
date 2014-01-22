@@ -148,16 +148,6 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += "<div class=\"row\">\n";
            
        if (list.name != 'groups') {
-       //    // Inventory groups
-       //    html += "<div class=\"inventory-title col-lg-5\">" + list.editTitle + "</div>\n";
-       //}
-       //else if (list.name == 'hosts') {
-       //    html += "<div class=\"col-lg-4\">\n";
-       //    html += "<span class=\"hosts-title\">{{ selected_group_name }}</span>";
-       //    html += "</div><!-- col-lg-4 -->";
-       //    html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: 'col-lg-5', 
-       //        searchWidgets: list.searchWidgets });
-       //}
            if (options.searchSize) {
                html += SearchWidget({ iterator: list.iterator, template: list, mini: true , size: options.searchSize, 
                    searchWidgets: list.searchWidgets });
@@ -347,9 +337,13 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  html += "<a ";
                  html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
                  html += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
-                 html += (action == 'cancel') ? " class=\"cancel red-txt\" " : "";
+                 html += (action == 'cancel') ? "class=\"cancel red-txt\" " : "";
+                 html += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
+                 html += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : ""; 
+                 html += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : ""; 
                  for (itm in fAction) {
-                     if (itm != 'ngHref' && itm != 'href' && itm != 'label' && itm != 'icon' && itm != 'class' && itm != 'iconClass') {
+                     if (itm != 'ngHref' && itm != 'href' && itm != 'label' && itm != 'icon' && itm != 'class' && 
+                         itm != 'iconClass' && itm != "dataPlacement" && itm != "awPopOver" && itm != "dataTitle") {
                          html += Attr(fAction, itm);
                      }
                  }

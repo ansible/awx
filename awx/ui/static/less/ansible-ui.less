@@ -7,9 +7,6 @@
  *
  */
 
-@import "animations.less";
-
-
 @black:       #171717;
 @white:       #FFF;
 @warning:     #FF9900;
@@ -27,6 +24,11 @@
 
 @tip-background: #0088CC;
 @tip-color: #fff;
+
+
+@import "animations.less";
+@import "jquery-ui-overrides.less";
+
 
 html, body { height: 100%; }
 
@@ -280,7 +282,7 @@ td.actions {
   border-color: #ccc;
 }
 
-.ssh-key-field {
+.ssh-key-field, .mono-space {
   font-family: Fixed, monospace;  
 }
 
@@ -1295,12 +1297,6 @@ tr td button i {
 
 .step-no {
   font-weight: bold;
-}
-
-.ui-dialog-titlebar.ui-widget-header {
-  color: #0088cc;
-  background-color: #F0F0F0;
-  background-image: none;
 }
 
 

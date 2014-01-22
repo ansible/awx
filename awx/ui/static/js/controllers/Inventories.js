@@ -304,7 +304,7 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
                           GetSyncStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, 
                           Rest, ProcessErrors, InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find,
                           HostsCreate, EditInventoryProperties, HostsEdit, HostsDelete, ToggleHostEnabled, CopyMoveGroup, CopyMoveHost,
-                          Stream, GetBasePath) 
+                          Stream, GetBasePath, ShowJobSummary) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -510,6 +510,10 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         var url = GetBasePath('activity_stream') + '?group__inventory__id=' + $scope.inventory_id;
         Stream({ inventory_name: $scope.inventory_name, url: url });
         }
+    
+    $scope.showJobSummary = function(job_id) { 
+        ShowJobSummary({ job_id: job_id });
+        }
 
     //Load tree data for the first time
     BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: false });
@@ -520,6 +524,6 @@ InventoriesEdit.$inject = [ '$scope', '$location', '$routeParams', '$compile', '
                             'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'GroupsDelete',
                             'Breadcrumbs', 'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren',
                             'ViewUpdateStatus', 'GroupsCancelUpdate', 'Find', 'HostsCreate', 'EditInventoryProperties', 'HostsEdit', 
-                            'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost', 'Stream', 'GetBasePath'
+                            'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost', 'Stream', 'GetBasePath', 'ShowJobSummary'
                             ]; 
   

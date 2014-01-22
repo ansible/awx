@@ -127,10 +127,6 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                url += 'inventories/' + obj.id + '/';
                break;
            default:
-               console.log('here');
-               console.log('url: ' + url);
-               console.log('base: ' + obj.base);
-               console.log('id: ' + obj.id);
                url += obj.base + 's/' + obj.id + '/';
         }
         return url;

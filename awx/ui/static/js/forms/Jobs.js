@@ -316,7 +316,7 @@ angular.module('JobFormDefinition', [])
                 readonly: true,
                 xtraWide: true,
                 rows: "\{\{ stdout_rows \}\}",
-                "class": 'nowrap',
+                "class": 'nowrap mono-space',
                 ngShow: "result_stdout != ''"
                 },
             result_traceback: {
@@ -325,7 +325,7 @@ angular.module('JobFormDefinition', [])
                 xtraWide: true,
                 readonly: true,
                 rows: "\{\{ traceback_rows \}\}",
-                "class": 'nowrap',
+                "class": 'nowrap mono-space',
                 ngShow: "result_traceback != ''"
                 }
             },

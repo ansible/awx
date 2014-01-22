@@ -8,7 +8,7 @@
 var INTEGER_REGEXP = /^\-?\d*$/;
 
 
-angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
+angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'JobsHelper'])
     // awpassmatch:  Add to password_confirm field. Will test if value
     //               matches that of 'input[name="password"]'
     .directive('awpassmatch', function() {
@@ -277,7 +277,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
      *  Include the standard TB data-XXX attributes to controll the pop-over's appearance.  We will 
      *  default placement to the left, delay to 0 seconds, content type to HTML, and title to 'Help'.
      */ 
-    .directive('awPopOver', function() {
+    .directive('awPopOver', ['$compile', function($compile) {
         return function(scope, element, attrs) {
             var placement = (attrs.placement != undefined && attrs.placement != null) ? attrs.placement : 'left';
             var title = (attrs.title != undefined && attrs.title != null) ? attrs.title : 'Help';
@@ -289,26 +289,34 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService'])
                 var e = $(this);
                 $('.help-link, .help-link-white').each( function(index) {
                     if (me != $(this).attr('id')) {
-                       $(this).popover('hide');
+                        $(this).popover('hide');
                     }
                     });
+            
                 $('.popover').each(function(index) {
                     // remove lingering popover <div>. Seems to be a bug in TB3 RC1
                     $(this).remove();
                     });
+
                 $(this).popover('toggle');
+
+                $('.popover').each(function(index) {
+                    $compile($(this))(scope);  //make nested directives work!
+                    });
+
                 });
+            
             $(document).bind('keydown', function(e) {
                 if (e.keyCode === 27) {
-                   $(element).popover('hide');
-                      $('.popover').each(function(index) {
-                      // remove lingering popover <div>. Seems to be a bug in TB3 RC1
-                         $(this).remove();
-                      });
+                    $(element).popover('hide');
+                    $('.popover').each(function(index) {
+                       // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+                       $(this).remove();
+                       });
                 }
                 });
         }
-        })
+        }])
 
     //
     // Enable jqueryui slider widget on a numeric input field

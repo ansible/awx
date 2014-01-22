@@ -1,0 +1,69 @@
+/*********************************************
+ *  Copyright (c) 2014 AnsibleWorks, Inc.
+ *  
+ *  jquery-ui-overrides.less
+ *  
+ *  Additions to the custom-theme to make things 
+ *  look closer to Twitter Bootstrap
+ *
+ */
+
+
+/* Modal dialog */
+
+.ui-dialog-title { 
+    font-size: 22px;
+    color: @blue;
+    font-weight: bold;
+    line-height: normal;
+}
+.ui-dialog {
+    .close {
+        font-size: 18px;
+        font-weight: bold;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        line-height: 1;
+        opacity: .7;
+        text-shadow: 0 1px 0 @white;
+    }
+    .ui-widget-header {
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid #A9A9A9;
+        height: 55px;
+    }
+    .ui-dialog-titlebar {
+        padding-bottom: 0;
+        padding-top: 12px;
+    }
+    .ui-dialog-titlebar .ui-state-default {
+        background-image: none;
+        background-color: @white;
+        border-color: @white;
+        color: #A9A9A9;
+    }
+    .mono-space {
+        font-family: Fixed, monospace;
+    }
+    textarea.resizable {
+        resize: vertical;
+    }
+    .ui-resizable-se {
+        right: 5px;
+        bottom: 5px;
+        background-position: -80px -224px;
+        color: @black;
+    }
+}
+
+.ui-dialog-buttonset {
+    button.btn.btn-primary.ui-state-hover,
+    button.btn.btn-primary.ui-state-active {
+        background-image: none;
+        color: @white;
+        background-color: @blue-dark;
+        border-color: #285e8e;
+        text-decoration: none;
+        font-weight: normal;
+    }
+}

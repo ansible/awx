@@ -14,8 +14,8 @@
  *
  */
 
-angular.module('PaginateHelper', ['RefreshHelper', 'ngCookies'])  
-    .factory('PaginateInit', [ 'Refresh', '$cookieStore', function(Refresh, $cookieStore) {
+angular.module('PaginateHelper', ['RefreshHelper', 'ngCookies', 'Utilities'])  
+    .factory('PaginateInit', [ 'Refresh', '$cookieStore', 'Wait', function(Refresh, $cookieStore, Wait) {
     return function(params) {
         
         var scope = params.scope;
@@ -51,6 +51,7 @@ angular.module('PaginateHelper', ['RefreshHelper', 'ngCookies'])
         scope.nextSet = function(set, iterator) {
            if (scope[iterator + 'NextUrl']) {
               scope[iterator + 'Page']++;
+              Wait('start');
               Refresh({ scope: scope, set: set, iterator: iterator, url: scope[iterator + 'NextUrl'] });
            }
            };
@@ -58,6 +59,7 @@ angular.module('PaginateHelper', ['RefreshHelper', 'ngCookies'])
         scope.prevSet = function(set, iterator) {
            if (scope[iterator + 'PrevUrl']) {
               scope[iterator + 'Page']--;
+              Wait('start');
               Refresh({ scope: scope, set: set, iterator: iterator, url: scope[iterator + 'PrevUrl'] });
            }
            };
@@ -70,11 +72,10 @@ angular.module('PaginateHelper', ['RefreshHelper', 'ngCookies'])
            
            scope[iterator + 'Page'] = 0;
            var new_url = url.replace(/\?page_size\=\d+/,'');
-           console.log('new_url: ' + new_url);
            var connect = (/\/$/.test(new_url)) ? '?' : '&';
            new_url += (scope[iterator + 'SearchParams']) ? connect + scope[iterator + 'SearchParams'] + '&page_size=' + scope[iterator + 'PageSize' ] :
                 connect + 'page_size=' + scope[iterator + 'PageSize' ];
-           console.log('new_url: ' + new_url);
+           Wait('start');
            Refresh({ scope: scope, set: set, iterator: iterator, url: new_url });  
            }
         }

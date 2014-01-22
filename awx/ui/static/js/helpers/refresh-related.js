@@ -41,7 +41,6 @@ angular.module('RefreshRelatedHelper', ['RestServices', 'Utilities'])
                 }
                 })
             .error ( function(data, status, headers, config) {
-                Wait('stop');
                 //scope[iterator + 'SearchSpin'] = true;
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to retrieve ' + set + '. GET returned status: ' + status });

@@ -60,7 +60,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        this.modal = (options.modal) ? true : false;
        this.setForm(form);
 
-      if (options.html) {
+       if (options.html) {
           element.html(options.html);
        }
        else {

@@ -423,7 +423,9 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
             Wait('stop');
             Alert('Update Started', 'Your request to start the inventory sync process was submitted. Monitor progress ' +
                    'by clicking the <i class="fa fa-refresh fa-lg"></i> button.', 'alert-info');
-            scope.removeHostReloadComplete();
+            if (scope.removeHostReloadComplete) {
+                scope.removeHostReloadComplete();
+            }
             });
 
         if (scope.removeUpdateSubmitted) {
@@ -431,10 +433,14 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         }
         scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function(e, action) {
             if (action == 'started') {
-                // Cancel the update process
-                scope.selected_tree_id = tree_id;
-                scope.selected_group_id = group_id;
-                scope.refreshGroups();
+                if (scope.refreshGroups) {
+                    scope.selected_tree_id = tree_id;
+                    scope.selected_group_id = group_id;
+                    scope.refreshGroups();
+                }
+                else {
+                    scope.$emit('HostReloadComplete');
+                }
             }
             });
         

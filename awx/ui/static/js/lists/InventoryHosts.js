@@ -47,37 +47,32 @@ angular.module('InventoryHostsDefinition', [])
                 searchOnly: true
                 },
             has_active_failures: {
-                label: 'Has failed jobs?',
+                label: 'Failed jobs?',
                 searchSingleValue: true,
                 searchType: 'boolean',
                 searchValue: 'true',
                 searchOnly: true
                 }
-            /*    ,
-            has_inventory_sources: {
-                label: 'Has external source?',
-                searchSingleValue: true,
-                searchType: 'boolean',
-                searchValue: 'true',
-                searchOnly: true
-                }*/
             },
         
         fieldActions: {
             enabled_flag: {
                 //label: 'Enabled',
-                iconClass: "\{\{ 'fa icon-enabled-' + host.enabled \}\}",
+                iconClass: "{{ 'fa icon-enabled-' + host.enabled }}",
                 dataPlacement: 'top',
-                awToolTip: "\{\{ host.enabledToolTip \}\}",
+                awToolTip: "{{ host.enabledToolTip }}",
                 dataTipWatch: "host.enabledToolTip",
-                ngClick: "toggleHostEnabled(\{\{ host.id \}\}, \{\{ host.has_inventory_sources \}\})"
+                ngClick: "toggleHostEnabled(host.id, host.has_inventory_sources)"
                 },
             active_failures: {
                 //label: 'Job Status',
-                ngHref: "\{\{'/#/hosts/' + host.id + '/job_host_summaries/?inventory=' + inventory_id \}\}",
-                awToolTip: "\{\{ host.badgeToolTip \}\}",
-                dataPlacement: 'top',
-                iconClass: "\{\{ 'fa icon-failures-' + host.has_active_failures \}\}"
+                //ngHref: "\{\{'/#/hosts/' + host.id + '/job_host_summaries/?inventory=' + inventory_id \}\}",
+                awPopOver: "{{ host.job_status_html }}",
+                dataTitle: "{{ host.job_status_title }}",
+                awToolTip: "{{ host.badgeToolTip }}",
+                awTipPlacement: 'top',
+                dataPlacement: 'left',
+                iconClass: "{{ 'fa icon-failures-' + host.has_active_failures }}"
                 },
             edit: {
                 //label: 'Edit',
