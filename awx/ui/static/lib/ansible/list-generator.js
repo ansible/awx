@@ -244,7 +244,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
         html += "<thead>\n";
         html += "<tr>\n";
         if (list.index) {
-            html += "<th class\"col-lg-1 col-md-1 col-sm-1\">#</th>\n";
+            html += "<th class=\"col-lg-1 col-md-1 col-sm-1 hidden-xs\">#</th>\n";
         }
         for (var fld in list.fields) {
             if ( (list.fields[fld].searchOnly == undefined || list.fields[fld].searchOnly == false) &&
@@ -298,7 +298,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += "\"";
        html += ">\n";
        if (list.index) {
-           html += "<td class=\"index-column\">{{ $index + (" + list.iterator + "Page * " + list.iterator + "PageSize) + 1 }}.</td>\n";
+           html += "<td class=\"index-column hidden-xs\">{{ $index + (" + list.iterator + "Page * " + list.iterator + "PageSize) + 1 }}.</td>\n";
        }
        var cnt = 2;
        var base = (list.base) ? list.base : list.name;

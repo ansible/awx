@@ -23,14 +23,13 @@ angular.module('HomeGroupListDefinition', [])
                 key: true,
                 label: 'Group',
                 ngClick: "editGroup(group.id, group.inventory)",
-                columnClass: 'col-lg-5 ellipsis'
-                //linkTo: "\{\{ '/#/inventories/' + group.inventory + '/' \}\}"
+                columnClass: 'col-lg-4 col-md3 col-sm-3 col-xs-6 ellipsis'
                 },
             inventory_name: {
                 label: 'Inventory', 
                 sourceModel: 'inventory',
                 sourceField: 'name',
-                //columnClass: 'col-lg-3 col-md3 col-sm-2 ellipsis',
+                columnClass: 'col-lg-3 col-md2 col-sm-2 hidden-xs elllipsis',
                 linkTo: "\{\{ '/#/inventories/' + group.inventory + '/' \}\}"
                 },
             /*failed_hosts: {

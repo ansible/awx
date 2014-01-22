@@ -23,14 +23,14 @@ angular.module('HomeHostListDefinition', [])
             name: {
                 key: true,
                 label: 'Name',
-                columnClass: 'col-lg-3 col-md3 col-sm-2',
+                columnClass: 'col-lg-4 col-md3 col-sm-3 col-xs-7 ellipsis',
                 ngClick: "editHost(\{\{ host.id \}\}, '\{\{ host.name \}\}')"
                 },
             inventory_name: {
                 label: 'Inventory', 
                 sourceModel: 'inventory',
                 sourceField: 'name',
-                columnClass: 'col-lg-3 col-md3 col-sm-2',
+                columnClass: 'col-lg-3 col-md2 col-sm-2 hidden-xs elllipsis',
                 linkTo: "\{\{ '/#/inventories/' + host.inventory \}\}"
                 },
             enabled: {
