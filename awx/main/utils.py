@@ -225,10 +225,12 @@ def update_scm_url(scm_type, url, username=True, password=True,
                                    parts.query, parts.fragment])
     return new_url
 
-def model_instance_diff(old, new):
+def model_instance_diff(old, new, serializer_mapping=None):
     """
     Calculate the differences between two model instances. One of the instances may be None (i.e., a newly
     created model or deleted model). This will cause all fields with a value to have changed (from None).
+    serializer_mapping are used to determine read-only fields.
+    When provided, read-only fields will not be included in the resulting dictionary
     """
     from django.db.models import Model
     from awx.main.models.organization import Credential
@@ -249,28 +251,42 @@ def model_instance_diff(old, new):
     else:
         fields = set()
 
-    for field in fields:
-        old_value = str(getattr(old, field.name, None))
-        new_value = str(getattr(new, field.name, None))
+    if serializer_mapping is not None and new.__class__ in serializer_mapping:
+        serializer_actual = serializer_mapping[new.__class__]()
+        allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
+    else:
+        allowed_fields = [x.name for x in new._meta.fields]
 
-        if old_value != new_value and field.name not in Credential.PASSWORD_FIELDS:
-            diff[field.name] = (old_value, new_value)
-        elif field.name in Credential.PASSWORD_FIELDS:
-            diff[field.name] = ("hidden", "hidden")
+    for field in allowed_fields:
+        old_value = str(getattr(old, field, None))
+        new_value = str(getattr(new, field, None))
+
+        if old_value != new_value and field not in Credential.PASSWORD_FIELDS:
+            diff[field] = (old_value, new_value)
+        elif old_value != new_value and field in Credential.PASSWORD_FIELDS:
+            diff[field] = ("hidden", "hidden")
 
     if len(diff) == 0:
         diff = None
 
     return diff
 
-def model_to_dict(obj):
+def model_to_dict(obj, serializer_mapping=None):
     """
     Serialize a model instance to a dictionary as best as possible
+    serializer_mapping are used to determine read-only fields.
+    When provided, read-only fields will not be included in the resulting dictionary
     """
     from awx.main.models.organization import Credential
     attr_d = {}
+    if serializer_mapping is not None and obj.__class__ in serializer_mapping:
+        serializer_actual = serializer_mapping[obj.__class__]()
+        allowed_fields = [x for x in serializer_actual.fields if not serializer_actual.fields[x].read_only] + ['id']
+    else:
+        allowed_fields = [x.name for x in obj._meta.fields]
     for field in obj._meta.fields:
-        # FIXME: This needs to be aware of fields not to be included in the AS delta log
+        if field.name not in allowed_fields:
+            continue
         if field.name not in Credential.PASSWORD_FIELDS:
             attr_d[field.name] = str(getattr(obj, field.name, None))
         else:

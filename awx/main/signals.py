@@ -13,6 +13,7 @@ from django.dispatch import receiver
 
 # AWX
 from awx.main.models import *
+from awx.api.serializers import *
 from awx.main.utils import model_instance_diff, model_to_dict, camelcase_to_underscore
 
 __all__ = []
@@ -186,6 +187,18 @@ def update_host_last_job_after_job_deleted(sender, **kwargs):
 
 # Set via ActivityStreamRegistrar to record activity stream events
 
+model_serializer_mapping = {Organization: OrganizationSerializer,
+                            Inventory: InventorySerializer,
+                            Host: HostSerializer,
+                            Group: GroupSerializer,
+                            InventorySource: InventorySourceSerializer,
+                            Credential: CredentialSerializer,
+                            Team: TeamSerializer,
+                            Project: ProjectSerializer,
+                            Permission: PermissionSerializer,
+                            JobTemplate: JobTemplateSerializer,
+                            Job: JobSerializer}
+
 def activity_stream_create(sender, instance, created, **kwargs):
     if created:
         # TODO: Rethink details of the new instance
@@ -193,7 +206,7 @@ def activity_stream_create(sender, instance, created, **kwargs):
         activity_entry = ActivityStream(
             operation='create',
             object1=object1,
-            changes=json.dumps(model_to_dict(instance)))
+            changes=json.dumps(model_to_dict(instance, model_serializer_mapping)))
         activity_entry.save()
         getattr(activity_entry, object1).add(instance)
 
@@ -209,7 +222,9 @@ def activity_stream_update(sender, instance, **kwargs):
         return
 
     new = instance
-    changes = model_instance_diff(old, new)
+    changes = model_instance_diff(old, new, model_serializer_mapping)
+    if changes is None:
+        return
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     activity_entry = ActivityStream(
         operation='update',
