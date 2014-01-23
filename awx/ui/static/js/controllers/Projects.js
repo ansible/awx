@@ -15,8 +15,9 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
                        ClearScope, ProcessErrors, GetBasePath, SelectionInit, ProjectUpdate, ProjectStatus,
                        FormatDate, Refresh, Wait, Stream, GetChoices)                        
 {
-    ClearScope('tree-form');
     ClearScope('htmlTemplate');
+    
+    Wait('start');
     
     var list = ProjectList;
     var defaultUrl = GetBasePath('projects');
@@ -24,8 +25,10 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
     var base = $location.path().replace(/^\//,'').split('/')[0];
     var mode = (base == 'projects') ? 'edit' : 'select';
     var scope = view.inject(list, { mode: mode });
-    $rootScope.flashMessage = null;
     
+    $rootScope.flashMessage = null;
+    scope.projectLoading = true;
+
     var url = (base == 'teams') ? GetBasePath('teams') + $routeParams.team_id + '/projects/' : defaultUrl;
     
     if (mode == 'select') {
@@ -179,9 +182,11 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
            }
            if (project.scm_type !== null) {
               if (project.related.current_update) {
+                 Wait('start');
                  ProjectStatus({ project_id: id, last_update: project.related.current_update });
               }
               else if (project.related.last_update) {
+                 Wait('start');
                  ProjectStatus({ project_id: id, last_update: project.related.last_update });
               }
               else {
@@ -197,8 +202,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
            });
      
        // Refresh the project list so we're looking at the latest data
-       scope.search(list.iterator);
-
+       scope.search(list.iterator, null, false, true);
        } 
  
     scope.deleteProject = function(id, name) {  

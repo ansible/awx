@@ -238,6 +238,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             //$('#s2id_group_source_regions').select2('data', []);
             $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
         }
+        else 
         var kind = (scope.source.value == 'rax') ? 'rax' : 'aws';
         var url = GetBasePath('credentials') + '?cloud=true&kind=' + kind;  
         LookUpInit({
@@ -1102,8 +1103,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             generator.reset();
             
             scope.formModalAction = function() {
-                console.log('tree_id: ' + tree_id);
-                console.log('selected_tree_id: ' + parent_scope.selected_tree_id);
                 $('#form-modal').modal("hide");
                 if (parent_scope && parent_scope.showHosts && !Empty(tree_id)) {
                     if (parent_scope.selected_tree_id !== tree_id)

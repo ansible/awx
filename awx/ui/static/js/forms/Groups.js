@@ -56,7 +56,7 @@ angular.module('GroupFormDefinition', [])
                     "YAML:<br />\n" +
                     "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                     '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
-                    '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
+                    '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                 dataContainer: 'body',
                 tab: 'properties'
                 },
@@ -98,7 +98,7 @@ angular.module('GroupFormDefinition', [])
                 dataTitle: 'Source Regions',
                 dataPlacement: 'right',
                 awPopOver: "<p>Click on the regions field to see a list of regions for your cloud provider. You can select multiple regions, " +
-                    "or choose <em>All</em> to include all regions. AWX will only be updated with Hosts associated with the selected regions." +
+                    "or choose <em>All</em> to include all regions. Tower will only be updated with Hosts associated with the selected regions." +
                     "</p>",
                 dataContainer: 'body',
                 tab: 'source'
@@ -123,7 +123,7 @@ angular.module('GroupFormDefinition', [])
                     "YAML:<br />\n" +
                     "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                     '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
-                    '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
+                    '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                 dataContainer: 'body',
                 tab: 'source'
                 },
@@ -137,7 +137,7 @@ angular.module('GroupFormDefinition', [])
                 'default': { label: 'none', value: 0 },
                 dataTitle: 'Update Interval',
                 dataPlacement: 'left',
-                awPopOver: "<p>Instruct the AWX server to automatically run the inventory update process the selected number of minutes from " +
+                awPopOver: "<p>Automatically run the inventory update process the selected number of minutes from " +
                     "the last run.</p><p>With a value set, task manager will periodically compare the amount of elapsed time from the last run. If enough time " +
                     "has elapsed, it will go ahead and start an inventory update process.</p>",
                 dataContainer: 'body'

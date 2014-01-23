@@ -1,7 +1,9 @@
-/*****************************************
+/*********************************************
+ *  Copyright (c) 2014 AnsibleWorks, Inc.
+ *
  * License.js
  *
- * View license info: /api/vi/config/
+ * View license info found in /api/vi/config/
  *
  *****************************************/
 
@@ -118,7 +120,7 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
            scope.formModalActionLabel = 'OK';
            scope.formModalCancelShow = false;
            scope.formModalInfo = 'Purchase/Extend License';
-           scope.formModalHeader = 'AWX License';
+           scope.formModalHeader = 'Tower License';
 
            //$('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
            //$('#form-modal').addClass('skinny-modal');
@@ -127,10 +129,10 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
            // Respond to license button
            scope.formModalInfoAction = function() {
                Prompt({
-                   hdr: 'AWX Licensing',
-                   body: "<p>AWX licenses can be purchased or extended by visiting <a id=\"license-link\" " +
-                       "href=\"http://store.ansibleworks.com\" target=\"_blank\">" +
-                       "the AnsibleWorks online store</a>. Would you like to purchase or extend your license now?</p>",
+                   hdr: 'Tower Licensing',
+                   body: "<p>Ansible Tower licenses can be purchased or extended by visiting <a id=\"license-link\" " +
+                       "href=\"http://store.ansible.com\" target=\"_blank\">" +
+                       "the Ansible online store</a>. Would you like to purchase or extend your license now?</p>",
                    'class': 'btn-primary', 
                    action: function() { 
                        var href = $('#license-link').attr('href'); 

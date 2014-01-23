@@ -51,7 +51,9 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
         var form = JobSummary;
         
         // Using jquery dialog for its expandable property
+        
         var html = "<div id=\"status-modal-dialog\" title=\"Job " + job_id + "\"><div id=\"form-container\" style=\"width: 100%;\"></div></div>\n";
+        
         $('#inventory-modal-container').empty().append(html);
         var scope = generator.inject(form, { mode: 'edit', id: 'form-container', breadCrumbs: false, related: false });
         
@@ -97,8 +99,19 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
                 },
             close: function(e, ui) {
                 // Destroy on close
+                $('.tooltip').each( function(index) {
+                    // Remove any lingering tooltip <div> elements
+                    $(this).remove();
+                    });
+                $('.popover').each(function(index) {
+                    // remove lingering popover <div> elements
+                    $(this).remove();
+                    });
                 $('#status-modal-dialog').dialog('destroy');
                 $('#inventory-modal-container').empty();
+                },
+            open: function(e, ui) {
+                Wait('stop');
                 }
             });
         
@@ -122,7 +135,6 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
                 scope['traceback_rows'] = calcRows(scope['result_traceback']);
                 var cDate = new Date(data.created);
                 scope.created = FormatDate(cDate);
-                Wait('stop');
                 $('#status-modal-dialog').dialog('open');
                 })
             .error( function(data, status, headers, config) {

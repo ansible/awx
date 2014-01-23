@@ -142,19 +142,39 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
              }
           }
           if (options.modal_selector) {
-             $(options.modal_selector).modal({ show: true, backdrop: 'static', keyboard: true });
-             $(options.modal_selector).on('shown.bs.modal', function() {
-                 $(options.modal_select + ' input:first').focus();
-                 });
-             $(options.modal_selector).unbind('hidden.bs.modal');
+              $(options.modal_selector).modal({ show: true, backdrop: 'static', keyboard: true });
+              $(options.modal_selector).on('shown.bs.modal', function() {
+                  $(options.modal_select + ' input:first').focus();
+                  });
+              $(options.modal_selector).on('hidden.bs.modal', function() { 
+                  $('.tooltip').each( function(index) {
+                      // Remove any lingering tooltip and popover <div> elements
+                      $(this).remove();
+                      });
+   
+                  $('.popover').each(function(index) {
+                      // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+                      $(this).remove();
+                      });
+                  });
           }
           else {
-             var show = (options.show_modal == false) ? false : true; 
-             $('#form-modal').modal({ show: show, backdrop: 'static', keyboard: true });
-             $('#form-modal').on('shown.bs.modal', function() {
-                 $('#form-modal input:first').focus();
-                 });
-             $('#form-modal').off('hidden.bs.modal');
+              var show = (options.show_modal == false) ? false : true; 
+              $('#form-modal').modal({ show: show, backdrop: 'static', keyboard: true });
+              $('#form-modal').on('shown.bs.modal', function() {
+                  $('#form-modal input:first').focus();
+                  });
+              $('#form-modal').on('hidden.bs.modal', function() { 
+                  $('.tooltip').each( function(index) {
+                      // Remove any lingering tooltip and popover <div> elements
+                      $(this).remove();
+                      });
+
+                  $('.popover').each(function(index) {
+                      // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+                      $(this).remove();
+                      });
+                  });
           }
           $(document).bind('keydown', function(e) {
               if (e.keyCode === 27) {
@@ -194,38 +214,51 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
         if (this.scope[this.form.name + '_form']) {
             this.scope[this.form.name + '_form'].$setPristine();
         }
+        
+        var scope = this.scope;
+        var form = this.form;
 
-        for (var fld in this.form.fields) {
-            if (this.form.fields[fld].type == 'checkbox_group') {
-              for (var i=0; i < this.form.fields[fld].fields.length; i++) {
-                   this.scope[this.form.fields[fld].fields[i].name] = '';
-                   this.scope[this.form.fields[fld].fields[i].name + '_api_error'] = '';
-              }
+        function resetField(f, fld) {
+            // f is the field object, fld is the key
+
+            if (f.type == 'checkbox_group') {
+                for (var i=0; i < f.fields.length; i++) {
+                    scope[f.name] = '';
+                    scope[f.name + '_api_error'] = '';
+                }
             }
             else {
-                this.scope[fld] = '';      
-                this.scope[fld + '_api_error'] = '';  
+                scope[fld] = '';      
+                scope[fld + '_api_error'] = '';  
             }
-            if (this.form.fields[fld].sourceModel) {
-                this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField] = '';
-                this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '_api_error'] = '';
+            if (f.sourceModel) {
+                scope[f.sourceModel + '_' + f.sourceField] = '';
+                scope[f.sourceModel + '_' + f.sourceField + '_api_error'] = '';
             }
-            if ( this.form.fields[fld].type == 'lookup' &&
-                this.scope[this.form.name + '_form'][this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField] ) {
-                this.scope[this.form.name + '_form'][this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField].$setPristine();
+            if (f.type == 'lookup' && scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField]) {
+                scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField].$setPristine();
             }
-            if (this.scope[this.form.name + '_form'][fld]) {
-                this.scope[this.form.name + '_form'][fld].$setPristine();
+            if (scope[form.name + '_form'][fld]) {
+                scope[form.name + '_form'][fld].$setPristine();
             }
-            if (this.form.fields[fld].chkPass && this.scope[this.form.name + '_form'][fld]) {
-                this.scope[this.form.name + '_form'][fld].$setValidity('complexity', true);
+            if (f.chkPass && scope[form.name + '_form'][fld]) {
+                scope[form.name + '_form'][fld].$setValidity('complexity', true);
                 $('#progbar').css({ width: 0 });
             }
-            if (this.form.fields[fld].awPassMatch && this.scope[this.form.name + '_form'][fld]) {
-                this.scope[this.form.name + '_form'][fld].$setValidity('awpassmatch', true);
+            if (f.awPassMatch && scope[form.name + '_form'][fld]) {
+                scope[form.name + '_form'][fld].$setValidity('awpassmatch', true);
             }
-            if (this.form.fields[fld].ask) {
-                this.scope[fld + '_ask'] = false;
+            if (f.ask) {
+                scope[fld + '_ask'] = false;
+            }
+            }
+
+        for (var fld in form.fields) {
+            resetField(form.fields[fld], fld);
+        }
+        if (form.statusFields) {
+            for (var fld in form.statusFields) {
+                resetField(form.statusFields[fld], fld);
             }
         }
         if (this.mode == 'add') {

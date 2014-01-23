@@ -139,7 +139,9 @@ angular.module('JobTemplateFormDefinition', [])
                 editRequired: false,
                 'class': "input-small",
                 column: 1,
-                awPopOver: "<p>The number of parallel or simultaneous processes to use while executing the playbook.</p>",
+                awPopOver: '<p>The number of parallel or simultaneous processes to use while executing the playbook. 0 signifies ' +
+                    'the default value from the <a href=\"http://docs.ansible.com/intro_configuration.html#the-ansible-configuration-file\" ' +
+                    ' target=\"_blank\">ansible configuration file</a>.</p>',
                 dataTitle: 'Forks',
                 dataPlacement: 'right',
                 dataContainer: "body"
@@ -151,9 +153,8 @@ angular.module('JobTemplateFormDefinition', [])
                 editRequired: false,
                 column: 1,
                 awPopOver: "<p>Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
-                    "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see the " +
-                    "<a href=\"http://ansible.cc/docs/patterns.html#selecting-targets\" target=\"_blank\">Selecting Targets section</a> under Inventory and Patterns " + 
-                    " in the Ansible documentation.</p>",
+                    "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see " +
+                    "<a href=\"http://docs.ansible.com/intro_patterns.html\" target=\"_blank\">the Patters top at docs.ansible.com</a>.</p>",
                 dataTitle: 'Limit',
                 dataPlacement: 'right',
                 dataContainer: "body"
@@ -218,7 +219,7 @@ angular.module('JobTemplateFormDefinition', [])
                 falseValue: 'false',
                 ngChange: "toggleCallback('host_config_key')",
                 column: 2,
-                awPopOver: "<p>Create a callback URL a host can use to contact the AWX server and request a configuration update " + 
+                awPopOver: "<p>Create a callback URL a host can use to contact Tower and request a configuration update " + 
                     "using the job template.  The URL will look like the following:</p>\n" +
                     "<p class=\"code-breakable\">http://your.server.com:999/api/v1/job_templates/1/callback/</p>" +
                     "<p>The request from the host must be a POST. Here is an example using curl:</p>\n" +
@@ -240,7 +241,7 @@ angular.module('JobTemplateFormDefinition', [])
                 column: 2,
                 required: false,
                 'class': 'span12',
-                awPopOver: "<p>Using this URL a host can contact the AWX server and request a configuration update using the job " +
+                awPopOver: "<p>Using this URL a host can contact Tower and request a configuration update using the job " +
                     "template. The request from the host must be a POST. Here is an example using curl:</p>\n" +
                     "<p class=\"code-breakable\">curl --data \"host_config_key=5a8ec154832b780b9bdef1061764ae5a\" " + 
                     "http://your.server.com:999/api/v1/job_templates/1/callback/</p>\n" +
@@ -257,7 +258,7 @@ angular.module('JobTemplateFormDefinition', [])
                 ngShow: "allow_callbacks",
                 genMD5: true,
                 column: 2,
-                awPopOver: "<p>When contacting the AWX server using the callback URL, the calling host must authenticate by including " +
+                awPopOver: "<p>When contacting the Tower server using the callback URL, the calling host must authenticate by including " +
                     "this key in the POST data of the request. Here's an example using curl:</p>\n" +
                     "<p class=\"code-breakable\">curl --data \"host_config_key=5a8ec154832b780b9bdef1061764ae5a\" " + 
                     "http://your.server.com:999/api/v1/job_templates/1/callback/</p>\n",

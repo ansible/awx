@@ -48,6 +48,11 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
         var status = 'success';
         var hdr, msg;
         var license = $cookieStore.get('license');
+        
+        var purchase_msg = '<p>To purchase a license or extend an existing license ' +
+            '<a href="http://store.ansibleworks.com" target="_blank"><strong>visit the Ansible online store</strong></a>, ' +
+            'or visit <a href="https://support.ansible.com/anonymous_requests/new">support.ansible.com</a> for assistance.</p>';
+
         if (license && !Authorization.licenseTested()) {
            // This is our first time evaluating the license
            license['tested'] = true; 
@@ -58,47 +63,37 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
               // The license is invalid. Stop the user from logging in.
               status = 'alert-danger';
               hdr = 'License Error';
-              msg = 'Something is wrong with your /etc/awx/license file on this server. ' +
-                    'Please contact <a href="mailto:info@ansibleworks.com">info@ansibleworks.com</a> for assistance.';
-              //action = function() { window.location = '#/logout'; };
+              msg = '<p>There is a problem with the /etc/awx/license file on your Tower server. Check to make sure Tower can access ' +
+                  'the file.<p>' + purchase_msg;
               Alert(hdr, msg, status, null, false, true);
            }
            else if (license['demo'] !== undefined && license['demo'] == true) {
               // demo
               status = 'alert-info';
-              hdr = 'AWX Demo';
-              msg = 'Thank you for trying AnsibleWorks AWX. You can use this edition to manage up to 10 hosts free. ' +
-                    'Should you wish to acquire a license for additional servers, please ' + 
-                    '<a href="http://store.ansibleworks.com" target="_blank"><strong>visit the AnsibleWorks online store</strong></a>, or ' +
-                    'contact <a href="mailto:info@ansibleworks.com"><strong>info@ansibleworks.com</strong></a> for assistance.';
+              hdr = 'Tower Demo';
+              msg = '<p>Thank you for trying Ansible Tower. You can use this edition to manage up to 10 hosts free.<p>' + 
+                  purchase_msg;
               Alert(hdr, msg, status);
            }
            if (license['date_expired'] !== undefined && license['date_expired'] == true) {
               // expired
               status = 'alert-info';
-              hdr = 'AWX License Expired';
-              msg = 'Your AnsibleWorks AWX License has expired and is no longer compliant. ' + 
-                    'You can continue, but you will be unable to add any additional hosts. Please ' +
-                    '<a href="http://store.ansibleworks.com" target="_blank"><strong>visit the AnsibleWorks online store</strong></a> ' +
-                    'for license and renewal information, or contact <a href="mailto:info@ansibleworks.com"><strong>info@ansibleworks.com</strong></a> ' +
-                    'for assistance.';
+              hdr = 'License Expired';
+              msg = '<p>Your Ansible Tower License has expired and is no longer compliant. You can continue, but you will be ' +
+                  'unable to add any additional hosts.<p>' + purchase_msg; 
               Alert(hdr, msg, status);
            }
            else if (license['date_warning'] !== undefined && license['date_warning'] == true) {
               status = 'alert-info';
-              hdr = 'AWX License Warning';
-              msg = 'Your AnsibleWorks AWX License is about to expire. To extend your license, please ' + 
-                    '<a href="http://store.ansibleworks.com" target="_blank"><strong>visit the AnsibleWorks online store</strong></a>, or ' +
-                    'contact <a href="mailto:info@ansibleworks.com"><strong>info@ansibleworks.com</strong></a> for more information.';
+              hdr = 'License Warning';
+              msg = '<p>Your Ansible Tower license is about to expire!</p>' + purchase_msg;
               Alert(hdr, msg, status);
            }
            if (license['free_instances'] !== undefined && parseInt(license['free_instances']) <= 0) {
               status = 'alert-info';
               hdr = 'License Warning'; 
-              msg = 'Your AnsibleWorks AWX License has reached capacity for the number of managed ' +
-                    'hosts allowed. You will not be able to add any additional hosts. To extend your license, please ' + 
-                    '<a href="http://store.ansibleworks.com" target="_blank"><strong>visit the AnsibleWorks online store</strong></a>, or ' +
-                    'contact <a href="mailto:info@ansibleworks.com"><strong>info@ansibleworks.com</strong></a> for more information.';
+              msg = '<p>Your Ansible Tower license has reached capacity for the number of managed ' +
+                    'hosts allowed. You will not be able to add any additional hosts.</p>' + purchase_msg;
               Alert(hdr, msg, status, null, true);
            } 
         }

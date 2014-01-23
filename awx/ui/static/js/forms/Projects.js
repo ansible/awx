@@ -76,8 +76,8 @@ angular.module('ProjectFormDefinition', [])
                 ngShow: 'showMissingPlaybooksAlert && !scm_type',
                 alertTxt: '<p class=\"text-justify\"><strong>WARNING:</strong> There are no unassigned playbook directories in the base project path {{ base_dir }}. Either the projects ' +
                     'directory is empty, or all of the contents are already assigned to other projects. New projects can be checked out from source control by ' + 
-                    'changing the SCM type option rather than specifying checkout paths manually. To continue with manual setup, log into the AWX server and ' +
-                    'ensure content is present in a subdirectory under {{ base_dir }}. Run "chown -R awx" on the content directory to ensure awx can read the ' +
+                    'changing the SCM type option rather than specifying checkout paths manually. To continue with manual setup, log into the Tower host and ' +
+                    'ensure content is present in a subdirectory under {{ base_dir }}. Run "chown -R awx" on the content directory to ensure Tower can read the ' +
                     'playbooks.</p>'
                 },
             base_dir: {

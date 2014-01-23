@@ -30,6 +30,7 @@ angular.module('ProjectStatusDefinition', [])
                 label: 'Std Out', 
                 type: 'textarea',
                 ngShow: "result_stdout",
+                'class': 'mono-space',
                 readonly: true,
                 rows: 15
             },
@@ -37,6 +38,7 @@ angular.module('ProjectStatusDefinition', [])
                 label: 'Traceback', 
                 type: 'textarea',
                 ngShow: "result_traceback",
+                'class': 'mono-space',
                 readonly: true,
                 rows: 15
             }

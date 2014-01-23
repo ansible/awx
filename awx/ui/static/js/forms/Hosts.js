@@ -66,7 +66,7 @@ angular.module('HostFormDefinition', [])
                     "YAML:<br />\n" +
                     "<blockquote>---<br />somevar: somevalue<br />password: magic<br /></blockquote>\n" +
                     '<p>View JSON examples at <a href="http://www.json.org" target="_blank">www.json.org</a></p>' +
-                    '<p>View YAML examples at <a href="http://www.ansibleworks.com/docs/YAMLSyntax.html" target="_blank">ansibleworks.com</a></p>',
+                    '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                 dataTitle: 'Host Variables',
                 dataPlacement: 'right',
                 dataContainer: '#form-modal .modal-content'

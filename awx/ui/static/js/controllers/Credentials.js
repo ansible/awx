@@ -14,9 +14,10 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                           ClearScope, ProcessErrors, GetBasePath, SelectionInit, GetChoices, Wait, Stream)
 {
-    ClearScope('tree-form');
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
-                                 //scope.
+                                 //scope. 
+    Wait('start');
+
     var list = CredentialList;
     var defaultUrl = GetBasePath('credentials');
     var view = GenerateList;
@@ -24,6 +25,7 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
     var mode = (base == 'credentials') ? 'edit' : 'select';      // if base path 'credentials', we're here to add/edit
     var scope = view.inject(list, { mode: mode });         // Inject our view
     scope.selected = [];
+    scope.credentialLoading = true;
   
     var url = GetBasePath(base);
        url += (base == 'users') ? $routeParams.user_id + '/credentials/' : $routeParams.team_id + '/credentials/';

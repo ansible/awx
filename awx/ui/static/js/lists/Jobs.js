@@ -84,7 +84,7 @@ angular.module('JobsListDefinition', [])
 
         fieldActions: {
             submit: {
-                label: 'Launch',
+                label: 'Relaunch',
                 icon: 'icon-rocket',
                 mode: 'all',             
                 ngClick: "submitJob(\{\{ job.id \}\}, '\{\{ job.summary_fields.job_template.name \}\}' )",
