@@ -54,7 +54,7 @@ within all designated text fields of a model.
 
     ?search=findme
 
-_New in AWX 1.4_
+_New since AWX 1.4_
 
 ## Filtering
 
@@ -75,7 +75,7 @@ To exclude results matching certain criteria, prefix the field parameter with
 
     ?not__field=value
 
-(_New in AWX 1.4_) By default, all query string filters are AND'ed together, so
+(_New since AWX 1.4_) By default, all query string filters are AND'ed together, so
 only the results matching *all* filters will be returned.  To combine results
 matching *any* one of multiple criteria, prefix each query string parameter
 with `or__`:
@@ -83,10 +83,10 @@ with `or__`:
     ?or__field=value&or__field=othervalue
     ?or__not__field=value&or__field=othervalue
 
-(_New in AWX 1.5_) The default AND filtering applies all filters simultaneously
-to each related object being filtered across database relationships.  The chain
-filter instead applies filters separately for each related object. To use,
-prefix the query string parameter with `chain__`:
+(_New in Ansible Tower 1.4.5_) The default AND filtering applies all filters
+simultaneously to each related object being filtered across database
+relationships.  The chain filter instead applies filters separately for each
+related object. To use, prefix the query string parameter with `chain__`:
 
     ?chain__related__field=value&chain__related__field2=othervalue
     ?chain__not__related__field=value&chain__related__field2=othervalue

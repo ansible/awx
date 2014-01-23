@@ -59,7 +59,7 @@ class ApiRootView(APIView):
 
         current = reverse('api:api_v1_root_view', args=[])
         data = dict(
-           description = 'AWX REST API',
+           description = 'Ansible Tower REST API',
            current_version = current,
            available_versions = dict(
               v1 = current
