@@ -258,10 +258,13 @@ def model_instance_diff(old, new, serializer_mapping=None):
         allowed_fields = [x.name for x in new._meta.fields]
 
     for field in allowed_fields:
-        old_value = str(getattr(old, field, None))
-        new_value = str(getattr(new, field, None))
+        old_value = getattr(old, field, None)
+        new_value = getattr(new, field, None)
 
         if old_value != new_value and field not in Credential.PASSWORD_FIELDS:
+            if type(old_value) not in (bool, int, type(None)):
+                old_value = str(old_value)
+                new_value = str(new_value)
             diff[field] = (old_value, new_value)
         elif old_value != new_value and field in Credential.PASSWORD_FIELDS:
             diff[field] = ("hidden", "hidden")
@@ -288,7 +291,11 @@ def model_to_dict(obj, serializer_mapping=None):
         if field.name not in allowed_fields:
             continue
         if field.name not in Credential.PASSWORD_FIELDS:
-            attr_d[field.name] = str(getattr(obj, field.name, None))
+            field_val = getattr(obj, field.name, None)
+            if type(field_val) not in (bool, int, type(None)):
+                attr_d[field.name] = str(field_val)
+            else:
+                attr_d[field.name] = field_val
         else:
             attr_d[field.name] = "hidden"
     return attr_d
