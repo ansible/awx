@@ -9,6 +9,7 @@
 # scm_delete_on_update: true/false
 # scm_username: username (only for svn)
 # scm_password: password (only for svn)
+# scm_accept_hostkey: true/false (only for git)
 
 - hosts: all
   connection: local
@@ -19,9 +20,13 @@
       file: path="{{project_path}}" state=absent
       when: scm_delete_on_update|default('')
 
+    - name: update project using git and accept hostkey
+      git: dest="{{project_path}}" repo="{{scm_url}}" version="{{scm_branch}}" force={{scm_clean}} accept_hostkey={{scm_accept_hostkey}}
+      when: scm_type == 'git' and scm_accept_hostkey is defined
+
     - name: update project using git
       git: dest="{{project_path}}" repo="{{scm_url}}" version="{{scm_branch}}" force={{scm_clean}}
-      when: scm_type == 'git'
+      when: scm_type == 'git' and scm_accept_hostkey is not defined
 
     - name: update project using hg
       hg: dest="{{project_path}}" repo="{{scm_url}}" revision="{{scm_branch}}" force={{scm_clean}}
