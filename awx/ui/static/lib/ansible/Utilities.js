@@ -379,10 +379,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
               width: $('html').width(),
               height: $(document).height() + 200
               }).fadeIn();
-          $('.spinny').css({
-              top: y, 
-              left: x
-              }).fadeIn(400);
+          $('.spinny').css({ top: y, left: x }).fadeIn(400);
        }
        else if (directive == 'stop' && $rootScope.waiting){
           $('.spinny, .overlay').fadeOut(400, function(){ $rootScope.waiting = false; });
