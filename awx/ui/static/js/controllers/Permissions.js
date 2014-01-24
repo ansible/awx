@@ -1,3 +1,14 @@
+/************************************
+ * Copyright (c) 2014 AnsibleWorks, Inc.
+ *
+ *
+ *  Permissions.js
+ *  
+ *  Controller functions for Permissions model.
+ *
+ */
+
+'use strict';
 
 function PermissionsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, PermissionList,
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,

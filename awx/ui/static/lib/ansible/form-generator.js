@@ -8,6 +8,8 @@
  * 
  */
 
+'use strict';
+
 angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
     .factory('GenerateForm', ['$rootScope', '$location', '$cookieStore', '$compile', 'SearchWidget', 'PaginateWidget', 'Attr',
         'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty', 'SelectIcon',
@@ -195,7 +197,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        },
 
     applyDefaults: function() {
-       for (fld in this.form.fields) {
+       for (var fld in this.form.fields) {
            if (this.form.fields[fld]['default'] || this.form.fields[fld]['default'] == 0) {
               if (this.form.fields[fld].type == 'select' && this.scope[fld + '_options']) {
                  this.scope[fld] = this.scope[fld + '_options'][this.form.fields[fld]['default']];
@@ -223,23 +225,27 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
             if (f.type == 'checkbox_group') {
                 for (var i=0; i < f.fields.length; i++) {
-                    scope[f.name] = '';
-                    scope[f.name + '_api_error'] = '';
+                    scope[f.fields[i].name] = '';
+                    scope[f.fields[i].name + '_api_error'] = '';
+                    scope[form.name + '_form'][f.fields[i].name].$setValidity('apiError', true);
                 }
             }
             else {
                 scope[fld] = '';      
-                scope[fld + '_api_error'] = '';  
+                scope[fld + '_api_error'] = '';
             }
             if (f.sourceModel) {
                 scope[f.sourceModel + '_' + f.sourceField] = '';
                 scope[f.sourceModel + '_' + f.sourceField + '_api_error'] = '';
+                scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField].$setValidity('apiError', true); 
             }
             if (f.type == 'lookup' && scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField]) {
                 scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField].$setPristine();
+                scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField].$setValidity('apiError', true); 
             }
             if (scope[form.name + '_form'][fld]) {
                 scope[form.name + '_form'][fld].$setPristine();
+                scope[form.name + '_form'][fld].$setValidity('apiError', true); 
             }
             if (f.chkPass && scope[form.name + '_form'][fld]) {
                 scope[form.name + '_form'][fld].$setValidity('complexity', true);
@@ -528,19 +534,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
           //text fields
           if (field.type == 'text' || field.type == 'password' || field.type == 'email') {
-             //html += "<div class=\"label-text " + getLabelWidth();
-             //html += (field.labelClass) ? " " + field.labelClass : "";
-             //html += "\" ";
-             //html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
-             //html += ">\n";
-             //html += (field.awPopOver && !field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
-             //html += "<label class=\"control-label\" ";
-             //html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
-             //html += "for=\"" + fld + '">';
-             //html += (field.icon) ? this.icon(field.icon) : "";
-             //html += "<span class=\"label-text\">" + field.label + '</span></label>' + "\n";
-             //html += (field.awPopOver && field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
-             //html += "</div>\n";
              
              html += label();
 
@@ -665,26 +658,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
          //textarea fields
          if (field.type == 'textarea') { 
-             
-            /*if (field.label !== false) {
-               html += "<div class=\"label-text " + getLabelWidth();
-               html += (field.labelClass) ? " " + field.labelClass : "";
-               html += "\" ";
-               html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
-               html += ">\n";
-               html += (field.awPopOver && !field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
-               html += "<label class=\"control-label\" ";
-               html += (field.labelBind) ? "ng-bind=\"" + field.labelBind + "\" " : "";
-               html += "for=\"" + fld + "\">";
-               html += field.label + '</label>' + "\n";
-               html += (field.awPopOver && field.awPopOverRight) ? this.attr(field, 'awPopOver', fld) : "";
-               html += "</div>\n";
-               html += "<div ";
-               html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-               html += "class=\"" + getFieldWidth() + "\"";
-               html += ">\n";
-            }
-           */
             
             html += label();
 
@@ -731,21 +704,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
          //select field
          if (field.type == 'select') {
             
-            /*html += "<div class=\"label-text " + getLabelWidth();
-            html += (field.labelClass) ? " " + field.labelClass : "";
-            html += "\" ";
-            html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
-            html += ">\n";
-            html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-            html += "<label class=\"control-label\" for=\"" + fld + '">';
-            html += field.label + '</label>' + "\n";
-            html += "</div>\n";
-            html += "<div ";
-            html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-            html += "class=\"" + getFieldWidth() + "\"";
-            html += ">\n";
-            */
-            
             html += label();
 
             html += "<div ";
@@ -788,17 +746,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
          //number field
          if (field.type == 'number') { 
-            /*html += "<label class=\"control-label " + getLabelWidth();
-            html += " for=\"" + fld + '">';
-            html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-            html += field.label + '</label>' + "\n";
-            html += "<div ";
-            html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-            html += "class=\"" + getFieldWidth() + "\"";
-            html += ">\n";
-            // Use 'text' rather than 'number' so that our integer directive works correctly
-            html += (field.slider) ? "<div class=\"slider\" id=\"" + fld + "-slider\"></div>\n" : "";
-            */
 
             html += label();
 
@@ -880,17 +827,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
          //checkbox
          if (field.type == 'checkbox') {
-            //html += "<div class=\"label-text " + getLabelWidth();
-            //html += (field.labelClass) ? " " + field.labelClass : "";
-            //html += "\" ";
-            //html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
-            //html += ">\n";
-
-            //html += "</div>\n";
-            //html += "<div ";
-            //html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-            //html += "class=\"" + getFieldWidth() + "\"";
-            //html += ">\n"; 
             
             if (horizontal) {
                 var fldWidth = getFieldWidth();
@@ -987,22 +923,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
          //lookup type fields
          if (field.type == 'lookup' && (field.excludeMode == undefined || field.excludeMode != options.mode)) {
-            /*
-            html += "<div class=\"label-text " + getLabelWidth();
-            html += (field.labelClass) ? " " + field.labelClass : "";
-            html += "\" ";
-            html += (field.labelNGClass) ? "ng-class=\"" + field.labelNGClass + "\" " : "";
-            html += "id=\"" + this.form.name + "_" + fld + "_lookup\" ";
-            html += ">\n";
-            html += (field.awPopOver) ? this.attr(field, 'awPopOver', fld) : "";
-            html += "<label class=\"control-label\" for=\"" + fld + '">';
-            html +=  field.label + '</label>' + "\n";
-            html += "</div>\n";
-            html += "<div ";
-            html += (field.controlNGClass) ? "ng-class=\"" + field.controlNGClass + "\" " : ""; 
-            html += "class=\"" + getFieldWidth() + "\"";
-            html += ">\n";
-            */
+            
             html += label();
 
             html += "<div ";
@@ -1080,8 +1001,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
     getActions: function(options) {
         // Use to add things like Activity Stream to a detail page  
-        html = "<div class=\"list-actions\">\n";
-        for (action in this.form.actions) {
+        var html = "<div class=\"list-actions\">\n";
+        for (var action in this.form.actions) {
             if (this.form.actions[action].mode == 'all' || this.form.actions[action].mode == options.mode) {
                 html += this.button({ btn: this.form.actions[action], action: action, toolbar: true });
             }
@@ -1090,24 +1011,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
         return html;
         },
 
-    /*
-    activityCrumbs: function() {
-       // Breadcrumbs for activity stream widget
-       // Make the links clickable using ng-click function so we can first remove the stream widget.
-       html = '';
-       html += "<div class=\"nav-path\">\n";
-       html += "<ul class=\"breadcrumb\">\n";
-       html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" ng-click=\"{{ crumb.ngClick }}\">{{ crumb.title | capitalize }}</a></li>\n";
-       html += "<li class=\"active\">";
-       html += this.form.editTitle;
-       html += "</li>\n</ul>\n</div>\n";
-       return html;
-       },
-       */
 
     breadCrumbs: function(options, navigation) {
-       var html = '';
        
+       var html = '';
        html += "<div class=\"nav-path\">\n";
        html += "<ul class=\"breadcrumb\">\n";
        html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title | capitalize }}</a></li>\n";
@@ -1190,7 +1097,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
           if (this.form.statusActions) {
              html += "<div class=\"list-actions\">\n";
              var act;
-             for (action in this.form.statusActions) {
+             for (var action in this.form.statusActions) {
                  act = this.form.statusActions[action];
                  html += this.button({ btn: act, action: action, toolbar: true });
              }
@@ -1241,7 +1148,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
              html += (options.mode == 'edit') ? this.form.editTitle : this.form.addTitle;
              if (this.has('titleActions')) {
                 html += "<div class=\"title-actions pull-right\">\n";
-                for (btn in this.form.titleActions) {
+                for (var btn in this.form.titleActions) {
                     html += this.button({ btn: this.form.titleActions[btn], action: btn, toolbar: true });
                 }
                 html += "</div>\n";
@@ -1442,7 +1349,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        }
 
        if ((!this.modal && this.form.items)) {
-          for (itm in this.form.items) {
+          for (var itm in this.form.items) {
               html += "<div class=\"well form-items\">\n";
               html += SearchWidget({ iterator: this.form.items[itm].iterator, template: this.form.items[itm], mini: false, label: 'Filter Events'});
               html += "<div class=\"item-count pull-right\">Viewing" + " \{\{ " + this.form.items[itm].iterator + "Page + 1 \}\} of " +
@@ -1485,7 +1392,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        //
        var idx = 1;
        var form = this.form;
-       html = "<div id=\"" + this.form.name + "-collapse-" + idx + "\" class=\"jqui-accordion\">\n";
+       var html = "<div id=\"" + this.form.name + "-collapse-" + idx + "\" class=\"jqui-accordion\">\n";
        for (var itm in form.related) {
            if (form.related[itm].type == 'collection') {
               html += "<h3 class=\"" + itm + "_collapse\">" + form.related[itm].title + "<h3>\n"; 
@@ -1561,7 +1468,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
               // Row level actions
               html += "<td class=\"actions\">";
-              for (act in form.related[itm].fieldActions) {
+              for (var act in form.related[itm].fieldActions) {
                  var fAction = form.related[itm].fieldActions[act];
                  html += "<a ";
                  html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";

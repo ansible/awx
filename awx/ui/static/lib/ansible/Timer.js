@@ -7,6 +7,9 @@
  *  duration set in config.js
  *
  */
+
+'use strict';
+
 angular.module('TimerService', ['ngCookies', 'Utilities'])
    .factory('Timer', ['$rootScope', '$cookieStore', '$location', 'GetBasePath', 'Empty',
    function($rootScope, $cookieStore, $location, GetBasePath, Empty) {

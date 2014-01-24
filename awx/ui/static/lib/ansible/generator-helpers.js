@@ -7,6 +7,8 @@
  * 
  */
 
+'use strict';
+
 angular.module('GeneratorHelpers', ['GeneratorHelpers'])
     
     .factory('Attr', function() {
@@ -386,7 +388,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
 
         html += "<div class=\"nav-path\">\n";
         html += "<ul class=\"breadcrumb\" id=\"breadcrumb-list\">\n";
-        html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"{{ '#' + crumb.path }}\">{{ crumb.title | capitalize }}</a></li>\n";
+        html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\{\{ \'#\' + crumb.path \}\}\">\{\{ crumb.title \| capitalize \}\}</a></li>\n";
 
         if (list.navigationLinks) {
             var navigation = list.navigationLinks;

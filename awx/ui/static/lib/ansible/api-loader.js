@@ -7,6 +7,8 @@
  *
  */
 
+'use strict';
+
 angular.module('ApiLoader', ['ngCookies'])
    .factory('LoadBasePaths', ['$http', '$rootScope', '$cookieStore', 'ProcessErrors', 
    function($http, $rootScope, $cookieStore, ProcessErrors) {

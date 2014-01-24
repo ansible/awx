@@ -7,6 +7,8 @@
  *
  */
 
+'use strict';
+
 angular.module('ListGenerator', ['GeneratorHelpers'])
     .factory('GenerateList', [ '$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
         'Column', 'DropDown', 'NavigationLink', 'Button', 'SelectIcon', 'Breadcrumbs',
@@ -124,7 +126,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            // before navigation
            html += "<div class=\"nav-path\">\n";
            html += "<ul class=\"breadcrumb\">\n";
-           html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" ng-click=\"{{ crumb.ngClick }}\">{{ crumb.title | capitalize }}</a></li>\n";
+           html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" ng-click=\"crumb.ngClick\">{{ crumb.title | capitalize }}</a></li>\n";
            html += "<li class=\"active\">";
            html += list.editTitle;
            html += "</li>\n</ul>\n</div>\n";
@@ -190,7 +192,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            html += "<div class=\"list-actions\">\n";
           
            // Add toolbar buttons or 'actions'
-           for (action in list.actions) {
+           for (var action in list.actions) {
                if (list.actions[action].mode == 'all' || list.actions[action].mode == options.mode) {
                    if ( (list.actions[action].basePaths == undefined) || 
                         (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1) ) {
@@ -341,7 +343,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                  html += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
                  html += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : ""; 
                  html += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : ""; 
-                 for (itm in fAction) {
+                 for (var itm in fAction) {
                      if (itm != 'ngHref' && itm != 'href' && itm != 'label' && itm != 'icon' && itm != 'class' && 
                          itm != 'iconClass' && itm != "dataPlacement" && itm != "awPopOver" && itm != "dataTitle") {
                          html += Attr(fAction, itm);

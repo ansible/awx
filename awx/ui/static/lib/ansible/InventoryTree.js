@@ -9,6 +9,8 @@
  *
  */
 
+'use strict';
+
 angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'PromptDialog'])
     
     .factory('SortNodes', [ function() {

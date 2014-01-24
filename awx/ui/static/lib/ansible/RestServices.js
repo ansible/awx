@@ -4,6 +4,9 @@
  * Generic accessor for Ansible Commander services
  *
  */
+ 
+ 'use strict';
+
 angular.module('RestServices',['ngCookies','AuthService'])
 .factory('Rest', ['$http','$rootScope','$cookieStore', '$q', 'Authorization',
 function($http, $rootScope, $cookieStore, $q, Authorization) {

@@ -5,8 +5,9 @@
  *
  */
 
-var INTEGER_REGEXP = /^\-?\d*$/;
+'use strict';
 
+var INTEGER_REGEXP = /^\-?\d*$/;
 
 angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'JobsHelper'])
     // awpassmatch:  Add to password_confirm field. Will test if value
@@ -108,7 +109,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             function checkIt () {
                var viewValue = elm.val();
                var txt, label;
-               validity = true;
+               var validity = true;
                if ( scope[attrs.awRequiredWhen] && (elm.attr('required') == null || elm.attr('required') == undefined) ) {
                   $(elm).attr('required','required');
                   if ($(elm).hasClass('lookup')) {

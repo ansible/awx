@@ -5,6 +5,9 @@
  *  Utility functions
  *
  */
+
+'use strict';
+
 angular.module('Utilities',['RestServices', 'Utilities'])
    
    .factory('ClearScope', [ function() {
@@ -137,6 +140,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
               if (form.fields[field].realName) {
                  if (data[form.fields[field].realName]) {
                     scope[field + '_api_error'] = data[form.fields[field]][0];
+                    scope[form.name + '_form'][form.fields[field].realName].$setValidity('apiError', false);
                     fieldErrors = true;
                  }
               }
@@ -144,12 +148,15 @@ angular.module('Utilities',['RestServices', 'Utilities'])
                  if (data[field]) {
                     scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '_api_error'] = 
                         data[field][0];
+                    scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField].$setValidity('apiError', false);
                     fieldErrors = true;
                  }
               }
               else {
                  if (data[field]) {
+                    console.log('setting api error: ' + form.name + '_form.' + field);
                     scope[field + '_api_error'] = data[field][0];
+                    scope[form.name + '_form'][field].$setValidity('apiError', false);
                     fieldErrors = true;
                  }
               }

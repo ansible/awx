@@ -6,6 +6,8 @@
  *  User authentication functions
  */
 
+'use strict';
+
 angular.module('AuthService', ['ngCookies', 'Utilities'])
    .factory('Authorization', ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath',
    function($http, $rootScope, $location, $cookieStore, GetBasePath) {

@@ -14,6 +14,8 @@
  *           }
  */
 
+'use strict';
+
 angular.module('PromptDialog', ['Utilities'])
     .factory('Prompt', ['$rootScope', '$compile', 'Alert', function($rootScope, $compile, Alert) {
     return function(params) {

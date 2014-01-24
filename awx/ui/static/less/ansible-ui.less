@@ -479,14 +479,14 @@ dd {
   padding-right: 10px;
 }
 
-/* Outline required fields in Red when focused */
 
-.form-control[required]:focus {
-  border-color: rgba(204, 0, 0, 0.8);
-  outline: 0;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(204, 0, 0, 0.6);
-          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(204, 0, 0, 0.6);
-}
+/* Outline required fields in Red when there is an error */
+  .form-control.ng-dirty.ng-invalid, .form-control.ng-dirty.ng-invalid:focus {
+      border-color: rgba(204, 0, 0, 0.8);
+      outline: 0;
+      -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(204, 0, 0, 0.6);
+              box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 5px rgba(204, 0, 0, 0.6);
+  }
 
 /* For some reason TB 3 RC1 does not provide an input-mini */
 

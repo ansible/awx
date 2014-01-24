@@ -93,17 +93,18 @@ function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $route
                                 //scope.
 
    // Inject dynamic view
-   var form = GenerateForm;
-   var scope = form.inject(OrganizationForm, {mode: 'add', related: false});
+   var generator = GenerateForm;
+   var form = OrganizationForm;
+   var scope = generator.inject(form, {mode: 'add', related: false});
    var base = $location.path().replace(/^\//,'').split('/')[0];
    var defaultUrl = GetBasePath('organizations');
-   form.reset();
+   generator.reset();
 
    LoadBreadCrumbs();
 
    // Save
    scope.formSave = function() {
-      form.clearApiErrors();
+      generator.clearApiErrors();
       Wait('start');
       var url = GetBasePath(base);
       url += (base != 'organizations') ? $routeParams['project_id'] + '/organizations/' : '';
@@ -121,9 +122,8 @@ function OrganizationsAdd ($scope, $rootScope, $compile, $location, $log, $route
               }
               })
           .error( function(data, status, headers, config) {
-              Wait('stop');
-              ProcessErrors(scope, data, status, OrganizationForm,
-                            { hdr: 'Error!', msg: 'Failed to add new organization. Post returned status: ' + status });
+              ProcessErrors(scope, data, status, form,
+                  { hdr: 'Error!', msg: 'Failed to add new organization. Post returned status: ' + status });
               });
       };
 
