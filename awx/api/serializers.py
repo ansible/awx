@@ -746,7 +746,7 @@ class PermissionSerializer(BaseSerializer):
         model = Permission
         fields = BASE_FIELDS + ('user', 'team', 'project', 'inventory',
                                 'permission_type',)
-         
+
     def get_related(self, obj):
         if obj is None:
             return {}

@@ -264,6 +264,7 @@ def model_instance_diff(old, new, serializer_mapping=None):
         if old_value != new_value and field not in Credential.PASSWORD_FIELDS:
             if type(old_value) not in (bool, int, type(None)):
                 old_value = str(old_value)
+            if type(new_value) not in (bool, int, type(None)):
                 new_value = str(new_value)
             diff[field] = (old_value, new_value)
         elif old_value != new_value and field in Credential.PASSWORD_FIELDS:
