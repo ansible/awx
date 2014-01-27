@@ -18,6 +18,7 @@ import yaml
 # Django
 from django.conf import settings
 from django.db import models
+from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.core.urlresolvers import reverse
@@ -29,6 +30,11 @@ from jsonfield import JSONField
 
 # AWX
 from awx.main.models.base import *
+
+# Celery
+from celery import chain
+
+logger = logging.getLogger('awx.main.models.jobs')
 
 __all__ = ['JobTemplate', 'Job', 'JobHostSummary', 'JobEvent']
 
@@ -328,6 +334,51 @@ class Job(CommonTask):
     def processed_hosts(self):
         return self._get_hosts(job_host_summaries__processed__gt=0)
 
+    def start(self, **kwargs):
+        task_class = self._get_task_class()
+        if not self.can_start:
+            return False
+        needed = self._get_passwords_needed_to_start()
+        opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        if not all(opts.values()):
+            return False
+        self.status = 'waiting'
+        self.save(update_fields=['status'])
+        transaction.commit()
+
+        runnable_tasks = []
+        inventory_updates_actual = []
+        project_update_actual = None
+
+        project = self.project
+        inventory = self.inventory
+        is_qs = inventory.inventory_sources.filter(active=True, update_on_launch=True)
+        if project.scm_update_on_launch:
+            # TODO: We assume these return a tuple but not on error
+            project_update, project_update_sig = project.update_signature()
+            if not project_update:
+                # TODO: Set error here
+                pass
+            else:
+                project_update_actual = project_update
+                # TODO: append a callback to gather the status?
+                runnable_tasks.append(project_update_sig)
+                # TODO: need to add celery task id to proj update instance
+        if is_qs.count():
+            for inventory_source in is_qs:
+                # TODO: We assume these return a tuple but not on error
+                inventory_update, inventory_update_sig = inventory_source.update_signature()
+                if not inventory_update:
+                    # TODO: Set error here
+                    pass
+                else:
+                    inventory_updates_actual.append(inventory_update)
+                    runnable_tasks.append(inventory_update_sig)
+        job_actual = task_class().si(self.pk, **opts)
+        runnable_tasks.append(job_actual)
+        print runnable_tasks
+        res = chain(runnable_tasks)()
+        return True
 
 class JobHostSummary(BaseModel):
     '''
