@@ -17,8 +17,9 @@ import traceback
 import yaml
 
 # Django
+from django.conf import settings
 from django.core.management.base import NoArgsCommand, CommandError
-from django.db import transaction
+from django.db import connection, transaction
 from django.contrib.auth.models import User
 
 # AWX
@@ -445,7 +446,7 @@ class Command(NoArgsCommand):
         else:
             q = dict(name=self.inventory_name)
         try:
-            self.inventory = Inventory.objects.get(**q)
+            self.inventory = Inventory.objects.filter(active=True).get(**q)
         except Inventory.DoesNotExist:
             raise CommandError('Inventory with %s = %s cannot be found' % q.items()[0])
         except Inventory.MultipleObjectsReturned:
@@ -459,7 +460,8 @@ class Command(NoArgsCommand):
         if inventory_source_id:
             try:
                 self.inventory_source = InventorySource.objects.get(pk=inventory_source_id,
-                                                               inventory=self.inventory)
+                                                                    inventory=self.inventory,
+                                                                    active=True)
             except InventorySource.DoesNotExist:
                 raise CommandError('Inventory source with id=%s not found' % \
                                    inventory_source_id)
@@ -467,19 +469,21 @@ class Command(NoArgsCommand):
         # Otherwise, create a new inventory source to capture this invocation
         # via command line.
         else:
-            self.inventory_source, created = InventorySource.objects.get_or_create(
-                inventory=self.inventory,
-                group=None,
-                source='file',
-                source_path=os.path.abspath(self.source),
-                overwrite=self.overwrite,
-                overwrite_vars=self.overwrite_vars,
-            )
-            self.inventory_update = self.inventory_source.inventory_updates.create(
-                job_args=json.dumps(sys.argv),
-                job_env=dict(os.environ.items()),
-                job_cwd=os.getcwd(),
-            )
+            with ignore_inventory_computed_fields():
+                self.inventory_source, created = InventorySource.objects.get_or_create(
+                    inventory=self.inventory,
+                    group=None,
+                    source='file',
+                    source_path=os.path.abspath(self.source),
+                    overwrite=self.overwrite,
+                    overwrite_vars=self.overwrite_vars,
+                    active=True,
+                )
+                self.inventory_update = self.inventory_source.inventory_updates.create(
+                    job_args=json.dumps(sys.argv),
+                    job_env=dict(os.environ.items()),
+                    job_cwd=os.getcwd(),
+                )
 
         # FIXME: Wait or raise error if inventory is being updated by another
         # source.
@@ -499,11 +503,11 @@ class Command(NoArgsCommand):
                 del_hosts = self.inventory_source.group.all_hosts
                 # FIXME: Also include hosts from inventory_source.managed_hosts?
             else:
-                del_hosts = self.inventory.hosts.all()
+                del_hosts = self.inventory.hosts.filter(active=True)
             del_hosts = del_hosts.exclude(name__in=self.all_group.all_hosts.keys())
             for host in del_hosts:
                 host_name = host.name
-                host.delete()
+                host.mark_inactive()
                 self.logger.info('Deleted host "%s"', host_name)
 
         # If overwrite is set, for each group in the database that is NOT in
@@ -515,11 +519,11 @@ class Command(NoArgsCommand):
                 del_groups = self.inventory_source.group.all_children
                 # FIXME: Also include groups from inventory_source.managed_groups?
             else:
-                del_groups = self.inventory.groups.all()
+                del_groups = self.inventory.groups.filter(active=True)
             del_groups = del_groups.exclude(name__in=self.all_group.all_groups.keys())
             for group in del_groups:
                 group_name = group.name
-                group.delete()
+                group.mark_inactive()
                 self.logger.info('Group "%s" deleted', group_name)
 
         # If overwrite is set, clear all invalid child relationships for groups
@@ -531,22 +535,22 @@ class Command(NoArgsCommand):
             if self.inventory_source.group:
                 db_groups = self.inventory_source.group.all_children
             else:
-                db_groups = self.inventory.groups.all()
+                db_groups = self.inventory.groups.filter(active=True)
             for db_group in db_groups:
-                db_children = db_group.children.all()
+                db_children = db_group.children.filter(active=True)
                 mem_children = self.all_group.all_groups[db_group.name].children
                 mem_children_names = [g.name for g in mem_children]
                 for db_child in db_children.exclude(name__in=mem_children_names):
-                    if db_child not in db_group.children.all():
+                    if db_child not in db_group.children.filter(active=True):
                         continue
                     db_group.children.remove(db_child)
                     self.logger.info('Group "%s" removed from group "%s"',
                                      db_child.name, db_group.name)
-                db_hosts = db_group.hosts.all()
+                db_hosts = db_group.hosts.filter(active=True)
                 mem_hosts = self.all_group.all_groups[db_group.name].hosts
                 mem_host_names = [h.name for h in mem_hosts]
                 for db_host in db_hosts.exclude(name__in=mem_host_names):
-                    if db_host not in db_group.hosts.all():
+                    if db_host not in db_group.hosts.filter(active=True):
                         continue
                     db_group.hosts.remove(db_host)
                     self.logger.info('Host "%s" removed from group "%s"',
@@ -739,10 +743,11 @@ class Command(NoArgsCommand):
         status, tb, exc = 'error', '', None
         try:
             # Update inventory update for this command line invocation.
-            if self.inventory_update:
-                self.inventory_update.status = 'running'
-                self.inventory_update.save()
-                transaction.commit()
+            with ignore_inventory_computed_fields():
+                if self.inventory_update:
+                    self.inventory_update.status = 'running'
+                    self.inventory_update.save()
+                    transaction.commit()
 
             # Load inventory from source.
             self.all_group = load_inventory_source(self.source)
@@ -762,6 +767,11 @@ class Command(NoArgsCommand):
             self.logger.info('Inventory import completed for %s in %0.1fs',
                              inv_name, time.time() - begin)
             status = 'successful'
+            if settings.DEBUG:
+                sqltime = sum(float(x['time']) for x in connection.queries)
+                self.logger.info('Inventory import required %d queries '
+                                 'taking %0.3fs', len(connection.queries),
+                                 sqltime)
         except Exception, e:
             if isinstance(e, KeyboardInterrupt):
                 status = 'canceled'
@@ -775,11 +785,12 @@ class Command(NoArgsCommand):
                 transaction.rollback()
 
         if self.inventory_update:
-            self.inventory_update = InventoryUpdate.objects.get(pk=self.inventory_update.pk)
-            self.inventory_update.result_traceback = tb
-            self.inventory_update.status = status
-            self.inventory_update.save(update_fields=['status', 'result_traceback'])
-            transaction.commit()
+            with ignore_inventory_computed_fields():
+                self.inventory_update = InventoryUpdate.objects.get(pk=self.inventory_update.pk)
+                self.inventory_update.result_traceback = tb
+                self.inventory_update.status = status
+                self.inventory_update.save(update_fields=['status', 'result_traceback'])
+                transaction.commit()
             
         if exc and isinstance(exc, CommandError):
             sys.exit(1)

@@ -753,5 +753,5 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertNotEqual(new_inv.groups.count(), 0)
         self.assertNotEqual(new_inv.total_hosts, 0)
         self.assertNotEqual(new_inv.total_groups, 0)
-        self.assertElapsedLessThan(120)
+        self.assertElapsedLessThan(60)
 

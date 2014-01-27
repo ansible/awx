@@ -32,10 +32,11 @@ def ignore_inventory_computed_fields():
     Context manager to ignore updating inventory computed fields.
     '''
     try:
+        previous_value = getattr(_inventory_updating, 'is_updating', False)
         _inventory_updating.is_updating = True
         yield
     finally:
-        _inventory_updating.is_updating = False
+        _inventory_updating.is_updating = previous_value
 
 def update_inventory_computed_fields(sender, **kwargs):
     '''
@@ -67,9 +68,13 @@ def update_inventory_computed_fields(sender, **kwargs):
         logger.debug('%s %s, updating inventory computed fields: %r %r',
                      sender_name, sender_action, sender, kwargs)
         with ignore_inventory_computed_fields():
-            inventory = instance.inventory
-            update_hosts = issubclass(sender, Job)
-            inventory.update_computed_fields(update_hosts=update_hosts)
+            try:
+                inventory = instance.inventory
+            except Inventory.DoesNotExist:
+                pass
+            else:
+                update_hosts = issubclass(sender, Job)
+                inventory.update_computed_fields(update_hosts=update_hosts)
 
 post_save.connect(update_inventory_computed_fields, sender=Host)
 post_delete.connect(update_inventory_computed_fields, sender=Host)
@@ -201,6 +206,9 @@ model_serializer_mapping = {Organization: OrganizationSerializer,
 
 def activity_stream_create(sender, instance, created, **kwargs):
     if created:
+        # Skip recording any inventory source directly associated with a group.
+        if isinstance(instance, InventorySource) and instance.group:
+            return
         # TODO: Rethink details of the new instance
         object1 = camelcase_to_underscore(instance.__class__.__name__)
         activity_entry = ActivityStream(
@@ -211,6 +219,8 @@ def activity_stream_create(sender, instance, created, **kwargs):
         getattr(activity_entry, object1).add(instance)
 
 def activity_stream_update(sender, instance, **kwargs):
+    if instance.id is None:
+        return
     try:
         old = sender.objects.get(id=instance.id)
     except sender.DoesNotExist:
@@ -238,6 +248,9 @@ def activity_stream_delete(sender, instance, **kwargs):
         old = sender.objects.get(id=instance.id)
     except sender.DoesNotExist:
         return
+    # Skip recording any inventory source directly associated with a group.
+    if isinstance(instance, InventorySource) and instance.group:
+        return
     changes = model_instance_diff(old, instance)
     object1 = camelcase_to_underscore(instance.__class__.__name__)
     activity_entry = ActivityStream(
@@ -262,6 +275,9 @@ def activity_stream_associate(sender, instance, **kwargs):
             obj2_id = entity_acted
             obj2_actual = obj2.objects.get(id=obj2_id)
             object2 = camelcase_to_underscore(obj2.__name__)
+            # Skip recording any inventory source changes here.
+            if isinstance(obj1, InventorySource) or isinstance(obj2_actual, InventorySource):
+                continue
             activity_entry = ActivityStream(
                 operation=action,
                 object1=object1,
