@@ -343,7 +343,6 @@ class Job(CommonTask):
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
-        # TODO: This is temporary to allow a dependent task to continue
         self.status = 'waiting'
         self.save(update_fields=['status'])
         transaction.commit()
