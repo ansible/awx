@@ -51,3 +51,14 @@ class ActivityStream(models.Model):
 
     def get_absolute_url(self):
         return reverse('api:activity_stream_detail', args=(self.pk,))
+
+    def save(self, *args, **kwargs):
+        # For compatibility with Django 1.4.x, attempt to handle any calls to
+        # save that pass update_fields.
+        try:
+            super(ActivityStream, self).save(*args, **kwargs)
+        except TypeError:
+            if 'update_fields' not in kwargs:
+                raise
+            kwargs.pop('update_fields')
+            super(ActivityStream, self).save(*args, **kwargs)

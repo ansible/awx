@@ -8,17 +8,18 @@ from django.db import IntegrityError
 from django.utils.functional import curry
 from awx.main.models import ActivityStream, AuthToken
 import json
+import threading
 import uuid
 import urllib2
 
 import logging
 logger = logging.getLogger('awx.main.middleware')
 
-class ActivityStreamMiddleware(object):
+class ActivityStreamMiddleware(threading.local):
 
     def __init__(self):
         self.disp_uid = None
-        self.instances = []
+        self.instance_ids = []
 
     def process_request(self, request):
         if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated():
@@ -28,6 +29,7 @@ class ActivityStreamMiddleware(object):
 
         set_actor = curry(self.set_actor, user)
         self.disp_uid = str(uuid.uuid1())
+        self.instance_ids = []
         post_save.connect(set_actor, sender=ActivityStream, dispatch_uid=self.disp_uid, weak=False)
 
     def process_response(self, request, response):
@@ -35,31 +37,27 @@ class ActivityStreamMiddleware(object):
         drf_user = getattr(drf_request, 'user', None)
         if self.disp_uid is not None:
             post_save.disconnect(dispatch_uid=self.disp_uid)
-        for instance_id in self.instances:
-            instance = ActivityStream.objects.filter(id=instance_id)
-            if instance.exists():
-                instance = instance[0]
-            else:
-                logger.debug("Failed to look up Activity Stream instance for id : " + str(instance_id))
-                continue
 
-            if drf_user is not None and drf_user.__class__ != AnonymousUser:
+        for instance in ActivityStream.objects.filter(id__in=self.instance_ids):
+            if drf_user and drf_user.pk:
                 instance.actor = drf_user
                 try:
-                    instance.save()
+                    instance.save(update_fields=['actor'])
                 except IntegrityError, e:
-                    logger.debug("Integrity Error saving Activity Stream instance for id : " + str(instance_id))
+                    logger.debug("Integrity Error saving Activity Stream instance for id : " + str(instance.id))
             # else:
             #     obj1_type_actual = instance.object1_type.split(".")[-1]
             #     if obj1_type_actual in ("InventoryUpdate", "ProjectUpdate", "Job") and instance.id is not None:
             #         instance.delete()
+
+        self.instance_ids = []
         return response
 
     def set_actor(self, user, sender, instance, **kwargs):
         if sender == ActivityStream:
-            if isinstance(user, User) and instance.user is None:
+            if isinstance(user, User) and instance.actor is None:
                 instance.actor = user
-                instance.save()
+                instance.save(update_fields=['actor'])
             else:
-                if instance.id not in self.instances:
-                    self.instances.append(instance.id)
+                if instance.id not in self.instance_ids:
+                    self.instance_ids.append(instance.id)

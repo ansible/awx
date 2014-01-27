@@ -34,6 +34,7 @@ from awx.main.licenses import LicenseReader
 from awx.main.models import *
 from awx.main.utils import *
 from awx.main.access import get_user_queryset
+from awx.main.signals import ignore_inventory_computed_fields, ignore_inventory_group_removal
 from awx.api.authentication import JobTaskAuthentication
 from awx.api.permissions import *
 from awx.api.serializers import *
@@ -618,6 +619,11 @@ class InventoryDetail(RetrieveUpdateDestroyAPIView):
 
     model = Inventory
     serializer_class = InventorySerializer
+
+    def destroy(self, request, *args, **kwargs):
+        with ignore_inventory_computed_fields():
+            with ignore_inventory_group_removal():
+                return super(InventoryDetail, self).destroy(request, *args, **kwargs)
 
 class InventoryActivityStreamList(SubListAPIView):
 
