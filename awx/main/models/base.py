@@ -366,7 +366,7 @@ class CommonTask(PrimordialModel):
     def _get_passwords_needed_to_start(self):
         return []
 
-    def start(self, **kwargs):
+    def start_signature(self, **kwargs):
         task_class = self._get_task_class()
         if not self.can_start:
             return False
@@ -377,7 +377,13 @@ class CommonTask(PrimordialModel):
         self.status = 'pending'
         self.save(update_fields=['status'])
         transaction.commit()
-        task_result = task_class().delay(self.pk, **opts)
+        task_actual = task_class().si(self.pk, **opts)
+        return task_actual
+
+    def start(self, **kwargs):
+        task_actual = self.start_signature(**kwargs)
+        # TODO: Callback for status
+        task_result = task_actual.delay()
         # Reload instance from database so we don't clobber results from task
         # (mainly from tests when using Django 1.4.x).
         instance = self.__class__.objects.get(pk=self.pk)

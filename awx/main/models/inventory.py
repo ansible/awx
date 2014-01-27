@@ -685,6 +685,12 @@ class InventorySource(PrimordialModel):
         # FIXME: Prevent update when another one is active!
         return bool(self.source)
 
+    def update_signature(self, **kwargs):
+        if self.can_update:
+            inventory_update = self.inventory_updates.create()
+            inventory_update_sig = inventory_update.start_signature()
+            return (inventory_update, inventory_update_sig)
+
     def update(self, **kwargs):
         if self.can_update:
             inventory_update = self.inventory_updates.create()

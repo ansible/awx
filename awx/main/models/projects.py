@@ -282,6 +282,12 @@ class Project(CommonModel):
         # FIXME: Prevent update when another one is active!
         return bool(self.scm_type)# and not self.current_update)
 
+    def update_signature(self, **kwargs):
+        if self.can_update:
+            project_update = self.project_updates.create()
+            project_update_sig = project_update.start_signature()
+            return (project_update, project_updaate_sig)
+
     def update(self, **kwargs):
         if self.can_update:
             project_update = self.project_updates.create()
