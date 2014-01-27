@@ -286,7 +286,7 @@ class Project(CommonModel):
         if self.can_update:
             project_update = self.project_updates.create()
             project_update_sig = project_update.start_signature()
-            return (project_update, project_updaate_sig)
+            return (project_update, project_update_sig)
 
     def update(self, **kwargs):
         if self.can_update:
