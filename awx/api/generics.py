@@ -6,7 +6,7 @@ import inspect
 import json
 
 # Django
-from django.http import HttpResponse, Http404
+from django.http import Http404
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
@@ -428,4 +428,4 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView, generics.RetrieveUpdat
             obj.mark_inactive()
         else:
             raise NotImplementedError('destroy() not implemented yet for %s' % obj)
-        return HttpResponse(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)

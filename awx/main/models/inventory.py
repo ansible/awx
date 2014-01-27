@@ -100,14 +100,15 @@ class Inventory(CommonModel):
         '''
         When marking inventory inactive, also mark hosts and groups inactive.
         '''
+        from awx.main.signals import ignore_inventory_computed_fields
+        with ignore_inventory_computed_fields():
+            for host in self.hosts.filter(active=True):
+                host.mark_inactive()
+            for group in self.groups.filter(active=True):
+                group.mark_inactive()
+            for inventory_source in self.inventory_sources.filter(active=True):
+                inventory_source.mark_inactive()
         super(Inventory, self).mark_inactive(save=save)
-        for host in self.hosts.filter(active=True):
-            host.mark_inactive()
-        for group in self.groups.filter(active=True):
-            group.mark_inactive()
-            group.inventory_source.mark_inactive()
-        for inventory_source in self.inventory_sources.filter(active=True):
-            inventory_source.mark_inactive()
 
     variables_dict = VarsDictProperty('variables')
 
