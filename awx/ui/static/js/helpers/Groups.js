@@ -27,9 +27,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 Rest.options()
                     .success( function(data, status, headers, config) { 
                         var choices = data.actions.GET.source.choices
+                        console.log(choices);
                         for (var i=0; i < choices.length; i++) {
                             if (choices[i][0] !== 'file') {
-                                scope[variable].push({ label: (choices[i][0] == "") ? 'Manual' : choices[i][1] , value: choices[i][0] });
+                                scope[variable].push({ 
+                                    label: ( (choices[i][0] == '') ? 'Manual' : choices[i][1] ),
+                                    value: choices[i][0]
+                                    });
                             }
                         }
                         })
@@ -212,42 +216,46 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         }])
 
-    .factory('SourceChange', [ 'GetBasePath', 'CredentialList', 'LookUpInit',
-    function(GetBasePath, CredentialList, LookUpInit){
+    .factory('SourceChange', [ 'GetBasePath', 'CredentialList', 'LookUpInit', 'Empty',
+    function(GetBasePath, CredentialList, LookUpInit, Empty){
     return function(params) {
         
         var scope = params.scope; 
-        var form = params.form; 
-
-        if (scope['source'].value == 'file') {
-            scope.sourcePathRequired = true;
+        var form = params.form;
+        
+        if (!Empty(scope['source'])) {
+            if (scope['source'].value == 'file') {
+                scope.sourcePathRequired = true;
+            }
+            else {
+                scope.sourcePathRequired = false;
+                // reset fields
+                scope.source_path = '';
+                scope[form.name + '_form']['source_path'].$setValidity('required',true);
+            }
+            if (scope['source'].value == 'rax') {
+                scope['source_region_choices'] = scope['rax_regions'];
+                //$('#s2id_group_source_regions').select2('data', []);
+                $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
+            }
+            else if (scope['source'].value == 'ec2') {
+                scope['source_region_choices'] = scope['ec2_regions'];
+                //$('#s2id_group_source_regions').select2('data', []);
+                $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
+            }
+            if (scope['source'].value == 'rax' || scope['source'].value == 'ec2') {
+                var kind = (scope.source.value == 'rax') ? 'rax' : 'aws';
+                var url = GetBasePath('credentials') + '?cloud=true&kind=' + kind;  
+                LookUpInit({
+                    url: url, 
+                    scope: scope,
+                    form: form,
+                    list: CredentialList,
+                    field: 'credential' 
+                    });
+            }
         }
-        else {
-            scope.sourcePathRequired = false;
-            // reset fields
-            scope.source_path = '';
-            scope[form.name + '_form']['source_path'].$setValidity('required',true);
-        }
-        if (scope['source'].value == 'rax') {
-            scope['source_region_choices'] = scope['rax_regions'];
-            //$('#s2id_group_source_regions').select2('data', []);
-            $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
-        }
-        else if (scope['source'].value == 'ec2') {
-            scope['source_region_choices'] = scope['ec2_regions'];
-            //$('#s2id_group_source_regions').select2('data', []);
-            $('#s2id_group_source_regions').select2('data', [{ id: 'all', text: 'All' }]);
-        }
-        else 
-        var kind = (scope.source.value == 'rax') ? 'rax' : 'aws';
-        var url = GetBasePath('credentials') + '?cloud=true&kind=' + kind;  
-        LookUpInit({
-            url: url, 
-            scope: scope,
-            form: form,
-            list: CredentialList,
-            field: 'credential' 
-            });
+        
         } 
         }])
 
@@ -862,75 +870,65 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             var parseError = false;
             var saveError = false;
             
-            // Update the selector tree with new group name, descr
-            //SetNodeName({ scope: scope['selectedNode'], group_id: group_id,
-            //    name: scope.name, description: scope.description });
+            var data = { group: group_id, 
+                source: ( (source && source.value) ? source.value : '' ),
+                source_path: scope['source_path'],
+                credential: scope['credential'],
+                overwrite: scope['overwrite'],
+                overwrite_vars: scope['overwrite_vars'],
+                update_on_launch: scope['update_on_launch']
+                //update_interval: scope['update_interval'].value
+                };
 
-            if (scope.source.value !== null && scope.source.value !== '') {
-                var data = { group: group_id, 
-                    source: scope['source'].value,
-                    source_path: scope['source_path'],
-                    credential: scope['credential'],
-                    overwrite: scope['overwrite'],
-                    overwrite_vars: scope['overwrite_vars'],
-                    update_on_launch: scope['update_on_launch']
-                    //update_interval: scope['update_interval'].value
-                    };
-
-                // Create a string out of selected list of regions
-                var regions = $('#s2id_group_source_regions').select2("data");
-                var r = [];
-                for (var i=0; i < regions.length; i++) {
-                    r.push(regions[i].id);
+            // Create a string out of selected list of regions
+            var regions = $('#s2id_group_source_regions').select2("data");
+            var r = [];
+            for (var i=0; i < regions.length; i++) {
+                r.push(regions[i].id);
+            }
+            data['source_regions'] = r.join();
+            
+            if (scope['source'].value == 'ec2') {
+                // for ec2, validate variable data
+                try {
+                     if (scope.envParseType == 'json') {
+                        var json_data = JSON.parse(scope.source_vars);  //make sure JSON parses
+                     }
+                     else {
+                        var json_data = jsyaml.load(scope.source_vars);  //parse yaml
+                     }
+                    
+                     // Make sure our JSON is actually an object
+                     if (typeof json_data !== 'object') {
+                        throw "failed to return an object!";
+                     }
+                     
+                     // Send JSON as a string
+                     if ($.isEmptyObject(json_data)) {
+                        data.source_vars = "";
+                     }
+                     else {
+                        data.source_vars = JSON.stringify(json_data, undefined, '\t'); 
+                     }
                 }
-                data['source_regions'] = r.join();
-                
-                if (scope['source'].value == 'ec2') {
-                    // for ec2, validate variable data
-                    try {
-                         if (scope.envParseType == 'json') {
-                            var json_data = JSON.parse(scope.source_vars);  //make sure JSON parses
-                         }
-                         else {
-                            var json_data = jsyaml.load(scope.source_vars);  //parse yaml
-                         }
-                        
-                         // Make sure our JSON is actually an object
-                         if (typeof json_data !== 'object') {
-                            throw "failed to return an object!";
-                         }
-                         
-                         // Send JSON as a string
-                         if ($.isEmptyObject(json_data)) {
-                            data.source_vars = "";
-                         }
-                         else {
-                            data.source_vars = JSON.stringify(json_data, undefined, '\t'); 
-                         }
-                    }
-                    catch(err) {
-                         parseError = true;
-                         scope.$emit('SaveComplete', true);
-                         Alert("Error", "Error parsing extra variables. Parser returned: " + err);     
-                    }
-                }
-
-                if (!parseError) {           
-                  Rest.setUrl(scope.source_url)
-                  Rest.put(data)
-                      .success( function(data, status, headers, config) {
-                          scope.$emit('SaveComplete', false);
-                          })
-                      .error( function(data, status, headers, config) {
-                          scope.$emit('SaveComplete', true);
-                          ProcessErrors(scope, data, status, form,
-                              { hdr: 'Error!', msg: 'Failed to update group inventory source. PUT status: ' + status });
-                          });
+                catch(err) {
+                     parseError = true;
+                     scope.$emit('SaveComplete', true);
+                     Alert("Error", "Error parsing extra variables. Parser returned: " + err);     
                 }
             }
-            else {
-               // No source value
-               scope.$emit('SaveComplete', false);
+
+            if (!parseError) {           
+              Rest.setUrl(scope.source_url)
+              Rest.put(data)
+                  .success( function(data, status, headers, config) {
+                      scope.$emit('SaveComplete', false);
+                      })
+                  .error( function(data, status, headers, config) {
+                      scope.$emit('SaveComplete', true);
+                      ProcessErrors(scope, data, status, form,
+                          { hdr: 'Error!', msg: 'Failed to update group inventory source. PUT status: ' + status });
+                      });
             }
             });
 

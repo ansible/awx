@@ -735,7 +735,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                   field.awRequiredWhen.variable + "\" " : "";
             html += ">\n";
             html += "<option value=\"\">";
-            html += (field.defaultOption) ? field.defaultOption : "Choose " + field.label;
+            html += (field.defaultOption) ? field.defaultOption : "Choose a " + field.label.toLowerCase();
             html += "</option>\n";
             html += "</select>\n";
             // Add error messages
@@ -1462,8 +1462,8 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
               html += "<tr ng-repeat=\"" + form.related[itm].iterator + " in " + itm + "\" >\n";
               if (form.related[itm].index == undefined || form.related[itm].index !== false) {
-                html += "<td>{{ $index + (" + form.related[itm].iterator + "Page * " + 
-                    form.related[itm].iterator + "PageSize) + 1 }}.</td>\n";
+                html += "<td>{{ $index + ((" + form.related[itm].iterator + "_page - 1) * " + 
+                    form.related[itm].iterator + "_page_size) + 1 }}.</td>\n";
               }
               var cnt = 1;
               var rfield;

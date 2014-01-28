@@ -67,12 +67,12 @@ angular.module('GroupFormDefinition', [])
                 ngChange: 'sourceChange()',
                 addRequired: false, 
                 editRequired: false,
-                'default': { label: 'Manual', value: '' },
+                //'default': { label: 'Manual', value: '' },
                 tab: 'source'
                 },
             source_path: {
                 label: 'Script Path',
-                ngShow: "source.value == 'file'",
+                ngShow: "source && source.value == 'file'",
                 type: 'text',
                 awRequiredWhen: {variable: "sourcePathRequired", init: "false" },
                 tab: 'source'
@@ -80,7 +80,7 @@ angular.module('GroupFormDefinition', [])
             credential: {
                 label: 'Cloud Credential',
                 type: 'lookup',
-                ngShow: "source.value !== ''",
+                ngShow: "source && source.value !== ''",
                 sourceModel: 'credential',
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
@@ -91,7 +91,7 @@ angular.module('GroupFormDefinition', [])
             source_regions: {
                 label: 'Regions',
                 type: 'text',
-                ngShow: "source.value == 'rax' || source.value == 'ec2'",
+                ngShow: "source && (source.value == 'rax' || source.value == 'ec2')",
                 addRequired: false,
                 editRequired: false,
                 awMultiselect: 'source_region_choices',
@@ -105,7 +105,7 @@ angular.module('GroupFormDefinition', [])
                 },
             source_vars: {
                 label: 'Source Variables',
-                ngShow: "source.value == 'file' || source.value == 'ec2'",
+                ngShow: "source && (source.value == 'file' || source.value == 'ec2')",
                 type: 'textarea',
                 addRequired: false,
                 editRequird: false, 
@@ -145,7 +145,7 @@ angular.module('GroupFormDefinition', [])
             checkbox_group: {
                 label: 'Update Options',
                 type: 'checkbox_group',
-                ngShow: "source.value !== '' && source.value !== null",
+                ngShow: "source && (source.value !== '' && source.value !== null)",
                 tab: 'source',
 
                 fields: [
