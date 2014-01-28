@@ -8,6 +8,11 @@ DATE := $(shell date -u +%Y%m%d%H%M)
 
 VERSION=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
 RELEASE=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[1])")
+
+# Allow ami license customization
+LICENSE_TIER ?= 30
+PACKER_LICENSE_FILE ?= test.json
+
 ifneq ($(OFFICIAL),yes)
 BUILD=dev$(DATE)
 SDIST_TAR_FILE=awx-$(VERSION)-$(BUILD).tar.gz
@@ -15,6 +20,7 @@ SETUP_TAR_NAME=awx-setup-$(VERSION)-$(BUILD)
 RPM_PKG_RELEASE=$(BUILD)
 DEB_BUILD_DIR=deb-build/awx-$(VERSION)-$(BUILD)
 DEB_PKG_RELEASE=$(VERSION)-$(BUILD)
+PACKER_BUILD_OPTS=-var-file=vars-awxkeys.json -var-file=vars-nightly.json
 else
 BUILD=
 SDIST_TAR_FILE=awx-$(VERSION).tar.gz
@@ -22,6 +28,7 @@ SETUP_TAR_NAME=awx-setup-$(VERSION)
 RPM_PKG_RELEASE=$(RELEASE)
 DEB_BUILD_DIR=deb-build/awx-$(VERSION)
 DEB_PKG_RELEASE=$(VERSION)-$(RELEASE)
+PACKER_BUILD_OPTS=-var-file=vars-awxkeys.json -var-file=vars-release.json
 endif
 
 .PHONY: clean rebase push requirements requirements_pypi develop refresh \
@@ -188,12 +195,11 @@ deb: sdist
 	@echo "awx_$(DEB_PKG_RELEASE).deb admin optional" > $(DEB_BUILD_DIR)/debian/realfiles
 	(cd $(DEB_BUILD_DIR) && PKG_RELEASE=$(DEB_PKG_RELEASE) dpkg-buildpackage -nc -us -uc -b --changes-option="-fdebian/realfiles")
 
-ami:
-	if [ "$(OFFICIAL)" = "yes" ] ; then \
-        (cd packaging/ami && $(PACKER) build -var-file=vars-awxkeys.json -var-file=vars-release.json awx.json) ; \
-	else \
-        (cd packaging/ami && $(PACKER) build -var-file=vars-awxkeys.json -var-file=vars-nightly.json awx.json) ; \
-	fi
+packer_license:
+	@python -c "import json; fp = open('packaging/ami/license/$(PACKER_LICENSE)', 'w+'); json.dump(dict(instance_count=$(LICENSE_TIER)), fp); fp.close();"
+
+ami: packer_license
+	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_license=$(PACKER_LICENSE_FILE)" awx.json)
 
 install:
 	$(PYTHON) setup.py install egg_info -b ""
