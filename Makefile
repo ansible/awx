@@ -196,7 +196,7 @@ deb: sdist
 	(cd $(DEB_BUILD_DIR) && PKG_RELEASE=$(DEB_PKG_RELEASE) dpkg-buildpackage -nc -us -uc -b --changes-option="-fdebian/realfiles")
 
 packer_license:
-	@python -c "import json; fp = open('packaging/ami/license/$(PACKER_LICENSE)', 'w+'); json.dump(dict(instance_count=$(LICENSE_TIER)), fp); fp.close();"
+	@python -c "import json; fp = open('packaging/ami/license/$(PACKER_LICENSE_FILE)', 'w+'); json.dump(dict(instance_count=$(LICENSE_TIER)), fp); fp.close();"
 
 ami: packer_license
 	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_license=$(PACKER_LICENSE_FILE)" awx.json)
