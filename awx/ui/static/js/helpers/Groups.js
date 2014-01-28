@@ -27,7 +27,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 Rest.options()
                     .success( function(data, status, headers, config) { 
                         var choices = data.actions.GET.source.choices
-                        console.log(choices);
                         for (var i=0; i < choices.length; i++) {
                             if (choices[i][0] !== 'file') {
                                 scope[variable].push({ 

@@ -84,7 +84,7 @@ angular.module('InventoriesListDefinition', [])
                 },
             edit: {
                 label: 'Edit',
-                ngClick: "editInventory(\{\{ inventory.id \}\})",
+                ngClick: 'editInventoryProperties(inventory.id)',
                 awToolTip: 'Edit inventory',
                 dataPlacement: 'top'
                 },

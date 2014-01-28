@@ -27,14 +27,15 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         var list = params.list; 
         var iterator = (params.iterator) ? params.iterator : list.iterator;
         var setWidgets = (params.setWidgets == false) ? false : true; 
-        
-        var sort_order, expected_objects=0, found_objects=0;
+        var sort_order = params.sort_order || '';
+        var expected_objects=0, found_objects=0;
 
         var params = { 
             set: set, 
             defaultUrl: defaultUrl, 
             list: list, 
-            iterator: iterator
+            iterator: iterator,
+            sort_order: sort_order
             };
         
         Store('CurrentSearchParams', params);  // Save in case Activity Stream widget needs to restore
@@ -135,6 +136,17 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 }
             }
         }
+
+        var params = { 
+            set: set, 
+            defaultUrl: defaultUrl, 
+            list: list, 
+            iterator: iterator,
+            sort_order: sort_order
+            };
+        
+        Store('CurrentSearchParams', params);  // Save in case Activity Stream widget needs to restore
+        
 
         // Functions to handle search widget changes
         scope.setSearchField = function(iterator, fld, label, widget) {
@@ -237,7 +249,8 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             //
             scope[iterator + 'Loading'] = (load == undefined || load == true) ? true : false;
             var url = defaultUrl;
-            
+            var connect; 
+
             //finalize and execute the query
             scope[iterator + 'Page'] = (page) ? parseInt(page) - 1 : 0;
             if (scope[iterator + 'SearchParams']) {
@@ -248,14 +261,17 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                     url += '&' + scope[iterator + 'SearchParams'];
                 }
             }
-            url = url.replace(/\&\&/,'&');
-            url += (scope[iterator + '_page_size']) ? '&page_size=' + scope[iterator + '_page_size'] : "";
+            connect = (/\/$/.test(url)) ? '?' : '&'; 
+            url += (scope[iterator + '_page_size']) ? connect + 'page_size=' + scope[iterator + '_page_size'] : "";
             if (page) {
-                url += '&page=' + page;
+                connect = (/\/$/.test(url)) ? '?' : '&';
+                url += connect + 'page=' + page;
             }
             if (scope[iterator + 'ExtraParms']) {
-                url += scope[iterator + 'ExtraParms'];
+                connect = (/\/$/.test(url)) ? '?' : '&';
+                url += connect + scope[iterator + 'ExtraParms'];
             }
+            url = url.replace(/\&\&/,'&');
             Refresh({ scope: scope, set: set, iterator: iterator, url: url });
             });
         

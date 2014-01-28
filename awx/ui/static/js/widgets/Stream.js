@@ -267,7 +267,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         var parent_scope = params.scope;
 
         // Hang onto current search params
-        var PreviousSearchParams = Store('SearchInitParams');
+        var PreviousSearchParams = Store('CurrentSearchParams');
 
         // pass in an inventory name to fix breadcrumb display
         var inventory_name = (params) ? params.inventory_name : null;
@@ -340,6 +340,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     list: PreviousSearchParams.list,
                     url: PreviousSearchParams.defaultUrl, 
                     iterator: PreviousSearchParams.iterator,
+                    sort_order: PreviousSearchParams.sort_order,
                     setWidgets: false });
             }
             if (inUrl) {

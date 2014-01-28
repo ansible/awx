@@ -9,7 +9,7 @@
  */
  
 angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationListDefinition', 'ListGenerator', 'AuthService', 
-                                    'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper'
+                                    'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper', 'SearchHelper'
                                     ]) 
 
     .factory('SaveInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
@@ -20,6 +20,7 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         // Save inventory property modifications
 
         var scope = params.scope;
+        
         var form = InventoryForm;
         var defaultUrl=GetBasePath('inventory');
 
@@ -71,7 +72,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     }
                     })
                 .error( function(data, status, headers, config) {
-                    Wait('stop');
                     ProcessErrors(scope, data, status, form,
                         { hdr: 'Error!', msg: 'Failed to update inventory. POST returned status: ' + status });
                     });
@@ -85,9 +85,9 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
 
 
     .factory('EditInventoryProperties', ['InventoryForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
-        'GetBasePath', 'ParseTypeChange', 'SaveInventory', 'Wait',
+        'GetBasePath', 'ParseTypeChange', 'SaveInventory', 'Wait', 'Store', 'SearchInit',
     function(InventoryForm, GenerateForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange, SaveInventory,
-        Wait) {
+        Wait, Store, SearchInit) {
     return function(params) {
 
         var parent_scope = params.scope
@@ -98,6 +98,9 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var defaultUrl=GetBasePath('inventory');
         var master = {}; 
 
+        // Hang onto current search params
+        var PreviousSearchParams = Store('CurrentSearchParams');
+        
         form.well = false;
         //form.formLabelSize = 'col-lg-3';
         //form.formFieldSize = 'col-lg-9';
@@ -115,8 +118,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         scope.formModalCancelShow = true;
         scope.formModalInfo = false;
         scope.formModalHeader = 'Inventory Properties'; 
-        
-        $('#form-modal .btn-success').removeClass('btn-none').addClass('btn-success');
         
         Wait('start');
         Rest.setUrl(GetBasePath('inventory') + inventory_id + '/');
@@ -170,7 +171,6 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
 
                 })
             .error( function(data, status, headers, config) {
-                Wait('stop');
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get inventory: ' + inventory_id + '. GET returned: ' + status });
                 });
@@ -179,11 +179,41 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
            scope.removeInventorySaved();
         }
         scope.removeInventorySaved = scope.$on('InventorySaved', function() {
-            $('#form-modal').modal('hide');           
+            $('#form-modal').modal('hide');
+            // Restore prior search state           
+            if (scope.searchCleanp) {
+                scope.searchCleanup();
+            }
+            SearchInit({ 
+                scope: parent_scope,
+                set: PreviousSearchParams.set,
+                list: PreviousSearchParams.list,
+                url: PreviousSearchParams.defaultUrl,
+                iterator: PreviousSearchParams.iterator,
+                sort_order: PreviousSearchParams.sort_order,
+                setWidgets: false
+                });
+            parent_scope.$emit('RefreshInventories');
             });
 
+        scope.cancelModal = function() {
+            // Restore prior search state
+            if (scope.searchCleanp) {
+                scope.searchCleanup();
+            }
+            SearchInit({ 
+                scope: parent_scope,
+                set: PreviousSearchParams.set,
+                list: PreviousSearchParams.list,
+                url: PreviousSearchParams.defaultUrl,
+                iterator: PreviousSearchParams.iterator,
+                sort_order: PreviousSearchParams.sort_order,
+                setWidgets: false
+                });
+            }
+
         scope.formModalAction = function() {
-            scope.inventory_id = inventory_id;
+            parent_scope.inventory_id = inventory_id;
             parent_scope.inventory_name = scope.inventory_name;
             SaveInventory({ scope: scope });
             } 

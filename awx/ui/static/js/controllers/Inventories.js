@@ -12,7 +12,7 @@
 
 function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, InventoryList,
                           GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-                          ClearScope, ProcessErrors, GetBasePath, Wait, Stream)
+                          ClearScope, ProcessErrors, GetBasePath, Wait, Stream, EditInventoryProperties)
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -128,8 +128,20 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
 
         }
         });
+
+    if (scope.removeRefreshInventories) {
+        scope.removeRefreshInventories();
+    }
+    scope.removeRefreshInventories = scope.$on('RefreshInventories', function() {
+        // Reflect changes after inventory properties edit completes
+        scope.search(list.iterator);
+        });
     
     scope.showActivity = function() { Stream({ scope: scope }); }
+
+    scope.editInventoryProperties = function(inventory_id) { 
+        EditInventoryProperties({ scope: scope, inventory_id: inventory_id });
+        }
 
     scope.addInventory = function() {
         $location.path($location.path() + '/add');
@@ -186,7 +198,7 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
 
 InventoriesList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'InventoryList', 'GenerateList', 
                             'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
-                            'GetBasePath', 'Wait', 'Stream' ];
+                            'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties'];
 
 
 function InventoriesAdd ($scope, $rootScope, $compile, $location, $log, $routeParams, InventoryForm, 
