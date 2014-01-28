@@ -301,10 +301,17 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                             if (scope[iterator + 'SearchValue' + modifier]) {
                                 // A search value was entered
                                 scope[iterator + 'ShowStartBtn' + modifier] = false;
-                                scope[iterator + 'SearchParams'] += '&' +
+                                if (list.fields[scope[iterator + 'SearchField'  + modifier]].searchOnID) {
+                                    scope[iterator + 'SearchParams'] += '&' +
                                     list.fields[scope[iterator + 'SearchField' + modifier]].searchObject + 
-                                    '__name__icontains=' +
-                                    scope[iterator + 'SearchValue' + modifier];
+                                    '__id=' + scope[iterator + 'SearchValue' + modifier];
+                                }
+                                else {
+                                    scope[iterator + 'SearchParams'] += '&' +
+                                        list.fields[scope[iterator + 'SearchField' + modifier]].searchObject + 
+                                        '__name__icontains=' +
+                                        scope[iterator + 'SearchValue' + modifier];
+                                }
                             }    
                             else {
                                 // Search value is empty
