@@ -182,7 +182,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             descr += obj2 + name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
             descr_nolink += obj2 + name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
         }
-        if (obj2_obj && obj1_obj.name && !/^\_delete/.test(obj1_obj.name)) {     
+        if (obj1_obj && obj1_obj.name && !/^\_delete/.test(obj1_obj.name)) {     
             obj1_obj['base'] = obj1;
             descr += obj1 + ' <a href=\"' + BuildUrl(obj1_obj) + '\">' + obj1_obj.name + '</a>';
             descr_nolink += obj1 + ' ' + obj1_obj.name; 
@@ -190,13 +190,34 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         else if (obj1) {
             name = '';
             // find the name in changes, if needed
-            if ( ((!(obj1_obj && obj1_obj.name)) || obj1_obj && obj1_obj.name && /^_delete/.test(obj1_obj.name))
-                   && (activity.changes && activity.changes.name) ) {
-                if (typeof activity.changes.name == 'string') {
-                    name = ' ' + activity.changes.name;
+            if ( !(obj1_obj && obj1_obj.name) || obj1_obj && obj1_obj.name && /^_delete/.test(obj1_obj.name) ) {
+                if (activity.changes && activity.changes.name) {
+                    if (typeof activity.changes.name == 'string') {
+                        name = ' ' + activity.changes.name;
+                    }
+                    else if (typeof activity.changes.name == 'object' && Array.isArray(activity.changes.name)) {
+                        name = ' ' + activity.changes.name[0]
+                    }
                 }
-                else if (typeof activity.changes.name == 'object' && Array.isArray(activity.changes.name)) {
-                    name = ' ' + activity.changes.name[0]
+                else if (obj1 == 'job' && obj1_obj && activity.changes && activity.changes.job_template) {
+                    // Hack for job activity where the template name is known
+                    if (activity.operation != 'delete') {
+                        obj1_obj['base'] = obj1;
+                        name = ' ' + '<a href=\"' + BuildUrl(obj1_obj) + '\">'+ obj1_obj.id + ' ' + activity.changes.job_template + '</a>';
+                    }
+                    else {
+                        name = ' ' + obj1_obj.id + ' ' + activity.changes.job_template;
+                    }
+                }
+                else if (obj1 == 'job' && obj1_obj) {
+                    // Hack for job activity where template name not known
+                    if (activity.operation != 'delete') {
+                        obj1_obj['base'] = obj1;
+                        name = ' ' + '<a href=\"' + BuildUrl(obj1_obj) + '\">' + obj1_obj.id + '</a>';
+                    }
+                    else {
+                        name = ' ' + obj1_obj.id;
+                    }
                 }
             }
             else if (obj1_obj && obj1_obj.name) {

@@ -102,6 +102,15 @@ angular.module('StreamListDefinition', [])
                 searchWidget: 2,
                 searchField: 'object1'
                 },
+            job_search: {
+                label: 'Job',
+                searchOnly: true,
+                searchObject: 'job',
+                searchPlaceholder: 'Job id',
+                searchOnID: true,
+                searchWidget: 2,
+                searchField: 'object1'
+                },
             organization_search: {
                 label: 'Organization',
                 searchOnly: true,
@@ -166,6 +175,15 @@ angular.module('StreamListDefinition', [])
                 searchOnly: true,
                 searchObject: 'inventory',
                 searchPlaceholder: 'Related inventory name',
+                searchWidget: 3,
+                searchField: 'object2'
+                },
+            job_search3: {
+                label: 'Job',
+                searchOnly: true,
+                searchObject: 'job',
+                searchPlaceholder: 'Job id',
+                searchOnID: true,
                 searchWidget: 3,
                 searchField: 'object2'
                 },
