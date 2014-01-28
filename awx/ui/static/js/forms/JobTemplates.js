@@ -325,7 +325,7 @@ angular.module('JobTemplateFormDefinition', [])
                             { name: "error", value: "error" },
                             { name: "failed", value: "failed" },
                             { name: "canceled", value: "canceled" } ],
-                        badgeIcon: 'icon-job-\{\{ job.status \}\}',
+                        badgeIcon: 'fa icon-job-\{\{ job.status \}\}',
                         badgePlacement: 'left',
                         badgeToolTip: "\{\{ job.statusBadgeToolTip \}\}",
                         badgeTipPlacement: 'top',
