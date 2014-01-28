@@ -94,7 +94,7 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
                else {
                   // many hosts with 0 failures
                   scope.inventories[i].failed_hosts_tip = scope.inventories[i].total_hosts + 
-                      ( (scope.inventories[i].total_hosts > 1) ? ' hosts' : ' host' ) + " with no failures. Click to view details.";
+                      ( (scope.inventories[i].total_hosts > 1) ? ' hosts' : ' host' ) + " with no job failures. Click to view details.";
                   scope.inventories[i].failed_hosts_link = '/#/inventories/' + scope.inventories[i].id + '/';
                   scope.inventories[i].failed_hosts_class = 'false';
                }
