@@ -23,22 +23,10 @@ angular.module('ActivityDetailDefinition', [])
                 readonly: true
                 },
             operation: {
-                label: 'Operation',
+                label: 'Action',
                 type: 'text',
                 readonly: true
                 },
-            /*object1_name: {
-                label: '\{\{ object1 \}\}',
-                type: 'text',
-                ngHide: '!object1',
-                readonly: true
-                },
-            object2_name: {
-                label: '\{\{ object2 \}\}',
-                type: 'text',
-                ngHide: '!object2',
-                readonly: true
-                },*/
             changes: {
                 label: 'Changes',
                 type: 'textarea',

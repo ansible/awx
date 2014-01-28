@@ -146,41 +146,51 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         descr += activity.operation;
         descr += (/e$/.test(activity.operation)) ? 'd ' : 'ed ';
         descr_nolink = descr;
+
+        // labels
         var obj1 = activity.object1;
         var obj2 = activity.object2;
+        
+        // objects
+        var obj1_obj = (activity.summary_fields[obj1]) ? activity.summary_fields[obj1][0] : null;
+        if (obj1 == obj2) {
+            var obj2_obj = activity.summary_fields[obj1][1];
+        }
+        else if (activity.summary_fields[obj2]) {
+            var obj2_obj = activity.summary_fields[obj2][0];
+        }
+        else { 
+            var obj2_obj = null;
+        }
         
         if (obj1 == 'user' || obj2 == 'user') {
             activity.summary_fields['user'][0].name = activity.summary_fields['user'][0].username;
         }
         
         var name;
-        if (activity.summary_fields[obj2] && activity.summary_fields[obj2][0].name 
-                && !/^_delete/.test(activity.summary_fields[obj2][0].name)) {
-            activity.summary_fields[obj2][0]['base'] = obj2;
-            descr += obj2 + ' <a href=\"' + BuildUrl(activity.summary_fields[obj2][0]) + '\">'
-                + activity.summary_fields[obj2][0].name  + '</a>' + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' ); 
-            descr_nolink += obj2 + ' ' + activity.summary_fields[obj2][0].name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
+        if (obj2_obj && obj2_obj.name && !/^_delete/.test(obj2_obj.name)) {
+            obj2_obj['base'] = obj2;
+            descr += obj2 + ' <a href=\"' + BuildUrl(obj2_obj) + '\">'
+                + obj2_obj.name  + '</a>' + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' ); 
+            descr_nolink += obj2 + ' ' + obj2_obj.name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
         }
-        else if (activity.object2) {
+        else if (obj2) {
             name = '';
-            if (activity.summary_fields[obj2] && activity.summary_fields[obj2][0].name) {
-                name = ' ' + stripDeleted(activity.summary_fields[obj2][0].name);
+            if (obj2_obj && obj2_obj.name) {
+                name = ' ' + stripDeleted(obj2_obj.name);
             }
-            descr += activity.object2 + name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
-            descr_nolink += activity.object2 + name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
+            descr += obj2 + name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
+            descr_nolink += obj2 + name + ( (activity.operation == 'disassociate') ? ' from ' : ' to ' );
         }
-        if (activity.summary_fields[obj1] && activity.summary_fields[obj1][0].name
-                && !/^\_delete/.test(activity.summary_fields[obj1][0].name)) {     
-            activity.summary_fields[obj1][0]['base'] = obj1;
-            descr += obj1 + ' <a href=\"' + BuildUrl(activity.summary_fields[obj1][0]) + '\">'
-                + activity.summary_fields[obj1][0].name + '</a>';
-            descr_nolink += obj1 + ' ' + activity.summary_fields[obj1][0].name; 
+        if (obj2_obj && obj1_obj.name && !/^\_delete/.test(obj1_obj.name)) {     
+            obj1_obj['base'] = obj1;
+            descr += obj1 + ' <a href=\"' + BuildUrl(obj1_obj) + '\">' + obj1_obj.name + '</a>';
+            descr_nolink += obj1 + ' ' + obj1_obj.name; 
         }
-        else if (activity.object1) {
+        else if (obj1) {
             name = '';
-            if ( ((!(activity.summary_fields[obj1] && activity.summary_fields[obj1][0].name)) || 
-                    activity.summary_fields[obj1] && activity.summary_fields[obj1][0].name && 
-                   /^_delete/.test(activity.summary_fields[obj1][0].name))
+            // find the name in changes, if needed
+            if ( ((!(obj1_obj && obj1_obj.name)) || obj1_obj && obj1_obj.name && /^_delete/.test(obj1_obj.name))
                    && (activity.changes && activity.changes.name) ) {
                 if (typeof activity.changes.name == 'string') {
                     name = ' ' + activity.changes.name;
@@ -189,11 +199,11 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     name = ' ' + activity.changes.name[0]
                 }
             }
-            else if (activity.summary_fields[obj1] && activity.summary_fields[obj1][0].name) {
-                name = ' ' + stripDeleted(activity.summary_fields[obj1][0].name);
+            else if (obj1_obj && obj1_obj.name) {
+                name = ' ' + stripDeleted(obj1_obj.name);
             }
-            descr += activity.object1 + name;
-            descr_nolink += activity.object1 + name;
+            descr += obj1 + name;
+            descr_nolink += obj1 + name;
         }
         activity['description'] = descr;
         activity['description_nolink'] = descr_nolink;
