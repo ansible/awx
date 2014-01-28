@@ -7,15 +7,16 @@
  *
  */
 
-angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', 'SearchHelper', 'PaginateHelper',
+angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', 'SearchHelper', 'PaginationHelpers',
         'RefreshHelper', 'ListGenerator', 'StreamWidget', 'AuthService'])
     
     .factory('setStreamHeight', [ function() {
     return function() {
         // Try not to overlap footer. Because stream is positioned absolute, the parent
         // doesn't resize correctly when stream is loaded.
-        var stream = $('#stream-container');
-        var height = stream.height() + 50;
+        var sheight = $('#stream-content').height();
+        var theight = parseInt($('#tab-content-container').css('min-height').replace(/px/,''));
+        var height = (theight < sheight) ? sheight : theight;
         $('#tab-content-container').css({ "min-height": height });
         }
         }])
@@ -253,16 +254,20 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
 
     .factory('Stream', ['$rootScope', '$location', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'StreamList', 'SearchInit', 
         'PaginateInit', 'GenerateList', 'FormatDate', 'ShowStream', 'HideStream', 'BuildDescription', 'FixUrl', 'BuildUrl', 
-        'ShowDetail', 'StreamBreadCrumbs', 'setStreamHeight', 'Find',
+        'ShowDetail', 'StreamBreadCrumbs', 'setStreamHeight', 'Find', 'Store',
     function($rootScope, $location, Rest, GetBasePath, ProcessErrors, Wait, StreamList, SearchInit, PaginateInit, GenerateList,
         FormatDate, ShowStream, HideStream, BuildDescription, FixUrl, BuildUrl, ShowDetail, StreamBreadCrumbs, setStreamHeight,
-        Find) {
+        Find, Store) {
     return function(params) {
     
         var list = StreamList;
         var defaultUrl = GetBasePath('activity_stream');
         var view = GenerateList;
         var base = $location.path().replace(/^\//,'').split('/')[0];
+        var parent_scope = params.scope;
+
+        // Hang onto current search params
+        var PreviousSearchParams = Store('SearchInitParams');
 
         // pass in an inventory name to fix breadcrumb display
         var inventory_name = (params) ? params.inventory_name : null;
@@ -324,10 +329,22 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         
         scope.closeStream = function(inUrl) { 
             HideStream();
-            if (scope.searchCleanup)
+            if (scope.searchCleanup) {
                 scope.searchCleanup();
-            if (inUrl)
+            }
+            // Restore prior search state
+            if (PreviousSearchParams) {
+                SearchInit({
+                    scope: parent_scope,
+                    set: PreviousSearchParams.set,
+                    list: PreviousSearchParams.list,
+                    url: PreviousSearchParams.defaultUrl, 
+                    iterator: PreviousSearchParams.iterator,
+                    setWidgets: false });
+            }
+            if (inUrl) {
                $location.path(inUrl);
+            }
             }
 
         scope.refreshStream = function() {
@@ -347,14 +364,6 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 cDate = new Date(scope['activities'][i].timestamp);
                 scope['activities'][i].timestamp = FormatDate(cDate);
                 
-                // Display username
-                /*scope['activities'][i].user = (scope['activities'][i].summary_fields.user) ? scope['activities'][i].summary_fields.user.username :
-                    'system';
-                if (scope['activities'][i].user !== 'system') {
-                    // turn user into a link when not 'system'
-                    scope['activities'][i].user = "<a href=\"" + FixUrl(scope['activities'][i].related.user) + "\">" + 
-                        scope['activities'][i].user + "</a>";
-                }*/
                 if (scope['activities'][i]['summary_fields']['actor']) {
                     scope['activities'][i]['user'] = "<a href=\"/#/users/" + scope['activities'][i]['summary_fields']['actor']['id'] + "\">" +
                         scope['activities'][i]['summary_fields']['actor']['username'] + "</a>";
@@ -399,7 +408,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             // Give ng-repeate a chance to show the data before adjusting the page size.
             setTimeout(function() { setStreamHeight(); }, 500);
             });
-
+        
         // Initialize search and paginate pieces and load data
         SearchInit({ scope: scope, set: list.name, list: list, url: defaultUrl });
         PaginateInit({ scope: scope, list: list, url: defaultUrl });

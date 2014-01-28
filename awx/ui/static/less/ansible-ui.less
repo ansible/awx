@@ -116,13 +116,16 @@ a:focus {
 .actions {
   a {
     font-size: 14px;
-    margin-right: 15px;
+    margin-right: 12px;
+  }
+  a:last-child {
+    margin-right: 0;
   }
   a:hover {
     cursor: pointer;
   }
   .cancel {
-    padding-right: 10px;
+    padding-right: 8px;
   }
   .dropdown .caret {
     border-top-color: @blue;
@@ -130,6 +133,7 @@ a:focus {
 }
 
 #home_groups_table .actions .cancel { padding-right: 3px; }
+#jobs_table .actions .cancel { padding-right: 10px; }
 
 .success-badge { 
   color: #ffffff;
@@ -533,6 +537,39 @@ legend {
   margin-left: 10px;
   font-size: 11px;
 }
+
+/* Pagination */
+  .page-label { 
+    margin-top: 0;
+    text-align: right;
+  }
+
+  .pagination {
+    margin-top: 0;
+    margin-bottom: 7px;
+  }
+
+  .pagination > li > a {
+    padding: 3px 6px;
+  }
+
+  .modal-body { 
+      .pagination {
+          margin-top: 15px;
+          margin-bottom: 0;
+      }
+      .pagination > li > a {
+          border: none;
+          padding-top: 0;
+          padding-bottom: 0;
+      }
+      .pagination > .active > a {
+          background-color: #fff;
+          color: #428bca;
+          border-color: none;
+          border: 1px solid #428bca;
+      }
+  }
 
 .footer-navigation {
   margin: 10px 0 10px 0;

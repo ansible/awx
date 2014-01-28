@@ -16,8 +16,9 @@
  */
 
 angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])  
-    .factory('SearchInit', ['Alert', 'Rest', 'Refresh', '$location', 'GetBasePath', 'Empty', '$timeout', 'Wait',
-    function(Alert, Rest, Refresh, $location, GetBasePath, Empty, $timeout, Wait) {
+    
+    .factory('SearchInit', ['Alert', 'Rest', 'Refresh', '$location', 'GetBasePath', 'Empty', '$timeout', 'Wait', 'Store',
+    function(Alert, Rest, Refresh, $location, GetBasePath, Empty, $timeout, Wait, Store) {
     return function(params) {
         
         var scope = params.scope;
@@ -25,14 +26,19 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         var defaultUrl = params.url;
         var list = params.list; 
         var iterator = (params.iterator) ? params.iterator : list.iterator;
-        var sort_order;
-        var expected_objects=0;
-        var found_objects=0;
-         
-        if (scope.searchTimer) {
-            $timeout.cancel(scope.searchTimer);
-        }
+        var setWidgets = (params.setWidgets == false) ? false : true; 
         
+        var sort_order, expected_objects=0, found_objects=0;
+
+        var params = { 
+            set: set, 
+            defaultUrl: defaultUrl, 
+            list: list, 
+            iterator: iterator
+            };
+        
+        Store('CurrentSearchParams', params);  // Save in case Activity Stream widget needs to restore
+
         function setDefaults(widget) {
             // Set default values
             var modifier = (widget == undefined || widget == 1) ? '' : widget;
@@ -119,15 +125,17 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             }
             }
         
-        // Set default values for each search widget on the page
-        var widgets = (list.searchWidgets) ? list.searchWidgets : 1;
-        for (var i=1; i <= widgets; i++) {
-            var modifier = (i == 1) ? '' : i;
-            if ( $('#search-widget-container' + modifier) ) {
-                setDefaults(i);
+        if (setWidgets) {
+            // Set default values for each search widget on the page
+            var widgets = (list.searchWidgets) ? list.searchWidgets : 1;
+            for (var i=1; i <= widgets; i++) {
+                var modifier = (i == 1) ? '' : i;
+                if ( $('#search-widget-container' + modifier) ) {
+                    setDefaults(i);
+                }
             }
         }
-       
+
         // Functions to handle search widget changes
         scope.setSearchField = function(iterator, fld, label, widget) {
            
@@ -223,14 +231,13 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
         if (scope.removeDoSearch) {
             scope.removeDoSearch();
         }
-        scope.removeDoSearch = scope.$on('doSearch', function(e, iterator, page, load, spin) {
+        scope.removeDoSearch = scope.$on('doSearch', function(e, iterator, page, load) {
             //
             // Execute the search
             //
-            //scope[iterator + 'SearchSpin'] = (spin == undefined || spin == true) ? true : false;
             scope[iterator + 'Loading'] = (load == undefined || load == true) ? true : false;
             var url = defaultUrl;
-
+            
             //finalize and execute the query
             scope[iterator + 'Page'] = (page) ? parseInt(page) - 1 : 0;
             if (scope[iterator + 'SearchParams']) {
@@ -242,7 +249,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 }
             }
             url = url.replace(/\&\&/,'&');
-            url += (scope[iterator + 'PageSize']) ? '&page_size=' + scope[iterator + 'PageSize'] : "";
+            url += (scope[iterator + '_page_size']) ? '&page_size=' + scope[iterator + '_page_size'] : "";
             if (page) {
                 url += '&page=' + page;
             }
@@ -252,38 +259,7 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             Refresh({ scope: scope, set: set, iterator: iterator, url: url });
             });
         
-        /*
-        if (scope.removeFoundObject) {
-           scope.removeFoundObject();
-        }
-        scope.removeFoundObject = scope.$on('foundObject', function(e, iterator, page, load, spin, widget, pk) {
-            found_objects++; 
-            // Add new criteria to search params
-            var modifier = (widget == 1) ? '' : widget;
-            var objs = list.fields[scope[iterator + 'SearchField' + modifier]].searchObject;
-            var o = (objs == 'inventories') ? 'inventory' : objs.replace(/s$/,'');
-            var searchFld = list.fields[scope[iterator + 'SearchField' + modifier]].searchField;
-            scope[iterator + 'SearchParams'] += '&' + searchFld + '__icontains=' + o;
-            if (!Empty(pk)) {
-               scope[iterator + 'SearchParams'] += '&' + searchFld + '_id__in=' + pk;
-            }
-            // Move to the next phase once all object types are processed
-            if (found_objects == expected_objects) {
-               scope.$emit('prepareSearch2', iterator, page, load, spin);
-            }
-            });
-        */
-
-        /*if (scope.removeResultWarning) {
-            scope.removeResultWarning();
-        }
-        scope.removeResultWarning = scope.$on('resultWarning', function(e, objs, length) {
-            // Alert the user that the # of objects was greater than 30
-            var label = (objs == 'inventory') ? 'inventories' : objs.replace(/s$/,'');
-            Alert('Warning', 'The number of matching ' + label + ' was too large. We limited your search to the first 30.', 'alert-info');
-            });
-        */
-
+       
         if (scope.removePrepareSearch) {
             scope.removePrepareSearch();
         }
@@ -296,22 +272,6 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
             scope[iterator + 'SearchParams'] = '';
             var widgets = (list.searchWidgets) ? list.searchWidgets : 1;
             var modifier;
-            
-            // Determine how many object values we're dealing with.
-            /*
-            expected_objects = 0;
-            found_objects = 0;
-            for (var i=1; i <= widgets; i++) {
-                modifier = (i == 1) ? '' : i;
-                scope[iterator + 'HoldInput' + modifier] = true; //Block any input until we're done. Refresh.js will flip this back.
-                if ($('#search-widget-container' + modifier) &&
-                    list.fields[scope[iterator + 'SearchField' + modifier]] &&
-                    list.fields[scope[iterator + 'SearchField' + modifier]].searchObject &&
-                    list.fields[scope[iterator + 'SearchField'  + modifier]].searchObject !== 'all') {
-                   expected_objects++;
-                }
-            }
-            */
             
             for (var i=1; i <= widgets; i++) {
                 var modifier = (i == 1) ? '' : i;
@@ -329,33 +289,6 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                                     list.fields[scope[iterator + 'SearchField' + modifier]].searchObject + 
                                     '__name__icontains=' +
                                     scope[iterator + 'SearchValue' + modifier];
-
-                                //var objUrl = GetBasePath('base') + objs + '/?name__icontains=' + scope[iterator + 'SearchValue' + modifier];
-                                /*
-                                Rest.setUrl(objUrl);
-                                Rest.setHeader({ widget: i });
-                                Rest.setHeader({ object: objs });
-                                Rest.get()
-                                    .success( function(data, status, headers, config) {
-                                        var pk='';
-                                        //limit result set to 30
-                                        var len = (data.results.length > 30) ? 30 : data.results.length;
-                                        for (var j=0; j < len; j++) {
-                                            pk += "," + data.results[j].id;
-                                        } 
-                                        pk = pk.replace(/^\,/,'');
-                                        scope.$emit('foundObject', iterator, page, load, spin, config.headers['widget'], pk);
-                                        if (data.results.length > 30) {
-                                            scope.$emit('resultWarning', config.headers['object'], data.results.length);
-                                        }
-                                        })
-                                   .error( function(data, status, headers, config) {
-                                        Wait('stop');
-                                        ProcessErrors(scope, data, status, null,
-                                            { hdr: 'Error!', msg: 'Retrieving list of ' + objs + ' where name contains: ' + scope[iterator + 'SearchValue' + modifier] +
-                                            ' GET returned status: ' + status });
-                                        });
-                                */
                             }    
                             else {
                                 // Search value is empty
@@ -363,7 +296,6 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                                 scope[iterator + 'SearchParams'] += '&' +
                                     list.fields[scope[iterator + 'SearchField' + modifier]].searchField + 
                                     '=' + list.fields[scope[iterator + 'SearchField' + modifier]].searchObject;
-                                //scope.$emit('foundObject', iterator, page, load, spin, i, null);  
                             }
                         }
                         else {
@@ -374,10 +306,6 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                 }
             }
             scope.$emit('prepareSearch2', iterator, page, load, spin);
-            //if (expected_objects == 0) {
-                // No search widgets contain objects
-            //    scope.$emit('prepareSearch2', iterator, page, load, spin);
-            //}
             });
         
         if (scope.removePrepareSearch2) {
@@ -437,17 +365,6 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
                                       scope[iterator + 'SearchSelectValue' + modifier].value == null) ) {
                             scope[iterator + 'SearchParams'] += 'iexact=';
                         }
-                        /*else if ( (list.fields[scope[iterator + 'SearchField' + modifier]].searchType && 
-                                  (list.fields[scope[iterator + 'SearchField' + modifier]].searchType == 'or')) ) {
-                            scope[iterator + 'SearchParams'] = ''; //start over
-                            var val = scope[iterator + 'SearchValue' + modifier];
-                            for (var k=0; k < list.fields[scope[iterator + 'SearchField' + modifier]].searchFields.length; k++) {
-                                scope[iterator + 'SearchParams'] += '&or__' +
-                                    list.fields[scope[iterator + 'SearchField' + modifier]].searchFields[k] +
-                                    '__icontains=' + escape(val); 
-                            }
-                            scope[iterator + 'SearchParams'].replace(/^\&/,'');     
-                        }*/
                         else {
                             scope[iterator + 'SearchParams'] += scope[iterator + 'SearchType' + modifier] + '='; 
                         }             
@@ -491,12 +408,16 @@ angular.module('SearchHelper', ['RestServices', 'Utilities', 'RefreshHelper'])
            }
            }
 
-        scope.search = function(iterator, page, load, spin) {
+        scope.search = function(iterator, page, load) {
            // Called to initiate a searh. 
            // Page is optional. Added to accomodate back function on Job Events detail. 
            // Spin optional -set to false if spin not desired.
            // Load optional -set to false if loading message not desired
-           scope.$emit('prepareSearch', iterator, page, load, spin); 
+           var load = (load === undefined) ? true : false;
+           if (load) {
+               scope[set] = [];
+           }
+           scope.$emit('prepareSearch', iterator, page, load); 
            }
 
         

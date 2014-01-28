@@ -233,7 +233,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
         var list = params['list'];
         var fld = params['fld'];
         var options = params['options'];
-        var field;
+        var html, field;
         
         if (params.field) {
            field = params.field; 
@@ -256,19 +256,6 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
            html = '';
         }
 
-        /*
-        html += "<div class=\"btn-group\">\n";
-        html += "<button type=\"button\" ";
-        html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
-        html += "class=\"btn btn-default";
-        html += (field['class']) ? " " + field['class'] : " btn-xs"; 
-        html += " dropdown-toggle\" data-toggle=\"dropdown\" ";
-        html += "id=\"" + name + "_ddown\" ";  
-        html += ">";
-        html += (field.icon) ? Icon(field.icon) : "";
-        html += field.label;
-        html += " <span class=\"caret\"></span></button>\n";
-        */
         html += "<div class=\"dropdown\">\n";
         html += "<a href=\"\" class=\"toggle";
         html += "\" ";
@@ -701,66 +688,42 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
              html += "</div>\n"; 
         }
 
-        // Reset button and spinner
-        //html += "<div class=\"col-lg-1 col-md-1 col-sm-1 col-xs-1\">\n";
-        //html += "<button type=\"button\" class=\"btn btn-default btn-sm\" ng-click=\"resetSearch('" + iterator + "')\" " +
-        //    "aw-tool-tip=\"Reset filter\" data-placement=\"top\"><i class=\"icon-undo\"></i></button>\n";
-        //html += "<i class=\"icon-spinner icon-spin icon-large\" ng-show=\"" + iterator +  "SearchSpin == true\"></i>\n";
-        //html += "</div>\n";
-
         return html;
         
         }
         })
-
-    .factory('PaginateWidget', function() {
+   
+    .factory('PaginateWidget', [ function() {
     return function(params) {
-        var set = params.set; 
-        var iterator = params.iterator; 
-        var useMini = params.mini;
-        var mode = (params.mode) ? params.mode : null;
-        var html = '';
-
-        if (mode == 'lookup') {
-           html += "<div class=\"lookup-navigation";
-        }
-        else { 
-           html += "<div class=\"footer-navigation";
-        }
-        html += (useMini) ? " related-footer" : "";
-        html += "\">\n";
-        html += "<form class=\"form-inline\">\n";
-        html += "<button type=\"button\" class=\"previous btn btn-light";
-        html += (useMini) ? " btn-xs\" " : "\" ";
-        html += "id=\"previous_page_btn\" ";
-        html += "ng-click=\"prevSet('" + set + "','" + iterator + "')\" " +
-                "ng-disabled=\"" + iterator + "PrevUrl == null || " + iterator + "PrevUrl == undefined\"><i class=\"fa fa-caret-left\"></i> Prev</button>\n";
-        html += "<button type=\"button\" class=\"next btn btn-light";
-        html += (useMini) ? " btn-xs\" " : "\" ";
-        html += "id=\"next_page_btn\" ";
-        html += " ng-click=\"nextSet('" + set + "','" + iterator + "')\"" + 
-                "ng-disabled=\"" + iterator + "NextUrl == null || " + iterator + "NextUrl == undefined\">Next <i class=\"fa fa-caret-right\"></i></button>\n";
-        
-        if (mode != 'lookup') {
-           html += "<label class=\"page-size-label\">Rows per page: </label>\n";
-           html += "<select ng-model=\"" + iterator + "PageSize\" ng-change=\"changePageSize('" + 
-                    set + "'," + "'" + iterator + "')\" ";
-           html += "id=\"page_size_select\" ";
-           html += "class=\"page-size input-sm form-control\">\n";
-           html += "<option value=\"10\" selected>10</option>\n";
-           html += "<option value=\"20\" selected>20</option>\n";
-           html += "<option value=\"40\">40</option>\n";
-           html += "<option value=\"60\">60</option>\n";
-           html += "<option value=\"80\">80</option>\n";    
-           html += "</select>\n";
-        }
-
-        html += "<div class=\"page-number-small pull-right\" ng-show=\"" + iterator + "PageCount > 0\" ";
-        html += ">Page: {{ " + iterator + "Page + 1 }} of {{ " + iterator + "PageCount }}</div>\n";
-        html += "</form>\n";
+        var iterator = params.iterator;
+        var set = params.set;
+        var html = ''; 
+        html += "<!-- Paginate Widget -->\n";
+        html += "<div class=\"row page-row\">\n";
+        html += "<div class=\"col-lg-8\">\n";
+        html += "<ul class=\"pagination\" ng-hide=\"" + iterator + "Loading || " + iterator + "_num_pages <= 1\">\n";
+        html += "<li ng-hide=\"" + iterator + "_page -5 <= 1 \"><a href ng-click=\"getPage(1,'" + set + "','" + iterator + "')\">" + 
+            "<i class=\"fa fa-angle-double-left\"></i></a></li>\n";
+        html += "<li ng-hide=\"" + iterator + "_page -1 <= 0\"><a href " + 
+            "ng-click=\"getPage(" + iterator + "_page - 1,'" + set + "','" + iterator + "')\">" +
+            "<i class=\"fa fa-angle-left\"></i></a></li>\n";
+        html += "<li ng-repeat=\"page in " + iterator + "_page_range\" ng-class=\"pageIsActive(page,'" + iterator + "')\">" + 
+            "<a href ng-click=\"getPage(page,'" + set + "','" + iterator + "')\">{{ page }}</a></li>\n";
+        html += "<li ng-hide=\"" + iterator + "_page + 1 > " + iterator + "_num_pages\"><a href ng-click=\"" + 
+            "getPage(" + iterator + "_page + 1,'" + set + "','" + iterator + "')\"><i class=\"fa fa-angle-right\"></i></a></li>\n";
+        html += "<li ng-hide=\"" + iterator + "_page +4 >= " + iterator + "_num_pages\"><a href ng-click=\"" + 
+            "getPage(" + iterator + "_num_pages,'" + set + "','" + iterator + "')\"><i class=\"fa fa-angle-double-right\"></i></a></li>\n";
+        html += "</ul>\n";
+        html += "</div>\n";
+        html += "<div class=\"col-lg-4 col-md-4\" ng-hide=\"" + iterator + "_mode == 'lookup'\">\n";
+        html += "<div class=\"page-label\">\n";
+        html += "Page {{ " + iterator + "_page }} of {{ " + iterator + "_num_pages }} for {{ " + iterator + "_total_rows | number:0 }} " + set + '.';
+        html += "</div>\n";
+        html += "</div>\n";
         html += "</div>\n";
 
         return html;
-
         }
-        });
+        }]);
+    
+

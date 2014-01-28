@@ -300,7 +300,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        html += "\"";
        html += ">\n";
        if (list.index) {
-           html += "<td class=\"index-column hidden-xs\">{{ $index + (" + list.iterator + "Page * " + list.iterator + "PageSize) + 1 }}.</td>\n";
+           html += "<td class=\"index-column hidden-xs\">{{ $index + ((" + list.iterator + "_page - 1) * " + list.iterator + "_page_size) + 1 }}.</td>\n";
        }
        var cnt = 2;
        var base = (list.base) ? list.base : list.name;
@@ -391,10 +391,10 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
        
        if (list.name !== 'groups') {
            if ( options.mode == 'lookup' || (options.id && options.id == "form-modal-body") ) {
-               html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true, mode: 'lookup' });
+               html += PaginateWidget({ set: list.name, iterator: list.iterator });
            }
            else {
-               html += PaginateWidget({ set: list.name, iterator: list.iterator, mini: true });
+               html += PaginateWidget({ set: list.name, iterator: list.iterator });
            }
        }
 

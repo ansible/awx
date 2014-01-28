@@ -69,7 +69,7 @@ function Home ($scope, $compile, $routeParams, $rootScope, $location, Wait, Obje
         ObjectCount({ scope: $scope, target: 'container3', dashboard: data});
         });
     
-    $scope.showActivity = function() { Stream(); } 
+    $scope.showActivity = function() { Stream({ scope: $scope }); } 
 
     $scope.refresh = function() {
         Wait('start');
@@ -218,7 +218,7 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
    
     LoadBreadCrumbs();
     
-    scope.showActivity = function() { Stream(); }
+    scope.showActivity = function() { Stream({ scope: scope }); }
 
     scope.editGroup = function(group_id, inventory_id) { 
         GroupsEdit({ scope: scope, group_id: group_id, inventory_id: inventory_id, groups_reload: false });
@@ -328,7 +328,7 @@ function HomeHosts ($location, $routeParams, HomeHostList, GenerateList, Process
    
     LoadBreadCrumbs();
     
-    scope.showActivity = function() { Stream(); }
+    scope.showActivity = function() { Stream({ scope: scope }); }
 
     scope.toggle_host_enabled = function(id, sources) { ToggleHostEnabled({ host_id: id, external_source: sources, scope: scope }); }
 

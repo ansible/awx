@@ -28,7 +28,8 @@ angular.module('InventoryGroupsDefinition', [])
                 ngClick: "\{\{ 'showHosts(' + group.id + ',' + group.group_id + ', false)' \}\}",
                 ngClass: "group.selected_class",
                 hasChildren: true,
-                columnClass: 'col-lg-9 ellipsis',
+                columnClass: 'col-lg-9 col-md-9 col-sm-7 col-xs-7',
+                'class': 'ellipsis',
                 nosort: true,
                 awDroppable: "\{\{ group.isDroppable \}\}",
                 awDraggable: "\{\{ group.isDraggable \}\}",
@@ -41,7 +42,7 @@ angular.module('InventoryGroupsDefinition', [])
 
         actions: {
             
-            columnClass: 'col-lg-3',
+            columnClass: 'col-lg-3 col-md-3 col-sm-5 col-xs-5',
             
             create: {
                 mode: 'all',

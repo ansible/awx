@@ -8,9 +8,9 @@
  */
 
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'HostListDefinition',
-                                'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'HostsHelper',
-                                'InventoryHelper', 'RelatedSearchHelper','RelatedPaginateHelper', 
-                                'InventoryFormDefinition', 'SelectionHelper', 'HostGroupsFormDefinition'
+                                'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'AuthService', 'HostsHelper',
+                                'InventoryHelper', 'RelatedSearchHelper', 'InventoryFormDefinition', 'SelectionHelper', 
+                                'HostGroupsFormDefinition'
                                 ])
   
 

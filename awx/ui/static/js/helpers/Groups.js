@@ -10,7 +10,7 @@
 'use strict';
 
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
-                                 'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService', 'GroupsHelper',
+                                 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'AuthService', 'GroupsHelper',
                                  'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper', 'RefreshHelper',
                                  'PromptDialog', 'InventorySummaryHelpDefinition', 'CredentialsListDefinition',
                                  'InventoryTree'
