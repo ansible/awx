@@ -45,7 +45,7 @@ function UsersList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
 
     LoadBreadCrumbs();
     
-    scope.showActivity = function() { Stream(); } 
+    scope.showActivity = function() { Stream({ scope: scope }); } 
     
     scope.addUser = function() {
        $location.path($location.path() + '/add');
@@ -300,7 +300,7 @@ function UsersEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
                   });
           };
 
-       scope.showActivity = function() { Stream(); } 
+       scope.showActivity = function() { Stream({ scope: scope }); } 
 
        // Cancel
        scope.formReset = function() {

@@ -6,7 +6,7 @@
  */
  
 angular.module('TeamHelper', [ 'RestServices', 'Utilities', 'OrganizationListDefinition',
-                               'SearchHelper', 'PaginateHelper', 'ListGenerator' ])  
+                               'SearchHelper', 'PaginationHelpers', 'ListGenerator' ])  
     .factory('SetTeamListeners', ['Alert', 'Rest', function(Alert, Rest) {
     return function(params) {
  

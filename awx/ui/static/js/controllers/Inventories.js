@@ -129,7 +129,7 @@ function InventoriesList ($scope, $rootScope, $location, $log, $routeParams, Res
         }
         });
     
-    scope.showActivity = function() { Stream(); }
+    scope.showActivity = function() { Stream({ scope: scope }); }
 
     scope.addInventory = function() {
         $location.path($location.path() + '/add');
@@ -500,15 +500,10 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
     $scope.toggleHostEnabled = function(host_id, external_source) {
         ToggleHostEnabled({ scope: $scope, host_id: host_id, external_source: external_source });
         }
-    
-    $scope.showHostActivity = function() { 
-        var url = GetBasePath('activity_stream') + '?host__inventory__id=' + $scope.inventory_id;
-        Stream({ inventory_name: $scope.inventory_name, url: url });
-        }
 
     $scope.showGroupActivity = function() { 
         var url = GetBasePath('activity_stream') + '?group__inventory__id=' + $scope.inventory_id;
-        Stream({ inventory_name: $scope.inventory_name, url: url });
+        Stream({ scope: $scope, inventory_name: $scope.inventory_name, url: url });
         }
     
     $scope.showJobSummary = function(job_id) { 

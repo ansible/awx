@@ -8,10 +8,8 @@
  *  
  */
  
-angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationListDefinition',
-                                    'SearchHelper', 'PaginateHelper', 'ListGenerator', 'AuthService',
-                                    'InventoryHelper', 'RelatedSearchHelper', 'RelatedPaginateHelper',
-                                    'InventoryFormDefinition', 'ParseHelper'
+angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationListDefinition', 'ListGenerator', 'AuthService', 
+                                    'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper'
                                     ]) 
 
     .factory('SaveInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 

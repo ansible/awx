@@ -45,7 +45,7 @@ function TeamsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Ale
 
     LoadBreadCrumbs();
 
-    scope.showActivity = function() { Stream(); }
+    scope.showActivity = function() { Stream({ scope: scope }); }
     
     scope.addTeam = function() {
        $location.path($location.path() + '/add');
@@ -237,7 +237,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
                { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $routeParams.team_id + '. GET status: ' + status });
            });
 
-   scope.showActivity = function() { Stream(); }
+   scope.showActivity = function() { Stream({ scope: scope }); }
    
    // Save changes to the parent
    scope.formSave = function() {

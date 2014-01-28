@@ -140,7 +140,8 @@ angular.module('Utilities',['RestServices', 'Utilities'])
               if (form.fields[field].realName) {
                  if (data[form.fields[field].realName]) {
                     scope[field + '_api_error'] = data[form.fields[field]][0];
-                    scope[form.name + '_form'][form.fields[field].realName].$setValidity('apiError', false);
+                    //scope[form.name + '_form'][form.fields[field].realName].$setValidity('apiError', false);
+                    $('[name="' + form.fields[field].realName + '"]').addClass('ng-invalid');
                     fieldErrors = true;
                  }
               }
@@ -148,15 +149,16 @@ angular.module('Utilities',['RestServices', 'Utilities'])
                  if (data[field]) {
                     scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '_api_error'] = 
                         data[field][0];
-                    scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField].$setValidity('apiError', false);
+                    //scope[form.name + '_form'][form.fields[field].sourceModel + '_' + form.fields[field].sourceField].$setValidity('apiError', false);
+                    $('[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').addClass('ng-invalid');
                     fieldErrors = true;
                  }
               }
               else {
                  if (data[field]) {
-                    console.log('setting api error: ' + form.name + '_form.' + field);
                     scope[field + '_api_error'] = data[field][0];
-                    scope[form.name + '_form'][field].$setValidity('apiError', false);
+                    //scope[form.name + '_form'][field].$setValidity('apiError', false);
+                    $('[name="' + field + '"]').addClass('ng-invalid');
                     fieldErrors = true;
                  }
               }
@@ -523,6 +525,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
       }
       }])
    
+   
    /* Empty()
     *
     * Test if a value is 'empty'. Returns true if val is null | '' | undefined.
@@ -533,7 +536,40 @@ angular.module('Utilities',['RestServices', 'Utilities'])
    return function(val) {
        return (val === null || val === undefined || val === '') ? true : false;
        }
-       }]);
+       }])
+
+   
+   /* Store
+    *
+    * Wrapper for local storage. All local storage requests flow through here so that we can 
+    * stringify/unstringify objects and respond to future issues in one place. For example,
+    * we may at some point want to only use session storage rather than local storage. We might
+    * want to add a test for whether or not local/session storage exists for the browser, etc.
+    *
+    * store(key,value) will store the value using the key
+    *
+    * store(key) retrieves the value of the key
+    *
+    */
+    .factory('Store', ['Empty', function(Empty) { 
+    return function(key, value) {
+        if (!Empty(value)) {
+           // Store the value
+           localStorage[key] = JSON.stringify(value);
+        }
+        else if (!Empty(key)) {
+           // Return the value
+           var val = localStorage[key];
+           return (!Empty(val)) ? JSON.parse(val) : null;
+        }   
+    }
+    }])
+
+
+
+
+
+
 
 
 

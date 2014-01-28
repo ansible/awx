@@ -45,7 +45,7 @@ function OrganizationsList ($routeParams, $scope, $rootScope, $location, $log, R
     PaginateInit({ scope: scope, list: list, url: defaultUrl });
     scope.search(list.iterator);
 
-    scope.showActivity = function() { Stream(); } 
+    scope.showActivity = function() { Stream({ scope: scope }); } 
 
     scope.addOrganization = function() {
        $location.path($location.path() + '/add');
@@ -220,7 +220,7 @@ function OrganizationsEdit ($scope, $rootScope, $compile, $location, $log, $rout
               });
       };
 
-   scope.showActivity = function() { Stream(); } 
+   scope.showActivity = function() { Stream({ scope: scope }); } 
 
    // Reset the form
    scope.formReset = function() {

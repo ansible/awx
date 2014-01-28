@@ -14,7 +14,7 @@
  *      })
  */
  
-angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'PaginateHelper', 'ListGenerator', 'ApiLoader' ])  
+angular.module('LookUpHelper', [ 'RestServices', 'Utilities', 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'ApiLoader' ])  
     .factory('LookUpInit', ['Alert', 'Rest', 'GenerateList', 'SearchInit', 'PaginateInit', 'GetBasePath', 'FormatDate', 'Empty',
     function(Alert, Rest, GenerateList, SearchInit, PaginateInit, GetBasePath, FormatDate, Empty) {
     return function(params) {

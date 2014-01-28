@@ -160,7 +160,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
 
     LoadBreadCrumbs();
 
-    scope.showActivity = function() { Stream(); }
+    scope.showActivity = function() { Stream({ scope: scope }); }
     
     scope.addProject = function() {
        $location.path($location.path() + '/add');
@@ -642,7 +642,7 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
                });
        };
 
-   scope.showActivity = function() { Stream(); }
+   scope.showActivity = function() { Stream({ scope: scope }); }
 
    // Related set: Add button
    scope.add = function(set) {

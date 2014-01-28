@@ -82,7 +82,7 @@ function CredentialsList ($scope, $rootScope, $location, $log, $routeParams, Res
 
     LoadBreadCrumbs();
 
-    scope.showActivity = function() { Stream(); }
+    scope.showActivity = function() { Stream({ scope: scope }); }
     
     scope.addCredential = function() {
        $location.path($location.path() + '/add');
@@ -406,7 +406,7 @@ function CredentialsEdit ($scope, $rootScope, $compile, $location, $log, $routeP
        callback: 'choicesReadyCredential'
        });
 
-   scope.showActivity = function() { Stream(); }
+   scope.showActivity = function() { Stream({ scope: scope }); }
  
    // Save changes to the parent
    scope.formSave = function() { generator.clearApiErrors(); FormSave({ scope: scope, mode: 'edit' }) };

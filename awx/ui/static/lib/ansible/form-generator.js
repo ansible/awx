@@ -237,11 +237,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
             if (f.sourceModel) {
                 scope[f.sourceModel + '_' + f.sourceField] = '';
                 scope[f.sourceModel + '_' + f.sourceField + '_api_error'] = '';
-                scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField].$setValidity('apiError', true); 
+                if (scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField]) {
+                    scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField].$setValidity('apiError', true);
+                }
             }
             if (f.type == 'lookup' && scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField]) {
                 scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField].$setPristine();
-                scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField].$setValidity('apiError', true); 
+                scope[form.name + '_form'][f.sourceModel + '_' + f.sourceField].$setValidity('apiError', true);
             }
             if (scope[form.name + '_form'][fld]) {
                 scope[form.name + '_form'][fld].$setPristine();
@@ -361,12 +363,18 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        },
 
     clearApiErrors: function() {
-       for (fld in this.form.fields) {
+       for (var fld in this.form.fields) {
            if (this.form.fields[fld].sourceModel) {
               this.scope[this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '_api_error'] = '';
+              $('[name="' + this.form.fields[fld].sourceModel + '_' + this.form.fields[fld].sourceField + '"]').removeClass('ng-invalid');
+           }
+           else if (this.form.fields[fld].realName) {
+              this.scope[this.form.fields[fld].realName + '_api_error'] = '';
+              $('[name="' + this.form.fields[fld].realName + '"]').removeClass('ng-invalid');   
            }
            else {
-              this.scope[fld + '_api_error'] = '';  
+              this.scope[fld + '_api_error'] = ''; 
+              $('[name="' + fld + '"]').removeClass('ng-invalid');
            }
        }
        if (!this.scope.$$phase) {

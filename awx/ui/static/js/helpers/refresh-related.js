@@ -14,8 +14,9 @@
  *
  */
 
-angular.module('RefreshRelatedHelper', ['RestServices', 'Utilities'])  
-    .factory('RefreshRelated', ['ProcessErrors', 'Rest', 'Wait', function(ProcessErrors, Rest, Wait) {
+angular.module('RefreshRelatedHelper', ['RestServices', 'Utilities', 'PaginationHelpers'])  
+    .factory('RefreshRelated', ['ProcessErrors', 'Rest', 'Wait', 'PageRangeSetup', 
+    function(ProcessErrors, Rest, Wait, PageRangeSetup) {
     return function(params) {
         
         var scope = params.scope; 
@@ -26,22 +27,15 @@ angular.module('RefreshRelatedHelper', ['RestServices', 'Utilities'])
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
-                Wait('stop');
+                PageRangeSetup({ scope: scope, count: data.count, next: data.next, previous: data.previous, iterator: iterator });
                 scope[set] = data['results'];
-                scope[iterator + 'NextUrl'] = data.next;
-                scope[iterator + 'PrevUrl'] = data.previous;
-                scope[iterator + 'Count'] = data.count;
-                scope[iterator + 'PageCount'] = Math.ceil((data.count / scope[iterator + 'PageSize']));
-                //scope[iterator + 'SearchSpin'] = false;
                 scope[iterator + 'Loading'] = false;
                 scope[iterator + 'HoldInput'] = false;
+                Wait('stop');
                 scope.$emit('related' + set);
-                if (!params.scope.$$phase) {
-                   params.scope.$digest();
-                }
+                
                 })
             .error ( function(data, status, headers, config) {
-                //scope[iterator + 'SearchSpin'] = true;
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to retrieve ' + set + '. GET returned status: ' + status });
                 });

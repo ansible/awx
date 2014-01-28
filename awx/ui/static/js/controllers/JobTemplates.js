@@ -48,7 +48,7 @@ function JobTemplatesList ($scope, $rootScope, $location, $log, $routeParams, Re
 
     LoadBreadCrumbs();
     
-    scope.showActivity = function() { Stream(); }
+    scope.showActivity = function() { Stream({ scope: scope }); }
 
     scope.addJobTemplate = function() {
        $location.path($location.path() + '/add');
@@ -646,7 +646,7 @@ function JobTemplatesEdit ($scope, $rootScope, $compile, $location, $log, $route
        }
        };
 
-   scope.showActivity = function() { Stream(); }
+   scope.showActivity = function() { Stream({ scope: scope }); }
 
    // Cancel
    scope.formReset = function() {

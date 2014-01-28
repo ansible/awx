@@ -136,7 +136,6 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                     .success( function(data, status, headers, config) {
                         buildAllHosts(data);
                         buildGroups(data, 0, 0);
-                        //console.log(groups);
                         if (refresh) {
                             scope.groups = groups;
                             scope.$emit('GroupTreeRefreshed', inventory_name, groups, emit);
