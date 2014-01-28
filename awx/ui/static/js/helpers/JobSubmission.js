@@ -230,7 +230,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 extra_vars: data.extra_vars
                 })
                 .success( function(data, status, headers, config) {
-                    Wait('stop');
                     scope.job_id = data.id;
                     if (data.passwords_needed_to_start.length > 0) {
                        // Passwords needed. Prompt for passwords, then start job.
@@ -243,7 +242,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                     }
                     else {
                        // No passwords needed, start the job!
-                       Wait('start');
                        Rest.setUrl(data.related.start); 
                        Rest.post()
                            .success( function(data, status, headers, config) {
@@ -257,7 +255,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                                }
                                })
                            .error( function(data, status, headers, config) { 
-                               Wait('stop');
                                ProcessErrors(scope, data, status, null,
                                    { hdr: 'Error!', msg: 'Failed to start job. POST returned status: ' + status });
                                });
@@ -275,11 +272,11 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
         Rest.setUrl(url);
         Rest.get()
             .success( function(data, status, headers, config) {
-                Wait('stop');
                 // Create a job record
                 scope.credential = '';
                 if (data.credential == '' || data.credential == null) {
                    // Template does not have credential, prompt for one
+                   Wait('stop');
                    if (scope.credentialWatchRemove) {
                       scope.credentialWatchRemove();
                    }
@@ -309,7 +306,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 }
             })
             .error( function(data, status, headers, config) {
-                Wait('stop');
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get job template details. GET returned status: ' + status });
             });
@@ -394,7 +390,6 @@ angular.module('JobSubmissionHelper', [ 'RestServices', 'Utilities', 'Credential
                 }   
             })
             .error( function(data, status, headers, config) {
-                Wait('stop');
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Failed to get project update details: ' +  url + ' GET status: ' + status });
             });
