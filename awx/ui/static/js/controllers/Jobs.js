@@ -198,6 +198,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
    var master = {};
    var id = $routeParams.id;
    var relatedSets = {};
+   var loadingFinishedCount = 0;
    
    scope.job_id = id;
    scope.parseType = 'yaml';
@@ -213,44 +214,28 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                    for (var i=0; i < data.length; i++) {
                        scope.playbook_options.push(data[i]);
                    }
+                   scope.$emit('jobTemplateLoadFinished');
                    })
                .error( function(data, status, headers, config) {
-                   //ProcessErrors(scope, data, status, form,
-                   //    { hdr: 'Error!', msg: 'Failed to get playbook list for ' + url +'. GET returned status: ' + status });
-                   
-                   // Ignore the error. We get this error when the project or playbook has been deleted 
-
+                   scope.$emit('jobTemplateLoadFinished');
                    });
        }
+       else {
+           scope.$emit('jobTemplateLoadFinished');
+       }
        }
 
-   // Register a watcher on project_name. Refresh the playbook list on change.
-   if (scope.selectPlaybookUnregister) {
-      scope.selectPlaybookUnregister();
-   }
-   scope.selectPlaybookUnregister = scope.$watch('project_name', function(oldValue, newValue) {
-       if (oldValue !== newValue && newValue !== '' && newValue !== null && newValue !== undefined) {
-          scope.playbook = null;
-          getPlaybooks(scope.project);
-       }
-       });
 
-   
    // Retrieve each related set and populate the playbook list
    if (scope.jobLoadedRemove) {
       scope.jobLoadedRemove();
    }
    scope.jobLoadedRemove = scope.$on('jobLoaded', function(e, related_cloud_credential) {
        
-       scope[form.name + 'ReadOnly'] = (scope.status == 'new') ? false : true;
-       
-       // Load related sets
-       for (var set in relatedSets) {
-           scope.search(relatedSets[set].iterator);
-       }
-       // Set the playbook lookup
        getPlaybooks(scope.project);
 
+       scope[form.name + 'ReadOnly'] = (scope.status == 'new') ? false : true;
+       
        $('#forks-slider').slider("option", "value", scope.forks);
        $('#forks-slider').slider("disable");
        $('input[type="checkbox"]').attr('disabled','disabled');
@@ -271,6 +256,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                    default_val: dft
                    });
                scope['callback_url'] = data.related['callback'];
+               scope.$emit('jobTemplateLoadFinished');
                })
            .error( function(data, status, headers, config) {
                scope['callback_url'] = '<< Job template not found >>';
@@ -282,15 +268,29 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
            Rest.get()
                .success( function(data, status, headers, config) {
                    scope['cloud_credential_name'] = data.name;
+                   scope.$emit('jobTemplateLoadFinished');
                    })
                .error( function(data, status, headers, config) {
                    ProcessErrors(scope, data, status, null,
                        { hdr: 'Error!', msg: 'Failed to related cloud credential. GET returned status: ' + status });
                    });
        }
-       
-       Wait('stop');
+       else {
+           scope.$emit('jobTemplateLoadFinished');
+       }
+       });
 
+   // Turn off 'Wait' after both cloud credential and playbook list come back
+   if (scope.removeJobTemplateLoadFinished) {
+       scope.removeJobTemplateLoadFinished();
+   }
+   scope.removeJobTemplateLoadFinished = scope.$on('jobTemplateLoadFinished', function() {
+       loadingFinishedCount++;
+       if (loadingFinishedCount >= 3) {
+           // The initial template load finished. Now load related jobs, which 
+           // will turn off the 'working' spinner.
+           Wait('stop');
+       }
        });
 
    // Our job type options

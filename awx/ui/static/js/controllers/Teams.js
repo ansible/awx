@@ -200,7 +200,7 @@ function TeamsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams,
        });
 
    // Retrieve detail record and prepopulate the form
-   Wait('stop');
+   Wait('start');
    Rest.setUrl(defaultUrl + ':id/'); 
    Rest.get({ params: {id: id} })
        .success( function(data, status, headers, config) {

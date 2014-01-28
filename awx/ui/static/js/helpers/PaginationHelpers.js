@@ -52,8 +52,8 @@ angular.module('PaginationHelpers', ['Utilities', 'RefreshHelper', 'RefreshRelat
         }
         }])
 
-    .factory('RelatedPaginateInit', [ 'RefreshRelated', '$cookieStore', 
-    function(RefreshRelated, $cookieStore) {
+    .factory('RelatedPaginateInit', [ 'RefreshRelated', '$cookieStore', 'Wait',
+    function(RefreshRelated, $cookieStore, Wait) {
     return function(params) {
         
         var scope = params.scope;
@@ -80,7 +80,7 @@ angular.module('PaginationHelpers', ['Utilities', 'RefreshHelper', 'RefreshRelat
             new_url += (scope[iterator + 'SearchParams']) ? '&' + scope[iterator + 'SearchParams'] + 
                 '&page_size=' + scope[iterator + '_page_size' ] : 'page_size=' + scope[iterator + 'PageSize' ];
             Wait('start');
-            RefreshRefresh({ scope: scope, set: set, iterator: iterator, url: new_url });  
+            RefreshRelated({ scope: scope, set: set, iterator: iterator, url: new_url });  
             }
 
         scope.pageIsActive = function(page, iterator) {
