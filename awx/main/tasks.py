@@ -44,21 +44,33 @@ logger = logging.getLogger('awx.main.tasks')
 @task(bind=True)
 def handle_work_error(self, task_id, subtasks=None):
     print('Executing error task id %s, subtasks: %s' % (str(self.request.id), str(subtasks)))
+    first_task = None
+    first_task_type = ''
+    first_task_name = ''
     if subtasks is not None:
         for each_task in subtasks:
+            instance_name = ''
             if each_task['type'] == 'project_update':
                 instance = ProjectUpdate.objects.get(id=each_task['id'])
+                instance_name = instance.project.name
             elif each_task['type'] == 'inventory_update':
                 instance = InventoryUpdate.objects.get(id=each_task['id'])
-            elif each_task['type': 'job']:
+                instance_name = instance.inventory_source.inventory.name
+            elif each_task['type'] == 'job':
                 instance = Job.objects.get(id=each_task['id'])
+                instance_name = instance.job_template.name
             else:
                 # Unknown task type
                 break
-            if instance.celery_task_id != instance.celery_task_id:
+            if first_task is None:
+                first_task = instance
+                first_task_type = each_task['type']
+                first_task_name = instance_name
+            if instance.celery_task_id != task_id:
                 instance.status = 'failed'
                 instance.failed = True
-                instance.result_traceback = "Previous Task Failed: %s" % str(subtasks)
+                instance.result_traceback = "Previous Task Failed: %s for %s with celery task id: %s" % \
+                    (first_task_type, first_task_name, task_id)
                 instance.save()
 
 class BaseTask(Task):

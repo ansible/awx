@@ -368,7 +368,7 @@ class Job(CommonTask):
         if is_qs.count():
             for inventory_source in is_qs:
                 inventory_update_details = inventory_source.update_signature()
-                if not inventory_update:
+                if not inventory_update_details:
                     # TODO: Set error here
                     pass
                 else:
@@ -381,7 +381,7 @@ class Job(CommonTask):
             run_tasks.append(runnable_tasks[idx]['sig'].set(link_error=handle_work_error.s(subtasks=dependent_tasks)))
         run_tasks.append(task_class().si(self.pk, **opts).set(link_error=handle_work_error.s(subtasks=[thisjob])))
         print runnable_tasks
-        res = chain(runnable_tasks)()
+        res = chain(run_tasks)()
         return True
 
 class JobHostSummary(BaseModel):
