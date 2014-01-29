@@ -77,7 +77,7 @@ def get_ansible_version():
 
 def get_awx_version():
     '''
-    Return AWX version as reported by setuptools.
+    Return Ansible Tower version as reported by setuptools.
     '''
     from awx import __version__
     try:

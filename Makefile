@@ -72,12 +72,14 @@ requirements_pypi:
 	    sudo pip install -r requirements/dev.txt; \
 	fi
 
-# "Install" awx package in development mode.  Creates link to working
+# "Install" ansible-tower package in development mode.  Creates link to working
 # copy in site-packages and installs awx-manage command.
 develop:
 	@if [ "$(VIRTUAL_ENV)" ]; then \
+	    pip uninstall -y awx; \
 	    $(PYTHON) setup.py develop; \
 	else \
+	    sudo pip uninstall -y awx; \
 	    sudo $(PYTHON) setup.py develop; \
 	fi
 
