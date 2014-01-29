@@ -192,7 +192,7 @@ deb: sdist
 	(cd $(DEB_BUILD_DIR) && dh_make --indep --yes -f ../$(SDIST_TAR_FILE) -p ansible-tower-$(VERSION))
 	@rm -rf $(DEB_BUILD_DIR)/debian
 	@cp -a packaging/debian $(DEB_BUILD_DIR)/
-	@echo "ansible-tower_$(DEB_PKG_RELEASE).deb admin optional" > $(DEB_BUILD_DIR)/debian/realfiles
+	@echo "ansible-tower-$(DEB_PKG_RELEASE).deb admin optional" > $(DEB_BUILD_DIR)/debian/realfiles
 	(cd $(DEB_BUILD_DIR) && PKG_RELEASE=$(DEB_PKG_RELEASE) dpkg-buildpackage -nc -us -uc -b --changes-option="-fdebian/realfiles")
 
 packer_license:
