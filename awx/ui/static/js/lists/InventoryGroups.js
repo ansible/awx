@@ -29,7 +29,6 @@ angular.module('InventoryGroupsDefinition', [])
                 ngClass: "group.selected_class",
                 hasChildren: true,
                 columnClass: 'col-lg-9 col-md-9 col-sm-7 col-xs-7',
-                'class': 'ellipsis',
                 nosort: true,
                 awDroppable: "\{\{ group.isDroppable \}\}",
                 awDraggable: "\{\{ group.isDraggable \}\}",

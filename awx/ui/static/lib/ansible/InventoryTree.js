@@ -173,18 +173,21 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
     
 
     // Update a group with a set of properties 
-    .factory('UpdateGroup', [ function() {
+    .factory('UpdateGroup', ['ApplyEllipsis', function(ApplyEllipsis) {
         return function(params) {
             
             var scope = params.scope; 
             var group_id = params.group_id; 
             var properties = params.properties;   // object of key:value pairs to update
-            
+            var old_name;
             for (var i=0; i < scope.groups.length; i++) {
                 if (scope.groups[i].group_id == group_id) {
                     var grp = scope.groups[i]; 
                     for (var p in properties) {
-                        scope.groups[i][p] = properties[p]; 
+                        if (p == 'name') {
+                            old_name = scope.groups[i].name;
+                        }
+                        scope.groups[i][p] = properties[p];
                     }
                 }
                 if (scope.groups[i].id == scope.selected_tree_id) {
@@ -194,6 +197,15 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                     scope.hostSearchPlaceholder = 'Search ' + scope.groups[i].name;
                 }
             }
+
+            // Update any titles attributes created by ApplyEllipsis
+            if (old_name) {
+                setTimeout(function() { 
+                    $('#groups_table .group-name a[title="' + old_name + '"').attr('title',properties.name);
+                    ApplyEllipsis('#groups_table .group-name a');
+                    }, 2500);
+            }
+
             }
             }])
 

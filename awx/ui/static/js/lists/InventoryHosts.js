@@ -26,7 +26,7 @@ angular.module('InventoryHostsDefinition', [])
                 label: 'Hosts',
                 ngClick: "editHost(\{\{ host.id \}\})",
                 searchPlaceholder: "search_place_holder",
-                columnClass: 'col-lg-9 ellipsis',
+                columnClass: 'col-lg-9 col-md-9 col-sm-7 col-xs-7',
                 dataHostId: "\{\{ host.id \}\}",
                 dataType: "host",
                 awDraggable: "true"
@@ -91,6 +91,9 @@ angular.module('InventoryHostsDefinition', [])
             },
 
         actions: {
+
+            columnClass: 'col-lg-3 col-md-3 col-sm-5 col-xs-5',
+
             create: {
                 mode: 'all',
                 ngClick: "createHost()",

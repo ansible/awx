@@ -12,6 +12,20 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                                     'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper', 'SearchHelper'
                                     ]) 
 
+    .factory('WatchInventoryWindowResize', ['ApplyEllipsis', function(ApplyEllipsis) {
+    return function() {
+        // Call to set or restore window resize
+        var timeOut;
+        $(window).resize(function() {
+            clearTimeout(timeOut);
+            timeOut = setTimeout(function() {
+                ApplyEllipsis('#groups_table .group-name a');
+                ApplyEllipsis('#hosts_table .host-name a');
+                }, 100);
+            });    
+        }
+        }])
+
     .factory('SaveInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList', 
         'GetBasePath', 'ParseTypeChange', 'Wait',
     function(InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange, Wait) {
@@ -102,16 +116,12 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         var PreviousSearchParams = Store('CurrentSearchParams');
         
         form.well = false;
-        //form.formLabelSize = 'col-lg-3';
-        //form.formFieldSize = 'col-lg-9';
         
         var scope = generator.inject(form, {mode: 'edit', modal: true, related: false, modal_show: false });
         
         /* Reset form properties. Otherwise it screws up future requests of the Inventories detail page */
         form.well = true;
-        //delete form.formLabelSize;
-        //delete form.formFieldSize;
-
+        
         ParseTypeChange(scope,'inventory_variables', 'inventoryParseType');
         scope.inventoryParseType = 'yaml';
         scope.formModalActionLabel = 'Save';

@@ -66,7 +66,12 @@ body.modal-open {
 .ellipsis {
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;  
+    text-overflow: ellipsis;
+}
+
+.group-name {
+    display: inline-block;
+    width: 90%;
 }
 
 a {
@@ -193,20 +198,22 @@ textarea {
 }
 
 /* TB tooltip overrides */
-  
+  .popover-content, .popover-content {
+      width: 100%;
+  }
   .popover {
-    z-index: 2000;
+      z-index: 2000;
   }
 
   .tooltip {
-    z-index: 1050;
-    opacity: 1.0;
+      z-index: 1050;
+      opacity: 1.0;
   }
 
-  .alert {
+.alert {
     margin-top: 15px;
     margin-bottom: 15px;
-  }
+}
 
 hr {
   border-color: #e3e3e3;
@@ -1132,6 +1139,10 @@ input[type="checkbox"].checkbox-no-label {
   .draggable-clone {
       opacity: .60;
       font-weight: bold;
+      /*z-index: 2000;
+      overflow: visible;
+      whitespace: wrap;
+      text-overflow: clip;*/
   }
 
   .droppable-hover {
@@ -1139,7 +1150,10 @@ input[type="checkbox"].checkbox-no-label {
       color: @info-color;
       padding: 6px;
       border: 1px solid @info-border;
-      border-radius: 4px; 
+      border-radius: 4px;
+      /*overflow: visible;
+      whitespace: wrap;
+      text-overflow: clip;*/
   }
 
 

@@ -316,7 +316,7 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
                           GetSyncStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, 
                           Rest, ProcessErrors, InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find,
                           HostsCreate, EditInventoryProperties, HostsEdit, HostsDelete, ToggleHostEnabled, CopyMoveGroup, CopyMoveHost,
-                          Stream, GetBasePath, ShowJobSummary) 
+                          Stream, GetBasePath, ShowJobSummary, ApplyEllipsis, WatchInventoryWindowResize) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -360,6 +360,11 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         // Add hosts view
         $scope.show_failures = false;
         InjectHosts({ scope: $scope, inventory_id: $scope.inventory_id, tree_id: $scope.selected_tree_id, group_id: $scope.selected_group_id }); 
+        
+        // As the window shrinks and expands, apply ellipsis
+        setTimeout(function() { ApplyEllipsis('#groups_table .group-name a'); }, 2500); //give the window time to display
+        WatchInventoryWindowResize();
+
         });
    
 
@@ -368,6 +373,8 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         $scope.removeGroupTreeRefreshed();
     }
     $scope.removeGroupTreeRefreshed = $scope.$on('GroupTreeRefreshed', function(e, inventory_name, groups) {
+        // Reapply ellipsis to groups
+        setTimeout(function() { ApplyEllipsis('#groups_table .group-name a'); }, 2500);
         // Reselect the preveiously selected group node, causing host view to refresh.
         $scope.showHosts($scope.selected_tree_id, $scope.selected_group_id, false);
         });
@@ -525,12 +532,14 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
     //Load tree data for the first time
     BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: false });
 
+
 }
 
 InventoriesEdit.$inject = [ '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts', 
                             'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'GroupsDelete',
                             'Breadcrumbs', 'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren',
                             'ViewUpdateStatus', 'GroupsCancelUpdate', 'Find', 'HostsCreate', 'EditInventoryProperties', 'HostsEdit', 
-                            'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost', 'Stream', 'GetBasePath', 'ShowJobSummary'
+                            'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost', 'Stream', 'GetBasePath', 'ShowJobSummary',
+                            'ApplyEllipsis', 'WatchInventoryWindowResize'
                             ]; 
   
