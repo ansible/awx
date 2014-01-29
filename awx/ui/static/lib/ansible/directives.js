@@ -582,7 +582,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                                        found = true;
                                        break;
                                     }
-
                                 }
                                 return (found) ? false : true;
                             }

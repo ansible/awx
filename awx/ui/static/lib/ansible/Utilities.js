@@ -539,18 +539,18 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        }])
 
    
-   /* Store
-    *
-    * Wrapper for local storage. All local storage requests flow through here so that we can 
-    * stringify/unstringify objects and respond to future issues in one place. For example,
-    * we may at some point want to only use session storage rather than local storage. We might
-    * want to add a test for whether or not local/session storage exists for the browser, etc.
-    *
-    * store(key,value) will store the value using the key
-    *
-    * store(key) retrieves the value of the key
-    *
-    */
+    /* Store
+     *
+     * Wrapper for local storage. All local storage requests flow through here so that we can 
+     * stringify/unstringify objects and respond to future issues in one place. For example,
+     * we may at some point want to only use session storage rather than local storage. We might
+     * want to add a test for whether or not local/session storage exists for the browser, etc.
+     *
+     * store(key,value) will store the value using the key
+     *
+     * store(key) retrieves the value of the key
+     *
+     */
     .factory('Store', ['Empty', function(Empty) { 
     return function(key, value) {
         if (!Empty(value)) {
@@ -562,8 +562,59 @@ angular.module('Utilities',['RestServices', 'Utilities'])
            var val = localStorage[key];
            return (!Empty(val)) ? JSON.parse(val) : null;
         }   
-    }
-    }])
+        
+        }
+        }])
+
+    /*
+     *
+     * ApplyEllipsis()
+     *
+     */
+    .factory('ApplyEllipsis', [ function() {
+    return function(selector) {
+        // Add a hidden element to the DOM. We'll use this to calc the px length of 
+        // our target text.
+        var tmp = $('#string-test');
+        if (!tmp.length) {
+            $('body').append('<div style="display:none;" id="string-test"></div>');
+            tmp = $('#string-test');
+        }
+        // Find and process the text.
+        $(selector).each(function() {
+            var setTitle = true;
+            var txt;
+            if ($(this).attr('title')) {
+                txt = $(this).attr('title');
+                setTitle = false;
+            }
+            else { 
+                txt = $(this).text();
+            }
+            tmp.text(txt);
+            var w = tmp.width();   //text width
+            var pw = $(this).parent().width();   //parent width
+            if (w > pw) {
+                // text is wider than parent width
+                if (setTitle) {
+                    // Save the original text in the title
+                    $(this).attr('title',txt);
+                }
+                var cw = w / txt.length; // px width per character
+                var df = w - pw;  // difference in px
+                txt = txt.substr(0, txt.length - (Math.ceil(df / cw) + 3));
+                $(this).text(txt + '...');
+            }
+            if (pw > w && !setTitle) {
+                // the parent has expanded and we previously set the title text
+                var txt = $(this).attr('title');
+                $(this).text(txt);
+            }
+            });
+        
+        }
+        }]);
+        
 
 
 

@@ -341,10 +341,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
     .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'Wait', 'GetChoices',
-        'GetSourceTypeOptions', 'LookUpInit', 'BuildTree', 'SourceChange',
+        'GetSourceTypeOptions', 'LookUpInit', 'BuildTree', 'SourceChange', 'WatchInventoryWindowResize',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, ParseTypeChange, GroupsEdit, Wait, GetChoices, GetSourceTypeOptions, LookUpInit, BuildTree,
-        SourceChange) {
+        SourceChange, WatchInventoryWindowResize) {
     return function(params) {
 
         var inventory_id = params.inventory_id;
@@ -387,11 +387,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         }
         scope.removeSaveComplete = scope.$on('SaveComplete', function(e, group_id, error) {
             if (!error) {
-                if (scope.searchCleanup)
+                if (scope.searchCleanup) {
                     scope.searchCleanup();
+                }
                 scope.formModalActionDisabled = false;
                 scope.showGroupHelp = false;  //get rid of the Hint
                 BuildTree({ scope: parent_scope, inventory_id: inventory_id, refresh: true, new_group_id: group_id });
+                WatchInventoryWindowResize();
             }
             });
 
@@ -484,6 +486,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             if (scope.searchCleanup) {
                 scope.searchCleanup();
             }
+            WatchInventoryWindowResize();
             }
 
         // Save
@@ -589,9 +592,10 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm', 
         'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
         'GetUpdateIntervalOptions', 'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find',
+        'WatchInventoryWindowResize',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions,
-        LookUpInit, Empty, Wait, GetChoices, UpdateGroup, SourceChange, Find) {
+        LookUpInit, Empty, Wait, GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize) {
     return function(params) {
        
         var parent_scope = params.scope;
@@ -855,6 +859,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 else {
                     Wait('stop');
                 }
+                WatchInventoryWindowResize();
             }
             });
 
@@ -936,6 +941,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             if (scope.searchCleanup) {
                 scope.searchCleanup();
             }
+            WatchInventoryWindowResize();
             }
 
         // Save
@@ -1076,9 +1082,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
 
 
     .factory('ShowUpdateStatus', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm', 'Wait', 'Empty',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'FormatDate', 'InventoryStatusForm', 'Wait', 'Empty', 'WatchInventoryWindowResize',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, GenerateForm, Prompt, ProcessErrors, GetBasePath,
-          FormatDate, InventoryStatusForm, Wait, Empty) {
+          FormatDate, InventoryStatusForm, Wait, Empty, WatchInventoryWindowResize) {
     return function(params) {
 
         var group_name = params.group_name;
@@ -1102,9 +1108,15 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             scope.formModalAction = function() {
                 $('#form-modal').modal("hide");
                 if (parent_scope && parent_scope.showHosts && !Empty(tree_id)) {
-                    if (parent_scope.selected_tree_id !== tree_id)
+                    if (parent_scope.selected_tree_id !== tree_id) {
                         parent_scope.showHosts(tree_id, group_id, false);
+                    }
                 }
+                WatchInventoryWindowResize();
+                }
+
+            scope.cancelModal = function() {
+                WatchInventoryWindowResize();
                 }
 
             if (scope.removeUpdateStatusReady) {

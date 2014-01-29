@@ -471,9 +471,16 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             
            // Add collapse/expand icon  --used on job_events page
            if (list['hasChildren'] && field.hasChildren) {
-              html += "<span class=\"level-\{\{ " + list.iterator + ".event_level \}\}\"><a href=\"\" ng-click=\"\{\{ " + list.iterator + ".ngclick \}\}\"> " +
-                  "<i class=\"\{\{ " + list.iterator + ".ngicon \}\}\"></i></a> ";
-              //ng-show=\"'\{\{ " + list.iterator + ".related.children \}\}' !== ''\"
+               html += "<span class=\"level-\{\{ " + list.iterator + ".event_level \}\}\"><a href=\"\" ng-click=\"\{\{ " + list.iterator + ".ngclick \}\}\"> " +
+                   "<i class=\"\{\{ " + list.iterator + ".ngicon \}\}\"></i></a> ";
+               //ng-show=\"'\{\{ " + list.iterator + ".related.children \}\}' !== ''\"
+           }
+           
+           if (list.name == 'groups') {
+               html += "<div class=\"group-name\">";
+           }
+           if (list.name == 'hosts') {
+               html += "<div class=\"host-name\">";
            }
 
            // Start the Link
@@ -550,9 +557,14 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                 && options.mode != 'lookup' && options.mode != 'select' && !field.noLink && !field.ngBindHtml ) {
               html += "</a>";
            }
+     
+           if (list.name == 'hosts' || list.name == 'groups') {
+               html += "</div>";
+           }
+
            // close ngShow
            html += (field.ngShow) ? "</span>" : "";
-     
+
            // Specific to Job Events page -showing event detail/results
            html += (field.appendHTML) ? "<div ng-show=\"" +  field.appendHTML + " !== null\" " + 
                "ng-bind-html-unsafe=\"" + field.appendHTML + "\" " +

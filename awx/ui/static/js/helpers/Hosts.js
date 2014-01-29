@@ -77,21 +77,21 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                             return -1 * (a - b);  
                         });
                     title = "Recent Jobs";
-                    html = "<table class=\"table table-condensed\">\n";
+                    html = "<table class=\"table table-condensed\" style=\"width: 100%\">\n";
                     html += "<thead>\n";
                     html += "<tr>\n";
                     html += "<th>ID</td>\n";
-                    html += "<th>Status</td>\n";
-                    html += "<th>Name</td>\n";
+                    html += "<th class=\"text-center\">Status</td>\n";
+                    html += "<th style=\"width: 50%;\">Name</td>\n";
                     html += "</tr>\n";
                     html += "</thead>\n";
                     html += "<tbody>\n";
                     for (var j=0; j < jobs.length; j++) {
                          var job = jobs[j];     
                          html += "<tr>\n";
-                         html += "<td><a href=\"/#/jobs/" + job.id + "\">" + job.id + "</a></td>\n";
-                         html += "<td><a ng-click=\"showJobSummary(" + job.id + ")\"><i class=\"fa icon-job-" + job.status + "\"></i> " + job.status + "</a></td>\n";
-                         html += "<td>" + job.name + "</td>\n";
+                         html += "<td><a ng-click=\"showJobSummary(" + job.id + ")\">" + job.id + "</a></td>\n";
+                         html += "<td><a ng-click=\"showJobSummary(" + job.id + ")\"><i class=\"fa icon-job-" + job.status + "\"></i></a></td>\n";
+                         html += "<td class=\"ellipsis\">" + job.name + "</td>\n";
                          html += "</tr>\n";
                     }
                     html += "</tbody>\n";
@@ -128,8 +128,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         }])
     
     .factory('HostsReload', [ '$routeParams', 'Empty', 'InventoryHosts', 'GetBasePath', 'SearchInit', 'PaginateInit', 'Wait', 
-    'SetHostStatus', 'SetStatus', 
-    function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus, SetStatus) {
+    'SetHostStatus', 'SetStatus', 'ApplyEllipsis',
+    function($routeParams, Empty, InventoryHosts, GetBasePath, SearchInit, PaginateInit, Wait, SetHostStatus, SetStatus,
+    ApplyEllipsis) {
     return function(params) {
         
         var scope = params.scope;
@@ -153,6 +154,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                 //SetHostStatus(scope.hosts[i]);
             }
             SetStatus({ scope: scope });
+            setTimeout(function() { ApplyEllipsis('#hosts_table .host-name a'); }, 2500);
             Wait('stop');
             scope.$emit('HostReloadComplete');
             });
@@ -304,9 +306,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
 
 
     .factory('HostsCreate', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'WatchInventoryWindowResize',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, HostsReload, ParseTypeChange, Wait) {
+        GetBasePath, HostsReload, ParseTypeChange, Wait, WatchInventoryWindowResize) {
     return function(params) {
         
         var parent_scope = params.scope;
@@ -349,11 +351,14 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.removeHostSaveComplete = scope.$on('HostSaveComplete', function() {
             Wait('stop');
             $('#form-modal').modal('hide');
+            
             HostsReload({
                 scope: parent_scope,
                 group_id: parent_scope.selected_group_id,
                 tree_id: parent_scope.selected_tree_id,
                 inventory_id: parent_scope.inventory_id });
+
+            WatchInventoryWindowResize();
             });
 
         // Save
@@ -417,15 +422,20 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            // Defaults
            generator.reset();
            }; 
-
+        
+        scope.cancelModal = function() {
+           WatchInventoryWindowResize();
+           }
+       
         }
         }])
 
 
     .factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm', 
-        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find', 'SetStatus',
+        'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find', 'SetStatus', 'ApplyEllipsis',
+        'WatchInventoryWindowResize',
     function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetStatus) {
+        GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetStatus, ApplyEllipsis, WatchInventoryWindowResize) {
     return function(params) {
         
         var parent_scope = params.scope;
@@ -513,13 +523,29 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
         scope.removeSaveCompleted = scope.$on('saveCompleted', function() {
             // Update the name on the list
             var host = Find({ list: parent_scope.hosts, key: 'id', val: host_id });
+            var old_name = host.name;
             host.name = scope.name;
             host.enabled = scope.enabled;
             host.enabled_flag = scope.enabled;
             SetStatus({ scope: parent_scope, host: host });
-            // Close modal
-            Wait('stop');
-            $('#form-modal').modal('hide');
+
+            // Update any titles attributes created by ApplyEllipsis
+            if (old_name) {
+                setTimeout(function() { 
+                    $('#hosts_table .host-name a[title="' + old_name + '"').attr('title', host.name);
+                    ApplyEllipsis('#hosts_table .host-name a');
+                    // Close modal
+                    Wait('stop');
+                    $('#form-modal').modal('hide');
+                    }, 2000);
+            }
+            else {
+                // Close modal
+                Wait('stop');
+                $('#form-modal').modal('hide');
+            }
+            // Restore ellipsis response to window resize
+            WatchInventoryWindowResize();
             });
 
         // Save changes to the parent
@@ -580,6 +606,11 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
            }
            scope.parseType = 'yaml';
            }
+
+        scope.cancelModal = function() {
+           WatchInventoryWindowResize();
+           }
+           
         }
         }])
 
