@@ -131,7 +131,7 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
                Prompt({
                    hdr: 'Tower Licensing',
                    body: "<p>Ansible Tower licenses can be purchased or extended by visiting <a id=\"license-link\" " +
-                       "href=\"http://store.ansible.com\" target=\"_blank\">" +
+                       "href=\"http://www.ansible.com/ansible-pricing\" target=\"_blank\">" +
                        "the Ansible online store</a>. Would you like to purchase or extend your license now?</p>",
                    'class': 'btn-primary', 
                    action: function() { 
