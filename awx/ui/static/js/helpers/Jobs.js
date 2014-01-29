@@ -7,7 +7,7 @@
  *  
  */
 
-angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinition'])
+angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper'])
 
     .factory('JobStatusToolTip', [ function() {
     return function(status) {
@@ -41,7 +41,8 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
         }])
 
     .factory('ShowJobSummary', ['Rest', 'Wait', 'GetBasePath', 'FormatDate', 'ProcessErrors', 'GenerateForm', 'JobSummary',
-    function(Rest, Wait, GetBasePath, FormatDate, ProcessErrors, GenerateForm, JobSummary) {
+    'WatchInventoryWindowResize',
+    function(Rest, Wait, GetBasePath, FormatDate, ProcessErrors, GenerateForm, JobSummary, WatchInventoryWindowResize) {
     return function(params) {
         // Display status info in a modal dialog- called from inventory edit page
         
@@ -109,6 +110,7 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
                     });
                 $('#status-modal-dialog').dialog('destroy');
                 $('#inventory-modal-container').empty();
+                WatchInventoryWindowResize();
                 },
             open: function(e, ui) {
                 Wait('stop');
