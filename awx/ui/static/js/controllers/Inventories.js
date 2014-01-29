@@ -521,10 +521,26 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         }
 
     $scope.showGroupActivity = function() { 
-        var url = GetBasePath('activity_stream') + '?group__inventory__id=' + $scope.inventory_id;
-        Stream({ scope: $scope, inventory_name: $scope.inventory_name, url: url });
+        var url, title, group;
+        if ($scope.selected_group_id) {
+            group = Find({ list: $scope.groups, key: 'id', val: $scope.selected_tree_id });
+            url = GetBasePath('activity_stream') + '?group__id=' + $scope.selected_group_id;
+            title = 'Showing all activities for group ' + group.name;
+        }
+        else {
+            title = 'Showing all activities for all ' + $scope.inventory_name + ' groups';
+            url = GetBasePath('activity_stream') + '?group__inventory__id=' + $scope.inventory_id;
+        }
+        Stream({ scope: $scope, inventory_name: $scope.inventory_name, url: url, title: title });
         }
     
+    $scope.showHostActivity = function() { 
+        var url, title;
+        title = 'Showing all activities for all ' + $scope.inventory_name + ' hosts';
+        url = GetBasePath('activity_stream') + '?host__inventory__id=' + $scope.inventory_id;
+        Stream({ scope: $scope, inventory_name: $scope.inventory_name, url: url, title: title });
+        }
+
     $scope.showJobSummary = function(job_id) { 
         ShowJobSummary({ job_id: job_id });
         }

@@ -100,7 +100,13 @@ angular.module('InventoryHostsDefinition', [])
                 ngHide: 'selected_tree_id == 1',   //disable when 'All Hosts' selected
                 awToolTip: "Create a new host"
                 },
-             help: {
+            stream: {
+                ngClick: "showHostActivity()",
+                awToolTip: "View Activity Stream",
+                mode: 'all',
+                ngShow: "user_is_superuser"
+                },
+            help: {
                 mode: 'all',
                 awToolTip:
                     //"<div style=\"text-align:left;\"><img src=\"/static/img/cow.png\" style=\"width:50px; height:56px; float:left; padding-right:5px;\">" +

@@ -147,6 +147,15 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            html += "<div class=\"well\">\n";
        }
        
+       if (options.activityStream) {
+           // Add a title row
+           html += "<div class=\"row\">\n";
+           html += "<div class=\"col-lg-12\">\n"; 
+           html += "<h5>{{ streamTitle }}</h5>\n";
+           html += "</div>\n";
+           html += "</div>\n";
+       }
+
        html += "<div class=\"row\">\n";
            
        if (list.name != 'groups') {

@@ -189,14 +189,17 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         }
         else if (obj1) {
             name = '';
+            var name_nolink = '';
             // find the name in changes, if needed
             if ( !(obj1_obj && obj1_obj.name) || obj1_obj && obj1_obj.name && /^_delete/.test(obj1_obj.name) ) {
                 if (activity.changes && activity.changes.name) {
                     if (typeof activity.changes.name == 'string') {
                         name = ' ' + activity.changes.name;
+                        name_nolink = name;
                     }
                     else if (typeof activity.changes.name == 'object' && Array.isArray(activity.changes.name)) {
-                        name = ' ' + activity.changes.name[0]
+                        name = ' ' + activity.changes.name[0];
+                        name_nolink = name;
                     }
                 }
                 else if (obj1 == 'job' && obj1_obj && activity.changes && activity.changes.job_template) {
@@ -204,9 +207,11 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     if (activity.operation != 'delete') {
                         obj1_obj['base'] = obj1;
                         name = ' ' + '<a href=\"' + BuildUrl(obj1_obj) + '\">'+ obj1_obj.id + ' ' + activity.changes.job_template + '</a>';
+                        name_nolink = ' ' + obj1_obj.id + ' ' + activity.changes.job_template;
                     }
                     else {
                         name = ' ' + obj1_obj.id + ' ' + activity.changes.job_template;
+                        name_nolink = name;
                     }
                 }
                 else if (obj1 == 'job' && obj1_obj) {
@@ -214,17 +219,20 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     if (activity.operation != 'delete') {
                         obj1_obj['base'] = obj1;
                         name = ' ' + '<a href=\"' + BuildUrl(obj1_obj) + '\">' + obj1_obj.id + '</a>';
+                        name_nolink = ' ' + obj1_obj.id;
                     }
                     else {
                         name = ' ' + obj1_obj.id;
+                        name_nolink = name;
                     }
                 }
             }
             else if (obj1_obj && obj1_obj.name) {
                 name = ' ' + stripDeleted(obj1_obj.name);
+                name_nolink = name;
             }
             descr += obj1 + name;
-            descr_nolink += obj1 + name;
+            descr_nolink += obj1 + name_nolink;
         }
         activity['description'] = descr;
         activity['description_nolink'] = descr_nolink;
@@ -301,10 +309,10 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         var PreviousSearchParams = Store('CurrentSearchParams');
 
         // pass in an inventory name to fix breadcrumb display
-        var inventory_name = (params) ? params.inventory_name : null;
+        var inventory_name = (params && params.inventory_name) ? params.inventory_name : null;
 
         // url will override the attempt to compute an activity_stream query
-        var url = (params) ? params.url : null;
+        var url = (params && params.url) ? params.url : null;
         
         $rootScope.flashMessage = null;
         
@@ -357,6 +365,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             secondWidget: true,
             activityStream: true
             });
+
+        // descriptive title describing what AS is showing
+        scope.streamTitle = (params && params.title) ? params.title : null;
         
         scope.closeStream = function(inUrl) { 
             HideStream();
