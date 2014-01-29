@@ -462,12 +462,12 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self.assertEqual(inventory_source.inventory_updates.count(), 1)
         inventory_update = inventory_source.inventory_updates.all()[0]
         self.assertEqual(inventory_update.status, 'successful')
-        for host in inventory.hosts.all():
+        for host in inventory.hosts.filter(active=True):
             if host.pk in (except_host_pks or []):
                 continue
             source_pks = host.inventory_sources.values_list('pk', flat=True)
             self.assertTrue(inventory_source.pk in source_pks)
-        for group in inventory.groups.all():
+        for group in inventory.groups.filter(active=True):
             if group.pk in (except_group_pks or []):
                 continue
             source_pks = group.inventory_sources.values_list('pk', flat=True)
@@ -619,20 +619,20 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                                     'lbservers'])
         if overwrite:
             expected_group_names.remove('lbservers')
-        group_names = set(new_inv.groups.values_list('name', flat=True))
+        group_names = set(new_inv.groups.filter(active=True).values_list('name', flat=True))
         self.assertEqual(expected_group_names, group_names)
         expected_host_names = set(['web1.example.com', 'web2.example.com',
                                    'web3.example.com', 'db1.example.com',
                                    'db2.example.com', 'lb.example.com'])
         if overwrite:
             expected_host_names.remove('lb.example.com')
-        host_names = set(new_inv.hosts.values_list('name', flat=True))
+        host_names = set(new_inv.hosts.filter(active=True).values_list('name', flat=True))
         self.assertEqual(expected_host_names, host_names)
         expected_inv_vars = {'vara': 'A', 'varc': 'C'}
         if overwrite or overwrite_vars:
             expected_inv_vars.pop('varc')
         self.assertEqual(new_inv.variables_dict, expected_inv_vars)
-        for host in new_inv.hosts.all():
+        for host in new_inv.hosts.filter(active=True):
             if host.name == 'web1.example.com':
                 self.assertEqual(host.variables_dict,
                                 {'ansible_ssh_host': 'w1.example.net'})
@@ -642,35 +642,35 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
                 self.assertEqual(host.variables_dict, {'lbvar': 'ni!'})
             else:
                 self.assertEqual(host.variables_dict, {})
-        for group in new_inv.groups.all():
+        for group in new_inv.groups.filter(active=True):
             if group.name == 'servers':
                 expected_vars = {'varb': 'B', 'vard': 'D'}
                 if overwrite or overwrite_vars:
                     expected_vars.pop('vard')
                 self.assertEqual(group.variables_dict, expected_vars)
-                children = set(group.children.values_list('name', flat=True))
+                children = set(group.children.filter(active=True).values_list('name', flat=True))
                 expected_children = set(['dbservers', 'webservers', 'lbservers'])
                 if overwrite:
                     expected_children.remove('lbservers')
                 self.assertEqual(children, expected_children)
-                self.assertEqual(group.hosts.count(), 0)
+                self.assertEqual(group.hosts.filter(active=True).count(), 0)
             elif group.name == 'dbservers':
                 self.assertEqual(group.variables_dict, {'dbvar': 'ugh'})
-                self.assertEqual(group.children.count(), 0)
-                hosts = set(group.hosts.values_list('name', flat=True))
+                self.assertEqual(group.children.filter(active=True).count(), 0)
+                hosts = set(group.hosts.filter(active=True).values_list('name', flat=True))
                 host_names = set(['db1.example.com','db2.example.com'])
                 self.assertEqual(hosts, host_names)                
             elif group.name == 'webservers':
                 self.assertEqual(group.variables_dict, {'webvar': 'blah'})
-                self.assertEqual(group.children.count(), 0)
-                hosts = set(group.hosts.values_list('name', flat=True))
+                self.assertEqual(group.children.filter(active=True).count(), 0)
+                hosts = set(group.hosts.filter(active=True).values_list('name', flat=True))
                 host_names = set(['web1.example.com','web2.example.com',
                                   'web3.example.com'])
                 self.assertEqual(hosts, host_names)
             elif group.name == 'lbservers':
                 self.assertEqual(group.variables_dict, {})
-                self.assertEqual(group.children.count(), 0)
-                hosts = set(group.hosts.values_list('name', flat=True))
+                self.assertEqual(group.children.filter(active=True).count(), 0)
+                hosts = set(group.hosts.filter(active=True).values_list('name', flat=True))
                 host_names = set(['lb.example.com'])
                 self.assertEqual(hosts, host_names)
         if overwrite:
