@@ -15,20 +15,20 @@ PACKER_LICENSE_FILE ?= test.json
 
 ifneq ($(OFFICIAL),yes)
 BUILD=dev$(DATE)
-SDIST_TAR_FILE=awx-$(VERSION)-$(BUILD).tar.gz
-SETUP_TAR_NAME=awx-setup-$(VERSION)-$(BUILD)
+SDIST_TAR_FILE=ansible-tower-$(VERSION)-$(BUILD).tar.gz
+SETUP_TAR_NAME=ansible-tower-setup-$(VERSION)-$(BUILD)
 RPM_PKG_RELEASE=$(BUILD)
-DEB_BUILD_DIR=deb-build/awx-$(VERSION)-$(BUILD)
+DEB_BUILD_DIR=deb-build/ansible-tower-$(VERSION)-$(BUILD)
 DEB_PKG_RELEASE=$(VERSION)-$(BUILD)
-PACKER_BUILD_OPTS=-var-file=vars-awxkeys.json -var-file=vars-nightly.json
+PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-nightly.json
 else
 BUILD=
-SDIST_TAR_FILE=awx-$(VERSION).tar.gz
-SETUP_TAR_NAME=awx-setup-$(VERSION)
+SDIST_TAR_FILE=ansible-tower-$(VERSION).tar.gz
+SETUP_TAR_NAME=ansible-tower-setup-$(VERSION)
 RPM_PKG_RELEASE=$(RELEASE)
-DEB_BUILD_DIR=deb-build/awx-$(VERSION)
+DEB_BUILD_DIR=deb-build/ansible-tower-$(VERSION)
 DEB_PKG_RELEASE=$(VERSION)-$(RELEASE)
-PACKER_BUILD_OPTS=-var-file=vars-awxkeys.json -var-file=vars-release.json
+PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-release.json
 endif
 
 .PHONY: clean rebase push requirements requirements_pypi develop refresh \
@@ -168,13 +168,13 @@ sdist: clean minjs
 rpmtar: sdist
 	if [ "$(OFFICIAL)" != "yes" ] ; then \
 	   (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
-	   (cd dist/ && mv awx-$(VERSION)-$(BUILD) awx-$(VERSION)) ; \
-	   (cd dist/ && tar czf awx-$(VERSION).tar.gz awx-$(VERSION)) ; \
+	   (cd dist/ && mv ansible-tower-$(VERSION)-$(BUILD) ansible-tower-$(VERSION)) ; \
+	   (cd dist/ && tar czf ansible-tower-$(VERSION).tar.gz ansible-tower-$(VERSION)) ; \
 	fi
 
 rpm: rpmtar
 	@mkdir -p rpm-build
-	@cp dist/awx-$(VERSION).tar.gz rpm-build/
+	@cp dist/ansible-tower-$(VERSION).tar.gz rpm-build/
 	@rpmbuild --define "_topdir %(pwd)/rpm-build" \
 	--define "_builddir %{_topdir}" \
 	--define "_rpmdir %{_topdir}" \
@@ -183,23 +183,23 @@ rpm: rpmtar
 	--define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
 	--define "_sourcedir  %{_topdir}" \
 	--define "_pkgrelease  $(RPM_PKG_RELEASE)" \
-	-ba packaging/rpm/awx.spec
+	-ba packaging/rpm/ansible-tower.spec
 
 deb: sdist
 	@mkdir -p deb-build
 	@cp dist/$(SDIST_TAR_FILE) deb-build/
 	(cd deb-build && tar zxf $(SDIST_TAR_FILE))
-	(cd $(DEB_BUILD_DIR) && dh_make --indep --yes -f ../$(SDIST_TAR_FILE) -p awx-$(VERSION))
+	(cd $(DEB_BUILD_DIR) && dh_make --indep --yes -f ../$(SDIST_TAR_FILE) -p ansible-tower-$(VERSION))
 	@rm -rf $(DEB_BUILD_DIR)/debian
 	@cp -a packaging/debian $(DEB_BUILD_DIR)/
-	@echo "awx_$(DEB_PKG_RELEASE).deb admin optional" > $(DEB_BUILD_DIR)/debian/realfiles
+	@echo "ansible-tower_$(DEB_PKG_RELEASE).deb admin optional" > $(DEB_BUILD_DIR)/debian/realfiles
 	(cd $(DEB_BUILD_DIR) && PKG_RELEASE=$(DEB_PKG_RELEASE) dpkg-buildpackage -nc -us -uc -b --changes-option="-fdebian/realfiles")
 
 packer_license:
 	@python -c "import json; fp = open('packaging/ami/license/$(PACKER_LICENSE_FILE)', 'w+'); json.dump(dict(instance_count=$(LICENSE_TIER)), fp); fp.close();"
 
 ami: packer_license
-	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_license=$(PACKER_LICENSE_FILE)" awx.json)
+	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_license=$(PACKER_LICENSE_FILE)" ansible-tower.json)
 
 install:
 	$(PYTHON) setup.py install egg_info -b ""

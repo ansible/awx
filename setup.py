@@ -105,11 +105,11 @@ class sdist_awx(_sdist, object):
         super(sdist_awx, self).make_distribution()
 
 setup(
-    name='awx',
+    name='ansible-tower',
     version=__version__.split("-")[0], # FIXME: Should keep full version here?
-    author='AnsibleWorks, Inc.',
-    author_email='support@ansibleworks.com',
-    description='AWX: API, UI and Task Engine for Ansible',
+    author='Ansible, Inc.',
+    author_email='support@ansible.com',
+    description='ansible-tower: API, UI and Task Engine for Ansible',
     long_description='AWX provides a web-based user interface, REST API and '
                      'task engine built on top of Ansible',
     license='Proprietary',
