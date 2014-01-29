@@ -50,7 +50,7 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
         var license = $cookieStore.get('license');
         
         var purchase_msg = '<p>To purchase a license or extend an existing license ' +
-            '<a href="http://store.ansibleworks.com" target="_blank"><strong>visit the Ansible online store</strong></a>, ' +
+            '<a href="http://www.ansible.com/ansible-pricing" target="_blank"><strong>visit the Ansible online store</strong></a>, ' +
             'or visit <a href="https://support.ansible.com/anonymous_requests/new">support.ansible.com</a> for assistance.</p>';
 
         if (license && !Authorization.licenseTested()) {
