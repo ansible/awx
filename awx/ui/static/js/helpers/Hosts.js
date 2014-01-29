@@ -82,7 +82,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     html += "<tr>\n";
                     html += "<th>ID</td>\n";
                     html += "<th class=\"text-center\">Status</td>\n";
-                    html += "<th style=\"width: 50%;\">Name</td>\n";
+                    html += "<th>Name</td>\n";
                     html += "</tr>\n";
                     html += "</thead>\n";
                     html += "<tbody>\n";
@@ -90,8 +90,8 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                          var job = jobs[j];     
                          html += "<tr>\n";
                          html += "<td><a ng-click=\"showJobSummary(" + job.id + ")\">" + job.id + "</a></td>\n";
-                         html += "<td><a ng-click=\"showJobSummary(" + job.id + ")\"><i class=\"fa icon-job-" + job.status + "\"></i></a></td>\n";
-                         html += "<td class=\"ellipsis\">" + job.name + "</td>\n";
+                         html += "<td class=\"text-center\"><a ng-click=\"showJobSummary(" + job.id + ")\"><i class=\"fa icon-job-" + job.status + "\"></i></a></td>\n";
+                         html += "<td>" + job.name + "</td>\n";
                          html += "</tr>\n";
                     }
                     html += "</tbody>\n";
