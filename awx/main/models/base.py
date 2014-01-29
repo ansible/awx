@@ -367,6 +367,8 @@ class CommonTask(PrimordialModel):
         return []
 
     def start_signature(self, **kwargs):
+        from awx.main.tasks import handle_work_error
+
         task_class = self._get_task_class()
         if not self.can_start:
             return False

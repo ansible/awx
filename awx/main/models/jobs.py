@@ -335,6 +335,7 @@ class Job(CommonTask):
         return self._get_hosts(job_host_summaries__processed__gt=0)
 
     def start(self, **kwargs):
+        from awx.main.tasks import handle_work_error
         task_class = self._get_task_class()
         if not self.can_start:
             return False
@@ -348,6 +349,7 @@ class Job(CommonTask):
         transaction.commit()
 
         runnable_tasks = []
+        run_tasks = []
         inventory_updates_actual = []
         project_update_actual = None
 
@@ -355,28 +357,29 @@ class Job(CommonTask):
         inventory = self.inventory
         is_qs = inventory.inventory_sources.filter(active=True, update_on_launch=True)
         if project.scm_update_on_launch:
-            # TODO: We assume these return a tuple but not on error
-            project_update, project_update_sig = project.update_signature()
-            if not project_update:
+            project_update_details = project.update_signature()
+            if not project_update_details:
                 # TODO: Set error here
                 pass
             else:
-                project_update_actual = project_update
-                # TODO: append a callback to gather the status?
-                runnable_tasks.append(project_update_sig)
-                # TODO: need to add celery task id to proj update instance
+                runnable_tasks.append({'obj': project_update_details[0],
+                                       'sig': project_update_details[1],
+                                       'type': 'project_update'})
         if is_qs.count():
             for inventory_source in is_qs:
-                # TODO: We assume these return a tuple but not on error
-                inventory_update, inventory_update_sig = inventory_source.update_signature()
+                inventory_update_details = inventory_source.update_signature()
                 if not inventory_update:
                     # TODO: Set error here
                     pass
                 else:
-                    inventory_updates_actual.append(inventory_update)
-                    runnable_tasks.append(inventory_update_sig)
-        job_actual = task_class().si(self.pk, **opts)
-        runnable_tasks.append(job_actual)
+                    runnable_tasks.append({'obj': inventory_update_details[0],
+                                           'sig': inventory_update_details[1],
+                                           'type': 'inventory_update'})
+        thisjob = {'type': 'job', 'id': self.id}
+        for idx in xrange(len(runnable_tasks)):
+            dependent_tasks = [{'type': r['type'], 'id': r['obj'].id} for r in runnable_tasks[idx:]] + [thisjob]
+            run_tasks.append(runnable_tasks[idx]['sig'].set(link_error=handle_work_error.s(subtasks=dependent_tasks)))
+        run_tasks.append(task_class().si(self.pk, **opts).set(link_error=handle_work_error.s(subtasks=[thisjob])))
         print runnable_tasks
         res = chain(runnable_tasks)()
         return True
