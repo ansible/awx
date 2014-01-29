@@ -126,7 +126,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            // before navigation
            html += "<div class=\"nav-path\">\n";
            html += "<ul class=\"breadcrumb\">\n";
-           html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" ng-click=\"crumb.ngClick\">{{ crumb.title | capitalize }}</a></li>\n";
+           html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" ng-click=\"\{\{ crumb.ngClick \}\}\">{{ crumb.title | capitalize }}</a></li>\n";
            html += "<li class=\"active\">";
            html += list.editTitle;
            html += "</li>\n</ul>\n</div>\n";
