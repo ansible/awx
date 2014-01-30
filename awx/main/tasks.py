@@ -105,7 +105,9 @@ class BaseTask(Task):
                     transaction.commit()
                     save_succeeded = True
             except DatabaseError as e:
-                logger.debug("Database error encountered, retrying: " + str(e))
+                transaction.rollback()
+                logger.debug("Database error encountered, retrying in 5 seconds: " + str(e))
+                time.sleep(5)
                 save_succeeded = False
             finally:
                 if save_succeeded:
@@ -448,7 +450,7 @@ class RunJob(BaseTask):
         return cwd
 
     def get_idle_timeout(self):
-        return getattr(settings, 'JOB_RUN_IDLE_TIMEOUT', 300)
+        return getattr(settings, 'JOB_RUN_IDLE_TIMEOUT', None)
 
     def get_password_prompts(self):
         d = super(RunJob, self).get_password_prompts()
@@ -818,7 +820,7 @@ class RunInventoryUpdate(BaseTask):
         return self.get_path_to('..', 'plugins', 'inventory')
 
     def get_idle_timeout(self):
-        return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', 300)
+        return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', None)
 
     def pre_run_check(self, inventory_update, **kwargs):
         '''
