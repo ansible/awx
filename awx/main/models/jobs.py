@@ -391,7 +391,6 @@ class Job(CommonTask):
             dependent_tasks = [{'type': r['type'], 'id': r['obj'].id} for r in runnable_tasks[idx:]] + [thisjob]
             run_tasks.append(runnable_tasks[idx]['sig'].set(link_error=handle_work_error.s(subtasks=dependent_tasks)))
         run_tasks.append(task_class().si(self.pk, **opts).set(link_error=handle_work_error.s(subtasks=[thisjob])))
-        print runnable_tasks
         res = chain(run_tasks)()
         return True
 

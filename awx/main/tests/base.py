@@ -52,6 +52,7 @@ class BaseTestMixin(object):
         # callbacks.
         if settings.BROKER_URL.startswith('amqp://'):
             settings.BROKER_URL = 'django://'
+        settings.CELERY_UNIT_TEST = True
         # Make temp job status directory for unit tests.
         job_status_dir = tempfile.mkdtemp()
         self._temp_project_dirs.append(job_status_dir)
