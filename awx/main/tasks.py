@@ -27,7 +27,7 @@ from celery import Task, task
 
 # Django
 from django.conf import settings
-from django.db import transaction
+from django.db import transaction, DatabaseError
 from django.utils.datastructures import SortedDict
 from django.utils.timezone import now
 
@@ -87,19 +87,29 @@ class BaseTask(Task):
         # Commit outstanding transaction so that we fetch the latest object
         # from the database.
         transaction.commit()
-        instance = self.model.objects.get(pk=pk)
-        if updates:
-            update_fields = ['modified']
-            for field, value in updates.items():
-                if field in ('result_stdout', 'result_traceback'):
-                    for srch, repl in output_replacements:
-                        value = value.replace(srch, repl)
-                setattr(instance, field, value)
-                update_fields.append(field)
-                if field == 'status':
-                    update_fields.append('failed')
-            instance.save(update_fields=update_fields)
-            transaction.commit()
+        save_succeeded = True
+        while True:
+            try:
+                instance = self.model.objects.get(pk=pk)
+                if updates:
+                    update_fields = ['modified']
+                    for field, value in updates.items():
+                        if field in ('result_stdout', 'result_traceback'):
+                            for srch, repl in output_replacements:
+                                value = value.replace(srch, repl)
+                        setattr(instance, field, value)
+                        update_fields.append(field)
+                        if field == 'status':
+                            update_fields.append('failed')
+                    instance.save(update_fields=update_fields)
+                    transaction.commit()
+                    save_succeeded = True
+            except DatabaseError as e:
+                logger.debug("Database error encountered, retrying: " + str(e))
+                save_succeeded = False
+            finally:
+                if save_succeeded:
+                    break
         return instance
 
     def get_model(self, pk):
