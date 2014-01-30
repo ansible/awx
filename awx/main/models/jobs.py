@@ -352,6 +352,8 @@ class Job(CommonTask):
         run_tasks = []
         inventory_updates_actual = []
         project_update_actual = None
+        has_setup_failures = False
+        setup_failure_message = ""
 
         project = self.project
         inventory = self.inventory
@@ -359,22 +361,32 @@ class Job(CommonTask):
         if project.scm_update_on_launch:
             project_update_details = project.update_signature()
             if not project_update_details:
-                # TODO: Set error here
-                pass
+                has_setup_failures = True
+                setup_failure_message = "Failed to check dependent project update task"
             else:
                 runnable_tasks.append({'obj': project_update_details[0],
                                        'sig': project_update_details[1],
                                        'type': 'project_update'})
-        if is_qs.count():
+        if is_qs.count() and not has_setup_failures:
             for inventory_source in is_qs:
                 inventory_update_details = inventory_source.update_signature()
                 if not inventory_update_details:
-                    # TODO: Set error here
-                    pass
+                    has_setup_failures = True
+                    setup_failure_message = "Failed to check dependent inventory update task"
+                    break
                 else:
                     runnable_tasks.append({'obj': inventory_update_details[0],
                                            'sig': inventory_update_details[1],
                                            'type': 'inventory_update'})
+        if has_setup_failures:
+            for each_task in runnable_tasks:
+                obj = each_task['obj']
+                obj.status = 'error'
+                obj.result_traceback = setup_failure_message
+                obj.save()
+            self.status = 'error'
+            self.result_traceback = setup_failure_message
+            self.save()
         thisjob = {'type': 'job', 'id': self.id}
         for idx in xrange(len(runnable_tasks)):
             dependent_tasks = [{'type': r['type'], 'id': r['obj'].id} for r in runnable_tasks[idx:]] + [thisjob]
