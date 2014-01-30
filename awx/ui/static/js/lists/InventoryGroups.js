@@ -1,9 +1,7 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  InventorySummary.js 
- *
- *  Summary of groups contained within an inventory
+ *  InventoryGroups.js 
  * 
  */
 angular.module('InventoryGroupsDefinition', [])
@@ -25,7 +23,7 @@ angular.module('InventoryGroupsDefinition', [])
             name: {
                 label: 'Groups',
                 key: true,
-                ngClick: "\{\{ 'showHosts(' + group.id + ',' + group.group_id + ', false)' \}\}",
+                ngClick: "showHosts(group.id,group.group_id, false)",
                 ngClass: "group.selected_class",
                 hasChildren: true,
                 columnClass: 'col-lg-9 col-md-9 col-sm-7 col-xs-7',
@@ -66,11 +64,8 @@ angular.module('InventoryGroupsDefinition', [])
                 },
             help: {
                 mode: 'all',
-                awToolTip:
-                    //"<div style=\"text-align:left;\"><img src=\"/static/img/cow.png\" style=\"width:50px; height:56px; float:left; padding-right:5px;\">" +
-                    //"<p>Need help getting started creating your inventory?</p><p>Click here for help.</p></div>",
-                    "<div style=\"text-align:left;\"><p>Need help getting started creating your inventory?</p><p>Click here for help.</p></div>",
-                ngClick: "showHelp()",
+                awToolTip: "Get help building your inventory",
+                ngClick: "showGroupHelp()",
                 id: "inventory-summary-help"
                 }
             },

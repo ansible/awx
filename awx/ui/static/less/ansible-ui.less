@@ -71,7 +71,7 @@ body.modal-open {
 
 .group-name {
     display: inline-block;
-    width: 90%;
+    width: 85%;
 }
 
 a {
@@ -223,6 +223,14 @@ hr {
   display: inline-block;
 }
 
+.help-auto-off {
+  margin-top: 15px;
+  margin-bottom: 15px; 
+  label {
+    font-weight: normal;
+  }
+}
+
 /* help collapse */
   h4.panel-title {
     font-size: 14px;
@@ -315,7 +323,7 @@ dd {
 }
 
 .break {
-  word-wrap: break-word;
+  word-break: break-all;
 }
 
 .login-alert {
@@ -1059,16 +1067,17 @@ input[type="checkbox"].checkbox-no-label {
     cursor: default;
   }
   /* Padding levels used on job events and inventory groups */
-  .level-1 { padding-left: 20px; }
-  .level-2 { padding-left: 40px; }
-  .level-3 { padding-left: 60px; }
-  .level-4 { padding-left: 80px; }
-  .level-5 { padding-left: 100px; }
-  .level-6 { padding-left: 120px; }
-  .level-7 { padding-left: 140px; }
-  .level-8 { padding-left: 160px; }
-  .level-9 { padding-left: 180px; }
-  .level-10 { padding-left: 200px; }
+  .level { display: inline-block; }
+  .level-1 { padding-left: 15px; }
+  .level-2 { padding-left: 30px; }
+  .level-3 { padding-left: 45px; }
+  .level-4 { padding-left: 60px; }
+  .level-5 { padding-left: 75px; }
+  .level-6 { padding-left: 90px; }
+  .level-7 { padding-left: 105px; }
+  .level-8 { padding-left: 120px; }
+  .level-9 { padding-left: 135px; }
+  .level-10 { padding-left: 150px; }
 
   .level-3-detail {
     padding-left: 80px;
@@ -1344,7 +1353,7 @@ tr td button i {
   text-align: center;
   border: 1px solid @info-border;
   border-radius: 6px;
-  margin-top: 0;
+  margin-top: 10px;
   margin-bottom: 10px;
   padding: 10px;
   background-color: @info;
@@ -1440,6 +1449,20 @@ tr td button i {
 }
 
 @media (min-width: 768px) and (max-width: 1199px) {
+  
+  .level-1,
+  .level-2,
+  .level-3,
+  .level-4,
+  .level-5,
+  .level-6,
+  .level-7,
+  .level-8,
+  .level-9,
+  .level-10,
+  .level-3-detail {
+      padding-left: 0;
+  }
 
   .list-actions button, .list-actions .checkbox-inline {
       margin-top: 10px;    
@@ -1465,6 +1488,13 @@ tr td button i {
   .level-1,
   .level-2,
   .level-3,
+  .level-4,
+  .level-5,
+  .level-6,
+  .level-7,
+  .level-8,
+  .level-9,
+  .level-10,
   .level-3-detail {
       padding-left: 0;
   }

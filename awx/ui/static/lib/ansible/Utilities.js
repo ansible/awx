@@ -243,7 +243,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        }
        }])
    
-   .factory('HelpDialog', ['$rootScope', '$location', function($rootScope, $location) {
+   .factory('HelpDialog', ['$rootScope', '$location', 'Store', function($rootScope, $location, Store) {
    return function(params) {
        // Display a help dialog
        //
@@ -257,6 +257,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
            var defn = params.defn;
            var nxtStory = { story: { steps: { } } };
            var width, height;
+           var autoShow = params.autoShow || false;
            
            function buildHtml(step) {
                var html = ''; 
@@ -270,6 +271,8 @@ angular.module('Utilities',['RestServices', 'Utilities'])
                   html += ">";
                }
                html += (step.box) ? "<div class=\"help-box\">" + step.box + "</div>" : "";
+               html += (autoShow && step.autoOffNotice) ? "<div class=\"help-auto-off\"><label><input type=\"checkbox\" name=\"auto-off-checkbox\" " + 
+                  "id=\"auto-off-checkbox\"> Do not show this message in the future</label></div>\n" : ""; 
                return html;
                }
            
@@ -291,7 +294,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
               }
               nxtStory.story.hdr = defn.story.hdr; 
 
-              nxtStep = function() {
+              var nxtStep = function() {
                   showHelp({ defn: nxtStory });
                   }
               
@@ -312,8 +315,9 @@ angular.module('Utilities',['RestServices', 'Utilities'])
                   hide: 500,
                   close: function() { $('#help-modal').empty(); }
                   });
-              $('.ui-dialog-buttonset button').addClass('btn btn-primary').focus();
-              $('.ui-dialog-titlebar-close').empty().removeClass('close').removeClass('ui-dialog-titlebar-close').addClass('close').append('x');
+              $('.ui-dialog-buttonset button').attr({ 'class': 'btn btn-primary' });
+              $('.ui-dialog[aria-describedby="help-modal"]').find('.ui-dialog-titlebar button')
+                  .empty().attr({ 'class': 'close' }).text('x');
            }
            else {
               try {
@@ -333,9 +337,19 @@ angular.module('Utilities',['RestServices', 'Utilities'])
                   hide: 500,
                   close: function() { $('#help-modal').empty(); }
                   });
-              $('.ui-dialog-buttonset button').addClass('btn btn-primary').focus();
-              $('.ui-dialog-titlebar button').empty().removeClass('close').removeClass('ui-dialog-titlebar-close').addClass('close').append('x');
+              $('.ui-dialog-buttonset button').attr({ 'class': 'btn btn-primary' });
+              $('.ui-dialog[aria-describedby="help-modal"]').find('.ui-dialog-titlebar button')
+                  .empty().attr({ 'class': 'close' }).text('x');
            }
+           
+           $('#auto-off-checkbox').click(function() {
+              if ($('input[name="auto-off-checkbox"]:checked').length) {
+                 Store('inventoryAutoHelp','off');
+              }
+              else {
+                 Store('inventoryAutoHelp','on');
+              }
+              });
            }
        
        showHelp(params);

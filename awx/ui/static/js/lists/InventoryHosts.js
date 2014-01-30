@@ -57,7 +57,6 @@ angular.module('InventoryHostsDefinition', [])
         
         fieldActions: {
             enabled_flag: {
-                //label: 'Enabled',
                 iconClass: "{{ 'fa icon-enabled-' + host.enabled }}",
                 dataPlacement: 'top',
                 awToolTip: "{{ host.enabledToolTip }}",
@@ -65,8 +64,6 @@ angular.module('InventoryHostsDefinition', [])
                 ngClick: "toggleHostEnabled(host.id, host.has_inventory_sources)"
                 },
             active_failures: {
-                //label: 'Job Status',
-                //ngHref: "\{\{'/#/hosts/' + host.id + '/job_host_summaries/?inventory=' + inventory_id \}\}",
                 awPopOver: "{{ host.job_status_html }}",
                 dataTitle: "{{ host.job_status_title }}",
                 awToolTip: "{{ host.badgeToolTip }}",
@@ -105,15 +102,6 @@ angular.module('InventoryHostsDefinition', [])
                 awToolTip: "View Activity Stream",
                 mode: 'all',
                 ngShow: "user_is_superuser"
-                },
-            help: {
-                mode: 'all',
-                awToolTip:
-                    //"<div style=\"text-align:left;\"><img src=\"/static/img/cow.png\" style=\"width:50px; height:56px; float:left; padding-right:5px;\">" +
-                    //"<p>Need help getting started creating your inventory?</p><p>Click here for help.</p></div>",
-                    "<div style=\"text-align:left;\"><p>Need help getting started creating your inventory?</p><p>Click here for help.</p></div>",
-                ngClick: "showHelp()",
-                id: "inventory-summary-help"
                 }
             }
 

@@ -19,6 +19,15 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
         $(window).resize(function() {
             clearTimeout(timeOut);
             timeOut = setTimeout(function() {
+                // Hack to stop group-name div slipping to a new line
+                $('#groups_table .name-column').each( function() {
+                    var td_width = $(this).width();
+                    var level_width = $(this).find('.level').width();
+                    var level_padding = parseInt($(this).find('.level').css('padding-left').replace(/px/,''));
+                    var level = level_width + level_padding;
+                    var pct = ( 100 - Math.ceil((level / td_width)*100) ) + '%';
+                    $(this).find('.group-name').css({ width: pct });
+                    });
                 ApplyEllipsis('#groups_table .group-name a');
                 ApplyEllipsis('#hosts_table .host-name a');
                 }, 100);

@@ -91,7 +91,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                          html += "<tr>\n";
                          html += "<td><a ng-click=\"showJobSummary(" + job.id + ")\">" + job.id + "</a></td>\n";
                          html += "<td class=\"text-center\"><a ng-click=\"showJobSummary(" + job.id + ")\"><i class=\"fa icon-job-" + job.status + "\"></i></a></td>\n";
-                         html += "<td>" + job.name + "</td>\n";
+                         html += "<td class=\"break\">" + "language_features/roletest.yml(limit:all:cloud)therealsuperlonglaskaname</td>\n";
                          html += "</tr>\n";
                     }
                     html += "</tbody>\n";

@@ -76,7 +76,7 @@ angular.module('ansible', [
     'StreamWidget',
     'JobsHelper',
     'InventoryStatusDefinition',
-    'InventorySummaryHelpDefinition',
+    'InventoryGroupsHelpDefinition',
     'InventoryHostsHelpDefinition',
     'InventoryTree',
     'CredentialsHelper',

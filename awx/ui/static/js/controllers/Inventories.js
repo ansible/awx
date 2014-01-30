@@ -316,7 +316,8 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
                           GetSyncStatusMsg, InjectHosts, HostsReload, GroupsAdd, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, 
                           Rest, ProcessErrors, InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find,
                           HostsCreate, EditInventoryProperties, HostsEdit, HostsDelete, ToggleHostEnabled, CopyMoveGroup, CopyMoveHost,
-                          Stream, GetBasePath, ShowJobSummary, ApplyEllipsis, WatchInventoryWindowResize) 
+                          Stream, GetBasePath, ShowJobSummary, ApplyEllipsis, WatchInventoryWindowResize, HelpDialog, InventoryGroupsHelp,
+                          Store) 
 {
     ClearScope('htmlTemplate');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                                  //scope.
@@ -362,8 +363,25 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         InjectHosts({ scope: $scope, inventory_id: $scope.inventory_id, tree_id: $scope.selected_tree_id, group_id: $scope.selected_group_id }); 
         
         // As the window shrinks and expands, apply ellipsis
-        setTimeout(function() { ApplyEllipsis('#groups_table .group-name a'); }, 2500); //give the window time to display
+        setTimeout(function() {
+            // Hack to keep group name from slipping to a new line
+            $('#groups_table .name-column').each( function() {
+                var td_width = $(this).width();
+                var level_width = $(this).find('.level').width();
+                var level_padding = parseInt($(this).find('.level').css('padding-left').replace(/px/,''));
+                var level = level_width + level_padding;
+                var pct = ( 100 - Math.ceil((level / td_width)*100) ) + '%';
+                $(this).find('.group-name').css({ width: pct });
+                });
+            ApplyEllipsis('#groups_table .group-name a');
+            ApplyEllipsis('#hosts_table .host-name a');
+            }, 2500); //give the window time to display
         WatchInventoryWindowResize();
+        
+        var inventoryAutoHelp = Store('inventoryAutoHelp');
+        if (inventoryAutoHelp !== 'off' && $scope.autoShowGroupHelp) {
+            $scope.showGroupHelp({ autoShow: true });
+        }
 
         });
    
@@ -545,17 +563,24 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         ShowJobSummary({ job_id: job_id });
         }
 
+    $scope.showGroupHelp = function(params) {
+        var opts = { defn: InventoryGroupsHelp };
+        if (params) {
+            opts.autoShow = params.autoShow || false;
+        }
+        HelpDialog(opts);
+        }
+
     //Load tree data for the first time
     BuildTree({ scope: $scope, inventory_id: $scope.inventory_id, refresh: false });
 
-
-}
+    }
 
 InventoriesEdit.$inject = [ '$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts', 
                             'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsAdd', 'GroupsEdit', 'GroupsDelete',
                             'Breadcrumbs', 'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren',
                             'ViewUpdateStatus', 'GroupsCancelUpdate', 'Find', 'HostsCreate', 'EditInventoryProperties', 'HostsEdit', 
                             'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost', 'Stream', 'GetBasePath', 'ShowJobSummary',
-                            'ApplyEllipsis', 'WatchInventoryWindowResize'
+                            'ApplyEllipsis', 'WatchInventoryWindowResize', 'HelpDialog', 'InventoryGroupsHelp', 'Store'
                             ]; 
   

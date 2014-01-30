@@ -12,8 +12,7 @@
 angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'GroupListDefinition',
                                  'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'AuthService', 'GroupsHelper',
                                  'InventoryHelper', 'SelectionHelper', 'JobSubmissionHelper', 'RefreshHelper',
-                                 'PromptDialog', 'InventorySummaryHelpDefinition', 'CredentialsListDefinition',
-                                 'InventoryTree'
+                                 'PromptDialog', 'CredentialsListDefinition','InventoryTree'
                                  ])
 
     .factory('GetSourceTypeOptions', [ 'Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
@@ -391,7 +390,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                     scope.searchCleanup();
                 }
                 scope.formModalActionDisabled = false;
-                scope.showGroupHelp = false;  //get rid of the Hint
                 BuildTree({ scope: parent_scope, inventory_id: inventory_id, refresh: true, new_group_id: group_id });
                 WatchInventoryWindowResize();
             }
@@ -848,7 +846,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 }
 
                 scope.formModalActionDisabled = false;
-                scope.showGroupHelp = false;  //get rid of the Hint
                 
                 $('#form-modal').modal('hide');     
                 
@@ -892,7 +889,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             }
             data['source_regions'] = r.join();
             
-            if (scope['source'].value == 'ec2') {
+            if (scope['source'] && scope['source'].value == 'ec2') {
                 // for ec2, validate variable data
                 try {
                      if (scope.envParseType == 'json') {

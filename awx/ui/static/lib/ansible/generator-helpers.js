@@ -471,8 +471,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             
            // Add collapse/expand icon  --used on job_events page
            if (list['hasChildren'] && field.hasChildren) {
-               html += "<span class=\"level-\{\{ " + list.iterator + ".event_level \}\}\"><a href=\"\" ng-click=\"\{\{ " + list.iterator + ".ngclick \}\}\"> " +
-                   "<i class=\"\{\{ " + list.iterator + ".ngicon \}\}\"></i></a> ";
+               html += "<div class=\"level level-\{\{ " + list.iterator + ".event_level \}\}\"><a href=\"\" ng-click=\"\{\{ " + list.iterator + ".ngclick \}\}\"> " +
+                   "<i class=\"\{\{ " + list.iterator + ".ngicon \}\}\"></i></a></div>";
                //ng-show=\"'\{\{ " + list.iterator + ".related.children \}\}' !== ''\"
            }
            
@@ -548,9 +548,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
               html += field.text;
            }
 
-           if (list['hasChildren'] && field.hasChildren) {
-              html += "</span>";
-           }
+           //if (list['hasChildren'] && field.hasChildren) {
+           //   html += "</span>";
+           //}
             
            // close the link
            if ( (field.key || field.link || field.linkTo || field.ngClick || field.ngHref )
