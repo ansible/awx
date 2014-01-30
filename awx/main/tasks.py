@@ -23,7 +23,7 @@ import uuid
 import pexpect
 
 # Celery
-from celery import Task
+from celery import Task, task
 
 # Django
 from django.conf import settings
@@ -35,11 +35,43 @@ from django.utils.timezone import now
 from awx.main.models import Job, JobEvent, ProjectUpdate, InventoryUpdate
 from awx.main.utils import get_ansible_version, decrypt_field, update_scm_url
 
-__all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryImport']
+__all__ = ['RunJob', 'RunProjectUpdate', 'RunInventoryUpdate', 'handle_work_error']
 
 logger = logging.getLogger('awx.main.tasks')
 
 # FIXME: Cleanly cancel task when celery worker is stopped.
+
+@task(bind=True)
+def handle_work_error(self, task_id, subtasks=None):
+    print('Executing error task id %s, subtasks: %s' % (str(self.request.id), str(subtasks)))
+    first_task = None
+    first_task_type = ''
+    first_task_name = ''
+    if subtasks is not None:
+        for each_task in subtasks:
+            instance_name = ''
+            if each_task['type'] == 'project_update':
+                instance = ProjectUpdate.objects.get(id=each_task['id'])
+                instance_name = instance.project.name
+            elif each_task['type'] == 'inventory_update':
+                instance = InventoryUpdate.objects.get(id=each_task['id'])
+                instance_name = instance.inventory_source.inventory.name
+            elif each_task['type'] == 'job':
+                instance = Job.objects.get(id=each_task['id'])
+                instance_name = instance.job_template.name
+            else:
+                # Unknown task type
+                break
+            if first_task is None:
+                first_task = instance
+                first_task_type = each_task['type']
+                first_task_name = instance_name
+            if instance.celery_task_id != task_id:
+                instance.status = 'failed'
+                instance.failed = True
+                instance.result_traceback = "Previous Task Failed: %s for %s with celery task id: %s" % \
+                    (first_task_type, first_task_name, task_id)
+                instance.save()
 
 class BaseTask(Task):
     
@@ -108,6 +140,7 @@ class BaseTask(Task):
             'yes': 'yes',
             'no': 'no',
             '': '',
+
         }
 
     def build_env(self, instance, **kwargs):
@@ -204,15 +237,10 @@ class BaseTask(Task):
             if logfile_pos != logfile.tell():
                 logfile_pos = logfile.tell()
                 last_stdout_update = time.time()
-            # Update instance status here (also updates modified timestamp, so
-            # we have a way to know the task is still running, otherwise the
-            # post_run_hook below would cancel long-running tasks that are
-            # really still active).
-            instance = self.update_model(instance.pk, status='running')
+            # NOTE: In case revoke doesn't have an affect
             if instance.cancel_flag:
-                child.close(True)
-                canceled = True
-            # FIXME: Find a way to determine if task is hung waiting at a prompt.
+                 child.close(True)
+                 canceled = True
             if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
                 child.close(True)
                 canceled = True
@@ -234,40 +262,14 @@ class BaseTask(Task):
         return True
 
     def post_run_hook(self, instance, **kwargs):
-        '''
-        Hook for actions to run after job/task has completed.
-        '''
-        # Cleanup instances that appear to be stuck.
-        try:
-            stuck_task_timeout = int(getattr(settings, 'STUCK_TASK_TIMEOUT', 300))
-        except (TypeError, ValueError):
-            stuck_task_timeout = 0
-        if stuck_task_timeout <= 0:
-            return
-        # Never less than 30 seconds so we're not messing with active tasks.
-        stuck_task_timeout = max(stuck_task_timeout, 30)
-        cutoff = now() - datetime.timedelta(seconds=stuck_task_timeout)
-        qs = self.model.objects.filter(status__in=('new', 'waiting', 'running'))
-        qs = qs.filter(modified__lt=cutoff)
-        for obj in qs:
-            # If new, created but never started.  If waiting or running, the
-            # modified timestamp should updated regularly, else the task is
-            # probably stuck.
-            # If pending, we could be started but celeryd is not running, or
-            # we're waiting for an open slot in celeryd -- in either case we
-            # shouldn't necessarily cancel the task.  Slim chance that somehow
-            # the task was started, picked up by celery, but hit an error
-            # before we could update the status.
-            obj.status = 'canceled'
-            obj.result_traceback += '\nCanceled stuck %s.' % unicode(self.model._meta.verbose_name)
-            obj.save(update_fields=['status', 'result_traceback'])
+        pass
 
     @transaction.commit_on_success
     def run(self, pk, **kwargs):
         '''
         Run the job/task and capture its output.
         '''
-        instance = self.update_model(pk)
+        instance = self.update_model(pk, status='pending', celery_task_id=self.request.id)
         status, stdout, tb = 'error', '', ''
         output_replacements = []
         try:
@@ -305,6 +307,10 @@ class BaseTask(Task):
                                      result_traceback=tb,
                                      output_replacements=output_replacements)
         self.post_run_hook(instance, **kwargs)
+        if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
+            # Raising an exception will mark the job as 'failed' in celery
+            # and will stop a task chain from continuing to execute
+            raise Exception("Task %s(pk:%s) encountered an error" % (str(self.model.__class__), str(pk)))
 
 class RunJob(BaseTask):
     '''
@@ -431,6 +437,9 @@ class RunJob(BaseTask):
                                (job.project.local_path, root))
         return cwd
 
+    def get_idle_timeout(self):
+        return getattr(settings, 'JOB_RUN_IDLE_TIMEOUT', 300)
+
     def get_password_prompts(self):
         d = super(RunJob, self).get_password_prompts()
         d[re.compile(r'^Enter passphrase for .*:\s*?$', re.M)] = 'ssh_key_unlock'
@@ -444,98 +453,14 @@ class RunJob(BaseTask):
         '''
         Hook for checking job before running.
         '''
-        project_update = None
-        inventory_updates = None
-        while True:
-            pk = job.pk
-            if job.status in ('pending', 'waiting'):
-                project = job.project
-                pu_qs = project.project_updates.filter(status__in=('pending', 'running'))
-                inventory = job.inventory
-                base_iu_qs = InventoryUpdate.objects.filter(inventory_source__inventory=inventory)
-                iu_qs = base_iu_qs.filter(status__in=('pending', 'running'))
-                is_qs = inventory.inventory_sources.filter(active=True, update_on_launch=True)
-                # Refresh the current project_update instance (if set).
-                if project_update:
-                    try:
-                        project_update = project.project_updates.filter(pk=project_update.pk)[0]
-                    except IndexError:
-                        msg = 'Unable to check project update.'
-                        job = self.update_model(pk, status='error',
-                                                result_traceback=msg)
-                        return False
-                # Refresh the current inventory_update instance(s) (if set).
-                if inventory_updates:
-                    inventory_update_pks = [x.pk for x in inventory_updates]
-                    inventory_updates = list(base_iu_qs.filter(pk__in=inventory_update_pks))
-
-                # If the job needs to update the project first (and there is no
-                # specific project update defined).
-                if not project_update and project.scm_update_on_launch:
-                    job = self.update_model(pk, status='waiting')
-                    try:
-                        project_update = pu_qs[0]
-                    except IndexError:
-                        project_update = project.update()
-                        if not project_update:
-                            msg = 'Unable to update project before launch.'
-                            job = self.update_model(pk, status='error',
-                                                    result_traceback=msg)
-                            return False
-                    #print 'job %d waiting on project update %d' % (pk, project_update.pk)
-                    time.sleep(2.0)
-                # If the job needs to update any inventory first (and there are
-                # no current inventory updates pending).
-                elif inventory_updates is None and is_qs.count():
-                    job = self.update_model(pk, status='waiting')
-                    inventory_updates = []
-                    msgs = []
-                    for inventory_source in is_qs:
-                        try:
-                            inventory_update = iu_qs.filter(inventory_source=inventory_source)[0]
-                        except IndexError:
-                            inventory_update = inventory_source.update()
-                            if not inventory_update:
-                                msgs.append('Unable to update inventory source %d before launch' % inventory_source.pk)
-                                continue
-                        inventory_updates.append(inventory_update)
-                    if msgs:
-                        msg = '\n'.join(msgs)
-                        job = self.update_model(pk, status='error',
-                                                result_traceback=msg)
-                        return False
-                    time.sleep(2.0)
-                # If project update has failed, abort the job.
-                elif project_update and project_update.failed:
-                    msg = 'Project update %d failed with status = %s.' % (project_update.pk, project_update.status)
-                    job = self.update_model(pk, status='error',
-                                            result_traceback=msg)
-                    return False
-                # If any inventory update has failed, abort the job.
-                elif inventory_updates and any([x.failed for x in inventory_updates]):
-                    msgs = []
-                    for inventory_update in inventory_updates:
-                        if inventory_update.failed:
-                            msgs.append('Inventory update %d failed with status = %s.' % (inventory_update.pk, inventory_update.status))
-                    if msgs:
-                        msg = '\n'.join(msgs)
-                        job = self.update_model(pk, status='error',
-                                                result_traceback=msg)
-                        return False
-                # Check if blocked by any other active project or inventory updates.
-                elif pu_qs.count() or iu_qs.count():
-                    #print 'job %d waiting on' % pk, pu_qs
-                    job = self.update_model(pk, status='waiting')
-                    time.sleep(4.0)
-                # Otherwise continue running the job.
-                else:
-                    job = self.update_model(pk, status='pending')
-                    return True
-            elif job.cancel_flag:
-                job = self.update_model(pk, status='canceled')
-                return False
-            else:
-                return False
+        if job.status in ('pending', 'waiting'):
+            job = self.update_model(job.pk, status='pending')
+            return True
+        elif job.cancel_flag:
+            job = self.update_model(job.pk, status='canceled')
+            return False
+        else:
+            return False
 
     def post_run_hook(self, job, **kwargs):
         '''
@@ -881,6 +806,9 @@ class RunInventoryUpdate(BaseTask):
 
     def build_cwd(self, inventory_update, **kwargs):
         return self.get_path_to('..', 'plugins', 'inventory')
+
+    def get_idle_timeout(self):
+        return getattr(settings, 'INVENTORY_UPDATE_IDLE_TIMEOUT', 300)
 
     def pre_run_check(self, inventory_update, **kwargs):
         '''

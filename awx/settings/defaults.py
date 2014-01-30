@@ -282,6 +282,7 @@ CELERYD_TASK_TIME_LIMIT = None
 CELERYD_TASK_SOFT_TIME_LIMIT = None
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERYBEAT_MAX_LOOP_INTERVAL = 60
+CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 
 # Any ANSIBLE_* settings will be passed to the subprocess environment by the
 # celery task.

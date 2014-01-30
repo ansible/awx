@@ -1551,7 +1551,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.assertEqual(job.status, 'new')
         self.assertFalse(job.passwords_needed_to_start)
         self.assertTrue(job.start())
-        self.assertEqual(job.status, 'pending')
+        self.assertEqual(job.status, 'waiting')
         job = Job.objects.get(pk=job.pk)
         self.assertTrue(job.status in ('successful', 'failed'))
         self.assertEqual(self.project.project_updates.count(), 3)
