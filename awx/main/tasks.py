@@ -307,7 +307,7 @@ class BaseTask(Task):
                                      result_traceback=tb,
                                      output_replacements=output_replacements)
         self.post_run_hook(instance, **kwargs)
-        if status != 'successful' and not has hasattr(settings, 'CELERY_UNIT_TEST'):
+        if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
             raise Exception("Task %s(pk:%s) encountered an error" % (str(self.model.__class__), str(pk)))
