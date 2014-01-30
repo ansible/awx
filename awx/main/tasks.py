@@ -237,12 +237,10 @@ class BaseTask(Task):
             if logfile_pos != logfile.tell():
                 logfile_pos = logfile.tell()
                 last_stdout_update = time.time()
-            #TODO: Find replacement for cancel flag
-            #TODO: Something about checking celery status
-            # if instance.cancel_flag:
-            #     child.close(True)
-            #     canceled = True
-            # FIXME: Find a way to determine if task is hung waiting at a prompt.
+            # NOTE: In case revoke doesn't have an affect
+            if instance.cancel_flag:
+                 child.close(True)
+                 canceled = True
             if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
                 child.close(True)
                 canceled = True
