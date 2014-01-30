@@ -521,7 +521,7 @@ function InventoriesEdit ($scope, $location, $routeParams, $compile, GenerateLis
         }
 
     $scope.showGroupActivity = function() { 
-       var url, title, group;
+        var url, title, group;
         if ($scope.selected_group_id) {
             group = Find({ list: $scope.groups, key: 'id', val: $scope.selected_tree_id });
             url = GetBasePath('activity_stream') + '?group__id=' + $scope.selected_group_id;

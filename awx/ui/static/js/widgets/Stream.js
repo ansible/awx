@@ -195,7 +195,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 if (activity.changes && activity.changes.name) {
                     if (typeof activity.changes.name == 'string') {
                         name = ' ' + activity.changes.name;
-                       name_nolink = name;
+                        name_nolink = name;
                     }
                     else if (typeof activity.changes.name == 'object' && Array.isArray(activity.changes.name)) {
                         name = ' ' + activity.changes.name[0];
@@ -219,7 +219,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                     if (activity.operation != 'delete') {
                         obj1_obj['base'] = obj1;
                         name = ' ' + '<a href=\"' + BuildUrl(obj1_obj) + '\">' + obj1_obj.id + '</a>';
-                       name_nolink = ' ' + obj1_obj.id;
+                        name_nolink = ' ' + obj1_obj.id;
                     }
                     else {
                         name = ' ' + obj1_obj.id;
@@ -229,7 +229,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             }
             else if (obj1_obj && obj1_obj.name) {
                 name = ' ' + stripDeleted(obj1_obj.name);
-               name_nolink = name;
+                name_nolink = name;
             }
             descr += obj1 + name;
             descr_nolink += obj1 + name_nolink;
