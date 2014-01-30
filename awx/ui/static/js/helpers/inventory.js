@@ -137,12 +137,24 @@ angular.module('InventoryHelper', [ 'RestServices', 'Utilities', 'OrganizationLi
                     if (fld == 'inventory_variables') {
                         // Parse variables, converting to YAML.  
                         if ($.isEmptyObject(data.variables) || data.variables == "\{\}" || 
-                            data.variables == "null" || data.data_variables == "") {
+                            data.variables == "null" || data.variables == "") {
                             scope.inventory_variables = "---";
                         }
                         else {
-                            var json_obj = JSON.parse(data.variables);
-                            scope.inventory_variables = jsyaml.safeDump(json_obj);
+                            try {
+                                var json_obj = JSON.parse(data.variables);
+                                scope.inventory_variables = jsyaml.safeDump(json_obj);
+                            }
+                            catch(err) {
+                                Alert('Variable Parse Error', 'Attempted to parse variables for inventory: ' + inventory_id + 
+                                '. Parse returned: ' + err);
+                                if (console) {
+                                    console.log(err);
+                                    console.log('data:');
+                                    console.log(data.variables); 
+                                }
+                                scope.inventory_variables = '---';
+                            }
                         }
                         master.inventory_variables = scope.variables;
                     }

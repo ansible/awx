@@ -126,7 +126,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            // before navigation
            html += "<div class=\"nav-path\">\n";
            html += "<ul class=\"breadcrumb\">\n";
-           html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" ng-click=\"crumb.ngClick\">{{ crumb.title | capitalize }}</a></li>\n";
+           html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" ng-click=\"\{\{ crumb.ngClick \}\}\">{{ crumb.title | capitalize }}</a></li>\n";
            html += "<li class=\"active\">";
            html += list.editTitle;
            html += "</li>\n</ul>\n</div>\n";
@@ -147,6 +147,15 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
            html += "<div class=\"well\">\n";
        }
        
+       if (options.activityStream) {
+           // Add a title row
+           html += "<div class=\"row\">\n";
+           html += "<div class=\"col-lg-12\">\n"; 
+           html += "<h5>{{ streamTitle }}</h5>\n";
+           html += "</div>\n";
+           html += "</div>\n";
+       }
+
        html += "<div class=\"row\">\n";
            
        if (list.name != 'groups') {
