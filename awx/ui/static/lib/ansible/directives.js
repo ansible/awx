@@ -298,7 +298,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     // remove lingering popover <div>. Seems to be a bug in TB3 RC1
                     $(this).remove();
                     });
-
+                $(this).tooltip('hide'); // hide a tooltip, if there is one associated with the element
                 $(this).popover('toggle');
 
                 $('.popover').each(function(index) {

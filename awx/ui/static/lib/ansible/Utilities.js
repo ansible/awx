@@ -313,9 +313,10 @@ angular.module('Utilities',['RestServices', 'Utilities'])
                   closeOnEscape: true,
                   show: 500,
                   hide: 500,
-                  close: function() { $('#help-modal').empty(); }
+                  close: function() { $('#help-modal').empty(); },
+                  focus: function() { $('.ui-dialog-buttonset button').blur(); }
                   });
-              $('.ui-dialog-buttonset button').attr({ 'class': 'btn btn-primary' });
+              $('.ui-dialog-buttonset button').attr({ 'class': 'btn btn-primary' }).blur();
               $('.ui-dialog[aria-describedby="help-modal"]').find('.ui-dialog-titlebar button')
                   .empty().attr({ 'class': 'close' }).text('x');
            }
@@ -335,13 +336,15 @@ angular.module('Utilities',['RestServices', 'Utilities'])
                   closeOnEscape: true,
                   show: 500,
                   hide: 500,
-                  close: function() { $('#help-modal').empty(); }
+                  close: function() { $('#help-modal').empty(); },
+                  focus: function() { $('.ui-dialog-buttonset button').blur(); }
                   });
-              $('.ui-dialog-buttonset button').attr({ 'class': 'btn btn-primary' });
+              $('.ui-dialog-buttonset button').attr({ 'class': 'btn btn-primary' }).blur();
               $('.ui-dialog[aria-describedby="help-modal"]').find('.ui-dialog-titlebar button')
                   .empty().attr({ 'class': 'close' }).text('x');
            }
            
+           // If user clicks the checkbox, update local storage
            $('#auto-off-checkbox').click(function() {
               if ($('input[name="auto-off-checkbox"]:checked').length) {
                  Store('inventoryAutoHelp','off');
