@@ -7,6 +7,7 @@
  *
  */
 
+'use strict';
 
 angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
     .factory('ObjectCount', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
@@ -21,7 +22,7 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
         var keys=[ 'organizations', 'users', 'teams', 'credentials', 'projects', 'inventories', 'groups', 'hosts',
             'job_templates', 'jobs' ];
             
-        html = "<div class=\"panel panel-default\">\n";
+        var html = "<div class=\"panel panel-default\">\n";
         html += "<div class=\"panel-heading\">System Summary</div>\n";
         html += "<div class=\"panel-body\">\n";
         html += "<table class=\"table table-condensed table-hover\">\n";
@@ -51,8 +52,8 @@ angular.module('ObjectCountWidget', ['RestServices', 'Utilities'])
         for (var i=0; i < keys.length; i++) {
             html += makeRow({
                 label: keys[i],
-                link: '/#/' + [(keys[i] == 'hosts' || keys[i] == 'groups') ? 'home/' + keys[i] : keys[i] ],
-                count: [(dashboard[keys[i]] && dashboard[keys[i]].total) ? dashboard[keys[i]].total : 0]
+                link: '/#/' + ( (keys[i] == 'hosts' || keys[i] == 'groups') ? 'home/' + keys[i] : keys[i] ),
+                count: (dashboard[keys[i]] && dashboard[keys[i]].total) ? dashboard[keys[i]].total : 0
                 });
         }
 

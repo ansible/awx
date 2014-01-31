@@ -7,6 +7,8 @@
  *
  */
 
+'use strict';
+
 angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
     .factory('SCMSyncStatus', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'GetChoices',
     function($rootScope, $compile, Rest, GetBasePath, ProcessErrors, Wait, GetChoices) {
@@ -59,7 +61,7 @@ angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
         html += makeRow({ label: 'Projects',
             link: '/#/projects',
             count: total_count,
-            fail: [(dashboard.projects && dashboard.projects.failed) ? dashboard.projects.failed : 0],
+            fail: (dashboard.projects && dashboard.projects.failed) ? dashboard.projects.failed : 0,
             fail_link: '/#/projects/?status=failed'
             });
         
@@ -75,8 +77,8 @@ angular.module('SCMSyncStatusWidget', ['RestServices', 'Utilities'])
                 html += makeRow({
                     label: dashboard.scm_types[type].label,
                     link: '/#/projects/?scm_type=' + type,
-                    count: [(dashboard.scm_types[type].total) ? dashboard.scm_types[type].total : 0],
-                    fail: [(dashboard.scm_types[type].failed) ? dashboard.scm_types[type].failed : 0],
+                    count: (dashboard.scm_types[type].total) ? dashboard.scm_types[type].total : 0,
+                    fail: (dashboard.scm_types[type].failed) ? dashboard.scm_types[type].failed : 0,
                     fail_link: '/#/projects/?scm_type=' + type + '&status=failed'
                     });
             }

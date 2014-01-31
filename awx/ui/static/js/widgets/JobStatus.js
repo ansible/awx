@@ -7,6 +7,8 @@
  *
  */
 
+'use strict';
+
 angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
     .factory('JobStatus', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait',
     function($rootScope, $compile, Rest, GetBasePath, ProcessErrors, Wait) {
@@ -55,29 +57,29 @@ angular.module('JobStatusWidget', ['RestServices', 'Utilities'])
         html += makeRow({
             label: 'Jobs',
             link: '/#/jobs',
-            count: [(dashboard.jobs && dashboard.jobs.total) ? dashboard.jobs.total : 0],
-            fail: [(dashboard.jobs && dashboard.jobs.failed) ? dashboard.jobs.failed : 0],
+            count: (dashboard.jobs && dashboard.jobs.total) ? dashboard.jobs.total : 0,
+            fail: (dashboard.jobs && dashboard.jobs.failed) ? dashboard.jobs.failed : 0,
             fail_link: '/#/jobs/?status=failed'
             });
         html += makeRow({
             label: 'Inventories', 
             link: '/#/inventories',
-            count: [(dashboard.inventories && dashboard.inventories.total) ? dashboard.inventories.total : 0],
-            fail:  [(dashboard.inventories && dashboard.inventories.job_failed) ? dashboard.inventories.job_failed : 0],
+            count: (dashboard.inventories && dashboard.inventories.total) ? dashboard.inventories.total : 0,
+            fail:  (dashboard.inventories && dashboard.inventories.job_failed) ? dashboard.inventories.job_failed : 0,
             fail_link: '/#/inventories/?has_active_failures=true' 
             });
         html += makeRow({
             label: 'Groups', 
             link: '/#/home/groups',
-            count: [(dashboard.groups && dashboard.groups.total) ? dashboard.groups.total : 0],
-            fail: [(dashboard.groups && dashboard.groups.job_failed) ? dashboard.groups.job_failed : 0],
+            count: (dashboard.groups && dashboard.groups.total) ? dashboard.groups.total : 0,
+            fail: (dashboard.groups && dashboard.groups.job_failed) ? dashboard.groups.job_failed : 0,
             fail_link: '/#/home/groups/?has_active_failures=true' 
             });
         html += makeRow({
             label: 'Hosts',
             link: '/#/home/hosts',
-            count: [(dashboard.hosts && dashboard.hosts.total) ? dashboard.hosts.total : 0],
-            fail: [(dashboard.hosts && dashboard.hosts.failed) ? dashboard.hosts.failed : 0],
+            count: (dashboard.hosts && dashboard.hosts.total) ? dashboard.hosts.total : 0,
+            fail: (dashboard.hosts && dashboard.hosts.failed) ? dashboard.hosts.failed : 0,
             fail_link: '/#/home/hosts/?has_active_failures=true'
             });
 

@@ -7,6 +7,8 @@
  *
  */
 
+'use strict';
+
 angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
     .factory('InventorySyncStatus', ['$rootScope', '$compile', 'Rest', 'GetBasePath', 'ProcessErrors', 'Wait', 'GetChoices',
     function($rootScope, $compile, Rest, GetBasePath, ProcessErrors, Wait, GetChoices) {
@@ -51,9 +53,9 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
             }
 
         html += makeRow({ label: 'Inventories',
-            count: [(dashboard.inventories && dashboard.inventories.total_with_inventory_source) ? 
-                dashboard.inventories.total_with_inventory_source : 0 ], 
-            fail: [(dashboard.inventories && dashboard.inventories.inventory_failed) ? dashboard.inventories.inventory_failed : 0], 
+            count: (dashboard.inventories && dashboard.inventories.total_with_inventory_source) ? 
+                dashboard.inventories.total_with_inventory_source : 0, 
+            fail: (dashboard.inventories && dashboard.inventories.inventory_failed) ? dashboard.inventories.inventory_failed : 0, 
             link: '/#/inventories/?has_inventory_sources=true', 
             fail_link: '/#/inventories/?inventory_sources_with_failures=true'
             });
@@ -78,8 +80,8 @@ angular.module('InventorySyncStatusWidget', ['RestServices', 'Utilities'])
         for (var src in dashboard.inventory_sources) {
             if (dashboard.inventory_sources[src].total) {
                 html += makeRow({ label: dashboard.inventory_sources[src].label, 
-                    count: [(dashboard.inventory_sources[src].total) ? dashboard.inventory_sources[src].total : 0], 
-                    fail: [(dashboard.inventory_sources[src].failed) ? dashboard.inventory_sources[src].failed : 0],
+                    count: (dashboard.inventory_sources[src].total) ? dashboard.inventory_sources[src].total : 0, 
+                    fail: (dashboard.inventory_sources[src].failed) ? dashboard.inventory_sources[src].failed : 0,
                     link: '/#/home/groups/?source=' + src,
                     fail_link: '/#/home/groups/?status=failed&source=' + src
                     });

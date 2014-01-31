@@ -7,6 +7,8 @@
  *
  */
 
+'use strict';
+
 angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefinition', 'SearchHelper', 'PaginationHelpers',
         'RefreshHelper', 'ListGenerator', 'StreamWidget', 'AuthService'])
     
@@ -402,6 +404,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
             scope.removeStreamPostRefresh();    
         }
         scope.removeStreamPostRefresh = scope.$on('PostRefresh', function() {
+            var cDate, href, deleted, obj1, obj2;
             for (var i=0; i < scope['activities'].length; i++) {
                 // Convert event_time date to local time zone
                 cDate = new Date(scope['activities'][i].timestamp);
@@ -416,10 +419,9 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 }
                 
                 // Objects
-                var href;
-                var deleted = /^\_delete/;
-                var obj1 = scope['activities'][i].object1;
-                var obj2 = scope['activities'][i].object2;
+                deleted = /^\_delete/;
+                obj1 = scope['activities'][i].object1;
+                obj2 = scope['activities'][i].object2;
                 if ( obj1 && scope['activities'][i].summary_fields[obj1] && scope['activities'][i].summary_fields[obj1].name) {
                     if ( !deleted.test(scope['activities'][i].summary_fields[obj1].name) ) {
                         href = BuildUrl(scope['activities'][i].summary_fields.object1);
