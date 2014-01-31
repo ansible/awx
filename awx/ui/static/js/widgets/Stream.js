@@ -75,7 +75,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         $rootScope.breadcrumbs = [];
         var paths = $location.path().split('/');
         paths.splice(0,1);
-        var path, title;
+        var path, title, j;
         for (var i=0; i < paths.length; i++) {
             if (/^\d+/.test(paths[i])) {
                 path='';

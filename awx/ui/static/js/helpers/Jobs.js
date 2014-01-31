@@ -78,6 +78,7 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
             y = (500 > wh) ? wh : 500;
             maxrows = 10;
         }
+        
         // Create the modal
         $('#status-modal-dialog').dialog({
             buttons: { "OK": function() {  $( this ).dialog( "close" ); } },

@@ -17,6 +17,7 @@
 @blue-link:   #1778c3;
 @blue-dark:   #2a6496;   /* link hover */ 
 @grey:        #A9A9A9;
+@grey-txt:    #707070;
 @well:        #f5f5f5;   /* well background color */
 @info:        #d9edf7;   /* alert info background color */
 @info-border: #bce8f1;   /* alert info border color */
@@ -1341,37 +1342,35 @@ tr td button i {
   margin-bottom: 5px;
 }
 
-/* help dialog */
+
+/* Help modal dialog */
 
 #help-modal {
   overflow: hidden;
   padding: 10px;
-  text-align: center;
+
+  img { 
+    max-width: 450px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border: 1px solid @grey;
+    box-shadow: 3px 3px 5px 0 @grey;
+    }
+}
+
+#help-modal .img-container {
+    width: 100%;
+    text-align: center;
 }
 
 .help-box {
-  text-align: center;
-  border: 1px solid @info-border;
-  border-radius: 6px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  padding: 10px;
-  background-color: @info;
-  color: @info-color;
-}
-
-.help-intro {
-  width: 100;
-  text-align: left;
-  margin: 15px 0 30px 0;
-  font-weight: normal;
-  font-size: 16px;
-  color: #888;
-}
-
-.step-no {
-  font-weight: bold;
-}
+    width: 100%;
+    margin-top: 15px;
+    border-radius: 6px;
+    padding: 8px;
+    color: @grey-txt;
+    font-size: 14px;
+    }
 
 
 /* Activity Stream Widget */ 

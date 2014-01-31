@@ -29,6 +29,13 @@ angular.module('Utilities',['RestServices', 'Utilities'])
            $(this).remove();
            });
 
+       try {
+          $('#help-modal').dialog('close');
+       }
+       catch(e) {
+          // ignore
+       }
+
        $(window).unbind('resize');
        
        }
@@ -250,112 +257,133 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        // HelpDialog({ defn: <HelpDefinition> })
        //
        
-       function showHelp(params) {
-           // Using a function inside a function so we can recurse 
-           // over the steps in the help story
-
-           var defn = params.defn;
-           var nxtStory = { story: { steps: { } } };
-           var width, height;
-           var autoShow = params.autoShow || false;
-           
+       var defn = params.defn;
+       var current_step = params.step;
+       var autoShow = params.autoShow || false;
+       
+       function showHelp(step) {
+           var width, height, isOpen=false;
+           current_step = step;
+                    
            function buildHtml(step) {
                var html = ''; 
-               html += (step.intro) ? "<div class=\"help-intro\">" + step.intro + "</div>" : "";
-               if (step.img) {
-                  html += "<img src=\"" + $basePath + "img/help/" + step.img.src + "\" ";
-                  html += "style=\"";
-                  html += (step.img.maxWidth) ? "max-width:" + step.img.maxWidth + "px;" : "";
-                  html += (step.img.maxHeight) ? " max-height: " + step.img.maxHeight + "px;" : "";
-                  html += "\" ";
-                  html += ">";
-               }
-               html += (step.box) ? "<div class=\"help-box\">" + step.box + "</div>" : "";
+               //html += (step.intro) ? "<div class=\"help-intro\">" + step.intro + "</div>" : "";
+               html += "<h4>" + step.intro + "</h4>\n";
+               html += "<div class=\"img-container\">\n";
+               html += "<img src=\"" + $basePath + "img/help/" + step.img.src + "\" >";
+               html += "</div>\n";
+               html += "<div class=\"help-box\">" + step.box + "</div>";
                html += (autoShow && step.autoOffNotice) ? "<div class=\"help-auto-off\"><label><input type=\"checkbox\" name=\"auto-off-checkbox\" " + 
-                  "id=\"auto-off-checkbox\"> Do not show this message in the future</label></div>\n" : ""; 
+                  "id=\"auto-off-checkbox\"> Do not show this message in the future</label></div>\n" : "";
                return html;
                }
            
-           var nxt;
-           for (var step in defn.story.steps) {
-               nxt = step;
-               break;
-           }
-           
-           width = (defn.story.steps[nxt].width !== undefined) ? defn.story.steps[nxt].width : 500; 
-           height = (defn.story.steps[nxt].height !== undefined) ? defn.story.steps[nxt].height : 600;
-           
-           if (Object.keys(defn.story.steps).length > 1) {
-              // We have multiple steps
-              for (var step in defn.story.steps) {
-                  if (step !== nxt) {
-                     nxtStory.story.steps[step] = defn.story.steps[step];
-                  }
-              }
-              nxtStory.story.hdr = defn.story.hdr; 
+           width = (defn.story.width) ? defn.story.width : 510; 
+           height = (defn.story.height) ? defn.story.height : 600;
+  
+           // Limit modal width to width of viewport
+           var ww = $(document).width(); 
+           width = (width > ww) ? ww : width;
 
-              var nxtStep = function() {
-                  showHelp({ defn: nxtStory });
-                  }
-              
-              try {
-                  $('#help-modal').dialog('hide');
-              }
-              catch(e) {
-                  // ignore
-              }
-              $('#help-modal').html(buildHtml(defn.story.steps[nxt])).dialog({
-                  position: { my: "center top", at: "center top+150", of: 'body' },
-                  title: defn.story.hdr, 
-                  width: width,
-                  height: height,
-                  buttons: [{ text: "Next", click: nxtStep }],
-                  closeOnEscape: true,
-                  show: 500,
-                  hide: 500,
-                  close: function() { $('#help-modal').empty(); },
-                  focus: function() { $('.ui-dialog-buttonset button').blur(); }
-                  });
-              $('.ui-dialog-buttonset button').attr({ 'class': 'btn btn-primary' }).blur();
-              $('.ui-dialog[aria-describedby="help-modal"]').find('.ui-dialog-titlebar button')
-                  .empty().attr({ 'class': 'close' }).text('x');
+           try {
+              isOpen = $('#help-modal').dialog('isOpen');
+           }
+           catch(e) {
+              // ignore
+           }
+          
+           if (isOpen) {
+               $('#help-modal').html(buildHtml(defn.story.steps[current_step]));
            }
            else {
-              try {
-                  $('#help-modal').dialog('hide');
-              }
-              catch(e) {
-                  // ignore
-              }
-              $('#help-modal').html(buildHtml(defn.story.steps[nxt])).dialog({
-                  position: { my: "center top", at: "center top+150", of: 'body' },
-                  title: defn.story.hdr, 
-                  width: width,
-                  height: height,
-                  buttons: [ { text: "OK", click: function() { $( this ).dialog( "close" ); } } ],
-                  closeOnEscape: true,
-                  show: 500,
-                  hide: 500,
-                  close: function() { $('#help-modal').empty(); },
-                  focus: function() { $('.ui-dialog-buttonset button').blur(); }
-                  });
-              $('.ui-dialog-buttonset button').attr({ 'class': 'btn btn-primary' }).blur();
-              $('.ui-dialog[aria-describedby="help-modal"]').find('.ui-dialog-titlebar button')
-                  .empty().attr({ 'class': 'close' }).text('x');
+               // Define buttons based on story length
+               var btns = [];
+               if (defn.story.steps.length > 1) { 
+                   btns.push({ 
+                      text: "Prev",
+                      click: function(e, ui) { 
+                          if (current_step - 1 == 0) {
+                              $(e.target).button('disable');
+                          }
+                          if (current_step - 1 < defn.story.steps.length - 1) {
+                              $(e.target).next().button('enable');
+                          }
+                          showHelp(current_step - 1); 
+                          }, 
+                      disabled: true
+                      });
+                   btns.push({
+                      text: "Next", 
+                      click: function(e, ui) { 
+                          if (current_step + 1 > 0) {
+                              $(e.target).prev().button('enable');
+                          }
+                          if (current_step + 1 == defn.story.steps.length - 1) {
+                              $(e.target).button('disable');
+                          }
+                          showHelp(current_step + 1);
+                          }
+                      });
+               }
+               btns.push({ text: "Close",
+                      click: function() { $('#help-modal').dialog('close'); }
+                      });
+               // Show the dialog
+               $('#help-modal').html(buildHtml(defn.story.steps[current_step])).dialog({
+                   position: { my: "center top", at: "center top+150", of: 'body' },
+                   title: defn.story.hdr, 
+                   width: width,
+                   height: height,
+                   buttons: btns,
+                   closeOnEscape: true,
+                   show: 500,
+                   hide: 500,
+                   close: function() { $('#help-modal').empty(); },
+                   resizeStop: function(e, ui) {
+                      // for some reason, after resizing the dialog the content doesn't expand to 100%
+                      var dialog = $('.ui-dialog[aria-describedby="help-modal"]');
+                      var content = dialog.find('#help-modal');
+                      content.width( dialog.width() - 20);
+                      }
+                   });
+               
+               // Make the buttons look like TB and add FA icons
+               $('.ui-dialog-buttonset button').each( function(idx) {
+                   var c, h, l; 
+                   l = $(this).text();
+                   if (l === 'Close') {
+                       h = "fa-times";
+                       c = "btn btn-default";
+                       $(this).attr({ 'class': c }).html("<i class=\"fa " + h + "\"></i> Close");
+                   }
+                   else if (l === 'Prev') {
+                       h = "fa-chevron-left";
+                       c = "btn btn-primary";
+                       $(this).attr({ 'class': c }).html("<i class=\"fa " + h + "\"></i> Prev");
+                   }
+                   else {
+                       h = "fa-chevron-right";
+                       c = "btn btn-primary";
+                       $(this).attr({ 'class': c }).html("Next <i class=\"fa " + h + "\"></i>").css({ 'margin-right': '20px'});
+                   }
+                   });
+
+               $('.ui-dialog[aria-describedby="help-modal"]').find('.ui-dialog-titlebar button')
+                   .empty().attr({ 'class': 'close' }).text('x');
+                 
+               // If user clicks the checkbox, update local storage
+               $('#auto-off-checkbox').click(function() {
+                   if ($('input[name="auto-off-checkbox"]:checked').length) {
+                       Store('inventoryAutoHelp','off');
+                   }
+                   else {
+                       Store('inventoryAutoHelp','on');
+                   }
+                   });
            }
-           
-           // If user clicks the checkbox, update local storage
-           $('#auto-off-checkbox').click(function() {
-              if ($('input[name="auto-off-checkbox"]:checked').length) {
-                 Store('inventoryAutoHelp','off');
-              }
-              else {
-                 Store('inventoryAutoHelp','on');
-              }
-              });
            }
        
-       showHelp(params);
+       showHelp(0);
 
        }
        }])
