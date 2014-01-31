@@ -442,6 +442,10 @@ class InventorySerializer(BaseSerializerWithVariables):
 
 class HostSerializer(BaseSerializerWithVariables):
 
+    # Allow the serializer to treat these fields as read-only
+    last_job = serializers.Field()
+    last_job_host_summary = serializers.Field()
+
     class Meta:
         model = Host
         fields = BASE_FIELDS + ('inventory', 'enabled', 'instance_id', 'variables',
