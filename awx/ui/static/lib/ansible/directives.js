@@ -18,19 +18,18 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         link: function(scope, elm, attrs, ctrl) {
             ctrl.$parsers.unshift( function(viewValue) {
                 var associated = attrs.awpassmatch;
-                var password = $('input[name="' + associated + '"]').val(); 
+                var password = $('input[name="' + associated + '"]').val();
                 if (viewValue == password) {
                    // it is valid
                    ctrl.$setValidity('awpassmatch', true);
                    return viewValue;
-                } else {
-                   // it is invalid, return undefined (no model update)
-                   ctrl.$setValidity('awpassmatch', false);
-                   return undefined;
-                }
+                } 
+                // Invalid, return undefined (no model update)
+                ctrl.$setValidity('awpassmatch', false);
+                return undefined;
                 });
             }
-        }
+        };
         })
     
     // caplitalize  Add to any input field where the first letter of each
@@ -44,7 +43,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
         link: function(scope, elm, attrs, ctrl) {
             ctrl.$parsers.unshift( function(viewValue) {
                 var values = viewValue.split(" ");
-                var result = "";
+                var result = "", i;
                 for (i = 0; i < values.length; i++){
                     result += values[i].charAt(0).toUpperCase() + values[i].substr(1) + ' ';
                 }
@@ -56,7 +55,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 return result;
                 });
             }
-        }
+        };
         })
 
     // integer  Validate that input is of type integer. Taken from Angular developer
@@ -76,23 +75,22 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                    // it is valid
                    ctrl.$setValidity('integer', true);
                    if ( elm.attr('min') &&
-                        ( viewValue == '' || viewValue == null || parseInt(viewValue) < parseInt(elm.attr('min')) ) ) {
+                        ( viewValue == '' || viewValue == null || parseInt(viewValue,10) < parseInt(elm.attr('min'),10) ) ) {
                       ctrl.$setValidity('min', false);
                       return undefined;  
                    }
-                   if ( elm.attr('max') && ( parseInt(viewValue) > parseInt(elm.attr('max')) ) ) {
+                   if ( elm.attr('max') && ( parseInt(viewValue,10) > parseInt(elm.attr('max'),10) ) ) {
                       ctrl.$setValidity('max', false);
                       return undefined;  
                    }
                    return viewValue;
-                } else {
-                  // it is invalid, return undefined (no model update)
-                  ctrl.$setValidity('integer', false);
-                  return undefined;
-                }
+                } 
+                // Invalid, return undefined (no model update)
+                ctrl.$setValidity('integer', false);
+                return undefined;
                 });
             }
-        }
+        };
         })
   
     //
@@ -108,7 +106,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             
             function checkIt () {
                var viewValue = elm.val();
-               var txt, label;
+               var label;
                var validity = true;
                if ( scope[attrs.awRequiredWhen] && (elm.attr('required') == null || elm.attr('required') == undefined) ) {
                   $(elm).attr('required','required');
@@ -150,7 +148,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 checkIt();
                 });
             }
-        }
+        };
         })
     
     // awPlaceholder: Dynamic placeholder set to a scope variable you want watched.
@@ -164,7 +162,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 $(elm).attr('placeholder',newVal);
                 });
             }
-        }
+        };
         }])
 
     // lookup   Validate lookup value against API
@@ -176,7 +174,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             ctrl.$parsers.unshift( function(viewValue) {
                 if (viewValue !== '' && viewValue !== null) {
                    var url = elm.attr('data-url');
-                   url = url.replace(/\:value/,escape(viewValue));
+                   url = url.replace(/\:value/, encodeURI(viewValue));
                    scope[elm.attr('data-source')] = null;
                    Rest.setUrl(url);
                    Rest.get().then( function(data) {
@@ -188,20 +186,18 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                           ctrl.$setValidity('awlookup', true);
                           return viewValue;
                        }
-                       else {
-                          ctrl.$setValidity('required', true); 
-                          ctrl.$setValidity('awlookup', false);
-                          return undefined;
-                       }
+                       ctrl.$setValidity('required', true); 
+                       ctrl.$setValidity('awlookup', false);
+                       return undefined;
                        });
                 }
                 else {
                    ctrl.$setValidity('awlookup', true);
                    scope[elm.attr('data-source')] = null;
                 }
-                })
+                });
             }
-        }
+        };
         }])
     
     //
@@ -222,9 +218,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                    }
                 }
                 ctrl.$setValidity('awvalidurl', validity); 
-                })
+                });
             }
-        }
+        };
         }])
 
     /*  
@@ -262,11 +258,11 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                   if (newVal !== oldVal) {
                       // Where did fixTitle come frome?:
                       //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
-                      $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle')
+                      $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle');
                   }
                   });
            }
-       }
+       };
        })
      
     /*  
@@ -316,7 +312,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                        });
                 }
                 });
-        }
+        };
         }])
 
     //
@@ -349,12 +345,12 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 });
 
             $('#' + name + '-number').change( function() {
-                $('#' + name + '-slider').slider('value', parseInt( $(this).val() ));
+                $('#' + name + '-slider').slider('value', parseInt($(this).val(),10));
                 });
 
 
             }
-        }
+        };
         }])
 
     .directive('awMultiSelect', [ function() {
@@ -370,20 +366,18 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                    if (options.length == 0) {
                        return 'None selected <b class="caret"></b>';
                    }
-                   else if (options.length > 3) {
+                   if (options.length > 3) {
                        return options.length + ' selected  <b class="caret"></b>';
                    }
-                   else {
-                       var selected = '';
-                       options.each(function() {
-                           selected += $(this).text() + ', ';
-                           });
-                       return selected.substr(0, selected.length -2) + ' <b class="caret"></b>';
-                   }
+                   var selected = '';
+                   options.each(function() {
+                       selected += $(this).text() + ', ';
+                       });
+                   return selected.substr(0, selected.length -2) + ' <b class="caret"></b>';
                 }
                 });
             }
-        }
+        };
         }])
 
     //
@@ -410,18 +404,18 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                    ctrl.$setValidity('max', true);
                    ctrl.$dirty = true;
                    ctrl.$render();
-                   scope['job_templates_form'].$dirty = true;
+                   scope.job_templates_form.$dirty = true;
                    if (!scope.$$phase) {
                        scope.$digest();
                    }
                    }
                 };
             if (disabled) { 
-               opts['disabled'] = true;
+               opts.disabled = true;
             }   
             $(elm).spinner(opts);
             }
-        }
+        };
         }])
 
     //
@@ -446,7 +440,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 }
                 });
             }
-        }
+        };
         }])
     
     //
@@ -482,7 +476,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 }
                 }, 1000);
             }
-        }
+        };
         }])
 
     
@@ -499,16 +493,14 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 data: function() {
                     // dynamically load the possible values
                     if (scope[attrs.awMultiselect]) {
-                       var set = scope[attrs.awMultiselect]; 
-                       var opts = [];
-                        for (var i=0; i < set.length; i++) {
+                        var set = scope[attrs.awMultiselect]; 
+                        var opts = [], i;
+                        for (i=0; i < set.length; i++) {
                             opts.push({ id: set[i].value, text: set[i].label });
                         }
                         return {results: opts };
                     }
-                    else {
-                        return {results: { id: '', text: ''} };
-                    }
+                    return {results: { id: '', text: ''} };
                     }
                 });
 
@@ -520,7 +512,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 }
                 });
             }
-        }
+        };
         }])
 
     
@@ -548,7 +540,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 });
         }
 
-        }
+        };
         }])
     
     /*  
@@ -559,6 +551,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
      */ 
     .directive('awDroppable', ['Find', function(Find) {
         return function(scope, element, attrs) {
+        var node;
         if (attrs.awDroppable == "true") {
             $(element).droppable({ 
                 // the following is inventory specific accept checking and 
@@ -570,35 +563,28 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                             // No dropping a node onto itself (or a copy)
                             return false;
                         }
-                        else {
-                            // No dropping a node into a group that already has the node
-                            var node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id')) });
-                            if (node) {
-                                var group = parseInt(draggable.attr('data-group-id'));
-                                var found = false;
-                                // For whatever reason indexOf() would not work...
-                                for (var i=0; i < node.children.length; i++) {
-                                    if (node.children[i] == group) {
-                                       found = true;
-                                       break;
-                                    }
+                        // No dropping a node into a group that already has the node
+                        node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id'),10) });
+                        if (node) {
+                            var group = parseInt(draggable.attr('data-group-id'),10),
+                                found = false, i;
+                            // For whatever reason indexOf() would not work...
+                            for (i=0; i < node.children.length; i++) {
+                                if (node.children[i] == group) {
+                                   found = true;
+                                   break;
                                 }
-                                return (found) ? false : true;
                             }
-                            else {
-                                // Node not found. This shouldn't be possible
-                                return false;
-                            }
+                            return (found) ? false : true;
                         }
-                    }
-                    else if (draggable.attr('data-type') == 'host') {
-                        // Dropped a host
-                        var node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id')) });
-                        return (node.id > 1) ? true : false;
-                    }
-                    else {
                         return false;
                     }
+                    if (draggable.attr('data-type') == 'host') {
+                        // Dropped a host
+                        node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id'),10) });
+                        return (node.id > 1) ? true : false;
+                    }
+                    return false;
                     },
                 over: function(e, ui) {
                     $(this).addClass('droppable-hover');
@@ -620,5 +606,5 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 });
         }
 
-        }
+        };
         }]);
