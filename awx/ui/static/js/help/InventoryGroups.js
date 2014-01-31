@@ -39,7 +39,7 @@ angular.module('InventoryGroupsHelpDefinition', [])
                 {
                 intro: 'Cloud inventory: synchronize Tower with the cloud',
                 img: { src: 'groups004.png', maxWidth: 261, maxHeight: 221 },
-                box: "To pull the cloud inventory into Tower, initiate an inventory sync by clicking <i class=\"fa fa-exchange\"></i>.",
+                box: "To pull the cloud inventory into Tower, initiate an inventory sync by clicking <i class=\"fa fa-exchange\"></i>."
                 },
                 {
                 intro: "Groups can have subgroups:",

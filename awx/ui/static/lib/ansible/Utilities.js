@@ -338,13 +338,8 @@ angular.module('Utilities',['RestServices', 'Utilities'])
                    closeOnEscape: true,
                    show: 500,
                    hide: 500,
-                   close: function() { $('#help-modal').empty(); },
-                   resizeStop: function(e, ui) {
-                      // for some reason, after resizing the dialog the content doesn't expand to 100%
-                      var dialog = $('.ui-dialog[aria-describedby="help-modal"]');
-                      var content = dialog.find('#help-modal');
-                      content.width( dialog.width() - 20);
-                      }
+                   resizable: false,
+                   close: function() { $('#help-modal').empty(); }
                    });
                
                // Make the buttons look like TB and add FA icons
