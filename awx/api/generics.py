@@ -401,8 +401,6 @@ class RetrieveUpdateAPIView(RetrieveAPIView, generics.RetrieveUpdateAPIView):
 
     def pre_save(self, obj):
         super(RetrieveUpdateAPIView, self).pre_save(obj)
-        if isinstance(obj, PrimordialModel):
-            obj.created_by = self.request.user
 
     def update(self, request, *args, **kwargs):
         self.update_filter(request, *args, **kwargs)
