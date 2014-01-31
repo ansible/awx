@@ -443,8 +443,8 @@ class InventorySerializer(BaseSerializerWithVariables):
 class HostSerializer(BaseSerializerWithVariables):
 
     # Allow the serializer to treat these fields as read-only
-    last_job = serializers.Field()
-    last_job_host_summary = serializers.Field()
+    last_job = serializers.PrimaryKeyRelatedField(read_only=True)
+    last_job_host_summary = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Host
