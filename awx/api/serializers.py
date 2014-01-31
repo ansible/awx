@@ -189,6 +189,18 @@ class BaseSerializer(serializers.ModelSerializer):
         else:
             return obj.active
 
+
+class BaseTaskSerializer(BaseSerializer):
+
+    job_env = serializers.SerializerMethodField('get_job_env')
+
+    def get_job_env(self, obj):
+        job_env_d = obj.job_env
+        if 'BROKER_URL' in job_env_d:
+            job_env_d.pop('BROKER_URL')
+        return job_env_d
+
+
 class UserSerializer(BaseSerializer):
 
     password = serializers.WritableField(required=False, default='',
@@ -364,7 +376,7 @@ class ProjectPlaybooksSerializer(ProjectSerializer):
         return ret.get('playbooks', [])
 
 
-class ProjectUpdateSerializer(BaseSerializer):
+class ProjectUpdateSerializer(BaseTaskSerializer):
 
     result_stdout = serializers.Field(source='result_stdout')
 
@@ -697,7 +709,7 @@ class InventorySourceSerializer(BaseSerializer):
         return metadata
 
 
-class InventoryUpdateSerializer(BaseSerializer):
+class InventoryUpdateSerializer(BaseTaskSerializer):
 
     result_stdout = serializers.Field(source='result_stdout')
 
@@ -858,7 +870,7 @@ class JobTemplateSerializer(BaseSerializer):
         return attrs
 
 
-class JobSerializer(BaseSerializer):
+class JobSerializer(BaseTaskSerializer):
 
     passwords_needed_to_start = serializers.Field(source='passwords_needed_to_start')
     result_stdout = serializers.Field(source='result_stdout')
