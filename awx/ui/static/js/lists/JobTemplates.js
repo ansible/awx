@@ -39,8 +39,7 @@ angular.module('JobTemplatesListDefinition', [])
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 icon: "icon-comments-alt",
-                mode: 'all',
-                ngShow: "user_is_superuser"
+                mode: 'all'
                 }
             },
 

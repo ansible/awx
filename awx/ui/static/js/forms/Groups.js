@@ -127,21 +127,6 @@ angular.module('GroupFormDefinition', [])
                 dataContainer: 'body',
                 tab: 'source'
                 },
-            /*update_interval: {
-                label: 'Update Interval',
-                type: 'select',
-                ngOptions: 'interval.label for interval in update_interval_options',
-                ngShow: "source.value !== '' && source.value !== null",
-                editRequired: false,
-                addRequired: false,
-                'default': { label: 'none', value: 0 },
-                dataTitle: 'Update Interval',
-                dataPlacement: 'left',
-                awPopOver: "<p>Automatically run the inventory update process the selected number of minutes from " +
-                    "the last run.</p><p>With a value set, task manager will periodically compare the amount of elapsed time from the last run. If enough time " +
-                    "has elapsed, it will go ahead and start an inventory update process.</p>",
-                dataContainer: 'body'
-                },*/
             checkbox_group: {
                 label: 'Update Options',
                 type: 'checkbox_group',

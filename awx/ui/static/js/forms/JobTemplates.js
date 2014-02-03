@@ -24,8 +24,7 @@ angular.module('JobTemplateFormDefinition', [])
                 dataPlacement: "top",
                 icon: "icon-comments-alt",
                 mode: 'edit',
-                iconSize: 'large',
-                ngShow: "user_is_superuser"
+                iconSize: 'large'
                 }    
             },
 

@@ -31,14 +31,6 @@ angular.module('InventoryHostsDefinition', [])
                 dataType: "host",
                 awDraggable: "true"
                 },
-            /*groups: {
-                label: 'Groups',
-                searchable: true,
-                sourceModel: 'groups',
-                sourceField: 'name',
-                nosort: true,
-                searchPlaceholder: "search_place_holder"
-                },*/
             enabled: {
                 label: 'Disabled?',
                 searchSingleValue: true,
@@ -100,8 +92,7 @@ angular.module('InventoryHostsDefinition', [])
             stream: {
                 ngClick: "showHostActivity()",
                 awToolTip: "View Activity Stream",
-                mode: 'all',
-                ngShow: "user_is_superuser"
+                mode: 'all'
                 }
             }
 

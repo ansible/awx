@@ -62,8 +62,7 @@ angular.module('InventoriesListDefinition', [])
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 icon: "icon-comments-alt",
-                mode: 'all',
-                ngShow: "user_is_superuser"
+                mode: 'all'
                 }
             },
 
@@ -94,17 +93,5 @@ angular.module('InventoriesListDefinition', [])
                 awToolTip: 'Delete inventory',
                 dataPlacement: 'top'
                 }
-             /*,
-             dropdown: {
-                type: 'DropDown',
-                label: 'Jobs',
-                icon: 'icon-zoom-in',
-                'class': 'btn-default btn-xs',
-                options: [
-                    { ngClick: 'viewJobs(\{\{ inventory.id \}\})', label: 'All' },
-                    { ngClick: "viewFailedJobs(\{\{ inventory.id \}\})", label: 'Failed' }
-                    ]
-                }
-                */
             }
         });

@@ -92,8 +92,7 @@ angular.module('HomeHostListDefinition', [])
             stream: {
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                mode: 'all',
-                ngShow: "user_is_superuser"
+                mode: 'all'
                 }
             }
 

@@ -32,46 +32,6 @@ angular.module('HomeGroupListDefinition', [])
                 columnClass: 'col-lg-3 col-md2 col-sm-2 hidden-xs elllipsis',
                 linkTo: "\{\{ '/#/inventories/' + group.inventory + '/' \}\}"
                 },
-            /*failed_hosts: {
-                label: 'Failed Hosts',
-                ngHref: "\{\{ group.failed_hosts_link \}\}",
-                badgeIcon: "\{\{ 'fa icon-failures-' + group.failed_hosts_class \}\}",
-                badgeNgHref: "\{\{ group.failed_hosts_link \}\}",
-                badgePlacement: 'left',
-                badgeToolTip: "\{\{ group.failed_hosts_tip \}\}",
-                badgeTipPlacement: 'top',
-                awToolTip: "\{\{ group.failed_hosts_tip \}\}",
-                dataPlacement: "top",
-                searchable: false,
-                excludeModal: true,
-                sortField: "hosts_with_active_failures"
-                },*/
-            /*status: {
-                label: 'Status',
-                ngClick: "viewUpdateStatus(\{\{ group.id \}\})",
-                searchType: 'select',
-                badgeIcon: "\{\{ 'fa fa-cloud ' + group.status_badge_class \}\}",
-                badgeToolTip: "\{\{ group.status_badge_tooltip \}\}",
-                awToolTip: "\{\{ group.status_badge_tooltip \}\}",
-                dataPlacement: 'top',
-                badgeTipPlacement: 'top',
-                badgePlacement: 'left',
-                searchOptions: [
-                    { name: "failed", value: "failed" },
-                    { name: "never", value: "never updated" },
-                    { name: "n/a", value: "none" },
-                    { name: "successful", value: "successful" },
-                    { name: "updating", value: "updating" }],
-                sourceModel: 'inventory_source',
-                sourceField: 'status'
-                },*/
-            /*last_updated: {
-                label: 'Last<br>Updated',
-                sourceModel: 'inventory_source',
-                sourceField: 'last_updated',
-                searchable: false,
-                nosort: false
-                },*/
             source: {
                 label: 'Source',
                 searchType: 'select',
@@ -164,8 +124,7 @@ angular.module('HomeGroupListDefinition', [])
             stream: {
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                mode: 'all',
-                ngShow: "user_is_superuser"
+                mode: 'all'
                 }
             }
 

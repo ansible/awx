@@ -30,8 +30,7 @@ function Home ($scope, $compile, $routeParams, $rootScope, $location, Wait, Obje
         stream: {
             ngClick: "showActivity()",
             awToolTip: "View Activity Stream",
-            mode: 'all',
-            ngShow: "user_is_superuser"
+            mode: 'all'
             }
         };
     var html = Button({ btn: buttons.refresh, action: 'refresh', toolbar: true });
@@ -136,15 +135,11 @@ function HomeGroups ($location, $routeParams, HomeGroupList, GenerateList, Proce
             scope['home_groups'][i].show_failures = hosts_status['failures'],
             scope['home_groups'][i].hosts_status_class = hosts_status['class'],
             
-            //scope.home_groups[i].failed_hosts_tip = msg['tooltip']; 
-            //scope.home_groups[i].failed_hosts_link = msg['url'];
-            //scope.home_groups[i].failed_hosts_class = msg['class'];
+            
             scope.home_groups[i].status = scope.home_groups[i].summary_fields.inventory_source.status;
             scope.home_groups[i].source = (scope.home_groups[i].summary_fields.inventory_source) ? 
                 scope.home_groups[i].summary_fields.inventory_source.source : null;
-            //scope.home_groups[i].last_updated = last_update;
-            //scope.home_groups[i].status_badge_class = update_status['class'];
-            //scope.home_groups[i].status_badge_tooltip = update_status['tooltip'];
+
         }
         });
 

@@ -64,14 +64,14 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
               status = 'alert-danger';
               hdr = 'License Error';
               msg = '<p>There is a problem with the /etc/awx/license file on your Tower server. Check to make sure Tower can access ' +
-                  'the file.<p>' + purchase_msg;
+                  'the file.</p>' + purchase_msg;
               Alert(hdr, msg, status, null, false, true);
            }
            else if (license['demo'] !== undefined && license['demo'] == true) {
               // demo
               status = 'alert-info';
               hdr = 'Tower Demo';
-              msg = '<p>Thank you for trying Ansible Tower. You can use this edition to manage up to 10 hosts free.<p>' + 
+              msg = '<p>Thank you for trying Ansible Tower. You can use this edition to manage up to 10 hosts free.</p>' + 
                   purchase_msg;
               Alert(hdr, msg, status);
            }
@@ -80,7 +80,7 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
               status = 'alert-info';
               hdr = 'License Expired';
               msg = '<p>Your Ansible Tower License has expired and is no longer compliant. You can continue, but you will be ' +
-                  'unable to add any additional hosts.<p>' + purchase_msg; 
+                  'unable to add any additional hosts.</p>' + purchase_msg; 
               Alert(hdr, msg, status);
            }
            else if (license['date_warning'] !== undefined && license['date_warning'] == true) {

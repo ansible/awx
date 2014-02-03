@@ -19,8 +19,7 @@ angular.module('CredentialFormDefinition', [])
             stream: {
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                mode: 'edit',
-                ngShow: "user_is_superuser"
+                mode: 'edit'
                 }    
             },
             
