@@ -9,9 +9,8 @@ DATE := $(shell date -u +%Y%m%d%H%M)
 VERSION=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
 RELEASE=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[1])")
 
-# Allow ami license customization
-LICENSE_TIER ?= 30
-PACKER_LICENSE_FILE ?= test.json
+# Allow AMI license customization
+LICENSE_TIER ?= 10
 
 ifneq ($(OFFICIAL),yes)
 BUILD=dev$(DATE)
@@ -197,11 +196,8 @@ deb: sdist
 	@echo "ansible-tower-$(DEB_PKG_RELEASE).deb admin optional" > $(DEB_BUILD_DIR)/debian/realfiles
 	(cd $(DEB_BUILD_DIR) && PKG_RELEASE=$(DEB_PKG_RELEASE) dpkg-buildpackage -nc -us -uc -b --changes-option="-fdebian/realfiles")
 
-packer_license:
-	@python -c "import json; fp = open('packaging/ami/license/$(PACKER_LICENSE_FILE)', 'w+'); json.dump(dict(instance_count=$(LICENSE_TIER)), fp); fp.close();"
-
-ami: packer_license
-	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_license=$(PACKER_LICENSE_FILE)" ansible-tower.json)
+ami:
+	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_license=$(LICENSE_TIER).json" ansible-tower.json)
 
 install:
 	$(PYTHON) setup.py install egg_info -b ""
