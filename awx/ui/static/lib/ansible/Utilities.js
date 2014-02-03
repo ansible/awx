@@ -41,6 +41,20 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        }
        }])
 
+   
+   /* Empty()
+    *
+    * Test if a value is 'empty'. Returns true if val is null | '' | undefined.
+    * Only works on non-Ojbect types.
+    *
+    */
+   .factory('Empty', [ function() {
+   return function(val) {
+       return (val === null || val === undefined || val === '') ? true : false;
+       }
+       }])
+
+   
    .factory('ToggleClass', function() {
    return function(selector, cssClass) {
        // Toggles the existance of a css class on a given element   
@@ -53,6 +67,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        } 
        })
 
+   
    .factory('Alert', ['$rootScope', '$location', function($rootScope, $location) {
    return function(hdr, msg, cls, action, secondAlert, disableButtons) {
        // Pass in the header and message you want displayed on TB modal dialog found in index.html.
@@ -104,6 +119,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        }
        }])
 
+   
    .factory('ProcessErrors', ['$rootScope', '$cookieStore', '$log', '$location', 'Alert', 'Wait',
    function($rootScope, $cookieStore, $log, $location, Alert, Wait) {
    return function(scope, data, status, form, defaultMsg) {
@@ -180,21 +196,25 @@ angular.module('Utilities',['RestServices', 'Utilities'])
        } 
        }])
 
-   .factory('LoadBreadCrumbs', ['$rootScope', '$routeParams', '$location', function($rootScope, $routeParams, $location, Rest) {
+   
+   .factory('LoadBreadCrumbs', ['$rootScope', '$routeParams', '$location', 'Empty', 
+   function($rootScope, $routeParams, $location, Empty) {
    return function(crumb) {
-       
+       var title, found, j, i;
+
        //Keep a list of path/title mappings. When we see /organizations/XX in the path, for example, 
        //we'll know the actual organization name it maps to.
-       if (crumb !== null && crumb !== undefined) {
-          var found = false; 
-          for (var i=0; i < $rootScope.crumbCache.length; i++) {
+       if (!Empty(crumb)) {
+          found = false;
+          //crumb.title = crumb.title.charAt(0).toUpperCase() + crumb.title.slice(1);
+          for (i=0; i < $rootScope.crumbCache.length; i++) {
               if ($rootScope.crumbCache[i].path == crumb.path) {
                  found = true; 
                  $rootScope.crumbCache[i] = crumb;
                  break;     
               }
           }
-          if (found == false) {
+          if (!found) {
              $rootScope.crumbCache.push(crumb);
           }
        }
@@ -207,42 +227,48 @@ angular.module('Utilities',['RestServices', 'Utilities'])
              if (i > 0 && paths[i].match(/\d+/)) {
                 parent = paths[i-1];
                 if (parent == 'inventories') {
-                    child = 'inventory';
+                    child = 'Inventory';
                 }
                 else {
                     child = parent.substring(0,parent.length - 1);  //assumes parent ends with 's'
+                    child = child.charAt(0).toUpperCase() + child.slice(1);
                 }
                 // find the correct title
+                found = false;
                 for (var j=0; j < $rootScope.crumbCache.length; j++) {
                     if ($rootScope.crumbCache[j].path == '/' + parent + '/' + paths[i]) {
                         child = $rootScope.crumbCache[j].title;
+                        found = true;
                         break;
                     }
                 }
-                if ($rootScope.crumbCache[j] && $rootScope.crumbCache[j]['altPath'] !== undefined) {
+
+                if (found && $rootScope.crumbCache[j]['altPath'] !== undefined) {
                     // Use altPath to override default path construction
                     $rootScope.breadcrumbs.push({ title: child, path: $rootScope.crumbCache[j].altPath });
                 }
                 else { 
-                    if (paths[i - 1] == 'hosts') {
+                    $rootScope.breadcrumbs.push({ title: child, path: ppath + '/' + paths[i] });
+                    /*if (paths[i - 1] == 'hosts') {
                         // For hosts, there is no /hosts, so we need to link back to the inventory
                         // We end up here when user has clicked refresh and the crumbcache is missing
                         $rootScope.breadcrumbs.push({ title: child, 
                             path: '/inventories/' + $routeParams.inventory + '/hosts' });
                     }
-                    else { 
-                        $rootScope.breadcrumbs.push({ title: child, path: ppath + '/' + paths[i] });
-                    }
+                    else { */
+                        
+                    //}
                 }
              }
              else {
-                if (paths[i] == 'hosts') {
+                title = paths[i].charAt(0).toUpperCase() + paths[i].slice(1);
+                $rootScope.breadcrumbs.push({ title: title, path: ppath + '/' + paths[i] });
+                /*if (paths[i] == 'hosts') {
                     $rootScope.breadcrumbs.push({ title: paths[i], path: '/inventories/' + $routeParams.inventory +
                         '/hosts' });
                 }
-                else {
-                    $rootScope.breadcrumbs.push({ title: paths[i], path: ppath + '/' + paths[i] });
-                }
+                else {*/
+                //}
              }
              ppath += '/' + paths[i];
           }
@@ -564,19 +590,6 @@ angular.module('Utilities',['RestServices', 'Utilities'])
       console.log('form valid: ' + scope[form.name + '_form'].$valid);
       }
       }])
-   
-   
-   /* Empty()
-    *
-    * Test if a value is 'empty'. Returns true if val is null | '' | undefined.
-    * Only works on non-Ojbect types.
-    *
-    */
-   .factory('Empty', [ function() {
-   return function(val) {
-       return (val === null || val === undefined || val === '') ? true : false;
-       }
-       }])
 
    
     /* Store

@@ -10,7 +10,7 @@ angular.module('InventoryGroupsDefinition', [])
 
         name: 'groups',
         iterator: 'group',
-        editTitle: '{{ inventory_name | capitalize }}',
+        editTitle: '{{ inventory_name }}',
         showTitle: false,
         well: true,
         index: false,

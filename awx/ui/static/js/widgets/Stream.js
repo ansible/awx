@@ -75,8 +75,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         $rootScope.breadcrumbs = [];
         var paths = $location.path().split('/');
         paths.splice(0,1);
-        var path, title, j;
-        for (var i=0; i < paths.length; i++) {
+        var path, title, i, j;
+        for (i=0; i < paths.length; i++) {
             if (/^\d+/.test(paths[i])) {
                 path='';
                 title='';
@@ -91,7 +91,8 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 }
                 if (!title) {
                     title = paths[i - 1].substr(0,paths[i - 1].length - 1);
-                    title = (title == 'inventorie') ? 'inventory' : title;
+                    title = title.charAt(0).toUpperCase() + title.slice(1);
+                    title = (title == 'Inventorie') ? 'Inventory' : title;
                 }
             }
             else {
@@ -106,6 +107,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                    path = '/' + paths[i];
                 }
                 title = paths[i];
+                title = title.charAt(0).toUpperCase() + title.slice(1);
             }
             $rootScope.breadcrumbs.push({ path: path, title: title, ngClick: "closeStream('" + path + "')" });    
         }
@@ -345,7 +347,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
         }
 
         // Add a container for the stream widget
-        $('#tab-content-container').append('<div id="stream-container"><div id=\"stream-content\"></div></div><!-- Stream widget -->');
+        $('#tab-content-container').append("<div id=\"stream-container\"><div id=\"stream-content\"></div></div><!-- Stream widget -->");
         
         StreamBreadCrumbs();
 
