@@ -516,14 +516,19 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        var horizontal = (this.form.horizontal) ? true : false;
        
        if (field.type == 'alertblock') {
-          html += "<div class=\"alert ";
-          html += (field.closeable == undefined || field.closeable == true) ? "alert-dismissable " : "";
-          html += field['class'] + "\" "; 
+          html += "<div class=\"row\">\n";
+          html += "<div class=\"col-lg-8 col-lg-offset-2\">\n";
+          html += "<div class=\"alert";
+          html += (field.closeable == undefined || field.closeable == true) ? " alert-dismissable" : "";
+          html += (field['class']) ? " " + field['class'] : "";
+          html += "\" "; 
           html += (field.ngShow) ? this.attr(field, 'ngShow') : "";
           html += ">\n";
           html += (field.closeable == undefined || field.closeable == true) ? 
               "<button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-hidden=\"true\">&times;</button>\n" : "";
           html += field.alertTxt;
+          html += "</div>\n";
+          html += "</div>\n";
           html += "</div>\n";
        }
 

@@ -1,6 +1,10 @@
-/*********************************************
+/******************************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
+ *  helpers/Access.js
+ *
+ *  Routines for checking user access and license state
+ *  
  */
 
 angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])  

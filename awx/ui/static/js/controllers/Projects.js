@@ -442,9 +442,11 @@ function ProjectsAdd ($scope, $rootScope, $compile, $location, $log, $routeParam
 
    scope.scmChange = function() {
        // When an scm_type is set, path is not required
-       scope.pathRequired = (scope.scm_type.value == '') ? true : false;
-       scope.scmRequired = (scope.scm_type.value !== '') ? true : false;
-       scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch'; 
+       if (scope.scm_type) {
+           scope.pathRequired = (scope.scm_type.value == '') ? true : false;
+           scope.scmRequired = (scope.scm_type.value !== '') ? true : false;
+           scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch'; 
+       }
        }
 
    // Cancel
@@ -681,9 +683,11 @@ function ProjectsEdit ($scope, $rootScope, $compile, $location, $log, $routePara
       }
   
    scope.scmChange = function() {
-       scope.pathRequired = (scope.scm_type.value == '') ? true : false;
-       scope.scmRequired = (scope.scm_type.value !== '') ? true : false;
-       scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch';  
+       if (scope.scm_type) {
+           scope.pathRequired = (scope.scm_type.value == '') ? true : false;
+           scope.scmRequired = (scope.scm_type.value !== '') ? true : false;
+           scope.scmBranchLabel = (scope.scm_type.value == 'svn') ? 'Revision #' : 'SCM Branch';  
+       }
        }
 
    // Reset the form

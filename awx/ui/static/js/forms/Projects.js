@@ -71,13 +71,15 @@ angular.module('ProjectFormDefinition', [])
                 },
             missing_path_alert: {
                 type: 'alertblock', 
-                "class": 'alert-info col-lg-6 col-lg-offset-2', 
-                ngShow: 'showMissingPlaybooksAlert && !scm_type',
-                alertTxt: '<p class=\"text-justify\"><strong>WARNING:</strong> There are no unassigned playbook directories in the base project path {{ base_dir }}. Either the projects ' +
-                    'directory is empty, or all of the contents are already assigned to other projects. New projects can be checked out from source control by ' + 
-                    'changing the SCM type option rather than specifying checkout paths manually. To continue with manual setup, log into the Tower host and ' +
-                    'ensure content is present in a subdirectory under {{ base_dir }}. Run "chown -R awx" on the content directory to ensure Tower can read the ' +
-                    'playbooks.</p>'
+                "class": 'alert-info', 
+                ngShow: "showMissingPlaybooksAlert && scm_type.value == ''",
+                alertTxt: '<p class=\"text-justify\"><strong>WARNING:</strong> There are no unassigned playbook directories in the base ' +
+                    'project path {{ base_dir }}. Either the projects directory is empty, or all of the contents are already assigned to ' +
+                    'other projects. New projects can be checked out from source control by ' + 
+                    'changing the SCM type option rather than specifying checkout paths manually. To continue with manual setup, log into ' +
+                    'the Tower host and ensure content is present in a subdirectory under {{ base_dir }}. Run "chown -R awx" on the content ' +
+                    'directory to ensure Tower can read the playbooks.</p>',
+                closeable: false
                 },
             base_dir: {
                 label: 'Project Base Path',
@@ -98,7 +100,7 @@ angular.module('ProjectFormDefinition', [])
                 id: 'local-path-select',
                 ngOptions: 'path.label for path in project_local_paths',
                 awRequiredWhen: { variable: "pathRequired", init: false },
-                ngShow: "scm_type.value == ''",
+                ngShow: "scm_type.value == '' && !showMissingPlaybooksAlert",
                 awPopOver: '<p>Select from the list of directories found in the base path.' +
                   'Together the base path and the playbook directory provide the full path used to locate playbooks.</p>' + 
                   '<p>Use PROJECTS_ROOT in your environment settings file to determine the base path value.</p>',
@@ -109,7 +111,7 @@ angular.module('ProjectFormDefinition', [])
             scm_url: {
                 label: 'SCM URL',
                 type: 'text',
-                ngShow: "scm_type.value !== ''",
+                ngShow: "scm_type && scm_type.value !== ''",
                 awRequiredWhen: { variable: "scmRequired", init: false },
                 helpCollapse: [
                     { hdr: 'GIT URLs',
@@ -137,14 +139,14 @@ angular.module('ProjectFormDefinition', [])
             scm_branch: {
                 labelBind: "scmBranchLabel",
                 type: 'text',
-                ngShow: "scm_type.value !== ''",
+                ngShow: "scm_type && scm_type.value !== ''",
                 addRequired: false,
                 editRequired: false
                 },
             credential: {
                 label: 'SCM Credential',
                 type: 'lookup',
-                ngShow: "scm_type.value !== ''",
+                ngShow: "scm_type && scm_type.value !== ''",
                 sourceModel: 'credential',
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
