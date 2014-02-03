@@ -16,9 +16,6 @@ function Home ($scope, $compile, $routeParams, $rootScope, $location, Wait, Obje
     ClearScope('home');  //Garbage collection. Don't leave behind any listeners/watchers from the prior
                          //scope.
     
-    //var element = angular.element(document.getElementById('htmlTemplate'));
-    //var scope = element.scope();
-
     // Add buttons to the top of the Home page. We're using lib/ansible/generator_helpers.js-> Buttons()
     // to build buttons dynamically and insure all styling and icons match the rest of the application.
     var buttons = {
