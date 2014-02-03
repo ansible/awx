@@ -139,12 +139,13 @@ class DashboardView(APIView):
 
         data = SortedDict()
         user_inventory = get_user_queryset(request.user, Inventory)
+        inventory_with_failed_hosts = user_inventory.filter(hosts_with_active_failures__gt=0)
         user_inventory_external = user_inventory.filter(has_inventory_sources=True)
         failed_inventory = sum(i.inventory_sources_with_failures for i in user_inventory)
         data['inventories'] = {'url': reverse('api:inventory_list'),
                                'total': user_inventory.count(),
                                'total_with_inventory_source': user_inventory_external.count(),
-                               #'job_failed'
+                               'job_failed': inventory_with_failed_hosts.count(),
                                'inventory_failed': failed_inventory}
         user_inventory_sources = get_user_queryset(request.user, InventorySource)
         rax_inventory_sources = user_inventory_sources.filter(source='rax')
