@@ -10,7 +10,7 @@ VERSION=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.spl
 RELEASE=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[1])")
 
 # Allow AMI license customization
-LICENSE_TIER ?= 10
+LICENSE_TIER ?= 10.json
 
 ifneq ($(OFFICIAL),yes)
 BUILD=dev$(DATE)
@@ -197,7 +197,7 @@ deb: sdist
 	(cd $(DEB_BUILD_DIR) && PKG_RELEASE=$(DEB_PKG_RELEASE) dpkg-buildpackage -nc -us -uc -b --changes-option="-fdebian/realfiles")
 
 ami:
-	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_license=$(LICENSE_TIER).json" ansible-tower.json)
+	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_license=$(LICENSE_TIER)" ansible-tower.json)
 
 install:
 	$(PYTHON) setup.py install egg_info -b ""
