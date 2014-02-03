@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Python
+import datetime
 import json
 import os
 import sys
@@ -46,6 +47,9 @@ except ImportError:
                                        'lib', 'site-packages')
     sys.path.insert(0, local_site_packages)
     import requests
+
+# Kombu
+from kombu import Connection, Exchange, Queue
 
 # Celery
 from celery import Celery
@@ -88,15 +92,44 @@ class CallbackModule(object):
         self.auth_token = os.getenv('REST_API_TOKEN', '')
         self.broker_url = os.getenv('BROKER_URL', '')
 
-    def _post_msg(self, event, event_data):
+    def _start_save_job_events_task(self):
         app = Celery('tasks', broker=self.broker_url)
-        send_task('awx.main.tasks.save_job_event', kwargs={
+        send_task('awx.main.tasks.save_job_events', kwargs={
+            'job_id': self.job_id,
+        }, serializer='json')
+
+    def _post_job_event_queue_msg(self, event, event_data):
+        if not hasattr(self, 'job_events_exchange'):
+            self.job_events_exchange = Exchange('job_events', 'direct',
+                                                durable=True)
+        if not hasattr(self, 'job_events_queue'):
+            self.job_events_queue = Queue('job_events',
+                                          exchange=self.job_events_exchange,
+                                          routing_key=('job_events[%d]' % self.job_id))
+        if not hasattr(self, 'connection'):
+            self.connection = Connection(self.broker_url)
+        if not hasattr(self, 'producer'):
+            self.producer = self.connection.Producer(serializer='json')
+        
+        msg = {
             'job_id': self.job_id,
             'event': event,
             'event_data': event_data,
-        }, serializer='json')
+            'created': datetime.datetime.utcnow().isoformat(),
+        }
+        self.producer.publish(msg, exchange=self.job_events_exchange,
+                              routing_key=('job_events[%d]' % self.job_id),
+                              declare=[self.job_events_queue])
+        if event == 'playbook_on_stats':
+            try:
+                self.producer.cancel()
+                del self.producer
+                self.connection.release()
+                del self.connection
+            except:
+                pass
 
-    def _post_data(self, event, event_data):
+    def _post_rest_api_event(self, event, event_data):
         data = json.dumps({
             'event': event,
             'event_data': event_data,
@@ -126,9 +159,11 @@ class CallbackModule(object):
         if task and event not in self.EVENTS_WITHOUT_TASK:
             event_data['task'] = task
         if self.broker_url:
-            self._post_msg(event, event_data)
+            if event == 'playbook_on_start':
+                self._start_save_job_events_task()
+            self._post_job_event_queue_msg(event, event_data)
         else:
-            self._post_data(event, event_data)
+            self._post_rest_api_event(event, event_data)
 
     def on_any(self, *args, **kwargs):
         pass

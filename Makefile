@@ -111,7 +111,7 @@ runserver:
 
 # Run to start the background celery worker for development.
 celeryd:
-	$(PYTHON) manage.py celeryd -l DEBUG -B -Ofair
+	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,2 -Ofair
 
 # Run all API unit tests.
 test:

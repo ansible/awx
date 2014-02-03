@@ -18,6 +18,7 @@ import yaml
 # Django
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
@@ -460,7 +461,7 @@ class JobHostSummary(BaseModel):
             update_fields.append('last_job_host_summary')
         if update_fields:
             self.host.save(update_fields=update_fields)
-        self.host.update_computed_fields()
+        #self.host.update_computed_fields()
 
 class JobEvent(BaseModel):
     '''
@@ -535,12 +536,14 @@ class JobEvent(BaseModel):
         editable=False,
     )
     created = models.DateTimeField(
-        auto_now_add=True,
-        default=now,
+        #auto_now_add=True,
+        editable=False,
+        default=None,
     )
     modified = models.DateTimeField(
-        auto_now=True,
-        default=now,
+        #auto_now=True,
+        editable=False,
+        default=None,
     )
     event = models.CharField(
         max_length=100,
@@ -666,7 +669,7 @@ class JobEvent(BaseModel):
             parent_events.add('playbook_on_task_start')
         if parent_events:
             try:
-                qs = self.job.job_events.all()
+                qs = JobEvent.objects.filter(job_id=self.job_id)
                 if self.pk:
                     qs = qs.filter(pk__lt=self.pk, event__in=parent_events)
                 else:
@@ -677,6 +680,7 @@ class JobEvent(BaseModel):
         return None
 
     def save(self, *args, **kwargs):
+        from awx.main.models.inventory import Host
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
@@ -722,7 +726,7 @@ class JobEvent(BaseModel):
                     pass
             try:
                 if not self.host and self.event_data.get('host', ''):
-                    self.host = self.job.inventory.hosts.get(name=self.event_data['host'])
+                    self.host = Host.objects.get(inventory__jobs__id=self.job_id, name=self.event_data['host'])
                     if 'host' not in update_fields:
                         update_fields.append('host')
             except (Host.DoesNotExist, AttributeError):
@@ -731,6 +735,13 @@ class JobEvent(BaseModel):
             self.task = self.event_data.get('task', '')
             self.parent = self._find_parent()
             update_fields.extend(['play', 'task', 'parent'])
+        # Manually perform auto_now_add and auto_now logic (to allow overriding
+        # created timestamp for queued job events).
+        if not self.pk and not self.created:
+            self.created = now()
+            update_fields.append('created')
+        self.modified = now()
+        update_fields.append('modified')
         super(JobEvent, self).save(*args, **kwargs)
         if post_process and not from_parent_update:
             self.update_parent_failed_and_changed()
@@ -752,9 +763,9 @@ class JobEvent(BaseModel):
                 parent.save(update_fields=update_fields, from_parent_update=True)
                 parent.update_parent_failed_and_changed()
 
-    def update_hosts(self, extra_hosts=None):
+    def update_hosts(self, extra_host_pks=None):
         from awx.main.models.inventory import Host
-        extra_hosts = extra_hosts or []
+        extra_host_pks = set(extra_host_pks or [])
         hostnames = set()
         if self.event_data.get('host', ''):
             hostnames.add(self.event_data['host'])
@@ -764,19 +775,17 @@ class JobEvent(BaseModel):
                     hostnames.update(v.keys())
             except AttributeError: # In case event_data or v isn't a dict.
                 pass
-        for hostname in hostnames:
-            try:
-                host = self.job.inventory.hosts.get(name=hostname)
-            except Host.DoesNotExist:
-                continue
-            self.hosts.add(host)
-        for host in extra_hosts:
+        qs = Host.objects.filter(inventory__jobs__id=self.job_id)
+        qs = qs.filter(Q(name__in=hostnames) | Q(pk__in=extra_host_pks))
+        qs = qs.exclude(job_events__pk=self.id)
+        for host in qs:
             self.hosts.add(host)
         if self.parent:
-            self.parent.update_hosts(self.hosts.all())
+            self.parent.update_hosts(self.hosts.values_list('pk', flat=True))
 
     def update_host_summary_from_stats(self):
         from awx.main.models.inventory import Host
+        from awx.main.signals import ignore_inventory_computed_fields
         if self.event != 'playbook_on_stats':
             return
         hostnames = set()
@@ -785,20 +794,21 @@ class JobEvent(BaseModel):
                 hostnames.update(v.keys())
         except AttributeError: # In case event_data or v isn't a dict.
             pass
-        for hostname in hostnames:
-            try:
-                host = self.job.inventory.hosts.get(name=hostname)
-            except Host.DoesNotExist:
-                continue
-            host_summary = self.job.job_host_summaries.get_or_create(host=host)[0]
-            update_fields = []
-            for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
-                try:
-                    value = self.event_data.get(stat, {}).get(hostname, 0)
-                    if getattr(host_summary, stat) != value:
-                        setattr(host_summary, stat, value)
-                        update_fields.append(stat)
-                except AttributeError: # in case event_data[stat] isn't a dict.
-                    pass
-            if update_fields:
-                host_summary.save(update_fields=update_fields)
+        with ignore_inventory_computed_fields():
+            qs = Host.objects.filter(inventory__jobs__id=self.job_id,
+                                     name__in=hostnames)
+            for host in qs:
+                host_summary = self.job.job_host_summaries.get_or_create(host=host)[0]
+                update_fields = []
+                for stat in ('changed', 'dark', 'failures', 'ok', 'processed', 'skipped'):
+                    try:
+                        value = self.event_data.get(stat, {}).get(host.name, 0)
+                        if getattr(host_summary, stat) != value:
+                            setattr(host_summary, stat, value)
+                            update_fields.append(stat)
+                    except AttributeError: # in case event_data[stat] isn't a dict.
+                        pass
+                if update_fields:
+                    host_summary.save(update_fields=update_fields)
+            self.job.inventory.update_computed_fields()
+
