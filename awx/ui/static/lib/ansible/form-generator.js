@@ -517,7 +517,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
        
        if (field.type == 'alertblock') {
           html += "<div class=\"row\">\n";
-          html += "<div class=\"col-lg-8 col-lg-offset-2\">\n";
+          html += "<div class=\"";
+          html += (options.modal || options.id) ? "col-lg-12" : "col-lg-8 col-lg-offset-2";
+          html += "\">\n";
           html += "<div class=\"alert";
           html += (field.closeable == undefined || field.closeable == true) ? " alert-dismissable" : "";
           html += (field['class']) ? " " + field['class'] : "";

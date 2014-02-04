@@ -19,8 +19,8 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
                 break;
             case 'failed':
                 toolTip = 'Some tasks encountered errors.';
-                break; 
-            case 'canceled': 
+                break;
+            case 'canceled':
                 toolTip = 'Stopped by user request.';
                 break;
             case 'new':
@@ -37,7 +37,7 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
                 break;
         }
         return toolTip;
-        }
+        };
         }])
 
     .factory('ShowJobSummary', ['Rest', 'Wait', 'GetBasePath', 'FormatDate', 'ProcessErrors', 'GenerateForm', 'JobSummary',
@@ -53,13 +53,14 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
         
         // Using jquery dialog for its expandable property
         
-        var html = "<div id=\"status-modal-dialog\" title=\"Job " + job_id + "\"><div id=\"form-container\" style=\"width: 100%;\"></div></div>\n";
+        var html = '<div id=\"status-modal-dialog\" title=\"Job ' + job_id + '\">' +
+            '<div id=\"form-container\" style=\"width: 100%;\"></div></div>\n';
         
         $('#inventory-modal-container').empty().append(html);
         var scope = generator.inject(form, { mode: 'edit', id: 'form-container', breadCrumbs: false, related: false });
         
         // Set modal dimensions based on viewport width
-        var ww = $(document).width(); 
+        var ww = $(document).width();
         var wh = $('body').height();
         var x, y, maxrows;
         if (ww > 1199) {
@@ -81,31 +82,32 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
         
         // Create the modal
         $('#status-modal-dialog').dialog({
-            buttons: { "OK": function() {  $( this ).dialog( "close" ); } },
-            modal: true, 
-            width: x, 
+            buttons: { 'OK': function() {  $( this ).dialog( 'close' ); } },
+            modal: true,
+            width: x,
             height: y,
             autoOpen: false,
-            create: function (e, ui) {
+            create: function () {
                 // fix the close button
-                $('.ui-dialog[aria-describedby="status-modal-dialog"]').find('.ui-dialog-titlebar button').empty().attr({ 'class': 'close' }).text('x'); 
+                $('.ui-dialog[aria-describedby="status-modal-dialog"]').find('.ui-dialog-titlebar button')
+                    .empty().attr({ 'class': 'close' }).text('x');
                 // fix the OK button
                 $('.ui-dialog[aria-describedby="status-modal-dialog"]').find('.ui-dialog-buttonset button:first')
                     .attr({ 'class': 'btn btn-primary' });
                 },
-            resizeStop: function(e, ui) {
+            resizeStop: function() {
                 // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
                 var dialog = $('.ui-dialog[aria-describedby="status-modal-dialog"]');
                 var content = dialog.find('#status-modal-dialog');
                 content.width( dialog.width() - 28 );
                 },
-            close: function(e, ui) {
+            close: function() {
                 // Destroy on close
-                $('.tooltip').each( function(index) {
+                $('.tooltip').each( function() {
                     // Remove any lingering tooltip <div> elements
                     $(this).remove();
                     });
-                $('.popover').each(function(index) {
+                $('.popover').each(function() {
                     // remove lingering popover <div> elements
                     $(this).remove();
                     });
@@ -113,7 +115,7 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
                 $('#inventory-modal-container').empty();
                 WatchInventoryWindowResize();
                 },
-            open: function(e, ui) {
+            open: function() {
                 Wait('stop');
                 }
             });
@@ -126,24 +128,25 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
 
         Wait('start');
         var url = GetBasePath('jobs') + job_id + '/';
-        Rest.setUrl(url); 
+        Rest.setUrl(url);
         Rest.get()
-            .success( function(data, status, headers, config) {
+            .success( function(data) {
                 scope.id = data.id;
                 scope.name = data.name;
-                scope.status = data.status; 
+                scope.status = data.status;
                 scope.result_stdout = data.result_stdout;
                 scope.result_traceback = data.result_traceback;
-                scope['stdout_rows'] = calcRows(scope['result_stdout']);
-                scope['traceback_rows'] = calcRows(scope['result_traceback']);
+                scope.stdout_rows = calcRows(scope.result_stdout);
+                scope.traceback_rows = calcRows(scope.result_traceback);
                 var cDate = new Date(data.created);
                 scope.created = FormatDate(cDate);
                 $('#status-modal-dialog').dialog('open');
                 })
-            .error( function(data, status, headers, config) {
+            .error( function(data, status) {
                 ProcessErrors(scope, data, status, null,
                     { hdr: 'Error!', msg: 'Attempt to load job failed. GET returned status: ' + status });
                 });
-        }
+        };
+
         }]);
 

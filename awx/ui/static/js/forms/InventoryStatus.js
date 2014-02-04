@@ -11,43 +11,47 @@ angular.module('InventoryStatusDefinition', [])
     'InventoryStatusForm', {
     
         name: 'inventory_update',
-        editTitle: 'Inventory Status', 
+        editTitle: 'Inventory Status',
         well: false,
         'class': 'horizontal-narrow',
 
         fields: {
-            license_error: { 
+            license_error: {
                 type: 'alertblock',
-                'class': "alert-info",
-                alertTxt: "The invenvtory update process exceeded the available number of licensed hosts. " + 
-                    "<strong><a ng-click=\"viewLicense()\" href=\"\">View your license</a></strong> " +
-                    "for more information.", 
+                'class': 'alert-info',
+                alertTxt: 'The invenvtory update process exceeded the available number of licensed hosts. ' +
+                    '<strong><a ng-click=\"viewLicense()\" href=\"\">View your license</a></strong> ' +
+                    'for more information.',
                 ngShow: 'license_error',
-                closeable: false
+                closeable: true
                 },
             created: {
-                label: 'Created', 
+                label: 'Created',
                 type: 'text',
                 readonly: true
                 },
             status: {
                 label: 'Status',
                 type: 'text',
-                readonly: true
+                readonly: true,
+                'class': 'nowrap mono-space resizable',
+                rows: '{{ status_rows }}'
                 },
             result_stdout: {
-                label: 'Std Out', 
+                label: 'Std Out',
                 type: 'textarea',
-                ngShow: "result_stdout",
+                ngShow: 'result_stdout',
+                'class': 'nowrap mono-space resizable',
                 readonly: true,
-                rows: 15
+                rows: '{{ stdout_rows }}'
                 },
             result_traceback: {
-                label: 'Traceback', 
+                label: 'Traceback',
                 type: 'textarea',
-                ngShow: "result_traceback",
+                ngShow: 'result_traceback',
+                'class': 'nowrap mono-space resizable',
                 readonly: true,
-                rows: 15
+                rows: '{{ traceback_rows }}'
                 }
         }
     }); //Form

@@ -1093,42 +1093,89 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         var group_id = params.group_id;
         var parent_scope = params.parent_scope;
         
+        var maxrows, html, scope, ww, wh, x, y;
+
+        function calcRows (content) {
+            var n, rows;
+            n = content.match(/\n/g);
+            rows = (n) ? n.length : 1;
+            return (rows > maxrows) ? maxrows : rows;
+            }
+
         if (last_update == undefined || last_update == null || last_update == ''){
             Wait('stop');
             Alert('Missing Configuration', 'The selected group is not configured for inventory sync. ' +
                 'Edit the group and provide Source information.', 'alert-info');
         }
         else {
-            var scope = generator.inject(form, { mode: 'edit', modal: true, related: false, showModal: false });
-            generator.reset();
-            
-            scope.formModalAction = function() {
-                $('#form-modal').modal("hide");
-                if (parent_scope && parent_scope.showHosts && !Empty(tree_id)) {
-                    if (parent_scope.selected_tree_id !== tree_id) {
-                        parent_scope.showHosts(tree_id, group_id, false);
-                    }
-                }
-                WatchInventoryWindowResize();
-                }
 
-            scope.cancelModal = function() {
-                WatchInventoryWindowResize();
-                }
-
-            if (scope.removeUpdateStatusReady) {
-                scope.removeUpdateStatusReady();
+            html = "<div id=\"status-modal-dialog\" title=\"" + group_name + "- Inventory Sync\">\n" + 
+                "<div id=\"form-container\" style=\"width: 100%;\"></div></div>\n";
+        
+            $('#inventory-modal-container').empty().append(html);
+            scope = generator.inject(form, { mode: 'edit', id: 'form-container', breadCrumbs: false, related: false });
+    
+            // Set modal dimensions based on viewport width
+            ww = $(document).width(); 
+            wh = $('body').height();
+            x, y, maxrows;
+            if (ww > 1199) {
+                // desktop
+                x = 675;
+                y = (750 > wh) ? wh - 20 : 750;
+                maxrows = 18;
             }
-            scope.removeUpdateStatusReady = scope.$on('UpdateStatusReady', function(e) {
-                scope.formModalActionLabel = 'OK';
-                scope.formModalCancelShow = false;
-                scope.formModalInfo = false;
-                scope.formModalHeader = group_name + '<span class="subtitle"> - Inventory Sync</span>';
-                $('#form-modal').modal('show');
-                Wait('stop');
+            else if (ww <= 1199 && ww >= 768) {
+                x = 550;
+                y = (620 > wh) ? wh - 15 : 620;
+                maxrows = 12;
+            }
+            else {
+                x = (ww - 20);
+                y = (500 > wh) ? wh : 500;
+                maxrows = 10;
+            }
+        
+            // Create the modal
+            $('#status-modal-dialog').dialog({
+                buttons: { "OK": function() {  $( this ).dialog( "close" ); } },
+                modal: true, 
+                width: x, 
+                height: y,
+                autoOpen: false,
+                create: function (e, ui) {
+                    // fix the close button
+                    $('.ui-dialog[aria-describedby="status-modal-dialog"]').find('.ui-dialog-titlebar button')
+                        .empty().attr({ 'class': 'close' }).text('x'); 
+                    // fix the OK button
+                    $('.ui-dialog[aria-describedby="status-modal-dialog"]').find('.ui-dialog-buttonset button:first')
+                        .attr({ 'class': 'btn btn-primary' });
+                    },
+                resizeStop: function(e, ui) {
+                    // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
+                    var dialog = $('.ui-dialog[aria-describedby="status-modal-dialog"]');
+                    var content = dialog.find('#status-modal-dialog');
+                    content.width( dialog.width() - 28 );
+                    },
+                close: function(e, ui) {
+                    // Destroy on close
+                    $('.tooltip').each( function(index) {
+                        // Remove any lingering tooltip <div> elements
+                        $(this).remove();
+                        });
+                    $('.popover').each(function(index) {
+                        // remove lingering popover <div> elements
+                        $(this).remove();
+                        });
+                    $('#status-modal-dialog').dialog('destroy');
+                    $('#inventory-modal-container').empty();
+                    WatchInventoryWindowResize();
+                    },
+                open: function(e, ui) {
+                    Wait('stop');
+                    }
                 });
-            
-            // Retrieve detail record and prepopulate the form
+
             Rest.setUrl(last_update);
             Rest.get()
                 .success( function(data, status, headers, config) { 
@@ -1142,8 +1189,11 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                            }
                         }
                     }
-                    scope.license_error = license_error; 
-                    scope.$emit('UpdateStatusReady');
+                    scope.license_error = license_error;
+                    scope.status_rows = calcRows(data.status);
+                    scope.stdout_rows = calcRows(data.result_stdout);
+                    scope.traceback_rows = calcRows(data.result_traceback);
+                    $('#status-modal-dialog').dialog('open');
                     })
                 .error( function(data, status, headers, config) {
                     $('#form-modal').modal("hide");
