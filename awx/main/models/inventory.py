@@ -357,12 +357,17 @@ class Group(CommonModelNameNotUnique):
         When marking groups inactive, remove all associations to related
         groups/hosts/inventory_sources.
         '''
-        super(Group, self).mark_inactive(save=save)
-        self.inventory_source.mark_inactive(save=save)
-        self.inventory_sources.clear()
-        self.parents.clear()
-        self.children.clear()
-        self.hosts.clear()
+        from awx.main.signals import ignore_inventory_computed_fields
+        i = self.inventory
+
+        with ignore_inventory_computed_fields():
+            super(Group, self).mark_inactive(save=save)
+            self.inventory_source.mark_inactive(save=save)
+            self.inventory_sources.clear()
+            self.parents.clear()
+            self.children.clear()
+            self.hosts.clear()
+        i.update_computed_fields()
 
     def update_computed_fields(self):
         '''
