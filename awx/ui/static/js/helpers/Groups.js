@@ -1118,7 +1118,6 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
             // Set modal dimensions based on viewport width
             ww = $(document).width(); 
             wh = $('body').height();
-            x, y, maxrows;
             if (ww > 1199) {
                 // desktop
                 x = 675;
