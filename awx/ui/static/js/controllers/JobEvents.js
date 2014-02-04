@@ -10,7 +10,7 @@
 
 'use strict';
 
-function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList,
+function JobEventsList ($filter, $scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobEventList,
                         GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
                         ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,
                         FormatDate, EventView, Refresh, Wait)
@@ -96,7 +96,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                      if (txt !== '') {
                         html += "<div class=\"form-group\">\n";
                         html += "<label>Results:</label>\n";
-                        html += "<textarea readonly class=\"form-control nowrap\" rows=\"" + rows + "\">" + txt + "</textarea>\n";
+                        html += "<textarea readonly class=\"form-control nowrap mono-space\" rows=\"" + rows + "\">" + txt + "</textarea>\n";
                         html += "</div>\n";
                         found = true;
                      }
@@ -104,7 +104,7 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                   if (fld == "rc" && eventData.res[fld] != '') {
                      html += "<div class=\"form-group\">\n";
                      html += "<label>Return Code:</label>\n";
-                     html += "<input type=\"text\" class=\"form-control\" value=\"" + eventData.res[fld] + "\" readonly >\n";
+                     html += "<input type=\"text\" class=\"form-control nowrap mono-space\" value=\"" + eventData.res[fld] + "\" readonly >\n";
                      html += "</div>\n";
                      found = true;
                   }
@@ -178,8 +178,9 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
                   scope.jobevents[i].statusBadgeToolTip = "No errors occurred. Click to view details";
                }
             }
-            cDate = new Date(set[i].created);
-            set[i].created = FormatDate(cDate);
+            //cDate = new Date(set[i].created);
+            //set[i].created = FormatDate(cDate);
+            set[i].created = $filter('date')(set[i].created, 'MM/dd HH:mm:ss');
         }
 
         // Need below lookup to get inventory_id, which is not on event record. Plus, good idea to get status and name
@@ -233,10 +234,10 @@ function JobEventsList ($scope, $rootScope, $location, $log, $routeParams, Rest,
        }
 }
 
-JobEventsList.$inject = [ '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
-                           'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-                           'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView', 'Refresh', 'Wait'
-                           ];
+JobEventsList.$inject = [ '$filter', '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
+                          'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
+                          'ProcessErrors','GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView', 'Refresh', 'Wait'
+                          ];
 
 function JobEventsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventForm, GenerateForm,
                         Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, FormatDate, EventView,

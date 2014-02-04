@@ -12,105 +12,107 @@
 angular.module('ListGenerator', ['GeneratorHelpers'])
     .factory('GenerateList', [ '$location', '$compile', '$rootScope', 'SearchWidget', 'PaginateWidget', 'Attr', 'Icon',
         'Column', 'DropDown', 'NavigationLink', 'Button', 'SelectIcon', 'Breadcrumbs',
-    function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink, Button, SelectIcon,
+function($location, $compile, $rootScope, SearchWidget, PaginateWidget, Attr, Icon, Column, DropDown, NavigationLink, Button, SelectIcon,
         Breadcrumbs) {
     return {
-    
-    setList: function(list) {
-       this.list = list;
-       },
+        
+        setList: function(list) {
+            this.list = list;
+        },
  
-    attr: Attr,
+        attr: Attr,
 
-    icon: Icon,
+        icon: Icon,
 
-    has: function(key) {
-       return (this.form[key] && this.form[key] != null && this.form[key] != undefined) ? true : false;
-       },
+        has: function(key) {
+            return (this.form[key] && this.form[key] !== null && this.form[key] !== undefined) ? true : false;
+        },
 
-    hide: function() {
-       $('#lookup-modal').modal('hide');
-       },
+        hide: function() {
+            $('#lookup-modal').modal('hide');
+        },
 
-    button: Button,
- 
-    inject: function(list, options) {
-       // options.mode = one of edit, select or lookup
-       //
-       // Modes edit and select will inject the list as html into element #htmlTemplate.
-       // 'lookup' mode injects the list html into #lookup-modal-body.
-       //
-       // For options.mode == 'lookup', include the following:
-       //
-       //     hdr: <lookup dialog header>
-       //
-       // Inject into a custom element using options.id: <'.selector'>
-       // Control breadcrumb creation with options.breadCrumbs: <true | false>
-       //
-       if (options.mode == 'lookup') {
-          var element = angular.element(document.getElementById('lookup-modal-body'));  
-       }
-       else if (options.id) {
-          var element = angular.element(document.getElementById(options.id));  
-       }
-       else {
-          var element = angular.element(document.getElementById('htmlTemplate'));  
-       }
-       this.setList(list);
-       element.html(this.build(options));    // Inject the html
-       if (options.prepend) {                // Add any extra HTML passed in options
-          element.prepend(options.prepend);
-       }
-       if (options.append) {
-          element.append(options.prepend);
-       }
-       
-       if (options.scope) {
-          this.scope = options.scope; 
-       }
-       else {
-          this.scope = element.scope();         // Set scope specific to the element we're compiling, avoids circular reference
-       }                                        // From here use 'scope' to manipulate the form, as the form is not in '$scope'
-       
-       $compile(element)(this.scope);
+        button: Button,
 
-       // Reset the scope to prevent displaying old data from our last visit to this list 
-       this.scope[list.name] = null;
-       this.scope[list.iterator] = null;
+        inject: function(list, options) {
+            // options.mode = one of edit, select or lookup
+            //
+            // Modes edit and select will inject the list as html into element #htmlTemplate.
+            // 'lookup' mode injects the list html into #lookup-modal-body.
+            //
+            // For options.mode == 'lookup', include the following:
+            //
+            //     hdr: <lookup dialog header>
+            //
+            // Inject into a custom element using options.id: <'.selector'>
+            // Control breadcrumb creation with options.breadCrumbs: <true | false>
+            //
+            var element;
 
-       // Remove any lingering tooltip and popover <div> elements
-       $('.tooltip').each( function(index) {
-           $(this).remove();
-           });
-       
-       $('.popover').each(function(index) {
-              // remove lingering popover <div>. Seems to be a bug in TB3 RC1
-              $(this).remove();
-              });
-       $(window).unbind('resize');
-       
-       try {
-           $('#help-modal').empty().dialog('destroy');
-       }
-       catch(e) {
-           //ignore any errors should the dialog not be initialized 
-       }
+            if (options.mode === 'lookup') {
+                element = angular.element(document.getElementById('lookup-modal-body'));
+            }
+            else if (options.id) {
+                element = angular.element(document.getElementById(options.id));
+            }
+            else {
+                element = angular.element(document.getElementById('htmlTemplate'));
+            }
+            this.setList(list);
+            element.html(this.build(options));    // Inject the html
+            if (options.prepend) {                // Add any extra HTML passed in options
+                element.prepend(options.prepend);
+            }
+            if (options.append) {
+                element.append(options.prepend);
+            }
+           
+            if (options.scope) {
+                this.scope = options.scope;
+            }
+            else {
+                this.scope = element.scope();         // Set scope specific to the element we're compiling, avoids circular reference
+            }                                         // From here use 'scope' to manipulate the form, as the form is not in '$scope'
+           
+            $compile(element)(this.scope);
 
-       if (options.mode == 'lookup') {
-          // options should include {hdr: <dialog header>, action: <function...> }
-          this.scope.formModalActionDisabled = false;
-          this.scope.lookupHeader = options.hdr;
-          $('#lookup-modal').modal({ backdrop: 'static', keyboard: true });
-          $('#lookup-modal').unbind('hidden.bs.modal');
-          $(document).bind('keydown', function(e) {
-              if (e.keyCode === 27) {
-                 $('#lookup-modal').modal('hide');
-              }
-              });
-       }
-       
-       return this.scope;
-       },
+            // Reset the scope to prevent displaying old data from our last visit to this list 
+            this.scope[list.name] = null;
+            this.scope[list.iterator] = null;
+
+            // Remove any lingering tooltip and popover <div> elements
+            $('.tooltip').each( function(index) {
+                $(this).remove();
+            });
+           
+            $('.popover').each(function(index) {
+                // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+                $(this).remove();
+            });
+            $(window).unbind('resize');
+           
+            try {
+                $('#help-modal').empty().dialog('destroy');
+            }
+            catch(e) {
+                //ignore any errors should the dialog not be initialized 
+            }
+
+            if (options.mode === 'lookup') {
+                // options should include {hdr: <dialog header>, action: <function...> }
+                this.scope.formModalActionDisabled = false;
+                this.scope.lookupHeader = options.hdr;
+                $('#lookup-modal').modal({ backdrop: 'static', keyboard: true });
+                $('#lookup-modal').unbind('hidden.bs.modal');
+                $(document).bind('keydown', function(e) {
+                    if (e.keyCode === 27) {
+                        $('#lookup-modal').modal('hide');
+                    }
+                });
+            }
+           
+            return this.scope;
+        },
 
     build: function(options) {
        //
@@ -332,41 +334,46 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
           // Row level actions
           
           html += "<td class=\"actions\">";
-          for (action in list.fieldActions) {
-              if (list.fieldActions[action].type && list.fieldActions[action].type == 'DropDown') {
-                 html += DropDown({ 
-                     list: list,
-                     fld: action, 
-                     options: options, 
-                     base: base, 
-                     type: 'fieldActions',
-                     td: false
-                     });
-              }
-              else {
-                 var fAction = list.fieldActions[action];
-                 html += "<a ";
-                 html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
-                 html += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
-                 html += (action == 'cancel') ? "class=\"cancel red-txt\" " : "";
-                 html += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
-                 html += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : ""; 
-                 html += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : ""; 
-                 for (var itm in fAction) {
-                     if (itm != 'ngHref' && itm != 'href' && itm != 'label' && itm != 'icon' && itm != 'class' && 
-                         itm != 'iconClass' && itm != "dataPlacement" && itm != "awPopOver" && itm != "dataTitle") {
-                         html += Attr(fAction, itm);
+          
+          var field_action, fAction, itm;
+
+          for (field_action in list.fieldActions) {
+              if (field_action !== 'columnClass') {
+                  if (list.fieldActions[field_action].type && list.fieldActions[field_action].type == 'DropDown') {
+                      html += DropDown({
+                          list: list,
+                          fld: field_action, 
+                          options: options, 
+                          base: base, 
+                          type: 'fieldActions',
+                          td: false
+                          });
+                  }
+                  else {
+                     fAction = list.fieldActions[field_action];
+                     html += "<a ";
+                     html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
+                     html += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
+                     html += (field_action == 'cancel') ? "class=\"cancel red-txt\" " : "";
+                     html += (fAction.awPopOver) ? "aw-pop-over=\"" + fAction.awPopOver + "\" " : "";
+                     html += (fAction.dataPlacement) ? Attr(fAction, 'dataPlacement') : "";
+                     html += (fAction.dataTitle) ? Attr(fAction, 'dataTitle') : ""; 
+                     for (itm in fAction) {
+                         if (itm != 'ngHref' && itm != 'href' && itm != 'label' && itm != 'icon' && itm != 'class' && 
+                             itm != 'iconClass' && itm != "dataPlacement" && itm != "awPopOver" && itm != "dataTitle") {
+                             html += Attr(fAction, itm);
+                         }
                      }
-                 }
-                 html += ">";
-                 if (fAction.iconClass) {
-                     html += "<i class=\"" + fAction.iconClass + "\"></i>"; 
-                 }
-                 else {
-                     html += SelectIcon({ action: action });
-                 }
-                 html += (fAction.label) ? " " + list.fieldActions[action]['label'] : "";
-                 html += "</a>"; 
+                     html += ">";
+                     if (fAction.iconClass) {
+                         html += "<i class=\"" + fAction.iconClass + "\"></i>"; 
+                     }
+                     else {
+                         html += SelectIcon({ action: field_action });
+                     }
+                     html += (fAction.label) ? " " + list.fieldActions[field_action]['label'] : "";
+                     html += "</a>"; 
+                  }
               }
           }
           html += "</td>";
