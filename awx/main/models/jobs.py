@@ -731,8 +731,8 @@ class JobEvent(BaseModel):
                         update_fields.append('host')
             except (Host.DoesNotExist, AttributeError):
                 pass
-            self.play = self.event_data.get('play', '')
-            self.task = self.event_data.get('task', '')
+            self.play = self.event_data.get('play', '').strip()
+            self.task = self.event_data.get('task', '').strip()
             self.parent = self._find_parent()
             update_fields.extend(['play', 'task', 'parent'])
         # Manually perform auto_now_add and auto_now logic (to allow overriding

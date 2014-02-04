@@ -108,7 +108,7 @@ class BaseTask(Task):
                             update_fields.append('failed')
                     instance.save(update_fields=update_fields)
                     transaction.commit()
-                    save_succeeded = True
+                save_succeeded = True
             except DatabaseError as e:
                 transaction.rollback()
                 logger.debug("Database error encountered, retrying in 5 seconds: " + str(e))
@@ -246,7 +246,8 @@ class BaseTask(Task):
             expect_list.append(item[0])
             expect_passwords[n] = passwords.get(item[1], '') or ''
         expect_list.extend([pexpect.TIMEOUT, pexpect.EOF])
-        self.update_model(instance.pk, status='running', output_replacements=output_replacements)
+        instance = self.update_model(instance.pk, status='running',
+                                     output_replacements=output_replacements)
         while child.isalive():
             result_id = child.expect(expect_list, timeout=pexpect_timeout)
             if result_id in expect_passwords:
@@ -255,9 +256,10 @@ class BaseTask(Task):
                 logfile_pos = logfile.tell()
                 last_stdout_update = time.time()
             # NOTE: In case revoke doesn't have an affect
+            instance = self.update_model(instance.pk)
             if instance.cancel_flag:
-                 child.close(True)
-                 canceled = True
+                child.terminate(canceled)
+                canceled = True
             if idle_timeout and (time.time() - last_stdout_update) > idle_timeout:
                 child.close(True)
                 canceled = True
@@ -376,6 +378,8 @@ class RunJob(BaseTask):
         env['REST_API_TOKEN'] = job.task_auth_token or ''
         if settings.BROKER_URL.startswith('amqp://'):
             env['BROKER_URL'] = settings.BROKER_URL
+        if settings.DEBUG:
+            env['JOB_CALLBACK_DEBUG'] = '1'
 
         # When using Ansible >= 1.3, allow the inventory script to include host
         # variables inline via ['_meta']['hostvars'].
@@ -490,7 +494,7 @@ class RunJob(BaseTask):
             job_events_exchange = Exchange('job_events', 'direct', durable=True)
             job_events_queue = Queue('job_events', exchange=job_events_exchange,
                                      routing_key=('job_events[%d]' % job.id))
-            with Connection(settings.BROKER_URL) as conn:
+            with Connection(settings.BROKER_URL, transport_options={'confirm_publish': True}) as conn:
                 with conn.Producer(serializer='json') as producer:
                       msg = {
                         'job_id': job.id,
@@ -515,7 +519,7 @@ class SaveJobEvents(Task):
     def run(self, *args, **kwargs):
         job_id = kwargs.get('job_id', None)
         if not job_id:
-            return {'job_id': job_id}
+            return {}
         
         job_events_exchange = Exchange('job_events', 'direct', durable=True)
         job_events_queue = Queue('job_events', exchange=job_events_exchange,
@@ -525,11 +529,8 @@ class SaveJobEvents(Task):
         def process_job_event(data, message):
             begints = time.time()
             event = data.get('event', '')
-            if not event:
+            if not event or 'job_id' not in data:
                 return
-            for key in data.keys():
-                if key not in ('job_id', 'event', 'event_data', 'created'):
-                    data.pop(key)
             try:
                 if not isinstance(data['created'], datetime.datetime):
                     data['created'] = parse_datetime(data['created'])
@@ -539,19 +540,32 @@ class SaveJobEvents(Task):
                 data.pop('created', None)
             if settings.DEBUG:
                 print data
+            for key in data.keys():
+                if key not in ('job_id', 'event', 'event_data', 'created'):
+                    data.pop(key)
+            data['play'] = data.get('event_data', {}).get('play', '').strip()
+            data['task'] = data.get('event_data', {}).get('task', '').strip()
+            duplicate = False
             if event != '__complete__':
-                job_event = JobEvent(**data)
-                job_event.save(post_process=True)
-                transaction.commit()
-            if event not in events_received:
-                events_received[event] = 1
-            else:
-                events_received[event] += 1
+                if not JobEvent.objects.filter(**data).exists():
+                    job_event = JobEvent(**data)
+                    job_event.save(post_process=True)
+                    if not event.startswith('runner_'):
+                        transaction.commit()
+                else:
+                    duplicate = True
+                    if settings.DEBUG:
+                        print 'skipping duplicate job event %r' % data
+            if not duplicate:
+                if event not in events_received:
+                    events_received[event] = 1
+                else:
+                    events_received[event] += 1
+                if settings.DEBUG:
+                    print 'saved job event in %0.3fs' % (time.time() - begints)
             message.ack()
-            if settings.DEBUG:
-                print 'saved job event in %0.3fs' % (time.time() - begints)
         
-        with Connection(settings.BROKER_URL) as conn:
+        with Connection(settings.BROKER_URL, transport_options={'confirm_publish': True}) as conn:
             with conn.Consumer(job_events_queue, callbacks=[process_job_event]) as consumer:
                 while '__complete__' not in events_received:
                     conn.drain_events()
@@ -562,7 +576,6 @@ class SaveJobEvents(Task):
                 
         return {
             'job_id': job_id,
-            #'events_received': events_received,
             'total_events': sum(events_received.values())}
 
 

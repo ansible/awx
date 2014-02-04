@@ -91,12 +91,34 @@ class CallbackModule(object):
         self.base_url = os.getenv('REST_API_URL', '')
         self.auth_token = os.getenv('REST_API_TOKEN', '')
         self.broker_url = os.getenv('BROKER_URL', '')
+        self.job_callback_debug = os.getenv('JOB_CALLBACK_DEBUG', '')
+
+    def __del__(self):
+        self._cleanup_connection()
 
     def _start_save_job_events_task(self):
         app = Celery('tasks', broker=self.broker_url)
         send_task('awx.main.tasks.save_job_events', kwargs={
             'job_id': self.job_id,
         }, serializer='json')
+
+    def _publish_errback(self, exc, interval):
+        if self.job_callback_debug:
+            print 'Publish Error: %r, retry in %s seconds, pid=%s' % (exc, interval, os.getpid())
+
+    def _cleanup_connection(self):
+        if hasattr(self, 'producer'):
+            try:
+                self.producer.cancel()
+            except:
+                pass
+            del self.producer
+        if hasattr(self, 'connection'):
+            try:
+                self.connection.release()
+            except:
+                pass
+            del self.connection
 
     def _post_job_event_queue_msg(self, event, event_data):
         if not hasattr(self, 'job_events_exchange'):
@@ -106,28 +128,41 @@ class CallbackModule(object):
             self.job_events_queue = Queue('job_events',
                                           exchange=self.job_events_exchange,
                                           routing_key=('job_events[%d]' % self.job_id))
-        if not hasattr(self, 'connection'):
-            self.connection = Connection(self.broker_url)
-        if not hasattr(self, 'producer'):
-            self.producer = self.connection.Producer(serializer='json')
-        
         msg = {
             'job_id': self.job_id,
             'event': event,
             'event_data': event_data,
             'created': datetime.datetime.utcnow().isoformat(),
         }
-        self.producer.publish(msg, exchange=self.job_events_exchange,
-                              routing_key=('job_events[%d]' % self.job_id),
-                              declare=[self.job_events_queue])
-        if event == 'playbook_on_stats':
+        if self.job_callback_debug:
+            msg.update({
+                'pid': os.getpid(),
+            })
+        retry_count = 0
+        while True:
             try:
-                self.producer.cancel()
-                del self.producer
-                self.connection.release()
-                del self.connection
-            except:
-                pass
+                if not hasattr(self, 'connection'):
+                    self.connection = Connection(self.broker_url, transport_options={'confirm_publish': True})
+                if not hasattr(self, 'producer'):
+                    channel = self.connection.channel()
+                    self.producer = self.connection.Producer(channel, exchange=self.job_events_exchange, serializer='json')
+                    self.publish = self.connection.ensure(self.producer, self.producer.publish,
+                                                          errback=self._publish_errback,
+                                                          max_retries=3, interval_start=1, interval_step=1, interval_max=10)
+                self.publish(msg, exchange=self.job_events_exchange,
+                             routing_key=('job_events[%d]' % self.job_id),
+                             declare=[self.job_events_queue])
+                if event == 'playbook_on_stats':
+                    self._cleanup_connection()
+                return
+            except Exception, e:
+                if self.job_callback_debug:
+                    print 'Publish Exception: %r, pid=%s, retry=%d' % (e, os.getpid(), retry_count)
+                if retry_count < 3:
+                    self._cleanup_connection()
+                else:
+                    raise
+            retry_count += 1
 
     def _post_rest_api_event(self, event, event_data):
         data = json.dumps({
