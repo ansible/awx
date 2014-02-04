@@ -452,7 +452,7 @@ angular.module('Utilities',['RestServices', 'Utilities'])
           var y = (doch - spinnyh) / 2;
           $('.overlay').css({
               width: $('html').width(),
-              height: $(document).height() + 200
+              height: $('html').height()
               }).fadeIn();
           $('.spinny').css({ top: y, left: x }).fadeIn(400);
        }
