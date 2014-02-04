@@ -105,7 +105,7 @@ class Inventory(CommonModel):
             for host in self.hosts.filter(active=True):
                 host.mark_inactive()
             for group in self.groups.filter(active=True):
-                group.mark_inactive()
+                group.mark_inactive(recompute=False)
             for inventory_source in self.inventory_sources.filter(active=True):
                 inventory_source.mark_inactive()
         super(Inventory, self).mark_inactive(save=save)
@@ -352,22 +352,27 @@ class Group(CommonModelNameNotUnique):
     def get_absolute_url(self):
         return reverse('api:group_detail', args=(self.pk,))
 
-    def mark_inactive(self, save=True):
+    def mark_inactive(self, save=True, recompute=True):
         '''
         When marking groups inactive, remove all associations to related
         groups/hosts/inventory_sources.
         '''
-        from awx.main.signals import ignore_inventory_computed_fields
-        i = self.inventory
-
-        with ignore_inventory_computed_fields():
+        def mark_actual():
             super(Group, self).mark_inactive(save=save)
             self.inventory_source.mark_inactive(save=save)
             self.inventory_sources.clear()
             self.parents.clear()
             self.children.clear()
             self.hosts.clear()
-        i.update_computed_fields()
+        from awx.main.signals import ignore_inventory_computed_fields
+        i = self.inventory
+
+        if recompute:
+            with ignore_inventory_computed_fields():
+                mark_actual()
+            i.update_computed_fields()
+        else:
+            mark_actual()
 
     def update_computed_fields(self):
         '''
