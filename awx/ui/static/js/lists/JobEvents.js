@@ -68,7 +68,7 @@ angular.module('JobEventsListDefinition', [])
             event_display: {
                 label: 'Event',
                 hasChildren: true,
-                ngClick: 'toggleChildren({{ jobevent.id }}, \'{{ jobevent.related.children }}\')',
+                ngClick: 'toggleChildren(jobevent.id, jobevent.related.children)',
                 nosort: true,
                 searchable: false,
                 ngClass: '{{ jobevent.class }}',
@@ -101,7 +101,7 @@ angular.module('JobEventsListDefinition', [])
 
             view: {
                 label: 'View',
-                ngClick: 'viewJobEvent({{ jobevent.id }})',
+                ngClick: 'viewJobEvent(jobevent.id)',
                 awToolTip: 'View event details',
                 dataPlacement: 'top'
             }

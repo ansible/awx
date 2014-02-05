@@ -7,8 +7,7 @@
  * 
  */
 angular.module('JobHostDefinition', [])
-    .value(
-    'JobHostList', {
+    .value('JobHostList', {
         
         name: 'jobhosts',
         iterator: 'jobhost',
@@ -23,50 +22,50 @@ angular.module('JobHostDefinition', [])
                 label: 'Status',
                 icon: 'icon-zoom-in',
                 ngShow: "job_id !== null"
-                },
+            },
             events: {
                 href: "/#/jobs/{{ job_id }}/job_events",
                 label: 'Events',
                 icon: 'icon-list-ul'
-                },
+            },
             hosts: {
                 href: "/#/jobs/{{ job_id }}/job_host_summaries",
                 label: 'Host Summary',
                 active: true,
                 icon: 'icon-laptop'
-                }
-            },
+            }
+        },
 
         fields: {
             job: {
                 label: 'Job ID',
-                ngClick: "showJob(\{\{ jobhost.job \}\})",
+                ngClick: "showJob(jobhost.job)",
                 columnShow: 'host_id !== null',
                 key: true,
                 desc: true
-                },
+            },
             host: {
                 label: 'Host',
                 key: true,
                 sourceModel: 'host',
                 sourceField: 'name',
                 ngBind: 'jobhost.host_name',
-                ngHref: "\{\{ jobhost.hostLinkTo \}\}"
-                },
+                ngHref: "jobhost.hostLinkTo"
+            },
             status: {
                 label: 'Status',
-                badgeNgHref: "\{\{ jobhost.statusLinkTo \}\}", 
-                badgeIcon: 'fa icon-job-\{\{ jobhost.status \}\}',
+                badgeNgHref: "{{ jobhost.statusLinkTo }}",
+                badgeIcon: 'fa icon-job-{{ jobhost.status }}',
                 badgePlacement: 'left',
-                badgeToolTip: "\{\{ jobhost.statusBadgeToolTip \}\}",
+                badgeToolTip: "{{ jobhost.statusBadgeToolTip }}",
                 badgeTipPlacement: 'top',
-                ngHref: "\{\{ jobhost.statusLinkTo \}\}",
-                awToolTip: "\{\{ jobhost.statusBadgeToolTip \}\}",
+                ngHref: "{{ jobhost.statusLinkTo }}",
+                awToolTip: "{{ jobhost.statusBadgeToolTip }}",
                 dataPlacement: 'top',
                 searchField: 'failed',
                 searchType: 'boolean',
                 searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }]
-                },
+            },
             failed: {
                 label: 'Job failed?',
                 searchSingleValue: true,
@@ -74,32 +73,32 @@ angular.module('JobHostDefinition', [])
                 searchValue: 'true',
                 searchOnly: true,
                 nosort: true
-                },
+            },
             ok: {
                 label: 'Success',
                 searchable: false
-                },
+            },
             changed: {
                 label: 'Changed',
                 searchable: false
-                },
+            },
             failures: {
                 label: 'Failure',
                 searchable: true,
                 searchLabel: 'Contains failed events?',
                 searchType: 'gtzero'
-                },
+            },
             dark: {
                 label: 'Unreachable',
                 searchable: true,
                 searchType: 'gtzero',
                 searchLabel: 'Contains unreachable hosts?'
-                },
+            },
             skipped: {
                 label: 'Skipped',
                 searchable: false
-                }
-            },
+            }
+        },
         
         actions: {
             help: {
@@ -116,17 +115,16 @@ angular.module('JobHostDefinition', [])
                 awToolTip: 'Click for help',
                 dataTitle: 'Job Host Summary',
                 id: 'jobhost-help-button'
-                },
+            },
             refresh: {
                 mode: 'all',
                 'class': 'btn-xs',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()",
                 ngShow: "host_id == null"    //don't show when viewing from inventory->hosts
-                }
-            },
-
-        fieldActions: {
             }
+        },
 
-        });
+        fieldActions: {}
+
+    });

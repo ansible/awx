@@ -9,51 +9,49 @@
 
 'use strict';
 
-angular.module('ApiLoader', ['ngCookies'])
-   .factory('LoadBasePaths', ['$http', '$rootScope', '$cookieStore', 'ProcessErrors', 
-   function($http, $rootScope, $cookieStore, ProcessErrors) {
-   return function() {  
-       $http.get('/api/')
-           .success( function(data, status, headers, config) {
-               var base = data.current_version;
-               $http.get(base)
-                   .success( function(data, status, headers, config) {
-                       data['base'] = base;
-                       $rootScope['defaultUrls'] = data;
-                       $cookieStore.remove('api');
-                       $cookieStore.put('api',data);   //Preserve in cookie to prevent against
-                                                       //loss during browser refresh
-                       })
-                   .error ( function(data, status, headers, config) {
-                       $rootScope['defaultUrls'] = { status: 'error' };
-                       ProcessErrors(null, data, status, null, 
-                           { hdr: 'Error', msg: 'Failed to read ' + base + '. GET status: ' + status });
-                       });      
-               })
-           .error( function(data, status, headers, config) {
-               $rootScope['defaultUrls'] = { status: 'error' };
-               ProcessErrors(null, data, status, null, 
-                   { hdr: 'Error', msg: 'Failed to read /api. GET status: ' + status });
-               });   
-       }
-       }])
+angular.module('ApiLoader', ['Utilities'])
 
-   .factory('GetBasePath', ['$rootScope', '$cookieStore', 'LoadBasePaths',
-   function($rootScope, $cookieStore, LoadBasePaths) {
-   return function(set) {
-       // use /api/v1/ results to construct API URLs.
-       var answer; 
-       if ($rootScope['defaultUrls'] == null || $rootScope['defaultUrls'] == undefined) {
-          // browser refresh must have occurred. use what's in session cookie and refresh
-          answer = $cookieStore.get('api')[set]; 
-          LoadBasePaths(); 
-       }
-       else {
-          answer = $rootScope['defaultUrls'][set];
-       }
-       return answer;
-       }
-       }]);
+    .factory('LoadBasePaths', ['$http', '$rootScope', 'Store', 'ProcessErrors',
+    function($http, $rootScope, Store, ProcessErrors) {
+        return function() {
+            $http.get('/api/')
+                .success( function(data) {
+                    var base = data.current_version;
+                    $http.get(base)
+                        .success( function(data) {
+                            data.base = base;
+                            $rootScope.defaultUrls = data;
+                            Store('api', data);
+                        })
+                        .error ( function(data, status) {
+                            $rootScope.defaultUrls = { status: 'error' };
+                            ProcessErrors(null, data, status, null,
+                                { hdr: 'Error', msg: 'Failed to read ' + base + '. GET status: ' + status });
+                        });
+                })
+                .error( function(data, status) {
+                    $rootScope.defaultUrls = { status: 'error' };
+                    ProcessErrors(null, data, status, null,
+                        { hdr: 'Error', msg: 'Failed to read /api. GET status: ' + status });
+                });
+        };
+    }])
+
+    .factory('GetBasePath', ['$rootScope', 'Store', 'LoadBasePaths', 'Empty',
+    function($rootScope, Store, LoadBasePaths, Empty) {
+        return function(set) {
+            // use /api/v1/ results to construct API URLs.
+            if (Empty($rootScope.defaultUrls)) {
+                // browser refresh must have occurred. load from local storage
+                if (Store('api')) {
+                    $rootScope.defaultUrls = Store('api');
+                    return $rootScope.defaultUrls[set];
+                }
+                return '';   //we should never get here
+            }
+            return $rootScope.defaultUrls[set];
+        };
+    }]);
 
 
-     
+
