@@ -13,6 +13,10 @@ from split_settings.tools import optional, include
 # Load default settings.
 from defaults import *
 
+# Disable capturing all SQL queries when running celeryd in development.
+if 'celeryd' in sys.argv:
+    SQL_DEBUG = False
+
 # If any local_*.py files are present in awx/settings/, use them to override
 # default settings for development.  If not present, we can still run using
 # only the defaults.

@@ -15,6 +15,7 @@ from defaults import *
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
+SQL_DEBUG = DEBUG
 
 # Clear database settings to force production environment to define them.
 DATABASES = {}

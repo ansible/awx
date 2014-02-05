@@ -64,6 +64,11 @@ def prepare_env():
     for opt in ('ENGINE', 'NAME', 'USER', 'PASSWORD', 'HOST', 'PORT'):
         if os.environ.get('AWX_TEST_DATABASE_%s' % opt, None):
             settings.DATABASES['default'][opt] = os.environ['AWX_TEST_DATABASE_%s' % opt]
+    # Disable capturing all SQL queries in memory when in DEBUG mode.
+    if settings.DEBUG and not getattr(settings, 'SQL_DEBUG', True):
+        from django.db.backends import BaseDatabaseWrapper
+        from django.db.backends.util import CursorWrapper
+        BaseDatabaseWrapper.make_debug_cursor = lambda self, cursor: CursorWrapper(cursor, self)
 
 def manage():
     # Prepare the AWX environment.
