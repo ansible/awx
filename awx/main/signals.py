@@ -143,7 +143,7 @@ def migrate_children_from_deleted_group_to_parent_groups(sender, **kwargs):
                     except Inventory.DoesNotExist:
                         pass
 
-@receiver(pre_save, sender=Group)
+receiver(pre_save, sender=Group)
 def save_related_pks_before_group_marked_inactive(sender, **kwargs):
     if getattr(_inventory_updates, 'is_removing', False):
         return
@@ -187,6 +187,7 @@ def migrate_children_from_inactive_group_to_parent_groups(sender, **kwargs):
                 except InventorySource.DoesNotExist:
                     pass
             inventory_pk = getattr(instance, '_saved_inventory_pk', None)
+        if not getattr(_inventory_updates, 'is_updating', False):
             if inventory_pk:
                 try:
                     inventory = Inventory.objects.get(pk=inventory_pk, active=True)

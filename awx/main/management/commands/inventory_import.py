@@ -523,7 +523,7 @@ class Command(NoArgsCommand):
             del_groups = del_groups.exclude(name__in=self.all_group.all_groups.keys())
             for group in del_groups:
                 group_name = group.name
-                group.mark_inactive()
+                group.mark_inactive(recompute=False)
                 self.logger.info('Group "%s" deleted', group_name)
 
         # If overwrite is set, clear all invalid child relationships for groups
