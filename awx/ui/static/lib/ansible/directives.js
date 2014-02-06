@@ -252,8 +252,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
 
             if (attrs.tipWatch) {
                 // Add dataTipWatch: 'variable_name'
+                console.log('adding watch');
                 scope.$watch(attrs.tipWatch, function(newVal, oldVal) {
                     if (newVal !== oldVal) {
+                        console.log('switch');
                         // Where did fixTitle come frome?:
                         //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
                         $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle');

@@ -827,7 +827,8 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                         properties: {
                             name: scope.name,
                             description: scope.description, 
-                            has_inventory_sources: (scope.source) ? true : false 
+                            has_inventory_sources: (scope.source && scope.source.value) ? true : false,
+                            source: (scope.source && scope.source.value) ? scope.source.value : ''
                             }
                         });
                 }

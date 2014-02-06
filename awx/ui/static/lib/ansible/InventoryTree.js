@@ -174,19 +174,39 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
     
 
     // Update a group with a set of properties 
-    .factory('UpdateGroup', ['ApplyEllipsis', function(ApplyEllipsis) {
+    .factory('UpdateGroup', ['ApplyEllipsis', 'GetSyncStatusMsg', 'Empty',
+    function(ApplyEllipsis, GetSyncStatusMsg, Empty) {
         return function(params) {
             
             var scope = params.scope; 
             var group_id = params.group_id; 
             var properties = params.properties;   // object of key:value pairs to update
-            var old_name;
+            var old_name, stat;
             for (var i=0; i < scope.groups.length; i++) {
-                if (scope.groups[i].group_id == group_id) {
+                if (scope.groups[i].group_id === group_id) {
                     var grp = scope.groups[i]; 
                     for (var p in properties) {
-                        if (p == 'name') {
+                        if (p === 'name') {
                             old_name = scope.groups[i].name;
+                        }
+                        if (p === 'source') {
+                            if (properties[p] !== scope.groups[i][p]) {
+                                // User changed source
+                                if (!Empty(properties[p]) && (scope.groups[i].status === 'none' || Empty(scope.groups[i].status))) {
+                                    // We have a source but no status, seed the status with 'never' to enable sync button
+                                    scope.groups[i].status = 'never updated';
+                                }
+                                else if (!properties[p]) {
+                                    // User removed source
+                                    scope.groups[i].status = 'none';
+                                }
+                                // Update date sync status links/icons
+                                stat = GetSyncStatusMsg({ status: scope.groups[i].status });
+                                scope.groups[i].status_class = stat['class'];
+                                scope.groups[i].status_tooltip = stat.tooltip;
+                                scope.groups[i].launch_tooltip = stat.launch_tip;
+                                scope.groups[i].launch_class = stat.launch_class;
+                            }
                         }
                         scope.groups[i][p] = properties[p];
                     }
