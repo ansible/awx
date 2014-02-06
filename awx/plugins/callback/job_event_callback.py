@@ -51,10 +51,6 @@ except ImportError:
 # Kombu
 from kombu import Connection, Exchange, Queue
 
-# Celery
-from celery import Celery
-from celery.execute import send_task
-
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -95,12 +91,6 @@ class CallbackModule(object):
 
     def __del__(self):
         self._cleanup_connection()
-
-    def _start_save_job_events_task(self):
-        app = Celery('tasks', broker=self.broker_url)
-        send_task('awx.main.tasks.save_job_events', kwargs={
-            'job_id': self.job_id,
-        }, serializer='json')
 
     def _publish_errback(self, exc, interval):
         if self.job_callback_debug:
@@ -194,8 +184,6 @@ class CallbackModule(object):
         if task and event not in self.EVENTS_WITHOUT_TASK:
             event_data['task'] = task
         if self.broker_url:
-            if event == 'playbook_on_start':
-                self._start_save_job_events_task()
             self._post_job_event_queue_msg(event, event_data)
         else:
             self._post_rest_api_event(event, event_data)

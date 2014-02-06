@@ -26,7 +26,8 @@ import pexpect
 from kombu import Connection, Exchange, Queue
 
 # Celery
-from celery import Task, task
+from celery import Celery, Task, task
+from celery.execute import send_task
 
 # Django
 from django.conf import settings
@@ -476,6 +477,12 @@ class RunJob(BaseTask):
         '''
         if job.status in ('pending', 'waiting'):
             job = self.update_model(job.pk, status='pending')
+            # Start another task to process job events.
+            if settings.BROKER_URL.startswith('amqp://'):
+                app = Celery('tasks', broker=settings.BROKER_URL)
+                send_task('awx.main.tasks.save_job_events', kwargs={
+                    'job_id': job.id,
+                }, serializer='json')
             return True
         elif job.cancel_flag:
             job = self.update_model(job.pk, status='canceled')
