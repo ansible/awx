@@ -120,7 +120,7 @@ class BaseAccess(object):
             return self.model.objects.none()
 
     def can_read(self, obj):
-        return bool(obj and self.get_queryset().filter(pk=obj.pk).count())
+        return bool(obj and self.get_queryset().filter(pk=obj.pk).exists())
 
     def can_add(self, data):
         return self.user.is_superuser
@@ -172,18 +172,18 @@ class UserAccess(BaseAccess):
         qs = self.model.objects.filter(is_active=True).distinct()
         if self.user.is_superuser:
             return qs
-        if self.user.admin_of_organizations.count():
+        if self.user.admin_of_organizations.filter(active=True).exists():
             return qs
         return qs.filter(
             Q(pk=self.user.pk) |
-            Q(organizations__in=self.user.admin_of_organizations.all()) |
-            Q(organizations__in=self.user.organizations.all()) |
-            Q(teams__in=self.user.teams.all())
+            Q(organizations__in=self.user.admin_of_organizations.filter(active=True)) |
+            Q(organizations__in=self.user.organizations.filter(active=True)) |
+            Q(teams__in=self.user.teams.filter(active=True))
         ).distinct()
 
     def can_add(self, data):
         return bool(self.user.is_superuser or
-                    self.user.admin_of_organizations.count())
+                    self.user.admin_of_organizations.filter(active=True).exists())
 
     def can_change(self, obj, data):
         # A user can be changed if they are themselves, or by org admins or
@@ -195,7 +195,8 @@ class UserAccess(BaseAccess):
         # Admin implies changing all user fields.
         if self.user.is_superuser:
             return True
-        return bool(obj.organizations.filter(admins__in=[self.user]).count())
+        #return bool(obj.organizations.filter(active=True, admins__in=[self.user]).exists()) TODO: replace line below
+        return bool(obj.organizations.filter(admins__in=[self.user]).exists())
 
     def can_delete(self, obj):
         if obj == self.user:
@@ -206,7 +207,8 @@ class UserAccess(BaseAccess):
             # cannot delete the last active superuser
             return False
         return bool(self.user.is_superuser or 
-                    obj.organizations.filter(admins__in=[self.user]).count())
+                    #obj.organizations.filter(active=True, admins__in=[self.user]).exists()) TODO: replace line below
+                    obj.organizations.filter(admins__in=[self.user]).exists())
 
 class OrganizationAccess(BaseAccess):
     '''
@@ -258,21 +260,24 @@ class InventoryAccess(BaseAccess):
         qs = qs.select_related('created_by', 'organization')
         if self.user.is_superuser:
             return qs
-        admin_of = qs.filter(organization__admins__in=[self.user]).distinct()
+        admin_of = qs.filter(organization__admins__in=[self.user],
+                             #organization__active=True).distinct() TODO: enable this line
+                             ).distinct()
         has_user_perms = qs.filter(
             permissions__user__in=[self.user],
             permissions__permission_type__in=allowed,
-            permissions__active=True,
+            permissions__active=True, # TODO: add test for this case
         ).distinct()
         has_team_perms = qs.filter(
             permissions__team__users__in=[self.user],
+            #permissions__team__active=True, TODO: enable this line
             permissions__permission_type__in=allowed,
-            permissions__active=True,
+            permissions__active=True, # TODO: add test for this case
         ).distinct()
         return admin_of | has_user_perms | has_team_perms
 
     def has_permission_types(self, obj, allowed):
-        return bool(obj and self.get_queryset(allowed).filter(pk=obj.pk).count())
+        return bool(obj and self.get_queryset(allowed).filter(pk=obj.pk).exists())
 
     def can_read(self, obj):
         return self.has_permission_types(obj, PERMISSION_TYPES_ALLOWING_INVENTORY_READ)
@@ -280,7 +285,9 @@ class InventoryAccess(BaseAccess):
     def can_add(self, data):
         # If no data is specified, just checking for generic add permission?
         if not data:
-            return bool(self.user.is_superuser or self.user.admin_of_organizations.count())
+            return bool(self.user.is_superuser or
+                        #self.user.admin_of_organizations.filter(active=True).exists()) TODO: replace line below
+                        self.user.admin_of_organizations.all().exists())
         # Otherwise, verify that the user has access to change the parent
         # organization of this inventory.
         if self.user.is_superuser:
@@ -360,7 +367,6 @@ class HostAccess(BaseAccess):
             raise PermissionDenied("license has expired")
 
         if validation_info.get('free_instances', 0) > 0:
-            # BOOKMARK
             return True
         instances = validation_info.get('available_instances', 0)
         raise PermissionDenied("license range of %s instances has been exceeded" % instances)
@@ -433,7 +439,6 @@ class GroupAccess(BaseAccess):
             parent_pks.add(obj.pk)
             child_pks = set(sub_obj.all_children.values_list('pk', flat=True))
             child_pks.add(sub_obj.pk)
-            #print parent_pks, child_pks
             if parent_pks & child_pks:
                 return False
         return True
@@ -518,11 +523,14 @@ class CredentialAccess(BaseAccess):
         qs = qs.select_related('created_by', 'user', 'team')
         if self.user.is_superuser:
             return qs
+        #orgs_as_admin = self.user.admin_of_organizations.filter(active=True) TODO: replace line below
         orgs_as_admin = self.user.admin_of_organizations.all()
         return qs.filter(
             Q(user=self.user) |
             Q(user__organizations__in=orgs_as_admin) |
             Q(user__admin_of_organizations__in=orgs_as_admin) |
+            #Q(team__organization__in=orgs_as_admin, team__active=True) |   TODO: replace both lines below
+            #Q(team__users__in=[self.user], team__active=True)
             Q(team__organization__in=orgs_as_admin) |
             Q(team__users__in=[self.user])
         )
@@ -550,11 +558,14 @@ class CredentialAccess(BaseAccess):
         if obj.user:
             if self.user == obj.user:
                 return True
-            if obj.user.organizations.filter(admins__in=[self.user]).count():
+            #if obj.user.organizations.filter(active=True, admins__in=[self.user]).exists(): TODO: replace line below
+            if obj.user.organizations.filter(admins__in=[self.user]).exists():
                 return True
-            if obj.user.admin_of_organizations.filter(admins__in=[self.user]).count():
+            #if obj.user.admin_of_organizations.filter(active=True, admins__in=[self.user]).exists(): TODO: replace line below
+            if obj.user.admin_of_organizations.filter(admins__in=[self.user]).exists():
                 return True
         if obj.team:
+            #if self.user in obj.team.organization.admins.filter(active=True): TODO: replace line below
             if self.user in obj.team.organization.admins.all():
                 return True
         return False
@@ -585,6 +596,7 @@ class TeamAccess(BaseAccess):
         if self.user.is_superuser:
             return qs
         return qs.filter(
+            #Q(organization__admins__in=[self.user], organization__active=True) |  TODO: replace line below
             Q(organization__admins__in=[self.user]) |
             Q(users__in=[self.user])
         )
@@ -639,17 +651,21 @@ class ProjectAccess(BaseAccess):
         allowed = [PERM_INVENTORY_DEPLOY, PERM_INVENTORY_CHECK]
         return qs.filter(
             Q(created_by=self.user) |
+            #Q(organizations__admins__in=[self.user], organizations__active=True) |  TODO: replace 3 lines below
+            #Q(organizations__users__in=[self.user], organizations__active=True) |
+            #Q(teams__users__in=[self.user], teams__active=True) |
             Q(organizations__admins__in=[self.user]) |
             Q(organizations__users__in=[self.user]) |
             Q(teams__users__in=[self.user]) |
-            Q(permissions__user=self.user, permissions__permission_type__in=allowed, permissions__active=True) |
+            Q(permissions__user=self.user, permissions__permission_type__in=allowed, permissions__active=True) |  # TODO: add tests for these 2 lines?
             Q(permissions__team__users__in=[self.user], permissions__permission_type__in=allowed, permissions__active=True)
         )
 
     def can_add(self, data):
         if self.user.is_superuser:
             return True
-        if self.user.admin_of_organizations.count():
+        #if self.user.admin_of_organizations.filter(active=True).exists(): TODO: replace line below
+        if self.user.admin_of_organizations.all().exists():
             return True
         return False
 
@@ -658,7 +674,8 @@ class ProjectAccess(BaseAccess):
             return True
         if obj.created_by == self.user:
             return True
-        if obj.organizations.filter(admins__in=[self.user]).count():
+        #if obj.organizations.filter(active=True, admins__in=[self.user]).exists(): TODO: replace line below
+        if obj.organizations.filter(admins__in=[self.user]).exists():
             return True
         return False
 
@@ -707,12 +724,15 @@ class PermissionAccess(BaseAccess):
                                'project')
         if self.user.is_superuser:
             return qs
+        #orgs_as_admin = self.user.admin_of_organizations.filter(active=True) TODO: replace line below
         orgs_as_admin = self.user.admin_of_organizations.all()
         return qs.filter(
             Q(user__organizations__in=orgs_as_admin) |
             Q(user__admin_of_organizations__in=orgs_as_admin) |
+            #Q(team__organization__in=orgs_as_admin, team__active=True) | TODO: replace line below
             Q(team__organization__in=orgs_as_admin) |
             Q(user=self.user) |
+            #Q(team__users__in=[self.user], team__active=True) TODO: replace line below
             Q(team__users__in=[self.user])
         )
 
@@ -802,7 +822,9 @@ class JobTemplateAccess(BaseAccess):
         credential_qs = self.user.get_queryset(Credential)
         base_qs = qs.filter(
             Q(credential__in=credential_qs) | Q(credential__isnull=True),
+            Q(cloud_credential__in=credential_qs) | Q(cloud_credential__isnull=True),
         )
+        # FIXME: Check active status on related objects!
         org_admin_qs = base_qs.filter(
             project__organizations__admins__in=[self.user]
         )
@@ -821,13 +843,17 @@ class JobTemplateAccess(BaseAccess):
 
     def can_read(self, obj):
         # you can only see the job templates that you have permission to launch.
-        data = dict(
-            inventory = obj.inventory.pk,
-            project = obj.project.pk,
-            job_type = obj.job_type,
-        )
+        data = {
+            'job_type': obj.job_type,
+        }
+        if obj.inventory and obj.inventory.pk:
+            data['inventory'] = obj.inventory.pk
+        if obj.project and obj.project.pk:
+            data['project'] = obj.project.pk
         if obj.credential:
             data['credential'] = obj.credential.pk
+        if obj.cloud_credential:
+            data['cloud_credential'] = obj.cloud_credential.pk
         return self.can_add(data)
 
     def can_add(self, data):
@@ -848,6 +874,14 @@ class JobTemplateAccess(BaseAccess):
         if credential_pk:
             credential = get_object_or_400(Credential, pk=credential_pk)
             if not self.user.can_access(Credential, 'read', credential):
+                return False
+
+        # If a cloud credential is provided, the user should have read access.
+        cloud_credential_pk = get_pk_from_dict(data, 'cloud_credential')
+        if cloud_credential_pk:
+            cloud_credential = get_object_or_400(Credential,
+                                                 pk=cloud_credential_pk)
+            if not self.user.can_access(Credential, 'read', cloud_credential):
                 return False
 
         # Check that the given inventory ID is valid.
@@ -1004,7 +1038,7 @@ class JobEventAccess(BaseAccess):
                                'host', 'parent')
         qs = qs.prefetch_related('hosts', 'children')
 
-        # Filter certain "internal" events generating by async polling.
+        # Filter certain "internal" events generated by async polling.
         qs = qs.exclude(event__in=('runner_on_ok', 'runner_on_failed'),
                         event_data__icontains='"ansible_job_id": "',
                         event_data__contains='"module_name": "async_status"')

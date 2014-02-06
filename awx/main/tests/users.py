@@ -45,6 +45,10 @@ class UsersTest(BaseTest):
         self.post(url, expect=400, data=new_user, auth=self.get_super_credentials())
         self.post(url, expect=201, data=new_user2, auth=self.get_normal_credentials())
         self.post(url, expect=400, data=new_user2, auth=self.get_normal_credentials())
+        # Normal user cannot add users after his org is marked inactive.
+        self.organizations[0].mark_inactive()
+        new_user3 = dict(username='blippy3')
+        self.post(url, expect=403, data=new_user3, auth=self.get_normal_credentials())
 
     def test_auth_token_login(self):
         auth_token_url = reverse('api:auth_token_view')
@@ -230,8 +234,15 @@ class UsersTest(BaseTest):
         # Normal user is an org admin, can see all users.
         data2 = self.get(url, expect=200, auth=self.get_normal_credentials())
         self.assertEquals(data2['count'], 4)
+        # Other use can only see users in his org.
         data1 = self.get(url, expect=200, auth=self.get_other_credentials())
         self.assertEquals(data1['count'], 2)
+        # Normal user can no longer see all users after the organization he
+        # admins is marked inactive, nor can he see any other users that were
+        # in that org, so he only sees himself.
+        self.organizations[0].mark_inactive()
+        data3 = self.get(url, expect=200, auth=self.get_normal_credentials())
+        self.assertEquals(data3['count'], 1)
 
     def test_super_user_can_delete_a_user_but_only_marked_inactive(self):
         user_pk = self.normal_django_user.pk

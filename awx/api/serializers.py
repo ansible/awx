@@ -143,8 +143,10 @@ class BaseSerializer(serializers.ModelSerializer):
 
     def get_related(self, obj):
         res = SortedDict()
-        if getattr(obj, 'created_by', None):
+        if getattr(obj, 'created_by', None) and obj.created_by.is_active:
             res['created_by'] = reverse('api:user_detail', args=(obj.created_by.pk,))
+        if getattr(obj, 'modified_by', None) and obj.modified_by.is_active:
+            res['modified_by'] = reverse('api:user_detail', args=(obj.modified_by.pk,))
         return res
 
     def get_summary_fields(self, obj):
@@ -154,12 +156,17 @@ class BaseSerializer(serializers.ModelSerializer):
         for fk, related_fields in SUMMARIZABLE_FK_FIELDS.items():
             try:
                 fkval = getattr(obj, fk, None)
-                if fkval is not None:
-                    summary_fields[fk] = SortedDict()
-                    for field in related_fields:
-                        fval = getattr(fkval, field, None)
-                        if fval is not None:
-                            summary_fields[fk][field] = fval
+                if fkval is None:
+                    continue
+                if hasattr(fkval, 'active') and not fkval.active:
+                    continue
+                if hasattr(fkval, 'is_active') and not fkval.is_active:
+                    continue
+                summary_fields[fk] = SortedDict()
+                for field in related_fields:
+                    fval = getattr(fkval, field, None)
+                    if fval is not None:
+                        summary_fields[fk][field] = fval
             # Can be raised by the reverse accessor for a OneToOneField.
             except ObjectDoesNotExist:
                 pass
@@ -337,7 +344,7 @@ class ProjectSerializer(BaseSerializer):
             project_updates = reverse('api:project_updates_list', args=(obj.pk,)),
             activity_stream = reverse('api:project_activity_stream_list', args=(obj.pk,)),
         ))
-        if obj.credential:
+        if obj.credential and obj.credential.active:
             res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
         if obj.current_update:
@@ -363,6 +370,12 @@ class ProjectSerializer(BaseSerializer):
         if source in attrs and attrs[source] not in valid_local_paths:
             raise serializers.ValidationError('Invalid path choice')
         return attrs
+
+    def to_native(self, obj):
+        ret = super(ProjectSerializer, self).to_native(obj)
+        if 'credential' in ret and (not obj.credential or not obj.credential.active):
+            ret['credential'] = None
+        return ret
 
 
 class ProjectPlaybooksSerializer(ProjectSerializer):
@@ -433,11 +446,18 @@ class InventorySerializer(BaseSerializerWithVariables):
             variable_data = reverse('api:inventory_variable_data',     args=(obj.pk,)),
             script        = reverse('api:inventory_script_view',       args=(obj.pk,)),
             tree          = reverse('api:inventory_tree_view',         args=(obj.pk,)),
-            organization  = reverse('api:organization_detail',         args=(obj.organization.pk,)),
             inventory_sources = reverse('api:inventory_inventory_sources_list', args=(obj.pk,)),
             activity_stream = reverse('api:inventory_activity_stream_list', args=(obj.pk,)),
         ))
+        if obj.organization and obj.organization.active:
+            res['organization'] = reverse('api:organization_detail', args=(obj.organization.pk,))
         return res
+
+    def to_native(self, obj):
+        ret = super(InventorySerializer, self).to_native(obj)
+        if 'organization' in ret and (not obj.organization or not obj.organization.active):
+            ret['organization'] = None
+        return ret
 
 
 class HostSerializer(BaseSerializerWithVariables):
@@ -458,7 +478,6 @@ class HostSerializer(BaseSerializerWithVariables):
         res = super(HostSerializer, self).get_related(obj)
         res.update(dict(
             variable_data = reverse('api:host_variable_data',   args=(obj.pk,)),
-            inventory     = reverse('api:inventory_detail',     args=(obj.inventory.pk,)),
             groups        = reverse('api:host_groups_list',     args=(obj.pk,)),
             all_groups    = reverse('api:host_all_groups_list', args=(obj.pk,)),
             job_events    = reverse('api:host_job_events_list',  args=(obj.pk,)),
@@ -466,9 +485,11 @@ class HostSerializer(BaseSerializerWithVariables):
             activity_stream = reverse('api:host_activity_stream_list', args=(obj.pk,)),
             #inventory_sources = reverse('api:host_inventory_sources_list', args=(obj.pk,)),
         ))
-        if obj.last_job:
+        if obj.inventory and obj.inventory.active:
+            res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
+        if obj.last_job and obj.last_job.active:
             res['last_job'] = reverse('api:job_detail', args=(obj.last_job.pk,))
-        if obj.last_job_host_summary:
+        if obj.last_job_host_summary and obj.last_job_host_summary.job.active:
             res['last_job_host_summary'] = reverse('api:job_host_summary_detail', args=(obj.last_job_host_summary.pk,))
         return res
 
@@ -543,6 +564,16 @@ class HostSerializer(BaseSerializerWithVariables):
 
         return attrs
 
+    def to_native(self, obj):
+        ret = super(HostSerializer, self).to_native(obj)
+        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+            ret['inventory'] = None
+        if 'last_job' in ret and (not obj.last_job or not obj.last_job.active):
+            ret['last_job'] = None
+        if 'last_job_host_summary' in ret and (not obj.last_job_host_summary or not obj.last_job_host_summary.job.active):
+            ret['last_job_host_summary'] = None
+        return ret
+
 
 class GroupSerializer(BaseSerializerWithVariables):
 
@@ -563,13 +594,15 @@ class GroupSerializer(BaseSerializerWithVariables):
             potential_children = reverse('api:group_potential_children_list',   args=(obj.pk,)),
             children      = reverse('api:group_children_list',   args=(obj.pk,)),
             all_hosts     = reverse('api:group_all_hosts_list',  args=(obj.pk,)),
-            inventory     = reverse('api:inventory_detail',       args=(obj.inventory.pk,)),
             job_events    = reverse('api:group_job_events_list',   args=(obj.pk,)),
             job_host_summaries = reverse('api:group_job_host_summaries_list', args=(obj.pk,)),
-            inventory_source = reverse('api:inventory_source_detail', args=(obj.inventory_source.pk,)),
             activity_stream = reverse('api:group_activity_stream_list', args=(obj.pk,)),
             #inventory_sources = reverse('api:group_inventory_sources_list', args=(obj.pk,)),
         ))
+        if obj.inventory and obj.inventory.active:
+            res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
+        if obj.inventory_source:
+            res['inventory_source'] = reverse('api:inventory_source_detail', args=(obj.inventory_source.pk,))
         return res
 
     def validate_name(self, attrs, source):
@@ -577,6 +610,12 @@ class GroupSerializer(BaseSerializerWithVariables):
         if name in ('all', '_meta'):
             raise serializers.ValidationError('Invalid group name')
         return attrs
+
+    def to_native(self, obj):
+        ret = super(GroupSerializer, self).to_native(obj)
+        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+            ret['inventory'] = None
+        return ret
 
 
 class GroupTreeSerializer(GroupSerializer):
@@ -659,11 +698,11 @@ class InventorySourceSerializer(BaseSerializer):
             #hosts = reverse('api:inventory_source_hosts_list', args=(obj.pk,)),
             #groups = reverse('api:inventory_source_groups_list', args=(obj.pk,)),
         ))
-        if obj.inventory:
+        if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
-        if obj.group:
+        if obj.group and obj.group.active:
             res['group'] = reverse('api:group_detail', args=(obj.group.pk,))
-        if obj.credential:
+        if obj.credential and obj.credential.active:
             res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
         if obj.current_update:
@@ -712,6 +751,16 @@ class InventorySourceSerializer(BaseSerializer):
         field_opts['rax_region_choices'] = self.opts.model.get_rax_region_choices()
         return metadata
 
+    def to_native(self, obj):
+        ret = super(InventorySourceSerializer, self).to_native(obj)
+        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+            ret['inventory'] = None
+        if 'group' in ret and (not obj.group or not obj.group.active):
+            ret['group'] = None
+        if 'credential' in ret and (not obj.credential or not obj.credential.active):
+            ret['credential'] = None
+        return ret
+
 
 class InventoryUpdateSerializer(BaseTaskSerializer):
 
@@ -749,11 +798,18 @@ class TeamSerializer(BaseSerializer):
             projects     = reverse('api:team_projects_list',    args=(obj.pk,)),
             users        = reverse('api:team_users_list',       args=(obj.pk,)),
             credentials  = reverse('api:team_credentials_list', args=(obj.pk,)),
-            organization = reverse('api:organization_detail',   args=(obj.organization.pk,)),
             permissions  = reverse('api:team_permissions_list', args=(obj.pk,)),
             activity_stream = reverse('api:team_activity_stream_list', args=(obj.pk,)),
         ))
+        if obj.organization:
+            res['organization'] = reverse('api:organization_detail',   args=(obj.organization.pk,))
         return res
+
+    def to_native(self, obj):
+        ret = super(TeamSerializer, self).to_native(obj)
+        if 'organization' in ret and (not obj.organization or not obj.organization.active):
+            ret['organization'] = None
+        return ret
 
 
 class PermissionSerializer(BaseSerializer):
@@ -792,6 +848,18 @@ class PermissionSerializer(BaseSerializer):
                                               'assigning deployment permissions')
         return attrs
 
+    def to_native(self, obj):
+        ret = super(PermissionSerializer, self).to_native(obj)
+        if 'user' in ret and (not obj.user or not obj.user.is_active):
+            ret['user'] = None
+        if 'team' in ret and (not obj.team or not obj.team.active):
+            ret['team'] = None
+        if 'project' in ret and (not obj.project or not obj.project.active):
+            ret['project'] = None
+        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+            ret['inventory'] = None
+        return ret
+
 
 class CredentialSerializer(BaseSerializer):
 
@@ -810,6 +878,10 @@ class CredentialSerializer(BaseSerializer):
 
     def to_native(self, obj):
         ret = super(CredentialSerializer, self).to_native(obj)
+        if 'user' in ret and (not obj.user or not obj.user.is_active):
+            ret['user'] = None
+        if 'team' in ret and (not obj.team or not obj.team.active):
+            ret['team'] = None
         # Replace the actual encrypted value with the string $encrypted$.
         for field in Credential.PASSWORD_FIELDS:
             if field in ret and unicode(ret[field]).startswith('$encrypted$'):
@@ -852,19 +924,35 @@ class JobTemplateSerializer(BaseSerializer):
             return {}
         res = super(JobTemplateSerializer, self).get_related(obj)
         res.update(dict(
-            inventory   = reverse('api:inventory_detail',   args=(obj.inventory.pk,)),
-            project     = reverse('api:project_detail',    args=(obj.project.pk,)),
-            jobs        = reverse('api:job_template_jobs_list', args=(obj.pk,)),
+            jobs = reverse('api:job_template_jobs_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_template_activity_stream_list', args=(obj.pk,)),
         ))
-        if obj.credential:
+        if obj.inventory and obj.inventory.active:
+            res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
+        if obj.project and obj.project.active:
+            res['project'] = reverse('api:project_detail', args=(obj.project.pk,)),
+        if obj.credential and obj.credential.active:
             res['credential'] = reverse('api:credential_detail', args=(obj.credential.pk,))
-        if obj.cloud_credential:
+        if obj.cloud_credential and obj.cloud_credential.active:
             res['cloud_credential'] = reverse('api:credential_detail',
                                               args=(obj.cloud_credential.pk,))
         if obj.host_config_key:
             res['callback'] = reverse('api:job_template_callback', args=(obj.pk,))
         return res
+
+    def to_native(self, obj):
+        ret = super(JobTemplateSerializer, self).to_native(obj)
+        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+            ret['inventory'] = None
+        if 'project' in ret and (not obj.project or not obj.project.active):
+            ret['project'] = None
+            if 'playbook' in ret:
+                ret['playbook'] = ''
+        if 'credential' in ret and (not obj.credential or not obj.credential.active):
+            ret['credential'] = None
+        if 'cloud_credential' in ret and (not obj.cloud_credential or not obj.cloud_credential.active):
+            ret['cloud_credential'] = None
+        return ret
 
     def validate_playbook(self, attrs, source):
         project = attrs.get('project', None)
@@ -894,16 +982,23 @@ class JobSerializer(BaseTaskSerializer):
             return {}
         res = super(JobSerializer, self).get_related(obj)
         res.update(dict(
-            inventory   = reverse('api:inventory_detail',   args=(obj.inventory.pk,)),
-            project     = reverse('api:project_detail',    args=(obj.project.pk,)),
-            credential  = reverse('api:credential_detail', args=(obj.credential.pk,)),
             job_events  = reverse('api:job_job_events_list', args=(obj.pk,)),
             job_host_summaries = reverse('api:job_job_host_summaries_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_activity_stream_list', args=(obj.pk,)),
         ))
-        if obj.job_template:
-            res['job_template'] = reverse('api:job_template_detail', args=(obj.job_template.pk,))
-        if obj.cloud_credential:
+        if obj.job_template and obj.job_template.active:
+            res['job_template'] = reverse('api:job_template_detail',
+                                          args=(obj.job_template.pk,))
+        if obj.inventory and obj.inventory.active:
+            res['inventory'] = reverse('api:inventory_detail',
+                                       args=(obj.inventory.pk,))
+        if obj.project and obj.project.active:
+            res['project'] = reverse('api:project_detail',
+                                     args=(obj.project.pk,))
+        if obj.credential and obj.credential.active:
+            res['credential'] = reverse('api:credential_detail',
+                                        args=(obj.credential.pk,))
+        if obj.cloud_credential and obj.cloud_credential.active:
             res['cloud_credential'] = reverse('api:credential_detail',
                                               args=(obj.cloud_credential.pk,))
         if obj.can_start or True:
@@ -923,9 +1018,11 @@ class JobSerializer(BaseTaskSerializer):
                 return
             # Don't auto-populate name or description.
             data.setdefault('job_type', job_template.job_type)
-            data.setdefault('inventory', job_template.inventory.pk)
-            data.setdefault('project', job_template.project.pk)
-            data.setdefault('playbook', job_template.playbook)
+            if job_template.inventory:
+                data.setdefault('inventory', job_template.inventory.pk)
+            if job_template.project:
+                data.setdefault('project', job_template.project.pk)
+                data.setdefault('playbook', job_template.playbook)
             if job_template.credential:
                 data.setdefault('credential', job_template.credential.pk)
             if job_template.cloud_credential:
@@ -936,6 +1033,22 @@ class JobSerializer(BaseTaskSerializer):
             data.setdefault('extra_vars', job_template.extra_vars)
             data.setdefault('job_tags', job_template.job_tags)
         return super(JobSerializer, self).from_native(data, files)
+
+    def to_native(self, obj):
+        ret = super(JobSerializer, self).to_native(obj)
+        if 'job_template' in ret and (not obj.job_template or not obj.job_template.active):
+            ret['job_template'] = None
+        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+            ret['inventory'] = None
+        if 'project' in ret and (not obj.project or not obj.project.active):
+            ret['project'] = None
+            if 'playbook' in ret:
+                ret['playbook'] = ''
+        if 'credential' in ret and (not obj.credential or not obj.credential.active):
+            ret['credential'] = None
+        if 'cloud_credential' in ret and (not obj.cloud_credential or not obj.cloud_credential.active):
+            ret['cloud_credential'] = None
+        return ret
 
 
 class JobHostSummarySerializer(BaseSerializer):

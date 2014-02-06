@@ -14,7 +14,7 @@ __all__ = ['__version__']
 try:
     import awx.devonly
     MODE = 'development'
-except ImportError:
+except ImportError: # pragma: no cover
     MODE = 'production'
 
 def find_commands(management_dir):
@@ -27,7 +27,7 @@ def find_commands(management_dir):
                 continue
             elif f.endswith('.py') and f[:-3] not in commands:
                 commands.append(f[:-3])
-            elif f.endswith('.pyc') and f[:-4] not in commands:
+            elif f.endswith('.pyc') and f[:-4] not in commands: # pragma: no cover
                 commands.append(f[:-4])
     except OSError:
         pass
@@ -43,7 +43,7 @@ def prepare_env():
     # Hide DeprecationWarnings when running in production.  Need to first load
     # settings to apply our filter after Django's own warnings filter.
     from django.conf import settings
-    if not settings.DEBUG:
+    if not settings.DEBUG: # pragma: no cover
         warnings.simplefilter('ignore', DeprecationWarning)
     # Monkeypatch Django find_commands to also work with .pyc files.
     import django.core.management
@@ -53,7 +53,7 @@ def prepare_env():
     import django.utils
     try:
         import django.utils.six
-    except ImportError:
+    except ImportError: # pragma: no cover
         import six
         sys.modules['django.utils.six'] = sys.modules['six']
         django.utils.six = sys.modules['django.utils.six']
@@ -61,7 +61,7 @@ def prepare_env():
     # Use the AWX_TEST_DATABASE_* environment variables to specify the test
     # database settings to use when management command is run as an external
     # program via unit tests.
-    for opt in ('ENGINE', 'NAME', 'USER', 'PASSWORD', 'HOST', 'PORT'):
+    for opt in ('ENGINE', 'NAME', 'USER', 'PASSWORD', 'HOST', 'PORT'): # pragma: no cover
         if os.environ.get('AWX_TEST_DATABASE_%s' % opt, None):
             settings.DATABASES['default'][opt] = os.environ['AWX_TEST_DATABASE_%s' % opt]
     # Disable capturing all SQL queries in memory when in DEBUG mode.
@@ -75,7 +75,7 @@ def manage():
     prepare_env()
     # Now run the command (or display the version).
     from django.core.management import execute_from_command_line
-    if len(sys.argv) >= 2 and sys.argv[1] in ('version', '--version'):
+    if len(sys.argv) >= 2 and sys.argv[1] in ('version', '--version'): # pragma: no cover
         sys.stdout.write('%s\n' % __version__)
     else:
         execute_from_command_line(sys.argv)
