@@ -99,7 +99,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     for (j=0; j < jobs.length; j++) {
                         job = jobs[j];
                         html += "<tr>\n";
-                        html += "<td><a ng-click=\"showJobSummary(" + job.id + ")\">" + job.id + "</a></td>\n";
+                        html += "<td><a href=\"/#/jobs/" + job.id + "\">" + job.id + "</a></td>\n";
                         html += "<td class=\"text-center\"><a ng-click=\"showJobSummary(" + job.id + ")\"><i class=\"fa icon-job-" +
                             job.status + "\"></i></a></td>\n";
                         html += "<td><a href=\"/#/jobs/" + job.id + "/job_events/?host=" + encodeURI(host.name) + "\">Events</a> " +

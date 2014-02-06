@@ -255,7 +255,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
                     check_field: 'allow_callbacks',
                     default_val: dft
                 });
-                scope.callback_url = data.related.callback;
+                scope.callback_url = (data.related) ? data.related.callback : '<< Job template not found >>';
                 scope.$emit('jobTemplateLoadFinished');
             })
             .error( function() {
@@ -340,7 +340,7 @@ function JobsEdit ($scope, $rootScope, $compile, $location, $log, $routeParams, 
             }
               
             scope.id = data.id;
-            scope.name = data.summary_fields.job_template.name;
+            scope.name = (data.summary_fields && data.summary_fields.job_template) ? data.summary_fields.job_template.name : '';
 
             if (fld === 'variables') {
                 // Parse extra_vars, converting to YAML.  
