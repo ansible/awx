@@ -756,7 +756,7 @@ class JobEvent(BaseModel):
             self.update_parent_failed_and_changed()
             # FIXME: The update_hosts() call (and its queries) are the current
             # performance bottleneck....
-            self.update_hosts()
+            #self.update_hosts()
             self.update_host_summary_from_stats()
 
     def update_parent_failed_and_changed(self):
