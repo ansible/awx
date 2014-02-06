@@ -202,7 +202,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
             // Update any titles attributes created by ApplyEllipsis
             if (old_name) {
                 setTimeout(function() { 
-                    $('#groups_table .group-name a[title="' + old_name + '"').attr('title',properties.name);
+                    $('#groups_table .group-name a[title="' + old_name + '"]').attr('title',properties.name);
                     ApplyEllipsis('#groups_table .group-name a');
                     }, 2500);
             }
