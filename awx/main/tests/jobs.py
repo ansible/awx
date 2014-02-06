@@ -931,14 +931,15 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
                 response = self.get(url)
 
         # Also test job event list for each host.
-        for host in Host.objects.filter(pk__in=host_ids):
-            url = reverse('api:host_job_events_list', args=(host.pk,))
-            with self.current_user(self.user_sue):
-                response = self.get(url)
-                qs = host.job_events.all()
-                self.assertTrue(qs.count())
-                self.check_pagination_and_size(response, qs.count())
-                self.check_list_ids(response, qs)
+        if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
+            for host in Host.objects.filter(pk__in=host_ids):
+                url = reverse('api:host_job_events_list', args=(host.pk,))
+                with self.current_user(self.user_sue):
+                    response = self.get(url)
+                    qs = host.job_events.all()
+                    self.assertTrue(qs.count())
+                    self.check_pagination_and_size(response, qs.count())
+                    self.check_list_ids(response, qs)
 
         # Test job event list for groups.
         for group in self.inv_ops_east.groups.all():

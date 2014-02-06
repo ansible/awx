@@ -118,6 +118,12 @@ class FieldLookupBackend(BaseFilterBackend):
             for key, values in request.QUERY_PARAMS.lists():
                 if key in self.RESERVED_NAMES:
                     continue
+                
+                # HACK: Make job event filtering by host name mostly work even
+                # when not capturing job event hosts M2M.
+                if queryset.model._meta.object_name == 'JobEvent' and key.startswith('hosts__name'):
+                    key = key.replace('hosts__name', 'or__host__name')
+                    or_filters.append((False, 'host__name__isnull', True))                 
 
                 # Custom __int filter suffix (internal use only).
                 q_int = False

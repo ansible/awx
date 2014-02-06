@@ -319,8 +319,9 @@ class RunJobTest(BaseCeleryTest):
             self.assertEqual(evt.failed, should_be_failed)
             if not async:
                 self.assertEqual(evt.changed, should_be_changed)
-            self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
-                             host_pks)
+            if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
+                self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
+                                 host_pks)
         qs = job_events.filter(event='playbook_on_play_start')
         self.assertEqual(qs.count(), plays)
         for evt in qs:
@@ -330,8 +331,9 @@ class RunJobTest(BaseCeleryTest):
             self.assertEqual(evt.failed, should_be_failed)
             if not async:
                 self.assertEqual(evt.changed, should_be_changed)
-            self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
-                             host_pks)
+            if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
+                self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
+                                 host_pks)
         qs = job_events.filter(event='playbook_on_task_start')
         self.assertEqual(qs.count(), tasks)
         for evt in qs:
@@ -341,8 +343,9 @@ class RunJobTest(BaseCeleryTest):
             self.assertEqual(evt.failed, should_be_failed)
             if not async:
                 self.assertEqual(evt.changed, should_be_changed)
-            self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
-                             host_pks)
+            if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
+                self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
+                                 host_pks)
         if check_ignore_errors:
             qs = job_events.filter(event='runner_on_failed')
         else:
@@ -360,8 +363,9 @@ class RunJobTest(BaseCeleryTest):
             self.assertEqual(evt.failed, should_be_failed)
             if not async:
                 self.assertEqual(evt.changed, should_be_changed)
-            self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
-                             host_pks)
+            if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
+                self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
+                                 host_pks)
         if async:
             qs = job_events.filter(event='runner_on_async_poll')
             if not async_nowait:
@@ -371,8 +375,9 @@ class RunJobTest(BaseCeleryTest):
                 self.assertTrue(evt.play, evt)
                 self.assertTrue(evt.task, evt)
                 self.assertEqual(evt.failed, False)#should_be_failed)
-                self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
-                                 host_pks)
+                if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
+                    self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
+                                     host_pks)
             qs = job_events.filter(event=('runner_on_async_%s' % runner_status))
             # Ansible 1.2 won't call the on_runner_async_failed callback when a
             # timeout occurs, so skip this check for now.
@@ -383,8 +388,9 @@ class RunJobTest(BaseCeleryTest):
                 self.assertTrue(evt.play, evt)
                 self.assertTrue(evt.task, evt)
                 self.assertEqual(evt.failed, should_be_failed)
-                self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
-                                 host_pks)
+                if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
+                    self.assertEqual(set(evt.hosts.values_list('pk', flat=True)),
+                                     host_pks)
         qs = job_events.filter(event__startswith='runner_')
         if check_ignore_errors:
             qs = qs.exclude(event='runner_on_failed')
