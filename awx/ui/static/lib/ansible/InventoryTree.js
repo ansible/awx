@@ -402,14 +402,13 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
         function($compile, Alert, ProcessErrors, Find, Wait, Rest, Empty, GetBasePath) {
         return function(params) {
 
-            var scope = params.scope;
-            var target = Find({ list: scope.groups, key: 'id', val: params.target_tree_id });
-            var host = Find({ list: scope.hosts, key: 'id', val: params.host_id });
-            
-            var found = false;
+            var scope = params.scope,
+                target = Find({ list: scope.groups, key: 'id', val: params.target_tree_id }),
+                host = Find({ list: scope.hosts, key: 'id', val: params.host_id }),
+                found = false, i;
             
             if (host.summary_fields.all_groups) {
-                for (var i=0; i< host.summary_fields.all_groups.length; i++) {
+                for (i=0; i< host.summary_fields.all_groups.length; i++) {
                     if (host.summary_fields.all_groups[i].id == target.group_id) {
                        found = true;
                        break;

@@ -590,10 +590,12 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                         // Drag-n-drop succeeded. Trigger a response from the inventory.edit controller
                         $(this).removeClass('droppable-hover');
                         if (ui.draggable.attr('data-type') === 'group') {
-                            scope.$emit('CopyMoveGroup', ui.draggable.attr('data-tree-id'), $(this).attr('data-tree-id'));
+                            scope.$emit('CopyMoveGroup', parseInt(ui.draggable.attr('data-tree-id'),10),
+                                parseInt($(this).attr('data-tree-id'),10));
                         }
                         else if (ui.draggable.attr('data-type') === 'host') {
-                            scope.$emit('CopyMoveHost', $(this).attr('data-tree-id'), ui.draggable.attr('data-host-id'));
+                            scope.$emit('CopyMoveHost', parseInt($(this).attr('data-tree-id'),10),
+                                parseInt(ui.draggable.attr('data-host-id'),10));
                         }
                     },
                     tolerance: 'pointer'

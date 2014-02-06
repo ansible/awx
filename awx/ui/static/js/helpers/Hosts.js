@@ -634,9 +634,9 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, Process
             
             url = (scope.selected_group_id === null) ? GetBasePath('inventory') + scope.inventory_id + '/hosts/' :
                 GetBasePath('groups') + scope.selected_group_id + '/hosts/',
-    
+     
             group = (scope.selected_tree_id) ? Find({ list: scope.groups, key: 'id', val: scope.selected_tree_id }) : null;
-        
+            
         if (scope.removeHostsReload) {
             scope.removeHostsReload();
         }

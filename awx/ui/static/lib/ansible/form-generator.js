@@ -201,7 +201,7 @@ function($rootScope, $location, $cookieStore, $compile, SearchWidget, PaginateWi
 
         applyDefaults: function() {
             for (var fld in this.form.fields) {
-                if (this.form.fields[fld].default || this.form.fields[fld].default === 0) {
+                if (this.form.fields[fld]['default'] || this.form.fields[fld]['default'] === 0) {
                     if (this.form.fields[fld].type === 'select' && this.scope[fld + '_options']) {
                         this.scope[fld] = this.scope[fld + '_options'][this.form.fields[fld]['default']];
                     }
