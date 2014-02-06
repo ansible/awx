@@ -7,30 +7,30 @@
 
 'use strict';
 
-var INTEGER_REGEXP = /^\-?\d*$/;
+/* global chkPass:false */
 
 angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'JobsHelper'])
     // awpassmatch:  Add to password_confirm field. Will test if value
     //               matches that of 'input[name="password"]'
     .directive('awpassmatch', function() {
         return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            ctrl.$parsers.unshift( function(viewValue) {
-                var associated = attrs.awpassmatch;
-                var password = $('input[name="' + associated + '"]').val();
-                if (viewValue == password) {
-                   // it is valid
-                   ctrl.$setValidity('awpassmatch', true);
-                   return viewValue;
-                } 
-                // Invalid, return undefined (no model update)
-                ctrl.$setValidity('awpassmatch', false);
-                return undefined;
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$parsers.unshift( function(viewValue) {
+                    var associated = attrs.awpassmatch,
+                        password = $('input[name="' + associated + '"]').val();
+                    if (viewValue === password) {
+                        // it is valid
+                        ctrl.$setValidity('awpassmatch', true);
+                        return viewValue;
+                    }
+                    // Invalid, return undefined (no model update)
+                    ctrl.$setValidity('awpassmatch', false);
+                    return undefined;
                 });
             }
         };
-        })
+    })
     
     // caplitalize  Add to any input field where the first letter of each
     //              word should be capitalized. Use in place of css test-transform.
@@ -39,24 +39,24 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     //              "autocapitalize='word'" only works in iOS. Use this as a fix.
     .directive('capitalize', function() {
         return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            ctrl.$parsers.unshift( function(viewValue) {
-                var values = viewValue.split(" ");
-                var result = "", i;
-                for (i = 0; i < values.length; i++){
-                    result += values[i].charAt(0).toUpperCase() + values[i].substr(1) + ' ';
-                }
-                result = result.trim();
-                if (result != viewValue) {
-                   ctrl.$setViewValue(result);
-                   ctrl.$render();
-                }
-                return result;
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$parsers.unshift( function(viewValue) {
+                    var values = viewValue.split(" "),
+                        result = "", i;
+                    for (i = 0; i < values.length; i++){
+                        result += values[i].charAt(0).toUpperCase() + values[i].substr(1) + ' ';
+                    }
+                    result = result.trim();
+                    if (result !== viewValue) {
+                        ctrl.$setViewValue(result);
+                        ctrl.$render();
+                    }
+                    return result;
                 });
             }
         };
-        })
+    })
 
     // integer  Validate that input is of type integer. Taken from Angular developer
     //          guide, form examples. Add min and max directives, and this will check
@@ -66,32 +66,32 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     //          override/interfere with this directive.
     .directive('integer', function() {
         return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            ctrl.$parsers.unshift(function(viewValue) {
-                ctrl.$setValidity('min', true);
-                ctrl.$setValidity('max', true);
-                if (INTEGER_REGEXP.test(viewValue)) {
-                   // it is valid
-                   ctrl.$setValidity('integer', true);
-                   if ( elm.attr('min') &&
-                        ( viewValue == '' || viewValue == null || parseInt(viewValue,10) < parseInt(elm.attr('min'),10) ) ) {
-                      ctrl.$setValidity('min', false);
-                      return undefined;  
-                   }
-                   if ( elm.attr('max') && ( parseInt(viewValue,10) > parseInt(elm.attr('max'),10) ) ) {
-                      ctrl.$setValidity('max', false);
-                      return undefined;  
-                   }
-                   return viewValue;
-                } 
-                // Invalid, return undefined (no model update)
-                ctrl.$setValidity('integer', false);
-                return undefined;
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$parsers.unshift(function(viewValue) {
+                    ctrl.$setValidity('min', true);
+                    ctrl.$setValidity('max', true);
+                    if (/^\-?\d*$/.test(viewValue)) {
+                       // it is valid
+                        ctrl.$setValidity('integer', true);
+                        if ( elm.attr('min') &&
+                            ( viewValue === '' || viewValue === null || parseInt(viewValue,10) < parseInt(elm.attr('min'),10) ) ) {
+                            ctrl.$setValidity('min', false);
+                            return undefined;
+                        }
+                        if ( elm.attr('max') && ( parseInt(viewValue,10) > parseInt(elm.attr('max'),10) ) ) {
+                            ctrl.$setValidity('max', false);
+                            return undefined;
+                        }
+                        return viewValue;
+                    }
+                    // Invalid, return undefined (no model update)
+                    ctrl.$setValidity('integer', false);
+                    return undefined;
                 });
             }
         };
-        })
+    })
   
     //
     // awRequiredWhen: { variable: "<variable to watch for true|false>", init:"true|false" }
@@ -101,127 +101,125 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     //  
     .directive('awRequiredWhen', function() {
         return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            
-            function checkIt () {
-               var viewValue = elm.val();
-               var label;
-               var validity = true;
-               if ( scope[attrs.awRequiredWhen] && (elm.attr('required') == null || elm.attr('required') == undefined) ) {
-                  $(elm).attr('required','required');
-                  if ($(elm).hasClass('lookup')) {
-                     $(elm).parent().parent().parent().find('label').first().addClass('prepend-asterisk');
-                  }
-                  else {
-                     $(elm).parent().parent().find('label').first().addClass('prepend-asterisk');
-                  }
-               }
-               else if (!scope[attrs.awRequiredWhen]) {
-                  elm.removeAttr('required');
-                  if ($(elm).hasClass('lookup')) {
-                     label = $(elm).parent().parent().parent().find('label').first();
-                     label.removeClass('prepend-asterisk');
-                  }
-                  else {
-                     $(elm).parent().parent().find('label').first().removeClass('prepend-asterisk');
-                  }
-               }
-               if (scope[attrs.awRequiredWhen] && (viewValue == undefined || viewValue == null || viewValue == '')) {
-                  validity = false;
-               }
-               ctrl.$setValidity('required', validity);
-               }
-            
-            if (attrs.awrequiredInit !== undefined && attrs.awrequiredInit !== null) {
-               scope[attrs.awRequiredWhen] = attrs.awrequiredInit;
-               checkIt();
-            }
-            
-            scope.$watch(attrs.awRequiredWhen, function() {
-                // watch for the aw-required-when expression to change value
-                checkIt();
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                
+                function checkIt () {
+                    var viewValue = elm.val(), label, validity = true;
+                    if ( scope[attrs.awRequiredWhen] && (elm.attr('required') === null || elm.attr('required') === undefined) ) {
+                        $(elm).attr('required','required');
+                        if ($(elm).hasClass('lookup')) {
+                            $(elm).parent().parent().parent().find('label').first().addClass('prepend-asterisk');
+                        }
+                        else {
+                            $(elm).parent().parent().find('label').first().addClass('prepend-asterisk');
+                        }
+                    }
+                    else if (!scope[attrs.awRequiredWhen]) {
+                        elm.removeAttr('required');
+                        if ($(elm).hasClass('lookup')) {
+                            label = $(elm).parent().parent().parent().find('label').first();
+                            label.removeClass('prepend-asterisk');
+                        }
+                        else {
+                            $(elm).parent().parent().find('label').first().removeClass('prepend-asterisk');
+                        }
+                    }
+                    if (scope[attrs.awRequiredWhen] && (viewValue === undefined || viewValue === null || viewValue === '')) {
+                        validity = false;
+                    }
+                    ctrl.$setValidity('required', validity);
+                }
+                
+                if (attrs.awrequiredInit !== undefined && attrs.awrequiredInit !== null) {
+                    scope[attrs.awRequiredWhen] = attrs.awrequiredInit;
+                    checkIt();
+                }
+                
+                scope.$watch(attrs.awRequiredWhen, function() {
+                    // watch for the aw-required-when expression to change value
+                    checkIt();
                 });
 
-            scope.$watch($(elm).attr('name'), function() {
-                // watch for the field to change value
-                checkIt();
+                scope.$watch($(elm).attr('name'), function() {
+                    // watch for the field to change value
+                    checkIt();
                 });
             }
         };
-        })
+    })
     
     // awPlaceholder: Dynamic placeholder set to a scope variable you want watched.
     //                Value will be place in field placeholder attribute.
     .directive('awPlaceholder', [ function() {
         return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            $(elm).attr('placeholder', scope[attrs.awPlaceholder]);
-            scope.$watch(attrs.awPlaceholder, function(newVal, oldVal) {
-                $(elm).attr('placeholder',newVal);
+            require: 'ngModel',
+            link: function(scope, elm, attrs) {
+                $(elm).attr('placeholder', scope[attrs.awPlaceholder]);
+                scope.$watch(attrs.awPlaceholder, function(newVal) {
+                    $(elm).attr('placeholder',newVal);
                 });
             }
         };
-        }])
+    }])
 
     // lookup   Validate lookup value against API
     //           
     .directive('awlookup', ['Rest', function(Rest) {
         return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            ctrl.$parsers.unshift( function(viewValue) {
-                if (viewValue !== '' && viewValue !== null) {
-                   var url = elm.attr('data-url');
-                   url = url.replace(/\:value/, encodeURI(viewValue));
-                   scope[elm.attr('data-source')] = null;
-                   Rest.setUrl(url);
-                   Rest.get().then( function(data) {
-                       var results = data.data.results;
-                       if (results.length > 0) {
-                          scope[elm.attr('data-source')] = results[0].id;
-                          scope[elm.attr('name')] = results[0].name;
-                          ctrl.$setValidity('required', true); 
-                          ctrl.$setValidity('awlookup', true);
-                          return viewValue;
-                       }
-                       ctrl.$setValidity('required', true); 
-                       ctrl.$setValidity('awlookup', false);
-                       return undefined;
-                       });
-                }
-                else {
-                   ctrl.$setValidity('awlookup', true);
-                   scope[elm.attr('data-source')] = null;
-                }
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$parsers.unshift( function(viewValue) {
+                    if (viewValue !== '' && viewValue !== null) {
+                        var url = elm.attr('data-url');
+                        url = url.replace(/\:value/, encodeURI(viewValue));
+                        scope[elm.attr('data-source')] = null;
+                        Rest.setUrl(url);
+                        Rest.get().then( function(data) {
+                            var results = data.data.results;
+                            if (results.length > 0) {
+                                scope[elm.attr('data-source')] = results[0].id;
+                                scope[elm.attr('name')] = results[0].name;
+                                ctrl.$setValidity('required', true);
+                                ctrl.$setValidity('awlookup', true);
+                                return viewValue;
+                            }
+                            ctrl.$setValidity('required', true);
+                            ctrl.$setValidity('awlookup', false);
+                            return undefined;
+                        });
+                    }
+                    else {
+                        ctrl.$setValidity('awlookup', true);
+                        scope[elm.attr('data-source')] = null;
+                    }
                 });
             }
         };
-        }])
+    }])
     
     //
     // awValidUrl
     //           
     .directive('awValidUrl', [ function() {
         return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            ctrl.$parsers.unshift( function(viewValue) {
-                var validity = true;
-                if (viewValue !== '') {
-                   ctrl.$setValidity('required', true);
-                   var rgx = /^(https|http|ssh)\:\/\//;
-                   var rgx2 = /\@/g;
-                   if (!rgx.test(viewValue) || rgx2.test(viewValue)) {
-                      validity = false;
-                   }
-                }
-                ctrl.$setValidity('awvalidurl', validity); 
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                ctrl.$parsers.unshift( function(viewValue) {
+                    var validity = true, rgx, rgx2;
+                    if (viewValue !== '') {
+                        ctrl.$setValidity('required', true);
+                        rgx = /^(https|http|ssh)\:\/\//;
+                        rgx2 = /\@/g;
+                        if (!rgx.test(viewValue) || rgx2.test(viewValue)) {
+                            validity = false;
+                        }
+                    }
+                    ctrl.$setValidity('awvalidurl', validity);
                 });
             }
         };
-        }])
+    }])
 
     /*  
      *  Enable TB tooltips. To add a tooltip to an element, include the following directive in
@@ -231,39 +229,39 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
      *
      *  Include the standard TB data-XXX attributes to controll a tooltip's appearance.  We will 
      *  default placement to the left and delay to 2 seconds.
-     */ 
+     */
     .directive('awToolTip', function() {
-       return function(scope, element, attrs) {
-           var delay = (attrs.delay != undefined && attrs.delay != null) ? attrs.delay : $AnsibleConfig.tooltip_delay;
-           var placement; 
-           if (attrs.awTipPlacement) { 
-               placement = attrs.awTipPlacement;
-           }
-           else {
-               placement = (attrs.placement != undefined && attrs.placement != null) ? attrs.placement : 'left';
-           }
-           $(element).on('hidden.bs.tooltip', function( ) {
-               // TB3RC1 is leaving behind tooltip <div> elements. This will remove them
-               // after a tooltip fades away. If not, they lay overtop of other elements and 
-               // honk up the page. 
-               $('.tooltip').each(function(index) {
-                   $(this).remove();
-                   });  
-               });
-           $(element).tooltip({ placement: placement, delay: delay, html: true, title: attrs.awToolTip, container: 'body' });
-           
-           if (attrs.tipWatch) {
-              // Add dataTipWatch: 'variable_name'
-              scope.$watch(attrs.tipWatch, function(newVal, oldVal) {
-                  if (newVal !== oldVal) {
-                      // Where did fixTitle come frome?:
-                      //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
-                      $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle');
-                  }
-                  });
-           }
-       };
-       })
+        return function(scope, element, attrs) {
+            var delay = (attrs.delay !== undefined && attrs.delay !== null) ? attrs.delay : $AnsibleConfig.tooltip_delay,
+                placement;
+            if (attrs.awTipPlacement) {
+                placement = attrs.awTipPlacement;
+            }
+            else {
+                placement = (attrs.placement !== undefined && attrs.placement !== null) ? attrs.placement : 'left';
+            }
+            $(element).on('hidden.bs.tooltip', function( ) {
+                // TB3RC1 is leaving behind tooltip <div> elements. This will remove them
+                // after a tooltip fades away. If not, they lay overtop of other elements and 
+                // honk up the page. 
+                $('.tooltip').each(function() {
+                    $(this).remove();
+                });
+            });
+            $(element).tooltip({ placement: placement, delay: delay, html: true, title: attrs.awToolTip, container: 'body' });
+
+            if (attrs.tipWatch) {
+                // Add dataTipWatch: 'variable_name'
+                scope.$watch(attrs.tipWatch, function(newVal, oldVal) {
+                    if (newVal !== oldVal) {
+                        // Where did fixTitle come frome?:
+                        //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
+                        $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle');
+                    }
+                });
+            }
+        };
+    })
      
     /*  
      *  Enable TB pop-overs. To add a pop-over to an element, include the following directive in
@@ -273,47 +271,46 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
      *
      *  Include the standard TB data-XXX attributes to controll the pop-over's appearance.  We will 
      *  default placement to the left, delay to 0 seconds, content type to HTML, and title to 'Help'.
-     */ 
+     */
     .directive('awPopOver', ['$compile', function($compile) {
         return function(scope, element, attrs) {
-            var placement = (attrs.placement != undefined && attrs.placement != null) ? attrs.placement : 'left';
-            var title = (attrs.title != undefined && attrs.title != null) ? attrs.title : 'Help';
-            var container = (attrs.container !== undefined) ? attrs.container : false;
-            $(element).popover({ placement: placement, delay: 0, title: title, 
+            var placement = (attrs.placement !== undefined && attrs.placement !== null) ? attrs.placement : 'left',
+                title = (attrs.title !== undefined && attrs.title !== null) ? attrs.title : 'Help',
+                container = (attrs.container !== undefined) ? attrs.container : false;
+            $(element).popover({ placement: placement, delay: 0, title: title,
                 content: attrs.awPopOver, trigger: 'manual', html: true, container: container });
             $(element).click(function() {
                 var me = $(this).attr('id');
-                var e = $(this);
-                $('.help-link, .help-link-white').each( function(index) {
-                    if (me != $(this).attr('id')) {
+                $('.help-link, .help-link-white').each( function() {
+                    if (me !== $(this).attr('id')) {
                         $(this).popover('hide');
                     }
-                    });
+                });
             
-                $('.popover').each(function(index) {
+                $('.popover').each(function() {
                     // remove lingering popover <div>. Seems to be a bug in TB3 RC1
                     $(this).remove();
-                    });
+                });
                 $(this).tooltip('hide'); // hide a tooltip, if there is one associated with the element
                 $(this).popover('toggle');
 
-                $('.popover').each(function(index) {
+                $('.popover').each(function() {
                     $compile($(this))(scope);  //make nested directives work!
-                    });
-
                 });
+
+            });
             
             $(document).bind('keydown', function(e) {
                 if (e.keyCode === 27) {
                     $(element).popover('hide');
-                    $('.popover').each(function(index) {
-                       // remove lingering popover <div>. Seems to be a bug in TB3 RC1
-                       $(this).remove();
-                       });
+                    $('.popover').each(function() {
+                        // remove lingering popover <div>. Seems to be a bug in TB3 RC1
+                        $(this).remove();
+                    });
                 }
-                });
+            });
         };
-        }])
+    }])
 
     //
     // Enable jqueryui slider widget on a numeric input field
@@ -322,63 +319,61 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     //
     .directive('ngSlider', [ function() {
         return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            var name = elm.attr('name');
-            $('#' + name + '-slider').slider({
-                value: 0,
-                step: 1,
-                min: elm.attr('min'),
-                max: elm.attr('max'),
-                slide: function(e, u) {
-                   ctrl.$setViewValue(u.value);
-                   ctrl.$setValidity('required',true);
-                   ctrl.$setValidity('min', true);
-                   ctrl.$setValidity('max', true);
-                   ctrl.$dirty = true;
-                   ctrl.$render();
-                   //scope['job_templates_form'].$dirty = true;
-                   if (!scope.$$phase) {
-                       scope.$digest();
-                   }
-                   }
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                var name = elm.attr('name');
+                $('#' + name + '-slider').slider({
+                    value: 0,
+                    step: 1,
+                    min: elm.attr('min'),
+                    max: elm.attr('max'),
+                    slide: function(e,u) {
+                        ctrl.$setViewValue(u.value);
+                        ctrl.$setValidity('required',true);
+                        ctrl.$setValidity('min', true);
+                        ctrl.$setValidity('max', true);
+                        ctrl.$dirty = true;
+                        ctrl.$render();
+                        if (!scope.$$phase) {
+                            scope.$digest();
+                        }
+                    }
                 });
 
-            $('#' + name + '-number').change( function() {
-                $('#' + name + '-slider').slider('value', parseInt($(this).val(),10));
+                $('#' + name + '-number').change( function() {
+                    $('#' + name + '-slider').slider('value', parseInt($(this).val(),10));
                 });
-
 
             }
         };
-        }])
+    }])
 
     .directive('awMultiSelect', [ function() {
         return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            $(elm).multiselect  ({
-                buttonClass: 'btn-default, btn-mini',
-                buttonWidth: 'auto',
-                buttonContainer: '<div class="btn-group" />',
-                maxHeight: false,
-                buttonText: function(options) {
-                   if (options.length == 0) {
-                       return 'None selected <b class="caret"></b>';
-                   }
-                   if (options.length > 3) {
-                       return options.length + ' selected  <b class="caret"></b>';
-                   }
-                   var selected = '';
-                   options.each(function() {
-                       selected += $(this).text() + ', ';
-                       });
-                   return selected.substr(0, selected.length -2) + ' <b class="caret"></b>';
-                }
+            require: 'ngModel',
+            link: function(scope, elm) {
+                $(elm).multiselect  ({
+                    buttonClass: 'btn-default, btn-mini',
+                    buttonWidth: 'auto',
+                    buttonContainer: '<div class="btn-group" />',
+                    maxHeight: false,
+                    buttonText: function(options) {
+                        if (options.length === 0) {
+                            return 'None selected <b class="caret"></b>';
+                        }
+                        if (options.length > 3) {
+                            return options.length + ' selected  <b class="caret"></b>';
+                        }
+                        var selected = '';
+                        options.each(function() {
+                            selected += $(this).text() + ', ';
+                        });
+                        return selected.substr(0, selected.length -2) + ' <b class="caret"></b>';
+                    }
                 });
             }
         };
-        }])
+    }])
 
     //
     // Enable jqueryui spinner widget on a numeric input field
@@ -387,36 +382,36 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     //
     .directive('ngSpinner', [ function() {
         return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {
-            var name = elm.attr('name');
-            var disabled = elm.attr('data-disabled');
-            var opts = {
-                value: 0,
-                step: 1,
-                min: elm.attr('min'),
-                max: elm.attr('max'),
-                numberFormat: "d",
-                spin: function(e, u) {
-                   ctrl.$setViewValue(u.value);
-                   ctrl.$setValidity('required',true);
-                   ctrl.$setValidity('min', true);
-                   ctrl.$setValidity('max', true);
-                   ctrl.$dirty = true;
-                   ctrl.$render();
-                   scope.job_templates_form.$dirty = true;
-                   if (!scope.$$phase) {
-                       scope.$digest();
-                   }
-                   }
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                var disabled, opts;
+                disabled = elm.attr('data-disabled');
+                opts = {
+                    value: 0,
+                    step: 1,
+                    min: elm.attr('min'),
+                    max: elm.attr('max'),
+                    numberFormat: "d",
+                    spin: function(e, u) {
+                        ctrl.$setViewValue(u.value);
+                        ctrl.$setValidity('required',true);
+                        ctrl.$setValidity('min', true);
+                        ctrl.$setValidity('max', true);
+                        ctrl.$dirty = true;
+                        ctrl.$render();
+                        scope.job_templates_form.$dirty = true;
+                        if (!scope.$$phase) {
+                            scope.$digest();
+                        }
+                    }
                 };
-            if (disabled) { 
-               opts.disabled = true;
-            }   
-            $(elm).spinner(opts);
+                if (disabled) {
+                    opts.disabled = true;
+                }
+                $(elm).spinner(opts);
             }
         };
-        }])
+    }])
 
     //
     // chkPass
@@ -426,22 +421,22 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     //
     .directive('chkPass', [ function() {
         return {
-        require: 'ngModel',
-        link: function(scope, elm, attrs, ctrl) {    
-            $(elm).keyup(function() {
-                var validity = true;
-                var score = chkPass(elm.val());
-                if (elm.val()) {
-                   validity = (score > $AnsibleConfig.password_strength) ? true : false;
-                }
-                ctrl.$setValidity('complexity', validity);
-                if (!scope.$$phase) {
-                   scope.$digest();
-                }
+            require: 'ngModel',
+            link: function(scope, elm, attrs, ctrl) {
+                $(elm).keyup(function() {
+                    var validity = true,
+                        score = chkPass(elm.val());
+                    if (elm.val()) {
+                        validity = (score > $AnsibleConfig.password_strength) ? true : false;
+                    }
+                    ctrl.$setValidity('complexity', validity);
+                    if (!scope.$$phase) {
+                        scope.$digest();
+                    }
                 });
             }
         };
-        }])
+    }])
     
     //
     // awRefresh
@@ -451,69 +446,69 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     //
     .directive('awRefresh', [ '$rootScope', function($rootScope) {
         return {
-        link: function(scope, elm, attrs, ctrl) {
-            function msg() {
-                var num = '' + scope.refreshCnt;
-                while (num.length < 2) {
-                   num = '0' + num;
+            link: function(scope) {
+                function msg() {
+                    var num = '' + scope.refreshCnt;
+                    while (num.length < 2) {
+                        num = '0' + num;
+                    }
+                    return 'Refresh in ' + num + ' sec.';
                 }
-                return 'Refresh in ' + num + ' sec.';
-                }
-            scope.refreshCnt = $AnsibleConfig.refresh_rate;
-            scope.refreshMsg = msg();
-            if ($rootScope.timer) {
-                clearInterval($rootScope.timer);
-            }
-            $rootScope.timer = setInterval( function() {
-                scope.refreshCnt--;
-                if (scope.refreshCnt <= 0) {
-                   scope.refresh();
-                   scope.refreshCnt = $AnsibleConfig.refresh_rate;
-                }
+                scope.refreshCnt = $AnsibleConfig.refresh_rate;
                 scope.refreshMsg = msg();
-                if (!scope.$$phase) {
-                   scope.$digest();
+                if ($rootScope.timer) {
+                    clearInterval($rootScope.timer);
                 }
+                $rootScope.timer = setInterval( function() {
+                    scope.refreshCnt--;
+                    if (scope.refreshCnt <= 0) {
+                        scope.refresh();
+                        scope.refreshCnt = $AnsibleConfig.refresh_rate;
+                    }
+                    scope.refreshMsg = msg();
+                    if (!scope.$$phase) {
+                        scope.$digest();
+                    }
                 }, 1000);
             }
         };
-        }])
+    }])
 
     
     /*  
        awMultiSelect
        Relies on select2.js to create a multi-select with tags.
-    */ 
+    */
     .directive('awMultiselect', [ function() {
         return {
-        require: '^form',  //inject the form into the ctrl parameter
-        link: function(scope, elm, attrs, ctrl) {
-            $(elm).select2({
-                multiple: true,
-                data: function() {
-                    // dynamically load the possible values
-                    if (scope[attrs.awMultiselect]) {
-                        var set = scope[attrs.awMultiselect]; 
-                        var opts = [], i;
-                        for (i=0; i < set.length; i++) {
-                            opts.push({ id: set[i].value, text: set[i].label });
+            require: '^form',  //inject the form into the ctrl parameter
+            link: function(scope, elm, attrs, ctrl) {
+                $(elm).select2({
+                    multiple: true,
+                    data: function() {
+                        // dynamically load the possible values
+                        if (scope[attrs.awMultiselect]) {
+                            var set = scope[attrs.awMultiselect],
+                                opts = [], i;
+                            for (i=0; i < set.length; i++) {
+                                opts.push({ id: set[i].value, text: set[i].label });
+                            }
+                            return {results: opts };
                         }
-                        return {results: opts };
-                    }
-                    return {results: { id: '', text: ''} };
+                        return {results: { id: '', text: ''} };
                     }
                 });
 
-            // Make sure the form buttons enable when the value changes
-            $(elm).on('change', function() { 
-                ctrl.$setDirty(); 
-                if (!scope.$$phase) {
-                   scope.$digest();
-                }
+                // Make sure the form buttons enable when the value changes
+                $(elm).on('change', function() {
+                    ctrl.$setDirty();
+                    if (!scope.$$phase) {
+                        scope.$digest();
+                    }
                 });
             }
         };
-        }])
+    }])
 
     
     /*  
@@ -521,90 +516,88 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
      *
      *  awDraggable: boolean || {{ expression }}
      *
-     */ 
+     */
     .directive('awDraggable', [ function() {
         return function(scope, element, attrs) {
     
-        if (attrs.awDraggable == "true") {
-            var containment = attrs.containment;  //provide dataContainment:"#id"
-            $(element).draggable({ 
-                containment: containment, 
-                scroll: true,
-                revert: "invalid",
-                helper: "clone", 
-                start: function(e, ui) {
-                    ui.helper.addClass('draggable-clone');
+            if (attrs.awDraggable === "true") {
+                var containment = attrs.containment;  //provide dataContainment:"#id"
+                $(element).draggable({
+                    containment: containment,
+                    scroll: true,
+                    revert: "invalid",
+                    helper: "clone",
+                    start: function(e, ui) {
+                        ui.helper.addClass('draggable-clone');
                     },
-                zIndex: 100,
-                cursorAt: { left: -1 }
+                    zIndex: 100,
+                    cursorAt: { left: -1 }
                 });
-        }
-
+            }
         };
-        }])
+    }])
     
     /*  
      *  Make an element droppable- it can receive draggable elements
      *
      *  awDroppable: boolean || {{ expression }}
      *
-     */ 
+     */
     .directive('awDroppable', ['Find', function(Find) {
         return function(scope, element, attrs) {
-        var node;
-        if (attrs.awDroppable == "true") {
-            $(element).droppable({ 
-                // the following is inventory specific accept checking and 
-                // drop processing.
-                accept: function(draggable) {
-                    if (draggable.attr('data-type') == 'group') {
-                        // Dropped a group
-                        if ($(this).attr('data-group-id') == draggable.attr('data-group-id')) {
-                            // No dropping a node onto itself (or a copy)
+            var node;
+            if (attrs.awDroppable === "true") {
+                $(element).droppable({
+                    // the following is inventory specific accept checking and 
+                    // drop processing.
+                    accept: function(draggable) {
+                        if (draggable.attr('data-type') === 'group') {
+                            // Dropped a group
+                            if ($(this).attr('data-group-id') === draggable.attr('data-group-id')) {
+                                // No dropping a node onto itself (or a copy)
+                                return false;
+                            }
+                            // No dropping a node into a group that already has the node
+                            node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id'),10) });
+                            if (node) {
+                                var group = parseInt(draggable.attr('data-group-id'),10),
+                                    found = false, i;
+                                // For whatever reason indexOf() would not work...
+                                for (i=0; i < node.children.length; i++) {
+                                    if (node.children[i] === group) {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                return (found) ? false : true;
+                            }
                             return false;
                         }
-                        // No dropping a node into a group that already has the node
-                        node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id'),10) });
-                        if (node) {
-                            var group = parseInt(draggable.attr('data-group-id'),10),
-                                found = false, i;
-                            // For whatever reason indexOf() would not work...
-                            for (i=0; i < node.children.length; i++) {
-                                if (node.children[i] == group) {
-                                   found = true;
-                                   break;
-                                }
-                            }
-                            return (found) ? false : true;
+                        if (draggable.attr('data-type') === 'host') {
+                            // Dropped a host
+                            node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id'),10) });
+                            return (node.id > 1) ? true : false;
                         }
                         return false;
-                    }
-                    if (draggable.attr('data-type') == 'host') {
-                        // Dropped a host
-                        node = Find({ list: scope.groups, key: 'id', val: parseInt($(this).attr('data-tree-id'),10) });
-                        return (node.id > 1) ? true : false;
-                    }
-                    return false;
                     },
-                over: function(e, ui) {
-                    $(this).addClass('droppable-hover');
+                    over: function() {
+                        $(this).addClass('droppable-hover');
                     },
-                out: function(e, ui) {
-                    $(this).removeClass('droppable-hover');
+                    out: function() {
+                        $(this).removeClass('droppable-hover');
                     },
-                drop: function(e, ui) {
-                    // Drag-n-drop succeeded. Trigger a response from the inventory.edit controller
-                    $(this).removeClass('droppable-hover');
-                    if (ui.draggable.attr('data-type') == 'group') {
-                        scope.$emit('CopyMoveGroup', ui.draggable.attr('data-tree-id'), $(this).attr('data-tree-id'));
-                    }
-                    else if (ui.draggable.attr('data-type') == 'host') {
-                        scope.$emit('CopyMoveHost', $(this).attr('data-tree-id'), ui.draggable.attr('data-host-id'));
-                    }
+                    drop: function(e, ui) {
+                        // Drag-n-drop succeeded. Trigger a response from the inventory.edit controller
+                        $(this).removeClass('droppable-hover');
+                        if (ui.draggable.attr('data-type') === 'group') {
+                            scope.$emit('CopyMoveGroup', ui.draggable.attr('data-tree-id'), $(this).attr('data-tree-id'));
+                        }
+                        else if (ui.draggable.attr('data-type') === 'host') {
+                            scope.$emit('CopyMoveHost', $(this).attr('data-tree-id'), ui.draggable.attr('data-host-id'));
+                        }
                     },
-                tolerance: 'pointer'
+                    tolerance: 'pointer'
                 });
-        }
-
+            }
         };
-        }]);
+    }]);
