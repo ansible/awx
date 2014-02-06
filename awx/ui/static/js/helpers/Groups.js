@@ -18,30 +18,30 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
     .factory('GetSourceTypeOptions', [ 'Rest', 'ProcessErrors', 'GetBasePath', function(Rest, ProcessErrors, GetBasePath) {
         return function(params) {
             // Lookup options for source and build an array of drop-down choices
-            var scope = params.scope;
-            var variable = params.variable;
-            if (scope[variable] == undefined) {
+            var scope = params.scope,
+                variable = params.variable;
+            if (scope[variable] === undefined) {
                 scope[variable] = [];
                 Rest.setUrl(GetBasePath('inventory_sources'));
                 Rest.options()
-                    .success( function(data, status, headers, config) { 
-                        var choices = data.actions.GET.source.choices
-                        for (var i=0; i < choices.length; i++) {
+                    .success( function(data) {
+                        var i, choices = data.actions.GET.source.choices;
+                        for (i=0; i < choices.length; i++) {
                             if (choices[i][0] !== 'file') {
-                                scope[variable].push({ 
-                                    label: ( (choices[i][0] == '') ? 'Manual' : choices[i][1] ),
+                                scope[variable].push({
+                                    label: ( (choices[i][0] === '') ? 'Manual' : choices[i][1] ),
                                     value: choices[i][0]
-                                    });
+                                });
                             }
                         }
-                        })
-                    .error( function(data, status, headers, config) { 
+                    })
+                    .error( function(data, status) {
                         ProcessErrors(scope, data, status, null,
                             { hdr: 'Error!', msg: 'Failed to retrieve options for inventory_sources.source. OPTIONS status: ' + status });
                     });
             }
-        }
-        }])
+        };
+    }])
 
 
     .factory('GetUpdateIntervalOptions', [ function() {
@@ -54,7 +54,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 { label: '30 minutes', value: 30 },
                 { label: '45 minutes', value: 45 },
                 { label: '1 hour', value: 60 },
-                { label: '2 hours', value: 120 }, 
+                { label: '2 hours', value: 120 },
                 { label: '3 hours', value: 180 },
                 { label: '4 hours', value: 240 },
                 { label: '5 hours', value: 300 },
@@ -81,9 +81,9 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 { label: '72 hours', value: 4320 },
                 { label: 'weekly (every 7 days)', value: 10080 },
                 { label: 'monthly (every 30 days)', value: 43200 }
-                ];
-        }
-        }])
+            ];
+        };
+    }])
     
     .factory('ViewUpdateStatus', [ 'Rest', 'ProcessErrors', 'GetBasePath', 'ShowUpdateStatus', 'Alert', 'Wait', 'Empty', 'Find',
     function(Rest, ProcessErrors, GetBasePath, ShowUpdateStatus, Alert, Wait, Empty, Find) {
@@ -703,7 +703,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                                     scope.source_vars = "---";
                                 }
                                 else {
-                                    var json_obj = JSON.parse(data.extra_vars);
+                                    var json_obj = JSON.parse(data.source_vars);
                                     scope.source_vars = jsyaml.safeDump(json_obj);
                                 }
                                 master.source_vars = scope.variables;
@@ -863,53 +863,53 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
         if (scope.removeFormSaveSuccess) {
             scope.removeFormSaveSuccess();
         }
-        scope.removeFormSaveSuccess = scope.$on('formSaveSuccess', function(e, group_id) {
+        scope.removeFormSaveSuccess = scope.$on('formSaveSuccess', function(e) {
             
             // Source data gets stored separately from the group. Validate and store Source
             // related fields, then call SaveComplete to wrap things up.
 
-            var parseError = false;
-            var saveError = false;
-            
-            var data = { group: group_id, 
-                source: ( (source && source.value) ? source.value : '' ),
-                source_path: scope['source_path'],
-                credential: scope['credential'],
-                overwrite: scope['overwrite'],
-                overwrite_vars: scope['overwrite_vars'],
-                update_on_launch: scope['update_on_launch']
-                //update_interval: scope['update_interval'].value
+            var parseError = false,
+                saveError = false,
+                regions, r, i,
+                
+                data = { group: group_id, 
+                    source: ( (scope.source && scope.source.value) ? scope.source.value : '' ),
+                    source_path: scope['source_path'],
+                    credential: scope['credential'],
+                    overwrite: scope['overwrite'],
+                    overwrite_vars: scope['overwrite_vars'],
+                    update_on_launch: scope['update_on_launch']
                 };
 
             // Create a string out of selected list of regions
-            var regions = $('#s2id_group_source_regions').select2("data");
-            var r = [];
-            for (var i=0; i < regions.length; i++) {
+            regions = $('#s2id_group_source_regions').select2("data");
+            r = [];
+            for (i=0; i < regions.length; i++) {
                 r.push(regions[i].id);
             }
             data['source_regions'] = r.join();
             
-            if (scope['source'] && scope['source'].value == 'ec2') {
+            if (scope.source && scope.source.value == 'ec2') {
                 // for ec2, validate variable data
                 try {
                      if (scope.envParseType == 'json') {
-                        var json_data = JSON.parse(scope.source_vars);  //make sure JSON parses
+                         var json_data = JSON.parse(scope.source_vars);  //make sure JSON parses
                      }
                      else {
-                        var json_data = jsyaml.load(scope.source_vars);  //parse yaml
+                         var json_data = jsyaml.load(scope.source_vars);  //parse yaml
                      }
                     
                      // Make sure our JSON is actually an object
                      if (typeof json_data !== 'object') {
-                        throw "failed to return an object!";
+                         throw "failed to return an object!";
                      }
                      
                      // Send JSON as a string
                      if ($.isEmptyObject(json_data)) {
-                        data.source_vars = "";
+                         data.source_vars = "";
                      }
                      else {
-                        data.source_vars = JSON.stringify(json_data, undefined, '\t'); 
+                         data.source_vars = JSON.stringify(json_data); 
                      }
                 }
                 catch(err) {
@@ -970,12 +970,13 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                 Rest.setUrl(defaultUrl);
                 Rest.put(data)
                     .success( function(data, status, headers, config) {
+                        var group = data.id;
                         if (scope.variables) {
                             //update group variables
                             Rest.setUrl(scope.variable_url);
                             Rest.put(json_data)
                                 .success( function(data, status, headers, config) {
-                                    scope.$emit('formSaveSuccess', data.id);
+                                    scope.$emit('formSaveSuccess');
                                     })
                                 .error( function(data, status, headers, config) {
                                     ProcessErrors(scope, data, status, form,
@@ -983,7 +984,7 @@ angular.module('GroupsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', '
                                     });
                         }
                         else {
-                            scope.$emit('formSaveSuccess', data.id);
+                            scope.$emit('formSaveSuccess');
                         }
                         })
                     .error( function(data, status, headers, config) {
