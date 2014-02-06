@@ -262,10 +262,12 @@ class InventoryAccess(BaseAccess):
         has_user_perms = qs.filter(
             permissions__user__in=[self.user],
             permissions__permission_type__in=allowed,
+            permissions__active=True,
         ).distinct()
         has_team_perms = qs.filter(
             permissions__team__users__in=[self.user],
             permissions__permission_type__in=allowed,
+            permissions__active=True,
         ).distinct()
         return admin_of | has_user_perms | has_team_perms
 
@@ -640,8 +642,8 @@ class ProjectAccess(BaseAccess):
             Q(organizations__admins__in=[self.user]) |
             Q(organizations__users__in=[self.user]) |
             Q(teams__users__in=[self.user]) |
-            Q(permissions__user=self.user, permissions__permission_type__in=allowed) |
-            Q(permissions__team__users__in=[self.user], permissions__permission_type__in=allowed)
+            Q(permissions__user=self.user, permissions__permission_type__in=allowed, permissions__active=True) |
+            Q(permissions__team__users__in=[self.user], permissions__permission_type__in=allowed, permissions__active=True)
         )
 
     def can_add(self, data):
@@ -810,6 +812,8 @@ class JobTemplateAccess(BaseAccess):
             Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
             inventory__permissions__permission_type__in=allowed,
             project__permissions__permission_type__in=allowed,
+            inventory__permissions__active=True,
+            project__permissions__active=True,
             inventory__permissions__pk=F('project__permissions__pk'),
         )
         # FIXME: I *think* this should work... needs more testing.
@@ -914,6 +918,8 @@ class JobAccess(BaseAccess):
             Q(project__permissions__user=self.user) | Q(project__permissions__team__users__in=[self.user]),
             inventory__permissions__permission_type__in=allowed,
             project__permissions__permission_type__in=allowed,
+            inventory__permissions__active=True,
+            project__permissions__active=True,
             inventory__permissions__pk=F('project__permissions__pk'),
         )
         # FIXME: I *think* this should work... needs more testing.
