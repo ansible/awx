@@ -24,7 +24,7 @@ from django.contrib.auth.models import User
 
 # AWX
 from awx.main.models import *
-from awx.main.signals import ignore_inventory_computed_fields
+from awx.main.signals import ignore_inventory_computed_fields, disable_activity_stream
 from awx.main.licenses import LicenseReader
 
 logger = logging.getLogger('awx.main.commands.inventory_import')
@@ -755,7 +755,11 @@ class Command(NoArgsCommand):
 
             # Merge/overwrite inventory into database.
             with ignore_inventory_computed_fields():
-                self.load_into_database()
+                if getattr(settings, 'ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC', True):
+                    self.load_into_database()
+                else:
+                    with disable_activity_stream():
+                        self.load_into_database()
                 self.inventory.update_computed_fields()
             self.check_license()
  

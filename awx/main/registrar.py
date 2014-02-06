@@ -3,6 +3,7 @@
 
 import logging
 
+from django.conf import settings
 from django.db.models.signals import pre_save, post_save, post_delete, m2m_changed
 
 logger = logging.getLogger('awx.main.registrar')
@@ -13,6 +14,8 @@ class ActivityStreamRegistrar(object):
         self.models = []
 
     def connect(self, model):
+        if not getattr(settings, 'ACTIVITY_STREAM_ENABLED', True):
+            return
         from awx.main.signals import activity_stream_create, activity_stream_update, activity_stream_delete, activity_stream_associate
         
         #(receiver, sender=model, dispatch_uid=self._dispatch_uid(signal, model))

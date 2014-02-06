@@ -43,6 +43,9 @@ ALLOWED_HOSTS = ['*']
 AWX_TASK_ENV['HOME'] = '/var/lib/awx'
 AWX_TASK_ENV['USER'] = 'awx'
 
+ACTIVITY_STREAM_ENABLED = True
+ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = True
+
 ###############################################################################
 # EMAIL SETTINGS
 ###############################################################################

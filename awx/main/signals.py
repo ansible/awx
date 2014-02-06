@@ -8,6 +8,7 @@ import threading
 import json
 
 # Django
+from django.conf import settings
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, m2m_changed
 from django.dispatch import receiver
 
@@ -239,6 +240,27 @@ def update_host_last_job_after_job_deleted(sender, **kwargs):
 
 # Set via ActivityStreamRegistrar to record activity stream events
 
+class ActivityStreamEnabled(threading.local):
+    def __init__(self):
+        self.enabled = getattr(settings, 'ACTIVITY_STREAM_ENABLED', True)
+    def __nonzero__(self):
+        return bool(self.enabled)
+
+activity_stream_enabled = ActivityStreamEnabled()
+
+@contextlib.contextmanager
+def disable_activity_stream():
+    '''
+    Context manager to disable capturing activity stream changes.
+    '''
+    try:
+        previous_value = activity_stream_enabled.enabled
+        activity_stream_enabled.enabled = False
+        yield
+    finally:
+        activity_stream_enabled.enabled = previous_value
+
+
 model_serializer_mapping = {Organization: OrganizationSerializer,
                             Inventory: InventorySerializer,
                             Host: HostSerializer,
@@ -252,7 +274,7 @@ model_serializer_mapping = {Organization: OrganizationSerializer,
                             Job: JobSerializer}
 
 def activity_stream_create(sender, instance, created, **kwargs):
-    if created:
+    if created and activity_stream_enabled:
         # Skip recording any inventory source directly associated with a group.
         if isinstance(instance, InventorySource) and instance.group:
             return
@@ -267,6 +289,8 @@ def activity_stream_create(sender, instance, created, **kwargs):
 
 def activity_stream_update(sender, instance, **kwargs):
     if instance.id is None:
+        return
+    if not activity_stream_enabled:
         return
     try:
         old = sender.objects.get(id=instance.id)
@@ -291,6 +315,8 @@ def activity_stream_update(sender, instance, **kwargs):
     getattr(activity_entry, object1).add(instance)
 
 def activity_stream_delete(sender, instance, **kwargs):
+    if not activity_stream_enabled:
+        return
     try:
         old = sender.objects.get(id=instance.id)
     except sender.DoesNotExist:
@@ -307,6 +333,8 @@ def activity_stream_delete(sender, instance, **kwargs):
     activity_entry.save()
 
 def activity_stream_associate(sender, instance, **kwargs):
+    if not activity_stream_enabled:
+        return
     if 'pre_add' in kwargs['action'] or 'pre_remove' in kwargs['action']:
         if kwargs['action'] == 'pre_add':
             action = 'associate'

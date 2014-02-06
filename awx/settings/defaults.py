@@ -335,6 +335,10 @@ EC2_REGIONS_BLACKLIST = [
     'cn-north-1',
 ]
 
+# Defaults for enabling/disabling activity stream.
+ACTIVITY_STREAM_ENABLED = True
+ACTIVITY_STREAM_ENABLED_FOR_INVENTORY_SYNC = True
+
 # Internal API URL for use by inventory scripts and callback plugin.
 if 'devserver' in INSTALLED_APPS:
     INTERNAL_API_URL = 'http://127.0.0.1:%s' % DEVSERVER_DEFAULT_PORT
