@@ -252,10 +252,8 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
 
             if (attrs.tipWatch) {
                 // Add dataTipWatch: 'variable_name'
-                console.log('adding watch');
                 scope.$watch(attrs.tipWatch, function(newVal, oldVal) {
                     if (newVal !== oldVal) {
-                        console.log('switch');
                         // Where did fixTitle come frome?:
                         //   http://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
                         $(element).tooltip('hide').attr('data-original-title', newVal).tooltip('fixTitle');
@@ -293,7 +291,12 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     // remove lingering popover <div>. Seems to be a bug in TB3 RC1
                     $(this).remove();
                 });
-                $(this).tooltip('hide'); // hide a tooltip, if there is one associated with the element
+                
+                $('.tooltip').each( function() {
+                    // close any lingering tool tipss
+                    $(this).hide();
+                });
+
                 $(this).popover('toggle');
 
                 $('.popover').each(function() {

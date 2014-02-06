@@ -100,7 +100,9 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                         job = jobs[j];
                         html += "<tr>\n";
                         html += "<td><a href=\"/#/jobs/" + job.id + "\">" + job.id + "</a></td>\n";
-                        html += "<td class=\"text-center\"><a ng-click=\"showJobSummary(" + job.id + ")\"><i class=\"fa icon-job-" +
+                        html += "<td class=\"text-center\"><a ng-click=\"showJobSummary(" + job.id + ")\" " +
+                            "aw-tool-tip=\"" + job.status.charAt(0).toUpperCase() + job.status.slice(1) +
+                            ". Click for details\" data-placement=\"top\"><i class=\"fa icon-job-" +
                             job.status + "\"></i></a></td>\n";
                         html += "<td><a href=\"/#/jobs/" + job.id + "/job_events/?host=" + encodeURI(host.name) + "\">Events</a> " +
                             "<a href=\"/#/jobs/" + job.id + "/job_host_summaries/?host_name=" + encodeURI(host.name) + "\">Hosts</a></td>\n";
