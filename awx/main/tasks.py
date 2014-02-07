@@ -379,7 +379,9 @@ class RunJob(BaseTask):
         env['REST_API_TOKEN'] = job.task_auth_token or ''
         if settings.BROKER_URL.startswith('amqp://'):
             env['BROKER_URL'] = settings.BROKER_URL
-        if settings.DEBUG:
+        if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
+            env['JOB_CALLBACK_DEBUG'] = '2'
+        elif settings.DEBUG:
             env['JOB_CALLBACK_DEBUG'] = '1'
 
         # When using Ansible >= 1.3, allow the inventory script to include host
