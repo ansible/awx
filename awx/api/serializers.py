@@ -938,7 +938,7 @@ class JobTemplateSerializer(BaseSerializer):
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         if obj.project and obj.project.active:
-            res['project'] = reverse('api:project_detail', args=(obj.project.pk,)),
+            res['project'] = reverse('api:project_detail', args=(obj.project.pk,))
         if obj.credential and obj.credential.active:
             res['credential'] = reverse('api:credential_detail', args=(obj.credential.pk,))
         if obj.cloud_credential and obj.cloud_credential.active:
