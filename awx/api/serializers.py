@@ -373,7 +373,7 @@ class ProjectSerializer(BaseSerializer):
 
     def to_native(self, obj):
         ret = super(ProjectSerializer, self).to_native(obj)
-        if 'credential' in ret and (not obj.credential or not obj.credential.active):
+        if obj is not None and 'credential' in ret and (not obj.credential or not obj.credential.active):
             ret['credential'] = None
         return ret
 
@@ -455,7 +455,7 @@ class InventorySerializer(BaseSerializerWithVariables):
 
     def to_native(self, obj):
         ret = super(InventorySerializer, self).to_native(obj)
-        if 'organization' in ret and (not obj.organization or not obj.organization.active):
+        if obj is not None and 'organization' in ret and (not obj.organization or not obj.organization.active):
             ret['organization'] = None
         return ret
 
@@ -566,6 +566,8 @@ class HostSerializer(BaseSerializerWithVariables):
 
     def to_native(self, obj):
         ret = super(HostSerializer, self).to_native(obj)
+        if not obj:
+            return ret
         if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
             ret['inventory'] = None
         if 'last_job' in ret and (not obj.last_job or not obj.last_job.active):
@@ -613,7 +615,7 @@ class GroupSerializer(BaseSerializerWithVariables):
 
     def to_native(self, obj):
         ret = super(GroupSerializer, self).to_native(obj)
-        if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
+        if obj is not None and 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
             ret['inventory'] = None
         return ret
 
@@ -753,6 +755,8 @@ class InventorySourceSerializer(BaseSerializer):
 
     def to_native(self, obj):
         ret = super(InventorySourceSerializer, self).to_native(obj)
+        if obj is None:
+            return ret
         if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
             ret['inventory'] = None
         if 'group' in ret and (not obj.group or not obj.group.active):
@@ -807,7 +811,7 @@ class TeamSerializer(BaseSerializer):
 
     def to_native(self, obj):
         ret = super(TeamSerializer, self).to_native(obj)
-        if 'organization' in ret and (not obj.organization or not obj.organization.active):
+        if obj is not None and 'organization' in ret and (not obj.organization or not obj.organization.active):
             ret['organization'] = None
         return ret
 
@@ -850,6 +854,8 @@ class PermissionSerializer(BaseSerializer):
 
     def to_native(self, obj):
         ret = super(PermissionSerializer, self).to_native(obj)
+        if obj is None:
+            return ret
         if 'user' in ret and (not obj.user or not obj.user.is_active):
             ret['user'] = None
         if 'team' in ret and (not obj.team or not obj.team.active):
@@ -878,9 +884,9 @@ class CredentialSerializer(BaseSerializer):
 
     def to_native(self, obj):
         ret = super(CredentialSerializer, self).to_native(obj)
-        if 'user' in ret and (not obj.user or not obj.user.is_active):
+        if obj is not None and 'user' in ret and (not obj.user or not obj.user.is_active):
             ret['user'] = None
-        if 'team' in ret and (not obj.team or not obj.team.active):
+        if obj is not None and 'team' in ret and (not obj.team or not obj.team.active):
             ret['team'] = None
         # Replace the actual encrypted value with the string $encrypted$.
         for field in Credential.PASSWORD_FIELDS:
@@ -927,6 +933,8 @@ class JobTemplateSerializer(BaseSerializer):
             jobs = reverse('api:job_template_jobs_list', args=(obj.pk,)),
             activity_stream = reverse('api:job_template_activity_stream_list', args=(obj.pk,)),
         ))
+        if obj is None:
+            return ret
         if obj.inventory and obj.inventory.active:
             res['inventory'] = reverse('api:inventory_detail', args=(obj.inventory.pk,))
         if obj.project and obj.project.active:
@@ -942,6 +950,8 @@ class JobTemplateSerializer(BaseSerializer):
 
     def to_native(self, obj):
         ret = super(JobTemplateSerializer, self).to_native(obj)
+        if obj is None:
+            return ret
         if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
             ret['inventory'] = None
         if 'project' in ret and (not obj.project or not obj.project.active):
@@ -1036,6 +1046,8 @@ class JobSerializer(BaseTaskSerializer):
 
     def to_native(self, obj):
         ret = super(JobSerializer, self).to_native(obj)
+        if obj is None:
+            return ret
         if 'job_template' in ret and (not obj.job_template or not obj.job_template.active):
             ret['job_template'] = None
         if 'inventory' in ret and (not obj.inventory or not obj.inventory.active):
