@@ -192,10 +192,10 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities','RefreshRelat
            else {
               scope[iterator + 'SearchParams'] = (sort_order) ? 'order_by=' + escape(sort_order) : '';
            }
-           scope[iterator + 'Page'] = 0;
+           scope[iterator + '_page'] = 1;
            url += (url.match(/\/$/)) ? '?' : '&';
            url += scope[iterator + 'SearchParams'];
-           url += (scope[iterator + 'PageSize']) ? '&page_size=' + scope[iterator + 'PageSize'] : "";
+           url += (scope[iterator + '_page_size']) ? '&page_size=' + scope[iterator + '_page_size'] : "";
            RefreshRelated({ scope: scope, set: set, iterator: iterator, url: url });
            }
 
