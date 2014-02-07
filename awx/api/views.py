@@ -1132,7 +1132,7 @@ class JobTemplateCallback(GenericAPIView):
 class JobTemplateJobsList(SubListCreateAPIView):
 
     model = Job
-    serializer_class = JobSerializer
+    serializer_class = JobListSerializer
     parent_model = JobTemplate
     relationship = 'jobs'
     parent_key = 'job_template'
@@ -1140,7 +1140,7 @@ class JobTemplateJobsList(SubListCreateAPIView):
 class JobList(ListCreateAPIView):
 
     model = Job
-    serializer_class = JobSerializer
+    serializer_class = JobListSerializer
 
 class JobDetail(RetrieveUpdateDestroyAPIView):
 

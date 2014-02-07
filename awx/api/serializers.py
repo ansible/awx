@@ -1063,6 +1063,19 @@ class JobSerializer(BaseTaskSerializer):
         return ret
 
 
+class JobListSerializer(JobSerializer):
+
+    class Meta:
+        model = Job
+        fields = ('id', 'url', 'related', 'summary_fields', 'created',
+                  'modified', 'job_template', 'job_type', 'inventory',
+                  'project', 'playbook', 'credential', 'cloud_credential',
+                  'forks', 'limit', 'verbosity', 'extra_vars',
+                  'job_tags', 'launch_type', 'status', 'failed',
+                  'result_traceback', 'passwords_needed_to_start', 'job_args',
+                  'job_cwd', 'job_env')
+
+
 class JobHostSummarySerializer(BaseSerializer):
 
     class Meta:
