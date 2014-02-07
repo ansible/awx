@@ -604,6 +604,7 @@ class ProjectsTest(BaseTest):
         url = reverse('api:user_permissions_list', args=(user.pk,))
         posted = self.post(url, user_permission, expect=201, auth=self.get_super_credentials())
         url2 = posted['url']
+        user_perm_detail = posted['url']
         got = self.get(url2, expect=200, auth=self.get_other_credentials())
 
         # cannot add permissions that apply to both team and user
@@ -658,7 +659,16 @@ class ProjectsTest(BaseTest):
         # do need to disassociate, just delete it
         self.delete(url2, expect=403, auth=self.get_other_credentials())
         self.delete(url2, expect=204, auth=self.get_super_credentials())
+        self.delete(user_perm_detail, expect=204, auth=self.get_super_credentials())
         self.delete(url2, expect=404, auth=self.get_other_credentials())
+
+        # User is still a team member
+        self.get(reverse('api:project_detail', args=(project.pk,)), expect=200, auth=self.get_other_credentials())
+
+        team.users.remove(self.other_django_user)
+
+        # User is no longer a team member and has no permissions
+        self.get(reverse('api:project_detail', args=(project.pk,)), expect=403, auth=self.get_other_credentials())
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,

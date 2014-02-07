@@ -243,6 +243,28 @@ class InventoryTest(BaseTest):
         self.assertFalse(self.inventory_b.hosts.filter(active=True).count())
         self.assertFalse(self.inventory_b.groups.filter(active=True).count())
 
+    def test_inventory_access_deleted_permissions(self):
+        temp_org = self.make_organizations(self.super_django_user, 1)[0]
+        temp_org.admins.add(self.normal_django_user)
+        temp_org.users.add(self.other_django_user)
+        temp_org.users.add(self.normal_django_user)
+        temp_inv = temp_org.inventories.create(name='Delete Org Inventory')
+        temp_group1 = temp_inv.groups.create(name='Delete Org Inventory Group')
+
+        temp_perm_read = Permission.objects.create(
+            inventory       = temp_inv,
+            user            = self.other_django_user,
+            permission_type = 'read'
+        )
+
+        org_detail = reverse('api:organization_detail', args=(temp_org.pk,))
+        inventory_detail = reverse('api:inventory_detail', args=(temp_inv.pk,))
+        permission_detail = reverse('api:permission_detail', args=(temp_perm_read.pk,))
+
+        self.get(inventory_detail, expect=200, auth=self.get_other_credentials())
+        self.delete(permission_detail, expect=204, auth=self.get_super_credentials())
+        self.get(inventory_detail, expect=403, auth=self.get_other_credentials())
+
     def test_main_line(self):
        
         # some basic URLs... 
