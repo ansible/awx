@@ -71,7 +71,6 @@ angular.module('PaginationHelpers', ['Utilities', 'RefreshHelper', 'RefreshRelat
               scope[relatedSets[key].iterator + '_page'] = 1;
               scope[relatedSets[key].iterator + '_page_size'] = pageSize;
             }
-            console.log('setting ' + relatedSets[key].iterator + ' page_size: ' + pageSize);
         }
 
         scope.getPage = function(page, set, iterator) {
