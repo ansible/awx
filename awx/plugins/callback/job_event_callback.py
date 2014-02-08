@@ -51,6 +51,13 @@ except ImportError:
     import requests
     from kombu import Connection, Exchange, Queue
 
+# Check to see if librabbitmq is installed.
+try:
+    import librabbitmq
+    LIBRABBITMQ_INSTALLED = True
+except ImportError:
+    LIBRABBITMQ_INSTALLED = False
+
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -88,6 +95,12 @@ class CallbackModule(object):
         self.auth_token = os.getenv('REST_API_TOKEN', '')
         self.broker_url = os.getenv('BROKER_URL', '')
         self._init_logging()
+        # Since we don't yet have a way to confirm publish when using
+        # librabbitmq, ensure we use pyamqp even if librabbitmq happens to be
+        # installed.
+        if LIBRABBITMQ_INSTALLED:
+            self.logger.info('Forcing use of pyamqp instead of librabbitmq')
+            self.broker_url = self.broker_url.replace('amqp://', 'pyamqp://')
 
     def _init_logging(self):
         try:
