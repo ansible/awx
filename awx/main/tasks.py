@@ -547,7 +547,7 @@ class SaveJobEvents(Task):
                 data['created'] = data['created'].replace(tzinfo=FixedOffset(0))
         except (KeyError, ValueError):
             data.pop('created', None)
-        if 0 and settings.DEBUG:
+        if settings.DEBUG:
             print data
         for key in data.keys():
             if key not in ('job_id', 'event', 'event_data', 'created'):
@@ -568,7 +568,7 @@ class SaveJobEvents(Task):
                             transaction.commit()
                     else:
                         duplicate = True
-                        if 0 and settings.DEBUG:
+                        if settings.DEBUG:
                             print 'skipping duplicate job event %r' % data
                     break
                 except DatabaseError as e:
@@ -580,7 +580,7 @@ class SaveJobEvents(Task):
                 events_received[event] = 1
             else:
                 events_received[event] += 1
-            if 0 and settings.DEBUG:
+            if settings.DEBUG:
                 print 'saved job event in %0.3fs' % (time.time() - begints)
         message.ack()
 
