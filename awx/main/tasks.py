@@ -94,7 +94,7 @@ class BaseTask(Task):
         # Commit outstanding transaction so that we fetch the latest object
         # from the database.
         transaction.commit()
-        while True:
+        for retry_count in xrange(5):
             try:
                 instance = self.model.objects.get(pk=pk)
                 if updates:
@@ -109,12 +109,16 @@ class BaseTask(Task):
                             update_fields.append('failed')
                     instance.save(update_fields=update_fields)
                     transaction.commit()
-                break
+                return instance
             except DatabaseError as e:
                 transaction.rollback()
-                logger.debug("Database error encountered, retrying in 5 seconds: " + str(e))
+                logger.debug('Database error updating %s, retrying in 5 '
+                             'seconds (retry #%d): %s',
+                             self.model._meta.object_name, retry_count + 1, e)
                 time.sleep(5)
-        return instance
+        else:
+            logger.error('Failed to update %s after %d retries.',
+                         self.model._meta.object_name, retry_count)
 
     def get_model(self, pk):
         return self.model.objects.get(pk=pk)
@@ -556,7 +560,7 @@ class SaveJobEvents(Task):
         data['task'] = data.get('event_data', {}).get('task', '').strip()
         duplicate = False
         if event != '__complete__':
-            while True:
+            for retry_count in xrange(11):
                 try:
                     # Commit any outstanding events before saving stats.
                     if event == 'playbook_on_stats':
@@ -573,8 +577,12 @@ class SaveJobEvents(Task):
                     break
                 except DatabaseError as e:
                     transaction.rollback()
-                    logger.debug("Database error encountered, retrying in 1 second: " + str(e))
+                    logger.debug('Database error saving job event, retrying in '
+                                 '1 second (retry #%d): %s', retry_count + 1, e)
                     time.sleep(1)
+            else:
+                logger.error('Failed to save job event after %d retries.',
+                             retry_count)
         if not duplicate:
             if event not in events_received:
                 events_received[event] = 1

@@ -161,8 +161,7 @@ class CallbackModule(object):
             msg.update({
                 'pid': os.getpid(),
             })
-        retry_count = 0
-        while True:
+        for retry_count in xrange(4):
             try:
                 if not hasattr(self, 'connection_pid'):
                     self.connection_pid = os.getpid()
@@ -170,14 +169,16 @@ class CallbackModule(object):
                     self._cleanup_connection()
                 if not hasattr(self, 'connection'):
                     self.connection = Connection(self.broker_url, transport_options={'confirm_publish': True})
-                    self.logger.debug('New Connection: %r, retry=%d', self.connection, retry_count)
+                    self.logger.debug('New Connection: %r, retry=%d',
+                                      self.connection, retry_count)
                 if not hasattr(self, 'producer'):
                     channel = self.connection.channel()
                     self.producer = self.connection.Producer(channel, exchange=self.job_events_exchange, serializer='json')
                     self.publish = self.connection.ensure(self.producer, self.producer.publish,
                                                           errback=self._publish_errback,
                                                           max_retries=3, interval_start=1, interval_step=1, interval_max=10)
-                    self.logger.debug('New Producer: %r, retry=%d', self.producer, retry_count)
+                    self.logger.debug('New Producer: %r, retry=%d',
+                                      self.producer, retry_count)
                 self.logger.debug('Publish: %r, retry=%d', msg, retry_count)
                 self.publish(msg, exchange=self.job_events_exchange,
                              routing_key=('job_events[%d]' % self.job_id),
@@ -186,12 +187,11 @@ class CallbackModule(object):
                     self._cleanup_connection()
                 return
             except Exception, e:
-                self.logger.info('Publish Exception: %r, retry=%d', e, retry_count, exc_info=True)
-                if retry_count < 3:
-                    self._cleanup_connection()
-                else:
+                self.logger.info('Publish Exception: %r, retry=%d', e,
+                                 retry_count, exc_info=True)
+                self._cleanup_connection()
+                if retry_count >= 3:
                     raise
-            retry_count += 1
 
     def _post_rest_api_event(self, event, event_data):
         data = json.dumps({
