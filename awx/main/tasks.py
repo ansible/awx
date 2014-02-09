@@ -294,7 +294,14 @@ class BaseTask(Task):
         output_replacements = []
         try:
             if not self.pre_run_check(instance, **kwargs):
-                return
+                if hasattr(settings, 'CELERY_UNIT_TEST'):
+                    return
+                else:
+                    # Stop the task chain and prevent starting the job if it has
+                    # already been canceled.
+                    instance = self.update_model(pk)
+                    status = instance.status
+                    raise RuntimeError('not starting %s task' % instance.status)
             instance = self.update_model(pk, status='running')
             kwargs['private_data_file'] = self.build_private_data_file(instance, **kwargs)
             kwargs['passwords'] = self.build_passwords(instance, **kwargs)
@@ -312,7 +319,8 @@ class BaseTask(Task):
                                          job_cwd=cwd, job_env=safe_env, result_stdout_file=stdout_filename)
             status, stdout = self.run_pexpect(instance, args, cwd, env, kwargs['passwords'], stdout_handle)
         except Exception:
-            tb = traceback.format_exc()
+            if status != 'canceled':
+                tb = traceback.format_exc()
         finally:
             if kwargs.get('private_data_file', ''):
                 try:
@@ -330,7 +338,10 @@ class BaseTask(Task):
         if status != 'successful' and not hasattr(settings, 'CELERY_UNIT_TEST'):
             # Raising an exception will mark the job as 'failed' in celery
             # and will stop a task chain from continuing to execute
-            raise Exception("Task %s(pk:%s) encountered an error" % (str(self.model.__class__), str(pk)))
+            if status == 'canceled':
+                raise Exception("Task %s(pk:%s) was canceled" % (str(self.model.__class__), str(pk)))
+            else:
+                raise Exception("Task %s(pk:%s) encountered an error" % (str(self.model.__class__), str(pk)))
 
 class RunJob(BaseTask):
     '''
@@ -477,7 +488,10 @@ class RunJob(BaseTask):
         '''
         Hook for checking job before running.
         '''
-        if job.status in ('pending', 'waiting'):
+        if job.cancel_flag:
+            job = self.update_model(job.pk, status='canceled')
+            return False
+        elif job.status in ('pending', 'waiting'):
             job = self.update_model(job.pk, status='pending')
             # Start another task to process job events.
             if settings.BROKER_URL.startswith('amqp://'):
@@ -486,9 +500,6 @@ class RunJob(BaseTask):
                     'job_id': job.id,
                 }, serializer='json')
             return True
-        elif job.cancel_flag:
-            job = self.update_model(job.pk, status='canceled')
-            return False
         else:
             return False
 

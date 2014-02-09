@@ -11,6 +11,7 @@ import os.path
 import yaml
 
 # Django
+from django.conf import settings
 from django.db import models
 from django.db import transaction
 from django.core.exceptions import ValidationError
@@ -405,10 +406,47 @@ class CommonTask(PrimordialModel):
     def can_cancel(self):
         return bool(self.status in ('pending', 'waiting', 'running'))
 
+    def _force_cancel(self):
+        # Update the status to 'canceled' if we can detect that the job
+        # really isn't running (i.e. celery has crashed or forcefully
+        # killed the worker).
+        task_statuses = ('STARTED', 'SUCCESS', 'FAILED', 'RETRY', 'REVOKED')
+        try:
+            taskmeta = self.celery_task
+            if not taskmeta or taskmeta.status not in task_statuses:
+                return
+            from celery import current_app
+            i = current_app.control.inspect()
+            for v in (i.active() or {}).values():
+                if taskmeta.task_id in [x['id'] for x in v]:
+                    return
+            for v in (i.reserved() or {}).values():
+                if taskmeta.task_id in [x['id'] for x in v]:
+                    return
+            for v in (i.revoked() or {}).values():
+                if taskmeta.task_id in [x['id'] for x in v]:
+                    return
+            for v in (i.scheduled() or {}).values():
+                if taskmeta.task_id in [x['id'] for x in v]:
+                    return
+            instance = self.__class__.objects.get(pk=self.pk)
+            if instance.can_cancel:
+                instance.status = 'canceled'
+                update_fields = ['status']
+                if not instance.result_traceback:
+                    instance.result_traceback = 'Forced cancel'
+                    update_fields.append('result_traceback')
+                instance.save(update_fields=update_fields)
+        except: # FIXME: Log this exception!
+            if settings.DEBUG:
+                raise
+
     def cancel(self):
-        # FIXME: Force cancel!
         if self.can_cancel:
             if not self.cancel_flag:
                 self.cancel_flag = True
                 self.save(update_fields=['cancel_flag'])
+            if settings.BROKER_URL.startswith('amqp://'):
+                self._force_cancel()
         return self.cancel_flag
+
