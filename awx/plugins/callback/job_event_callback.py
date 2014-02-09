@@ -147,9 +147,10 @@ class CallbackModule(object):
             self.job_events_exchange = Exchange('job_events', 'direct',
                                                 durable=True)
         if not hasattr(self, 'job_events_queue'):
-            self.job_events_queue = Queue('job_events',
+            self.job_events_queue = Queue('job_events[%d]' % self.job_id,
                                           exchange=self.job_events_exchange,
-                                          routing_key=('job_events[%d]' % self.job_id))
+                                          routing_key=('job_events[%d]' % self.job_id),
+                                          auto_delete=True)
         msg = {
             'job_id': self.job_id,
             'event': event,
