@@ -38,26 +38,10 @@ import sys
 import urllib
 import urlparse
 
-# Requests / Kombu
-try:
-    import requests
-    from kombu import Connection, Exchange, Queue
-except ImportError:
-    # If running from an AWX installation, use the local version of requests if
-    # if cannot be found globally.
-    local_site_packages = os.path.join(os.path.dirname(__file__), '..', '..',
-                                       'lib', 'site-packages')
-    sys.path.insert(0, local_site_packages)
-    import requests
-    from kombu import Connection, Exchange, Queue
+import requests
 
-# Check to see if librabbitmq is installed.
-try:
-    import librabbitmq
-    LIBRABBITMQ_INSTALLED = True
-except ImportError:
-    LIBRABBITMQ_INSTALLED = False
-
+# ZeroMQ
+import zmq
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -93,14 +77,11 @@ class CallbackModule(object):
         self.job_id = int(os.getenv('JOB_ID'))
         self.base_url = os.getenv('REST_API_URL', '')
         self.auth_token = os.getenv('REST_API_TOKEN', '')
-        self.broker_url = os.getenv('BROKER_URL', '')
+        self.context = None
+        self.socket = None
+        self.broker_url = True # TODO: Figure this out for unit tests
         self._init_logging()
-        # Since we don't yet have a way to confirm publish when using
-        # librabbitmq, ensure we use pyamqp even if librabbitmq happens to be
-        # installed.
-        if LIBRABBITMQ_INSTALLED:
-            self.logger.info('Forcing use of pyamqp instead of librabbitmq')
-            self.broker_url = self.broker_url.replace('amqp://', 'pyamqp://')
+        self._init_connection()
 
     def _init_logging(self):
         try:
@@ -120,37 +101,12 @@ class CallbackModule(object):
         self.logger.addHandler(handler)
         self.logger.propagate = False
 
-    def __del__(self):
-        self._cleanup_connection()
-
-    def _publish_errback(self, exc, interval):
-        self.logger.info('Publish Error: %r', exc)
-
-    def _cleanup_connection(self):
-        if hasattr(self, 'producer'):
-            try:
-                #self.logger.debug('Cleanup Producer: %r', self.producer)
-                self.producer.cancel()
-            except:
-                pass
-            del self.producer
-        if hasattr(self, 'connection'):
-            try:
-                #self.logger.debug('Cleanup Connection: %r', self.connection)
-                self.connection.release()
-            except:
-                pass
-            del self.connection
+    def _init_connection(self):
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.REQ)
+        self.socket.connect("tcp://127.0.0.1:5556")
 
     def _post_job_event_queue_msg(self, event, event_data):
-        if not hasattr(self, 'job_events_exchange'):
-            self.job_events_exchange = Exchange('job_events', 'direct',
-                                                durable=True)
-        if not hasattr(self, 'job_events_queue'):
-            self.job_events_queue = Queue('job_events[%d]' % self.job_id,
-                                          exchange=self.job_events_exchange,
-                                          routing_key=('job_events[%d]' % self.job_id),
-                                          auto_delete=True)
         msg = {
             'job_id': self.job_id,
             'event': event,
@@ -163,33 +119,15 @@ class CallbackModule(object):
             })
         for retry_count in xrange(4):
             try:
-                if not hasattr(self, 'connection_pid'):
-                    self.connection_pid = os.getpid()
-                if self.connection_pid != os.getpid():
-                    self._cleanup_connection()
-                if not hasattr(self, 'connection'):
-                    self.connection = Connection(self.broker_url, transport_options={'confirm_publish': True})
-                    self.logger.debug('New Connection: %r, retry=%d',
-                                      self.connection, retry_count)
-                if not hasattr(self, 'producer'):
-                    channel = self.connection.channel()
-                    self.producer = self.connection.Producer(channel, exchange=self.job_events_exchange, serializer='json')
-                    self.publish = self.connection.ensure(self.producer, self.producer.publish,
-                                                          errback=self._publish_errback,
-                                                          max_retries=3, interval_start=1, interval_step=1, interval_max=10)
-                    self.logger.debug('New Producer: %r, retry=%d',
-                                      self.producer, retry_count)
+                self.socket.send(json.dumps(msg))
                 self.logger.debug('Publish: %r, retry=%d', msg, retry_count)
-                self.publish(msg, exchange=self.job_events_exchange,
-                             routing_key=('job_events[%d]' % self.job_id),
-                             declare=[self.job_events_queue])
-                if event == 'playbook_on_stats':
-                    self._cleanup_connection()
+                reply = self.socket.recv()
+                print("Received reply: " + str(reply))
                 return
             except Exception, e:
                 self.logger.info('Publish Exception: %r, retry=%d', e,
                                  retry_count, exc_info=True)
-                self._cleanup_connection()
+                # TODO: Maybe recycle connection here?
                 if retry_count >= 3:
                     raise
 

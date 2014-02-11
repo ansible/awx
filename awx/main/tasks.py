@@ -494,11 +494,11 @@ class RunJob(BaseTask):
         elif job.status in ('pending', 'waiting'):
             job = self.update_model(job.pk, status='pending')
             # Start another task to process job events.
-            if settings.BROKER_URL.startswith('amqp://'):
-                app = Celery('tasks', broker=settings.BROKER_URL)
-                send_task('awx.main.tasks.save_job_events', kwargs={
-                    'job_id': job.id,
-                }, serializer='json')
+            # if settings.BROKER_URL.startswith('amqp://'):
+            #     app = Celery('tasks', broker=settings.BROKER_URL)
+            #     send_task('awx.main.tasks.save_job_events', kwargs={
+            #         'job_id': job.id,
+            #     }, serializer='json')
             return True
         else:
             return False
@@ -511,20 +511,21 @@ class RunJob(BaseTask):
         # Send a special message to this job's event queue after the job has run
         # to tell the save job events task to end.
         if settings.BROKER_URL.startswith('amqp://'):
-            job_events_exchange = Exchange('job_events', 'direct', durable=True)
-            job_events_queue = Queue('job_events[%d]' % job.id,
-                                     exchange=job_events_exchange,
-                                     routing_key=('job_events[%d]' % job.id),
-                                     auto_delete=True)
-            with Connection(settings.BROKER_URL, transport_options={'confirm_publish': True}) as conn:
-                with conn.Producer(serializer='json') as producer:
-                      msg = {
-                        'job_id': job.id,
-                        'event': '__complete__'
-                      }
-                      producer.publish(msg, exchange=job_events_exchange,
-                                       routing_key=('job_events[%d]' % job.id),
-                                       declare=[job_events_queue])
+            pass
+            # job_events_exchange = Exchange('job_events', 'direct', durable=True)
+            # job_events_queue = Queue('job_events[%d]' % job.id,
+            #                          exchange=job_events_exchange,
+            #                          routing_key=('job_events[%d]' % job.id),
+            #                          auto_delete=True)
+            # with Connection(settings.BROKER_URL, transport_options={'confirm_publish': True}) as conn:
+            #     with conn.Producer(serializer='json') as producer:
+            #           msg = {
+            #             'job_id': job.id,
+            #             'event': '__complete__'
+            #           }
+            #           producer.publish(msg, exchange=job_events_exchange,
+            #                            routing_key=('job_events[%d]' % job.id),
+            #                            declare=[job_events_queue])
 
         # Update job event fields after job has completed (only when using REST
         # API callback).
