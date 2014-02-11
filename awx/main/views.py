@@ -2,6 +2,7 @@
 # All Rights Reserved.
 
 # Django
+from django.conf import settings
 from django.shortcuts import render
 from django.template import RequestContext
 from django.utils.safestring import mark_safe
@@ -10,7 +11,7 @@ def handle_error(request, status=404, **kwargs):
     # FIXME: Should attempt to check HTTP Accept request header and return
     # plain JSON response instead of HTML (maybe only for /api/*).
     context = kwargs
-    if request.path.startswith('/admin/'):
+    if 'django.contrib.admin' in settings.INSTALLED_APPS and request.path.startswith('/admin/'):
         template_name = 'admin/error.html'
     else:
         # Return enough context to popuplate the base API template.
