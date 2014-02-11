@@ -1,12 +1,12 @@
-/************************************
+/*************************************************
  * Copyright (c) 2014 AnsibleWorks, Inc.
- *
  *
  *  Credentials.js
  *
  *  Controller functions for the Credential model.
  *
  */
+
 'use strict';
 
 function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, CredentialList,
@@ -114,10 +114,10 @@ function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest
             var url = defaultUrl + id + '/';
             Rest.setUrl(url);
             Rest.destroy()
-                .success(function (data, status, headers, config) {
+                .success(function () {
                     scope.search(list.iterator);
                 })
-                .error(function (data, status, headers, config) {
+                .error(function (data, status) {
                     Wait('stop');
                     ProcessErrors(scope, data, status, null, {
                         hdr: 'Error!',
@@ -143,7 +143,7 @@ CredentialsList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeP
 function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, CredentialForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
     GenerateList, SearchInit, PaginateInit, LookUpInit, UserList, TeamList, GetBasePath,
-    GetChoices, Empty, KindChange, OwnerChange, FormSave, DebugForm) {
+    GetChoices, Empty, KindChange, OwnerChange, FormSave) {
     ClearScope('tree-form');
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
     //scope.
@@ -152,7 +152,6 @@ function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routePar
     var form = CredentialForm,
         generator = GenerateForm,
         scope = generator.inject(form, { mode: 'add', related: false }),
-        base = $location.path().replace(/^\//, '').split('/')[0],
         defaultUrl = GetBasePath('credentials'),
         url;
     
@@ -193,10 +192,10 @@ function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routePar
         url = GetBasePath('users') + $routeParams.user_id + '/';
         Rest.setUrl(url);
         Rest.get()
-            .success(function (data, status, headers, config) {
+            .success(function (data) {
                 scope.user_username = data.username;
             })
-            .error(function (data, status, headers, config) {
+            .error(function (data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user. GET status: ' + status
                 });
             });
@@ -210,10 +209,10 @@ function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routePar
         url = GetBasePath('teams') + $routeParams.team_id + '/';
         Rest.setUrl(url);
         Rest.get()
-            .success(function (data, status, headers, config) {
+            .success(function (data) {
                 scope.team_name = data.name;
             })
-            .error(function (data, status, headers, config) {
+            .error(function (data, status) {
                 ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve team. GET status: ' + status
                 });
             });
@@ -289,7 +288,7 @@ function CredentialsAdd($scope, $rootScope, $compile, $location, $log, $routePar
 CredentialsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'CredentialForm', 'GenerateForm',
     'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GenerateList',
     'SearchInit', 'PaginateInit', 'LookUpInit', 'UserList', 'TeamList', 'GetBasePath', 'GetChoices', 'Empty',
-    'KindChange', 'OwnerChange', 'FormSave', 'DebugForm'
+    'KindChange', 'OwnerChange', 'FormSave'
 ];
 
 

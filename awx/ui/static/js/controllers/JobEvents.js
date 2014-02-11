@@ -249,13 +249,12 @@ JobEventsList.$inject = ['$filter', '$scope', '$rootScope', '$location', '$log',
     'ProcessErrors', 'GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView', 'Refresh', 'Wait'
 ];
 
-function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventForm, GenerateForm,
-    Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, FormatDate, EventView,
-    Wait) {
-    ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
-    //scope.
-    // Inject dynamic view
-    var form = JobEventForm,
+function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventsForm, GenerateForm,
+    Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, FormatDate, EventView, Wait) {
+    
+    ClearScope('htmlTemplate');
+
+    var form = JobEventsForm,
         generator = GenerateForm,
         scope = GenerateForm.inject(form, { mode: 'edit', related: true }),
         defaultUrl = GetBasePath('base') + 'job_events/' + $routeParams.event_id + '/';
@@ -348,7 +347,7 @@ function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $routePara
 
 }
 
-JobEventsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobEventForm',
+JobEventsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobEventsForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'FormatDate',
     'EventView', 'Wait'
 ];

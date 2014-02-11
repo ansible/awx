@@ -7,14 +7,13 @@
  *  
  */
 angular.module('HostGroupsFormDefinition', [])
-    .value(
-    'HostGroupsForm', {
+    .value('HostGroupsForm', {
         
-        editTitle: 'Host Groups',                            //Legend in edit mode
-        name: 'host',                                        //Form name attribute
-        well: false,                                         //Wrap the form with TB well
+        editTitle: 'Host Groups',
+        name: 'host',
+        well: false,
         formLabelSize: 'col-lg-3',
-        formFieldSize: 'col-lg-9',          
+        formFieldSize: 'col-lg-9',
 
         fields: {
             groups: {
@@ -26,30 +25,28 @@ angular.module('HostGroupsFormDefinition', [])
                 editRequired: true,
                 awPopOver: "<p>Provide a host name, ip address, or ip address:port. Examples include:</p>" +
                      "<blockquote>myserver.domain.com<br/>" +
-                     "127.0.0.1<br />" + 
+                     "127.0.0.1<br />" +
                      "10.1.0.140:25<br />" +
                      "server.example.com:25" +
-                     "</blockquote>", 
+                     "</blockquote>",
                 dataTitle: 'Host Name',
                 dataPlacement: 'right',
                 dataContainer: '#form-modal .modal-content'
-                }
-            },
+            }
+        },
 
         buttons: { //for now always generates <button> tags 
-            save: { 
-                ngClick: 'formSave()',    //$scope.function to call on click, optional
-                ngDisabled: true          //Disable when $pristine or $invalid, optional
-                },
-            reset: { 
-                ngClick: 'formReset()',
-                ngDisabled: true          //Disabled when $pristine
-                }
+            save: {
+                ngClick: 'formSave()',
+                ngDisabled: true
             },
-
-        related: { //related colletions (and maybe items?)
-               
+            reset: {
+                ngClick: 'formReset()',
+                ngDisabled: true
             }
+        },
+
+        related: { }
 
     }); //UserForm
 

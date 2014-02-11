@@ -4,12 +4,11 @@
  *  Inventories.js
  *  Form definition for User model
  *
- * 
+ *
  */
 angular.module('InventoryFormDefinition', [])
-    .value(
-    'InventoryForm', {
-        
+    .value('InventoryForm', {
+
         addTitle: 'Create Inventory',
         editTitle: '{{ inventory_name | capitalize }}',
         name: 'inventory',
@@ -24,8 +23,8 @@ angular.module('InventoryFormDefinition', [])
                 icon: "icon-comments-alt",
                 mode: 'edit',
                 iconSize: 'large'
-                }    
-            },
+            }
+        },
 
         fields: {
             inventory_name: {
@@ -35,29 +34,32 @@ angular.module('InventoryFormDefinition', [])
                 addRequired: true,
                 editRequired: true,
                 capitalize: false
-                },
-            inventory_description: { 
+            },
+            inventory_description: {
                 realName: 'description',
                 label: 'Description',
                 type: 'text',
                 addRequired: false,
                 editRequired: false
-                },
+            },
             organization: {
                 label: 'Organization',
                 type: 'lookup',
                 sourceModel: 'organization',
                 sourceField: 'name',
                 ngClick: 'lookUpOrganization()',
-                awRequiredWhen: {variable: "organizationrequired", init: "true" }
-                },
+                awRequiredWhen: {
+                    variable: "organizationrequired",
+                    init: "true"
+                }
+            },
             inventory_variables: {
                 realName: 'variables',
                 label: 'Variables',
                 type: 'textarea',
                 'class': 'span12',
                 addRequired: false,
-                editRequird: false, 
+                editRequird: false,
                 parseTypeName: 'inventoryParseType',
                 rows: 6,
                 "default": "---",
@@ -71,23 +73,22 @@ angular.module('InventoryFormDefinition', [])
                 dataTitle: 'Inventory Variables',
                 dataPlacement: 'right',
                 dataContainer: 'body'
-                }
-            },
+            }
+        },
 
-        buttons: { //for now always generates <button> tags 
-            save: { 
-                ngClick: 'formSave()',    //$scope.function to call on click, optional
-                ngDisabled: true          //Disable when $pristine or $invalid, optional
-                },
-            reset: { 
-                ngClick: 'formReset()',
-                ngDisabled: true          //Disabled when $pristine
-                }
+        buttons: {
+            save: {
+                ngClick: 'formSave()',
+                ngDisabled: true
             },
+            reset: {
+                ngClick: 'formReset()',
+                ngDisabled: true
+            }
+        },
 
         related: {
 
-            }
+        }
 
-    }); //InventoryForm
-
+    });
