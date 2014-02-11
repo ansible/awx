@@ -102,6 +102,10 @@ class CallbackModule(object):
         self.logger.propagate = False
 
     def _init_connection(self):
+        self.context = None
+        self.socket = None
+
+    def _start_connection(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect("tcp://127.0.0.1:5556")
@@ -119,10 +123,16 @@ class CallbackModule(object):
             })
         for retry_count in xrange(4):
             try:
+                if not hasattr(self, 'connection_pid'):
+                    self.connection_pid = os.getpid()
+                if self.connection_pid != os.getpid():
+                    self._init_connection()
+                if self.context is None:
+                    self._start_connection()
+
                 self.socket.send(json.dumps(msg))
                 self.logger.debug('Publish: %r, retry=%d', msg, retry_count)
                 reply = self.socket.recv()
-                print("Received reply: " + str(reply))
                 return
             except Exception, e:
                 self.logger.info('Publish Exception: %r, retry=%d', e,
