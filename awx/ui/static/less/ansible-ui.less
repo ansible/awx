@@ -19,6 +19,7 @@
 @grey:        #A9A9A9;
 @grey-txt:    #707070;
 @well:        #f5f5f5;   /* well background color */
+@well-border: #e3e3e3;
 @info:        #d9edf7;   /* alert info background color */
 @info-border: #bce8f1;   /* alert info border color */
 @info-color:  #3a87ad;
@@ -387,7 +388,7 @@ dd {
   padding-left: 20px;
 }
 
-.navbar>.container .navbar-brand {
+.navbar>.container-fluid .navbar-brand {
   margin-left: 0;
   margin-top: 11px;
 }
@@ -785,6 +786,29 @@ input[type="checkbox"].checkbox-no-label {
   }
 }
 
+.jqui-accordion {
+    .list-actions {
+        margin: 0;
+    }
+    table {
+        background-color: @well;
+        padding: 10px; 
+        border-radius: 4px;
+        border: 1px solid @well-border;
+    }
+    form {
+        background-color: @well;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid @well-border;
+        margin: 10px 0;
+    }
+    .ui-accordion-content {
+        padding-left: 15px; 
+        padding-right: 15px;
+    }
+}
+
 #home-list-actions {
   margin-bottom: 15px;
 }
@@ -827,6 +851,14 @@ input[type="checkbox"].checkbox-no-label {
 .table-no-border tbody > tr > td,
 .table-no-border tfoot > tr > td {
   border-top: none;
+}
+
+/* Table info rows */
+
+.loading-info {
+  color: @grey-txt; 
+  font-weight: bold;
+  padding: 15px 0;
 }
 
 /* Jobs pages */
@@ -1420,10 +1452,6 @@ tr td button i {
 /* Large desktop */
 
 @media (min-width: 1200px) {
-  
-  .container,  {
-    max-width: 96%;
-  }
 
   .delete-btn {
     /* Used on job and project page to make cancel and delete buttons have an equal width */

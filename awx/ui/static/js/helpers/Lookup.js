@@ -21,13 +21,13 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
         function (Alert, Rest, GenerateList, SearchInit, PaginateInit, GetBasePath, FormatDate, Empty) {
             return function (params) {
 
-                var scope = params.scope, // form scope
-                    form = params.form, // form object
-                    list = params.list, // list object
-                    field = params.field, // form field
-                    postAction = params.postAction, //action to perform post user selection
+                var scope = params.scope,
+                    form = params.form,
+                    list = params.list,
+                    field = params.field,
+                    postAction = params.postAction,
                     defaultUrl, name, hdr, watchUrl;
-                
+
                 if (params.url) {
                     // pass in a url value to override the default
                     defaultUrl = params.url;
@@ -46,7 +46,7 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                 $('input[name="' + form.fields[field].sourceModel + '_' + form.fields[field].sourceField + '"]').attr('data-source', field);
 
                 scope['lookUp' + name] = function () {
-                    
+
                     var master = {}, listGenerator, listScope;
 
                     // Generating the search list potentially kills the values held in scope for the field.
@@ -72,6 +72,7 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                     });
 
                     listScope.selectAction = function () {
+
                         var i, found = false;
                         for (i = 0; i < listScope[list.name].length; i++) {
                             if (listScope[list.name][i].checked === '1') {
@@ -102,7 +103,8 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                     };
 
                     listScope['toggle_' + list.iterator] = function (id) {
-                        for (var i = 0; i < scope[list.name].length; i++) {
+                        var i;
+                        for (i = 0; i < scope[list.name].length; i++) {
                             if (listScope[list.name][i].id === id) {
                                 listScope[list.name][i].checked = '1';
                                 listScope[list.name][i].success_class = 'success';
@@ -133,13 +135,15 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                     listScope.lookupPostRefreshRemove = scope.$on('PostRefresh', function () {
                         var fld, i;
                         for (fld in list.fields) {
-                            if (list.fields[fld].type === 'date') {
+
+                            if (list.fields[fld].type && list.fields[fld].type === 'date') {
                                 //convert dates to our standard format
                                 for (i = 0; i < scope[list.name].length; i++) {
                                     scope[list.name][i][fld] = FormatDate(new Date(scope[list.name][i][fld]));
                                 }
                             }
                         }
+
                         // List generator creates the form, resetting it and losing the previously selected value. 
                         // If it's in the current set, find it and marke it as selected.
                         if (scope[form.fields[field].sourceModel + '_' + form.fields[field].sourceField] !== '' &&

@@ -1,65 +1,86 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  InventoryGroups.js 
+ *  InventoryGroups.js
  *
  *  Help object for inventory groups/hosts page.
  *
  *  @dict
  */
 
+'use strict';
+
 angular.module('InventoryGroupsHelpDefinition', [])
-    .value(
-    'InventoryGroupsHelp', {
+    .value('InventoryGroupsHelp', {
         story: {
             hdr: 'Building your inventory',
             width: 510,
             height: 560,
-            steps: [
-                {
+            steps: [{
                 intro: 'Start by creating a group:',
-                img: { src: 'groups001.png', maxWidth: 338 , maxHeight: 222 },
+                img: {
+                    src: 'groups001.png',
+                    maxWidth: 338,
+                    maxHeight: 222
+                },
                 box: "Click <i class=\"fa fa-plus\"></i> on the groups list (the left side of the page) to add a new group.",
                 autoOffNotice: true
-                },
-                {
+            }, {
                 intro: 'Enter group properties:',
-                img: { src: 'groups002.png', maxWidth: 443, maxHeight: 251 },
+                img: {
+                    src: 'groups002.png',
+                    maxWidth: 443,
+                    maxHeight: 251
+                },
                 box: 'Enter the group name, a description and any inventory variables. Variables can be entered using either JSON or YAML syntax. ' +
-                'For more on inventory variables, see <a href=\"http://docs.ansible.com/intro_inventory.html\" target="_blank"> ' +
-                'docs.ansible.com/intro_inventory.html</a>'
-                },
-                {
+                    'For more on inventory variables, see <a href=\"http://docs.ansible.com/intro_inventory.html\" target="_blank"> ' +
+                    'docs.ansible.com/intro_inventory.html</a>'
+            }, {
                 intro: 'Cloud inventory: select cloud source',
-                img: { src: 'groups003.png', maxWidth: 412, maxHeight: 215 },
+                img: {
+                    src: 'groups003.png',
+                    maxWidth: 412,
+                    maxHeight: 215
+                },
                 box: "For a cloud inventory, choose the cloud provider from the list and select your credentials. If you have not already setup " +
-                "credentials for the provider, you will need to do that first on the <a href=\"/#/credentials\" " + 
-                "target=\"_blank\">Credentials</a> tab."
-                },
-                {
+                    "credentials for the provider, you will need to do that first on the <a href=\"/#/credentials\" " +
+                    "target=\"_blank\">Credentials</a> tab."
+            }, {
                 intro: 'Cloud inventory: synchronize Tower with the cloud',
-                img: { src: 'groups004.png', maxWidth: 261, maxHeight: 221 },
+                img: {
+                    src: 'groups004.png',
+                    maxWidth: 261,
+                    maxHeight: 221
+                },
                 box: "To pull the cloud inventory into Tower, initiate an inventory sync by clicking <i class=\"fa fa-exchange\"></i>."
-                },
-                {
+            }, {
                 intro: "Groups can have subgroups:",
-                img: { src: 'groups005.png', maxWidth: 430, maxHeight: 206 },
+                img: {
+                    src: 'groups005.png',
+                    maxWidth: 430,
+                    maxHeight: 206
+                },
                 box: "<div class=\"text-left\">First, select a group. Then click <i class=\"fa fa-plus\"></i> to create a new group. The new group " +
-                "will be added to the selected group.</div>"
-                },
-                {
+                    "will be added to the selected group.</div>"
+            }, {
                 intro: 'Copy or move groups:',
-                img: { src: 'groups006.png', maxWidth: 263, maxHeight: 211 },
-                box: "<div class=\"text-left\">Copy or move a group by dragging and dropping its name onto another group name. A dialog will appear " +
-                "asking if the group should be coppied or moved.</div>"
+                img: {
+                    src: 'groups006.png',
+                    maxWidth: 263,
+                    maxHeight: 211
                 },
-                {
+                box: "<div class=\"text-left\">Copy or move a group by dragging and dropping its name onto another group name. A dialog will appear " +
+                    "asking if the group should be coppied or moved.</div>"
+            }, {
                 intro: 'Adding hosts:',
-                img: { src: 'groups007.png', maxWidth: 466, maxHeight: 178 },
-                box: "<div class=\"text-left\"><p>First, select a Group. " + 
-                "Then click <i class=\"fa fa-plus\"></i> on the hosts list (the right side of the page) to create a host. " +
-                "The new host will be part of the selected group.</p><p>Note hosts cannot be added to the All Hosts group.</p></div>"
-                }  
-                ]  
-            }
-        });
+                img: {
+                    src: 'groups007.png',
+                    maxWidth: 466,
+                    maxHeight: 178
+                },
+                box: "<div class=\"text-left\"><p>First, select a Group. " +
+                    "Then click <i class=\"fa fa-plus\"></i> on the hosts list (the right side of the page) to create a host. " +
+                    "The new host will be part of the selected group.</p><p>Note hosts cannot be added to the All Hosts group.</p></div>"
+            }]
+        }
+    });

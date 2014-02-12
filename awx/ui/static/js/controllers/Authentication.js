@@ -8,139 +8,145 @@
  *
  */
 
+ /* globals console:false */
+
 'use strict';
 
-function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert, Wait, 
-    Timer, Empty)
-{
-   var setLoginFocus = function() {
-      $('#login-username').focus();
-      };
+function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Authorization, ToggleClass, Alert, Wait,
+    Timer, Empty) {
+    
+    var setLoginFocus, lastPath, sessionExpired, scope;
 
-   var sessionExpired = (Empty($rootScope.sessionExpired)) ? $cookieStore.get('sessionExpired') : $rootScope.sessionExpired;
-   
-   var lastPath = function() {
-      return (Empty($rootScope.lastPath)) ? $cookieStore.get('lastPath') : $rootScope.lastPath;
-      }
+    setLoginFocus = function () {
+        $('#login-username').focus();
+    };
 
-   if ($AnsibleConfig.debug_mode && console) {
-      console.log('User session expired: ' + sessionExpired);
-      console.log('Last URL: ' + lastPath());
-   }
-   
-   // Hide any lingering modal dialogs
-   $('.modal[aria-hidden=false]').each( function() {
-       if ($(this).attr('id') !== 'login-modal') {
-          $(this).modal('hide');
-       }
-       });
+    sessionExpired = (Empty($rootScope.sessionExpired)) ? $cookieStore.get('sessionExpired') : $rootScope.sessionExpired;
 
-   // Just in case, make sure the wait widget is not active
-   Wait('stop');
-   
-   // Display the login dialog
-   $('#login-modal').modal({ show: true, keyboard: false, backdrop: 'static' });
-   
-   // Set focus to username field
-   $('#login-modal').on('shown.bs.modal', function() {
-       setLoginFocus();
-       });
+    lastPath = function () {
+        return (Empty($rootScope.lastPath)) ? $cookieStore.get('lastPath') : $rootScope.lastPath;
+    };
 
-   var scope = angular.element(document.getElementById('login-modal')).scope();
-   
-   // Reset the login form
-   scope['login_username'] = null;
-   scope['login_password'] = null;
-   scope['loginForm']['login_username'].$setPristine();
-   scope['loginForm']['login_password'].$setPristine();
+    if ($AnsibleConfig.debug_mode && console) {
+        console.log('User session expired: ' + sessionExpired);
+        console.log('Last URL: ' + lastPath());
+    }
 
-   if ($location.path() == '/logout') {
-      //if logout request, clear AuthToken and user session data
-      Authorization.logout();
-   }
-  
-   $rootScope.userLoggedIn = false;             //hide the logout link. if you got here, you're logged out.
-   $cookieStore.put('userLoggedIn', false);     //gets set back to true by Authorization.setToken().
+    // Hide any lingering modal dialogs
+    $('.modal[aria-hidden=false]').each(function () {
+        if ($(this).attr('id') !== 'login-modal') {
+            $(this).modal('hide');
+        }
+    });
 
-   $('#login-password').bind('keypress', function(e) {
-       var code = (e.keyCode ? e.keyCode : e.which);
-       if (code == 13) {
-          $('#login-button').click();
-       }
-       });
-   
-   scope.reset = function() { 
-       $('#login-form input').each( function(index) { $(this).val(''); });
-       };
+    // Just in case, make sure the wait widget is not active
+    Wait('stop');
 
-   // Call the API to get an auth token
-   scope.systemLogin = function(username, password) {   
-       $('.api-error').empty();
-       var token;
-       if (username == null || username == undefined || username == '' || 
-           password == null || password == undefined || password == '' ) {
-           Alert('Error!', 'Please provide a username and password before attempting to login.', 'alert-danger', setLoginFocus);
-       }
-       else {
-           Wait('start');
-           Authorization.retrieveToken(username, password)
-             .success( function(data, status, headers, config) {
-                 $('#login-modal').modal('hide');
-                 token = data.token;
-                 Authorization.setToken(data.token, data.expires);
-                 $rootScope.sessionTimer = Timer.init();
-                 // Get all the profile/access info regarding the logged in user
-                 Authorization.getUser()
-                     .success(function(data, status, headers, config) {
-                         Authorization.setUserInfo(data);
-                         $rootScope['user_is_superuser'] = data.results[0].is_superuser;
-                         Authorization.getLicense()
-                             .success(function(data, status, headers, config) {
-                                 Authorization.setLicense(data['license_info']);
-                                 if (lastPath()) {
-                                     // Go back to most recent navigation path
-                                     $location.path(lastPath());
-                                 }
-                                 else {
-                                     $location.url('/home?login=true');
-                                 }
-                                 })
-                             .error(function(data, status, headers, config) {
-                                 Wait('stop');
-                                 Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
-                                 });
-                         })
-                     .error( function(data, status, headers, config) {
-                         Wait('stop');
-                         Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
-                         });
-                 })
-             .error( function(data, status, headers, config) {
-                 Wait('stop');
-                 if ( data.non_field_errors && data.non_field_errors.length == 0 ) {
-                    // show field specific errors returned by the API
-                    for (var key in data) {
-                        scope[key + 'Error'] = data[key][0];
+    // Display the login dialog
+    $('#login-modal').modal({
+        show: true,
+        keyboard: false,
+        backdrop: 'static'
+    });
+
+    // Set focus to username field
+    $('#login-modal').on('shown.bs.modal', function () {
+        setLoginFocus();
+    });
+
+    scope = angular.element(document.getElementById('login-modal')).scope();
+
+    // Reset the login form
+    scope.login_username = null;
+    scope.login_password = null;
+    scope.loginForm.login_username.$setPristine();
+    scope.loginForm.login_password.$setPristine();
+
+    if ($location.path() === '/logout') {
+        //if logout request, clear AuthToken and user session data
+        Authorization.logout();
+    }
+
+    $rootScope.userLoggedIn = false; //hide the logout link. if you got here, you're logged out.
+    $cookieStore.put('userLoggedIn', false); //gets set back to true by Authorization.setToken().
+
+    $('#login-password').bind('keypress', function (e) {
+        var code = (e.keyCode ? e.keyCode : e.which);
+        if (code === 13) {
+            $('#login-button').click();
+        }
+    });
+
+    scope.reset = function () {
+        $('#login-form input').each(function () {
+            $(this).val('');
+        });
+    };
+
+    // Call the API to get an auth token
+    scope.systemLogin = function (username, password) {
+        $('.api-error').empty();
+        var token;
+        if (Empty(username) || Empty(password)) {
+            Alert('Error!', 'Please provide a username and password before attempting to login.', 'alert-danger', setLoginFocus);
+        } else {
+            Wait('start');
+            Authorization.retrieveToken(username, password)
+                .success(function (data, status) {
+                    $('#login-modal').modal('hide');
+                    token = data.token;
+                    Authorization.setToken(data.token, data.expires);
+                    $rootScope.sessionTimer = Timer.init();
+                    // Get all the profile/access info regarding the logged in user
+                    Authorization.getUser()
+                        .success(function (data) {
+                            Authorization.setUserInfo(data);
+                            $rootScope.user_is_superuser = data.results[0].is_superuser;
+                            Authorization.getLicense()
+                                .success(function (data) {
+                                    Authorization.setLicense(data.license_info);
+                                    if (lastPath()) {
+                                        // Go back to most recent navigation path
+                                        $location.path(lastPath());
+                                    } else {
+                                        $location.url('/home?login=true');
+                                    }
+                                })
+                                .error(function () {
+                                    Wait('stop');
+                                    Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
+                                });
+                        })
+                        .error(function (data, status) {
+                            Wait('stop');
+                            Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
+                        });
+                })
+                .error(function (data, status) {
+                    var hdr, msg, key;
+                    Wait('stop');
+                    if (data.non_field_errors && data.non_field_errors.length === 0) {
+                        // show field specific errors returned by the API
+                        for (key in data) {
+                            scope[key + 'Error'] = data[key][0];
+                        }
+                    } else {
+                        if (data.non_field_errors && data.non_field_errors.length > 0) {
+                            hdr = 'Error';
+                            msg = data.non_field_errors[0];
+                        } else {
+                            hdr = 'Error';
+                            msg = 'The login attempt failed with a status of: ' + status;
+                        }
+                        scope.reset();
+                        Alert(hdr, msg, 'alert-danger', setLoginFocus);
                     }
-                 }
-                 else {
-                    var hdr, msg;
-                    if ( data.non_field_errors && data.non_field_errors.length > 0 ) {
-                       hdr = 'Error';
-                       msg = data.non_field_errors[0];
-                    }
-                    else {
-                       hdr = 'Error';
-                       msg = 'The login attempt failed with a status of: ' + status;
-                    }
-                    scope.reset();
-                    Alert(hdr, msg, 'alert-danger', setLoginFocus);
-                 }
-                 });
-           }
-       }
+                });
+        }
+    };
 }
 
 Authenticate.$inject = ['$cookieStore', '$window', '$scope', '$rootScope', '$location', 'Authorization', 'ToggleClass', 'Alert', 'Wait',
-                        'Timer', 'Empty'];
+    'Timer', 'Empty'
+];
 

@@ -1,41 +1,41 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  Admins.js 
+ *  Admins.js
  *  List view object for Admins data model.
  *
  *  @dict
  */
+
+'use strict';
+
 angular.module('AdminListDefinition', [])
-    .value(
-    'AdminList', {
-        
+    .value('AdminList', {
+
         name: 'admins',
         iterator: 'admin',
         selectTitle: 'Add Administrators',
         editTitle: 'Admins',
         selectInstructions: '<p>Select existing users by clicking each user or checking the related checkbox. When finished, click the blue ' +
-            '<em>Select</em> button, located bottom right.</p>', 
+            '<em>Select</em> button, located bottom right.</p>',
         base: 'users',
         index: true,
-        hover: true, 
-        
+        hover: true,
+
         fields: {
             username: {
                 key: true,
                 label: 'Username'
-                },
-           first_name: {
+            },
+            first_name: {
                 label: 'First Name'
-                },
-           last_name: {
+            },
+            last_name: {
                 label: 'Last Name'
-                }
-            },
-        
-        actions: {
-            },
-
-        fieldActions: {
             }
-        });
+        },
+
+        actions: {},
+
+        fieldActions: {}
+    });

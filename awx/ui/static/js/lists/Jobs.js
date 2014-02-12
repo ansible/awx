@@ -6,6 +6,9 @@
  *
  * 
  */
+
+'use strict';
+
 angular.module('JobsListDefinition', [])
     .value( 'JobList', {
         

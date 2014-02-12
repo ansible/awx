@@ -10,6 +10,7 @@
 /* global chkPass:false */
 
 angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'JobsHelper'])
+    
     // awpassmatch:  Add to password_confirm field. Will test if value
     //               matches that of 'input[name="password"]'
     .directive('awpassmatch', function() {

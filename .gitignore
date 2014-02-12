@@ -4,9 +4,10 @@ awx/projects
 awx/job_status
 awx/public/media
 awx/public/static
-awx/ui/static/js/awx-min.js
+awx/ui/static/js/awx.min.js
 awx/ui/static/css/awx.min.css
 env/*
+node_modules/**
 build
 deb-build
 dist

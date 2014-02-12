@@ -1,0 +1,34 @@
+{
+  "name": "angular-md5",
+  "version": "0.1.7",
+  "main": "angular-md5.js",
+  "description": "A md5 crypto component for Angular.js",
+  "author": [
+    {
+      "name": "Patrick Stapleton",
+      "email": "github@gdi2290.com",
+      "url": "www.gdi2290.com"
+    }
+  ],
+  "keywords": [
+    "PatrickJS",
+    "gdi2290",
+    "angular.js",
+    "angularjs",
+    "angular",
+    "crypto",
+    "md5"
+  ],
+  "ignore": [
+    "**/.*",
+    "*.yml",
+    "*.xml",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "*"
+  }
+}

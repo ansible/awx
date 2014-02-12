@@ -4,12 +4,11 @@
  *  Groups.js
  *  Form definition for Group model
  *
- *  
+ *
  */
 angular.module('GroupFormDefinition', [])
-    .value(
-    'GroupForm', {
-        
+    .value('GroupForm', {
+
         addTitle: 'Create Group',
         editTitle: 'Edit Group',
         showTitle: true,
@@ -18,12 +17,15 @@ angular.module('GroupFormDefinition', [])
         well: true,
         formLabelSize: 'col-lg-3',
         formFieldSize: 'col-lg-9',
-        
-        tabs: [
-            { name: 'properties', label: 'Properties'}, 
-            { name: 'source', label: 'Source' }
-            ],
-        
+
+        tabs: [{
+            name: 'properties',
+            label: 'Properties'
+        }, {
+            name: 'source',
+            label: 'Source'
+        }],
+
         fields: {
             name: {
                 label: 'Name',
@@ -31,19 +33,19 @@ angular.module('GroupFormDefinition', [])
                 addRequired: true,
                 editRequired: true,
                 tab: 'properties'
-                },
-            description: { 
+            },
+            description: {
                 label: 'Description',
                 type: 'text',
                 addRequired: false,
                 editRequired: false,
                 tab: 'properties'
-                },
+            },
             variables: {
                 label: 'Variables',
                 type: 'textarea',
                 addRequired: false,
-                editRequird: false, 
+                editRequird: false,
                 rows: 6,
                 'default': '---',
                 dataTitle: 'Group Variables',
@@ -59,24 +61,27 @@ angular.module('GroupFormDefinition', [])
                     '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                 dataContainer: 'body',
                 tab: 'properties'
-                },
+            },
             source: {
                 label: 'Source',
                 type: 'select',
                 ngOptions: 'source.label for source in source_type_options',
                 ngChange: 'sourceChange()',
-                addRequired: false, 
+                addRequired: false,
                 editRequired: false,
                 //'default': { label: 'Manual', value: '' },
                 tab: 'source'
-                },
+            },
             source_path: {
                 label: 'Script Path',
                 ngShow: "source && source.value == 'file'",
                 type: 'text',
-                awRequiredWhen: {variable: "sourcePathRequired", init: "false" },
-                tab: 'source'
+                awRequiredWhen: {
+                    variable: "sourcePathRequired",
+                    init: "false"
                 },
+                tab: 'source'
+            },
             credential: {
                 label: 'Cloud Credential',
                 type: 'lookup',
@@ -84,10 +89,10 @@ angular.module('GroupFormDefinition', [])
                 sourceModel: 'credential',
                 sourceField: 'name',
                 ngClick: 'lookUpCredential()',
-                addRequired: false, 
+                addRequired: false,
                 editRequired: false,
                 tab: 'source'
-                },
+            },
             source_regions: {
                 label: 'Regions',
                 type: 'text',
@@ -102,13 +107,13 @@ angular.module('GroupFormDefinition', [])
                     "</p>",
                 dataContainer: 'body',
                 tab: 'source'
-                },
+            },
             source_vars: {
                 label: 'Source Variables',
                 ngShow: "source && (source.value == 'file' || source.value == 'ec2')",
                 type: 'textarea',
                 addRequired: false,
-                editRequird: false, 
+                editRequird: false,
                 rows: 6,
                 'default': '---',
                 parseTypeName: 'envParseType',
@@ -126,80 +131,73 @@ angular.module('GroupFormDefinition', [])
                     '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                 dataContainer: 'body',
                 tab: 'source'
-                },
+            },
             checkbox_group: {
                 label: 'Update Options',
                 type: 'checkbox_group',
                 ngShow: "source && (source.value !== '' && source.value !== null)",
                 tab: 'source',
 
-                fields: [
-                    {
-                        name: 'overwrite',
-                        label: 'Overwrite',
-                        type: 'checkbox',
-                        ngShow: "source.value !== '' && source.value !== null",
-                        addRequired: false,
-                        editRequired: false,
-                        awPopOver: '<p>When checked all child groups and hosts not found on the remote source will be deleted from ' +
-                           'the local inventory.</p><p>Unchecked any local child hosts and groups not found on the external source will ' + 
-                           'remain untouched by the inventory update process.</p>',
-                        dataTitle: 'Overwrite',
-                        dataContainer: 'body',
-                        dataPlacement: 'right',
-                        labelClass: 'checkbox-options'
-                        },
-                    {
-                        name: 'overwrite_vars',
-                        label: 'Overwrite Variables',
-                        type: 'checkbox',
-                        ngShow: "source.value !== '' && source.value !== null",
-                        addRequired: false,
-                        editRequired: false,
-                        awPopOver: '<p>If checked, all variables for child groups and hosts will be removed and replaced by those ' + 
-                          'found on the external source.</p><p>When not checked a merge will be performed, combining local variables with ' +
-                          'those found on the external source.</p>',
-                        dataTitle: 'Overwrite Variables',
-                        dataContainer: 'body',
-                        dataPlacement: 'right',
-                        labelClass: 'checkbox-options'
-                        },
-                    {
-                        name: 'update_on_launch',
-                        label: 'Update on Launch',
-                        type: 'checkbox',
-                        ngShow: "source.value !== '' && source.value !== null",
-                        addRequired: false,
-                        editRequired: false,
-                        awPopOver: '<p>Each time a job runs using this inventory, refresh the inventory from the selected source before ' +
-                            'executing job tasks.</p>',
-                        dataTitle: 'Update on Launch',
-                        dataContainer: 'body',
-                        dataPlacement: 'right',
-                        labelClass: 'checkbox-options'
-                        }
-                    ]
-                } 
-            },
+                fields: [{
+                    name: 'overwrite',
+                    label: 'Overwrite',
+                    type: 'checkbox',
+                    ngShow: "source.value !== '' && source.value !== null",
+                    addRequired: false,
+                    editRequired: false,
+                    awPopOver: '<p>When checked all child groups and hosts not found on the remote source will be deleted from ' +
+                        'the local inventory.</p><p>Unchecked any local child hosts and groups not found on the external source will ' +
+                        'remain untouched by the inventory update process.</p>',
+                    dataTitle: 'Overwrite',
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    labelClass: 'checkbox-options'
+                }, {
+                    name: 'overwrite_vars',
+                    label: 'Overwrite Variables',
+                    type: 'checkbox',
+                    ngShow: "source.value !== '' && source.value !== null",
+                    addRequired: false,
+                    editRequired: false,
+                    awPopOver: '<p>If checked, all variables for child groups and hosts will be removed and replaced by those ' +
+                        'found on the external source.</p><p>When not checked a merge will be performed, combining local variables with ' +
+                        'those found on the external source.</p>',
+                    dataTitle: 'Overwrite Variables',
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    labelClass: 'checkbox-options'
+                }, {
+                    name: 'update_on_launch',
+                    label: 'Update on Launch',
+                    type: 'checkbox',
+                    ngShow: "source.value !== '' && source.value !== null",
+                    addRequired: false,
+                    editRequired: false,
+                    awPopOver: '<p>Each time a job runs using this inventory, refresh the inventory from the selected source before ' +
+                        'executing job tasks.</p>',
+                    dataTitle: 'Update on Launch',
+                    dataContainer: 'body',
+                    dataPlacement: 'right',
+                    labelClass: 'checkbox-options'
+                }]
+            }
+        },
 
-        buttons: { //for now always generates <button> tags 
-            
+        buttons: {
+
             labelClass: 'col-lg-3',
             controlClass: 'col-lg-5',
 
-            save: { 
-                ngClick: 'formSave()',    //$scope.function to call on click, optional
-                ngDisabled: true          //Disable when $pristine or $invalid, optional
-                },
-            reset: { 
-                ngClick: 'formReset()',
-                ngDisabled: true          //Disabled when $pristine
-                }
+            save: {
+                ngClick: 'formSave()',
+                ngDisabled: true
             },
-
-        related: { //related colletions (and maybe items?)
-               
+            reset: {
+                ngClick: 'formReset()',
+                ngDisabled: true //Disabled when $pristine
             }
+        },
+
+        related: { }
 
     });
-
