@@ -42,7 +42,7 @@ angular.module('JobTemplatesListDefinition', [])
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
                 icon: "icon-comments-alt",
-                mode: 'all'
+                mode: 'edit'
             }
         },
 

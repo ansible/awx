@@ -18,8 +18,8 @@
 'use strict';
 
 angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRelatedHelper'])
-    .factory('RelatedSearchInit', ['$timeout', 'Alert', 'Rest', 'RefreshRelated', 'Wait',
-        function ($timeout, Alert, Rest, RefreshRelated, Wait) {
+    .factory('RelatedSearchInit', ['$timeout', 'Alert', 'Rest', 'RefreshRelated', 'Wait', 'Empty',
+        function ($timeout, Alert, Rest, RefreshRelated, Wait, Empty) {
             return function (params) {
 
                 var scope = params.scope,
@@ -157,10 +157,10 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRela
                     }
 
                     sort_order = (scope[iterator + 'SortOrder'] === null) ? sort_order : scope[iterator + 'SortOrder'];
-
+                    console.log('iterator: ' + iterator + ' searchValue: ' + scope[iterator + 'SearchValue']);
                     f = form.related[set].fields[scope[iterator + 'SearchField']];
-                    if ((scope[iterator + 'SelectShow'] === false && scope[iterator + 'SearchValue'] !== '' &&
-                        scope[iterator + 'SearchValue'] !== undefined) || (scope[iterator + 'SelectShow'] && scope[iterator + 'SearchSelectValue']) ||
+                    if ((scope[iterator + 'SelectShow'] === false && !Empty(scope[iterator + 'SearchValue'])) ||
+                        (scope[iterator + 'SelectShow'] && scope[iterator + 'SearchSelectValue']) ||
                         (f.searchType && f.searchType === 'gtzero')) {
                         if (f.sourceModel) {
                             // handle fields whose source is a related model e.g. inventories.organization
@@ -204,7 +204,7 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRela
                     $('.' + iterator + ' .list-header').each(function () {
                         if ($(this).attr('id') !== iterator + '-' + fld + '-header') {
                             var icon = $(this).find('i');
-                            icon.attr('class', 'icon-sort');
+                            icon.attr('class', 'fa fa-sort');
                         }
                     });
 
@@ -212,16 +212,16 @@ angular.module('RelatedSearchHelper', ['RestServices', 'Utilities', 'RefreshRela
                     // and set the sort direction  
                     icon = $('#' + iterator + '-' + fld + '-header i');
                     direction = '';
-                    if (icon.hasClass('icon-sort')) {
-                        icon.removeClass('icon-sort');
-                        icon.addClass('icon-sort-up');
-                    } else if (icon.hasClass('icon-sort-up')) {
-                        icon.removeClass('icon-sort-up');
-                        icon.addClass('icon-sort-down');
+                    if (icon.hasClass('fa-sort')) {
+                        icon.removeClass('fa-sort');
+                        icon.addClass('fa-sort-up');
+                    } else if (icon.hasClass('fa-sort-up')) {
+                        icon.removeClass('fa-sort-up');
+                        icon.addClass('fa-sort-down');
                         direction = '-';
-                    } else if (icon.hasClass('icon-sort-down')) {
-                        icon.removeClass('icon-sort-down');
-                        icon.addClass('icon-sort-up');
+                    } else if (icon.hasClass('fa-sort-down')) {
+                        icon.removeClass('fa-sort-down');
+                        icon.addClass('fa-sort-up');
                     }
 
                     // Set the sorder order value and call the API to refresh the list with the new order

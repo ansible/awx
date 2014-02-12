@@ -14,59 +14,58 @@ function PermissionsList($scope, $rootScope, $location, $log, $routeParams, Rest
     GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
     GetBasePath, CheckAccess, Wait) {
     
-    ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
-    
-    //scope.
+    ClearScope();
+
     var list = PermissionList,
         base = $location.path().replace(/^\//, '').split('/')[0],
         defaultUrl = GetBasePath(base),
-        view = GenerateList,
-        scope = view.inject(list, { mode: 'edit' }); // Inject our view
+        generator = GenerateList;
     
+    generator.inject(list, { mode: 'edit', scope: $scope });
     defaultUrl += ($routeParams.user_id !== undefined) ? $routeParams.user_id : $routeParams.team_id;
     defaultUrl += '/permissions/';
 
-    scope.selected = [];
+    $scope.selected = [];
 
     CheckAccess({
-        scope: scope
+        scope: $scope
     });
 
-    if (scope.removePostRefresh) {
-        scope.removePostRefresh();
+    if ($scope.removePostRefresh) {
+        $scope.removePostRefresh();
     }
-    scope.removePostRefresh = scope.$on('PostRefresh', function () {
+    $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         // Cleanup after a delete
         Wait('stop');
         $('#prompt-modal').off();
     });
 
     SearchInit({
-        scope: scope,
+        scope: $scope,
         set: 'permissions',
         list: list,
         url: defaultUrl
     });
     PaginateInit({
-        scope: scope,
+        scope: $scope,
         list: list,
         url: defaultUrl
     });
-    scope.search(list.iterator);
+    $scope.search(list.iterator);
 
     LoadBreadCrumbs();
 
-    scope.addPermission = function () {
-        if (scope.PermissionAddAllowed) {
+    $scope.addPermission = function () {
+        if ($scope.PermissionAddAllowed) {
             $location.path($location.path() + '/add');
         }
     };
 
-    scope.editPermission = function (id) {
+    $scope.editPermission = function (id) {
         $location.path($location.path() + '/' + id);
     };
 
-    scope.deletePermission = function (id, name) {
+    $scope.deletePermission = function (id, name) {
         var action = function () {
             $('#prompt-modal').on('hidden.bs.modal', function () {
                 Wait('start');
@@ -76,18 +75,16 @@ function PermissionsList($scope, $rootScope, $location, $log, $routeParams, Rest
             Rest.setUrl(url);
             Rest.destroy()
                 .success(function () {
-                    scope.search(list.iterator);
+                    $scope.search(list.iterator);
                 })
                 .error(function (data, status) {
                     Wait('stop');
-                    ProcessErrors(scope, data, status, null, {
-                        hdr: 'Error!',
-                        msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status
-                    });
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                 });
         };
 
-        if (scope.PermissionAddAllowed) {
+        if ($scope.PermissionAddAllowed) {
             Prompt({
                 hdr: 'Delete',
                 body: 'Are you sure you want to delete ' + name + '?',
@@ -107,30 +104,30 @@ function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $routePar
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope,
     GetBasePath, ReturnToCaller, InventoryList, ProjectList, LookUpInit, CheckAccess,
     Wait, PermissionCategoryChange) {
-    ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
-    //scope.
+    
+    ClearScope();
 
     // Inject dynamic view
     var form = PermissionsForm,
         generator = GenerateForm,
         id = ($routeParams.user_id !== undefined) ? $routeParams.user_id : $routeParams.team_id,
         base = $location.path().replace(/^\//, '').split('/')[0],
-        scope = generator.inject(form, { mode: 'add', related: false }),
         master = {};
-
-    CheckAccess({ scope: scope });
+    
+    generator.inject(form, { mode: 'add', related: false, scope: $scope });
+    CheckAccess({ scope: $scope });
     generator.reset();
     LoadBreadCrumbs();
 
-    scope.inventoryrequired = true;
-    scope.projectrequired = false;
-    scope.category = 'Inventory';
+    $scope.inventoryrequired = true;
+    $scope.projectrequired = false;
+    $scope.category = 'Inventory';
     master.category = 'Inventory';
     master.inventoryrequired = true;
     master.projectrequired = false;
 
     LookUpInit({
-        scope: scope,
+        scope: $scope,
         form: form,
         current_item: null,
         list: InventoryList,
@@ -138,7 +135,7 @@ function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $routePar
     });
 
     LookUpInit({
-        scope: scope,
+        scope: $scope,
         form: form,
         current_item: null,
         list: ProjectList,
@@ -146,14 +143,14 @@ function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $routePar
     });
 
     // Save
-    scope.formSave = function () {
+    $scope.formSave = function () {
         var fld, url, data = {};
         generator.clearApiErrors();
         Wait('start');
-        if (scope.PermissionAddAllowed) {
+        if ($scope.PermissionAddAllowed) {
             data = {};
             for (fld in form.fields) {
-                data[fld] = scope[fld];
+                data[fld] = $scope[fld];
             }
             url = (base === 'teams') ? GetBasePath('teams') + id + '/permissions/' : GetBasePath('users') + id + '/permissions/';
             Rest.setUrl(url);
@@ -164,10 +161,8 @@ function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $routePar
                 })
                 .error(function (data, status) {
                     Wait('stop');
-                    ProcessErrors(scope, data, status, PermissionsForm, {
-                        hdr: 'Error!',
-                        msg: 'Failed to create new permission. Post returned status: ' + status
-                    });
+                    ProcessErrors($scope, data, status, PermissionsForm, { hdr: 'Error!',
+                        msg: 'Failed to create new permission. Post returned status: ' + status });
                 });
         } else {
             Alert('Access Denied', 'You do not have access to create new permission objects. Please contact a system administrator.',
@@ -176,24 +171,21 @@ function PermissionsAdd($scope, $rootScope, $compile, $location, $log, $routePar
     };
 
     // Cancel
-    scope.formReset = function () {
+    $scope.formReset = function () {
         $rootScope.flashMessage = null;
         generator.reset();
         for (var fld in master) {
-            scope[fld] = master[fld];
+            $scope[fld] = master[fld];
         }
-        scope.selectCategory();
+        $scope.selectCategory();
     };
 
-    scope.selectCategory = function () {
-        PermissionCategoryChange({
-            scope: scope,
-            reset: true
-        });
+    $scope.selectCategory = function () {
+        PermissionCategoryChange({ scope: $scope, reset: true });
     };
 
 
-    scope.selectCategory();
+    $scope.selectCategory();
 
 }
 
@@ -204,30 +196,27 @@ PermissionsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 
 
 function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, PermissionsForm,
-    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller,
-    ClearScope, Prompt, GetBasePath, InventoryList, ProjectList, LookUpInit, CheckAccess,
-    Wait, PermissionCategoryChange) {
-    ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
-    //scope.
+    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, Prompt, GetBasePath,
+    InventoryList, ProjectList, LookUpInit, CheckAccess, Wait, PermissionCategoryChange) {
+    
+    ClearScope();
 
     var generator = GenerateForm,
         form = PermissionsForm,
-        scope = generator.inject(form, { mode: 'edit', related: true }),
         base_id = ($routeParams.user_id !== undefined) ? $routeParams.user_id : $routeParams.team_id,
         id = $routeParams.permission_id,
         defaultUrl = GetBasePath('base') + 'permissions/' + id + '/',
         master = {};
-
+    
+    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
 
     
-    CheckAccess({
-        scope: scope
-    });
+    CheckAccess({ scope: $scope });
 
-    scope.selectCategory = function (resetIn) {
+    $scope.selectCategory = function (resetIn) {
         var reset = (resetIn === false) ? false : true;
-        PermissionCategoryChange({ scope: scope, reset: reset });
+        PermissionCategoryChange({ scope: $scope, reset: reset });
     };
 
     // Retrieve detail record and prepopulate the form
@@ -242,23 +231,23 @@ function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routePa
                     if (form.fields[fld].sourceModel) {
                         sourceModel = form.fields[fld].sourceModel;
                         sourceField = form.fields[fld].sourceField;
-                        scope[sourceModel + '_' + sourceField] = data.summary_fields[sourceModel][sourceField];
+                        $scope[sourceModel + '_' + sourceField] = data.summary_fields[sourceModel][sourceField];
                         master[sourceModel + '_' + sourceField] = data.summary_fields[sourceModel][sourceField];
                     }
-                    scope[fld] = data[fld];
-                    master[fld] = scope[fld];
+                    $scope[fld] = data[fld];
+                    master[fld] = $scope[fld];
                 }
             }
 
-            scope.category = 'Deploy';
+            $scope.category = 'Deploy';
             if (data.permission_type !== 'run' && data.permission_type !== 'check') {
-                scope.category = 'Inventory';
+                $scope.category = 'Inventory';
             }
-            master.category = scope.category;
-            scope.selectCategory(false); //call without resetting scope.category value
+            master.category = $scope.category;
+            $scope.selectCategory(false); //call without resetting $scope.category value
 
             LookUpInit({
-                scope: scope,
+                scope: $scope,
                 form: form,
                 current_item: data.inventory,
                 list: InventoryList,
@@ -266,14 +255,14 @@ function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routePa
             });
 
             LookUpInit({
-                scope: scope,
+                scope: $scope,
                 form: form,
                 current_item: data.project,
                 list: ProjectList,
                 field: 'project'
             });
 
-            if (!scope.PermissionAddAllowed) {
+            if (!$scope.PermissionAddAllowed) {
                 // If not a privileged user, disable access
                 $('form[name="permission_form"]').find('select, input, button').each(function () {
                     if ($(this).is('input') || $(this).is('select')) {
@@ -289,18 +278,18 @@ function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routePa
             Wait('stop');
         })
         .error(function (data, status) {
-            ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+            ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                 msg: 'Failed to retrieve Permission: ' + id + '. GET status: ' + status });
         });
 
 
     // Save changes to the parent
-    scope.formSave = function () {
+    $scope.formSave = function () {
         var fld, data = {};
         generator.clearApiErrors();
         Wait('start');
         for (fld in form.fields) {
-            data[fld] = scope[fld];
+            data[fld] = $scope[fld];
         }
         Rest.setUrl(defaultUrl);
         Rest.put(data)
@@ -309,20 +298,19 @@ function PermissionsEdit($scope, $rootScope, $compile, $location, $log, $routePa
                 ReturnToCaller(1);
             })
             .error(function (data, status) {
-                Wait('stop');
-                ProcessErrors(scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update Permission: ' +
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update Permission: ' +
                     $routeParams.id + '. PUT status: ' + status });
             });
     };
 
 
     // Cancel
-    scope.formReset = function () {
+    $scope.formReset = function () {
         generator.reset();
         for (var fld in master) {
-            scope[fld] = master[fld];
+            $scope[fld] = master[fld];
         }
-        scope.selectCategory(false);
+        $scope.selectCategory(false);
     };
 
 }

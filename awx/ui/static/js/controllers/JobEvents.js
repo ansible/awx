@@ -14,31 +14,32 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
     LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, LookUpInit, ToggleChildren,
     FormatDate, EventView, Refresh, Wait) {
     
-    ClearScope('htmlTemplate');
+    ClearScope();
     
     var list = JobEventList,
         defaultUrl = GetBasePath('jobs') + $routeParams.id + '/job_events/', //?parent__isnull=1';
-        view = GenerateList,
-        scope = view.inject(list, { mode: 'edit' }),
+        generator = GenerateList,
         page;
     
+    generator.inject(list, { mode: 'edit', scope: $scope });
+    
     list.base = $location.path();
-    scope.job_id = $routeParams.id;
+    $scope.job_id = $routeParams.id;
     $rootScope.flashMessage = null;
-    scope.selected = [];
-    scope.expand = true; //on load, automatically expand all nodes
+    $scope.selected = [];
+    $scope.expand = true; //on load, automatically expand all nodes
 
-    scope.parentNode = 'parent-event'; // used in ngClass to dynamically set row level class and control
-    scope.childNode = 'child-event'; // link color and cursor
+    $scope.parentNode = 'parent-event'; // used in ngClass to dynamically set row level class and control
+    $scope.childNode = 'child-event'; // link color and cursor
 
-    if (scope.removeSetHostLinks) {
-        scope.removeSetHostLinks();
+    if ($scope.removeSetHostLinks) {
+        $scope.removeSetHostLinks();
     }
-    scope.removeSetHostLinks = scope.$on('SetHostLinks', function (e, inventory_id) {
-        for (var i = 0; i < scope.jobevents.length; i++) {
-            if (scope.jobevents[i].summary_fields.host) {
-                scope.jobevents[i].hostLink = "/#/inventories/" + inventory_id + "/hosts/?name=" +
-                    encodeURI(scope.jobevents[i].summary_fields.host.name);
+    $scope.removeSetHostLinks = $scope.$on('SetHostLinks', function (e, inventory_id) {
+        for (var i = 0; i < $scope.jobevents.length; i++) {
+            if ($scope.jobevents[i].summary_fields.host) {
+                $scope.jobevents[i].hostLink = "/#/inventories/" + inventory_id + "/hosts/?name=" +
+                    encodeURI($scope.jobevents[i].summary_fields.host.name);
             }
         }
     });
@@ -119,12 +120,12 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
         return html;
     }
 
-    if (scope.removePostRefresh) {
-        scope.removePostRefresh();
+    if ($scope.removePostRefresh) {
+        $scope.removePostRefresh();
     }
-    scope.removePostRefresh = scope.$on('PostRefresh', function () {
+    $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         // Initialize the parent levels
-        var set = scope[list.name], i;
+        var set = $scope[list.name], i;
         for (i = 0; i < set.length; i++) {
             set[i].event_display = set[i].event_display.replace(/^\u00a0*/g, '');
             if (set[i].event_level < 3) {
@@ -138,32 +139,32 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
             }
             set[i].show = true;
             set[i].spaces = set[i].event_level * 24;
-            if (scope.jobevents[i].failed) {
-                scope.jobevents[i].status = 'error';
+            if ($scope.jobevents[i].failed) {
+                $scope.jobevents[i].status = 'error';
                 if (i === set.length - 1) {
-                    scope.jobevents[i].statusBadgeToolTip = "A failure occurred durring one or more playbook tasks.";
+                    $scope.jobevents[i].statusBadgeToolTip = "A failure occurred durring one or more playbook tasks.";
                 } else if (set[i].event_level < 3) {
-                    scope.jobevents[i].statusBadgeToolTip = "A failure occurred within the children of this event.";
+                    $scope.jobevents[i].statusBadgeToolTip = "A failure occurred within the children of this event.";
                 } else {
-                    scope.jobevents[i].statusBadgeToolTip = "A failure occurred. Click to view details";
+                    $scope.jobevents[i].statusBadgeToolTip = "A failure occurred. Click to view details";
                 }
-            } else if (scope.jobevents[i].changed) {
-                scope.jobevents[i].status = 'changed';
+            } else if ($scope.jobevents[i].changed) {
+                $scope.jobevents[i].status = 'changed';
                 if (i === set.length - 1) {
-                    scope.jobevents[i].statusBadgeToolTip = "A change was completed durring one or more playbook tasks.";
+                    $scope.jobevents[i].statusBadgeToolTip = "A change was completed durring one or more playbook tasks.";
                 } else if (set[i].event_level < 3) {
-                    scope.jobevents[i].statusBadgeToolTip = "A change was completed by one or more children of this event.";
+                    $scope.jobevents[i].statusBadgeToolTip = "A change was completed by one or more children of this event.";
                 } else {
-                    scope.jobevents[i].statusBadgeToolTip = "A change was completed. Click to view details";
+                    $scope.jobevents[i].statusBadgeToolTip = "A change was completed. Click to view details";
                 }
             } else {
-                scope.jobevents[i].status = 'success';
+                $scope.jobevents[i].status = 'success';
                 if (i === set.length - 1) {
-                    scope.jobevents[i].statusBadgeToolTip = "All playbook tasks completed successfully.";
+                    $scope.jobevents[i].statusBadgeToolTip = "All playbook tasks completed successfully.";
                 } else if (set[i].event_level < 3) {
-                    scope.jobevents[i].statusBadgeToolTip = "All the children of this event completed successfully.";
+                    $scope.jobevents[i].statusBadgeToolTip = "All the children of this event completed successfully.";
                 } else {
-                    scope.jobevents[i].statusBadgeToolTip = "No errors occurred. Click to view details";
+                    $scope.jobevents[i].statusBadgeToolTip = "No errors occurred. Click to view details";
                 }
             }
             //cDate = new Date(set[i].created);
@@ -173,27 +174,26 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
 
         // Need below lookup to get inventory_id, which is not on event record. Plus, good idea to get status and name
         // from job in the event that there are no job event records
-        Rest.setUrl(GetBasePath('jobs') + scope.job_id);
+        Rest.setUrl(GetBasePath('jobs') + $scope.job_id);
         Rest.get()
             .success(function (data) {
-                scope.job_status = data.status;
-                scope.job_name = data.summary_fields.job_template.name;
+                $scope.job_status = data.status;
+                $scope.job_name = data.summary_fields.job_template.name;
                 LoadBreadCrumbs({
-                    path: '/jobs/' + scope.job_id,
-                    title: scope.job_id + ' - ' + data.summary_fields.job_template.name
+                    path: '/jobs/' + $scope.job_id,
+                    title: $scope.job_id + ' - ' + data.summary_fields.job_template.name
                 });
-                scope.$emit('SetHostLinks', data.inventory);
+                $scope.$emit('SetHostLinks', data.inventory);
             })
             .error(function (data, status) {
-                ProcessErrors(scope, data, status, null, {
-                    hdr: 'Error!',
-                    msg: 'Failed to get job status for job: ' + scope.job_id + '. GET status: ' + status
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Failed to get job status for job: ' + $scope.job_id + '. GET status: ' + status
                 });
             });
     });
 
     SearchInit({
-        scope: scope,
+        scope: $scope,
         set: 'jobevents',
         list: list,
         url: defaultUrl
@@ -201,7 +201,7 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
 
     page = ($routeParams.page) ? parseInt($routeParams.page,10) - 1 : null;
     PaginateInit({
-        scope: scope,
+        scope: $scope,
         list: list,
         url: defaultUrl,
         page: page
@@ -209,56 +209,56 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
 
     // Called from Inventories tab, host failed events link:
     if ($routeParams.host) {
-        scope[list.iterator + 'SearchField'] = 'host';
-        scope[list.iterator + 'SearchValue'] = $routeParams.host;
-        scope[list.iterator + 'SearchFieldLabel'] = list.fields.host.label;
+        $scope[list.iterator + 'SearchField'] = 'host';
+        $scope[list.iterator + 'SearchValue'] = $routeParams.host;
+        $scope[list.iterator + 'SearchFieldLabel'] = list.fields.host.label;
     }
 
-    scope.search(list.iterator, $routeParams.page);
+    $scope.search(list.iterator, $routeParams.page);
 
-    scope.toggleChildren = function (id, children) {
+    $scope.toggleChildren = function (id, children) {
         ToggleChildren({
-            scope: scope,
+            scope: $scope,
             list: list,
             id: id,
             children: children
         });
     };
 
-    scope.viewJobEvent = function (id) {
+    $scope.viewJobEvent = function (id) {
         EventView({
             event_id: id
         });
     };
 
-    scope.refresh = function () {
-        scope.jobSearchSpin = true;
-        scope.jobLoading = true;
+    $scope.refresh = function () {
+        $scope.jobSearchSpin = true;
+        $scope.jobLoading = true;
         Wait('start');
         Refresh({
-            scope: scope,
+            scope: $scope,
             set: 'jobevents',
             iterator: 'jobevent',
-            url: scope.current_url
+            url: $scope.current_url
         });
     };
 }
 
 JobEventsList.$inject = ['$filter', '$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'JobEventList',
-    'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope',
-    'ProcessErrors', 'GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView', 'Refresh', 'Wait'
+    'GenerateList', 'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
+    'GetBasePath', 'LookUpInit', 'ToggleChildren', 'FormatDate', 'EventView', 'Refresh', 'Wait'
 ];
 
 function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobEventsForm, GenerateForm,
     Rest, Alert, ProcessErrors, LoadBreadCrumbs, ClearScope, GetBasePath, FormatDate, EventView, Wait) {
     
-    ClearScope('htmlTemplate');
+    ClearScope();
 
     var form = JobEventsForm,
         generator = GenerateForm,
-        scope = GenerateForm.inject(form, { mode: 'edit', related: true }),
         defaultUrl = GetBasePath('base') + 'job_events/' + $routeParams.event_id + '/';
-        
+    
+    generator.inject(form, { mode: 'edit', related: true, scope: $scope});
     generator.reset();
 
     // Retrieve detail record and prepopulate the form
@@ -267,38 +267,38 @@ function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $routePara
     Rest.get()
         .success(function (data) {
             var cDate, fld, n, rows;
-            scope.event_display = data.event_display.replace(/^\u00a0*/g, '');
-            LoadBreadCrumbs({ path: '/jobs/' + $routeParams.job_id + '/job_events/' + $routeParams.event_id, title: scope.event_display });
+            $scope.event_display = data.event_display.replace(/^\u00a0*/g, '');
+            LoadBreadCrumbs({ path: '/jobs/' + $routeParams.job_id + '/job_events/' + $routeParams.event_id, title: $scope.event_display });
             for (fld in form.fields) {
                 switch (fld) {
                 case 'status':
                     if (data.failed) {
-                        scope.status = 'error';
+                        $scope.status = 'error';
                     } else if (data.changed) {
-                        scope.status = 'changed';
+                        $scope.status = 'changed';
                     } else {
-                        scope.status = 'success';
+                        $scope.status = 'success';
                     }
                     break;
                 case 'created':
                     cDate = new Date(data.created);
-                    scope.created = FormatDate(cDate);
+                    $scope.created = FormatDate(cDate);
                     break;
                 case 'host':
                     if (data.summary_fields && data.summary_fields.host) {
-                        scope.host = data.summary_fields.host.name;
+                        $scope.host = data.summary_fields.host.name;
                     }
                     break;
                 case 'id':
                 case 'task':
                 case 'play':
-                    scope[fld] = data[fld];
+                    $scope[fld] = data[fld];
                     break;
                 case 'start':
                 case 'end':
                     if (data.event_data && data.event_data.res && data.event_data.res[fld] !== undefined) {
                         cDate = new Date(data.event_data.res[fld]);
-                        scope[fld] = FormatDate(cDate);
+                        $scope[fld] = FormatDate(cDate);
                     }
                     break;
                 case 'msg':
@@ -307,7 +307,7 @@ function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $routePara
                 case 'delta':
                 case 'rc':
                     if (data.event_data && data.event_data.res && data.event_data.res[fld] !== undefined) {
-                        scope[fld] = data.event_data.res[fld];
+                        $scope[fld] = data.event_data.res[fld];
                         if (form.fields[fld].type === 'textarea') {
                             n = data.event_data.res[fld].match(/\n/g);
                             rows = (n) ? n.length : 1;
@@ -319,7 +319,7 @@ function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $routePara
                 case 'module_name':
                 case 'module_args':
                     if (data.event_data.res && data.event_data.res.invocation) {
-                        scope[fld] = data.event_data.res.invocation.fld;
+                        $scope[fld] = data.event_data.res.invocation.fld;
                     }
                     break;
                 }
@@ -327,11 +327,11 @@ function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $routePara
             Wait('stop');
         })
         .error(function (data) {
-            ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve host: ' + $routeParams.event_id +
+            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve host: ' + $routeParams.event_id +
                 '. GET status: ' + status });
         });
 
-    scope.navigateBack = function () {
+    $scope.navigateBack = function () {
         var url = '/jobs/' + $routeParams.job_id + '/job_events';
         if ($routeParams.page) {
             url += '?page=' + $routeParams.page;
@@ -339,15 +339,14 @@ function JobEventsEdit($scope, $rootScope, $compile, $location, $log, $routePara
         $location.url(url);
     };
 
-    scope.rawView = function () {
+    $scope.rawView = function () {
         EventView({
-            "event_id": scope.id
+            "event_id": $scope.id
         });
     };
 
 }
 
-JobEventsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobEventsForm',
-    'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'FormatDate',
-    'EventView', 'Wait'
+JobEventsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobEventsForm', 'GenerateForm',
+    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ClearScope', 'GetBasePath', 'FormatDate', 'EventView', 'Wait'
 ];

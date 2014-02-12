@@ -14,69 +14,67 @@ function TeamsList($scope, $rootScope, $location, $log, $routeParams, Rest, Aler
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, SetTeamListeners, GetBasePath, SelectionInit, Wait,
     Stream) {
     
-    ClearScope('htmlTemplate');
+    ClearScope();
 
     var list = TeamList,
         defaultUrl = GetBasePath('teams'),
-        view = GenerateList,
+        generator = GenerateList,
         paths = $location.path().replace(/^\//, '').split('/'),
-        mode = (paths[0] === 'teams') ? 'edit' : 'select', // if base path 'teams', we're here to add/edit teams
-        scope = view.inject(list, { mode: mode }),
+        mode = (paths[0] === 'teams') ? 'edit' : 'select',
         url;
-
-    scope.selected = [];
+    
+    generator.inject(list, { mode: mode, scope: $scope });
+    $scope.selected = [];
 
     url = GetBasePath('base') + $location.path() + '/';
     SelectionInit({
-        scope: scope,
+        scope: $scope,
         list: list,
         url: url,
         returnToCaller: 1
     });
 
-    if (scope.removePostRefresh) {
-        scope.removePostRefresh();
+    if ($scope.removePostRefresh) {
+        $scope.removePostRefresh();
     }
-    scope.removePostRefresh = scope.$on('PostRefresh', function () {
+    $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         // After a refresh, populate the organization name on each row
         var i;
-        if (scope.teams) {
-            for (i = 0; i < scope.teams.length; i++) {
-                scope.teams[i].organization_name = scope.teams[i].summary_fields.organization.name;
+        if ($scope.teams) {
+            for (i = 0; i < $scope.teams.length; i++) {
+                $scope.teams[i].organization_name = $scope.teams[i].summary_fields.organization.name;
             }
         }
     });
 
     SearchInit({
-        scope: scope,
+        scope: $scope,
         set: 'teams',
         list: list,
         url: defaultUrl
     });
     PaginateInit({
-        scope: scope,
+        scope: $scope,
         list: list,
         url: defaultUrl
     });
-    scope.search(list.iterator);
+    $scope.search(list.iterator);
 
     LoadBreadCrumbs();
 
-    scope.showActivity = function () {
-        Stream({
-            scope: scope
-        });
+    $scope.showActivity = function () {
+        Stream({ scope: $scope });
     };
 
-    scope.addTeam = function () {
+    $scope.addTeam = function () {
         $location.path($location.path() + '/add');
     };
 
-    scope.editTeam = function (id) {
+    $scope.editTeam = function (id) {
         $location.path($location.path() + '/' + id);
     };
 
-    scope.deleteTeam = function (id, name) {
+    $scope.deleteTeam = function (id, name) {
 
         var action = function () {
             Wait('start');
@@ -86,12 +84,12 @@ function TeamsList($scope, $rootScope, $location, $log, $routeParams, Rest, Aler
                 .success(function () {
                     Wait('stop');
                     $('#prompt-modal').modal('hide');
-                    scope.search(list.iterator);
+                    $scope.search(list.iterator);
                 })
                 .error(function (data, status) {
                     Wait('stop');
                     $('#prompt-modal').modal('hide');
-                    ProcessErrors(scope, data, status, null, {
+                    ProcessErrors($scope, data, status, null, {
                         hdr: 'Error!',
                         msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status
                     });
@@ -116,7 +114,7 @@ function TeamsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, T
     Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GenerateList,
     OrganizationList, SearchInit, PaginateInit, GetBasePath, LookUpInit, Wait) {
     ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
-    //scope.
+    //$scope.
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('teams'),
@@ -129,7 +127,7 @@ function TeamsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, T
     LoadBreadCrumbs();
 
     LookUpInit({
-        scope: scope,
+        scope: $scope,
         form: form,
         current_item: null,
         list: OrganizationList,
@@ -137,7 +135,7 @@ function TeamsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, T
     });
 
     // Save
-    scope.formSave = function () {
+    $scope.formSave = function () {
         var fld, data;
         generator.clearApiErrors();
         Wait('start');
@@ -154,13 +152,13 @@ function TeamsAdd($scope, $rootScope, $compile, $location, $log, $routeParams, T
             })
             .error(function (data, status) {
                 Wait('stop');
-                ProcessErrors(scope, data, status, form, { hdr: 'Error!', msg: 'Failed to add new team. Post returned status: ' +
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to add new team. Post returned status: ' +
                     status });
             });
     };
 
     // Reset
-    scope.formReset = function () {
+    $scope.formReset = function () {
         // Defaults
         generator.reset();
     };
@@ -172,45 +170,44 @@ TeamsAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$r
 ];
 
 
-function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm,
-    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
-    RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt,
-    GetBasePath, CheckAccess, OrganizationList, Wait, Stream) {
-    ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
-    //scope.
+function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, TeamForm, GenerateForm, Rest, Alert, ProcessErrors,
+    LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, LookUpInit, Prompt, GetBasePath, CheckAccess,
+    OrganizationList, Wait, Stream) {
+    
+    ClearScope();
 
     var defaultUrl = GetBasePath('teams'),
         generator = GenerateForm,
         form = TeamForm,
-        scope = generator.inject(form, { mode: 'edit', related: true }),
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
         id = $routeParams.team_id,
         relatedSets = {};
 
+    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
     generator.reset();
 
-    scope.PermissionAddAllowed = false;
+    $scope.PermissionAddAllowed = false;
 
     // Retrieve each related set and any lookups
-    if (scope.teamLoadedRemove) {
-        scope.teamLoadedRemove();
+    if ($scope.teamLoadedRemove) {
+        $scope.teamLoadedRemove();
     }
-    scope.teamLoadedRemove = scope.$on('teamLoaded', function () {
-        CheckAccess({ scope: scope });
-        Rest.setUrl(scope.organization_url);
+    $scope.teamLoadedRemove = $scope.$on('teamLoaded', function () {
+        CheckAccess({ scope: $scope });
+        Rest.setUrl($scope.organization_url);
         Rest.get()
             .success(function (data) {
-                scope.organization_name = data.name;
+                $scope.organization_name = data.name;
                 master.organization_name = data.name;
                 Wait('stop');
             })
             .error(function (data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve organization: ' +
-                    scope.orgnization_url + '. GET status: ' + status });
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve organization: ' +
+                    $scope.orgnization_url + '. GET status: ' + status });
             });
         for (var set in relatedSets) {
-            scope.search(relatedSets[set].iterator);
+            $scope.search(relatedSets[set].iterator);
         }
     });
 
@@ -227,8 +224,8 @@ function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
             LoadBreadCrumbs({ path: '/teams/' + id, title: data.name });
             for (fld in form.fields) {
                 if (data[fld]) {
-                    scope[fld] = data[fld];
-                    master[fld] = scope[fld];
+                    $scope[fld] = data[fld];
+                    master[fld] = $scope[fld];
                 }
             }
             related = data.related;
@@ -242,46 +239,44 @@ function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
             }
             // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
             RelatedSearchInit({
-                scope: scope,
+                scope: $scope,
                 form: form,
                 relatedSets: relatedSets
             });
             RelatedPaginateInit({
-                scope: scope,
+                scope: $scope,
                 relatedSets: relatedSets
             });
 
             LookUpInit({
-                scope: scope,
+                scope: $scope,
                 form: form,
                 current_item: data.organization,
                 list: OrganizationList,
                 field: 'organization'
             });
 
-            scope.organization_url = data.related.organization;
-            scope.$emit('teamLoaded');
+            $scope.organization_url = data.related.organization;
+            $scope.$emit('teamLoaded');
         })
         .error(function (data, status) {
-            ProcessErrors(scope, data, status, form, { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $routeParams.team_id +
+            ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to retrieve team: ' + $routeParams.team_id +
                 '. GET status: ' + status });
         });
 
-    scope.showActivity = function () {
-        Stream({
-            scope: scope
-        });
+    $scope.showActivity = function () {
+        Stream({ scope: $scope });
     };
 
     // Save changes to the parent
-    scope.formSave = function () {
+    $scope.formSave = function () {
         var data = {}, fld;
         generator.clearApiErrors();
         Wait('start');
         $rootScope.flashMessage = null;
         Rest.setUrl(defaultUrl + $routeParams.team_id + '/');
         for (fld in form.fields) {
-            data[fld] = scope[fld];
+            data[fld] = $scope[fld];
         }
         Rest.put(data)
             .success(function () {
@@ -294,25 +289,25 @@ function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
             })
             .error(function (data, status) {
                 Wait('stop');
-                ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                     msg: 'Failed to update team: ' + $routeParams.team_id + '. PUT status: ' + status });
             });
     };
 
     // Cancel
-    scope.formReset = function () {
+    $scope.formReset = function () {
         $rootScope.flashMessage = null;
         generator.reset();
         for (var fld in master) {
-            scope[fld] = master[fld];
+            $scope[fld] = master[fld];
         }
     };
 
     // Related set: Add button
-    scope.add = function (set) {
+    $scope.add = function (set) {
         $rootScope.flashMessage = null;
         if (set === 'permissions') {
-            if (scope.PermissionAddAllowed) {
+            if ($scope.PermissionAddAllowed) {
                 $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/add');
             } else {
                 Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
@@ -323,7 +318,7 @@ function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
     };
 
     // Related set: Edit button
-    scope.edit = function (set, id) {
+    $scope.edit = function (set, id) {
         $rootScope.flashMessage = null;
         if (set === 'permissions') {
             $location.path('/' + base + '/' + $routeParams.team_id + '/' + set + '/' + id);
@@ -333,23 +328,23 @@ function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
     };
 
     // Related set: Delete button
-    scope['delete'] = function (set, itm_id, name, title) {
+    $scope['delete'] = function (set, itm_id, name, title) {
         $rootScope.flashMessage = null;
 
         var action = function () {
             var url;
             if (set === 'permissions') {
-                if (scope.PermissionAddAllowed) {
+                if ($scope.PermissionAddAllowed) {
                     url = GetBasePath('base') + 'permissions/' + itm_id + '/';
                     Rest.setUrl(url);
                     Rest.destroy()
                         .success(function () {
                             $('#prompt-modal').modal('hide');
-                            scope.search(form.related[set].iterator);
+                            $scope.search(form.related[set].iterator);
                         })
                         .error(function (data, status) {
                             $('#prompt-modal').modal('hide');
-                            ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
+                            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
                                 ' failed. DELETE returned status: ' + status });
                         });
                 } else {
@@ -361,11 +356,11 @@ function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
                 Rest.post({ id: itm_id, disassociate: 1 })
                     .success(function () {
                         $('#prompt-modal').modal('hide');
-                        scope.search(form.related[set].iterator);
+                        $scope.search(form.related[set].iterator);
                     })
                     .error(function (data, status) {
                         $('#prompt-modal').modal('hide');
-                        ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
+                        ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url +
                             ' failed. POST returned status: ' + status });
                     });
             }
@@ -373,7 +368,7 @@ function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
 
         Prompt({
             hdr: 'Delete',
-            body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
+            body: 'Are you sure you want to remove ' + name + ' from ' + $scope.name + ' ' + title + '?',
             action: action
         });
     };

@@ -14,6 +14,10 @@ angular.module('UserFormDefinition', [])
         name: 'user',
         well: true,
         forceListeners: true,
+        collapse: true,
+        collapseTitle: "Properties",
+        collapseMode: 'edit',
+        collapseOpen: true,
 
         actions: {
             stream: {

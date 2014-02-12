@@ -10,11 +10,15 @@
 angular.module('ProjectFormDefinition', [])
     .value('ProjectsForm', {
 
-        addTitle: 'Create Project', // Title in add mode
-        editTitle: '{{ name }}', // Title in edit mode
-        name: 'project', // entity or model name in singular form
-        well: true, // Wrap the form with TB well
+        addTitle: 'Create Project',
+        editTitle: '{{ name }}',
+        name: 'project',
         forceListeners: true,
+        well: true,
+        collapse: true,
+        collapseTitle: "Properties",
+        collapseMode: 'edit',
+        collapseOpen: true,
 
         actions: {
             stream: {

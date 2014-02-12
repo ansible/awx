@@ -2,9 +2,9 @@
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
  * FormGenerator
- * Pass in a form definition from FormDefinitions and out pops an html template.
- * See js/form-definitions.js for form example. For now produces a Twitter Bootstrap
- * horizontal form.
+ *
+ * Pass in a form definition and get back an html template. Use the.inject() method 
+ * to add the template to the DOM and compile.
  *
  */
 
@@ -18,9 +18,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
         HelpCollapse, Button, DropDown, Empty, SelectIcon) {
         return {
 
-            setForm: function (form) {
-                this.form = form;
-            },
+            setForm: function (form) { this.form = form; },
 
             attr: Attr,
 
@@ -317,7 +315,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         }
 
                         $(this).accordion({
-                            collapsible: true,
+                            collapsible: false,
                             heightStyle: 'content',
                             active: active,
                             activate: function () {
@@ -1090,7 +1088,6 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                             });
                         }
                         html += "</div>\n";
-                        //html += "<div class=\"status-spin\"><i class=\"icon-spinner icon-spin\" ng-show=\"statusSearchSpin == true\"></i></div>\n";
                     }
                     html += "<div class=\"form status-fields\">\n";
                     for (fld in this.form.statusFields) {
@@ -1118,11 +1115,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         html += "class=\"jqui-accordion\">\n";
                         html += "<h3>" + this.form.collapseTitle + "</h3>\n";
                         html += "<div>\n";
+                        options.collapseAlreadyStarted = true;
                     }
 
                     // Start the well
                     if (!this.modal && this.has('well')) {
-                        html += "<div class=\"well\">\n";
+                        if ( !(this.form.collapse && this.form.collapseMode === options.mode)) {
+                            html += "<div class=\"well\">\n";
+                        }
                     }
 
                     if (!this.modal && this.form.actions) {
@@ -1319,12 +1319,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                     html += "</form>\n";
 
                     if (!this.modal && this.has('well')) {
-                        html += "</div>\n";
+                        if ( !(this.form.collapse && this.form.collapseMode === options.mode)) {
+                            html += "</div>\n";
+                        }
                     }
 
                     if (this.form.collapse && this.form.collapseMode === options.mode) {
                         html += "</div>\n";
-                        html += "</div>\n";
+                        //html += "</div>\n";
                     }
                 }
 
@@ -1343,8 +1345,15 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                 //
                 var idx = 1,
                     form = this.form,
-                    html = "<div id=\"" + this.form.name + "-collapse-" + idx + "\" class=\"jqui-accordion\">\n",
-                    act, fAction, fld, itm, action, cnt, base;
+                    html, act, fAction, fld, itm, action, cnt, base;
+
+                if (options.collapseAlreadyStarted) {
+                    // A collapse is already started for 'Properties'
+                    html = '';
+                }
+                else {
+                    html = "<div id=\"" + this.form.name + "-collapse-" + idx + "\" class=\"jqui-accordion\">\n";
+                }
                 
                 for (itm in form.related) {
                     if (form.related[itm].type === 'collection') {
@@ -1358,7 +1367,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                             html += "</div>\n";
                         }
 
-                        html += "<div class=\"well\">\n";
+                        //html += "<div class=\"well\">\n";
                         html += "<div class=\"row\">\n";
 
                         html += SearchWidget({
@@ -1396,12 +1405,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                             html += " <i class=\"";
                             if (form.related[itm].fields[fld].key) {
                                 if (form.related[itm].fields[fld].desc) {
-                                    html += "icon-sort-down";
+                                    html += "fa fa-sort-down";
                                 } else {
-                                    html += "icon-sort-up";
+                                    html += "fa fa-sort-up";
                                 }
                             } else {
-                                html += "icon-sort";
+                                html += "fa fa-sort";
                             }
                             html += "\"></i></a></th>\n";
                         }
@@ -1446,19 +1455,19 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         html += "</tr>\n";
 
                         // Message for when a related collection is empty
-                        html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == false && (" + itm + " == null || " + itm + ".length == 0)\">\n";
-                        html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
+                        html += "<tr class=\"loading-info\" ng-show=\"" + form.related[itm].iterator + "Loading == false && (" + itm + " == null || " + itm + ".length == 0)\">\n";
+                        html += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">No records matched your search.</div></td>\n";
                         html += "</tr>\n";
 
                         // Message for loading
-                        html += "<tr class=\"info\" ng-show=\"" + form.related[itm].iterator + "Loading == true\">\n";
-                        html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">Loading...</div></td>\n";
+                        html += "<tr ng-show=\"" + form.related[itm].iterator + "Loading == true\">\n";
+                        html += "<td colspan=\"" + cnt + "\"><div class=\"loading-info\">Loading...</div></td>\n";
                         html += "</tr>\n";
 
                         // End List
                         html += "</tbody>\n";
                         html += "</table>\n";
-                        html += "</div>\n"; // close well
+                        //html += "</div>\n"; // close well
                         html += "</div>\n"; // close list div
 
                         html += PaginateWidget({

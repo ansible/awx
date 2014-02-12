@@ -1,41 +1,39 @@
-/************************************
+/********************************************
  * Copyright (c) 2014 AnsibleWorks, Inc.
- *
  *
  *  Users.js
  *
  *  Controller functions for User model.
  *
  */
+
 'use strict';
 
 function UsersList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, UserList, GenerateList, LoadBreadCrumbs,
     Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors, GetBasePath, SelectionInit, Wait, Stream) {
 
-    ClearScope('htmlTemplate');
+    ClearScope();
 
     var list = UserList,
         defaultUrl = GetBasePath('users'),
-        view = GenerateList,
+        generator = GenerateList,
         base = $location.path().replace(/^\//, '').split('/')[0],
-        mode = (base === 'users') ? 'edit' : 'select', // if base path 'users', we're here to add/edit users
-        scope = view.inject(UserList, { mode: mode }),
+        mode = (base === 'users') ? 'edit' : 'select',
         url = (base === 'organizations') ? GetBasePath('organizations') + $routeParams.organization_id + '/users/' :
             GetBasePath('teams') + $routeParams.team_id + '/users/';
 
-    scope.selected = [];
+    generator.inject(UserList, { mode: mode, scope: $scope });
+        
+    $scope.selected = [];
 
-    SelectionInit({
-        scope: scope,
-        list: list,
-        url: url,
-        returnToCaller: 1
-    });
-
-    if (scope.removePostRefresh) {
-        scope.removePostRefresh();
+    if (mode === 'select') {
+        SelectionInit({ scope: $scope, list: list, url: url, returnToCaller: 1 });
     }
-    scope.removePostRefresh = scope.$on('PostRefresh', function () {
+
+    if ($scope.removePostRefresh) {
+        $scope.removePostRefresh();
+    }
+    $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         // Cleanup after a delete
         Wait('stop');
         $('#prompt-modal').off();
@@ -43,35 +41,33 @@ function UsersList($scope, $rootScope, $location, $log, $routeParams, Rest, Aler
 
     $rootScope.flashMessage = null;
     SearchInit({
-        scope: scope,
+        scope: $scope,
         set: 'users',
         list: list,
         url: defaultUrl
     });
     PaginateInit({
-        scope: scope,
+        scope: $scope,
         list: list,
         url: defaultUrl
     });
-    scope.search(list.iterator);
+    $scope.search(list.iterator);
 
     LoadBreadCrumbs();
 
-    scope.showActivity = function () {
-        Stream({
-            scope: scope
-        });
+    $scope.showActivity = function () {
+        Stream({ scope: $scope });
     };
 
-    scope.addUser = function () {
+    $scope.addUser = function () {
         $location.path($location.path() + '/add');
     };
 
-    scope.editUser = function (id) {
+    $scope.editUser = function (id) {
         $location.path($location.path() + '/' + id);
     };
 
-    scope.deleteUser = function (id, name) {
+    $scope.deleteUser = function (id, name) {
 
         var action = function () {
             $('#prompt-modal').on('hidden.bs.modal', function () {
@@ -82,12 +78,11 @@ function UsersList($scope, $rootScope, $location, $log, $routeParams, Rest, Aler
             Rest.setUrl(url);
             Rest.destroy()
                 .success(function () {
-                    scope.search(list.iterator);
+                    $scope.search(list.iterator);
                 })
                 .error(function (data, status) {
-                    Wait('stop');
-                    ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Call to ' + url + ' failed. DELETE returned status: ' +
-                      status });
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                 });
         };
 
@@ -108,19 +103,19 @@ UsersList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams'
 function UsersAdd($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert, ProcessErrors,
     LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath, LookUpInit, OrganizationList, ResetForm, Wait) {
     
-    ClearScope('htmlTemplate');
+    ClearScope();
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('organizations'),
         form = UserForm,
-        generator = GenerateForm,
-        scope = generator.inject(form, { mode: 'add', related: false });
+        generator = GenerateForm;
     
+    generator.inject(form, { mode: 'add', related: false, scope: $scope });
     ResetForm();
     
-    scope.ldap_user = false;
-    scope.not_ldap_user = !scope.ldap_user;
-    scope.ldap_dn = null;
+    $scope.ldap_user = false;
+    $scope.not_ldap_user = !$scope.ldap_user;
+    $scope.ldap_dn = null;
 
     generator.reset();
 
@@ -129,7 +124,7 @@ function UsersAdd($scope, $rootScope, $compile, $location, $log, $routeParams, U
     // Configure the lookup dialog. If we're adding a user through the Organizations tab, 
     // default the Organization value.
     LookUpInit({
-        scope: scope,
+        scope: $scope,
         form: form,
         current_item: ($routeParams.organization_id !== undefined) ? $routeParams.organization_id : null,
         list: OrganizationList,
@@ -137,31 +132,29 @@ function UsersAdd($scope, $rootScope, $compile, $location, $log, $routeParams, U
     });
 
     if ($routeParams.organization_id) {
-        scope.organization = $routeParams.organization_id;
+        $scope.organization = $routeParams.organization_id;
         Rest.setUrl(GetBasePath('organizations') + $routeParams.organization_id + '/');
         Rest.get()
             .success(function (data) {
-                scope.organization_name = data.name;
+                $scope.organization_name = data.name;
             })
             .error(function (data, status) {
-                ProcessErrors(scope, data, status, form, {
-                    hdr: 'Error!',
-                    msg: 'Failed to lookup Organization: ' + data.id + '. GET returned status: ' + status
-                });
+                ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                    msg: 'Failed to lookup Organization: ' + data.id + '. GET returned status: ' + status });
             });
     }
 
     // Save
-    scope.formSave = function () {
+    $scope.formSave = function () {
         generator.clearApiErrors();
         var fld, data = {};
-        if (scope.organization !== undefined && scope.organization !== null && scope.organization !== '') {
-            Rest.setUrl(defaultUrl + scope.organization + '/users/');
+        if ($scope.organization !== undefined && $scope.organization !== null && $scope.organization !== '') {
+            Rest.setUrl(defaultUrl + $scope.organization + '/users/');
             for (fld in form.fields) {
                 if (form.fields[fld].realName) {
-                    data[form.fields[fld].realName] = scope[fld];
+                    data[form.fields[fld].realName] = $scope[fld];
                 } else {
-                    data[fld] = scope[fld];
+                    data[fld] = $scope[fld];
                 }
             }
             data.is_superuser = data.is_superuser || false;
@@ -176,41 +169,39 @@ function UsersAdd($scope, $rootScope, $compile, $location, $log, $routeParams, U
                     ReturnToCaller(1);
                 })
                 .error(function (data, status) {
-                    Wait('stop');
-                    ProcessErrors(scope, data, status, form, { hdr: 'Error!', msg: 'Failed to add new user. POST returned status: ' + status });
+                    ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to add new user. POST returned status: ' + status });
                 });
         } else {
-            scope.organization_name_api_error = 'A value is required';
+            $scope.organization_name_api_error = 'A value is required';
         }
     };
 
     // Cancel
-    scope.formReset = function () {
+    $scope.formReset = function () {
         // Defaults
         generator.reset();
-        scope.ldap_user = false;
+        $scope.ldap_user = false;
     };
 
     // Password change
-    scope.clearPWConfirm = function (fld) {
+    $scope.clearPWConfirm = function (fld) {
         // If password value changes, make sure password_confirm must be re-entered
-        scope[fld] = '';
-        scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
+        $scope[fld] = '';
+        $scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
     };
 }
 
 UsersAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'UserForm', 'GenerateForm',
-    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GetBasePath',
-    'LookUpInit', 'OrganizationList', 'ResetForm', 'Wait'
+    'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope', 'GetBasePath', 'LookUpInit',
+    'OrganizationList', 'ResetForm', 'Wait'
 ];
 
 
-function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm,
-    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit,
-    RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath, Prompt, CheckAccess,
-    ResetForm, Wait, Stream) {
-    ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
-    //scope.
+function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, UserForm, GenerateForm, Rest, Alert,
+    ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, GetBasePath,
+    Prompt, CheckAccess, ResetForm, Wait, Stream) {
+    
+    ClearScope();
 
     var defaultUrl = GetBasePath('users'),
         generator = GenerateForm,
@@ -224,26 +215,24 @@ function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
         $scope.removeFormReady();
     }
     $scope.removeFormReady = $scope.$on('formReady', function () {
-        var scope = generator.inject(form, { mode: 'edit', related: true });
+        generator.inject(form, { mode: 'edit', related: true, scope: $scope });
         generator.reset();
 
-        if (scope.removePostRefresh) {
-            scope.removePostRefresh();
+        if ($scope.removePostRefresh) {
+            $scope.removePostRefresh();
         }
 
-        scope.PermissionAddAllowed = false;
+        $scope.PermissionAddAllowed = false;
 
         // After the Organization is loaded, retrieve each related set
-        if (scope.removeUserLoaded) {
-            scope.removeUserLoaded();
+        if ($scope.removeUserLoaded) {
+            $scope.removeUserLoaded();
         }
-        scope.removeUserLoaded = scope.$on('userLoaded', function () {
+        $scope.removeUserLoaded = $scope.$on('userLoaded', function () {
             for (var set in relatedSets) {
-                scope.search(relatedSets[set].iterator);
+                $scope.search(relatedSets[set].iterator);
             }
-            CheckAccess({
-                scope: scope
-            }); //Does the user have access to add/edit Permissions?
+            CheckAccess({ scope: $scope }); //Does the user have access to add/edit Permissions?
             Wait('stop');
         });
 
@@ -256,11 +245,11 @@ function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
                 for (fld in form.fields) {
                     if (data[fld]) {
                         if (fld === 'is_superuser') {
-                            scope[fld] = (data[fld] === 'true' || data[fld] === true) ? 'true' : 'false';
+                            $scope[fld] = (data[fld] === 'true' || data[fld] === true) ? 'true' : 'false';
                         } else {
-                            scope[fld] = data[fld];
+                            $scope[fld] = data[fld];
                         }
-                        master[fld] = scope[fld];
+                        master[fld] = $scope[fld];
                     }
                 }
                 related = data.related;
@@ -273,38 +262,38 @@ function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
                     }
                 }
 
-                scope.ldap_user = (data.ldap_dn !== null && data.ldap_dn !== undefined && data.ldap_dn !== '') ? true : false;
-                scope.not_ldap_user = !scope.ldap_user;
-                master.ldap_user = scope.ldap_user;
+                $scope.ldap_user = (data.ldap_dn !== null && data.ldap_dn !== undefined && data.ldap_dn !== '') ? true : false;
+                $scope.not_ldap_user = !$scope.ldap_user;
+                master.ldap_user = $scope.ldap_user;
 
                 // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
                 RelatedSearchInit({
-                    scope: scope,
+                    scope: $scope,
                     form: form,
                     relatedSets: relatedSets
                 });
                 RelatedPaginateInit({
-                    scope: scope,
+                    scope: $scope,
                     relatedSets: relatedSets
                 });
-                scope.$emit('userLoaded');
+                $scope.$emit('userLoaded');
             })
             .error(function (data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user: ' +
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user: ' +
                     $routeParams.id + '. GET status: ' + status });
             });
 
         // Save changes to the parent
-        scope.formSave = function () {
+        $scope.formSave = function () {
             var data = {}, fld;
             generator.clearApiErrors();
             $rootScope.flashMessage = null;
             Rest.setUrl(defaultUrl + id + '/');
             for (fld in form.fields) {
                 if (form.fields[fld].realName) {
-                    data[form.fields[fld].realName] = scope[fld];
+                    data[form.fields[fld].realName] = $scope[fld];
                 } else {
-                    data[fld] = scope[fld];
+                    data[fld] = $scope[fld];
                 }
             }
 
@@ -321,42 +310,39 @@ function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
                     ReturnToCaller(1);
                 })
                 .error(function (data, status) {
-                    Wait('stop');
-                    ProcessErrors(scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update users: ' + $routeParams.id +
+                    ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update users: ' + $routeParams.id +
                         '. PUT status: ' + status });
                 });
         };
 
-        scope.showActivity = function () {
-            Stream({
-                scope: scope
-            });
+        $scope.showActivity = function () {
+            Stream({ scope: $scope });
         };
 
         // Cancel
-        scope.formReset = function () {
+        $scope.formReset = function () {
             $rootScope.flashMessage = null;
             generator.reset();
             for (var fld in master) {
-                scope[fld] = master[fld];
+                $scope[fld] = master[fld];
             }
-            scope.password_confirm = scope.password;
+            $scope.password_confirm = $scope.password;
         };
 
         // Password change
-        scope.clearPWConfirm = function (fld) {
+        $scope.clearPWConfirm = function (fld) {
             // If password value changes, make sure password_confirm must be re-entered
-            scope[fld] = '';
-            scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
+            $scope[fld] = '';
+            $scope[form.name + '_form'][fld].$setValidity('awpassmatch', false);
             $rootScope.flashMessage = null;
         };
 
 
         // Related set: Add button
-        scope.add = function (set) {
+        $scope.add = function (set) {
             $rootScope.flashMessage = null;
             if (set === 'permissions') {
-                if (scope.PermissionAddAllowed) {
+                if ($scope.PermissionAddAllowed) {
                     $location.path('/' + base + '/' + $routeParams.user_id + '/' + set + '/add');
                 } else {
                     Alert('Access Denied', 'You do not have access to this function. Please contact your system administrator.');
@@ -367,7 +353,7 @@ function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
         };
 
         // Related set: Edit button
-        scope.edit = function (set, id) {
+        $scope.edit = function (set, id) {
             $rootScope.flashMessage = null;
             if (set === 'permissions') {
                 $location.path('/users/' + $routeParams.user_id + '/permissions/' + id);
@@ -377,23 +363,23 @@ function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
         };
 
         // Related set: Delete button
-        scope['delete'] = function (set, itm_id, name, title) {
+        $scope['delete'] = function (set, itm_id, name, title) {
             $rootScope.flashMessage = null;
 
             var action = function () {
                 var url;
                 if (set === 'permissions') {
-                    if (scope.PermissionAddAllowed) {
+                    if ($scope.PermissionAddAllowed) {
                         url = GetBasePath('base') + 'permissions/' + itm_id + '/';
                         Rest.setUrl(url);
                         Rest.destroy()
                             .success(function () {
                                 $('#prompt-modal').modal('hide');
-                                scope.search(form.related[set].iterator);
+                                $scope.search(form.related[set].iterator);
                             })
                             .error(function (data, status) {
                                 $('#prompt-modal').modal('hide');
-                                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                                ProcessErrors($scope, data, status, null, { hdr: 'Error!',
                                     msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                             });
                     } else {
@@ -408,21 +394,19 @@ function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
                     })
                         .success(function () {
                             $('#prompt-modal').modal('hide');
-                            scope.search(form.related[set].iterator);
+                            $scope.search(form.related[set].iterator);
                         })
                         .error(function (data, status) {
                             $('#prompt-modal').modal('hide');
-                            ProcessErrors(scope, data, status, null, {
-                                hdr: 'Error!',
-                                msg: 'Call to ' + url + ' failed. POST returned status: ' + status
-                            });
+                            ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                                msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
                         });
                 }
             };
 
             Prompt({
                 hdr: 'Delete',
-                body: 'Are you sure you want to remove ' + name + ' from ' + scope.username + ' ' + title + '?',
+                body: 'Are you sure you want to remove ' + name + ' from ' + $scope.username + ' ' + title + '?',
                 action: action
             });
         };
@@ -456,7 +440,8 @@ function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
                 $scope.$emit('formReady');
             })
             .error(function (data, status) {
-                ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve application config. GET status: ' + status });
+                ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Failed to retrieve application config. GET status: ' + status });
             });
     });
 
@@ -472,7 +457,8 @@ function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
             }
         })
         .error(function (data, status) {
-            ProcessErrors($scope, data, status, null, { hdr: 'Error!', msg: 'Failed to retrieve user: ' + id + '. GET status: ' + status });
+            ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                msg: 'Failed to retrieve user: ' + id + '. GET status: ' + status });
         });
 }
 

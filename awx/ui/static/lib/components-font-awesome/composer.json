@@ -1,0 +1,26 @@
+{
+    "name": "components/font-awesome",
+    "description": "The iconic font designed for use with Twitter Bootstrap.",
+    "type": "component",
+    "license": [
+        "MIT",
+        "OFL-1.1"
+    ],
+    "require": {
+        "robloach/component-installer": "*"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "4.0.x-dev"
+        },
+        "component": {
+            "styles": [
+                "css/font-awesome.css"
+            ],
+            "files": [
+                "css/font-awesome.min.css",
+                "fonts/*"
+            ]
+        }
+    }
+}

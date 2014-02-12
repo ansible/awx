@@ -38,11 +38,10 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
                 var i, j, found;
                 for (i = 0; i < scope[list.name].length; i++) {
                     if (scope[list.name][i].id === id) {
-                        if ((scope[list.name][i].checked === '0' && !ischeckbox) || (scope[list.name][i].checked === 1 && ischeckbox)) {
+                        if ((scope[list.name][i].checked === "0" && !ischeckbox) || (scope[list.name][i].checked === "1" && ischeckbox)) {
                             // select the row
                             scope[list.name][i].checked = '1';
                             scope[list.name][i].success_class = 'success';
-
                             // add selected object to the array
                             found = false;
                             for (j = 0; j < selected.length; j++) {
@@ -70,6 +69,7 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
                     }
                 }
                 if (selected.length > 0) {
+                    console.log('selected.length: ' + selected.length);
                     scope.formModalActionDisabled = false;
                     scope.disableSelectBtn = false;
                 } else {

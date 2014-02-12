@@ -130,8 +130,7 @@ angular.module('StreamWidget', ['RestServices', 'Utilities', 'StreamListDefiniti
                 }
                 $rootScope.breadcrumbs.push({
                     path: path,
-                    title: title,
-                    ngClick: "closeStream('" + path + "')"
+                    title: title
                 });
             }
         };

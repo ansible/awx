@@ -12,24 +12,18 @@
 
 angular.module('Utilities', ['RestServices', 'Utilities'])
 
+/*
+ *  Place to remove things that might be lingering from a prior tab or view.
+ *  This used to destroy the scope, but that causes issues in angular 1.2.x
+ */
 .factory('ClearScope', [
     function () {
-        return function (id) {
-
-            var element = document.getElementById(id),
-                scope;
-            if (element) {
-                scope = angular.element(element).scope();
-                scope.$destroy();
-            }
-
+        return function () {
             $('.tooltip').each(function () {
-                // Remove any lingering tooltip and popover <div> elements
                 $(this).remove();
             });
 
             $('.popover').each(function () {
-                // remove lingering popover <div>. Seems to be a bug in TB3 RC1
                 $(this).remove();
             });
 
@@ -38,9 +32,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             } catch (e) {
                 // ignore
             }
-
             $(window).unbind('resize');
-
         };
     }
 ])
@@ -73,13 +65,15 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 })
 
 
+/* 
+ * Pass in the header and message you want displayed on TB modal dialog found in index.html.
+ * Assumes an #id of 'alert-modal'. Pass in an optional TB alert class (i.e. alert-danger, alert-success,
+ * alert-info...). Pass an optional function(){}, if you want a specific action to occur when user
+ * clicks 'OK' button. Set secondAlert to true, when a second dialog is needed.
+ */
 .factory('Alert', ['$rootScope',
     function ($rootScope) {
         return function (hdr, msg, cls, action, secondAlert, disableButtons) {
-            // Pass in the header and message you want displayed on TB modal dialog found in index.html.
-            // Assumes an #id of 'alert-modal'. Pass in an optional TB alert class (i.e. alert-danger, alert-success,
-            // alert-info...). Pass an optional function(){}, if you want a specific action to occur when user
-            // clicks 'OK' button. Set secondAlert to true, when a second dialog is needed.
             if (secondAlert) {
                 $rootScope.alertHeader2 = hdr;
                 $rootScope.alertBody2 = msg;
@@ -286,14 +280,16 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
+
+/* Display a help dialog
+ *
+ * HelpDialog({ defn: <HelpDefinition> })
+ *
+ */
 .factory('HelpDialog', ['$rootScope', '$location', 'Store',
     function ($rootScope, $location, Store) {
         return function (params) {
-            // Display a help dialog
-            //
-            // HelpDialog({ defn: <HelpDefinition> })
-            //
-
+            
             var defn = params.defn,
                 current_step = params.step,
                 autoShow = params.autoShow || false;
@@ -436,12 +432,15 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
+
+/* 
+ * Split the current path by '/' and use the array elements from 0 up to and
+ * including idx as the new path.  If no idx value supplied, use 0 to length - 1.  
+ *
+ */
 .factory('ReturnToCaller', ['$location', 'Empty',
     function ($location, Empty) {
         return function (idx) {
-            // Split the current path by '/' and use the array elements from 0 up to and
-            // including idx as the new path.  If no idx value supplied, use 0 to length - 1.  
-
             var paths = $location.path().replace(/^\//, '').split('/'),
                 newpath = '',
                 i;
@@ -454,22 +453,28 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
+
+/*
+ * Wrapper for data filter- an attempt to insure all dates display in
+ * the same format. Pass in date object.
+ */
 .factory('FormatDate', ['$filter',
     function ($filter) {
         return function (dt) {
-            // Wrapper for data filter- an attempt to insure all dates display in
-            // the same format. Pass in date object.
             return $filter('date')(dt, 'MM/dd/yy HH:mm:ss');
         };
     }
 ])
 
+/* 
+ * Display a spinning icon in the center of the screen to freeze the 
+ * UI while waiting on async things to complete (i.e. API calls).    
+ * Wait('start' | 'stop');
+ *
+ */
 .factory('Wait', ['$rootScope',
     function ($rootScope) {
         return function (directive) {
-            // Display a spinning icon in the center of the screen to freeze the 
-            // UI while waiting on async things to complete (i.e. API calls).    
-            //   Wait('start' | 'stop');
             var docw, doch, spinnyw, spinnyh, x, y;
             if (directive === 'start' && !$rootScope.waiting) {
                 $rootScope.waiting = true;
@@ -540,11 +545,13 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
     }
 ])
 
+/* 
+ * Make an Options call to the API and retrieve dropdown options
+ *
+ */
 .factory('GetChoices', ['Rest', 'ProcessErrors',
     function (Rest, ProcessErrors) {
         return function (params) {
-            // Get dropdown options
-
             var scope = params.scope,
                 url = params.url,
                 field = params.field,

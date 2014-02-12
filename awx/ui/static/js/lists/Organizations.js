@@ -17,7 +17,7 @@ angular.module('OrganizationListDefinition', [])
         selectTitle: 'Add Organizations',
         editTitle: 'Organizations',
         hover: true,
-        index: true,
+        index: false,
 
         fields: {
             name: {
@@ -38,7 +38,7 @@ angular.module('OrganizationListDefinition', [])
             stream: {
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                mode: 'all'
+                mode: 'edit'
             }
         },
 

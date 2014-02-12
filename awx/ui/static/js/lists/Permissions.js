@@ -54,7 +54,7 @@ angular.module('PermissionListDefinition', [])
             stream: {
                 ngClick: "showActivity()",
                 awToolTip: "View Activity Stream",
-                mode: 'all'
+                mode: 'edit'
             }
         },
 

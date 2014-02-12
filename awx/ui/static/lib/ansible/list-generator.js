@@ -56,26 +56,29 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     } else {
                         element = angular.element(document.getElementById('htmlTemplate'));
                     }
+                    
                     this.setList(list);
                     element.html(this.build(options)); // Inject the html
-                    if (options.prepend) { // Add any extra HTML passed in options
+                    
+                    if (options.prepend) {
                         element.prepend(options.prepend);
                     }
+                    
                     if (options.append) {
-                        element.append(options.prepend);
+                        element.append(options.append);
                     }
 
                     if (options.scope) {
                         this.scope = options.scope;
                     } else {
-                        this.scope = element.scope(); // Set scope specific to the element we're compiling, avoids circular reference
-                    } // From here use 'scope' to manipulate the form, as the form is not in '$scope'
+                        this.scope = element.scope();
+                    }
 
                     $compile(element)(this.scope);
 
                     // Reset the scope to prevent displaying old data from our last visit to this list 
-                    this.scope[list.name] = null;
-                    this.scope[list.iterator] = null;
+                    //this.scope[list.name] = null;
+                    this.scope[list.iterator] = [];
 
                     // Remove any lingering tooltip and popover <div> elements
                     $('.tooltip').each(function() {
@@ -128,8 +131,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                         // before navigation
                         html += "<div class=\"nav-path\">\n";
                         html += "<ul class=\"breadcrumb\">\n";
-                        html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" " +
-                            "ng-click=\"{{ crumb.ngClick }}\">{{ crumb.title }}</a></li>\n";
+                        html += "<li ng-repeat=\"crumb in breadcrumbs\"><a href=\"\" " + "ng-click=\"closeStream(crumb.path)\">" +
+                            "{{ crumb.title }}</a></li>\n";
                         html += "<li class=\"active\">";
                         html += list.editTitle;
                         html += "</li>\n</ul>\n</div>\n";
@@ -160,7 +163,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                         html += "</div>\n";
                         html += "</div>\n";
                     }
-
+                    
                     html += "<div class=\"row\">\n";
 
                     if (list.name !== 'groups') {
@@ -235,7 +238,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                         if (options.mode === 'select' && list.selectInstructions) {
                             btn = {
                                 awPopOver: list.selectInstructions,
-                                dataPlacement: 'top',
+                                dataPlacement: 'left',
                                 dataContainer: 'body',
                                 'class': 'btn-xs btn-help',
                                 awToolTip: 'Click for help',
@@ -290,7 +293,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                             html += (list.fields[fld].id) ? list.fields[fld].id : fld + "-header";
                             html += "\"";
                             html += (list.fields[fld].columnShow) ? " ng-show=\"" + list.fields[fld].columnShow + "\" " : "";
-                            html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? "ng-click=\"sort('" + fld + "')\"" : "";
+                            html += (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) ? " ng-click=\"sort('" + fld + "')\"" : "";
                             html += ">";
                             html += list.fields[fld].label;
                             if (list.fields[fld].nosort === undefined || list.fields[fld].nosort !== true) {
@@ -324,11 +327,11 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     html += "<tr ng-class=\"" + list.iterator;
                     html += (options.mode === 'lookup' || options.mode === 'select') ? ".success_class" : ".active_class";
                     html += "\" ";
-                    html += "class=\"" + list.iterator + "_class\" ng-repeat=\"" + list.iterator + " in " + list.name;
+                    html += "class=\"" + list.iterator + "_class\" ";
+                    html += "ng-repeat=\"" + list.iterator + " in " + list.name;
                     html += (list.orderBy) ? " | orderBy:'" + list.orderBy + "'" : "";
                     html += (list.filterBy) ? " | filter: " + list.filterBy : "";
-                    html += "\"";
-                    html += ">\n";
+                    html += "\">\n";
                     if (list.index) {
                         html += "<td class=\"index-column hidden-xs\">{{ $index + ((" + list.iterator + "_page - 1) * " + list.iterator + "_page_size) + 1 }}.</td>\n";
                     }
@@ -351,7 +354,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
 
                     if (options.mode === 'select' || options.mode === 'lookup') {
                         html += "<td><input type=\"checkbox\" ng-model=\"" + list.iterator + ".checked\" name=\"check_{{" +
-                            list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "({{ " + list.iterator + ".id }}, true)\" ng-true-value=\"1\" " +
+                            list.iterator + ".id }}\" ng-click=\"toggle_" + list.iterator + "(" + list.iterator + ".id, true)\" ng-true-value=\"1\" " +
                             "ng-false-value=\"0\" id=\"check_{{" + list.iterator + ".id}}\" /></td>";
                     } else if ((options.mode === 'edit' || options.mode === 'summary') && list.fieldActions) {
 
@@ -398,18 +401,18 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                                 }
                             }
                         }
-                        html += "</td>";
+                        html += "</td>\n";
                     }
                     html += "</tr>\n";
 
                     // Message for when a collection is empty
-                    html += "<tr class=\"info\" ng-show=\"" + list.iterator + "Loading == false && (" + list.name + " == null || " + list.name + ".length == 0)\">\n";
-                    html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">No records matched your search.</div></td>\n";
+                    html += "<tr class=\"info\" ng-show=\"" + list.iterator + "Loading == false && " + list.name + ".length == 0\">\n";
+                    html += "<td colspan=\"" + cnt + "\">No records matched your search.</td>\n";
                     html += "</tr>\n";
 
                     // Message for loading
                     html += "<tr class=\"info\" ng-show=\"" + list.iterator + "Loading == true\">\n";
-                    html += "<td colspan=\"" + cnt + "\"><div class=\"alert alert-info\">Loading...</div></td>\n";
+                    html += "<td colspan=\"" + cnt + "\">Loading...</td>\n";
                     html += "</tr>\n";
 
                     // End List

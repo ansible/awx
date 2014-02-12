@@ -7,6 +7,9 @@
 var urlPrefix = $basePath;
 
 angular.module('ansible', [
+    'ngRoute',
+    'ngSanitize',
+    'ngCookies',
     'RestServices',
     'AuthService',
     'Utilities',

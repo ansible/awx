@@ -2,8 +2,8 @@
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
  *  Teams.js
- *  Form definition for Team model
  *
+ *  Form definition for Team model
  *
  */
 angular.module('TeamFormDefinition', [])
@@ -14,7 +14,7 @@ angular.module('TeamFormDefinition', [])
         name: 'team',
         well: true,
         collapse: true,
-        collapseTitle: 'Team Settings',
+        collapseTitle: "Properties",
         collapseMode: 'edit',
         collapseOpen: true,
 

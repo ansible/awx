@@ -7,70 +7,69 @@
  *  Controller functions for the Job Template model.
  *
  */
+
 'use strict';
 
 function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobTemplateList,
-    GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller,
-    ClearScope, ProcessErrors, GetBasePath, PromptPasswords, JobTemplateForm, CredentialList,
-    LookUpInit, SubmitJob, Wait, Stream) {
-    ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
-    //scope.
+    GenerateList, LoadBreadCrumbs, Prompt, SearchInit, PaginateInit, ReturnToCaller, ClearScope, ProcessErrors,
+    GetBasePath, PromptPasswords, JobTemplateForm, CredentialList, LookUpInit, SubmitJob, Wait, Stream) {
+
+    ClearScope();
+
     var list = JobTemplateList,
         defaultUrl = GetBasePath('job_templates'),
         view = GenerateList,
         base = $location.path().replace(/^\//, '').split('/')[0],
-        mode = (base === 'job_templates') ? 'edit' : 'select',
-        scope = view.inject(list, { mode: mode });
-
+        mode = (base === 'job_templates') ? 'edit' : 'select';
+    
+    view.inject(list, { mode: mode, scope: $scope });
     $rootScope.flashMessage = null;
 
-    if (scope.removePostRefresh) {
-        scope.removePostRefresh();
+    if ($scope.removePostRefresh) {
+        $scope.removePostRefresh();
     }
-    scope.removePostRefresh = scope.$on('PostRefresh', function () {
+    $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         // Cleanup after a delete
         Wait('stop');
         $('#prompt-modal').off();
     });
 
     SearchInit({
-        scope: scope,
+        scope: $scope,
         set: 'job_templates',
         list: list,
         url: defaultUrl
     });
     PaginateInit({
-        scope: scope,
+        scope: $scope,
         list: list,
         url: defaultUrl
     });
 
     // Called from Inventories tab, host failed events link:
     if ($routeParams.name) {
-        scope[list.iterator + 'SearchField'] = 'name';
-        scope[list.iterator + 'SearchValue'] = $routeParams.name;
-        scope[list.iterator + 'SearchFieldLabel'] = list.fields.name.label;
+        $scope[list.iterator + 'SearchField'] = 'name';
+        $scope[list.iterator + 'SearchValue'] = $routeParams.name;
+        $scope[list.iterator + 'SearchFieldLabel'] = list.fields.name.label;
     }
 
-    scope.search(list.iterator);
+    $scope.search(list.iterator);
 
     LoadBreadCrumbs();
 
-    scope.showActivity = function () {
-        Stream({
-            scope: scope
-        });
+    $scope.showActivity = function () {
+        Stream({ scope: $scope });
     };
 
-    scope.addJobTemplate = function () {
+    $scope.addJobTemplate = function () {
         $location.path($location.path() + '/add');
     };
 
-    scope.editJobTemplate = function (id) {
+    $scope.editJobTemplate = function (id) {
         $location.path($location.path() + '/' + id);
     };
 
-    scope.deleteJobTemplate = function (id, name) {
+    $scope.deleteJobTemplate = function (id, name) {
         var action = function () {
             $('#prompt-modal').on('hidden.bs.modal', function () {
                 Wait('start');
@@ -80,14 +79,12 @@ function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Res
             Rest.setUrl(url);
             Rest.destroy()
                 .success(function () {
-                    scope.search(list.iterator);
+                    $scope.search(list.iterator);
                 })
                 .error(function (data) {
                     Wait('stop');
-                    ProcessErrors(scope, data, status, null, {
-                        hdr: 'Error!',
-                        msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status
-                    });
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + ' failed. DELETE returned status: ' + status });
                 });
         };
 
@@ -98,8 +95,8 @@ function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Res
         });
     };
 
-    scope.submitJob = function (id) {
-        SubmitJob({ scope: scope, id: id });
+    $scope.submitJob = function (id) {
+        SubmitJob({ scope: $scope, id: id });
     };
 }
 
@@ -110,50 +107,50 @@ JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$route
 ];
 
 function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm,
-    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope,
-    GetBasePath, InventoryList, CredentialList, ProjectList, LookUpInit,
-    md5Setup, ParseTypeChange, Wait, Empty) {
-    ClearScope('htmlTemplate'); //Garbage collection. Don't leave behind any listeners/watchers from the prior
-    //scope.
+    GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath,
+    InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait, Empty) {
+    
+    ClearScope();
 
     // Inject dynamic view
     var defaultUrl = GetBasePath('job_templates'),
         form = JobTemplateForm,
         generator = GenerateForm,
-        scope = generator.inject(form, { mode: 'add', related: false }),
         master = {},
         CloudCredentialList = {},
         selectPlaybook, checkSCMStatus;
+    
+    generator.inject(form, { mode: 'add', related: false, scope: $scope });
+    
+    $scope.parseType = 'yaml';
+    ParseTypeChange($scope);
 
-    scope.parseType = 'yaml';
-    ParseTypeChange(scope);
-
-    scope.job_type_options = [
+    $scope.job_type_options = [
         { value: 'run', label: 'Run' },
         { value: 'check', label: 'Check' }
     ];
 
-    scope.verbosity_options = [
+    $scope.verbosity_options = [
         { value: '0', label: 'Default' },
         { value: '1', label: 'Verbose' },
         { value: '3', label: 'Debug' }
     ];
 
-    scope.playbook_options = [];
-    scope.allow_callbacks = 'false';
+    $scope.playbook_options = [];
+    $scope.allow_callbacks = 'false';
 
     generator.reset();
     LoadBreadCrumbs();
 
     md5Setup({
-        scope: scope,
+        scope: $scope,
         master: master,
         check_field: 'allow_callbacks',
         default_val: false
     });
 
     LookUpInit({
-        scope: scope,
+        scope: $scope,
         form: form,
         current_item: null,
         list: InventoryList,
@@ -168,7 +165,7 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
 
     LookUpInit({
         url: GetBasePath('credentials') + '?cloud=true',
-        scope: scope,
+        scope: $scope,
         form: form,
         current_item: null,
         list: CloudCredentialList,
@@ -178,7 +175,7 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
 
     LookUpInit({
         url: GetBasePath('credentials') + '?kind=ssh',
-        scope: scope,
+        scope: $scope,
         form: form,
         current_item: null,
         list: CredentialList,
@@ -190,9 +187,9 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
     selectPlaybook = function (oldValue, newValue) {
         var url;
         if (oldValue !== newValue) {
-            if (scope.project) {
+            if ($scope.project) {
                 Wait('start');
-                url = GetBasePath('projects') + scope.project + '/playbooks/';
+                url = GetBasePath('projects') + $scope.project + '/playbooks/';
                 Rest.setUrl(url);
                 Rest.get()
                     .success(function (data) {
@@ -200,14 +197,12 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
                         for (i = 0; i < data.length; i++) {
                             opts.push(data[i]);
                         }
-                        scope.playbook_options = opts;
+                        $scope.playbook_options = opts;
                         Wait('stop');
                     })
                     .error(function (data, status) {
-                        ProcessErrors(scope, data, status, form, {
-                            hdr: 'Error!',
-                            msg: 'Failed to get playbook list for ' + url + '. GET returned status: ' + status
-                        });
+                        ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                            msg: 'Failed to get playbook list for ' + url + '. GET returned status: ' + status });
                     });
             }
         }
@@ -215,8 +210,8 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
 
     // Detect and alert user to potential SCM status issues
     checkSCMStatus = function (oldValue, newValue) {
-        if (oldValue !== newValue && !Empty(scope.project)) {
-            Rest.setUrl(GetBasePath('projects') + scope.project + '/');
+        if (oldValue !== newValue && !Empty($scope.project)) {
+            Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
             Rest.get()
                 .success(function (data) {
                     var msg;
@@ -240,25 +235,23 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
                     }
                 })
                 .error(function (data, status) {
-                    ProcessErrors(scope, data, status, form, {
-                        hdr: 'Error!',
-                        msg: 'Failed to get project ' + scope.project + '. GET returned status: ' + status
-                    });
+                    ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                        msg: 'Failed to get project ' + $scope.project + '. GET returned status: ' + status });
                 });
         }
     };
 
     // Register a watcher on project_name
-    if (scope.selectPlaybookUnregister) {
-        scope.selectPlaybookUnregister();
+    if ($scope.selectPlaybookUnregister) {
+        $scope.selectPlaybookUnregister();
     }
-    scope.selectPlaybookUnregister = scope.$watch('project_name', function (oldval, newval) {
+    $scope.selectPlaybookUnregister = $scope.$watch('project_name', function (oldval, newval) {
         selectPlaybook(oldval, newval);
         checkSCMStatus(oldval, newval);
     });
 
     LookUpInit({
-        scope: scope,
+        scope: $scope,
         form: form,
         current_item: null,
         list: ProjectList,
@@ -266,16 +259,16 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
     });
 
     // Save
-    scope.formSave = function () {
+    $scope.formSave = function () {
         generator.clearApiErrors();
         Wait('start');
         var data = {}, json_data, fld;
         try {
             // Make sure we have valid variable data
-            if (scope.parseType === 'json') {
-                json_data = JSON.parse(scope.variables); //make sure JSON parses
+            if ($scope.parseType === 'json') {
+                json_data = JSON.parse($scope.variables); //make sure JSON parses
             } else {
-                json_data = jsyaml.load(scope.variables); //parse yaml
+                json_data = jsyaml.load($scope.variables); //parse yaml
             }
 
             // Make sure our JSON is actually an object
@@ -285,10 +278,10 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
 
             for (fld in form.fields) {
                 if (form.fields[fld].type === 'select' && fld !== 'playbook') {
-                    data[fld] = scope[fld].value;
+                    data[fld] = $scope[fld].value;
                 } else {
                     if (fld !== 'variables') {
-                        data[fld] = scope[fld];
+                        data[fld] = $scope[fld];
                     }
                 }
             }
@@ -310,8 +303,7 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
                 })
                 .error(function (data, status) {
                     Wait('stop');
-                    ProcessErrors(scope, data, status, form, {
-                        hdr: 'Error!',
+                    ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                         msg: 'Failed to add new job template. POST returned status: ' + status
                     });
                 });
@@ -323,12 +315,12 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
     };
 
     // Reset
-    scope.formReset = function () {
+    $scope.formReset = function () {
         // Defaults
         generator.reset();
-        //$('#forks-slider').slider("option", "value", scope.forks);
+        //$('#forks-slider').slider("option", "value", $scope.forks);
         for (var fld in master) {
-            scope[fld] = master[fld];
+            $scope[fld] = master[fld];
         }
     };
 }
@@ -345,12 +337,11 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     CredentialList, ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
     Wait, Stream, Empty, Prompt) {
     
-    ClearScope('htmlTemplate');
+    ClearScope();
 
     var defaultUrl = GetBasePath('job_templates'),
         generator = GenerateForm,
         form = JobTemplateForm,
-        scope = generator.inject(form, { mode: 'edit', related: true }),
         loadingFinishedCount = 0,
         base = $location.path().replace(/^\//, '').split('/')[0],
         master = {},
@@ -358,23 +349,25 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         relatedSets = {},
         checkSCMStatus, getPlaybooks;
 
-    scope.parseType = 'yaml';
-    ParseTypeChange(scope);
+    generator.inject(form, { mode: 'edit', related: true, scope: $scope });
+
+    $scope.parseType = 'yaml';
+    ParseTypeChange($scope);
 
     // Our job type options
-    scope.job_type_options = [
+    $scope.job_type_options = [
         { value: 'run', label: 'Run' },
         { value: 'check', label: 'Check' }
     ];
     
-    scope.verbosity_options = [
+    $scope.verbosity_options = [
         { value: '0', label: 'Default' },
         { value: '1', label: 'Verbose' },
         { value: '3', label: 'Debug' }
     ];
 
-    scope.playbook_options = null;
-    scope.playbook = null;
+    $scope.playbook_options = null;
+    $scope.playbook = null;
     generator.reset();
 
     getPlaybooks = function (project) {
@@ -386,15 +379,15 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             Rest.get()
                 .success(function (data) {
                     var i;
-                    scope.playbook_options = [];
+                    $scope.playbook_options = [];
                     for (i = 0; i < data.length; i++) {
-                        scope.playbook_options.push(data[i]);
-                        if (data[i] === scope.playbook) {
-                            scope.job_templates_form.playbook.$setValidity('required', true);
+                        $scope.playbook_options.push(data[i]);
+                        if (data[i] === $scope.playbook) {
+                            $scope.job_templates_form.playbook.$setValidity('required', true);
                         }
                     }
-                    if (scope.playbook) {
-                        scope.$emit('jobTemplateLoadFinished');
+                    if ($scope.playbook) {
+                        $scope.$emit('jobTemplateLoadFinished');
                     } else {
                         Wait('stop');
                     }
@@ -409,9 +402,9 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
     // Detect and alert user to potential SCM status issues
     checkSCMStatus = function () {
-        if (!Empty(scope.project)) {
+        if (!Empty($scope.project)) {
             Wait('start');
-            Rest.setUrl(GetBasePath('projects') + scope.project + '/');
+            Rest.setUrl(GetBasePath('projects') + $scope.project + '/');
             Rest.get()
                 .success(function (data) {
                     var msg;
@@ -436,7 +429,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                     }
                 })
                 .error(function (data, status) {
-                    ProcessErrors(scope, data, status, form, { hdr: 'Error!', msg: 'Failed to get project ' + scope.project +
+                    ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to get project ' + $scope.project +
                         '. GET returned status: ' + status });
                 });
         }
@@ -444,58 +437,58 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
 
     // Register a watcher on project_name. Refresh the playbook list on change.
-    if (scope.watchProjectUnregister) {
-        scope.watchProjectUnregister();
+    if ($scope.watchProjectUnregister) {
+        $scope.watchProjectUnregister();
     }
-    scope.watchProjectUnregister = scope.$watch('project_name', function (oldValue, newValue) {
+    $scope.watchProjectUnregister = $scope.$watch('project_name', function (oldValue, newValue) {
         if (oldValue !== newValue && newValue !== '' && newValue !== null && newValue !== undefined) {
-            scope.playbook = null;
-            getPlaybooks(scope.project);
+            $scope.playbook = null;
+            getPlaybooks($scope.project);
             checkSCMStatus();
         }
     });
 
     // Turn off 'Wait' after both cloud credential and playbook list come back
-    if (scope.removeJobTemplateLoadFinished) {
-        scope.removeJobTemplateLoadFinished();
+    if ($scope.removeJobTemplateLoadFinished) {
+        $scope.removeJobTemplateLoadFinished();
     }
-    scope.removeJobTemplateLoadFinished = scope.$on('jobTemplateLoadFinished', function () {
+    $scope.removeJobTemplateLoadFinished = $scope.$on('jobTemplateLoadFinished', function () {
         loadingFinishedCount++;
         if (loadingFinishedCount >= 2) {
             // The initial template load finished. Now load related jobs, which 
             // will turn off the 'working' spinner.
             for (var set in relatedSets) {
-                scope.search(relatedSets[set].iterator);
+                $scope.search(relatedSets[set].iterator);
             }
 
         }
     });
 
     // Set the status/badge for each related job
-    if (scope.removeRelatedJobs) {
-        scope.removeRelatedJobs();
+    if ($scope.removeRelatedJobs) {
+        $scope.removeRelatedJobs();
     }
-    scope.removeRelatedJobs = scope.$on('relatedjobs', function () {
+    $scope.removeRelatedJobs = $scope.$on('relatedjobs', function () {
         var i, cDate;
-        if (scope.jobs && scope.jobs.length) {
-            for (i = 0; i < scope.jobs.length; i++) {
+        if ($scope.jobs && $scope.jobs.length) {
+            for (i = 0; i < $scope.jobs.length; i++) {
                 // Convert created date to local time zone 
-                cDate = new Date(scope.jobs[i].created);
-                scope.jobs[i].created = FormatDate(cDate);
+                cDate = new Date($scope.jobs[i].created);
+                $scope.jobs[i].created = FormatDate(cDate);
                 // Set tooltip and link
-                scope.jobs[i].statusBadgeToolTip = JobStatusToolTip(scope.jobs[i].status) +
+                $scope.jobs[i].statusBadgeToolTip = JobStatusToolTip($scope.jobs[i].status) +
                     " Click to view status details.";
-                scope.jobs[i].statusLinkTo = '/#/jobs/' + scope.jobs[i].id;
+                $scope.jobs[i].statusLinkTo = '/#/jobs/' + $scope.jobs[i].id;
             }
         }
     });
 
-    if (scope.cloudCredentialReadyRemove) {
-        scope.cloudCredentialReadyRemove();
+    if ($scope.cloudCredentialReadyRemove) {
+        $scope.cloudCredentialReadyRemove();
     }
-    scope.cloudCredentialReadyRemove = scope.$on('cloudCredentialReady', function (e, name) {
+    $scope.cloudCredentialReadyRemove = $scope.$on('cloudCredentialReady', function (e, name) {
         var CloudCredentialList = {};
-        scope.cloud_credential_name = name;
+        $scope.cloud_credential_name = name;
         master.cloud_credential_name = name;
         // Clone the CredentialList object for use with cloud_credential. Cloning
         // and changing properties to avoid collision.
@@ -504,28 +497,28 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         CloudCredentialList.iterator = 'cloudcredential';
         LookUpInit({
             url: GetBasePath('credentials') + '?cloud=true',
-            scope: scope,
+            scope: $scope,
             form: form,
-            current_item: scope.cloud_credential,
+            current_item: $scope.cloud_credential,
             list: CloudCredentialList,
             field: 'cloud_credential',
             hdr: 'Select Cloud Credential'
         });
-        scope.$emit('jobTemplateLoadFinished');
+        $scope.$emit('jobTemplateLoadFinished');
     });
 
 
     // Retrieve each related set and populate the playbook list
-    if (scope.jobTemplateLoadedRemove) {
-        scope.jobTemplateLoadedRemove();
+    if ($scope.jobTemplateLoadedRemove) {
+        $scope.jobTemplateLoadedRemove();
     }
-    scope.jobTemplateLoadedRemove = scope.$on('jobTemplateLoaded', function (e, related_cloud_credential) {
+    $scope.jobTemplateLoadedRemove = $scope.$on('jobTemplateLoaded', function (e, related_cloud_credential) {
         var dft;
-        getPlaybooks(scope.project);
+        getPlaybooks($scope.project);
 
-        dft = (scope.host_config_key === "" || scope.host_config_key === null) ? 'false' : 'true';
+        dft = ($scope.host_config_key === "" || $scope.host_config_key === null) ? 'false' : 'true';
         md5Setup({
-            scope: scope,
+            scope: $scope,
             master: master,
             check_field: 'allow_callbacks',
             default_val: dft
@@ -535,15 +528,15 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             Rest.setUrl(related_cloud_credential);
             Rest.get()
                 .success(function (data) {
-                    scope.$emit('cloudCredentialReady', data.name);
+                    $scope.$emit('cloudCredentialReady', data.name);
                 })
                 .error(function (data, status) {
-                    ProcessErrors(scope, data, status, null, {hdr: 'Error!',
+                    ProcessErrors($scope, data, status, null, {hdr: 'Error!',
                         msg: 'Failed to related cloud credential. GET returned status: ' + status });
                 });
         } else {
             // No existing cloud credential
-            scope.$emit('cloudCredentialReady', null);
+            $scope.$emit('cloudCredentialReady', null);
         }
     });
 
@@ -557,40 +550,40 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             for (fld in form.fields) {
                 if (fld !== 'variables' && data[fld] !== null && data[fld] !== undefined) {
                     if (form.fields[fld].type === 'select') {
-                        if (scope[fld + '_options'] && scope[fld + '_options'].length > 0) {
-                            for (i = 0; i < scope[fld + '_options'].length; i++) {
-                                if (data[fld] === scope[fld + '_options'][i].value) {
-                                    scope[fld] = scope[fld + '_options'][i];
+                        if ($scope[fld + '_options'] && $scope[fld + '_options'].length > 0) {
+                            for (i = 0; i < $scope[fld + '_options'].length; i++) {
+                                if (data[fld] === $scope[fld + '_options'][i].value) {
+                                    $scope[fld] = $scope[fld + '_options'][i];
                                 }
                             }
                         } else {
-                            scope[fld] = data[fld];
+                            $scope[fld] = data[fld];
                         }
                     } else {
-                        scope[fld] = data[fld];
+                        $scope[fld] = data[fld];
                     }
-                    master[fld] = scope[fld];
+                    master[fld] = $scope[fld];
                 }
                 if (fld === 'variables') {
                     // Parse extra_vars, converting to YAML.  
                     if ($.isEmptyObject(data.extra_vars) || data.extra_vars === "{}" || data.extra_vars === "null" ||
                         data.extra_vars === "" || data.extra_vars === null) {
-                        scope.variables = "---";
+                        $scope.variables = "---";
                     } else {
                         json_obj = JSON.parse(data.extra_vars);
-                        scope.variables = jsyaml.safeDump(json_obj);
+                        $scope.variables = jsyaml.safeDump(json_obj);
                     }
-                    master.variables = scope.variables;
+                    master.variables = $scope.variables;
                 }
                 if (form.fields[fld].type === 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
-                    scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
+                    $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
                         data.summary_fields[form.fields[fld].sourceModel][form.fields[fld].sourceField];
                     master[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =
-                        scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
+                        $scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField];
                 }
             }
 
-            scope.url = data.url;
+            $scope.url = data.url;
             related = data.related;
             for (set in form.related) {
                 if (related[set]) {
@@ -601,11 +594,11 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                 }
             }
 
-            scope.callback_url = data.related.callback;
-            master.callback_url = scope.callback_url;
+            $scope.callback_url = data.related.callback;
+            master.callback_url = $scope.callback_url;
 
             LookUpInit({
-                scope: scope,
+                scope: $scope,
                 form: form,
                 current_item: data.inventory,
                 list: InventoryList,
@@ -614,7 +607,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
             LookUpInit({
                 url: GetBasePath('credentials') + '?kind=ssh',
-                scope: scope,
+                scope: $scope,
                 form: form,
                 current_item: data.credential,
                 list: CredentialList,
@@ -623,7 +616,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             });
 
             LookUpInit({
-                scope: scope,
+                scope: $scope,
                 form: form,
                 current_item: data.project,
                 list: ProjectList,
@@ -632,34 +625,34 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
             // Initialize related search functions. Doing it here to make sure relatedSets object is populated.
             RelatedSearchInit({
-                scope: scope,
+                scope: $scope,
                 form: form,
                 relatedSets: relatedSets
             });
             RelatedPaginateInit({
-                scope: scope,
+                scope: $scope,
                 relatedSets: relatedSets
             });
-            scope.$emit('jobTemplateLoaded', data.related.cloud_credential);
+            $scope.$emit('jobTemplateLoaded', data.related.cloud_credential);
         })
         .error(function (data, status) {
-            ProcessErrors(scope, data, status, form, {
+            ProcessErrors($scope, data, status, form, {
                 hdr: 'Error!',
                 msg: 'Failed to retrieve job template: ' + $routeParams.id + '. GET status: ' + status
             });
         });
 
     // Save changes to the parent
-    scope.formSave = function () {
+    $scope.formSave = function () {
         generator.clearApiErrors();
         Wait('start');
         var data = {}, json_data, fld;
         try {
             // Make sure we have valid variable data
-            if (scope.parseType === 'json') {
-                json_data = JSON.parse(scope.variables); //make sure JSON parses
+            if ($scope.parseType === 'json') {
+                json_data = JSON.parse($scope.variables); //make sure JSON parses
             } else {
-                json_data = jsyaml.load(scope.variables); //parse yaml
+                json_data = jsyaml.load($scope.variables); //parse yaml
             }
 
             // Make sure our JSON is actually an object
@@ -669,10 +662,10 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
             for (fld in form.fields) {
                 if (form.fields[fld].type === 'select' && fld !== 'playbook') {
-                    data[fld] = scope[fld].value;
+                    data[fld] = $scope[fld].value;
                 } else {
                     if (fld !== 'variables' && fld !== 'callback_url') {
-                        data[fld] = scope[fld];
+                        data[fld] = $scope[fld];
                     }
                 }
             }
@@ -693,7 +686,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                     ReturnToCaller(1);
                 })
                 .error(function (data, status) {
-                    ProcessErrors(scope, data, status, form, {
+                    ProcessErrors($scope, data, status, form, {
                         hdr: 'Error!',
                         msg: 'Failed to update job template. PUT returned status: ' + status
                     });
@@ -705,36 +698,36 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         }
     };
 
-    scope.showActivity = function () {
+    $scope.showActivity = function () {
         Stream({
-            scope: scope
+            scope: $scope
         });
     };
 
     // Cancel
-    scope.formReset = function () {
+    $scope.formReset = function () {
         generator.reset();
         for (var fld in master) {
-            scope[fld] = master[fld];
+            $scope[fld] = master[fld];
         }
-        scope.parseType = 'yaml';
-        $('#forks-slider').slider("option", "value", scope.forks);
+        $scope.parseType = 'yaml';
+        $('#forks-slider').slider("option", "value", $scope.forks);
     };
 
     // Related set: Add button
-    scope.add = function (set) {
+    $scope.add = function (set) {
         $rootScope.flashMessage = null;
         $location.path('/' + base + '/' + $routeParams.id + '/' + set);
     };
 
     // Related set: Edit button
-    scope.edit = function (set, id) {
+    $scope.edit = function (set, id) {
         $rootScope.flashMessage = null;
         $location.path('/' + set + '/' + id);
     };
 
     // Related set: Delete button
-    scope['delete'] = function (set, itm_id, name, title) {
+    $scope['delete'] = function (set, itm_id, name, title) {
         $rootScope.flashMessage = null;
 
         var action = function () {
@@ -746,20 +739,18 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             })
                 .success(function () {
                     $('#prompt-modal').modal('hide');
-                    scope.search(form.related[set].iterator);
+                    $scope.search(form.related[set].iterator);
                 })
                 .error(function (data, status) {
                     $('#prompt-modal').modal('hide');
-                    ProcessErrors(scope, data, status, null, {
-                        hdr: 'Error!',
-                        msg: 'Call to ' + url + ' failed. POST returned status: ' + status
-                    });
+                    ProcessErrors($scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Call to ' + url + ' failed. POST returned status: ' + status });
                 });
         };
 
         Prompt({
             hdr: 'Delete',
-            body: 'Are you sure you want to remove ' + name + ' from ' + scope.name + ' ' + title + '?',
+            body: 'Are you sure you want to remove ' + name + ' from ' + $scope.name + ' ' + title + '?',
             action: action
         });
 

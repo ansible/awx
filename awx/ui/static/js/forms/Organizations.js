@@ -13,6 +13,10 @@ angular.module('OrganizationFormDefinition', [])
         editTitle: '{{ name }}', //Title in edit mode
         name: 'organization', //entity or model name in singular form
         well: true,
+        collapse: true,
+        collapseTitle: "Properties",
+        collapseMode: 'edit',
+        collapseOpen: true,
 
         actions: {
             stream: {

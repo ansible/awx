@@ -455,9 +455,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                 html += "\" ";
                 html += (field.ngClass) ? Attr(field, 'ngClass') : "";
                 html += (options.mode === 'lookup' || options.mode === 'select') ? " ng-click=\"toggle_" + list.iterator +
-                    "({{ " + list.iterator + ".id }})\"" : "";
+                    "(" + list.iterator + ".id)\"" : "";
                 html += (field.columnShow) ? Attr(field, 'columnShow') : "";
-                html += (field.ngBindHtml) ? "ng-bind-html-unsafe=\"" + field.ngBindHtml + "\" " : "";
+                html += (field.ngBindHtml) ? "ng-bind-html=\"" + field.ngBindHtml + "\" " : "";
                 html += ">\n";
 
                 // Add ngShow
