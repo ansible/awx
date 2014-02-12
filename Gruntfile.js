@@ -11,7 +11,7 @@ module.exports = function(grunt) {
             uses_defaults: ['awx/ui/static/js/*','awx/ui/static/lib/ansible/*', '!awx/ui/static/js/awx-min.js']
         },
 
-	    uglify: {
+        uglify: {
             options: {
                 banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
                     '<%= grunt.template.today("yyyy-mm-dd") %> */'
