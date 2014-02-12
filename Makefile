@@ -139,7 +139,12 @@ test_jenkins:
 
 # Build minified JS/CSS.
 minjs:
-	(cd tools/ui/ && ./compile.sh)
+	grunt
+
+# Check .js files for errors and lint 
+lintjs: 
+	grunt jshint
+        
 
 # Build a pip-installable package into dist/ with a timestamped version number.
 dev_build: 

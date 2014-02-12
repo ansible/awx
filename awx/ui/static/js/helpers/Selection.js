@@ -69,7 +69,6 @@ angular.module('SelectionHelper', ['Utilities', 'RestServices'])
                     }
                 }
                 if (selected.length > 0) {
-                    console.log('selected.length: ' + selected.length);
                     scope.formModalActionDisabled = false;
                     scope.disableSelectBtn = false;
                 } else {
