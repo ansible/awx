@@ -127,6 +127,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                 }
 
                 if (options.modal) {
+                    $rootScope.flashMessage = null;
                     this.scope.formModalActionDisabled = false;
                     this.scope.formModalInfo = false; //Disable info button for default modal
                     if (form) {

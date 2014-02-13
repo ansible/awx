@@ -104,7 +104,7 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
 
                     listScope['toggle_' + list.iterator] = function (id) {
                         var i;
-                        for (i = 0; i < scope[list.name].length; i++) {
+                        for (i = 0; i < listScope[list.name].length; i++) {
                             if (listScope[list.name][i].id === id) {
                                 listScope[list.name][i].checked = '1';
                                 listScope[list.name][i].success_class = 'success';
@@ -135,7 +135,6 @@ angular.module('LookUpHelper', ['RestServices', 'Utilities', 'SearchHelper', 'Pa
                     listScope.lookupPostRefreshRemove = scope.$on('PostRefresh', function () {
                         var fld, i;
                         for (fld in list.fields) {
-
                             if (list.fields[fld].type && list.fields[fld].type === 'date') {
                                 //convert dates to our standard format
                                 for (i = 0; i < scope[list.name].length; i++) {

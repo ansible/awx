@@ -66,8 +66,7 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
                                     "the Ansible online store</a>. Would you like to purchase or extend your license now?</p>",
                                 'class': 'btn-primary',
                                 action: function () {
-                                    var href = $('#license-link').attr('href');
-                                    window.open(href, 'storeWindow');
+                                    window.open('http://www.ansible.com/ansible-pricing', 'storeWindow');
                                 }
                             });
                         };
@@ -127,8 +126,7 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
 
                     })
                     .error(function (data, status) {
-                        ProcessErrors($rootScope, data, status, form, {
-                            hdr: 'Error!',
+                        ProcessErrors($rootScope, data, status, form, { hdr: 'Error!',
                             msg: 'Failed to retrieve license. GET status: ' + status
                         });
                     });
