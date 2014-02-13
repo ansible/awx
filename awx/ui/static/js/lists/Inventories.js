@@ -92,7 +92,7 @@ angular.module('InventoriesListDefinition', [])
             },
             "delete": {
                 label: 'Delete',
-                ngClick: "deleteInventory(inventory.id, inventory.names')",
+                ngClick: "deleteInventory(inventory.id, inventory.names)",
                 awToolTip: 'Delete inventory',
                 dataPlacement: 'top'
             }

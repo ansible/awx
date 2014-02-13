@@ -8,7 +8,7 @@ module.exports = function(grunt) {
             options: {
                 jshintrc: '.jshintrc'
             },
-            uses_defaults: ['awx/ui/static/js/*','awx/ui/static/lib/ansible/*', '!awx/ui/static/js/awx-min.js']
+            uses_defaults: ['awx/ui/static/js/*','awx/ui/static/lib/ansible/*', '!awx/ui/static/js/awx.min.js']
         },
 
         uglify: {
@@ -18,8 +18,8 @@ module.exports = function(grunt) {
             },
             my_target: {
                 files: {
-                    'awx/ui/static/js/awx-min.js': ['awx/ui/static/js/**/*.js', 'awx/ui/static/lib/ansible/*.js',
-                        '!awx/ui/static/js/awx.min.js']
+                    'awx/ui/static/js/awx.min.js': ['awx/ui/static/js/**/*.js', 'awx/ui/static/lib/ansible/*.js',
+                        '!awx/ui/static/js/awx.min.js', '!awx/ui/static/js/config.js']
                 }
             }
         },

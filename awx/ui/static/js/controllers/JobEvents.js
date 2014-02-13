@@ -129,7 +129,6 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
         for (i = 0; i < set.length; i++) {
             set[i].event_display = set[i].event_display.replace(/^\u00a0*/g, '');
             if (set[i].event_level < 3) {
-                set[i].ngclick = "toggleChildren(" + set[i].id + ", \"" + set[i].related.children + "\")";
                 set[i].ngicon = 'fa fa-minus-square-o node-toggle';
                 set[i]['class'] = 'parentNode';
             } else {
@@ -216,12 +215,11 @@ function JobEventsList($filter, $scope, $rootScope, $location, $log, $routeParam
 
     $scope.search(list.iterator, $routeParams.page);
 
-    $scope.toggleChildren = function (id, children) {
+    $scope.toggle = function (id) {
         ToggleChildren({
             scope: $scope,
             list: list,
-            id: id,
-            children: children
+            id: id
         });
     };
 

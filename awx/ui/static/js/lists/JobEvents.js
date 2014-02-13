@@ -64,14 +64,14 @@ angular.module('JobEventsListDefinition', [])
                 }],
                 nosort: true,
                 searchable: false,
-                ngClick: 'viewJobEvent({{ jobevent.id }})',
+                ngClick: 'viewJobEvent(jobevent.id)',
                 awToolTip: '{{ jobevent.statusBadgeToolTip }}',
                 dataPlacement: 'top',
                 badgeIcon: 'fa icon-job-{{ jobevent.status }}',
                 badgePlacement: 'left',
                 badgeToolTip: '{{ jobevent.statusBadgeToolTip }}',
                 badgeTipPlacement: 'top',
-                badgeNgClick: 'viewJobEvent({{ jobevent.id }})'
+                badgeNgClick: 'viewJobEvent(jobevent.id)'
             },
             event_display: {
                 label: 'Event',

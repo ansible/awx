@@ -113,7 +113,6 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                         event_level: level,
                         children: children,
                         ngicon: (sorted[i].children.length > 0) ? 'fa fa-minus-square-o node-toggle' : 'fa fa-square-o node-no-toggle',
-                        ngclick: 'toggle(' + id + ')',
                         related: {
                             children: (sorted[i].children.length > 0) ? sorted[i].related.children : '',
                             inventory_source: sorted[i].related.inventory_source

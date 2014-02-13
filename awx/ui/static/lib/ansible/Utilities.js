@@ -262,12 +262,12 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                             });
                         }
                     } else {
-                        if (/_/.test(paths[i])) {
+                        //if (/_/.test(paths[i])) {
                             // replace '_' with space and uppercase each word
-                            paths[i] = paths[i].replace(/(?:^|_)\S/g, toUppercase)
-                                .replace(/_/g, ' ');
-                        }
-                        title = paths[i].charAt(0).toUpperCase() + paths[i].slice(1);
+                            
+                        //}
+                        //title = paths[i].charAt(0).toUpperCase() + paths[i].slice(1);
+                        title = paths[i].replace(/(?:^|_)\S/g, toUppercase).replace(/_/g, ' ');
                         $rootScope.breadcrumbs.push({
                             title: title,
                             path: ppath + '/' + paths[i]
@@ -456,7 +456,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
 /*
  * Wrapper for data filter- an attempt to insure all dates display in
- * the same format. Pass in date object.
+ * the same format. Pass in date object or string. See: http://docs.angularjs.org/api/ng.filter:date
  */
 .factory('FormatDate', ['$filter',
     function ($filter) {

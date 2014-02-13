@@ -59,11 +59,11 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
                 var scope = angular.element(document.getElementById('main-view')).scope();
                 scope.$destroy();
                 $rootScope.$destroy();
-                $cookieStore.remove('accordions');
                 $cookieStore.remove('token');
                 $cookieStore.remove('token_expires');
                 $cookieStore.remove('current_user');
                 $cookieStore.remove('lastPath');
+                $cookieStore.remove('license');
                 $cookieStore.put('userLoggedIn', false);
                 $cookieStore.put('sessionExpired', false);
                 $cookieStore.remove('lastPath', '/home');

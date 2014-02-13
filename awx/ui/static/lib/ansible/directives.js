@@ -321,9 +321,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     //
     // Enable jqueryui slider widget on a numeric input field
     //
-    // <input type="number" ng-slider name="myfield" min="0" max="100" />
+    // <input type="number" aw-slider name="myfield" min="0" max="100" />
     //
-    .directive('ngSlider', [ function() {
+    .directive('awSlider', [ function() {
         return {
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
@@ -333,6 +333,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     step: 1,
                     min: elm.attr('min'),
                     max: elm.attr('max'),
+                    disabled: (elm.attr('readonly')) ? true : false,
                     slide: function(e,u) {
                         ctrl.$setViewValue(u.value);
                         ctrl.$setValidity('required',true);
@@ -384,9 +385,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
     //
     // Enable jqueryui spinner widget on a numeric input field
     //
-    // <input type="number" ng-spinner name="myfield" min="0" max="100" />
+    // <input type="number" aw-spinner name="myfield" min="0" max="100" />
     //
-    .directive('ngSpinner', [ function() {
+    .directive('awSpinner', [ function() {
         return {
             require: 'ngModel',
             link: function(scope, elm, attrs, ctrl) {
@@ -398,6 +399,7 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                     min: elm.attr('min'),
                     max: elm.attr('max'),
                     numberFormat: "d",
+                    disabled: (elm.attr('readonly')) ? true : false,
                     spin: function(e, u) {
                         ctrl.$setViewValue(u.value);
                         ctrl.$setValidity('required',true);

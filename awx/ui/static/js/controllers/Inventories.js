@@ -213,8 +213,8 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest
     };
 }
 
-InventoriesList.$inject = ['$scope', '$root $scope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'InventoryList', 'GenerateList',
-    'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'Clear $scope', 'ProcessErrors',
+InventoriesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'InventoryList', 'GenerateList',
+    'LoadBreadCrumbs', 'Prompt', 'SearchInit', 'PaginateInit', 'ReturnToCaller', 'ClearScope', 'ProcessErrors',
     'GetBasePath', 'Wait', 'Stream', 'EditInventoryProperties'
 ];
 

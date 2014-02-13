@@ -13,9 +13,9 @@
 angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
 .factory('GenerateForm', ['$rootScope', '$location', '$cookieStore', '$compile', 'SearchWidget', 'PaginateWidget', 'Attr',
-    'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty', 'SelectIcon',
+    'Icon', 'Column', 'NavigationLink', 'HelpCollapse', 'Button', 'DropDown', 'Empty', 'SelectIcon', 'Store',
     function ($rootScope, $location, $cookieStore, $compile, SearchWidget, PaginateWidget, Attr, Icon, Column, NavigationLink,
-        HelpCollapse, Button, DropDown, Empty, SelectIcon) {
+        HelpCollapse, Button, DropDown, Empty, SelectIcon, Store) {
         return {
 
             setForm: function (form) { this.form = form; },
@@ -283,6 +283,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         active: 0
                     });
                 } else {
+                    // For help collapse, toggle the plus/minus icon
                     this.scope.accordionToggle = function (selector) {
                         $(selector).collapse('toggle');
                         if ($(selector + '-icon').hasClass('fa-minus')) {
@@ -293,25 +294,28 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                     };
 
                     $('.jqui-accordion').each(function () {
-
                         var active = false,
-                            list = $cookieStore.get('accordions'),
+                            list = Store('accordions'),
                             found = false,
                             id, base, i;
 
-                        if (list) {
-                            id = $(this).attr('id');
-                            base = ($location.path().replace(/^\//, '').split('/')[0]);
-                            for (i = 0; i < list.length && found === false; i++) {
-                                if (list[i].base === base && list[i].id === id) {
-                                    found = true;
-                                    active = list[i].active;
+                        if ($(this).attr('data-open-first')) {
+                            active = 0;
+                        }
+                        else {
+                            if (list) {
+                                id = $(this).attr('id');
+                                base = ($location.path().replace(/^\//, '').split('/')[0]);
+                                for (i = 0; i < list.length && found === false; i++) {
+                                    if (list[i].base === base && list[i].id === id) {
+                                        found = true;
+                                        active = list[i].active;
+                                    }
                                 }
                             }
-                        }
-
-                        if (found === false && $(this).attr('data-open') === 'true') {
-                            active = 0;
+                            if (found === false && $(this).attr('data-open') === 'true') {
+                                active = 0;
+                            }
                         }
 
                         $(this).accordion({
@@ -319,16 +323,19 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                             heightStyle: 'content',
                             active: active,
                             activate: function () {
+                                // Maintain in local storage of list of all accordions by page, recording
+                                // the active panel for each. If user navigates away and comes back, 
+                                // we can activate the last panely viewed.
                                 $('.jqui-accordion').each(function () {
                                     var active = $(this).accordion('option', 'active'),
                                         id = $(this).attr('id'),
                                         base = ($location.path().replace(/^\//, '').split('/')[0]),
-                                        list = $cookieStore.get('accordions'),
-                                        i, found;
-                                    if (list === null || list === undefined) {
+                                        list = Store('accordions'),
+                                        found = false,
+                                        i;
+                                    if (!list) {
                                         list = [];
                                     }
-                                    found = false;
                                     for (i = 0; i < list.length && found === false; i++) {
                                         if (list[i].base === base && list[i].id === id) {
                                             found = true;
@@ -342,7 +349,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                                             active: active
                                         });
                                     }
-                                    $cookieStore.put('accordions', list);
+                                    Store('accordions', list);
                                 });
                             }
                         });
@@ -728,7 +735,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
                         html += (options.mode === 'add' && field.addRequired) ? "required " : "";
                         html += (field.multiSelect) ? "multiple " : "";
-                        html += (field.readonly) ? "readonly " : "";
+                        html += (field.readonly) ? "disabled " : "";
                         html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
                             field.awRequiredWhen.variable + "\" " : "";
                         html += ">\n";
@@ -762,11 +769,14 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         html += "<input ";
                         html += (field.spinner) ? "" : "type=\"text\" ";
                         html += "\" value=\"" + field['default'] + "\" ";
-                        html += "class=\"form-control";
+                        html += "class=\"";
+                        if (!field.slider && !field.spinner) {
+                            html += "form-control";
+                        }
                         html += (field['class']) ? " " + field['class'] : "";
                         html += "\" ";
-                        html += (field.slider) ? "ng-slider=\"" + fld + "\" " : "";
-                        html += (field.spinner) ? "ng-spinner=\"" + fld + "\" " : "";
+                        html += (field.slider) ? "aw-slider=\"" + fld + "\" " : "";
+                        html += (field.spinner) ? "aw-spinner=\"" + fld + "\" " : "";
                         html += "ng-model=\"" + fld + '" ';
                         html += 'name="' + fld + '" ';
                         html += buildId(field, fld, this.form);
@@ -937,7 +947,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
                         html += "<div class=\"input-group\">\n";
                         html += "<span class=\"input-group-btn\">\n";
-                        html += "<button type=\"button\" class=\"lookup-btn btn btn-default\" " + this.attr(field, 'ngClick') + "><i class=\"fa fa-search\"></i></button>\n";
+                        html += "<button type=\"button\" class=\"lookup-btn btn btn-default\" " + this.attr(field, 'ngClick');
+                        html += (field.readonly || field.showonly) ? " disabled " : "";
+                        html += "><i class=\"fa fa-search\"></i></button>\n";
                         html += "</span>\n";
                         html += "<input type=\"text\" class=\"form-control input-medium lookup\" ";
                         html += "ng-model=\"" + field.sourceModel + '_' + field.sourceField + "\" ";
@@ -947,6 +959,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         html += (field.id) ? this.attr(field, 'id') : "";
                         html += (field.placeholder) ? this.attr(field, 'placeholder') : "";
                         html += (options.mode === 'edit' && field.editRequired) ? "required " : "";
+                        html += (field.readonly || field.showonly) ? "readonly " : "";
                         html += (field.awRequiredWhen) ? "data-awrequired-init=\"" + field.awRequiredWhen.init + "\" aw-required-when=\"" +
                             field.awRequiredWhen.variable + "\" " : "";
                         html += " awlookup >\n";
@@ -1063,7 +1076,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                 // Generate HTML. Do NOT call this function directly. Called by inject(). Returns an HTML 
                 // string to be injected into the current view. 
                 //
-                var act, action, btn, button, fld, field, html = '', i, section, group,
+                var btn, button, fld, field, html = '', i, section, group,
                     tab, sectionShow, offset, width;
 
                 if (!this.modal && (options.breadCrumbs === undefined || options.breadCrumbs === true)) {
@@ -1073,262 +1086,228 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         html += this.breadCrumbs(options);
                     }
                 }
+                
+                if (this.form.collapse && this.form.collapseMode === options.mode) {
+                    html += "<div id=\"" + this.form.name + "-collapse-0\" ";
+                    html += (this.form.collapseOpen) ? "data-open=\"true\" " : "";
+                    html += (this.form.collapseOpenFirst) ? "data-open-first=\"true\" " : "";
+                    html += "class=\"jqui-accordion\">\n";
+                    html += "<h3>" + this.form.collapseTitle + "</h3>\n";
+                    html += "<div>\n";
+                    options.collapseAlreadyStarted = true;
+                }
 
-                if ((!this.modal && this.form.statusFields)) {
-                    // Add status fields section (used in Jobs form)
-                    html += "<div class=\"well\">\n";
-                    if (this.form.statusActions) {
-                        html += "<div class=\"list-actions\">\n";
-                        for (action in this.form.statusActions) {
-                            act = this.form.statusActions[action];
+                // Start the well
+                if (!this.modal && this.has('well')) {
+                    if ( !(this.form.collapse && this.form.collapseMode === options.mode)) {
+                        html += "<div class=\"well\">\n";
+                    }
+                }
+
+                if (!this.modal && this.form.actions) {
+                    html += this.getActions(options);
+                }
+
+                // Add a title and optionally a close button (used on Inventory->Groups)
+                /*if ((!options.modal) && this.form.showTitle) {
+                    html += "<div class=\"form-title\">";
+                    html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
+                    if (this.has('titleActions')) {
+                        html += "<div class=\"title-actions pull-right\">\n";
+                        for (btn in this.form.titleActions) {
                             html += this.button({
-                                btn: act,
-                                action: action,
+                                btn: this.form.titleActions[btn],
+                                action: btn,
                                 toolbar: true
                             });
                         }
                         html += "</div>\n";
                     }
-                    html += "<div class=\"form status-fields\">\n";
-                    for (fld in this.form.statusFields) {
-                        field = this.form.statusFields[fld];
-                        html += this.buildField(fld, field, options, this.form);
-                    }
-                    html += "</div><!-- status fields -->\n";
-                    html += "</div><!-- well -->\n";
-                }
+                    html += "</div>\n";
+                    html += "<hr class=\"form-title-hr\">\n";
+                }*/
 
-                if (this.form.fieldsAsHeader) {
-                    html += "<div class=\"well\">\n";
-                    html += "<form class=\"form-inline\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "_form\" novalidate >\n";
+                html += "<form class=\"";
+                html += (this.form.horizontal) ? "form-horizontal" : "";
+                html += (this.form['class']) ? ' ' + this.form['class'] : '';
+                html += "\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "_form\" autocomplete=\"off\" novalidate>\n";
+                html += "<div ng-show=\"flashMessage != null && flashMessage != undefined\" class=\"alert alert-info\">{{ flashMessage }}</div>\n";
+
+                if (this.form.twoColumns) {
+                    html += "<div class=\"row\">\n";
+                    html += "<div class=\"col-lg-6\">\n";
                     for (fld in this.form.fields) {
                         field = this.form.fields[fld];
-                        html += this.headerField(fld, field, options);
+                        if (field.column === 1) {
+                            html += this.buildField(fld, field, options, this.form);
+                        }
                     }
-                    html += "</form>\n";
+                    html += "</div><!-- column 1 -->\n";
+                    html += "<div class=\"col-lg-6\">\n";
+                    for (fld in this.form.fields) {
+                        field = this.form.fields[fld];
+                        if (field.column === 2) {
+                            html += this.buildField(fld, field, options, this.form);
+                        }
+                    }
+                    html += "</div><!-- column 2 -->\n";
+                    html += "</div>\n";
+                } else if (this.form.tabs) {
+                    html += "<ul id=\"" + this.form.name + "_tabs\" class=\"nav nav-tabs\">\n";
+                    for (i = 0; i < this.form.tabs.length; i++) {
+                        tab = this.form.tabs[i];
+                        html += "<li";
+                        if (i === 0) {
+                            html += " class=\"active\"";
+                        }
+                        html += "><a href=\"#" + tab.name + "\" data-toggle=\"tab\">" + tab.label + "</a></li>\n";
+                    }
+                    html += "</ul>\n";
+                    html += "<div class=\"tab-content\">\n";
+                    for (i = 0; i < this.form.tabs.length; i++) {
+                        tab = this.form.tabs[i];
+                        html += "<div class=\"tab-pane";
+                        if (i === 0) {
+                            html += " active";
+                        }
+                        html += "\" id=\"" + tab.name + "\">\n";
+                        for (fld in this.form.fields) {
+                            if (this.form.fields[fld].tab === tab.name) {
+                                html += this.buildField(fld, this.form.fields[fld], options, this.form);
+                            }
+                        }
+                        html += "</div>\n";
+                    }
                     html += "</div>\n";
                 } else {
-
-                    if (this.form.collapse && this.form.collapseMode === options.mode) {
-                        html += "<div id=\"" + this.form.name + "-collapse-0\" ";
-                        html += (this.form.collapseOpen) ? "data-open=\"true\" " : "";
-                        html += "class=\"jqui-accordion\">\n";
-                        html += "<h3>" + this.form.collapseTitle + "</h3>\n";
-                        html += "<div>\n";
-                        options.collapseAlreadyStarted = true;
-                    }
-
-                    // Start the well
-                    if (!this.modal && this.has('well')) {
-                        if ( !(this.form.collapse && this.form.collapseMode === options.mode)) {
-                            html += "<div class=\"well\">\n";
-                        }
-                    }
-
-                    if (!this.modal && this.form.actions) {
-                        html += this.getActions(options);
-                    }
-
-                    // Add a title and optionally a close button (used on Inventory->Groups)
-                    if ((!options.modal) && this.form.showTitle) {
-                        html += "<div class=\"form-title\">";
-                        html += (options.mode === 'edit') ? this.form.editTitle : this.form.addTitle;
-                        if (this.has('titleActions')) {
-                            html += "<div class=\"title-actions pull-right\">\n";
-                            for (btn in this.form.titleActions) {
-                                html += this.button({
-                                    btn: this.form.titleActions[btn],
-                                    action: btn,
-                                    toolbar: true
-                                });
+                    // original, single-column form
+                    section = '';
+                    group = '';
+                    for (fld in this.form.fields) {
+                        field = this.form.fields[fld];
+                        if (!(options.modal && field.excludeModal)) {
+                            if (field.group && field.group !== group) {
+                                if (group !== '') {
+                                    html += "</div>\n";
+                                }
+                                html += "<div class=\"well\">\n";
+                                html += "<h5>" + field.group + "</h5>\n";
+                                group = field.group;
                             }
-                            html += "</div>\n";
+                            if (field.section && field.section !== section) {
+                                if (section !== '') {
+                                    html += "</div>\n";
+                                } else {
+                                    html += "</div>\n";
+                                    html += "<div id=\"" + this.form.name + "-collapse\" class=\"jqui-accordion-modal\">\n";
+                                }
+                                sectionShow = (this.form[field.section + 'Show']) ? " ng-show=\"" + this.form[field.section + 'Show'] + "\"" : "";
+                                html += "<h3" + sectionShow + ">" + field.section + "</h3>\n";
+                                html += "<div" + sectionShow + ">\n";
+                                section = field.section;
+                            }
+                            html += this.buildField(fld, field, options, this.form);
                         }
+                    }
+                    if (section !== '') {
+                        html += "</div>\n</div>\n";
+                    }
+                    if (group !== '') {
                         html += "</div>\n";
-                        html += "<hr class=\"form-title-hr\">\n";
-                    }
-
-                    html += "<form class=\"";
-                    html += (this.form.horizontal) ? "form-horizontal" : "";
-                    html += (this.form['class']) ? ' ' + this.form['class'] : '';
-                    html += "\" name=\"" + this.form.name + "_form\" id=\"" + this.form.name + "_form\" autocomplete=\"off\" novalidate>\n";
-                    html += "<div ng-show=\"flashMessage != null && flashMessage != undefined\" class=\"alert alert-info\">{{ flashMessage }}</div>\n";
-
-                    if (this.form.twoColumns) {
-                        html += "<div class=\"row\">\n";
-                        html += "<div class=\"col-lg-6\">\n";
-                        for (fld in this.form.fields) {
-                            field = this.form.fields[fld];
-                            if (field.column === 1) {
-                                html += this.buildField(fld, field, options, this.form);
-                            }
-                        }
-                        html += "</div><!-- column 1 -->\n";
-                        html += "<div class=\"col-lg-6\">\n";
-                        for (fld in this.form.fields) {
-                            field = this.form.fields[fld];
-                            if (field.column === 2) {
-                                html += this.buildField(fld, field, options, this.form);
-                            }
-                        }
-                        html += "</div><!-- column 2 -->\n";
-                        html += "</div>\n";
-                    } else if (this.form.tabs) {
-                        html += "<ul id=\"" + this.form.name + "_tabs\" class=\"nav nav-tabs\">\n";
-                        for (i = 0; i < this.form.tabs.length; i++) {
-                            tab = this.form.tabs[i];
-                            html += "<li";
-                            if (i === 0) {
-                                html += " class=\"active\"";
-                            }
-                            html += "><a href=\"#" + tab.name + "\" data-toggle=\"tab\">" + tab.label + "</a></li>\n";
-                        }
-                        html += "</ul>\n";
-                        html += "<div class=\"tab-content\">\n";
-                        for (i = 0; i < this.form.tabs.length; i++) {
-                            tab = this.form.tabs[i];
-                            html += "<div class=\"tab-pane";
-                            if (i === 0) {
-                                html += " active";
-                            }
-                            html += "\" id=\"" + tab.name + "\">\n";
-                            for (fld in this.form.fields) {
-                                if (this.form.fields[fld].tab === tab.name) {
-                                    html += this.buildField(fld, this.form.fields[fld], options, this.form);
-                                }
-                            }
-                            html += "</div>\n";
-                        }
-                        html += "</div>\n";
-                    } else {
-                        // original, single-column form
-                        section = '';
-                        group = '';
-                        for (fld in this.form.fields) {
-                            field = this.form.fields[fld];
-                            if (!(options.modal && field.excludeModal)) {
-                                if (field.group && field.group !== group) {
-                                    if (group !== '') {
-                                        html += "</div>\n";
-                                    }
-                                    html += "<div class=\"well\">\n";
-                                    html += "<h5>" + field.group + "</h5>\n";
-                                    group = field.group;
-                                }
-                                if (field.section && field.section !== section) {
-                                    if (section !== '') {
-                                        html += "</div>\n";
-                                    } else {
-                                        html += "</div>\n";
-                                        html += "<div id=\"" + this.form.name + "-collapse\" class=\"jqui-accordion-modal\">\n";
-                                    }
-                                    sectionShow = (this.form[field.section + 'Show']) ? " ng-show=\"" + this.form[field.section + 'Show'] + "\"" : "";
-                                    html += "<h3" + sectionShow + ">" + field.section + "</h3>\n";
-                                    html += "<div" + sectionShow + ">\n";
-                                    section = field.section;
-                                }
-                                html += this.buildField(fld, field, options, this.form);
-                            }
-                        }
-                        if (section !== '') {
-                            html += "</div>\n</div>\n";
-                        }
-                        if (group !== '') {
-                            html += "</div>\n";
-                        }
-                    }
-
-                    //buttons
-                    if (!this.modal) {
-                        if (this.has('buttons')) {
-
-                            if (this.form.twoColumns) {
-                                html += "<div class=\"row\">\n";
-                                html += "<div class=\"col-lg-12\">\n";
-                                html += "<hr />\n";
-                            }
-
-                            html += "<div class=\"buttons\" ";
-                            html += "id=\"" + this.form.name + "_controls\" ";
-
-                            html += ">\n";
-
-                            if (this.form.horizontal) {
-                                offset = 2;
-                                if (this.form.buttons.labelClass) {
-                                    offset = parseInt(this.form.buttons.labelClass.replace(/[A-Z,a-z,-]/g, ''));
-                                }
-                                width = 12 - offset;
-                                html += "<div class=\"col-lg-offset-" + offset + " col-lg-" + width + ">\n";
-                            }
-
-                            for (btn in this.form.buttons) {
-                                if (typeof this.form.buttons[btn] === 'object') {
-                                    button = this.form.buttons[btn];
-
-                                    // Set default color and label for Save and Reset
-                                    if (btn === 'save') {
-                                        button.label = 'Save';
-                                        button['class'] = 'btn-success';
-                                    }
-                                    if (btn === 'reset') {
-                                        button.label = 'Reset';
-                                        button['class'] = 'btn-default';
-                                    }
-
-                                    // Build button HTML
-                                    html += "<button type=\"button\" ";
-                                    html += "class=\"btn btn-sm";
-                                    html += (button['class']) ? " " + button['class'] : "";
-                                    html += "\" ";
-                                    html += "id=\"" + this.form.name + "_" + btn + "_btn\" ";
-
-                                    if (button.ngClick) {
-                                        html += this.attr(button, 'ngClick');
-                                    }
-                                    if (button.ngDisabled) {
-                                        if (btn !== 'reset') {
-                                            html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
-                                            html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
-                                            html += "\" ";
-                                        } else {
-                                            html += "ng-disabled=\"" + this.form.name + "_form.$pristine";
-                                            html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
-                                            html += "\" ";
-                                        }
-                                    }
-                                    html += ">";
-                                    html += SelectIcon({
-                                        action: btn
-                                    });
-                                    html += " " + button.label + "</button>\n";
-                                }
-                            }
-                            html += "</div><!-- buttons -->\n";
-
-                            if (this.form.horizontal) {
-                                html += "</div>\n";
-                            }
-
-                            if (this.form.twoColumns) {
-                                html += "</div>\n";
-                                html += "</div>\n";
-                            }
-                        }
-                    }
-                    html += "</form>\n";
-
-                    if (!this.modal && this.has('well')) {
-                        if ( !(this.form.collapse && this.form.collapseMode === options.mode)) {
-                            html += "</div>\n";
-                        }
-                    }
-
-                    if (this.form.collapse && this.form.collapseMode === options.mode) {
-                        html += "</div>\n";
-                        //html += "</div>\n";
                     }
                 }
+
+                //buttons
+                if (!this.modal) {
+                    if (this.has('buttons')) {
+
+                        if (this.form.twoColumns) {
+                            html += "<div class=\"row\">\n";
+                            html += "<div class=\"col-lg-12\">\n";
+                            html += "<hr />\n";
+                        }
+
+                        html += "<div class=\"buttons\" ";
+                        html += "id=\"" + this.form.name + "_controls\" ";
+
+                        html += ">\n";
+
+                        if (this.form.horizontal) {
+                            offset = 2;
+                            if (this.form.buttons.labelClass) {
+                                offset = parseInt(this.form.buttons.labelClass.replace(/[A-Z,a-z,-]/g, ''));
+                            }
+                            width = 12 - offset;
+                            html += "<div class=\"col-lg-offset-" + offset + " col-lg-" + width + ">\n";
+                        }
+
+                        for (btn in this.form.buttons) {
+                            if (typeof this.form.buttons[btn] === 'object') {
+                                button = this.form.buttons[btn];
+
+                                // Set default color and label for Save and Reset
+                                if (btn === 'save') {
+                                    button.label = 'Save';
+                                    button['class'] = 'btn-success';
+                                }
+                                if (btn === 'reset') {
+                                    button.label = 'Reset';
+                                    button['class'] = 'btn-default';
+                                }
+
+                                // Build button HTML
+                                html += "<button type=\"button\" ";
+                                html += "class=\"btn btn-sm";
+                                html += (button['class']) ? " " + button['class'] : "";
+                                html += "\" ";
+                                html += "id=\"" + this.form.name + "_" + btn + "_btn\" ";
+
+                                if (button.ngClick) {
+                                    html += this.attr(button, 'ngClick');
+                                }
+                                if (button.ngDisabled) {
+                                    if (btn !== 'reset') {
+                                        html += "ng-disabled=\"" + this.form.name + "_form.$pristine || " + this.form.name + "_form.$invalid";
+                                        html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
+                                        html += "\" ";
+                                    } else {
+                                        html += "ng-disabled=\"" + this.form.name + "_form.$pristine";
+                                        html += (this.form.allowReadonly) ? " || " + this.form.name + "ReadOnly == true" : "";
+                                        html += "\" ";
+                                    }
+                                }
+                                html += ">";
+                                html += SelectIcon({
+                                    action: btn
+                                });
+                                html += " " + button.label + "</button>\n";
+                            }
+                        }
+                        html += "</div><!-- buttons -->\n";
+
+                        if (this.form.horizontal) {
+                            html += "</div>\n";
+                        }
+
+                        if (this.form.twoColumns) {
+                            html += "</div>\n";
+                            html += "</div>\n";
+                        }
+                    }
+                }
+                html += "</form>\n";
+
+                if (!this.modal && this.has('well')) {
+                    if ( !(this.form.collapse && this.form.collapseMode === options.mode)) {
+                        html += "</div>\n";
+                    }
+                }
+
+                if (this.form.collapse && this.form.collapseMode === options.mode) {
+                    html += "</div>\n";
+                    //html += "</div>\n";
+                }
+            
 
                 if ((!this.modal) && options.related && this.form.related) {
                     html += this.buildCollections(options);
