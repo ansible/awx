@@ -331,8 +331,6 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                 scope = generator.inject(form, { mode: 'add', modal: true, related: false, show_modal: false }),
                 choicesReady;
 
-            $('#form-modal .btn-none').removeClass('btn-none').addClass('btn-success');
-
             scope.formModalActionLabel = 'Save';
             scope.formModalCancelShow = true;
             scope.parseType = 'yaml';
@@ -564,8 +562,8 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
     'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
     'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find','WatchInventoryWindowResize',
     function ($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, GetUpdateIntervalOptions,
-        LookUpInit, Empty, Wait, GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize) {
+        GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
+        GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize) {
         return function (params) {
 
             var parent_scope = params.scope,
@@ -747,10 +745,8 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                         scope.$emit('groupLoaded');
                     })
                     .error(function (data, status) {
-                        ProcessErrors(scope, data, status, form, {
-                            hdr: 'Error!',
-                            msg: 'Failed to retrieve group: ' + defaultUrl + '. GET status: ' + status
-                        });
+                        ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                            msg: 'Failed to retrieve group: ' + defaultUrl + '. GET status: ' + status });
                     });
             });
 

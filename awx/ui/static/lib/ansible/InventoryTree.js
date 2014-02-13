@@ -202,6 +202,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                 group_id = params.group_id,
                 properties = params.properties,
                 i, p, grp, old_name, stat;
+            
             for (i = 0; i < scope.groups.length; i++) {
                 if (scope.groups[i].group_id === group_id) {
                     grp = scope.groups[i];
