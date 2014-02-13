@@ -11,8 +11,8 @@
 
 angular.module('AuthService', ['ngCookies', 'Utilities'])
 
-.factory('Authorization', ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath',
-    function ($http, $rootScope, $location, $cookieStore, GetBasePath) {
+.factory('Authorization', ['$http', '$rootScope', '$location', '$cookieStore', 'GetBasePath', 'Store',
+    function ($http, $rootScope, $location, $cookieStore, GetBasePath, Store) {
         return {
             setToken: function (token, expires) {
                 // set the session cookie
@@ -63,7 +63,6 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
                 $cookieStore.remove('token_expires');
                 $cookieStore.remove('current_user');
                 $cookieStore.remove('lastPath');
-                $cookieStore.remove('license');
                 $cookieStore.put('userLoggedIn', false);
                 $cookieStore.put('sessionExpired', false);
                 $cookieStore.remove('lastPath', '/home');
@@ -86,9 +85,11 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
                 });
             },
 
-            setLicense: function (license) {
+            setLicense: function (data) {
+                var license = data.license_info;
+                license.version = data.version;
                 license.tested = false;
-                $cookieStore.put('license', license);
+                Store('license', license);
             },
 
             licenseTested: function () {
@@ -96,7 +97,9 @@ angular.module('AuthService', ['ngCookies', 'Utilities'])
                 if ($rootScope.license_tested !== undefined) {
                     result = $rootScope.license_tested;
                 } else {
-                    license = $cookieStore.get('license');
+                    // User may have hit browser refresh
+                    license = Store('license');
+                    $rootScope.version = license.version;
                     if (license && license.tested !== undefined) {
                         result = license.tested;
                     } else {

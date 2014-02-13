@@ -1161,7 +1161,9 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         if (i === 0) {
                             html += " class=\"active\"";
                         }
-                        html += "><a href=\"#" + tab.name + "\" data-toggle=\"tab\">" + tab.label + "</a></li>\n";
+                        html += "><a id=\"" + tab.name + "_link\" ng-click=\"toggleTab($event, '" + tab.name + "_link', '" +
+                            this.form.name + "_tabs')\" href=\"#" + tab.name + "\"" +
+                            tab.name + "\" data-toggle=\"tab\">" + tab.label + "</a></li>\n";
                     }
                     html += "</ul>\n";
                     html += "<div class=\"tab-content\">\n";

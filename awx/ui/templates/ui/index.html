@@ -164,15 +164,15 @@
     <div class="row">
       <div class="col-lg-12">
         <ul class="nav nav-tabs" id="main_tabs">
-          <li class="active"><a href="#home" id="main_home_tab" data-toggle="tab">Home</a></li>
-          <li><a href="#organizations" id="main_organizations_tab" data-toggle="tab">Organizations</a></li>
-          <li><a href="#users" id="main_users_tab" data-toggle="tab">Users</a></li>
-          <li><a href="#teams" id="main_teams_tab" data-toggle="tab">Teams</a></li>
-          <li><a href="#credentials" id="main_credentials_tab" data-toggle="tab">Credentials</a></li>
-          <li><a href="#projects" id="main_projects_tab" data-toggle="tab">Projects</a></li>
-          <li><a href="#inventories" id="main_inventories_tab" data-toggle="tab">Inventories</a></li>
-          <li><a href="#job_templates" id="main_job_templates_tab" data-toggle="tab">Job Templates</a></li>
-          <li><a href="#jobs" id="main_jobs_tab" data-toggle="tab">Jobs</a></li>
+          <li class="active"><a href="#home" id="main_home_tab" data-toggle="tab" class="main-tab-link">Home</a></li>
+          <li><a href="#organizations" id="main_organizations_tab" class="main-tab-link" data-toggle="tab">Organizations</a></li>
+          <li><a href="#users" id="main_users_tab" data-toggle="tab" class="main-tab-link">Users</a></li>
+          <li><a href="#teams" id="main_teams_tab" data-toggle="tab" class="main-tab-link">Teams</a></li>
+          <li><a href="#credentials" id="main_credentials_tab" data-toggle="tab" class="main-tab-link">Credentials</a></li>
+          <li><a href="#projects" id="main_projects_tab" data-toggle="tab" class="main-tab-link">Projects</a></li>
+          <li><a href="#inventories" id="main_inventories_tab" data-toggle="tab" class="main-tab-link">Inventories</a></li>
+          <li><a href="#job_templates" id="main_job_templates_tab" data-toggle="tab" class="main-tab-link">Job Templates</a></li>
+          <li><a href="#jobs" id="main_jobs_tab" data-toggle="tab" class="main-tab-link">Jobs</a></li>
         </ul>
      
         <div class="tab-content" id="tab-content-container">
@@ -374,7 +374,7 @@
                     target="_blank"><i class="fa fa-question-circle"></i> Contact Support</a>
             </div>
             <div class="col-lg-6 text-center copyright">
-                <a href="http://www.ansible.com">Copyright &copy; 2014 AnsibleWorks, Inc. All rights reserved.</a>
+                <a href="http://www.ansible.com">Ansible Tower <span ng-bind="version"></span><br />Copyright &copy; 2014 Ansible, Inc. All rights reserved.</a>
             </div>
             <div class="col-lg-3">
                 <div class="logo">
@@ -391,6 +391,7 @@
   <script src="{{ STATIC_URL }}lib/jqueryui/ui/minified/jquery-ui.min.js"></script>
   
   <script>
+      // When user clicks on main tab, fire the matching Angular route
       $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
           var url = $(e.target).text();
           var regx = new RegExp('/\#\/' + url.toLowerCase().replace(/ /g,'_') + '/');
@@ -398,7 +399,7 @@
           if (! regx.test(loc)) {
              window.location = '#/' + url.toLowerCase().replace(/ /g,'_');
           }
-          });
+      });
   </script>
 
 </body>

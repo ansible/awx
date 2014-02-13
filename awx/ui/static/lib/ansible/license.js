@@ -51,11 +51,7 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
                         scope.formModalActionLabel = 'OK';
                         scope.formModalCancelShow = false;
                         scope.formModalInfo = 'Purchase/Extend License';
-                        scope.formModalHeader = 'Tower License';
-
-                        //$('#form-modal .btn-success').removeClass('btn-success').addClass('btn-none');
-                        //$('#form-modal').addClass('skinny-modal');
-
+                        scope.formModalHeader = "Ansible Tower <span class=\"license-version\">v." + data.version + "</span>";
 
                         // Respond to license button
                         scope.formModalInfoAction = function () {
@@ -126,7 +122,7 @@ angular.module('License', ['RestServices', 'Utilities', 'FormGenerator', 'Prompt
 
                     })
                     .error(function (data, status) {
-                        ProcessErrors($rootScope, data, status, form, { hdr: 'Error!',
+                        ProcessErrors($rootScope, data, status, null, { hdr: 'Error!',
                             msg: 'Failed to retrieve license. GET status: ' + status
                         });
                     });

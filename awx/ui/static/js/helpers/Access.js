@@ -48,13 +48,13 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
         }
     ])
 
-.factory('CheckLicense', ['$rootScope', '$cookieStore', 'Alert', '$location', 'Authorization',
-    function ($rootScope, $cookieStore, Alert, $location, Authorization) {
+.factory('CheckLicense', ['$rootScope', 'Store', 'Alert', '$location', 'Authorization',
+    function ($rootScope, Store, Alert, $location, Authorization) {
         return function () {
             // Check license status and alert the user, if needed
             var status = 'success',
                 hdr, msg,
-                license = $cookieStore.get('license'),
+                license = Store('license'),
                 purchase_msg = '<p>To purchase a license or extend an existing license ' +
                 '<a href="http://www.ansible.com/ansible-pricing" target="_blank"><strong>visit the Ansible online store</strong></a>, ' +
                 'or visit <strong><a href="https://support.ansible.com" target="_blank">support.ansible.com</a></strong> for assistance.</p>';
@@ -62,9 +62,9 @@ angular.module('AccessHelper', ['RestServices', 'Utilities', 'ngCookies'])
             if (license && !Authorization.licenseTested()) {
                 // This is our first time evaluating the license
                 license.tested = true;
-                $cookieStore.remove('license');
-                $cookieStore.put('license', license);
+                Store('license',license);  //update with tested flag
                 $rootScope.license_tested = true;
+                $rootScope.version = license.version;
                 if (license.valid_key !== undefined && license.valid_key === false) {
                     // The license is invalid. Stop the user from logging in.
                     status = 'alert-danger';

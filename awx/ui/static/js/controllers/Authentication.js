@@ -104,7 +104,7 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
                             $rootScope.user_is_superuser = data.results[0].is_superuser;
                             Authorization.getLicense()
                                 .success(function (data) {
-                                    Authorization.setLicense(data.license_info);
+                                    Authorization.setLicense(data);
                                     if (lastPath()) {
                                         // Go back to most recent navigation path
                                         $location.path(lastPath());
@@ -114,12 +114,12 @@ function Authenticate($cookieStore, $window, $scope, $rootScope, $location, Auth
                                 })
                                 .error(function () {
                                     Wait('stop');
-                                    Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
+                                    Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
                                 });
                         })
                         .error(function (data, status) {
                             Wait('stop');
-                            Alert('Error', 'Failed to access license information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
+                            Alert('Error', 'Failed to access user information. GET returned status: ' + status, 'alert-danger', setLoginFocus);
                         });
                 })
                 .error(function (data, status) {

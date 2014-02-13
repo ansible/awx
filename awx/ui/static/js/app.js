@@ -446,8 +446,11 @@ angular.module('ansible', [
             };
 
             $rootScope.viewLicense = function () {
-                //$location.path('/license');
                 ViewLicense();
+            };
+            $rootScope.toggleTab = function(e, tab, tabs) {
+                e.preventDefault();
+                $('#' + tabs + ' #' + tab).tab('show');
             };
         }
     ]);
