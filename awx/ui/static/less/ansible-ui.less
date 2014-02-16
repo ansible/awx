@@ -30,6 +30,7 @@
 
 @import "animations.less";
 @import "jquery-ui-overrides.less";
+@import "codemirror.less";
 
 
 html, body { height: 100%; }
@@ -1221,21 +1222,27 @@ a.btn-disabled:hover {
   cursor: not-allowed;  
 }
 
-.parse-selection {
-  display: inline-block;
-  margin: 5px 0 8px 0;
-  font-size: 12px;
-  line-height: normal;
-}
+/* Variable Editing */
+  .parse-selection {
+      display: inline-block;
+      margin: 5px 0 8px 0;
+      font-size: 12px;
+      line-height: normal;
+  }
 
-.parse-selection input {
-  margin-left: 5px;
-}
+  .parse-selection input {
+      margin-left: 5px;
+  }
 
-.parse-select .parse-label {
-  margin-left: 3px;
-}
+  .parse-select .parse-label {
+      margin-left: 3px;
+  }
 
+  .external-editor-link {
+      display: inline-block;
+      margin-left: 20px;
+  }
+  
 .slider {
   display: inline-block;
   width: 100px;

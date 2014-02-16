@@ -684,10 +684,12 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                             html += "<div class=\"parse-selection\" id=\"" + this.form.name + "_" + fld + "_parse_type\">Parse as: " +
                                 "<input type=\"radio\" ng-model=\"";
                             html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
-                            html += "\" value=\"yaml\"> <span class=\"parse-label\">YAML</span>\n";
+                            html += "\" value=\"yaml\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">YAML</span>\n";
                             html += "<input type=\"radio\" ng-model=\"";
                             html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
-                            html += "\" value=\"json\"> <span class=\"parse-label\">JSON</span>\n";
+                            html += "\" value=\"json\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">JSON</span>\n";
+                            html += "<a class=\"external-editor-link\" ng-click=\"showCodeEditor()\" data-placement=\"top\" " +
+                                "aw-tooltip=\"View in editor\" href=\"\"><i class=\"fa fa-external-link\"></i> Editor</a>";
                             html += "</div>\n";
                         }
 

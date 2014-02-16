@@ -1,0 +1,20 @@
+
+<div class="row">
+    <div class="col-lg-12">
+        <h4>CodeMirror Example</h4>
+        <div id="parse-type-group">
+            <div id="parse-type-label">Parse Type:</div>
+            <label class="radio-inline"><input type="radio" name="parsetype" value="json" ng-model="parseType" 
+                ng-change="parseTypeChange()">JSON</label>
+            <label class="radio-inline"><input type="radio" name="parsetype" value="yaml" ng-model="parseType" 
+                ng-change="parseTypeChange()">YAML</label>
+            <a class="external-editor-link" ng-click="showCodeEditor('code')" data-placement="top" 
+                    af-tooltip="View in code editor" href=""><i class="fa fa-external-link"></i> Code Editor</a>
+        </div>
+        <form>
+            <div class="form-group">
+                <textarea rows="10" name="code" id="code_textarea" class="form-control" ng-model="codeValue"></textarea>
+            </div> 
+        </form>
+    </div><!-- col-lg-12 -->
+</div><!-- row -->

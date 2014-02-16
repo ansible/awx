@@ -74,7 +74,7 @@ angular.module('ProjectsListDefinition', [])
                     "</dl>\n",
                 dataPlacement: 'left',
                 dataContainer: 'body',
-                mode: 'all',
+                mode: 'edit',
                 awToolTip: 'Click for help',
                 awTipPlacement: 'top'
             },

@@ -1,0 +1,14 @@
+{
+  "name": "jsonlint",
+  "homepage": "https://github.com/zaach/jsonlint",
+  "version": "1.6.0",
+  "_release": "1.6.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.6.0",
+    "commit": "5f3ad28c8fd92ba2b2f70cd55fd5c51c2a7aced1"
+  },
+  "_source": "git://github.com/zaach/jsonlint.git",
+  "_target": "*",
+  "_originalSource": "jsonlint"
+}

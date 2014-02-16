@@ -1,0 +1,25 @@
+{
+  "name": "angular-codemirror",
+  "version": "1.0.1",
+  "dependencies": {
+    "angular": "latest",
+    "angular-route": "latest",
+    "jquery": "latest",
+    "jqueryui": "latest",
+    "components-font-awesome": "latest",
+    "twitter": "latest",
+    "js-yaml": "latest",
+    "jsonlint": "latest",
+    "codemirror": "latest"
+  },
+  "homepage": "https://github.com/chouseknecht/angular-codemirror",
+  "_release": "1.0.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.0.1",
+    "commit": "9a3d595de6b18faeb0834074f73bde476e4af9ec"
+  },
+  "_source": "git://github.com/chouseknecht/angular-codemirror.git",
+  "_target": "~1.0.0",
+  "_originalSource": "angular-codemirror"
+}

@@ -9,6 +9,9 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/components-font-awesome/css/font-awesome.min.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/select2/select2.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}lib/select2/select2-bootstrap.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/lib/codemirror.css" >
+  <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/theme/elegant.css" >
+  <link rel="stylesheet" href="{{ STATIC_URL }}lib/codemirror/addon/lint/lint.css" >
   
   {% if settings.USE_MINIFIED_JS %} 
   <link rel="stylesheet" href="{{ STATIC_URL }}css/awx.min.css" />
@@ -28,6 +31,7 @@
   <script src="{{ STATIC_URL }}lib/angular-cookies/angular-cookies.min.js"></script>
   <script src="{{ STATIC_URL }}lib/angular-sanitize/angular-sanitize.min.js"></script>
   <script src="{{ STATIC_URL }}lib/angular-md5/angular-md5.min.js"></script>
+  <script src="{{ STATIC_URL }}lib/angular-codemirror/lib/AngularCodeMirror.js"></script>
   {% if settings.USE_MINIFIED_JS %} 
   <script src="{{ STATIC_URL }}js/awx.min.js"></script>
   {% else %}
@@ -389,6 +393,19 @@
   <script src="{{ STATIC_URL }}lib/js-yaml/js-yaml.min.js"></script>
   <script src="{{ STATIC_URL }}lib/select2/select2.min.js"></script>
   <script src="{{ STATIC_URL }}lib/jqueryui/ui/minified/jquery-ui.min.js"></script>
+  
+  <!-- Codemirror bits to make variable editing possible -->
+  <script src="{{ STATIC_URL }}lib/js-yaml/js-yaml.min.js"></script>
+  <script src="{{ STATIC_URL }}lib/jsonlint/lib/jsonlint.js"></script>
+  <script src="{{ STATIC_URL }}lib/codemirror/lib/codemirror.js"></script>
+  <script src="{{ STATIC_URL }}lib/codemirror/mode/javascript/javascript.js"></script>
+  <script src="{{ STATIC_URL }}lib/codemirror/mode/yaml/yaml.js"></script>
+  <script src="{{ STATIC_URL }}lib/codemirror/addon/lint/lint.js"></script>
+  <script src="{{ STATIC_URL }}lib/codemirror/addon/lint/json-lint.js"></script>
+  <script src="{{ STATIC_URL }}lib/angular-codemirror/lib/yaml-lint.js"></script>
+  <script src="{{ STATIC_URL }}lib/codemirror/addon/edit/closebrackets.js"></script>
+  <script src="{{ STATIC_URL }}lib/codemirror/addon/edit/matchbrackets.js"></script>
+  <script src="{{ STATIC_URL }}lib/codemirror/addon/selection/active-line.js"></script>
   
   <script>
       // When user clicks on main tab, fire the matching Angular route

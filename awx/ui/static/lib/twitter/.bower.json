@@ -1,6 +1,6 @@
 {
   "name": "bootstrap",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "main": [
     "./dist/css/bootstrap.css",
     "./dist/js/bootstrap.js",
@@ -22,14 +22,13 @@
     "jquery": ">= 1.9.0"
   },
   "homepage": "https://github.com/twbs/bootstrap",
-  "_release": "3.1.0",
+  "_release": "3.1.1",
   "_resolution": {
     "type": "version",
-    "tag": "v3.1.0",
-    "commit": "1409cde7e800ca83fd761f87e5ad8f0d259e38d1"
+    "tag": "v3.1.1",
+    "commit": "a365d8689c3f3cee7f1acf86b61270ecca8e106d"
   },
   "_source": "git://github.com/twbs/bootstrap.git",
-  "_target": "~3.1.0",
-  "_originalSource": "twitter",
-  "_direct": true
+  "_target": "*",
+  "_originalSource": "twitter"
 }
