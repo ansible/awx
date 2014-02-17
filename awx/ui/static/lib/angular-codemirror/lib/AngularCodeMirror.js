@@ -72,13 +72,20 @@ angular.module('AngularCodeMirrorModule', [])
                             }
                         ],
                         open: function() {
-                             // fix buttons- make them more twittery
-                            $('.ui-dialog[aria-describedby="af-code-editor-modal"]').find('.ui-dialog-titlebar button')
-                                .empty().attr({'class': 'close'}).text('x');
+                            var self = $('.ui-dialog[aria-describedby="af-code-editor-modal"]'),
+                                idx, options;
+                            
+                            // bring the overlay up to just below the new window
+                            idx = self.css('z-index');
+                            $('.ui-widget-overlay').css({ 'z-index': idx - 1});
+                            
+                            // fix buttons- make them more twittery
+                            self.find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).text('x');
                             $('#af-code-edit-cancel').attr({ "class": "btn btn-default" }).empty().html("<i class=\"fa fa-times\"></i> Cancel");
                             $('#af-code-edit-ok').attr({ "class": "btn btn-primary" }).empty().html("<i class=\"fa fa-check\"></i> Save");
 
-                            var options = modes[mode];
+                            // initialize CodeMirror
+                            options = modes[mode];
                             options.value = scope[model];
                             myCodeMirror = CodeMirror(document.getElementById('af-code'), options);
                         }

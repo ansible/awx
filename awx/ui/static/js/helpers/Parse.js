@@ -21,47 +21,6 @@ angular.module('ParseHelper', ['Utilities', 'AngularCodeMirrorModule'])
                 codeMirror = AngularCodeMirror();
             codeMirror.addModes($AnsibleConfig.variable_edit_modes);
 
-            /*
-            scope.blockParseTypeWatch = false;
-            scope.blockVariableDataWatch = false;
-
-            if (scope['remove' + fld + 'Watch']) {
-                scope['remove' + fld + 'Watch']();
-            }
-            scope['remove' + fld + 'Watch'] = scope.$watch(pfld, function (newVal, oldVal) {
-                var json_obj;
-                if (newVal !== oldVal) {
-                    if (newVal === 'json') {
-                        if (scope[fld] && !/^---$/.test(scope[fld])) {
-                            // convert YAML to JSON
-                            try {
-                                json_obj = jsyaml.load(scope[fld]); //parse yaml into an obj
-                                scope[fld] = JSON.stringify(json_obj, null, " ");
-                            } catch (err) {
-                                // ignore parse errors. allow the user to paste values in and sync the
-                                // radio button later. parse errors will be flagged on save.
-                            }
-                        } else {
-                            scope[fld] = "{}";
-                        }
-                    } else {
-                        if (scope[fld] && !/^\{\}$/.test(scope[fld])) {
-                            // convert JSON to YAML
-                            try {
-                                json_obj = JSON.parse(scope[fld]);
-                                scope[fld] = jsyaml.safeDump(json_obj);
-                            } catch (err) {
-                                // ignore the errors. allow the user to paste values in and sync the
-                                // radio button later. parse errors will be flagged on save.
-                            }
-                        } else {
-                            scope[fld] = "---";
-                        }
-                    }
-                }
-            });
-            */
-
             scope.showCodeEditor = function() {
                 var title = 'Edit ' + scope[pfld].toUpperCase(),
                     container = document.getElementById('main-view');
