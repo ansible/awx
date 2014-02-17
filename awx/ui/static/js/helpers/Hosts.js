@@ -543,7 +543,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             // Update any titles attributes created by ApplyEllipsis
             if (old_name) {
                 setTimeout(function() {
-                    $('#hosts_table .host-name a[title="' + old_name + '"').attr('title', host.name);
+                    $('#hosts_table .host-name a[title="' + old_name + '"]').attr('title', host.name);
                     ApplyEllipsis('#hosts_table .host-name a');
                     // Close modal
                     Wait('stop');
