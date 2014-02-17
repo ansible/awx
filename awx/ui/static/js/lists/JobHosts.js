@@ -53,7 +53,7 @@ angular.module('JobHostDefinition', [])
                 sourceModel: 'host',
                 sourceField: 'name',
                 ngBind: 'jobhost.host_name',
-                ngHref: "jobhost.hostLinkTo"
+                ngHref: "{{ jobhost.hostLinkTo }}"
             },
             status: {
                 label: 'Status',

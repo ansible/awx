@@ -72,14 +72,14 @@ angular.module('InventoriesListDefinition', [])
         fieldActions: {
             status: {
                 //label: 'Status', 
-                ngHref: "inventory.status_link",
+                ngHref: "{{ inventory.status_link }}",
                 iconClass: "{{ 'fa fa-cloud icon-cloud-' + inventory.status_class }}",
                 awToolTip: "{{ inventory.status_tip }}",
                 dataPlacement: "top"
             },
             failed_hosts: {
                 //label: 'Failures',
-                ngHref: "inventory.failed_hosts_link",
+                ngHref: "{{ inventory.failed_hosts_link }}",
                 iconClass: "{{ 'fa icon-failures-' + inventory.failed_hosts_class }}",
                 awToolTip: "{{ inventory.failed_hosts_tip }}",
                 dataPlacement: "top"
