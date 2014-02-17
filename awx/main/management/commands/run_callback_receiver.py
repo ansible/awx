@@ -24,6 +24,9 @@ from awx.main.models import *
 import zmq
 
 class Worker(Process):
+    '''
+    Process to validate and store save job events received via zeromq
+    '''
 
     def run(self):
         print("Starting worker")
@@ -36,7 +39,6 @@ class Worker(Process):
 
     @transaction.commit_on_success
     def process_job_event(self, data):
-        print("Received data: %s" % str(data))
         event = data.get('event', '')
         if not event or 'job_id' not in data:
             return
@@ -58,20 +60,15 @@ class Worker(Process):
             try:
                 if event == 'playbook_on_stats':
                     transaction.commit()
-                if not JobEvent.objects.filter(**data).exists():
-                    job_event = JobEvent(**data)
-                    job_event.save(post_process=True)
-                    if not event.startswith('runner_'):
-                        transaction.commit()
-                else:
-                    duplicate = True
-                    if settings.DEBUG:
-                        print 'skipping duplicate job event %r' % data
+                job_event = JobEvent(**data)
+                job_event.save(post_process=True)
+                if not event.startswith('runner_'):
+                    transaction.commit()
                 break
             except DatabaseError as e:
                 transaction.rollback()
-                # logger.debug('Database error saving job event, retrying in '
-                #              '1 second (retry #%d): %s', retry_count + 1, e)
+                logger.debug('Database error saving job event, retrying in '
+                              '1 second (retry #%d): %s', retry_count + 1, e)
                 time.sleep(1)
         else:
             logger.error('Failed to save job event after %d retries.',
@@ -80,9 +77,11 @@ class Worker(Process):
 
 class Command(NoArgsCommand):
     '''
-    Management command to run the job callback receiver
+    Save Job Callback receiver (see awx.plugins.callbacks.job_event_callback)
+    Runs as a management command and receives job save events.  It then hands
+    them off to worker processors (see Worker) which writes them to the database
     '''
-
+    
     help = 'Launch the job callback receiver'
 
     option_list = NoArgsCommand.option_list + (
@@ -124,4 +123,4 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
         self.init_logging()
-        self.run_subscriber()
+        self.run_subscriber(port=options.get('port'))

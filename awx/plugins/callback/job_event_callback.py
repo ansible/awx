@@ -117,15 +117,16 @@ class CallbackModule(object):
             'event_data': event_data,
             'created': datetime.datetime.utcnow().isoformat(),
         }
+        active_pid = os.getpid()
         if self.job_callback_debug:
             msg.update({
-                'pid': os.getpid(),
+                'pid': active_pid,
             })
         for retry_count in xrange(4):
             try:
                 if not hasattr(self, 'connection_pid'):
-                    self.connection_pid = os.getpid()
-                if self.connection_pid != os.getpid():
+                    self.connection_pid = active_pid
+                if self.connection_pid != active_pid:
                     self._init_connection()
                 if self.context is None:
                     self._start_connection()
