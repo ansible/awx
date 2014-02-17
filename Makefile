@@ -40,7 +40,8 @@ clean:
 	rm -rf dist/*
 	rm -rf build rpm-build *.egg-info
 	rm -rf debian deb-build
-	rm -f awx/ui/static/js/awx-min.js
+	rm -f awx/ui/static/css/awx*.js awx/ui/static/css/awx*.css
+	rm -rf node_modules
 	find . -type f -regex ".*\.py[co]$$" -delete
 
 # Fetch from origin, rebase local commits on top of origin commits.
@@ -137,17 +138,20 @@ test_tox:
 test_jenkins:
 	$(PYTHON) manage.py jenkins -v2
 
+# Update local npm install
+node_modules:
+	npm install
+
 # Build minified JS/CSS.
-minjs:
+minjs: node_modules
 	grunt
 
-# Check .js files for errors and lint 
-lintjs: 
+# Check .js files for errors and lint
+lintjs: node_modules
 	grunt jshint
-        
 
 # Build a pip-installable package into dist/ with a timestamped version number.
-dev_build: 
+dev_build:
 	$(PYTHON) setup.py dev_build
 
 # Build a pip-installable package into dist/ with the release version number.
