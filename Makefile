@@ -31,7 +31,7 @@ PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-release.json
 endif
 
 .PHONY: clean rebase push requirements requirements_pypi develop refresh \
-	adduser syncdb migrate dbchange dbshell runserver celeryd test \
+	adduser syncdb migrate dbchange dbshell runserver celeryd receiver test \
 	test_coverage coverage_html test_ui test_jenkins dev_build \
 	release_build release_clean sdist rpm
 
@@ -113,6 +113,10 @@ runserver:
 # Run to start the background celery worker for development.
 celeryd:
 	$(PYTHON) manage.py celeryd -l DEBUG -B --autoscale=20,2 -Ofair
+
+# Run to start the zeromq callback receiver
+receiver:
+	$(PYTHON) manage.py run_callback_receiver
 
 # Run all API unit tests.
 test:
