@@ -345,6 +345,10 @@ if 'devserver' in INSTALLED_APPS:
 else:
     INTERNAL_API_URL = 'http://127.0.0.1:8000'
 
+CALLBACK_CONSUMER_PORT = "tcp://127.0.0.1:5556"
+CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver.ipc"
+CALLBACK_BYPASS_QUEUE = False
+
 # Logging configuration.
 LOGGING = {
     'version': 1,

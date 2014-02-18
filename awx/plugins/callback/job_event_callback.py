@@ -40,6 +40,9 @@ import urlparse
 
 import requests
 
+# Django
+from django.conf import settings
+
 # ZeroMQ
 import zmq
 
@@ -79,7 +82,6 @@ class CallbackModule(object):
         self.auth_token = os.getenv('REST_API_TOKEN', '')
         self.context = None
         self.socket = None
-        self.broker_url = True # TODO: Figure this out for unit tests
         self._init_logging()
         self._init_connection()
 
@@ -132,7 +134,6 @@ class CallbackModule(object):
                     self._start_connection()
 
                 self.socket.send_json(msg)
-                self.logger.debug('Publish: %r, retry=%d', msg, retry_count)
                 return
             except Exception, e:
                 self.logger.info('Publish Exception: %r, retry=%d', e,
@@ -170,7 +171,7 @@ class CallbackModule(object):
         task = getattr(getattr(self, 'task', None), 'name', '')
         if task and event not in self.EVENTS_WITHOUT_TASK:
             event_data['task'] = task
-        if self.broker_url:
+        if not settings.CALLBACK_BYPASS_QUEUE:
             self._post_job_event_queue_msg(event, event_data)
         else:
             self._post_rest_api_event(event, event_data)
