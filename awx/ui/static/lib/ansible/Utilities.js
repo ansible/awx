@@ -84,17 +84,15 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     backdrop: 'static'
                 });
                 $rootScope.disableButtons2 = (disableButtons) ? true : false;
-                if (action) {
-                    $('#alert-modal2').on('hidden.bs.modal', function () {
+                
+                $('#alert-modal2').on('hidden.bs.modal', function () {
+                    if (action) {
                         action();
-                    });
-                }
+                    }
+                });
                 $(document).bind('keydown', function (e) {
                     if (e.keyCode === 27) {
                         $('#alert-modal2').modal('hide');
-                        if (action) {
-                            action();
-                        }
                     }
                 });
             } else {
@@ -108,9 +106,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 });
 
                 $('#alert-modal').on('hidden.bs.modal', function () {
-                    console.log('modal closed');
                     if (action) {
-                        console.log('attempting callback');
                         action();
                     }
                 });
@@ -118,14 +114,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 $(document).bind('keydown', function (e) {
                     if (e.keyCode === 27) {
                         $('#alert-modal').modal('hide');
-                        if (action) {
-                            action();
-                        }
                     }
                 });
 
                 $rootScope.disableButtons = (disableButtons) ? true : false;
-
             }
         };
     }
