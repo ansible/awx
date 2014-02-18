@@ -10,8 +10,8 @@
 
 'use strict';
 
-angular.module('md5Helper', ['RestServices', 'Utilities'])
-    .factory('md5Setup', [ function () {
+angular.module('md5Helper', ['RestServices', 'Utilities', 'angular-md5'])
+    .factory('md5Setup', ['md5', function (md5) {
         return function (params) {
           
             var scope = params.scope,
@@ -24,7 +24,7 @@ angular.module('md5Helper', ['RestServices', 'Utilities'])
 
             scope.genMD5 = function (fld) {
                 var now = new Date();
-                scope[fld] = $.md5('AnsibleWorks' + now.getTime());
+                scope[fld] = md5.createHash('AnsibleWorks' + now.getTime());
             };
 
             scope.toggleCallback = function (fld) {

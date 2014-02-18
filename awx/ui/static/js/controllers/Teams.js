@@ -285,7 +285,9 @@ function TeamsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
                 if (base === 'teams') {
                     ReturnToCaller();
                 }
-                ReturnToCaller(1);
+                else {
+                    ReturnToCaller(1);
+                }
             })
             .error(function (data, status) {
                 Wait('stop');

@@ -444,10 +444,11 @@ function ProjectsAdd($scope, $rootScope, $compile, $location, $log, $routeParams
                         if (base === 'projects') {
                             ReturnToCaller();
                         }
-                        ReturnToCaller(1);
+                        else {
+                            ReturnToCaller(1);
+                        }
                     })
                     .error(function (data, status) {
-                        Wait('stop');
                         ProcessErrors($scope, data, status, ProjectsForm, { hdr: 'Error!',
                             msg: 'Failed to add organization to project. POST returned status: ' + status });
                     });

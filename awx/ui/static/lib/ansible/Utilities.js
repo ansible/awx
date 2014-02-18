@@ -85,7 +85,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 });
                 $rootScope.disableButtons2 = (disableButtons) ? true : false;
                 if (action) {
-                    $('#alert-modal2').on('hidden', function () {
+                    $('#alert-modal2').on('hidden.bs.modal', function () {
                         action();
                     });
                 }
@@ -107,6 +107,14 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     backdrop: 'static'
                 });
 
+                $('#alert-modal').on('hidden.bs.modal', function () {
+                    console.log('modal closed');
+                    if (action) {
+                        console.log('attempting callback');
+                        action();
+                    }
+                });
+
                 $(document).bind('keydown', function (e) {
                     if (e.keyCode === 27) {
                         $('#alert-modal').modal('hide');
@@ -117,11 +125,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 });
 
                 $rootScope.disableButtons = (disableButtons) ? true : false;
-                if (action) {
-                    $('#alert-modal').on('hidden', function () {
-                        action();
-                    });
-                }
+
             }
         };
     }
@@ -630,6 +634,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             var form = params.form,
                 scope = params.scope,
                 fld;
+            console.log('here');
             for (fld in form.fields) {
                 if (scope[form.name + '_form'][fld]) {
                     console.log(fld + ' valid: ' + scope[form.name + '_form'][fld].$valid);

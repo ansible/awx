@@ -236,11 +236,12 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routePar
 
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
     
-    $scope.inventoryParseType = 'yaml';
-
     generator.reset();
     LoadBreadCrumbs();
-    ParseTypeChange( $scope, 'inventory_variables', 'inventoryParseType');
+
+    $scope.inventoryParseType = 'yaml';
+    ParseTypeChange({ scope: $scope, variable: 'inventory_variables', parse_variable: 'inventoryParseType',
+        field_id: 'inventory_inventory_variables' });
 
     LookUpInit({
         scope:  $scope,

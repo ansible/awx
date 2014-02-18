@@ -20,6 +20,7 @@
     "commit": "94b7aac548b036f4fbd94e56129ed9574e472616"
   },
   "_source": "git://github.com/chouseknecht/angular-codemirror.git",
-  "_target": "~1.0.0",
-  "_originalSource": "angular-codemirror"
+  "_target": "~1.0.2",
+  "_originalSource": "angular-codemirror",
+  "_direct": true
 }

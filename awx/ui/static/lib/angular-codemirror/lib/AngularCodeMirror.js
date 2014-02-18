@@ -32,16 +32,94 @@ angular.module('AngularCodeMirrorModule', [])
     .factory('AngularCodeMirror', [ function() {
         return function() {
             var fn = function() {
-               
-                this.show = function(params) {
+
+                this.myCodeMirror = null;
+                this.element = null;
+
+                this.showTextArea = function(params) {
+                    var self = this,
+                        element = (typeof params.element === "object") ? params.element : document.getElementById(params.element),
+                        scope = params.scope,
+                        model = params.model,
+                        mode = params.mode,
+                        onReady = params.onReady,
+                        onChange = params.onChange,
+                        height = 0;
+
+                    self.element = $(element);
                     
-                    var scope = params.scope,
+                    // We don't want to touch the original textarea. Angular likely has a model and other listeners
+                    // attached to it. In prior iterations attaching CodeMirror to it seemed to go bad, so we'll insert a 
+                    // <div> under it, hide the textarea and let CodeMirror attach to the <div>.
+                    if ($('#cm-' + model + '-container').length > 0) {
+                        $('#cm-' + model + '-container').empty();
+                    }
+                    else {
+                        self.element.after("<div id=\"cm-" + model + "-container\"></div>");
+                    }
+                    
+                    // Calc the height of the text area- our CodeMirror should match.
+                    height += self.element.attr('rows') * parseInt($(self.element).css('line-height').replace(/px/,''),10);
+                    height += parseInt(self.element.css('padding-top').replace(/px|%/,''),10) +
+                        parseInt(self.element.css('padding-bottom').replace(/px|%/,''),10);
+                    height += 2;  //for the border
+                    
+                    // hide
+                    self.element.hide();
+
+                    // Initialize CodeMirror
+                    self.modes[mode].value = scope[model];
+                    self.myCodeMirror = CodeMirror(document.getElementById('cm-' + model + '-container'), self.modes[mode]);
+
+                    // Adjust the height
+                    $('.CodeMirror').css({ 'min-height': height, 'max-height': height });
+                    self.myCodeMirror.setSize(null, height);
+
+                    // This doesn't work without a setTimeout
+                    setTimeout(function() {
+                        self.myCodeMirror.refresh();
+                        if (onReady) {
+                            onReady();
+                        }
+                    }, 500);
+
+                    // Update the model on change
+                    self.myCodeMirror.on('change', function() {
+                        setTimeout(function() {
+                            scope.$apply(function(){
+                                scope[model] = self.myCodeMirror.getValue();
+                                if (onChange) {
+                                    onChange();
+                                }
+                            });
+                        }, 500);
+                    });
+                };
+               
+                this.getValue = function() {
+                    var self = this;
+                    return self.myCodeMirror.getValue();
+                };
+
+                this.destroy = function() {
+                    // Intended for use with showTextArea. This will get ride of CM and put the
+                    // textarea back to normal
+                    var self = this;
+                    $('.CodeMirror').empty().remove();
+                    if (self.element) {
+                        self.element.show();
+                    }
+                };
+
+                this.showModal = function(params) {
+                    
+                    var self = this,
+                        scope = params.scope,
                         target = (typeof params.container === "string") ? document.getElementById(params.container) : params.container,
                         mode = params.mode,
                         model = params.model,
                         title = params.title || 'Code Editor',
-                        modes = this.modes,
-                        myCodeMirror;
+                        modes = self.modes;
 
                     this.html = "<div id=\"af-code-editor-modal\"><div id=\"af-code\"></div>\n</div>\n";
                     if ($('#af-code-editor-modal').length === 0) {
@@ -66,7 +144,7 @@ angular.module('AngularCodeMirrorModule', [])
                             { text: "Cancel", id: "af-code-edit-cancel", click: function() { $(this).dialog('close'); } },
                             { text: "OK", id: "af-code-edit-ok", click:
                                 function() {
-                                    scope.$apply(function() { scope[model] = myCodeMirror.getValue(); });
+                                    scope.$apply(function() { scope[model] = self.myCodeMirror.getValue(); });
                                     $(this).dialog('close');
                                 }
                             }
@@ -87,7 +165,7 @@ angular.module('AngularCodeMirrorModule', [])
                             // initialize CodeMirror
                             options = modes[mode];
                             options.value = scope[model];
-                            myCodeMirror = CodeMirror(document.getElementById('af-code'), options);
+                            self.myCodeMirror = CodeMirror(document.getElementById('af-code'), options);
                         }
                     });
                 };

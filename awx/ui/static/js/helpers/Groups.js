@@ -178,13 +178,13 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
     }
 ])
 
-.factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit', 'Empty',
-    function (GetBasePath, CredentialList, LookUpInit, Empty) {
+.factory('SourceChange', ['GetBasePath', 'CredentialList', 'LookUpInit', 'Empty', 'Wait', 'ParseTypeChange',
+    function (GetBasePath, CredentialList, LookUpInit, Empty, Wait, ParseTypeChange) {
         return function (params) {
 
             var scope = params.scope,
                 form = params.form,
-                kind, url;
+                kind, url, callback;
 
             if (!Empty(scope.source)) {
                 if (scope.source.value === 'file') {
@@ -220,6 +220,13 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                         list: CredentialList,
                         field: 'credential'
                     });
+
+                    if ($('#group_tabs .active a').text() === 'Source' && scope.source.value === 'ec2') {
+                        callback = function(){ Wait('stop'); };
+                        Wait('start');
+                        ParseTypeChange({ scope: scope, variable: 'source_vars', parse_variable: form.fields.source_vars.parseTypeName,
+                            field_id: 'group_source_vars', onReady: callback });
+                    }
                 }
             }
         };
@@ -314,10 +321,10 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
 ])
 
 .factory('GroupsAdd', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
-    'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'GroupsEdit', 'Wait', 'GetChoices',
+    'Prompt', 'ProcessErrors', 'GetBasePath', 'ParseTypeChange', 'Wait', 'GetChoices',
     'GetSourceTypeOptions', 'LookUpInit', 'BuildTree', 'SourceChange', 'WatchInventoryWindowResize',
     function ($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
-        GetBasePath, ParseTypeChange, GroupsEdit, Wait, GetChoices, GetSourceTypeOptions, LookUpInit, BuildTree,
+        GetBasePath, ParseTypeChange, Wait, GetChoices, GetSourceTypeOptions, LookUpInit, BuildTree,
         SourceChange, WatchInventoryWindowResize) {
         return function (params) {
 
@@ -333,12 +340,28 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
 
             scope.formModalActionLabel = 'Save';
             scope.formModalCancelShow = true;
-            scope.parseType = 'yaml';
             scope.source = null;
-            ParseTypeChange(scope);
-
             generator.reset();
             
+            scope[form.fields.source_vars.parseTypeName] = 'yaml';
+            scope.parseType = 'yaml';
+            ParseTypeChange({ scope: scope, field_id: 'group_variables' });
+
+            $('#group_tabs a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+                var callback = function(){ Wait('stop'); };
+                if ($(e.target).text() === 'Properties') {
+                    Wait('start');
+                    ParseTypeChange({ scope: scope, field_id: 'group_variables', onReady: callback });
+                }
+                else {
+                    if (scope.source && scope.source.value === 'ec2') {
+                        Wait('start');
+                        ParseTypeChange({ scope: scope, variable: 'source_vars', parse_variable: form.fields.source_vars.parseTypeName,
+                            field_id: 'group_source_vars', onReady: callback });
+                    }
+                }
+            });
+
             if (scope.removeAddTreeRefreshed) {
                 scope.removeAddTreeRefreshed();
             }
@@ -586,12 +609,33 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
             scope.formModalHeader = 'Group';
             scope.formModalCancelShow = true;
             scope.source = form.fields.source['default'];
-            scope.parseType = 'yaml';
-            scope[form.fields.source_vars.parseTypeName] = 'yaml';
             scope.sourcePathRequired = false;
 
-            ParseTypeChange(scope);
-            ParseTypeChange(scope, 'source_vars', form.fields.source_vars.parseTypeName);
+            $('#group_tabs a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+                var callback = function(){ Wait('stop'); };
+                if ($(e.target).text() === 'Properties') {
+                    Wait('start');
+                    ParseTypeChange({ scope: scope, field_id: 'group_variables', onReady: callback });
+                }
+                else {
+                    if (scope.source && scope.source.value === 'ec2') {
+                        Wait('start');
+                        ParseTypeChange({ scope: scope, variable: 'source_vars', parse_variable: form.fields.source_vars.parseTypeName,
+                            field_id: 'group_source_vars', onReady: callback });
+                    }
+                }
+            });
+
+            scope[form.fields.source_vars.parseTypeName] = 'yaml';
+            scope.parseType = 'yaml';
+
+            if (scope.groupVariablesLoadedRemove) {
+                scope.groupVariablesLoadedRemove();
+            }
+            scope.groupVariablesLoadedRemove = scope.$on('groupVariablesLoaded', function () {
+                var callback = function() { Wait('stop'); };
+                ParseTypeChange({ scope: scope, field_id: 'group_variables', onReady: callback });
+            });
 
             // After the group record is loaded, retrieve related data
             if (scope.groupLoadedRemove) {
@@ -608,18 +652,16 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                             } else {
                                 scope.variables = jsyaml.safeDump(data);
                             }
-                            Wait('stop');
+                            scope.$emit('groupVariablesLoaded');
                         })
                         .error(function (data, status) {
                             scope.variables = null;
-                            Wait('stop');
-                            ProcessErrors(scope, data, status, form, {
-                                hdr: 'Error!',
-                                msg: 'Failed to retrieve group variables. GET returned status: ' + status
-                            });
+                            ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                                msg: 'Failed to retrieve group variables. GET returned status: ' + status });
                         });
                 } else {
                     scope.variables = "---";
+                    scope.$emit('groupVariablesLoaded');
                 }
                 master.variables = scope.variables;
 
@@ -714,11 +756,10 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                                 }];
                             }
                             scope.group_update_url = data.related.update;
-                            Wait('stop');
+                            //Wait('stop');
                         })
                         .error(function (data, status) {
                             scope.source = "";
-                            Wait('stop');
                             ProcessErrors(scope, data, status, form, { hdr: 'Error!',
                                 msg: 'Failed to retrieve inventory source. GET status: ' + status });
                         });

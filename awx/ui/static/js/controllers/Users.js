@@ -166,7 +166,9 @@ function UsersAdd($scope, $rootScope, $compile, $location, $log, $routeParams, U
                         $rootScope.flashMessage = 'New user successfully created!';
                         $location.path('/users/' + data.id);
                     }
-                    ReturnToCaller(1);
+                    else {
+                        ReturnToCaller(1);
+                    }
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to add new user. POST returned status: ' + status });
@@ -307,7 +309,9 @@ function UsersEdit($scope, $rootScope, $compile, $location, $log, $routeParams, 
                     if (base === 'users') {
                         ReturnToCaller();
                     }
-                    ReturnToCaller(1);
+                    else {
+                        ReturnToCaller(1);
+                    }
                 })
                 .error(function (data, status) {
                     ProcessErrors($scope, data, status, form, { hdr: 'Error!', msg: 'Failed to update users: ' + $routeParams.id +

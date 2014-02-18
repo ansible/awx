@@ -118,12 +118,18 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
         generator = GenerateForm,
         master = {},
         CloudCredentialList = {},
-        selectPlaybook, checkSCMStatus;
+        selectPlaybook, checkSCMStatus,
+        callback;
     
     generator.inject(form, { mode: 'add', related: false, scope: $scope });
     
+    callback = function() {
+        // Make sure the form controller knows there was a change
+        $scope[form.name + '_form'].setDirty();
+    };
+
     $scope.parseType = 'yaml';
-    ParseTypeChange($scope);
+    ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
 
     $scope.job_type_options = [
         { value: 'run', label: 'Run' },
@@ -131,9 +137,9 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
     ];
 
     $scope.verbosity_options = [
-        { value: '0', label: 'Default' },
-        { value: '1', label: 'Verbose' },
-        { value: '3', label: 'Debug' }
+        { value: 0, label: 'Default' },
+        { value: 1, label: 'Verbose' },
+        { value: 3, label: 'Debug' }
     ];
 
     $scope.playbook_options = [];
@@ -258,6 +264,24 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
         field: 'project'
     });
 
+    function saveCompleted() {
+        setTimeout(function() { $scope.$apply(function() { $location.path('/job_templates'); }); }, 500);
+    }
+
+    if ($scope.removeTemplateSaveSuccess) {
+        $scope.removeTemplateSaveSuccess();
+    }
+    $scope.removeTemplateSaveSuccess = $scope.$on('templateSaveSuccess', function(e, data) {
+        Wait('stop');
+        if (data.related && data.related.callback) {
+            Alert('Callback URL', '<p>Host callbacks are enabled for this template. The callback URL is: <strong>' + data.related.callback +
+                '</strong></p><p>The host configuration key is: <strong>' + data.host_config_key + '</strong></p>', 'alert-info', saveCompleted);
+        }
+        else {
+            saveCompleted();
+        }
+    });
+
     // Save
     $scope.formSave = function () {
         generator.clearApiErrors();
@@ -293,16 +317,10 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
 
             Rest.setUrl(defaultUrl);
             Rest.post(data)
-                .success(function () {
-                    Wait('stop');
-                    var base = $location.path().replace(/^\//, '').split('/')[0];
-                    if (base === 'job_templates') {
-                        ReturnToCaller();
-                    }
-                    ReturnToCaller(1);
+                .success(function(data) {
+                    $scope.$emit('templateSaveSuccess', data);
                 })
                 .error(function (data, status) {
-                    Wait('stop');
                     ProcessErrors($scope, data, status, form, { hdr: 'Error!',
                         msg: 'Failed to add new job template. POST returned status: ' + status
                     });
@@ -347,13 +365,12 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
         master = {},
         id = $routeParams.id,
         relatedSets = {},
-        checkSCMStatus, getPlaybooks;
+        checkSCMStatus, getPlaybooks, callback;
 
     generator.inject(form, { mode: 'edit', related: true, scope: $scope });
 
     $scope.parseType = 'yaml';
-    ParseTypeChange($scope);
-
+    
     // Our job type options
     $scope.job_type_options = [
         { value: 'run', label: 'Run' },
@@ -361,10 +378,15 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     ];
     
     $scope.verbosity_options = [
-        { value: '0', label: 'Default' },
-        { value: '1', label: 'Verbose' },
-        { value: '3', label: 'Debug' }
+        { value: 0, label: 'Default' },
+        { value: 1, label: 'Verbose' },
+        { value: 3, label: 'Debug' }
     ];
+    
+    callback = function() {
+        // Make sure the form controller knows there was a change
+        $scope[form.name + '_form'].$setDirty();
+    };
 
     $scope.playbook_options = null;
     $scope.playbook = null;
@@ -524,6 +546,8 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             default_val: dft
         });
 
+        ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
+
         if (related_cloud_credential) {
             Rest.setUrl(related_cloud_credential);
             Rest.get()
@@ -642,6 +666,24 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             });
         });
 
+    function saveCompleted() {
+        setTimeout(function() { $scope.$apply(function() { $location.path('/job_templates'); }); }, 500);
+    }
+
+    if ($scope.removeTemplateSaveSuccess) {
+        $scope.removeTemplateSaveSuccess();
+    }
+    $scope.removeTemplateSaveSuccess = $scope.$on('templateSaveSuccess', function(e, data) {
+        Wait('stop');
+        if (Empty(master.callback_url) && data.related && data.related.callback) {
+            Alert('Callback URL', '<p>Host callbacks are enabled for this template. The callback URL is: <strong>' + data.related.callback +
+                '</strong></p><p>The host configuration key is: <strong>' + data.host_config_key + '</strong></p>', 'alert-info', saveCompleted);
+        }
+        else {
+            saveCompleted();
+        }
+    });
+
     // Save changes to the parent
     $scope.formSave = function () {
         generator.clearApiErrors();
@@ -677,19 +719,12 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 
             Rest.setUrl(defaultUrl + id + '/');
             Rest.put(data)
-                .success(function () {
-                    Wait('stop');
-                    var base = $location.path().replace(/^\//, '').split('/')[0];
-                    if (base === 'job_templates') {
-                        ReturnToCaller();
-                    }
-                    ReturnToCaller(1);
+                .success(function (data) {
+                    $scope.$emit('templateSaveSuccess', data);
                 })
                 .error(function (data, status) {
-                    ProcessErrors($scope, data, status, form, {
-                        hdr: 'Error!',
-                        msg: 'Failed to update job template. PUT returned status: ' + status
-                    });
+                    ProcessErrors($scope, data, status, form, { hdr: 'Error!',
+                        msg: 'Failed to update job template. PUT returned status: ' + status });
                 });
 
         } catch (err) {
@@ -711,6 +746,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
             $scope[fld] = master[fld];
         }
         $scope.parseType = 'yaml';
+        ParseTypeChange({ scope: $scope, field_id: 'job_templates_variables', onChange: callback });
         $('#forks-slider').slider("option", "value", $scope.forks);
     };
 

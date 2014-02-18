@@ -8,8 +8,6 @@
  *
  */
 
- /* globals console:false */
-
 'use strict';
 
 angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', 'ListGenerator', 'AuthService',
@@ -131,8 +129,14 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
             /* Reset form properties. Otherwise it screws up future requests of the Inventories detail page */
             form.well = true;
 
-            ParseTypeChange(scope, 'inventory_variables', 'inventoryParseType');
-            scope.inventoryParseType = 'yaml';
+            scope.$on('inventoryPropertiesLoaded', function() {
+                var callback = function() { Wait('stop'); };
+                $('#form-modal').modal('show');
+                scope.inventoryParseType = 'yaml';
+                ParseTypeChange({ scope: scope, variable: 'inventory_variables', parse_variable: 'inventoryParseType',
+                    field_id: 'inventory_inventory_variables', onReady: callback });
+            });
+
             scope.formModalActionLabel = 'Save';
             scope.formModalCancelShow = true;
             scope.formModalInfo = false;
@@ -156,11 +160,6 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                                 } catch (err) {
                                     Alert('Variable Parse Error', 'Attempted to parse variables for inventory: ' + inventory_id +
                                         '. Parse returned: ' + err);
-                                    if (console) {
-                                        console.log(err);
-                                        console.log('data:');
-                                        console.log(data.variables);
-                                    }
                                     scope.inventory_variables = '---';
                                 }
                             }
@@ -193,15 +192,12 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                         field: 'organization'
                     });
 
-                    Wait('stop');
-                    $('#form-modal').modal('show');
+                    scope.$emit('inventoryPropertiesLoaded');
 
                 })
                 .error(function (data, status) {
-                    ProcessErrors(scope, data, status, null, {
-                        hdr: 'Error!',
-                        msg: 'Failed to get inventory: ' + inventory_id + '. GET returned: ' + status
-                    });
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Failed to get inventory: ' + inventory_id + '. GET returned: ' + status });
                 });
 
             if (scope.removeInventorySaved) {
@@ -242,11 +238,9 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
             };
 
             scope.formModalAction = function () {
-                parent_scope.inventory_id = inventory_id;
+                scope.inventory_id = inventory_id;
                 parent_scope.inventory_name = scope.inventory_name;
-                SaveInventory({
-                    scope: scope
-                });
+                SaveInventory({ scope: scope });
             };
 
         };
