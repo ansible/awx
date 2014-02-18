@@ -36,3 +36,4 @@ ipython
 # - psycopg2 (via "yum install python-psycopg2")
 # - python-ldap (via "yum install python-ldap")
 # - readline (for using the ipython interactive shell)
+# - python-zmq (for using the job callback receiver)
