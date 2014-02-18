@@ -19,6 +19,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 .factory('ClearScope', [
     function () {
         return function () {
+            
+            $('#form-modal .modal-body').empty();
+            $('#form-modal2 .modal-body').empty();
+
             $('.tooltip').each(function () {
                 $(this).remove();
             });

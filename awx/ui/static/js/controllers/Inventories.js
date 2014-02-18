@@ -238,7 +238,7 @@ function InventoriesAdd($scope, $rootScope, $compile, $location, $log, $routePar
     
     generator.reset();
     LoadBreadCrumbs();
-
+    
     $scope.inventoryParseType = 'yaml';
     ParseTypeChange({ scope: $scope, variable: 'inventory_variables', parse_variable: 'inventoryParseType',
         field_id: 'inventory_inventory_variables' });
