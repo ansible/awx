@@ -1,20 +1,23 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  JobHosts.js 
+ *  JobHosts.js
  *  List view object for Job Host Summary data model.
  *
- * 
+ *
  */
+
+'use strict';
+
 angular.module('JobHostDefinition', [])
     .value('JobHostList', {
-        
+
         name: 'jobhosts',
         iterator: 'jobhost',
         editTitle: 'All summaries',
         index: true,
         hover: true,
-        
+
         navigationLinks: {
             ngHide: 'host_id !== null',
             details: {
@@ -50,7 +53,7 @@ angular.module('JobHostDefinition', [])
                 sourceModel: 'host',
                 sourceField: 'name',
                 ngBind: 'jobhost.host_name',
-                ngHref: "jobhost.hostLinkTo"
+                ngHref: "{{ jobhost.hostLinkTo }}"
             },
             status: {
                 label: 'Status',
@@ -64,7 +67,13 @@ angular.module('JobHostDefinition', [])
                 dataPlacement: 'top',
                 searchField: 'failed',
                 searchType: 'boolean',
-                searchOptions: [{ name: "success", value: 0 }, { name: "error", value: 1 }]
+                searchOptions: [{
+                    name: "success",
+                    value: 0
+                }, {
+                    name: "error",
+                    value: 1
+                }]
             },
             failed: {
                 label: 'Job failed?',
@@ -99,7 +108,7 @@ angular.module('JobHostDefinition', [])
                 searchable: false
             }
         },
-        
+
         actions: {
             help: {
                 awPopOver: "<dl>\n<dt>Success</dt><dd>Tasks successfully executed on the host.</dd>\n" +
@@ -121,7 +130,7 @@ angular.module('JobHostDefinition', [])
                 'class': 'btn-xs',
                 awToolTip: "Refresh the page",
                 ngClick: "refresh()",
-                ngShow: "host_id == null"    //don't show when viewing from inventory->hosts
+                ngShow: "host_id == null" //don't show when viewing from inventory->hosts
             }
         },
 

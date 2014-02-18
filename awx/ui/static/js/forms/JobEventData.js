@@ -7,10 +7,9 @@
  *  
  */
 angular.module('JobEventDataDefinition', [])
-    .value(
-    'JobEventDataForm', {
+    .value('JobEventDataForm', {
         
-        editTitle: '{{ id }} - {{ event_display }}',                         //Legend in edit mode
+        editTitle: '{{ id }} - {{ event_display }}',
         name: 'job_events',
         well: false,
         'class': 'horizontal-narrow',
@@ -22,7 +21,7 @@ angular.module('JobEventDataDefinition', [])
                 readonly: true,
                 rows: 18,
                 'class': 'modal-input-xxlarge'
-                } 
             }
+        }
             
     }); //Form

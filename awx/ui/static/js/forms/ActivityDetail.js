@@ -6,11 +6,10 @@
  *  
  */
 angular.module('ActivityDetailDefinition', [])
-    .value(
-    'ActivityDetailForm', {
-    
+    .value('ActivityDetailForm', {
+
         name: 'activity',
-        editTitle: 'Activity Detail', 
+        editTitle: 'Activity Detail',
         well: false,
         'class': 'horizontal-narrow',
         formFieldSize: 'col-lg-10',
@@ -21,18 +20,18 @@ angular.module('ActivityDetailDefinition', [])
                 label: "Initiated by",
                 type: 'text',
                 readonly: true
-                },
+            },
             operation: {
                 label: 'Action',
                 type: 'text',
                 readonly: true
-                },
+            },
             changes: {
                 label: 'Changes',
                 type: 'textarea',
                 ngHide: "!changes || changes =='' || changes == 'null'",
                 readonly: true
-                }
-            }        
+            }
+        }
     
     }); //Form

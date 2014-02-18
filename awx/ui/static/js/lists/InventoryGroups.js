@@ -99,7 +99,7 @@ angular.module('InventoryGroupsDefinition', [])
             cancel: {
                 //label: 'Cancel',
                 mode: 'all',
-                ngClick: "cancelUpdate({{ group.id }})",
+                ngClick: "cancelUpdate(group.id)",
                 awToolTip: "Cancel sync process",
                 'class': 'red-txt',
                 ngShow: "group.id > 1 && (group.status == 'running' || group.status == 'pending' || group.status == 'updating')",
@@ -108,7 +108,7 @@ angular.module('InventoryGroupsDefinition', [])
             edit: {
                 //label: 'Edit',
                 mode: 'all',
-                ngClick: "editGroup({{ group.group_id + ',' + group.id }})",
+                ngClick: "editGroup(group.group_id, group.id)",
                 awToolTip: 'Edit group',
                 ngShow: "group.id > 1", // hide for all hosts
                 dataPlacement: "top"
@@ -116,7 +116,7 @@ angular.module('InventoryGroupsDefinition', [])
             "delete": {
                 //label: 'Delete',
                 mode: 'all',
-                ngClick: "deleteGroup({{ group.id + ',' + group.group_id }})",
+                ngClick: "deleteGroup(group.id, group.group_id)",
                 awToolTip: 'Delete group',
                 ngShow: "group.id != 1", // hide for all hosts
                 dataPlacement: "top"

@@ -9,6 +9,8 @@
 
 /* jshint loopfunc: true */
 
+'use strict';
+
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'HostListDefinition',
                                 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'AuthService', 'HostsHelper',
                                 'InventoryHelper', 'RelatedSearchHelper', 'InventoryFormDefinition', 'SelectionHelper',
@@ -334,8 +336,9 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
         scope.formModalActionLabel = 'Save';
         scope.formModalHeader = 'Create New Host';
         scope.formModalCancelShow = true;
+        
         scope.parseType = 'yaml';
-        ParseTypeChange(scope);
+        ParseTypeChange({ scope: scope, field_id: 'host_variables' });
         
         if (scope.removeHostsReload) {
             scope.removeHostsReload();
@@ -464,7 +467,15 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
         scope.formModalHeader = 'Host Properties';
         scope.formModalCancelShow = true;
         scope.parseType = 'yaml';
-        ParseTypeChange(scope);
+        
+        if (scope.hostVariablesLoadedRemove) {
+            scope.hostVariablesLoadedRemove();
+        }
+        scope.hostVariablesLoadedRemove = scope.$on('hostVariablesLoaded', function() {
+            var callback = function() { Wait('stop'); };
+            $('#form-modal').modal('show');
+            ParseTypeChange({ scope: scope, field_id: 'host_variables', onReady: callback });
+        });
 
         if (scope.hostLoadedRemove) {
             scope.hostLoadedRemove();
@@ -481,8 +492,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
                         else {
                             scope.variables = jsyaml.safeDump(data);
                         }
-                        Wait('stop');
-                        $('#form-modal').modal('show');
+                        scope.$emit('hostVariablesLoaded');
                     })
                     .error( function(data, status) {
                         scope.variables = null;
@@ -492,8 +502,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             }
             else {
                 scope.variables = "---";
-                Wait('stop');
-                $('#form-modal').modal('show');
+                scope.$emit('hostVariablesLoaded');
             }
             master.variables = scope.variables;
         });
@@ -541,7 +550,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             // Update any titles attributes created by ApplyEllipsis
             if (old_name) {
                 setTimeout(function() {
-                    $('#hosts_table .host-name a[title="' + old_name + '"').attr('title', host.name);
+                    $('#hosts_table .host-name a[title="' + old_name + '"]').attr('title', host.name);
                     ApplyEllipsis('#hosts_table .host-name a');
                     // Close modal
                     Wait('stop');

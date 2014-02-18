@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" ng-app="sampleApp">
+<head>
+    <meta charset="utf-8">
+    <title>AngularCodeMirror | Sample application</title>
+    <link rel="stylesheet" href="/bower_components/twitter/dist/css/bootstrap.min.css" >
+    <link rel="stylesheet" href="/bower_components/components-font-awesome/css/font-awesome.min.css" >
+    <link rel="stylesheet" href="/bower_components/jqueryui/themes/redmond/jquery-ui.min.css" >
+    <link rel="stylesheet" href="/bower_components/codemirror/lib/codemirror.css" >
+    <link rel="stylesheet" href="/bower_components/codemirror/theme/elegant.css" >
+    <link rel="stylesheet" href="/bower_components/codemirror/addon/lint/lint.css" >
+    <link rel="stylesheet" href="/lib/AngularCodeMirror.css" >
+    <link rel="stylesheet" href="/app/css/sampleApp.css" >
+
+    <script src="/bower_components/angular/angular.min.js"></script>
+    <script src="/bower_components/angular-route/angular-route.min.js"></script>
+    <script src="/app/js/sampleApp.js"></script>
+    <script src="/lib/AngularCodeMirror.js"></script>
+
+</head>
+<body>
+    
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#nb-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Angular CodeMirror</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="main-view" ng-view></div>
+    </div>
+
+    <div class="footer navbar-default navbar-fixed-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <a class="navbar-brand pull-right" href="/">Angular CodeMirror</a>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <script src="/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="/bower_components/jqueryui/ui/minified/jquery-ui.min.js"></script>
+    <script src="/bower_components/twitter/dist/js/bootstrap.min.js"></script>    
+    
+    <!-- bits to support code mirror -->
+    <script src="/bower_components/js-yaml/js-yaml.min.js"></script>
+    <script src="/bower_components/jsonlint/lib/jsonlint.js"></script>
+    <script src="/bower_components/codemirror/lib/codemirror.js"></script>
+    <script src="/bower_components/codemirror/mode/javascript/javascript.js"></script>
+    <script src="/bower_components/codemirror/mode/yaml/yaml.js"></script>
+    <script src="/bower_components/codemirror/addon/lint/lint.js"></script>
+    <script src="/bower_components/codemirror/addon/lint/json-lint.js"></script>
+    <script src="/lib/yaml-lint.js"></script>
+    <script src="/bower_components/codemirror/addon/edit/closebrackets.js"></script>
+    <script src="/bower_components/codemirror/addon/edit/matchbrackets.js"></script>
+    <script src="/bower_components/codemirror/addon/selection/active-line.js"></script>
+    
+</body>
+</html>

@@ -4,15 +4,18 @@
  *  JobsHelper
  *
  *  Routines shared by job related controllers
- *  
+ *
  */
+
+'use strict';
 
 angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinition', 'InventoryHelper'])
 
-    .factory('JobStatusToolTip', [ function() {
-    return function(status) {
-        var toolTip;
-        switch (status) {
+.factory('JobStatusToolTip', [
+    function () {
+        return function (status) {
+            var toolTip;
+            switch (status) {
             case 'successful':
             case 'success':
                 toolTip = 'There were no failed tasks.';
@@ -35,118 +38,124 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
             case 'running':
                 toolTip = 'Playbook tasks executing.';
                 break;
-        }
-        return toolTip;
+            }
+            return toolTip;
         };
-        }])
+    }
+])
 
-    .factory('ShowJobSummary', ['Rest', 'Wait', 'GetBasePath', 'FormatDate', 'ProcessErrors', 'GenerateForm', 'JobSummary',
+.factory('ShowJobSummary', ['Rest', 'Wait', 'GetBasePath', 'FormatDate', 'ProcessErrors', 'GenerateForm', 'JobSummary',
     'WatchInventoryWindowResize',
-    function(Rest, Wait, GetBasePath, FormatDate, ProcessErrors, GenerateForm, JobSummary, WatchInventoryWindowResize) {
-    return function(params) {
-        // Display status info in a modal dialog- called from inventory edit page
-        
-        var job_id = params.job_id;
+    function (Rest, Wait, GetBasePath, FormatDate, ProcessErrors, GenerateForm, JobSummary, WatchInventoryWindowResize) {
+        return function (params) {
+            // Display status info in a modal dialog- called from inventory edit page
 
-        var generator = GenerateForm;
-        var form = JobSummary;
-        
-        // Using jquery dialog for its expandable property
-        
-        var html = '<div id=\"status-modal-dialog\" title=\"Job ' + job_id + '\">' +
-            '<div id=\"form-container\" style=\"width: 100%;\"></div></div>\n';
-        
-        $('#inventory-modal-container').empty().append(html);
-        var scope = generator.inject(form, { mode: 'edit', id: 'form-container', breadCrumbs: false, related: false });
-        
-        // Set modal dimensions based on viewport width
-        var ww = $(document).width();
-        var wh = $('body').height();
-        var x, y, maxrows;
-        if (ww > 1199) {
-            // desktop
-            x = 675;
-            y = (750 > wh) ? wh - 20 : 750;
-            maxrows = 20;
-        }
-        else if (ww <= 1199 && ww >= 768) {
-            x = 550;
-            y = (620 > wh) ? wh - 15 : 620;
-            maxrows = 15;
-        }
-        else {
-            x = (ww - 20);
-            y = (500 > wh) ? wh : 500;
-            maxrows = 10;
-        }
-        
-        // Create the modal
-        $('#status-modal-dialog').dialog({
-            buttons: { 'OK': function() {  $( this ).dialog( 'close' ); } },
-            modal: true,
-            width: x,
-            height: y,
-            autoOpen: false,
-            create: function () {
-                // fix the close button
-                $('.ui-dialog[aria-describedby="status-modal-dialog"]').find('.ui-dialog-titlebar button')
-                    .empty().attr({ 'class': 'close' }).text('x');
-                // fix the OK button
-                $('.ui-dialog[aria-describedby="status-modal-dialog"]').find('.ui-dialog-buttonset button:first')
-                    .attr({ 'class': 'btn btn-primary' });
-                },
-            resizeStop: function() {
-                // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
-                var dialog = $('.ui-dialog[aria-describedby="status-modal-dialog"]');
-                var content = dialog.find('#status-modal-dialog');
-                content.width( dialog.width() - 28 );
-                },
-            close: function() {
-                // Destroy on close
-                $('.tooltip').each( function() {
-                    // Remove any lingering tooltip <div> elements
-                    $(this).remove();
-                    });
-                $('.popover').each(function() {
-                    // remove lingering popover <div> elements
-                    $(this).remove();
-                    });
-                $('#status-modal-dialog').dialog('destroy');
-                $('#inventory-modal-container').empty();
-                WatchInventoryWindowResize();
-                },
-            open: function() {
-                Wait('stop');
-                }
-            });
-        
-        function calcRows (content) {
-            var n = content.match(/\n/g);
-            var rows = (n) ? n.length : 1;
-            return (rows > maxrows) ? 20 : rows;
+            var job_id = params.job_id,
+                generator = GenerateForm,
+                form = JobSummary,
+                scope, ww, wh, x, y, maxrows, url, html;
+
+            html = '<div id=\"status-modal-dialog\" title=\"Job ' + job_id + '\">' +
+                '<div id=\"form-container\" style=\"width: 100%;\"></div></div>\n';
+
+            $('#inventory-modal-container').empty().append(html);
+            
+            scope = generator.inject(form, { mode: 'edit', id: 'form-container', breadCrumbs: false, related: false });
+
+            // Set modal dimensions based on viewport width
+            ww = $(document).width();
+            wh = $('body').height();
+            if (ww > 1199) {
+                // desktop
+                x = 675;
+                y = (750 > wh) ? wh - 20 : 750;
+                maxrows = 20;
+            } else if (ww <= 1199 && ww >= 768) {
+                x = 550;
+                y = (620 > wh) ? wh - 15 : 620;
+                maxrows = 15;
+            } else {
+                x = (ww - 20);
+                y = (500 > wh) ? wh : 500;
+                maxrows = 10;
             }
 
-        Wait('start');
-        var url = GetBasePath('jobs') + job_id + '/';
-        Rest.setUrl(url);
-        Rest.get()
-            .success( function(data) {
-                scope.id = data.id;
-                scope.name = data.name;
-                scope.status = data.status;
-                scope.result_stdout = data.result_stdout;
-                scope.result_traceback = data.result_traceback;
-                scope.stdout_rows = calcRows(scope.result_stdout);
-                scope.traceback_rows = calcRows(scope.result_traceback);
-                var cDate = new Date(data.created);
-                scope.created = FormatDate(cDate);
-                $('#status-modal-dialog').dialog('open');
+            // Create the modal
+            $('#status-modal-dialog').dialog({
+                buttons: {
+                    'OK': function () {
+                        $(this).dialog('close');
+                    }
+                },
+                modal: true,
+                width: x,
+                height: y,
+                autoOpen: false,
+                create: function () {
+                    // fix the close button
+                    $('.ui-dialog[aria-describedby="status-modal-dialog"]').find('.ui-dialog-titlebar button')
+                        .empty().attr({
+                            'class': 'close'
+                        }).text('x');
+                    // fix the OK button
+                    $('.ui-dialog[aria-describedby="status-modal-dialog"]').find('.ui-dialog-buttonset button:first')
+                        .attr({
+                            'class': 'btn btn-primary'
+                        });
+                },
+                resizeStop: function () {
+                    // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
+                    var dialog = $('.ui-dialog[aria-describedby="status-modal-dialog"]'),
+                    content = dialog.find('#status-modal-dialog');
+                    content.width(dialog.width() - 28);
+                },
+                close: function () {
+                    // Destroy on close
+                    $('.tooltip').each(function () {
+                        // Remove any lingering tooltip <div> elements
+                        $(this).remove();
+                    });
+                    $('.popover').each(function () {
+                        // remove lingering popover <div> elements
+                        $(this).remove();
+                    });
+                    $('#status-modal-dialog').dialog('destroy');
+                    $('#inventory-modal-container').empty();
+                    WatchInventoryWindowResize();
+                },
+                open: function () {
+                    Wait('stop');
+                }
+            });
+
+            function calcRows(content) {
+                var n = content.match(/\n/g),
+                    rows = (n) ? n.length : 1;
+                return (rows > maxrows) ? 20 : rows;
+            }
+
+            Wait('start');
+            url = GetBasePath('jobs') + job_id + '/';
+            Rest.setUrl(url);
+            Rest.get()
+                .success(function (data) {
+                    var cDate;
+                    scope.id = data.id;
+                    scope.name = data.name;
+                    scope.status = data.status;
+                    scope.result_stdout = data.result_stdout;
+                    scope.result_traceback = data.result_traceback;
+                    scope.stdout_rows = calcRows(scope.result_stdout);
+                    scope.traceback_rows = calcRows(scope.result_traceback);
+                    cDate = new Date(data.created);
+                    scope.created = FormatDate(cDate);
+                    $('#status-modal-dialog').dialog('open');
                 })
-            .error( function(data, status) {
-                ProcessErrors(scope, data, status, null,
-                    { hdr: 'Error!', msg: 'Attempt to load job failed. GET returned status: ' + status });
+                .error(function (data, status) {
+                    ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                        msg: 'Attempt to load job failed. GET returned status: ' + status });
                 });
         };
 
-        }]);
-
+    }
+]);

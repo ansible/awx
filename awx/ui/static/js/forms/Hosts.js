@@ -4,18 +4,17 @@
  *  Hosts.js
  *  Form definition for Host model
  *
- *  
+ *
  */
 angular.module('HostFormDefinition', [])
-    .value(
-    'HostForm', {
-        
-        addTitle: 'Create Host',                             //Legend in add mode
-        editTitle: '{{ name }}',                             //Legend in edit mode
-        name: 'host',                                        //Form name attribute
-        well: false,                                         //Wrap the form with TB well
+    .value('HostForm', {
+
+        addTitle: 'Create Host',
+        editTitle: '{{ name }}',
+        name: 'host',
+        well: false,
         formLabelSize: 'col-lg-3',
-        formFieldSize: 'col-lg-9',          
+        formFieldSize: 'col-lg-9',
 
         fields: {
             name: {
@@ -24,21 +23,21 @@ angular.module('HostFormDefinition', [])
                 addRequired: true,
                 editRequired: true,
                 awPopOver: "<p>Provide a host name, ip address, or ip address:port. Examples include:</p>" +
-                     "<blockquote>myserver.domain.com<br/>" +
-                     "127.0.0.1<br />" + 
-                     "10.1.0.140:25<br />" +
-                     "server.example.com:25" +
-                     "</blockquote>", 
+                    "<blockquote>myserver.domain.com<br/>" +
+                    "127.0.0.1<br />" +
+                    "10.1.0.140:25<br />" +
+                    "server.example.com:25" +
+                    "</blockquote>",
                 dataTitle: 'Host Name',
                 dataPlacement: 'right',
                 dataContainer: '#form-modal .modal-content'
-                },
-            description: { 
+            },
+            description: {
                 label: 'Description',
                 type: 'text',
                 addRequired: false,
                 editRequired: false
-                },
+            },
             enabled: {
                 label: 'Enabled?',
                 type: 'checkbox',
@@ -51,12 +50,12 @@ angular.module('HostFormDefinition', [])
                 dataPlacement: 'right',
                 dataContainer: '#form-modal .modal-content',
                 ngDisabled: 'has_inventory_sources == true'
-                },
+            },
             variables: {
                 label: 'Variables',
                 type: 'textarea',
                 addRequired: false,
-                editRequird: false, 
+                editRequird: false,
                 rows: 6,
                 "class": "modal-input-xlarge",
                 "default": "---",
@@ -70,28 +69,25 @@ angular.module('HostFormDefinition', [])
                 dataTitle: 'Host Variables',
                 dataPlacement: 'right',
                 dataContainer: '#form-modal .modal-content'
-                },
+            },
             inventory: {
                 type: 'hidden',
-                includeOnEdit: true, 
+                includeOnEdit: true,
                 includeOnAdd: true
-                }
-            },
+            }
+        },
 
         buttons: { //for now always generates <button> tags 
-            save: { 
-                ngClick: 'formSave()',    //$scope.function to call on click, optional
-                ngDisabled: true          //Disable when $pristine or $invalid, optional
-                },
-            reset: { 
-                ngClick: 'formReset()',
-                ngDisabled: true          //Disabled when $pristine
-                }
+            save: {
+                ngClick: 'formSave()', //$scope.function to call on click, optional
+                ngDisabled: true //Disable when $pristine or $invalid, optional
             },
-
-        related: { //related colletions (and maybe items?)
-               
+            reset: {
+                ngClick: 'formReset()',
+                ngDisabled: true //Disabled when $pristine
             }
+        },
 
-    }); 
+        related: {}
 
+    });

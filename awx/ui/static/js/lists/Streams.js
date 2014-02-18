@@ -1,24 +1,26 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  Streams.js 
+ *  Streams.js
  *  List view object for activity stream data model.
  *
- * 
+ *
  */
+
+'use strict';
+
 angular.module('StreamListDefinition', [])
-    .value(
-    'StreamList', {
-        
+    .value('StreamList', {
+
         name: 'activities',
         iterator: 'activity',
         editTitle: 'Activity Stream',
-        selectInstructions: '', 
+        selectInstructions: '',
         index: false,
         hover: true,
         "class": "table-condensed",
         searchWidgets: 3,
-        
+
         fields: {
             timestamp: {
                 label: 'Event Time',
@@ -26,7 +28,7 @@ angular.module('StreamListDefinition', [])
                 desc: true,
                 noLink: true,
                 searchable: false
-                },
+            },
             user: {
                 label: 'Initiated by',
                 ngBindHtml: 'activity.user',
@@ -36,22 +38,22 @@ angular.module('StreamListDefinition', [])
                 //dataPlacement: 'top',
                 searchPlaceholder: 'Username',
                 searchWidget: 1
-                },
+            },
             description: {
                 label: 'Action',
                 ngBindHtml: 'activity.description',
-                nosort: true, 
+                nosort: true,
                 searchable: false,
                 columnClass: 'col-lg-7'
-                },
+            },
             system_event: {
                 label: 'System event',
-                searchOnly: true, 
+                searchOnly: true,
                 searchType: 'isnull',
                 sourceModel: 'actor',
                 sourceField: 'username',
                 searchWidget: 1
-                },
+            },
 
             // The following fields exist to force loading each type of object into the search
             // dropdown
@@ -61,7 +63,7 @@ angular.module('StreamListDefinition', [])
                 searchObject: 'all',
                 searchPlaceholder: 'All resources',
                 searchWidget: 2
-                },
+            },
             credential_search: {
                 label: 'Credential',
                 searchOnly: true,
@@ -69,7 +71,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Credential name',
                 searchWidget: 2,
                 searchField: 'object1'
-                },
+            },
             group_search: {
                 label: 'Group',
                 searchOnly: true,
@@ -77,7 +79,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Group name',
                 searchWidget: 2,
                 searchField: 'object1'
-                },
+            },
             host_search: {
                 label: 'Host',
                 searchOnly: true,
@@ -85,7 +87,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Host name',
                 searchWidget: 2,
                 searchField: 'object1'
-                },
+            },
             inventory_search: {
                 label: 'Inventory',
                 searchOnly: true,
@@ -93,7 +95,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Inventory name',
                 searchWidget: 2,
                 searchField: 'object1'
-                },
+            },
             job_template_search: {
                 label: 'Job Template',
                 searchOnly: true,
@@ -101,7 +103,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Job template name',
                 searchWidget: 2,
                 searchField: 'object1'
-                },
+            },
             job_search: {
                 label: 'Job',
                 searchOnly: true,
@@ -110,7 +112,7 @@ angular.module('StreamListDefinition', [])
                 searchOnID: true,
                 searchWidget: 2,
                 searchField: 'object1'
-                },
+            },
             organization_search: {
                 label: 'Organization',
                 searchOnly: true,
@@ -118,7 +120,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Organization name',
                 searchWidget: 2,
                 searchField: 'object1'
-                },
+            },
             project_search: {
                 label: 'Project',
                 searchOnly: true,
@@ -126,7 +128,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Project name',
                 searchWidget: 2,
                 searchField: 'object1'
-                },
+            },
             user_search: {
                 label: 'User',
                 searchOnly: true,
@@ -134,18 +136,18 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Primary username',
                 searchWidget: 2,
                 searchField: 'object1'
-                },
+            },
 
             // The following fields exist to force loading each type of object into the search
             // dropdown
             all_objects3: {
                 label: 'All',
-                searchOnly: true, 
+                searchOnly: true,
                 searchObject: 'all',
                 searchPlaceholder: 'All related resources',
                 searchWidget: 3,
                 searchField: 'object2'
-                },
+            },
             credential_search3: {
                 label: 'Credential',
                 searchOnly: true,
@@ -153,7 +155,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Related credential name',
                 searchWidget: 3,
                 searchField: 'object2'
-                },
+            },
             group_search3: {
                 label: 'Group',
                 searchOnly: true,
@@ -161,7 +163,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Related group name',
                 searchWidget: 3,
                 searchField: 'object2'
-                },
+            },
             host_search3: {
                 label: 'Host',
                 searchOnly: true,
@@ -169,7 +171,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Related host name',
                 searchWidget: 3,
                 searchField: 'object2'
-                },
+            },
             inventory_search3: {
                 label: 'Inventory',
                 searchOnly: true,
@@ -177,7 +179,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Related inventory name',
                 searchWidget: 3,
                 searchField: 'object2'
-                },
+            },
             job_search3: {
                 label: 'Job',
                 searchOnly: true,
@@ -186,7 +188,7 @@ angular.module('StreamListDefinition', [])
                 searchOnID: true,
                 searchWidget: 3,
                 searchField: 'object2'
-                },
+            },
             job_template_search3: {
                 label: 'Job Template',
                 searchOnly: true,
@@ -194,7 +196,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Related job template name',
                 searchWidget: 3,
                 searchField: 'object2'
-                },
+            },
             organization_search3: {
                 label: 'Organization',
                 searchOnly: true,
@@ -202,7 +204,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Related organization name',
                 searchWidget: 3,
                 searchField: 'object2'
-                },
+            },
             project_search3: {
                 label: 'Project',
                 searchOnly: true,
@@ -210,7 +212,7 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Related project name',
                 searchWidget: 3,
                 searchField: 'object2'
-                },
+            },
             user_search3: {
                 label: 'User',
                 searchOnly: true,
@@ -218,32 +220,32 @@ angular.module('StreamListDefinition', [])
                 searchPlaceholder: 'Related username',
                 searchWidget: 3,
                 searchField: 'object2'
-                }
-            },
-        
+            }
+        },
+
         actions: {
             refresh: {
                 mode: 'all',
                 'class': 'btn-xs',
                 awToolTip: "Refresh the page",
                 ngClick: "refreshStream()"
-                },
+            },
             close: {
                 mode: 'all',
                 awToolTip: "Close Activity Stream view",
                 ngClick: "closeStream()"
-                }
-            },
+            }
+        },
 
         fieldActions: {
             view: {
                 label: 'View',
-                ngClick: "showDetail(\{\{ activity.id \}\})",
+                ngClick: "showDetail(activity.id)",
                 icon: 'fa-zoom-in',
                 "class": 'btn-default btn-xs',
                 awToolTip: 'View event details',
                 dataPlacement: 'top'
-                }
             }
-
-        });
+        }
+        
+    });

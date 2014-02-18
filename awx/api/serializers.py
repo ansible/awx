@@ -1207,7 +1207,18 @@ class ActivityStreamSerializer(BaseSerializer):
                 allm2m = getattr(obj, fk).all()
                 if allm2m.count() > 0:
                     summary_fields[fk] = []
+                    summary_fields['job_template'] = []
                     for thisItem in allm2m:
+                        if fk == 'job':
+                            job_template_item = {}
+                            job_template_fields = SUMMARIZABLE_FK_FIELDS['job_template']
+                            job_template = getattr(thisItem, 'job_template', None)
+                            if job_template is not None:
+                                for field in job_template_fields:
+                                    fval = getattr(job_template, field, None)
+                                    if fval is not None:
+                                        job_template_item[field] = fval
+                                summary_fields['job_template'].append(job_template_item)
                         thisItemDict = {}
                         if 'id' not in related_fields:
                             related_fields = related_fields + ('id',)

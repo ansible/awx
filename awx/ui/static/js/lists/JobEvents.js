@@ -1,15 +1,17 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  Jobs.js 
+ *  Jobs.js
  *  List view object for Team data model.
  *
- *  
+ *
  */
+
+'use strict';
+
 angular.module('JobEventsListDefinition', [])
-    .value(
-    'JobEventList', {
-        
+    .value('JobEventList', {
+
         name: 'jobevents',
         iterator: 'jobevent',
         editTitle: 'Job Events',
@@ -37,7 +39,7 @@ angular.module('JobEventsListDefinition', [])
                 icon: 'icon-laptop'
             }
         },
-        
+
         fields: {
             created: {
                 label: 'Created On',
@@ -53,17 +55,23 @@ angular.module('JobEventsListDefinition', [])
                 columnClass: 'col-sm-1 col-xs-2 text-center',
                 searchField: 'failed',
                 searchType: 'boolean',
-                searchOptions: [{ name: 'success', value: 0 }, { name: 'error', value: 1 }],
+                searchOptions: [{
+                    name: 'success',
+                    value: 0
+                }, {
+                    name: 'error',
+                    value: 1
+                }],
                 nosort: true,
                 searchable: false,
-                ngClick: 'viewJobEvent({{ jobevent.id }})',
+                ngClick: 'viewJobEvent(jobevent.id)',
                 awToolTip: '{{ jobevent.statusBadgeToolTip }}',
                 dataPlacement: 'top',
                 badgeIcon: 'fa icon-job-{{ jobevent.status }}',
                 badgePlacement: 'left',
                 badgeToolTip: '{{ jobevent.statusBadgeToolTip }}',
                 badgeTipPlacement: 'top',
-                badgeNgClick: 'viewJobEvent({{ jobevent.id }})'
+                badgeNgClick: 'viewJobEvent(jobevent.id)'
             },
             event_display: {
                 label: 'Event',
@@ -86,7 +94,7 @@ angular.module('JobEventsListDefinition', [])
                 columnClass: 'col-lg-2 hidden-sm hidden-xs'
             }
         },
-        
+
         actions: {
             refresh: {
                 mode: 'all',

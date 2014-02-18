@@ -2,13 +2,12 @@
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
  *  InventoryStatus.js
- *  Form definition for Inventory Status -JSON view
  *
+ *  Use to show inventory sync status
  *  
  */
 angular.module('InventoryStatusDefinition', [])
-    .value(
-    'InventoryStatusForm', {
+    .value('InventoryStatusForm', {
     
         name: 'inventory_update',
         editTitle: 'Inventory Status',
@@ -24,19 +23,19 @@ angular.module('InventoryStatusDefinition', [])
                     'for more information.',
                 ngShow: 'license_error',
                 closeable: true
-                },
+            },
             created: {
                 label: 'Created',
                 type: 'text',
                 readonly: true
-                },
+            },
             status: {
                 label: 'Status',
                 type: 'text',
                 readonly: true,
                 'class': 'nowrap mono-space resizable',
                 rows: '{{ status_rows }}'
-                },
+            },
             result_stdout: {
                 label: 'Std Out',
                 type: 'textarea',
@@ -44,7 +43,7 @@ angular.module('InventoryStatusDefinition', [])
                 'class': 'nowrap mono-space resizable',
                 readonly: true,
                 rows: '{{ stdout_rows }}'
-                },
+            },
             result_traceback: {
                 label: 'Traceback',
                 type: 'textarea',
@@ -52,6 +51,6 @@ angular.module('InventoryStatusDefinition', [])
                 'class': 'nowrap mono-space resizable',
                 readonly: true,
                 rows: '{{ traceback_rows }}'
-                }
+            }
         }
     }); //Form

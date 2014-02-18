@@ -1,0 +1,111 @@
+/**********************************************
+ * AngularCodeMirror.css
+ * 
+ * CodeMirror.css overrides
+ *
+ * Copyright (c) 2014 Chris Houseknecht
+ *
+ * The MIT License (MIT)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of angular-codemirror and associated files and documentation (the "Software"),
+ * to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
+
+  .CodeMirror {
+      height: auto;
+  }
+  
+  .CodeMirror-activeline-background {
+      background-color: #f7f7f7;
+  }
+  
+
+
+/* Modal dialog overrides to make jqueryui dialog blend in with Twitter. 
+   Why? Twitter's modal is not draggable or resizable, which is not very
+   useful for a code editor */
+
+  .ui-dialog-title {
+      font-size: 22px;
+      color: #1778c3;
+      font-weight: bold;
+      line-height: normal;
+  }
+  .ui-dialog .close {
+      font-size: 18px;
+      font-weight: bold;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      line-height: 1;
+      opacity: .7;
+      text-shadow: 0 1px 0 #ffffff;
+  }
+  .ui-dialog .ui-widget-header {
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid #A9A9A9;
+      height: 55px;
+  }
+  .ui-dialog .ui-dialog-titlebar {
+      padding-bottom: 0;
+      padding-top: 12px;
+  }
+  .ui-dialog .ui-dialog-titlebar {
+      background-image: none;
+      background-color: #ffffff;
+      border-color: #ffffff;
+      color: #A9A9A9;
+  }
+  
+  .ui-dialog .ui-resizable-se {
+      right: 5px;
+      bottom: 5px;
+      background-position: -80px -224px;
+      color: #171717;
+  }
+
+  .ui-dialog-buttonset button.btn.btn-default.ui-state-hover,
+  .ui-dialog-buttonset button.btn.btn-default.ui-state-active,
+  .ui-dialog-buttonset button.btn.btn-default.ui-state-focus {
+      font-weight: normal;
+  }
+  .ui-dialog-buttonset button.btn.btn-primary.ui-state-hover,
+  .ui-dialog-buttonset button.btn.btn-primary.ui-state-active,
+  .ui-dialog-buttonset button.btn.btn-primary.ui-state-focus {
+      background-image: none;
+      color: #ffffff;
+      background-color: #2a6496;
+      border-color: #285e8e;
+      text-decoration: none;
+      font-weight: normal;
+  }
+  /* Bring the overlay above any TB fixed navs and darken it to match */
+  .ui-widget-overlay.ui-front {
+      background-image: none;
+      background-color: #000;
+      opacity: .6;
+      z-index: 1040;
+  }
+  /* Make sure code editor dialog is always at top of stack */
+  [aria-describedby=af-code-editor-modal].ui-front {
+      z-index: 2050;
+  }
+  .CodeMirror-lint-tooltip {
+      z-index: 2060;
+  }
+

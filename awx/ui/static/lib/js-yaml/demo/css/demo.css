@@ -1,0 +1,87 @@
+body {
+  margin: 30px;
+  padding: 0;
+  font-family: verdana, sans-serif; 
+}
+h1 {
+  font-size: 50px;
+  margin: 40px 0 30px;
+  color: #aaa;
+}
+#permalink {
+  float: right;
+}
+h5 {
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 30px;
+  margin: 0;
+  font-style: italic;  
+}
+.src {
+  width: 49%;
+  float: left;
+}
+.dst {
+  width: 49%;
+  float: right;
+}
+
+.src .CodeMirror {
+  background-color: #fffffb;
+  border: 1px solid #888;
+  border-radius: 3px;
+  box-shadow: 0 0 3px #ccc inset;
+}
+
+.dst .CodeMirror {
+  background-color: #F8F8F8;
+  border: 1px solid #eee;
+  border-radius: 3px;
+}
+
+.CodeMirror-scroll {
+  height: 500px;
+  line-height: 1.2;
+}
+
+.cm-s-default span.cm-comment {color: #baa;}
+
+.addthis_toolbox {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  opacity: .6;
+}
+.addthis_toolbox:hover {
+  opacity: 1;
+}
+
+.gh-ribbon {
+    -moz-transform: rotate(45deg);
+    background-color: #686868;
+    box-shadow: 0 0 2px rgba(102, 102, 102, 0.4);
+    display: block;
+    padding: 1px 0;
+    position: fixed;
+    right: -60px;
+    top: 44px;
+    width: 230px;
+    z-index: 10000;
+}
+.gh-ribbon a {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 13px;
+    border: 1px solid #AAAAAA;
+    color: #FFFFFF;
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    outline: medium none;
+    padding: 4px 50px 2px;
+    text-align: center;
+    text-decoration: none;
+}
+.csstransforms .gh-ribbon {
+    display: block;
+}

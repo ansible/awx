@@ -4,17 +4,20 @@
  *  Users.js
  *  Form definition for User model
  *
- *  
+ *
  */
 angular.module('UserFormDefinition', [])
-    .value(
-    'UserForm', {
-        
-        addTitle: 'Create User',                             //Legend in add mode
-        editTitle: '{{ username }}',                         //Legend in edit mode
-        name: 'user',                                        //Form name attribute
-        well: true,                                          //Wrap the form with TB well
+    .value('UserForm', {
+
+        addTitle: 'Create User',
+        editTitle: '{{ username }}',
+        name: 'user',
+        well: true,
         forceListeners: true,
+        collapse: true,
+        collapseTitle: "Properties",
+        collapseMode: 'edit',
+        collapseOpen: true,
 
         actions: {
             stream: {
@@ -25,31 +28,31 @@ angular.module('UserFormDefinition', [])
                 icon: "icon-comments-alt",
                 mode: 'edit',
                 iconSize: 'large'
-                }    
-            },
+            }
+        },
 
         fields: {
-            first_name: { 
+            first_name: {
                 label: 'First Name',
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
                 capitalize: true
-                },
-            last_name: { 
+            },
+            last_name: {
                 label: 'Last Name',
                 type: 'text',
                 addRequired: true,
                 editRequired: true,
                 capitalize: true
-                },
+            },
             email: {
                 label: 'Email',
                 type: 'email',
                 addRequired: true,
                 editRequired: true,
                 autocomplete: false
-                },
+            },
             organization: {
                 label: 'Organization',
                 type: 'lookup',
@@ -57,14 +60,20 @@ angular.module('UserFormDefinition', [])
                 sourceField: 'name',
                 ngClick: 'lookUpOrganization()',
                 excludeMode: 'edit',
-                awRequiredWhen: { variable: "orgrequired", init: true }
-                },
+                awRequiredWhen: {
+                    variable: "orgrequired",
+                    init: true
+                }
+            },
             username: {
                 label: 'Username',
                 type: 'text',
-                awRequiredWhen: { variable: "not_ldap_user", init: true },
-                autocomplete: false
+                awRequiredWhen: {
+                    variable: "not_ldap_user",
+                    init: true
                 },
+                autocomplete: false
+            },
             password: {
                 label: 'Password',
                 type: 'password',
@@ -74,7 +83,7 @@ angular.module('UserFormDefinition', [])
                 ngChange: "clearPWConfirm('password_confirm')",
                 autocomplete: false,
                 chkPass: true
-                },
+            },
             password_confirm: {
                 label: 'Confirm Password',
                 type: 'password',
@@ -84,7 +93,7 @@ angular.module('UserFormDefinition', [])
                 awPassMatch: true,
                 associated: 'password',
                 autocomplete: false
-                },
+            },
             is_superuser: {
                 label: 'Superuser (User has full system administration privileges.)',
                 type: 'checkbox',
@@ -92,171 +101,169 @@ angular.module('UserFormDefinition', [])
                 falseValue: 'false',
                 "default": 'false',
                 ngShow: "current_user['is_superuser'] == true"
-                },
-             ldap_user: {
-                label: 'Created by LDAP', 
+            },
+            ldap_user: {
+                label: 'Created by LDAP',
                 type: 'checkbox',
                 readonly: true
-                }
-            },
+            }
+        },
 
-        buttons: { //for now always generates <button> tags 
-            save: { 
-                ngClick: 'formSave()',    //$scope.function to call on click, optional
-                ngDisabled: true          //Disable when $pristine or $invalid, optional
-                },
-            reset: { 
+        buttons: {
+            save: {
+                ngClick: 'formSave()',
+                ngDisabled: true
+            },
+            reset: {
                 ngClick: 'formReset()',
-                ngDisabled: true          //Disabled when $pristine
-                }
-            },
+                ngDisabled: true
+            }
+        },
 
-        related: { //related colletions (and maybe items?)
-            
+        related: {
+
             credentials: {
                 type: 'collection',
                 title: 'Credentials',
                 iterator: 'credential',
                 open: false,
 
-                actions: { 
+                actions: {
                     add: {
                         ngClick: "add('credentials')",
                         icon: 'icon-plus',
                         label: 'Add',
                         awToolTip: 'Add a credential for this user'
-                        }
-                    },
+                    }
+                },
 
                 fields: {
                     name: {
                         key: true,
                         label: 'Name'
-                        },
+                    },
                     description: {
                         label: 'Description'
-                        }
-                    },
+                    }
+                },
 
                 fieldActions: {
                     edit: {
                         label: 'Edit',
-                        ngClick: "edit('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}')",
+                        ngClick: "edit('credentials', credential.id, credential.name)",
                         icon: 'icon-edit',
                         awToolTip: 'Edit the credential',
                         'class': 'btn btn-default'
-                        },
+                    },
                     "delete": {
                         label: 'Delete',
-                        ngClick: "delete('credentials', \{\{ credential.id \}\}, '\{\{ credential.name \}\}', 'credentials')",
+                        ngClick: "delete('credentials', credential.id, credential.name, 'credentials')",
                         icon: 'icon-trash',
                         "class": 'btn-danger',
                         awToolTip: 'Delete the credential'
-                        }
                     }
-                },
- 
+                }
+            },
+
             permissions: {
                 type: 'collection',
                 title: 'Permissions',
                 iterator: 'permission',
                 open: false,
-                
-                actions: { 
+
+                actions: {
                     add: {
                         ngClick: "add('permissions')",
                         icon: 'icon-plus',
                         label: 'Add',
                         awToolTip: 'Add a permission for this user',
                         ngShow: 'PermissionAddAllowed'
-                        }
-                    },
+                    }
+                },
 
                 fields: {
                     name: {
-                        key: true, 
+                        key: true,
                         label: 'Name',
-                        ngClick: "edit('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}')"
-                        },
+                        ngClick: "edit('permissions', permission.id, permission.name)"
+                    },
                     inventory: {
                         label: 'Inventory',
                         sourceModel: 'inventory',
                         sourceField: 'name',
                         ngBind: 'permission.summary_fields.inventory.name'
-                        },
+                    },
                     project: {
                         label: 'Project',
                         sourceModel: 'project',
                         sourceField: 'name',
                         ngBind: 'permission.summary_fields.project.name'
-                        },
+                    },
                     permission_type: {
                         label: 'Permission'
-                        }
-                    
-                    },
-                
+                    }
+
+                },
+
                 fieldActions: {
                     edit: {
                         label: 'Edit',
-                        ngClick: "edit('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}')",
+                        ngClick: "edit('permissions', permission.id, permission.name)",
                         icon: 'icon-edit',
                         awToolTip: 'Edit the permission',
                         'class': 'btn btn-default'
-                        },
-                    
+                    },
+
                     "delete": {
                         label: 'Delete',
-                        ngClick: "delete('permissions', \{\{ permission.id \}\}, '\{\{ permission.name \}\}', 'permissions')",
+                        ngClick: "delete('permissions', permission.id, permission.name, 'permissions')",
                         icon: 'icon-trash',
                         "class": 'btn-danger',
                         awToolTip: 'Delete the permission',
                         ngShow: 'PermissionAddAllowed'
-                        }
                     }
+                }
 
-                },
-                
-            admin_of_organizations: {                                       // Assumes a plural name (e.g. things)
+            },
+
+            admin_of_organizations: { // Assumes a plural name (e.g. things)
                 type: 'collection',
                 title: 'Admin of Organizations',
-                iterator: 'adminof',                                        // Singular form of name (e.g.  thing)
-                open: false,                                                // Open accordion on load?
+                iterator: 'adminof', // Singular form of name (e.g.  thing)
+                open: false, // Open accordion on load?
                 base: '/organizations',
-                
-                actions: {
-                    },
+
+                actions: {},
 
                 fields: {
                     name: {
                         key: true,
                         label: 'Name'
-                        },
+                    },
                     description: {
                         label: 'Description'
-                        }
                     }
-                },
+                }
+            },
 
-            organizations:  {
+            organizations: {
                 type: 'collection',
                 title: 'Organizations',
                 iterator: 'organization',
                 open: false,
-                
-                actions: {
-                    },
+
+                actions: {},
 
                 fields: {
                     name: {
                         key: true,
                         label: 'Name'
-                        },
+                    },
                     description: {
                         label: 'Description'
-                        }
                     }
-                },
+                }
+            },
 
             teams: {
                 type: 'collection',
@@ -264,19 +271,18 @@ angular.module('UserFormDefinition', [])
                 iterator: 'team',
                 open: false,
 
-                actions: {
-                    },
+                actions: {},
 
                 fields: {
                     name: {
                         key: true,
                         label: 'Name'
-                        },
+                    },
                     description: {
                         label: 'Description'
-                        }
                     }
-                },
+                }
+            },
 
             projects: {
                 type: 'collection',
@@ -284,21 +290,19 @@ angular.module('UserFormDefinition', [])
                 iterator: 'project',
                 open: false,
 
-                actions: {
-                    },
+                actions: {},
 
                 fields: {
                     name: {
                         key: true,
                         label: 'Name'
-                        },
+                    },
                     description: {
                         label: 'Description'
-                        }
                     }
                 }
-                
             }
 
-    }); //UserForm
+        }
 
+    }); //UserForm

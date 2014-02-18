@@ -7,17 +7,16 @@
  *  
  */
 angular.module('ProjectStatusDefinition', [])
-    .value(
-    'ProjectStatusForm', {
+    .value('ProjectStatusForm', {
     
         name: 'project_update',
-        editTitle: 'SCM Status', 
+        editTitle: 'SCM Status',
         well: false,
         'class': 'horizontal-narrow',
 
         fields: {
             created: {
-                label: 'Created', 
+                label: 'Created',
                 type: 'text',
                 readonly: true
             },
@@ -27,7 +26,7 @@ angular.module('ProjectStatusDefinition', [])
                 readonly: true
             },
             result_stdout: {
-                label: 'Std Out', 
+                label: 'Std Out',
                 type: 'textarea',
                 ngShow: "result_stdout",
                 'class': 'mono-space',
@@ -35,7 +34,7 @@ angular.module('ProjectStatusDefinition', [])
                 rows: 15
             },
             result_traceback: {
-                label: 'Traceback', 
+                label: 'Traceback',
                 type: 'textarea',
                 ngShow: "result_traceback",
                 'class': 'mono-space',

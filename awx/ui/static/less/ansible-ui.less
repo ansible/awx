@@ -19,6 +19,7 @@
 @grey:        #A9A9A9;
 @grey-txt:    #707070;
 @well:        #f5f5f5;   /* well background color */
+@well-border: #e3e3e3;
 @info:        #d9edf7;   /* alert info background color */
 @info-border: #bce8f1;   /* alert info border color */
 @info-color:  #3a87ad;
@@ -29,6 +30,7 @@
 
 @import "animations.less";
 @import "jquery-ui-overrides.less";
+@import "codemirror.less";
 
 
 html, body { height: 100%; }
@@ -182,6 +184,11 @@ textarea {
 
 .subtitle {
   font-size: 16px;
+}
+
+.license-version {
+  font-size: 18px; 
+  color: @grey-txt;
 }
 
 .modal-dialog .ui-accordion .ui-accordion-content {
@@ -387,7 +394,8 @@ dd {
   padding-left: 20px;
 }
 
-.navbar>.container .navbar-brand {
+.navbar>.container-fluid .navbar-brand {
+  height: 0;
   margin-left: 0;
   margin-top: 11px;
 }
@@ -406,12 +414,16 @@ dd {
 
 .help-link,
 .help-link:active,
-.help-link:visited {
+.help-link:visited,
+.ui-widget-content a.help-link,
+.ui-widget-content a.help-link:active,
+.ui-widget-content a.help-link:visited {
   color: @grey;
   text-decoration: none;
 }
 
-.help-link:hover {
+.help-link:hover,
+.ui-widget-content a.help-link:hover {
   color: @black;
   text-decoration: none;
 }
@@ -449,7 +461,7 @@ dd {
     }
 
     .copyright {
-        padding-top: 18px;
+        padding-top: 6px;
         font-weight: normal;
         text-align: center;
     }
@@ -785,6 +797,29 @@ input[type="checkbox"].checkbox-no-label {
   }
 }
 
+.jqui-accordion {
+    .list-actions {
+        margin: 0;
+    }
+    table {
+        background-color: @well;
+        padding: 10px; 
+        border-radius: 4px;
+        border: 1px solid @well-border;
+    }
+    form {
+        background-color: @well;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid @well-border;
+        margin: 10px 0;
+    }
+    .ui-accordion-content {
+        padding-left: 15px; 
+        padding-right: 15px;
+    }
+}
+
 #home-list-actions {
   margin-bottom: 15px;
 }
@@ -827,6 +862,14 @@ input[type="checkbox"].checkbox-no-label {
 .table-no-border tbody > tr > td,
 .table-no-border tfoot > tr > td {
   border-top: none;
+}
+
+/* Table info rows */
+
+.loading-info {
+  color: @grey-txt; 
+  font-weight: bold;
+  padding: 15px 0;
 }
 
 /* Jobs pages */
@@ -1180,21 +1223,27 @@ a.btn-disabled:hover {
   cursor: not-allowed;  
 }
 
-.parse-selection {
-  display: inline-block;
-  margin: 5px 0 8px 0;
-  font-size: 12px;
-  line-height: normal;
-}
+/* Variable Editing */
+  .parse-selection {
+      display: inline-block;
+      margin: 5px 0 8px 0;
+      font-size: 12px;
+      line-height: normal;
+  }
 
-.parse-selection input {
-  margin-left: 5px;
-}
+  .parse-selection input {
+      margin-left: 5px;
+  }
 
-.parse-select .parse-label {
-  margin-left: 3px;
-}
+  .parse-select .parse-label {
+      margin-left: 3px;
+  }
 
+  .external-editor-link {
+      display: inline-block;
+      margin-left: 20px;
+  }
+  
 .slider {
   display: inline-block;
   width: 100px;
@@ -1420,10 +1469,6 @@ tr td button i {
 /* Large desktop */
 
 @media (min-width: 1200px) {
-  
-  .container,  {
-    max-width: 96%;
-  }
 
   .delete-btn {
     /* Used on job and project page to make cancel and delete buttons have an equal width */
