@@ -32,7 +32,6 @@ angular.module('ParseHelper', ['Utilities', 'AngularCodeMirrorModule'])
                 //hide the textarea and show a fresh CodeMirror with the current mode (json or yaml)
                 codeMirror = AngularCodeMirror();
                 codeMirror.addModes($AnsibleConfig.variable_edit_modes);
-                console.log('here');
                 codeMirror.showTextArea({ scope: scope, model: fld, element: field_id, mode: scope[pfld], onReady: onReady, onChange: onChange });
             }
 
