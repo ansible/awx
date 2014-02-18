@@ -442,6 +442,12 @@ class BaseJobTestMixin(BaseTestMixin):
     def setUp(self):
         super(BaseJobTestMixin, self).setUp()
         self.populate()
+        #self.start_queue("ipc:///tmp/test_consumer.ipc", "ipc:///tmp/test_queue.ipc")
+        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
+
+    def tearDown(self):
+        super(BaseJobTestMixin, self).tearDown()
+        self.terminate_queue()
 
 class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
@@ -773,6 +779,7 @@ MIDDLEWARE_CLASSES = filter(lambda x: not x.endswith('TransactionMiddleware'),
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                   CALLBACK_BYPASS_QUEUE=True,
                    ANSIBLE_TRANSPORT='local',
                    MIDDLEWARE_CLASSES=MIDDLEWARE_CLASSES)
 class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
@@ -904,6 +911,9 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         job = self.job_ops_east_run
         job.start()
 
+        # Wait for events to filter in since we are using a single consumer
+        time.sleep(30)
+        
         # Check that the job detail has been updated.
         url = reverse('api:job_detail', args=(job.pk,))
         with self.current_user(self.user_sue):

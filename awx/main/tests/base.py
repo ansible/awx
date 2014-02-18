@@ -10,6 +10,7 @@ import os
 import shutil
 import tempfile
 import time
+from multiprocessing import Process
 
 # PyYAML
 import yaml
@@ -23,6 +24,8 @@ from django.test.client import Client
 # AWX
 from awx.main.models import *
 from awx.main.backend import LDAPSettings
+from awx.main.management.commands.run_callback_receiver import run_subscriber
+
 
 class BaseTestMixin(object):
     '''
@@ -363,6 +366,14 @@ class BaseTestMixin(object):
             for obj in response['results']:
                 self.assertTrue(set(obj.keys()) <= set(fields))
 
+    def start_queue(self, consumer_port, queue_port):
+        self.queue_process = Process(target=run_subscriber,
+                                args=(consumer_port, queue_port, False,))
+        self.queue_process.start()
+
+    def terminate_queue(self):
+        self.queue_process.terminate()
+                
 class BaseTest(BaseTestMixin, django.test.TestCase):
     '''
     Base class for unit tests.

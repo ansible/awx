@@ -494,11 +494,11 @@ class RunJob(BaseTask):
         elif job.status in ('pending', 'waiting'):
             job = self.update_model(job.pk, status='pending')
             # Start another task to process job events.
-            if settings.BROKER_URL.startswith('amqp://'):
-                app = Celery('tasks', broker=settings.BROKER_URL)
-                send_task('awx.main.tasks.save_job_events', kwargs={
-                    'job_id': job.id,
-                }, serializer='json')
+            # if settings.BROKER_URL.startswith('amqp://'):
+            #     app = Celery('tasks', broker=settings.BROKER_URL)
+            #     send_task('awx.main.tasks.save_job_events', kwargs={
+            #         'job_id': job.id,
+            #     }, serializer='json')
             return True
         else:
             return False
@@ -511,111 +511,27 @@ class RunJob(BaseTask):
         # Send a special message to this job's event queue after the job has run
         # to tell the save job events task to end.
         if settings.BROKER_URL.startswith('amqp://'):
-            job_events_exchange = Exchange('job_events', 'direct', durable=True)
-            job_events_queue = Queue('job_events[%d]' % job.id,
-                                     exchange=job_events_exchange,
-                                     routing_key=('job_events[%d]' % job.id),
-                                     auto_delete=True)
-            with Connection(settings.BROKER_URL, transport_options={'confirm_publish': True}) as conn:
-                with conn.Producer(serializer='json') as producer:
-                      msg = {
-                        'job_id': job.id,
-                        'event': '__complete__'
-                      }
-                      producer.publish(msg, exchange=job_events_exchange,
-                                       routing_key=('job_events[%d]' % job.id),
-                                       declare=[job_events_queue])
+            pass
+            # job_events_exchange = Exchange('job_events', 'direct', durable=True)
+            # job_events_queue = Queue('job_events[%d]' % job.id,
+            #                          exchange=job_events_exchange,
+            #                          routing_key=('job_events[%d]' % job.id),
+            #                          auto_delete=True)
+            # with Connection(settings.BROKER_URL, transport_options={'confirm_publish': True}) as conn:
+            #     with conn.Producer(serializer='json') as producer:
+            #           msg = {
+            #             'job_id': job.id,
+            #             'event': '__complete__'
+            #           }
+            #           producer.publish(msg, exchange=job_events_exchange,
+            #                            routing_key=('job_events[%d]' % job.id),
+            #                            declare=[job_events_queue])
 
         # Update job event fields after job has completed (only when using REST
         # API callback).
         else:
             for job_event in job.job_events.order_by('pk'):
                 job_event.save(post_process=True)
-
-
-class SaveJobEvents(Task):
-
-    name = 'awx.main.tasks.save_job_events'
-
-    def process_job_event(self, data, message, events_received=None):
-        if events_received is None:
-            events_received = {}
-        begints = time.time()
-        event = data.get('event', '')
-        if not event or 'job_id' not in data:
-            return
-        try:
-            if not isinstance(data['created'], datetime.datetime):
-                data['created'] = parse_datetime(data['created'])
-            if not data['created'].tzinfo:
-                data['created'] = data['created'].replace(tzinfo=FixedOffset(0))
-        except (KeyError, ValueError):
-            data.pop('created', None)
-        if settings.DEBUG:
-            print data
-        for key in data.keys():
-            if key not in ('job_id', 'event', 'event_data', 'created'):
-                data.pop(key)
-        data['play'] = data.get('event_data', {}).get('play', '').strip()
-        data['task'] = data.get('event_data', {}).get('task', '').strip()
-        duplicate = False
-        if event != '__complete__':
-            for retry_count in xrange(11):
-                try:
-                    # Commit any outstanding events before saving stats.
-                    if event == 'playbook_on_stats':
-                        transaction.commit()
-                    if not JobEvent.objects.filter(**data).exists():
-                        job_event = JobEvent(**data)
-                        job_event.save(post_process=True)
-                        if not event.startswith('runner_'):
-                            transaction.commit()
-                    else:
-                        duplicate = True
-                        if settings.DEBUG:
-                            print 'skipping duplicate job event %r' % data
-                    break
-                except DatabaseError as e:
-                    transaction.rollback()
-                    logger.debug('Database error saving job event, retrying in '
-                                 '1 second (retry #%d): %s', retry_count + 1, e)
-                    time.sleep(1)
-            else:
-                logger.error('Failed to save job event after %d retries.',
-                             retry_count)
-        if not duplicate:
-            if event not in events_received:
-                events_received[event] = 1
-            else:
-                events_received[event] += 1
-            if settings.DEBUG:
-                print 'saved job event in %0.3fs' % (time.time() - begints)
-        message.ack()
-
-    @transaction.commit_on_success
-    def run(self, *args, **kwargs):
-        job_id = kwargs.get('job_id', None)
-        if not job_id:
-            return {}
-        
-        events_received = {}
-        process_job_event = functools.partial(self.process_job_event,
-                                              events_received=events_received)
-
-        job_events_exchange = Exchange('job_events', 'direct', durable=True)
-        job_events_queue = Queue('job_events[%d]' % job_id,
-                                 exchange=job_events_exchange,
-                                 routing_key=('job_events[%d]' % job_id),
-                                 auto_delete=True)
-        with Connection(settings.BROKER_URL, transport_options={'confirm_publish': True}) as conn:
-            with conn.Consumer(job_events_queue, callbacks=[process_job_event]) as consumer:
-                while '__complete__' not in events_received:
-                    conn.drain_events()
-                
-        return {
-            'job_id': job_id,
-            'total_events': sum(events_received.values())}
-
 
 class RunProjectUpdate(BaseTask):
     
