@@ -157,7 +157,7 @@ angular.module('JobTemplateFormDefinition', [])
                 column: 1,
                 awPopOver: "<p>Provide a host pattern to further constrain the list of hosts that will be managed or affected by the playbook. " +
                     "Multiple patterns can be separated by &#59; &#58; or &#44;</p><p>For more information and examples see " +
-                    "<a href=\"http://docs.ansible.com/intro_patterns.html\" target=\"_blank\">the Patters topic at docs.ansible.com</a>.</p>",
+                    "<a href=\"http://docs.ansible.com/intro_patterns.html\" target=\"_blank\">the Patterns topic at docs.ansible.com</a>.</p>",
                 dataTitle: 'Limit',
                 dataPlacement: 'right',
                 dataContainer: "body"
