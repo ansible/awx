@@ -368,7 +368,7 @@ class BaseTestMixin(object):
 
     def start_queue(self, consumer_port, queue_port):
         self.queue_process = Process(target=run_subscriber,
-                                args=(consumer_port, queue_port,))
+                                args=(consumer_port, queue_port, False,))
         self.queue_process.start()
 
     def terminate_queue(self):
