@@ -97,7 +97,6 @@ def process_job_event(data):
                      retry_count)
 
 def callback_worker(port):
-    print("Starting worker")
     pool_context = zmq.Context()
     pool_subscriber = pool_context.socket(zmq.PULL)
     pool_subscriber.connect(port)
