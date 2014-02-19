@@ -36,7 +36,7 @@ def run_subscriber(consumer_port, queue_port, use_workers=True):
     if use_workers:
         workers = []
         for idx in range(4):
-            w = Worker(queue_port)
+            w = Process(target=callback_worker, args=(queue_port,))
             w.start()
             workers.append(w)
 
@@ -85,23 +85,14 @@ def process_job_event(data):
         logger.error('Failed to save job event after %d retries.',
                      retry_count)
 
-
-class Worker(Process):
-    '''
-    Process to validate and store save job events received via zeromq
-    '''
-
-    def __init__(self, port):
-        self.port = port
-
-    def run(self):
-        print("Starting worker")
-        pool_context = zmq.Context()
-        pool_subscriber = pool_context.socket(zmq.PULL)
-        pool_subscriber.connect(self.port)
-        while True:
-            message = pool_subscriber.recv_json()
-            process_job_event(message)
+def callback_worker(port):
+    print("Starting worker")
+    pool_context = zmq.Context()
+    pool_subscriber = pool_context.socket(zmq.PULL)
+    pool_subscriber.connect(port)
+    while True:
+        message = pool_subscriber.recv_json()
+        process_job_event(message)
 
 class Command(NoArgsCommand):
     '''
