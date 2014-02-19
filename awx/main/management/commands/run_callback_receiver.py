@@ -2,9 +2,11 @@
 # All Rights Reserved.
 
 # Python
+import os
 import datetime
 import logging
 import json
+import signal
 from optparse import make_option
 from multiprocessing import Process
 
@@ -24,7 +26,14 @@ from awx.main.models import *
 import zmq
 
 def run_subscriber(consumer_port, queue_port, use_workers=True):
-
+    def shutdown_handler(active_workers):
+        def _handler(signum, frame):
+            for active_worker in active_workers:
+                active_worker.terminate()
+            signal.signal(signum, signal.SIG_DFL)
+            os.kill(os.getpid(), signum) # Rethrow signal, this time without catching it
+        return _handler
+        
     consumer_context = zmq.Context()
     consumer_subscriber = consumer_context.socket(zmq.PULL)
     consumer_subscriber.bind(consumer_port)
@@ -37,8 +46,10 @@ def run_subscriber(consumer_port, queue_port, use_workers=True):
         workers = []
         for idx in range(4):
             w = Process(target=callback_worker, args=(queue_port,))
+            w.daemon = True
             w.start()
             workers.append(w)
+        signal.signal(signal.SIGTERM, shutdown_handler(workers))
 
     while True: # Handle signal
         message = consumer_subscriber.recv_json()
