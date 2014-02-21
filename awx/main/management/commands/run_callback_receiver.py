@@ -7,6 +7,7 @@ import datetime
 import logging
 import json
 import signal
+import time
 from optparse import make_option
 from multiprocessing import Process
 
@@ -35,7 +36,7 @@ def run_subscriber(consumer_port, queue_port, use_workers=True):
         return _handler
         
     consumer_context = zmq.Context()
-    consumer_subscriber = consumer_context.socket(zmq.PULL)
+    consumer_subscriber = consumer_context.socket(zmq.REP)
     consumer_subscriber.bind(consumer_port)
 
     queue_context = zmq.Context()
@@ -57,6 +58,7 @@ def run_subscriber(consumer_port, queue_port, use_workers=True):
             queue_publisher.send_json(message)
         else:
             process_job_event(message)
+        consumer_subscriber.send("1")
 
 
 @transaction.commit_on_success
@@ -89,12 +91,12 @@ def process_job_event(data):
             break
         except DatabaseError as e:
             transaction.rollback()
-            logger.debug('Database error saving job event, retrying in '
-                          '1 second (retry #%d): %s', retry_count + 1, e)
+            print('Database error saving job event, retrying in '
+                  '1 second (retry #%d): %s', retry_count + 1, e)
             time.sleep(1)
     else:
-        logger.error('Failed to save job event after %d retries.',
-                     retry_count)
+        print('Failed to save job event after %d retries.',
+              retry_count)
 
 def callback_worker(port):
     pool_context = zmq.Context()

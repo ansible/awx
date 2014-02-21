@@ -911,9 +911,6 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         job = self.job_ops_east_run
         job.start()
 
-        # Wait for events to filter in since we are using a single consumer
-        time.sleep(30)
-        
         # Check that the job detail has been updated.
         url = reverse('api:job_detail', args=(job.pk,))
         with self.current_user(self.user_sue):

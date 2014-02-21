@@ -37,6 +37,7 @@ import os
 import sys
 import urllib
 import urlparse
+import time
 
 import requests
 
@@ -109,7 +110,7 @@ class CallbackModule(object):
 
     def _start_connection(self):
         self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.PUSH)
+        self.socket = self.context.socket(zmq.REQ)
         self.socket.connect("tcp://127.0.0.1:5556")
 
     def _post_job_event_queue_msg(self, event, event_data):
@@ -134,6 +135,7 @@ class CallbackModule(object):
                     self._start_connection()
 
                 self.socket.send_json(msg)
+                self.socket.recv()
                 return
             except Exception, e:
                 self.logger.info('Publish Exception: %r, retry=%d', e,
