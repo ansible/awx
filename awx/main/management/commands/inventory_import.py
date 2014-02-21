@@ -702,7 +702,11 @@ class Command(NoArgsCommand):
         license_info = reader.from_file()
         available_instances = license_info.get('available_instances', 0)
         free_instances = license_info.get('free_instances', 0)
+        time_remaining = license_info.get('time_remaining', 0)
         new_count = Host.objects.filter(active=True).count()
+        if time_remaining <= 0:
+            self.logger.error('License has expired')
+            raise CommandError("License has expired!")
         if free_instances < 0:
             d = {
                 'new_count': new_count,
@@ -737,6 +741,7 @@ class Command(NoArgsCommand):
         if not self.source:
             raise CommandError('--source is required')
 
+        self.check_license()
         begin = time.time()
         self.load_inventory_from_database()
 
