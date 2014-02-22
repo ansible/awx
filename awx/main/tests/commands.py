@@ -5,6 +5,7 @@
 import json
 import os
 import shutil
+import string
 import StringIO
 import sys
 import tempfile
@@ -63,6 +64,27 @@ varb=B
 
 [all:vars]
 vara=A
+'''
+
+TEST_INVENTORY_INI_WITH_HOST_PATTERNS = '''\
+[dotcom]
+web[00:63].example.com ansible_ssh_user=example
+dns.example.com
+
+[dotnet]
+db-[a:z].example.net
+ns.example.net
+
+[dotorg]
+[A:F][0:9].example.org:1022 ansible_ssh_user=example
+mx.example.org
+
+[dotus]
+lb[00:08:2].example.us even_odd=even
+lb[01:09:2].example.us even_odd=odd
+
+[dotcc]
+media[0:9][0:9].example.cc
 '''
 
 TEST_GROUP_VARS = '''\
@@ -431,10 +453,11 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
         self._temp_files.append(license_path)
         os.environ['AWX_LICENSE_FILE'] = license_path
 
-    def create_test_ini(self, inv_dir=None):
+    def create_test_ini(self, inv_dir=None, ini_content=None):
+        ini_content = ini_content or TEST_INVENTORY_INI
         handle, self.ini_path = tempfile.mkstemp(suffix='.txt', dir=inv_dir)
         ini_file = os.fdopen(handle, 'w')
-        ini_file.write(TEST_INVENTORY_INI)
+        ini_file.write(ini_content)
         ini_file.close()
         self._temp_files.append(self.ini_path)
 
@@ -689,6 +712,101 @@ class InventoryImportTest(BaseCommandMixin, BaseLiveServerTest):
 
     def test_overwrite_from_ini_file(self):
         self.test_merge_from_ini_file(overwrite=True)
+
+    def test_ini_file_with_host_patterns(self):
+        self.create_test_ini(ini_content=TEST_INVENTORY_INI_WITH_HOST_PATTERNS)
+        # New empty inventory.
+        new_inv = self.organizations[0].inventories.create(name='newb')
+        self.assertEqual(new_inv.hosts.count(), 0)
+        self.assertEqual(new_inv.groups.count(), 0)
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=self.ini_path)
+        self.assertEqual(result, None, stdout + stderr)
+        # Check that inventory is populated as expected.
+        new_inv = Inventory.objects.get(pk=new_inv.pk)
+        expected_group_names = set(['dotcom', 'dotnet', 'dotorg', 'dotus', 'dotcc'])
+        group_names = set(new_inv.groups.values_list('name', flat=True))
+        self.assertEqual(expected_group_names, group_names)
+        # Check that all host ranges are expanded into host names.
+        expected_host_names = set()
+        expected_host_names.update(['web%02d.example.com' % x for x in xrange(64)])
+        expected_host_names.add('dns.example.com')
+        expected_host_names.update(['db-%s.example.net' % x for x in string.ascii_lowercase])
+        expected_host_names.add('ns.example.net')
+        for x in 'ABCDEF':
+            for y in xrange(10):
+                expected_host_names.add('%s%d.example.org' % (x, y))
+        expected_host_names.add('mx.example.org')
+        expected_host_names.update(['lb%02d.example.us' % x for x in xrange(10)])
+        expected_host_names.update(['media%02d.example.cc' % x for x in xrange(100)])
+        host_names = set(new_inv.hosts.values_list('name', flat=True))
+        self.assertEqual(expected_host_names, host_names)
+        # Check hosts in dotcom group.
+        group = new_inv.groups.get(name='dotcom')
+        self.assertEqual(group.hosts.count(), 65)
+        for host in group.hosts.filter(active=True, name__startswith='web'):
+            self.assertEqual(host.variables_dict.get('ansible_ssh_user', ''), 'example')
+        # Check hosts in dotnet group.
+        group = new_inv.groups.get(name='dotnet')
+        self.assertEqual(group.hosts.count(), 27)
+        # Check hosts in dotorg group.
+        group = new_inv.groups.get(name='dotorg')
+        self.assertEqual(group.hosts.count(), 61)
+        for host in group.hosts.filter(active=True):
+            if host.name.startswith('mx.'):
+                continue
+            self.assertEqual(host.variables_dict.get('ansible_ssh_user', ''), 'example')
+            self.assertEqual(host.variables_dict.get('ansible_ssh_port', 22), 1022)
+        # Check hosts in dotus group.
+        group = new_inv.groups.get(name='dotus')
+        self.assertEqual(group.hosts.count(), 10)
+        for host in group.hosts.filter(active=True):
+            if int(host.name[2:4]) % 2 == 0:
+                self.assertEqual(host.variables_dict.get('even_odd', ''), 'even')
+            else:
+                self.assertEqual(host.variables_dict.get('even_odd', ''), 'odd')
+        # Check hosts in dotcc group.
+        group = new_inv.groups.get(name='dotcc')
+        self.assertEqual(group.hosts.count(), 100)
+        # Check inventory source/update after running command.
+        self.check_adhoc_inventory_source(new_inv)
+        # Test with invalid host pattern -- alpha begin > end.
+        self.create_test_ini(ini_content='[invalid]\nhost[X:P]')
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=self.ini_path)
+        self.assertTrue(isinstance(result, ValueError), result)
+        # Test with invalid host pattern -- different numeric pattern lengths.
+        self.create_test_ini(ini_content='[invalid]\nhost[001:08]')
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=self.ini_path)
+        self.assertTrue(isinstance(result, ValueError), result)
+        # Test with invalid host pattern -- invalid range/slice spec.
+        self.create_test_ini(ini_content='[invalid]\nhost[1:2:3:4]')
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=self.ini_path)
+        self.assertTrue(isinstance(result, ValueError), result)
+        # Test with invalid host pattern -- no begin.
+        self.create_test_ini(ini_content='[invalid]\nhost[:9]')
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=self.ini_path)
+        self.assertTrue(isinstance(result, ValueError), result)
+        # Test with invalid host pattern -- no end.
+        self.create_test_ini(ini_content='[invalid]\nhost[0:]')
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=self.ini_path)
+        self.assertTrue(isinstance(result, ValueError), result)
+        # Test with invalid host pattern -- invalid slice.
+        self.create_test_ini(ini_content='[invalid]\nhost[0:9:Q]')
+        result, stdout, stderr = self.run_command('inventory_import',
+                                                  inventory_id=new_inv.pk,
+                                                  source=self.ini_path)
+        self.assertTrue(isinstance(result, ValueError), result)
 
     def test_executable_file(self):
         # New empty inventory.

@@ -7,7 +7,9 @@ import json
 import logging
 from optparse import make_option
 import os
+import re
 import shlex
+import string
 import subprocess
 import sys
 import time
@@ -140,15 +142,10 @@ class MemHost(MemObject):
     def __init__(self, name, source_dir):
         super(MemHost, self).__init__(name, source_dir)
         self.variables = {}
-      
         if ':' in name:
-            tokens = name.split(":")
+            tokens = name.split(':')
             self.name = tokens[0]
             self.variables['ansible_ssh_port'] = int(tokens[1])
-
-        if '[' in name:
-            raise ValueError('Block ranges like host[0:50].example.com are not yet supported by the importer')
-
         host_vars = os.path.join(source_dir, 'host_vars', name)
         self.variables.update(self.load_vars(host_vars))
         logger.debug('Loaded host: %s', self.name)
@@ -168,12 +165,52 @@ class BaseLoader(object):
         '''
         Return a MemHost instance from host name, creating if needed.
         '''
+        if '[' in name or ']' in name:
+            raise ValueError('host ranges like %s are not supported by this importer' % name)
         host_name = name.split(':')[0]
         host = None
         if not host_name in self.all_group.all_hosts:
             host = MemHost(name, self.source_dir)
             self.all_group.all_hosts[host_name] = host
         return self.all_group.all_hosts[host_name]
+
+    def get_hosts(self, name):
+        '''
+        Return iterator over one or more MemHost instances from host name or
+        host pattern.
+        '''
+        def iternest(*args):
+            if args:
+                for i in args[0]:
+                    for j in iternest(*args[1:]):
+                        yield ''.join([str(i), j])
+            else:
+                yield ''
+        pattern_re = re.compile(r'(\[(?:(?:\d+\:\d+)|(?:[A-Za-z]\:[A-Za-z]))(?:\:\d+)??\])')
+        iters = []
+        for s in re.split(pattern_re, name):
+            if re.match(pattern_re, s):
+                start, end, step = (s[1:-1] + ':1').split(':')[:3]
+                mapfunc = str
+                if start in string.ascii_letters:
+                    istart = string.ascii_letters.index(start)
+                    iend = string.ascii_letters.index(end) + 1
+                    if istart >= iend:
+                        raise ValueError('invalid host range specified')
+                    seq = string.ascii_letters[istart:iend:int(step)]
+                else:
+                    if start[0] == '0' and len(start) > 1:
+                        if len(start) != len(end):
+                            raise ValueError('invalid host range specified')
+                        mapfunc = lambda x: str(x).zfill(len(start))
+                    seq = xrange(int(start), int(end) + 1, int(step))
+                iters.append(map(mapfunc, seq))
+            elif re.search(r'[\[\]]', s):
+                raise ValueError('invalid host range specified')
+            elif s:
+                iters.append([s])
+        for iname in iternest(*iters):
+            yield self.get_host(iname)
 
     def get_group(self, name, all_group=None, child=False):
         '''
@@ -219,22 +256,23 @@ class IniLoader(BaseLoader):
                      input_mode = 'host'
                  group = self.get_group(line)
             else:
-                 # Add a host or variable to the existing group/host
+                 # Add hosts with inline variables, or variables/children to
+                 # an existing group.
                  tokens = shlex.split(line)
                  if input_mode == 'host':
-                     host = self.get_host(tokens[0])
-                     if len(tokens) > 1:
-                         for t in tokens[1:]:
-                             k,v = t.split('=', 1)
-                             host.variables[k] = v
-                     group.add_host(host) 
+                     for host in self.get_hosts(tokens[0]):
+                         if len(tokens) > 1:
+                             for t in tokens[1:]:
+                                 k,v = t.split('=', 1)
+                                 host.variables[k] = v
+                         group.add_host(host) 
                  elif input_mode == 'children':
                      group.child_group_by_name(line, self)
                  elif input_mode == 'vars':
                      for t in tokens:
                          k, v = t.split('=', 1)
                          group.variables[k] = v
-            # TODO: expansion patterns are probably not going to be supported
+            # TODO: expansion patterns are probably not going to be supported.  YES THEY ARE!
 
 
 # from API documentation:
