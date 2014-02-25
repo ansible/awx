@@ -359,7 +359,7 @@ class HostAccess(BaseAccess):
             # but still go down *most* of the license code path.
             validation_info['free_instances'] = 99999999
 
-        if not validation_info.get('demo') and validation_info.get('time_remaining') < 0:
+        if not validation_info.get('demo') and validation_info.get('time_remaining') <= 0:
             raise PermissionDenied("license has expired")
 
         if validation_info.get('free_instances', 0) > 0:
