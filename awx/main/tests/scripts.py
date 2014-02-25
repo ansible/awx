@@ -137,10 +137,10 @@ class InventoryScriptTest(BaseScriptTest):
     def test_without_inventory_id(self):
         rc, stdout, stderr = self.run_inventory_script(list=True)
         self.assertNotEqual(rc, 0, stderr)
-        self.assertEqual(json.loads(stdout), {})
+        self.assertEqual(json.loads(stdout), {'failed': True})
         rc, stdout, stderr = self.run_inventory_script(host=self.hosts[0].name)
         self.assertNotEqual(rc, 0, stderr)
-        self.assertEqual(json.loads(stdout), {})
+        self.assertEqual(json.loads(stdout), {'failed': True})
 
     def test_list_with_inventory_id_as_argument(self):
         inventory = self.inventories[0]
@@ -293,11 +293,11 @@ class InventoryScriptTest(BaseScriptTest):
         os.environ['INVENTORY_ID'] = str(inventory.pk)
         rc, stdout, stderr = self.run_inventory_script(host=host.name)
         self.assertNotEqual(rc, 0, stderr)
-        self.assertEqual(json.loads(stdout), {})
+        self.assertEqual(json.loads(stdout), {'failed': True})
         # Invalid hostname not in database.
         rc, stdout, stderr = self.run_inventory_script(host='blah.example.com')
         self.assertNotEqual(rc, 0, stderr)
-        self.assertEqual(json.loads(stdout), {})
+        self.assertEqual(json.loads(stdout), {'failed': True})
 
     def test_with_invalid_inventory_id(self):
         inventory_pks = set(map(lambda x: x.pk, self.inventories))
@@ -305,19 +305,19 @@ class InventoryScriptTest(BaseScriptTest):
         os.environ['INVENTORY_ID'] = str(invalid_id)
         rc, stdout, stderr = self.run_inventory_script(list=True)
         self.assertNotEqual(rc, 0, stderr)
-        self.assertEqual(json.loads(stdout), {})
+        self.assertEqual(json.loads(stdout), {'failed': True})
         os.environ['INVENTORY_ID'] = 'not_an_int'
         rc, stdout, stderr = self.run_inventory_script(list=True)
         self.assertNotEqual(rc, 0, stderr)
-        self.assertEqual(json.loads(stdout), {})
+        self.assertEqual(json.loads(stdout), {'failed': True})
         os.environ['INVENTORY_ID'] = str(invalid_id)
         rc, stdout, stderr = self.run_inventory_script(host=self.hosts[1].name)
         self.assertNotEqual(rc, 0, stderr)
-        self.assertEqual(json.loads(stdout), {})
+        self.assertEqual(json.loads(stdout), {'failed': True})
         os.environ['INVENTORY_ID'] = 'not_an_int'
         rc, stdout, stderr = self.run_inventory_script(host=self.hosts[2].name)
         self.assertNotEqual(rc, 0, stderr)
-        self.assertEqual(json.loads(stdout), {})
+        self.assertEqual(json.loads(stdout), {'failed': True})
 
     def test_with_deleted_inventory(self):
         inventory = self.inventories[0]
@@ -326,7 +326,7 @@ class InventoryScriptTest(BaseScriptTest):
         os.environ['INVENTORY_ID'] = str(inventory.pk)
         rc, stdout, stderr = self.run_inventory_script(list=True)
         self.assertNotEqual(rc, 0, stderr)
-        self.assertEqual(json.loads(stdout), {})
+        self.assertEqual(json.loads(stdout), {'failed': True})
 
     def test_without_list_or_host_argument(self):
         inventory = self.inventories[0]
@@ -334,7 +334,7 @@ class InventoryScriptTest(BaseScriptTest):
         os.environ['INVENTORY_ID'] = str(inventory.pk)
         rc, stdout, stderr = self.run_inventory_script()
         self.assertNotEqual(rc, 0, stderr)
-        self.assertEqual(json.loads(stdout), {})
+        self.assertEqual(json.loads(stdout), {'failed': True})
 
     def test_with_both_list_and_host_arguments(self):
         inventory = self.inventories[0]
@@ -342,7 +342,7 @@ class InventoryScriptTest(BaseScriptTest):
         os.environ['INVENTORY_ID'] = str(inventory.pk)
         rc, stdout, stderr = self.run_inventory_script(list=True, host='blah')
         self.assertNotEqual(rc, 0, stderr)
-        self.assertEqual(json.loads(stdout), {})
+        self.assertEqual(json.loads(stdout), {'failed': True})
 
     def test_with_disabled_hosts(self):
         inventory = self.inventories[1]

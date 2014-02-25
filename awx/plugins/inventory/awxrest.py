@@ -36,6 +36,7 @@ import json
 import optparse
 import os
 import sys
+import traceback
 import urllib
 import urlparse
 
@@ -106,6 +107,7 @@ class InventoryScript(object):
             try:
                 # Command line argument takes precedence over environment
                 # variable.
+                raise ValueError('foo')
                 self.inventory_id = int(self.options.get('inventory_id', 0) or \
                                         os.getenv('INVENTORY_ID', 0))
             except ValueError:
@@ -126,13 +128,13 @@ class InventoryScript(object):
             else:
                 raise RuntimeError('Either --list or --host must be specified')
         except Exception, e:
-            # Always return an empty hash on stdout, even when an error occurs.
-            sys.stdout.write(json.dumps({}))
+            sys.stdout.write('%s\n' % json.dumps(dict(failed=True)))
             if self.options.get('traceback', False):
-                raise
-            sys.stderr.write(str(e) + '\n')
+                sys.stderr.write(traceback.format_exc())
+            else:
+                sys.stderr.write('%s\n' % str(e))
             if hasattr(e, 'response'):
-                sys.stderr.write(e.response.content + '\n')
+                sys.stderr.write('%s\n' % e.response.content)
             sys.exit(1)
 
 def main():
