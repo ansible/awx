@@ -107,7 +107,6 @@ class InventoryScript(object):
             try:
                 # Command line argument takes precedence over environment
                 # variable.
-                raise ValueError('foo')
                 self.inventory_id = int(self.options.get('inventory_id', 0) or \
                                         os.getenv('INVENTORY_ID', 0))
             except ValueError:
