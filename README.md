@@ -1,8 +1,9 @@
-AWX
-===
+Ansible Tower
+=============
 
-Formerly known as ansible-commander and AnsibleWorks, AWX provides a web-based
-user interface, REST API and task engine built on top of Ansible.
+Formerly known as awx, ansible-commander and AnsibleWorks, ansible-tower
+provides a web-based user interface, REST API and task engine built on top of
+Ansible.
 
 The current version under development is 1.4.8, and uses the master branch.
 
@@ -22,8 +23,10 @@ master.
 Resources
 ---------
 
-Refer to `CONTRIBUTING.md` to get started developing, testing and building AWX.
+Refer to `CONTRIBUTING.md` to get started developing, testing and building Tower.
 
-Refer to `setup/README.md` to get started deploying AWX.
+Refer to `setup/README.md` to get started deploying Tower.
 
-See `docs/build_system.md` for more about Jenkins and installing nightly builds (as opposed to running from source).
+Refer to `docs/build_system.md` for more about Jenkins and installing nightly builds (as opposed to running from source).
+
+Refer to `docs/release_process.md` for information on the steps involved in creating a release.

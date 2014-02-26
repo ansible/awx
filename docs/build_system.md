@@ -1,5 +1,5 @@
-AWX Build and Release Process
-=============================
+Build and Release Process
+=========================
 
 This document describes the AWX Software build and release process.
 This process includes the automation of the packaging for Debian/Ubuntu
@@ -19,8 +19,8 @@ the `awx/__init__.py file.` This string should always be of the format:
 
 There should only be one "-" contained in the string.  (Which can represent
 a build/rev type release number).  Example:
- 
-   1.2.2-0
+
+    1.2.2-0
 
 ### OFFICIAL vs. Non-OFFICIAL Builds ###
 
