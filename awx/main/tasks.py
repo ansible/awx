@@ -388,8 +388,7 @@ class RunJob(BaseTask):
         env['ANSIBLE_CALLBACK_PLUGINS'] = plugin_dir
         env['REST_API_URL'] = settings.INTERNAL_API_URL
         env['REST_API_TOKEN'] = job.task_auth_token or ''
-        if settings.BROKER_URL.startswith('amqp://'):
-            env['BROKER_URL'] = settings.BROKER_URL
+        env['CALLBACK_CONSUMER_PORT'] = settings.CALLBACK_CONSUMER_PORT
         if getattr(settings, 'JOB_CALLBACK_DEBUG', False):
             env['JOB_CALLBACK_DEBUG'] = '2'
         elif settings.DEBUG:
@@ -502,14 +501,9 @@ class RunJob(BaseTask):
         Hook for actions to run after job/task has completed.
         '''
         super(RunJob, self).post_run_hook(job, **kwargs)
-        # Send a special message to this job's event queue after the job has run
-        # to tell the save job events task to end.
-        if settings.BROKER_URL.startswith('amqp://'):
-            pass
-
         # Update job event fields after job has completed (only when using REST
         # API callback).
-        else:
+        if not settings.CALLBACK_CONSUMER_PORT:
             for job_event in job.job_events.order_by('pk'):
                 job_event.save(post_process=True)
 

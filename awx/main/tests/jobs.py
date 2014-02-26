@@ -442,8 +442,8 @@ class BaseJobTestMixin(BaseTestMixin):
     def setUp(self):
         super(BaseJobTestMixin, self).setUp()
         self.populate()
-        #self.start_queue("ipc:///tmp/test_consumer.ipc", "ipc:///tmp/test_queue.ipc")
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
+        if settings.CALLBACK_CONSUMER_PORT:
+            self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
 
     def tearDown(self):
         super(BaseJobTestMixin, self).tearDown()
@@ -779,7 +779,7 @@ MIDDLEWARE_CLASSES = filter(lambda x: not x.endswith('TransactionMiddleware'),
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-                   CALLBACK_BYPASS_QUEUE=True,
+                   CALLBACK_CONSUMER_PORT='',
                    ANSIBLE_TRANSPORT='local',
                    MIDDLEWARE_CLASSES=MIDDLEWARE_CLASSES)
 class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):

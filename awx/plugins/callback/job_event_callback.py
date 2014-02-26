@@ -39,13 +39,12 @@ import urllib
 import urlparse
 import time
 
+# Requests
 import requests
-
-# Django
-from django.conf import settings
 
 # ZeroMQ
 import zmq
+
 
 class TokenAuth(requests.auth.AuthBase):
 
@@ -81,6 +80,7 @@ class CallbackModule(object):
         self.job_id = int(os.getenv('JOB_ID'))
         self.base_url = os.getenv('REST_API_URL', '')
         self.auth_token = os.getenv('REST_API_TOKEN', '')
+        self.callback_consumer_port = os.getenv('CALLBACK_CONSUMER_PORT', '')
         self.context = None
         self.socket = None
         self._init_logging()
@@ -111,7 +111,7 @@ class CallbackModule(object):
     def _start_connection(self):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
-        self.socket.connect("tcp://127.0.0.1:5556")
+        self.socket.connect(self.callback_consumer_port)
 
     def _post_job_event_queue_msg(self, event, event_data):
         msg = {
@@ -173,7 +173,7 @@ class CallbackModule(object):
         task = getattr(getattr(self, 'task', None), 'name', '')
         if task and event not in self.EVENTS_WITHOUT_TASK:
             event_data['task'] = task
-        if not settings.CALLBACK_BYPASS_QUEUE:
+        if self.callback_consumer_port:
             self._post_job_event_queue_msg(event, event_data)
         else:
             self._post_rest_api_event(event, event_data)

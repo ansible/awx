@@ -50,7 +50,12 @@ def run_subscriber(consumer_port, queue_port, use_workers=True):
             w.daemon = True
             w.start()
             workers.append(w)
+        signal.signal(signal.SIGINT, shutdown_handler(workers))
         signal.signal(signal.SIGTERM, shutdown_handler(workers))
+        if settings.DEBUG:
+            print 'Started callback receiver (4 workers)'
+    elif settings.DEBUG:
+        print 'Started callback receiver (no workers)'
 
     while True: # Handle signal
         message = consumer_subscriber.recv_json()
@@ -134,4 +139,8 @@ class Command(NoArgsCommand):
         self.init_logging()
         consumer_port = settings.CALLBACK_CONSUMER_PORT
         queue_port = settings.CALLBACK_QUEUE_PORT
-        run_subscriber(consumer_port, queue_port)
+        try:
+            run_subscriber(consumer_port, queue_port)
+        except KeyboardInterrupt:
+            pass
+

@@ -7,6 +7,7 @@ import contextlib
 import datetime
 import json
 import os
+import random
 import shutil
 import tempfile
 import time
@@ -51,11 +52,15 @@ class BaseTestMixin(object):
         # commands that run from tests.
         for opt in ('ENGINE', 'NAME', 'USER', 'PASSWORD', 'HOST', 'PORT'):
             os.environ['AWX_TEST_DATABASE_%s' % opt] = settings.DATABASES['default'][opt]
-        # For now, prevent tests from trying to use celery for job event
-        # callbacks.
-        if settings.BROKER_URL.startswith('amqp://'):
-            settings.BROKER_URL = 'django://'
+        # Set flag so that task chain works with unit tests.
         settings.CELERY_UNIT_TEST = True
+        # Create unique random consumer and queue ports for zeromq callback.
+        if settings.CALLBACK_CONSUMER_PORT:
+            callback_port = random.randint(55700, 55799)
+            settings.CALLBACK_CONSUMER_PORT = 'tcp://127.0.0.1:%d' % callback_port
+            callback_queue_path = '/tmp/callback_receiver_test_%d.ipc' % callback_port
+            self._temp_project_dirs.append(callback_queue_path)
+            settings.CALLBACK_QUEUE_PORT = 'ipc://%s' % callback_queue_path
         # Make temp job status directory for unit tests.
         job_status_dir = tempfile.mkdtemp()
         self._temp_project_dirs.append(job_status_dir)
@@ -66,7 +71,10 @@ class BaseTestMixin(object):
         super(BaseTestMixin, self).tearDown()
         for project_dir in self._temp_project_dirs:
             if os.path.exists(project_dir):
-                shutil.rmtree(project_dir, True)
+                if os.path.isdir(project_dir):
+                    shutil.rmtree(project_dir, True)
+                else:
+                    os.remove(project_dir)
         # Restore previous settings after each test.
         settings._wrapped = self._wrapped
 
@@ -372,7 +380,8 @@ class BaseTestMixin(object):
         self.queue_process.start()
 
     def terminate_queue(self):
-        self.queue_process.terminate()
+        if hasattr(self, 'queue_process'):
+            self.queue_process.terminate()
                 
 class BaseTest(BaseTestMixin, django.test.TestCase):
     '''
