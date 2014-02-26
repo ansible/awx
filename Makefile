@@ -6,6 +6,7 @@ PACKER ?= packer
 GIT_DATE := $(shell git log -n 1 --format="%ai")
 DATE := $(shell date -u +%Y%m%d%H%M)
 
+NAME=ansible-tower
 VERSION=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[0])")
 RELEASE=$(shell $(PYTHON) -c "from awx import __version__; print(__version__.split('-')[1])")
 
@@ -14,18 +15,18 @@ LICENSE_TIER ?= 10.json
 
 ifneq ($(OFFICIAL),yes)
 BUILD=dev$(DATE)
-SDIST_TAR_FILE=ansible-tower-$(VERSION)-$(BUILD).tar.gz
-SETUP_TAR_NAME=ansible-tower-setup-$(VERSION)-$(BUILD)
+SDIST_TAR_FILE=$(NAME)-$(VERSION)-$(BUILD).tar.gz
+SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)-$(BUILD)
 RPM_PKG_RELEASE=$(BUILD)
-DEB_BUILD_DIR=deb-build/ansible-tower-$(VERSION)-$(BUILD)
+DEB_BUILD_DIR=deb-build/$(NAME)-$(VERSION)-$(BUILD)
 DEB_PKG_RELEASE=$(VERSION)-$(BUILD)
 PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-nightly.json
 else
 BUILD=
-SDIST_TAR_FILE=ansible-tower-$(VERSION).tar.gz
-SETUP_TAR_NAME=ansible-tower-setup-$(VERSION)
+SDIST_TAR_FILE=$(NAME)-$(VERSION).tar.gz
+SETUP_TAR_NAME=$(NAME)-setup-$(VERSION)
 RPM_PKG_RELEASE=$(RELEASE)
-DEB_BUILD_DIR=deb-build/ansible-tower-$(VERSION)
+DEB_BUILD_DIR=deb-build/$(NAME)-$(VERSION)
 DEB_PKG_RELEASE=$(VERSION)-$(RELEASE)
 PACKER_BUILD_OPTS=-var-file=vars-aws-keys.json -var-file=vars-release.json
 endif
@@ -41,7 +42,7 @@ clean:
 	rm -rf build rpm-build *.egg-info
 	rm -rf debian deb-build
 	rm -f awx/ui/static/css/awx*.js awx/ui/static/css/awx*.css
-	rm -rf node_modules
+	rm -rf node_modules package.json
 	find . -type f -regex ".*\.py[co]$$" -delete
 
 # Fetch from origin, rebase local commits on top of origin commits.
@@ -142,8 +143,11 @@ test_tox:
 test_jenkins:
 	$(PYTHON) manage.py jenkins -v2
 
+package.json:
+	sed -e 's/%NAME%/$(NAME)/;s/%VERSION%/$(VERSION)/' packaging/grunt/package.template > $@
+
 # Update local npm install
-node_modules:
+node_modules: package.json
 	npm install
 
 # Build minified JS/CSS.
@@ -182,13 +186,13 @@ sdist: clean minjs
 rpmtar: sdist
 	if [ "$(OFFICIAL)" != "yes" ] ; then \
 	   (cd dist/ && tar zxf $(SDIST_TAR_FILE)) ; \
-	   (cd dist/ && mv ansible-tower-$(VERSION)-$(BUILD) ansible-tower-$(VERSION)) ; \
-	   (cd dist/ && tar czf ansible-tower-$(VERSION).tar.gz ansible-tower-$(VERSION)) ; \
+	   (cd dist/ && mv $(NAME)-$(VERSION)-$(BUILD) $(NAME)-$(VERSION)) ; \
+	   (cd dist/ && tar czf $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)) ; \
 	fi
 
 rpm: rpmtar
 	@mkdir -p rpm-build
-	@cp dist/ansible-tower-$(VERSION).tar.gz rpm-build/
+	@cp dist/$(NAME)-$(VERSION).tar.gz rpm-build/
 	@rpmbuild --define "_topdir %(pwd)/rpm-build" \
 	--define "_builddir %{_topdir}" \
 	--define "_rpmdir %{_topdir}" \
@@ -197,20 +201,20 @@ rpm: rpmtar
 	--define '_rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
 	--define "_sourcedir  %{_topdir}" \
 	--define "_pkgrelease  $(RPM_PKG_RELEASE)" \
-	-ba packaging/rpm/ansible-tower.spec
+	-ba packaging/rpm/$(NAME).spec
 
 deb: sdist
 	@mkdir -p deb-build
 	@cp dist/$(SDIST_TAR_FILE) deb-build/
 	(cd deb-build && tar zxf $(SDIST_TAR_FILE))
-	(cd $(DEB_BUILD_DIR) && dh_make --indep --yes -f ../$(SDIST_TAR_FILE) -p ansible-tower-$(VERSION))
+	(cd $(DEB_BUILD_DIR) && dh_make --indep --yes -f ../$(SDIST_TAR_FILE) -p $(NAME)-$(VERSION))
 	@rm -rf $(DEB_BUILD_DIR)/debian
 	@cp -a packaging/debian $(DEB_BUILD_DIR)/
-	@echo "ansible-tower-$(DEB_PKG_RELEASE).deb admin optional" > $(DEB_BUILD_DIR)/debian/realfiles
+	@echo "$(NAME)-$(DEB_PKG_RELEASE).deb admin optional" > $(DEB_BUILD_DIR)/debian/realfiles
 	(cd $(DEB_BUILD_DIR) && PKG_RELEASE=$(DEB_PKG_RELEASE) dpkg-buildpackage -nc -us -uc -b --changes-option="-fdebian/realfiles")
 
 ami:
-	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_license=$(LICENSE_TIER)" ansible-tower.json)
+	(cd packaging/ami && $(PACKER) build $(PACKER_BUILD_OPTS) -var "aws_license=$(LICENSE_TIER)" $(NAME).json)
 
 install:
 	$(PYTHON) setup.py install egg_info -b ""
