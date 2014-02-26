@@ -7,6 +7,7 @@ Time for a release
 ------------------
 
 When the time comes for a release, the first step is to tag the release in git.
+
     # git tag <X.Y.Z>
 
 Monitor Jenkins
