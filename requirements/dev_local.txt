@@ -62,6 +62,7 @@ Django-1.5.5.tar.gz
   #django-celery-3.1.1.tar.gz
   #django-extensions-1.2.5.tar.gz
   #django-jsonfield-0.9.12.tar.gz
+  #django_polymorphic-0.5.3.tar.gz
   #django-split-settings-0.1.1.tar.gz
   #django-taggit-0.11.2.tar.gz
   #djangorestframework-2.3.10.tar.gz
@@ -93,3 +94,4 @@ ipython-1.1.0.tar.gz
 # - psycopg2 (via "yum install python-psycopg2")
 # - python-ldap (via "yum install python-ldap")
 # - readline-6.2.4.1.tar.gz (for the ipython shell)
+# - python-zmq (for using the job callback receiver)

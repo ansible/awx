@@ -10,6 +10,7 @@ Django>=1.4
   #django-celery
   #django-extensions
   #django-jsonfield
+  #django-polymorphic
   #django-split-settings
   #django-taggit
   #djangorestframework>=2.3.0,<2.4.0
@@ -25,3 +26,4 @@ Django>=1.4
 # - ansible (via yum, pip or source checkout)
 # - psycopg2 (via "yum install python-psycopg2")
 # - python-ldap (via "yum install python-ldap")
+# - python-zmq (for using the job callback receiver)
