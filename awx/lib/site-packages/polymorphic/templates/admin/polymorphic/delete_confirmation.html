@@ -1,0 +1,6 @@
+{% extends "admin/delete_confirmation.html" %}
+{% load polymorphic_admin_tags %}
+
+{% block breadcrumbs %}
+  {% breadcrumb_scope base_opts %}{{ block.super }}{% endbreadcrumb_scope %}
+{% endblock %}
