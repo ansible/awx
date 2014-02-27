@@ -1,6 +1,6 @@
 Generate inventory group and host data as needed for an inventory script.
 
-Refer to [External Inventory Scripts](http://www.ansibleworks.com/docs/api.html#external-inventory-scripts)
+Refer to [Dynamic Inventory](http://docs.ansible.com/intro_dynamic_inventory.html)
 for more information on inventory scripts.
 
 ## List Response
@@ -15,7 +15,7 @@ object above including all host variables.  The `['_meta']['hostvars']` object
 in the response contains an entry for each host with its variables.  This
 response format can be used with Ansible 1.3 and later to avoid making a
 separate API request for each host.  Refer to
-[Tuning the External Inventory Script](http://www.ansibleworks.com/docs/api.html#tuning-the-external-inventory-script)
+[Tuning the External Inventory Script](http://docs.ansible.com/developing_inventory.html#tuning-the-external-inventory-script)
 for more information on this feature.
 
 _(New since AWX 1.4)_ By default, the inventory script will only return hosts that
