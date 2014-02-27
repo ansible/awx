@@ -17,25 +17,25 @@
   tasks:
 
     - name: delete project directory before update
-      file: path="{{project_path}}" state=absent
+      file: path={{project_path|quote}} state=absent
       when: scm_delete_on_update|default('')
 
     - name: update project using git and accept hostkey
-      git: dest="{{project_path}}" repo="{{scm_url}}" version="{{scm_branch}}" force={{scm_clean}} accept_hostkey={{scm_accept_hostkey}}
+      git: dest={{project_path|quote}} repo={{scm_url|quote}} version={{scm_branch|quote}} force={{scm_clean}} accept_hostkey={{scm_accept_hostkey}}
       when: scm_type == 'git' and scm_accept_hostkey is defined
 
     - name: update project using git
-      git: dest="{{project_path}}" repo="{{scm_url}}" version="{{scm_branch}}" force={{scm_clean}}
+      git: dest={{project_path|quote}} repo={{scm_url|quote}} version={{scm_branch|quote}} force={{scm_clean}}
       when: scm_type == 'git' and scm_accept_hostkey is not defined
 
     - name: update project using hg
-      hg: dest="{{project_path}}" repo="{{scm_url}}" revision="{{scm_branch}}" force={{scm_clean}}
+      hg: dest={{project_path|quote}} repo={{scm_url|quote}} revision={{scm_branch|quote}} force={{scm_clean}}
       when: scm_type == 'hg'
 
     - name: update project using svn
-      subversion: dest="{{project_path}}" repo="{{scm_url}}" revision="{{scm_branch}}" force={{scm_clean}}
+      subversion: dest={{project_path|quote}} repo={{scm_url|quote}} revision={{scm_branch|quote}} force={{scm_clean}}
       when: scm_type == 'svn' and not scm_username|default('')
 
     - name: update project using svn with auth
-      subversion: dest="{{project_path}}" repo="{{scm_url}}" revision="{{scm_branch}}" force={{scm_clean}} username="{{scm_username}}" password="{{scm_password}}"
+      subversion: dest={{project_path|quote}} repo={{scm_url|quote}} revision={{scm_branch|quote}} force={{scm_clean}} username={{scm_username|quote}} password={{scm_password|quote}}
       when: scm_type == 'svn' and scm_username|default('')
