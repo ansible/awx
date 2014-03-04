@@ -325,7 +325,7 @@ class BaseTask(Task):
             if kwargs.get('private_data_file', ''):
                 try:
                     os.remove(kwargs['private_data_file'])
-                except IOError:
+                except OSError:
                     pass
                 try:
                     stdout_handle.close()
