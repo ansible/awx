@@ -37,7 +37,7 @@ function OrganizationsList($routeParams, $scope, $rootScope, $location, $log, Re
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         // Cleanup after a delete
         Wait('stop');
-        $('#prompt-modal').off();
+        $('#prompt-modal').modal('hide');
     });
 
     // Initialize search and pagination, then load data

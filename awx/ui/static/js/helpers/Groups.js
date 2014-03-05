@@ -1057,7 +1057,7 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                 Rest.setUrl(url);
                 Rest.post({ id: node.group_id, disassociate: 1 })
                     .success(function () {
-                        $('#prompt-modal').off();
+                        $('#prompt-modal').modal('hide');
                         scope.$emit('GroupDeleteCompleted'); // Signal a group refresh to start
                     })
                     .error(function (data, status) {

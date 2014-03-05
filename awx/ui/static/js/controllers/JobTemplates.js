@@ -31,7 +31,7 @@ function JobTemplatesList($scope, $rootScope, $location, $log, $routeParams, Res
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         // Cleanup after a delete
         Wait('stop');
-        $('#prompt-modal').off();
+        $('#prompt-modal').modal('hide');
     });
 
     SearchInit({

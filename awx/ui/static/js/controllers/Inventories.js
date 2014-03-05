@@ -88,7 +88,7 @@ function InventoriesList($scope, $rootScope, $location, $log, $routeParams, Rest
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
         //If we got here by deleting an inventory, stop the spinner and cleanup events
         Wait('stop');
-        $('#prompt-modal').off();
+        $('#prompt-modal').modal('hide');
 
         for (var i = 0; i < $scope.inventories.length; i++) {
 

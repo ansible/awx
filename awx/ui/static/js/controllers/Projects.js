@@ -47,7 +47,7 @@ function ProjectsList ($scope, $rootScope, $location, $log, $routeParams, Rest, 
         // Cleanup after a delete
         var j, i;
         Wait('stop');
-        $('#prompt-modal').off();
+        $('#prompt-modal').modal('hide');
 
         if ($scope.projects) {
             for (i = 0; i < $scope.projects.length; i++) {

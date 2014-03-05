@@ -39,11 +39,11 @@ function CredentialsList($scope, $rootScope, $location, $log, $routeParams, Rest
         $scope.removePostRefresh();
     }
     $scope.removePostRefresh = $scope.$on('PostRefresh', function () {
-        // Cleanup after a delete
         var i, j;
         
+        // Cleanup after a delete 
         Wait('stop');
-        $('#prompt-modal').off();
+        $('#prompt-modal').modal('hide');
 
         list.fields.kind.searchOptions = $scope.credential_kind_options;
 
