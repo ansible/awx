@@ -133,10 +133,13 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
         return function (scope, data, status, form, defaultMsg) {
             var field, fieldErrors, msg;
             Wait('stop');
-            if ($AnsibleConfig.debug_mode && console) {
-                console.log('Debug status: ' + status);
-                console.log('Debug data: ');
-                console.log(data);
+            if ($AnsibleConfig.debug_mode) {
+                $log.debug('Debug status: ' + status);
+                $log.debug('Debug data: ');
+                $log.debug(data);
+                if (defaultMsg.msg) {
+                    $log.debug('Debug: ' + defaultMsg.msg);
+                }
             }
             if (status === 403) {
                 msg = 'The API responded with a 403 Access Denied error. ';

@@ -594,8 +594,22 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                         data.extra_vars === "" || data.extra_vars === null) {
                         $scope.variables = "---";
                     } else {
-                        json_obj = JSON.parse(data.extra_vars);
-                        $scope.variables = jsyaml.safeDump(json_obj);
+                        $scope.variables = '---';
+                        try {
+                            json_obj = JSON.parse(data.extra_vars);
+                            $scope.variables = jsyaml.safeDump(json_obj);
+                        }
+                        catch (e) {
+                            $log.info('Attempt to parse extra_vars as JSON faild. Attempting to parse as YAML');
+                            try {
+                                json_obj = jsyaml.safeLoad(data.extra_vars);
+                                $scope.variables = jsyaml.safeDump(json_obj);
+                            }
+                            catch(e2) {
+                                ProcessErrors($scope, data.extra_vars, e2.message, null, { hdr: 'Error!',
+                                    msg: 'Attempts to parse variables as JSON and YAML failed. Last attempt returned: ' + e2.message });
+                            }
+                        }
                     }
                     master.variables = $scope.variables;
                 }
