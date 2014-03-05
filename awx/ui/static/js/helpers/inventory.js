@@ -11,7 +11,7 @@
 'use strict';
 
 angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationListDefinition', 'ListGenerator', 'AuthService',
-    'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper', 'SearchHelper'
+    'InventoryHelper', 'InventoryFormDefinition', 'ParseHelper', 'SearchHelper', 'VariablesHelper',
 ])
 
 .factory('WatchInventoryWindowResize', ['ApplyEllipsis',
@@ -40,8 +40,9 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
 ])
 
 .factory('SaveInventory', ['InventoryForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList',
-    'GetBasePath', 'ParseTypeChange', 'Wait',
-    function (InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange, Wait) {
+    'GetBasePath', 'ParseTypeChange', 'Wait', 'ToJSON',
+    function (InventoryForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange, Wait,
+        ToJSON) {
         return function (params) {
 
             // Save inventory property modifications
@@ -52,67 +53,58 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                 fld, json_data, data;
 
             Wait('start');
+            
+            // Make sure we have valid variable data
+            json_data = ToJSON(scope.inventoryParseType, scope.inventory_variables);
+        
+            // Make sure our JSON is actually an object
+            if (typeof json_data !== 'object') {
+                throw "failed to return an object!";
+            }
 
-            try {
-                // Make sure we have valid variable data
-                if (scope.inventoryParseType === 'json') {
-                    json_data = JSON.parse(scope.inventory_variables); //make sure JSON parses
-                } else {
-                    json_data = jsyaml.load(scope.inventory_variables); //parse yaml
-                }
-
-                // Make sure our JSON is actually an object
-                if (typeof json_data !== 'object') {
-                    throw "failed to return an object!";
-                }
-
-                data = {};
-                for (fld in form.fields) {
-                    if (fld !== 'inventory_variables') {
-                        if (form.fields[fld].realName) {
-                            data[form.fields[fld].realName] = scope[fld];
-                        } else {
-                            data[fld] = scope[fld];
-                        }
+            data = {};
+            for (fld in form.fields) {
+                if (fld !== 'inventory_variables') {
+                    if (form.fields[fld].realName) {
+                        data[form.fields[fld].realName] = scope[fld];
+                    } else {
+                        data[fld] = scope[fld];
                     }
                 }
-
-                Rest.setUrl(defaultUrl + scope.inventory_id + '/');
-                Rest.put(data)
-                    .success(function (data) {
-                        if (scope.inventory_variables) {
-                            Rest.setUrl(data.related.variable_data);
-                            Rest.put(json_data)
-                                .success(function () {
-                                    Wait('stop');
-                                    scope.$emit('InventorySaved');
-                                })
-                                .error(function (data, status) {
-                                    ProcessErrors(scope, data, status, form, { hdr: 'Error!',
-                                        msg: 'Failed to update inventory varaibles. PUT returned status: ' + status
-                                    });
-                                });
-                        } else {
-                            scope.$emit('InventorySaved');
-                        }
-                    })
-                    .error(function (data, status) {
-                        ProcessErrors(scope, data, status, form, { hdr: 'Error!',
-                            msg: 'Failed to update inventory. POST returned status: ' + status });
-                    });
-            } catch (err) {
-                Wait('stop');
-                Alert("Error", "Error parsing inventory variables. Parser returned: " + err);
             }
+
+            Rest.setUrl(defaultUrl + scope.inventory_id + '/');
+            Rest.put(data)
+                .success(function (data) {
+                    if (scope.inventory_variables) {
+                        Rest.setUrl(data.related.variable_data);
+                        Rest.put(json_data)
+                            .success(function () {
+                                Wait('stop');
+                                scope.$emit('InventorySaved');
+                            })
+                            .error(function (data, status) {
+                                ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                                    msg: 'Failed to update inventory varaibles. PUT returned status: ' + status
+                                });
+                            });
+                    } else {
+                        scope.$emit('InventorySaved');
+                    }
+                })
+                .error(function (data, status) {
+                    ProcessErrors(scope, data, status, form, { hdr: 'Error!',
+                        msg: 'Failed to update inventory. POST returned status: ' + status });
+                });
         };
     }
 ])
 
 
 .factory('EditInventoryProperties', ['InventoryForm', 'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LookUpInit', 'OrganizationList',
-    'GetBasePath', 'ParseTypeChange', 'SaveInventory', 'Wait', 'Store', 'SearchInit',
+    'GetBasePath', 'ParseTypeChange', 'SaveInventory', 'Wait', 'Store', 'SearchInit', 'ParseVariableString',
     function (InventoryForm, GenerateForm, Rest, Alert, ProcessErrors, LookUpInit, OrganizationList, GetBasePath, ParseTypeChange, SaveInventory,
-        Wait, Store, SearchInit) {
+        Wait, Store, SearchInit, ParseVariableString) {
         return function (params) {
 
             var parent_scope = params.scope,
@@ -146,23 +138,10 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
             Rest.setUrl(GetBasePath('inventory') + inventory_id + '/');
             Rest.get()
                 .success(function (data) {
-                    var fld, json_obj;
+                    var fld;
                     for (fld in form.fields) {
                         if (fld === 'inventory_variables') {
-                            // Parse variables, converting to YAML.  
-                            if ($.isEmptyObject(data.variables) || data.variables === "{}" ||
-                                data.variables === "null" || data.variables === "") {
-                                scope.inventory_variables = "---";
-                            } else {
-                                try {
-                                    json_obj = JSON.parse(data.variables);
-                                    scope.inventory_variables = jsyaml.safeDump(json_obj);
-                                } catch (err) {
-                                    Alert('Variable Parse Error', 'Attempted to parse variables for inventory: ' + inventory_id +
-                                        '. Parse returned: ' + err);
-                                    scope.inventory_variables = '---';
-                                }
-                            }
+                            scope.inventory_variables = ParseVariableString(data.variables);
                             master.inventory_variables = scope.variables;
                         } else if (fld === 'inventory_name') {
                             scope[fld] = data.name;
@@ -174,7 +153,6 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
                             scope[fld] = data[fld];
                             master[fld] = scope[fld];
                         }
-
                         if (form.fields[fld].sourceModel && data.summary_fields &&
                             data.summary_fields[form.fields[fld].sourceModel]) {
                             scope[form.fields[fld].sourceModel + '_' + form.fields[fld].sourceField] =

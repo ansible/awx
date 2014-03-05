@@ -14,7 +14,7 @@
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'HostListDefinition',
                                 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'AuthService', 'HostsHelper',
                                 'InventoryHelper', 'RelatedSearchHelper', 'InventoryFormDefinition', 'SelectionHelper',
-                                'HostGroupsFormDefinition'
+                                'HostGroupsFormDefinition', 'VariablesHelper'
                                 ])
   
 .factory('SetEnabledMsg', [ function() {
@@ -320,8 +320,9 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostList, Gener
 
 .factory('HostsCreate', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'WatchInventoryWindowResize',
+    'ToJSON',
 function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-    GetBasePath, HostsReload, ParseTypeChange, Wait, WatchInventoryWindowResize) {
+    GetBasePath, HostsReload, ParseTypeChange, Wait, WatchInventoryWindowResize, ToJSON) {
     return function(params) {
         
         var parent_scope = params.scope,
@@ -380,55 +381,27 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             
             Wait('start');
            
-            try {
-                var fld, json_data, data={};
-                scope.formModalActionDisabled = true;
-
-                // Make sure we have valid variable data
-                if (scope.parseType === 'json') {
-                    json_data = JSON.parse(scope.variables);  //make sure JSON parses
+            var fld, data={};
+            scope.formModalActionDisabled = true;
+            data.variables = ToJSON(scope.parseType, scope.variables, true);
+            for (fld in form.fields) {
+                if (fld !== 'variables') {
+                    data[fld] = scope[fld];
                 }
-                else {
-                    json_data = jsyaml.load(scope.variables);  //parse yaml
-                }
-
-                // Make sure our JSON is actually an object
-                if (typeof json_data !== 'object') {
-                    throw "failed to return an object!";
-                }
-
-                for (fld in form.fields) {
-                    if (fld !== 'variables') {
-                        data[fld] = scope[fld];
-                    }
-                }
-               
-                data.inventory = inventory_id;
-                
-                if ($.isEmptyObject(json_data)) {
-                    data.variables = "";
-                }
-                else {
-                    data.variables = JSON.stringify(json_data, undefined, '\t');
-                }
-
-                Rest.setUrl(defaultUrl);
-                Rest.post(data)
-                    .success( function() {
-                        scope.$emit('HostSaveComplete');
-                    })
-                    .error( function(data, status) {
-                        Wait('stop');
-                        scope.formModalActionDisabled = false;
-                        ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to add new host. POST returned status: ' + status });
-                    });
             }
-            catch(err) {
-                Wait('stop');
-                scope.formModalActionDisabled = false;
-                Alert("Error", "Error parsing host variables. Parser returned: " + err);
-            }
+            data.inventory = inventory_id;
+
+            Rest.setUrl(defaultUrl);
+            Rest.post(data)
+                .success( function() {
+                    scope.$emit('HostSaveComplete');
+                })
+                .error( function(data, status) {
+                    Wait('stop');
+                    scope.formModalActionDisabled = false;
+                    ProcessErrors(scope, data, status, form,
+                        { hdr: 'Error!', msg: 'Failed to add new host. POST returned status: ' + status });
+                });
         };
 
         // Cancel
@@ -447,9 +420,10 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
 
 .factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find', 'SetStatus', 'ApplyEllipsis',
-    'WatchInventoryWindowResize',
+    'WatchInventoryWindowResize', 'ToJSON', 'ParseVariableString',
 function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
-    GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetStatus, ApplyEllipsis, WatchInventoryWindowResize) {
+    GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetStatus, ApplyEllipsis, WatchInventoryWindowResize, ToJSON,
+    ParseVariableString) {
     return function(params) {
         
         var parent_scope = params.scope,
@@ -486,12 +460,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
                 Rest.setUrl(scope.variable_url);
                 Rest.get()
                     .success( function(data) {
-                        if ($.isEmptyObject(data)) {
-                            scope.variables = "---";
-                        }
-                        else {
-                            scope.variables = jsyaml.safeDump(data);
-                        }
+                        scope.variables = ParseVariableString(data);
                         scope.$emit('hostVariablesLoaded');
                     })
                     .error( function(data, status) {
@@ -570,49 +539,23 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
         scope.formModalAction = function() {
             
             Wait('start');
-
-            try {
-                // Make sure we have valid variable data
-                var fld, json_data, data={};
-                if (scope.parseType === 'json') {
-                    json_data = JSON.parse(scope.variables);  //make sure JSON parses
-                }
-                else {
-                    json_data = jsyaml.load(scope.variables);  //parse yaml
-                }
-
-                // Make sure our JSON is actually an object
-                if (typeof json_data !== 'object') {
-                    throw "failed to return an object!";
-                }
-
-                for (fld in form.fields) {
-                    data[fld] = scope[fld];
-                }
-                data.inventory = inventory_id;
-
-                if ($.isEmptyObject(json_data)) {
-                    data.variables = "";
-                }
-                else {
-                    data.variables = JSON.stringify(json_data, undefined, '\t');
-                }
-
-                Rest.setUrl(defaultUrl);
-                Rest.put(data)
-                    .success( function() {
-                        scope.$emit('saveCompleted');
-                    })
-                    .error( function(data, status) {
-                        Wait('stop');
-                        ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to update host: ' + host_id + '. PUT returned status: ' + status });
-                    });
+            var fld, data={};
+            
+            data.variables = ToJSON(scope.parseType, scope.variables, true);
+            for (fld in form.fields) {
+                data[fld] = scope[fld];
             }
-            catch(err) {
-                Wait('stop');
-                Alert("Error", "Error parsing host variables. Parser returned: " + err);
-            }
+            data.inventory = inventory_id;
+            Rest.setUrl(defaultUrl);
+            Rest.put(data)
+                .success( function() {
+                    scope.$emit('saveCompleted');
+                })
+                .error( function(data, status) {
+                    Wait('stop');
+                    ProcessErrors(scope, data, status, form,
+                        { hdr: 'Error!', msg: 'Failed to update host: ' + host_id + '. PUT returned status: ' + status });
+                });
         };
 
         // Cancel

@@ -8,8 +8,6 @@
  *
  */
 
-/* global jsyaml:false */
-
 'use strict';
 
 function JobsListCtrl($scope, $rootScope, $location, $log, $routeParams, Rest, Alert, JobList, GenerateList, LoadBreadCrumbs, Prompt,
@@ -189,7 +187,8 @@ JobsListCtrl.$inject = ['$scope', '$rootScope', '$location', '$log', '$routePara
 
 function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobForm, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
-    CredentialList, ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, FormatDate, JobStatusToolTip, Wait, Empty) {
+    CredentialList, ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, FormatDate, JobStatusToolTip, Wait, Empty,
+    ParseVariableString) {
 
     ClearScope();
 
@@ -374,28 +373,7 @@ function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, J
                     }
                 }
                 if (fld === 'variables') {
-                    // Parse extra_vars, converting to YAML.  
-                    if ($.isEmptyObject(data.extra_vars) || data.extra_vars === "{}" || data.extra_vars === "null" ||
-                        data.extra_vars === "" || data.extra_vars === null) {
-                        $scope.variables = "---";
-                    } else {
-                        $scope.variables = '---';
-                        try {
-                            json_obj = JSON.parse(data.extra_vars);
-                            $scope.variables = jsyaml.safeDump(json_obj);
-                        }
-                        catch (e) {
-                            $log.info('Attempt to parse extra_vars as JSON faild. Attempting to parse as YAML');
-                            try {
-                                json_obj = jsyaml.safeLoad(data.extra_vars);
-                                $scope.variables = jsyaml.safeDump(json_obj);
-                            }
-                            catch(e2) {
-                                ProcessErrors($scope, data.extra_vars, e2.message, null, { hdr: 'Error!',
-                                    msg: 'Attempts to parse variables as JSON and YAML failed. Last attempt returned: ' + e2.message });
-                            }
-                        }
-                    }
+                    $scope.variables = ParseVariableString(data.extra_vars);
                 }
                 if (JobTemplateForm.fields[fld].type === 'lookup' && data.summary_fields[JobTemplateForm.fields[fld].sourceModel]) {
                     $scope[JobTemplateForm.fields[fld].sourceModel + '_' + JobTemplateForm.fields[fld].sourceField] =
@@ -446,5 +424,5 @@ function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, J
 JobsEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobForm', 'JobTemplateForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit', 'PromptPasswords',
-    'GetBasePath', 'md5Setup', 'FormatDate', 'JobStatusToolTip', 'Wait', 'Empty'
+    'GetBasePath', 'md5Setup', 'FormatDate', 'JobStatusToolTip', 'Wait', 'Empty', 'ParseVariableString'
 ];

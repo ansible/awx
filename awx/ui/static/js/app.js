@@ -85,7 +85,8 @@ angular.module('ansible', [
     'StreamListDefinition',
     'HomeGroupListDefinition',
     'HomeHostListDefinition',
-    'ActivityDetailDefinition'
+    'ActivityDetailDefinition',
+    'VariablesHelper'
 ])
     .config(['$routeProvider',
         function ($routeProvider) {

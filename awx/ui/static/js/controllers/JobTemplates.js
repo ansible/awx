@@ -108,7 +108,7 @@ JobTemplatesList.$inject = ['$scope', '$rootScope', '$location', '$log', '$route
 
 function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm,
     GenerateForm, Rest, Alert, ProcessErrors, LoadBreadCrumbs, ReturnToCaller, ClearScope, GetBasePath,
-    InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait, Empty) {
+    InventoryList, CredentialList, ProjectList, LookUpInit, md5Setup, ParseTypeChange, Wait, Empty, ToJSON) {
     
     ClearScope();
 
@@ -286,20 +286,8 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
     $scope.formSave = function () {
         generator.clearApiErrors();
         Wait('start');
-        var data = {}, json_data, fld;
+        var data = {}, fld;
         try {
-            // Make sure we have valid variable data
-            if ($scope.parseType === 'json') {
-                json_data = JSON.parse($scope.variables); //make sure JSON parses
-            } else {
-                json_data = jsyaml.load($scope.variables); //parse yaml
-            }
-
-            // Make sure our JSON is actually an object
-            if (typeof json_data !== 'object') {
-                throw "failed to return an object!";
-            }
-
             for (fld in form.fields) {
                 if (form.fields[fld].type === 'select' && fld !== 'playbook') {
                     data[fld] = $scope[fld].value;
@@ -309,11 +297,7 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
                     }
                 }
             }
-
-            data.extra_vars = JSON.stringify(json_data, undefined, '\t');
-            if (Empty(data.extra_vars)) {
-                data.extra_vars = "";
-            }
+            data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
 
             Rest.setUrl(defaultUrl);
             Rest.post(data)
@@ -346,14 +330,14 @@ function JobTemplatesAdd($scope, $rootScope, $compile, $location, $log, $routePa
 JobTemplatesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'ReturnToCaller', 'ClearScope',
     'GetBasePath', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit',
-    'md5Setup', 'ParseTypeChange', 'Wait', 'Empty'
+    'md5Setup', 'ParseTypeChange', 'Wait', 'Empty', 'ToJSON'
 ];
 
 
 function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeParams, JobTemplateForm, GenerateForm, Rest,
     Alert, ProcessErrors, LoadBreadCrumbs, RelatedSearchInit, RelatedPaginateInit, ReturnToCaller, ClearScope, InventoryList,
     CredentialList, ProjectList, LookUpInit, PromptPasswords, GetBasePath, md5Setup, ParseTypeChange, JobStatusToolTip, FormatDate,
-    Wait, Stream, Empty, Prompt) {
+    Wait, Stream, Empty, Prompt, ParseVariableString, ToJSON) {
     
     ClearScope();
 
@@ -569,7 +553,7 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     Rest.setUrl(defaultUrl + ':id/');
     Rest.get({ params: { id: id } })
         .success(function (data) {
-            var fld, i, json_obj, related, set;
+            var fld, i, related, set;
             LoadBreadCrumbs({ path: '/job_templates/' + id, title: data.name });
             for (fld in form.fields) {
                 if (fld !== 'variables' && data[fld] !== null && data[fld] !== undefined) {
@@ -589,28 +573,8 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                     master[fld] = $scope[fld];
                 }
                 if (fld === 'variables') {
-                    // Parse extra_vars, converting to YAML.  
-                    if ($.isEmptyObject(data.extra_vars) || data.extra_vars === "{}" || data.extra_vars === "null" ||
-                        data.extra_vars === "" || data.extra_vars === null) {
-                        $scope.variables = "---";
-                    } else {
-                        $scope.variables = '---';
-                        try {
-                            json_obj = JSON.parse(data.extra_vars);
-                            $scope.variables = jsyaml.safeDump(json_obj);
-                        }
-                        catch (e) {
-                            $log.info('Attempt to parse extra_vars as JSON faild. Attempting to parse as YAML');
-                            try {
-                                json_obj = jsyaml.safeLoad(data.extra_vars);
-                                $scope.variables = jsyaml.safeDump(json_obj);
-                            }
-                            catch(e2) {
-                                ProcessErrors($scope, data.extra_vars, e2.message, null, { hdr: 'Error!',
-                                    msg: 'Attempts to parse variables as JSON and YAML failed. Last attempt returned: ' + e2.message });
-                            }
-                        }
-                    }
+                    // Parse extra_vars, converting to YAML. 
+                    $scope.variables = ParseVariableString(data.extra_vars);
                     master.variables = $scope.variables;
                 }
                 if (form.fields[fld].type === 'lookup' && data.summary_fields[form.fields[fld].sourceModel]) {
@@ -702,20 +666,10 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
     $scope.formSave = function () {
         generator.clearApiErrors();
         Wait('start');
-        var data = {}, json_data, fld;
+        var data = {}, fld;
         try {
             // Make sure we have valid variable data
-            if ($scope.parseType === 'json') {
-                json_data = JSON.parse($scope.variables); //make sure JSON parses
-            } else {
-                json_data = jsyaml.load($scope.variables); //parse yaml
-            }
-
-            // Make sure our JSON is actually an object
-            if (typeof json_data !== 'object') {
-                throw "failed to return an object!";
-            }
-
+            data.extra_vars = ToJSON($scope.parseType, $scope.variables, true);
             for (fld in form.fields) {
                 if (form.fields[fld].type === 'select' && fld !== 'playbook') {
                     data[fld] = $scope[fld].value;
@@ -725,12 +679,6 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
                     }
                 }
             }
-
-            data.extra_vars = JSON.stringify(json_data, undefined, '\t');
-            if (data.extra_vars === "null" || data.extra_vars === null) {
-                data.extra_vars = "";
-            }
-
             Rest.setUrl(defaultUrl + id + '/');
             Rest.put(data)
                 .success(function (data) {
@@ -810,5 +758,6 @@ function JobTemplatesEdit($scope, $rootScope, $compile, $location, $log, $routeP
 JobTemplatesEdit.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log', '$routeParams', 'JobTemplateForm',
     'GenerateForm', 'Rest', 'Alert', 'ProcessErrors', 'LoadBreadCrumbs', 'RelatedSearchInit', 'RelatedPaginateInit',
     'ReturnToCaller', 'ClearScope', 'InventoryList', 'CredentialList', 'ProjectList', 'LookUpInit', 'PromptPasswords',
-    'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt'
+    'GetBasePath', 'md5Setup', 'ParseTypeChange', 'JobStatusToolTip', 'FormatDate', 'Wait', 'Stream', 'Empty', 'Prompt',
+    'ParseVariableString', 'ToJSON'
 ];
