@@ -484,6 +484,9 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, GenerateList
                     $scope.groups[i].active_class = '';
                 }
             }
+            if (Empty($scope.inventory_id)) {
+                $scope.inventory_id = $scope.groups[0].inentory_id;
+            }
             HostsReload({
                 scope: $scope,
                 group_id: group_id,

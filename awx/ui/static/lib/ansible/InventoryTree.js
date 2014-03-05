@@ -125,6 +125,7 @@ angular.module('InventoryTree', ['Utilities', 'RestServices', 'GroupsHelper', 'P
                         hosts_status_tip: hosts_status.tooltip,
                         show_failures: hosts_status.failures,
                         hosts_status_class: hosts_status['class'],
+                        inventory_id: inventory_id,
                         selected_class: '',
                         show: true,
                         isDraggable: true,

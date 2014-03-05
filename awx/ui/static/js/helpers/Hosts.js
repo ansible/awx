@@ -633,8 +633,8 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
 
 
 .factory('HostsDelete', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'Prompt', 'ProcessErrors', 'GetBasePath',
-    'HostsReload', 'Wait', 'Find',
-function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload, Wait, Find) {
+    'HostsReload', 'Wait', 'Find', 'Empty',
+function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, ProcessErrors, GetBasePath, HostsReload, Wait, Find, Empty) {
     return function(params) {
         // Remove the selected host from the current group by disassociating
        
@@ -642,12 +642,33 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, Process
             scope = params.scope,
             host_id = params.host_id,
             host_name = params.host_name,
-            
-            url = (scope.selected_group_id === null) ? GetBasePath('inventory') + scope.inventory_id + '/hosts/' :
-                GetBasePath('groups') + scope.selected_group_id + '/hosts/',
-     
-            group = (scope.selected_tree_id) ? Find({ list: scope.groups, key: 'id', val: scope.selected_tree_id }) : null;
-            
+            group,
+            url_list = [];
+
+        function getChildren(tree_id) {
+            var parent, found, j;
+            for (j = 0; j < scope.groups.length; j++) {
+                if (scope.groups[j].id === tree_id || scope.groups[j].parent === parent) {
+                    found = true;
+                    url_list.push(GetBasePath('groups') + scope.groups[j].group_id + '/hosts/');
+                    parent = scope.groups[j].id;
+                }
+                else {
+                    if (found) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!Empty(scope.selected_group_id)) {
+            group = Find({ list: scope.groups, key: 'id', val: scope.selected_tree_id });
+            getChildren(group.id);
+        }
+        else {
+            url_list.push(GetBasePath('inventory') + scope.inventory_id + '/hosts/');
+        }
+
         if (scope.removeHostsReload) {
             scope.removeHostsReload();
         }
@@ -656,23 +677,37 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, Process
         });
 
         action_to_take = function() {
+            var count=0, i;
+
             $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('start'); });
             $('#prompt-modal').modal('hide');
-            Rest.setUrl(url);
-            Rest.post({ id: host_id, disassociate: 1 })
-                .success( function() {
+            
+            if (scope.removeHostRemoved) {
+                scope.removeHostRemoved();
+            }
+            scope.removeHostRemoved = scope.$on('hostRemoved', function(){
+                count++;
+                if (count === url_list.length) {
                     scope.$emit('hostsReload');
-                })
-                .error( function(data, status) {
-                    Wait('stop');
-                    ProcessErrors(scope, data, status, null,
-                        { hdr: 'Error!', msg: 'Attempt to delete ' + host_name + ' failed. POST returned status: ' + status });
-                });
+                }
+            });
+
+            for(i=0; i < url_list.length; i++) {
+                Rest.setUrl(url_list[i]);
+                Rest.post({ id: host_id, disassociate: 1 })
+                    .success( function() {
+                        scope.$emit('hostRemoved');
+                    })
+                    .error( function(data, status) {
+                        ProcessErrors(scope, data, status, null,
+                            { hdr: 'Error!', msg: 'Attempt to delete ' + host_name + ' failed. DELETE returned status: ' + status });
+                    });
+            }
         };
             
-        body = (group) ? '<p>Are you sure you want to delete host <em>' + host_name + '</em> from group <em>' + group.name + '</em>?</p>' :
-            '<p>Are you sure you want to delete host <em>' + host_name + '</em>?</p>';
-            
+        body = (group) ? '<p>Are you sure you want to remove host <strong>' + host_name + '</strong> from group ' + group.name + '?' +
+            ' It will still be part of the inventory and available in All Hosts.</p>' :
+            '<p>Are you sure you want to permanently delete host <strong>' + host_name + '</strong> from the inventory?</p>';
         Prompt({ hdr: 'Delete Host', body: body, action: action_to_take, 'class': 'btn-danger' });
 
     };
