@@ -14,7 +14,7 @@ jQuery(function($){
 		dayNames: ['Sunnuntai','Maanantai','Tiistai','Keskiviikko','Torstai','Perjantai','Lauantai'],
 		dayNamesMin: ['Su','Ma','Ti','Ke','To','Pe','La'],
 		weekHeader: 'Vk',
-		dateFormat: 'dd.mm.yy',
+		dateFormat: 'd.m.yy',
 		firstDay: 1,
 		isRTL: false,
 		showMonthAfterYear: false,

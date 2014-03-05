@@ -2,7 +2,7 @@
 jQuery(function($){
 	$.datepicker.regional['pt'] = {
 		closeText: 'Fechar',
-		prevText: '&#x3C;Anterior',
+		prevText: 'Anterior',
 		nextText: 'Seguinte',
 		currentText: 'Hoje',
 		monthNames: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
