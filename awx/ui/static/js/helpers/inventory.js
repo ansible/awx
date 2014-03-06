@@ -57,11 +57,6 @@ angular.module('InventoryHelper', ['RestServices', 'Utilities', 'OrganizationLis
             // Make sure we have valid variable data
             json_data = ToJSON(scope.inventoryParseType, scope.inventory_variables);
         
-            // Make sure our JSON is actually an object
-            if (typeof json_data !== 'object') {
-                throw "failed to return an object!";
-            }
-
             data = {};
             for (fld in form.fields) {
                 if (fld !== 'inventory_variables') {

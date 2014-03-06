@@ -711,7 +711,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                 html = '';
             html += "<!-- Paginate Widget -->\n";
             html += "<div class=\"row page-row\">\n";
-            html += "<div class=\"col-lg-8\">\n";
+            html += "<div class=\"col-lg-8 col-md-8\">\n";
             html += "<ul class=\"pagination\" ng-hide=\"" + iterator + "Loading || " + iterator + "_num_pages <= 1\">\n";
             html += "<li ng-hide=\"" + iterator + "_page -5 <= 1 \"><a href ng-click=\"getPage(1,'" + set + "','" + iterator + "')\">" +
                 "<i class=\"fa fa-angle-double-left\"></i></a></li>\n";

@@ -332,7 +332,7 @@ function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, J
     Rest.get({ params: { id: id } })
         .success(function (data) {
             
-            var i, fld, json_obj;
+            var i, fld;
             
             LoadBreadCrumbs();
             
