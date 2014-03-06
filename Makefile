@@ -1,6 +1,7 @@
 PYTHON=python
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 PACKER ?= packer
+GRUNT ?= grunt
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
@@ -152,11 +153,11 @@ node_modules: package.json
 
 # Build minified JS/CSS.
 minjs: node_modules
-	grunt
+	$(GRUNT)
 
 # Check .js files for errors and lint
 lintjs: node_modules
-	grunt jshint
+	$(GRUNT) jshint
 
 # Build a pip-installable package into dist/ with a timestamped version number.
 dev_build:
