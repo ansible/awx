@@ -1,7 +1,7 @@
 PYTHON=python
 SITELIB=$(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 PACKER ?= packer
-GRUNT ?= $(shell [[ -t 0 || -p /dev/stdin ]] && echo "grunt" || echo "grunt --no-color")
+GRUNT ?= $(shell [ -t 0 -o -p /dev/stdin ] && echo "grunt" || echo "grunt --no-color")
 
 # Get the branch information from git
 GIT_DATE := $(shell git log -n 1 --format="%ai")
