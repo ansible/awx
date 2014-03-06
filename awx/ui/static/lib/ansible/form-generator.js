@@ -320,7 +320,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         }
 
                         $(this).accordion({
-                            collapsible: false,
+                            collapsible: true,
                             heightStyle: 'content',
                             active: active,
                             activate: function () {

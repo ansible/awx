@@ -336,7 +336,7 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                     if (defn.story.steps.length > 1) {
                         btns.push({
                             text: "Prev",
-                            click: function (e) {
+                            click: function () {
                                 if (current_step - 1 === 0) {
                                     $('#help-prev-button').prop('disabled', true);
                                 }
