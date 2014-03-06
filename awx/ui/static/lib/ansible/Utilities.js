@@ -338,10 +338,10 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                             text: "Prev",
                             click: function (e) {
                                 if (current_step - 1 === 0) {
-                                    $(e.target).button('disable');
+                                    $('#help-prev-button').prop('disabled', true);
                                 }
                                 if (current_step - 1 < defn.story.steps.length - 1) {
-                                    $(e.target).next().button('enable');
+                                    $('#help-next-button').prop('disabled', false);
                                 }
                                 showHelp(current_step - 1);
                             },
@@ -349,12 +349,12 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                         });
                         btns.push({
                             text: "Next",
-                            click: function (e) {
+                            click: function() {
                                 if (current_step + 1 > 0) {
-                                    $(e.target).prev().button('enable');
+                                    $('#help-prev-button').prop('disabled', false);
                                 }
-                                if (current_step + 1 === defn.story.steps.length - 1) {
-                                    $(e.target).button('disable');
+                                if (current_step + 1 >= defn.story.steps.length - 1) {
+                                    $('#help-next-button').prop('disabled', true);
                                 }
                                 showHelp(current_step + 1);
                             }
@@ -388,25 +388,31 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 
                     // Make the buttons look like TB and add FA icons
                     $('.ui-dialog-buttonset button').each(function () {
-                        var c, h, l;
+                        var c, h, i, l;
                         l = $(this).text();
                         if (l === 'Close') {
                             h = "fa-times";
                             c = "btn btn-default";
+                            i = "help-close-button";
                             $(this).attr({
-                                'class': c
+                                'class': c,
+                                'id': i
                             }).html("<i class=\"fa " + h + "\"></i> Close");
                         } else if (l === 'Prev') {
                             h = "fa-chevron-left";
                             c = "btn btn-primary";
+                            i = "help-prev-button";
                             $(this).attr({
-                                'class': c
+                                'class': c,
+                                'id': i
                             }).html("<i class=\"fa " + h + "\"></i> Prev");
                         } else {
                             h = "fa-chevron-right";
                             c = "btn btn-primary";
+                            i = "help-next-button";
                             $(this).attr({
-                                'class': c
+                                'class': c,
+                                'id': i
                             }).html("Next <i class=\"fa " + h + "\"></i>").css({
                                 'margin-right': '20px'
                             });
