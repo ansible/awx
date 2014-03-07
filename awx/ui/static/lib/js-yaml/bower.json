@@ -2,7 +2,7 @@
 {
   "name": "js-yaml",
   "main": "js-yaml.js",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "homepage": "https://github.com/nodeca/js-yaml",
   "authors": [ "Dervus Grim <dervus.grim@gmail.com>",
                "Vitaly Puzrin <vitaly@rcdesign.ru>",

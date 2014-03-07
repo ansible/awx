@@ -682,10 +682,10 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         // Variable editing
                         if (fld === "variables" || fld === "extra_vars" || fld === 'inventory_variables' || fld === 'source_vars') {
                             html += "<div class=\"parse-selection\" id=\"" + this.form.name + "_" + fld + "_parse_type\">Parse as: " +
-                                "<input type=\"radio\" ng-model=\"";
+                                "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
                             html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
                             html += "\" value=\"yaml\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">YAML</span>\n";
-                            html += "<input type=\"radio\" ng-model=\"";
+                            html += "<input type=\"radio\" ng-disabled=\"disableParseSelection\" ng-model=\"";
                             html += (field.parseTypeName) ? field.parseTypeName : 'parseType';
                             html += "\" value=\"json\" ng-change=\"parseTypeChange()\"> <span class=\"parse-label\">JSON</span>\n";
                             html += "</div>\n";
@@ -1099,7 +1099,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                 }
 
                 // Start the well
-                if (!this.modal && this.has('well')) {
+                if (!this.modal && this.form.well) {
                     if ( !(this.form.collapse && this.form.collapseMode === options.mode)) {
                         html += "<div class=\"well\">\n";
                     }
@@ -1300,7 +1300,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                 }
                 html += "</form>\n";
 
-                if (!this.modal && this.has('well')) {
+                if (!this.modal && this.form.well) {
                     if ( !(this.form.collapse && this.form.collapseMode === options.mode)) {
                         html += "</div>\n";
                     }
@@ -1375,11 +1375,11 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         html += "</div><!-- row -->\n";
 
                         // Start the list
-                        html += "<div class=\"list\">\n";
+                        html += "<div class=\"list-wrapper\">\n";
                         html += "<table id=\"" + itm + "_table" + "\" class=\"" + form.related[itm].iterator + " table table-condensed table-hover\">\n";
                         html += "<thead>\n";
                         html += "<tr>\n";
-                        html += (form.related[itm].index === undefined || form.related[itm].index !== false) ? "<th>#</th>\n" : "";
+                        html += (form.related[itm].index === undefined || form.related[itm].index !== false) ? "<th class=\"col-xs-1\">#</th>\n" : "";
                         for (fld in form.related[itm].fields) {
                             html += "<th class=\"list-header\" id=\"" + form.related[itm].iterator + '-' + fld + "-header\" " +
                                 "ng-click=\"sort('" + form.related[itm].iterator + "', '" + fld + "')\">" +
@@ -1430,7 +1430,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                             html += (fAction.ngShow) ? this.attr(fAction, 'ngShow') : "";
                             html += ">";
                             html += SelectIcon({ action: act });
-                            html += (fAction.label) ? " " + fAction.label : "";
+                            html += (fAction.label) ? "<span class=\"list-action-label\"> " + fAction.label + "</span>": "";
                             html += "</a>";
                         }
                         html += "</td>";
@@ -1450,7 +1450,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                         html += "</tbody>\n";
                         html += "</table>\n";
                         //html += "</div>\n"; // close well
-                        html += "</div>\n"; // close list div
+                        html += "</div>\n"; // close list-wrapper div
 
                         html += PaginateWidget({
                             set: itm,

@@ -1,0 +1,229 @@
+<!--
+   angular-scheruler.html
+ 
+   Partial to be injected on inect() method call, providing the form for our widget.
+
+   Copyright (c) 2014 Ansible, Inc.
+
+   Maintainers: 
+      Chris Houseknecht
+      @chouseknecht 
+      chouse@ansible.com
+-->
+
+<div class="row">
+    <div class="col-md-12">
+
+        <form class="form" role="form" name="scheduler_form" novalidate>    
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label><span class="red-text">*</span> Name</label>
+                        <input type="text" class="form-control input-sm" name="schedulerName" id="schedulerName" ng-model="schedulerName" required placeholder="Schedule name">
+                        <div class="error" ng-show="scheduler_form.schedulerName.$dirty && scheduler_form.schedulerName.$error.required">Schedule name is required</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label>Start Date <span class="fmt-help"> yyyy-mm-dd</span></label>
+                        <div class="input-group">
+                            <input type="text" class="form-control input-sm" name="schedulerStartDt" id="schedulerStartDt"  ng-model="schedulerStartDt"
+                                sch-date-picker data-min-today="true" placeholder="YYYY-MM-DD" required ng-change="scheduleTimeChange()" >
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default btn-sm" type="button" ng-click="showCalendar('schedulerStartDt')">
+                                        <i class="fa fa-calendar"></i></button>
+                                </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div class="form-group">
+                        <label>Start Time <span class="fmt-help">HH24:MM:SS</span><span class="fmt-help" ng-show="!schedulerShowTimeZone">UTC</span></label>
+                        <div class="input-group">
+                            <input name="schedulerStartHour" id="schedulerStartHour" sch-spinner="scheduler_form" class="scheduler-time-spinner"
+                                ng-model="schedulerStartHour" data-zero-pad="2" placeholder="HH24" min="0" max="23" required ng-change="scheduleTimeChange" >
+                            <span>:</span><input name="schedulerStartMinute" id="schedulerStartMinute" sch-spinner="scheduler_form" class="scheduler-time-spinner"
+                                data-zero-pad="2" ng-model="schedulerStartMinute" placeholder="MM" min="0" max="59" required ng-change="scheduleTimeChange" >
+                            <span>:</span><input name="schedulerStartSecond" id="schedulerStartSecond" sch-spinner="scheduler_form" class="scheduler-time-spinner"
+                                data-zero-pad="2" ng-model="schedulerStartSecond" placeholder="SS" min="0" max="23" required ng-change="scheduleTimeChange" >
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="error pull-up" ng-show="scheduler_form.schedulerStartDt.$dirty && scheduler_form_schedulerStartDt_error" ng-bind="scheduler_form_schedulerStartDt_error"></div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4" ng-show="schedulerShowTimeZone">
+                    <div class="form-group">
+                        <label>Time Zone</label>
+                        <select name="schedulerTimeZone" id="schedulerTimeZone" ng-model="schedulerTimeZone" ng-options="z.name for z in timeZones"
+                            required class="form-control input-sm" ng-change="scheduleTimeChange()" ></select>
+                    </div>
+                </div>
+                <div class="col-md-4" ng-show="schedulerShowUTCStartTime">
+                    <div class="form-group">
+                        <label>UTC Start Time</label>
+                        <input type="text" name="schedulerUTCTime" ng-model="schedulerUTCTime" id="schedulerUTCTime" class="form-control input-sm" readonly>
+                    </div>
+                </div>
+            </div>
+           
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Repeat</label>
+                        <select name="schedulerFrequency" id="schedulerFrequency" ng-model="schedulerFrequency"
+                            ng-options="f.name for f in frequencyOptions" required class="form-control input-sm"
+                            ng-change="scheduleRepeatChange()"></select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group no-label" ng-show="schedulerShowInterval">
+                        <label>Every</label>
+                        <input name="schedulerInterval" id="schedulerInterval" sch-spinner="scheduler_form" class="scheduler-spinner"
+                            ng-model="schedulerInterval" min="1" max="999" >
+                        <label class="inline-label" ng-bind="schedulerIntervalLabel"></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" ng-show="schedulerFrequency && schedulerFrequency.value == 'monthly'">
+                <div class="col-md-12">
+                    <div class="form-group option-pad-left">
+                        <div class="radio col-md-2">
+                            <label><input type="radio" value="day" ng-model="monthlyRepeatOption" ng-change="monthlyRepeatChange()" name="monthlyRepeatOption"
+                                id="monthlyRepeatOption"> on day</label>
+                        </div>
+                        <div class="col-md-3" style="padding-top:5px">
+                            <input name="monthDay" id="monthDay" sch-spinner="scheduler_form" class="scheduler-spinner"
+                                ng-model="monthDay" min="1" max="31" >
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row option-pad-bottom" ng-show="schedulerFrequency && schedulerFrequency.value == 'monthly'">
+                <div class="col-md-12">
+                    <div class="form-group option-pad-left">
+                        <div class="radio col-md-2">
+                            <label><input type="radio" value="other" ng-model="monthlyRepeatOption" ng-change="monthlyRepeatChange()" name="monthlyRepeatOption" id="monthlyRepeatOption"> on the</label>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="monthlyOccurrence" id="monthlyOccurrence" ng-model="monthlyOccurrence" ng-options="o.name for o in occurrences"
+                                ng-disabled="monthlyRepeatOption != 'other'" class="form-control input-sm" ></select>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="monthlyWeekDay" id="monthlyWeekDay" ng-model="monthlyWeekDay" ng-options="w.name for w in weekdays"
+                                ng-disabled="monthlyRepeatOption != 'other'" class="form-control input-sm" ></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" ng-show="schedulerFrequency && schedulerFrequency.value == 'yearly'">
+                <div class="col-md-12">
+                    <div class="form-group option-pad-left">
+                        <div class="radio col-md-2">
+                            <label><input type="radio" value="month" ng-model="yearlyRepeatOption" ng-change="yearlyRepeatChange()" name="yearlyRepeatOption" id="yearlyRepeatOption"> on</label>
+                        </div>
+                        <div class="col-md-3 padding-top-slim">
+                            <select name="yearlyMonth" id="yearlyMonth" ng-model="yearlyMonth" ng-options="m.name for m in months"
+                                ng-disabled="yearlyRepeatOption != 'month'" class="form-control input-sm" ></select>
+                        </div>
+                        <div class="col-md-3 padding-top-slim">
+                            <input name="yearlyMonthDay" id="yearlyMonthDay" sch-spinner="scheduler_form" class="scheduler-spinner"
+                                ng-model="yearlyMonthDay" min="1" max="31" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row option-pad-bottom" ng-show="schedulerFrequency && schedulerFrequency.value == 'yearly'">
+                <div class="col-md-12">
+                    <div class="form-group option-pad-left">
+                        <div class="radio col-md-2">
+                            <label><input type="radio" value="other" ng-model="yearlyRepeatOption" ng-change="yearlyRepeatChange()" name="yearlyRepeatOption"
+                                id="yearlyRepeatOption"> on the</label>
+                        </div>
+                        <div class="col-md-2 padding-top-slim">
+                            <select name="yearlyOccurrence" id="yearlyOccurrence" ng-model="yearlyOccurrence" ng-options="o.name for o in occurrences"
+                                ng-disabled="yearlyRepeatOption != 'other'" class="form-control input-sm" ></select>
+                        </div>
+                        <div class="col-md-2 padding-top-slim">
+                            <select name="yearlyWeekDay" id="yearlyWeekDay" ng-model="yearlyWeekDay" ng-options="w.name for w in weekdays"
+                                ng-disabled="yearlyRepeatOption != 'other'" class="form-control input-sm" ></select>
+                        </div>
+                        <div class="col-md-2 padding-top-slim">
+                            <select name="yearlyOtherMonth" id="yearlyOtherMonth" ng-model="yearlyOtherMonth" ng-options="m.name for m in months"
+                                ng-disabled="yearlyRepeatOption != 'other'" class="form-control input-sm" ></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group option-pad-left option-pad-bottom" ng-show="schedulerFrequency && schedulerFrequency.value == 'weekly'">
+                <label><span class="red-text">*</span> On Days</label>
+                <div class="input-group">
+                    <div class="btn-group" data-toggle="buttons-checkbox" id="weekdaySelect">
+                        <button type="button" ng-class="weekDaySUClass" class="btn btn-default" data-value="SU" ng-click="setWeekday('su')">Sun</button>
+                        <button type="button" ng-class="weekDayMOClass" class="btn btn-default" data-value="MO" ng-click="setWeekday('mo')">Mon</button>
+                        <button type="button" ng-class="weekDayTUClass" class="btn btn-default" data-value="TU" ng-click="setWeekday('tu')">Tue</button>
+                        <button type="button" ng-class="weekDayWEClass" class="btn btn-default" data-value="WE" ng-click="setWeekday('we')">Wed</button>
+                        <button type="button" ng-class="weekDayTHClass" class="btn btn-default" data-value="TH" ng-click="setWeekday('th')">Thu</button>
+                        <button type="button" ng-class="weekDayFRClass" class="btn btn-default" data-value="FR" ng-click="setWeekday('fr')">Fri</button>
+                        <button type="button" ng-class="weekDaySAClass" class="btn btn-default" data-value="SA" ng-click="setWeekday('sa')">Sat</button>
+                    </div>
+                </div>
+                <div class="error" ng-show="scheduler_weekDays_error">Select one or more days</div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group" ng-show="schedulerShowInterval">
+                        <label>End</label>
+                        <div>
+                            <select id="schedulerEnd" name="schedulerEnd" ng-model="schedulerEnd" ng-options="e.name for e in endOptions" required
+                                class="form-control input-sm" ng-change="scheduleRepeatChange()"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" ng-show="schedulerEnd && schedulerEnd.value == 'after'">
+                    <div class="form-group no-label">
+                        <div class="input-group">
+                            <input ng-name="schedulerOccurrenceCount" ng-id="schedulerOccurrenceCount" sch-spinner="scheduler_form" class="scheduler-spinner"
+                                ng-model="schedulerOccurrenceCount" min="1" max="999" >
+                            <label class="inline-label">Occurrence(s)</label> 
+                        </div>  
+                    </div>
+                </div>
+                <div class="col-md-4" ng-show="schedulerEnd && schedulerEnd.value == 'on'">
+                    <div class="form-group no-label">
+                        <div class="input-group">
+                            <input type="text" name="schedulerEndDt" id="schedulerEndDt" class="form-control input-sm" ng-model="schedulerEndDt" sch-date-picker
+                                data-min-today="true" placeholder="YYYY-MM-DD" >
+                            <span class="input-group-btn">
+                                <button class="btn btn-default btn-sm" type="button" ng-click="showCalendar('schedulerEndDt')">
+                                    <i class="fa fa-calendar"></i></button>
+                            </span>
+                        </div>
+                        <div class="error" ng-show="scheduler_endDt_error">Provide a valid date</div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div id="scheduler-buttons" style="display:none;">
+            <button type="button" class="btn btn-default btn-sm" id="reset-button" ng-click="resetForm()"><i class="fa fa-undo"></i> Reset</button>
+            <button type="button" class="btn btn-primary btn-sm" id="save-button" ng-click="saveForm()"><i class="fa fa-check"></i> Save</button>
+        </div>
+
+    </div><!-- col-md-12 -->
+</div><!-- row -->

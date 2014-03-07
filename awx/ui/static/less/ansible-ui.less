@@ -584,6 +584,7 @@ legend {
 
 /* Pagination */
   .page-label { 
+    font-size: 12px;
     margin-top: 0;
     text-align: right;
   }
@@ -816,22 +817,18 @@ input[type="checkbox"].checkbox-no-label {
     .list-actions {
         margin: 0;
     }
-    table {
+    .list-wrapper {
         background-color: @well;
         padding: 10px; 
         border-radius: 4px;
         border: 1px solid @well-border;
     }
-    form {
-        background-color: @well;
-        padding: 10px;
-        border-radius: 4px;
-        border: 1px solid @well-border;
-        margin: 10px 0;
-    }
     .ui-accordion-content {
         padding-left: 15px; 
         padding-right: 15px;
+    }
+    .page-label { 
+        margin-top: 5px;
     }
 }
 
@@ -1584,6 +1581,10 @@ tr td button i {
 
   .label-text {
       text-align: left;
+  }
+
+  .list-action-label {
+      display: none;
   }
 
   .site-footer {

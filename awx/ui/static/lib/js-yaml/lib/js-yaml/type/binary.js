@@ -3,11 +3,9 @@
 
 'use strict';
 
-
-var NodeBuffer;
-try {
-  NodeBuffer = require('buffer').Buffer; // A trick for browserified version.
-} catch (_) {}
+// A trick for browserified version.
+// Since we make browserifier to ignore `buffer` module, NodeBuffer will be undefined
+var NodeBuffer = require('buffer').Buffer;
 
 var Type       = require('../type');
 
@@ -72,7 +70,7 @@ function resolveYamlBinary(state) {
     return false;
   } else {
     // Wrap into Buffer for NodeJS and leave Array for browser
-    if (NodeBuffer && NodeBuffer.isBuffer) {
+    if (NodeBuffer) {
       state.result = new NodeBuffer(result);
     } else {
       state.result = result;

@@ -1,0 +1,68 @@
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="well">
+            <div id="form-container"></div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <hr class="visible-sm visible-xs"/>
+        <table class="table table-condensed">
+            <theader>
+            <tr>
+                <th>Scope Variable</th>
+                <th>Value</th>
+            </tr>
+            <theader>
+            <tbody>
+                <tr><td>schedulerName</td><td>{{ schedulerName }}</td></tr>
+                <tr><td>schedulerStartDt</td><td>{{ schedulerStartDt }}</td></tr>
+                <tr><td>schedulerStartHour</td><td>{{ schedulerStartHour }}</td></tr>
+                <tr><td>schedulerStartMinute</td><td>{{ schedulerStartMinute }}</td></tr>
+                <tr><td>schedulerStartSecond</td><td>{{ schedulerStartSecond }}</td></tr>
+                <tr ng-show="schedulerShowTimeZone"><td>schedulerTimeZone.name</td><td>{{ schedulerTimeZone.name }}</td></tr>
+                <tr><td>schedulerUTCTime</td><td>{{ schedulerUTCTime }}</td></tr>
+                <tr><td>schedulerFrequency.value</td><td>{{ schedulerFrequency.value }}</td></tr>
+                <tr><td>schedulerInterval</td><td>{{ schedulerInterval }}</td></tr>
+                <tr ng-show="schedulerFrequency.value == 'monthly'"><td>monthlyRepeatOption</td><td>{{ monthlyRepeatOption }}</td></tr>
+                <tr ng-show="schedulerFrequency.value == 'monthly' && monthlyRepeatOption == 'day'"><td>monthDay</td><td>{{ monthDay }}</td></tr>
+                <tr ng-show="schedulerFrequency.value == 'monthly' && monthlyRepeatOption == 'other'"><td>monthlyOccurrence.value</td><td>{{ monthlyOccurrence.value }}</td></tr>
+                <tr ng-show="schedulerFrequency.value == 'monthly' && monthlyRepeatOption == 'other'"><td>monthlyWeekDay.value</td><td>{{ monthlyWeekDay.value }}</td></tr>
+                <tr ng-show="schedulerFrequency.value == 'yearly'"><td>yearlyRepeatOption</td><td>{{ yearlyRepeatOption }}</td></tr>
+                <tr ng-show="schedulerFrequency.value == 'yearly' && yearlyRepeatOption == 'month'"><td>yearlyMonth.value</td><td>{{ yearlyMonth.value }}</td></tr>
+                <tr ng-show="schedulerFrequency.value == 'yearly' && yearlyRepeatOption == 'month'"><td>yearlyMonthDay</td><td>{{ yearlyMonthDay }}</td></tr>
+                <tr ng-show="schedulerFrequency.value == 'yearly' && yearlyRepeatOption == 'other'"><td>yearlyOccurrence.value</td><td>{{ yearlyOccurrence.value }}</td></tr>
+                <tr ng-show="schedulerFrequency.value == 'yearly' && yearlyRepeatOption == 'other'"><td>yearlyWeekDay.value</td><td>{{ yearlyWeekDay.value }}</td></tr>
+                <tr ng-show="schedulerFrequency.value == 'yearly' && yearlyRepeatOption == 'other'"><td>yearlyOtherMonth.value</td><td>{{ yearlyOtherMonth.value }}</td></tr>
+                <tr ng-show="schedulerFrequency.value == 'weekly'"><td>weekDays.value</td><td>{{ weekDays }}</td></tr>
+                <tr ng-show="schedulerFrequency && schedulerFrequency.value != 'none'"><td>schedulerEnd.value</td><td>{{ schedulerEnd.value }}</td></tr>
+                <tr ng-show="schedulerFrequency && schedulerFrequency.value != 'none' && schedulerEnd.value == 'after'"><td>schedulerOccurrenceCount</td><td>{{ schedulerOccurrenceCount }}</td></tr>
+                <tr ng-show="schedulerFrequency && schedulerFrequency.value != 'none' && schedulerEnd.value == 'on'"><td>schedulerEndDt</td><td>{{ schedulerEndDt }}</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <hr />
+        <div id="set-value-test">
+            <h4>RRule Demo</h4>
+            <p>Enter an RRule to display in the form above. For RRule syntax refer to examples at <a href="https://github.com/jkbr/rrule">https://github.com/jkbr/rrule</a>. Click Show Me to see the form change.</p>
+            <form class="form" role="form">
+                <div class="form-group">
+                    <label>RRule</label>
+                    <input type="text" ng-model="inputRRule" class="form-control" ng-keypress="inputRRuleMsg='';" placeholder="RRule key=value pairs">
+                    <div class="error" ng-bind="inputRRuleMsg" style="height: 20px;"></div>
+                </div>
+            </form>
+            <div class="button-group">
+                <button type="button" class="btn btn-primary btn-sm" id="show-me-button" ng-click="setRRule()">Show Me</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="message"><div>

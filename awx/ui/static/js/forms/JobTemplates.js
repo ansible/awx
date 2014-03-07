@@ -240,6 +240,7 @@ angular.module('JobTemplateFormDefinition', [])
                 addRequired: false,
                 editRequired: false,
                 readonly: true,
+                ngShow: "allow_callbacks",
                 column: 2,
                 required: false,
                 'class': 'span12',

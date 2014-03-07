@@ -1,0 +1,185 @@
+/*********************************************
+ *  Copyright (c) 2013-2014 Chris Houseknecht
+ *
+ *  SampleForm.js
+ *
+ *  Demonstrate some of the things you can do with angular-forms.js to 
+ *  generate clean, consistent forms in your app.
+ *  
+ */
+
+@black:       #171717;
+@white:       #FFF;
+@red:         #da4f49;
+@red-hover:   #AE3F3A;
+@green:       #5bb75b;
+@blue:        #1778c3;   /* logo blue */
+@blue-link:   #1778c3;
+@blue-dark:   #2a6496;   /* link hover */
+@grey:        #A9A9A9;
+@grey-txt:    #707070;
+@well:        #f5f5f5;   /* well background color */
+@well-border: #e3e3e3;
+@info:        #d9edf7;   /* alert info background color */
+@info-border: #bce8f1;   /* alert info border color */
+@info-color:  #3a87ad;
+
+
+body {
+    padding-bottom: 80px;    
+}
+
+.navbar {
+    margin-bottom: 40px;
+}
+
+#parse-type-group {
+    margin: 15px 0;
+}
+
+#parse-type-label {
+    display: inline-block;
+    padding-right: 10px;
+    font-weight: bold;
+}
+
+hr {
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.well {
+    margin-bottom: 0;
+}
+
+textarea {
+    resize: none;
+}
+
+a,
+a:active,
+a:link,
+a:hover {
+    text-decoration: none;
+}
+
+.external-editor-link {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+#message {
+    display: none;
+}
+
+.navbar-default .navbar-brand {
+    font-size: 24px;
+    color: #000;
+}
+
+.navigation {
+    margin-top: 20px;
+    padding-right: 15px;
+}
+
+.footer {
+    margin-top: 30px;
+}
+
+.footer .navbar-brand { 
+    margin-bottom: 0;
+    padding-right: 0;
+}
+
+#form-container {
+    margin-top: 0;
+}
+
+#set-value-test {
+    margin-top: 40px;
+}
+
+/* Modal dialog */
+
+.ui-dialog-title {
+    font-size: 22px;
+    color: @blue;
+    font-weight: bold;
+    line-height: normal;
+}
+.ui-dialog {
+    .close {
+        font-size: 18px;
+        font-weight: bold;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        line-height: 1;
+        opacity: .7;
+        text-shadow: 0 1px 0 @white;
+    }
+    .ui-widget-header {
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid #A9A9A9;
+        height: 55px;
+    }
+    .ui-dialog-titlebar {
+        padding-bottom: 0;
+        padding-top: 12px;
+    }
+
+    .ui-dialog-titlebar.ui-widget-header {
+        background-image: none; 
+        background-color: @white;
+    }
+
+    .ui-dialog-titlebar .ui-state-default {
+        background-image: none;
+        background-color: @white;
+        border-color: @white;
+        color: #A9A9A9;
+    }
+    .mono-space {
+        font-family: Fixed, monospace;
+    }
+    textarea.resizable {
+        resize: vertical;
+    }
+    .ui-resizable-se {
+        right: 5px;
+        bottom: 5px;
+        background-position: -80px -224px;
+        color: @black;
+    }
+}
+
+.ui-dialog-buttonset {
+    button.btn.btn-default.ui-state-hover,
+    button.btn.btn-default.ui-state-active,
+    button.btn.btn-default.ui-state-focus {
+        font-weight: normal;
+        }
+    button.btn.btn-primary.ui-state-hover,
+    button.btn.btn-primary.ui-state-active,
+    button.btn.btn-primary.ui-state-focus {
+        background-image: none;
+        color: @white;
+        background-color: @blue-dark;
+        border-color: #285e8e;
+        text-decoration: none;
+        font-weight: normal;
+    }
+}
+
+.ui-widget-overlay.ui-front {
+    background-image: none;
+    background-color: #000;
+    opacity: .6;
+    z-index: 1040;
+}
+.ui-front {
+    z-index: 1050;
+}

@@ -1,7 +1,7 @@
 {
   "name": "js-yaml",
   "main": "js-yaml.js",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "homepage": "https://github.com/nodeca/js-yaml",
   "authors": [
     "Dervus Grim <dervus.grim@gmail.com>",
@@ -26,11 +26,11 @@
     "index*",
     "package.json"
   ],
-  "_release": "3.0.1",
+  "_release": "3.0.2",
   "_resolution": {
     "type": "version",
-    "tag": "3.0.1",
-    "commit": "49695cba9bba55f26d1eee750a30bf3d50129ffe"
+    "tag": "3.0.2",
+    "commit": "e708f1ad52542dc6ef23fdd4025d08438870b530"
   },
   "_source": "git://github.com/nodeca/js-yaml.git",
   "_target": "*",

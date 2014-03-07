@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html ng-app="application">
+<head>
+  <meta charset="utf-8">
+
+  <title>Filters - Timezones for AngularJS</title>
+
+  <script type="text/javascript" src="/bower_components/jquery/dist/jquery.min.js"></script>
+  <script type="text/javascript" src="/bower_components/angular/angular.min.js"></script>
+  <script type="text/javascript" src="/bower_components/angular-filters/dist/angular-filters.min.js"></script>
+  <script type="text/javascript" src="/bower_components/timezone-js/src/date.js"></script>
+  <script type="text/javascript" src="/packages/jstimezonedetect/jstz.min.js"></script>
+
+  <script type="text/javascript" src="/lib/angular-tz-extensions.js"></script>
+
+  <script type="text/javascript" src="/app/js/filters.js"></script>
+
+  <style>
+      .demo {
+          margin-top: 30px;
+      }
+      .zone-table {
+          margin-top: 20px;
+      }
+      .zone-table tr td {
+          padding-left: 10px;
+          padding-right: 10px;
+      }
+  </style>
+
+</head>
+<body>
+
+<div ng-controller="World">
+
+  <h1>Available Time Zones</h1>
+  
+  <select ng-model="selectedZone" ng-change="zoneChange()" ng-options="z.name for z in zones">
+    <option value="">--Choose your timezone --</options>
+  <select>
+
+  <table class="zone-table">
+    <thead>
+      <tr>
+        <th>Abbreviation</th>
+        <th>Locality</th>
+        <th>Name</th>
+        <th>Offset</th>
+        <th>Region</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ current_timezone.abbreviation }}</td>
+        <td>{{ current_timezone.locality }}</td>
+        <td>{{ current_timezone.name }}</td>
+        <td>{{ current_timezone.offset }}</td>
+        <td>{{ current_timezone.region }}</td>
+      </td>
+    </tbody>
+  </table>
+   
+  <div class="demo">
+      <h1>Filters</h1>
+
+      <h2><code>tzDate</code></h2>
+
+      <p>
+        The local time, {{now|date:"yyyy-MM-dd HH:mm:ss Z"}}, shown around the world.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Timezone</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="example in examples">
+            <td>{{example.timezone}}</td>
+            <td>{{example.reference|tzAlign:example.timezone|date:"yyyy-MM-dd HH:mm:ss Z"}}</td>
+          </tr>
+        </tbody>
+      </table>
+  </div>
+
+</div>
+
+
+</body>
+</html>

@@ -396,7 +396,8 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                                             action: field_action
                                         });
                                     }
-                                    html += (fAction.label) ? " " + list.fieldActions[field_action].label : "";
+                                    html += (fAction.label) ? "<span class=\"list-action-label\"> " + list.fieldActions[field_action].label +
+                                        "</span>" : "";
                                     html += "</a>";
                                 }
                             }

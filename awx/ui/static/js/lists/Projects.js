@@ -28,14 +28,15 @@ angular.module('ProjectsListDefinition', [])
             },
             description: {
                 label: 'Description',
-                columnClass: 'hidden-sm hidden-xs',
-                excludeModal: true
+                excludeModal: true,
+                columnClass: 'hidden-sm hidden-xs'
             },
             scm_type: {
                 label: 'Type',
                 searchType: 'select',
                 searchOptions: [], // will be set by Options call to projects resource
                 excludeModal: true,
+                columnClass: 'hidden-sm hidden-xs',
                 nosort: true
             },
             status: {

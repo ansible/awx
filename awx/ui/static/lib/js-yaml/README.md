@@ -268,7 +268,7 @@ Breaking changes in 2.x.x -> 3.0.x
 ----------------------------------
 
 If your have not used __custom__ tags or loader classes and not loaded yaml
-files fia require - no changes needed. Just upgrade library.
+files via `require()` - no changes needed. Just upgrade library.
 
 In other case, you should:
 

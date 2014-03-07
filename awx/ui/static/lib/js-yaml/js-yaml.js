@@ -1,4 +1,4 @@
-/* js-yaml 3.0.1 https://github.com/nodeca/js-yaml */!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.jsyaml=e():"undefined"!=typeof global?global.jsyaml=e():"undefined"!=typeof self&&(self.jsyaml=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/* js-yaml 3.0.2 https://github.com/nodeca/js-yaml */!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.jsyaml=e():"undefined"!=typeof global?global.jsyaml=e():"undefined"!=typeof self&&(self.jsyaml=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 
@@ -2588,11 +2588,9 @@ module.exports = Type;
 
 'use strict';
 
-
-var NodeBuffer;
-try {
-  NodeBuffer = require('buffer').Buffer; // A trick for browserified version.
-} catch (_) {}
+// A trick for browserified version.
+// Since we make browserifier to ignore `buffer` module, NodeBuffer will be undefined
+var NodeBuffer = require('buffer').Buffer;
 
 var Type       = require('../type');
 
@@ -2657,7 +2655,7 @@ function resolveYamlBinary(state) {
     return false;
   } else {
     // Wrap into Buffer for NodeJS and leave Array for browser
-    if (NodeBuffer && NodeBuffer.isBuffer) {
+    if (NodeBuffer) {
       state.result = new NodeBuffer(result);
     } else {
       state.result = result;
@@ -3190,7 +3188,7 @@ var YAML_NULL_MAP = {
 
 
 function resolveYamlNull(state) {
-  if (YAML_NULL_MAP[state.result]) {
+  if (YAML_NULL_MAP.hasOwnProperty(state.result)) {
     state.result = null;
     return true;
   }

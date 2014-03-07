@@ -135,6 +135,9 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             case 'sync_status':
                 icon = "fa-cloud";
                 break;
+            case 'schedule':
+                icon = "fa-calendar";
+                break;
             }
             icon += (size) ? " " + size : "";
             return Icon(icon);

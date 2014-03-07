@@ -1,0 +1,48 @@
+{
+  "name": "angular-scheduler",
+  "authors": [
+    "Chris Houseknecht <chouse@ansible.com>"
+  ],
+  "description": "Angular based UI widget for creating repeat schedule entries.",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "angular-route": "*",
+    "components-font-awesome": "*",
+    "jquery": "*",
+    "jqueryui": "*",
+    "less": "*",
+    "angular-mocks": "~1.2.13"
+  },
+  "dependencies": {
+    "angular": "~1.2.14",
+    "underscore": "*",
+    "twitter": "*",
+    "rrule": "*",
+    "timezone-js": "*",
+    "angular-tz-extensions": "*"
+  },
+  "homepage": "https://github.com/chouseknecht/angular-scheduler",
+  "main": "git@github.com:chouseknecht/angular-scheduler.git",
+  "keywords": [
+    "schedule",
+    "rrule",
+    "calendar"
+  ],
+  "_release": "f2488ff1ec",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "f2488ff1ec1b2aa48206fa97111b6f8d5e88de89"
+  },
+  "_source": "git://github.com/chouseknecht/angular-scheduler.git",
+  "_target": "*",
+  "_originalSource": "angular-scheduler",
+  "_direct": true
+}

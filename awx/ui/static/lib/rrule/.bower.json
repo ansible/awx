@@ -1,0 +1,14 @@
+{
+  "name": "rrule",
+  "homepage": "https://github.com/jkbr/rrule",
+  "version": "2.0.0",
+  "_release": "2.0.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v2.0.0",
+    "commit": "53afe8a59ae5f52163cf755018f1508ca30aebef"
+  },
+  "_source": "git://github.com/jkbr/rrule.git",
+  "_target": "*",
+  "_originalSource": "rrule"
+}

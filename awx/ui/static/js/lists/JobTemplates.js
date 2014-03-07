@@ -27,7 +27,8 @@ angular.module('JobTemplatesListDefinition', [])
                 label: 'Name'
             },
             description: {
-                label: 'Description'
+                label: 'Description',
+                columnClass: 'hidden-sm hidden-xs'
             }
         },
 
@@ -50,24 +51,26 @@ angular.module('JobTemplatesListDefinition', [])
             edit: {
                 label: 'Edit',
                 ngClick: "editJobTemplate(job_template.id)",
-                icon: 'icon-edit',
                 awToolTip: 'Edit template',
                 "class": 'btn-default btn-xs',
                 dataPlacement: 'top'
             },
             submit: {
                 label: 'Launch',
-                icon: 'icon-rocket',
                 mode: 'all',
-                "class": 'btn-xs btn-success',
                 ngClick: 'submitJob(job_template.id)',
                 awToolTip: 'Start a job using this template',
+                dataPlacement: 'top'
+            },
+            schedule: {
+                label: 'Schedule',
+                mode: 'all',
+                awToolTip: 'Schedule a future job using this template',
                 dataPlacement: 'top'
             },
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteJobTemplate(job_template.id, job_template.name)",
-                icon: 'icon-trash',
                 "class": 'btn-danger btn-xs',
                 awToolTip: 'Delete template',
                 dataPlacement: 'top'

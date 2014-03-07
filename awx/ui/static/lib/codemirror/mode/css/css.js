@@ -140,6 +140,8 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       return pushContext(state, stream, "media");
     } else if (type == "@font-face") {
       return "font_face_before";
+    } else if (/^@(-(moz|ms|o|webkit)-)?keyframes$/.test(type)) {
+      return "keyframes";
     } else if (type && type.charAt(0) == "@") {
       return pushContext(state, stream, "at");
     } else if (type == "hash") {
@@ -264,6 +266,12 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     return "font_face";
   };
 
+  states.keyframes = function(type, stream, state) {
+    if (type == "word") { override = "variable"; return "keyframes"; }
+    if (type == "{") return pushContext(state, stream, "top");
+    return pass(type, stream, state);
+  };
+
   states.at = function(type, stream, state) {
     if (type == ";") return popContext(state);
     if (type == "{" || type == "}") return popAndPass(type, stream, state);
@@ -308,6 +316,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     indent: function(state, textAfter) {
       var cx = state.context, ch = textAfter && textAfter.charAt(0);
       var indent = cx.indent;
+      if (cx.type == "prop" && ch == "}") cx = cx.prev;
       if (cx.prev &&
           (ch == "}" && (cx.type == "block" || cx.type == "top" || cx.type == "interpolation" || cx.type == "font_face") ||
            ch == ")" && (cx.type == "parens" || cx.type == "params" || cx.type == "media_parens") ||
@@ -353,10 +362,10 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
   var propertyKeywords_ = [
     "align-content", "align-items", "align-self", "alignment-adjust",
     "alignment-baseline", "anchor-point", "animation", "animation-delay",
-    "animation-direction", "animation-duration", "animation-iteration-count",
-    "animation-name", "animation-play-state", "animation-timing-function",
-    "appearance", "azimuth", "backface-visibility", "background",
-    "background-attachment", "background-clip", "background-color",
+    "animation-direction", "animation-duration", "animation-fill-mode",
+    "animation-iteration-count", "animation-name", "animation-play-state",
+    "animation-timing-function", "appearance", "azimuth", "backface-visibility",
+    "background", "background-attachment", "background-clip", "background-color",
     "background-image", "background-origin", "background-position",
     "background-repeat", "background-size", "baseline-shift", "binding",
     "bleed", "bookmark-label", "bookmark-level", "bookmark-state",
@@ -387,10 +396,11 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     "font-stretch", "font-style", "font-synthesis", "font-variant",
     "font-variant-alternates", "font-variant-caps", "font-variant-east-asian",
     "font-variant-ligatures", "font-variant-numeric", "font-variant-position",
-    "font-weight", "grid-cell", "grid-column", "grid-column-align",
-    "grid-column-sizing", "grid-column-span", "grid-columns", "grid-flow",
-    "grid-row", "grid-row-align", "grid-row-sizing", "grid-row-span",
-    "grid-rows", "grid-template", "hanging-punctuation", "height", "hyphens",
+    "font-weight", "grid", "grid-area", "grid-auto-columns", "grid-auto-flow",
+    "grid-auto-position", "grid-auto-rows", "grid-column", "grid-column-end",
+    "grid-column-start", "grid-row", "grid-row-end", "grid-row-start",
+    "grid-template", "grid-template-areas", "grid-template-columns",
+    "grid-template-rows", "hanging-punctuation", "height", "hyphens",
     "icon", "image-orientation", "image-rendering", "image-resolution",
     "inline-box-align", "justify-content", "left", "letter-spacing",
     "line-break", "line-height", "line-stacking", "line-stacking-ruby",
@@ -667,7 +677,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
         }
       },
       "@": function(stream) {
-        if (stream.match(/^(charset|document|font-face|import|keyframes|media|namespace|page|supports)\b/, false)) return false;
+        if (stream.match(/^(charset|document|font-face|import|(-(moz|ms|o|webkit)-)?keyframes|media|namespace|page|supports)\b/, false)) return false;
         stream.eatWhile(/[\w\\\-]/);
         if (stream.match(/^\s*:/, false))
           return ["variable-2", "variable-definition"];

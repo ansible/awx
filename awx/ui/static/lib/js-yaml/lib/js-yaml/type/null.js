@@ -13,7 +13,7 @@ var YAML_NULL_MAP = {
 
 
 function resolveYamlNull(state) {
-  if (YAML_NULL_MAP[state.result]) {
+  if (YAML_NULL_MAP.hasOwnProperty(state.result)) {
     state.result = null;
     return true;
   }

@@ -74,7 +74,7 @@
     { keys: ['<S-BS>'], type: 'keyToKey', toKeys: ['b'] },
     { keys: ['<C-n>'], type: 'keyToKey', toKeys: ['j'] },
     { keys: ['<C-p>'], type: 'keyToKey', toKeys: ['k'] },
-    { keys: ['C-['], type: 'keyToKey', toKeys: ['<Esc>'] },
+    { keys: ['<C-[>'], type: 'keyToKey', toKeys: ['<Esc>'] },
     { keys: ['<C-c>'], type: 'keyToKey', toKeys: ['<Esc>'] },
     { keys: ['s'], type: 'keyToKey', toKeys: ['c', 'l'], context: 'normal' },
     { keys: ['s'], type: 'keyToKey', toKeys: ['x', 'i'], context: 'visual'},
@@ -1457,7 +1457,7 @@
             motionArgs.selectedCharacter);
         var increment = motionArgs.forward ? -1 : 1;
         recordLastCharacterSearch(increment, motionArgs);
-        if(!curEnd)return cm.getCursor();
+        if (!curEnd) return null;
         curEnd.ch += increment;
         return curEnd;
       },
@@ -1532,22 +1532,44 @@
             ch: findFirstNonWhiteSpaceCharacter(cm.getLine(lineNum)) };
       },
       textObjectManipulation: function(cm, motionArgs) {
+        // TODO: lots of possible exceptions that can be thrown here. Try da(
+        //     outside of a () block.
+
+        // TODO: adding <> >< to this map doesn't work, presumably because
+        // they're operators
+        var mirroredPairs = {'(': ')', ')': '(',
+                             '{': '}', '}': '{',
+                             '[': ']', ']': '['};
+        var selfPaired = {'\'': true, '"': true};
+
         var character = motionArgs.selectedCharacter;
+
         // Inclusive is the difference between a and i
         // TODO: Instead of using the additional text object map to perform text
         //     object operations, merge the map into the defaultKeyMap and use
         //     motionArgs to define behavior. Define separate entries for 'aw',
         //     'iw', 'a[', 'i[', etc.
         var inclusive = !motionArgs.textObjectInner;
-        if (!textObjects[character]) {
+
+        var tmp;
+        if (mirroredPairs[character]) {
+          tmp = selectCompanionObject(cm, mirroredPairs[character], inclusive);
+        } else if (selfPaired[character]) {
+          tmp = findBeginningAndEnd(cm, character, inclusive);
+        } else if (character === 'W') {
+          tmp = expandWordUnderCursor(cm, inclusive, true /** forward */,
+                                                     true /** bigWord */);
+        } else if (character === 'w') {
+          tmp = expandWordUnderCursor(cm, inclusive, true /** forward */,
+                                                     false /** bigWord */);
+        } else {
           // No text object defined for this, don't move.
           return null;
         }
-        var tmp = textObjects[character](cm, inclusive);
-        var start = tmp.start;
-        var end = tmp.end;
-        return [start, end];
+
+        return [tmp.start, tmp.end];
       },
+
       repeatLastCharacterSearch: function(cm, motionArgs) {
         var lastSearch = vimGlobalState.lastChararacterSearch;
         var repeat = motionArgs.repeat;
@@ -2012,36 +2034,6 @@
           repeat = vim.lastEditInputState.repeatOverride || repeat;
         }
         repeatLastEdit(cm, vim, repeat, false /** repeatForInsert */);
-      }
-    };
-
-    var textObjects = {
-      // TODO: lots of possible exceptions that can be thrown here. Try da(
-      //     outside of a () block.
-      // TODO: implement text objects for the reverse like }. Should just be
-      //     an additional mapping after moving to the defaultKeyMap.
-      'w': function(cm, inclusive) {
-        return expandWordUnderCursor(cm, inclusive, true /** forward */,
-            false /** bigWord */);
-      },
-      'W': function(cm, inclusive) {
-        return expandWordUnderCursor(cm, inclusive,
-            true /** forward */, true /** bigWord */);
-      },
-      '{': function(cm, inclusive) {
-        return selectCompanionObject(cm, '}', inclusive);
-      },
-      '(': function(cm, inclusive) {
-        return selectCompanionObject(cm, ')', inclusive);
-      },
-      '[': function(cm, inclusive) {
-        return selectCompanionObject(cm, ']', inclusive);
-      },
-      '\'': function(cm, inclusive) {
-        return findBeginningAndEnd(cm, "'", inclusive);
-      },
-      '"': function(cm, inclusive) {
-        return findBeginningAndEnd(cm, '"', inclusive);
       }
     };
 
@@ -2634,13 +2626,25 @@
       return cur;
     }
 
+    // TODO: perhaps this finagling of start and end positions belonds
+    // in codmirror/replaceRange?
     function selectCompanionObject(cm, revSymb, inclusive) {
       var cur = cm.getCursor();
-
       var end = findMatchedSymbol(cm, cur, revSymb);
       var start = findMatchedSymbol(cm, end);
-      start.ch += inclusive ? 1 : 0;
-      end.ch += inclusive ? 0 : 1;
+
+      if((start.line == end.line && start.ch > end.ch)
+          || (start.line > end.line)) {
+        var tmp = start;
+        start = end;
+        end = tmp;
+      }
+
+      if(inclusive) {
+        end.ch += 1;
+      } else {
+        start.ch += 1;
+      }
 
       return { start: start, end: end };
     }
@@ -2750,10 +2754,84 @@
         if (!escapeNextChar && c == '/') {
           slashes.push(i);
         }
-        escapeNextChar = (c == '\\');
+        escapeNextChar = !escapeNextChar && (c == '\\');
       }
       return slashes;
     }
+
+    // Translates a search string from ex (vim) syntax into javascript form.
+    function fixRegex(str) {
+      // When these match, add a '\' if unescaped or remove one if escaped.
+      var specials = ['|', '(', ')', '{'];
+      // Remove, but never add, a '\' for these.
+      var unescape = ['}'];
+      var escapeNextChar = false;
+      var out = [];
+      for (var i = -1; i < str.length; i++) {
+        var c = str.charAt(i) || '';
+        var n = str.charAt(i+1) || '';
+        var specialComesNext = (specials.indexOf(n) != -1);
+        if (escapeNextChar) {
+          if (c !== '\\' || !specialComesNext) {
+            out.push(c);
+          }
+          escapeNextChar = false;
+        } else {
+          if (c === '\\') {
+            escapeNextChar = true;
+            // Treat the unescape list as special for removing, but not adding '\'.
+            if (unescape.indexOf(n) != -1) {
+              specialComesNext = true;
+            }
+            // Not passing this test means removing a '\'.
+            if (!specialComesNext || n === '\\') {
+              out.push(c);
+            }
+          } else {
+            out.push(c);
+            if (specialComesNext && n !== '\\') {
+              out.push('\\');
+            }
+          }
+        }
+      }
+      return out.join('');
+    }
+
+    // Translates the replace part of a search and replace from ex (vim) syntax into
+    // javascript form.  Similar to fixRegex, but additionally fixes back references
+    // (translates '\[0..9]' to '$[0..9]') and follows different rules for escaping '$'.
+    function fixRegexReplace(str) {
+      var escapeNextChar = false;
+      var out = [];
+      for (var i = -1; i < str.length; i++) {
+        var c = str.charAt(i) || '';
+        var n = str.charAt(i+1) || '';
+        if (escapeNextChar) {
+          out.push(c);
+          escapeNextChar = false;
+        } else {
+          if (c === '\\') {
+            escapeNextChar = true;
+            if ((isNumber(n) || n === '$')) {
+              out.push('$');
+            } else if (n !== '/' && n !== '\\') {
+              out.push('\\');
+            }
+          } else {
+            if (c === '$') {
+              out.push('$');
+            }
+            out.push(c);
+            if (n === '/') {
+              out.push('\\');
+            }
+          }
+        }
+      }
+      return out.join('');
+    }
+
     /**
      * Extract the regular expression from the query and return a Regexp object.
      * Returns null if the query is blank.
@@ -2785,6 +2863,7 @@
       if (!regexPart) {
         return null;
       }
+      regexPart = fixRegex(regexPart);
       if (smartCase) {
         ignoreCase = (/^[^A-Z]*$/).test(regexPart);
       }
@@ -3279,6 +3358,7 @@
         var confirm = false; // Whether to confirm each replace.
         if (slashes[1]) {
           replacePart = argString.substring(slashes[1] + 1, slashes[2]);
+          replacePart = fixRegexReplace(replacePart);
         }
         if (slashes[2]) {
           // After the 3rd slash, we can have flags followed by a space followed
@@ -3495,18 +3575,10 @@
        * Shift + key modifier to the resulting letter, while preserving other
        * modifers.
        */
-      // TODO: Figure out a way to catch capslock.
       function cmKeyToVimKey(key, modifier) {
         var vimKey = key;
-        if (isUpperCase(vimKey)) {
-          // Convert to lower case if shift is not the modifier since the key
-          // we get from CodeMirror is always upper case.
-          if (modifier == 'Shift') {
-            modifier = null;
-          }
-          else {
+        if (isUpperCase(vimKey) && modifier == 'Ctrl') {
             vimKey = vimKey.toLowerCase();
-          }
         }
         if (modifier) {
           // Vim will parse modifier+key combination as a single key.
@@ -3532,9 +3604,9 @@
       function bindKeys(keys, modifier) {
         for (var i = 0; i < keys.length; i++) {
           var key = keys[i];
-          if (!modifier && inArray(key, specialSymbols)) {
-            // Wrap special symbols with '' because that's how CodeMirror binds
-            // them.
+          if (!modifier && key.length == 1) {
+            // Wrap all keys without modifiers with '' to identify them by their
+            // key characters instead of key identifiers.
             key = "'" + key + "'";
           }
           var vimKey = cmKeyToVimKey(keys[i], modifier);
@@ -3543,7 +3615,7 @@
         }
       }
       bindKeys(upperCaseAlphabet);
-      bindKeys(upperCaseAlphabet, 'Shift');
+      bindKeys(lowerCaseAlphabet);
       bindKeys(upperCaseAlphabet, 'Ctrl');
       bindKeys(specialSymbols);
       bindKeys(specialSymbols, 'Ctrl');

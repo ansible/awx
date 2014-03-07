@@ -203,6 +203,7 @@ function JobsEdit($scope, $rootScope, $compile, $location, $log, $routeParams, J
     $scope.job_id = id;
     $scope.parseType = 'yaml';
     $scope.statusSearchSpin = false;
+    $scope.disableParseSelection = true;
 
     function getPlaybooks(project, playbook) {
         if (!Empty(project)) {

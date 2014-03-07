@@ -1,0 +1,93 @@
+/***************************************************************************
+ * angular-scheruler.css
+ * 
+ * Copyright (c) 2014 Ansible, Inc.
+ *
+ * Maintainers:
+ *
+ * Chris Houseknecht
+ *   @chouseknecht
+ *   chouse@ansible.com 
+ *
+ */
+.ui-widget input {
+    font-size: 12px;
+    font-weight: normal;
+    text-align: center;
+}
+.ui-spinner.ui-widget-content {
+    border-bottom-color: #ccc;
+    border-top-color: #ccc;
+    border-left-color: #ccc;
+    border-right-color: #ccc;
+}
+.ui-spinner-button {
+    border-left-color: #ccc;
+    border-left-style: solid;
+    border-left-width: 1px;
+}
+.scheduler-time-spinner {
+    width: 40px;
+    height: 24px;
+}
+.scheduler-spinner {
+    width: 50px;
+    height: 24px;
+}
+.fmt-help {
+    font-size: 12px;
+    font-weight: normal;
+    color: #999;
+    padding-left: 10px;
+}
+.error { 
+    color: #dd1b16;
+    font-size: 12px;
+    margin-bottom: 0;
+    margin-top: 0;
+    padding-top: 3px;
+}
+.pull-up { 
+    margin-top: -15px;
+    margin-bottom: 10px;
+}
+.red-text {
+    color: #dd1b16;
+}
+input.ng-dirty.ng-invalid, select.ng-dirty.ng-invalid, textarea.ng-dirty.ng-invalid {
+    border: 1px solid red;
+    outline: none;
+}
+.help-text {
+    font-size: 12px;
+    font-weight: normal;
+    color: #999;
+    margin-top: 5px;
+}
+.inline-label {
+    margin-left: 10px;
+}
+#scheduler-buttons {
+    margin-top: 20px;
+}
+.no-label {
+    padding-top: 25px;
+}
+.padding-top-slim {
+    padding-top: 5px;
+}
+.option-pad-left {
+    padding-left: 15px;
+}
+.option-pad-top {
+    padding-top: 15px;
+}
+.option-pad-bottom {
+    padding-bottom: 15px;
+}
+#monthlyOccurrence, #monthlyWeekDay {
+    margin-top: 5px;
+}
+select {
+    width: 100%;
+}
