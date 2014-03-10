@@ -1122,7 +1122,7 @@ class JobTemplateCallback(GenericAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
         limit = ':'.join(filter(None, [job_template.limit, host.name]))
         job = job_template.create_job(limit=limit, launch_type='callback')
-        result = job.start()
+        result = job.signal_start()
         if not result:
             data = dict(msg='Error starting job!')
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
@@ -1178,7 +1178,7 @@ class JobStart(GenericAPIView):
     def post(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.can_start:
-            result = obj.start(**request.DATA)
+            result = obj.signal_start(**request.DATA)
             if not result:
                 data = dict(passwords_needed_to_start=obj.passwords_needed_to_start)
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)

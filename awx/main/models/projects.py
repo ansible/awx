@@ -16,6 +16,9 @@ import uuid
 # PyYAML
 import yaml
 
+# ZeroMQ
+import zmq
+
 # Django
 from django.conf import settings
 from django.db import models
@@ -291,7 +294,7 @@ class Project(CommonModel):
     def update(self, **kwargs):
         if self.can_update:
             project_update = self.project_updates.create()
-            project_update.start()
+            project_update.signal_start()
             return project_update
 
     def get_absolute_url(self):
@@ -361,6 +364,18 @@ class ProjectUpdate(CommonTask):
     def _get_task_class(self):
         from awx.main.tasks import RunProjectUpdate
         return RunProjectUpdate
+
+    @property
+    def task_impact(self):
+        return 20
+
+    def signal_start(self, **kwargs):
+        signal_context = zmq.Context()
+        signal_socket = signal_context.socket(zmq.REQ)
+        signal_socket.connect(settings.TASK_COMMAND_PORT)
+        signal_socket.send_json(dict(task_type="project_update", id=self.id, metadata=kwargs))
+        self.socket.recv()
+        return True
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()

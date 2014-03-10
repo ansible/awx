@@ -278,6 +278,11 @@ class CommonTask(PrimordialModel):
         default={},
         editable=False,
     )
+    start_args = models.TextField(
+        blank=True,
+        default='',
+        editable=False,
+    )
     _result_stdout = models.TextField(
         blank=True,
         default='',
@@ -367,11 +372,28 @@ class CommonTask(PrimordialModel):
     def can_start(self):
         return bool(self.status == 'new')
 
+    @property
+    def task_impact(self):
+        raise NotImplementedError
+
     def _get_task_class(self):
         raise NotImplementedError
 
     def _get_passwords_needed_to_start(self):
         return []
+
+    def is_blocked_by(self, task_object):
+        ''' Given another task object determine if this task would be blocked by it '''
+        raise NotImplementedError
+
+    def generate_dependencies(self, active_tasks):
+        ''' Generate any tasks that the current task might be dependent on given a list of active
+            tasks that might preclude creating one'''
+        return []
+
+    def signal_start(self):
+        ''' Notify the task runner system to begin work on this task '''
+        raise NotImplementedError
 
     def start_signature(self, **kwargs):
         from awx.main.tasks import handle_work_error
@@ -383,13 +405,10 @@ class CommonTask(PrimordialModel):
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
-        self.status = 'pending'
-        self.save(update_fields=['status'])
-        transaction.commit()
         task_actual = task_class().si(self.pk, **opts)
         return task_actual
 
-    def start(self, **kwargs):
+    def start(self, error_callback, **kwargs):
         task_actual = self.start_signature(**kwargs)
         # TODO: Callback for status
         task_result = task_actual.delay()

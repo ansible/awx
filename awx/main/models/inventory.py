@@ -705,7 +705,7 @@ class InventorySource(PrimordialModel):
     def update(self, **kwargs):
         if self.can_update:
             inventory_update = self.inventory_updates.create()
-            inventory_update.start()
+            inventory_update.signal_start()
             return inventory_update
 
     def get_absolute_url(self):
@@ -739,7 +739,7 @@ class InventoryUpdate(CommonTask):
             if 'license_error' not in update_fields:
                 update_fields.append('license_error')
         super(InventoryUpdate, self).save(*args, **kwargs)
-        
+
     def _get_parent_instance(self):
         return self.inventory_source
 
@@ -749,3 +749,15 @@ class InventoryUpdate(CommonTask):
     def _get_task_class(self):
         from awx.main.tasks import RunInventoryUpdate
         return RunInventoryUpdate
+
+    @property
+    def task_impact(self):
+        return 50
+
+    def signal_start(self, **kwargs):
+        signal_context = zmq.Context()
+        signal_socket = signal_context.socket(zmq.REQ)
+        signal_socket.connect(settings.TASK_COMMAND_PORT)
+        signal_socket.send_json(dict(task_type="inventory_update", id=self.id, metadata=kwargs))
+        self.socket.recv()
+        return True

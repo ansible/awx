@@ -63,7 +63,7 @@ def handle_work_error(self, task_id, subtasks=None):
             elif each_task['type'] == 'inventory_update':
                 instance = InventoryUpdate.objects.get(id=each_task['id'])
                 instance_name = instance.inventory_source.inventory.name
-            elif each_task['type'] == 'job':
+            elif each_task['type'] == 'ansible_playbook':
                 instance = Job.objects.get(id=each_task['id'])
                 instance_name = instance.job_template.name
             else:
