@@ -33,8 +33,8 @@ from awx.main.utils import update_scm_url, camelcase_to_underscore
 
 logger = logging.getLogger('awx.api.serializers')
 
-BASE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created', 'modified',
-               'name', 'description')
+BASE_FIELDS = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
+               'modified', 'name', 'description')
 
 # Fields that should be summarized regardless of object type.
 DEFAULT_SUMMARY_FIELDS = ('name', 'description',)
@@ -101,6 +101,7 @@ serializers.ChoiceField = ChoiceField
 class BaseSerializer(serializers.ModelSerializer):
 
     # add the URL and related resources
+    type           = serializers.SerializerMethodField('get_type')
     url            = serializers.SerializerMethodField('get_url')
     related        = serializers.SerializerMethodField('get_related')
     summary_fields = serializers.SerializerMethodField('get_summary_fields')
@@ -116,6 +117,9 @@ class BaseSerializer(serializers.ModelSerializer):
         for key, field in ret.items():
             if key == 'id' and not getattr(field, 'help_text', None):
                 field.help_text = 'Database ID for this %s.' % unicode(opts.verbose_name)
+            elif key == 'type':
+                field.help_text = 'Data type for this %s.' % unicode(opts.verbose_name)
+                field.type_label = 'string'
             elif key == 'url':
                 field.help_text = 'URL for this %s.' % unicode(opts.verbose_name)
                 field.type_label = 'string'
@@ -132,6 +136,10 @@ class BaseSerializer(serializers.ModelSerializer):
                 field.help_text = 'Timestamp when this %s was last modified.' % unicode(opts.verbose_name)
                 field.type_label = 'datetime'
         return ret
+
+    def get_type(self, obj):
+        opts = get_concrete_model(self.opts.model)._meta
+        return camelcase_to_underscore(opts.object_name)
 
     def get_url(self, obj):
         if obj is None:
@@ -216,8 +224,9 @@ class UserSerializer(BaseSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'url', 'related', 'created', 'username', 'first_name',
-                  'last_name', 'email', 'is_superuser', 'password', 'ldap_dn')
+        fields = ('id', 'type', 'url', 'related', 'created', 'username',
+                  'first_name', 'last_name', 'email', 'is_superuser',
+                  'password', 'ldap_dn')
 
     def to_native(self, obj):
         ret = super(UserSerializer, self).to_native(obj)
@@ -395,7 +404,7 @@ class ProjectUpdateSerializer(BaseTaskSerializer):
 
     class Meta:
         model = ProjectUpdate
-        fields = ('id', 'url', 'related', 'summary_fields', 'created',
+        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'project', 'status', 'failed', 'result_stdout',
                   'result_traceback', 'job_args', 'job_cwd', 'job_env')
 
@@ -682,7 +691,7 @@ class InventorySourceSerializer(BaseSerializer):
 
     class Meta:
         model = InventorySource
-        fields = ('id', 'url', 'related', 'summary_fields', 'created',
+        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'inventory', 'group', 'source', 'source_path',
                   'source_vars', 'credential', 'source_regions', 'overwrite',
                   'overwrite_vars', 'update_on_launch', 'update_interval',
@@ -772,7 +781,7 @@ class InventoryUpdateSerializer(BaseTaskSerializer):
 
     class Meta:
         model = InventoryUpdate
-        fields = ('id', 'url', 'related', 'summary_fields', 'created',
+        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'inventory_source', 'status', 'failed',
                   'result_stdout', 'result_traceback', 'job_args', 'job_cwd',
                   'job_env', 'license_error')
@@ -979,7 +988,7 @@ class JobSerializer(BaseTaskSerializer):
 
     class Meta:
         model = Job
-        fields = ('id', 'url', 'related', 'summary_fields', 'created',
+        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'job_template', 'job_type', 'inventory',
                   'project', 'playbook', 'credential', 'cloud_credential',
                   'forks', 'limit', 'verbosity', 'extra_vars',
@@ -1067,7 +1076,7 @@ class JobListSerializer(JobSerializer):
 
     class Meta:
         model = Job
-        fields = ('id', 'url', 'related', 'summary_fields', 'created',
+        fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'job_template', 'job_type', 'inventory',
                   'project', 'playbook', 'credential', 'cloud_credential',
                   'forks', 'limit', 'verbosity', 'extra_vars',
@@ -1080,7 +1089,7 @@ class JobHostSummarySerializer(BaseSerializer):
 
     class Meta:
         model = JobHostSummary
-        fields = ('id', 'url', 'job', 'host', 'created', 'modified',
+        fields = ('id', 'type', 'url', 'job', 'host', 'created', 'modified',
                   'summary_fields', 'related', 'changed', 'dark', 'failures',
                   'ok', 'processed', 'skipped', 'failed')
 
@@ -1113,7 +1122,7 @@ class JobEventSerializer(BaseSerializer):
 
     class Meta:
         model = JobEvent
-        fields = ('id', 'url', 'created', 'modified', 'job', 'event',
+        fields = ('id', 'type', 'url', 'created', 'modified', 'job', 'event',
                   'event_display', 'event_data', 'event_level', 'failed',
                   'changed', 'host', 'related', 'summary_fields', 'parent',
                   'play', 'task')
@@ -1153,7 +1162,8 @@ class ActivityStreamSerializer(BaseSerializer):
 
     class Meta:
         model = ActivityStream
-        fields = ('id', 'url', 'related', 'summary_fields', 'timestamp', 'operation', 'changes', 'object1', 'object2')
+        fields = ('id', 'type', 'url', 'related', 'summary_fields',
+                  'timestamp', 'operation', 'changes', 'object1', 'object2')
 
     def get_fields(self):
         ret = super(ActivityStreamSerializer, self).get_fields()
