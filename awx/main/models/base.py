@@ -395,9 +395,7 @@ class CommonTask(PrimordialModel):
         ''' Notify the task runner system to begin work on this task '''
         raise NotImplementedError
 
-    def start_signature(self, **kwargs):
-        from awx.main.tasks import handle_work_error
-
+    def start(self, error_callback, **kwargs):
         task_class = self._get_task_class()
         if not self.can_start:
             return False
@@ -405,20 +403,7 @@ class CommonTask(PrimordialModel):
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
-        task_actual = task_class().si(self.pk, **opts)
-        return task_actual
-
-    def start(self, error_callback, **kwargs):
-        task_actual = self.start_signature(**kwargs)
-        # TODO: Callback for status
-        task_result = task_actual.delay()
-        # Reload instance from database so we don't clobber results from task
-        # (mainly from tests when using Django 1.4.x).
-        instance = self.__class__.objects.get(pk=self.pk)
-        # The TaskMeta instance in the database isn't created until the worker
-        # starts processing the task, so we can only store the task ID here.
-        instance.celery_task_id = task_result.task_id
-        instance.save(update_fields=['celery_task_id'])
+        task_class().apply_async((self.pk, **opts), link_error=error_callback)
         return True
 
     @property

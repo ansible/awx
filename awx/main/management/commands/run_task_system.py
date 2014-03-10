@@ -183,7 +183,7 @@ def process_graph(graph, task_capacity):
         if impact <= remaining_volume or running_impact == 0:
             dependent_nodes = [{'type': graph.get_node_type(n), 'id': n.id} for n in graph.get_dependents()]
             error_handler = handle_work_error.s(subtasks=dependent_nodes)
-            node_obj.start(error_callback=error_handler)
+            start_status = node_obj.start(error_callback=error_handler)
             remaining_volume -= impact
             running_impact += impact
 
