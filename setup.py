@@ -143,7 +143,9 @@ setup(
             ("%s" % homedir,        ["config/wsgi.py",
                                      "awx/static/favicon.ico",
                                     ]),
-            ("%s" % webconfig,      ["config/awx.conf","config/awx-plain.conf"]),
+            ("%s" % webconfig,      ["config/awx-httpd-80.conf",
+                                     "config/awx-httpd-443.conf",
+                                    ]),
         ]
     ),
     options = {
