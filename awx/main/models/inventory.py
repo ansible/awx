@@ -15,6 +15,9 @@ import uuid
 # PyYAML
 import yaml
 
+# ZMQ
+import zmq
+
 # Django
 from django.conf import settings
 from django.db import models
@@ -750,6 +753,12 @@ class InventoryUpdate(CommonTask):
         from awx.main.tasks import RunInventoryUpdate
         return RunInventoryUpdate
 
+    def is_blocked_by(self, obj):
+        if type(obj) == InventoryUpdate:
+            if self.inventory_source == obj.inventory_source:
+                return True
+        return False
+
     @property
     def task_impact(self):
         return 50
@@ -759,5 +768,5 @@ class InventoryUpdate(CommonTask):
         signal_socket = signal_context.socket(zmq.REQ)
         signal_socket.connect(settings.TASK_COMMAND_PORT)
         signal_socket.send_json(dict(task_type="inventory_update", id=self.id, metadata=kwargs))
-        self.socket.recv()
+        signal_socket.recv()
         return True

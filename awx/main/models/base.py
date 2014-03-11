@@ -370,7 +370,7 @@ class CommonTask(PrimordialModel):
 
     @property
     def can_start(self):
-        return bool(self.status == 'new')
+        return bool(self.status in ('new', 'waiting'))
 
     @property
     def task_impact(self):
@@ -403,7 +403,7 @@ class CommonTask(PrimordialModel):
         opts = dict([(field, kwargs.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
-        task_class().apply_async((self.pk, **opts), link_error=error_callback)
+        task_class().apply_async((self.pk,), opts, link_error=error_callback)
         return True
 
     @property

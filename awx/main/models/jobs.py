@@ -371,7 +371,7 @@ class Job(CommonTask):
             if type(obj) == InventoryUpdate:
                 if obj.inventory_source in inventory_sources:
                     inventory_sources_found.append(obj.inventory_source)
-        if not project_found and self.project.scm_update_on_launch::
+        if not project_found and self.project.scm_update_on_launch:
             dependencies.append(self.project.project_updates.create())
         if inventory_sources.count(): # and not has_setup_failures?  Probably handled as an error scenario in the task runner
             for source in inventory_sources:
@@ -389,7 +389,7 @@ class Job(CommonTask):
         signal_socket = signal_context.socket(zmq.REQ)
         signal_socket.connect(settings.TASK_COMMAND_PORT)
         signal_socket.send_json(dict(task_type="ansible_playbook", id=self.id))
-        self.socket.recv()
+        signal_socket.recv()
         return True
 
     def start(self, error_callback, **kwargs):
@@ -408,7 +408,7 @@ class Job(CommonTask):
             opts = stored_args
         if not all(opts.values()):
             return False
-        task_class().apply_async((self.pk, **opts), link_error=error_callback)
+        task_class().apply_async((self.pk,), opts, link_error=error_callback)
         return True
 
 class JobHostSummary(BaseModel):

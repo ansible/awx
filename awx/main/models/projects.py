@@ -365,6 +365,12 @@ class ProjectUpdate(CommonTask):
         from awx.main.tasks import RunProjectUpdate
         return RunProjectUpdate
 
+    def is_blocked_by(self, obj):
+        if type(obj) == ProjectUpdate:
+            if self.project == obj.project:
+                return True
+        return False
+
     @property
     def task_impact(self):
         return 20
@@ -374,7 +380,7 @@ class ProjectUpdate(CommonTask):
         signal_socket = signal_context.socket(zmq.REQ)
         signal_socket.connect(settings.TASK_COMMAND_PORT)
         signal_socket.send_json(dict(task_type="project_update", id=self.id, metadata=kwargs))
-        self.socket.recv()
+        signal_socket.recv()
         return True
 
     def _update_parent_instance(self):
