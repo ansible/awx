@@ -177,7 +177,7 @@ def rebuild_graph(message):
             time_delt = len(task_dependencies) - task_dependencies.index(dep)
             dep.created = task.created - datetime.timedelta(seconds=1+time_delt)
             dep.save()
-            waiting_tasks.insert(dep, waiting_tasks.index(task))
+            waiting_tasks.insert(waiting_tasks.index(task), dep)
         task.status = 'waiting'
         task.save()
         

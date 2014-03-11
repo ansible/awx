@@ -15,6 +15,9 @@ import uuid
 # PyYAML
 import yaml
 
+# ZMQ
+import zmq
+
 # Django
 from django.conf import settings
 from django.db import models
@@ -328,7 +331,9 @@ class Job(CommonTask):
     @property
     def task_impact(self):
         # NOTE: We sorta have to assume the host count matches and that forks default to 5
-        return min(self._get_hosts().count(), 5 if self.forks == 0 else self.forks) * 10
+        from awx.main.models.inventory import Host
+        count_hosts = Host.objects.filter(inventory__jobs__pk=self.pk).count()
+        return min(count_hosts, 5 if self.forks == 0 else self.forks) * 10
 
     @property
     def successful_hosts(self):
