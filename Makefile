@@ -120,6 +120,9 @@ celeryd:
 receiver:
 	$(PYTHON) manage.py run_callback_receiver
 
+taskmanager:
+	$(PYTHON) manage.py run_task_system
+
 # Run all API unit tests.
 test:
 	$(PYTHON) manage.py test -v2 main
