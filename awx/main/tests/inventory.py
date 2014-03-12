@@ -991,10 +991,12 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.group = self.inventory.groups.create(name='Cloud Group')
         self.inventory2 = self.organization.inventories.create(name='Cloud Inventory 2')
         self.group2 = self.inventory2.groups.create(name='Cloud Group 2')
+        self.start_taskmanager(settings.TASK_COMMAND_PORT)
         self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
 
     def tearDown(self):
         super(InventoryUpdatesTest, self).tearDown()
+        self.terminate_taskmanager()
         self.terminate_queue()
         
     def update_inventory_source(self, group, **kwargs):

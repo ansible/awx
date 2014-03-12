@@ -323,11 +323,13 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
         self.project = None
         self.credential = None
         settings.INTERNAL_API_URL = self.live_server_url
+        self.start_taskmanager(settings.TASK_COMMAND_PORT)
         self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
 
     def tearDown(self):
         super(CleanupJobsTest, self).tearDown()
         self.terminate_queue()
+        self.terminate_taskmanager()
         if self.test_project_path:
             shutil.rmtree(self.test_project_path, True)
 

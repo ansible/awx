@@ -188,6 +188,7 @@ class RunJobTest(BaseCeleryTest):
             return args
         RunJob.build_args = new_build_args
         settings.INTERNAL_API_URL = self.live_server_url
+        self.start_taskmanager(settings.TASK_COMMAND_PORT)
         if settings.CALLBACK_CONSUMER_PORT:
             self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
 
@@ -196,6 +197,7 @@ class RunJobTest(BaseCeleryTest):
         if self.test_project_path:
             shutil.rmtree(self.test_project_path, True)
         RunJob.build_args = self.original_build_args
+        self.terminate_taskmanager()
         self.terminate_queue()
 
     def create_test_credential(self, **kwargs):

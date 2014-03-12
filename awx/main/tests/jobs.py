@@ -442,11 +442,13 @@ class BaseJobTestMixin(BaseTestMixin):
     def setUp(self):
         super(BaseJobTestMixin, self).setUp()
         self.populate()
+        self.start_taskmanager(settings.TASK_COMMAND_PORT)
         if settings.CALLBACK_CONSUMER_PORT:
             self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
 
     def tearDown(self):
         super(BaseJobTestMixin, self).tearDown()
+        self.terminate_taskmanager()
         self.terminate_queue()
 
 class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):

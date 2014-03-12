@@ -26,6 +26,7 @@ from django.test.client import Client
 from awx.main.models import *
 from awx.main.backend import LDAPSettings
 from awx.main.management.commands.run_callback_receiver import run_subscriber
+from awx.main.management.commands.run_task_system import run_taskmanager
 
 
 class BaseTestMixin(object):
@@ -61,6 +62,7 @@ class BaseTestMixin(object):
             callback_queue_path = '/tmp/callback_receiver_test_%d.ipc' % callback_port
             self._temp_project_dirs.append(callback_queue_path)
             settings.CALLBACK_QUEUE_PORT = 'ipc://%s' % callback_queue_path
+            settings.CALLBACK_COMMAND_PORT = 'ipc:///tmp/task_command_receiver_%d.ipc' % callback_port
         # Make temp job status directory for unit tests.
         job_status_dir = tempfile.mkdtemp()
         self._temp_project_dirs.append(job_status_dir)
@@ -374,6 +376,15 @@ class BaseTestMixin(object):
             for obj in response['results']:
                 self.assertTrue(set(obj.keys()) <= set(fields))
 
+    def start_taskmanager(self, command_port):
+        self.taskmanager_process = Process(target=run_taskmanager,
+                                           args=(command_port,))
+        self.taskmanager_process.start()
+
+    def terminate_taskmanager(self):
+        if hasattr(self, 'taskmanager_process'):
+            self.taskmanager_process.terminate()
+
     def start_queue(self, consumer_port, queue_port):
         self.queue_process = Process(target=run_subscriber,
                                 args=(consumer_port, queue_port, False,))
@@ -382,7 +393,7 @@ class BaseTestMixin(object):
     def terminate_queue(self):
         if hasattr(self, 'queue_process'):
             self.queue_process.terminate()
-                
+
 class BaseTest(BaseTestMixin, django.test.TestCase):
     '''
     Base class for unit tests.

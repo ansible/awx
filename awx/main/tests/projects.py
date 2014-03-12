@@ -680,10 +680,12 @@ class ProjectUpdatesTest(BaseTransactionTest):
     def setUp(self):
         super(ProjectUpdatesTest, self).setUp()
         self.setup_users()
+        self.start_taskmanager(settings.TASK_COMMAND_PORT)
         self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
 
     def tearDown(self):
         super(ProjectUpdatesTest, self).tearDown()
+        self.terminate_taskmanager()
         self.terminate_queue()
 
     def create_project(self, **kwargs):
