@@ -161,11 +161,11 @@ def rebuild_graph(message):
         print("Active celery tasks: " + str(active_tasks))
     for task in list(running_tasks):
         if task.celery_task_id not in active_tasks:
-            # Pull status again and make sure it didn't finish in the meantime
+            # NOTE: Pull status again and make sure it didn't finish in the meantime?
             task.status = 'failed'
             task.result_traceback += "Task was marked as running in Tower but was not present in Celery so it has been marked as failed"
             task.save()
-            running_tasks.pop(task)
+            running_tasks.pop(running_tasks.index(task))
             if settings.DEBUG:
                 print("Task %s appears orphaned... marking as failed" % task)
 
@@ -268,8 +268,15 @@ def run_taskmanager(command_port):
         time.sleep(0.1)
 
 class Command(NoArgsCommand):
+    '''
+    Tower Task Management System
+    This daemon is designed to reside between our tasks and celery and provide a mechanism
+    for understanding the relationship between those tasks and their dependencies.  It also
+    actively prevents situations in which Tower can get blocked because it doesn't have an
+    understanding of what is progressing through celery.
+    '''
 
-    help = 'Launch the job graph runner'
+    help = 'Launch the Tower task management system'
 
     def init_logging(self):
         log_levels = dict(enumerate([logging.ERROR, logging.INFO,
