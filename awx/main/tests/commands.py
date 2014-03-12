@@ -402,7 +402,7 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
         self.assertFalse(job.passwords_needed_to_start)
-        self.assertTrue(job.start())
+        self.assertTrue(job.signal_start())
         self.assertEqual(job.status, 'waiting')
         job = Job.objects.get(pk=job.pk)
         self.assertEqual(job.status, 'successful')

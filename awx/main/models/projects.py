@@ -294,7 +294,7 @@ class Project(CommonModel):
     def update(self, **kwargs):
         if self.can_update:
             project_update = self.project_updates.create()
-            project_update.signal_start()
+            project_update.signal_start(**kwargs)
             return project_update
 
     def get_absolute_url(self):
@@ -376,6 +376,11 @@ class ProjectUpdate(CommonTask):
         return 20
 
     def signal_start(self, **kwargs):
+        json_args = json.dumps(kwargs)
+        self.start_args = json_args
+        self.save()
+        self.start_args = encrypt_field(self, 'start_args')
+        self.save()
         signal_context = zmq.Context()
         signal_socket = signal_context.socket(zmq.REQ)
         signal_socket.connect(settings.TASK_COMMAND_PORT)
