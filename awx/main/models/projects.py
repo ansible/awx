@@ -33,6 +33,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 from awx.lib.compat import slugify
 from awx.main.models.base import *
 from awx.main.utils import update_scm_url
+from awx.main.utils import encrypt_field
 
 __all__ = ['Project', 'ProjectUpdate']
 

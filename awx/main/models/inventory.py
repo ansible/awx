@@ -31,6 +31,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 # AWX
 from awx.main.fields import AutoOneToOneField
 from awx.main.models.base import *
+from awx.main.utils import encrypt_field
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate']
 

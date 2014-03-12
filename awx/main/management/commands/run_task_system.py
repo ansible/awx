@@ -72,7 +72,7 @@ class SimpleDAG(object):
         for from_node, to_node in self.edges:
             doc += "%s -> %s;\n" % (short_string_obj(self.nodes[from_node]['node_object']),
                                     short_string_obj(self.nodes[to_node]['node_object']))
-        doc += "}"
+        doc += "}\n"
         gv_file = open('/tmp/graph.gv', 'w')
         gv_file.write(doc)
         gv_file.close()

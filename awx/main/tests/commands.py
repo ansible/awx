@@ -395,7 +395,7 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
         result, stdout, stderr = self.run_command('cleanup_jobs')
         self.assertEqual(result, None)
         jobs_after = Job.objects.all().count()
-        self.assertEqual(jobs_before, jobs_after)        
+        self.assertEqual(jobs_before, jobs_after)
         # Create and run job.
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
