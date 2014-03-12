@@ -145,13 +145,17 @@ def rebuild_graph(message):
     inspector = inspect()
     active_task_queues = inspector.active()
     active_tasks = []
-    for queue in active_task_queues:
-        active_tasks += [at['id'] for at in active_task_queues[queue]]
-
+    if active_task_queues is not None:
+        for queue in active_task_queues:
+            active_tasks += [at['id'] for at in active_task_queues[queue]]
+    else:
+        if settings.DEBUG:
+            print("Could not communicate with celery!")
+        # TODO: Something needs to be done here to signal to the system as a whole that celery appears to be down
+        return None
     all_sorted_tasks = get_tasks()
     if not len(all_sorted_tasks):
         return None
-
     running_tasks = filter(lambda t: t.status == 'running', all_sorted_tasks)
     waiting_tasks = filter(lambda t: t.status != 'running', all_sorted_tasks)
     new_tasks = filter(lambda t: t.status == 'new', all_sorted_tasks)
