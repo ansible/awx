@@ -346,6 +346,54 @@ angular.module('JobTemplateFormDefinition', [])
                         icon: 'icon-zoom-in'
                     }
                 }
+            },
+
+            schedules:  {
+                type: 'collection',
+                title: 'Schedules',
+                iterator: 'schedule',
+                index: true,
+                open: false,
+                
+                fields: {
+                    name: {
+                        key: true,
+                        label: 'Name'
+                    },
+                    dtstart: {
+                        label: 'Start'
+                    },
+                    dtend: {
+                        label: 'End'
+                    }
+                },
+
+                actions: {
+                    add: {
+                        mode: 'all',
+                        ngClick: 'addSchedule()',
+                        awToolTip: 'Add a new schedule'
+                    }
+                },
+
+                fieldActions: {
+                    edit: {
+                        label: 'Edit',
+                        ngClick: "editSchedule(schedule.id)",
+                        icon: 'icon-edit',
+                        awToolTip: 'Edit schedule',
+                        dataPlacement: 'top'
+                    },
+
+                    "delete": {
+                        label: 'Delete',
+                        ngClick: "deleteSchedule(schedule.id)",
+                        icon: 'icon-trash',
+                        awToolTip: 'Delete schedule',
+                        dataPlacement: 'top'
+                    }
+                }
+                
             }
         }
             

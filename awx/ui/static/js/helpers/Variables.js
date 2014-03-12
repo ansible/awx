@@ -23,8 +23,7 @@ angular.module('VariablesHelper', ['Utilities'])
         return function (variables) {
             var result = "---", json_obj;
             if (typeof variables === 'string') {
-                if ($.isEmptyObject(variables) || variables === "{}" || variables === "null" ||
-                    variables === "" || variables === null) {
+                if (variables === "{}" || variables === "null" || variables === "") {
                     // String is empty, return ---
                 } else {
                     try {
@@ -45,13 +44,18 @@ angular.module('VariablesHelper', ['Utilities'])
                 }
             }
             else {
-                // an object was passed in. just convert to yaml
-                try {
-                    result = jsyaml.safeDump(variables);
+                if ($.isEmptyObject(variables) || variables === null) {
+                    // Empty object, return ---
                 }
-                catch(e3) {
-                    ProcessErrors(null, variables, e3.message, null, { hdr: 'Error!',
-                        msg: 'Attempt to convert JSON object to YAML document failed: ' + e3.message });
+                else {
+                    // convert object to yaml
+                    try {
+                        result = jsyaml.safeDump(variables);
+                    }
+                    catch(e3) {
+                        ProcessErrors(null, variables, e3.message, null, { hdr: 'Error!',
+                            msg: 'Attempt to convert JSON object to YAML document failed: ' + e3.message });
+                    }
                 }
             }
             return result;

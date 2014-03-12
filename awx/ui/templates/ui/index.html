@@ -33,6 +33,16 @@
   <script src="{{ STATIC_URL }}lib/angular-sanitize/angular-sanitize.min.js"></script>
   <script src="{{ STATIC_URL }}lib/angular-md5/angular-md5.min.js"></script>
   <script src="{{ STATIC_URL }}lib/angular-codemirror/lib/AngularCodeMirror.js"></script>
+
+  <!-- scheduler pieces -->
+  <script src="{{ STATIC_URL }}lib/timezone-js/src/date.js"></script>
+  <script src="{{ STATIC_URL }}lib/angular-tz-extensions/packages/jstimezonedetect/jstz.min.js"></script>
+  <script src="{{ STATIC_URL }}lib/underscore/underscore.js"></script>
+  <script src="{{ STATIC_URL }}lib/rrule/lib/rrule.js"></script>
+  <script src="{{ STATIC_URL }}lib/rrule/lib/nlp.js"></script>
+  <script src="{{ STATIC_URL }}lib/angular-tz-extensions/lib/angular-tz-extensions.js"></script>
+  <script src="{{ STATIC_URL }}lib/angular-scheduler/lib/angular-scheduler.js"></script>
+  
   {% if settings.USE_MINIFIED_JS %} 
   <script src="{{ STATIC_URL }}js/awx.min.js"></script>
   {% else %}
@@ -66,6 +76,7 @@
   <script src="{{ STATIC_URL }}js/controllers/JobEvents.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/JobHosts.js"></script>
   <script src="{{ STATIC_URL }}js/controllers/Permissions.js"></script>
+  <script src="{{ STATIC_URL }}js/controllers/Schedules.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Users.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Organizations.js"></script>
   <script src="{{ STATIC_URL }}js/forms/Inventories.js"></script>
@@ -104,6 +115,7 @@
   <script src="{{ STATIC_URL }}js/lists/HomeHosts.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Groups.js"></script>
   <script src="{{ STATIC_URL }}js/lists/Hosts.js"></script>
+  <script src="{{ STATIC_URL }}js/lists/Schedules.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/refresh-related.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/related-search.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/refresh.js"></script>
@@ -128,6 +140,7 @@
   <script src="{{ STATIC_URL }}js/helpers/Groups.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/Hosts.js"></script>
   <script src="{{ STATIC_URL }}js/helpers/Variables.js"></script>
+  <script src="{{ STATIC_URL }}js/helpers/Schedules.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/JobStatus.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/InventorySyncStatus.js"></script>
   <script src="{{ STATIC_URL }}js/widgets/SCMSyncStatus.js"></script>
@@ -401,7 +414,7 @@
   <script src="{{ STATIC_URL }}lib/codemirror/addon/edit/closebrackets.js"></script>
   <script src="{{ STATIC_URL }}lib/codemirror/addon/edit/matchbrackets.js"></script>
   <script src="{{ STATIC_URL }}lib/codemirror/addon/selection/active-line.js"></script>
-  
+
   <script>
       // When user clicks on main tab, fire the matching Angular route
       $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {

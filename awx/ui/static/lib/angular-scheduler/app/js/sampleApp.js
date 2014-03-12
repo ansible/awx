@@ -31,9 +31,6 @@ angular.module('sampleApp', ['ngRoute', 'AngularScheduler', 'Timezones'])
        
         scheduler.inject('form-container', true);
 
-        console.log('User timezone: ');
-        console.log(scheduler.getUserTimezone());
-
         $scope.setRRule = function() {
             $scope.inputRRuleMsg = '';
             $scope.inputRRuleMsg = scheduler.setRRule($scope.inputRRule);
@@ -44,19 +41,44 @@ angular.module('sampleApp', ['ngRoute', 'AngularScheduler', 'Timezones'])
         $scope.saveForm = function() {
             if (scheduler.isValid()) {
                 var schedule = scheduler.getValue(),
-                    html =
-                    "<form>\n" +
-                    "<div class=\"form-group\">\n" +
-                    "<label>RRule</label>\n" +
-                    "<textarea id=\"rrule-result\" readonly class=\"form-control\" rows=\"8\">" + schedule.rrule + "</textarea>\n" +
-                    "</div>\n" +
-                    "</form>\n",
+                    rrule = scheduler.getRRule(),
+                    html,
                     wheight = $(window).height(),
                     wwidth = $(window).width(),
-                    w, h;
-                
+                    w, h, occurrences;
+
+                occurrences = [];
+                rrule.all(function(date, i) {
+                    if (i < 10) {
+                        occurrences.push(date);
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                });
+
+                html = "<form>\n" +
+                    "<div class=\"form-group\">\n" +
+                    "<label>Description</label>\n" +
+                    "<textarea id=\"rrule-description\" readonly class=\"form-control\" rows=\"2\">Run " + rrule.toText() + "</textarea>\n" +
+                    "</div>" +
+                    "<div class=\"form-group\">\n" +
+                    "<label>RRule</label>\n" +
+                    "<textarea id=\"rrule-result\" readonly class=\"form-control\" rows=\"3\">" + schedule.rrule + "</textarea>\n" +
+                    "</div>\n" +
+                    "<div class=\"form-group\">\n" +
+                    "<label>Occurrences (up to 10)</label>\n" +
+                    "<ul class=\"occurrence-list mono-space\">\n";
+                occurrences.forEach(function(itm){
+                    html += "<li>" + itm + "</li>\n";
+                });
+                html += "</ul>\n" +
+                    "</div>\n" +
+                    "</form>\n";
+
                 w = (600 > wwidth) ? wwidth : 600;
-                h = (400 > wheight) ? wheight : 400;
+                h = (600 > wheight) ? wheight : 600;
 
                 $('#message').html(html)
                     .dialog({

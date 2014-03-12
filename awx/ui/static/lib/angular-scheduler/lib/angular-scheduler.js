@@ -290,14 +290,14 @@ angular.module('AngularScheduler', ['underscore'])
                         }
                     }
                     else {
-                        scope.startDateError("Provide a valid start date and time");
+                        this.scope.startDateError("Provide a valid start date and time");
                         validity = false;
                     }
                     return validity;
                 };
 
                 // Returns an rrule object
-                this.getRule = function() {
+                this.getRRule = function() {
                     var options = this.getOptions();
                     return GetRule(options);
                 };
@@ -305,7 +305,7 @@ angular.module('AngularScheduler', ['underscore'])
                 // Return object containing schedule name, string representation of rrule per iCalendar RFC,
                 // and options used to create rrule
                 this.getValue = function() {
-                    var rule = this.getRule(),
+                    var rule = this.getRRule(),
                         options = this.getOptions();
                     return {
                         name: scope.schedulerName,
@@ -317,6 +317,10 @@ angular.module('AngularScheduler', ['underscore'])
                 this.setRRule = function(rule) {
                     this.clear();
                     return SetRule(rule, this.scope);
+                };
+
+                this.setName = function(name) {
+                    this.scope.schedulerName = name;
                 };
 
                 // Read in the HTML partial, compile and inject it into the DOM. 
@@ -336,13 +340,13 @@ angular.module('AngularScheduler', ['underscore'])
                 // Get the user's local timezone
                 this.getUserTimezone = function() {
                     return $timezones.getLocal();
-                }
+                };
             };
             return new fn();
         };
     }])
 
-    .factory('Inject', ['AngularScheduler.partial', '$compile', '$http', '$log', function(scheduler_partial, $compile, $http, $log) {
+    .factory('Inject', ['AngularScheduler.partial', '$compile', '$http', '$log', function(scheduler_partial, $compile, $http) {
         return function(params) {
             
             var scope = params.scope,
@@ -741,12 +745,12 @@ angular.module('AngularScheduler', ['underscore'])
         
             scope.frequencyOptions = [
                 { name: 'None (run once)', value: 'none', intervalLabel: '' },
-                { name: 'Minutely', value: 'minutely', intervalLabel: 'minutes' },
-                { name: 'Hourly', value: 'hourly', intervalLabel: 'hours' },
-                { name: 'Daily', value: 'daily', intervalLabel: 'days' },
-                { name: 'Weekly', value: 'weekly', intervalLabel: 'weeks' },
-                { name: 'Monthly', value: 'monthly', intervalLabel: 'months' },
-                { name: 'Yearly', value: 'yearly', intervalLabel: 'years' }
+                { name: 'Minute', value: 'minutely', intervalLabel: 'minutes' },
+                { name: 'Hour', value: 'hourly', intervalLabel: 'hours' },
+                { name: 'Day', value: 'daily', intervalLabel: 'days' },
+                { name: 'Week', value: 'weekly', intervalLabel: 'weeks' },
+                { name: 'Month', value: 'monthly', intervalLabel: 'months' },
+                { name: 'Year', value: 'yearly', intervalLabel: 'years' }
             ];
 
             scope.endOptions = [
@@ -830,6 +834,11 @@ angular.module('AngularScheduler', ['underscore'])
                     options.maxDate = (attrs.maxDate) ? new Date(attrs('maxDate')) : null;
                     options.changeMonth = (attrs.changeMonth === "false")  ? false : true;
                     options.changeYear = (attrs.changeYear === "false") ? false : true;
+                    options.beforeShow = function() {
+                        setTimeout(function(){
+                            $('.ui-datepicker').css('z-index', 9999);
+                        }, 100);
+                    };
                     $(element).datepicker(options);
                 }
         };

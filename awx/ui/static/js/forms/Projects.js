@@ -129,9 +129,9 @@ angular.module('ProjectFormDefinition', [])
                     hdr: 'GIT URLs',
                     content: '<p>Example URLs for GIT SCM include:</p><ul class=\"no-bullets\"><li>https://github.com/ansible/ansible.git</li>' +
                         '<li>git@github.com:ansible/ansible.git</li><li>git://servername.example.com/ansible.git</li></ul>' +
-                        '<p><strong>Note:</strong> If using SSH protocol for GitHub or Bitbucket, enter in the SSH key only, ' +
+                        '<p><strong>Note:</strong> When using SSH protocol for GitHub or Bitbucket, enter an SSH key only, ' +
                         'do not enter a username (other than git). Additionally, GitHub and Bitbucket do not support password authentication when using ' +
-                        'SSH protocol. GIT read only protocol (git://) does not use username or password information.',
+                        'SSH. GIT read only protocol (git://) does not use username or password information.',
                     show: "scm_type.value == 'git'"
                 }, {
                     hdr: 'SVN URLs',
@@ -262,6 +262,54 @@ angular.module('ProjectFormDefinition', [])
                         awToolTip: 'Delete the organization'
                     }
                 }
+            },
+
+            schedules:  {
+                type: 'collection',
+                title: 'Schedules',
+                iterator: 'schedule',
+                index: true,
+                open: false,
+                
+                fields: {
+                    name: {
+                        key: true,
+                        label: 'Name'
+                    },
+                    dtstart: {
+                        label: 'Start'
+                    },
+                    dtend: {
+                        label: 'End'
+                    }
+                },
+
+                actions: {
+                    add: {
+                        mode: 'all',
+                        ngClick: 'addSchedule()',
+                        awToolTip: 'Add a new schedule'
+                    }
+                },
+
+                fieldActions: {
+                    edit: {
+                        label: 'Edit',
+                        ngClick: "editSchedule(schedule.id)",
+                        icon: 'icon-edit',
+                        awToolTip: 'Edit schedule',
+                        dataPlacement: 'top'
+                    },
+
+                    "delete": {
+                        label: 'Delete',
+                        ngClick: "deleteSchedule(schedule.id)",
+                        icon: 'icon-trash',
+                        awToolTip: 'Delete schedule',
+                        dataPlacement: 'top'
+                    }
+                }
+                
             }
         }
 

@@ -1162,8 +1162,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                             html += " class=\"active\"";
                         }
                         html += "><a id=\"" + tab.name + "_link\" ng-click=\"toggleTab($event, '" + tab.name + "_link', '" +
-                            this.form.name + "_tabs')\" href=\"#" + tab.name + "\"" +
-                            tab.name + "\" data-toggle=\"tab\">" + tab.label + "</a></li>\n";
+                            this.form.name + "_tabs')\" href=\"#" + tab.name + "\" data-toggle=\"tab\">" + tab.label + "</a></li>\n";
                     }
                     html += "</ul>\n";
                     html += "<div class=\"tab-content\">\n";
@@ -1396,7 +1395,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                             }
                             html += "\"></i></a></th>\n";
                         }
-                        html += "<th></th>\n";
+                        html += "<th>Actions</th>\n";
                         html += "</tr>\n";
                         html += "</thead>";
                         html += "<tbody>\n";

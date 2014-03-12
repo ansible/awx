@@ -47,9 +47,10 @@
     margin-top: 0;
     padding-top: 3px;
 }
-.pull-up { 
-    margin-top: -15px;
-    margin-bottom: 10px;
+.error-pull-up {
+    position: relative;
+    top: -15px;
+    margin-bottom: 15px;
 }
 .red-text {
     color: #dd1b16;

@@ -31,6 +31,7 @@
 @import "animations.less";
 @import "jquery-ui-overrides.less";
 @import "codemirror.less";
+@import "angular-scheduler.less";
 
 
 html, body { height: 100%; }
@@ -527,6 +528,9 @@ dd {
   padding-right: 10px;
 }
 
+#group_form #group_tabs {
+  margin-top: 25px;
+}
 
 /* Outline required fields in Red when there is an error */
   .form-control.ng-dirty.ng-invalid, .form-control.ng-dirty.ng-invalid:focus {
@@ -792,6 +796,16 @@ select.field-mini-height {
 
 input[type="checkbox"].checkbox-no-label {
   margin-top: 10px;
+}
+
+.checkbox-group {
+  .radio-inline + .radio-inline,
+  .checkbox-inline + .checkbox-inline {
+    margin-left: 0;
+  }
+  .checkbox-inline, .radio-inline {
+    margin-right: 10px;
+  }
 }
 
 .checkbox-options {

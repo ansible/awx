@@ -86,8 +86,18 @@ angular.module('ansible', [
     'HomeGroupListDefinition',
     'HomeHostListDefinition',
     'ActivityDetailDefinition',
-    'VariablesHelper'
+    'VariablesHelper',
+    'SchedulesListDefinition',
+    'AngularScheduler',
+    'Timezones',
+    'SchedulesHelper'
 ])
+    
+    .constant('AngularScheduler.partial', $basePath + 'lib/angular-scheduler/lib/angular-scheduler.html')
+    .constant('AngularScheduler.useTimezone', false)
+    .constant('AngularScheduler.showUTCField', false)
+    .constant('$timezones.definitions.location', $basePath + 'lib/angular-tz-extensions/tz/data')
+
     .config(['$routeProvider',
         function ($routeProvider) {
             $routeProvider.
@@ -131,6 +141,11 @@ angular.module('ansible', [
                 controller: 'JobTemplatesEdit'
             }).
 
+            when('/job_templates/:id/schedules', {
+                templateUrl: urlPrefix + 'partials/schedule_detail.html',
+                controller: 'ScheduleEdit'
+            }).
+
             when('/projects', {
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: 'ProjectsList'
@@ -144,6 +159,11 @@ angular.module('ansible', [
             when('/projects/:id', {
                 templateUrl: urlPrefix + 'partials/projects.html',
                 controller: 'ProjectsEdit'
+            }).
+            
+            when('/projects/:id/schedules', {
+                templateUrl: urlPrefix + 'partials/schedule_detail.html',
+                controller: 'ScheduleEdit'
             }).
 
             when('/projects/:project_id/organizations', {

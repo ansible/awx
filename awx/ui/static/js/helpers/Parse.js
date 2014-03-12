@@ -19,22 +19,20 @@ angular.module('ParseHelper', ['Utilities', 'AngularCodeMirrorModule'])
                 fld = (params.variable) ? params.variable : 'variables',
                 pfld = (params.parse_variable) ? params.parse_variable : 'parseType',
                 onReady = params.onReady,
-                onChange = params.onChange,
-                codeMirror;
-        
+                onChange = params.onChange;
+
             function removeField() {
                 //set our model to the last change in CodeMirror and then destroy CodeMirror
-                scope[fld] = codeMirror.getValue();
-                codeMirror.destroy();
+                scope[fld] = scope.codeMirror.getValue();
+                scope.codeMirror.destroy();
             }
 
             function createField(onChange, onReady) {
                 //hide the textarea and show a fresh CodeMirror with the current mode (json or yaml)
-                codeMirror = AngularCodeMirror();
-                codeMirror.addModes($AnsibleConfig.variable_edit_modes);
-                codeMirror.showTextArea({ scope: scope, model: fld, element: field_id, mode: scope[pfld], onReady: onReady, onChange: onChange });
+                scope.codeMirror = AngularCodeMirror();
+                scope.codeMirror.addModes($AnsibleConfig.variable_edit_modes);
+                scope.codeMirror.showTextArea({ scope: scope, model: fld, element: field_id, mode: scope[pfld], onReady: onReady, onChange: onChange });
             }
-
 
             // Hide the textarea and show a CodeMirror editor
             createField(onChange, onReady);

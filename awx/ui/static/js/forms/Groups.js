@@ -14,7 +14,7 @@ angular.module('GroupFormDefinition', [])
         showTitle: true,
         cancelButton: false,
         name: 'group',
-        well: true,
+        well: false,
         formLabelSize: 'col-lg-3',
         formFieldSize: 'col-lg-9',
 
@@ -24,6 +24,9 @@ angular.module('GroupFormDefinition', [])
         }, {
             name: 'source',
             label: 'Source'
+        },{
+            name: 'schedules',
+            label: 'Schedules'
         }],
 
         fields: {
@@ -46,7 +49,7 @@ angular.module('GroupFormDefinition', [])
                 type: 'textarea',
                 addRequired: false,
                 editRequird: false,
-                rows: 6,
+                rows: 12,
                 'default': '---',
                 dataTitle: 'Group Variables',
                 dataPlacement: 'right',
@@ -184,7 +187,7 @@ angular.module('GroupFormDefinition', [])
         },
 
         buttons: {
-
+            /*
             labelClass: 'col-lg-3',
             controlClass: 'col-lg-5',
 
@@ -196,6 +199,7 @@ angular.module('GroupFormDefinition', [])
                 ngClick: 'formReset()',
                 ngDisabled: true //Disabled when $pristine
             }
+            */
         },
 
         related: { }

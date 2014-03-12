@@ -112,6 +112,13 @@ angular.module('ProjectsListDefinition', [])
                 ngShow: "project.status == 'updating'",
                 dataPlacement: 'top'
             },
+            schedule: {
+                label: 'Schedule',
+                mode: 'all',
+                ngHref: '#/projects/{{ project.id }}/schedules',
+                awToolTip: 'Schedule future project sync runs',
+                dataPlacement: 'top'
+            },
             "delete": {
                 label: 'Delete',
                 ngClick: "deleteProject(project.id, project.name)",

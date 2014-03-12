@@ -551,25 +551,138 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                 defaultUrl = GetBasePath('groups') + group_id + '/',
                 master = {},
                 choicesReady,
-                scope = generator.inject(form, { mode: 'edit', modal: true, related: false, show_modal: false });
+                scope, html, x, y, ww, wh, maxrows;
             
-            generator.reset();
-
+            html = "<div id=\"group-modal-dialog\" title=\"Group Edit\">\n" +
+                    "<div id=\"form-container\" style=\"width: 100%;\"></div></div>\n";
+            $('#inventory-modal-container').empty().append(html);
+            scope = generator.inject(form, { mode: 'edit', id: 'form-container', breadCrumbs: false, related: false });
+            //generator.reset();
             GetSourceTypeOptions({ scope: scope, variable: 'source_type_options' });
-
-            scope.formModalActionLabel = 'Save';
-            scope.formModalHeader = 'Group';
-            scope.formModalCancelShow = true;
             scope.source = form.fields.source['default'];
             scope.sourcePathRequired = false;
+            scope[form.fields.source_vars.parseTypeName] = 'yaml';
+            scope.parseType = 'yaml';
+
+            function waitStop() { Wait('stop'); }
+            
+            function textareaResize(textareaID) {
+                var formHeight = $('#group_form').height(),
+                    windowHeight = $('#group-modal-dialog').height(),
+                    current_height, height, rows, row_height, model;
+                Wait('start');
+                current_height = $('#' + textareaID).height();
+                row_height = Math.floor( current_height / $('#' + textareaID).attr('rows'));
+                height = current_height + windowHeight - formHeight;
+                rows = Math.floor(height / row_height) - 3;
+                rows = (rows < 6) ? 6 : rows;
+                $('#' + textareaID).attr('rows', rows);
+                if (scope.codeMirror) {
+                    model = $('#' + textareaID).attr('ng-model');
+                    scope[model] = scope.codeMirror.getValue();
+                    scope.codeMirror.destroy();
+                }
+                ParseTypeChange({ scope: scope, field_id: textareaID, onReady: waitStop });
+            }
+
+            // Set modal dimensions based on viewport width
+            ww = $(document).width();
+            wh = $('body').height();
+            if (ww > 1199) {
+                // desktop
+                x = 675;
+                y = (750 > wh) ? wh - 20 : 750;
+                maxrows = 18;
+            } else if (ww <= 1199 && ww >= 768) {
+                x = 550;
+                y = (620 > wh) ? wh - 15 : 620;
+                maxrows = 12;
+            } else {
+                x = (ww - 20);
+                y = (500 > wh) ? wh : 500;
+                maxrows = 10;
+            }
+
+            // Create the modal
+            $('#group-modal-dialog').dialog({
+                buttons: {
+                    'Cancel': function() {
+                        scope.cancelModal();
+                    },
+                    'Save': function () {
+                        //setTimeout(function(){
+                        //    scope.$apply(function(){
+                        scope.saveGroup();
+                        //    });
+                        //});
+                    }
+                },
+                modal: true,
+                width: x,
+                height: y,
+                autoOpen: false,
+                create: function () {
+                    $('.ui-dialog[aria-describedby="group-modal-dialog"]').find('.ui-dialog-titlebar button').empty().attr({'class': 'close'}).text('x');
+                    $('.ui-dialog[aria-describedby="group-modal-dialog"]').find('.ui-dialog-buttonset button').each(function () {
+                        var c, h, i, l;
+                        l = $(this).text();
+                        if (l === 'Cancel') {
+                            h = "fa-times";
+                            c = "btn btn-default";
+                            i = "group-close-button";
+                            $(this).attr({
+                                'class': c,
+                                'id': i
+                            }).html("<i class=\"fa " + h + "\"></i> Cancel");
+                        } else if (l === 'Save') {
+                            h = "fa-check";
+                            c = "btn btn-primary";
+                            i = "group-save-button";
+                            $(this).attr({
+                                'class': c,
+                                'id': i
+                            }).html("<i class=\"fa " + h + "\"></i> Save");
+                        }
+                    });
+                },
+                resizeStop: function () {
+                    // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
+                    var dialog = $('.ui-dialog[aria-describedby="group-modal-dialog"]'),
+                        content = dialog.find('#group-modal-dialog');
+                    content.width(dialog.width() - 28);
+                    if ($('#group_tabs .active a').text() === 'Properties') {
+                        textareaResize('group_variables');
+                    }
+                },
+                close: function () {
+                    // Destroy on close
+                    $('.tooltip').each(function () {
+                        // Remove any lingering tooltip <div> elements
+                        $(this).remove();
+                    });
+                    $('.popover').each(function () {
+                        // remove lingering popover <div> elements
+                        $(this).remove();
+                    });
+                    $('#group-modal-dialog').dialog('destroy');
+                    $('#inventory-modal-container').empty();
+                    scope.cancelModal();
+                },
+                open: function () {
+                    Wait('stop');
+                }
+            });
 
             $('#group_tabs a[data-toggle="tab"]').on('show.bs.tab', function (e) {
-                var callback = function(){ Wait('stop'); };
+                var callback = function(){
+                    Wait('stop');
+                };
                 if ($(e.target).text() === 'Properties') {
                     Wait('start');
-                    ParseTypeChange({ scope: scope, field_id: 'group_variables', onReady: callback });
+                    setTimeout(function(){ textareaResize('group_variables'); }, 300);
+                    //ParseTypeChange({ scope: scope, field_id: 'group_variables', onReady: callback });
                 }
-                else {
+                else if ($(e.target).text() === 'Scope') {
                     if (scope.source && scope.source.value === 'ec2') {
                         Wait('start');
                         ParseTypeChange({ scope: scope, variable: 'source_vars', parse_variable: form.fields.source_vars.parseTypeName,
@@ -578,15 +691,16 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                 }
             });
 
-            scope[form.fields.source_vars.parseTypeName] = 'yaml';
-            scope.parseType = 'yaml';
-
             if (scope.groupVariablesLoadedRemove) {
                 scope.groupVariablesLoadedRemove();
             }
             scope.groupVariablesLoadedRemove = scope.$on('groupVariablesLoaded', function () {
-                var callback = function() { Wait('stop'); };
-                ParseTypeChange({ scope: scope, field_id: 'group_variables', onReady: callback });
+                //$('#group_tabs a:first').tab('show');
+                
+                //ParseTypeChange({ scope: scope, field_id: 'group_variables', onReady: callback });
+                Wait('start');
+                $('#group-modal-dialog').dialog('open');
+                setTimeout(function() { textareaResize('group_variables'); }, 300);
             });
 
             // After the group record is loaded, retrieve related data
@@ -600,6 +714,7 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                     Rest.get()
                         .success(function (data) {
                             scope.variables = ParseVariableString(data);
+                            master.variables = scope.variables;
                             scope.$emit('groupVariablesLoaded');
                         })
                         .error(function (data, status) {
@@ -609,10 +724,10 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                         });
                 } else {
                     scope.variables = "---";
+                    master.variables = scope.variables;
                     scope.$emit('groupVariablesLoaded');
                 }
-                master.variables = scope.variables;
-
+                
                 if (scope.source_url) {
                     // get source data
                     Rest.setUrl(scope.source_url);
@@ -724,7 +839,7 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                         }
                         scope.variable_url = data.related.variable_data;
                         scope.source_url = data.related.inventory_source;
-                        $('#form-modal').modal('show');
+                        //$('#form-modal').modal('show');
                         scope.$emit('groupLoaded');
                     })
                     .error(function (data, status) {
@@ -803,7 +918,7 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
 
                     scope.formModalActionDisabled = false;
 
-                    $('#form-modal').modal('hide');
+                    $('#group-modal-dialog').dialog('close');
 
                     // Change the selected group
                     if (groups_reload && parent_scope.selected_tree_id !== tree_id) {
@@ -864,6 +979,12 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
 
             // Cancel
             scope.cancelModal = function () {
+                try {
+                    $('#group-modal-dialog').dialog('close');
+                }
+                catch(e) {
+                    //ignore
+                }
                 if (scope.searchCleanup) {
                     scope.searchCleanup();
                 }
@@ -871,7 +992,7 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
             };
 
             // Save
-            scope.formModalAction = function () {
+            scope.saveGroup = function () {
                 Wait('start');
                 var fld, data, json_data;
 

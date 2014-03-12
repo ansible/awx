@@ -1,0 +1,52 @@
+<div class="row">
+    <div class="col-lg-12" id="breadcrumbs"></div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div id="schedule-list-target"></div>
+    </div>
+</div>
+
+<div id="scheduler-modal-dialog" title="Edit Schedule">
+    <ul id="scheduler-tabs" class="nav nav-tabs">
+        <li class="active"><a href="#schedule" id="schedule-link" data-toggle="tab" ng-click="toggleTab($event, 'schedule-link', 'scheduler-tabs')">Options</a></li>
+        <li><a href="#occurrences" id="occurrence-link" data-toggle="tab" ng-click="toggleTab($event, 'occurrence-link', 'scheduler-tabs')">Details</a></li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active" id="schedule">
+            <div id="form-container"></div>
+        </div>
+        <div class="tab-pane" id="occurrences">
+            <div class="alert alert-danger" ng-show="!schedulerIsValid">
+                <p>The scheduler options are invalid or incomplete. Make the needed changes on the options tab, then come back here to see details.</p>
+            </div>
+            <div ng-show="schedulerIsValid">
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea ng-model="rrule_nlp_description" name="rrule_nlp_description" id="rrule_nlp_description" readonly class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group" ng-show="showRRuleDetail">
+                    <label>RRule</label>
+                    <textarea ng-model="rrule" name="rrule" id="rrule" readonly class="form-control" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label id="occurrences-label">Occurrences <span class="sublabel">(limited to first 10)</label>
+                    <div id="date-choice">
+                        <div class="label-inline"><strong>Date format</strong></div>
+                        <input type="radio" ng-model="dateChoice" id="date-choice-utc" value="utc" >
+                        <div class="label-inline"> UTC</div>
+                        <input type="radio" ng-model="dateChoice" id="date-choice-local" value="local" >
+                        <div class="label-inline"> Local time</div>
+                    </div>
+                    <ul class="occurrence-list mono-space" ng-show="dateChoice == 'utc'">
+                        <li ng-repeat="occurrence in occurrence_list">{{ occurrence.utc }}</li>
+                    </ul>
+                    <ul class="occurrence-list mono-space" ng-show="dateChoice == 'local'">
+                        <li ng-repeat="occurrence in occurrence_list">{{ occurrence.local }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

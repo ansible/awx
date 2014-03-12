@@ -65,7 +65,8 @@ angular.module('JobTemplatesListDefinition', [])
             schedule: {
                 label: 'Schedule',
                 mode: 'all',
-                awToolTip: 'Schedule a future job using this template',
+                ngHref: '#/job_templates/{{ job_template.id }}/schedules',
+                awToolTip: 'Schedule future job template runs',
                 dataPlacement: 'top'
             },
             "delete": {
