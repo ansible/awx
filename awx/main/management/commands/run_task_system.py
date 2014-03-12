@@ -152,7 +152,8 @@ def rebuild_graph(message):
         if settings.DEBUG:
             print("Could not communicate with celery!")
         # TODO: Something needs to be done here to signal to the system as a whole that celery appears to be down
-        return None
+        if not hasattr(settings, 'CELERY_UNIT_TEST'):
+            return None
     all_sorted_tasks = get_tasks()
     if not len(all_sorted_tasks):
         return None

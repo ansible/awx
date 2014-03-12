@@ -62,7 +62,7 @@ class BaseTestMixin(object):
             callback_queue_path = '/tmp/callback_receiver_test_%d.ipc' % callback_port
             self._temp_project_dirs.append(callback_queue_path)
             settings.CALLBACK_QUEUE_PORT = 'ipc://%s' % callback_queue_path
-            settings.CALLBACK_COMMAND_PORT = 'ipc:///tmp/task_command_receiver_%d.ipc' % callback_port
+            settings.TASK_COMMAND_PORT = 'ipc:///tmp/task_command_receiver_%d.ipc' % callback_port
         # Make temp job status directory for unit tests.
         job_status_dir = tempfile.mkdtemp()
         self._temp_project_dirs.append(job_status_dir)
