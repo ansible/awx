@@ -193,7 +193,6 @@ def rebuild_graph(message):
 
     # Rebuild graph
     graph = SimpleDAG()
-    print("Graph nodes: " + str(graph.nodes))
     for task in running_tasks:
         if settings.DEBUG:
             print("Adding running task: %s to graph" % str(task))

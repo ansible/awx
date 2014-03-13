@@ -352,7 +352,8 @@ class BaseTask(Task):
                 raise Exception("Task %s(pk:%s) was canceled" % (str(self.model.__class__), str(pk)))
             else:
                 raise Exception("Task %s(pk:%s) encountered an error" % (str(self.model.__class__), str(pk)))
-        self.signal_finished(pk)
+        if not hasattr(settings, 'CELERY_UNIT_TEST'):
+            self.signal_finished(pk)
 
 class RunJob(BaseTask):
     '''

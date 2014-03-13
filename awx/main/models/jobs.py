@@ -410,7 +410,7 @@ class Job(CommonTask):
         if stored_args is None or stored_args == '':
             opts = dict([(field, kwargs.get(field, '')) for field in needed])
         else:
-            opts = stored_args
+            opts = dict([(field, stored_args.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
         task_class().apply_async((self.pk,), opts, link_error=error_callback)
