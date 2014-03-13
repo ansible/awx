@@ -6,17 +6,38 @@
  */
 
  /* 
-    #schedules-form  -inventory group add/edit dialog
+    #schedules-form-container -inventory group add/edit dialog
  */
 
-#schedules-form {
-    border: 1px solid #ddd; 
+#schedules-form-container {
+    display: none;
+    border: 1px solid #e5e5e5; 
     border-radius: 4px;
     box-shadow: 3px 3px 6px 0 #666;
-    padding: 8px 10px 15px 8px;
+    padding: 0 10px 15px 8px;
 }
 
-#scheduler-modal-dialog, #schedules-form {
+#schedules-title {
+    border-bottom: 1px solid #e5e5e5;
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+    margin-top: 0;
+
+    h4 {
+        display: inline-block;
+        margin: 0;
+    }
+    button {
+        display: inline-block;
+        /*margin-top: -10px;*/
+    }
+}
+
+#schedules-buttons {
+    text-align: right;
+}
+
+#scheduler-modal-dialog, #schedules-form-container {
     display: none; 
     overflow-x: hidden; 
     overflow-y: auto;
@@ -97,8 +118,7 @@
 
     .error-pull-up {
         position: relative;
-        top: -15px;
-        margin-bottom: 15px;
+        top: -23px;
     }
     
     .red-text {

@@ -35,7 +35,8 @@ angular.module('AngularScheduler', ['underscore'])
     function($log, $filter, $timezones, LoadLookupValues, SetDefaults, CreateObject, _, useTimezone, showUTCField) {
         return function(params) {
 
-            var scope = params.scope;
+            var scope = params.scope,
+                requireFutureStartTime = params.requireFutureStartTime || false;
 
             scope.schedulerShowTimeZone = useTimezone;
             scope.schedulerShowUTCStartTime = showUTCField;
@@ -167,7 +168,7 @@ angular.module('AngularScheduler', ['underscore'])
                 scope.setDefaults();
             }
 
-            return CreateObject(scope);
+            return CreateObject(scope, requireFutureStartTime);
             
         };
     }])
@@ -179,11 +180,12 @@ angular.module('AngularScheduler', ['underscore'])
      */
     .factory('CreateObject', ['AngularScheduler.useTimezone', '$filter', 'GetRule', 'Inject', 'SetDefaults', '$timezones', 'SetRule',
     function(useTimezone, $filter, GetRule, Inject, SetDefaults, $timezones, SetRule) {
-        return function(scope) {
+        return function(scope, requireFutureST) {
             var fn = function() {
                 
                 this.scope = scope;
                 this.useTimezone = useTimezone;
+                this.requireFutureStartTime = requireFutureST;
                 
                 // Evaluate user intput and build options for passing to rrule
                 this.getOptions = function() {
@@ -280,23 +282,23 @@ angular.module('AngularScheduler', ['underscore'])
                                 else {
                                     timeNow = now.getTime();
                                 }
-                                if (timeNow >= timeFuture) {
-                                    this.scope.startDateError("Start date and time must be in the future");
+                                if (this.requireFutureStartTime && timeNow >= timeFuture) {
+                                    this.scope.startDateError("Start time must be in the future");
                                     validity = false;
                                 }
                             }
                             else {
-                                this.scope.startDateError("Invalid start date and time");
+                                this.scope.startDateError("Invalid start time");
                                 validity = false;
                             }
                         }
                         catch(e) {
-                            this.scope.startDateError("Invalid start date and time");
+                            this.scope.startDateError("Invalid start time");
                             validity = false;
                         }
                     }
                     else {
-                        this.scope.startDateError("Provide a valid start date and time");
+                        this.scope.startDateError("Provide a start time");
                         validity = false;
                     }
                     return validity;
@@ -348,6 +350,15 @@ angular.module('AngularScheduler', ['underscore'])
                 // Get the user's local timezone
                 this.getUserTimezone = function() {
                     return $timezones.getLocal();
+                };
+
+                // futureStartTime setter/getter
+                this.setRequireFutureStartTime = function(opt) {
+                    this.requireFutureStartTime = opt;
+                };
+
+                this.getRequireFutureStartTime = function() {
+                    return this.requireFutureStartTime;
                 };
             };
             return new fn();

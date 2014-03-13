@@ -22,15 +22,15 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
             if (ww > 1199) {
                 // desktop
                 x = 675;
-                y = (625 > wh) ? wh - 20 : 625;
+                y = (675 > wh) ? wh - 20 : 675;
                 maxrows = 20;
             } else if (ww <= 1199 && ww >= 768) {
                 x = 550;
-                y = (625 > wh) ? wh - 15 : 625;
+                y = (675 > wh) ? wh - 15 : 675;
                 maxrows = 15;
             } else {
                 x = (ww - 20);
-                y = (625 > wh) ? wh : 625;
+                y = (675 > wh) ? wh : 675;
                 maxrows = 10;
             }
 
@@ -206,6 +206,7 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
             $('#form-container').empty();
             scheduler = SchedulerInit({ scope: scope });
             scheduler.inject('form-container', false);
+            scheduler.clear();
             ShowSchedulerModal({ scope: scope });
             scope.showRRuleDetail = false;
 

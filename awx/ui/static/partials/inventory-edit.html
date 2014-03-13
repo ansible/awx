@@ -27,7 +27,20 @@
                 <div class="tab-pane" id="sources-tab"></div>
                 <div class="tab-pane" id="schedules-tab">
                     <div id="schedules-list"></div>
-                    <div id="schedules-form"></div>
+                    <div id="schedules-form-container">
+                        <div id="schedules-title">
+                            <h4 ng-bind="schedulesTitle"></h4>
+                            <button type="button" class="close pull-right" ng-click="cancelScheduleForm()">&times;</button>
+                        </div>
+                        <div id="schedules-form"></div>
+                        <div id="schedules-buttons">
+                            <button type="button" class="btn btn-default btn-sm" id="reset-button" ng-click="cancelScheduleForm()"><i class="fa fa-times"></i> Cancel</button>
+                            <button type="button" class="btn btn-primary btn-sm" id="save-button" ng-click="saveScheduleForm()"><i class="fa fa-check"></i> Save</button>
+                        </div>
+                    </div>
+                    <div id="schedules-detail">
+
+                    </div>
                 </div>
            </div>    
         </div>
