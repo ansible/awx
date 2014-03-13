@@ -177,16 +177,6 @@ class RunJobTest(BaseCeleryTest):
         self.project = None
         self.credential = None
         self.cloud_credential = None
-        # Monkeypatch RunJob to capture list of command line arguments.
-        self.original_build_args = RunJob.build_args
-        self.run_job_args = None
-        self.build_args_callback = lambda: None
-        def new_build_args(_self, job, **kw):
-            args = self.original_build_args(_self, job, **kw)
-            self.run_job_args = args
-            self.build_args_callback()
-            return args
-        RunJob.build_args = new_build_args
         settings.INTERNAL_API_URL = self.live_server_url
         self.start_taskmanager(settings.TASK_COMMAND_PORT)
         if settings.CALLBACK_CONSUMER_PORT:
@@ -684,9 +674,9 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('--forks=3' in self.run_job_args)
-        self.assertTrue('-vv' in self.run_job_args)
-        self.assertTrue('-e' in self.run_job_args)
+        self.assertTrue('--forks=3' in job.job_args)
+        self.assertTrue('-vv' in job.job_args)
+        self.assertTrue('-e' in job.job_args)
         # Test with extra_vars as key=value (old format).
         job_template2 = self.create_test_job_template(extra_vars='foo=1')
         job2 = self.create_test_job(job_template=job_template2)
@@ -713,7 +703,7 @@ class RunJobTest(BaseCeleryTest):
         job = Job.objects.get(pk=job.pk)
         self.assertTrue(len(job.job_args) > 1024)
         self.check_job_result(job, 'successful')
-        self.assertTrue('-e' in self.run_job_args)
+        self.assertTrue('-e' in job.job_args)
 
     def test_limit_option(self):
         self.create_test_project(TEST_PLAYBOOK)
@@ -724,7 +714,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'failed')
-        self.assertTrue('-l' in self.run_job_args)
+        self.assertTrue('-l' in job.job_args)
 
     def test_limit_option_with_group_pattern_and_ssh_agent(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA)
@@ -736,7 +726,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('ssh-agent' in self.run_job_args)
+        self.assertTrue('ssh-agent' in job.job_args)
 
     def test_ssh_username_and_password(self):
         self.create_test_credential(username='sshuser', password='sshpass')
@@ -748,8 +738,8 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('-u' in self.run_job_args)
-        self.assertTrue('--ask-pass' in self.run_job_args)
+        self.assertTrue('-u' in job.job_args)
+        self.assertTrue('--ask-pass' in job.job_args)
 
     def test_ssh_ask_password(self):
         self.create_test_credential(password='ASK')
@@ -764,7 +754,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start(ssh_password='sshpass'))
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('--ask-pass' in self.run_job_args)
+        self.assertTrue('--ask-pass' in job.job_args)
 
     def test_sudo_username_and_password(self):
         self.create_test_credential(sudo_username='sudouser',
@@ -779,8 +769,8 @@ class RunJobTest(BaseCeleryTest):
         # Job may fail if current user doesn't have password-less sudo
         # privileges, but we're mainly checking the command line arguments.
         self.check_job_result(job, ('successful', 'failed'))
-        self.assertTrue('-U' in self.run_job_args)
-        self.assertTrue('--ask-sudo-pass' in self.run_job_args)
+        self.assertTrue('-U' in job.job_args)
+        self.assertTrue('--ask-sudo-pass' in job.job_args)
 
     def test_sudo_ask_password(self):
         self.create_test_credential(sudo_password='ASK')
@@ -796,7 +786,7 @@ class RunJobTest(BaseCeleryTest):
         # Job may fail if current user doesn't have password-less sudo
         # privileges, but we're mainly checking the command line arguments.
         self.assertTrue(job.status in ('successful', 'failed'))
-        self.assertTrue('--ask-sudo-pass' in self.run_job_args)
+        self.assertTrue('--ask-sudo-pass' in job.job_args)
 
     def test_unlocked_ssh_key(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA)
@@ -808,7 +798,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('ssh-agent' in self.run_job_args)
+        self.assertTrue('ssh-agent' in job.job_args)
 
     def test_locked_ssh_key_with_password(self):
         self.create_test_credential(ssh_key_data=TEST_SSH_KEY_DATA_LOCKED,
@@ -821,7 +811,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('ssh-agent' in self.run_job_args)
+        self.assertTrue('ssh-agent' in job.job_args)
         self.assertTrue('Bad passphrase' not in job.result_stdout)
 
     def test_locked_ssh_key_with_bad_password(self):
@@ -835,7 +825,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'failed')
-        self.assertTrue('ssh-agent' in self.run_job_args)
+        self.assertTrue('ssh-agent' in job.job_args)
         self.assertTrue('Bad passphrase' in job.result_stdout)
 
     def test_locked_ssh_key_ask_password(self):
@@ -852,7 +842,7 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.signal_start(ssh_key_unlock=TEST_SSH_KEY_DATA_UNLOCK))
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'successful')
-        self.assertTrue('ssh-agent' in self.run_job_args)
+        self.assertTrue('ssh-agent' in job.job_args)
         self.assertTrue('Bad passphrase' not in job.result_stdout)
 
     def _test_cloud_credential_environment_variables(self, kind):

@@ -1012,7 +1012,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         if project.scm_type:
             self.assertTrue(project.last_update)
             self.check_project_update(project,
-                                      project_udpate=project.last_update)
+                                      project_update=project.last_update)
             self.assertTrue(os.path.exists(project_path))
         else:
             self.assertFalse(os.path.exists(project_path))
@@ -1567,8 +1567,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
         self.assertFalse(job.passwords_needed_to_start)
-        self.assertTrue(job.start())
-        self.assertEqual(job.status, 'waiting')
+        self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.assertTrue(job.status in ('successful', 'failed'))
         self.assertEqual(self.project.project_updates.count(), 3)

@@ -188,8 +188,9 @@ def rebuild_graph(message):
             dep.status = 'waiting'
             dep.save()
             waiting_tasks.insert(waiting_tasks.index(task), dep)
-        task.status = 'waiting'
-        task.save()
+        if not hasattr(settings, 'CELERY_UNIT_TEST'):
+            task.status = 'waiting'
+            task.save()
 
     # Rebuild graph
     graph = SimpleDAG()
@@ -242,7 +243,8 @@ def process_graph(graph, task_capacity):
                 continue
             remaining_volume -= impact
             running_impact += impact
-            print("Started Node: %s (capacity hit: %s) Remaining Capacity: %s" % (str(node_obj), str(impact), str(remaining_volume)))
+            if settings.DEBUG:
+                print("Started Node: %s (capacity hit: %s) Remaining Capacity: %s" % (str(node_obj), str(impact), str(remaining_volume)))
 
 def run_taskmanager(command_port):
     ''' Receive task start and finish signals to rebuild a dependency graph and manage the actual running of tasks '''
