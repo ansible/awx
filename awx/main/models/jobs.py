@@ -385,6 +385,13 @@ class Job(CommonTask):
         return dependencies
 
     def signal_start(self, **kwargs):
+        if not self.can_start:
+            return False
+        needed = self._get_passwords_needed_to_start()
+        opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        if not all(opts.values()):
+            return False
+
         json_args = json.dumps(kwargs)
         self.start_args = json_args
         self.save()

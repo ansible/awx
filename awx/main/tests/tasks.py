@@ -648,7 +648,6 @@ class RunJobTest(BaseCeleryTest):
         self.assertFalse(job.passwords_needed_to_start)
         self.build_args_callback = self._cancel_job_callback
         self.assertTrue(job.signal_start())
-        self.assertEqual(job.status, 'waiting')
         job = Job.objects.get(pk=job.pk)
         self.check_job_result(job, 'canceled')
         self.assertEqual(job.cancel_flag, True)
