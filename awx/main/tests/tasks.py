@@ -186,7 +186,6 @@ class RunJobTest(BaseCeleryTest):
         super(RunJobTest, self).tearDown()
         if self.test_project_path:
             shutil.rmtree(self.test_project_path, True)
-        RunJob.build_args = self.original_build_args
         self.terminate_taskmanager()
         self.terminate_queue()
 
