@@ -400,7 +400,14 @@ class CommonTask(PrimordialModel):
         if not self.can_start:
             return False
         needed = self._get_passwords_needed_to_start()
-        opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        try:
+            stored_args = json.loads(decrypt_field(self, 'start_args'))
+        except Exception, e:
+            stored_args = None
+        if stored_args is None or stored_args == '':
+            opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        else:
+            opts = dict([(field, stored_args.get(field, '')) for field in needed])
         if not all(opts.values()):
             return False
         task_class().apply_async((self.pk,), opts, link_error=error_callback)
