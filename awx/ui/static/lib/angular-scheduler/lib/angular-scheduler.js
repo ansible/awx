@@ -130,9 +130,11 @@ angular.module('AngularScheduler', ['underscore'])
 
             scope.startDateError = function(msg) {
                 if (scope.scheduler_form) {
-                    scope.scheduler_form_schedulerStartDt_error = msg;
-                    scope.scheduler_form.schedulerStartDt.$pristine = false;
-                    scope.scheduler_form.schedulerStartDt.$dirty = true;
+                    if (scope.scheduler_form.schedulerStartDt) {
+                        scope.scheduler_form_schedulerStartDt_error = msg;
+                        scope.scheduler_form.schedulerStartDt.$pristine = false;
+                        scope.scheduler_form.schedulerStartDt.$dirty = true;
+                    }
                     $('#schedulerStartDt').removeClass('ng-pristine').removeClass('ng-valid').removeClass('ng-valid-custom-error')
                         .addClass('ng-dirty').addClass('ng-invalid').addClass('ng-invalid-custom-error');
                 }
@@ -141,8 +143,10 @@ angular.module('AngularScheduler', ['underscore'])
             scope.resetStartDate = function() {
                 if (scope.scheduler_form) {
                     scope.scheduler_form_schedulerStartDt_error = '';
-                    scope.scheduler_form.schedulerStartDt.$setValidity('custom-error', true);
-                    scope.scheduler_form.schedulerStartDt.$setPristine();
+                    if (scope.scheduler_form.schedulerStartDt) {
+                        scope.scheduler_form.schedulerStartDt.$setValidity('custom-error', true);
+                        scope.scheduler_form.schedulerStartDt.$setPristine();
+                    }
                 }
             };
 
@@ -225,9 +229,11 @@ angular.module('AngularScheduler', ['underscore'])
                     this.scope.scheduler_endDt_error = false;
                     this.scope.resetStartDate();
                     this.scope.scheduler_endDt_error = false;
-                    this.scope.scheduler_form.schedulerEndDt.$setValidity('custom-error', true);
-                    this.scope.scheduler_form.schedulerEndDt.$setPristine();
-                    this.scope.scheduler_form.$setPristine();
+                    if (this.scope.scheduler_form && this.scope.scheduler_form.schedulerEndDt) {
+                        this.scope.scheduler_form.schedulerEndDt.$setValidity('custom-error', true);
+                        this.scope.scheduler_form.schedulerEndDt.$setPristine();
+                        this.scope.scheduler_form.$setPristine();
+                    }
                 };
 
                 // Check the input form for errors
@@ -333,7 +339,9 @@ angular.module('AngularScheduler', ['underscore'])
                 // Clear the form, returning all elements to a default state
                 this.clear = function() {
                     this.clearErrors();
-                    this.scope.scheduler_form.schedulerName.$setPristine();
+                    if (this.scope.scheduler_form && this.scope.scheduler_form.schedulerName) {
+                        this.scope.scheduler_form.schedulerName.$setPristine();
+                    }
                     this.scope.setDefaults();
                 };
 

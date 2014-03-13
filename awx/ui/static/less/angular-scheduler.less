@@ -5,7 +5,18 @@
  *
  */
 
-#scheduler-modal-dialog {
+ /* 
+    #schedules-form  -inventory group add/edit dialog
+ */
+
+#schedules-form {
+    border: 1px solid #ddd; 
+    border-radius: 4px;
+    box-shadow: 3px 3px 6px 0 #666;
+    padding: 8px 10px 15px 8px;
+}
+
+#scheduler-modal-dialog, #schedules-form {
     display: none; 
     overflow-x: hidden; 
     overflow-y: auto;
@@ -83,6 +94,13 @@
         margin-top: 0;
         padding-top: 3px;
     }
+
+    .error-pull-up {
+        position: relative;
+        top: -15px;
+        margin-bottom: 15px;
+    }
+    
     .red-text {
         color: #dd1b16;
     }
