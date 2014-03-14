@@ -188,9 +188,9 @@ def rebuild_graph(message):
             dep.status = 'waiting'
             dep.save()
             waiting_tasks.insert(waiting_tasks.index(task), dep)
-        if not hasattr(settings, 'CELERY_UNIT_TEST'):
-            task.status = 'waiting'
-            task.save()
+        #if not hasattr(settings, 'CELERY_UNIT_TEST'):
+        task.status = 'waiting'
+        task.save()
 
     # Rebuild graph
     graph = SimpleDAG()

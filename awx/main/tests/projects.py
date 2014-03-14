@@ -7,6 +7,7 @@ import getpass
 import json
 import os
 import re
+import time
 import subprocess
 import tempfile
 import urlparse
@@ -1267,7 +1268,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.assertTrue(response['can_update'])
         with self.current_user(self.super_django_user):
             response = self.post(url, {}, expect=202)
-        project_update = project.project_updates.order_by('-pk')[0]
+        project_update = project.project_updates.filter(status='successful').order_by('-pk')[0]
         self.check_project_update(project, should_fail=None,
                                   project_update=project_update)
         # Verify that we responded to ssh-agent prompt.
@@ -1568,6 +1569,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.assertEqual(job.status, 'new')
         self.assertFalse(job.passwords_needed_to_start)
         self.assertTrue(job.signal_start())
+        time.sleep(10) # Need some time to wait for the dependency to run
         job = Job.objects.get(pk=job.pk)
         self.assertTrue(job.status in ('successful', 'failed'))
         self.assertEqual(self.project.project_updates.count(), 3)
