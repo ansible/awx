@@ -34,7 +34,7 @@ from jsonfield import JSONField
 
 # AWX
 from awx.main.models.base import *
-from awx.main.utils import encrypt_field
+from awx.main.utils import encrypt_field, decrypt_field
 
 # Celery
 from celery import chain

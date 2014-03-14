@@ -836,6 +836,9 @@ class RunJobTest(BaseCeleryTest):
         self.assertTrue(job.passwords_needed_to_start)
         self.assertTrue('ssh_key_unlock' in job.passwords_needed_to_start)
         self.assertFalse(job.signal_start())
+        job.status = 'failed'
+        job.save()
+        job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
         self.assertTrue(job.signal_start(ssh_key_unlock=TEST_SSH_KEY_DATA_UNLOCK))
         job = Job.objects.get(pk=job.pk)
