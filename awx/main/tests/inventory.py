@@ -977,6 +977,7 @@ class InventoryTest(BaseTest):
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                   UNIT_TEST_IGNORE_TASK_WAIT=True,
                    PEXPECT_TIMEOUT=60)
 class InventoryUpdatesTest(BaseTransactionTest):
 
