@@ -628,12 +628,14 @@ function(SchedulerInit, Rest, Wait) {
             scope = parent_scope.$new(),
             scheduler,
             target,
-            callback,
+            showForm,
             list,
-            restore,
+            detail,
+            restoreList,
             container;
 
         Wait('start');
+        detail = $('#schedules-detail').hide();
         list = $('#schedules-list');
         target = $('#schedules-form');
         container = $('#schedules-form-container');
@@ -642,8 +644,8 @@ function(SchedulerInit, Rest, Wait) {
         container.hide();
         target.empty();
         $('.tooltip').each(function () {
-                $(this).remove();
-            });
+            $(this).remove();
+        });
         $('.popover').each(function () {
             $(this).remove();
         });
@@ -651,26 +653,47 @@ function(SchedulerInit, Rest, Wait) {
         // Insert the scheduler widget into the hidden div
         scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
         scheduler.inject('schedules-form', false);
+        scheduler.injectDetail('schedules-detail', false);
         scheduler.clear();
         scope.showRRuleDetail = false;
         parent_scope.schedulesTitle = 'Edit Schedule';
         
         // display the scheduler widget
-        callback = function() {
+        showForm = function() {
             Wait('stop');
-            container.show('slide', { direction: 'left' }, 500);
+            $('#schedules-overlay').width($('#schedules-tab').width()).height($('#schedules-tab').height()).show();
+            container.show('slide', { direction: 'left' }, 300);
             $('#group-save-button').prop('disabled', true);
+            target.show();
             scope.$apply(function() {
                 scheduler.setRRule(schedule.rrule);
                 scheduler.setName(schedule.name);
             });
         };
-        list.hide({ complete: callback, duration: 300 });
+        //list.hide({ complete: callback, duration: 300 });
+        setTimeout(function() { showForm(); }, 1000);
 
-        restore = function() {
+        restoreList = function() {
             $('#group-save-button').prop('disabled', false);
             list.show('slide', { direction: 'right' }, 500);
+            $('#schedules-overlay').width($('#schedules-tab').width()).height($('#schedules-tab').height()).hide();
             //refresh the list
+        };
+
+        parent_scope.showScheduleDetail = function() {
+            if (parent_scope.formShowing) {
+                scheduler.isValid();
+                //$('#schedules-form').hide();
+                detail.width($('#schedules-form').width()).height($('#schedules-form').height());
+                target.hide();
+                detail.show();
+                parent_scope.formShowing = false;
+            }
+            else {
+                detail.hide();
+                target.show();
+                parent_scope.formShowing = true;
+            }
         };
 
         parent_scope.saveScheduleForm = function() {
@@ -686,11 +709,11 @@ function(SchedulerInit, Rest, Wait) {
                 Rest.post(schedule)
                     .success(function(){
                         Wait('stop');
-                        container.hide('slide', { direction: 'right' }, 500, restore);
+                        container.hide('slide', { direction: 'right' }, 500, restoreList);
                     })
                     .error(function(){
                         Wait('stop');
-                        container.hide('slide', { direction: 'right' }, 500, restore);
+                        container.hide('slide', { direction: 'right' }, 500, restoreList);
                     });
             }
             else {
@@ -699,7 +722,7 @@ function(SchedulerInit, Rest, Wait) {
         };
 
         parent_scope.cancelScheduleForm = function() {
-            container.hide('slide', { direction: 'right' }, 500, restore);
+            container.hide('slide', { direction: 'right' }, 500, restoreList);
         };
     };
 }])
@@ -827,10 +850,16 @@ function(SchedulerInit, Rest, Wait) {
                 resizeStop: function () {
                     // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
                     var dialog = $('.ui-dialog[aria-describedby="group-modal-dialog"]'),
-                        content = dialog.find('#group-modal-dialog');
+                        content = dialog.find('#group-modal-dialog'),
+                        w;
                     content.width(dialog.width() - 28);
                     if ($('#group_tabs .active a').text() === 'Properties') {
                         textareaResize('group_variables', properties_scope);
+                    }
+                    else if ($('#group_tabs .active a').text() === 'Schedule') {
+                        w = $('#group_tabs').width() - 15;
+                        $('#schedules-overlay').width(w);
+                        $('#schedules-form-container').width(w);
                     }
                 },
                 close: function () {
@@ -866,6 +895,8 @@ function(SchedulerInit, Rest, Wait) {
                     }
                 }
                 else if ($(e.target).text() === 'Schedule') {
+                    $('#schedules-overlay').hide();
+                    parent_scope.formShowing = true;
                     ScheduleList({ scope: parent_scope });
                 }
             });

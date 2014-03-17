@@ -9,12 +9,33 @@
     #schedules-form-container -inventory group add/edit dialog
  */
 
+#schedules-tab {
+    position: relative; 
+    top: 0;
+    left: 0;
+}
+
+#schedules-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100; 
+    background-color: @black;
+    opacity: 0;  
+}
+
 #schedules-form-container {
+    position: absolute; 
+    top: 0;
+    left: 0;
     display: none;
     border: 1px solid #e5e5e5; 
     border-radius: 4px;
     box-shadow: 3px 3px 6px 0 #666;
     padding: 0 10px 15px 8px;
+    background-color: @white;
+    z-index: 200;
 }
 
 #schedules-title {
@@ -33,12 +54,23 @@
     }
 }
 
+#schedules-form-container-body {
+    overflow: auto;
+}
+
 #schedules-buttons {
+    height: 45px;
+    padding-top: 15px;
     text-align: right;
+    border-top: 1px solid #A6C9E2;
+    a {
+        margin-right: 8px;
+        font-size: 12px;
+    }
 }
 
 #schedules-detail {
-    display:none;
+    display: none;
 }
 
 #scheduler-modal-dialog, #schedules-form-container {

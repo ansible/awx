@@ -100,7 +100,6 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                     Wait('stop');
                     $('#schedulerName').focus();
                     $('#rrule_nlp_description').dblclick(function() {
-                        console.log('here!');
                         setTimeout(function() { scope.$apply(function() { scope.showRRule = (scope.showRRule) ? false : true; }); }, 100);
                     });
                 }
