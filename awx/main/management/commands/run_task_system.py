@@ -188,9 +188,9 @@ def rebuild_graph(message):
             dep.status = 'waiting'
             dep.save()
             waiting_tasks.insert(waiting_tasks.index(task), dep)
-        #if not hasattr(settings, 'CELERY_UNIT_TEST'):
-        task.status = 'waiting'
-        task.save()
+        if not hasattr(settings, 'UNIT_TEST_IGNORE_TASK_WAIT'):
+            task.status = 'waiting'
+            task.save()
 
     # Rebuild graph
     graph = SimpleDAG()
@@ -248,6 +248,13 @@ def process_graph(graph, task_capacity):
 
 def run_taskmanager(command_port):
     ''' Receive task start and finish signals to rebuild a dependency graph and manage the actual running of tasks '''
+    def shutdown_handler():
+        def _handler(signum, frame):
+            signal.signal(signum, signal.SIG_DFL)
+            os.kill(os.getpid(), signum)
+        return _handler
+    signal.signal(signal.SIGINT, shutdown_handler())
+    signal.signal(signal.SIGTERM, shutdown_handler())
     paused = False
     task_capacity = get_system_task_capacity()
     command_context = zmq.Context()

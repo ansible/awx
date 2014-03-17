@@ -646,10 +646,11 @@ class RunJobTest(BaseCeleryTest):
         self.assertFalse(job.cancel())
         self.assertEqual(job.cancel_flag, False)
         self.assertFalse(job.passwords_needed_to_start)
-        self.build_args_callback = self._cancel_job_callback
+        job.cancel_flag = True
+        job.save()
         self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
-        self.check_job_result(job, 'canceled')
+        self.check_job_result(job, 'canceled', expect_stdout=False)
         self.assertEqual(job.cancel_flag, True)
         # Calling cancel afterwards just returns the cancel flag.
         self.assertTrue(job.cancel())
