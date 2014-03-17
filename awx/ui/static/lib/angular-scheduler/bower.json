@@ -1,6 +1,6 @@
 {
   "name": "angular-scheduler",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "authors": [
     "Chris Houseknecht <chouse@ansible.com>"
   ],
@@ -24,10 +24,10 @@
   "dependencies": {
     "angular": "~1.2.14",
     "underscore": "*",
-    "twitter": "*",
+    "bootstrap": "~3.1.1",
     "rrule": "*",
     "timezone-js": "*",
-    "angular-tz-extensions":"*"
+    "angular-tz-extensions": "*"
   },
   "homepage": "https://github.com/chouseknecht/angular-scheduler",
   "main": "git@github.com:chouseknecht/angular-scheduler.git",

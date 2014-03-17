@@ -24,7 +24,7 @@ angular.module('underscore',[])
 
 angular.module('AngularScheduler', ['underscore'])
     
-    .constant('AngularScheduler.partial', '/lib/angular-scheduler.html')
+    .constant('AngularScheduler.partials', '/lib/')
     .constant('AngularScheduler.useTimezone', false)
     .constant('AngularScheduler.showUTCField', false)
 
@@ -178,8 +178,8 @@ angular.module('AngularScheduler', ['underscore'])
        user input is valid, reset the form, etc. All the things we need to access and manipulate the 
        scheduler widget 
      */
-    .factory('CreateObject', ['AngularScheduler.useTimezone', '$filter', 'GetRule', 'Inject', 'SetDefaults', '$timezones', 'SetRule',
-    function(useTimezone, $filter, GetRule, Inject, SetDefaults, $timezones, SetRule) {
+    .factory('CreateObject', ['AngularScheduler.useTimezone', '$filter', 'GetRule', 'Inject', 'InjectDetail', 'SetDefaults', '$timezones', 'SetRule',
+    function(useTimezone, $filter, GetRule, Inject, InjectDetail, SetDefaults, $timezones, SetRule) {
         return function(scope, requireFutureST) {
             var fn = function() {
                 
@@ -235,6 +235,25 @@ angular.module('AngularScheduler', ['underscore'])
                         this.scope.scheduler_form.schedulerEndDt.$setValidity('custom-error', true);
                         this.scope.scheduler_form.schedulerEndDt.$setPristine();
                         this.scope.scheduler_form.$setPristine();
+                    }
+                };
+
+                // Set values for detail page
+                this.setDetails = function() {
+                    var rrule = this.getRRule();
+                    if (rrule) {
+                        scope.rrule_nlp_description = rrule.toText();
+                        scope.dateChoice = 'utc';
+                        scope.occurrence_list = [];
+                        rrule.all(function(date, i){
+                            if (i < 10) {
+                                scope.occurrence_list.push({ utc: date.toUTCString(), local: date.toString() });
+                                return true;
+                            }
+                            return false;
+                        });
+                        scope.rrule_nlp_description = rrule.toText().replace(/^RRule error.*$/,'Natural language description not available');
+                        scope.rrule = rrule.toString();
                     }
                 };
 
@@ -301,6 +320,12 @@ angular.module('AngularScheduler', ['underscore'])
                         this.scope.startDateError("Provide a start time");
                         validity = false;
                     }
+
+                    scope.schedulerIsValid = validity;
+                    if (validity) {
+                        this.setDetails();
+                    }
+
                     return validity;
                 };
 
@@ -338,6 +363,10 @@ angular.module('AngularScheduler', ['underscore'])
                     return Inject({ scope: this.scope, target: element, buttons: showButtons });
                 };
 
+                this.injectDetail = function(element, showRRule) {
+                    return InjectDetail({ scope: this.scope, target: element, showRRule: showRRule });
+                };
+
                 // Clear the form, returning all elements to a default state
                 this.clear = function() {
                     this.clearErrors();
@@ -360,12 +389,16 @@ angular.module('AngularScheduler', ['underscore'])
                 this.getRequireFutureStartTime = function() {
                     return this.requireFutureStartTime;
                 };
+
+                this.setShowRRule = function(opt) {
+                    scope.showRRule = opt;
+                };
             };
             return new fn();
         };
     }])
 
-    .factory('Inject', ['AngularScheduler.partial', '$compile', '$http', '$log', function(scheduler_partial, $compile, $http) {
+    .factory('Inject', ['AngularScheduler.partials', '$compile', '$http', '$log', function(scheduler_partial, $compile, $http) {
         return function(params) {
             
             var scope = params.scope,
@@ -384,12 +417,41 @@ angular.module('AngularScheduler', ['underscore'])
                 }
             });
 
-            $http({ method: 'GET', url: scheduler_partial })
+            $http({ method: 'GET', url: scheduler_partial + 'angular-scheduler.html' })
                 .success( function(data) {
                     scope.$emit('htmlReady', data);
                 })
                 .error( function(data, status) {
-                    throw('Error reading ' + scheduler_partial + '. ' + status);
+                    throw('Error reading ' + scheduler_partial + 'angular-scheduler.html. ' + status);
+                    //$log.error('Error calling ' + scheduler_partial + '. ' + status);
+                });
+        };
+    }])
+
+    .factory('InjectDetail', ['AngularScheduler.partials', '$compile', '$http', '$log', function(scheduler_partial, $compile, $http) {
+        return function(params) {
+            
+            var scope = params.scope,
+                target = params.target,
+                showRRule = params.showRRule;
+
+            scope.showRRule = showRRule || false;
+
+            if (scope.removeHtmlDetailReady) {
+                scope.removeHtmlDetailReady();
+            }
+            scope.removeHtmlDetailReady = scope.$on('htmlDetailReady', function(e, data) {
+                var element = (angular.isObject(target)) ? target : angular.element(document.getElementById(target));
+                element.html(data);
+                $compile(element)(scope);
+            });
+
+            $http({ method: 'GET', url: scheduler_partial + 'angular-scheduler-detail.html' })
+                .success( function(data) {
+                    scope.$emit('htmlDetailReady', data);
+                })
+                .error( function(data, status) {
+                    throw('Error reading ' + scheduler_partial + 'angular-scheduler-detail.html. ' + status);
                     //$log.error('Error calling ' + scheduler_partial + '. ' + status);
                 });
         };
@@ -756,6 +818,13 @@ angular.module('AngularScheduler', ['underscore'])
             scope.weekDayFRClass = '';
             scope.weekDaySAClass = '';
             scope.weekDaySUClass = '';
+
+            //Detail view
+            scope.schedulerIsValid = false;
+            scope.rrule_nlp_description = '';
+            scope.rrule = '';
+            scope.dateChoice = 'utc';
+            scope.occurrence_list = [];
         };
     }])
 

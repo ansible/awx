@@ -20,16 +20,33 @@ angular.module('sampleApp', ['ngRoute', 'AngularScheduler', 'Timezones'])
         });
     }])
 
-    .constant('AngularScheduler.partial', '/lib/angular-scheduler.html')
+    .run(['$rootScope', function($rootScope) {
+        $rootScope.toggleTab = function(e, tab, tabs) {
+            e.preventDefault();
+            $('#' + tabs + ' #' + tab).tab('show');
+        };
+    }])
+
+    .constant('AngularScheduler.partial', '/lib/')
     .constant('AngularScheduler.useTimezone', false)
     .constant('AngularScheduler.showUTCField', false)
     .constant('$timezones.definitions.location', '/bower_components/angular-tz-extensions/tz/data')
 
     .controller('sampleController', ['$scope', '$filter', 'SchedulerInit', function($scope, $filter, SchedulerInit) {
     
-        var scheduler = SchedulerInit({ scope: $scope });
+        var scheduler = SchedulerInit({ scope: $scope, requireFutureStartTime: false });
        
         scheduler.inject('form-container', true);
+        scheduler.injectDetail('details-tab', true);
+
+        $('#scheduler-tabs a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+            // Only show detail tab if schedule is valid
+            if ($(e.target).text() === 'Details') {
+                if (!scheduler.isValid()) {
+                    $('#scheduler-link').tab('show');
+                }
+            }
+        });
 
         $scope.setRRule = function() {
             $scope.inputRRuleMsg = '';
@@ -41,62 +58,32 @@ angular.module('sampleApp', ['ngRoute', 'AngularScheduler', 'Timezones'])
         $scope.saveForm = function() {
             if (scheduler.isValid()) {
                 var schedule = scheduler.getValue(),
-                    rrule = scheduler.getRRule(),
-                    html,
                     wheight = $(window).height(),
                     wwidth = $(window).width(),
-                    w, h, occurrences;
+                    w, h;
 
-                occurrences = [];
-                rrule.all(function(date, i) {
-                    if (i < 10) {
-                        occurrences.push(date);
-                        return true;
-                    }
-                    else {
-                        return false;
-                    }
-                });
-
-                html = "<form>\n" +
-                    "<div class=\"form-group\">\n" +
-                    "<label>Description</label>\n" +
-                    "<textarea id=\"rrule-description\" readonly class=\"form-control\" rows=\"2\">Run " + rrule.toText() + "</textarea>\n" +
-                    "</div>" +
-                    "<div class=\"form-group\">\n" +
-                    "<label>RRule</label>\n" +
-                    "<textarea id=\"rrule-result\" readonly class=\"form-control\" rows=\"3\">" + schedule.rrule + "</textarea>\n" +
-                    "</div>\n" +
-                    "<div class=\"form-group\">\n" +
-                    "<label>Occurrences (up to 10)</label>\n" +
-                    "<ul class=\"occurrence-list mono-space\">\n";
-                occurrences.forEach(function(itm){
-                    html += "<li>" + itm + "</li>\n";
-                });
-                html += "</ul>\n" +
-                    "</div>\n" +
-                    "</form>\n";
+                $('#message').empty();
+                scheduler.injectDetail('message', true);
 
                 w = (600 > wwidth) ? wwidth : 600;
-                h = (600 > wheight) ? wheight : 600;
+                h = (635 > wheight) ? wheight : 635;
 
-                $('#message').html(html)
-                    .dialog({
-                        title: schedule.name,
-                        modal: true,
-                        width: w,
-                        height: h,
-                        position: 'center',
-                        buttons: { OK: function() { $(this).dialog('close');} },
-                        open: function () {
-                            // fix the close button
-                            $('.ui-dialog[aria-describedby="message"]').find('.ui-dialog-titlebar button')
-                                .empty().attr({ 'class': 'close' }).text('x');
-                            // fix the OK button
-                            $('.ui-dialog[aria-describedby="message"]').find('.ui-dialog-buttonset button:first')
-                                .attr({ 'class': 'btn btn-primary', 'id': 'modal-ok-button' });
-                        }
-                    });
+                $('#message').dialog({
+                    title: schedule.name,
+                    modal: true,
+                    width: w,
+                    height: h,
+                    position: 'center',
+                    buttons: { OK: function() { $(this).dialog('close');} },
+                    open: function () {
+                        // fix the close button
+                        $('.ui-dialog[aria-describedby="message"]').find('.ui-dialog-titlebar button')
+                            .empty().attr({ 'class': 'close' }).text('x');
+                        // fix the OK button
+                        $('.ui-dialog[aria-describedby="message"]').find('.ui-dialog-buttonset button:first')
+                            .attr({ 'class': 'btn btn-primary', 'id': 'modal-ok-button' });
+                    }
+                });
             }
         };
 

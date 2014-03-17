@@ -93,7 +93,7 @@ angular.module('ansible', [
     'SchedulesHelper'
 ])
     
-    .constant('AngularScheduler.partial', $basePath + 'lib/angular-scheduler/lib/angular-scheduler.html')
+    .constant('AngularScheduler.partials', $basePath + 'lib/angular-scheduler/lib/')
     .constant('AngularScheduler.useTimezone', false)
     .constant('AngularScheduler.showUTCField', false)
     .constant('$timezones.definitions.location', $basePath + 'lib/angular-tz-extensions/tz/data')

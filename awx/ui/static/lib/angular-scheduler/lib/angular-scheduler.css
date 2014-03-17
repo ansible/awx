@@ -92,3 +92,45 @@ input.ng-dirty.ng-invalid, select.ng-dirty.ng-invalid, textarea.ng-dirty.ng-inva
 select {
     width: 100%;
 }
+
+/* Details page */
+
+#occurrence-label {
+    display: inline-block;
+}
+
+.occurrence-list {
+    border: 1px solid #ccc; 
+    padding: 8px 10px;
+    border-radius: 4px;
+    background-color: #eee;
+    list-style: none;
+    margin-bottom: 5px;
+    min-height: 220px;
+}
+
+#date-choice {
+    display: inline-block;
+    margin-left: 15px;
+    font-size: 12px;
+}
+
+#date-choice .label-inline {
+        display: inline-block;
+        vertical-align: middle;
+}
+
+#date-choice input {
+    margin-bottom: 2px;
+    height: 11px;
+    width: 10px;
+}
+
+#date-choice .label-inline:first-child {
+    padding-bottom: 2px;
+    margin-right: 10px;
+}
+
+#date-choice .label-inline:nth-child(3) {
+    margin-right: 10px;
+}

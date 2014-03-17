@@ -37,6 +37,10 @@
     text-align: right;
 }
 
+#schedules-detail {
+    display:none;
+}
+
 #scheduler-modal-dialog, #schedules-form-container {
     display: none; 
     overflow-x: hidden; 
@@ -53,6 +57,15 @@
 
     #occurrence-label {
         display: inline-block;
+    }
+
+    .occurrence-list {
+        border: 1px solid @well-border; 
+        padding: 8px 10px;
+        border-radius: 4px;
+        background-color: @well;
+        list-style: none;
+        margin-bottom: 5px;
     }
 
     #date-choice {

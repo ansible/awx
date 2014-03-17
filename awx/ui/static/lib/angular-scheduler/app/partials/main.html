@@ -1,14 +1,24 @@
 
 <div class="row">
     <div class="col-md-8">
-        <div class="well">
-            <div id="form-container"></div>
+        
+        <ul id="scheduler-tabs" class="nav nav-tabs">
+            <li class="active"><a id="scheduler-link" href="#scheduler-tab" data-toggle="tab"
+                ng-click="toggleTab($event, 'scheduler-link', 'scheduler-tabs')">Scheduler</a></li>
+            <li><a id="details-link" href="#details-tab" data-toggle="tab"
+                ng-click="toggleTab($event, 'details-link', 'scheduler-tabs')">Details</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane active" id="scheduler-tab">
+                    <div id="form-container"></div>
+            </div>
+            <div class="tab-pane" id="details-tab"></div>
         </div>
     </div>
 
     <div class="col-md-4">
-        <hr class="visible-sm visible-xs"/>
-        <table class="table table-condensed">
+        <table class="table table-condensed" id="scope-variables">
             <theader>
             <tr>
                 <th>Scope Variable</th>

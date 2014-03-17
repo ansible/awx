@@ -76,9 +76,6 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                         }
                     });
                     $('#scheduler-tabs a:first').tab('show');
-                    $('#rrule_nlp_description').dblclick(function() {
-                        setTimeout(function() { scope.$apply(function() { scope.showRRuleDetail = (scope.showRRuleDetail) ? false : true; }); }, 100);
-                    });
                 },
                 resizeStop: function () {
                     // for some reason, after resizing dialog the form and fields (the content) doesn't expand to 100%
@@ -102,12 +99,16 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                 open: function () {
                     Wait('stop');
                     $('#schedulerName').focus();
+                    $('#rrule_nlp_description').dblclick(function() {
+                        console.log('here!');
+                        setTimeout(function() { scope.$apply(function() { scope.showRRule = (scope.showRRule) ? false : true; }); }, 100);
+                    });
                 }
             });
         };
     }])
 
-    .factory('ShowDetails', [ function() {
+    /*.factory('ShowDetails', [ function() {
         return function(params) {
             
             var scope = params.scope,
@@ -137,10 +138,10 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                 }
             }
         };
-    }])
+    }])*/
 
-    .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'ShowDetails', 'Wait', 'Rest',
-    function(SchedulerInit, ShowSchedulerModal, ShowDetails, Wait, Rest) {
+    .factory('EditSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait', 'Rest',
+    function(SchedulerInit, ShowSchedulerModal, Wait, Rest) {
         return function(params) {
             var scope = params.scope,
                 schedule = params.schedule,
@@ -149,8 +150,10 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
 
             Wait('start');
             $('#form-container').empty();
-            scheduler = SchedulerInit({ scope: scope });
+            scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
             scheduler.inject('form-container', false);
+            scheduler.injectDetail('occurrences', false);
+
             ShowSchedulerModal({ scope: scope });
             scope.showRRuleDetail = false;
 
@@ -167,7 +170,6 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                 var newSchedule;
                 $('#scheduler-tabs a:first').tab('show');
                 if (scheduler.isValid()) {
-                    scope.schedulerIsValid = true;
                     Wait('start');
                     newSchedule = scheduler.getValue();
                     schedule.name = newSchedule.name;
@@ -183,19 +185,20 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                             $('#scheduler-modal-dialog').dialog('close');
                         });
                 }
-                else {
-                    scope.schedulerIsValid = false;
-                }
             };
 
             $('#scheduler-tabs li a').on('shown.bs.tab', function(e) {
-                ShowDetails({ e: e, scope: scope, scheduler: scheduler });
+                if ($(e.target).text() === 'Details') {
+                    if (!scheduler.isValid()) {
+                        $('#scheduler-tabs a:first').tab('show');
+                    }
+                }
             });
         };
     }])
 
-    .factory('AddSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'ShowDetails', 'Wait', 'Rest',
-    function(SchedulerInit, ShowSchedulerModal, ShowDetails, Wait, Rest) {
+    .factory('AddSchedule', ['SchedulerInit', 'ShowSchedulerModal', 'Wait', 'Rest',
+    function(SchedulerInit, ShowSchedulerModal, Wait, Rest) {
         return function(params) {
             var scope = params.scope,
                 url = params.url,
@@ -204,8 +207,9 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
 
             Wait('start');
             $('#form-container').empty();
-            scheduler = SchedulerInit({ scope: scope });
+            scheduler = SchedulerInit({ scope: scope, requireFutureStartTime: false });
             scheduler.inject('form-container', false);
+            scheduler.injectDetail('occurrences', false);
             scheduler.clear();
             ShowSchedulerModal({ scope: scope });
             scope.showRRuleDetail = false;
@@ -218,7 +222,6 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                 var newSchedule;
                 $('#scheduler-tabs a:first').tab('show');
                 if (scheduler.isValid()) {
-                    scope.schedulerIsValid = true;
                     Wait('start');
                     newSchedule = scheduler.getValue();
                     schedule.name = newSchedule.name;
@@ -234,13 +237,14 @@ angular.module('SchedulesHelper', ['Utilities', 'SchedulesHelper'])
                             $('#scheduler-modal-dialog').dialog('close');
                         });
                 }
-                else {
-                    scope.schedulerIsValid = false;
-                }
             };
 
             $('#scheduler-tabs li a').on('shown.bs.tab', function(e) {
-                ShowDetails({ e: e, scope: scope, scheduler: scheduler });
+                if ($(e.target).text() === 'Details') {
+                    if (!scheduler.isValid()) {
+                        $('#scheduler-tabs a:first').tab('show');
+                    }
+                }
             });
         };
     }]);

@@ -32,14 +32,15 @@
                             <h4 ng-bind="schedulesTitle"></h4>
                             <button type="button" class="close pull-right" ng-click="cancelScheduleForm()">&times;</button>
                         </div>
-                        <div id="schedules-form"></div>
+                        <div id="schedules-form-container-body">
+                            <div id="schedules-form"></div>
+                            <div id="schedules-detail"></div>
+                        </div>
                         <div id="schedules-buttons">
+                            <a id="schedules-flip-link" ng-click="scheduleDetailRotate()" href=""><i class="fa fa-list-ul"> Show Details</i></a>
                             <button type="button" class="btn btn-default btn-sm" id="reset-button" ng-click="cancelScheduleForm()"><i class="fa fa-times"></i> Cancel</button>
                             <button type="button" class="btn btn-primary btn-sm" id="save-button" ng-click="saveScheduleForm()"><i class="fa fa-check"></i> Save</button>
                         </div>
-                    </div>
-                    <div id="schedules-detail">
-
                     </div>
                 </div>
            </div>    
