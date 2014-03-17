@@ -25,6 +25,11 @@
     opacity: 0;  
 }
 
+#schedules-list {
+    overflow-x: hidden;
+    overflow-y: auto;    
+}
+
 #schedules-form-container {
     position: absolute; 
     top: 0;
@@ -41,28 +46,32 @@
 #schedules-title {
     border-bottom: 1px solid #e5e5e5;
     padding-bottom: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     margin-top: 0;
-
     h4 {
         display: inline-block;
         margin: 0;
     }
     button {
         display: inline-block;
-        /*margin-top: -10px;*/
     }
 }
 
 #schedules-form-container-body {
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#schedules-form .form-group {
+    margin-bottom: 15px;
 }
 
 #schedules-buttons {
-    height: 45px;
-    padding-top: 15px;
+    height: 46px;
+    padding-top: 10px;
     text-align: right;
     border-top: 1px solid #A6C9E2;
+    margin-top: 5px;
     a {
         margin-right: 8px;
         font-size: 12px;
@@ -160,12 +169,10 @@
         margin-top: 0;
         padding-top: 3px;
     }
-
     .error-pull-up {
         position: relative;
-        top: -23px;
+        top: -20px;
     }
-    
     .red-text {
         color: #dd1b16;
     }

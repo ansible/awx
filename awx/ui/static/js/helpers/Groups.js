@@ -615,13 +615,22 @@ function(ScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Re
 }])
 
 
+.factory('SetSchedulesInnerDialogSize', [ function() {
+    return function() {
+        var height = $('#group-modal-dialog').outerHeight() - $('#group_tabs').outerHeight() - 25;
+        height = height - 110 - $('#schedules-buttons').outerHeight();
+        $('#schedules-form-container-body').height(height);
+    };
+}])
+
+
 /**
  *
  * Remove the schedule list, add the schedule widget and populate it with an rrule
  *
  */
-.factory('ScheduleEdit', ['SchedulerInit', 'Rest', 'Wait',
-function(SchedulerInit, Rest, Wait) {
+.factory('ScheduleEdit', ['SchedulerInit', 'Rest', 'Wait', 'SetSchedulesInnerDialogSize',
+function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
     return function(params) {
         var parent_scope = params.scope,
             schedule = params.schedule,
@@ -661,7 +670,10 @@ function(SchedulerInit, Rest, Wait) {
         // display the scheduler widget
         showForm = function() {
             Wait('stop');
-            $('#schedules-overlay').width($('#schedules-tab').width()).height($('#schedules-tab').height()).show();
+            $('#schedules-overlay').width($('#schedules-tab')
+                .width()).height($('#schedules-tab').height()).show();
+            container.width($('#schedules-tab').width() - 18);
+            SetSchedulesInnerDialogSize();
             container.show('slide', { direction: 'left' }, 300);
             $('#group-save-button').prop('disabled', true);
             target.show();
@@ -670,7 +682,6 @@ function(SchedulerInit, Rest, Wait) {
                 scheduler.setName(schedule.name);
             });
         };
-        //list.hide({ complete: callback, duration: 300 });
         setTimeout(function() { showForm(); }, 1000);
 
         restoreList = function() {
@@ -731,11 +742,11 @@ function(SchedulerInit, Rest, Wait) {
 .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
     'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find','WatchInventoryWindowResize',
-    'ParseVariableString', 'ToJSON', 'ScheduleList', 'SourceForm',
+    'ParseVariableString', 'ToJSON', 'ScheduleList', 'SourceForm', 'SetSchedulesInnerDialogSize',
     function ($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
         GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize, ParseVariableString, ToJSON, ScheduleList,
-        SourceForm) {
+        SourceForm, SetSchedulesInnerDialogSize) {
         return function (params) {
 
             var parent_scope = params.scope,
@@ -857,9 +868,10 @@ function(SchedulerInit, Rest, Wait) {
                         textareaResize('group_variables', properties_scope);
                     }
                     else if ($('#group_tabs .active a').text() === 'Schedule') {
-                        w = $('#group_tabs').width() - 15;
+                        w = $('#group_tabs').width() - 18;
                         $('#schedules-overlay').width(w);
                         $('#schedules-form-container').width(w);
+                        SetSchedulesInnerDialogSize();
                     }
                 },
                 close: function () {
