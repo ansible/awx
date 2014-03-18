@@ -143,7 +143,7 @@ def rebuild_graph(message):
     ''' Regenerate the task graph by refreshing known tasks from Tower, purging orphaned running tasks,
     and creatingdependencies for new tasks before generating directed edge relationships between those tasks '''
     inspector = inspect()
-    if not hasattr(settings, 'UNIT_TEST_IGNORE_TASK_WAIT'):
+    if not hasattr(settings, 'IGNORE_CELERY_INSPECTOR'):
         active_task_queues = inspector.active()
     else:
         print("Ignoring celery task inspector")
