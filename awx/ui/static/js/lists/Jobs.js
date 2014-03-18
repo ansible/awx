@@ -15,8 +15,10 @@ angular.module('JobsListDefinition', [])
         name: 'jobs',
         iterator: 'job',
         editTitle: 'Jobs',
+        showTitle: true,
         index: false,
         hover: true,
+        well: false,
         "class": 'jobs-table',
         
         fields: {

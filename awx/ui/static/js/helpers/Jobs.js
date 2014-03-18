@@ -158,4 +158,42 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
         };
 
     }
-]);
+])
+
+/**
+ * 
+ *  Called from JobsList controller to load each section or list on the page
+ *
+ */
+.factory('LoadScope', ['SearchInit', 'PaginateInit', 'GenerateList', function(SearchInit, PaginateInit, GenerateList) {
+    return function(params) {
+        var scope = params.scope,
+            list = params.list,
+            id = params.id,
+            url = params.url;
+
+        GenerateList.inject(list, {
+            mode: 'edit',
+            id: id,
+            breadCrumbs: false,
+            scope: scope,
+            searchSize: 'col-lg-4 col-md-6 col-sm-12 col-xs-12',
+            showSearch: false
+        });
+
+        url = '/static/sample/data/schedules/inventory/data.json';
+        SearchInit({
+            scope: scope,
+            set: list.name,
+            list: list,
+            url: url
+        });
+
+        PaginateInit({
+            scope: scope,
+            list: list,
+            url: url,
+            pageSize: 10
+        });
+    };
+}]);

@@ -166,101 +166,103 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     
                     html += "<div class=\"row\">\n";
 
-                    if (list.name !== 'groups') {
-                        if (options.searchSize) {
-                            html += SearchWidget({
-                                iterator: list.iterator,
-                                template: list,
-                                mini: true,
-                                size: options.searchSize,
-                                searchWidgets: list.searchWidgets
-                            });
-                        } else if (options.mode === 'summary') {
-                            html += SearchWidget({
-                                iterator: list.iterator,
-                                template: list,
-                                mini: true,
-                                size: 'col-lg-6'
-                            });
-                        } else if (options.mode === 'lookup' || options.id !== undefined) {
-                            html += SearchWidget({
-                                iterator: list.iterator,
-                                template: list,
-                                mini: true,
-                                size: 'col-lg-8'
-                            });
-                        } else {
-                            html += SearchWidget({
-                                iterator: list.iterator,
-                                template: list,
-                                mini: true
-                            });
-                        }
-                    }
-
-                    if (options.mode !== 'lookup') {
-                        //actions
-                        base = $location.path().replace(/^\//, '').split('/')[0];
-                        html += "<div class=\"";
-                        if (list.name === 'groups') {
-                            html += "col-lg-12";
-                        } else if (options.searchSize) {
-                            // User supplied searchSize, calc the remaining
-                            size = parseInt(options.searchSize.replace(/([A-Z]|[a-z]|\-)/g, ''));
-                            size = (list.searchWidgets) ? list.searchWidgets * size : size;
-                            html += 'col-lg-' + (12 - size);
-                        } else if (options.mode === 'summary') {
-                            html += 'col-lg-6';
-                        } else if (options.id !== undefined) {
-                            html += "col-lg-4";
-                        } else {
-                            html += "col-lg-8 col-md-6";
-                        }
-                        html += "\">\n";
-
-                        html += "<div class=\"list-actions\">\n";
-
-                        // Add toolbar buttons or 'actions'
-                        for (action in list.actions) {
-                            if (list.actions[action].mode === 'all' || list.actions[action].mode === options.mode) {
-                                if ((list.actions[action].basePaths === undefined) ||
-                                    (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1)) {
-                                    html += this.button({
-                                        btn: list.actions[action],
-                                        action: action,
-                                        toolbar: true
-                                    });
-                                }
+                    if (options.showSearch === undefined || options.showSearch === true) {
+                        if (list.name !== 'groups') {
+                            if (options.searchSize) {
+                                html += SearchWidget({
+                                    iterator: list.iterator,
+                                    template: list,
+                                    mini: true,
+                                    size: options.searchSize,
+                                    searchWidgets: list.searchWidgets
+                                });
+                            } else if (options.mode === 'summary') {
+                                html += SearchWidget({
+                                    iterator: list.iterator,
+                                    template: list,
+                                    mini: true,
+                                    size: 'col-lg-6'
+                                });
+                            } else if (options.mode === 'lookup' || options.id !== undefined) {
+                                html += SearchWidget({
+                                    iterator: list.iterator,
+                                    template: list,
+                                    mini: true,
+                                    size: 'col-lg-8'
+                                });
+                            } else {
+                                html += SearchWidget({
+                                    iterator: list.iterator,
+                                    template: list,
+                                    mini: true
+                                });
                             }
                         }
 
-                        //select instructions
-                        if (options.mode === 'select' && list.selectInstructions) {
-                            btn = {
-                                awPopOver: list.selectInstructions,
-                                dataPlacement: 'left',
-                                dataContainer: 'body',
-                                'class': 'btn-xs btn-help',
-                                awToolTip: 'Click for help',
-                                dataTitle: 'Help',
-                                iconSize: 'fa-lg'
-                            };
-                            //html += this.button(btn, 'select');
-                            html += this.button({
-                                btn: btn,
-                                action: 'help',
-                                toolbar: true
-                            });
+                        if (options.mode !== 'lookup') {
+                            //actions
+                            base = $location.path().replace(/^\//, '').split('/')[0];
+                            html += "<div class=\"";
+                            if (list.name === 'groups') {
+                                html += "col-lg-12";
+                            } else if (options.searchSize) {
+                                // User supplied searchSize, calc the remaining
+                                size = parseInt(options.searchSize.replace(/([A-Z]|[a-z]|\-)/g, ''));
+                                size = (list.searchWidgets) ? list.searchWidgets * size : size;
+                                html += 'col-lg-' + (12 - size);
+                            } else if (options.mode === 'summary') {
+                                html += 'col-lg-6';
+                            } else if (options.id !== undefined) {
+                                html += "col-lg-4";
+                            } else {
+                                html += "col-lg-8 col-md-6";
+                            }
+                            html += "\">\n";
+
+                            html += "<div class=\"list-actions\">\n";
+
+                            // Add toolbar buttons or 'actions'
+                            for (action in list.actions) {
+                                if (list.actions[action].mode === 'all' || list.actions[action].mode === options.mode) {
+                                    if ((list.actions[action].basePaths === undefined) ||
+                                        (list.actions[action].basePaths && list.actions[action].basePaths.indexOf(base) > -1)) {
+                                        html += this.button({
+                                            btn: list.actions[action],
+                                            action: action,
+                                            toolbar: true
+                                        });
+                                    }
+                                }
+                            }
+
+                            //select instructions
+                            if (options.mode === 'select' && list.selectInstructions) {
+                                btn = {
+                                    awPopOver: list.selectInstructions,
+                                    dataPlacement: 'left',
+                                    dataContainer: 'body',
+                                    'class': 'btn-xs btn-help',
+                                    awToolTip: 'Click for help',
+                                    dataTitle: 'Help',
+                                    iconSize: 'fa-lg'
+                                };
+                                //html += this.button(btn, 'select');
+                                html += this.button({
+                                    btn: btn,
+                                    action: 'help',
+                                    toolbar: true
+                                });
+                            }
+
+                            html += "</div><!-- list-acitons -->\n";
+                            html += "</div><!-- list-actions-column -->\n";
+                        } else {
+                            //lookup
+                            html += "<div class=\"col-lg-7\"></div>\n";
                         }
 
-                        html += "</div><!-- list-acitons -->\n";
-                        html += "</div><!-- list-actions-column -->\n";
-                    } else {
-                        //lookup
-                        html += "<div class=\"col-lg-7\"></div>\n";
+                        html += "</div><!-- row -->\n";
                     }
-
-                    html += "</div><!-- row -->\n";
 
                     // Add a title and optionally a close button (used on Inventory->Groups)
                     if (options.mode !== 'lookup' && list.showTitle) {

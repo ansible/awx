@@ -142,7 +142,6 @@ a:focus {
 }
 
 #home_groups_table .actions .cancel { padding-right: 3px; }
-#jobs_table .actions .cancel { padding-right: 10px; }
 
 .success-badge { 
   color: #ffffff;
@@ -991,19 +990,24 @@ input[type="checkbox"].checkbox-no-label {
     content: "\f111";
   }
 
-  /*.icon-failures-none,
-  .icon-failures-na,
-  .icon-failures-true,
-  .icon-failures-false {
-    font-size: 12px;
-  }*/
-
   .badge {
     padding: 2px 3px 3px 4px;
     font-size: 10px;
     font-weight: normal;
     line-height: 1;
   }
+
+  .job_list {
+      padding-left: 15px; 
+      padding-right: 15px;
+      margin-top: 30px;
+
+      .form-title {
+          padding-left: 8px;
+      }
+  }
+
+
 
 /* Inventory job status badge */
   .failures-true {

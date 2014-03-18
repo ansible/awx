@@ -103,7 +103,7 @@ angular.module('ansible', [
             $routeProvider.
             when('/jobs', {
                 templateUrl: urlPrefix + 'partials/jobs.html',
-                controller: 'JobsListCtrl'
+                controller: 'JobsList'
             }).
 
             when('/jobs/:id', {
