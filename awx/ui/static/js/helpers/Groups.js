@@ -330,7 +330,8 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
 function(ScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Rest, PageRangeSetup, Wait, ProcessErrors, Find) {
     return function(params) {
         var parent_scope = params.scope,
-            scope, url, list;
+            schedule_scope = parent_scope.$new(),
+            url, list;
 
         // Clean up
         $('#schedules-list').hide().empty();
@@ -348,11 +349,12 @@ function(ScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Re
         delete list.fields.dtend;
         delete list.actions.stream;
         list.well = false;
-        scope = GenerateList.inject(list, {
+        GenerateList.inject(list, {
             mode: 'edit',
             id: 'schedules-list',
             breadCrumbs: false,
-            searchSize: 'col-lg-6 col-md-5 col-sm-5 col-xs-5'
+            searchSize: 'col-lg-6 col-md-5 col-sm-5 col-xs-5',
+            scope: schedule_scope
         });
 
         $('#schedules-list').show();
@@ -360,13 +362,13 @@ function(ScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Re
         // Change later to use GetBasePath(base)
         url = '/static/sample/data/schedules/inventory/data.json';
         SearchInit({
-            scope: scope,
+            scope: schedule_scope,
             set: 'schedules',
             list: SchedulesList,
             url: url
         });
         PaginateInit({
-            scope: scope,
+            scope: schedule_scope,
             list: SchedulesList,
             url: url
         });
@@ -375,34 +377,33 @@ function(ScheduleEdit, SchedulesList, GenerateList, SearchInit, PaginateInit, Re
             .success(function(data) {
                 var i, modifier;
                 PageRangeSetup({
-                    scope: scope,
+                    scope: schedule_scope,
                     count: data.count,
                     next: data.next,
                     previous: data.previous,
                     iterator: SchedulesList.iterator
                 });
-                scope[SchedulesList.iterator + 'Loading'] = false;
+                schedule_scope[SchedulesList.iterator + 'Loading'] = false;
                 for (i = 1; i <= 3; i++) {
                     modifier = (i === 1) ? '' : i;
-                    scope[SchedulesList.iterator + 'HoldInput' + modifier] = false;
+                    schedule_scope[SchedulesList.iterator + 'HoldInput' + modifier] = false;
                 }
-                scope.schedules = data.results;
+                schedule_scope.schedules = data.results;
                 window.scrollTo(0, 0);
                 Wait('stop');
-                scope.$emit('PostRefresh');
-                scope.schedules = data.results;
+                schedule_scope.schedules = data.results;
             })
             .error(function(data, status) {
-                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                ProcessErrors(schedule_scope, data, status, null, { hdr: 'Error!',
                     msg: 'Call to ' + url + ' failed. GET returned: ' + status });
             });
 
-        scope.editSchedule = function(id) {
-            var schedule = Find({ list: scope[SchedulesList.name], key: 'id', val: id });
+        schedule_scope.editSchedule = function(id) {
+            var schedule = Find({ list: schedule_scope[SchedulesList.name], key: 'id', val: id });
             ScheduleEdit({ scope: parent_scope, schedule: schedule, mode: 'edit' });
         };
 
-        scope.addSchedule = function() {
+        schedule_scope.addSchedule = function() {
             ScheduleEdit({ scope: parent_scope, schedule: {}, mode: 'add'});
         };
     };
@@ -854,6 +855,9 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                 }
             });
 
+            if (sources_scope.removeScopeSourceTypeOptionsReady) {
+                sources_scope.removeScopeSourceTypeOptionsReady();
+            }
             sources_scope.removeScopeSourceTypeOptionsReady = sources_scope.$on('sourceTypeOptionsReady', function() {
                 if (mode === 'add') {
                     sources_scope.source = Find({
@@ -861,7 +865,6 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                         key: 'value',
                         val: ''
                     });
-                    console.log(sources_scope.source);
                     parent_scope.showSourceTab = false;
                 }
             });
