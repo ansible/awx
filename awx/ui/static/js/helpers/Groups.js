@@ -34,6 +34,7 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                                 });
                             }
                         }
+                        scope.$emit('sourceTypeOptionsReady');
                     })
                     .error(function (data, status) {
                         ProcessErrors(scope, data, status, null, {
@@ -853,6 +854,18 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                 }
             });
 
+            sources_scope.removeScopeSourceTypeOptionsReady = sources_scope.$on('sourceTypeOptionsReady', function() {
+                if (mode === 'add') {
+                    sources_scope.source = Find({
+                        list: sources_scope.source_type_options,
+                        key: 'value',
+                        val: ''
+                    });
+                    console.log(sources_scope.source);
+                    parent_scope.showSourceTab = false;
+                }
+            });
+
             if (modal_scope.removeChoicesComplete) {
                 modal_scope.removeChoicesComplete();
             }
@@ -889,6 +902,8 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                         modal_scope.$emit('choicesCompleteGroup');
                     }
                     else {
+                        properties_scope.variables = "---";
+                        master.variables = properties_scope.variables;
                         modal_scope.$emit('groupVariablesLoaded');
                     }
                 }
@@ -1125,6 +1140,7 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
 
             // Change the lookup and regions when the source changes
             sources_scope.sourceChange = function () {
+                parent_scope.showSourceTab = (sources_scope.source && sources_scope.source.value) ? true : false;
                 SourceChange({ scope: sources_scope, form: SourceForm });
             };
 
