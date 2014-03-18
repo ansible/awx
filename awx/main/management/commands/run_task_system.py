@@ -170,7 +170,7 @@ def rebuild_graph(message):
     if settings.DEBUG:
         print("Active celery tasks: " + str(active_tasks))
     for task in list(running_tasks):
-        if task.celery_task_id not in active_tasks:
+        if task.celery_task_id not in active_tasks and not hasattr(settings, 'IGNORE_CELERY_INSPECTOR'):
             # NOTE: Pull status again and make sure it didn't finish in the meantime?
             task.status = 'failed'
             task.result_traceback += "Task was marked as running in Tower but was not present in Celery so it has been marked as failed"
