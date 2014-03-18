@@ -128,7 +128,7 @@ angular.module('PaginationHelpers', ['Utilities', 'RefreshHelper', 'RefreshRelat
             } else {
                 scope[iterator + '_page_size'] = 20;
             }
-            
+
             scope.getPage = function (page, set, iterator) {
                 var new_url = scope[iterator + '_url'].replace(/.page\=\d+/, ''),
                     connect = (/\/$/.test(new_url)) ? '?' : '&';

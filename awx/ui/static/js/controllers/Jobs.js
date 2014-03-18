@@ -10,45 +10,36 @@
  
 'use strict';
 
-function JobsList($scope, $compile, ClearScope, Breadcrumbs, LoadScope, JobList) {
+function JobsList($scope, $compile, ClearScope, Breadcrumbs, LoadScope, RunningJobsList, CompletedJobsList) {
     
     ClearScope();
 
-    var e, completed_scope, running_scope, queued_scope, schedule_scope,
-        completed_list, running_list, queued_list, schedule_list;
+    var e, completed_scope, running_scope, queued_scope, schedule_scope;
 
     // Add breadcrumbs
     e = angular.element(document.getElementById('breadcrumbs'));
-    e.html(Breadcrumbs({ list: JobList, mode: 'edit' }));
+    e.html(Breadcrumbs({ list: { editTitle: 'Jobs' } , mode: 'edit' }));
     $compile(e)($scope);
 
-    completed_list = angular.copy(JobList);
-    completed_list.name = "completed_jobs";
-    completed_list.iterator = "completed_jobs";
-    completed_list.editTitle = "Completed";
     completed_scope = $scope.$new();
     LoadScope({
         scope: completed_scope,
-        list: completed_list,
+        list: CompletedJobsList,
         id: 'completed_jobs',
-        url: '/api/v1/jobs'
+        url: '/static/sample/data/jobs/completed/data.json'
     });
 
-    running_list = angular.copy(JobList);
-    running_list.name   = "running_jobs";
-    running_list.iterator = "running_job";
-    running_list.editTitle = "Running";
     running_scope = $scope.$new();
     LoadScope({
         scope: running_scope,
-        list: running_list,
+        list: RunningJobsList,
         id: 'running_jobs',
-        url: '/api/v1/jobs'
+        url: '/static/sample/data/jobs/running/data.json'
     });
 
 }
 
-JobsList.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadScope', 'JobList'];
+JobsList.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadScope', 'RunningJobsList', 'CompletedJobsList'];
 
 
 

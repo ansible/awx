@@ -1,25 +1,22 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  Jobs.js 
- *  List view object for Team data model.
+ *  CompletedJobs.js 
  *
  * 
  */
 
 'use strict';
 
-angular.module('JobsListDefinition', [])
-    .value( 'JobList', {
+angular.module('CompletedJobsDefinition', [])
+    .value( 'CompletedJobsList', {
         
-        name: 'jobs',
-        iterator: 'job',
-        editTitle: 'Jobs',
-        showTitle: false,
+        name: 'completed_jobs',
+        iterator: 'completed_job',
+        editTitle: 'Completed Jobs',
         index: false,
         hover: true,
         well: false,
-        "class": 'jobs-table',
         
         fields: {
             id: {
@@ -41,9 +38,9 @@ angular.module('JobsListDefinition', [])
             },
             job_template: {
                 label: 'Job Template',
-                ngBind: 'job.summary_fields.job_template.name',
-                //ngHref: "{{ '/#/job_templates/?name=' + job.summary_fields.job_template.name }}",
-                ngHref:"{{ '/#/job_templates/' + job.job_template }}",
+                ngBind: 'completed_job.summary_fields.job_template.name',
+                //ngHref: "{{ '/#/job_templates/?name=' + completed_job.summary_fields.job_template.name }}",
+                ngHref:"{{ '/#/job_templates/' + completed_job.job_template }}",
                 sourceModel: 'job_template',
                 sourceField: 'name'
             },
@@ -57,9 +54,9 @@ angular.module('JobsListDefinition', [])
             },
             status: {
                 label: 'Status',
-                "class": 'job-{{ job.status }}',
+                "class": 'job-{{ completed_job.status }}',
                 searchType: 'select',
-                linkTo: "{{ job.statusLinkTo }}",
+                linkTo: "{{ completed_job.statusLinkTo }}",
                 searchOptions: [
                     { name: "new", value: "new" },
                     { name: "waiting", value: "waiting" },
@@ -70,12 +67,12 @@ angular.module('JobsListDefinition', [])
                     { name: "failed", value: "failed" },
                     { name: "canceled", value: "canceled" }
                 ],
-                badgeIcon: 'fa icon-job-{{ job.status }}',
+                badgeIcon: 'fa icon-job-{{ completed_job.status }}',
                 badgePlacement: 'left',
-                badgeToolTip: "{{ job.statusBadgeToolTip }}",
+                badgeToolTip: "{{ completed_job.statusBadgeToolTip }}",
                 badgeTipPlacement: 'top',
-                badgeNgHref: "{{ job.statusLinkTo }}",
-                awToolTip: "{{ job.statusBadgeToolTip }}",
+                badgeNgHref: "{{ completed_job.statusLinkTo }}",
+                awToolTip: "{{ completed_job.statusBadgeToolTip }}",
                 dataPlacement: 'top'
             }
         },
@@ -93,24 +90,24 @@ angular.module('JobsListDefinition', [])
                 label: 'Relaunch',
                 icon: 'icon-rocket',
                 mode: 'all',
-                ngClick: 'submitJob(job.id, job.summary_fields.job_template.name)',
+                ngClick: 'submitJob(completed_job.id, completed_job.summary_fields.job_template.name)',
                 awToolTip: 'Start the job',
                 dataPlacement: 'top'
             },
             cancel: {
                 label: 'Stop',
                 mode: 'all',
-                ngClick: 'deleteJob(job.id)',
+                ngClick: 'deleteJob(completed_job.id)',
                 awToolTip: 'Cancel a running or pending job',
-                ngShow: "job.status == 'pending' || job.status == 'running' || job.status == 'waiting'",
+                ngShow: "completed_job.status == 'pending' || completed_job.status == 'running' || completed_job.status == 'waiting'",
                 dataPlacement: 'top'
             },
             "delete": {
                 label: 'Delete',
                 mode: 'all',
-                ngClick: 'deleteJob(job.id)',
+                ngClick: 'deleteJob(completed_job.id)',
                 awToolTip: 'Delete the job',
-                ngShow: "job.status != 'pending' && job.status != 'running' && job.status != 'waiting'",
+                ngShow: "completed_job.status != 'pending' && completed_job.status != 'running' && completed_job.status != 'waiting'",
                 dataPlacement: 'top'
             },
             dropdown: {
@@ -119,11 +116,11 @@ angular.module('JobsListDefinition', [])
                 icon: 'fa-search-plus',
                 'class': 'btn-default btn-xs',
                 options: [
-                    { ngClick: 'editJob(job.id, job.summary_fields.job_template.name)', label: 'Status' },
-                    { ngClick: 'viewEvents(job.id, job.summary_fields.job_template.name)', label: 'Events',
-                        ngHide: "job.status == 'new'" },
-                    { ngClick: 'viewSummary(job.id, job.summary_fields.job_template.name)', label: 'Host Summary',
-                        ngHide: "job.status == 'new'" }
+                    { ngClick: 'editJob(completed_job.id, completed_job.summary_fields.job_template.name)', label: 'Status' },
+                    { ngClick: 'viewEvents(completed_job.id, completed_job.summary_fields.job_template.name)', label: 'Events',
+                        ngHide: "completed_job.status == 'new'" },
+                    { ngClick: 'viewSummary(completed_job.id, completed_job.summary_fields.job_template.name)', label: 'Host Summary',
+                        ngHide: "completed_job.status == 'new'" }
                 ]
             }
         }

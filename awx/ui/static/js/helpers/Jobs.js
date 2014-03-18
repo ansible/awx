@@ -165,7 +165,8 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
  *  Called from JobsList controller to load each section or list on the page
  *
  */
-.factory('LoadScope', ['SearchInit', 'PaginateInit', 'GenerateList', function(SearchInit, PaginateInit, GenerateList) {
+.factory('LoadScope', ['SearchInit', 'PaginateInit', 'GenerateList', 'PageRangeSetup', 'Wait', 'ProcessErrors', 'Rest',
+    function(SearchInit, PaginateInit, GenerateList, PageRangeSetup, Wait, ProcessErrors, Rest) {
     return function(params) {
         var scope = params.scope,
             list = params.list,
@@ -181,7 +182,6 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
             showSearch: false
         });
 
-        url = '/static/sample/data/schedules/inventory/data.json';
         SearchInit({
             scope: scope,
             set: list.name,
@@ -195,5 +195,40 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
             url: url,
             pageSize: 10
         });
+
+        
+        // The following bits probably don't belong here once the API is available.
+
+        if (scope.removePostRefresh) {
+            scope.removePostRefresh();
+        }
+        scope.$on('PostRefresh', function(e, data){
+            var i, modifier;
+            PageRangeSetup({
+                scope: scope,
+                count: data.count,
+                next: data.next,
+                previous: data.previous,
+                iterator: list.iterator
+            });
+            scope[list.iterator + 'Loading'] = false;
+            for (i = 1; i <= 3; i++) {
+                modifier = (i === 1) ? '' : i;
+                scope[list.iterator + 'HoldInput' + modifier] = false;
+            }
+            scope[list.name] = data.results;
+            window.scrollTo(0, 0);
+            Wait('stop');
+        });
+
+        Rest.setUrl(url);
+        Rest.get()
+            .success(function(data) {
+                scope.$emit('PostRefresh', data);
+            })
+            .error(function(data, status) {
+                ProcessErrors(scope, data, status, null, { hdr: 'Error!',
+                    msg: 'Call to ' + url + ' failed. GET returned: ' + status });
+            });
     };
 }]);

@@ -166,7 +166,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                     
                     html += "<div class=\"row\">\n";
 
-                    if (options.showSearch === undefined || options.showSearch === true) {
+                    if (options.showSearch=== undefined || options.showSearch === true) {
                         if (list.name !== 'groups') {
                             if (options.searchSize) {
                                 html += SearchWidget({
@@ -270,7 +270,7 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                         html += (options.mode === 'edit' || options.mode === 'summary') ? list.editTitle : list.addTitle;
                         html += "</div>\n";
                     }
-
+                    
                     // table header row
                     html += "<table id=\"" + list.name + "_table\" ";
                     html += "class=\"table";

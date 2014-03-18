@@ -6,10 +6,22 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="well">
-                    <div class="job_list" id="completed_jobs"></div>
-                    <div class="job_list" id="running_jobs"></div>
-                    <div class="job_list" id="queued_jobs"></div>
-                    <div class="job_list" id="scheduled_jobs"></div>
+                    <div class="job_list">
+                        <div class="title"><a href="/#/jobs/completed">Completed</a></div>
+                        <div id="completed_jobs"></div>
+                    </div>
+                    <div class="job_list">
+                        <div class="title"><a href="/#/jobs/running">Running</a></div>
+                        <div id="running_jobs"></div>
+                    </div>
+                    <div class="job_list">
+                        <div class="title"><a href="/#/jobs/queued">Queued</a></div>
+                        <div id="queued_jobs"></div>
+                    </div>
+                    <div class="job_list">
+                        <div class="title"><a href="/#/jobs/scheduled">Scheduled</a></div>
+                        <div id="scheduled_jobs"></div>
+                    </div>
                 </div>
             </div>
         </div>   

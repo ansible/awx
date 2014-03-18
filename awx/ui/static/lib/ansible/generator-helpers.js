@@ -535,9 +535,15 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                 // Add data binds 
                 if (!field.ngBindHtml && (field.showValue === undefined || field.showValue === true)) {
                     if (field.ngBind) {
-                        html += "{{ " + field.ngBind + " }}";
+                        html += "{{ " + field.ngBind;
                     } else {
-                        html += "{{" + list.iterator + "." + fld + "}}";
+                        html += "{{" + list.iterator + "." + fld;
+                    }
+                    if (field.filter) {
+                        html += " | " + field.filter + " }}";
+                    }
+                    else {
+                        html += " }}";
                     }
                 }
 
@@ -731,7 +737,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             html += "</div>\n";
             html += "<div class=\"col-lg-4 col-md-4\" ng-hide=\"" + iterator + "_mode == 'lookup'\">\n";
             html += "<div class=\"page-label\">\n";
-            html += "Page {{ " + iterator + "_page }} of {{ " + iterator + "_num_pages }} for {{ " + iterator + "_total_rows | number:0 }} " + set + '.';
+            html += "Page {{ " + iterator + "_page }} of {{ " + iterator + "_num_pages }} for {{ " + iterator + "_total_rows | number:0 }} " +
+                set.replace(/\_/g,' ') + '.';
             html += "</div>\n";
             html += "</div>\n";
             html += "</div>\n";
