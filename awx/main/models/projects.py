@@ -29,25 +29,13 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 # AWX
 from awx.lib.compat import slugify
 from awx.main.models.base import *
+from awx.main.models.unified_jobs import *
 from awx.main.utils import update_scm_url
 
 __all__ = ['Project', 'ProjectUpdate']
 
+class ProjectOptions(models.Model):
 
-class Project(CommonModel):
-    '''
-    A project represents a playbook git repo that can access a set of inventories
-    '''
-
-    PROJECT_STATUS_CHOICES = [
-        ('ok', 'OK'),
-        ('missing', 'Missing'),
-        ('never updated', 'Never Updated'),
-        ('updating', 'Updating'),
-        ('failed', 'Failed'),
-        ('successful', 'Successful'),
-    ]
-        
     SCM_TYPE_CHOICES = [
         ('', _('Manual')),
         ('git', _('Git')),
@@ -56,10 +44,7 @@ class Project(CommonModel):
     ]
     
     class Meta:
-        app_label = 'main'
-
-    # this is not part of the project, but managed with perms
-    # inventories      = models.ManyToManyField('Inventory', blank=True, related_name='projects')
+        abstract = True
 
     # Project files must be available on the server in folders directly
     # beneath the path specified by settings.PROJECTS_ROOT.  There is no way
@@ -111,49 +96,12 @@ class Project(CommonModel):
     scm_delete_on_update = models.BooleanField(
         default=False,
     )
-    scm_delete_on_next_update = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    scm_update_on_launch = models.BooleanField(
-        default=False,
-    )
     credential = models.ForeignKey(
         'Credential',
-        related_name='projects',
+        related_name='%(class)ss',
         blank=True,
         null=True,
         default=None,
-    )
-    current_update = models.ForeignKey(
-        'ProjectUpdate',
-        null=True,
-        default=None,
-        editable=False,
-        related_name='project_as_current_update+',
-    )
-    last_update = models.ForeignKey(
-        'ProjectUpdate',
-        null=True,
-        default=None,
-        editable=False,
-        related_name='project_as_last_update+',
-    )
-    last_update_failed = models.BooleanField(
-        default=False,
-        editable=False,
-    )
-    last_updated = models.DateTimeField(
-        null=True,
-        default=None,
-        editable=False,
-    )
-    status = models.CharField(
-        max_length=32,
-        choices=PROJECT_STATUS_CHOICES,
-        default='ok',
-        editable=False,
-        null=True, # FIXME: Remove
     )
 
     def clean_scm_type(self):
@@ -198,6 +146,30 @@ class Project(CommonModel):
             except ValueError:
                 pass
         return cred
+
+
+class ProjectBase(ProjectOptions):
+    '''
+    A project represents a playbook git repo that can access a set of inventories
+    '''
+
+    class Meta:
+        app_label = 'main'
+        abstract = True
+
+    # this is not part of the project, but managed with perms
+    # inventories      = models.ManyToManyField('Inventory', blank=True, related_name='projects')
+
+    scm_delete_on_next_update = models.BooleanField(
+        default=False,
+        editable=False,
+    )
+    scm_update_on_launch = models.BooleanField(
+        default=False,
+    )
+    scm_update_cache_timeout = models.PositiveIntegerField(
+        default=0,
+    )
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
@@ -284,13 +256,13 @@ class Project(CommonModel):
 
     def update_signature(self, **kwargs):
         if self.can_update:
-            project_update = self.project_updates.create()
+            project_update = self.project_updates.create() # FIXME: Copy options to ProjectUpdate
             project_update_sig = project_update.start_signature()
             return (project_update, project_update_sig)
 
     def update(self, **kwargs):
         if self.can_update:
-            project_update = self.project_updates.create()
+            project_update = self.project_updates.create() # FIXME: Copy options to ProjectUpdate
             project_update.start()
             return project_update
 
@@ -337,20 +309,84 @@ class Project(CommonModel):
                     results.append(playbook)
         return results
 
-class ProjectUpdate(CommonTask):
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
+
+    class Project(CommonModel, ProjectBase):
+
+        PROJECT_STATUS_CHOICES = [
+            ('ok', 'OK'),
+            ('missing', 'Missing'),
+            ('never updated', 'Never Updated'),
+            ('updating', 'Updating'),
+            ('failed', 'Failed'),
+            ('successful', 'Successful'),
+        ]
+
+        class Meta:
+            app_label = 'main'
+
+        current_update = models.ForeignKey(
+            'ProjectUpdate',
+            null=True,
+            default=None,
+            editable=False,
+            related_name='project_as_current_update+',
+        )
+        last_update = models.ForeignKey(
+            'ProjectUpdate',
+            null=True,
+            default=None,
+            editable=False,
+            related_name='project_as_last_update+',
+        )
+        last_update_failed = models.BooleanField(
+            default=False,
+            editable=False,
+        )
+        last_updated = models.DateTimeField(
+            null=True,
+            default=None,
+            editable=False,
+        )
+        status = models.CharField(
+            max_length=32,
+            choices=PROJECT_STATUS_CHOICES,
+            default='ok',
+            editable=False,
+            null=True, # FIXME: Remove
+        )
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
+
+    class ProjectNew(UnifiedJobTemplate, ProjectBase):
+
+        class Meta:
+            app_label = 'main'
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
+
+    class Project(ProjectNew):
+
+        class Meta:
+            proxy = True
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
+
+    class Project(UnifiedJobTemplate, ProjectBase):
+
+        class Meta:
+            app_label = 'main'
+
+
+class ProjectUpdateBase(ProjectOptions):
     '''
     Internal job for tracking project updates from SCM.
     '''
 
     class Meta:
         app_label = 'main'
-
-    project = models.ForeignKey(
-        'Project',
-        related_name='project_updates',
-        on_delete=models.CASCADE,
-        editable=False,
-    )
+        abstract = True
 
     def get_absolute_url(self):
         return reverse('api:project_update_detail', args=(self.pk,))
@@ -380,3 +416,53 @@ class ProjectUpdate(CommonTask):
                                                     'last_update',
                                                     'last_update_failed',
                                                     'scm_delete_on_next_update'])
+
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
+
+    class ProjectUpdate(CommonTask, ProjectUpdateBase):
+
+        class Meta:
+            app_label = 'main'
+
+        project = models.ForeignKey(
+            'Project',
+            related_name='project_updates',
+            on_delete=models.CASCADE,
+            editable=False,
+        )
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
+
+    class ProjectUpdateNew(UnifiedJob, ProjectUpdateBase):
+
+        class Meta:
+            app_label = 'main'
+
+        project = models.ForeignKey(
+            'ProjectNew',
+            related_name='project_updates',
+            on_delete=models.CASCADE,
+            editable=False,
+        )
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
+    
+    class ProjectUpdate(ProjectUpdateNew):
+
+        class Meta:
+            proxy = True
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
+
+    class ProjectUpdate(UnifiedJob, ProjectUpdateBase):
+
+        class Meta:
+            app_label = 'main'
+
+        project = models.ForeignKey(
+            'Project',
+            related_name='project_updates',
+            on_delete=models.CASCADE,
+            editable=False,
+        )
