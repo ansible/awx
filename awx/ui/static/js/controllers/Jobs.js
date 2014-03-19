@@ -10,7 +10,7 @@
  
 'use strict';
 
-function JobsList($scope, $compile, ClearScope, Breadcrumbs, LoadScope, RunningJobsList, CompletedJobsList) {
+function JobsList($scope, $compile, ClearScope, Breadcrumbs, LoadScope, RunningJobsList, CompletedJobsList, QueuedJobsList) {
     
     ClearScope();
 
@@ -25,7 +25,7 @@ function JobsList($scope, $compile, ClearScope, Breadcrumbs, LoadScope, RunningJ
     LoadScope({
         scope: completed_scope,
         list: CompletedJobsList,
-        id: 'completed_jobs',
+        id: 'completed-jobs',
         url: '/static/sample/data/jobs/completed/data.json'
     });
 
@@ -33,13 +33,21 @@ function JobsList($scope, $compile, ClearScope, Breadcrumbs, LoadScope, RunningJ
     LoadScope({
         scope: running_scope,
         list: RunningJobsList,
-        id: 'running_jobs',
+        id: 'active-jobs',
         url: '/static/sample/data/jobs/running/data.json'
+    });
+
+    queued_scope = $scope.$new();
+    LoadScope({
+        scope: queued_scope,
+        list: QueuedJobsList,
+        id: 'queued-jobs',
+        url: '/static/sample/data/jobs/queued/data.json'
     });
 
 }
 
-JobsList.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadScope', 'RunningJobsList', 'CompletedJobsList'];
+JobsList.$inject = ['$scope', '$compile', 'ClearScope', 'Breadcrumbs', 'LoadScope', 'RunningJobsList', 'CompletedJobsList', 'QueuedJobsList'];
 
 
 

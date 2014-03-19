@@ -91,7 +91,8 @@ angular.module('ansible', [
     'SchedulesListDefinition',
     'AngularScheduler',
     'Timezones',
-    'SchedulesHelper'
+    'SchedulesHelper',
+    'QueuedJobsDefinition'
 ])
     
     .constant('AngularScheduler.partials', $basePath + 'lib/angular-scheduler/lib/')

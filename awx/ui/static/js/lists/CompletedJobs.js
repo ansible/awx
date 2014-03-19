@@ -23,7 +23,8 @@ angular.module('CompletedJobsDefinition', [])
                 label: 'Job ID',
                 key: true,
                 desc: true,
-                searchType: 'int'
+                searchType: 'int',
+                columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2'
             },
             inventory: {
                 label: 'Inventory ID',
@@ -34,7 +35,8 @@ angular.module('CompletedJobsDefinition', [])
                 label: 'Create On',
                 link: false,
                 searchable: false,
-                filter: "date:'MM/dd HH:mm:ss'"
+                filter: "date:'MM/dd/yy HH:mm:ss'",
+                columnClass: "hidden-sm hidden-xs"
             },
             job_template: {
                 label: 'Job Template',
@@ -42,7 +44,8 @@ angular.module('CompletedJobsDefinition', [])
                 //ngHref: "{{ '/#/job_templates/?name=' + completed_job.summary_fields.job_template.name }}",
                 ngHref:"{{ '/#/job_templates/' + completed_job.job_template }}",
                 sourceModel: 'job_template',
-                sourceField: 'name'
+                sourceField: 'name',
+                columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-3'
             },
             failed: {
                 label: 'Job failed?',

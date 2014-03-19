@@ -997,8 +997,7 @@ input[type="checkbox"].checkbox-no-label {
     line-height: 1;
   }
 
-  .job_list {
-      padding-right: 15px;
+  .job-list {
       margin-top: 30px;
       .row {
           margin-left: 0;
@@ -1010,11 +1009,19 @@ input[type="checkbox"].checkbox-no-label {
       .title {
           padding-left: 8px;
           font-weight: bold;
+          margin-bottom: 6px;
       }
-
+      thead >tr >th, tbody >tr >td, .page-row, .title {
+          color: #666;
+      }
+      .pagination li a {
+          font-size: 12px;
+      }
   }
 
-
+  #completed-jobs-container {
+      margin-top: 0;
+  }
 
 /* Inventory job status badge */
   .failures-true {

@@ -1,19 +1,19 @@
 /*********************************************
  *  Copyright (c) 2014 AnsibleWorks, Inc.
  *
- *  RunningJobs.js 
+ *  QueuedJobs.js
  *
  * 
  */
 
 'use strict';
 
-angular.module('RunningJobsDefinition', [])
-    .value( 'RunningJobsList', {
+angular.module('QueuedJobsDefinition', [])
+    .value( 'QueuedJobsList', {
         
-        name: 'running_jobs',
-        iterator: 'running_job',
-        editTitle: 'Completed Jobs',
+        name: 'queued_jobs',
+        iterator: 'queued_job',
+        editTitle: 'Queued Jobs',
         index: false,
         hover: true,
         well: false,
@@ -40,9 +40,9 @@ angular.module('RunningJobsDefinition', [])
             },
             job_template: {
                 label: 'Job Template',
-                ngBind: 'running_job.summary_fields.job_template.name',
-                //ngHref: "{{ '/#/job_templates/?name=' + running_job.summary_fields.job_template.name }}",
-                ngHref:"{{ '/#/job_templates/' + running_job.job_template }}",
+                ngBind: 'queued_job.summary_fields.job_template.name',
+                //ngHref: "{{ '/#/job_templates/?name=' + queued_job.summary_fields.job_template.name }}",
+                ngHref:"{{ '/#/job_templates/' + queued_job.job_template }}",
                 sourceModel: 'job_template',
                 sourceField: 'name',
                 columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-3'
@@ -57,9 +57,9 @@ angular.module('RunningJobsDefinition', [])
             },
             status: {
                 label: 'Status',
-                "class": 'job-{{ running_job.status }}',
+                "class": 'job-{{ queued_job.status }}',
                 searchType: 'select',
-                linkTo: "{{ running_job.statusLinkTo }}",
+                linkTo: "{{ queued_job.statusLinkTo }}",
                 searchOptions: [
                     { name: "new", value: "new" },
                     { name: "waiting", value: "waiting" },
@@ -70,12 +70,12 @@ angular.module('RunningJobsDefinition', [])
                     { name: "failed", value: "failed" },
                     { name: "canceled", value: "canceled" }
                 ],
-                badgeIcon: 'fa icon-job-{{ running_job.status }}',
+                badgeIcon: 'fa icon-job-{{ queued_job.status }}',
                 badgePlacement: 'left',
-                badgeToolTip: "{{ running_job.statusBadgeToolTip }}",
+                badgeToolTip: "{{ queued_job.statusBadgeToolTip }}",
                 badgeTipPlacement: 'top',
-                badgeNgHref: "{{ running_job.statusLinkTo }}",
-                awToolTip: "{{ running_job.statusBadgeToolTip }}",
+                badgeNgHref: "{{ queued_job.statusLinkTo }}",
+                awToolTip: "{{ queued_job.statusBadgeToolTip }}",
                 dataPlacement: 'top'
             }
         },
@@ -93,24 +93,24 @@ angular.module('RunningJobsDefinition', [])
                 label: 'Relaunch',
                 icon: 'icon-rocket',
                 mode: 'all',
-                ngClick: 'submitJob(running_job.id, running_job.summary_fields.job_template.name)',
+                ngClick: 'submitJob(queued_job.id, queued_job.summary_fields.job_template.name)',
                 awToolTip: 'Start the job',
                 dataPlacement: 'top'
             },
             cancel: {
                 label: 'Stop',
                 mode: 'all',
-                ngClick: 'deleteJob(running_job.id)',
+                ngClick: 'deleteJob(queued_job.id)',
                 awToolTip: 'Cancel a running or pending job',
-                ngShow: "running_job.status == 'pending' || running_job.status == 'running' || running_job.status == 'waiting'",
+                ngShow: "queued_job.status == 'pending' || queued_job.status == 'running' || queued_job.status == 'waiting'",
                 dataPlacement: 'top'
             },
             "delete": {
                 label: 'Delete',
                 mode: 'all',
-                ngClick: 'deleteJob(running_job.id)',
+                ngClick: 'deleteJob(queued_job.id)',
                 awToolTip: 'Delete the job',
-                ngShow: "running_job.status != 'pending' && running_job.status != 'running' && running_job.status != 'waiting'",
+                ngShow: "queued_job.status != 'pending' && queued_job.status != 'running' && queued_job.status != 'waiting'",
                 dataPlacement: 'top'
             },
             dropdown: {
@@ -119,11 +119,11 @@ angular.module('RunningJobsDefinition', [])
                 icon: 'fa-search-plus',
                 'class': 'btn-default btn-xs',
                 options: [
-                    { ngClick: 'editJob(running_job.id, running_job.summary_fields.job_template.name)', label: 'Status' },
-                    { ngClick: 'viewEvents(running_job.id, running_job.summary_fields.job_template.name)', label: 'Events',
-                        ngHide: "running_job.status == 'new'" },
-                    { ngClick: 'viewSummary(running_job.id, running_job.summary_fields.job_template.name)', label: 'Host Summary',
-                        ngHide: "running_job.status == 'new'" }
+                    { ngClick: 'editJob(queued_job.id, queued_job.summary_fields.job_template.name)', label: 'Status' },
+                    { ngClick: 'viewEvents(queued_job.id, queued_job.summary_fields.job_template.name)', label: 'Events',
+                        ngHide: "queued_job.status == 'new'" },
+                    { ngClick: 'viewSummary(queued_job.id, queued_job.summary_fields.job_template.name)', label: 'Host Summary',
+                        ngHide: "queued_job.status == 'new'" }
                 ]
             }
         }
