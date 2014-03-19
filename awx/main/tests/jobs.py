@@ -929,7 +929,7 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         # Start/run a job and then access its results via the API.
         #job = self.job_ops_east_run
         job = self.make_job(self.jt_ops_east_run, self.user_sue, 'new')
-        job.start()
+        job.signal_start()
 
         # Check that the job detail has been updated.
         url = reverse('api:job_detail', args=(job.pk,))
