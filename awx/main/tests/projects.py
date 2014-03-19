@@ -1270,8 +1270,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.assertTrue(response['can_update'])
         with self.current_user(self.super_django_user):
             response = self.post(url, {}, expect=202)
-        time.sleep(15)
-        project_update = project.project_updates.filter(status='successful').order_by('-pk')[0]
+        project_update = project.project_updates.order_by('-pk')
         self.check_project_update(project, should_fail=None,
                                   project_update=project_update)
         # Verify that we responded to ssh-agent prompt.
