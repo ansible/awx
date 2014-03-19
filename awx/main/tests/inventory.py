@@ -32,7 +32,7 @@ class InventoryTest(BaseTest):
 
         self.inventory_a = Inventory.objects.create(name='inventory-a', description='foo', organization=self.organizations[0])
         self.inventory_b = Inventory.objects.create(name='inventory-b', description='bar', organization=self.organizations[1])
- 
+
         # the normal user is an org admin of org 0
 
         # create a permission here on the 'other' user so they have edit access on the org
@@ -977,6 +977,8 @@ class InventoryTest(BaseTest):
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+                   IGNORE_CELERY_INSPECTOR=True,
+                   UNIT_TEST_IGNORE_TASK_WAIT=True,
                    PEXPECT_TIMEOUT=60)
 class InventoryUpdatesTest(BaseTransactionTest):
 
@@ -996,7 +998,7 @@ class InventoryUpdatesTest(BaseTransactionTest):
     def tearDown(self):
         super(InventoryUpdatesTest, self).tearDown()
         self.terminate_queue()
-        
+
     def update_inventory_source(self, group, **kwargs):
         inventory_source = group.inventory_source
         update_fields = []

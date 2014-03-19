@@ -16,6 +16,9 @@ import uuid
 # PyYAML
 import yaml
 
+# ZeroMQ
+import zmq
+
 # Django
 from django.conf import settings
 from django.db import models
@@ -30,6 +33,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 from awx.lib.compat import slugify
 from awx.main.models.base import *
 from awx.main.utils import update_scm_url
+from awx.main.utils import encrypt_field
 
 __all__ = ['Project', 'ProjectUpdate']
 
@@ -291,7 +295,10 @@ class Project(CommonModel):
     def update(self, **kwargs):
         if self.can_update:
             project_update = self.project_updates.create()
-            project_update.start()
+            if hasattr(settings, 'CELERY_UNIT_TEST'):
+                project_update.start(None, **kwargs)
+            else:
+                project_update.signal_start(**kwargs)
             return project_update
 
     def get_absolute_url(self):
@@ -361,6 +368,36 @@ class ProjectUpdate(CommonTask):
     def _get_task_class(self):
         from awx.main.tasks import RunProjectUpdate
         return RunProjectUpdate
+
+    def is_blocked_by(self, obj):
+        if type(obj) == ProjectUpdate:
+            if self.project == obj.project:
+                return True
+        return False
+
+    @property
+    def task_impact(self):
+        return 20
+
+    def signal_start(self, **kwargs):
+        if not self.can_start:
+            return False
+        needed = self._get_passwords_needed_to_start()
+        opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        if not all(opts.values()):
+            return False
+
+        json_args = json.dumps(kwargs)
+        self.start_args = json_args
+        self.save()
+        self.start_args = encrypt_field(self, 'start_args')
+        self.save()
+        signal_context = zmq.Context()
+        signal_socket = signal_context.socket(zmq.REQ)
+        signal_socket.connect(settings.TASK_COMMAND_PORT)
+        signal_socket.send_json(dict(task_type="project_update", id=self.id, metadata=kwargs))
+        signal_socket.recv()
+        return True
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()

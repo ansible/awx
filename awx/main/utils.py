@@ -300,3 +300,12 @@ def model_to_dict(obj, serializer_mapping=None):
         else:
             attr_d[field.name] = "hidden"
     return attr_d
+
+def get_system_task_capacity():
+    from django.conf import settings
+    if hasattr(settings, 'SYSTEM_TASK_CAPACITY'):
+        return settings.SYSTEM_TASK_CAPACITY
+    total_mem_value = subprocess.check_output(['free','-m']).split()[7]
+    if int(total_mem_value) <= 2048:
+        return 50
+    return 50 + ((int(total_mem_value) / 1024) - 2) * 75

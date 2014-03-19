@@ -15,6 +15,9 @@ import uuid
 # PyYAML
 import yaml
 
+# ZMQ
+import zmq
+
 # Django
 from django.conf import settings
 from django.db import models
@@ -28,6 +31,7 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 # AWX
 from awx.main.fields import AutoOneToOneField
 from awx.main.models.base import *
+from awx.main.utils import encrypt_field
 
 __all__ = ['Inventory', 'Host', 'Group', 'InventorySource', 'InventoryUpdate']
 
@@ -705,7 +709,10 @@ class InventorySource(PrimordialModel):
     def update(self, **kwargs):
         if self.can_update:
             inventory_update = self.inventory_updates.create()
-            inventory_update.start()
+            if hasattr(settings, 'CELERY_UNIT_TEST'):
+                inventory_update.start(None, **kwargs)
+            else:
+                inventory_update.signal_start(**kwargs)
             return inventory_update
 
     def get_absolute_url(self):
@@ -739,7 +746,7 @@ class InventoryUpdate(CommonTask):
             if 'license_error' not in update_fields:
                 update_fields.append('license_error')
         super(InventoryUpdate, self).save(*args, **kwargs)
-        
+
     def _get_parent_instance(self):
         return self.inventory_source
 
@@ -749,3 +756,33 @@ class InventoryUpdate(CommonTask):
     def _get_task_class(self):
         from awx.main.tasks import RunInventoryUpdate
         return RunInventoryUpdate
+
+    def is_blocked_by(self, obj):
+        if type(obj) == InventoryUpdate:
+            if self.inventory_source == obj.inventory_source:
+                return True
+        return False
+
+    @property
+    def task_impact(self):
+        return 50
+
+    def signal_start(self, **kwargs):
+        if not self.can_start:
+            return False
+        needed = self._get_passwords_needed_to_start()
+        opts = dict([(field, kwargs.get(field, '')) for field in needed])
+        if not all(opts.values()):
+            return False
+
+        json_args = json.dumps(kwargs)
+        self.start_args = json_args
+        self.save()
+        self.start_args = encrypt_field(self, 'start_args')
+        self.save()
+        signal_context = zmq.Context()
+        signal_socket = signal_context.socket(zmq.REQ)
+        signal_socket.connect(settings.TASK_COMMAND_PORT)
+        signal_socket.send_json(dict(task_type="inventory_update", id=self.id, metadata=kwargs))
+        signal_socket.recv()
+        return True

@@ -23,6 +23,9 @@ import uuid
 # Pexpect
 import pexpect
 
+# ZMQ
+import zmq
+
 # Kombu
 from kombu import Connection, Exchange, Queue
 
@@ -63,7 +66,7 @@ def handle_work_error(self, task_id, subtasks=None):
             elif each_task['type'] == 'inventory_update':
                 instance = InventoryUpdate.objects.get(id=each_task['id'])
                 instance_name = instance.inventory_source.inventory.name
-            elif each_task['type'] == 'job':
+            elif each_task['type'] == 'ansible_playbook':
                 instance = Job.objects.get(id=each_task['id'])
                 instance_name = instance.job_template.name
             else:
@@ -119,6 +122,13 @@ class BaseTask(Task):
         else:
             logger.error('Failed to update %s after %d retries.',
                          self.model._meta.object_name, retry_count)
+
+    def signal_finished(self, pk):
+        signal_context = zmq.Context()
+        signal_socket = signal_context.socket(zmq.REQ)
+        signal_socket.connect(settings.TASK_COMMAND_PORT)
+        signal_socket.send_json(dict(complete=pk))
+        signal_socket.recv()
 
     def get_model(self, pk):
         return self.model.objects.get(pk=pk)
@@ -342,6 +352,8 @@ class BaseTask(Task):
                 raise Exception("Task %s(pk:%s) was canceled" % (str(self.model.__class__), str(pk)))
             else:
                 raise Exception("Task %s(pk:%s) encountered an error" % (str(self.model.__class__), str(pk)))
+        if not hasattr(settings, 'CELERY_UNIT_TEST'):
+            self.signal_finished(pk)
 
 class RunJob(BaseTask):
     '''

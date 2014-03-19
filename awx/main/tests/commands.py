@@ -393,15 +393,14 @@ class CleanupJobsTest(BaseCommandMixin, BaseLiveServerTest):
         result, stdout, stderr = self.run_command('cleanup_jobs')
         self.assertEqual(result, None)
         jobs_after = Job.objects.all().count()
-        self.assertEqual(jobs_before, jobs_after)        
+        self.assertEqual(jobs_before, jobs_after)
         # Create and run job.
         self.create_test_project(TEST_PLAYBOOK)
         job_template = self.create_test_job_template()
         job = self.create_test_job(job_template=job_template)
         self.assertEqual(job.status, 'new')
         self.assertFalse(job.passwords_needed_to_start)
-        self.assertTrue(job.start())
-        self.assertEqual(job.status, 'waiting')
+        self.assertTrue(job.signal_start())
         job = Job.objects.get(pk=job.pk)
         self.assertEqual(job.status, 'successful')
         # With days=1, no jobs will be deleted.
