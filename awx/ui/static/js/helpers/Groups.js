@@ -552,11 +552,11 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
 .factory('GroupsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'GroupForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'SetNodeName', 'ParseTypeChange', 'GetSourceTypeOptions', 'InventoryUpdate',
     'LookUpInit', 'Empty', 'Wait', 'GetChoices', 'UpdateGroup', 'SourceChange', 'Find','WatchInventoryWindowResize',
-    'ParseVariableString', 'ToJSON', 'ScheduleList', 'SourceForm', 'SetSchedulesInnerDialogSize',
+    'ParseVariableString', 'ToJSON', 'ScheduleList', 'SourceForm', 'SetSchedulesInnerDialogSize', 'BuildTree',
     function ($rootScope, $location, $log, $routeParams, Rest, Alert, GroupForm, GenerateForm, Prompt, ProcessErrors,
         GetBasePath, SetNodeName, ParseTypeChange, GetSourceTypeOptions, InventoryUpdate, LookUpInit, Empty, Wait,
         GetChoices, UpdateGroup, SourceChange, Find, WatchInventoryWindowResize, ParseVariableString, ToJSON, ScheduleList,
-        SourceForm, SetSchedulesInnerDialogSize) {
+        SourceForm, SetSchedulesInnerDialogSize, BuildTree) {
         return function (params) {
 
             var parent_scope = params.scope,
@@ -933,6 +933,27 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
 
             Wait('start');
 
+            if (parent_scope.removeAddTreeRefreshed) {
+                parent_scope.removeAddTreeRefreshed();
+            }
+            parent_scope.removeAddTreeRefreshed = parent_scope.$on('GroupTreeRefreshed', function() {
+                //Clean up
+                if (modal_scope.searchCleanUp) {
+                    modal_scope.searchCleanup();
+                }
+
+                $('#group-modal-dialog').dialog('close');
+
+                // Change the selected group
+                if (groups_reload && parent_scope.selected_tree_id !== tree_id) {
+                    parent_scope.showHosts(tree_id, group_id, false);
+                } else {
+                    Wait('stop');
+                }
+                WatchInventoryWindowResize();
+                parent_scope.removeAddTreeRefreshed();
+            });
+
             if (modal_scope.removeSaveComplete) {
                 modal_scope.removeSaveComplete();
             }
@@ -963,20 +984,17 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                         }
                     }
 
-                    //Clean up
-                    if (modal_scope.searchCleanUp) {
-                        modal_scope.searchCleanup();
+                    if (mode === 'add') {
+                        BuildTree({
+                            scope: parent_scope,
+                            inventory_id: inventory_id,
+                            refresh: true,
+                            new_group_id: group_id
+                        });
                     }
-
-                    $('#group-modal-dialog').dialog('close');
-
-                    // Change the selected group
-                    if (groups_reload && parent_scope.selected_tree_id !== tree_id) {
-                        parent_scope.showHosts(tree_id, group_id, false);
-                    } else {
-                        Wait('stop');
+                    else {
+                        parent_scope.$emit('GroupTreeRefreshed');
                     }
-                    WatchInventoryWindowResize();
                 }
             });
 
@@ -1015,28 +1033,15 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
 
                 if (!parseError) {
                     Rest.setUrl(sources_scope.source_url);
-                    if (mode === 'edit') {
-                        Rest.put(data)
-                            .success(function () {
-                                modal_scope.$emit('SaveComplete', false);
-                            })
-                            .error(function (data, status) {
-                                modal_scope.$emit('SaveComplete', true);
-                                ProcessErrors(sources_scope, data, status, SourceForm, { hdr: 'Error!',
-                                    msg: 'Failed to update group inventory source. PUT status: ' + status });
-                            });
-                    }
-                    else {
-                        Rest.post(data)
-                            .success(function () {
-                                modal_scope.$emit('SaveComplete', false);
-                            })
-                            .error(function (data, status) {
-                                modal_scope.$emit('SaveComplete', true);
-                                ProcessErrors(sources_scope, data, status, SourceForm, { hdr: 'Error!',
-                                    msg: 'Failed to update group inventory source. PUT status: ' + status });
-                            });
-                    }
+                    Rest.put(data)
+                        .success(function () {
+                            modal_scope.$emit('SaveComplete', false);
+                        })
+                        .error(function (data, status) {
+                            modal_scope.$emit('SaveComplete', true);
+                            ProcessErrors(sources_scope, data, status, SourceForm, { hdr: 'Error!',
+                                msg: 'Failed to update group inventory source. PUT status: ' + status });
+                        });
                 }
             });
             
@@ -1074,51 +1079,58 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                 Wait('start');
                 var fld, data, json_data;
 
-                json_data = ToJSON(properties_scope.parseType, properties_scope.variables);
+                try {
+                    
+                    json_data = ToJSON(properties_scope.parseType, properties_scope.variables);
 
-                data = {};
-                for (fld in GroupForm.fields) {
-                    if (fld !== 'variables') {
-                        data[fld] = properties_scope[fld];
+                    data = {};
+                    for (fld in GroupForm.fields) {
+                        if (fld !== 'variables') {
+                            data[fld] = properties_scope[fld];
+                        }
+                    }
+
+                    data.inventory = inventory_id;
+
+                    Rest.setUrl(defaultUrl);
+                    if (mode === 'edit') {
+                        Rest.put(data)
+                            .success(function () {
+                                if (properties_scope.variables) {
+                                    modal_scope.$emit('updateVariables', json_data, properties_scope.variable_url);
+                                }
+                                else {
+                                    modal_scope.$emit('formSaveSuccess');
+                                }
+                            })
+                            .error(function (data, status) {
+                                Wait('stop');
+                                ProcessErrors(properties_scope, data, status, GroupForm, { hdr: 'Error!',
+                                    msg: 'Failed to update group: ' + group_id + '. PUT status: ' + status
+                                });
+                            });
+                    }
+                    else {
+                        Rest.post(data)
+                            .success(function (data) {
+                                if (properties_scope.variables) {
+                                    sources_scope.source_url = data.related.inventory_source;
+                                    modal_scope.$emit('updateVariables', json_data, data.related.variable_data);
+                                }
+                                else {
+                                    modal_scope.$emit('formSaveSuccess');
+                                }
+                            })
+                            .error(function (data, status) {
+                                Wait('stop');
+                                ProcessErrors(properties_scope, data, status, GroupForm, { hdr: 'Error!',
+                                    msg: 'Failed to create group: ' + group_id + '. POST status: ' + status
+                                });
+                            });
                     }
                 }
-
-                data.inventory = inventory_id;
-
-                Rest.setUrl(defaultUrl);
-                if (mode === 'edit') {
-                    Rest.put(data)
-                        .success(function () {
-                            if (properties_scope.variables) {
-                                modal_scope.$emit('updateVariables', json_data, properties_scope.variable_url);
-                            }
-                            else {
-                                modal_scope.$emit('formSaveSuccess');
-                            }
-                        })
-                        .error(function (data, status) {
-                            Wait('stop');
-                            ProcessErrors(properties_scope, data, status, GroupForm, { hdr: 'Error!',
-                                msg: 'Failed to update group: ' + group_id + '. PUT status: ' + status
-                            });
-                        });
-                }
-                else {
-                    Rest.post(data)
-                        .success(function () {
-                            if (properties_scope.variables) {
-                                modal_scope.$emit('updateVariables', json_data, properties_scope.variable_url);
-                            }
-                            else {
-                                modal_scope.$emit('formSaveSuccess');
-                            }
-                        })
-                        .error(function (data, status) {
-                            Wait('stop');
-                            ProcessErrors(properties_scope, data, status, GroupForm, { hdr: 'Error!',
-                                msg: 'Failed to create group: ' + group_id + '. POST status: ' + status
-                            });
-                        });
+                catch(e) {
+                    // ignore. ToJSON will have already alerted the user
                 }
             };
 

@@ -14,7 +14,8 @@ function JobsList($scope, $compile, ClearScope, Breadcrumbs, LoadScope, RunningJ
     
     ClearScope();
 
-    var e, completed_scope, running_scope, queued_scope, schedule_scope;
+    var e, completed_scope, running_scope, queued_scope;
+    // schedule_scope;
 
     // Add breadcrumbs
     e = angular.element(document.getElementById('breadcrumbs'));

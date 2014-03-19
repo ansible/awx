@@ -99,6 +99,9 @@ angular.module('VariablesHelper', ['Utilities'])
             if (typeof json_data !== 'object') {
                 ProcessErrors(null, variables, null, null, { hdr: 'Error!',
                     msg: 'Failed to parse variables. Attempted to parse ' + parseType + ' Parser did not return an object.' });
+                setTimeout( function() {
+                    throw { name: 'Parse error', message: 'Failed to parse variables. Attempted to parse ' + parseType + ' Parser did not return an object.' };
+                }, 1000);
             }
             result = json_data;
             if (stringify) {
