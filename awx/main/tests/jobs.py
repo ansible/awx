@@ -447,13 +447,11 @@ class BaseJobTestMixin(BaseTestMixin):
     def setUp(self):
         super(BaseJobTestMixin, self).setUp()
         self.populate()
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
         if settings.CALLBACK_CONSUMER_PORT:
             self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
 
     def tearDown(self):
         super(BaseJobTestMixin, self).tearDown()
-        self.terminate_taskmanager()
         self.terminate_queue()
 
 class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
@@ -785,7 +783,6 @@ class JobTest(BaseJobTestMixin, django.test.TestCase):
 # asynchronously; the start API call will update the database, queue the task,
 # then return immediately (committing the transaction) before celery has even
 # woken up to run the new task.
-# FIXME: TODO: These tests are completely broken at the moment, we cover a lot of the run actions in the tasks tests anyway
 MIDDLEWARE_CLASSES = filter(lambda x: not x.endswith('TransactionMiddleware'),
                             settings.MIDDLEWARE_CLASSES)
 
@@ -902,133 +899,133 @@ class JobStartCancelTest(BaseJobTestMixin, django.test.LiveServerTestCase):
 
         # FIXME: Test with other users, test when passwords are required.
 
-    # def test_job_cancel(self):
-    #     #job = self.job_ops_east_run
-    #     job = self.make_job(self.jt_ops_east_run, self.user_sue, 'new')
-    #     url = reverse('api:job_cancel', args=(job.pk,))
+    def test_job_cancel(self):
+        #job = self.job_ops_east_run
+        job = self.make_job(self.jt_ops_east_run, self.user_sue, 'new')
+        url = reverse('api:job_cancel', args=(job.pk,))
 
-    #     # Test with no auth and with invalid login.
-    #     self.check_invalid_auth(url)
-    #     self.check_invalid_auth(url, methods=('post',))
+        # Test with no auth and with invalid login.
+        self.check_invalid_auth(url)
+        self.check_invalid_auth(url, methods=('post',))
 
-    #     # sue can cancel the job, but only when it is pending or running.
-    #     for status in [x[0] for x in TASK_STATUS_CHOICES]:
-    #         if status == 'waiting':
-    #             continue
-    #         job.status = status
-    #         job.save()
-    #         with self.current_user(self.user_sue):
-    #             response = self.get(url)
-    #             if status in ('pending', 'running'):
-    #                 self.assertTrue(response['can_cancel'])
-    #                 response = self.post(url, {}, expect=202)
-    #             else:
-    #                 self.assertFalse(response['can_cancel'])
-    #                 response = self.post(url, {}, expect=405)
+        # sue can cancel the job, but only when it is pending or running.
+        for status in [x[0] for x in TASK_STATUS_CHOICES]:
+            if status == 'waiting':
+                continue
+            job.status = status
+            job.save()
+            with self.current_user(self.user_sue):
+                response = self.get(url)
+                if status in ('pending', 'running'):
+                    self.assertTrue(response['can_cancel'])
+                    response = self.post(url, {}, expect=202)
+                else:
+                    self.assertFalse(response['can_cancel'])
+                    response = self.post(url, {}, expect=405)
 
         # FIXME: Test with other users.
 
-    # def test_get_job_results(self):
-    #     # Start/run a job and then access its results via the API.
-    #     #job = self.job_ops_east_run
-    #     job = self.make_job(self.jt_ops_east_run, self.user_sue, 'new')
-    #     job.signal_start()
+    def test_get_job_results(self):
+        # Start/run a job and then access its results via the API.
+        #job = self.job_ops_east_run
+        job = self.make_job(self.jt_ops_east_run, self.user_sue, 'new')
+        job.start()
 
-    #     # Check that the job detail has been updated.
-    #     url = reverse('api:job_detail', args=(job.pk,))
-    #     with self.current_user(self.user_sue):
-    #         response = self.get(url)
-    #         self.assertEqual(response['status'], 'successful',
-    #                          response['result_traceback'])
-    #         self.assertTrue(response['result_stdout'])
+        # Check that the job detail has been updated.
+        url = reverse('api:job_detail', args=(job.pk,))
+        with self.current_user(self.user_sue):
+            response = self.get(url)
+            self.assertEqual(response['status'], 'successful',
+                             response['result_traceback'])
+            self.assertTrue(response['result_stdout'])
 
-    #     # Test job events for completed job.
-    #     url = reverse('api:job_job_events_list', args=(job.pk,))
-    #     with self.current_user(self.user_sue):
-    #         response = self.get(url)
-    #         qs = job.job_events.all()
-    #         self.assertTrue(qs.count())
-    #         self.check_pagination_and_size(response, qs.count())
-    #         self.check_list_ids(response, qs)
+        # Test job events for completed job.
+        url = reverse('api:job_job_events_list', args=(job.pk,))
+        with self.current_user(self.user_sue):
+            response = self.get(url)
+            qs = job.job_events.all()
+            self.assertTrue(qs.count())
+            self.check_pagination_and_size(response, qs.count())
+            self.check_list_ids(response, qs)
 
-    #     # Test individual job event detail records.
-    #     host_ids = set()
-    #     for job_event in job.job_events.all():
-    #         if job_event.host:
-    #             host_ids.add(job_event.host.pk)
-    #         url = reverse('api:job_event_detail', args=(job_event.pk,))
-    #         with self.current_user(self.user_sue):
-    #             response = self.get(url)
+        # Test individual job event detail records.
+        host_ids = set()
+        for job_event in job.job_events.all():
+            if job_event.host:
+                host_ids.add(job_event.host.pk)
+            url = reverse('api:job_event_detail', args=(job_event.pk,))
+            with self.current_user(self.user_sue):
+                response = self.get(url)
 
-    #     # Also test job event list for each host.
-    #     if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
-    #         for host in Host.objects.filter(pk__in=host_ids):
-    #             url = reverse('api:host_job_events_list', args=(host.pk,))
-    #             with self.current_user(self.user_sue):
-    #                 response = self.get(url)
-    #                 qs = host.job_events.all()
-    #                 self.assertTrue(qs.count())
-    #                 self.check_pagination_and_size(response, qs.count())
-    #                 self.check_list_ids(response, qs)
+        # Also test job event list for each host.
+        if getattr(settings, 'CAPTURE_JOB_EVENT_HOSTS', False):
+            for host in Host.objects.filter(pk__in=host_ids):
+                url = reverse('api:host_job_events_list', args=(host.pk,))
+                with self.current_user(self.user_sue):
+                    response = self.get(url)
+                    qs = host.job_events.all()
+                    self.assertTrue(qs.count())
+                    self.check_pagination_and_size(response, qs.count())
+                    self.check_list_ids(response, qs)
 
-    #     # Test job event list for groups.
-    #     for group in self.inv_ops_east.groups.all():
-    #         url = reverse('api:group_job_events_list', args=(group.pk,))
-    #         with self.current_user(self.user_sue):
-    #             response = self.get(url)
-    #             qs = group.job_events.all()
-    #             self.assertTrue(qs.count(), group)
-    #             self.check_pagination_and_size(response, qs.count())
-    #             self.check_list_ids(response, qs)
+        # Test job event list for groups.
+        for group in self.inv_ops_east.groups.all():
+            url = reverse('api:group_job_events_list', args=(group.pk,))
+            with self.current_user(self.user_sue):
+                response = self.get(url)
+                qs = group.job_events.all()
+                self.assertTrue(qs.count(), group)
+                self.check_pagination_and_size(response, qs.count())
+                self.check_list_ids(response, qs)
 
-    #     # Test global job event list.
-    #     url = reverse('api:job_event_list')
-    #     with self.current_user(self.user_sue):
-    #         response = self.get(url)
-    #         qs = JobEvent.objects.all()
-    #         self.assertTrue(qs.count())
-    #         self.check_pagination_and_size(response, qs.count())
-    #         self.check_list_ids(response, qs)
+        # Test global job event list.
+        url = reverse('api:job_event_list')
+        with self.current_user(self.user_sue):
+            response = self.get(url)
+            qs = JobEvent.objects.all()
+            self.assertTrue(qs.count())
+            self.check_pagination_and_size(response, qs.count())
+            self.check_list_ids(response, qs)
 
-    #     # Test job host summaries for completed job.
-    #     url = reverse('api:job_job_host_summaries_list', args=(job.pk,))
-    #     with self.current_user(self.user_sue):
-    #         response = self.get(url)
-    #         qs = job.job_host_summaries.all()
-    #         self.assertTrue(qs.count())
-    #         self.check_pagination_and_size(response, qs.count())
-    #         self.check_list_ids(response, qs)
-    #         # Every host referenced by a job_event should be present as a job
-    #         # host summary record.
-    #         self.assertEqual(host_ids,
-    #                          set(qs.values_list('host__pk', flat=True)))
+        # Test job host summaries for completed job.
+        url = reverse('api:job_job_host_summaries_list', args=(job.pk,))
+        with self.current_user(self.user_sue):
+            response = self.get(url)
+            qs = job.job_host_summaries.all()
+            self.assertTrue(qs.count())
+            self.check_pagination_and_size(response, qs.count())
+            self.check_list_ids(response, qs)
+            # Every host referenced by a job_event should be present as a job
+            # host summary record.
+            self.assertEqual(host_ids,
+                             set(qs.values_list('host__pk', flat=True)))
 
-    #     # Test individual job host summary records.
-    #     for job_host_summary in job.job_host_summaries.all():
-    #         url = reverse('api:job_host_summary_detail',
-    #                       args=(job_host_summary.pk,))
-    #         with self.current_user(self.user_sue):
-    #             response = self.get(url)
+        # Test individual job host summary records.
+        for job_host_summary in job.job_host_summaries.all():
+            url = reverse('api:job_host_summary_detail',
+                          args=(job_host_summary.pk,))
+            with self.current_user(self.user_sue):
+                response = self.get(url)
 
-    #     # Test job host summaries for each host.
-    #     for host in Host.objects.filter(pk__in=host_ids):
-    #         url = reverse('api:host_job_host_summaries_list', args=(host.pk,))
-    #         with self.current_user(self.user_sue):
-    #             response = self.get(url)
-    #             qs = host.job_host_summaries.all()
-    #             self.assertTrue(qs.count())
-    #             self.check_pagination_and_size(response, qs.count())
-    #             self.check_list_ids(response, qs)
+        # Test job host summaries for each host.
+        for host in Host.objects.filter(pk__in=host_ids):
+            url = reverse('api:host_job_host_summaries_list', args=(host.pk,))
+            with self.current_user(self.user_sue):
+                response = self.get(url)
+                qs = host.job_host_summaries.all()
+                self.assertTrue(qs.count())
+                self.check_pagination_and_size(response, qs.count())
+                self.check_list_ids(response, qs)
 
-    #     # Test job host summaries for groups.
-    #     for group in self.inv_ops_east.groups.all():
-    #         url = reverse('api:group_job_host_summaries_list', args=(group.pk,))
-    #         with self.current_user(self.user_sue):
-    #             response = self.get(url)
-    #             qs = group.job_host_summaries.all()
-    #             self.assertTrue(qs.count())
-    #             self.check_pagination_and_size(response, qs.count())
-    #             self.check_list_ids(response, qs)
+        # Test job host summaries for groups.
+        for group in self.inv_ops_east.groups.all():
+            url = reverse('api:group_job_host_summaries_list', args=(group.pk,))
+            with self.current_user(self.user_sue):
+                response = self.get(url)
+                qs = group.job_host_summaries.all()
+                self.assertTrue(qs.count())
+                self.check_pagination_and_size(response, qs.count())
+                self.check_list_ids(response, qs)
 
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
@@ -1179,9 +1176,8 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
         self.assertEqual(job.limit, host.name)
-        # TODO: Actual job runs are broken in this
-        #self.assertEqual(job.hosts.count(), 1)
-        #self.assertEqual(job.hosts.all()[0], host)
+        self.assertEqual(job.hosts.count(), 1)
+        self.assertEqual(job.hosts.all()[0], host)
 
         # GET as unauthenticated user will prompt for authentication.
         self.get(url, expect=401, remote_addr=host_ip)
@@ -1224,9 +1220,8 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
         self.assertEqual(job.limit, host.name)
-        # TODO: Actual job runs are broken in this
-        #self.assertEqual(job.hosts.count(), 1)
-        #self.assertEqual(job.hosts.all()[0], host)
+        self.assertEqual(job.hosts.count(), 1)
+        self.assertEqual(job.hosts.all()[0], host)
 
         # Try using an IP for the host that doesn't resolve via reverse lookup,
         # but can be found by doing a forward lookup on the host name.
@@ -1250,9 +1245,8 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
         self.assertEqual(job.limit, host.name)
-        # TODO: Actual job runs are broken in this
-        #self.assertEqual(job.hosts.count(), 1)
-        #self.assertEqual(job.hosts.all()[0], host)
+        self.assertEqual(job.hosts.count(), 1)
+        self.assertEqual(job.hosts.all()[0], host)
 
         # Try using address only specified via ansible_ssh_host.
         host_qs = job_template.inventory.hosts.order_by('pk')
@@ -1265,9 +1259,8 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
         self.assertEqual(job.limit, host.name)
-        # TODO: Actual job runs are broken in this
-        #self.assertEqual(job.hosts.count(), 1)
-        #self.assertEqual(job.hosts.all()[0], host)
+        self.assertEqual(job.hosts.count(), 1)
+        self.assertEqual(job.hosts.all()[0], host)
 
         # Try when hostname is also an IP address, even if a different one is
         # specified via ansible_ssh_host.
@@ -1293,9 +1286,8 @@ class JobTemplateCallbackTest(BaseJobTestMixin, django.test.LiveServerTestCase):
         job = jobs_qs[0]
         self.assertEqual(job.launch_type, 'callback')
         self.assertEqual(job.limit, host.name)
-        # TODO: Actual job runs are broken in this
-        #self.assertEqual(job.hosts.count(), 1)
-        #self.assertEqual(job.hosts.all()[0], host)
+        self.assertEqual(job.hosts.count(), 1)
+        self.assertEqual(job.hosts.all()[0], host)
 
         # Find a new job template to use.
         job_template = None

@@ -32,7 +32,7 @@ class InventoryTest(BaseTest):
 
         self.inventory_a = Inventory.objects.create(name='inventory-a', description='foo', organization=self.organizations[0])
         self.inventory_b = Inventory.objects.create(name='inventory-b', description='bar', organization=self.organizations[1])
- 
+
         # the normal user is an org admin of org 0
 
         # create a permission here on the 'other' user so they have edit access on the org
@@ -993,14 +993,12 @@ class InventoryUpdatesTest(BaseTransactionTest):
         self.group = self.inventory.groups.create(name='Cloud Group')
         self.inventory2 = self.organization.inventories.create(name='Cloud Inventory 2')
         self.group2 = self.inventory2.groups.create(name='Cloud Group 2')
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
         self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
 
     def tearDown(self):
         super(InventoryUpdatesTest, self).tearDown()
-        self.terminate_taskmanager()
         self.terminate_queue()
-        
+
     def update_inventory_source(self, group, **kwargs):
         inventory_source = group.inventory_source
         update_fields = []

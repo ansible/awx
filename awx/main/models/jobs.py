@@ -385,6 +385,8 @@ class Job(CommonTask):
         return dependencies
 
     def signal_start(self, **kwargs):
+        if hasattr(settings, 'CELERY_UNIT_TEST'):
+            return self.start(None, **kwargs)
         if not self.can_start:
             return False
         needed = self._get_passwords_needed_to_start()

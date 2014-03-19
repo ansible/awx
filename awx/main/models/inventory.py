@@ -709,7 +709,10 @@ class InventorySource(PrimordialModel):
     def update(self, **kwargs):
         if self.can_update:
             inventory_update = self.inventory_updates.create()
-            inventory_update.signal_start(**kwargs)
+            if hasattr(settings, 'CELERY_UNIT_TEST'):
+                inventory_update.start(None, **kwargs)
+            else:
+                inventory_update.signal_start(**kwargs)
             return inventory_update
 
     def get_absolute_url(self):

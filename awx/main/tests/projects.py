@@ -674,17 +674,18 @@ class ProjectsTest(BaseTest):
 @override_settings(CELERY_ALWAYS_EAGER=True,
                    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
                    ANSIBLE_TRANSPORT='local',
-                   UNIT_TEST_IGNORE_TASK_WAIT=True,
                    PROJECT_UPDATE_IDLE_TIMEOUT=60,
                    PROJECT_UPDATE_VVV=True)
 class ProjectUpdatesTest(BaseTransactionTest):
 
     def setUp(self):
         super(ProjectUpdatesTest, self).setUp()
+        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         self.setup_users()
 
     def tearDown(self):
         super(ProjectUpdatesTest, self).tearDown()
+        self.terminate_queue()
 
     def create_project(self, **kwargs):
         cred_fields = ['scm_username', 'scm_password', 'scm_key_data',
@@ -1111,10 +1112,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
             else:
                 self.check_project_update(project, should_fail=should_still_fail)
 
-    @override_settings(IGNORE_CELERY_INSPECTOR=True)
     def test_create_project_with_scm(self):
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
                           'https://github.com/ansible/ansible.github.com.git')
         if not all([scm_url]):
@@ -1185,12 +1183,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
         }
         with self.current_user(self.super_django_user):
             self.post(projects_url, project_data, expect=201)
-	self.terminate_taskmanager()
-	self.terminate_queue()
 
     def test_public_git_project_over_https(self):
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         scm_url = getattr(settings, 'TEST_GIT_PUBLIC_HTTPS',
                           'https://github.com/ansible/ansible.github.com.git')
         if not all([scm_url]):
@@ -1214,12 +1208,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
                 scm_password=scm_password,
             )
             self.check_project_update(project2)
-	self.terminate_taskmanager()
-	self.terminate_queue()
 
     def test_private_git_project_over_https(self):
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         scm_url = getattr(settings, 'TEST_GIT_PRIVATE_HTTPS', '')
         scm_username = getattr(settings, 'TEST_GIT_USERNAME', '')
         scm_password = getattr(settings, 'TEST_GIT_PASSWORD', '')
@@ -1233,12 +1223,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_password=scm_password,
         )
         self.check_project_scm(project)
-	self.terminate_taskmanager()
-	self.termiante_queue()
-    
+
     def test_private_git_project_over_ssh(self):
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         scm_url = getattr(settings, 'TEST_GIT_PRIVATE_SSH', '')
         scm_key_data = getattr(settings, 'TEST_GIT_KEY_DATA', '')
         scm_username = getattr(settings, 'TEST_GIT_USERNAME', '')
@@ -1264,59 +1250,50 @@ class ProjectUpdatesTest(BaseTransactionTest):
         should_error = bool('github.com' in scm_url and scm_username != 'git')
         self.check_project_update(project2, should_fail=None)#,
                                   #should_error=should_error)
-	self.terminate_taskmanager()
-	self.terminate_queue()
 
-    # TODO: This does not work well with the new task system.  Rework.
-    # @override_settings(IGNORE_CELERY_INSPECTOR=True, DEBUG=True)
-    # def _test_scm_key_unlock_on_project_update(self):
-    #     self.start_taskmanager(settings.TASK_COMMAND_PORT)
-    #     self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
-    #     scm_url = 'git@github.com:ansible/ansible.github.com.git'
-    #     project = self.create_project(
-    #         name='my git project over ssh with encrypted key',
-    #         scm_type='git',
-    #         scm_url=scm_url,
-    #         scm_key_data=TEST_SSH_KEY_DATA_LOCKED,
-    #         scm_key_unlock=TEST_SSH_KEY_DATA_UNLOCK,
-    #     )
-    #     url = reverse('api:project_update_view', args=(project.pk,))
-    #     with self.current_user(self.super_django_user):
-    #         response = self.get(url, expect=200)
-    #     self.assertTrue(response['can_update'])
-    #     with self.current_user(self.super_django_user):
-    #         response = self.post(url, {}, expect=202)
-    #     time.sleep(15)
-    #     print("PU: " + str(project.project_updates.all()[0].result_traceback))
-    #     project_update = project.project_updates.filter(status='successful').order_by('-pk')[0]
-    #     self.check_project_update(project, should_fail=None,
-    #                               project_update=project_update)
-    #     # Verify that we responded to ssh-agent prompt.
-    #     self.assertTrue('Identity added' in project_update.result_stdout,
-    #                     project_update.result_stdout)
-    #     # Try again with a bad unlock password.
-    #     project = self.create_project(
-    #         name='my git project over ssh with encrypted key and bad pass',
-    #         scm_type='git',
-    #         scm_url=scm_url,
-    #         scm_key_data=TEST_SSH_KEY_DATA_LOCKED,
-    #         scm_key_unlock='not the right password',
-    #     )
-    #     with self.current_user(self.super_django_user):
-    #         response = self.get(url, expect=200)
-    #     self.assertTrue(response['can_update'])
-    #     with self.current_user(self.super_django_user):
-    #         response = self.post(url, {}, expect=202)
-    #     project_update = project.project_updates.order_by('-pk')[0]
-    #     self.check_project_update(project, should_fail=None,
-    #                               project_update=project_update)
-    #     # Verify response to ssh-agent prompt, did not accept password.
-    #     self.assertTrue('Bad passphrase' in project_update.result_stdout,
-    #                     project_update.result_stdout)
-    #     self.assertFalse('Identity added' in project_update.result_stdout,
-    #                      project_update.result_stdout)
-    #     self.terminate_taskamanger()
-    #     self.terminate_queue()
+    def test_scm_key_unlock_on_project_update(self):
+        scm_url = 'git@github.com:ansible/ansible.github.com.git'
+        project = self.create_project(
+            name='my git project over ssh with encrypted key',
+            scm_type='git',
+            scm_url=scm_url,
+            scm_key_data=TEST_SSH_KEY_DATA_LOCKED,
+            scm_key_unlock=TEST_SSH_KEY_DATA_UNLOCK,
+        )
+        url = reverse('api:project_update_view', args=(project.pk,))
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        self.assertTrue(response['can_update'])
+        with self.current_user(self.super_django_user):
+            response = self.post(url, {}, expect=202)
+        time.sleep(15)
+        project_update = project.project_updates.filter(status='successful').order_by('-pk')[0]
+        self.check_project_update(project, should_fail=None,
+                                  project_update=project_update)
+        # Verify that we responded to ssh-agent prompt.
+        self.assertTrue('Identity added' in project_update.result_stdout,
+                        project_update.result_stdout)
+        # Try again with a bad unlock password.
+        project = self.create_project(
+            name='my git project over ssh with encrypted key and bad pass',
+            scm_type='git',
+            scm_url=scm_url,
+            scm_key_data=TEST_SSH_KEY_DATA_LOCKED,
+            scm_key_unlock='not the right password',
+        )
+        with self.current_user(self.super_django_user):
+            response = self.get(url, expect=200)
+        self.assertTrue(response['can_update'])
+        with self.current_user(self.super_django_user):
+            response = self.post(url, {}, expect=202)
+        project_update = project.project_updates.order_by('-pk')[0]
+        self.check_project_update(project, should_fail=None,
+                                  project_update=project_update)
+        # Verify response to ssh-agent prompt, did not accept password.
+        self.assertTrue('Bad passphrase' in project_update.result_stdout,
+                        project_update.result_stdout)
+        self.assertFalse('Identity added' in project_update.result_stdout,
+                         project_update.result_stdout)
 
     def create_local_git_repo(self):
         repo_dir = tempfile.mkdtemp()
@@ -1344,8 +1321,6 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.check_project_scm(project)
 
     def test_git_project_via_ssh_loopback(self):
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         scm_username = getattr(settings, 'TEST_SSH_LOOPBACK_USERNAME', '')
         scm_password = getattr(settings, 'TEST_SSH_LOOPBACK_PASSWORD', '')
         if not all([scm_username, scm_password]):
@@ -1360,12 +1335,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_password=scm_password,
         )
         self.check_project_scm(project)
-	self.terminate_taskmanager()
-	self.termiante_queue()
 
     def test_public_hg_project_over_https(self):
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         scm_url = getattr(settings, 'TEST_HG_PUBLIC_HTTPS',
                           'https://bitbucket.org/cchurch/django-hotrunner')
         if not all([scm_url]):
@@ -1389,12 +1360,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
                 scm_password=scm_password,
             )
             self.check_project_update(project2)
-	self.terminate_taskmanager()
-	self.terminate_queue()
 
     def test_private_hg_project_over_https(self):
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         scm_url = getattr(settings, 'TEST_HG_PRIVATE_HTTPS', '')
         scm_username = getattr(settings, 'TEST_HG_USERNAME', '')
         scm_password = getattr(settings, 'TEST_HG_PASSWORD', '')
@@ -1408,12 +1375,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_password=scm_password,
         )
         self.check_project_scm(project)
-	self.terminate_taskmanager()
-	self.terminate_queue()
 
     def test_private_hg_project_over_ssh(self):
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         scm_url = getattr(settings, 'TEST_HG_PRIVATE_SSH', '')
         scm_key_data = getattr(settings, 'TEST_HG_KEY_DATA', '')
         if not all([scm_url, scm_key_data]):
@@ -1426,8 +1389,6 @@ class ProjectUpdatesTest(BaseTransactionTest):
         )
         self.check_project_scm(project)
         # hg doesn't support password for ssh:// urls.
-	self.terminate_taskmanager()
-	self.terminate_queue()
 
     def create_local_hg_repo(self):
         repo_dir = tempfile.mkdtemp()
@@ -1472,8 +1433,6 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.check_project_scm(project)
 
     def test_public_svn_project_over_https(self):
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         scm_url = getattr(settings, 'TEST_SVN_PUBLIC_HTTPS',
                           'https://github.com/ansible/ansible.github.com')
         if not all([scm_url]):
@@ -1484,12 +1443,8 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_url=scm_url,
         )
         self.check_project_scm(project)
-	self.terminate_taskmanager()
-	self.terminate_queue()
 
     def test_private_svn_project_over_https(self):
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         scm_url = getattr(settings, 'TEST_SVN_PRIVATE_HTTPS', '')
         scm_username = getattr(settings, 'TEST_SVN_USERNAME', '')
         scm_password = getattr(settings, 'TEST_SVN_PASSWORD', '')
@@ -1503,8 +1458,6 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_password=scm_password,
         )
         self.check_project_scm(project)
-	self.terminate_taskmanager()
-	self.terminate_queue()
 
     def create_local_svn_repo(self):
         repo_dir = tempfile.mkdtemp()
@@ -1533,8 +1486,6 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.check_project_scm(project)
 
     def test_svn_project_via_ssh_loopback(self):
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         scm_username = getattr(settings, 'TEST_SSH_LOOPBACK_USERNAME', '')
         scm_password = getattr(settings, 'TEST_SSH_LOOPBACK_PASSWORD', '')
         if not all([scm_username, scm_password]):
@@ -1549,8 +1500,6 @@ class ProjectUpdatesTest(BaseTransactionTest):
             scm_password=scm_password,
         )
         self.check_project_scm(project)
-	self.terminate_taskmanager()
-	self.terminate_queue()
 
     def create_test_job_template(self, **kwargs):
         opts = {
@@ -1626,10 +1575,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
     #     self.assertTrue(job.status in ('successful', 'failed'))
     #     self.assertEqual(self.project.project_updates.count(), 3)
 
-    @override_settings(IGNORE_CELERY_INSPECTOR=True)
     def test_update_on_launch_with_project_passwords(self):
-        self.start_taskmanager(settings.TASK_COMMAND_PORT)
-        self.start_queue(settings.CALLBACK_CONSUMER_PORT, settings.CALLBACK_QUEUE_PORT)
         scm_url = getattr(settings, 'TEST_GIT_PRIVATE_HTTPS', '')
         scm_username = getattr(settings, 'TEST_GIT_USERNAME', '')
         scm_password = getattr(settings, 'TEST_GIT_PASSWORD', '')
@@ -1682,5 +1628,3 @@ class ProjectUpdatesTest(BaseTransactionTest):
         #self.assertEqual(job.status, 'error',
         #                 '\n'.join([job.result_stdout, job.result_traceback]))
         self.assertEqual(self.project.project_updates.count(), 4)
-	self.terminate_taskmanager()
-	self.terminate_queue()

@@ -295,7 +295,10 @@ class Project(CommonModel):
     def update(self, **kwargs):
         if self.can_update:
             project_update = self.project_updates.create()
-            project_update.signal_start(**kwargs)
+            if hasattr(settings, 'CELERY_UNIT_TEST'):
+                project_update.start(None, **kwargs)
+            else:
+                project_update.signal_start(**kwargs)
             return project_update
 
     def get_absolute_url(self):
