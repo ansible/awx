@@ -23,6 +23,7 @@ angular.module('InventoryGroupsDefinition', [])
                 label: 'Groups',
                 key: true,
                 ngClick: "showHosts(group.id,group.group_id, false)",
+                columnClick: "showHosts(group.id,group.group_id, false)",
                 ngClass: "group.selected_class",
                 hasChildren: true,
                 columnClass: 'col-lg-9 col-md-9 col-sm-7 col-xs-7',

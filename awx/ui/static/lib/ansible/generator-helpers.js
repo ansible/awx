@@ -461,6 +461,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                     "(" + list.iterator + ".id)\"" : "";
                 html += (field.columnShow) ? Attr(field, 'columnShow') : "";
                 html += (field.ngBindHtml) ? "ng-bind-html=\"" + field.ngBindHtml + "\" " : "";
+                html += (field.columnClick) ? "ng-click=\"" + field.columnClick + "\" " : "";
                 html += ">\n";
 
                 // Add ngShow
