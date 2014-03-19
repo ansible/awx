@@ -19,7 +19,7 @@ angular.module('VariablesHelper', ['Utilities'])
      will attempt to load via jsyaml.safeLoad() and return a YAML document using jsyaml.safeDump(). In all cases
      a YAML document is returned.
     **/
-    .factory('ParseVariableString', ['$log', 'ProcessErrors', function ($log, ProcessErrors) {
+    .factory('ParseVariableString', ['$log', 'ProcessErrors', 'SortVariables', function ($log, ProcessErrors, SortVariables) {
         return function (variables) {
             var result = "---", json_obj;
             if (typeof variables === 'string') {
@@ -28,10 +28,11 @@ angular.module('VariablesHelper', ['Utilities'])
                 } else {
                     try {
                         json_obj = JSON.parse(variables);
+                        json_obj = SortVariables(json_obj);
                         result = jsyaml.safeDump(json_obj);
                     }
                     catch (e) {
-                        $log.info('Attempt to parse extra_vars as JSON faild. Attempting to parse as YAML');
+                        $log.info('Attempt to parse extra_vars as JSON failed. Attempting to parse as YAML');
                         try {
                             json_obj = jsyaml.safeLoad(variables);
                             result = jsyaml.safeDump(json_obj);
@@ -50,7 +51,8 @@ angular.module('VariablesHelper', ['Utilities'])
                 else {
                     // convert object to yaml
                     try {
-                        result = jsyaml.safeDump(variables);
+                        json_obj = SortVariables(variables);
+                        result = jsyaml.safeDump(json_obj);
                     }
                     catch(e3) {
                         ProcessErrors(null, variables, e3.message, null, { hdr: 'Error!',
@@ -113,4 +115,54 @@ angular.module('VariablesHelper', ['Utilities'])
             }
             return result;
         };
+    }])
+
+    .factory('SortVariables', [ function() {
+        return function(variableObj) {
+            var newObj;
+            function sortIt(objToSort) {
+                var i, keys = Object.keys(objToSort), newObj = {};
+                keys = keys.sort();
+                for (i=0; i < keys.length; i++) {
+                    if (typeof objToSort[keys[i]] === 'object' && !Array.isArray(objToSort[keys[i]])) {
+                        newObj[keys[i]] = sortIt(objToSort[keys[i]]);
+                    }
+                    else {
+                        newObj[keys[i]] = objToSort[keys[i]];
+                    }
+                }
+                return newObj;
+            }
+
+            newObj = sortIt(variableObj);
+            return newObj;
+        };
     }]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
