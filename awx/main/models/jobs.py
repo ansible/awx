@@ -34,6 +34,7 @@ from jsonfield import JSONField
 
 # AWX
 from awx.main.models.base import *
+from awx.main.models.unified_jobs import *
 from awx.main.utils import encrypt_field, decrypt_field
 
 # Celery
@@ -43,15 +44,12 @@ logger = logging.getLogger('awx.main.models.jobs')
 
 __all__ = ['JobTemplate', 'Job', 'JobHostSummary', 'JobEvent']
 
-
-class JobTemplate(CommonModel):
+class JobOptions(BaseModel):
     '''
-    A job template is a reusable job definition for applying a project (with
-    playbook) to an inventory source with a given credential.
     '''
-
+    
     class Meta:
-        app_label = 'main'
+        abstract = True
 
     job_type = models.CharField(
         max_length=64,
@@ -59,23 +57,23 @@ class JobTemplate(CommonModel):
     )
     inventory = models.ForeignKey(
         'Inventory',
-        related_name='job_templates',
+        related_name='%(class)ss',
         null=True,
         on_delete=models.SET_NULL,
     )
-    project = models.ForeignKey(
-        'Project',
-        related_name='job_templates',
-        null=True,
-        on_delete=models.SET_NULL,
-    )
+    #project = models.ForeignKey(
+    #    'Project',
+    #    related_name='%(class)ss',
+    #    null=True,
+    #    on_delete=models.SET_NULL,
+    #)
     playbook = models.CharField(
         max_length=1024,
         default='',
     )
     credential = models.ForeignKey(
         'Credential',
-        related_name='job_templates',
+        related_name='%(class)ss',
         blank=True,
         null=True,
         default=None,
@@ -83,7 +81,7 @@ class JobTemplate(CommonModel):
     )
     cloud_credential = models.ForeignKey(
         'Credential',
-        related_name='job_templates_as_cloud_credential+',
+        related_name='%(class)ss_as_cloud_credential+',
         blank=True,
         null=True,
         default=None,
@@ -111,11 +109,8 @@ class JobTemplate(CommonModel):
         blank=True,
         default='',
     )
-    host_config_key = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-    )
+
+    extra_vars_dict = VarsDictProperty('extra_vars', True)
 
     def clean_credential(self):
         cred = self.credential
@@ -129,6 +124,24 @@ class JobTemplate(CommonModel):
             raise ValidationError('Cloud credential kind must be "aws" or '
                                   '"rax"')
         return cred
+
+
+class JobTemplateBase(JobOptions):
+    '''
+    A job template is a reusable job definition for applying a project (with
+    playbook) to an inventory source with a given credential.
+    '''
+
+    class Meta:
+        abstract = True
+        app_label = 'main'
+
+    host_config_key = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+    )
+
 
     def create_job(self, **kwargs):
         '''
@@ -169,116 +182,79 @@ class JobTemplate(CommonModel):
                     needed.append(pw)
         return bool(self.credential and not len(needed))
 
-class Job(CommonTask):
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
+
+    class JobTemplate(CommonModel, JobTemplateBase):
+
+        class Meta:
+            app_label = 'main'
+
+        project = models.ForeignKey(
+            'Project',
+            related_name='job_templates',
+            null=True,
+            on_delete=models.SET_NULL,
+        )
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
+
+    class JobTemplateNew(UnifiedJobTemplate, JobTemplateBase):
+
+        class Meta:
+            app_label = 'main'
+            db_table = 'main_jobtemplatenew'
+
+        project = models.ForeignKey(
+            'ProjectNew',
+            related_name='job_templates',
+            null=True,
+            on_delete=models.SET_NULL,
+        )
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
+
+    class JobTemplate(JobTemplateNew):
+
+        class Meta:
+            proxy = True
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
+
+    class JobTemplate(UnifiedJobTemplate, JobTemplateBase):
+
+        class Meta:
+            app_label = 'main'
+
+        project = models.ForeignKey(
+            'Project',
+            related_name='job_templates',
+            null=True,
+            on_delete=models.SET_NULL,
+        )
+
+
+class JobBase(JobOptions):
     '''
     A job applies a project (with playbook) to an inventory source with a given
     credential.  It represents a single invocation of ansible-playbook with the
     given parameters.
     '''
 
-    LAUNCH_TYPE_CHOICES = [
-        ('manual', _('Manual')),
-        ('callback', _('Callback')),
-        ('scheduled', _('Scheduled')),
-    ]
-
     class Meta:
+        abstract = True
         app_label = 'main'
 
-    job_template = models.ForeignKey(
-        'JobTemplate',
-        related_name='jobs',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
-    job_type = models.CharField(
-        max_length=64,
-        choices=JOB_TYPE_CHOICES,
-    )
-    inventory = models.ForeignKey(
-        'Inventory',
-        related_name='jobs',
-        null=True,
-        on_delete=models.SET_NULL,
-    )
-    credential = models.ForeignKey(
-        'Credential',
-        related_name='jobs',
-        null=True,
-        on_delete=models.SET_NULL,
-    )
-    cloud_credential = models.ForeignKey(
-        'Credential',
-        related_name='jobs_as_cloud_credential+',
-        blank=True,
-        null=True,
-        default=None,
-        on_delete=models.SET_NULL,
-    )
-    project = models.ForeignKey(
-        'Project',
-        related_name='jobs',
-        null=True,
-        on_delete=models.SET_NULL,
-    )
-    playbook = models.CharField(
-        max_length=1024,
-    )
-    forks = models.PositiveIntegerField(
-        blank=True,
-        default=0,
-    )
-    limit = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-    )
-    verbosity = models.PositiveIntegerField(
-        blank=True,
-        default=0,
-    )
-    extra_vars = models.TextField(
-        blank=True,
-        default='',
-    )
-    job_tags = models.CharField(
-        max_length=1024,
-        blank=True,
-        default='',
-    )
-    launch_type = models.CharField(
-        max_length=20,
-        choices=LAUNCH_TYPE_CHOICES,
-        default='manual',
-        editable=False,
-    )
     hosts = models.ManyToManyField(
         'Host',
-        related_name='jobs',
+        related_name='%(class)ss',
         blank=True,
         editable=False,
         through='JobHostSummary',
     )
 
-    def clean_credential(self):
-        cred = self.credential
-        if cred and cred.kind != 'ssh':
-            raise ValidationError('Credential kind must be "ssh"')
-        return cred
-
-    def clean_cloud_credential(self):
-        cred = self.cloud_credential
-        if cred and cred.kind not in ('aws', 'rax'):
-            raise ValidationError('Cloud credential kind must be "aws" or '
-                                  '"rax"')
-        return cred
-
     def get_absolute_url(self):
         return reverse('api:job_detail', args=(self.pk,))
-
-    extra_vars_dict = VarsDictProperty('extra_vars', True)
 
     @property
     def task_auth_token(self):
@@ -426,35 +402,115 @@ class Job(CommonTask):
         task_class().apply_async((self.pk,), opts, link_error=error_callback)
         return True
 
-class JobHostSummary(BaseModel):
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
+    
+    class Job(CommonTask, JobBase):
+
+        LAUNCH_TYPE_CHOICES = [
+            ('manual', _('Manual')),
+            ('callback', _('Callback')),
+            ('scheduled', _('Scheduled')),
+        ]
+
+        class Meta:
+            app_label = 'main'
+
+        job_template = models.ForeignKey(
+            'JobTemplate',
+            related_name='jobs',
+            blank=True,
+            null=True,
+            default=None,
+            on_delete=models.SET_NULL,
+        )
+        project = models.ForeignKey(
+            'Project',
+            related_name='jobs',
+            null=True,
+            on_delete=models.SET_NULL,
+        )
+        launch_type = models.CharField(
+            max_length=20,
+            choices=LAUNCH_TYPE_CHOICES,
+            default='manual',
+            editable=False,
+        )
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
+
+    class JobNew(UnifiedJob, JobBase):
+
+        class Meta:
+            app_label = 'main'
+
+        job_template = models.ForeignKey(
+            'JobTemplateNew',
+            related_name='jobs',
+            blank=True,
+            null=True,
+            default=None,
+            on_delete=models.SET_NULL,
+        )
+        project = models.ForeignKey(
+            'ProjectNew',
+            related_name='jobs',
+            null=True,
+            on_delete=models.SET_NULL,
+        )
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
+
+    class Job(JobNew):
+
+        class Meta:
+            proxy = True
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
+
+    class Job(UnifiedJob, JobBase):
+
+        class Meta:
+            app_label = 'main'
+
+        job_template = models.ForeignKey(
+            'JobTemplate',
+            related_name='jobs',
+            blank=True,
+            null=True,
+            default=None,
+            on_delete=models.SET_NULL,
+        )
+        project = models.ForeignKey(
+            'Project',
+            related_name='jobs',
+            null=True,
+            on_delete=models.SET_NULL,
+        )
+
+
+class JobHostSummaryBase(CreatedModifiedModel):
     '''
     Per-host statistics for each job.
     '''
 
     class Meta:
+        abstract = True
         app_label = 'main'
         unique_together = [('job', 'host')]
         verbose_name_plural = _('job host summaries')
         ordering = ('-pk',)
 
-    job = models.ForeignKey(
-        'Job',
-        related_name='job_host_summaries',
-        on_delete=models.CASCADE,
-        editable=False,
-    )
+    #job = models.ForeignKey(
+    #    'Job',
+    #    related_name='job_host_summaries',
+    #    on_delete=models.CASCADE,
+    #    editable=False,
+    #)
     host = models.ForeignKey('Host',
         related_name='job_host_summaries',
         on_delete=models.CASCADE,
         editable=False,
-    )
-    created = models.DateTimeField(
-        auto_now_add=True,
-        default=now,
-    )
-    modified = models.DateTimeField(
-        auto_now=True,
-        default=now,
     )
 
     changed = models.PositiveIntegerField(default=0, editable=False)
@@ -494,7 +550,68 @@ class JobHostSummary(BaseModel):
             self.host.save(update_fields=update_fields)
         #self.host.update_computed_fields()
 
-class JobEvent(BaseModel):
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
+    
+    class JobHostSummary(JobHostSummaryBase):
+
+        class Meta:
+            app_label = 'main'
+            unique_together = [('job', 'host'), ('new_job', 'host')]
+            verbose_name_plural = _('job host summaries')
+            ordering = ('-pk',)
+
+        job = models.ForeignKey(
+            'Job',
+            related_name='job_host_summaries',
+            on_delete=models.CASCADE,
+            editable=False,
+        )
+        new_job = models.ForeignKey(
+            'JobNew',
+            related_name='new_job_host_summaries',
+            on_delete=models.CASCADE,
+            null=True,
+            default=None,
+            editable=False,
+        )
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
+
+    class JobHostSummary(JobHostSummaryBase):
+
+        class Meta:
+            app_label = 'main'
+            unique_together = [('new_job', 'host')]
+            verbose_name_plural = _('job host summaries')
+            ordering = ('-pk',)
+
+        new_job = models.ForeignKey(
+            'JobNew',
+            related_name='new_job_host_summaries',
+            on_delete=models.CASCADE,
+            editable=False,
+        )
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
+    
+    class JobHostSummary(JobHostSummaryBase):
+
+        class Meta:
+            app_label = 'main'
+            unique_together = [('job', 'host')]
+            verbose_name_plural = _('job host summaries')
+            ordering = ('-pk',)
+
+        job = models.ForeignKey(
+            'Job',
+            related_name='job_host_summaries',
+            on_delete=models.CASCADE,
+            editable=False,
+        )
+    
+
+class JobEventBase(CreatedModifiedModel):
     '''
     An event/message logged from the callback when running a job.
     '''
@@ -503,14 +620,14 @@ class JobEvent(BaseModel):
     # - playbook_on_start (once for each playbook file)
     #   - playbook_on_vars_prompt (for each play, but before play starts, we
     #     currently don't handle responding to these prompts)
-    #   - playbook_on_play_start
+    #   - playbook_on_play_start (once for each play)
     #     - playbook_on_import_for_host
     #     - playbook_on_not_import_for_host
     #     - playbook_on_no_hosts_matched
     #     - playbook_on_no_hosts_remaining
     #     - playbook_on_setup
     #       - runner_on*
-    #     - playbook_on_task_start
+    #     - playbook_on_task_start (once for each task within a play)
     #       - runner_on_failed
     #       - runner_on_ok
     #       - runner_on_error
@@ -521,7 +638,7 @@ class JobEvent(BaseModel):
     #       - runner_on_async_ok
     #       - runner_on_async_failed
     #       - runner_on_file_diff
-    #     - playbook_on_notify
+    #     - playbook_on_notify (once for each notification from the play)
     #   - playbook_on_stats
 
     EVENT_TYPES = [
@@ -557,25 +674,16 @@ class JobEvent(BaseModel):
     LEVEL_FOR_EVENT = dict([(x[1], x[0]) for x in EVENT_TYPES])
 
     class Meta:
+        abstract = True
         app_label = 'main'
         ordering = ('pk',)
 
-    job = models.ForeignKey(
-        'Job',
-        related_name='job_events',
-        on_delete=models.CASCADE,
-        editable=False,
-    )
-    created = models.DateTimeField(
-        #auto_now_add=True,
-        editable=False,
-        default=None,
-    )
-    modified = models.DateTimeField(
-        #auto_now=True,
-        editable=False,
-        default=None,
-    )
+    #job = models.ForeignKey(
+    #    'Job',
+    #    related_name='job_events',
+    #    on_delete=models.CASCADE,
+    #    editable=False,
+    #)
     event = models.CharField(
         max_length=100,
         choices=EVENT_CHOICES,
@@ -608,6 +716,12 @@ class JobEvent(BaseModel):
         editable=False,
     )
     play = models.CharField(
+        max_length=1024,
+        blank=True,
+        default='',
+        editable=False,
+    )
+    role = models.CharField( # FIXME: Determine from callback or task name.
         max_length=1024,
         blank=True,
         default='',
@@ -773,15 +887,6 @@ class JobEvent(BaseModel):
             self.parent = self._find_parent()
             if 'parent' not in update_fields:
                 update_fields.append('parent')
-        # Manually perform auto_now_add and auto_now logic (to allow overriding
-        # created timestamp for queued job events).
-        if not self.pk and not self.created:
-            self.created = now()
-            if 'created' not in update_fields:
-                update_fields.append('created')
-        self.modified = now()
-        if 'modified' not in update_fields:
-            update_fields.append('modified')
         super(JobEvent, self).save(*args, **kwargs)
         if post_process and not from_parent_update:
             self.update_parent_failed_and_changed()
@@ -859,3 +964,56 @@ class JobEvent(BaseModel):
                         host_summary.save(update_fields=update_fields)
             job.inventory.update_computed_fields()
 
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
+
+    class JobEvent(JobEventBase):
+
+        class Meta:
+            app_label = 'main'
+            ordering = ('pk',)
+
+        job = models.ForeignKey(
+            'Job',
+            related_name='job_events',
+            on_delete=models.CASCADE,
+            editable=False,
+        )
+        new_job = models.ForeignKey(
+            'JobNew',
+            related_name='new_job_events',
+            on_delete=models.CASCADE,
+            null=True,
+            default=None,
+            editable=False,
+        )
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
+
+    class JobEvent(JobEventBase):
+
+        class Meta:
+            app_label = 'main'
+            ordering = ('pk',)
+
+        new_job = models.ForeignKey(
+            'JobNew',
+            related_name='new_job_events',
+            on_delete=models.CASCADE,
+            editable=False,
+        )
+
+if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
+
+    class JobEvent(JobEventBase):
+
+        class Meta:
+            app_label = 'main'
+            ordering = ('pk',)
+
+        job = models.ForeignKey(
+            'Job',
+            related_name='job_events',
+            on_delete=models.CASCADE,
+            editable=False,
+        )

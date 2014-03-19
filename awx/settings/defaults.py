@@ -134,6 +134,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'djcelery',
     'kombu.transport.django',
+    'polymorphic',
     'taggit',
     'awx.main',
     'awx.api',
@@ -302,6 +303,9 @@ AWX_TASK_ENV = {}
 
 # Flag to enable/disable updating hosts M2M when saving job events.
 CAPTURE_JOB_EVENT_HOSTS = False
+
+# Flag to indicate which version of unified jobs model to use.
+UNIFIED_JOBS_STEP = 2
 
 # Not possible to get list of regions without authenticating, so use this list
 # instead (based on docs from:

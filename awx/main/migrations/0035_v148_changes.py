@@ -1,734 +1,197 @@
 # -*- coding: utf-8 -*-
 from south.utils import datetime_utils as datetime
 from south.db import db
-from south.v2 import SchemaMigration
+from south.v2 import DataMigration
 from django.db import models
 
+class Migration(DataMigration):
 
-class Migration(SchemaMigration):
+    def _get_dict_from_primordial_model(self, instance):
+        return {
+            'description': instance.description,
+            'created': instance.created,
+            'modified': instance.modified,
+            'created_by': instance.created_by,
+            'modified_by': instance.modified_by,
+            'active': instance.active,
+            'old_pk': instance.pk,
+        }
+
+    def _get_dict_from_common_model(self, instance):
+        d = self._get_dict_from_primordial_model(instance)
+        if hasattr(instance, 'name'):
+            d['name'] = instance.name
+        else:
+            d['name'] = u'%s-%s' % (instance._meta.verbose_name, instance.pk)
+        return d
+
+    def _get_dict_from_common_task_model(self, instance):
+        d = self._get_dict_from_primordial_model(instance)
+        td = instance.modified - instance.created
+        elapsed = (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / (10**6 * 1.0)
+        d.update({
+            'launch_type': getattr(instance, 'launch_type', 'manual'),
+            'cancel_flag': instance.cancel_flag,
+            'status': instance.status,
+            'failed': instance.failed,
+            'started': instance.created,
+            'finished': instance.modified,
+            'elapsed': elapsed,
+            'job_args': instance.job_args,
+            'job_env': instance.job_env,
+            'result_stdout_text': instance._result_stdout,
+            'result_stdout_file': instance.result_stdout_file,
+            'result_traceback': instance.result_traceback,
+            'celery_task_id': instance.celery_task_id,
+        })
+        return d
 
     def forwards(self, orm):
-        # Adding model 'InventoryUpdateNew'
-        db.create_table(u'main_inventoryupdatenew', (
-            (u'unifiedjob_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['main.UnifiedJob'], unique=True, primary_key=True)),
-            ('source', self.gf('django.db.models.fields.CharField')(default='', max_length=32, blank=True)),
-            ('source_path', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('source_vars', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='inventoryupdatenews', null=True, blank=True, to=orm['main.Credential'])),
-            ('source_regions', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('overwrite', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('overwrite_vars', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('license_error', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('inventory_source', self.gf('django.db.models.fields.related.ForeignKey')(related_name='inventory_updates', to=orm['main.InventorySourceNew'])),
-        ))
-        db.send_create_signal('main', ['InventoryUpdateNew'])
-
-        # Adding model 'JobNew'
-        db.create_table(u'main_jobnew', (
-            (u'unifiedjob_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['main.UnifiedJob'], unique=True, primary_key=True)),
-            ('job_type', self.gf('django.db.models.fields.CharField')(max_length=64)),
-            ('inventory', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobnews', null=True, on_delete=models.SET_NULL, to=orm['main.Inventory'])),
-            ('playbook', self.gf('django.db.models.fields.CharField')(default='', max_length=1024)),
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobnews', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('cloud_credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobnews_as_cloud_credential+', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('forks', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
-            ('limit', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('verbosity', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
-            ('extra_vars', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('job_tags', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('job_template', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobs', on_delete=models.SET_NULL, default=None, to=orm['main.JobTemplateNew'], blank=True, null=True)),
-            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobs', null=True, on_delete=models.SET_NULL, to=orm['main.ProjectNew'])),
-        ))
-        db.send_create_signal('main', ['JobNew'])
-
-        # Adding model 'UnifiedJob'
-        db.create_table(u'main_unifiedjob', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('polymorphic_ctype', self.gf('django.db.models.fields.related.ForeignKey')(related_name='polymorphic_main.unifiedjob_set', null=True, to=orm['contenttypes.ContentType'])),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'unifiedjob', 'app_label': 'main'}(class)s_created+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'unifiedjob', 'app_label': 'main'}(class)s_modified+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('old_pk', self.gf('django.db.models.fields.PositiveIntegerField')(default=None, null=True)),
-            ('unified_job_template', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='unifiedjob_unified_jobs', null=True, to=orm['main.UnifiedJobTemplate'])),
-            ('launch_type', self.gf('django.db.models.fields.CharField')(default='manual', max_length=20)),
-            ('schedule', self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['main.Schedule'], null=True)),
-            ('cancel_flag', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('status', self.gf('django.db.models.fields.CharField')(default='new', max_length=20)),
-            ('failed', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('started', self.gf('django.db.models.fields.DateTimeField')(default=None, null=True)),
-            ('finished', self.gf('django.db.models.fields.DateTimeField')(default=None, null=True)),
-            ('elapsed', self.gf('django.db.models.fields.DecimalField')(max_digits=12, decimal_places=3)),
-            ('job_args', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('job_cwd', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('job_env', self.gf('jsonfield.fields.JSONField')(default={}, blank=True)),
-            ('start_args', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('result_stdout_text', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('result_stdout_file', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('result_traceback', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('celery_task_id', self.gf('django.db.models.fields.CharField')(default='', max_length=100, blank=True)),
-        ))
-        db.send_create_signal('main', ['UnifiedJob'])
-
-        # Adding M2M table for field depends_on on 'UnifiedJob'
-        m2m_table_name = db.shorten_name(u'main_unifiedjob_depends_on')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('from_unifiedjob', models.ForeignKey(orm['main.unifiedjob'], null=False)),
-            ('to_unifiedjob', models.ForeignKey(orm['main.unifiedjob'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['from_unifiedjob_id', 'to_unifiedjob_id'])
-
-        # Adding model 'Schedule'
-        db.create_table(u'main_schedule', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'schedule', 'app_label': 'main'}(class)s_created+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'schedule', 'app_label': 'main'}(class)s_modified+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=512)),
-            ('job_template', self.gf('django.db.models.fields.related.ForeignKey')(related_name='schedules', to=orm['main.UnifiedJobTemplate'])),
-            ('dtstart', self.gf('django.db.models.fields.DateTimeField')()),
-            ('dtend', self.gf('django.db.models.fields.DateTimeField')(default=None, null=True)),
-            ('rrule', self.gf('django.db.models.fields.CharField')(max_length=255)),
-        ))
-        db.send_create_signal('main', ['Schedule'])
-
-        # Adding model 'InventorySourceNew'
-        db.create_table(u'main_inventorysourcenew', (
-            (u'unifiedjobtemplate_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['main.UnifiedJobTemplate'], unique=True, primary_key=True)),
-            ('source', self.gf('django.db.models.fields.CharField')(default='', max_length=32, blank=True)),
-            ('source_path', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('source_vars', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='inventorysourcenews', null=True, blank=True, to=orm['main.Credential'])),
-            ('source_regions', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('overwrite', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('overwrite_vars', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('update_on_launch', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('update_cache_timeout', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
-            ('inventory', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='new_inventory_sources', null=True, to=orm['main.Inventory'])),
-            ('group', self.gf('awx.main.fields.AutoOneToOneField')(related_name='new_inventory_source', null=True, default=None, to=orm['main.Group'], blank=True, unique=True)),
-        ))
-        db.send_create_signal('main', ['InventorySourceNew'])
-
-        # Adding model 'JobTemplateNew'
-        db.create_table('main_jobtemplatenew', (
-            (u'unifiedjobtemplate_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['main.UnifiedJobTemplate'], unique=True, primary_key=True)),
-            ('job_type', self.gf('django.db.models.fields.CharField')(max_length=64)),
-            ('inventory', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobtemplatenews', null=True, on_delete=models.SET_NULL, to=orm['main.Inventory'])),
-            ('playbook', self.gf('django.db.models.fields.CharField')(default='', max_length=1024)),
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobtemplatenews', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('cloud_credential', self.gf('django.db.models.fields.related.ForeignKey')(related_name='jobtemplatenews_as_cloud_credential+', on_delete=models.SET_NULL, default=None, to=orm['main.Credential'], blank=True, null=True)),
-            ('forks', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
-            ('limit', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('verbosity', self.gf('django.db.models.fields.PositiveIntegerField')(default=0, blank=True)),
-            ('extra_vars', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('job_tags', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('host_config_key', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='job_templates', null=True, on_delete=models.SET_NULL, to=orm['main.ProjectNew'])),
-        ))
-        db.send_create_signal('main', ['JobTemplateNew'])
-
-        # Adding model 'ProjectNew'
-        db.create_table(u'main_projectnew', (
-            (u'unifiedjobtemplate_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['main.UnifiedJobTemplate'], unique=True, primary_key=True)),
-            ('local_path', self.gf('django.db.models.fields.CharField')(max_length=1024, blank=True)),
-            ('scm_type', self.gf('django.db.models.fields.CharField')(default='', max_length=8, blank=True)),
-            ('scm_url', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('scm_branch', self.gf('django.db.models.fields.CharField')(default='', max_length=256, blank=True)),
-            ('scm_clean', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('scm_delete_on_update', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='projectnews', null=True, blank=True, to=orm['main.Credential'])),
-            ('scm_delete_on_next_update', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('scm_update_on_launch', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('scm_update_cache_timeout', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
-        ))
-        db.send_create_signal('main', ['ProjectNew'])
-
-        # Adding model 'ProjectUpdateNew'
-        db.create_table(u'main_projectupdatenew', (
-            (u'unifiedjob_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['main.UnifiedJob'], unique=True, primary_key=True)),
-            ('local_path', self.gf('django.db.models.fields.CharField')(max_length=1024, blank=True)),
-            ('scm_type', self.gf('django.db.models.fields.CharField')(default='', max_length=8, blank=True)),
-            ('scm_url', self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True)),
-            ('scm_branch', self.gf('django.db.models.fields.CharField')(default='', max_length=256, blank=True)),
-            ('scm_clean', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('scm_delete_on_update', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('credential', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='projectupdatenews', null=True, blank=True, to=orm['main.Credential'])),
-            ('project', self.gf('django.db.models.fields.related.ForeignKey')(related_name='project_updates', to=orm['main.ProjectNew'])),
-        ))
-        db.send_create_signal('main', ['ProjectUpdateNew'])
-
-        # Adding model 'UnifiedJobTemplate'
-        db.create_table(u'main_unifiedjobtemplate', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('polymorphic_ctype', self.gf('django.db.models.fields.related.ForeignKey')(related_name='polymorphic_main.unifiedjobtemplate_set', null=True, to=orm['contenttypes.ContentType'])),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(default=None)),
-            ('description', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'unifiedjobtemplate', 'app_label': 'main'}(class)s_created+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name="{'class': 'unifiedjobtemplate', 'app_label': 'main'}(class)s_modified+", null=True, on_delete=models.SET_NULL, to=orm['auth.User'])),
-            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=512)),
-            ('old_pk', self.gf('django.db.models.fields.PositiveIntegerField')(default=None, null=True)),
-            ('current_job', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='unifiedjobtemplate_as_current_job+', null=True, to=orm['main.UnifiedJob'])),
-            ('last_job', self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='unifiedjobtemplate_as_last_job+', null=True, to=orm['main.UnifiedJob'])),
-            ('last_job_failed', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('last_job_run', self.gf('django.db.models.fields.DateTimeField')(default=None, null=True)),
-            ('has_schedules', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('next_job_run', self.gf('django.db.models.fields.DateTimeField')(default=None, null=True)),
-            ('status', self.gf('django.db.models.fields.CharField')(default='ok', max_length=32)),
-        ))
-        db.send_create_signal('main', ['UnifiedJobTemplate'])
-
-        # Adding unique constraint on 'UnifiedJobTemplate', fields ['polymorphic_ctype', 'name']
-        db.create_unique(u'main_unifiedjobtemplate', ['polymorphic_ctype_id', 'name'])
-
-
-        # Changing field 'Profile.created'
-        db.alter_column(u'main_profile', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Profile.modified'
-        db.alter_column(u'main_profile', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-        # Adding field 'ProjectUpdate.local_path'
-        db.add_column(u'main_projectupdate', 'local_path',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True),
-                      keep_default=False)
-
-        # Adding field 'ProjectUpdate.scm_type'
-        db.add_column(u'main_projectupdate', 'scm_type',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=8, blank=True),
-                      keep_default=False)
-
-        # Adding field 'ProjectUpdate.scm_url'
-        db.add_column(u'main_projectupdate', 'scm_url',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True),
-                      keep_default=False)
-
-        # Adding field 'ProjectUpdate.scm_branch'
-        db.add_column(u'main_projectupdate', 'scm_branch',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=256, blank=True),
-                      keep_default=False)
-
-        # Adding field 'ProjectUpdate.scm_clean'
-        db.add_column(u'main_projectupdate', 'scm_clean',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
-
-        # Adding field 'ProjectUpdate.scm_delete_on_update'
-        db.add_column(u'main_projectupdate', 'scm_delete_on_update',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
-
-        # Adding field 'ProjectUpdate.credential'
-        db.add_column(u'main_projectupdate', 'credential',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='projectupdates', null=True, blank=True, to=orm['main.Credential']),
-                      keep_default=False)
-
-
-        # Changing field 'ProjectUpdate.created'
-        db.alter_column(u'main_projectupdate', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'ProjectUpdate.modified'
-        db.alter_column(u'main_projectupdate', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-        # Adding M2M table for field new_inventory_sources on 'Group'
-        m2m_table_name = db.shorten_name(u'main_group_new_inventory_sources')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('group', models.ForeignKey(orm['main.group'], null=False)),
-            ('inventorysourcenew', models.ForeignKey(orm['main.inventorysourcenew'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['group_id', 'inventorysourcenew_id'])
-
-
-        # Changing field 'Group.created'
-        db.alter_column(u'main_group', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Group.modified'
-        db.alter_column(u'main_group', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Job.created'
-        db.alter_column(u'main_job', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Job.modified'
-        db.alter_column(u'main_job', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Inventory.created'
-        db.alter_column(u'main_inventory', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Inventory.modified'
-        db.alter_column(u'main_inventory', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-        # Adding field 'Host.new_last_job'
-        db.add_column(u'main_host', 'new_last_job',
-                      self.gf('django.db.models.fields.related.ForeignKey')(related_name='hosts_as_last_job+', on_delete=models.SET_NULL, default=None, to=orm['main.JobNew'], blank=True, null=True),
-                      keep_default=False)
-
-        # Adding M2M table for field new_inventory_sources on 'Host'
-        m2m_table_name = db.shorten_name(u'main_host_new_inventory_sources')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('host', models.ForeignKey(orm['main.host'], null=False)),
-            ('inventorysourcenew', models.ForeignKey(orm['main.inventorysourcenew'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['host_id', 'inventorysourcenew_id'])
-
-
-        # Changing field 'Host.created'
-        db.alter_column(u'main_host', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Host.modified'
-        db.alter_column(u'main_host', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-        # Adding field 'JobHostSummary.new_job'
-        db.add_column(u'main_jobhostsummary', 'new_job',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='new_job_host_summaries', null=True, to=orm['main.JobNew']),
-                      keep_default=False)
-
-
-        # Changing field 'JobHostSummary.created'
-        db.alter_column(u'main_jobhostsummary', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'JobHostSummary.modified'
-        db.alter_column(u'main_jobhostsummary', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-        # Adding unique constraint on 'JobHostSummary', fields ['new_job', 'host']
-        db.create_unique(u'main_jobhostsummary', ['new_job_id', 'host_id'])
-
-        # Adding field 'InventoryUpdate.source'
-        db.add_column(u'main_inventoryupdate', 'source',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=32, blank=True),
-                      keep_default=False)
-
-        # Adding field 'InventoryUpdate.source_path'
-        db.add_column(u'main_inventoryupdate', 'source_path',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True),
-                      keep_default=False)
-
-        # Adding field 'InventoryUpdate.source_vars'
-        db.add_column(u'main_inventoryupdate', 'source_vars',
-                      self.gf('django.db.models.fields.TextField')(default='', blank=True),
-                      keep_default=False)
-
-        # Adding field 'InventoryUpdate.credential'
-        db.add_column(u'main_inventoryupdate', 'credential',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='inventoryupdates', null=True, blank=True, to=orm['main.Credential']),
-                      keep_default=False)
-
-        # Adding field 'InventoryUpdate.source_regions'
-        db.add_column(u'main_inventoryupdate', 'source_regions',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True),
-                      keep_default=False)
-
-        # Adding field 'InventoryUpdate.overwrite'
-        db.add_column(u'main_inventoryupdate', 'overwrite',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
-
-        # Adding field 'InventoryUpdate.overwrite_vars'
-        db.add_column(u'main_inventoryupdate', 'overwrite_vars',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
-
-
-        # Changing field 'InventoryUpdate.created'
-        db.alter_column(u'main_inventoryupdate', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'InventoryUpdate.modified'
-        db.alter_column(u'main_inventoryupdate', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Credential.created'
-        db.alter_column(u'main_credential', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Credential.modified'
-        db.alter_column(u'main_credential', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'JobTemplate.created'
-        db.alter_column(u'main_jobtemplate', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'JobTemplate.modified'
-        db.alter_column(u'main_jobtemplate', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-        # Adding M2M table for field unified_job_template on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_unified_job_template')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('unifiedjobtemplate', models.ForeignKey(orm['main.unifiedjobtemplate'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'unifiedjobtemplate_id'])
-
-        # Adding M2M table for field unified_job on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_unified_job')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('unifiedjob', models.ForeignKey(orm['main.unifiedjob'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'unifiedjob_id'])
-
-        # Adding M2M table for field new_inventory_source on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_new_inventory_source')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('inventorysourcenew', models.ForeignKey(orm['main.inventorysourcenew'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'inventorysourcenew_id'])
-
-        # Adding M2M table for field new_inventory_update on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_new_inventory_update')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('inventoryupdatenew', models.ForeignKey(orm['main.inventoryupdatenew'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'inventoryupdatenew_id'])
-
-        # Adding M2M table for field new_project on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_new_project')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('projectnew', models.ForeignKey(orm['main.projectnew'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'projectnew_id'])
-
-        # Adding M2M table for field new_project_update on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_new_project_update')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('projectupdatenew', models.ForeignKey(orm['main.projectupdatenew'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'projectupdatenew_id'])
-
-        # Adding M2M table for field new_job_template on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_new_job_template')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('jobtemplatenew', models.ForeignKey(orm['main.jobtemplatenew'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'jobtemplatenew_id'])
-
-        # Adding M2M table for field new_job on 'ActivityStream'
-        m2m_table_name = db.shorten_name(u'main_activitystream_new_job')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('activitystream', models.ForeignKey(orm['main.activitystream'], null=False)),
-            ('jobnew', models.ForeignKey(orm['main.jobnew'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['activitystream_id', 'jobnew_id'])
-
-        # Adding M2M table for field new_projects on 'Team'
-        m2m_table_name = db.shorten_name(u'main_team_new_projects')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('team', models.ForeignKey(orm['main.team'], null=False)),
-            ('projectnew', models.ForeignKey(orm['main.projectnew'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['team_id', 'projectnew_id'])
-
-
-        # Changing field 'Team.created'
-        db.alter_column(u'main_team', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Team.modified'
-        db.alter_column(u'main_team', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-        # Adding field 'Project.scm_update_cache_timeout'
-        db.add_column(u'main_project', 'scm_update_cache_timeout',
-                      self.gf('django.db.models.fields.PositiveIntegerField')(default=0),
-                      keep_default=False)
-
-
-        # Changing field 'Project.created'
-        db.alter_column(u'main_project', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Project.modified'
-        db.alter_column(u'main_project', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-        # Adding M2M table for field new_projects on 'Organization'
-        m2m_table_name = db.shorten_name(u'main_organization_new_projects')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('organization', models.ForeignKey(orm['main.organization'], null=False)),
-            ('projectnew', models.ForeignKey(orm['main.projectnew'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['organization_id', 'projectnew_id'])
-
-
-        # Changing field 'Organization.created'
-        db.alter_column(u'main_organization', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Organization.modified'
-        db.alter_column(u'main_organization', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-        # Adding field 'Permission.new_project'
-        db.add_column(u'main_permission', 'new_project',
-                      self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='permissions', null=True, on_delete=models.SET_NULL, to=orm['main.ProjectNew']),
-                      keep_default=False)
-
-
-        # Changing field 'Permission.created'
-        db.alter_column(u'main_permission', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'Permission.modified'
-        db.alter_column(u'main_permission', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-        # Deleting field 'InventorySource.update_interval'
-        db.delete_column(u'main_inventorysource', 'update_interval')
-
-        # Adding field 'InventorySource.update_cache_timeout'
-        db.add_column(u'main_inventorysource', 'update_cache_timeout',
-                      self.gf('django.db.models.fields.PositiveIntegerField')(default=0),
-                      keep_default=False)
-
-
-        # Changing field 'InventorySource.created'
-        db.alter_column(u'main_inventorysource', 'created', self.gf('django.db.models.fields.DateTimeField')())
-
-        # Changing field 'InventorySource.modified'
-        db.alter_column(u'main_inventorysource', 'modified', self.gf('django.db.models.fields.DateTimeField')())
-        # Adding field 'JobEvent.role'
-        db.add_column(u'main_jobevent', 'role',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=1024, blank=True),
-                      keep_default=False)
-
-        # Adding field 'JobEvent.new_job'
-        db.add_column(u'main_jobevent', 'new_job',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=None, related_name='new_job_events', null=True, to=orm['main.JobNew']),
-                      keep_default=False)
-
+        "Write your forwards methods here."
+
+        # Copy Project old to new.
+        new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.Project._meta.app_label, model=orm.Project._meta.module_name)
+        for project in orm.Project.objects.order_by('pk'):
+            d = self._get_dict_from_common_model(project)
+            d['polymorphic_ctype_id'] = new_ctype.pk
+            new_project, created = orm.ProjectNew.objects.get_or_create(old_pk=project.pk, defaults=d)
+
+        # Copy ProjectUpdate old to new.
+        new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.ProjectUpdate._meta.app_label, model=orm.ProjectUpdate._meta.module_name)
+        for project_update in orm.ProjectUpdate.objects.order_by('pk'):
+            d = self._get_dict_from_common_task_model(project_update)
+            d['project_id'] = orm.ProjectNew.objects.get(old_pk=project_update.project_id).pk
+            d['polymorphic_ctype_id'] = new_ctype.pk
+            new_project_update, created = orm.ProjectUpdateNew.objects.get_or_create(old_pk=project_update.pk, defaults=d)
+
+        # Update Project last run.
+        for project in orm.Project.objects.order_by('pk'):
+            new_project = orm.ProjectNew.objects.get(old_pk=project.pk)
+            if project.current_update:
+                new_project.current_job = orm.ProjectUpdateNew.objects.get(old_pk=project.current_update_id)
+            if project.last_update:
+                new_project.last_job = orm.ProjectUpdateNew.objects.get(old_pk=project.last_update_id)
+            new_project.save()
+
+        # Update Organization projects.
+        for organization in orm.Organization.objects.order_by('pk'):
+            for project in organization.projects.order_by('pk'):
+                new_project = orm.ProjectNew.objects.get(old_pk=project.pk)
+                organization.new_projects.add(new_project)
+
+        # Update Team projects.
+        for team in orm.Team.objects.order_by('pk'):
+            for project in team.projects.order_by('pk'):
+                new_project = orm.ProjectNew.objects.get(old_pk=project.pk)
+                team.new_projects.add(new_project)
+
+        # Update Permission project.
+        for permission in orm.Permission.objects.order_by('pk'):
+            if not permission.project_id:
+                continue
+            new_project = orm.ProjectNew.objects.get(old_pk=permission.project_id)
+            permission.new_project = new_project
+            permission.save()
+
+        # Copy InventorySource old to new.
+        new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.InventorySource._meta.app_label, model=orm.InventorySource._meta.module_name)
+        for inventory_source in orm.InventorySource.objects.order_by('pk'):
+            d = self._get_dict_from_common_model(inventory_source)
+            d['polymorphic_ctype_id'] = new_ctype.pk
+            new_inventory_source, created = orm.InventorySourceNew.objects.get_or_create(old_pk=inventory_source.pk, defaults=d)
+
+        # Copy InventoryUpdate old to new.
+        new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.InventoryUpdate._meta.app_label, model=orm.InventoryUpdate._meta.module_name)
+        for inventory_update in orm.InventoryUpdate.objects.order_by('pk'):
+            d = self._get_dict_from_common_task_model(inventory_update)
+            d['inventory_source_id'] = orm.InventorySourceNew.objects.get(old_pk=inventory_update.inventory_source_id).pk
+            d['polymorphic_ctype_id'] = new_ctype.pk
+            new_inventory_update, created = orm.InventoryUpdateNew.objects.get_or_create(old_pk=inventory_update.pk, defaults=d)
+
+        # Update InventorySource last run.
+        for inventory_source in orm.InventorySource.objects.order_by('pk'):
+            new_inventory_source = orm.InventorySourceNew.objects.get(old_pk=inventory_source.pk)
+            if inventory_source.current_update:
+                new_inventory_source.current_job = orm.InventoryUpdateNew.objects.get(old_pk=inventory_source.current_update_id)
+            if inventory_source.last_update:
+                new_inventory_source.last_job = orm.InventoryUpdateNew.objects.get(old_pk=inventory_source.last_update_id)
+            new_inventory_source.save()
+
+        # Update Group inventory_sources.
+        for group in orm.Group.objects.order_by('pk'):
+            for inventory_source in group.inventory_sources.order_by('pk'):
+                new_inventory_source = orm.InventorySourceNew.objects.get(old_pk=inventory_source.pk)
+                group.new_inventory_sources.add(new_inventory_source)
+        
+        # Update Host inventory_sources.
+        for host in orm.Host.objects.order_by('pk'):
+            for inventory_source in host.inventory_sources.order_by('pk'):
+                new_inventory_source = orm.InventorySourceNew.objects.get(old_pk=inventory_source.pk)
+                host.new_inventory_sources.add(new_inventory_source)
+
+        # Copy JobTemplate old to new.
+        new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.JobTemplate._meta.app_label, model=orm.JobTemplate._meta.module_name)
+        for job_template in orm.JobTemplate.objects.order_by('pk'):
+            d = self._get_dict_from_common_model(job_template)
+            if job_template.project:
+                d['project_id'] = orm.ProjectNew.objects.get(old_pk=job_template.project_id).pk
+            d['polymorphic_ctype_id'] = new_ctype.pk
+            new_job_template, created = orm.JobTemplateNew.objects.get_or_create(old_pk=job_template.pk, defaults=d)
+
+        # Copy Job old to new.
+        new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.Job._meta.app_label, model=orm.Job._meta.module_name)
+        for job in orm.Job.objects.order_by('pk'):
+            d = self._get_dict_from_common_task_model(job)
+            if job.project:
+                d['project_id'] = orm.ProjectNew.objects.get(old_pk=job.project_id).pk
+            d['polymorphic_ctype_id'] = new_ctype.pk
+            new_job, created = orm.JobNew.objects.get_or_create(old_pk=job.pk, defaults=d)
+
+        # Update JobHostSummary job.
+        for job_host_summary in orm.JobHostSummary.objects.order_by('pk'):
+            new_job = orm.JobNew.objects.get(old_pk=job_host_summary.job_id)
+            job_host_summary.new_job = new_job
+            job_host_summary.save()
+
+        # Update JobEvent job.
+        for job_event in orm.JobEvent.objects.order_by('pk'):
+            new_job = orm.JobNew.objects.get(old_pk=job_event.job_id)
+            job_event.new_job = new_job
+            job_event.save()
+
+        # Update Host last_job.
+        for host in orm.Host.objects.order_by('pk'):
+            if not host.last_job:
+                continue
+            new_job = orm.JobNew.objects.get(old_pk=host.last_job_id)
+            host.new_last_job = new_job
+            host.save()
+
+        # Update ActivityStream
+        for a_s in orm.ActivityStream.objects.order_by('pk'):
+            for project in a_s.project.all():
+                new_project = orm.ProjectNew.objects.get(old_pk=project.pk)
+                a_s.new_project.add(new_project)
+            for project_update in a_s.project_update.all():
+                new_project_update = orm.ProjectUpdateNew.objects.get(old_pk=project_update.pk)
+                a_s.new_project_update.add(new_project_update)
+            for inventory_source in a_s.inventory_source.all():
+                new_inventory_source = orm.InventorySourceNew.objects.get(old_pk=inventory_source.pk)
+                a_s.new_inventory_source.add(new_inventory_source)
+            for inventory_update in a_s.inventory_update.all():
+                new_inventory_update = orm.InventoryUpdateNew.objects.get(old_pk=inventory_update.pk)
+                a_s.new_inventory_update.add(new_inventory_update)
+            for job_template in a_s.job_template.all():
+                new_job_template = orm.JobTemplateNew.objects.get(old_pk=job_template.pk)
+                a_s.new_job_template.add(new_job_template)
+            for job in a_s.job.all():
+                new_job = orm.JobNew.objects.get(old_pk=job.pk)
+                a_s.new_job.add(new_job)
 
     def backwards(self, orm):
-        # Removing unique constraint on 'JobHostSummary', fields ['new_job', 'host']
-        db.delete_unique(u'main_jobhostsummary', ['new_job_id', 'host_id'])
-
-        # Removing unique constraint on 'UnifiedJobTemplate', fields ['polymorphic_ctype', 'name']
-        db.delete_unique(u'main_unifiedjobtemplate', ['polymorphic_ctype_id', 'name'])
-
-        # Deleting model 'InventoryUpdateNew'
-        db.delete_table(u'main_inventoryupdatenew')
-
-        # Deleting model 'JobNew'
-        db.delete_table(u'main_jobnew')
-
-        # Deleting model 'UnifiedJob'
-        db.delete_table(u'main_unifiedjob')
-
-        # Removing M2M table for field depends_on on 'UnifiedJob'
-        db.delete_table(db.shorten_name(u'main_unifiedjob_depends_on'))
-
-        # Deleting model 'Schedule'
-        db.delete_table(u'main_schedule')
-
-        # Deleting model 'InventorySourceNew'
-        db.delete_table(u'main_inventorysourcenew')
-
-        # Deleting model 'JobTemplateNew'
-        db.delete_table('main_jobtemplatenew')
-
-        # Deleting model 'ProjectNew'
-        db.delete_table(u'main_projectnew')
-
-        # Deleting model 'ProjectUpdateNew'
-        db.delete_table(u'main_projectupdatenew')
-
-        # Deleting model 'UnifiedJobTemplate'
-        db.delete_table(u'main_unifiedjobtemplate')
-
-
-        # Changing field 'Profile.created'
-        db.alter_column(u'main_profile', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'Profile.modified'
-        db.alter_column(u'main_profile', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-        # Deleting field 'ProjectUpdate.local_path'
-        db.delete_column(u'main_projectupdate', 'local_path')
-
-        # Deleting field 'ProjectUpdate.scm_type'
-        db.delete_column(u'main_projectupdate', 'scm_type')
-
-        # Deleting field 'ProjectUpdate.scm_url'
-        db.delete_column(u'main_projectupdate', 'scm_url')
-
-        # Deleting field 'ProjectUpdate.scm_branch'
-        db.delete_column(u'main_projectupdate', 'scm_branch')
-
-        # Deleting field 'ProjectUpdate.scm_clean'
-        db.delete_column(u'main_projectupdate', 'scm_clean')
-
-        # Deleting field 'ProjectUpdate.scm_delete_on_update'
-        db.delete_column(u'main_projectupdate', 'scm_delete_on_update')
-
-        # Deleting field 'ProjectUpdate.credential'
-        db.delete_column(u'main_projectupdate', 'credential_id')
-
-
-        # Changing field 'ProjectUpdate.created'
-        db.alter_column(u'main_projectupdate', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'ProjectUpdate.modified'
-        db.alter_column(u'main_projectupdate', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-        # Removing M2M table for field new_inventory_sources on 'Group'
-        db.delete_table(db.shorten_name(u'main_group_new_inventory_sources'))
-
-
-        # Changing field 'Group.created'
-        db.alter_column(u'main_group', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'Group.modified'
-        db.alter_column(u'main_group', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-
-        # Changing field 'Job.created'
-        db.alter_column(u'main_job', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'Job.modified'
-        db.alter_column(u'main_job', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-
-        # Changing field 'Inventory.created'
-        db.alter_column(u'main_inventory', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'Inventory.modified'
-        db.alter_column(u'main_inventory', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-        # Deleting field 'Host.new_last_job'
-        db.delete_column(u'main_host', 'new_last_job_id')
-
-        # Removing M2M table for field new_inventory_sources on 'Host'
-        db.delete_table(db.shorten_name(u'main_host_new_inventory_sources'))
-
-
-        # Changing field 'Host.created'
-        db.alter_column(u'main_host', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'Host.modified'
-        db.alter_column(u'main_host', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-        # Deleting field 'JobHostSummary.new_job'
-        db.delete_column(u'main_jobhostsummary', 'new_job_id')
-
-
-        # Changing field 'JobHostSummary.created'
-        db.alter_column(u'main_jobhostsummary', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'JobHostSummary.modified'
-        db.alter_column(u'main_jobhostsummary', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-        # Deleting field 'InventoryUpdate.source'
-        db.delete_column(u'main_inventoryupdate', 'source')
-
-        # Deleting field 'InventoryUpdate.source_path'
-        db.delete_column(u'main_inventoryupdate', 'source_path')
-
-        # Deleting field 'InventoryUpdate.source_vars'
-        db.delete_column(u'main_inventoryupdate', 'source_vars')
-
-        # Deleting field 'InventoryUpdate.credential'
-        db.delete_column(u'main_inventoryupdate', 'credential_id')
-
-        # Deleting field 'InventoryUpdate.source_regions'
-        db.delete_column(u'main_inventoryupdate', 'source_regions')
-
-        # Deleting field 'InventoryUpdate.overwrite'
-        db.delete_column(u'main_inventoryupdate', 'overwrite')
-
-        # Deleting field 'InventoryUpdate.overwrite_vars'
-        db.delete_column(u'main_inventoryupdate', 'overwrite_vars')
-
-
-        # Changing field 'InventoryUpdate.created'
-        db.alter_column(u'main_inventoryupdate', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'InventoryUpdate.modified'
-        db.alter_column(u'main_inventoryupdate', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-
-        # Changing field 'Credential.created'
-        db.alter_column(u'main_credential', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'Credential.modified'
-        db.alter_column(u'main_credential', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-
-        # Changing field 'JobTemplate.created'
-        db.alter_column(u'main_jobtemplate', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'JobTemplate.modified'
-        db.alter_column(u'main_jobtemplate', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-        # Removing M2M table for field unified_job_template on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_unified_job_template'))
-
-        # Removing M2M table for field unified_job on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_unified_job'))
-
-        # Removing M2M table for field new_inventory_source on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_new_inventory_source'))
-
-        # Removing M2M table for field new_inventory_update on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_new_inventory_update'))
-
-        # Removing M2M table for field new_project on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_new_project'))
-
-        # Removing M2M table for field new_project_update on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_new_project_update'))
-
-        # Removing M2M table for field new_job_template on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_new_job_template'))
-
-        # Removing M2M table for field new_job on 'ActivityStream'
-        db.delete_table(db.shorten_name(u'main_activitystream_new_job'))
-
-        # Removing M2M table for field new_projects on 'Team'
-        db.delete_table(db.shorten_name(u'main_team_new_projects'))
-
-
-        # Changing field 'Team.created'
-        db.alter_column(u'main_team', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'Team.modified'
-        db.alter_column(u'main_team', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-        # Deleting field 'Project.scm_update_cache_timeout'
-        db.delete_column(u'main_project', 'scm_update_cache_timeout')
-
-
-        # Changing field 'Project.created'
-        db.alter_column(u'main_project', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'Project.modified'
-        db.alter_column(u'main_project', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-        # Removing M2M table for field new_projects on 'Organization'
-        db.delete_table(db.shorten_name(u'main_organization_new_projects'))
-
-
-        # Changing field 'Organization.created'
-        db.alter_column(u'main_organization', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'Organization.modified'
-        db.alter_column(u'main_organization', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-        # Deleting field 'Permission.new_project'
-        db.delete_column(u'main_permission', 'new_project_id')
-
-
-        # Changing field 'Permission.created'
-        db.alter_column(u'main_permission', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'Permission.modified'
-        db.alter_column(u'main_permission', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-        # Adding field 'InventorySource.update_interval'
-        db.add_column(u'main_inventorysource', 'update_interval',
-                      self.gf('django.db.models.fields.PositiveIntegerField')(default=0),
-                      keep_default=False)
-
-        # Deleting field 'InventorySource.update_cache_timeout'
-        db.delete_column(u'main_inventorysource', 'update_cache_timeout')
-
-
-        # Changing field 'InventorySource.created'
-        db.alter_column(u'main_inventorysource', 'created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True))
-
-        # Changing field 'InventorySource.modified'
-        db.alter_column(u'main_inventorysource', 'modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True))
-        # Deleting field 'JobEvent.role'
-        db.delete_column(u'main_jobevent', 'role')
-
-        # Deleting field 'JobEvent.new_job'
-        db.delete_column(u'main_jobevent', 'new_job_id')
-
+        "Write your backwards methods here."
+        
+        # FIXME: Would like to have this, but not required.
 
     models = {
         u'auth.group': {
@@ -1319,3 +782,4 @@ class Migration(SchemaMigration):
     }
 
     complete_apps = ['main']
+    symmetrical = True
