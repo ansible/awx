@@ -374,7 +374,16 @@ class BaseTestMixin(object):
         self.check_list_ids(response, qs, check_order)
         if fields:
             for obj in response['results']:
-                self.assertTrue(set(obj.keys()) <= set(fields))
+                returned_fields = set(obj.keys())
+                expected_fields = set(fields)
+                msg = ''
+                not_expected = returned_fields - expected_fields
+                if not_expected:
+                    msg += 'fields %s not expected ' % ', '.join(not_expected)
+                not_returned = expected_fields - returned_fields
+                if not_returned:
+                    msg += 'fields %s not returned ' % ', '.join(not_returned)
+                self.assertTrue(set(obj.keys()) <= set(fields), msg)
 
     def start_taskmanager(self, command_port):
         self.taskmanager_process = Process(target=run_taskmanager,

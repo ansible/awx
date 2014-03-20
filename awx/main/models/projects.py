@@ -175,6 +175,9 @@ class ProjectBase(ProjectOptions):
         default=0,
     )
 
+
+class ProjectBaseMethods(object):
+
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
         # If update_fields has been specified, add our field names to it,
@@ -182,7 +185,7 @@ class ProjectBase(ProjectOptions):
         update_fields = kwargs.get('update_fields', [])
         # Check if scm_type or scm_url changes.
         if self.pk:
-            project_before = Project.objects.get(pk=self.pk)
+            project_before = self.__class__.objects.get(pk=self.pk)
             if project_before.scm_type != self.scm_type or project_before.scm_url != self.scm_url:
                 self.scm_delete_on_next_update = True
                 if 'scm_delete_on_next_update' not in update_fields:
@@ -193,13 +196,8 @@ class ProjectBase(ProjectOptions):
             self.local_path = u'_%d__%s' % (self.pk, slug_name)
             if 'local_path' not in update_fields:
                 update_fields.append('local_path')
-        # Update status and last_updated fields.
-        updated_fields = self.set_status_and_last_updated(save=False)
-        for field in updated_fields:
-            if field not in update_fields:
-                update_fields.append(field)
         # Do the actual save.
-        super(Project, self).save(*args, **kwargs)
+        super(ProjectBaseMethods, self).save(*args, **kwargs)
         if new_instance:
             update_fields=[]
             # Generate local_path for SCM after initial save (so we have a PK).
@@ -211,50 +209,37 @@ class ProjectBase(ProjectOptions):
         if new_instance and self.scm_type:
             self.update()
 
-    def set_status_and_last_updated(self, save=True):
-        # Determine current status.
+    def _get_current_status(self):
         if self.scm_type:
             if self.current_update:
-                status = 'updating'
-            elif not self.last_update:
-                status = 'never updated'
-            elif self.last_update_failed:
-                status = 'failed'
+                return 'updating'
+            elif not self.last_job:
+                return 'never updated'
+            elif self.last_job_failed:
+                return 'failed'
             elif not self.get_project_path():
-                status = 'missing'
+                return 'missing'
             else:
-                status = 'successful'
+                return 'successful'
         elif not self.get_project_path():
-            status = 'missing'
+            return 'missing'
         else:
-            status = 'ok'
-        # Determine current last_updated timestamp.
-        last_updated = None
-        if self.scm_type and self.last_update:
-            last_updated = self.last_update.modified
+            return 'ok'
+
+    def _get_last_job_run(self):
+        if self.scm_type and self.last_job:
+            return self.last_job.finished
         else:
             project_path = self.get_project_path()
             if project_path:
                 try:
                     mtime = os.path.getmtime(project_path)
                     dt = datetime.datetime.fromtimestamp(mtime)
-                    last_updated = make_aware(dt, get_default_timezone())
+                    return make_aware(dt, get_default_timezone())
                 except os.error:
                     pass
-        # Update values if changed.
-        update_fields = []
-        if self.status != status:
-            self.status = status
-            update_fields.append('status')
-        if self.last_updated != last_updated:
-            self.last_updated = last_updated
-            update_fields.append('last_updated')
-        if save and update_fields:
-            self.save(update_fields=update_fields)
-        return update_fields
 
-    @property
-    def can_update(self):
+    def _can_update(self):
         # FIXME: Prevent update when another one is active!
         return bool(self.scm_type)# and not self.current_update)
 
@@ -319,7 +304,7 @@ class ProjectBase(ProjectOptions):
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
 
-    class Project(CommonModel, ProjectBase):
+    class Project(ProjectBaseMethods, CommonModel, ProjectBase):
 
         PROJECT_STATUS_CHOICES = [
             ('ok', 'OK'),
@@ -366,7 +351,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
 
-    class ProjectNew(UnifiedJobTemplate, ProjectBase):
+    class ProjectNew(ProjectBaseMethods, UnifiedJobTemplate, ProjectBase):
 
         class Meta:
             app_label = 'main'
@@ -380,7 +365,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
 
-    class Project(UnifiedJobTemplate, ProjectBase):
+    class Project(ProjectBaseMethods, UnifiedJobTemplate, ProjectBase):
 
         class Meta:
             app_label = 'main'
@@ -395,11 +380,14 @@ class ProjectUpdateBase(ProjectOptions):
         app_label = 'main'
         abstract = True
 
-    def get_absolute_url(self):
-        return reverse('api:project_update_detail', args=(self.pk,))
+
+class ProjectUpdateBaseMethods(object):
 
     def _get_parent_instance(self):
         return self.project
+
+    def get_absolute_url(self):
+        return reverse('api:project_update_detail', args=(self.pk,))
 
     def _get_task_class(self):
         from awx.main.tasks import RunProjectUpdate
@@ -436,25 +424,25 @@ class ProjectUpdateBase(ProjectOptions):
         parent_instance = self._get_parent_instance()
         if parent_instance:
             if self.status in ('pending', 'waiting', 'running'):
-                if parent_instance.current_update != self:
-                    parent_instance.current_update = self
-                    parent_instance.save(update_fields=['current_update'])
+                if parent_instance.current_job != self:
+                    parent_instance.current_job = self
+                    parent_instance.save(update_fields=['current_job'])
             elif self.status in ('successful', 'failed', 'error', 'canceled'):
-                if parent_instance.current_update == self:
-                    parent_instance.current_update = None
-                parent_instance.last_update = self
-                parent_instance.last_update_failed = self.failed
+                if parent_instance.current_job == self:
+                    parent_instance.current_job = None
+                parent_instance.last_job = self
+                parent_instance.last_job_failed = self.failed
                 if not self.failed and parent_instance.scm_delete_on_next_update:
                     parent_instance.scm_delete_on_next_update = False
-                parent_instance.save(update_fields=['current_update',
-                                                    'last_update',
-                                                    'last_update_failed',
+                parent_instance.save(update_fields=['current_job',
+                                                    'last_job',
+                                                    'last_job_failed',
                                                     'scm_delete_on_next_update'])
 
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
 
-    class ProjectUpdate(CommonTask, ProjectUpdateBase):
+    class ProjectUpdate(ProjectUpdateBaseMethods, CommonTask, ProjectUpdateBase):
 
         class Meta:
             app_label = 'main'
@@ -468,7 +456,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
 
-    class ProjectUpdateNew(UnifiedJob, ProjectUpdateBase):
+    class ProjectUpdateNew(ProjectUpdateBaseMethods, UnifiedJob, ProjectUpdateBase):
 
         class Meta:
             app_label = 'main'
@@ -489,7 +477,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
 
-    class ProjectUpdate(UnifiedJob, ProjectUpdateBase):
+    class ProjectUpdate(ProjectUpdateBaseMethods, UnifiedJob, ProjectUpdateBase):
 
         class Meta:
             app_label = 'main'

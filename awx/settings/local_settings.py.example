@@ -269,8 +269,8 @@ TEST_GIT_USERNAME = ''
 TEST_GIT_PASSWORD = ''
 TEST_GIT_KEY_DATA = TEST_SSH_KEY_DATA
 TEST_GIT_PUBLIC_HTTPS = 'https://github.com/ansible/ansible.github.com.git'
-TEST_GIT_PRIVATE_HTTPS = 'https://github.com/ansible/ansible-doc.git'
-TEST_GIT_PRIVATE_SSH = 'git@github.com:ansible/ansible-doc.git'
+TEST_GIT_PRIVATE_HTTPS = 'https://github.com/ansible/product-docs.git'
+TEST_GIT_PRIVATE_SSH = 'git@github.com:ansible/product-docs.git'
 
 TEST_HG_USERNAME = ''
 TEST_HG_PASSWORD = ''
@@ -282,7 +282,7 @@ TEST_HG_PRIVATE_SSH = ''
 TEST_SVN_USERNAME = ''
 TEST_SVN_PASSWORD = ''
 TEST_SVN_PUBLIC_HTTPS = 'https://github.com/ansible/ansible.github.com'
-TEST_SVN_PRIVATE_HTTPS = 'https://github.com/ansible/ansible-doc'
+TEST_SVN_PRIVATE_HTTPS = 'https://github.com/ansible/product-docs'
 
 # To test repo access via SSH login to localhost.
 import getpass

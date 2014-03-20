@@ -644,7 +644,7 @@ class ProjectList(ListCreateAPIView):
         projects_qs = Project.objects.filter(active=True)
         projects_qs = projects_qs.select_related('current_update', 'last_updated')
         for project in projects_qs:
-            project.set_status_and_last_updated()
+            project._set_status_and_last_job_run()
         return super(ProjectList, self).get(request, *args, **kwargs)
 
 class ProjectDetail(RetrieveUpdateDestroyAPIView):

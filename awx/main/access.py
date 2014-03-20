@@ -396,7 +396,7 @@ class GroupAccess(BaseAccess):
 
     def get_queryset(self):
         qs = self.model.objects.filter(active=True).distinct()
-        qs = qs.select_related('created_by', 'inventory', 'inventory_source')
+        qs = qs.select_related('created_by', 'inventory')#, 'inventory_source')
         qs = qs.prefetch_related('parents', 'children')
         inventories_qs = self.user.get_queryset(Inventory)
         return qs.filter(inventory__in=inventories_qs)

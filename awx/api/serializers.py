@@ -339,7 +339,8 @@ class ProjectSerializer(BaseSerializer):
                                 'scm_branch', 'scm_clean',
                                 'scm_delete_on_update', 'scm_delete_on_next_update',
                                 'scm_update_on_launch', 'credential',
-                                'last_update_failed', 'status', 'last_updated')
+                                #'last_update_failed', 'status', 'last_updated')
+                                'last_job_failed', 'status', 'last_job_run')
 
     def get_related(self, obj):
         if obj is None:
@@ -356,12 +357,17 @@ class ProjectSerializer(BaseSerializer):
         if obj.credential and obj.credential.active:
             res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
-        if obj.current_update:
-            res['current_update'] = reverse('api:project_update_detail',
-                                            args=(obj.current_update.pk,))
-        if obj.last_update:
-            res['last_update'] = reverse('api:project_update_detail',
-                                         args=(obj.last_update.pk,))
+        #if obj.current_update:
+        #    res['current_update'] = reverse('api:project_update_detail',
+        #if obj.last_update:
+        #    res['last_update'] = reverse('api:project_update_detail',
+        #                                 args=(obj.last_update.pk,))
+        if obj.current_job:
+            res['current_job'] = reverse('api:project_update_detail',
+                                         args=(obj.current_job.pk,))
+        if obj.last_job:
+            res['last_job'] = reverse('api:project_update_detail',
+                                         args=(obj.last_job.pk,))
         return res
 
     def validate_local_path(self, attrs, source):
@@ -694,8 +700,9 @@ class InventorySourceSerializer(BaseSerializer):
         fields = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
                   'modified', 'inventory', 'group', 'source', 'source_path',
                   'source_vars', 'credential', 'source_regions', 'overwrite',
-                  'overwrite_vars', 'update_on_launch', 'update_interval',
-                  'last_update_failed', 'status', 'last_updated')
+                  'overwrite_vars', 'update_on_launch', #'update_interval',
+                  #'last_update_failed', 'status', 'last_updated')
+                  'last_job_failed', 'status', 'last_job_run')
         read_only_fields = ('inventory', 'group')
 
     def get_related(self, obj):
@@ -716,12 +723,18 @@ class InventorySourceSerializer(BaseSerializer):
         if obj.credential and obj.credential.active:
             res['credential'] = reverse('api:credential_detail',
                                         args=(obj.credential.pk,))
-        if obj.current_update:
-            res['current_update'] = reverse('api:inventory_update_detail',
-                                            args=(obj.current_update.pk,))
-        if obj.last_update:
-            res['last_update'] = reverse('api:inventory_update_detail',
-                                         args=(obj.last_update.pk,))
+        #if obj.current_update:
+        #    res['current_update'] = reverse('api:inventory_update_detail',
+        #                                    args=(obj.current_update.pk,))
+        #if obj.last_update:
+        #    res['last_update'] = reverse('api:inventory_update_detail',
+        #                                 args=(obj.last_update.pk,))
+        if obj.current_job:
+            res['current_job'] = reverse('api:inventory_update_detail',
+                                            args=(obj.current_job.pk,))
+        if obj.last_job:
+            res['last_job'] = reverse('api:inventory_update_detail',
+                                         args=(obj.last_job.pk,))
         return res
 
     def get_summary_fields(self, obj):

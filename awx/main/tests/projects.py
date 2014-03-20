@@ -1610,7 +1610,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.assertEqual(job.status, 'new')
         self.assertFalse(job.passwords_needed_to_start)
         self.assertTrue(job.start())
-        self.assertEqual(job.status, 'pending')
+        self.assertTrue(job.status in ('pending', 'waiting'), job.status)
         job = Job.objects.get(pk=job.pk)
         self.assertTrue(job.status in ('successful', 'failed'),
                         job.result_stdout + job.result_traceback)
@@ -1624,7 +1624,7 @@ class ProjectUpdatesTest(BaseTransactionTest):
         self.assertEqual(job.status, 'new')
         self.assertFalse(job.passwords_needed_to_start)
         self.assertTrue(job.start())
-        self.assertEqual(job.status, 'pending')
+        self.assertTrue(job.status in ('pending', 'waiting'), job.status)
         job = Job.objects.get(pk=job.pk)
         # FIXME: Not quite sure why the project update still returns successful
         # in this case?

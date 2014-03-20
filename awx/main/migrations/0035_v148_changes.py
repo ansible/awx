@@ -53,15 +53,36 @@ class Migration(DataMigration):
         new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.Project._meta.app_label, model=orm.Project._meta.module_name)
         for project in orm.Project.objects.order_by('pk'):
             d = self._get_dict_from_common_model(project)
-            d['polymorphic_ctype_id'] = new_ctype.pk
+            d.update({
+                'polymorphic_ctype_id': new_ctype.pk,
+                'local_path': project.local_path,
+                'scm_type': project.scm_type,
+                'scm_url': project.scm_url,
+                'scm_branch': project.scm_branch,
+                'scm_clean': project.scm_clean,
+                'scm_delete_on_update': project.scm_delete_on_update,
+                'credential_id': project.credential_id,
+                'scm_delete_on_next_update': project.scm_delete_on_next_update,
+                'scm_update_on_launch': project.scm_update_on_launch,
+            })
             new_project, created = orm.ProjectNew.objects.get_or_create(old_pk=project.pk, defaults=d)
 
         # Copy ProjectUpdate old to new.
         new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.ProjectUpdate._meta.app_label, model=orm.ProjectUpdate._meta.module_name)
         for project_update in orm.ProjectUpdate.objects.order_by('pk'):
+            project = project_update.project
             d = self._get_dict_from_common_task_model(project_update)
-            d['project_id'] = orm.ProjectNew.objects.get(old_pk=project_update.project_id).pk
-            d['polymorphic_ctype_id'] = new_ctype.pk
+            d.update({
+                'polymorphic_ctype_id': new_ctype.pk,
+                'project_id': orm.ProjectNew.objects.get(old_pk=project_update.project_id).pk,
+                'local_path': project.local_path,
+                'scm_type': project.scm_type,
+                'scm_url': project.scm_url,
+                'scm_branch': project.scm_branch,
+                'scm_clean': project.scm_clean,
+                'scm_delete_on_update': project.scm_delete_on_update,
+                'credential_id': project.credential_id,
+            })
             new_project_update, created = orm.ProjectUpdateNew.objects.get_or_create(old_pk=project_update.pk, defaults=d)
 
         # Update Project last run.
@@ -71,6 +92,9 @@ class Migration(DataMigration):
                 new_project.current_job = orm.ProjectUpdateNew.objects.get(old_pk=project.current_update_id)
             if project.last_update:
                 new_project.last_job = orm.ProjectUpdateNew.objects.get(old_pk=project.last_update_id)
+            new_project.last_job_failed = project.last_update_failed
+            new_project.last_job_run = project.last_updated
+            new_project.status = project.status
             new_project.save()
 
         # Update Organization projects.
@@ -97,15 +121,38 @@ class Migration(DataMigration):
         new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.InventorySource._meta.app_label, model=orm.InventorySource._meta.module_name)
         for inventory_source in orm.InventorySource.objects.order_by('pk'):
             d = self._get_dict_from_common_model(inventory_source)
-            d['polymorphic_ctype_id'] = new_ctype.pk
+            d.update({
+                'polymorphic_ctype_id': new_ctype.pk,
+                'source': inventory_source.source,
+                'source_path': inventory_source.source_path,
+                'source_vars': inventory_source.source_vars,
+                'credential_id': inventory_source.credential_id,
+                'source_regions': inventory_source.source_regions,
+                'overwrite': inventory_source.overwrite,
+                'overwrite_vars': inventory_source.overwrite_vars,
+                'update_on_launch': inventory_source.update_on_launch,
+                'inventory_id': inventory_source.inventory_id,
+                'group_id': inventory_source.group_id,
+            })
             new_inventory_source, created = orm.InventorySourceNew.objects.get_or_create(old_pk=inventory_source.pk, defaults=d)
 
         # Copy InventoryUpdate old to new.
         new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.InventoryUpdate._meta.app_label, model=orm.InventoryUpdate._meta.module_name)
         for inventory_update in orm.InventoryUpdate.objects.order_by('pk'):
+            inventory_source = inventory_update.inventory_source
             d = self._get_dict_from_common_task_model(inventory_update)
-            d['inventory_source_id'] = orm.InventorySourceNew.objects.get(old_pk=inventory_update.inventory_source_id).pk
-            d['polymorphic_ctype_id'] = new_ctype.pk
+            d.update({
+                'polymorphic_ctype_id': new_ctype.pk,
+                'source': inventory_source.source,
+                'source_path': inventory_source.source_path,
+                'source_vars': inventory_source.source_vars,
+                'credential_id': inventory_source.credential_id,
+                'source_regions': inventory_source.source_regions,
+                'overwrite': inventory_source.overwrite,
+                'overwrite_vars': inventory_source.overwrite_vars,
+                'inventory_source_id': orm.InventorySourceNew.objects.get(old_pk=inventory_update.inventory_source_id).pk,
+                'license_error': inventory_update.license_error,
+            })
             new_inventory_update, created = orm.InventoryUpdateNew.objects.get_or_create(old_pk=inventory_update.pk, defaults=d)
 
         # Update InventorySource last run.
@@ -115,6 +162,9 @@ class Migration(DataMigration):
                 new_inventory_source.current_job = orm.InventoryUpdateNew.objects.get(old_pk=inventory_source.current_update_id)
             if inventory_source.last_update:
                 new_inventory_source.last_job = orm.InventoryUpdateNew.objects.get(old_pk=inventory_source.last_update_id)
+            new_inventory_source.last_job_failed = inventory_source.last_update_failed
+            new_inventory_source.last_job_run = inventory_source.last_updated
+            new_inventory_source.status = inventory_source.status
             new_inventory_source.save()
 
         # Update Group inventory_sources.
@@ -133,19 +183,56 @@ class Migration(DataMigration):
         new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.JobTemplate._meta.app_label, model=orm.JobTemplate._meta.module_name)
         for job_template in orm.JobTemplate.objects.order_by('pk'):
             d = self._get_dict_from_common_model(job_template)
+            d.update({
+                'polymorphic_ctype_id': new_ctype.pk,
+                'job_type': job_template.job_type,
+                'inventory_id': job_template.inventory_id,
+                'playbook': job_template.playbook,
+                'credential_id': job_template.credential_id,
+                'cloud_credential_id': job_template.cloud_credential_id,
+                'forks': job_template.forks,
+                'limit': job_template.limit,
+                'extra_vars': job_template.extra_vars,
+                'job_tags': job_template.job_tags,
+                'host_config_key': job_template.host_config_key,
+            })
             if job_template.project:
                 d['project_id'] = orm.ProjectNew.objects.get(old_pk=job_template.project_id).pk
-            d['polymorphic_ctype_id'] = new_ctype.pk
             new_job_template, created = orm.JobTemplateNew.objects.get_or_create(old_pk=job_template.pk, defaults=d)
 
         # Copy Job old to new.
         new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.Job._meta.app_label, model=orm.Job._meta.module_name)
         for job in orm.Job.objects.order_by('pk'):
             d = self._get_dict_from_common_task_model(job)
+            d.update({
+                'polymorphic_ctype_id': new_ctype.pk,
+                'job_type': job_template.job_type,
+                'inventory_id': job_template.inventory_id,
+                'playbook': job_template.playbook,
+                'credential_id': job_template.credential_id,
+                'cloud_credential_id': job_template.cloud_credential_id,
+                'forks': job_template.forks,
+                'limit': job_template.limit,
+                'extra_vars': job_template.extra_vars,
+                'job_tags': job_template.job_tags,
+            })
             if job.project:
                 d['project_id'] = orm.ProjectNew.objects.get(old_pk=job.project_id).pk
-            d['polymorphic_ctype_id'] = new_ctype.pk
+            if job.job_template:
+                d['job_template_id'] = orm.JobTemplateNew.objects.get(old_pk=job.job_template_id).pk
             new_job, created = orm.JobNew.objects.get_or_create(old_pk=job.pk, defaults=d)
+
+        # Update JobTemplate last run.
+        for new_job_template in orm.JobTemplateNew.objects.order_by('pk'):
+            try:
+                new_last_job = new_job_template.jobs.order_by('-pk')[0]
+                new_job_template.last_job = new_last_job
+                new_job_template.last_job_failed = new_last_job.failed
+                new_job_template.last_job_run = new_last_job.finished
+                new_job_template.status = 'failed' if new_last_job.failed else 'successful'
+            except IndexError:
+                new_job_template.status = 'never updated'
+            new_inventory_source.save()
 
         # Update JobHostSummary job.
         for job_host_summary in orm.JobHostSummary.objects.order_by('pk'):
@@ -192,6 +279,7 @@ class Migration(DataMigration):
         "Write your backwards methods here."
         
         # FIXME: Would like to have this, but not required.
+        raise NotImplementedError()
 
     models = {
         u'auth.group': {
