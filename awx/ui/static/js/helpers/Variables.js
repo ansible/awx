@@ -124,7 +124,7 @@ angular.module('VariablesHelper', ['Utilities'])
                 var i, keys = Object.keys(objToSort), newObj = {};
                 keys = keys.sort();
                 for (i=0; i < keys.length; i++) {
-                    if (typeof objToSort[keys[i]] === 'object' && !Array.isArray(objToSort[keys[i]])) {
+                    if (typeof objToSort[keys[i]] === 'object' && objToSort[keys[i]] !== null && !Array.isArray(objToSort[keys[i]])) {
                         newObj[keys[i]] = sortIt(objToSort[keys[i]]);
                     }
                     else {
@@ -133,7 +133,6 @@ angular.module('VariablesHelper', ['Utilities'])
                 }
                 return newObj;
             }
-
             newObj = sortIt(variableObj);
             return newObj;
         };

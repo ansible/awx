@@ -703,8 +703,19 @@ function(SchedulerInit, Rest, Wait, SetSchedulesInnerDialogSize) {
                         // remove lingering popover <div> elements
                         $(this).remove();
                     });
+                    if (properties_scope.codeMirror) {
+                        properties_scope.codeMirror.destroy();
+                    }
+                    if (sources_scope.codeMirror) {
+                        sources_scope.codeMirror.destroy();
+                    }
                     $('#group-modal-dialog').dialog('destroy');
                     $('#group-modal-dialog').hide();
+                    $('#properties-tab').empty();
+                    $('#sources-tab').empty();
+                    $('#schedules-list').empty();
+                    $('#schedules-form').empty();
+                    $('#schedules-detail').empty();
                     modal_scope.cancelModal();
                 },
                 open: function () {

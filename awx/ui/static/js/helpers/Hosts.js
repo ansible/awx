@@ -14,7 +14,7 @@
 angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'HostListDefinition',
                                 'SearchHelper', 'PaginationHelpers', 'ListGenerator', 'AuthService', 'HostsHelper',
                                 'InventoryHelper', 'RelatedSearchHelper', 'InventoryFormDefinition', 'SelectionHelper',
-                                'HostGroupsFormDefinition', 'VariablesHelper'
+                                'HostGroupsFormDefinition', 'VariablesHelper', 'ModalDialog'
                                 ])
   
 .factory('SetEnabledMsg', [ function() {
@@ -420,10 +420,10 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
 
 .factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find', 'SetStatus', 'ApplyEllipsis',
-    'WatchInventoryWindowResize', 'ToJSON', 'ParseVariableString',
+    'WatchInventoryWindowResize', 'ToJSON', 'ParseVariableString', 'CreateDialog', 'TextareaResize',
 function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
     GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetStatus, ApplyEllipsis, WatchInventoryWindowResize, ToJSON,
-    ParseVariableString) {
+    ParseVariableString, CreateDialog, TextareaResize) {
     return function(params) {
         
         var parent_scope = params.scope,
@@ -432,14 +432,64 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             generator = GenerateForm,
             form = HostForm,
             defaultUrl =  GetBasePath('hosts') + host_id + '/',
-            scope = generator.inject(form, { mode: 'edit', modal: true, related: false, show_modal: false }),
+            scope = parent_scope.$new(),
             master = {},
-            relatedSets = {};
+            relatedSets = {},
+            buttons;
         
+        generator.inject(HostForm, { mode: 'edit', id: 'host-modal-dialog', breadCrumbs: false, related: false, scope: scope });
         generator.reset();
-        scope.formModalActionLabel = 'Save';
-        scope.formModalHeader = 'Host Properties';
-        scope.formModalCancelShow = true;
+        
+        buttons = [{
+            label: "Cancel",
+            onClick: function() {
+                scope.cancelModal();
+            },
+            icon: "fa-times",
+            "class": "btn btn-default",
+            "id": "host-cancel-button"
+        },{
+            label: "Save",
+            onClick: function() {
+                scope.saveModal();
+            },
+            icon: "fa-check",
+            "class": "btn btn-primary",
+            "id": "host-save-button"
+        }];
+
+        CreateDialog({
+            scope: scope,
+            buttons: buttons,
+            width: 675,
+            height: 750,
+            minWidth: 400,
+            title: 'Host Properties',
+            id: 'host-modal-dialog',
+            onClose: function() {
+                Wait('stop');
+                scope.codeMirror.destroy();
+                $('#host-modal-dialog').empty();
+                WatchInventoryWindowResize();
+            },
+            onResizeStop: function() {
+                TextareaResize({
+                    scope: scope,
+                    textareaId: 'host_variables',
+                    modalId: 'host-modal-dialog',
+                    formId: 'host_form'
+                });
+            },
+            onOpen: function() {
+                TextareaResize({
+                    scope: scope,
+                    textareaId: 'host_variables',
+                    modalId: 'host-modal-dialog',
+                    formId: 'host_form'
+                });
+            }
+        });
+        
         scope.parseType = 'yaml';
         
         if (scope.hostVariablesLoadedRemove) {
@@ -447,7 +497,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
         }
         scope.hostVariablesLoadedRemove = scope.$on('hostVariablesLoaded', function() {
             var callback = function() { Wait('stop'); };
-            $('#form-modal').modal('show');
+            $('#host-modal-dialog').dialog('open');
             ParseTypeChange({ scope: scope, field_id: 'host_variables', onReady: callback });
         });
 
@@ -496,6 +546,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
                     }
                 }
                 scope.variable_url = data.related.variable_data;
+                scope.has_inventory_sources = data.has_inventory_sources;
                 scope.$emit('hostLoaded');
             })
             .error( function(data, status) {
@@ -512,8 +563,8 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
             var host = Find({ list: parent_scope.hosts, key: 'id', val: host_id }),
                 old_name = host.name;
             host.name = scope.name;
-            host.enabled = scope.enabled;
-            host.enabled_flag = scope.enabled;
+            host.enabled = (scope.enabled) ? true : false;
+            host.enabled_flag = host.enabled;
             SetStatus({ scope: parent_scope, host: host });
 
             // Update any titles attributes created by ApplyEllipsis
@@ -522,40 +573,44 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
                     $('#hosts_table .host-name a[title="' + old_name + '"]').attr('title', host.name);
                     ApplyEllipsis('#hosts_table .host-name a');
                     // Close modal
-                    Wait('stop');
-                    $('#form-modal').modal('hide');
+                    $('#host-modal-dialog').dialog('close');
                 }, 2000);
             }
             else {
                 // Close modal
                 Wait('stop');
-                $('#form-modal').modal('hide');
+                $('#host-modal-dialog').dialog('close');
             }
             // Restore ellipsis response to window resize
             WatchInventoryWindowResize();
         });
 
         // Save changes to the parent
-        scope.formModalAction = function() {
-            
+        scope.saveModal = function() {
+
             Wait('start');
             var fld, data={};
             
-            data.variables = ToJSON(scope.parseType, scope.variables, true);
-            for (fld in form.fields) {
-                data[fld] = scope[fld];
+            try {
+                data.variables = ToJSON(scope.parseType, scope.variables, true);
+                for (fld in form.fields) {
+                    data[fld] = scope[fld];
+                }
+                data.inventory = inventory_id;
+                Rest.setUrl(defaultUrl);
+                Rest.put(data)
+                    .success( function() {
+                        scope.$emit('saveCompleted');
+                    })
+                    .error( function(data, status) {
+                        Wait('stop');
+                        ProcessErrors(scope, data, status, form,
+                            { hdr: 'Error!', msg: 'Failed to update host: ' + host_id + '. PUT returned status: ' + status });
+                    });
             }
-            data.inventory = inventory_id;
-            Rest.setUrl(defaultUrl);
-            Rest.put(data)
-                .success( function() {
-                    scope.$emit('saveCompleted');
-                })
-                .error( function(data, status) {
-                    Wait('stop');
-                    ProcessErrors(scope, data, status, form,
-                        { hdr: 'Error!', msg: 'Failed to update host: ' + host_id + '. PUT returned status: ' + status });
-                });
+            catch(e) {
+                // ignore. ToJSON will have already alerted the user
+            }
         };
 
         // Cancel
@@ -568,7 +623,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
         };
 
         scope.cancelModal = function() {
-            WatchInventoryWindowResize();
+            $('#host-modal-dialog').dialog('close');
         };
            
     };

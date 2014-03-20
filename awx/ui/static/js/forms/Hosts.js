@@ -30,7 +30,7 @@ angular.module('HostFormDefinition', [])
                     "</blockquote>",
                 dataTitle: 'Host Name',
                 dataPlacement: 'right',
-                dataContainer: '#form-modal .modal-content'
+                dataContainer: 'body'
             },
             description: {
                 label: 'Description',
@@ -48,7 +48,7 @@ angular.module('HostFormDefinition', [])
                     "are part of an external inventory, this flag cannot be changed. It will be set by the inventory sync process.</p>",
                 dataTitle: 'Host Enabled',
                 dataPlacement: 'right',
-                dataContainer: '#form-modal .modal-content',
+                dataContainer: 'body',
                 ngDisabled: 'has_inventory_sources == true'
             },
             variables: {
@@ -68,7 +68,7 @@ angular.module('HostFormDefinition', [])
                     '<p>View YAML examples at <a href="http://docs.ansible.com/YAMLSyntax.html" target="_blank">docs.ansible.com</a></p>',
                 dataTitle: 'Host Variables',
                 dataPlacement: 'right',
-                dataContainer: '#form-modal .modal-content'
+                dataContainer: 'body'
             },
             inventory: {
                 type: 'hidden',
@@ -78,6 +78,7 @@ angular.module('HostFormDefinition', [])
         },
 
         buttons: { //for now always generates <button> tags 
+           /*
             save: {
                 ngClick: 'formSave()', //$scope.function to call on click, optional
                 ngDisabled: true //Disable when $pristine or $invalid, optional
@@ -86,6 +87,7 @@ angular.module('HostFormDefinition', [])
                 ngClick: 'formReset()',
                 ngDisabled: true //Disabled when $pristine
             }
+            */
         },
 
         related: {}

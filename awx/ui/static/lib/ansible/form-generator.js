@@ -483,6 +483,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                     html += (field.falseValue !== undefined) ? Attr(field, 'falseValue') : "";
                     html += (field.checked) ? "checked " : "";
                     html += (field.readonly) ? "disabled " : "";
+                    html += (field.ngDisabled) ? "ng-disabled=\"" + field.ngDisabled + "\" " : "";
                     html += " > ";
 
                     if (label) {
