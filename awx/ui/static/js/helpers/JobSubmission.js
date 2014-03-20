@@ -386,7 +386,7 @@ angular.module('JobSubmissionHelper', ['RestServices', 'Utilities', 'CredentialF
 ])
 
 
-// Sumbit Inventory Update request
+// Submit Inventory Update request
 .factory('InventoryUpdate', ['PromptPasswords', '$compile', 'Rest', '$location', 'GetBasePath', 'ProcessErrors', 'Alert',
     'GroupForm', 'BuildTree', 'Wait',
     function (PromptPasswords, $compile, Rest, $location, GetBasePath, ProcessErrors, Alert, GroupForm, BuildTree, Wait) {
@@ -413,16 +413,18 @@ angular.module('JobSubmissionHelper', ['RestServices', 'Utilities', 'CredentialF
                 scope.removeUpdateSubmitted();
             }
             scope.removeUpdateSubmitted = scope.$on('UpdateSubmitted', function (e, action) {
-                if (action === 'started') {
-                    if (scope.refreshGroups) {
-                        scope.selected_tree_id = tree_id;
-                        scope.selected_group_id = group_id;
-                        scope.refreshGroups();
-                    } else if (scope.refresh) {
-                        scope.refresh();
+                setTimeout(function() {
+                    if (action === 'started') {
+                        if (scope.refreshGroups) {
+                            scope.selected_tree_id = tree_id;
+                            scope.selected_group_id = group_id;
+                            scope.refreshGroups();
+                        } else if (scope.refresh) {
+                            scope.refresh();
+                        }
+                        scope.$emit('HostReloadComplete');
                     }
-                    scope.$emit('HostReloadComplete');
-                }
+                }, 2000);
             });
 
             if (scope.removeInventorySubmit) {

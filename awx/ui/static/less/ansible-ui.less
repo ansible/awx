@@ -1007,11 +1007,14 @@ input[type="checkbox"].checkbox-no-label {
           padding-left: 8px;
       }
       .title {
+          font-size: 14px;
           padding-left: 8px;
           font-weight: bold;
           margin-bottom: 6px;
+          color: @black;
       }
-      thead >tr >th, tbody >tr >td, .page-row, .title {
+      thead >tr >th, tbody >tr >td, .page-row {
+          font-size: 12.5px;
           color: #666;
       }
       .pagination li a {
@@ -1374,6 +1377,7 @@ tr td button i {
 
 .modal {
   border: 1px solid @black;
+  z-index: 2050;
 }
 
 .close {

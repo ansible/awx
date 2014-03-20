@@ -220,10 +220,10 @@ angular.module('GroupsHelper', ['RestServices', 'Utilities', 'ListGenerator', 'G
                         list: CredentialList,
                         field: 'credential'
                     });
-
                     if ($('#group_tabs .active a').text() === 'Source' && scope.source.value === 'ec2') {
                         callback = function(){ Wait('stop'); };
                         Wait('start');
+                        scope.source_vars = (Empty(scope.source_vars)) ? "---" : scope.source_vars;
                         ParseTypeChange({ scope: scope, variable: 'source_vars', parse_variable: form.fields.source_vars.parseTypeName,
                             field_id: 'source_source_vars', onReady: callback });
                     }
