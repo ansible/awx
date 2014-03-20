@@ -272,7 +272,7 @@ def run_taskmanager(command_port):
         try:
             message = command_socket.recv_json(flags=zmq.NOBLOCK)
             command_socket.send("1")
-        except zmq.error.ZMQError,e:
+        except zmq.ZMQError,e:
             message = None
         if message is not None or (datetime.datetime.now() - last_rebuild).seconds > 60:
             if message is not None and 'pause' in message:

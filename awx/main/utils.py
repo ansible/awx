@@ -305,7 +305,9 @@ def get_system_task_capacity():
     from django.conf import settings
     if hasattr(settings, 'SYSTEM_TASK_CAPACITY'):
         return settings.SYSTEM_TASK_CAPACITY
-    total_mem_value = subprocess.check_output(['free','-m']).split()[7]
+    proc = subprocess.Popen(['free', '-m'], stdout=subprocess.PIPE)
+    out,err = proc.communicate()
+    total_mem_value = out.split()[7]
     if int(total_mem_value) <= 2048:
         return 50
     return 50 + ((int(total_mem_value) / 1024) - 2) * 75
