@@ -7,7 +7,7 @@ from django.db import models
 
 class Migration(SchemaMigration):
     '''
-    Rename tables to be consistent with model names.
+    Rename tables/columns to be consistent with model/field names.
     '''
 
     def forwards(self, orm):
@@ -19,41 +19,60 @@ class Migration(SchemaMigration):
         db.rename_table(u'main_jobnew', 'main_job')
 
         db.rename_table(db.shorten_name(u'main_team_new_projects'), db.shorten_name(u'main_team_projects'))
+        db.rename_column(db.shorten_name(u'main_team_projects'), 'projectnew_id', 'project_id')
         db.rename_table(db.shorten_name(u'main_organization_new_projects'), db.shorten_name(u'main_organization_projects'))
+        db.rename_column(db.shorten_name(u'main_organization_projects'), 'projectnew_id', 'project_id')
         db.rename_column(u'main_permission', 'new_project_id', 'project_id')
 
         db.rename_column(u'main_host', 'new_last_job_id', 'last_job_id')
         db.rename_table(db.shorten_name(u'main_host_new_inventory_sources'), db.shorten_name(u'main_host_inventory_sources'))
+        db.rename_column(db.shorten_name(u'main_host_inventory_sources'), 'inventorysourcenew_id', 'inventorysource_id')
         db.rename_table(db.shorten_name(u'main_group_new_inventory_sources'), db.shorten_name(u'main_group_inventory_sources'))
+        db.rename_column(db.shorten_name(u'main_group_inventory_sources'), 'inventorysourcenew_id', 'inventorysource_id')
         
         db.rename_column(u'main_jobhostsummary', 'new_job_id', 'job_id')
         db.rename_column(u'main_jobevent', 'new_job_id', 'job_id')
 
         db.rename_table(db.shorten_name(u'main_activitystream_new_project'), db.shorten_name(u'main_activitystream_project'))
+        db.rename_column(db.shorten_name(u'main_activitystream_project'), 'projectnew_id', 'project_id')
         db.rename_table(db.shorten_name(u'main_activitystream_new_project_update'), db.shorten_name(u'main_activitystream_project_update'))
+        db.rename_column(db.shorten_name(u'main_activitystream_project_update'), 'projectupdatenew_id', 'projectupdate_id')
         db.rename_table(db.shorten_name(u'main_activitystream_new_inventory_source'), db.shorten_name(u'main_activitystream_inventory_source'))
+        db.rename_column(db.shorten_name(u'main_activitystream_inventory_source'), 'inventorysourcenew_id', 'inventorysource_id')
         db.rename_table(db.shorten_name(u'main_activitystream_new_inventory_update'), db.shorten_name(u'main_activitystream_inventory_update'))
+        db.rename_column(db.shorten_name(u'main_activitystream_inventory_update'), 'inventoryupdatenew_id', 'inventoryupdate_id')
         db.rename_table(db.shorten_name(u'main_activitystream_new_job_template'), db.shorten_name(u'main_activitystream_job_template'))
+        db.rename_column(db.shorten_name(u'main_activitystream_job_template'), 'jobtemplatenew_id', 'jobtemplate_id')
         db.rename_table(db.shorten_name(u'main_activitystream_new_job'), db.shorten_name(u'main_activitystream_job'))
+        db.rename_column(db.shorten_name(u'main_activitystream_job'), 'jobnew_id', 'job_id')
 
     def backwards(self, orm):
+        db.rename_column(db.shorten_name(u'main_activitystream_job'), 'job_id', 'jobnew_id')
         db.rename_table(db.shorten_name(u'main_activitystream_job'), db.shorten_name(u'main_activitystream_new_job'))
+        db.rename_column(db.shorten_name(u'main_activitystream_job_template'), 'jobtemplate_id', 'jobtemplatenew_id')
         db.rename_table(db.shorten_name(u'main_activitystream_job_template'), db.shorten_name(u'main_activitystream_new_job_template'))
+        db.rename_column(db.shorten_name(u'main_activitystream_inventory_update'), 'inventoryupdate_id', 'inventoryupdatenew_id')
         db.rename_table(db.shorten_name(u'main_activitystream_inventory_update'), db.shorten_name(u'main_activitystream_new_inventory_update'))
+        db.rename_column(db.shorten_name(u'main_activitystream_inventory_source'), 'inventorysource_id', 'inventorysourcenew_id')
         db.rename_table(db.shorten_name(u'main_activitystream_inventory_source'), db.shorten_name(u'main_activitystream_new_inventory_source'))
+        db.rename_column(db.shorten_name(u'main_activitystream_project_update'), 'projectupdate_id', 'projectupdatenew_id')
         db.rename_table(db.shorten_name(u'main_activitystream_project_update'), db.shorten_name(u'main_activitystream_new_project_update'))
+        db.rename_column(db.shorten_name(u'main_activitystream_project'), 'project_id', 'projectnew_id')
         db.rename_table(db.shorten_name(u'main_activitystream_project'), db.shorten_name(u'main_activitystream_new_project'))
 
         db.rename_column(u'main_jobevent', 'job_id', 'new_job_id')
         db.rename_column(u'main_jobhostsummary', 'job_id', 'new_job_id')
 
-
+        db.rename_column(db.shorten_name(u'main_group_inventory_sources'), 'inventorysource_id', 'inventorysourcenew_id')
         db.rename_table(db.shorten_name(u'main_group_inventory_sources'), db.shorten_name(u'main_group_new_inventory_sources'))
+        db.rename_column(db.shorten_name(u'main_host_inventory_sources'), 'inventorysource_id', 'inventorysourcenew_id')
         db.rename_table(db.shorten_name(u'main_host_inventory_sources'), db.shorten_name(u'main_host_new_inventory_sources'))
         db.rename_column(u'main_host', 'last_job_id', 'new_last_job_id')
 
         db.rename_column(u'main_permission', 'project_id', 'new_project_id')
+        db.rename_column(db.shorten_name(u'main_organization_projects'), 'project_id', 'projectnew_id')
         db.rename_table(db.shorten_name(u'main_organization_projects'), db.shorten_name(u'main_organization_new_projects'))
+        db.rename_column(db.shorten_name(u'main_team_projects'), 'project_id', 'projectnew_id')
         db.rename_table(db.shorten_name(u'main_team_projects'), db.shorten_name(u'main_team_new_projects'))
         
         db.rename_table(u'main_job', 'main_jobnew')

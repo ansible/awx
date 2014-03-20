@@ -451,7 +451,7 @@ class BaseJobTestMixin(BaseTestMixin):
 
 class JobTemplateTest(BaseJobTestMixin, django.test.TestCase):
 
-    JOB_TEMPLATE_FIELDS = ('id', 'url', 'related', 'summary_fields', 'created',
+    JOB_TEMPLATE_FIELDS = ('id', 'type', 'url', 'related', 'summary_fields', 'created',
                            'modified', 'name', 'description', 'job_type',
                            'inventory', 'project', 'playbook', 'credential',
                            'cloud_credential', 'forks', 'limit', 'verbosity',

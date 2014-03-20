@@ -40,3 +40,6 @@ class Schedule(CommonModel):
     rrule = models.CharField(
         max_length=255,
     )
+
+    def save(self, *args, **kwargs):
+        super(Schedule, self).save(*args, **kwargs)

@@ -23,6 +23,7 @@ class AutoSingleRelatedObjectDescriptor(SingleRelatedObjectDescriptor):
         except self.related.model.DoesNotExist:
             obj = self.related.model(**{self.related.field.name: instance})
             if self.related.field.rel.parent_link:
+                raise NotImplementedError('not supported with polymorphic!')
                 for f in instance._meta.local_fields:
                     setattr(obj, f.name, getattr(instance, f.name))
             obj.save()

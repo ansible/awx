@@ -29,6 +29,9 @@ from django.utils.timezone import now, make_aware, get_default_timezone
 # Django-JSONField
 from jsonfield import JSONField
 
+# Django-Polymorphic
+from polymorphic import PolymorphicModel
+
 # AWX
 from awx.main.models.base import *
 from awx.main.models.unified_jobs import *
@@ -138,6 +141,7 @@ class JobTemplateBase(JobOptions):
         default='',
     )
 
+class JobTemplateBaseMethods(object):
 
     def create_job(self, **kwargs):
         '''
@@ -181,7 +185,7 @@ class JobTemplateBase(JobOptions):
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
 
-    class JobTemplate(CommonModel, JobTemplateBase):
+    class JobTemplate(JobTemplateBaseMethods, CommonModel, JobTemplateBase):
 
         class Meta:
             app_label = 'main'
@@ -195,7 +199,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
 
-    class JobTemplateNew(UnifiedJobTemplate, JobTemplateBase):
+    class JobTemplateNew(JobTemplateBaseMethods, UnifiedJobTemplate, JobTemplateBase):
 
         class Meta:
             app_label = 'main'
@@ -217,7 +221,8 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
 
-    class JobTemplate(UnifiedJobTemplate, JobTemplateBase):
+    #class JobTemplate(JobTemplateBase, UnifiedJobTemplate):
+    class JobTemplate(JobTemplateBaseMethods, UnifiedJobTemplate, JobTemplateBase):
 
         class Meta:
             app_label = 'main'
@@ -248,6 +253,8 @@ class JobBase(JobOptions):
         editable=False,
         through='JobHostSummary',
     )
+
+class JobBaseMethods(object):
 
     def get_absolute_url(self):
         return reverse('api:job_detail', args=(self.pk,))
@@ -374,7 +381,7 @@ class JobBase(JobOptions):
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
     
-    class Job(CommonTask, JobBase):
+    class Job(JobBaseMethods, CommonTask, JobBase):
 
         LAUNCH_TYPE_CHOICES = [
             ('manual', _('Manual')),
@@ -408,7 +415,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
 
-    class JobNew(UnifiedJob, JobBase):
+    class JobNew(JobBaseMethods, UnifiedJob, JobBase):
 
         class Meta:
             app_label = 'main'
@@ -437,7 +444,8 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
 
-    class Job(UnifiedJob, JobBase):
+    #class Job(JobBase, UnifiedJob):
+    class Job(JobBaseMethods, UnifiedJob, JobBase):
 
         class Meta:
             app_label = 'main'
@@ -504,7 +512,7 @@ class JobHostSummaryBase(CreatedModifiedModel):
         update_fields = kwargs.get('update_fields', [])
         self.failed = bool(self.dark or self.failures)
         update_fields.append('failed')
-        super(JobHostSummary, self).save(*args, **kwargs)
+        super(JobHostSummaryBase, self).save(*args, **kwargs)
         self.update_host_last_job_summary()
 
     def update_host_last_job_summary(self):
@@ -856,7 +864,7 @@ class JobEventBase(CreatedModifiedModel):
             self.parent = self._find_parent()
             if 'parent' not in update_fields:
                 update_fields.append('parent')
-        super(JobEvent, self).save(*args, **kwargs)
+        super(JobEventBase, self).save(*args, **kwargs)
         if post_process and not from_parent_update:
             self.update_parent_failed_and_changed()
             # FIXME: The update_hosts() call (and its queries) are the current

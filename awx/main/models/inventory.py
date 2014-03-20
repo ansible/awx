@@ -129,7 +129,8 @@ class Inventory(CommonModel):
         active_groups = self.groups.filter(active=True)
         failed_groups = active_groups.filter(has_active_failures=True)
         active_inventory_sources = self.inventory_sources.filter(active=True, source__in=CLOUD_INVENTORY_SOURCES)
-        failed_inventory_sources = active_inventory_sources.filter(last_update_failed=True)
+        #failed_inventory_sources = active_inventory_sources.filter(last_update_failed=True)
+        failed_inventory_sources = active_inventory_sources.filter(last_job_failed=True)
         computed_fields = {
             'has_active_failures': bool(failed_hosts.count()),
             'total_hosts': active_hosts.count(),
@@ -229,7 +230,7 @@ class HostBase(CommonModelNameNotUnique):
         When marking hosts inactive, remove all associations to related
         inventory sources.
         '''
-        super(Host, self).mark_inactive(save=save)
+        super(HostBase, self).mark_inactive(save=save)
         self.inventory_sources.clear()
 
     def update_computed_fields(self, update_inventory=True, update_groups=True):
@@ -453,7 +454,7 @@ class GroupBase(CommonModelNameNotUnique):
         groups/hosts/inventory_sources.
         '''
         def mark_actual():
-            super(Group, self).mark_inactive(save=save)
+            super(GroupBase, self).mark_inactive(save=save)
             self.inventory_source.mark_inactive(save=save)
             self.inventory_sources.clear()
             self.parents.clear()
@@ -670,20 +671,6 @@ class InventorySourceOptions(BaseModel):
         help_text=_('Overwrite local variables from remote inventory source.'),
     )
 
-
-class InventorySourceBase(InventorySourceOptions):
-
-    class Meta:
-        abstract = True
-        app_label = 'main'
-
-    update_on_launch = models.BooleanField(
-        default=False,
-    )
-    update_cache_timeout = models.PositiveIntegerField(
-        default=0,
-    )
-
     @classmethod
     def get_ec2_region_choices(cls):
         ec2_region_names = getattr(settings, 'EC2_REGION_NAMES', {})
@@ -754,57 +741,46 @@ class InventorySourceBase(InventorySourceOptions):
                                   ', '.join(invalid_regions)))
         return ','.join(regions)
 
+
+class InventorySourceBase(InventorySourceOptions):
+
+    class Meta:
+        abstract = True
+        app_label = 'main'
+
+    update_on_launch = models.BooleanField(
+        default=False,
+    )
+    update_cache_timeout = models.PositiveIntegerField(
+        default=0,
+    )
+
+
+class InventorySourceBaseMethods(object):
+
     def save(self, *args, **kwargs):
-        new_instance = not bool(self.pk)
         # If update_fields has been specified, add our field names to it,
         # if it hasn't been specified, then we're just doing a normal save.
         update_fields = kwargs.get('update_fields', [])
-        # Update status and last_updated fields.
-        updated_fields = self.set_status_and_last_updated(save=False)
-        for field in updated_fields:
-            if field not in update_fields:
-                update_fields.append(field)
         # Update inventory from group (if available).
         if self.group and not self.inventory:
             self.inventory = self.group.inventory
             if 'inventory' not in update_fields:
                 update_fields.append('inventory')
+        # Set name automatically.
+        if not self.name:
+            self.name = 'inventory_source %s' % now()
+            if 'name' not in update_fields:
+                update_fields.append('name')
         # Do the actual save.
-        super(InventorySource, self).save(*args, **kwargs)
+        super(InventorySourceBaseMethods, self).save(*args, **kwargs)
 
     source_vars_dict = VarsDictProperty('source_vars')
 
-    def set_status_and_last_updated(self, save=True):
-        # Determine current status.
-        if self.source:
-            if self.current_update:
-                status = 'updating'
-            elif not self.last_update:
-                status = 'never updated'
-            elif self.last_update_failed:
-                status = 'failed'
-            else:
-                status = 'successful'
-        else:
-            status = 'none'
-        # Determine current last_updated timestamp.
-        last_updated = None
-        if self.source and self.last_update:
-            last_updated = self.last_update.modified
-        # Update values if changed.
-        update_fields = []
-        if self.status != status:
-            self.status = status
-            update_fields.append('status')
-        if self.last_updated != last_updated:
-            self.last_updated = last_updated
-            update_fields.append('last_updated')
-        if save and update_fields:
-            self.save(update_fields=update_fields)
-        return update_fields
+    def get_absolute_url(self):
+        return reverse('api:inventory_source_detail', args=(self.pk,))
 
-    @property
-    def can_update(self):
+    def _can_update(self):
         # FIXME: Prevent update when another one is active!
         return bool(self.source)
 
@@ -820,13 +796,10 @@ class InventorySourceBase(InventorySourceOptions):
             inventory_update.start()
             return inventory_update
 
-    def get_absolute_url(self):
-        return reverse('api:inventory_source_detail', args=(self.pk,))
-
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
 
-    class InventorySource(PrimordialModel, InventorySourceBase):
+    class InventorySource(InventorySourceBaseMethods, PrimordialModel, InventorySourceBase):
 
         INVENTORY_SOURCE_STATUS_CHOICES = [
             ('none', _('No External Source')),
@@ -886,7 +859,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
 
-    class InventorySourceNew(UnifiedJobTemplate, InventorySourceBase):
+    class InventorySourceNew(InventorySourceBaseMethods, UnifiedJobTemplate, InventorySourceBase):
 
         class Meta:
             app_label = 'main'
@@ -916,7 +889,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
 
-    class InventorySource(UnifiedJobTemplate, InventorySourceBase):
+    class InventorySource(InventorySourceBaseMethods, UnifiedJobTemplate, InventorySourceBase):
 
         class Meta:
             app_label = 'main'
@@ -952,6 +925,9 @@ class InventoryUpdateBase(InventorySourceOptions):
         editable=False,
     )
 
+
+class InventoryUpdateBaseMethods(object):
+
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
         if bool('license' in self.result_stdout and
@@ -959,7 +935,7 @@ class InventoryUpdateBase(InventorySourceOptions):
             self.license_error = True
             if 'license_error' not in update_fields:
                 update_fields.append('license_error')
-        super(InventoryUpdate, self).save(*args, **kwargs)
+        super(InventoryUpdateBaseMethods, self).save(*args, **kwargs)
         
     def _get_parent_instance(self):
         return self.inventory_source
@@ -974,7 +950,7 @@ class InventoryUpdateBase(InventorySourceOptions):
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
 
-    class InventoryUpdate(CommonTask, InventoryUpdateBase):
+    class InventoryUpdate(InventoryUpdateBaseMethods, CommonTask, InventoryUpdateBase):
 
         class Meta:
             app_label = 'main'
@@ -988,7 +964,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') in (0, 1):
 
-    class InventoryUpdateNew(UnifiedJob, InventoryUpdateBase):
+    class InventoryUpdateNew(InventoryUpdateBaseMethods, UnifiedJob, InventoryUpdateBase):
 
         class Meta:
             app_label = 'main'
@@ -1009,7 +985,7 @@ if getattr(settings, 'UNIFIED_JOBS_STEP') == 1:
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 2:
 
-    class InventoryUpdate(UnifiedJob, InventoryUpdateBase):
+    class InventoryUpdate(InventoryUpdateBaseMethods, UnifiedJob, InventoryUpdateBase):
 
         class Meta:
             app_label = 'main'
