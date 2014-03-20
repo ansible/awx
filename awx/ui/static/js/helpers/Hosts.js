@@ -420,22 +420,24 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
 
 .factory('HostsEdit', ['$rootScope', '$location', '$log', '$routeParams', 'Rest', 'Alert', 'HostForm', 'GenerateForm',
     'Prompt', 'ProcessErrors', 'GetBasePath', 'HostsReload', 'ParseTypeChange', 'Wait', 'Find', 'SetStatus', 'ApplyEllipsis',
-    'WatchInventoryWindowResize', 'ToJSON', 'ParseVariableString', 'CreateDialog', 'TextareaResize',
+    'WatchInventoryWindowResize', 'ToJSON', 'ParseVariableString', 'CreateDialog', 'TextareaResize', 'Empty',
 function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, GenerateForm, Prompt, ProcessErrors,
     GetBasePath, HostsReload, ParseTypeChange, Wait, Find, SetStatus, ApplyEllipsis, WatchInventoryWindowResize, ToJSON,
-    ParseVariableString, CreateDialog, TextareaResize) {
+    ParseVariableString, CreateDialog, TextareaResize, Empty) {
     return function(params) {
         
         var parent_scope = params.scope,
             host_id = params.host_id,
             inventory_id = params.inventory_id,
+            mode = params.mode,  // 'add' or 'edit'
+            selected_group_id = params.selected_group_id,
             generator = GenerateForm,
             form = HostForm,
-            defaultUrl =  GetBasePath('hosts') + host_id + '/',
+            defaultUrl,
             scope = parent_scope.$new(),
             master = {},
             relatedSets = {},
-            buttons;
+            group, buttons;
         
         generator.inject(HostForm, { mode: 'edit', id: 'host-modal-dialog', breadCrumbs: false, related: false, scope: scope });
         generator.reset();
@@ -481,12 +483,14 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
                 });
             },
             onOpen: function() {
-                TextareaResize({
-                    scope: scope,
-                    textareaId: 'host_variables',
-                    modalId: 'host-modal-dialog',
-                    formId: 'host_form'
-                });
+                setTimeout(function() {
+                    TextareaResize({
+                        scope: scope,
+                        textareaId: 'host_variables',
+                        modalId: 'host-modal-dialog',
+                        formId: 'host_form'
+                    });
+                }, 300);
             }
         });
         
@@ -529,58 +533,86 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
         Wait('start');
 
         // Retrieve detail record and prepopulate the form
-        Rest.setUrl(defaultUrl);
-        Rest.get()
-            .success( function(data) {
-                var set, fld, related;
-                for (fld in form.fields) {
-                    if (data[fld]) {
-                        scope[fld] = data[fld];
-                        master[fld] = scope[fld];
+        if (mode === 'edit') {
+            defaultUrl = GetBasePath('hosts') + host_id + '/';
+            Rest.setUrl(defaultUrl);
+            Rest.get()
+                .success( function(data) {
+                    var set, fld, related;
+                    for (fld in form.fields) {
+                        if (data[fld]) {
+                            scope[fld] = data[fld];
+                            master[fld] = scope[fld];
+                        }
                     }
-                }
-                related = data.related;
-                for (set in form.related) {
-                    if (related[set]) {
-                        relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
+                    related = data.related;
+                    for (set in form.related) {
+                        if (related[set]) {
+                            relatedSets[set] = { url: related[set], iterator: form.related[set].iterator };
+                        }
                     }
-                }
-                scope.variable_url = data.related.variable_data;
-                scope.has_inventory_sources = data.has_inventory_sources;
-                scope.$emit('hostLoaded');
-            })
-            .error( function(data, status) {
-                ProcessErrors(scope, data, status, form,
-                    { hdr: 'Error!', msg: 'Failed to retrieve host: ' + host_id + '. GET returned status: ' + status });
-            });
-       
+                    scope.variable_url = data.related.variable_data;
+                    scope.has_inventory_sources = data.has_inventory_sources;
+                    scope.$emit('hostLoaded');
+                })
+                .error( function(data, status) {
+                    ProcessErrors(scope, data, status, form,
+                        { hdr: 'Error!', msg: 'Failed to retrieve host: ' + host_id + '. GET returned status: ' + status });
+                });
+        }
+        else {
+            // Add mode
+            group = Find({ list: scope.groups, key: 'id', val: selected_group_id });
+            if (!Empty(group)) {
+                scope.has_inventory_sources = group.has_inventory_sources;
+                scope.enabled = true;
+                scope.variables = '---';
+                defaultUrl = GetBasePath('groups') + group.group_id + '/hosts/';
+                scope.$emit('hostVariablesLoaded');
+            }
+            else {
+                ProcessErrors(scope, null, status, null, { hdr: 'Error',
+                    msg: 'Group lookup failed. Selected group id: ' + selected_group_id });
+            }
+        }
 
         if (scope.removeSaveCompleted) {
             scope.removeSaveCompleted();
         }
         scope.removeSaveCompleted = scope.$on('saveCompleted', function() {
-            // Update the name on the list
-            var host = Find({ list: parent_scope.hosts, key: 'id', val: host_id }),
+            var host, old_name;
+            if (mode === 'edit') {
+                // Update the name on the list
+                host = Find({ list: parent_scope.hosts, key: 'id', val: host_id });
                 old_name = host.name;
-            host.name = scope.name;
-            host.enabled = (scope.enabled) ? true : false;
-            host.enabled_flag = host.enabled;
-            SetStatus({ scope: parent_scope, host: host });
-
-            // Update any titles attributes created by ApplyEllipsis
-            if (old_name) {
-                setTimeout(function() {
-                    $('#hosts_table .host-name a[title="' + old_name + '"]').attr('title', host.name);
-                    ApplyEllipsis('#hosts_table .host-name a');
+                host.name = scope.name;
+                host.enabled = (scope.enabled) ? true : false;
+                host.enabled_flag = host.enabled;
+                SetStatus({ scope: parent_scope, host: host });
+                // Update any titles attributes created by ApplyEllipsis
+                if (old_name) {
+                    setTimeout(function() {
+                        $('#hosts_table .host-name a[title="' + old_name + '"]').attr('title', host.name);
+                        ApplyEllipsis('#hosts_table .host-name a');
+                        // Close modal
+                        $('#host-modal-dialog').dialog('close');
+                    }, 2000);
+                }
+                else {
                     // Close modal
                     $('#host-modal-dialog').dialog('close');
-                }, 2000);
+                }
             }
             else {
-                // Close modal
-                Wait('stop');
                 $('#host-modal-dialog').dialog('close');
+                HostsReload({
+                    scope: parent_scope,
+                    group_id: parent_scope.selected_group_id,
+                    tree_id: parent_scope.selected_tree_id,
+                    inventory_id: parent_scope.inventory_id
+                });
             }
+
             // Restore ellipsis response to window resize
             WatchInventoryWindowResize();
         });
@@ -598,15 +630,26 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, HostForm, Gener
                 }
                 data.inventory = inventory_id;
                 Rest.setUrl(defaultUrl);
-                Rest.put(data)
-                    .success( function() {
-                        scope.$emit('saveCompleted');
-                    })
-                    .error( function(data, status) {
-                        Wait('stop');
-                        ProcessErrors(scope, data, status, form,
-                            { hdr: 'Error!', msg: 'Failed to update host: ' + host_id + '. PUT returned status: ' + status });
-                    });
+                if (mode === 'edit') {
+                    Rest.put(data)
+                        .success( function() {
+                            scope.$emit('saveCompleted');
+                        })
+                        .error( function(data, status) {
+                            ProcessErrors(scope, data, status, form,
+                                { hdr: 'Error!', msg: 'Failed to update host: ' + host_id + '. PUT returned status: ' + status });
+                        });
+                }
+                else {
+                    Rest.post(data)
+                        .success( function() {
+                            scope.$emit('saveCompleted');
+                        })
+                        .error( function(data, status) {
+                            ProcessErrors(scope, data, status, form,
+                                { hdr: 'Error!', msg: 'Failed to create host. POST returned status: ' + status });
+                        });
+                }
             }
             catch(e) {
                 // ignore. ToJSON will have already alerted the user
@@ -671,14 +714,16 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, Process
             scope.removeHostsReload();
         }
         scope.removeHostsReload = scope.$on('hostsReload', function() {
+            $('#prompt-modal').modal('hide');
             scope.showHosts(scope.selected_tree_id, scope.selected_group_id, false);
         });
 
+        $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('stop'); });
+            
         action_to_take = function() {
             var count=0, i;
 
-            $('#prompt-modal').on('hidden.bs.modal', function(){ Wait('start'); });
-            $('#prompt-modal').modal('hide');
+            Wait('start');
             
             if (scope.removeHostRemoved) {
                 scope.removeHostRemoved();
@@ -686,6 +731,7 @@ function($rootScope, $location, $log, $routeParams, Rest, Alert, Prompt, Process
             scope.removeHostRemoved = scope.$on('hostRemoved', function(){
                 count++;
                 if (count === url_list.length) {
+                    Wait('start');
                     scope.$emit('hostsReload');
                 }
             });

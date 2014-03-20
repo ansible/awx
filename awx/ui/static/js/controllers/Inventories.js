@@ -328,7 +328,7 @@ InventoriesAdd.$inject = ['$scope', '$rootScope', '$compile', '$location', '$log
 
 function InventoriesEdit($scope, $location, $routeParams, $compile, GenerateList, ClearScope, InventoryGroups, InventoryHosts, BuildTree, Wait,
     GetSyncStatusMsg, InjectHosts, HostsReload, GroupsEdit, GroupsDelete, Breadcrumbs, LoadBreadCrumbs, Empty, Rest, ProcessErrors,
-    InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find, HostsCreate, EditInventoryProperties, HostsEdit,
+    InventoryUpdate, Alert, ToggleChildren, ViewUpdateStatus, GroupsCancelUpdate, Find, EditInventoryProperties, HostsEdit,
     HostsDelete, ToggleHostEnabled, CopyMoveGroup, CopyMoveHost, Stream, GetBasePath, ShowJobSummary, ApplyEllipsis, WatchInventoryWindowResize,
     HelpDialog, InventoryGroupsHelp, Store) {
     
@@ -586,7 +586,7 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, GenerateList
     };
 
     $scope.createHost = function () {
-        HostsCreate({ scope: $scope });
+        HostsEdit({ scope: $scope, mode: 'add', host_id: null, selected_group_id: $scope.selected_tree_id, inventory_id: $scope.inventory_id });
     };
 
     $scope.editInventoryProperties = function () {
@@ -594,7 +594,7 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, GenerateList
     };
 
     $scope.editHost = function (host_id) {
-        HostsEdit({ scope: $scope, host_id: host_id, inventory_id: $scope.inventory_id });
+        HostsEdit({ scope: $scope, mode: 'edit', host_id: host_id, inventory_id: $scope.inventory_id });
     };
 
     $scope.deleteHost = function (host_id, host_name) {
@@ -667,6 +667,6 @@ function InventoriesEdit($scope, $location, $routeParams, $compile, GenerateList
 InventoriesEdit.$inject = ['$scope', '$location', '$routeParams', '$compile', 'GenerateList', 'ClearScope', 'InventoryGroups', 'InventoryHosts',
     'BuildTree', 'Wait', 'GetSyncStatusMsg', 'InjectHosts', 'HostsReload', 'GroupsEdit', 'GroupsDelete', 'Breadcrumbs',
     'LoadBreadCrumbs', 'Empty', 'Rest', 'ProcessErrors', 'InventoryUpdate', 'Alert', 'ToggleChildren', 'ViewUpdateStatus', 'GroupsCancelUpdate',
-    'Find', 'HostsCreate', 'EditInventoryProperties', 'HostsEdit', 'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost',
+    'Find', 'EditInventoryProperties', 'HostsEdit', 'HostsDelete', 'ToggleHostEnabled', 'CopyMoveGroup', 'CopyMoveHost',
     'Stream', 'GetBasePath', 'ShowJobSummary', 'ApplyEllipsis', 'WatchInventoryWindowResize', 'HelpDialog', 'InventoryGroupsHelp', 'Store'
 ];
