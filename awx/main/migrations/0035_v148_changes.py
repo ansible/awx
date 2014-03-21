@@ -3,6 +3,7 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
+from django.utils.encoding import smart_text
 
 class Migration(DataMigration):
 
@@ -46,11 +47,18 @@ class Migration(DataMigration):
         })
         return d
 
+    def _get_content_type_for_model(self, orm, model):
+        app_label = model._meta.app_label
+        model_name = model._meta.module_name
+        defaults = {'name': smart_text(model._meta.verbose_name_raw)}
+        content_type, created = orm['contenttypes.ContentType'].objects.get_or_create(app_label=app_label, model=model_name, defaults=defaults)
+        return content_type
+
     def forwards(self, orm):
         "Write your forwards methods here."
 
         # Copy Project old to new.
-        new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.Project._meta.app_label, model=orm.Project._meta.module_name)
+        new_ctype = self._get_content_type_for_model(orm, orm.Project)
         for project in orm.Project.objects.order_by('pk'):
             d = self._get_dict_from_common_model(project)
             d.update({
@@ -68,7 +76,7 @@ class Migration(DataMigration):
             new_project, created = orm.ProjectNew.objects.get_or_create(old_pk=project.pk, defaults=d)
 
         # Copy ProjectUpdate old to new.
-        new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.ProjectUpdate._meta.app_label, model=orm.ProjectUpdate._meta.module_name)
+        new_ctype = self._get_content_type_for_model(orm, orm.ProjectUpdate)
         for project_update in orm.ProjectUpdate.objects.order_by('pk'):
             project = project_update.project
             d = self._get_dict_from_common_task_model(project_update)
@@ -118,7 +126,7 @@ class Migration(DataMigration):
             permission.save()
 
         # Copy InventorySource old to new.
-        new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.InventorySource._meta.app_label, model=orm.InventorySource._meta.module_name)
+        new_ctype = self._get_content_type_for_model(orm, orm.InventorySource)
         for inventory_source in orm.InventorySource.objects.order_by('pk'):
             d = self._get_dict_from_common_model(inventory_source)
             d.update({
@@ -137,7 +145,7 @@ class Migration(DataMigration):
             new_inventory_source, created = orm.InventorySourceNew.objects.get_or_create(old_pk=inventory_source.pk, defaults=d)
 
         # Copy InventoryUpdate old to new.
-        new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.InventoryUpdate._meta.app_label, model=orm.InventoryUpdate._meta.module_name)
+        new_ctype = self._get_content_type_for_model(orm, orm.InventoryUpdate)
         for inventory_update in orm.InventoryUpdate.objects.order_by('pk'):
             inventory_source = inventory_update.inventory_source
             d = self._get_dict_from_common_task_model(inventory_update)
@@ -180,7 +188,7 @@ class Migration(DataMigration):
                 host.new_inventory_sources.add(new_inventory_source)
 
         # Copy JobTemplate old to new.
-        new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.JobTemplate._meta.app_label, model=orm.JobTemplate._meta.module_name)
+        new_ctype = self._get_content_type_for_model(orm, orm.JobTemplate)
         for job_template in orm.JobTemplate.objects.order_by('pk'):
             d = self._get_dict_from_common_model(job_template)
             d.update({
@@ -201,7 +209,7 @@ class Migration(DataMigration):
             new_job_template, created = orm.JobTemplateNew.objects.get_or_create(old_pk=job_template.pk, defaults=d)
 
         # Copy Job old to new.
-        new_ctype = orm['contenttypes.ContentType'].objects.get(app_label=orm.Job._meta.app_label, model=orm.Job._meta.module_name)
+        new_ctype = self._get_content_type_for_model(orm, orm.Job)
         for job in orm.Job.objects.order_by('pk'):
             d = self._get_dict_from_common_task_model(job)
             d.update({
