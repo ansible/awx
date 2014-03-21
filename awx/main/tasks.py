@@ -516,9 +516,8 @@ class RunProjectUpdate(BaseTask):
         '''
         Return SSH private key data needed for this project update.
         '''
-        project = project_update.project
-        if project.credential:
-            return decrypt_field(project.credential, 'ssh_key_data') or None
+        if project_update.credential:
+            return decrypt_field(project_update.credential, 'ssh_key_data') or None
 
     def build_passwords(self, project_update, **kwargs):
         '''
@@ -527,12 +526,11 @@ class RunProjectUpdate(BaseTask):
         '''
         passwords = super(RunProjectUpdate, self).build_passwords(project_update,
                                                                   **kwargs)
-        project = project_update.project
-        if project.credential:
-            passwords['scm_key_unlock'] = decrypt_field(project.credential,
+        if project_update.credential:
+            passwords['scm_key_unlock'] = decrypt_field(project_update.credential,
                                                         'ssh_key_unlock')
-            passwords['scm_username'] = project.credential.username
-            passwords['scm_password'] = decrypt_field(project.credential,
+            passwords['scm_username'] = project_update.credential.username
+            passwords['scm_password'] = decrypt_field(project_update.credential,
                                                      'password')
         return passwords
 
@@ -552,9 +550,8 @@ class RunProjectUpdate(BaseTask):
         for authentication.
         '''
         extra_vars = {}
-        project = project_update.project
-        scm_type = project.scm_type
-        scm_url = update_scm_url(scm_type, project.scm_url,
+        scm_type = project_update.scm_type
+        scm_url = update_scm_url(scm_type, project_update.scm_url,
                                  check_special_cases=False)
         scm_url_parts = urlparse.urlsplit(scm_url)
         scm_username = kwargs.get('passwords', {}).get('scm_username', '')
@@ -597,18 +594,16 @@ class RunProjectUpdate(BaseTask):
             args.append('-vvv')
         else:
             args.append('-v')
-        project = project_update.project
         scm_url, extra_vars = self._build_scm_url_extra_vars(project_update,
                                                              **kwargs)
-        scm_branch = project.scm_branch or {'hg': 'tip'}.get(project.scm_type, 'HEAD')
-        scm_delete_on_update = project.scm_delete_on_update or project.scm_delete_on_next_update
+        scm_branch = project_update.scm_branch or {'hg': 'tip'}.get(project_update.scm_type, 'HEAD')
         extra_vars.update({
-            'project_path': project.get_project_path(check_if_exists=False),
-            'scm_type': project.scm_type,
+            'project_path': project_update.get_project_path(check_if_exists=False),
+            'scm_type': project_update.scm_type,
             'scm_url': scm_url,
             'scm_branch': scm_branch,
-            'scm_clean': project.scm_clean,
-            'scm_delete_on_update': scm_delete_on_update,
+            'scm_clean': project_update.scm_clean,
+            'scm_delete_on_update': project_update.scm_delete_on_update,
         })
         args.extend(['-e', json.dumps(extra_vars)])
         args.append('project_update.yml')
@@ -652,8 +647,7 @@ class RunProjectUpdate(BaseTask):
                                                    **kwargs)[0]
         if after_url != before_url:
             output_replacements.append((before_url, after_url))
-        project = project_update.project
-        if project.scm_type == 'svn' and scm_username and scm_password:
+        if project_update.scm_type == 'svn' and scm_username and scm_password:
             d_before = {
                 'username': scm_username,
                 'password': scm_password,
@@ -719,14 +713,13 @@ class RunInventoryUpdate(BaseTask):
         '''
         Return private data needed for inventory update.
         '''
-        inventory_source = inventory_update.inventory_source
         cp = ConfigParser.ConfigParser()
         # Build custom ec2.ini for ec2 inventory script to use.
-        if inventory_source.source == 'ec2':
+        if inventory_update.source == 'ec2':
             section = 'ec2'
             cp.add_section(section)
-            ec2_opts = dict(inventory_source.source_vars_dict.items())
-            regions = inventory_source.source_regions or 'all'
+            ec2_opts = dict(inventory_update.source_vars_dict.items())
+            regions = inventory_update.source_regions or 'all'
             regions = ','.join([x.strip() for x in regions.split(',')])
             regions_blacklist = ','.join(settings.EC2_REGIONS_BLACKLIST)
             ec2_opts['regions'] = regions
@@ -739,10 +732,10 @@ class RunInventoryUpdate(BaseTask):
             for k,v in ec2_opts.items():
                 cp.set(section, k, str(v))
         # Build pyrax creds INI for rax inventory script.
-        elif inventory_source.source == 'rax':
+        elif inventory_update.source == 'rax':
             section = 'rackspace_cloud'
             cp.add_section(section)
-            credential = inventory_source.credential
+            credential = inventory_update.credential
             if credential:
                 cp.set(section, 'username', credential.username)
                 cp.set(section, 'api_key', decrypt_field(credential,
@@ -759,8 +752,7 @@ class RunInventoryUpdate(BaseTask):
         '''
         passwords = super(RunInventoryUpdate, self).build_passwords(inventory_update,
                                                                     **kwargs)
-        inventory_source = inventory_update.inventory_source
-        credential = inventory_source.credential
+        credential = inventory_update.credential
         if credential:
             passwords['source_username'] = credential.username
             passwords['source_password'] = decrypt_field(credential, 'password')
@@ -772,20 +764,19 @@ class RunInventoryUpdate(BaseTask):
         '''
         env = super(RunInventoryUpdate, self).build_env(inventory_update, **kwargs)
         # Pass inventory source ID to inventory script.
-        inventory_source = inventory_update.inventory_source
-        env['INVENTORY_SOURCE_ID'] = str(inventory_source.pk)
+        env['INVENTORY_SOURCE_ID'] = str(inventory_update.inventory_source_id)
         # Set environment variables specific to each source.
-        if inventory_source.source == 'ec2':
+        if inventory_update.source == 'ec2':
             env['AWS_ACCESS_KEY_ID'] = kwargs.get('passwords', {}).get('source_username', '')
             env['AWS_SECRET_ACCESS_KEY'] = kwargs.get('passwords', {}).get('source_password', '')
             env['EC2_INI_PATH'] = kwargs.get('private_data_file', '')
-        elif inventory_source.source == 'rax':
+        elif inventory_update.source == 'rax':
             env['RAX_CREDS_FILE'] = kwargs.get('private_data_file', '')
-            env['RAX_REGION'] = inventory_source.source_regions or 'all'
+            env['RAX_REGION'] = inventory_update.source_regions or 'all'
             # Set this environment variable so the vendored package won't
             # complain about not being able to determine its version number.
             env['PBR_VERSION'] = '0.5.21'
-        elif inventory_source.source == 'file':
+        elif inventory_update.source == 'file':
             # FIXME: Parse source_env to dict, update env.
             pass
         #print env
@@ -799,25 +790,25 @@ class RunInventoryUpdate(BaseTask):
         inventory = inventory_source.group.inventory
         args = ['awx-manage', 'inventory_import']
         args.extend(['--inventory-id', str(inventory.pk)])
-        if inventory_source.overwrite:
+        if inventory_update.overwrite:
             args.append('--overwrite')
-        if inventory_source.overwrite_vars:
+        if inventory_update.overwrite_vars:
             args.append('--overwrite-vars')
         args.append('--source')
-        if inventory_source.source == 'ec2':
+        if inventory_update.source == 'ec2':
             ec2_path = self.get_path_to('..', 'plugins', 'inventory', 'ec2.py')
             args.append(ec2_path)
             args.extend(['--enabled-var', 'ec2_state'])
             args.extend(['--enabled-value', 'running'])
             #args.extend(['--instance-id', 'ec2_id'])
-        elif inventory_source.source == 'rax':
+        elif inventory_update.source == 'rax':
             rax_path = self.get_path_to('..', 'plugins', 'inventory', 'rax.py')
             args.append(rax_path)
             args.extend(['--enabled-var', 'rax_status'])
             args.extend(['--enabled-value', 'ACTIVE'])
             #args.extend(['--instance-id', 'rax_id'])
-        elif inventory_source.source == 'file':
-            args.append(inventory_source.source_path)
+        elif inventory_update.source == 'file':
+            args.append(inventory_update.source_path)
         verbosity = getattr(settings, 'INVENTORY_UPDATE_VERBOSITY', 1)
         args.append('-v%d' % verbosity)
         if settings.DEBUG:

@@ -741,6 +741,8 @@ class InventorySourceOptions(BaseModel):
                                   ', '.join(invalid_regions)))
         return ','.join(regions)
 
+    source_vars_dict = VarsDictProperty('source_vars')
+
 
 class InventorySourceBase(InventorySourceOptions):
 
@@ -757,6 +759,15 @@ class InventorySourceBase(InventorySourceOptions):
 
 
 class InventorySourceBaseMethods(object):
+
+    @classmethod
+    def _get_unified_job_class(cls):
+        return InventoryUpdate
+
+    @classmethod
+    def _get_unified_job_field_names(cls):
+        return ['source', 'source_path', 'source_vars', 'credential',
+                'source_regions', 'overwrite', 'overwrite_vars']
 
     def save(self, *args, **kwargs):
         # If update_fields has been specified, add our field names to it,
@@ -775,8 +786,6 @@ class InventorySourceBaseMethods(object):
         # Do the actual save.
         super(InventorySourceBaseMethods, self).save(*args, **kwargs)
 
-    source_vars_dict = VarsDictProperty('source_vars')
-
     def get_absolute_url(self):
         return reverse('api:inventory_source_detail', args=(self.pk,))
 
@@ -784,15 +793,18 @@ class InventorySourceBaseMethods(object):
         # FIXME: Prevent update when another one is active!
         return bool(self.source)
 
+    def create_inventory_update(self, **kwargs):
+        return self._create_unified_job_instance(**kwargs)
+
     def update_signature(self, **kwargs):
         if self.can_update:
-            inventory_update = self.inventory_updates.create() # FIXME: Copy inventory source fields to update
+            inventory_update = self.create_inventory_update()
             inventory_update_sig = inventory_update.start_signature()
             return (inventory_update, inventory_update_sig)
 
     def update(self, **kwargs):
         if self.can_update:
-            inventory_update = self.inventory_updates.create() # FIXME: Copy inventory source fields to update
+            inventory_update = self.create_inventory_update()
             inventory_update.start()
             return inventory_update
 
@@ -928,6 +940,15 @@ class InventoryUpdateBase(InventorySourceOptions):
 
 class InventoryUpdateBaseMethods(object):
 
+    @classmethod
+    def _get_parent_field_name(cls):
+        return 'inventory_source'
+
+    @classmethod
+    def _get_task_class(cls):
+        from awx.main.tasks import RunInventoryUpdate
+        return RunInventoryUpdate
+
     def save(self, *args, **kwargs):
         update_fields = kwargs.get('update_fields', [])
         if bool('license' in self.result_stdout and
@@ -937,15 +958,8 @@ class InventoryUpdateBaseMethods(object):
                 update_fields.append('license_error')
         super(InventoryUpdateBaseMethods, self).save(*args, **kwargs)
         
-    def _get_parent_instance(self):
-        return self.inventory_source
-
     def get_absolute_url(self):
         return reverse('api:inventory_update_detail', args=(self.pk,))
-
-    def _get_task_class(self):
-        from awx.main.tasks import RunInventoryUpdate
-        return RunInventoryUpdate
 
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
