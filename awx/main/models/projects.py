@@ -151,6 +151,46 @@ class ProjectOptions(models.Model):
                 pass
         return cred
 
+    def get_project_path(self, check_if_exists=True):
+        local_path = os.path.basename(self.local_path)
+        if local_path and not local_path.startswith('.'):
+            proj_path = os.path.join(settings.PROJECTS_ROOT, local_path)
+            if not check_if_exists or os.path.exists(proj_path):
+                return proj_path
+
+    @property
+    def playbooks(self):
+        valid_re = re.compile(r'^\s*?-?\s*?(?:hosts|include):\s*?.*?$')
+        results = []
+        project_path = self.get_project_path()
+        if project_path:
+            for dirpath, dirnames, filenames in os.walk(project_path):
+                for filename in filenames:
+                    if os.path.splitext(filename)[-1] not in ['.yml', '.yaml']:
+                        continue
+                    playbook = os.path.join(dirpath, filename)
+                    # Filter files that do not have either hosts or top-level
+                    # includes. Use regex to allow files with invalid YAML to
+                    # show up.
+                    matched = False
+                    try:
+                        for line in file(playbook):
+                            if valid_re.match(line):
+                                matched = True
+                    except IOError:
+                        continue
+                    if not matched:
+                        continue
+                    playbook = os.path.relpath(playbook, project_path)
+                    # Filter files in a roles subdirectory.
+                    if 'roles' in playbook.split(os.sep):
+                        continue
+                    # Filter files in a tasks subdirectory.
+                    if 'tasks' in playbook.split(os.sep):
+                        continue
+                    results.append(playbook)
+        return results
+
 
 class ProjectBase(ProjectOptions):
     '''
@@ -177,6 +217,15 @@ class ProjectBase(ProjectOptions):
 
 
 class ProjectBaseMethods(object):
+
+    @classmethod
+    def _get_unified_job_class(cls):
+        return ProjectUpdate
+
+    @classmethod
+    def _get_unified_job_field_names(cls):
+        return ['local_path', 'scm_type', 'scm_url', 'scm_branch',
+                'scm_clean', 'scm_delete_on_update', 'credential']
 
     def save(self, *args, **kwargs):
         new_instance = not bool(self.pk)
@@ -243,15 +292,20 @@ class ProjectBaseMethods(object):
         # FIXME: Prevent update when another one is active!
         return bool(self.scm_type)# and not self.current_update)
 
+    def create_project_update(self, **kwargs):
+        if self.scm_delete_on_next_update:
+            kwargs['scm_delete_on_update'] = True
+        return self._create_unified_job_instance(**kwargs)
+
     def update_signature(self, **kwargs):
         if self.can_update:
-            project_update = self.project_updates.create() # FIXME: Copy options to ProjectUpdate
+            project_update = self.create_project_update()
             project_update_sig = project_update.start_signature()
             return (project_update, project_update_sig)
 
     def update(self, **kwargs):
         if self.can_update:
-            project_update = self.project_updates.create() # FIXME: Copy options to ProjectUpdate
+            project_update = self.create_project_update()
             if hasattr(settings, 'CELERY_UNIT_TEST'):
                 project_update.start(None, **kwargs)
             else:
@@ -260,46 +314,6 @@ class ProjectBaseMethods(object):
 
     def get_absolute_url(self):
         return reverse('api:project_detail', args=(self.pk,))
-
-    def get_project_path(self, check_if_exists=True):
-        local_path = os.path.basename(self.local_path)
-        if local_path and not local_path.startswith('.'):
-            proj_path = os.path.join(settings.PROJECTS_ROOT, local_path)
-            if not check_if_exists or os.path.exists(proj_path):
-                return proj_path
-
-    @property
-    def playbooks(self):
-        valid_re = re.compile(r'^\s*?-?\s*?(?:hosts|include):\s*?.*?$')
-        results = []
-        project_path = self.get_project_path()
-        if project_path:
-            for dirpath, dirnames, filenames in os.walk(project_path):
-                for filename in filenames:
-                    if os.path.splitext(filename)[-1] not in ['.yml', '.yaml']:
-                        continue
-                    playbook = os.path.join(dirpath, filename)
-                    # Filter files that do not have either hosts or top-level
-                    # includes. Use regex to allow files with invalid YAML to
-                    # show up.
-                    matched = False
-                    try:
-                        for line in file(playbook):
-                            if valid_re.match(line):
-                                matched = True
-                    except IOError:
-                        continue
-                    if not matched:
-                        continue
-                    playbook = os.path.relpath(playbook, project_path)
-                    # Filter files in a roles subdirectory.
-                    if 'roles' in playbook.split(os.sep):
-                        continue
-                    # Filter files in a tasks subdirectory.
-                    if 'tasks' in playbook.split(os.sep):
-                        continue
-                    results.append(playbook)
-        return results
 
 
 if getattr(settings, 'UNIFIED_JOBS_STEP') == 0:
@@ -383,13 +397,12 @@ class ProjectUpdateBase(ProjectOptions):
 
 class ProjectUpdateBaseMethods(object):
 
-    def _get_parent_instance(self):
-        return self.project
+    @classmethod
+    def _get_parent_field_name(cls):
+        return 'project'
 
-    def get_absolute_url(self):
-        return reverse('api:project_update_detail', args=(self.pk,))
-
-    def _get_task_class(self):
+    @classmethod
+    def _get_task_class(cls):
         from awx.main.tasks import RunProjectUpdate
         return RunProjectUpdate
 
@@ -419,6 +432,9 @@ class ProjectUpdateBaseMethods(object):
         self.save()
         # notify_task_runner.delay(dict(task_type="project_update", id=self.id, metadata=kwargs))
         return True
+
+    def get_absolute_url(self):
+        return reverse('api:project_update_detail', args=(self.pk,))
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()

@@ -147,27 +147,21 @@ class JobTemplateBase(JobOptions):
 
 class JobTemplateBaseMethods(object):
 
+    @classmethod
+    def _get_unified_job_class(cls):
+        return Job
+
+    @classmethod
+    def _get_unified_job_field_names(cls):
+        return ['job_type', 'inventory', 'project', 'playbook', 'credential',
+                'cloud_credential', 'forks', 'limit', 'verbosity',
+                'extra_vars', 'job_tags']
+
     def create_job(self, **kwargs):
         '''
         Create a new job based on this template.
         '''
-        save_job = kwargs.pop('save', True)
-        kwargs['job_template'] = self
-        kwargs.setdefault('job_type', self.job_type)
-        kwargs.setdefault('inventory', self.inventory)
-        kwargs.setdefault('project', self.project)
-        kwargs.setdefault('playbook', self.playbook)
-        kwargs.setdefault('credential', self.credential)
-        kwargs.setdefault('cloud_credential', self.cloud_credential)
-        kwargs.setdefault('forks', self.forks)
-        kwargs.setdefault('limit', self.limit)
-        kwargs.setdefault('verbosity', self.verbosity)
-        kwargs.setdefault('extra_vars', self.extra_vars)
-        kwargs.setdefault('job_tags', self.job_tags)
-        job = Job(**kwargs)
-        if save_job:
-            job.save()
-        return job
+        return self._create_unified_job_instance(**kwargs)
 
     def get_absolute_url(self):
         return reverse('api:job_template_detail', args=(self.pk,))
@@ -260,6 +254,15 @@ class JobBase(JobOptions):
 
 class JobBaseMethods(object):
 
+    @classmethod
+    def _get_parent_field_name(cls):
+        return 'job_template'
+
+    @classmethod
+    def _get_task_class(cls):
+        from awx.main.tasks import RunJob
+        return RunJob
+
     def get_absolute_url(self):
         return reverse('api:job_detail', args=(self.pk,))
 
@@ -281,10 +284,6 @@ class JobBaseMethods(object):
                 else:
                     needed.append(pw)
         return needed
-
-    def _get_task_class(self):
-        from awx.main.tasks import RunJob
-        return RunJob
 
     def _get_passwords_needed_to_start(self):
         return self.passwords_needed_to_start

@@ -79,10 +79,12 @@ class Migration(DataMigration):
         new_ctype = self._get_content_type_for_model(orm, orm.ProjectUpdate)
         for project_update in orm.ProjectUpdate.objects.order_by('pk'):
             project = project_update.project
+            new_project = orm.ProjectNew.objects.get(old_pk=project_update.project_id)
             d = self._get_dict_from_common_task_model(project_update)
             d.update({
                 'polymorphic_ctype_id': new_ctype.pk,
-                'project_id': orm.ProjectNew.objects.get(old_pk=project_update.project_id).pk,
+                'project_id': new_project.pk,
+                'unified_job_template_id': new_project.pk,
                 'local_path': project.local_path,
                 'scm_type': project.scm_type,
                 'scm_url': project.scm_url,
@@ -148,6 +150,7 @@ class Migration(DataMigration):
         new_ctype = self._get_content_type_for_model(orm, orm.InventoryUpdate)
         for inventory_update in orm.InventoryUpdate.objects.order_by('pk'):
             inventory_source = inventory_update.inventory_source
+            new_inventory_source = orm.InventorySourceNew.objects.get(old_pk=inventory_update.inventory_source_id)
             d = self._get_dict_from_common_task_model(inventory_update)
             d.update({
                 'polymorphic_ctype_id': new_ctype.pk,
@@ -158,7 +161,8 @@ class Migration(DataMigration):
                 'source_regions': inventory_source.source_regions,
                 'overwrite': inventory_source.overwrite,
                 'overwrite_vars': inventory_source.overwrite_vars,
-                'inventory_source_id': orm.InventorySourceNew.objects.get(old_pk=inventory_update.inventory_source_id).pk,
+                'inventory_source_id': new_inventory_source.pk,
+                'unified_job_template_id': new_inventory_source.pk,
                 'license_error': inventory_update.license_error,
             })
             new_inventory_update, created = orm.InventoryUpdateNew.objects.get_or_create(old_pk=inventory_update.pk, defaults=d)
@@ -227,7 +231,9 @@ class Migration(DataMigration):
             if job.project:
                 d['project_id'] = orm.ProjectNew.objects.get(old_pk=job.project_id).pk
             if job.job_template:
-                d['job_template_id'] = orm.JobTemplateNew.objects.get(old_pk=job.job_template_id).pk
+                new_job_template = orm.JobTemplateNew.objects.get(old_pk=job.job_template_id)
+                d['job_template_id'] = new_job_template.pk
+                d['unified_job_template_id'] = new_job_template.pk
             new_job, created = orm.JobNew.objects.get_or_create(old_pk=job.pk, defaults=d)
 
         # Update JobTemplate last run.

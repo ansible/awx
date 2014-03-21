@@ -182,11 +182,34 @@ class UnifiedJobTemplate(PolymorphicModel, CommonModelNameNotUnique):
     def update(self, **kwargs):
         raise NotImplementedError # Implement in subclass.
 
-    def _get_child_queryset(self):
-        pass
+    @classmethod
+    def _get_unified_job_class(cls):
+        raise NotImplementedError # Implement in subclass.
 
-    def _create_child_instance(self, **kwargs):
-        pass
+    @classmethod
+    def _get_unified_job_field_names(cls):
+        raise NotImplementedError # Implement in subclass.
+
+    def _create_unified_job_instance(self, **kwargs):
+        '''
+        Create a new unified job based on this unified job template.
+        '''
+        save_unified_job = kwargs.pop('save', True)
+        unified_job_class = self._get_unified_job_class()
+        parent_field_name = unified_job_class._get_parent_field_name()
+        kwargs.pop('%s_id' % parent_field_name, None)
+        kwargs[parent_field_name] = self
+        for field_name in self._get_unified_job_field_names():
+            if field_name in kwargs:
+                continue
+            # Foreign keys can be specified as field_name or field_name_id.
+            if hasattr(self, '%s_id' % field_name) and ('%s_id' % field_name) in kwargs:
+                continue
+            kwargs[field_name] = getattr(self, field_name)
+        unified_job = unified_job_class(**kwargs)
+        if save_unified_job:
+            unified_job.save()
+        return unified_job
 
 
 class UnifiedJob(PolymorphicModel, PrimordialModel):
@@ -306,11 +329,19 @@ class UnifiedJob(PolymorphicModel, PrimordialModel):
         editable=False,
     )
 
+    @classmethod
+    def _get_task_class(cls):
+        raise NotImplementedError # Implement in subclasses.
+    
+    @classmethod
+    def _get_parent_field_name(cls):
+        return 'unified_job_template' # Override in subclasses.
+
     def __unicode__(self):
         return u'%s-%s-%s' % (self.created, self.id, self.status)
 
     def _get_parent_instance(self):
-        return self.job_template
+        return getattr(self, self._get_parent_field_name())
 
     def _update_parent_instance(self):
         parent_instance = self._get_parent_instance()
@@ -360,6 +391,10 @@ class UnifiedJob(PolymorphicModel, PrimordialModel):
             self.elapsed = elapsed
             if 'elapsed' not in update_fields:
                 update_fields.append('elapsed')
+        if self.unified_job_template != self._get_parent_instance():
+            self.unified_job_template = self._get_parent_instance()
+            if 'unified_job_template' not in update_fields:
+                update_fields.append('unified_job_template')
         super(UnifiedJob, self).save(*args, **kwargs)
         # If status changed, update parent instance....
         if self.status != status_before:
@@ -395,9 +430,6 @@ class UnifiedJob(PolymorphicModel, PrimordialModel):
     @property
     def can_start(self):
         return bool(self.status == 'new')
-
-    def _get_task_class(self):
-        raise NotImplementedError
 
     def _get_passwords_needed_to_start(self):
         return []
