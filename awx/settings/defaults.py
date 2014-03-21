@@ -349,7 +349,7 @@ else:
 CALLBACK_CONSUMER_PORT = "tcp://127.0.0.1:5556"
 CALLBACK_QUEUE_PORT = "ipc:///tmp/callback_receiver.ipc"
 
-TASK_COMMAND_PORT = "ipc:///tmp/task_command_receiver.ipc"
+TASK_COMMAND_PORT = "tcp://127.0.0.1:6556"
 
 # Logging configuration.
 LOGGING = {
