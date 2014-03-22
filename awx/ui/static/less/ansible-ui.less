@@ -133,9 +133,6 @@ a:focus {
   a:hover {
     cursor: pointer;
   }
-  .cancel {
-    padding-right: 8px;
-  }
   .dropdown .caret {
     border-top-color: @blue;
   }
@@ -211,8 +208,20 @@ textarea {
   }
   .popover {
       z-index: 2000;
+      max-width: 325px;
   }
-
+  .popover-footer {
+      font-size: 12px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      text-align: right; 
+      .key {
+          color: @white;
+          background-color: @grey;
+          padding: 0 1px 1px 1px;
+          border-radius: 3px;
+      }
+  }
   .tooltip {
       z-index: 2050;
       opacity: 1.0;
@@ -1013,8 +1022,8 @@ input[type="checkbox"].checkbox-no-label {
           margin-bottom: 6px;
           color: @black;
       }
-      thead >tr >th, tbody >tr >td, .page-row {
-          font-size: 12.5px;
+      thead >tr >th, .page-row {
+          font-size: 12px;
           color: #666;
       }
       .pagination li a {

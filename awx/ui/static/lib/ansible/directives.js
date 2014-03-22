@@ -290,9 +290,9 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
             $(element).popover({ placement: placement, delay: 0, title: title,
                 content: attrs.awPopOver, trigger: 'manual', html: true, container: container });
             $(element).click(function() {
-                var me = $(this).attr('id');
+                var self = $(this).attr('id');
                 $('.help-link, .help-link-white').each( function() {
-                    if (me !== $(this).attr('id')) {
+                    if (self !== $(this).attr('id')) {
                         $(this).popover('hide');
                     }
                 });
@@ -311,6 +311,10 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
 
                 $('.popover').each(function() {
                     $compile($(this))(scope);  //make nested directives work!
+                });
+
+                $('.popover-content, .popover-title').click(function() {
+                    $('#' + self).popover('hide');
                 });
 
             });

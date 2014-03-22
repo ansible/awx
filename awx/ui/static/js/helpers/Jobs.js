@@ -165,10 +165,11 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
  *  Called from JobsList controller to load each section or list on the page
  *
  */
-.factory('LoadScope', ['SearchInit', 'PaginateInit', 'GenerateList', 'PageRangeSetup', 'Wait', 'ProcessErrors', 'Rest',
-    function(SearchInit, PaginateInit, GenerateList, PageRangeSetup, Wait, ProcessErrors, Rest) {
+.factory('LoadScope', ['SearchInit', 'PaginateInit', 'GenerateList', 'PageRangeSetup', 'ProcessErrors', 'Rest',
+    function(SearchInit, PaginateInit, GenerateList, PageRangeSetup, ProcessErrors, Rest) {
     return function(params) {
-        var scope = params.scope,
+        var parent_scope = params.parent_scope,
+            scope = params.scope,
             list = params.list,
             id = params.id,
             url = params.url;
@@ -218,7 +219,19 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
             }
             scope[list.name] = data.results;
             window.scrollTo(0, 0);
-            Wait('stop');
+
+            if (list.fields.type) {
+                scope[list.name].forEach(function(item, item_idx) {
+                    parent_scope.type_choices.every(function(choice) {
+                        if (choice.value === item.type) {
+                            scope[list.name][item_idx].type = choice.label;
+                            return false;
+                        }
+                        return true;
+                    });
+                });
+            }
+            parent_scope.$emit('listLoaded');
         });
 
         Rest.setUrl(url);

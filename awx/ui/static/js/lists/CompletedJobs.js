@@ -21,31 +21,28 @@ angular.module('CompletedJobsDefinition', [])
         fields: {
             id: {
                 label: 'Job ID',
+                linkTo: '/#/jobs/{{ completed_job.id }}',
                 key: true,
                 desc: true,
                 searchType: 'int',
                 columnClass: 'col-lg-1 col-md-2 col-sm-2 col-xs-2'
             },
-            inventory: {
-                label: 'Inventory ID',
-                searchType: 'int',
-                searchOnly: true
-            },
-            created: {
-                label: 'Create On',
+            modified: {
+                label: 'Completed On',
                 link: false,
                 searchable: false,
                 filter: "date:'MM/dd/yy HH:mm:ss'",
-                columnClass: "hidden-sm hidden-xs"
+                columnClass: "col-md-2 hidden-xs"
             },
-            job_template: {
-                label: 'Job Template',
-                ngBind: 'completed_job.summary_fields.job_template.name',
-                //ngHref: "{{ '/#/job_templates/?name=' + completed_job.summary_fields.job_template.name }}",
-                ngHref:"{{ '/#/job_templates/' + completed_job.job_template }}",
-                sourceModel: 'job_template',
-                sourceField: 'name',
-                columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-3'
+            type: {
+                label: 'Type',
+                link: false,
+                columnClass: "col-md-2 hidden-sm hidden-xs"
+            },
+            name: {
+                label: 'Name',
+                columnClass: 'col-sm-4 col-xs-5',
+                ngHref: 'nameHref'
             },
             failed: {
                 label: 'Job failed?',
@@ -54,29 +51,6 @@ angular.module('CompletedJobsDefinition', [])
                 searchValue: 'true',
                 searchOnly: true,
                 nosort: true
-            },
-            status: {
-                label: 'Status',
-                "class": 'job-{{ completed_job.status }}',
-                searchType: 'select',
-                linkTo: "{{ completed_job.statusLinkTo }}",
-                searchOptions: [
-                    { name: "new", value: "new" },
-                    { name: "waiting", value: "waiting" },
-                    { name: "pending", value: "pending" },
-                    { name: "running", value: "running" },
-                    { name: "successful", value: "successful" },
-                    { name: "error", value: "error" },
-                    { name: "failed", value: "failed" },
-                    { name: "canceled", value: "canceled" }
-                ],
-                badgeIcon: 'fa icon-job-{{ completed_job.status }}',
-                badgePlacement: 'left',
-                badgeToolTip: "{{ completed_job.statusBadgeToolTip }}",
-                badgeTipPlacement: 'top',
-                badgeNgHref: "{{ completed_job.statusLinkTo }}",
-                awToolTip: "{{ completed_job.statusBadgeToolTip }}",
-                dataPlacement: 'top'
             }
         },
         
@@ -89,16 +63,40 @@ angular.module('CompletedJobsDefinition', [])
         },
 
         fieldActions: {
+            status: {
+                mode: 'all',
+                //"class": 'job-{{ completed_job.status }}',
+                //searchType: 'select',
+                //linkTo: "{{ completed_job.statusLinkTo }}",
+                //searchOptions: [
+                //    { name: "new", value: "new" },
+                //    { name: "waiting", value: "waiting" },
+                //    { name: "pending", value: "pending" },
+                //    { name: "running", value: "running" },
+                //    { name: "successful", value: "successful" },
+                //    { name: "error", value: "error" },
+                //    { name: "failed", value: "failed" },
+                //    { name: "canceled", value: "canceled" }
+                //],
+                iconClass: 'fa icon-job-{{ completed_job.status }}',
+                awToolTip: "{{ completed_job.statusToolTip }}",
+                dataPlacement: 'top'
+                //badgeIcon: 'fa icon-job-{{ completed_job.status }}',
+                //badgePlacement: 'left',
+                //badgeToolTip: "{{ completed_job.statusBadgeToolTip }}",
+                //badgeTipPlacement: 'top',
+                //badgeNgHref: "{{ completed_job.statusLinkTo }}",
+                //awToolTip: "{{ completed_job.statusBadgeToolTip }}",
+                //dataPlacement: 'top'
+            },
             submit: {
-                label: 'Relaunch',
                 icon: 'icon-rocket',
                 mode: 'all',
                 ngClick: 'submitJob(completed_job.id, completed_job.summary_fields.job_template.name)',
-                awToolTip: 'Start the job',
+                awToolTip: 'Relaunch the job',
                 dataPlacement: 'top'
             },
             cancel: {
-                label: 'Stop',
                 mode: 'all',
                 ngClick: 'deleteJob(completed_job.id)',
                 awToolTip: 'Cancel a running or pending job',
@@ -106,7 +104,6 @@ angular.module('CompletedJobsDefinition', [])
                 dataPlacement: 'top'
             },
             "delete": {
-                label: 'Delete',
                 mode: 'all',
                 ngClick: 'deleteJob(completed_job.id)',
                 awToolTip: 'Delete the job',

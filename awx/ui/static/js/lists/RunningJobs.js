@@ -31,21 +31,22 @@ angular.module('RunningJobsDefinition', [])
                 searchType: 'int',
                 searchOnly: true
             },
-            created: {
-                label: 'Create On',
+            modified: {
+                label: 'Last Updated',
                 link: false,
                 searchable: false,
                 filter: "date:'MM/dd/yy HH:mm:ss'",
-                columnClass: 'hidden-sm hidden-xs'
+                columnClass: "col-md-2 hidden-xs"
             },
-            job_template: {
-                label: 'Job Template',
-                ngBind: 'running_job.summary_fields.job_template.name',
-                //ngHref: "{{ '/#/job_templates/?name=' + running_job.summary_fields.job_template.name }}",
-                ngHref:"{{ '/#/job_templates/' + running_job.job_template }}",
-                sourceModel: 'job_template',
-                sourceField: 'name',
-                columnClass: 'col-lg-4 col-md-4 col-sm-4 col-xs-3'
+            type: {
+                label: 'Type',
+                link: false,
+                columnClass: "col-md-2 hidden-sm hidden-xs"
+            },
+            name: {
+                label: 'Name',
+                columnClass: 'col-sm-4 col-xs-5',
+                ngHref: 'nameHref'
             },
             failed: {
                 label: 'Job failed?',
@@ -54,29 +55,6 @@ angular.module('RunningJobsDefinition', [])
                 searchValue: 'true',
                 searchOnly: true,
                 nosort: true
-            },
-            status: {
-                label: 'Status',
-                "class": 'job-{{ running_job.status }}',
-                searchType: 'select',
-                linkTo: "{{ running_job.statusLinkTo }}",
-                searchOptions: [
-                    { name: "new", value: "new" },
-                    { name: "waiting", value: "waiting" },
-                    { name: "pending", value: "pending" },
-                    { name: "running", value: "running" },
-                    { name: "successful", value: "successful" },
-                    { name: "error", value: "error" },
-                    { name: "failed", value: "failed" },
-                    { name: "canceled", value: "canceled" }
-                ],
-                badgeIcon: 'fa icon-job-{{ running_job.status }}',
-                badgePlacement: 'left',
-                badgeToolTip: "{{ running_job.statusBadgeToolTip }}",
-                badgeTipPlacement: 'top',
-                badgeNgHref: "{{ running_job.statusLinkTo }}",
-                awToolTip: "{{ running_job.statusBadgeToolTip }}",
-                dataPlacement: 'top'
             }
         },
         
@@ -89,24 +67,27 @@ angular.module('RunningJobsDefinition', [])
         },
 
         fieldActions: {
+            status: {
+                mode: 'all',
+                iconClass: 'fa icon-job-{{ running_job.status }}',
+                awToolTip: "{{ running_job.statusToolTip }}",
+                dataPlacement: 'top'
+            },
             submit: {
-                label: 'Relaunch',
                 icon: 'icon-rocket',
                 mode: 'all',
                 ngClick: 'submitJob(running_job.id, running_job.summary_fields.job_template.name)',
-                awToolTip: 'Start the job',
+                awToolTip: 'Launch another instance of the job',
                 dataPlacement: 'top'
             },
             cancel: {
-                label: 'Stop',
                 mode: 'all',
                 ngClick: 'deleteJob(running_job.id)',
-                awToolTip: 'Cancel a running or pending job',
+                awToolTip: 'Cancel the job',
                 ngShow: "running_job.status == 'pending' || running_job.status == 'running' || running_job.status == 'waiting'",
                 dataPlacement: 'top'
             },
             "delete": {
-                label: 'Delete',
                 mode: 'all',
                 ngClick: 'deleteJob(running_job.id)',
                 awToolTip: 'Delete the job',

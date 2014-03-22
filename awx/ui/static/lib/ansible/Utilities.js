@@ -557,6 +557,14 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
 /* 
  * Make an Options call to the API and retrieve dropdown options
  *
+ * GetChoices({
+ *     scope:       Parent $scope
+ *     url:         API resource to access   
+ *     field:       API element in the response object that contains the option list.
+ *     variable:    Scope variable that will receive the list.
+ *     callback:    Optional. Will issue scope.$emit(callback) on completion.
+ *     choice_name: Optional. Used when list is found in a variable other than 'choices'. 
+ * })
  */
 .factory('GetChoices', ['Rest', 'ProcessErrors',
     function (Rest, ProcessErrors) {
@@ -565,8 +573,8 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
                 url = params.url,
                 field = params.field,
                 variable = params.variable,
-                callback = params.callback, // Optional. Provide if you want scop.$emit on completion. 
-                choice_name = params.choice_name; // Optional. Used when data is in something other than 'choices'
+                callback = params.callback,
+                choice_name = params.choice_name;
 
             if (scope[variable]) {
                 scope[variable].length = 0;
@@ -577,16 +585,16 @@ angular.module('Utilities', ['RestServices', 'Utilities'])
             Rest.setUrl(url);
             Rest.options()
                 .success(function (data) {
-                    var choices, i;
+                    var choices;
                     choices = (choice_name) ? data.actions.GET[field][choice_name] : data.actions.GET[field].choices;
                     // including 'name' property so list can be used by search
-                    for (i = 0; i < choices.length; i++) {
+                    choices.forEach(function(choice) {
                         scope[variable].push({
-                            label: choices[i][1],
-                            value: choices[i][0],
-                            name: choices[i][1]
+                            label: choice[1],
+                            value: choice[0],
+                            name: choice[1]
                         });
-                    }
+                    });
                     if (callback) {
                         scope.$emit(callback);
                     }
