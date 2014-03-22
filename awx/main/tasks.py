@@ -51,6 +51,14 @@ logger = logging.getLogger('awx.main.tasks')
 
 # FIXME: Cleanly cancel task when celery worker is stopped.
 
+@task()
+def notify_task_runner(metadata_dict):
+    time.sleep(1)
+    signal_context = zmq.Context()
+    signal_socket = signal_context.socket(zmq.PUSH)
+    signal_socket.connect(settings.TASK_COMMAND_PORT)
+    signal_socket.send_json(metadata_dict)
+
 @task(bind=True)
 def handle_work_error(self, task_id, subtasks=None):
     print('Executing error task id %s, subtasks: %s' % (str(self.request.id), str(subtasks)))
@@ -124,11 +132,7 @@ class BaseTask(Task):
                          self.model._meta.object_name, retry_count)
 
     def signal_finished(self, pk):
-        signal_context = zmq.Context()
-        signal_socket = signal_context.socket(zmq.REQ)
-        signal_socket.connect(settings.TASK_COMMAND_PORT)
-        signal_socket.send_json(dict(complete=pk))
-        signal_socket.recv()
+        notify_task_runner(dict(complete=pk))
 
     def get_model(self, pk):
         return self.model.objects.get(pk=pk)

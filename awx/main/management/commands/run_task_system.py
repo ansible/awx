@@ -142,6 +142,10 @@ def get_tasks():
 def rebuild_graph(message):
     ''' Regenerate the task graph by refreshing known tasks from Tower, purging orphaned running tasks,
     and creatingdependencies for new tasks before generating directed edge relationships between those tasks '''
+    all_sorted_tasks = get_tasks()
+    if not len(all_sorted_tasks):
+        return None
+
     inspector = inspect()
     if not hasattr(settings, 'IGNORE_CELERY_INSPECTOR'):
         active_task_queues = inspector.active()
@@ -159,9 +163,6 @@ def rebuild_graph(message):
         # TODO: Something needs to be done here to signal to the system as a whole that celery appears to be down
         if not hasattr(settings, 'CELERY_UNIT_TEST'):
             return None
-    all_sorted_tasks = get_tasks()
-    if not len(all_sorted_tasks):
-        return None
     running_tasks = filter(lambda t: t.status == 'running', all_sorted_tasks)
     waiting_tasks = filter(lambda t: t.status != 'running', all_sorted_tasks)
     new_tasks = filter(lambda t: t.status == 'new', all_sorted_tasks)
@@ -264,7 +265,7 @@ def run_taskmanager(command_port):
             command_socket.send("1")
         except zmq.ZMQError,e:
             message = None
-        if message is not None or (datetime.datetime.now() - last_rebuild).seconds > 60:
+        if message is not None or (datetime.datetime.now() - last_rebuild).seconds > 10:
             if message is not None and 'pause' in message:
                 print("Pause command received: %s" % str(message))
                 paused = message['pause']

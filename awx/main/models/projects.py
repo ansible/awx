@@ -380,6 +380,7 @@ class ProjectUpdate(CommonTask):
         return 20
 
     def signal_start(self, **kwargs):
+        from awx.main.tasks import notify_task_runner
         if not self.can_start:
             return False
         needed = self._get_passwords_needed_to_start()
@@ -392,11 +393,7 @@ class ProjectUpdate(CommonTask):
         self.save()
         self.start_args = encrypt_field(self, 'start_args')
         self.save()
-        signal_context = zmq.Context()
-        signal_socket = signal_context.socket(zmq.REQ)
-        signal_socket.connect(settings.TASK_COMMAND_PORT)
-        signal_socket.send_json(dict(task_type="project_update", id=self.id, metadata=kwargs))
-        signal_socket.recv()
+        notify_task_runner.delay(dict(task_type="project_update", id=self.id, metadata=kwargs))
         return True
 
     def _update_parent_instance(self):

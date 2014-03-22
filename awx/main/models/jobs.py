@@ -385,6 +385,7 @@ class Job(CommonTask):
         return dependencies
 
     def signal_start(self, **kwargs):
+        from awx.main.tasks import notify_task_runner
         if hasattr(settings, 'CELERY_UNIT_TEST'):
             return self.start(None, **kwargs)
         if not self.can_start:
@@ -399,11 +400,7 @@ class Job(CommonTask):
         self.save()
         self.start_args = encrypt_field(self, 'start_args')
         self.save()
-        signal_context = zmq.Context()
-        signal_socket = signal_context.socket(zmq.REQ)
-        signal_socket.connect(settings.TASK_COMMAND_PORT)
-        signal_socket.send_json(dict(task_type="ansible_playbook", id=self.id))
-        signal_socket.recv()
+        notify_task_runner.delay(dict(task_type="ansible_playbook", id=self.id))
         return True
 
     def start(self, error_callback, **kwargs):
