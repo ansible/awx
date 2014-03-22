@@ -88,7 +88,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                             return -1 * (a - b);
                         });
                     title = "Recent Jobs";
-                    html = "<table class=\"table table-condensed host-flyout\" style=\"width: 100%\">\n";
+                    html = "<table class=\"table table-condensed flyout\" style=\"width: 100%\">\n";
                     html += "<thead>\n";
                     html += "<tr>\n";
                     html += "<th>ID</td>\n";
@@ -106,7 +106,7 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                             "aw-tool-tip=\"" + job.status.charAt(0).toUpperCase() + job.status.slice(1) +
                             ". Click for details\" data-placement=\"top\"><i class=\"fa icon-job-" +
                             job.status + "\"></i></a></td>\n";
-                        html += "<td><a href=\"/#/jobs/" + job.id + "/job_events/?host=" + encodeURI(host.name) + "\">Events</a> " +
+                        html += "<td><a href=\"/#/jobs/" + job.id + "/job_events/?host=" + encodeURI(host.name) + "\">Events</a><br />" +
                             "<a href=\"/#/jobs/" + job.id + "/job_host_summaries/?host_name=" + encodeURI(host.name) + "\">Hosts</a></td>\n";
                         html += "<td class=\"break\">" + ellipsis(job.name) + "</td>\n";
                         html += "</tr>\n";

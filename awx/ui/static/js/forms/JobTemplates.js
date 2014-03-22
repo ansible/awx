@@ -223,10 +223,10 @@ angular.module('JobTemplateFormDefinition', [])
                 column: 2,
                 awPopOver: "<p>Create a callback URL a host can use to contact Tower and request a configuration update " +
                     "using the job template.  The URL will look like the following:</p>\n" +
-                    "<p class=\"code-breakable\">http://your.server.com:999/api/v1/job_templates/1/callback/</p>" +
+                    "<pre>http://your.server.com:999/api/v1/job_templates/1/callback/</pre>" +
                     "<p>The request from the host must be a POST. Here is an example using curl:</p>\n" +
-                    "<p class=\"code-breakable\">curl --data \"host_config_key=5a8ec154832b780b9bdef1061764ae5a\" " +
-                    "http://your.server.com:999/api/v1/job_templates/1/callback/</p>\n" +
+                    "<pre>curl --data \"host_config_key=5a8ec154832b780b9bdef1061764ae5a\" " +
+                    "http://your.server.com:999/api/v1/job_templates/1/callback/</pre>\n" +
                     "<p>Note the requesting host must be defined in your inventory. If ansible fails to locate the host either by name or IP address " +
                     "in one of your defined inventories, the request will be denied.</p>" +
                     "<p>Successful requests will result in an entry on the Jobs tab, where the results and history can be viewed.</p>",
@@ -243,11 +243,10 @@ angular.module('JobTemplateFormDefinition', [])
                 ngShow: "allow_callbacks",
                 column: 2,
                 required: false,
-                'class': 'span12',
                 awPopOver: "<p>Using this URL a host can contact Tower and request a configuration update using the job " +
                     "template. The request from the host must be a POST. Here is an example using curl:</p>\n" +
-                    "<p class=\"code-breakable\">curl --data \"host_config_key=5a8ec154832b780b9bdef1061764ae5a\" " +
-                    "http://your.server.com:999/api/v1/job_templates/1/callback/</p>\n" +
+                    "<pre>curl --data \"host_config_key=5a8ec154832b780b9bdef1061764ae5a\" " +
+                    "http://your.server.com:999/api/v1/job_templates/1/callback/</pre>\n" +
                     "<p>Note the requesting host must be defined in your inventory. If ansible fails to locate the host either by name or IP address " +
                     "in one of your defined inventories, the request will be denied.</p>" +
                     "<p>Successful requests will result in an entry on the Jobs tab, where the results and history can be viewed.</p>",
@@ -263,9 +262,10 @@ angular.module('JobTemplateFormDefinition', [])
                 column: 2,
                 awPopOver: "<p>When contacting the Tower server using the callback URL, the calling host must authenticate by including " +
                     "this key in the POST data of the request. Here's an example using curl:</p>\n" +
-                    "<p class=\"code-breakable\">curl --data \"host_config_key=5a8ec154832b780b9bdef1061764ae5a\" " +
-                    "http://your.server.com:999/api/v1/job_templates/1/callback/</p>\n",
+                    "<pre>curl --data \"host_config_key=5a8ec154832b780b9bdef1061764ae5a\" " +
+                    "http://your.server.com:999/api/v1/job_templates/1/callback/</pre>\n",
                 dataPlacement: 'right',
+                dataTitle: "Host Config Key",
                 dataContainer: "body"
             }
         },

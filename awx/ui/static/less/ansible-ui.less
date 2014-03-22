@@ -73,6 +73,10 @@ body.modal-open {
     text-overflow: ellipsis;
 }
 
+blockquote {
+    font-size: 14px;
+}
+
 .group-name {
     display: inline-block;
     width: 85%;
@@ -203,8 +207,18 @@ textarea {
 }
 
 /* TB tooltip overrides */
-  .popover-content, .popover-content {
+  .popover-content {
       width: 100%;
+  }
+  h3.popover-title, .popover-content, .popover-content blockquote {
+      font-size: 12px;
+  }
+  .flyout thead> tr> th, .flyout tbody> tr> td {
+      font-size: 12px; 
+  }
+  .popover-title {
+      padding-top: 5px;
+      padding-bottom: 5px;
   }
   .popover {
       z-index: 2000;

@@ -38,7 +38,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                 break;
             case 'awPopOver':
                 // construct the entire help link
-                result = "<a id=\"awp-" + fld + "\" href=\"\" aw-pop-over=\'" + value + "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to exit</div>\' ";
+                result = "<a id=\"awp-" + fld + "\" href=\"\" aw-pop-over=\'" + value + "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\' ";
                 result += (obj.dataPlacement) ? "data-placement=\"" + obj.dataPlacement + "\" " : "";
                 result += (obj.dataContainer) ? "data-container=\"" + obj.dataContainer + "\" " : "";
                 result += (obj.dataTitle) ? "data-title=\"" + obj.dataTitle + "\" " : "";
