@@ -370,7 +370,7 @@ class CommonTask(PrimordialModel):
 
     @property
     def can_start(self):
-        return bool(self.status in ('new', 'waiting'))
+        return bool(self.status == 'new')
 
     @property
     def task_impact(self):
