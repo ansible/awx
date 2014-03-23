@@ -42,13 +42,7 @@ angular.module('JobFormDefinition', [])
         fields: {
             status: {
                 type: 'custom',
-                control: "<div class=\"job-detail-status\"><span style=\"padding-right: 15px; font-weight: bold;\">Status</span> " +
-                    "<i class=\"fa icon-job-{{ status }}\"></i> {{ status }}</div>",
-                readonly: true
-            },
-            created: {
-                label: 'Created On',
-                type: 'text',
+                control: "<i class=\"fa icon-job-{{ status }}\"></i> &nbsp;{{ job_explanation }}",
                 readonly: true
             },
             result_stdout: {
@@ -57,7 +51,7 @@ angular.module('JobFormDefinition', [])
                 readonly: true,
                 xtraWide: true,
                 rows: "{{ stdout_rows }}",
-                "class": 'nowrap mono-space',
+                "class": 'nowrap mono-space allowresize',
                 ngShow: "result_stdout != ''"
             },
             result_traceback: {
@@ -66,8 +60,28 @@ angular.module('JobFormDefinition', [])
                 xtraWide: true,
                 readonly: true,
                 rows: "{{ traceback_rows }}",
-                "class": 'nowrap mono-space',
+                "class": 'nowrap mono-space allowresize',
                 ngShow: "result_traceback != ''"
+            },
+            type: {
+                label: 'Job Type',
+                type: 'text',
+                readonly: true
+            },
+            launch_type: {
+                label: 'Launch Type',
+                type: 'text',
+                readonly: true
+            },
+            created: {
+                label: 'Created On',
+                type: 'text',
+                readonly: true
+            },
+            modified: {
+                label: 'Last Updated',
+                type: 'text',
+                readonly: true
             }
         },
 
@@ -95,4 +109,5 @@ angular.module('JobFormDefinition', [])
                 fields: { }
             }
         }
+
     });

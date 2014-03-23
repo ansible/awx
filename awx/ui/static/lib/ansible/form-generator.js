@@ -1308,16 +1308,13 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
 
                 if (this.form.collapse && this.form.collapseMode === options.mode) {
                     html += "</div>\n";
-                    //html += "</div>\n";
                 }
             
-
                 if ((!this.modal) && options.related && this.form.related) {
                     html += this.buildCollections(options);
                 }
 
                 return html;
-
             },
 
             buildCollections: function (options) {
@@ -1339,7 +1336,7 @@ angular.module('FormGenerator', ['GeneratorHelpers', 'ngCookies', 'Utilities'])
                 
                 for (itm in form.related) {
                     if (form.related[itm].type === 'collection') {
-                        html += "<h3 class=\"" + itm + "_collapse\">" + form.related[itm].title + "<h3>\n";
+                        html += "<h3 class=\"" + itm + "_collapse\">" + form.related[itm].title + "</h3>\n";
                         html += "<div>\n";
 
                         if (form.related[itm].instructions) {

@@ -158,6 +158,10 @@ textarea {
   resize: none;
 }
 
+textarea.allowresize {
+  resize: both;
+}
+
 /* Working... spinner */
 .spinny {
   display: none;
@@ -210,7 +214,7 @@ textarea {
   .popover-content {
       width: 100%;
   }
-  h3.popover-title, .popover-content, .popover-content blockquote {
+  h3.popover-title, .popover-content, .popover-content blockquote, .popover-content a {
       font-size: 12px;
   }
   .flyout thead> tr> th, .flyout tbody> tr> td, .flyout tbody> tr> td> a {
@@ -1164,7 +1168,6 @@ input[type="checkbox"].checkbox-no-label {
     display: inline-block;
     margin-top: 5px;
     font-size: 15px;
-    font-weight: bold;
   }
 
   /*.form-items .search-widget {

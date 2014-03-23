@@ -220,8 +220,9 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
             scope[list.name] = data.results;
             window.scrollTo(0, 0);
 
-            if (list.fields.type) {
-                scope[list.name].forEach(function(item, item_idx) {
+            scope[list.name].forEach(function(item, item_idx) {
+                // Set the item type label
+                if (list.fields.type) {
                     parent_scope.type_choices.every(function(choice) {
                         if (choice.value === item.type) {
                             scope[list.name][item_idx].type = choice.label;
@@ -229,8 +230,26 @@ angular.module('JobsHelper', ['Utilities', 'FormGenerator', 'JobSummaryDefinitio
                         }
                         return true;
                     });
+                }
+                // Set the job status label
+                parent_scope.status_choices.every(function(status) {
+                    if (status.value === item.status) {
+                        scope[list.name][item_idx].status_label = status.label;
+                        return false;
+                    }
+                    return true;
                 });
-            }
+                if (list.name === 'completed_jobs' || list.name === 'running_jobs') {
+                    scope[list.name][item_idx].status_tip = scope[list.name][item_idx].status_label + '. Click for details.';
+                }
+                else {
+                    scope[list.name][item_idx].status_tip = 'Pending';
+                }
+                scope[list.name][item_idx].status_popover_title = scope[list.name][item_idx].status_label;
+                scope[list.name][item_idx].status_popover = "<p>" + scope[list.name][item_idx].job_explanation + "</p>\n";
+                scope[list.name][item_idx].status_popover += "<p><a href=\"/#/jobs/" + scope[list.name][item_idx].id + "\">More...</a></p>\n";
+            });
+
             parent_scope.$emit('listLoaded');
         });
 

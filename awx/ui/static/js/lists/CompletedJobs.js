@@ -65,29 +65,12 @@ angular.module('CompletedJobsDefinition', [])
         fieldActions: {
             status: {
                 mode: 'all',
-                //"class": 'job-{{ completed_job.status }}',
-                //searchType: 'select',
-                //linkTo: "{{ completed_job.statusLinkTo }}",
-                //searchOptions: [
-                //    { name: "new", value: "new" },
-                //    { name: "waiting", value: "waiting" },
-                //    { name: "pending", value: "pending" },
-                //    { name: "running", value: "running" },
-                //    { name: "successful", value: "successful" },
-                //    { name: "error", value: "error" },
-                //    { name: "failed", value: "failed" },
-                //    { name: "canceled", value: "canceled" }
-                //],
+                awToolTip: "{{ completed_job.status_tip }}",
+                awTipPlacement: "top",
+                dataTitle: "{{ completed_job.status_popover_title }}",
                 iconClass: 'fa icon-job-{{ completed_job.status }}',
-                awToolTip: "{{ completed_job.statusToolTip }}",
-                dataPlacement: 'top'
-                //badgeIcon: 'fa icon-job-{{ completed_job.status }}',
-                //badgePlacement: 'left',
-                //badgeToolTip: "{{ completed_job.statusBadgeToolTip }}",
-                //badgeTipPlacement: 'top',
-                //badgeNgHref: "{{ completed_job.statusLinkTo }}",
-                //awToolTip: "{{ completed_job.statusBadgeToolTip }}",
-                //dataPlacement: 'top'
+                awPopOver: "{{ completed_job.status_popover }}",
+                dataPlacement: 'left'
             },
             submit: {
                 icon: 'icon-rocket',

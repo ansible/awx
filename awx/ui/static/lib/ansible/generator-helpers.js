@@ -42,6 +42,7 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
                 result += (obj.dataPlacement) ? "data-placement=\"" + obj.dataPlacement + "\" " : "";
                 result += (obj.dataContainer) ? "data-container=\"" + obj.dataContainer + "\" " : "";
                 result += (obj.dataTitle) ? "data-title=\"" + obj.dataTitle + "\" " : "";
+                result += (obj.dataTrigger) ? "data-trigger=\"" + obj.dataTrigger + "\" " : "";
                 result += "class=\"help-link\" ";
                 result += "><i class=\"fa fa-question-circle\"></i></a> ";
                 break;
@@ -271,7 +272,8 @@ angular.module('GeneratorHelpers', ['GeneratorHelpers'])
             html += "<ul class=\"dropdown-menu pull-right\" role=\"menu\" aria-labelledby=\"dropdownMenu1\">\n";
             for (i = 0; i < field.options.length; i++) {
                 html += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" ";
-                html += "ng-click=\"" + field.options[i].ngClick + "\" ";
+                html += (field.options[i].ngClick) ? "ng-click=\"" + field.options[i].ngClick + "\" " : "";
+                html += (field.options[i].ngHref) ? "ng-href=\"" + field.options[i].ngHref + "\" " : "";
                 html += (field.options[i].ngShow) ? "ng-show=\"" + field.options[i].ngShow + "\" " : "";
                 html += (field.options[i].ngHide) ? "ng-hide=\"" + field.options[i].ngHide + "\" " : "";
                 html += "href=\"\">" + field.options[i].label + "</a></li>\n";
