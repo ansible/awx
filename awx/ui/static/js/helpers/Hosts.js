@@ -113,10 +113,12 @@ angular.module('HostsHelper', [ 'RestServices', 'Utilities', 'ListGenerator', 'H
                     }
                     html += "</tbody>\n";
                     html += "</table>\n";
+                    html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
                 }
                 else {
                     title = 'No job data';
                     html = '<p>No recent job data available for this host.</p>';
+                    html += "<div class=\"popover-footer\"><span class=\"key\">esc</span> or click to close</div>\n";
                 }
             }
             else if (host.has_active_failures === false && host.last_job === null) {

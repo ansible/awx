@@ -316,7 +316,6 @@ angular.module('AWDirectives', ['RestServices', 'Utilities', 'AuthService', 'Job
                 $('.popover-content, .popover-title').click(function() {
                     $('#' + self).popover('hide');
                 });
-
             });
             
             $(document).bind('keydown', function(e) {

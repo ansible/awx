@@ -377,7 +377,9 @@ angular.module('ListGenerator', ['GeneratorHelpers'])
                                     });
                                 } else {
                                     fAction = list.fieldActions[field_action];
-                                    html += "<a ";
+                                    html += "<a id=\"";
+                                    html += (fAction.id) ? fAction.id : field_action + "-action";
+                                    html += "\" ";
                                     html += (fAction.href) ? "href=\"" + fAction.href + "\" " : "";
                                     html += (fAction.ngHref) ? "ng-href=\"" + fAction.ngHref + "\" " : "";
                                     html += (field_action === 'cancel') ? "class=\"cancel red-txt\" " : "";
